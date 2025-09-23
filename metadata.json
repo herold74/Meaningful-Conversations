@@ -1,0 +1,7 @@
+{
+  "name": "Meaningful Conversations",
+  "description": "An application that provides access to several coaching bot characters with different perspectives and coaching styles. Users can upload a 'life context' file to personalize conversations and update it with new insights after each session.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
