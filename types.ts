@@ -1,12 +1,24 @@
 import React from 'react';
 
+export type Language = 'en' | 'de';
+
+export type BotAccessTier = 'guest' | 'registered' | 'premium';
+
 export interface Bot {
     id: string;
     name: string;
     description: string;
+    description_de: string;
     avatar: string;
     style: string;
+    style_de: string;
     systemPrompt: string;
+    systemPrompt_de: string;
+    accessTier: BotAccessTier;
+}
+
+export interface BotWithAvailability extends Bot {
+    isAvailable: boolean;
 }
 
 export interface Message {
@@ -32,16 +44,27 @@ export interface GamificationState {
     coachesUsed: Set<string>;
 }
 
+export interface SolutionBlockage {
+    blockage: 'Self-Reproach' | 'Blaming Others' | 'Expectational Attitudes' | 'Age Regression' | 'Dysfunctional Loyalties';
+    explanation: string;
+    quote: string;
+}
+
 export interface SessionAnalysis {
     newFindings: string;
     proposedUpdates: ProposedUpdate[];
     nextSteps: { action: string; deadline: string }[];
+    solutionBlockages: SolutionBlockage[];
+    blockageScore: number;
 }
 
-// FIX: Moved 'achievements' from AppView to NavView to correctly classify it as a secondary/informational screen and resolve type errors.
-// FIX: Added 'pii-warning' and 'access-key' to handle new steps in the user flow.
-export type AppView = 'welcome' | 'landing' | 'questionnaire' | 'bot-selection' | 'chat' | 'session-review' | 'pii-warning' | 'access-key';
-export type NavView = 'about' | 'faq' | 'disclaimer' | 'terms' | 'achievements';
+export interface UserData {
+    lifeContext: string | null;
+    gamificationState: GamificationState;
+}
+
+export type AppView = 'welcome' | 'auth' | 'login' | 'register' | 'landing' | 'questionnaire' | 'pii-warning' | 'bot-selection' | 'chat' | 'session-review' | 'context-choice' | 'forgot-password';
+export type NavView = 'about' | 'faq' | 'disclaimer' | 'terms' | 'achievements' | 'formatting-help' | 'user-guide';
 export type View = AppView | NavView;
 
 
@@ -49,7 +72,11 @@ export interface Achievement {
     id: string;
     name: string;
     description: string;
-    // FIX: Changed icon type to React.FC to match the type of the imported icon components.
     icon: React.FC<React.SVGProps<SVGSVGElement>>;
     isUnlocked: (state: GamificationState) => boolean;
+}
+
+export interface User {
+    email: string;
+    isBetaTester?: boolean;
 }

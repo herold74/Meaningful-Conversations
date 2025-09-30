@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Chat } from '@google/genai';
-import { BOTS } from './constants';
-import { Bot, Message, AppView, View, ProposedUpdate, GamificationState, NavView, SessionAnalysis } from './types';
-import { createChatSession, analyzeSession } from './services/geminiService';
-import { ALL_ACHIEVEMENTS } from './achievements';
+import { Bot, Message, AppView, View, GamificationState, NavView, SessionAnalysis, User, UserData } from './types';
+import * as geminiService from './services/geminiService';
+import { getAchievements } from './achievements';
+import * as userService from './services/userService';
+import { deserializeGamificationState } from './utils/gamificationSerializer';
 
 import LandingPage from './components/LandingPage';
 import BotSelection from './components/BotSelection';
@@ -20,92 +20,158 @@ import DisclaimerView from './components/DisclaimerView';
 import TermsView from './components/TermsView';
 import AchievementsView from './components/AchievementsView';
 import PIIWarningView from './components/PIIWarningView';
-import AccessKeyView from './components/AccessKeyView';
-import { decrypt } from './utils/encryption';
+import FormattingHelpView from './components/FormattingHelpView';
+import UserGuideView from './components/UserGuideView';
+import AuthView from './components/AuthView';
+import LoginView from './components/LoginView';
+import RegisterView from './components/RegisterView';
+import ContextChoiceView from './components/ContextChoiceView';
+import ForgotPasswordView from './components/ForgotPasswordView';
+
+import { useLocalization } from './context/LocalizationContext';
+import Spinner from './components/shared/Spinner';
+
+const useTheme = () => {
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+            return localStorage.getItem('theme') as 'light' | 'dark';
+        }
+        if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
+    });
+
+    const toggleTheme = () => {
+        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    };
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove(theme === 'light' ? 'dark' : 'light');
+        root.classList.add(theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    return { theme, toggleTheme };
+};
+
+const getDefaultGamificationState = (): GamificationState => ({
+    xp: 0,
+    level: 1,
+    streak: 0,
+    unlockedAchievements: new Set(['beta_pioneer']),
+    totalSessions: 0,
+    lastSessionDate: null,
+    coachesUsed: new Set(),
+});
 
 const App: React.FC = () => {
+    const { theme, toggleTheme } = useTheme();
+    const { t, language } = useLocalization();
     const [view, setView] = useState<View>('welcome');
     const [previousAppView, setPreviousAppView] = useState<AppView>('landing');
     const [lifeContext, setLifeContext] = useState<string | null>(null);
     const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
-    const [chatSession, setChatSession] = useState<Chat | null>(null);
     const [chatHistory, setChatHistory] = useState<Message[]>([]);
     const [sessionAnalysis, setSessionAnalysis] = useState<SessionAnalysis | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    
-    const DEV_AUTH_BYPASS = false; // Set to true to deactivate access screen for development
-    // FIX: Reverted to synchronous state initialization for the developer auth bypass. This ensures the access key is available immediately from the first render, preventing race conditions when handling the initial file upload.
-    const [isAuthenticated, setIsAuthenticated] = useState(DEV_AUTH_BYPASS);
-    const [accessKey, setAccessKey] = useState(DEV_AUTH_BYPASS ? 'key' : '');
+    const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
     const [pendingReview, setPendingReview] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(userService.getCurrentUser());
+    const [pendingUserData, setPendingUserData] = useState<UserData | null>(null);
+    const [isLoading, setIsLoading] = useState(true); // For initial data load
 
-    const [gamificationState, setGamificationState] = useState<GamificationState>(() => {
-        try {
-            const savedState = localStorage.getItem('gamificationState');
-            if (savedState) {
-                const parsed = JSON.parse(savedState);
-                return {
-                    ...parsed,
-                    unlockedAchievements: new Set(parsed.unlockedAchievements || []),
-                    coachesUsed: new Set(parsed.coachesUsed || []),
-                };
+    const ALL_ACHIEVEMENTS = getAchievements(t);
+
+    const [gamificationState, setGamificationState] = useState<GamificationState>(getDefaultGamificationState());
+    
+    // Effect to save gamification state for guests, or trigger save for users
+    useEffect(() => {
+        const saveState = async () => {
+            if (currentUser) {
+                try {
+                    await userService.saveUserData({ gamificationState });
+                } catch (error) {
+                    console.error("Failed to save user gamification state:", error);
+                }
+            } else {
+                 try {
+                    const stateToSave = {
+                        ...gamificationState,
+                        unlockedAchievements: Array.from(gamificationState.unlockedAchievements),
+                        coachesUsed: Array.from(gamificationState.coachesUsed),
+                    };
+                    localStorage.setItem('gamificationState_guest', JSON.stringify(stateToSave));
+                } catch (error) {
+                    console.error("Failed to save guest gamification state:", error);
+                }
             }
-        } catch (error) {
-            console.error("Failed to load gamification state:", error);
-        }
-        return {
-            xp: 0,
-            level: 1,
-            streak: 0,
-            unlockedAchievements: new Set(['beta_pioneer']),
-            totalSessions: 0,
-            lastSessionDate: null,
-            coachesUsed: new Set(),
         };
-    });
-
-    useEffect(() => {
-        try {
-            const stateToSave = {
-                ...gamificationState,
-                unlockedAchievements: Array.from(gamificationState.unlockedAchievements),
-                coachesUsed: Array.from(gamificationState.coachesUsed),
-            };
-            localStorage.setItem('gamificationState', JSON.stringify(stateToSave));
-        } catch (error) {
-            console.error("Failed to save gamification state:", error);
+        // Don't save on initial load
+        if (!isLoading) {
+            saveState();
         }
-    }, [gamificationState]);
+    }, [gamificationState, currentUser, isLoading]);
 
+    // Initial load effect
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const nextView = isAuthenticated ? 'landing' : 'access-key';
-            setView(prev => prev === 'welcome' ? nextView : prev);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, [isAuthenticated]);
+        const initializeApp = async () => {
+            const user = userService.getCurrentUser();
+            if (user) {
+                setCurrentUser(user);
+                const userData = await userService.loadUserData();
+                if (userData) {
+                    setGamificationState(userData.gamificationState);
+                    if (userData.lifeContext) {
+                        setPendingUserData(userData);
+                        setView('context-choice');
+                    } else {
+                        setView('landing');
+                    }
+                } else {
+                    setView('landing');
+                }
+            } else {
+                // Load guest state
+                try {
+                    const savedState = localStorage.getItem('gamificationState_guest');
+                    if (savedState) {
+                        const parsed = JSON.parse(savedState);
+                        setGamificationState({
+                            ...parsed,
+                            unlockedAchievements: new Set(parsed.unlockedAchievements || ['beta_pioneer']),
+                            coachesUsed: new Set(parsed.coachesUsed || []),
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to load guest gamification state:", error);
+                }
+                setTimeout(() => setView(prev => prev === 'welcome' ? 'auth' : prev), 1500);
+            }
+            setIsLoading(false);
+        };
+        initializeApp();
+    }, []);
 
-    // This effect ensures the view transitions to 'session-review' only after all state updates from ending a session are complete.
+
     useEffect(() => {
         if (pendingReview) {
             setIsAnalyzing(false);
             setView('session-review');
             setPendingReview(false);
         }
-    }, [pendingReview, gamificationState]); // Dependency on gamificationState is crucial
+    }, [pendingReview, gamificationState]);
 
     const updateGamificationOnSessionStart = useCallback((botId: string) => {
         setGamificationState(prev => {
             let newStreak = prev.streak;
-            
             const todayUTC = new Date();
-            // FIX: Corrected the Date.UTC call to use getUTCMonth() instead of getUTCFullYear() for the month parameter. This fixes the streak calculation logic, which was previously always resetting the streak to 1.
             const todayAtUTCmidnight = new Date(Date.UTC(todayUTC.getUTCFullYear(), todayUTC.getUTCMonth(), todayUTC.getUTCDate()));
     
-            if (prev.lastSessionDate) { // This is a YYYY-MM-DD string from UTC
+            if (prev.lastSessionDate) {
                 const lastSessionUTCmidnight = new Date(prev.lastSessionDate);
-    
                 const diffTime = todayAtUTCmidnight.getTime() - lastSessionUTCmidnight.getTime();
                 const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     
@@ -120,17 +186,13 @@ const App: React.FC = () => {
     
             const newCoachesUsed = new Set(prev.coachesUsed).add(botId);
     
-            return {
-                ...prev,
-                streak: newStreak,
-                coachesUsed: newCoachesUsed,
-            };
+            return { ...prev, streak: newStreak, coachesUsed: newCoachesUsed };
         });
     }, []);
 
     const updateGamificationOnMessage = useCallback(() => {
         setGamificationState(prev => {
-            const newXp = prev.xp + 10;
+            const newXp = prev.xp + 5;
             const newLevel = Math.floor(newXp / 100) + 1;
             return { ...prev, xp: newXp, level: newLevel };
         });
@@ -140,10 +202,9 @@ const App: React.FC = () => {
         setGamificationState(prev => {
             const today = new Date().toISOString().split('T')[0];
             const newTotalSessions = prev.totalSessions + 1;
-            
             let newXp = prev.xp;
             if (nextSteps && nextSteps.length > 0) {
-                newXp += 50; // Bonus for finishing a session with a defined next step
+                newXp += 50;
             }
             const newLevel = Math.floor(newXp / 100) + 1;
 
@@ -164,111 +225,207 @@ const App: React.FC = () => {
 
             return { ...updatedState, unlockedAchievements: newUnlocked };
         });
-    }, []);
+    }, [ALL_ACHIEVEMENTS]);
 
-
-    const handleContextSubmit = (context: string) => {
-        const streakMatchRegex = /<!-- do not delete: (.*?) -->/;
-        const match = context.match(streakMatchRegex);
-
-        if (match && match[1] && accessKey) {
-            try {
-                const decrypted = decrypt(match[1], accessKey);
-                if (decrypted) {
-                    const { streak, lastSessionDate } = JSON.parse(decrypted);
-                    setGamificationState(prev => ({
-                        ...prev,
-                        streak: streak || 0,
-                        lastSessionDate: lastSessionDate || null,
-                    }));
+    const handleContextSubmit = async (context: string) => {
+        const dataMatchRegex = /<!-- do not delete: (.*?) -->/;
+        
+        if (!currentUser) {
+            const match = context.match(dataMatchRegex);
+            if (match && match[1]) {
+                try {
+                    const decodedData = atob(match[1]);
+                    const loadedState = deserializeGamificationState(decodedData);
+                    setGamificationState(loadedState);
+                } catch (e) {
+                    console.warn("Could not parse gamification data from file. Using local state.");
                 }
-            } catch (error) {
-                console.error("Failed to decrypt or parse streak data:", error);
             }
         }
         
-        const streakRemoveRegex = /<!-- do not delete: (.*?) -->/g;
-        setLifeContext(context.replace(streakRemoveRegex, '').trim());
+        const dataRemoveRegex = /<!-- do not delete: (.*?) -->/g;
+        const cleanContext = context.replace(dataRemoveRegex, '').trim();
+        setLifeContext(cleanContext);
+        
+        if (currentUser) {
+            await userService.saveUserData({ lifeContext: cleanContext });
+        }
+        
         setView('pii-warning');
     };
+
+    const handleLoginSuccess = async (user: User) => {
+        setCurrentUser(user);
+        setIsLoading(true);
+        const userData = await userService.loadUserData();
+        if (userData) {
+            setGamificationState(userData.gamificationState);
+            if (userData.lifeContext) {
+                setPendingUserData(userData);
+                setView('context-choice');
+            } else {
+                setLifeContext(null);
+                setView('landing');
+            }
+        } else {
+            // New registered user or failed load
+            setLifeContext(null);
+            setGamificationState(getDefaultGamificationState());
+            setView('landing');
+        }
+        setIsLoading(false);
+    };
+
+    const handleLoadSavedContext = () => {
+        if (pendingUserData) {
+            setLifeContext(pendingUserData.lifeContext);
+            setGamificationState(pendingUserData.gamificationState);
+            setPendingUserData(null);
+            setView('bot-selection');
+        }
+    };
+
+    const handleStartNewWithAccount = () => {
+        if (pendingUserData) {
+            setGamificationState(pendingUserData.gamificationState);
+        }
+        setLifeContext(null);
+        setPendingUserData(null);
+        setView('landing');
+    };
+
+    const handleBetaLogin = async () => {
+        setIsLoading(true);
+        try {
+            const user = await userService.loginAsBetaTester();
+            await handleLoginSuccess(user);
+        } catch (error) {
+            console.error("Beta login failed:", error);
+            setIsLoading(false);
+            // Optionally show an error message to the user
+        }
+    };
+
+    const handleLogout = () => {
+        userService.logout();
+        setCurrentUser(null);
+        handleFullReset();
+    };
+
+    const handleGuestAccess = () => {
+        setCurrentUser(null); 
+        setLifeContext(null); 
+        try {
+            const savedState = localStorage.getItem('gamificationState_guest');
+            if (savedState) {
+                const parsed = JSON.parse(savedState);
+                setGamificationState({
+                    ...parsed,
+                    unlockedAchievements: new Set(parsed.unlockedAchievements || ['beta_pioneer']),
+                    coachesUsed: new Set(parsed.coachesUsed || []),
+                });
+            } else {
+                 setGamificationState(getDefaultGamificationState());
+            }
+        } catch (error) {
+            console.error("Failed to load guest gamification state:", error);
+            setGamificationState(getDefaultGamificationState());
+        }
+        setView('landing');
+    };
+
 
     const handlePIIConfirm = () => {
         setView('bot-selection');
     };
 
     const handleBotSelect = (bot: Bot) => {
-        if (!lifeContext) return;
+        if (lifeContext === null) return;
         
         updateGamificationOnSessionStart(bot.id);
-
-        const welcomeMessage: Message = {
-            id: `bot-welcome-${Date.now()}`,
-            text: `Hi! I'm ${bot.name}, your performance coach. I've reviewed your Life Context. What's on your mind today?`,
-            role: 'bot',
-            timestamp: new Date().toISOString(),
-        };
-
-        const history: Message[] = [welcomeMessage];
-        const session = createChatSession(bot, lifeContext, []);
+        const welcomeText = t('chat_welcome_default', { name: bot.name });
+        const welcomeMessage: Message = { id: `bot-welcome-${Date.now()}`, text: welcomeText, role: 'bot', timestamp: new Date().toISOString() };
+        
+        setChatHistory([welcomeMessage]);
         setSelectedBot(bot);
-        setChatSession(session);
-        setChatHistory(history);
         setView('chat');
     };
 
     const handleEndSession = async () => {
-        if (!lifeContext || chatHistory.length <= 1) { // 1 because of the welcome message
-            setView('bot-selection'); // Go back if no real conversation happened
+        if (lifeContext === null || chatHistory.length <= 1) {
+            setView('bot-selection');
             return;
         }
-
         setIsAnalyzing(true);
-        const analysis = await analyzeSession(chatHistory, lifeContext);
+        const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
         setSessionAnalysis(analysis);
         updateGamificationOnSessionEnd(analysis.nextSteps);
-        setPendingReview(true); // Trigger the useEffect to handle the view change
+        setPendingReview(true);
     };
     
-    const handleContinueSession = (newContext: string) => {
-        setLifeContext(newContext.replace(/<!-- do not delete: (.*?) -->/g, '').trim());
+    const handleContinueSession = async (newContext: string) => {
+        const cleanContext = newContext.replace(/<!-- do not delete: (.*?) -->/g, '').trim();
+        setLifeContext(cleanContext);
+
+        if (currentUser) {
+            await userService.saveUserData({ lifeContext: cleanContext });
+        }
+
         if (selectedBot) {
-            const newChatSession = createChatSession(selectedBot, newContext, chatHistory);
-            setChatSession(newChatSession);
-            const continueMessage: Message = {
-                id: `bot-continue-${Date.now()}`,
-                text: "I've updated your context. What's next?",
-                role: 'bot',
-                timestamp: new Date().toISOString(),
-            };
+            const continueMessage: Message = { id: `bot-continue-${Date.now()}`, text: t('chat_continue'), role: 'bot', timestamp: new Date().toISOString() };
             setChatHistory(prev => [...prev, continueMessage]);
         }
         setView('chat');
     };
 
-    const handleSwitchCoach = (newContext: string) => {
-        setLifeContext(newContext.replace(/<!-- do not delete: (.*?) -->/g, '').trim());
+    const handleSwitchCoach = async (newContext: string) => {
+        const cleanContext = newContext.replace(/<!-- do not delete: (.*?) -->/g, '').trim();
+        setLifeContext(cleanContext);
+        
+        if (currentUser) {
+            await userService.saveUserData({ lifeContext: cleanContext });
+        }
+
         setChatHistory([]);
         setSelectedBot(null);
-        setChatSession(null);
         setSessionAnalysis(null);
         setView('bot-selection');
     };
 
-    const handleRestart = () => {
+    const handleRestart = async () => {
+        if (currentUser) {
+            await userService.saveUserData({ lifeContext: null });
+        }
         setLifeContext(null);
         setSelectedBot(null);
-        setChatSession(null);
         setChatHistory([]);
         setSessionAnalysis(null);
         setIsMenuOpen(false);
+        setQuestionnaireAnswers({});
         setView('landing');
     };
 
+    const handleFullReset = () => {
+        setLifeContext(null);
+        setSelectedBot(null);
+        setChatHistory([]);
+        setSessionAnalysis(null);
+        setIsMenuOpen(false);
+        setQuestionnaireAnswers({});
+        
+        setCurrentUser(null);
+        userService.logout(); // Clear session
+        localStorage.removeItem('gamificationState_guest'); // Clear guest data
+        setGamificationState(getDefaultGamificationState());
+        
+        setView('auth'); 
+    };
+
     const handleNavigate = (navView: NavView) => {
-        if (view !== 'welcome' && view !== 'access-key' && view !== 'landing' && view !== 'questionnaire' && view !== 'pii-warning' && view !== 'bot-selection' && view !== 'chat' && view !== 'session-review') {
-            // it's a NavView, don't update previousAppView
+        if (!['welcome', 'auth', 'login', 'register', 'landing', 'questionnaire', 'pii-warning', 'bot-selection', 'chat', 'session-review', 'context-choice', 'forgot-password'].includes(view)) {
+            // it's already a NavView
         } else {
-             setPreviousAppView(view as AppView); // Assuming we only navigate from AppViews
+             setPreviousAppView(view as AppView);
         }
         setView(navView);
         setIsMenuOpen(false);
@@ -278,85 +435,96 @@ const App: React.FC = () => {
         setView(previousAppView);
     };
     
-    const handleAccessKeySubmit = (key: string): boolean => {
-        if (key === 'key') {
-            setIsAuthenticated(true);
-            setAccessKey(key);
-            setView('landing');
-            return true;
-        }
-        return false;
-    };
-
-
     const renderView = () => {
-        if (view === 'welcome') {
-            return <WelcomeScreen />;
+        if (isLoading) {
+            return (
+                <div className="flex items-center justify-center min-h-screen">
+                    <Spinner />
+                </div>
+            );
         }
-
-        if (!isAuthenticated) {
-            return <AccessKeyView onSubmit={handleAccessKeySubmit} />;
-        }
-
         switch (view) {
+            case 'welcome':
+                return <WelcomeScreen />;
+            case 'auth':
+                return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={handleGuestAccess} onBetaLogin={handleBetaLogin} />;
+            case 'login':
+                return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setView('register')} onBack={() => setView('auth')} onForgotPassword={() => setView('forgot-password')} />;
+            case 'register':
+                 return <RegisterView onRegisterSuccess={handleLoginSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
+            case 'forgot-password':
+                return <ForgotPasswordView onBack={() => setView('login')} />;
+            case 'context-choice':
+                if (currentUser && pendingUserData && pendingUserData.lifeContext) {
+                    return <ContextChoiceView 
+                        user={currentUser}
+                        savedContext={pendingUserData.lifeContext}
+                        onContinue={handleLoadSavedContext}
+                        onStartNew={handleStartNewWithAccount}
+                    />;
+                }
+                return <LandingPage onSubmit={handleContextSubmit} onStartQuestionnaire={() => { setQuestionnaireAnswers({}); setView('questionnaire'); }} />;
             case 'landing':
-                return <LandingPage onSubmit={handleContextSubmit} onStartQuestionnaire={() => setView('questionnaire')} />;
+                return <LandingPage onSubmit={handleContextSubmit} onStartQuestionnaire={() => { setQuestionnaireAnswers({}); setView('questionnaire'); }} />;
             case 'questionnaire':
-                return <Questionnaire onSubmit={handleContextSubmit} onBack={() => setView('landing')} />;
+                return <Questionnaire onSubmit={handleContextSubmit} onBack={() => { setView('landing'); setQuestionnaireAnswers({}); }} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'pii-warning':
                 return <PIIWarningView onConfirm={handlePIIConfirm} onCancel={() => setView('landing')} />;
             case 'bot-selection':
-                return <BotSelection bots={BOTS} onSelect={handleBotSelect} />;
+                return <BotSelection onSelect={handleBotSelect} currentUser={currentUser} />;
             case 'chat':
-                if (selectedBot && chatSession) {
-                    return <ChatView bot={selectedBot} chatSession={chatSession} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={updateGamificationOnMessage}/>;
+                if (selectedBot && lifeContext !== null) {
+                    return <ChatView bot={selectedBot} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={updateGamificationOnMessage}/>;
                 }
+                // Fallback if state is inconsistent
+                handleFullReset();
                 return null;
             case 'session-review':
-                if (sessionAnalysis && lifeContext && selectedBot) {
+                if (sessionAnalysis && lifeContext !== null && selectedBot) {
                     return (
                         <SessionReview
                             newFindings={sessionAnalysis.newFindings}
                             proposedUpdates={sessionAnalysis.proposedUpdates}
                             nextSteps={sessionAnalysis.nextSteps}
+                            solutionBlockages={sessionAnalysis.solutionBlockages}
+                            blockageScore={sessionAnalysis.blockageScore}
                             originalContext={lifeContext}
                             selectedBot={selectedBot}
                             onContinueSession={handleContinueSession}
                             onSwitchCoach={handleSwitchCoach}
                             onReturnToStart={handleRestart}
                             gamificationState={gamificationState}
-                            accessKey={accessKey}
-                            isAuthenticated={isAuthenticated}
+                            currentUser={currentUser}
                         />
                     );
                 }
-                return null; // Or a loading/error state
-            case 'about':
-                return <AboutView onBack={handleBackFromInfo} />;
-            case 'faq':
-                return <FAQView onBack={handleBackFromInfo} />;
-            case 'disclaimer':
-                return <DisclaimerView onBack={handleBackFromInfo} />;
-            case 'terms':
-                return <TermsView onBack={handleBackFromInfo} />;
-            case 'achievements':
-                return <AchievementsView gamificationState={gamificationState} onBack={handleBackFromInfo} />;
+                return null;
+            case 'about': return <AboutView onBack={handleBackFromInfo} />;
+            case 'faq': return <FAQView onBack={handleBackFromInfo} />;
+            case 'disclaimer': return <DisclaimerView onBack={handleBackFromInfo} />;
+            case 'terms': return <TermsView onBack={handleBackFromInfo} />;
+            case 'achievements': return <AchievementsView gamificationState={gamificationState} onBack={handleBackFromInfo} />;
+            case 'formatting-help': return <FormattingHelpView onBack={handleBackFromInfo} />;
+            case 'user-guide': return <UserGuideView onBack={handleBackFromInfo} />;
             default:
-                return <LandingPage onSubmit={handleContextSubmit} onStartQuestionnaire={() => setView('questionnaire')} />;
+                return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={handleGuestAccess} onBetaLogin={handleBetaLogin} />;
         }
     };
     
-    const isMinimalBar = ['welcome', 'access-key', 'landing', 'questionnaire', 'pii-warning'].includes(view);
+    const isMinimalBar = ['welcome', 'auth', 'login', 'register', 'forgot-password', 'landing', 'questionnaire', 'pii-warning', 'context-choice'].includes(view);
 
     return (
-        <div className="bg-gray-950 min-h-screen text-gray-300 font-sans">
+        <div className="bg-gray-100 dark:bg-gray-950 min-h-screen text-gray-800 dark:text-gray-300 font-sans">
             <div className="container mx-auto px-4 py-2">
-                {isAuthenticated && (
+                {!['welcome'].includes(view) && !isLoading && (
                      <GamificationBar 
                         gamificationState={gamificationState}
+                        currentUser={currentUser}
                         onViewAchievements={() => handleNavigate('achievements')}
                         onToggleMenu={() => setIsMenuOpen(true)}
                         minimal={isMinimalBar}
+                        theme={theme}
+                        toggleTheme={toggleTheme}
                      />
                 )}
                 {isAnalyzing && <AnalyzingView />}
@@ -365,9 +533,12 @@ const App: React.FC = () => {
                 </main>
                 <BurgerMenu
                     isOpen={isMenuOpen}
+                    currentUser={currentUser}
                     onClose={() => setIsMenuOpen(false)}
                     onNavigate={handleNavigate}
                     onRestart={handleRestart}
+                    onFullReset={handleFullReset}
+                    onLogout={handleLogout}
                 />
             </div>
         </div>

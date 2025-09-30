@@ -10,6 +10,7 @@ interface SubSection {
     title: string;
     level: 3;
     fields: Field[];
+    description?: string;
 }
 
 interface Section {
@@ -22,73 +23,77 @@ interface Section {
     collapseText?: string;
 }
 
-export const questionnaireStructure: Section[] = [
+export const getQuestionnaireStructure = (t: (key: string) => string): Section[] => [
     {
-        title: 'Background',
+        title: t('questionnaire_background_title'),
         level: 2,
+        description: t('questionnaire_background_desc'),
         fields: [
-            { id: 'background_work', label: 'Work', prompt: 'e.g., current role, responsibilities, career satisfaction.' },
-            { id: 'background_family', label: 'Family', prompt: 'e.g., relationships, home life.' },
-            { id: 'background_social', label: 'Social Engagements', prompt: 'e.g., friends, hobbies, community involvement.' },
-            { id: 'background_health', label: 'Health', prompt: 'e.g., physical and mental well-being.' },
-            { id: 'background_sentiment', label: 'General Sentiment', prompt: 'e.g., overall mood, outlook on life.' },
+            { id: 'background_work', label: t('questionnaire_background_work_label'), prompt: t('questionnaire_background_work_prompt') },
+            { id: 'background_family', label: t('questionnaire_background_family_label'), prompt: t('questionnaire_background_family_prompt') },
+            { id: 'background_social', label: t('questionnaire_background_social_label'), prompt: t('questionnaire_background_social_prompt') },
+            { id: 'background_health', label: t('questionnaire_background_health_label'), prompt: t('questionnaire_background_health_prompt') },
+            { id: 'background_sentiment', label: t('questionnaire_background_sentiment_label'), prompt: t('questionnaire_background_sentiment_prompt') },
         ]
     },
     {
-        title: 'My Top Goals',
+        title: t('questionnaire_goals_title'),
         level: 2,
+        description: t('questionnaire_goals_desc'),
         subSections: [
             {
-                title: 'This year (2025)',
+                title: t('questionnaire_goals_2025_title'),
                 level: 3,
                 fields: [
-                    { id: 'goals_2025_career', label: 'Career', prompt: 'What specific career advancements are you aiming for?' },
-                    { id: 'goals_2025_personal', label: 'Personal', prompt: 'What skills or habits do you want to develop?' },
-                    { id: 'goals_2025_financial', label: 'Financial', prompt: 'What are your financial targets for the year?' },
+                    { id: 'goals_2025_career', label: t('questionnaire_goals_2025_career_label'), prompt: t('questionnaire_goals_2025_career_prompt') },
+                    { id: 'goals_2025_personal', label: t('questionnaire_goals_2025_personal_label'), prompt: t('questionnaire_goals_2025_personal_prompt') },
+                    { id: 'goals_2025_financial', label: t('questionnaire_goals_2025_financial_label'), prompt: t('questionnaire_goals_2025_financial_prompt') },
                 ]
             },
             {
-                title: 'Long-term',
+                title: t('questionnaire_goals_longterm_title'),
                 level: 3,
+                description: t('questionnaire_goals_longterm_desc'),
                 fields: [
-                    { id: 'goals_longterm_big5', label: '"Big 5 for life"', prompt: 'What are the 5 biggest things you want to do, see, or experience in your life?' },
+                    { id: 'goals_longterm_big5', label: t('questionnaire_goals_longterm_big5_label'), prompt: t('questionnaire_goals_longterm_big5_prompt') },
                 ]
             }
         ],
         collapsedByDefault: true,
-        collapseText: 'recommended',
+        collapseText: t('questionnaire_goals_collapseText'),
     },
     {
-        title: 'My Routines',
+        title: t('questionnaire_routines_title'),
         level: 2,
-        description: 'Habits you learned, and implemented to structure your day and engagements.',
+        description: t('questionnaire_routines_desc'),
         fields: [
-            { id: 'routines_focus', label: 'Focus Blocks', prompt: 'How do you schedule deep work or focused time?' },
-            { id: 'routines_learning', label: 'Learning System', prompt: 'How do you incorporate learning into your life?' },
-            { id: 'routines_p_tm', label: 'Project-, Time Management', prompt: 'What systems do you use to manage your tasks and projects?' },
-            { id: 'routines_health', label: 'Health Routine', prompt: 'What are your regular health and wellness practices?' },
-            { id: 'routines_growth', label: 'Personal Growth', prompt: 'What activities do you do for personal growth (e.g., journaling, meditation)?' },
+            { id: 'routines_focus', label: t('questionnaire_routines_focus_label'), prompt: t('questionnaire_routines_focus_prompt') },
+            { id: 'routines_learning', label: t('questionnaire_routines_learning_label'), prompt: t('questionnaire_routines_learning_prompt') },
+            { id: 'routines_p_tm', label: t('questionnaire_routines_ptm_label'), prompt: t('questionnaire_routines_ptm_prompt') },
+            { id: 'routines_health', label: t('questionnaire_routines_health_label'), prompt: t('questionnaire_routines_health_prompt') },
+            { id: 'routines_growth', label: t('questionnaire_routines_growth_label'), prompt: t('questionnaire_routines_growth_prompt') },
         ],
         collapsedByDefault: true,
-        collapseText: 'optional',
+        collapseText: t('questionnaire_routines_collapseText'),
     },
     {
-        title: 'Current Challenges I\'m Thinking About',
+        title: t('questionnaire_challenges_title'),
         level: 2,
+        description: t('questionnaire_challenges_desc'),
         fields: [
-            { id: 'challenges_career', label: 'Career Direction', prompt: 'What questions or uncertainties do you have about your career path?' },
-            { id: 'challenges_wlb', label: 'Work-Life Integration', prompt: 'Are you struggling to balance work and your personal life?' },
-            { id: 'challenges_social', label: 'Social Engagements', prompt: 'What challenges are you facing in your social life?' },
-            { id: 'challenges_growth', label: 'Personal Development', prompt: 'What is holding you back in your personal development?' },
+            { id: 'challenges_career', label: t('questionnaire_challenges_career_label'), prompt: t('questionnaire_challenges_career_prompt') },
+            { id: 'challenges_wlb', label: t('questionnaire_challenges_wlb_label'), prompt: t('questionnaire_challenges_wlb_prompt') },
+            { id: 'challenges_social', label: t('questionnaire_challenges_social_label'), prompt: t('questionnaire_challenges_social_prompt') },
+            { id: 'challenges_growth', label: t('questionnaire_challenges_growth_label'), prompt: t('questionnaire_challenges_growth_prompt') },
         ],
         collapsedByDefault: true,
-        collapseText: 'optional',
+        collapseText: t('questionnaire_challenges_collapseText'),
     }
 ];
 
-export const getAllFieldIds = (): string[] => {
+export const getAllFieldIds = (t: (key: string) => string): string[] => {
     const ids: string[] = [];
-    questionnaireStructure.forEach(section => {
+    getQuestionnaireStructure(t).forEach(section => {
         if (section.fields) {
             section.fields.forEach(field => ids.push(field.id));
         }

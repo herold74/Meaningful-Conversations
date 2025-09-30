@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meaningful Conversations</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
     <script type="importmap">
 {
   "imports": {
@@ -22,17 +27,29 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
+      /* Light theme scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #1a1a1a;
+        background: #f1f5f9; /* gray-100 */
       }
       ::-webkit-scrollbar-thumb {
-        background: #4a4a4a;
+        background: #94a3b8; /* gray-400 */
+        border-radius: 4px;
         transition: background 0.2s;
       }
       ::-webkit-scrollbar-thumb:hover {
+        background: #4ade80; /* green-400 */
+      }
+      /* Dark theme scrollbar */
+      .dark ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #4a4a4a;
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
         background: #00ff00; 
       }
       @keyframes fadeIn {
@@ -49,9 +66,17 @@
       .animate-slideInFromRight {
         animation: slideInFromRight 0.3s ease-out forwards;
       }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes spin-reverse {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(-360deg); }
+      }
     </style>
   </head>
-  <body class="bg-white dark:bg-black">
+  <body class="bg-gray-100 dark:bg-black">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

@@ -1,36 +1,37 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ProposedUpdate, Bot, GamificationState } from '../types';
+import { ProposedUpdate, Bot, GamificationState, SolutionBlockage, User } from '../types';
 import { DownloadIcon } from './icons/DownloadIcon';
 import DiffViewer from './DiffViewer';
-import { encrypt } from '../utils/encryption';
+import { useLocalization } from '../context/LocalizationContext';
+import { UsersIcon } from './icons/UsersIcon';
+import BlockageScoreGauge from './BlockageScoreGauge';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import { serializeGamificationState } from '../utils/gamificationSerializer';
 
-// A simplified and more robust regex pattern to capture both markdown and bolded headlines.
+type AppliedUpdatePayload = { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string };
+
 const headlinePatternString = '^(?:\\s*#{1,6}\\s.*|\\s*\\*\\*.*\\*\\*.*)';
 const headlineRegex = new RegExp(headlinePatternString, 'gm');
 const headlineSplitRegex = new RegExp(`(?=${headlinePatternString})`, 'gm');
 const headlineFindRegex = new RegExp(headlinePatternString, 'm');
 
 
-// A more robust function to extract the clean title from a full headline line.
-const normalizeHeadline = (headline: string): string => {
-    if (!headline || typeof headline !== 'string') return '';
+const normalizeHeadline = (headline: unknown): string => {
+    if (typeof headline !== 'string' || !headline) return '';
     const cleanHeadline = headline.trim();
 
     if (cleanHeadline.startsWith('#')) {
         return cleanHeadline.replace(/^#+\s*/, '').trim();
     }
     
-    // This correctly captures content within '**...**' and then cleans it up.
     const boldMatch = cleanHeadline.match(/^\*\*(.+?)\*\*/);
     if (boldMatch && boldMatch[1]) {
-        // Extract content from **...**, then trim it and any trailing colon.
         return boldMatch[1].trim().replace(/:$/, '').trim();
     }
     
-    return cleanHeadline; // Fallback for non-matching lines
+    return cleanHeadline;
 };
 
-// A rewritten function to apply updates to the context reliably.
 const buildUpdatedContext = (
     originalContext: string,
     updates: ProposedUpdate[],
@@ -43,7 +44,6 @@ const buildUpdatedContext = (
     const formatContentForBlock = (content: string): string => {
         const trimmed = (content || '').trim();
         if (!trimmed) return '';
-        // Ensure content starts on a new line and ends with one for proper spacing.
         return '\n' + trimmed + '\n';
     };
 
@@ -78,19 +78,19 @@ const buildUpdatedContext = (
             if (choice.type === 'append') {
                 sections[targetIndex] = originalSection.trimEnd() + formatContentForBlock(update.content);
             } else if (choice.type === 'replace_section') {
-                let keyPart = headlineLine.trimEnd();
-                 if (keyPart.trim().startsWith('**')) {
-                    const keyMatch = keyPart.match(/^\s*(\*\*.+?\*\*[:]?)/);
-                    if (keyMatch && keyMatch[1]) {
-                        keyPart = keyMatch[1];
-                        // If original was a single line, keep it that way.
-                        if (!originalSection.trim().includes('\n')) {
-                            sections[targetIndex] = keyPart + ' ' + update.content.trim();
-                            return; // continue forEach
-                        }
-                    }
+                const keyPart = headlineLine.trimEnd();
+                const content = (update.content || '').trim();
+                const separatorMatch = originalSection.match(/\n(\s*---\s*\n*)$/);
+                const separator = separatorMatch ? separatorMatch[0] : null;
+                const sectionWithoutSeparator = separator ? originalSection.substring(0, originalSection.lastIndexOf(separator)) : originalSection;
+                
+                let newSectionBody;
+                if (keyPart.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n')) {
+                    newSectionBody = keyPart + ' ' + content;
+                } else {
+                    newSectionBody = keyPart + '\n' + content;
                 }
-                sections[targetIndex] = keyPart + formatContentForBlock(update.content);
+                sections[targetIndex] = newSectionBody + (separator || '\n\n');
             }
         } else { 
             const newHeadline = choice.targetHeadline.trim().startsWith('**')
@@ -114,36 +114,38 @@ interface SessionReviewProps {
     newFindings: string;
     proposedUpdates: ProposedUpdate[];
     nextSteps: { action: string; deadline: string }[];
+    solutionBlockages: SolutionBlockage[];
+    blockageScore: number;
     originalContext: string;
     selectedBot: Bot;
     onContinueSession: (newContext: string) => void;
     onSwitchCoach: (newContext: string) => void;
     onReturnToStart: () => void;
     gamificationState: GamificationState;
-    accessKey: string;
-    isAuthenticated: boolean;
+    currentUser: User | null;
 }
 
 const SessionReview: React.FC<SessionReviewProps> = ({
     newFindings,
     proposedUpdates,
     nextSteps,
+    solutionBlockages,
+    blockageScore,
     originalContext,
     selectedBot,
     onContinueSession,
     onSwitchCoach,
     onReturnToStart,
     gamificationState,
-    accessKey,
-    isAuthenticated,
+    currentUser,
 }) => {
-    
+    const { t } = useLocalization();
+    const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
     const existingHeadlines = useMemo(() => {
         if (!originalContext) return [];
         const allHeadlines = originalContext.match(headlineRegex) || [];
-        // Filter out unwanted general headlines from the dropdown.
         const headlinesToExclude = ['My Life Context', 'Background'];
-        const uniqueHeadlines = [...new Set(allHeadlines.map(h => h.trim()))]; // Ensure uniqueness and trim
+        const uniqueHeadlines = [...new Set(allHeadlines.map(h => h.trim()))];
         return uniqueHeadlines.filter(h => !headlinesToExclude.includes(normalizeHeadline(h)));
     }, [originalContext]);
 
@@ -151,14 +153,18 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return new Map(existingHeadlines.map((h): [string, string] => [normalizeHeadline(h), h]));
     }, [existingHeadlines]);
     
-    const [appliedUpdates, setAppliedUpdates] = useState<Map<number, { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string }>>(() => {
-        return new Map(proposedUpdates.map((update, index): [number, { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string }] => {
+    const canSeeBlockages = useMemo(() => {
+        // A premium user is currently defined as a beta tester.
+        // This can be expanded later if a 'plan' property is added to the User type.
+        return currentUser?.isBetaTester === true;
+    }, [currentUser]);
+
+    const [appliedUpdates, setAppliedUpdates] = useState<Map<number, AppliedUpdatePayload>>(() => {
+        return new Map(proposedUpdates.map((update, index): [number, AppliedUpdatePayload] => {
             const normalizedProposed = normalizeHeadline(update.headline);
             const matchingOriginal = normalizedToOriginalHeadlineMap.get(normalizedProposed);
-            
             const targetHeadline = matchingOriginal || update.headline || 'New Section';
             const type = (matchingOriginal && update.type === 'create_headline') ? 'append' : update.type;
-
             return [index, { type, targetHeadline }];
         }));
     });
@@ -185,25 +191,20 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     
     const handleActionChange = (index: number, newTargetHeadline: string) => {
         setAppliedUpdates(prev => {
-            const newMap = new Map(prev);
-            const originalUpdate = proposedUpdates[index];
+            const newMap = new Map<number, AppliedUpdatePayload>(prev);
+            const existingUpdate = newMap.get(index);
+            if (!existingUpdate) return prev;
             const existingNormalizedHeadlines = new Set(existingHeadlines.map(h => normalizeHeadline(h)));
             const isNewHeadline = !existingNormalizedHeadlines.has(normalizeHeadline(newTargetHeadline));
-
-            let newType: ProposedUpdate['type'] = 'append'; // Default to append for existing
+            let newType = existingUpdate.type;
             if (isNewHeadline) {
                 newType = 'create_headline';
             } else {
-                if (originalUpdate.type === 'replace_section') {
-                    newType = 'replace_section';
+                if (existingUpdate.type === 'create_headline') {
+                    newType = 'append';
                 }
             }
-            
-            newMap.set(index, {
-                type: newType,
-                targetHeadline: newTargetHeadline
-            });
-
+            newMap.set(index, { ...existingUpdate, type: newType, targetHeadline: newTargetHeadline });
             return newMap;
         });
     };
@@ -211,7 +212,6 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const newHeadlineProposals = useMemo(() => {
         const proposals = new Set<string>();
         const existingNormalized = new Set(existingHeadlines.map(normalizeHeadline));
-
         proposedUpdates.forEach(update => {
             const normalized = normalizeHeadline(update.headline);
             if (normalized && !existingNormalized.has(normalized)) {
@@ -227,33 +227,30 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     }, [originalContext, proposedUpdates, appliedUpdates]);
 
     useEffect(() => {
-        // The streak key is added back during download/continuation, not here.
-        // This ensures the textarea and diff view remain clean.
         setEditableContext(updatedContext);
     }, [updatedContext]);
 
-    const addStreakToContext = (context: string): string => {
-        const streakRegex = /<!-- do not delete: (.*?) -->/g;
-        let finalContext = context.replace(streakRegex, '').trim();
-
-        if (isAuthenticated && accessKey && gamificationState.lastSessionDate) {
-            const dataToEncrypt = JSON.stringify({
-                streak: gamificationState.streak,
-                lastSessionDate: gamificationState.lastSessionDate,
-            });
-            const encryptedData = encrypt(dataToEncrypt, accessKey);
-            const streakComment = `<!-- do not delete: ${encryptedData} -->`;
-            if (finalContext) {
-                finalContext = `${finalContext.trimEnd()}\n\n${streakComment}`;
-            } else {
-                finalContext = streakComment;
-            }
+    const addGamificationDataForGuest = (context: string): string => {
+        let finalContext = context.replace(/<!-- do not delete: (.*?) -->/g, '').trim();
+        const dataToEncrypt = serializeGamificationState(gamificationState);
+        // We use a simple key for guests as it's just for data transfer, not security.
+        const encryptedData = btoa(dataToEncrypt); 
+        const dataComment = `<!-- do not delete: ${encryptedData} -->`;
+        if (finalContext) {
+            finalContext = `${finalContext.trimEnd()}\n\n${dataComment}`;
+        } else {
+            finalContext = dataComment;
         }
         return finalContext ? `${finalContext.trim()}\n` : '';
     };
 
     const handleDownloadContext = () => {
-        const blob = new Blob([addStreakToContext(editableContext)], { type: 'text/markdown;charset=utf-8' });
+        let contentToDownload = editableContext;
+        // For guests, embed their progress in the file.
+        if (!currentUser) {
+            contentToDownload = addGamificationDataForGuest(editableContext);
+        }
+        const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -264,8 +261,20 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         URL.revokeObjectURL(url);
     };
 
+    const getBlockageNameTranslation = (blockageName: string) => {
+        const key = `blockage_${blockageName.toLowerCase().replace(/ /g, '_').replace('with', '_with_')}`;
+        return t(key);
+    };
+
     const handleDownloadSummary = () => {
-        const blob = new Blob([newFindings], { type: 'text/plain;charset=utf-8' });
+        let summaryContent = `${t('sessionReview_summary')}\n---------------------------------\n${newFindings}\n\n`;
+        if (solutionBlockages && solutionBlockages.length > 0) {
+            summaryContent += `${t('sessionReview_blockages_title')}\n---------------------------------\n`;
+            solutionBlockages.forEach(blockage => {
+                summaryContent += `Blockage: ${getBlockageNameTranslation(blockage.blockage)}\nExplanation: ${blockage.explanation}\nQuote: "${blockage.quote}"\n\n`;
+            });
+        }
+        const blob = new Blob([summaryContent.trim()], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -275,163 +284,144 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
+    
+    const getActionTypeTranslation = (type: string) => {
+        return t(`sessionReview_action_${type.toLowerCase()}`);
+    };
+
+    const primaryActionText = currentUser ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
+    const secondaryActionText = currentUser ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
 
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
-            <div className="w-full max-w-4xl p-8 space-y-8 bg-transparent border border-gray-700">
+            <div className="w-full max-w-4xl p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-200 uppercase">Session Review</h1>
-                    <p className="mt-2 text-lg text-gray-400">Review the insights and approve changes to your Life Context.</p>
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('sessionReview_title')}</h1>
+                    <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">{t('sessionReview_subtitle')}</p>
                 </div>
 
-                <div className="p-4 bg-gray-900 border border-gray-700">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold text-gray-300">Summary of New Findings</h2>
-                        <button
-                            onClick={handleDownloadSummary}
-                            className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-400 bg-transparent border border-green-400 uppercase hover:bg-green-400 hover:text-black"
-                        >
-                           <DownloadIcon className="w-4 h-4" /> Download Summary
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_summary')}</h2>
+                        <button onClick={handleDownloadSummary} className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-transparent border border-green-600 dark:border-green-400 uppercase hover:bg-green-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black">
+                           <DownloadIcon className="w-4 h-4" /> {t('sessionReview_downloadSummary')}
                         </button>
                     </div>
-                    <p className="mt-2 text-gray-400 whitespace-pre-wrap">{newFindings}</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{newFindings}</p>
                 </div>
 
                 {nextSteps && nextSteps.length > 0 && (
-                    <div className="p-4 bg-gray-900 border border-green-500/50">
-                        <h2 className="text-xl font-semibold text-gray-300">Your Next Steps</h2>
-                        <p className="text-sm text-green-400 mt-1">Congratulations! You've earned a +50 XP bonus for defining clear actions.</p>
-                        <ul className="mt-3 text-gray-400 space-y-2 list-disc list-inside">
-                            {nextSteps.map((step, index) => (
-                                <li key={index}>
-                                    <strong>{step.action}</strong> (Deadline: {step.deadline})
-                                </li>
-                            ))}
+                    <div className="p-4 bg-green-50 dark:bg-gray-900 border border-green-300 dark:border-green-500/50">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_nextSteps')}</h2>
+                        <p className="text-sm text-green-700 dark:text-green-400 mt-1">{t('sessionReview_xpBonus')}</p>
+                        <ul className="mt-3 text-gray-600 dark:text-gray-400 space-y-2 list-disc list-inside">
+                            {nextSteps.map((step, index) => ( <li key={index}> <strong>{step.action}</strong> (Deadline: {step.deadline}) </li> ))}
                         </ul>
                     </div>
                 )}
-                
-                {proposedUpdates.length > 0 && (
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-semibold text-gray-300">Proposed Context Updates</h2>
-                        <div className="space-y-3 max-h-96 overflow-y-auto p-3 bg-gray-900 border border-gray-700">
-                            {proposedUpdates.map((update, index) => {
-                                const currentApplied = appliedUpdates.get(index);
-                                const actionType = currentApplied?.type || update.type;
-                                const targetHeadline = currentApplied?.targetHeadline || update.headline;
 
-                                return (
-                                <div key={index} className="flex items-start gap-3 p-3 bg-gray-800/50 border border-gray-700/50">
-                                    <input
-                                        type="checkbox"
-                                        id={`update-${index}`}
-                                        checked={appliedUpdates.has(index)}
-                                        onChange={() => handleToggleUpdate(index)}
-                                        className="mt-1 h-5 w-5 rounded bg-gray-700 border-gray-600 text-green-500 focus:ring-green-600 cursor-pointer"
-                                    />
+                {canSeeBlockages && solutionBlockages && (
+                    <div className="bg-blue-50 dark:bg-gray-900 border border-blue-300 dark:border-blue-500/50 rounded-lg overflow-hidden">
+                        <button onClick={() => setIsBlockagesExpanded(p => !p)} className="w-full p-4 flex justify-between items-center text-left hover:bg-blue-100/50 dark:hover:bg-gray-800/50 transition-colors" aria-expanded={isBlockagesExpanded} aria-controls="blockages-content">
+                            <div className="flex items-center gap-3">
+                                <UsersIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_blockages_title')}</h2>
+                            </div>
+                            <ChevronDownIcon className={`w-6 h-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isBlockagesExpanded ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isBlockagesExpanded && (
+                            <div id="blockages-content" className="p-4 pt-0 space-y-4 animate-fadeIn">
+                                <div className="border-t border-blue-200 dark:border-blue-500/30 mt-4 pt-4 space-y-4">
+                                     <p className="text-sm text-blue-700 dark:text-blue-300 italic">{t('sessionReview_blockages_subtitle')}</p>
+                                    {solutionBlockages.length > 0 ? (
+                                        <>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {solutionBlockages.map((blockage, index) => (
+                                                    <div key={index} className="p-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50">
+                                                        <h4 className="font-bold text-blue-800 dark:text-blue-300">{getBlockageNameTranslation(blockage.blockage)}</h4>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{blockage.explanation}</p>
+                                                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2 border-l-2 border-blue-300 dark:border-blue-500 pl-2 italic">"{blockage.quote}"</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <BlockageScoreGauge score={blockageScore} />
+                                        </>
+                                    ) : ( <p className="text-center text-gray-600 dark:text-gray-400 py-4">{t('sessionReview_no_blockages')}</p> )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">{t('sessionReview_proposedUpdates')}</h2>
+                     <div className="flex items-center gap-4 mb-3">
+                        <button onClick={() => setAppliedUpdates(new Map(proposedUpdates.map((update, index) => [index, { type: update.type, targetHeadline: normalizedToOriginalHeadlineMap.get(normalizeHeadline(update.headline)) || update.headline }])))} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
+                        <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
+                    </div>
+                    <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                        {proposedUpdates.map((update, index) => {
+                             const appliedUpdate = appliedUpdates.get(index);
+                             const isApplied = !!appliedUpdate;
+                            return (
+                                <div key={index} className={`flex items-start gap-3 p-3 transition-colors ${isApplied ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-100 dark:bg-gray-800/20 opacity-60'} border border-gray-200 dark:border-gray-700/50`}>
+                                    <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 cursor-pointer" />
                                     <div className="flex-1">
-                                        <p className="font-mono whitespace-pre-wrap text-gray-400 text-sm">{update.content}</p>
-                                        
-                                        <div className="mt-2 flex items-center gap-2 text-sm flex-wrap">
-                                            <span className={`font-mono px-2 py-0.5 rounded capitalize ${
-                                                actionType === 'append' ? 'bg-blue-900 text-blue-300' :
-                                                actionType === 'replace_section' ? 'bg-yellow-900 text-yellow-300' :
-                                                'bg-purple-900 text-purple-300'
-                                            }`}>{actionType.replace('_', ' ')}</span>
-                                            <span className="text-gray-400">to</span>
-                                            <select
-                                                value={targetHeadline}
-                                                onChange={(e) => handleActionChange(index, e.target.value)}
-                                                className="bg-gray-700 border border-gray-600 text-white p-1 max-w-full"
-                                            >
-                                                <optgroup label="Add to existing section:">
-                                                    {existingHeadlines.map(h => (
-                                                        <option
-                                                            key={h}
-                                                            value={h}
-                                                        >
-                                                            {h.trim().startsWith('**') ? normalizeHeadline(h) : `» ${normalizeHeadline(h)}`}
-                                                        </option>
-                                                    ))}
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                            <span className="text-sm font-mono px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 whitespace-nowrap">{getActionTypeTranslation(appliedUpdate?.type || update.type)}</span>
+                                            {appliedUpdate?.type !== 'create_headline' && <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{t('sessionReview_to')}</span>}
+                                            <select value={appliedUpdate?.targetHeadline} onChange={(e) => handleActionChange(index, e.target.value)} disabled={!isApplied} className="w-full sm:w-auto p-1 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 dark:disabled:bg-gray-800/50">
+                                                <optgroup label={t('sessionReview_optgroup_existing')}>
+                                                    {existingHeadlines.map(h => <option key={h} value={h}>{normalizeHeadline(h)}</option>)}
                                                 </optgroup>
-                                                {newHeadlineProposals.length > 0 && (
-                                                    <optgroup label="Create new section:">
-                                                        {newHeadlineProposals.map(h => (
-                                                            <option
-                                                                key={h}
-                                                                value={h}
-                                                            >
-                                                                {h.trim().startsWith('**') ? normalizeHeadline(h) : `» ${normalizeHeadline(h)}`}
-                                                            </option>
-                                                        ))}
-                                                    </optgroup>
-                                                )}
+                                                <optgroup label={t('sessionReview_optgroup_new')}>
+                                                    {newHeadlineProposals.map(h => <option key={h} value={h}>{normalizeHeadline(h)} (New)</option>)}
+                                                </optgroup>
                                             </select>
                                         </div>
+                                         <p className="mt-2 text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap font-mono p-2 bg-gray-100 dark:bg-gray-900/50 border-l-2 border-gray-300 dark:border-gray-600">{update.content}</p>
                                     </div>
                                 </div>
-                            )})}
-                        </div>
+                            );
+                        })}
                     </div>
-                )}
-
-                {proposedUpdates.length > 0 && (
-                     <div className="space-y-4">
-                        <h2 className="text-xl font-semibold text-gray-300">Context Changes (Diff View)</h2>
-                        <div className="flex items-center gap-4 text-sm mb-2">
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 bg-red-900/40 border border-red-500"></span><span>Removed</span></div>
-                            <div className="flex items-center gap-2"><span className="w-4 h-4 bg-green-900/40 border border-green-500"></span><span>Added</span></div>
-                        </div>
-                        <DiffViewer oldText={originalContext} newText={updatedContext} />
-                    </div>
-                )}
-                 
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold text-gray-300">Final Updated Context</h2>
-                        <button
-                            onClick={() => setIsFinalContextVisible(prev => !prev)}
-                            className="px-3 py-1 text-xs font-bold text-gray-400 bg-transparent border border-gray-700 uppercase hover:bg-gray-800"
-                            aria-expanded={isFinalContextVisible}
-                        >
-                            {isFinalContextVisible ? 'Hide' : 'Show & Edit'}
-                        </button>
-                    </div>
-                    {isFinalContextVisible && (
-                        <textarea
-                            value={editableContext}
-                            onChange={(e) => setEditableContext(e.target.value)}
-                            rows={10}
-                            className="w-full p-3 font-mono text-sm bg-gray-900 text-gray-300 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-green-400 animate-fadeIn"
-                            aria-label="Editable final context"
-                        />
-                    )}
                 </div>
 
-
-                <div className="pt-6 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
-                     <button
-                        onClick={handleDownloadContext}
-                        className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 text-base font-bold text-green-400 bg-transparent border border-green-400 uppercase hover:bg-green-400 hover:text-black"
-                    >
-                        <DownloadIcon className="w-5 h-5" />
-                        Download Context
-                    </button>
-
-                    <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                         <button
-                            onClick={() => onContinueSession(addStreakToContext(editableContext))}
-                            className="w-full sm:w-auto px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500"
-                        >
-                            Continue with {selectedBot.name}
-                        </button>
-                         <button
-                            onClick={() => onSwitchCoach(addStreakToContext(editableContext))}
-                            className="w-full sm:w-auto px-6 py-3 text-base font-bold text-gray-400 bg-transparent border border-gray-700 uppercase hover:bg-gray-800 hover:text-white"
-                        >
-                            Choose Different Coach
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2 border-b border-gray-200 dark:border-gray-700 pb-2">{t('sessionReview_diffView')}</h2>
+                     <div className="flex items-center gap-4 text-sm mb-2 text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-500"></span><span>{t('sessionReview_removed')}</span></div>
+                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-500"></span><span>{t('sessionReview_added')}</span></div>
+                    </div>
+                    <DiffViewer oldText={originalContext} newText={updatedContext} />
+                </div>
+                
+                 <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">{t('sessionReview_finalContext')}</h2>
+                        <button onClick={() => setIsFinalContextVisible(p => !p)} className="text-sm text-green-500 dark:text-green-400 hover:underline">
+                            {isFinalContextVisible ? t('sessionReview_hide') : t('sessionReview_showEdit')}
                         </button>
                     </div>
+                    {isFinalContextVisible && ( <textarea value={editableContext} onChange={(e) => setEditableContext(e.target.value)} rows={15} className="w-full p-3 font-mono text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500" /> )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button onClick={handleDownloadContext} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95">
+                        <DownloadIcon className="w-5 h-5"/>
+                        {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
+                    </button>
+                    <button onClick={() => onContinueSession(editableContext)} className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500">
+                        {primaryActionText}
+                    </button>
+                    <button onClick={() => onSwitchCoach(editableContext)} className="flex-1 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                        {secondaryActionText}
+                    </button>
+                </div>
+                 <div className="text-center pt-4">
+                    <button onClick={onReturnToStart} className="text-sm text-gray-500 dark:text-gray-400 hover:underline">
+                        {t('sessionReview_startOver')}
+                    </button>
                 </div>
             </div>
         </div>

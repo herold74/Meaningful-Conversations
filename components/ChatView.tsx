@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Chat } from '@google/genai';
-import { Bot, Message } from '../types';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { Bot, Message, Language } from '../types';
+import * as geminiService from '../services/geminiService';
 import Spinner from './shared/Spinner';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import ReactMarkdown from 'react-markdown';
@@ -11,6 +11,15 @@ import { SpeakerOffIcon } from './icons/SpeakerOffIcon';
 import { PauseIcon } from './icons/PauseIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { RepeatIcon } from './icons/RepeatIcon';
+import { VoiceModeIcon } from './icons/VoiceModeIcon';
+import { TextModeIcon } from './icons/TextModeIcon';
+import { XIcon } from './icons/XIcon';
+import { LogOutIcon } from './icons/LogOutIcon';
+import { GearIcon } from './icons/GearIcon';
+import VoiceSelectionModal from './VoiceSelectionModal';
+import { useLocalization } from '../context/LocalizationContext';
+import { FlagIcon } from './icons/FlagIcon';
+import FeedbackModal from './FeedbackModal';
 
 // Add missing type definitions for the Web Speech API to resolve compilation errors.
 interface SpeechRecognitionAlternative {
@@ -62,10 +71,171 @@ interface CustomWindow extends Window {
 }
 declare let window: CustomWindow;
 
+/**
+ * Attempts to determine the gender of a voice based on keywords and common names.
+ * This function is now more robust.
+ */
+const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' | 'unknown' => {
+    const name = voice.name.toLowerCase();
+
+    // Explicitly exclude certain voices from being identified as female.
+    const excludedFemaleNames = ['karen', 'tessa', 'tara', 'katrin', 'moira'];
+    const namePartsForExclusion = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
+    if (namePartsForExclusion.some(part => excludedFemaleNames.includes(part))) {
+        return 'unknown';
+    }
+    
+    // Define keywords and names inside the function
+    const maleKeywords = ['male', 'man', 'boy', 'männlich'];
+    const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
+    
+    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji'];
+      
+    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena'];
+
+    // 1. Check for explicit gender keywords first, as they are the strongest indicator.
+    // Using a regex with word boundaries is more accurate than `includes`.
+    if (maleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'male';
+    if (femaleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'female';
+    
+    // 2. If no keywords, check against name lists by splitting the voice name into parts.
+    const nameParts = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
+    if (nameParts.some(part => femaleNames.includes(part))) return 'female';
+    if (nameParts.some(part => maleNames.includes(part))) return 'male';
+
+    return 'unknown';
+};
+
+
+/**
+ * Selects the best available voice based on language, gender, and a scoring system
+ * that prioritizes local, enhanced/premium voices.
+ */
+const selectVoice = (
+  voices: SpeechSynthesisVoice[],
+  langPrefix: Language,
+  gender: 'male' | 'female'
+): SpeechSynthesisVoice | null => {
+  if (!voices || voices.length === 0) return null;
+
+  // --- Whitelist First Pass ---
+  let allowedNames: string[] = [];
+  if (langPrefix === 'de') {
+      allowedNames = gender === 'female' ? ['petra', 'anna'] : ['markus', 'viktor'];
+  } else if (langPrefix === 'en') {
+      if (gender === 'female') {
+          allowedNames = ['samantha', 'susan', 'serena'];
+      } else {
+          allowedNames = ['daniel', 'jamie'];
+      }
+  }
+
+  if (allowedNames.length > 0) {
+      const whitelistedVoices = voices.filter(v => {
+          if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
+          const name = v.name.toLowerCase();
+          return allowedNames.some(allowedName => name.includes(allowedName));
+      });
+
+      if (whitelistedVoices.length > 0) {
+          const score = (voice: SpeechSynthesisVoice): number => {
+              let score = 0;
+              const name = voice.name.toLowerCase();
+              if (voice.localService) score += 100;
+              if (name.includes('enhanced') || name.includes('premium') || name.includes('erweitert')) score += 80;
+              if (voice.default) score += 1;
+              return score;
+          };
+          const scoredVoices = whitelistedVoices
+              .map(voice => ({ voice, score: score(voice) }))
+              .sort((a, b) => b.score - a.score);
+          return scoredVoices[0].voice;
+      }
+  }
+  
+  // --- Fallback to Broader Search if Whitelist Fails ---
+  const oppositeGender = gender === 'male' ? 'female' : 'male';
+
+  const voicesToScore = voices.filter(v => {
+    if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
+    const voiceGender = getVoiceGender(v);
+    // FIX: Simplified the voice gender filtering logic to resolve a TypeScript type comparison error.
+    return voiceGender !== oppositeGender;
+  });
+
+  if (voicesToScore.length === 0) {
+     // If still no matches, take any voice for the language as a last resort.
+     const anyVoiceForLang = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+     return anyVoiceForLang || null;
+  }
+
+  const score = (voice: SpeechSynthesisVoice): number => {
+    let score = 0;
+    const name = voice.name.toLowerCase();
+    
+    if (voice.localService) score += 100;
+    if (name.includes('enhanced') || name.includes('premium') || name.includes('wavenet') || name.includes('erweitert')) score += 80;
+    if (voice.default) score += 1;
+
+    return score;
+  };
+
+  const scoredVoices = voicesToScore
+    .map(voice => ({ voice, score: score(voice) }))
+    .sort((a, b) => b.score - a.score);
+
+  return scoredVoices.length > 0 ? scoredVoices[0].voice : null;
+};
+
+interface CoachInfoModalProps {
+  bot: Bot;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose }) => {
+    const { language } = useLocalization();
+    if (!isOpen) return null;
+
+    const botDescription = language === 'de' ? bot.description_de : bot.description;
+    const botStyle = language === 'de' ? bot.style_de : bot.style;
+
+  return (
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="coach-info-title"
+    >
+      <div 
+        className="bg-white dark:bg-gray-900 w-full max-w-md m-4 p-6 border border-gray-300 dark:border-gray-700 shadow-xl text-center animate-fadeIn" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-end -mt-2 -mr-2">
+            <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label="Close">
+                <XIcon className="w-6 h-6" />
+            </button>
+        </div>
+        <img src={bot.avatar} alt={bot.name} className="w-24 h-24 rounded-full mx-auto -mt-6 mb-4 border-4 border-white dark:border-gray-900" />
+        <h2 id="coach-info-title" className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
+        <div className="flex flex-wrap justify-center gap-2 my-3">
+          {botStyle.split(', ').map(tag => (
+            <span key={tag} className="px-2.5 py-1 text-xs font-bold tracking-wide uppercase bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-gray-600 dark:text-gray-400 leading-relaxed">{botDescription}</p>
+      </div>
+    </div>
+  );
+};
+
 
 interface ChatViewProps {
   bot: Bot;
-  chatSession: Chat;
+  lifeContext: string;
   chatHistory: Message[];
   setChatHistory: React.Dispatch<React.SetStateAction<Message[]>>;
   onEndSession: () => void;
@@ -73,18 +243,56 @@ interface ChatViewProps {
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setChatHistory, onEndSession, onMessageSent }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent }) => {
+  const { t, language } = useLocalization();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const baseTranscriptRef = useRef<string>('');
 
   const [isListening, setIsListening] = useState(false);
-  const [isTtsEnabled, setIsTtsEnabled] = useState(false);
+  const [isTtsEnabled, setIsTtsEnabled] = useState(true); // Default to on for voice mode
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
   const lastSpokenTextRef = useRef<string>('');
+  
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
+    const savedURI = typeof localStorage !== 'undefined' ? localStorage.getItem('selectedVoiceURI') : null;
+    return savedURI || null;
+  });
+  const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
+  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [reportedBotMessage, setReportedBotMessage] = useState<Message | null>(null);
+  const [lastUserMessageForReport, setLastUserMessageForReport] = useState<Message | null>(null);
+
+  const botGender = useMemo((): 'male' | 'female' => {
+      switch (bot.id) {
+          case 'ava-strategic':
+          case 'chloe-cbt':
+              return 'female';
+          case 'max-ambitious':
+          case 'rob-pq':
+          case 'kenji-stoic':
+          case 'nexus-gps':
+          default:
+              return 'male';
+      }
+  }, [bot.id]);
+
+  useEffect(() => {
+    if (typeof localStorage !== 'undefined') {
+        if (selectedVoiceURI === null) {
+             localStorage.removeItem('selectedVoiceURI');
+        } else {
+            localStorage.setItem('selectedVoiceURI', selectedVoiceURI);
+        }
+    }
+  }, [selectedVoiceURI]);
+
 
   useEffect(() => {
     if (!window.speechSynthesis) return;
@@ -124,16 +332,63 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setC
     utterance.onstart = () => setTtsStatus('speaking');
     utterance.onend = () => setTtsStatus('idle');
     utterance.onerror = () => setTtsStatus('idle');
+    
+    let finalVoice: SpeechSynthesisVoice | null = null;
+    
+    if (selectedVoiceURI) {
+        finalVoice = voices.find(v => v.voiceURI === selectedVoiceURI) || null;
+    }
 
-    const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-    if (englishVoices.length > 0) {
-        const preferredVoices = ['Microsoft David - English (United States)', 'Alex', 'Daniel', 'Google UK English Male', 'Google US English'];
-        let selectedVoice = preferredVoices.map(name => englishVoices.find(v => v.name === name)).find(v => v) || englishVoices.find(v => v.lang === 'en-US') || englishVoices[0];
-        if (selectedVoice) utterance.voice = selectedVoice;
+    if (!finalVoice) {
+        let gender: 'male' | 'female' = 'female';
+        
+        if (language === 'de') {
+            gender = botGender;
+        } else { // 'en'
+            switch (bot.id) {
+                case 'ava-strategic':
+                case 'chloe-cbt':
+                    gender = 'female';
+                    break;
+                case 'max-ambitious':
+                case 'rob-pq':
+                    gender = 'male';
+                    utterance.rate = 1.05;
+                    utterance.pitch = 1.0;
+                    break;
+                case 'kenji-stoic':
+                    gender = 'male';
+                    break;
+                case 'nexus-gps':
+                    gender = 'male';
+                    utterance.rate = 1.1;
+                    break;
+                default:
+                    gender = 'male';
+                    break;
+            }
+        }
+        
+        finalVoice = selectVoice(voices, language, gender);
+    }
+
+    if (finalVoice) {
+        utterance.voice = finalVoice;
     }
 
     window.speechSynthesis.speak(utterance);
-  }, [isTtsEnabled, voices]);
+  }, [isTtsEnabled, voices, bot.id, selectedVoiceURI, language, botGender]);
+
+  const handlePreviewVoice = useCallback((voice: SpeechSynthesisVoice) => {
+    if (!voice || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const sampleText = t('voiceModal_preview_text');
+    const utterance = new SpeechSynthesisUtterance(sampleText);
+    utterance.voice = voice;
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  }, [t]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -151,7 +406,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setC
     const recognition = new SpeechRecognitionAPI();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.lang = language === 'de' ? 'de-DE' : 'en-US';
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
@@ -161,70 +416,57 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setC
     };
     
     recognition.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-                setInput(prev => (prev + ' ' + event.results[i][0].transcript).trim());
-            } else {
-                interimTranscript += event.results[i][0].transcript;
-            }
-        }
+      const newTranscript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setInput(baseTranscriptRef.current + newTranscript);
     };
 
     recognitionRef.current = recognition;
-  }, []);
+  }, [language]);
   
   useEffect(() => {
       if (chatHistory.length === 1 && chatHistory[0].role === 'bot' && voices.length > 0) {
         speak(chatHistory[0].text);
       }
   }, [speak, chatHistory, voices]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  
+  const sendMessage = async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return;
 
     window.speechSynthesis.cancel();
+    setTtsStatus('idle');
     if (isListening) recognitionRef.current?.stop();
-    
+
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      text: input,
+      text: messageText,
       role: 'user',
       timestamp: new Date().toISOString(),
     };
     
     onMessageSent();
-    setChatHistory(prev => [...prev, userMessage]);
-    setInput('');
+    const newHistory = [...chatHistory, userMessage];
+    setChatHistory(newHistory);
     setIsLoading(true);
 
     try {
-      const stream = await chatSession.sendMessageStream({ message: input });
-      let botResponseText = '';
-      const botMessageId = `bot-${Date.now()}`;
-
-      setChatHistory(prev => [
-        ...prev,
-        { id: botMessageId, text: '', role: 'bot', timestamp: new Date().toISOString() },
-      ]);
-
-      for await (const chunk of stream) {
-        botResponseText += chunk.text;
-        setChatHistory(prev =>
-          prev.map(msg =>
-            msg.id === botMessageId ? { ...msg, text: botResponseText } : msg
-          )
-        );
-      }
-
-      speak(botResponseText);
+        const response = await geminiService.sendMessage(bot, lifeContext, newHistory, language, messageText);
+        
+        const botMessage: Message = {
+            id: `bot-${Date.now()}`,
+            text: response.text,
+            role: 'bot',
+            timestamp: new Date().toISOString(),
+        };
+        setChatHistory(prev => [...prev, botMessage]);
+        speak(botMessage.text);
 
     } catch (err) {
       console.error('Error sending message:', err);
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: t('chat_error'),
         role: 'bot',
         timestamp: new Date().toISOString(),
       };
@@ -234,17 +476,31 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setC
     }
   };
 
-  const handleMicClick = () => {
-    if (!recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
-    } else {
-      window.speechSynthesis.cancel();
-      setTtsStatus('idle');
-      recognitionRef.current.start();
-    }
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessage(input);
+    setInput('');
   };
+  
+  const handleVoiceInteraction = async () => {
+      if (isLoading || !recognitionRef.current) return;
+
+      if (isListening) {
+          recognitionRef.current.stop();
+          setTimeout(async () => {
+              if (input.trim()) {
+                  await sendMessage(input);
+                  setInput('');
+              }
+          }, 300);
+      } else {
+          window.speechSynthesis.cancel();
+          setTtsStatus('idle');
+          baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
+          recognitionRef.current.start();
+      }
+  };
+
 
   const handlePauseTTS = () => {
     window.speechSynthesis.pause();
@@ -261,77 +517,217 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, chatSession, chatHistory, setC
         speak(lastSpokenTextRef.current);
     }
   };
+  
+  const handleOpenFeedbackModal = (botMessage: Message) => {
+    const botMessageIndex = chatHistory.findIndex(msg => msg.id === botMessage.id);
+    if (botMessageIndex > 0) {
+        // Find the last user message before this bot message
+        let userMessage: Message | null = null;
+        for (let i = botMessageIndex - 1; i >= 0; i--) {
+            if (chatHistory[i].role === 'user') {
+                userMessage = chatHistory[i];
+                break;
+            }
+        }
+        setLastUserMessageForReport(userMessage);
+        setReportedBotMessage(botMessage);
+        setFeedbackModalOpen(true);
+    }
+  };
+
+  const handleSubmitFeedback = (feedback: { comments: string; isAnonymous: boolean; email?: string }) => {
+      const feedbackData = {
+          lastUserMessage: lastUserMessageForReport?.text || 'N/A',
+          botMessage: reportedBotMessage?.text || 'N/A',
+          ...feedback,
+          timestamp: new Date().toISOString(),
+          botId: bot.id,
+      };
+      console.log("--- FEEDBACK SUBMITTED ---", feedbackData);
+      // In a real app, this would be an API call.
+      // The modal itself will handle showing the success state and closing.
+  };
+
+  const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
-    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-transparent border border-gray-700">
-      <header className="flex items-center p-4 border-b border-gray-700">
-        <img src={bot.avatar} alt={bot.name} className="w-12 h-12 rounded-full mr-4" />
-        <div>
-          <h1 className="text-xl font-bold text-gray-200">{bot.name}</h1>
-          <p className="text-sm text-gray-400">{bot.style}</p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-            <>
-                {ttsStatus === 'speaking' && (
-                    <button onClick={handlePauseTTS} className="p-1 text-gray-400 hover:text-white" aria-label="Pause speech"><PauseIcon className="w-6 h-6" /></button>
-                )}
-                {ttsStatus === 'paused' && (
-                    <button onClick={handleResumeTTS} className="p-1 text-gray-400 hover:text-white" aria-label="Resume speech"><PlayIcon className="w-6 h-6" /></button>
-                )}
-                {ttsStatus === 'idle' && (
-                    <button className="p-1 text-gray-700 cursor-not-allowed" aria-label="Play/Pause" disabled><PlayIcon className="w-6 h-6" /></button>
-                )}
-                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-1 text-gray-400 hover:text-white disabled:text-gray-700" aria-label="Repeat last message"><RepeatIcon className="w-6 h-6" /></button>
-                <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-400 hover:text-white" aria-label={isTtsEnabled ? "Disable voice output" : "Enable voice output"}>
-                    {isTtsEnabled ? <SpeakerOnIcon className="w-6 h-6" /> : <SpeakerOffIcon className="w-6 h-6" />}
-                </button>
-            </>
-            <button 
-              onClick={onEndSession}
-              className="px-4 py-2 text-sm font-bold text-green-400 bg-transparent border border-green-400 uppercase hover:bg-green-400 hover:text-black"
+    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 shadow-lg">
+      <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 gap-2">
+        {/* Left: Coach Info (responsive) */}
+        <div className="flex-1 min-w-0">
+             <button 
+                onClick={() => setIsCoachInfoOpen(true)} 
+                className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500 rounded-lg p-1 -ml-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
-              End Session
+                <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
+                <div className="min-w-0">
+                    <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-200 truncate">{bot.name}</h1>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('chat_viewInfo')}</p>
+                </div>
+            </button>
+        </div>
+
+        {/* Right: Controls */}
+        <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
+            <button onClick={() => setIsVoiceMode(p => !p)} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isVoiceMode ? t('chat_switchToText') : t('chat_switchToVoice')}>
+                {isVoiceMode ? <TextModeIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <VoiceModeIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
+            </button>
+
+            {!isVoiceMode && (
+                <div className="flex items-center justify-end gap-2 border-l border-gray-200 dark:border-gray-700 pl-2 sm:pl-2 md:pl-4">
+                    {ttsStatus === 'speaking' && (
+                        <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_pauseSpeech')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                    )}
+                    {ttsStatus === 'paused' && (
+                        <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_resumeSpeech')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                    )}
+                    {ttsStatus === 'idle' && (
+                        <button className="p-1 text-gray-300 dark:text-gray-700 cursor-not-allowed" aria-label={t('chat_playPause')} disabled><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                    )}
+                    <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat')}><RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? t('chat_disableVoice') : t('chat_enableVoice')}>
+                        {isTtsEnabled ? <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
+                    </button>
+                    {isTtsEnabled && relevantVoices.length > 0 && (
+                        <button
+                            onClick={() => setIsVoiceModalOpen(true)}
+                            className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                            aria-label={t('chat_voiceSettings')}
+                        >
+                            <GearIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {/* Separator */}
+            <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            {/* End Session Button/Icon */}
+            <button
+                onClick={onEndSession}
+                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-green-400 bg-transparent border border-red-600 dark:border-green-400 uppercase hover:bg-red-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black"
+            >
+                {t('chat_endSession')}
+            </button>
+            <button
+                onClick={onEndSession}
+                className="md:hidden p-2 text-red-600 dark:text-green-400 rounded-full hover:bg-red-50 dark:hover:bg-green-400/10"
+                aria-label={t('chat_endSession')}
+            >
+                <LogOutIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
         </div>
       </header>
       
-      <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6">
-        {chatHistory.map((message) => (
-          <div key={message.id} className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />}
-            <div className={`prose prose-invert max-w-md p-3 ${message.role === 'user' ? 'bg-green-600 text-white rounded-l-lg rounded-br-lg' : 'bg-gray-800 text-gray-300 rounded-r-lg rounded-bl-lg'}`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+    {isVoiceMode ? (
+        <main className="flex-1 flex flex-col justify-around items-center p-6 text-center bg-gray-50 dark:bg-gray-900/50">
+            <div className="animate-fadeIn">
+                <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-white dark:border-gray-700" />
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h1>
             </div>
-          </div>
-        ))}
-        {isLoading && (
-            <div className="flex gap-3 justify-start">
-                <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />
-                <div className="max-w-md p-3 bg-gray-800 text-gray-300 rounded-r-lg rounded-bl-lg">
-                    <Spinner />
+
+            <div className="flex flex-col items-center justify-center my-8 w-full">
+                <button
+                    onClick={handleVoiceInteraction}
+                    disabled={isLoading}
+                    className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
+                        isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
+                    } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
+                    aria-label={isListening ? t('chat_stopAndSend') : t('chat_startRecording')}
+                >
+                    {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
+                </button>
+                <div className="mt-4 h-14 text-lg text-gray-600 dark:text-gray-400 flex items-center justify-center px-4 w-full max-w-md">
+                    <p>{input || (isListening ? t('chat_listening') : t('chat_tapToSpeak'))}</p>
                 </div>
             </div>
-        )}
-      </main>
-      
-      <footer className="p-4 border-t border-gray-700">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            disabled={isLoading}
-            className="flex-1 p-3 bg-gray-800 text-gray-200 border border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-400"
-          />
-          <button type="button" onClick={handleMicClick} disabled={isLoading} className="p-2 text-gray-400 hover:text-white disabled:text-gray-700" aria-label={isListening ? "Stop listening" : "Start listening"}>
-              <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
-          </button>
-          <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-black hover:bg-green-600 disabled:bg-gray-700">
-            <PaperPlaneIcon className="w-6 h-6" />
-          </button>
-        </form>
-      </footer>
+
+            <div className="flex items-center justify-center gap-6">
+                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={ttsStatus === 'speaking' ? t('chat_pauseSpeech') : t('chat_resumeSpeech')}>
+                    {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/> : <PlayIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>}
+                </button>
+                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={t('chat_repeat')}>
+                    <RepeatIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>
+                </button>
+                <button onClick={() => setIsTtsEnabled(p => !p)} className="p-4 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={isTtsEnabled ? t('chat_disableVoice') : t('chat_enableVoice')}>
+                    {isTtsEnabled ? <SpeakerOnIcon className="w-8 h-8 text-gray-700 dark:text-gray-200" /> : <SpeakerOffIcon className="w-8 h-8 text-gray-700 dark:text-gray-200" />}
+                </button>
+            </div>
+        </main>
+    ) : (
+      <>
+        <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6">
+          {chatHistory.map((message) => (
+            <div key={message.id} className={`flex gap-3 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />}
+              <div className={`max-w-md p-3 ${message.role === 'user' ? 'bg-green-600 text-white rounded-l-lg rounded-br-lg' : 'prose dark:prose-invert bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 rounded-r-lg rounded-bl-lg'}`}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+              </div>
+              {message.role === 'bot' && !isLoading && (
+                  <button 
+                      onClick={() => handleOpenFeedbackModal(message)}
+                      className="self-center p-1 text-gray-400 dark:text-gray-500 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-opacity"
+                      aria-label={t('chat_reportIssue')}
+                  >
+                      <FlagIcon className="w-4 h-4" />
+                  </button>
+              )}
+            </div>
+          ))}
+          {isLoading && (
+              <div className="flex gap-3 justify-start">
+                  <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />
+                  <div className="max-w-md p-3 bg-gray-100 dark:bg-gray-800 rounded-r-lg rounded-bl-lg">
+                      <Spinner />
+                  </div>
+              </div>
+          )}
+        </main>
+        
+        <footer className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <form onSubmit={handleFormSubmit} className="flex items-center gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={t('chat_inputPlaceholder')}
+              disabled={isLoading}
+              className="flex-1 p-3 bg-gray-100 text-gray-800 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-green-400"
+            />
+            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? t('chat_stopAndSend') : t('chat_startRecording')}>
+                <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+            </button>
+            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700">
+              <PaperPlaneIcon className="w-6 h-6" />
+            </button>
+          </form>
+        </footer>
+      </>
+    )}
+    <VoiceSelectionModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        voices={relevantVoices}
+        currentVoiceURI={selectedVoiceURI}
+        onSelectVoice={setSelectedVoiceURI}
+        onPreviewVoice={handlePreviewVoice}
+        botLanguage={language}
+        botGender={botGender}
+    />
+     <CoachInfoModal
+        bot={bot}
+        isOpen={isCoachInfoOpen}
+        onClose={() => setIsCoachInfoOpen(false)}
+    />
+    <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)}
+        onSubmit={handleSubmitFeedback}
+        lastUserMessage={lastUserMessageForReport}
+        botMessage={reportedBotMessage}
+    />
     </div>
   );
 };
