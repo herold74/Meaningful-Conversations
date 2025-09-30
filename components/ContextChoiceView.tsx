@@ -14,8 +14,8 @@ interface ContextChoiceViewProps {
 const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContext, onContinue, onStartNew }) => {
   const { t } = useLocalization();
 
-  // Create a short preview of the context
-  const contextPreview = savedContext.split('\n').slice(0, 5).join('\n').trim();
+  // Show the full context, trimmed.
+  const contextPreview = savedContext.trim();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
@@ -30,7 +30,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-left">
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
           <pre className="font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
-            <code>{contextPreview}...</code>
+            <code>{contextPreview}</code>
           </pre>
         </div>
 

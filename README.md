@@ -268,3 +268,35 @@ A common point of confusion is how to manage the different "servers" (the databa
 -   `podman start mysql_server_podman`: Start your existing (stopped) container.
 -   `podman stop mysql_server_podman`: Stop the running container.
 -   `podman logs mysql_server_podman`: View the logs from the database container if you suspect an issue.
+
+---
+
+### Appendix: `.env` File Content
+
+If you are having trouble creating the `.env` file, copy the entire block below and paste it into a new file named `.env` inside your `meaningful-conversations-backend` directory.
+
+**IMPORTANT:** After pasting, you must replace the placeholder values for `DATABASE_URL` and `API_KEY` with your own personal credentials.
+
+```dotenv
+# .env file content starts here
+
+# --- Database Connection ---
+# Replace the placeholders <user>, <password>, <host>, <port>, and <database_name>
+# with your actual MySQL database credentials.
+# The `?allowPublicKeyRetrieval=true` is often necessary for local MySQL 8+ connections.
+DATABASE_URL="mysql://<user>:<password>@<host>:<port>/<database_name>?allowPublicKeyRetrieval=true"
+
+# --- Gemini API Key ---
+# Paste your API key from Google AI Studio here.
+API_KEY=""
+
+# --- JWT Secret for Authentication ---
+# This is a randomly generated secret for signing login tokens.
+# There is no need to change this value.
+JWT_SECRET="a_very_secure_and_random_string_for_jwt_!@#$1234_CHANGE_ME_IF_YOU_WANT_BUT_NO_NEED"
+
+# --- Server Port ---
+PORT=3001
+
+# .env file content ends here
+```

@@ -6,16 +6,15 @@ import { apiFetch } from './api';
 export const sendMessage = async (
     bot: Bot,
     context: string,
-    history: Message[],
-    lang: Language,
-    message: string
+    history: Message[], // This is newHistory from ChatView: [bot_welcome, user1, ..., userN]
+    lang: Language
 ): Promise<{ text: string }> => {
     
-    const relevantHistory = history.slice(1); // Remove initial welcome message
+    const historyForApi = history.slice(1); // Remove initial welcome message.
 
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ bot, context, history: relevantHistory, lang, message }),
+        body: JSON.stringify({ bot, context, history: historyForApi, lang }),
     });
 };
 

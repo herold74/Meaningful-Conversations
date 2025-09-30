@@ -1,49 +1,57 @@
 import React from 'react';
+import { LogoIcon } from './icons/LogoIcon';
 import { BOTS } from '../constants';
-import { useLocalization } from '../context/LocalizationContext';
 
 const WelcomeScreen: React.FC = () => {
-    const { t } = useLocalization();
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden p-4" style={{ backgroundColor: '#FECC78' }}>
-            <div className="relative w-[360px] h-[360px] flex items-center justify-center scale-[0.85] sm:scale-100 transition-transform duration-300 ease-in-out">
-                
-                {/* This is a static container for the title */}
-                <div className="relative text-center p-4 z-10 max-w-[240px]">
-                     <h1 className="text-3xl font-extrabold text-gray-900 uppercase tracking-wider" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.2)' }}>
-                        {t('meaningfulConversations').split(' ').map((word, index) => <React.Fragment key={index}>{word}<br/></React.Fragment>)}
-                    </h1>
-                </div>
+    // Pre-calculated positions for 6 bots in a hexagon shape around the central logo
+    const avatarPositions = [
+        { top: '-1.5rem', left: 'calc(50% - 1.5rem)' }, // Top
+        { top: 'calc(25% - 1rem)', right: '-1.5rem' },  // Top-right
+        { bottom: 'calc(25% - 1rem)', right: '-1.5rem' }, // Bottom-right
+        { bottom: '-1.5rem', left: 'calc(50% - 1.5rem)' },// Bottom
+        { bottom: 'calc(25% - 1rem)', left: '-1.5rem' }, // Bottom-left
+        { top: 'calc(25% - 1rem)', left: '-1.5rem' },   // Top-left
+    ];
 
-                {/* This container will rotate, carrying the icons with it */}
-                <div 
-                    className="absolute inset-0"
-                    style={{
-                        animation: `spin 30s linear infinite`,
-                    }}
-                >
-                    {BOTS.map((bot, index) => (
-                        <div
-                            key={bot.id}
-                            className="absolute top-1/2 left-1/2 -mt-10 -ml-10 w-20 h-20"
-                            style={{
-                                transform: `rotate(${(360 / BOTS.length) * index}deg) translateY(-180px)`,
-                            }}
-                        >
-                            <img
-                                src={bot.avatar}
-                                alt={bot.name}
-                                className="w-full h-full rounded-full object-cover bg-white border-2 border-gray-200 shadow-lg"
-                                style={{
-                                    animation: `spin-reverse 30s linear infinite`,
-                                }}
-                            />
-                        </div>
-                    ))}
-                </div>
-            </div>
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 text-center animate-fadeIn">
+      {/* Container for the logo and avatars */}
+      <div className="relative w-40 h-40">
+        
+        {/* Main Logo at the center */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <LogoIcon className="w-32 h-32 text-green-500 dark:text-green-400" />
+            <div className="absolute inset-0 rounded-full border-4 border-green-500/20 dark:border-green-400/20 animate-ping"></div>
         </div>
-    );
+        
+        {/* Bot Avatars positioned around the logo container */}
+        {BOTS.slice(0, 6).map((bot, index) => {
+          const animationDelay = `${200 + index * 100}ms`;
+          const position = avatarPositions[index];
+
+          return (
+            <img
+              key={bot.id}
+              src={bot.avatar}
+              alt={bot.name}
+              className={`absolute w-12 h-12 rounded-full border-2 border-white dark:border-gray-800 shadow-lg opacity-0 animate-fadeIn`}
+              style={{ 
+                ...position,
+                animationDelay 
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <h1 className="mt-20 text-2xl font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest">
+        Meaningful Conversations
+      </h1>
+      <p className="mt-2 text-gray-500 dark:text-gray-400">
+        Loading your experience...
+      </p>
+    </div>
+  );
 };
 
 export default WelcomeScreen;

@@ -154,13 +154,11 @@ const selectVoice = (
   }
   
   // --- Fallback to Broader Search if Whitelist Fails ---
-  const oppositeGender = gender === 'male' ? 'female' : 'male';
-
   const voicesToScore = voices.filter(v => {
     if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
     const voiceGender = getVoiceGender(v);
-    // FIX: Simplified the voice gender filtering logic to resolve a TypeScript type comparison error.
-    return voiceGender !== oppositeGender;
+    // Keep voices that match the desired gender or are of unknown gender.
+    return voiceGender === gender || voiceGender === 'unknown';
   });
 
   if (voicesToScore.length === 0) {
@@ -451,7 +449,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     setIsLoading(true);
 
     try {
-        const response = await geminiService.sendMessage(bot, lifeContext, newHistory, language, messageText);
+        const response = await geminiService.sendMessage(bot, lifeContext, newHistory, language);
         
         const botMessage: Message = {
             id: `bot-${Date.now()}`,

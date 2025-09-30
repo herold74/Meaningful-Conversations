@@ -124,11 +124,18 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
 
                 <div className="mt-4 md:mt-0">
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                        {(language === 'de' ? bot.style_de : bot.style).split(', ').map(tag => (
-                            <span key={tag} className="px-2.5 py-1 text-xs font-bold tracking-wide uppercase bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300">
-                                {tag}
-                            </span>
-                        ))}
+                        {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
+                            const isFirstTag = index === 0;
+                            const tagClass = !isLocked && isFirstTag
+                                ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+                            
+                            return (
+                                <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
+                                    {tag}
+                                </span>
+                            );
+                        })}
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
                     <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed">{language === 'de' ? bot.description_de : bot.description}</p>

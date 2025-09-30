@@ -6,7 +6,15 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const prisma = new PrismaClient();
 
-const INITIAL_GAMIFICATION_STATE = "0;1;0;0;-1;1;0"; // As defined in the README
+const INITIAL_GAMIFICATION_STATE_OBJ = {
+    xp: 0,
+    level: 1,
+    streak: 0,
+    unlockedAchievements: ['beta_pioneer'], // Use array for JSON
+    totalSessions: 0,
+    lastSessionDate: null,
+    coachesUsed: [], // Use array for JSON
+};
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -26,7 +34,7 @@ router.post('/register', async (req, res) => {
             data: {
                 email: email.toLowerCase(),
                 passwordHash,
-                gamificationState: INITIAL_GAMIFICATION_STATE
+                gamificationState: JSON.stringify(INITIAL_GAMIFICATION_STATE_OBJ)
             }
         });
 
@@ -97,7 +105,9 @@ router.post('/beta-login', async (req, res) => {
 
         if (!user) {
             const betaLifeContext = `# My Life Context...`; // Abridged for brevity
-            const betaGamificationState = "210;3;3;4;760;46;7"; // Serialized state for beta user
+            const betaGamificationState = {
+                xp: 210, level: 3, streak: 3, totalSessions: 4, lastSessionDate: "2024-08-01", unlockedAchievements: ["beta_pioneer", "first_session", "streak_starter", "polymath"], coachesUsed: ["max-ambitious", "kenji-stoic", "ava-strategic"]
+            };
 
             user = await prisma.user.create({
                 data: {
@@ -105,7 +115,7 @@ router.post('/beta-login', async (req, res) => {
                     passwordHash: await bcrypt.hash('beta', 10), // Dummy password
                     isBetaTester: true,
                     lifeContext: betaLifeContext,
-                    gamificationState: betaGamificationState
+                    gamificationState: JSON.stringify(betaGamificationState)
                 }
             });
         }

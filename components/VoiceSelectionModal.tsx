@@ -33,9 +33,9 @@ const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' | 'unkno
     const maleKeywords = ['male', 'man', 'boy', 'männlich'];
     const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
     
-    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor'];
+    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji'];
       
-    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'kenji', 'anna', 'hedda', 'serena'];
+    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena'];
 
     // 1. Check for explicit gender keywords first, as they are the strongest indicator.
     // Using a regex with word boundaries is more accurate than `includes`.

@@ -118,8 +118,8 @@ interface SessionReviewProps {
     blockageScore: number;
     originalContext: string;
     selectedBot: Bot;
-    onContinueSession: (newContext: string) => void;
-    onSwitchCoach: (newContext: string) => void;
+    onContinueSession: (newContext: string, options: { preventSave: boolean }) => void;
+    onSwitchCoach: (newContext: string, options: { preventSave: boolean }) => void;
     onReturnToStart: () => void;
     gamificationState: GamificationState;
     currentUser: User | null;
@@ -170,6 +170,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     });
     const [editableContext, setEditableContext] = useState('');
     const [isFinalContextVisible, setIsFinalContextVisible] = useState(false);
+    const [preventSave, setPreventSave] = useState(false);
 
 
     const handleToggleUpdate = (index: number) => {
@@ -246,8 +247,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
     const handleDownloadContext = () => {
         let contentToDownload = editableContext;
-        // For guests, embed their progress in the file.
-        if (!currentUser) {
+        // For guests, or users opting out of save, embed their progress in the file.
+        if (!currentUser || preventSave) {
             contentToDownload = addGamificationDataForGuest(editableContext);
         }
         const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
@@ -289,8 +290,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return t(`sessionReview_action_${type.toLowerCase()}`);
     };
 
-    const primaryActionText = currentUser ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
-    const secondaryActionText = currentUser ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
+    const continueDisabled = currentUser && preventSave;
+    const primaryActionText = (currentUser && !preventSave) ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
+    const secondaryActionText = (currentUser && !preventSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
 
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
@@ -406,18 +408,49 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     {isFinalContextVisible && ( <textarea value={editableContext} onChange={(e) => setEditableContext(e.target.value)} rows={15} className="w-full p-3 font-mono text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500" /> )}
                 </div>
 
+                {currentUser && (
+                    <div className="p-4 bg-yellow-50 dark:bg-gray-900 border border-yellow-200 dark:border-yellow-700 rounded-md">
+                        <label className="flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={preventSave}
+                                onChange={(e) => setPreventSave(e.target.checked)}
+                                className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
+                            />
+                            <div className="ml-3">
+                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('sessionReview_preventSave_label')}</span>
+                                <p className="text-sm text-yellow-700 dark:text-yellow-400">{t('sessionReview_preventSave_desc')}</p>
+                            </div>
+                        </label>
+                    </div>
+                )}
+
+
                 <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button onClick={handleDownloadContext} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95">
                         <DownloadIcon className="w-5 h-5"/>
                         {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
                     </button>
-                    <button onClick={() => onContinueSession(editableContext)} className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500">
+                    <button
+                        onClick={() => onContinueSession(editableContext, { preventSave })}
+                        disabled={continueDisabled}
+                        className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
+                    >
                         {primaryActionText}
                     </button>
-                    <button onClick={() => onSwitchCoach(editableContext)} className="flex-1 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button
+                        onClick={() => onSwitchCoach(editableContext, { preventSave })}
+                        disabled={continueDisabled}
+                        className="flex-1 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
+                    >
                         {secondaryActionText}
                     </button>
                 </div>
+                 {continueDisabled && (
+                    <div className="text-center text-sm text-yellow-600 dark:text-yellow-400 -mt-2">
+                        {t('sessionReview_preventSave_continueDisabled_tooltip')}
+                    </div>
+                )}
                  <div className="text-center pt-4">
                     <button onClick={onReturnToStart} className="text-sm text-gray-500 dark:text-gray-400 hover:underline">
                         {t('sessionReview_startOver')}

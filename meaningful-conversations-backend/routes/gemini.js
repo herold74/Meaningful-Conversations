@@ -1,46 +1,57 @@
 const express = require('express');
-const { GoogleGenAI, Type } = require('@google/genai');
+const { GoogleGenAI } = require('@google/genai');
 const authMiddleware = require('../middleware/auth');
+const { analysisPrompts, contextResponseSchema, blockageAnalysisPrompts, blockageResponseSchema } = require('../services/geminiPrompts');
 
 const router = express.Router();
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-// Note: In a production app, you might apply middleware selectively if some
-// features are available to guests. For now, all Gemini interactions require auth.
 router.use(authMiddleware);
+
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', async (req, res) => {
-    const { bot, context, history, lang, message } = req.body;
+    const { bot, context, history: historyForApi, lang } = req.body;
 
-    if (!bot || !context || !history || !lang || !message) {
-        return res.status(400).json({ error: 'Missing required fields for chat message.' });
+    if (!bot || !context || !historyForApi) {
+        return res.status(400).json({ error: "Missing bot, context, or history." });
     }
 
+    const botSystemPrompt = lang === 'de' ? bot.systemPrompt_de : bot.systemPrompt;
+
     try {
-        const systemPrompt = lang === 'de' ? bot.systemPrompt_de : bot.systemPrompt;
+        const contents = [];
         
-        const chat = ai.chats.create({
-            model: 'gemini-2.5-flash',
-            config: {
-                systemInstruction: `${systemPrompt}\n\n## User's Life Context:\n${context}`,
-            },
-            history: history.map(msg => ({
-                role: msg.role === 'bot' ? 'model' : 'user',
-                parts: [{ text: msg.text }],
-            })),
+        // Prepend context to the first user message
+        if (historyForApi.length > 0 && historyForApi[0].role === 'user') {
+            const firstUserMessage = historyForApi.shift();
+            contents.push({
+                role: 'user',
+                parts: [{ text: `My Life Context:\n---\n${context}\n---\n\nMy message:\n${firstUserMessage.text}` }]
+            });
+        }
+
+        // Add the rest of the history
+        historyForApi.forEach(msg => {
+            contents.push({
+                role: (msg.role === 'user' ? 'user' : 'model'),
+                parts: [{ text: msg.text }]
+            });
         });
 
-        // NOTE: For simplicity, this implementation uses the non-streaming sendMessage.
-        // The frontend will need to be adapted to handle a single response object
-        // instead of a stream when it's switched over to use this backend.
-        const result = await chat.sendMessage(message);
-        
-        res.status(200).json({ text: result.text });
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: contents,
+            // FIX: systemInstruction must be inside a config object
+            config: {
+                systemInstruction: botSystemPrompt
+            }
+        });
+
+        res.status(200).json({ text: response.text });
 
     } catch (error) {
-        console.error("Error in Gemini chat proxy:", error);
-        res.status(500).json({ error: 'Failed to get response from AI model.' });
+        console.error("Error in send-message:", error);
+        res.status(500).json({ error: "Failed to get response from AI." });
     }
 });
 
@@ -48,57 +59,60 @@ router.post('/chat/send-message', async (req, res) => {
 // POST /api/gemini/session/analyze
 router.post('/session/analyze', async (req, res) => {
     const { history, context, lang } = req.body;
-    
-    if (!history || !context || !lang) {
-        return res.status(400).json({ error: 'Missing required fields for session analysis.' });
+
+    if (!history || !context) {
+        return res.status(400).json({ error: "Missing history or context." });
     }
 
-    // Replicate the analysis logic from the frontend's geminiService.
-    // This logic can now live securely on the backend.
-    const relevantHistory = history.slice(1);
-    const conversation = relevantHistory.map(msg => `${msg.role}: ${msg.text}`).join('\n');
-    
-    // Using require here to avoid circular dependencies if these were in a separate file
-    const { analysisPrompts, contextResponseSchema, blockageAnalysisPrompts, blockageResponseSchema } = require('../services/geminiPrompts');
-    
-    const contextAnalysisPrompt = `${analysisPrompts[lang]}\n\n**Life Context:**\n${context}\n\n**Conversation:**\n${conversation}`;
-    const blockageAnalysisPrompt = `${blockageAnalysisPrompts[lang]}\n\n**Conversation:**\n${conversation}`;
+    const chatTranscript = history.map(h => `${h.role === 'user' ? 'Client' : 'Coach'}: ${h.text}`).join('\n');
+    const existingHeadlines = (context.match(/^(#+\s.*|\*\*.+\*\*.*)/gm) || []).join('\n');
 
     try {
-        const contextAnalysisPromise = ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: contextAnalysisPrompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: contextResponseSchema,
-            },
+        // Parallelize the two analysis calls
+        const [contextResult, blockageResult] = await Promise.all([
+            ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: `${analysisPrompts[lang]}\n\nExisting Headlines:\n${existingHeadlines}\n\nLife Context:\n${context}\n\nConversation Transcript:\n${chatTranscript}`,
+                config: { responseMimeType: "application/json", responseSchema: contextResponseSchema },
+            }),
+            ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: `${blockageAnalysisPrompts[lang]}\n\nConversation Transcript:\n${chatTranscript}`,
+                config: { responseMimeType: "application/json", responseSchema: blockageResponseSchema },
+            })
+        ]);
+
+        let parsedUpdates = { summary: '', updates: [], nextSteps: [] };
+        if (contextResult && contextResult.text) {
+             try {
+                parsedUpdates = JSON.parse(contextResult.text);
+            } catch (e) {
+                console.error('Failed to parse context updates JSON:', e, 'Raw text:', contextResult.text);
+                // Gracefully continue with empty updates
+            }
+        }
+       
+        let parsedBlockages = [];
+        if (blockageResult && blockageResult.text) {
+             try {
+                parsedBlockages = JSON.parse(blockageResult.text);
+            } catch (e) {
+                console.error('Failed to parse blockage analysis JSON:', e, 'Raw text:', blockageResult.text);
+                // Gracefully continue with empty blockages
+            }
+        }
+
+        res.status(200).json({
+            summary: parsedUpdates.summary,
+            updates: parsedUpdates.updates,
+            nextSteps: parsedUpdates.nextSteps,
+            solutionBlockages: parsedBlockages
         });
 
-        const blockageAnalysisPromise = ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: blockageAnalysisPrompt,
-            config: {
-                responseMimeType: 'application/json',
-                responseSchema: blockageResponseSchema,
-            },
-        });
-        
-        const [contextResponse, blockageResponse] = await Promise.all([contextAnalysisPromise, blockageAnalysisPromise]);
-
-        const contextJsonText = contextResponse.text.trim();
-        const parsedContext = JSON.parse(contextJsonText);
-
-        const blockageJsonText = blockageResponse.text.trim();
-        const parsedBlockages = JSON.parse(blockageJsonText);
-        
-        // Combine and send the full analysis payload
-        res.status(200).json({ ...parsedContext, solutionBlockages: parsedBlockages });
-
-    } catch (error) {
-        console.error("Error analyzing session on backend:", error);
+    } catch (e) {
+        console.error("Analysis error:", e);
         res.status(500).json({ error: "Failed to analyze session." });
     }
 });
 
-// A small helper module to keep prompts separate
 module.exports = router;

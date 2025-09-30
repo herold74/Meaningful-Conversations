@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Language } from '../types';
+import WelcomeScreen from '../components/WelcomeScreen'; // Import a loading component
 
 // Define the shape of the context
 interface LocalizationContextType {
@@ -19,7 +20,8 @@ export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ childr
         return (savedLang === 'de' || savedLang === 'en') ? savedLang : 'en';
     });
     
-    const [translations, setTranslations] = useState<Record<Language, Record<string, string>> | null>(null);
+    const [translations, setTranslations] = useState<Record<string, string> | null>(null);
+    const [fallback, setFallback] = useState<Record<string, string> | null>(null);
 
     useEffect(() => {
         const fetchTranslations = async () => {
@@ -35,33 +37,60 @@ export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 const enData = await enResponse.json();
                 const deData = await deResponse.json();
                 
-                setTranslations({
-                    en: enData,
-                    de: deData,
-                });
+                setFallback(enData); // Always have English as a fallback
+                if (language === 'en') {
+                    setTranslations(enData);
+                } else {
+                    setTranslations(deData);
+                }
             } catch (error) {
                 console.error("Error loading translation files:", error);
-                // Fallback to prevent crashes, though the app might not have text.
-                setTranslations({ en: {}, de: {} });
+                // Try to load at least English as a fallback
+                try {
+                    const enResponse = await fetch('/locales/en.json');
+                    const enData = await enResponse.json();
+                    setFallback(enData);
+                    setTranslations(enData);
+                } catch (fallbackError) {
+                    console.error("Failed to load even the fallback English translations:", fallbackError);
+                    setTranslations({}); // Prevent infinite loading on total failure
+                    setFallback({});
+                }
             }
         };
 
         fetchTranslations();
-    }, []);
+    }, []); // Fetch once on mount
 
-    const setLanguage = (lang: Language) => {
-        localStorage.setItem('language', lang);
-        setLanguageState(lang);
-    };
-    
+    useEffect(() => {
+        // Function to load the new language file when language changes
+        const loadLanguage = async () => {
+            if (!fallback) return; // Don't run if initial fetch failed
+            try {
+                const response = await fetch(`/locales/${language}.json`);
+                if (!response.ok) throw new Error(`Failed to fetch ${language}.json`);
+                const data = await response.json();
+                setTranslations(data);
+            } catch (error) {
+                console.error(`Could not switch to language ${language}:`, error);
+                setTranslations(fallback); // Revert to English on failure
+            }
+        };
+        
+        if (translations) { // Only switch if initial load is complete
+             loadLanguage();
+        }
+        localStorage.setItem('language', language);
+
+    }, [language, fallback]);
+
     // The translation function
     const t = (key: string, replacements?: Record<string, string | number>): string => {
-        // Return the key itself if translations are not loaded yet.
         if (!translations) {
-            return key;
+            return key; // Should not happen if loading screen is shown
         }
 
-        let translation = translations[language][key] || key;
+        let translation = translations[key] || fallback?.[key] || key;
         if (replacements) {
             Object.keys(replacements).forEach(placeholder => {
                 translation = translation.replace(`{{${placeholder}}}`, String(replacements[placeholder]));
@@ -70,14 +99,14 @@ export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ childr
         return translation;
     };
     
-    // Don't render the rest of the app until translations are loaded to prevent
-    // a flash of untranslated content.
+    // Show a loading screen until the initial translations are ready.
+    // This prevents the app from rendering a blank page (returning null).
     if (!translations) {
-        return null; 
+        return <WelcomeScreen />;
     }
 
     return (
-        <LocalizationContext.Provider value={{ language, setLanguage, t }}>
+        <LocalizationContext.Provider value={{ language, setLanguage: setLanguageState, t }}>
             {children}
         </LocalizationContext.Provider>
     );

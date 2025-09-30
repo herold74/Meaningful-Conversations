@@ -16,18 +16,18 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<{ type: 'email' | 'password' | 'general', message: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     if (password.length < 6) {
-      setError(t('register_error_short_password'));
+      setError({ type: 'password', message: t('register_error_short_password') });
       return;
     }
     if (password !== confirmPassword) {
-      setError(t('register_error_mismatch'));
+      setError({ type: 'password', message: t('register_error_mismatch') });
       return;
     }
     setIsLoading(true);
@@ -36,9 +36,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
       onRegisterSuccess(user);
     } catch (err: any) {
       if (err instanceof Response && err.status === 409) {
-          setError(t('register_error_exists'));
+          setError({ type: 'email', message: t('register_error_exists') });
       } else {
-          setError(err.message || "An unknown error occurred.");
+          setError({ type: 'general', message: err.message || "An unknown error occurred." });
       }
     } finally {
         setIsLoading(false);
@@ -65,8 +65,11 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'email' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              aria-invalid={error?.type === 'email'}
+              aria-describedby={error?.type === 'email' ? 'email-error' : undefined}
             />
+            {error?.type === 'email' && <p id="email-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
           </div>
           <div>
             <label htmlFor="password"  className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('register_password_label')}</label>
@@ -77,7 +80,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              aria-invalid={error?.type === 'password'}
+              aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
             />
           </div>
            <div>
@@ -89,11 +94,14 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              aria-invalid={error?.type === 'password'}
+              aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
             />
+            {error?.type === 'password' && <p id="password-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error?.type === 'general' && <p className="text-red-500 text-sm">{error.message}</p>}
           
           <button
             type="submit"
