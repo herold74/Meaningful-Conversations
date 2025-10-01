@@ -14,6 +14,7 @@ import { ClipboardIcon } from './icons/ClipboardIcon';
 import { XIcon } from './icons/XIcon';
 import { StarIcon } from './icons/StarIcon';
 import { ShieldIcon } from './icons/ShieldIcon';
+import { WarningIcon } from './icons/WarningIcon';
 
 interface AdminViewProps {
     onBack: () => void;
@@ -36,7 +37,6 @@ const ResetPasswordSuccessModal: React.FC<{
     };
 
     const description = t('admin_reset_success_desc', { email: data.email });
-    const descriptionParts = description.split(data.email);
 
     return (
         <div 
@@ -57,9 +57,7 @@ const ResetPasswordSuccessModal: React.FC<{
                 </div>
                 <div className="space-y-4">
                     <p className="text-gray-600 dark:text-gray-400">
-                        {descriptionParts[0]}
-                        <strong>{data.email}</strong>
-                        {descriptionParts[1]}
+                        {description}
                     </p>
                     <div className="p-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4">
                         <span className="font-mono text-lg text-gray-800 dark:text-gray-200">{data.newPass}</span>
@@ -82,6 +80,52 @@ const ResetPasswordSuccessModal: React.FC<{
     );
 };
 
+const ResetConfirmationModal: React.FC<{
+    user: User;
+    onConfirm: () => void;
+    onCancel: () => void;
+}> = ({ user, onConfirm, onCancel }) => {
+    const { t } = useLocalization();
+
+    return (
+        <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            onClick={onCancel}
+            role="dialog"
+            aria-modal="true"
+        >
+            <div 
+                className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-yellow-400 dark:border-yellow-500/50 shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                        <WarningIcon className="w-8 h-8 text-yellow-500 dark:text-yellow-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">{t('admin_users_reset_password')}</h2>
+                        <p className="mt-2 text-gray-600 dark:text-gray-400">
+                          {t('admin_reset_confirm_part1')} <strong>{user.email}</strong>?
+                        </p>
+                        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-300">
+                           <p className="font-bold">{t('admin_reset_confirm_warning_title')}</p>
+                           <p className="text-sm">{t('admin_reset_confirm_warning_desc')}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button onClick={onCancel} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                        {t('deleteAccount_cancel')}
+                    </button>
+                    <button onClick={onConfirm} className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700">
+                        {t('admin_users_reset_password')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const { t } = useLocalization();
@@ -94,10 +138,15 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const [codes, setCodes] = useState<UpgradeCode[]>([]);
     const [tickets, setTickets] = useState<Ticket[]>([]);
 
-    const [newCodeBotId, setNewCodeBotId] = useState(BOTS[0]?.id || '');
+    const botsForCodes = useMemo(() => {
+        return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'chloe-cbt');
+    }, []);
+
+    const [newCodeBotId, setNewCodeBotId] = useState(botsForCodes[0]?.id || '');
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
+    const [userToReset, setUserToReset] = useState<User | null>(null);
 
 
     const loadData = useCallback(async () => {
@@ -136,7 +185,11 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
         }
     };
 
-    const handleResetPassword = async (user: User) => {
+    const confirmAndResetPassword = async () => {
+        if (!userToReset) return;
+        const user = userToReset;
+        setUserToReset(null); // Close confirmation modal
+        
         const actionId = `reset-${user.id}`;
         setActionLoading(prev => ({ ...prev, [actionId]: true }));
         try {
@@ -148,6 +201,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
             setActionLoading(prev => ({ ...prev, [actionId]: false }));
         }
     };
+
 
     const handleCreateCode = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -240,7 +294,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                         <div className="flex items-center justify-end gap-1">
                                             <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
                                             <button onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} disabled={actionLoading[`toggle-admin-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_admin')}><ShieldIcon className="w-5 h-5" /></button>
-                                            <button onClick={() => handleResetPassword(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
+                                            <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -264,7 +318,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
-                            {BOTS.filter(b => b.accessTier !== 'guest').map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
+                            {botsForCodes.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
                         </select>
                     </div>
                     <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center">
@@ -390,6 +444,13 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                 <ResetPasswordSuccessModal
                     data={resetSuccessData}
                     onClose={() => setResetSuccessData(null)}
+                />
+            )}
+            {userToReset && (
+                <ResetConfirmationModal
+                    user={userToReset}
+                    onConfirm={confirmAndResetPassword}
+                    onCancel={() => setUserToReset(null)}
                 />
             )}
         </div>

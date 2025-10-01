@@ -3,6 +3,7 @@ import { XIcon } from './icons/XIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
+import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
 
 interface VoiceSelectionModalProps {
     isOpen: boolean;
@@ -14,59 +15,6 @@ interface VoiceSelectionModalProps {
     botLanguage: Language;
     botGender: 'male' | 'female';
 }
-
-/**
- * Attempts to determine the gender of a voice based on keywords and common names.
- * This function is now more robust.
- */
-const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' | 'unknown' => {
-    const name = voice.name.toLowerCase();
-    
-    // Explicitly exclude certain voices from being identified as female.
-    const excludedFemaleNames = ['karen', 'tessa', 'tara', 'katrin', 'moira'];
-    const namePartsForExclusion = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
-    if (namePartsForExclusion.some(part => excludedFemaleNames.includes(part))) {
-        return 'unknown';
-    }
-
-    // Define keywords and names inside the function
-    const maleKeywords = ['male', 'man', 'boy', 'männlich'];
-    const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
-    
-    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji'];
-      
-    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena'];
-
-    // 1. Check for explicit gender keywords first, as they are the strongest indicator.
-    // Using a regex with word boundaries is more accurate than `includes`.
-    if (maleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'male';
-    if (femaleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'female';
-    
-    // 2. If no keywords, check against name lists by splitting the voice name into parts.
-    const nameParts = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
-    if (nameParts.some(part => femaleNames.includes(part))) return 'female';
-    if (nameParts.some(part => maleNames.includes(part))) return 'male';
-
-    return 'unknown';
-};
-
-const cleanVoiceName = (name: string): string => {
-    // Preserve the quality indicator (e.g., "Enhanced") if it exists
-    const qualityMatch = name.match(/\((enhanced|premium|erweitert)\)/i);
-    const qualitySuffix = qualityMatch ? ` ${qualityMatch[0]}` : '';
-
-    // Take the part of the name before any parenthesis, which is usually the core name.
-    let baseName = name.split('(')[0].trim();
-
-    // If the original name had no parenthesis, it might have a hyphenated descriptor.
-    if (name === baseName && baseName.includes(' - ')) {
-        baseName = baseName.split(' - ')[0].trim();
-    }
-    
-    // Return the cleaned base name with the quality indicator re-applied.
-    return `${baseName}${qualitySuffix}`;
-};
-
 
 const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     isOpen,

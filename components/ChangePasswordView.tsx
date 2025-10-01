@@ -5,13 +5,16 @@ import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
 import { CheckIcon } from './icons/CheckIcon';
+import { deriveKey, encryptData, hexToUint8Array } from '../utils/encryption';
 
 interface ChangePasswordViewProps {
   onBack: () => void;
   currentUser: User;
+  encryptionKey: CryptoKey;
+  lifeContext: string;
 }
 
-const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, currentUser }) => {
+const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, currentUser, encryptionKey, lifeContext }) => {
   const { t } = useLocalization();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -36,9 +39,24 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
     
     setIsLoading(true);
     try {
-        await userService.changePassword(oldPassword, newPassword);
+        if (!currentUser.encryptionSalt) {
+            throw new Error("User salt is missing. Cannot re-encrypt data.");
+        }
+        // Re-encrypt the life context with a key derived from the new password
+        const saltBytes = hexToUint8Array(currentUser.encryptionSalt);
+        const newKey = await deriveKey(newPassword, saltBytes);
+        const newEncryptedLifeContext = await encryptData(newKey, lifeContext);
+
+        await userService.changePassword(oldPassword, newPassword, newEncryptedLifeContext);
+        
         setSuccess(true);
-        setTimeout(() => onBack(), 2000); // Go back after success
+        // On success, we must log the user out because their in-memory key is now invalid.
+        // The API session is still valid, but they need to log in again to derive the new key.
+        setTimeout(() => {
+            // A full page reload is a simple way to force a clean logout and redirect to auth.
+            window.location.reload(); 
+        }, 2500);
+
     } catch (err: any) {
         if (err.status === 401) {
              setError(t('changePassword_error_incorrect'));
@@ -66,6 +84,7 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
                     <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
                 </div>
                 <p className="text-lg text-gray-700 dark:text-gray-300">{t('changePassword_success')}</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">You will be logged out and asked to log in again shortly.</p>
              </div>
         ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

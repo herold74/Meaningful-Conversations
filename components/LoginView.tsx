@@ -4,15 +4,18 @@ import * as userService from '../services/userService';
 import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
+import { deriveKey, hexToUint8Array } from '../utils/encryption';
+import { InfoIcon } from './icons/InfoIcon';
 
 interface LoginViewProps {
-  onLoginSuccess: (user: User) => void;
+  onLoginSuccess: (user: User, key: CryptoKey) => void;
   onSwitchToRegister: () => void;
   onBack: () => void;
   onForgotPassword: () => void;
+  reason?: string | null;
 }
 
-const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegister, onBack, onForgotPassword }) => {
+const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegister, onBack, onForgotPassword, reason }) => {
   const { t } = useLocalization();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,8 +27,19 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
     setError('');
     setIsLoading(true);
     try {
-        const user = await userService.login(email, password);
-        onLoginSuccess(user);
+        const { user, token } = await userService.login(email, password);
+        
+        if (!user.encryptionSalt) {
+            throw new Error("Encryption salt is missing for this user.");
+        }
+        
+        // The salt is hex-encoded on the backend, decode it to a byte array for the Web Crypto API
+        const saltBytes = hexToUint8Array(user.encryptionSalt);
+        
+        const key = await deriveKey(password, saltBytes);
+        
+        onLoginSuccess(user, key);
+
     } catch (err) {
         setError(t('login_error_credentials'));
     } finally {
@@ -42,6 +56,13 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('login_title')}</h1>
         </div>
+
+        {reason && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 flex items-start gap-3 text-sm text-left">
+                <InfoIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <p>{reason}</p>
+            </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -31,16 +31,10 @@ router.use(adminMiddleware);
 router.get('/users', async (req, res) => {
     try {
         const users = await prisma.user.findMany({
-            select: { id: true, email: true, isBetaTester: true, isAdmin: true, unlockedCoaches: true, createdAt: true, loginCount: true, lastLogin: true },
+            select: { id: true, email: true, isBetaTester: true, isAdmin: true, createdAt: true, loginCount: true, lastLogin: true },
             orderBy: { createdAt: 'desc' }
         });
-
-        const usersWithParsedData = users.map(u => ({
-            ...u,
-            unlockedCoaches: JSON.parse(u.unlockedCoaches || '[]')
-        }));
-
-        res.json(usersWithParsedData);
+        res.json(users);
     } catch (error) {
         console.error("Admin get users error:", error);
         res.status(500).json({ error: 'Failed to retrieve users.' });
@@ -53,11 +47,11 @@ const toggleUserField = async (res, userId, field) => {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) return res.status(404).json({ error: 'User not found.' });
 
-        const updatedUser = await prisma.user.update({
+        await prisma.user.update({
             where: { id: userId },
             data: { [field]: !user[field] },
         });
-        res.json(updatedUser);
+        res.status(204).send();
     } catch (error) {
         console.error(`Admin toggle ${field} error:`, error);
         res.status(500).json({ error: `Failed to toggle ${field} status.` });
@@ -82,7 +76,12 @@ router.post('/users/:userId/reset-password', async (req, res) => {
 
         await prisma.user.update({
             where: { id: req.params.userId },
-            data: { passwordHash },
+            data: { 
+                passwordHash,
+                // The user's life context is encrypted with their old password.
+                // It is now irrecoverable. We must clear it to prevent issues.
+                lifeContext: ""
+            },
         });
 
         res.json({ newPassword });

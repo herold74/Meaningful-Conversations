@@ -7,6 +7,10 @@ import { UsersIcon } from './icons/UsersIcon';
 import BlockageScoreGauge from './BlockageScoreGauge';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
+import { StarIcon } from './icons/StarIcon';
+import Spinner from './shared/Spinner';
+import * as userService from '../services/userService';
+import { simpleCipher } from '../utils/simpleGuestCipher';
 
 type AppliedUpdatePayload = { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string };
 
@@ -141,6 +145,30 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 }) => {
     const { t } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
+    
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [feedbackText, setFeedbackText] = useState('');
+    const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
+
+    const handleFeedbackSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setFeedbackStatus('submitting');
+        try {
+            await userService.submitFeedback({
+                rating,
+                comments: feedbackText,
+                botId: selectedBot.id,
+                isAnonymous: !currentUser, // Guests are always anonymous. Logged in users are not.
+            });
+            setFeedbackStatus('submitted');
+        } catch (err) {
+            console.error('Failed to submit session feedback:', err);
+            alert('Failed to submit feedback. Please try again.');
+            setFeedbackStatus('idle');
+        }
+    };
+
     const existingHeadlines = useMemo(() => {
         if (!originalContext) return [];
         const allHeadlines = originalContext.match(headlineRegex) || [];
@@ -242,9 +270,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
     const addGamificationDataForGuest = (context: string): string => {
         let finalContext = context.replace(/<!-- do not delete: (.*?) -->/g, '').trim();
-        const dataToEncrypt = serializeGamificationState(gamificationState);
-        // We use a simple key for guests as it's just for data transfer, not security.
-        const encryptedData = btoa(dataToEncrypt); 
+        const dataToSerialize = serializeGamificationState(gamificationState);
+        const encryptedData = simpleCipher(dataToSerialize); 
         const dataComment = `<!-- do not delete: ${encryptedData} -->`;
         if (finalContext) {
             finalContext = `${finalContext.trimEnd()}\n\n${dataComment}`;
@@ -319,6 +346,59 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         </button>
                     </div>
                     <p className="mt-2 text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{newFindings}</p>
+                </div>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-center text-gray-800 dark:text-gray-300">{t('sessionReview_rating_title')}</h2>
+                    <p className="mt-1 text-center text-gray-600 dark:text-gray-400">{t('sessionReview_rating_prompt', { botName: selectedBot.name })}</p>
+                    <div className="flex justify-center items-center gap-2 my-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                                key={star}
+                                onClick={() => setRating(star)}
+                                onMouseEnter={() => setHoverRating(star)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                className="focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-yellow-400 rounded-full"
+                                aria-label={`Rate ${star} out of 5 stars`}
+                            >
+                                <StarIcon 
+                                    className={`w-10 h-10 transition-colors ${
+                                        star <= (hoverRating || rating)
+                                        ? 'text-yellow-400'
+                                        : 'text-gray-300 dark:text-gray-600'
+                                    }`}
+                                    fill={star <= (hoverRating || rating) ? 'currentColor' : 'none'}
+                                />
+                            </button>
+                        ))}
+                    </div>
+
+                    {rating > 0 && rating <= 3 && feedbackStatus !== 'submitted' && (
+                        <form onSubmit={handleFeedbackSubmit} className="space-y-3 animate-fadeIn max-w-lg mx-auto">
+                            <label htmlFor="feedback" className="font-semibold text-gray-700 dark:text-gray-300">{t('sessionReview_feedback_prompt')}</label>
+                            <textarea
+                                id="feedback"
+                                rows={3}
+                                value={feedbackText}
+                                onChange={(e) => setFeedbackText(e.target.value)}
+                                placeholder={t('sessionReview_feedback_placeholder')}
+                                className="w-full p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                            />
+                            <button
+                                type="submit"
+                                disabled={!feedbackText.trim() || feedbackStatus === 'submitting'}
+                                className="w-full px-4 py-2 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 disabled:bg-gray-300 dark:disabled:bg-gray-700"
+                            >
+                                {feedbackStatus === 'submitting' ? <Spinner /> : t('sessionReview_feedback_submit')}
+                            </button>
+                        </form>
+                    )}
+                    
+                    {feedbackStatus === 'submitted' && (
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/30 max-w-lg mx-auto animate-fadeIn">
+                            <p className="font-semibold text-green-700 dark:text-green-300">{t('sessionReview_feedback_thanks')}</p>
+                        </div>
+                    )}
                 </div>
 
                 {nextSteps && nextSteps.length > 0 && (

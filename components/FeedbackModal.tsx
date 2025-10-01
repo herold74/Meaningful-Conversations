@@ -8,7 +8,7 @@ import { CheckIcon } from './icons/CheckIcon';
 interface FeedbackModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (feedback: { comments: string; isAnonymous: boolean; email?: string }) => void;
+    onSubmit: (feedback: { comments: string; isAnonymous: boolean; email?: string }) => Promise<void>;
     lastUserMessage: Message | null;
     botMessage: Message | null;
 }
@@ -32,7 +32,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmissionStatus('submitting');
         
@@ -42,14 +42,17 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             email: isAnonymous ? undefined : email,
         };
 
-        // Simulate API call
-        setTimeout(() => {
-            onSubmit(feedbackData);
+        try {
+            await onSubmit(feedbackData);
             setSubmissionStatus('success');
             setTimeout(() => {
                 onClose();
             }, 2500); // Close after showing success message
-        }, 1000);
+        } catch (error) {
+            console.error("Feedback submission failed:", error);
+            alert("Failed to submit feedback. Please try again.");
+            setSubmissionStatus('idle');
+        }
     };
 
     const renderContent = () => {

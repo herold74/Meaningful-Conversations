@@ -6,7 +6,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const dataRoutes = require('./routes/data');
 const geminiRoutes = require('./routes/gemini');
-const adminRoutes = require('./routes/admin'); // New admin routes
+const adminRoutes = require('./routes/admin');
+const feedbackRoutes = require('./routes/feedback');
 
 const app = express();
 
@@ -20,7 +21,8 @@ app.use(express.json({ limit: '5mb' })); // Increase limit for larger context fi
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/gemini', geminiRoutes);
-app.use('/api/admin', adminRoutes); // Register admin routes
+app.use('/api/admin', adminRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

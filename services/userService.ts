@@ -1,38 +1,63 @@
 import { apiFetch, setSession, getSession, clearSession } from './api';
 import { User, UpgradeCode, Ticket } from '../types';
+import { encryptData, decryptData } from '../utils/encryption';
 
-interface UserData {
-    context: string;
+
+interface EncryptedUserData {
+    context: string; // This will be the encrypted string from the server
     gamificationState: string;
 }
 
-export const loadUserData = async (): Promise<UserData> => {
-    return await apiFetch('/data/user');
+interface DecryptedUserData {
+    context: string; // This will be the decrypted, plaintext context
+    gamificationState: string;
+}
+
+export const loadUserData = async (key: CryptoKey): Promise<DecryptedUserData> => {
+    const data: EncryptedUserData = await apiFetch('/data/user');
+    
+    let decryptedContext = '';
+    if (data.context) {
+        try {
+            decryptedContext = await decryptData(key, data.context);
+        } catch (error) {
+            console.error("Failed to decrypt life context:", error);
+            // In a real app, you might want to inform the user that their data is corrupt
+            // and offer recovery options (like starting over).
+            // For now, we'll return an empty context to prevent the app from crashing.
+        }
+    }
+
+    return {
+        context: decryptedContext,
+        gamificationState: data.gamificationState,
+    };
 };
 
-export const saveUserData = async (context: string, gamificationState: string): Promise<void> => {
+export const saveUserData = async (context: string, gamificationState: string, key: CryptoKey): Promise<void> => {
+    const encryptedContext = await encryptData(key, context);
     await apiFetch('/data/user', {
         method: 'PUT',
-        body: JSON.stringify({ context, gamificationState }),
+        body: JSON.stringify({ context: encryptedContext, gamificationState }),
     });
 };
 
-export const login = async (email: string, password: string): Promise<User> => {
+export const login = async (email: string, password: string): Promise<{ user: User, token: string }> => {
     const session = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
     });
     setSession(session);
-    return session.user;
+    return session;
 };
 
-export const register = async (email: string, password: string): Promise<User> => {
+export const register = async (email: string, password: string): Promise<{ user: User, token: string }> => {
     const session = await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
     });
     setSession(session);
-    return session.user;
+    return session;
 };
 
 export const requestPasswordReset = async (email: string): Promise<void> => {
@@ -49,10 +74,10 @@ export const deleteAccount = async (): Promise<void> => {
     clearSession();
 };
 
-export const changePassword = async (oldPassword: string, newPassword: string): Promise<void> => {
+export const changePassword = async (oldPassword: string, newPassword: string, newEncryptedLifeContext: string): Promise<void> => {
     await apiFetch('/data/user/password', {
         method: 'PUT',
-        body: JSON.stringify({ oldPassword, newPassword }),
+        body: JSON.stringify({ oldPassword, newPassword, newEncryptedLifeContext }),
     });
 };
 
@@ -69,18 +94,33 @@ export const redeemCode = async (code: string): Promise<User> => {
     return user;
 };
 
+export const submitFeedback = async (feedbackData: {
+    rating?: number;
+    comments: string;
+    botId: string;
+    lastUserMessage?: string;
+    botResponse?: string;
+    isAnonymous: boolean;
+}): Promise<void> => {
+    await apiFetch('/feedback', {
+        method: 'POST',
+        body: JSON.stringify(feedbackData),
+    });
+};
+
+
 // --- Admin Functions ---
 
 export const getAdminUsers = async (): Promise<User[]> => {
     return await apiFetch('/admin/users');
 };
 
-export const toggleUserPremium = async (userId: string): Promise<User> => {
-    return await apiFetch(`/admin/users/${userId}/toggle-premium`, { method: 'PUT' });
+export const toggleUserPremium = async (userId: string): Promise<void> => {
+    await apiFetch(`/admin/users/${userId}/toggle-premium`, { method: 'PUT' });
 };
 
-export const toggleUserAdmin = async (userId: string): Promise<User> => {
-    return await apiFetch(`/admin/users/${userId}/toggle-admin`, { method: 'PUT' });
+export const toggleUserAdmin = async (userId: string): Promise<void> => {
+     await apiFetch(`/admin/users/${userId}/toggle-admin`, { method: 'PUT' });
 };
 
 export const resetUserPassword = async (userId: string): Promise<{ newPassword: string }> => {

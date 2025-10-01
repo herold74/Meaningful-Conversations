@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Bot, Message, Language } from '../types';
 import * as geminiService from '../services/geminiService';
+import * as userService from '../services/userService';
 import Spinner from './shared/Spinner';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import ReactMarkdown from 'react-markdown';
@@ -20,6 +21,7 @@ import VoiceSelectionModal from './VoiceSelectionModal';
 import { useLocalization } from '../context/LocalizationContext';
 import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
+import { selectVoice } from '../utils/voiceUtils';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -69,120 +71,6 @@ interface CustomWindow extends Window {
   webkitSpeechRecognition: typeof webkitSpeechRecognition;
 }
 declare let window: CustomWindow;
-
-/**
- * Attempts to determine the gender of a voice based on keywords and common names.
- * This function is now more robust.
- */
-const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' | 'unknown' => {
-    const name = voice.name.toLowerCase();
-
-    // Explicitly exclude certain voices from being identified as female.
-    const excludedFemaleNames = ['karen', 'tessa', 'tara', 'katrin', 'moira'];
-    const namePartsForExclusion = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
-    if (namePartsForExclusion.some(part => excludedFemaleNames.includes(part))) {
-        return 'unknown';
-    }
-    
-    // Define keywords and names inside the function
-    const maleKeywords = ['male', 'man', 'boy', 'männlich'];
-    const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
-    
-    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji'];
-      
-    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena'];
-
-    // 1. Check for explicit gender keywords first, as they are the strongest indicator.
-    // Using a regex with word boundaries is more accurate than `includes`.
-    if (maleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'male';
-    if (femaleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'female';
-    
-    // 2. If no keywords, check against name lists by splitting the voice name into parts.
-    const nameParts = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
-    if (nameParts.some(part => femaleNames.includes(part))) return 'female';
-    if (nameParts.some(part => maleNames.includes(part))) return 'male';
-
-    return 'unknown';
-};
-
-
-/**
- * Selects the best available voice based on language, gender, and a scoring system
- * that prioritizes local, enhanced/premium voices.
- */
-const selectVoice = (
-  voices: SpeechSynthesisVoice[],
-  langPrefix: Language,
-  gender: 'male' | 'female'
-): SpeechSynthesisVoice | null => {
-  if (!voices || voices.length === 0) return null;
-
-  // --- Whitelist First Pass ---
-  let allowedNames: string[] = [];
-  if (langPrefix === 'de') {
-      allowedNames = gender === 'female' ? ['petra', 'anna'] : ['markus', 'viktor'];
-  } else if (langPrefix === 'en') {
-      if (gender === 'female') {
-          allowedNames = ['samantha', 'susan', 'serena'];
-      } else {
-          allowedNames = ['daniel', 'jamie'];
-      }
-  }
-
-  if (allowedNames.length > 0) {
-      const whitelistedVoices = voices.filter(v => {
-          if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
-          const name = v.name.toLowerCase();
-          return allowedNames.some(allowedName => name.includes(allowedName));
-      });
-
-      if (whitelistedVoices.length > 0) {
-          const score = (voice: SpeechSynthesisVoice): number => {
-              let score = 0;
-              const name = voice.name.toLowerCase();
-              if (voice.localService) score += 100;
-              if (name.includes('enhanced') || name.includes('premium') || name.includes('erweitert')) score += 80;
-              if (voice.default) score += 1;
-              return score;
-          };
-          const scoredVoices = whitelistedVoices
-              .map(voice => ({ voice, score: score(voice) }))
-              .sort((a, b) => b.score - a.score);
-          return scoredVoices[0].voice;
-      }
-  }
-  
-  // --- Fallback to Broader Search if Whitelist Fails ---
-  const voicesToScore = voices.filter(v => {
-    if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
-    const voiceGender = getVoiceGender(v);
-    // Keep voices that match the desired gender or are of unknown gender.
-    return voiceGender === gender || voiceGender === 'unknown';
-  });
-
-  if (voicesToScore.length === 0) {
-     // If still no matches, take any voice for the language as a last resort.
-     const anyVoiceForLang = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-     return anyVoiceForLang || null;
-  }
-
-  const score = (voice: SpeechSynthesisVoice): number => {
-    let score = 0;
-    const name = voice.name.toLowerCase();
-    
-    if (voice.localService) score += 100;
-    if (name.includes('enhanced') || name.includes('premium') || name.includes('wavenet') || name.includes('erweitert')) score += 80;
-    if (voice.default) score += 1;
-
-    return score;
-  };
-
-  const scoredVoices = voicesToScore
-    .map(voice => ({ voice, score: score(voice) }))
-    .sort((a, b) => b.score - a.score);
-
-  return scoredVoices.length > 0 ? scoredVoices[0].voice : null;
-};
 
 interface CoachInfoModalProps {
   bot: Bot;
@@ -443,12 +331,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     onMessageSent();
-    const newHistory = [...chatHistory, userMessage];
-    setChatHistory(newHistory);
+    const historyWithUserMessage = [...chatHistory, userMessage];
+    setChatHistory(historyWithUserMessage);
     setIsLoading(true);
 
     try {
-        const response = await geminiService.sendMessage(bot, lifeContext, newHistory, language);
+        const response = await geminiService.sendMessage(bot, lifeContext, historyWithUserMessage, language);
         
         const botMessage: Message = {
             id: `bot-${Date.now()}`,
@@ -532,17 +420,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   };
 
-  const handleSubmitFeedback = (feedback: { comments: string; isAnonymous: boolean; email?: string }) => {
-      const feedbackData = {
-          lastUserMessage: lastUserMessageForReport?.text || 'N/A',
-          botMessage: reportedBotMessage?.text || 'N/A',
-          ...feedback,
-          timestamp: new Date().toISOString(),
-          botId: bot.id,
-      };
-      console.log("--- FEEDBACK SUBMITTED ---", feedbackData);
-      // In a real app, this would be an API call.
-      // The modal itself will handle showing the success state and closing.
+  const handleSubmitFeedback = async (feedback: { comments: string; isAnonymous: boolean; email?: string }) => {
+      try {
+          await userService.submitFeedback({
+              comments: feedback.comments,
+              isAnonymous: feedback.isAnonymous,
+              botId: bot.id,
+              lastUserMessage: lastUserMessageForReport?.text || undefined,
+              botResponse: reportedBotMessage?.text || undefined,
+          });
+      } catch (error) {
+          console.error("Failed to submit message feedback:", error);
+          // Re-throw the error so the modal can catch it and display an error message
+          throw error;
+      }
   };
 
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));

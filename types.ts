@@ -13,7 +13,6 @@ export type NavView =
     | 'questionnaire'
     | 'botSelection'
     | 'chat'
-    | 'analyzing'
     | 'sessionReview'
     | 'contextChoice'
     | 'achievements'
@@ -36,6 +35,7 @@ export interface User {
     createdAt?: string;
     loginCount?: number;
     lastLogin?: string;
+    encryptionSalt?: string; // Hex-encoded string
 }
 
 export type BotAccessTier = 'guest' | 'registered' | 'premium';

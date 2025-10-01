@@ -3,6 +3,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -14,6 +15,7 @@ const sendAuthResponse = (res, user, statusCode = 200) => {
         isBetaTester: user.isBetaTester,
         isAdmin: user.isAdmin,
         unlockedCoaches: JSON.parse(user.unlockedCoaches || '[]'),
+        encryptionSalt: user.encryptionSalt, // Include the salt for the client
     };
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -39,6 +41,7 @@ router.post('/register', async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const salt = crypto.randomBytes(16).toString('hex'); // Generate a 128-bit salt
         
         // Ensure a valid, parsable default state is used.
         const defaultGamificationState = JSON.stringify({
@@ -55,6 +58,8 @@ router.post('/register', async (req, res) => {
             data: {
                 email,
                 passwordHash,
+                encryptionSalt: salt,
+                lifeContext: '', // Start with an empty (but not null) context
                 gamificationState: defaultGamificationState,
             },
         });

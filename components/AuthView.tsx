@@ -10,18 +10,17 @@ interface AuthViewProps {
   onLogin: () => void;
   onRegister: () => void;
   onGuest: () => void;
-  onLoginSuccess: (user: User) => void;
   redirectReason: string | null;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, onLoginSuccess, redirectReason }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redirectReason }) => {
   const { t, language, setLanguage } = useLocalization();
   const [isLoading, setIsLoading] = useState(false);
 
   const getButtonClass = (lang: 'en' | 'de') => {
     const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500";
     if (language === lang) {
-        return `${baseClass} bg-green-500 text-white dark:bg-green-400 dark:text-black`;
+        return `${baseClass} bg-green-400 text-black`;
     }
     return `${baseClass} bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700`;
   };

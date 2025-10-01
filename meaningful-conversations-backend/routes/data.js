@@ -21,7 +21,7 @@ router.get('/user', async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
         
-        // Ensure we don't send nulls, which might break frontend logic.
+        // The lifeContext sent from here is encrypted.
         res.status(200).json({
             context: user.lifeContext || '',
             gamificationState: user.gamificationState || '{}'
@@ -35,6 +35,7 @@ router.get('/user', async (req, res) => {
 
 // PUT /api/data/user - Save user's context and gamification state
 router.put('/user', async (req, res) => {
+    // The context received here is already encrypted by the client.
     const { context, gamificationState } = req.body;
 
     if (typeof context !== 'string' || typeof gamificationState !== 'string') {
@@ -65,6 +66,11 @@ router.delete('/user', async (req, res) => {
                 where: { usedById: req.userId },
                 data: { usedById: null }
             });
+            
+            // Delete associated feedback
+            await tx.feedback.deleteMany({
+                where: { userId: req.userId }
+            });
 
             // Delete the user
             await tx.user.delete({
@@ -82,10 +88,10 @@ router.delete('/user', async (req, res) => {
 
 // PUT /api/data/user/password - Change user's password
 router.put('/user/password', async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
 
-    if (!oldPassword || !newPassword || newPassword.length < 6) {
-        return res.status(400).json({ error: 'Invalid input. Please provide current password and a new password of at least 6 characters.' });
+    if (!oldPassword || !newPassword || newPassword.length < 6 || typeof newEncryptedLifeContext !== 'string') {
+        return res.status(400).json({ error: 'Invalid input. Please provide current password, a new password of at least 6 characters, and the re-encrypted context.' });
     }
 
     try {
@@ -99,7 +105,10 @@ router.put('/user/password', async (req, res) => {
 
         await prisma.user.update({
             where: { id: req.userId },
-            data: { passwordHash: newPasswordHash }
+            data: { 
+                passwordHash: newPasswordHash,
+                lifeContext: newEncryptedLifeContext // Save the re-encrypted context
+            }
         });
 
         res.status(204).send();
@@ -167,6 +176,7 @@ router.post('/redeem-code', async (req, res) => {
                 isBetaTester: updatedUser.isBetaTester,
                 isAdmin: updatedUser.isAdmin,
                 unlockedCoaches: JSON.parse(updatedUser.unlockedCoaches || '[]'),
+                encryptionSalt: updatedUser.encryptionSalt
             }
         });
 

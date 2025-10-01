@@ -4,9 +4,10 @@ import * as userService from '../services/userService';
 import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
+import { deriveKey, hexToUint8Array } from '../utils/encryption';
 
 interface RegisterViewProps {
-  onRegisterSuccess: (user: User) => void;
+  onRegisterSuccess: (user: User, key: CryptoKey) => void;
   onSwitchToLogin: () => void;
   onBack: () => void;
 }
@@ -32,10 +33,19 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
     }
     setIsLoading(true);
     try {
-      const user = await userService.register(email, password);
-      onRegisterSuccess(user);
+      const { user } = await userService.register(email, password);
+      
+      if (!user.encryptionSalt) {
+            throw new Error("Encryption salt was not created for the new user.");
+      }
+      
+      const saltBytes = hexToUint8Array(user.encryptionSalt);
+      const key = await deriveKey(password, saltBytes);
+
+      onRegisterSuccess(user, key);
+
     } catch (err: any) {
-      if (err instanceof Response && err.status === 409) {
+      if (err.status === 409) {
           setError({ type: 'email', message: t('register_error_exists') });
       } else {
           setError({ type: 'general', message: err.message || "An unknown error occurred." });

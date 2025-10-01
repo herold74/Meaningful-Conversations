@@ -6,6 +6,9 @@ import * as userService from './services/userService';
 import * as geminiService from './services/geminiService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
+import { simpleCipher } from './utils/simpleGuestCipher';
+import { decryptData } from './utils/encryption';
+
 
 // Component Imports
 import WelcomeScreen from './components/WelcomeScreen';
@@ -54,6 +57,7 @@ const App: React.FC = () => {
 
     // Core App State
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
     const [lifeContext, setLifeContext] = useState<string>('');
     const [gamificationState, setGamificationState] = useState<GamificationState>(DEFAULT_GAMIFICATION_STATE);
     const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
@@ -93,7 +97,6 @@ const App: React.FC = () => {
         botId: string,
         awardSessionBonus: boolean
     ): GamificationState => {
-        const { t } = useLocalization();
         let xpGained = (userMessageCount * 5) + ((analysis?.nextSteps?.length || 0) * 10);
         if (awardSessionBonus) {
             xpGained += 50;
@@ -125,8 +128,9 @@ const App: React.FC = () => {
         if(userMessageCount >= 5) {
             newCoachesUsed.add(botId);
         }
-
+        
         const newXp = currentState.xp + xpGained;
+        const newUnlockedAchievements = new Set(currentState.unlockedAchievements);
 
         // Progressive XP calculation
         const calculateLevelFromXp = (xp: number) => {
@@ -140,50 +144,44 @@ const App: React.FC = () => {
             }
             return level;
         };
-
         const newLevel = calculateLevelFromXp(newXp);
         
-        const achievements = getAchievements(t);
-        const newUnlockedAchievements = new Set(currentState.unlockedAchievements);
-
-        const potentialNewState: GamificationState = {
+        const newState: GamificationState = {
             ...currentState,
             xp: newXp,
             level: newLevel,
             streak: newStreak,
-            totalSessions: currentState.totalSessions + 1,
+            totalSessions: currentState.totalSessions + (userMessageCount >= 5 ? 1 : 0),
             lastSessionDate: userMessageCount >= 5 ? today : currentState.lastSessionDate,
-            coachesUsed: newCoachesUsed
+            coachesUsed: newCoachesUsed,
+            unlockedAchievements: newUnlockedAchievements
         };
 
+        const achievements = getAchievements(t);
         achievements.forEach(ach => {
-            if (!newUnlockedAchievements.has(ach.id) && ach.isUnlocked(potentialNewState)) {
-                newUnlockedAchievements.add(ach.id);
+            if (!newState.unlockedAchievements.has(ach.id) && ach.isUnlocked(newState)) {
+                newState.unlockedAchievements.add(ach.id);
             }
         });
 
-        return { ...potentialNewState, unlockedAchievements: newUnlockedAchievements };
+        return newState;
 
     }, [userMessageCount, t]);
 
 
     // --- INITIALIZATION ---
     useEffect(() => {
+        // This effect handles app startup.
         const initialize = async () => {
             const session = api.getSession();
             if (session) {
-                try {
-                    const data = await userService.loadUserData();
-                    setCurrentUser(session.user);
-                    setLifeContext(data.context || '');
-                    setGamificationState(deserializeGamificationState(data.gamificationState));
-                    setView(data.context ? 'contextChoice' : 'landing');
-                } catch (error) {
-                    console.error("Failed to load user data, logging out.", error);
-                    api.clearSession();
-                    setView('auth');
-                }
+                // If a session exists, we don't have the encryption key.
+                // Go directly to the login screen with an explanation.
+                setAuthRedirectReason("Welcome back! For your security, please enter your password to continue.");
+                setView('login');
             } else {
+                // No session, start at the auth screen.
+                setAuthRedirectReason(null);
                 setView('auth');
             }
         };
@@ -193,44 +191,59 @@ const App: React.FC = () => {
     
     // --- NAVIGATION & STATE HANDLERS ---
     
-    const handleLoginSuccess = (user: User) => {
+    const handleLoginSuccess = async (user: User, key: CryptoKey) => {
         setCurrentUser(user);
-        userService.loadUserData().then(data => {
-            setLifeContext(data.context || '');
+        setEncryptionKey(key);
+        try {
+            const data = await userService.loadUserData(key);
+            setLifeContext(data.context || ''); // Already decrypted by userService
             setGamificationState(deserializeGamificationState(data.gamificationState));
             setView(data.context ? 'contextChoice' : 'landing');
-        }).catch((error) => {
+        } catch (error) {
             console.error("Failed to load user data after login, logging out.", error);
             api.clearSession();
             setCurrentUser(null);
+            setEncryptionKey(null);
             setView('auth');
             setAuthRedirectReason("There was an issue loading your profile. Please try logging in again.");
-        });
+        }
     };
     
     const handleLogout = () => {
         api.clearSession();
         setCurrentUser(null);
+        setEncryptionKey(null);
         setLifeContext('');
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        setView('auth');
         setAuthRedirectReason(null);
+        // Go to welcome screen first, then to auth screen to mimic app start
+        setView('welcome');
+        setTimeout(() => setView('auth'), 1500);
     };
 
-    const handleFileSubmit = (context: string) => {
+    const handleFileUpload = (context: string) => {
         const dataRegex = /<!-- do not delete: (.*?) -->/;
         const match = context.match(dataRegex);
         if (match && match[1]) {
+            let decodedData = '';
+            const payload = match[1];
             try {
-                const decodedData = atob(match[1]);
-                setGamificationState(deserializeGamificationState(decodedData));
+                // First, attempt to decode as Base64 (for files saved with the `btoa` version)
+                decodedData = atob(payload);
             } catch (e) {
-                console.error("Could not parse guest gamification data.", e);
-                setGamificationState(DEFAULT_GAMIFICATION_STATE);
+                // If atob fails, it's likely not Base64. Assume it's the simple cipher text.
+                decodedData = simpleCipher(payload);
             }
+            setGamificationState(deserializeGamificationState(decodedData));
         } else {
             setGamificationState(DEFAULT_GAMIFICATION_STATE);
         }
+        setLifeContext(context);
+        setView('botSelection');
+    };
+
+    const handleQuestionnaireSubmit = (context: string) => {
+        setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setTempContext(context);
         setView('piiWarning');
     };
@@ -288,9 +301,9 @@ const App: React.FC = () => {
     const saveData = async (newContext: string, stateToSave: GamificationState, preventSave: boolean) => {
         setLifeContext(newContext);
         setGamificationState(stateToSave);
-        if (currentUser && !preventSave) {
+        if (currentUser && encryptionKey && !preventSave) {
             try {
-                await userService.saveUserData(newContext, serializeGamificationState(stateToSave));
+                await userService.saveUserData(newContext, serializeGamificationState(stateToSave), encryptionKey);
             } catch (error) {
                 console.error("Failed to save user data:", error);
             }
@@ -330,14 +343,14 @@ const App: React.FC = () => {
 
         switch (currentView) {
             case 'welcome': return <WelcomeScreen />;
-            case 'auth': return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={() => setView('landing')} onLoginSuccess={handleLoginSuccess} redirectReason={authRedirectReason}/>;
-            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setView('register')} onBack={() => setView('auth')} onForgotPassword={() => setView('forgotPassword')} />;
+            case 'auth': return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={() => setView('landing')} redirectReason={authRedirectReason}/>;
+            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
             case 'register': return <RegisterView onRegisterSuccess={handleLoginSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => setView('botSelection')} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
-            case 'landing': return <LandingPage onSubmit={handleFileSubmit} onStartQuestionnaire={() => setView('questionnaire')} />;
-            case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('landing')} />;
-            case 'questionnaire': return <Questionnaire onSubmit={handleFileSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
+            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} />;
+            case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
+            case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
             case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} />;
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={resetToStart} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} />;
@@ -350,7 +363,7 @@ const App: React.FC = () => {
             case 'terms': return <TermsView onBack={() => setMenuView(null)} />;
             case 'redeemCode': return <RedeemCodeView onBack={() => setMenuView(null)} onRedeemSuccess={(user) => { setCurrentUser(user); setMenuView(null); }} />;
             case 'admin': return <AdminView onBack={() => setMenuView(null)} />;
-            case 'changePassword': return <ChangePasswordView onBack={() => setMenuView(null)} currentUser={currentUser!} />;
+            case 'changePassword': return <ChangePasswordView onBack={() => setMenuView(null)} currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
             default: return <WelcomeScreen />;
         }
     };

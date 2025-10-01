@@ -16,27 +16,42 @@ const UserGuideView: React.FC<InfoViewProps> = ({ onBack }) => {
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('userGuide_title')}</h1>
             </div>
-            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
-                <p>{t('userGuide_p1')}</p>
+            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-6 leading-relaxed">
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gettingStarted_title')}</h2>
+                    <p>{t('userGuide_gettingStarted_p1')}</p>
+                    <ul className="list-disc list-inside space-y-1">
+                        <li>{t('userGuide_gettingStarted_li1')}</li>
+                        <li>{t('userGuide_gettingStarted_li2')}</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_session_title')}</h2>
+                    <p>{t('userGuide_session_p1')}</p>
+                    <p>{t('userGuide_session_p2')}</p>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_analysis_title')}</h2>
+                    <p>{t('userGuide_analysis_p1')}</p>
+                    <p>{t('userGuide_analysis_p2')}</p>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_context_title')}</h2>
+                    <p>{t('userGuide_context_p1')}</p>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gamification_title')}</h2>
+                    <p>{t('userGuide_gamification_p1')}</p>
+                </section>
                 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gettingStarted_title')}</h2>
-                <p>{t('userGuide_gettingStarted_p1')}</p>
-                <ul className="list-disc list-inside space-y-1 pl-4">
-                    <li>{t('userGuide_gettingStarted_li1')}</li>
-                    <li>{t('userGuide_gettingStarted_li2')}</li>
-                    <li>{t('userGuide_gettingStarted_li3')}</li>
-                </ul>
-
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_theSession_title')}</h2>
-                <p>{t('userGuide_theSession_p1')}</p>
-                <p>{t('userGuide_theSession_p2')}</p>
-
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_sessionReview_title')}</h2>
-                <p>{t('userGuide_sessionReview_p1')}</p>
-                <p>{t('userGuide_sessionReview_p2')}</p>
-
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gamification_title')}</h2>
-                <p>{t('userGuide_gamification_p1')}</p>
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_privacy_title')}</h2>
+                    <p dangerouslySetInnerHTML={{ __html: t('userGuide_privacy_p1') }} />
+                </section>
             </div>
         </div>
     );
