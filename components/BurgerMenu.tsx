@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from '../types';
+import { User, NavView } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { LogInIcon } from './icons/LogInIcon';
 import { UserIcon } from './icons/UserIcon';
@@ -11,14 +11,15 @@ import { ListIcon } from './icons/ListIcon';
 import { QuestionMarkCircleIcon } from './icons/QuestionMarkCircleIcon';
 import { BookOpenIcon } from './icons/BookOpenIcon';
 import { CodeIcon } from './icons/CodeIcon';
-import { TuneIcon } from './icons/TuneIcon';
+import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
+import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
 
 interface BurgerMenuProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: User | null;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: NavView) => void;
   onLogout: () => void;
 }
 
@@ -27,7 +28,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
 
     if (!isOpen) return null;
 
-    const handleNavigate = (view: string) => {
+    const handleNavigate = (view: NavView) => {
         onNavigate(view);
         onClose();
     };
@@ -55,29 +56,33 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     </button>
                 </div>
                 
-                <nav className="flex-1 flex flex-col space-y-2">
+                <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
+                    {/* Items moved to the top */}
+                    <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => handleNavigate('about')} />
+                    <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => handleNavigate('disclaimer')} />
+
+                    <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                    
                     {currentUser && (
                         <>
-                            <MenuItem icon={TrophyIcon} text={t('menu_achievements')} onClick={() => handleNavigate('achievements')} />
-                            <MenuItem icon={KeyIcon} text={t('menu_redeem_code')} onClick={() => handleNavigate('redeemCode')} />
+                            <MenuItem icon={KeyIcon} text={t('menu_change_password')} onClick={() => handleNavigate('changePassword')} />
+                            <MenuItem icon={ShoppingBagIcon} text={t('menu_redeem_code')} onClick={() => handleNavigate('redeemCode')} />
                         </>
                     )}
 
                     <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => handleNavigate('userGuide')} />
-                    <MenuItem icon={TuneIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
+                    <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => handleNavigate('faq')} />
-                    <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => handleNavigate('about')} />
-                    <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => handleNavigate('disclaimer')} />
                     <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
                     
                     {currentUser?.isAdmin && (
-                        <MenuItem icon={CodeIcon} text={t('menu_admin')} onClick={() => handleNavigate('admin')} />
+                        <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => handleNavigate('admin')} />
                     )}
                 </nav>
 
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
                     {currentUser ? (
-                         <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} />
+                         <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50" />
                     ) : (
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => handleNavigate('auth')} />
                     )}
@@ -87,12 +92,16 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
     );
 };
 
-const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void }> = ({ icon: Icon, text, onClick }) => (
+const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void, specialColor?: string }> = ({ icon: Icon, text, onClick, specialColor }) => (
     <button 
         onClick={onClick} 
-        className="w-full flex items-center gap-4 px-4 py-3 text-left text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className={`w-full flex items-center gap-4 px-4 py-3 text-left rounded-md transition-colors ${
+            specialColor 
+                ? specialColor 
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
     >
-        <Icon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+        <Icon className={`w-6 h-6 ${specialColor ? '' : 'text-gray-500 dark:text-gray-400'}`} />
         <span className="font-semibold">{text}</span>
     </button>
 );

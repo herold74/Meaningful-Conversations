@@ -17,27 +17,26 @@ const UserGuideView: React.FC<InfoViewProps> = ({ onBack }) => {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('userGuide_title')}</h1>
             </div>
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
-                <p>{t('userGuide_intro')}</p>
+                <p>{t('userGuide_p1')}</p>
+                
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gettingStarted_title')}</h2>
+                <p>{t('userGuide_gettingStarted_p1')}</p>
+                <ul className="list-disc list-inside space-y-1 pl-4">
+                    <li>{t('userGuide_gettingStarted_li1')}</li>
+                    <li>{t('userGuide_gettingStarted_li2')}</li>
+                    <li>{t('userGuide_gettingStarted_li3')}</li>
+                </ul>
 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_step1_title')}</h2>
-                <p>{t('userGuide_step1_p1')}</p>
-                <p>{t('userGuide_step1_p2')}</p>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_theSession_title')}</h2>
+                <p>{t('userGuide_theSession_p1')}</p>
+                <p>{t('userGuide_theSession_p2')}</p>
 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_step2_title')}</h2>
-                <p>{t('userGuide_step2_p1')}</p>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_sessionReview_title')}</h2>
+                <p>{t('userGuide_sessionReview_p1')}</p>
+                <p>{t('userGuide_sessionReview_p2')}</p>
 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_step3_title')}</h2>
-                <p>{t('userGuide_step3_p1')}</p>
-                <p>{t('userGuide_step3_p2')}</p>
-
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_step4_title')}</h2>
-                <p>{t('userGuide_step4_p1')}</p>
-                 <p dangerouslySetInnerHTML={{ __html: t('userGuide_step4_p2') }} />
-                 <p>{t('userGuide_step4_p3')}</p>
-                 
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_account_title')}</h2>
-                <p>{t('userGuide_account_p1')}</p>
-                <p dangerouslySetInnerHTML={{ __html: t('userGuide_account_p2') }} />
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_gamification_title')}</h2>
+                <p>{t('userGuide_gamification_p1')}</p>
             </div>
         </div>
     );

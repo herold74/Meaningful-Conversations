@@ -34,7 +34,6 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ oldText, newText }) => {
         return (
             <div key={index} className={lineClass}>
                 <span className="select-none mr-2">{prefix}</span>
-                {/* FIX: The 'className' prop on ReactMarkdown is causing a type error, likely due to a type definition mismatch. Moved the classes to a wrapper div to resolve the issue while preserving styling. */}
                 <div className="w-full whitespace-pre-wrap">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}

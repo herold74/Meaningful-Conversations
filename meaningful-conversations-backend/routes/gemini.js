@@ -41,7 +41,6 @@ router.post('/chat/send-message', async (req, res) => {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: contents,
-            // FIX: systemInstruction must be inside a config object
             config: {
                 systemInstruction: botSystemPrompt
             }

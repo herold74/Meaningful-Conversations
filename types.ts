@@ -2,6 +2,42 @@ import React from 'react';
 
 export type Language = 'en' | 'de';
 
+export type NavView =
+    | 'welcome'
+    | 'auth'
+    | 'login'
+    | 'register'
+    | 'forgotPassword'
+    | 'landing'
+    | 'piiWarning'
+    | 'questionnaire'
+    | 'botSelection'
+    | 'chat'
+    | 'analyzing'
+    | 'sessionReview'
+    | 'contextChoice'
+    | 'achievements'
+    | 'userGuide'
+    | 'formattingHelp'
+    | 'faq'
+    | 'about'
+    | 'disclaimer'
+    | 'terms'
+    | 'redeemCode'
+    | 'admin'
+    | 'changePassword';
+
+export interface User {
+    id: string;
+    email: string;
+    isBetaTester: boolean;
+    isAdmin: boolean;
+    unlockedCoaches: string[];
+    createdAt?: string;
+    loginCount?: number;
+    lastLogin?: string;
+}
+
 export type BotAccessTier = 'guest' | 'registered' | 'premium';
 
 export interface Bot {
@@ -23,21 +59,23 @@ export interface BotWithAvailability extends Bot {
 
 export interface Message {
     id: string;
-    text: string;
     role: 'user' | 'bot';
+    text: string;
     timestamp: string;
 }
 
-export interface User {
-    id: string;
-    email: string;
-    isBetaTester: boolean;
-    isAdmin: boolean;
-    unlockedCoaches: string[];
+export interface GamificationState {
+    xp: number;
+    level: number;
+    streak: number;
+    totalSessions: number;
+    lastSessionDate: string | null;
+    unlockedAchievements: Set<string>;
+    coachesUsed: Set<string>;
 }
 
 export interface ProposedUpdate {
-    type: 'create_headline' | 'append' | 'replace_section';
+    type: 'append' | 'replace_section' | 'create_headline';
     headline: string;
     content: string;
 }
@@ -57,21 +95,11 @@ export interface SessionAnalysis {
     hasConversationalEnd: boolean;
 }
 
-export interface GamificationState {
-    xp: number;
-    level: number;
-    streak: number;
-    totalSessions: number;
-    lastSessionDate: string | null;
-    unlockedAchievements: Set<string>;
-    coachesUsed: Set<string>;
-}
-
 export interface Achievement {
     id: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
     name: string;
     description: string;
+    icon: React.FC<React.SVGProps<SVGSVGElement>>;
     isUnlocked: (state: GamificationState) => boolean;
 }
 
@@ -80,6 +108,14 @@ export interface UpgradeCode {
     code: string;
     botId: string;
     isUsed: boolean;
+    createdAt: string;
     usedBy?: { email: string };
+}
+
+export interface Ticket {
+    id: string;
+    type: 'PASSWORD_RESET';
+    status: 'OPEN' | 'RESOLVED';
+    payload: { email: string };
     createdAt: string;
 }

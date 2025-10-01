@@ -51,7 +51,6 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
             if (section.fields) {
                 section.fields.forEach(field => {
                     const answer = answers[field.id]?.trim() || '';
-                    // The 'if (answer)' check was removed to ensure all fields are included.
                     md += `**${field.label}**: ${answer}\n\n`;
                 });
             }
@@ -66,7 +65,6 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                     }
                     subSection.fields.forEach(field => {
                         const answer = answers[field.id]?.trim() || '';
-                         // The 'if (answer)' check was removed to ensure all fields are included.
                         md += `**${field.label}**: ${answer}\n\n`;
                     });
                 });

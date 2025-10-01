@@ -21,7 +21,6 @@ import { useLocalization } from '../context/LocalizationContext';
 import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
 
-// Add missing type definitions for the Web Speech API to resolve compilation errors.
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
   readonly confidence: number;
