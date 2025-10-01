@@ -82,7 +82,12 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
                     {currentUser ? (
-                         <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50" />
+                        <>
+                            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-left truncate">
+                                {currentUser.email}
+                            </div>
+                            <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50" />
+                        </>
                     ) : (
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => handleNavigate('auth')} />
                     )}

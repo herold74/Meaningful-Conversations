@@ -76,11 +76,6 @@ const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, cu
                     <span>{t('gamificationBar_streak')}</span>
                     <span className="font-bold text-gray-900 dark:text-white">{streak}</span>
                 </div>
-                {currentUser && (
-                    <div className="hidden lg:block text-sm text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-gray-700 pl-4">
-                        {currentUser.email}
-                    </div>
-                )}
             </div>
             <div className="flex items-center gap-4">
                 <div className="hidden md:flex items-center gap-3 w-64">
