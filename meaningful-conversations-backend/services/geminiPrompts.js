@@ -18,7 +18,9 @@ Analyze the provided conversation and the user's current Life Context, then foll
 
 4.  **Identify Actionable Next Steps:** Analyze the conversation for any concrete, actionable next steps the user has committed to. A valid next step must have a clear action and a timeframe or a specific deadline (e.g., "I will draft the email by Friday," "I'll talk to my manager next week"). Vague intentions without a timeframe (e.g., "I should think about that more") are not valid next steps. Extract these steps. If no such steps are found, return an empty array for the 'nextSteps' field.
 
-5.  **Format the Output:** Adhere strictly to the provided JSON schema. The goal is a clean, non-repetitive, and accurate context file.
+5.  **Detect Conversational End:** Analyze the final two exchanges (last user message and last coach message) of the conversation. Determine if the coach provided a natural conclusion. A natural conclusion includes summarizing key takeaways, saying goodbye (e.g., "It was a pleasure working with you today"), or proposing a next session. If a natural conclusion is detected, set \`hasConversationalEnd\` to \`true\`. Otherwise, set it to \`false\`.
+
+6.  **Format the Output:** Adhere strictly to the provided JSON schema. The goal is a clean, non-repetitive, and accurate context file.
 
 Analyze the following conversation history and life context.
 `,
@@ -37,7 +39,9 @@ Analysieren Sie das bereitgestellte Gespräch und den aktuellen Lebenskontext de
 
 4.  **Umsetzbare nächste Schritte identifizieren:** Analysieren Sie das Gespräch auf konkrete, umsetzbare nächste Schritte, zu denen sich der Benutzer verpflichtet hat. Ein gültiger nächster Schritt muss eine klare Aktion und einen Zeitrahmen oder eine spezifische Frist haben (z.B. "Ich werde die E-Mail bis Freitag entwerfen", "Ich werde nächste Woche mit meinem Manager sprechen"). Vage Absichten ohne Zeitrahmen (z.B. "Ich sollte mehr darüber nachdenken") sind keine gültigen nächsten Schritte. Extrahieren Sie diese Schritte. Wenn keine solchen Schritte gefunden werden, geben Sie ein leeres Array für das Feld 'nextSteps' zurück.
 
-5.  **Ausgabe formatieren:** Halten Sie sich strikt an das bereitgestellte JSON-Schema. Das Ziel ist eine saubere, nicht-repetitive und genaue Kontextdatei.
+5.  **Gesprächsende erkennen:** Analysieren Sie die letzten beiden Wortwechsel (letzte Benutzernachricht und letzte Coach-Nachricht) des Gesprächs. Stellen Sie fest, ob der Coach einen natürlichen Abschluss geliefert hat. Ein natürlicher Abschluss beinhaltet die Zusammenfassung wichtiger Erkenntnisse, eine Verabschiedung (z.B. "Es war mir eine Freude, heute mit Ihnen zu arbeiten") oder den Vorschlag einer nächsten Sitzung. Wenn ein natürlicher Abschluss erkannt wird, setzen Sie \`hasConversationalEnd\` auf \`true\`. Andernfalls setzen Sie es auf \`false\`.
+
+6.  **Ausgabe formatieren:** Halten Sie sich strikt an das bereitgestellte JSON-Schema. Das Ziel ist eine saubere, nicht-repetitive und genaue Kontextdatei.
 
 Analysieren Sie den folgenden Gesprächsverlauf und Lebenskontext.
 `
@@ -74,9 +78,13 @@ const contextResponseSchema = {
                 },
                 required: ["action", "deadline"]
             }
+        },
+        hasConversationalEnd: {
+            type: Type.BOOLEAN,
+            description: "Set to true if the coach provided a natural conclusion to the conversation (e.g., a summary or goodbye)."
         }
     },
-    required: ["summary", "updates"]
+    required: ["summary", "updates", "hasConversationalEnd"]
 };
 
 const blockageAnalysisPrompts = {

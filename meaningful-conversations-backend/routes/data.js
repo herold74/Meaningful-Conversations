@@ -1,83 +1,186 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Apply auth middleware to all routes in this file
+router.use(authMiddleware);
+
 // GET /api/data/user - Load user's context and gamification state
-router.get('/user', authMiddleware, async (req, res) => {
+router.get('/user', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.userId },
-            select: {
-                lifeContext: true,
-                gamificationState: true,
-            }
+            select: { lifeContext: true, gamificationState: true }
         });
 
         if (!user) {
-            return res.status(404).json({ error: "User not found." });
+            return res.status(404).json({ error: 'User not found.' });
         }
-
-        // The gamification state is stored as a JSON string, so we need to parse it.
-        // Provide a default empty state if it's null or invalid.
-        let gamificationState = {};
-        try {
-            gamificationState = JSON.parse(user.gamificationState || '{}');
-        } catch (e) {
-            console.error(`Failed to parse gamificationState for user ${req.userId}`, e);
-        }
-
+        
+        // Ensure we don't send nulls, which might break frontend logic.
         res.status(200).json({
-            lifeContext: user.lifeContext || '',
-            gamificationState: gamificationState,
+            context: user.lifeContext || '',
+            gamificationState: user.gamificationState || '{}'
         });
 
     } catch (error) {
         console.error("Error loading user data:", error);
-        res.status(500).json({ error: "Failed to load user data." });
+        res.status(500).json({ error: 'Failed to load user data.' });
     }
 });
 
 // PUT /api/data/user - Save user's context and gamification state
-router.put('/user', authMiddleware, async (req, res) => {
-    const { lifeContext, gamificationState } = req.body;
+router.put('/user', async (req, res) => {
+    const { context, gamificationState } = req.body;
 
-    if (typeof lifeContext === 'undefined' || typeof gamificationState === 'undefined') {
-        return res.status(400).json({ error: "Missing lifeContext or gamificationState." });
+    if (typeof context !== 'string' || typeof gamificationState !== 'string') {
+        return res.status(400).json({ error: 'Invalid data format. Both context and gamificationState must be strings.' });
     }
 
     try {
         await prisma.user.update({
             where: { id: req.userId },
             data: {
-                lifeContext,
-                // The gamification state comes as a JSON object, we stringify it for DB storage.
-                gamificationState: JSON.stringify(gamificationState),
+                lifeContext: context,
+                gamificationState: gamificationState
             }
         });
-
-        // The frontend expects the updated state object back.
-        res.status(200).json(gamificationState);
-
+        res.status(204).send();
     } catch (error) {
         console.error("Error saving user data:", error);
-        res.status(500).json({ error: "Failed to save user data." });
+        res.status(500).json({ error: 'Failed to save user data.' });
     }
 });
 
 // DELETE /api/data/user - Delete user's account
-router.delete('/user', authMiddleware, async (req, res) => {
+router.delete('/user', async (req, res) => {
     try {
-        await prisma.user.delete({
-            where: { id: req.userId }
+        await prisma.$transaction(async (tx) => {
+            // Unlink any redeemed codes from the user. The code remains 'used'.
+            await tx.upgradeCode.updateMany({
+                where: { usedById: req.userId },
+                data: { usedById: null }
+            });
+
+            // Delete the user
+            await tx.user.delete({
+                where: { id: req.userId }
+            });
         });
-        res.status(204).send(); // Success, no content
+
+        res.status(204).send();
     } catch (error) {
         console.error("Error deleting user account:", error);
-        res.status(500).json({ error: "Failed to delete account." });
+        res.status(500).json({ error: 'Failed to delete account.' });
     }
 });
+
+
+// PUT /api/data/user/password - Change user's password
+router.put('/user/password', async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword || newPassword.length < 6) {
+        return res.status(400).json({ error: 'Invalid input. Please provide current password and a new password of at least 6 characters.' });
+    }
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id: req.userId } });
+
+        if (!user || !(await bcrypt.compare(oldPassword, user.passwordHash))) {
+            return res.status(401).json({ error: "Incorrect current password." });
+        }
+
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { id: req.userId },
+            data: { passwordHash: newPasswordHash }
+        });
+
+        res.status(204).send();
+    } catch (error) {
+        console.error("Error changing password:", error);
+        res.status(500).json({ error: 'Failed to change password.' });
+    }
+});
+
+
+// POST /api/data/redeem-code - Redeem an upgrade code
+router.post('/redeem-code', async (req, res) => {
+    const { code } = req.body;
+
+    if (!code || typeof code !== 'string') {
+        return res.status(400).json({ error: 'A valid code is required.' });
+    }
+
+    try {
+        const updatedUser = await prisma.$transaction(async (tx) => {
+            const upgradeCode = await tx.upgradeCode.findUnique({
+                where: { code: code.trim() }
+            });
+
+            if (!upgradeCode) {
+                const err = new Error("Code not found.");
+                err.name = "NotFound";
+                throw err;
+            }
+
+            if (upgradeCode.isUsed) {
+                const err = new Error("Code has already been used.");
+                err.name = "Conflict";
+                throw err;
+            }
+            
+            await tx.upgradeCode.update({
+                where: { id: upgradeCode.id },
+                data: { isUsed: true, usedById: req.userId }
+            });
+
+            const user = await tx.user.findUnique({ where: { id: req.userId } });
+            
+            if(!user) {
+                throw new Error("User not found during transaction.");
+            }
+            
+            const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+            if (!unlockedCoaches.includes(upgradeCode.botId)) {
+                unlockedCoaches.push(upgradeCode.botId);
+            }
+
+            const finalUser = await tx.user.update({
+                where: { id: req.userId },
+                data: { unlockedCoaches: JSON.stringify(unlockedCoaches) }
+            });
+
+            return finalUser;
+        });
+        
+        res.status(200).json({
+            user: {
+                id: updatedUser.id,
+                email: updatedUser.email,
+                isBetaTester: updatedUser.isBetaTester,
+                isAdmin: updatedUser.isAdmin,
+                unlockedCoaches: JSON.parse(updatedUser.unlockedCoaches || '[]'),
+            }
+        });
+
+    } catch (error) {
+        if (error.name === 'NotFound') {
+            return res.status(404).json({ error: 'Invalid or expired code.' });
+        }
+        if (error.name === 'Conflict') {
+            return res.status(409).json({ error: 'This code has already been redeemed.' });
+        }
+        console.error("Error redeeming code:", error);
+        res.status(500).json({ error: 'Failed to redeem code.' });
+    }
+});
+
 
 module.exports = router;

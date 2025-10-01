@@ -5,34 +5,18 @@ import { UserIcon } from './icons/UserIcon';
 import { UsersIcon } from './icons/UsersIcon';
 import { InfoIcon } from './icons/InfoIcon';
 import { User } from '../types';
-import * as userService from '../services/userService';
 
 interface AuthViewProps {
   onLogin: () => void;
   onRegister: () => void;
   onGuest: () => void;
-  onBetaLogin: (user: User) => void;
+  onLoginSuccess: (user: User) => void;
   redirectReason: string | null;
 }
 
-const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, onBetaLogin, redirectReason }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, onLoginSuccess, redirectReason }) => {
   const { t, language, setLanguage } = useLocalization();
   const [isLoading, setIsLoading] = useState(false);
-
-  // FIX: Handle beta login inside the component to fetch user data before calling the prop.
-  // This aligns with the pattern used in LoginView and RegisterView.
-  const handleBetaLogin = async () => {
-    setIsLoading(true);
-    try {
-        const user = await userService.betaLogin();
-        onBetaLogin(user);
-    } catch (error) {
-        console.error("Beta login failed:", error);
-        // Optionally, display an error to the user here.
-    } finally {
-        setIsLoading(false);
-    }
-  };
 
   const getButtonClass = (lang: 'en' | 'de') => {
     const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500";
@@ -87,13 +71,6 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, onBet
             <UsersIcon className="w-6 h-6" />
             {t('auth_guest')}
           </button>
-          
-          <div className="pt-2">
-            <button onClick={handleBetaLogin} disabled={isLoading} className="text-sm text-gray-500 dark:text-gray-400 hover:underline disabled:opacity-50">
-              {t('auth_beta_login')}
-            </button>
-          </div>
-
         </div>
       </div>
     </div>

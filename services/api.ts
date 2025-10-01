@@ -73,7 +73,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     // --- Error Handling ---
 
     // 1. Handle expired sessions (a 401 when a token was sent on a protected route)
-    const isAuthEndpoint = endpoint.startsWith('/auth/login') || endpoint.startsWith('/auth/register');
+    const isAuthEndpoint = endpoint.startsWith('/auth/');
     if (response.status === 401 && session?.token && !isAuthEndpoint) {
         console.log("Session expired or invalid. Automatically logging out.");
         clearSession();

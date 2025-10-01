@@ -5,18 +5,18 @@ import { BOTS } from '../constants';
 const WelcomeScreen: React.FC = () => {
     // Pre-calculated positions for 6 bots in a hexagon shape around the central logo
     const avatarPositions = [
-        { top: '-1.5rem', left: 'calc(50% - 1.5rem)' }, // Top
-        { top: 'calc(25% - 1rem)', right: '-1.5rem' },  // Top-right
-        { bottom: 'calc(25% - 1rem)', right: '-1.5rem' }, // Bottom-right
-        { bottom: '-1.5rem', left: 'calc(50% - 1.5rem)' },// Bottom
-        { bottom: 'calc(25% - 1rem)', left: '-1.5rem' }, // Bottom-left
-        { top: 'calc(25% - 1rem)', left: '-1.5rem' },   // Top-left
+        { top: '-1.75rem', left: 'calc(50% - 1.75rem)' }, // Top
+        { top: 'calc(25% - 1rem)', right: '-1.75rem' },  // Top-right
+        { bottom: 'calc(25% - 1rem)', right: '-1.75rem' }, // Bottom-right
+        { bottom: '-1.75rem', left: 'calc(50% - 1.75rem)' },// Bottom
+        { bottom: 'calc(25% - 1rem)', left: '-1.75rem' }, // Bottom-left
+        { top: 'calc(25% - 1rem)', left: '-1.75rem' },   // Top-left
     ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 text-center animate-fadeIn">
       {/* Container for the logo and avatars */}
-      <div className="relative w-40 h-40">
+      <div className="relative w-48 h-48">
         
         {/* Main Logo at the center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -34,7 +34,7 @@ const WelcomeScreen: React.FC = () => {
               key={bot.id}
               src={bot.avatar}
               alt={bot.name}
-              className={`absolute w-12 h-12 rounded-full border-2 border-white dark:border-gray-800 shadow-lg opacity-0 animate-fadeIn`}
+              className={`absolute w-14 h-14 rounded-full border-2 border-white dark:border-gray-800 shadow-lg opacity-0 animate-fadeIn`}
               style={{ 
                 ...position,
                 animationDelay 

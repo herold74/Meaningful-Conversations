@@ -1,128 +1,61 @@
+
 import { GamificationState } from '../types';
-import { ALL_ACHIEVEMENT_DEFS } from '../achievementDefs';
-import { BOTS } from '../constants';
 
-// --- Mappers for Bitmasks (Lazy Initialized) ---
-let mappers: {
-    achievementIdToBitValue: Map<string, number>;
-    bitValueToAchievementId: Map<number, string>;
-    botIdToBitValue: Map<string, number>;
-    bitValueToBotId: Map<number, string>;
-} | null = null;
-
-const getMappers = () => {
-    if (mappers) {
-        return mappers;
-    }
-    const achievementIdToBitValue = new Map(
-        ALL_ACHIEVEMENT_DEFS.map((ach, i) => [ach.id, 1 << i])
+// A type guard to check if an object is a valid GamificationState after parsing
+const isGamificationState = (obj: any): obj is Omit<GamificationState, 'unlockedAchievements' | 'coachesUsed'> & { unlockedAchievements: string[], coachesUsed: string[] } => {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj.xp === 'number' &&
+        typeof obj.level === 'number' &&
+        typeof obj.streak === 'number' &&
+        typeof obj.totalSessions === 'number' &&
+        (typeof obj.lastSessionDate === 'string' || obj.lastSessionDate === null) &&
+        Array.isArray(obj.unlockedAchievements) &&
+        Array.isArray(obj.coachesUsed)
     );
-    const bitValueToAchievementId = new Map(
-        ALL_ACHIEVEMENT_DEFS.map((ach, i) => [1 << i, ach.id])
-    );
-    const botIdToBitValue = new Map(
-        BOTS.map((bot, i) => [bot.id, 1 << i])
-    );
-    const bitValueToBotId = new Map(
-        BOTS.map((bot, i) => [1 << i, bot.id])
-    );
-    mappers = {
-        achievementIdToBitValue,
-        bitValueToAchievementId,
-        botIdToBitValue,
-        bitValueToBotId,
-    };
-    return mappers;
-};
-
-
-// --- Date Logic ---
-const EPOCH = new Date('2024-01-01T00:00:00Z');
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
-const dateToDays = (dateString: string | null): number => {
-    if (!dateString) return -1; // Use -1 to represent null
-    const date = new Date(dateString + 'T00:00:00Z');
-    if (isNaN(date.getTime())) return -1;
-    return Math.floor((date.getTime() - EPOCH.getTime()) / MS_PER_DAY);
-};
-
-const daysToDate = (days: number): string | null => {
-    if (days < 0) return null;
-    const date = new Date(EPOCH.getTime() + days * MS_PER_DAY);
-    return date.toISOString().split('T')[0];
 };
 
 /**
- * Serializes the gamification state into a compact, semicolon-delimited string.
- * Format: xp;level;streak;totalSessions;lastSessionDate(days);achievementsMask;coachesMask
+ * Serializes the GamificationState to a JSON string, converting Sets to arrays.
+ * This is used for storing the state in the database or embedding it in a downloaded file.
+ * @param state The GamificationState object.
+ * @returns A JSON string representation of the state.
  */
 export const serializeGamificationState = (state: GamificationState): string => {
-    const { achievementIdToBitValue, botIdToBitValue } = getMappers();
-
-    const achievementMask = Array.from(state.unlockedAchievements)
-        .reduce((mask, id) => mask | (achievementIdToBitValue.get(id) || 0), 0);
-    
-    const coachesMask = Array.from(state.coachesUsed)
-        .reduce((mask, id) => mask | (botIdToBitValue.get(id) || 0), 0);
-
-    const parts = [
-        state.xp,
-        state.level,
-        state.streak,
-        state.totalSessions,
-        dateToDays(state.lastSessionDate),
-        achievementMask,
-        coachesMask
-    ];
-
-    return parts.join(';');
+    const serializableState = {
+        ...state,
+        unlockedAchievements: Array.from(state.unlockedAchievements),
+        coachesUsed: Array.from(state.coachesUsed),
+    };
+    return JSON.stringify(serializableState);
 };
 
 /**
- * Deserializes the compact string back into a GamificationState object.
+ * Deserializes a JSON string back into a GamificationState, converting arrays back to Sets.
+ * This is used when loading state from the database or a user-uploaded file.
+ * @param jsonString The JSON string to parse.
+ * @returns A GamificationState object, or null if parsing fails or the data is invalid.
  */
-export const deserializeGamificationState = (serialized: string): GamificationState => {
-    const { bitValueToAchievementId, bitValueToBotId } = getMappers();
-    
-    const parts = serialized.split(';').map(p => parseInt(p, 10));
-
-    const [
-        xp = 0,
-        level = 1,
-        streak = 0,
-        totalSessions = 0,
-        lastSessionDays = -1,
-        achievementMask = 1, // Default to beta_pioneer
-        coachesMask = 0
-    ] = parts;
-
-    const unlockedAchievements = new Set<string>();
-    bitValueToAchievementId.forEach((id, bitValue) => {
-        if ((achievementMask & bitValue) === bitValue) {
-            unlockedAchievements.add(id);
-        }
-    });
-
-    const coachesUsed = new Set<string>();
-    bitValueToBotId.forEach((id, bitValue) => {
-        if ((coachesMask & bitValue) === bitValue) {
-            coachesUsed.add(id);
-        }
-    });
-    
-    // If deserialization results in an empty set (e.g., from old file), add default.
-    if (unlockedAchievements.size === 0) {
-        unlockedAchievements.add('beta_pioneer');
+export const deserializeGamificationState = (jsonString: string | null | undefined): GamificationState | null => {
+    if (!jsonString) {
+        return null;
     }
+    
+    try {
+        const parsed = JSON.parse(jsonString);
 
-    return {
-        xp,
-        level,
-        streak,
-        totalSessions,
-        lastSessionDate: daysToDate(lastSessionDays),
-        unlockedAchievements,
-        coachesUsed
-    };
+        if (isGamificationState(parsed)) {
+            return {
+                ...parsed,
+                unlockedAchievements: new Set(parsed.unlockedAchievements),
+                coachesUsed: new Set(parsed.coachesUsed),
+            };
+        }
+        console.warn("Parsed object is not a valid GamificationState:", parsed);
+        return null;
+    } catch (error) {
+        console.error("Failed to deserialize gamification state:", error);
+        return null;
+    }
 };

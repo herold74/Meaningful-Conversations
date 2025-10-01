@@ -154,9 +154,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     }, [existingHeadlines]);
     
     const canSeeBlockages = useMemo(() => {
-        // A premium user is currently defined as a beta tester.
-        // This can be expanded later if a 'plan' property is added to the User type.
-        return currentUser?.isBetaTester === true;
+        return currentUser?.isBetaTester === true || (currentUser?.unlockedCoaches?.length ?? 0) > 0;
     }, [currentUser]);
 
     const [appliedUpdates, setAppliedUpdates] = useState<Map<number, AppliedUpdatePayload>>(() => {
@@ -197,15 +195,26 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             if (!existingUpdate) return prev;
             const existingNormalizedHeadlines = new Set(existingHeadlines.map(h => normalizeHeadline(h)));
             const isNewHeadline = !existingNormalizedHeadlines.has(normalizeHeadline(newTargetHeadline));
-            let newType = existingUpdate.type;
+            let newType: 'create_headline' | 'append' | 'replace_section' = existingUpdate.type;
             if (isNewHeadline) {
                 newType = 'create_headline';
             } else {
                 if (existingUpdate.type === 'create_headline') {
-                    newType = 'append';
+                    newType = 'append'; // Default to append when switching from new to existing
                 }
             }
             newMap.set(index, { ...existingUpdate, type: newType, targetHeadline: newTargetHeadline });
+            return newMap;
+        });
+    };
+
+    const handleUpdateTypeChange = (index: number, newType: 'append' | 'replace_section') => {
+        setAppliedUpdates(prev => {
+            const newMap = new Map<number, AppliedUpdatePayload>(prev);
+            const updatePayload = newMap.get(index);
+            if (updatePayload && (newType === 'append' || newType === 'replace_section')) {
+                newMap.set(index, { ...updatePayload, type: newType });
+            }
             return newMap;
         });
     };
@@ -365,12 +374,29 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {proposedUpdates.map((update, index) => {
                              const appliedUpdate = appliedUpdates.get(index);
                              const isApplied = !!appliedUpdate;
+                             const isNewHeadline = appliedUpdate ? !normalizedToOriginalHeadlineMap.has(normalizeHeadline(appliedUpdate.targetHeadline)) : false;
+                             const canChangeType = isApplied && !isNewHeadline;
+
                             return (
                                 <div key={index} className={`flex items-start gap-3 p-3 transition-colors ${isApplied ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-100 dark:bg-gray-800/20 opacity-60'} border border-gray-200 dark:border-gray-700/50`}>
                                     <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 cursor-pointer" />
                                     <div className="flex-1">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                                            <span className="text-sm font-mono px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 whitespace-nowrap">{getActionTypeTranslation(appliedUpdate?.type || update.type)}</span>
+                                            {canChangeType ? (
+                                                <select
+                                                    value={appliedUpdate.type}
+                                                    onChange={(e) => handleUpdateTypeChange(index, e.target.value as 'append' | 'replace_section')}
+                                                    disabled={!isApplied}
+                                                    className="p-1 text-sm font-mono bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border border-purple-200 dark:border-purple-700 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                                >
+                                                    <option value="append">{t('sessionReview_action_append')}</option>
+                                                    <option value="replace_section">{t('sessionReview_action_replace_section')}</option>
+                                                </select>
+                                            ) : (
+                                                <span className="text-sm font-mono px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 whitespace-nowrap">
+                                                    {getActionTypeTranslation(appliedUpdate?.type || update.type)}
+                                                </span>
+                                            )}
                                             {appliedUpdate?.type !== 'create_headline' && <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{t('sessionReview_to')}</span>}
                                             <select value={appliedUpdate?.targetHeadline} onChange={(e) => handleActionChange(index, e.target.value)} disabled={!isApplied} className="w-full sm:w-auto p-1 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 dark:disabled:bg-gray-800/50">
                                                 <optgroup label={t('sessionReview_optgroup_existing')}>

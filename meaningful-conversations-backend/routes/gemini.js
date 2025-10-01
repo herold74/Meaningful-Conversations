@@ -82,7 +82,7 @@ router.post('/session/analyze', async (req, res) => {
             })
         ]);
 
-        let parsedUpdates = { summary: '', updates: [], nextSteps: [] };
+        let parsedUpdates = { summary: '', updates: [], nextSteps: [], hasConversationalEnd: false };
         if (contextResult && contextResult.text) {
              try {
                 parsedUpdates = JSON.parse(contextResult.text);
@@ -106,7 +106,8 @@ router.post('/session/analyze', async (req, res) => {
             summary: parsedUpdates.summary,
             updates: parsedUpdates.updates,
             nextSteps: parsedUpdates.nextSteps,
-            solutionBlockages: parsedBlockages
+            solutionBlockages: parsedBlockages,
+            hasConversationalEnd: parsedUpdates.hasConversationalEnd,
         });
 
     } catch (e) {

@@ -12,9 +12,9 @@ export interface Bot {
     avatar: string;
     style: string;
     style_de: string;
+    accessTier: BotAccessTier;
     systemPrompt: string;
     systemPrompt_de: string;
-    accessTier: BotAccessTier;
 }
 
 export interface BotWithAvailability extends Bot {
@@ -28,24 +28,22 @@ export interface Message {
     timestamp: string;
 }
 
+export interface User {
+    id: string;
+    email: string;
+    isBetaTester: boolean;
+    isAdmin: boolean;
+    unlockedCoaches: string[];
+}
+
 export interface ProposedUpdate {
-    type: 'append' | 'create_headline' | 'replace_section';
+    type: 'create_headline' | 'append' | 'replace_section';
     headline: string;
     content: string;
 }
 
-export interface GamificationState {
-    xp: number;
-    level: number;
-    streak: number;
-    unlockedAchievements: Set<string>;
-    totalSessions: number;
-    lastSessionDate: string | null;
-    coachesUsed: Set<string>;
-}
-
 export interface SolutionBlockage {
-    blockage: 'Self-Reproach' | 'Blaming Others' | 'Expectational Attitudes' | 'Age Regression' | 'Dysfunctional Loyalties';
+    blockage: string;
     explanation: string;
     quote: string;
 }
@@ -56,27 +54,32 @@ export interface SessionAnalysis {
     nextSteps: { action: string; deadline: string }[];
     solutionBlockages: SolutionBlockage[];
     blockageScore: number;
+    hasConversationalEnd: boolean;
 }
 
-export interface UserData {
-    lifeContext: string | null;
-    gamificationState: GamificationState;
+export interface GamificationState {
+    xp: number;
+    level: number;
+    streak: number;
+    totalSessions: number;
+    lastSessionDate: string | null;
+    unlockedAchievements: Set<string>;
+    coachesUsed: Set<string>;
 }
-
-export type AppView = 'welcome' | 'auth' | 'login' | 'register' | 'landing' | 'questionnaire' | 'pii-warning' | 'bot-selection' | 'chat' | 'session-review' | 'context-choice' | 'forgot-password';
-export type NavView = 'about' | 'faq' | 'disclaimer' | 'terms' | 'achievements' | 'formatting-help' | 'user-guide';
-export type View = AppView | NavView;
-
 
 export interface Achievement {
     id: string;
+    icon: React.FC<React.SVGProps<SVGSVGElement>>;
     name: string;
     description: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
     isUnlocked: (state: GamificationState) => boolean;
 }
 
-export interface User {
-    email: string;
-    isBetaTester?: boolean;
+export interface UpgradeCode {
+    id: string;
+    code: string;
+    botId: string;
+    isUsed: boolean;
+    usedBy?: { email: string };
+    createdAt: string;
 }

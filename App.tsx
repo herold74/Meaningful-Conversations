@@ -1,355 +1,362 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-    AppView, Bot, GamificationState, Message, User, View,
-    SessionAnalysis, NavView
-} from './types';
+import { Bot, Message, SessionAnalysis, User, GamificationState, Language } from './types';
 import * as userService from './services/userService';
 import * as geminiService from './services/geminiService';
+import { getSession, clearSession } from './services/api';
+import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 
-import { ALL_ACHIEVEMENT_DEFS } from './achievementDefs';
-import { deserializeGamificationState } from './utils/gamificationSerializer';
-import { useLocalization } from './context/LocalizationContext';
-
+// Components (Views)
 import WelcomeScreen from './components/WelcomeScreen';
-import GamificationBar from './components/GamificationBar';
-import BurgerMenu from './components/BurgerMenu';
-import AnalyzingView from './components/AnalyzingView';
+import LandingPage from './components/LandingPage';
+import BotSelection from './components/BotSelection';
+import ChatView from './components/ChatView';
+import SessionReview from './components/SessionReview';
+import Questionnaire from './components/Questionnaire';
+import PIIWarningView from './components/PIIWarningView';
+import ContextChoiceView from './components/ContextChoiceView';
 import AuthView from './components/AuthView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
 import ForgotPasswordView from './components/ForgotPasswordView';
-import LandingPage from './components/LandingPage';
-import Questionnaire from './components/Questionnaire';
-import PIIWarningView from './components/PIIWarningView';
-import ContextChoiceView from './components/ContextChoiceView';
-import BotSelection from './components/BotSelection';
-import ChatView from './components/ChatView';
-import SessionReview from './components/SessionReview';
+import ChangePasswordView from './components/ChangePasswordView';
 import AchievementsView from './components/AchievementsView';
-import AboutView from './components/AboutView';
+import UserGuideView from './components/UserGuideView';
+import FormattingHelpView from './components/FormattingHelpView';
 import FAQView from './components/FAQView';
+import AboutView from './components/AboutView';
 import DisclaimerView from './components/DisclaimerView';
 import TermsView from './components/TermsView';
-import FormattingHelpView from './components/FormattingHelpView';
-import UserGuideView from './components/UserGuideView';
+import AdminView from './components/AdminView';
+import RedeemCodeView from './components/RedeemCodeView';
+import DeleteAccountModal from './components/DeleteAccountModal';
 
-// --- Inlined Helper Functions ---
+// Shared UI
+import GamificationBar from './components/GamificationBar';
+import BurgerMenu from './components/BurgerMenu';
+import AnalyzingView from './components/AnalyzingView';
 
-// Gamification logic
-const XP_PER_MESSAGE = 5;
-const XP_PER_SESSION = 50;
-const XP_PER_NEXT_STEP = 10;
-const XP_PER_LEVEL = 100;
+// Types
+type View =
+  | 'loading'
+  | 'auth'
+  | 'landing'
+  | 'contextChoice'
+  | 'questionnaire'
+  | 'piiWarning'
+  | 'botSelection'
+  | 'chat'
+  | 'sessionReview'
+  | 'achievements'
+  | 'userGuide'
+  | 'formattingHelp'
+  | 'faq'
+  | 'about'
+  | 'disclaimer'
+  | 'terms'
+  | 'admin'
+  | 'redeemCode'
+  | 'login'
+  | 'register'
+  | 'forgotPassword'
+  | 'changePassword';
 
-const getInitialGamificationState = (): GamificationState => ({
-    xp: 0,
-    level: 1,
-    streak: 0,
-    unlockedAchievements: new Set(['beta_pioneer']),
-    totalSessions: 0,
-    lastSessionDate: null,
-    coachesUsed: new Set(),
-});
-
-const updateGamificationState = (
-    currentState: GamificationState,
-    action: 'sendMessage' | 'endSession',
-    payload: { botId?: string, xpGained?: number }
-): GamificationState => {
-    const newState = { ...currentState };
-    newState.unlockedAchievements = new Set(currentState.unlockedAchievements);
-    newState.coachesUsed = new Set(currentState.coachesUsed);
-
-    if (action === 'sendMessage') {
-        newState.xp += XP_PER_MESSAGE;
-        if (payload.botId) {
-            newState.coachesUsed.add(payload.botId);
-        }
-    }
-
-    if (action === 'endSession') {
-        newState.xp += XP_PER_SESSION;
-        if (payload.xpGained) {
-            newState.xp += payload.xpGained;
-        }
-
-        newState.totalSessions += 1;
-
-        const today = new Date().toISOString().split('T')[0];
-        if (newState.lastSessionDate) {
-            const lastDate = new Date(newState.lastSessionDate);
-            const todayDate = new Date(today);
-            const diffDays = Math.round((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-            if (diffDays === 1) {
-                newState.streak += 1;
-            } else if (diffDays > 1) {
-                newState.streak = 1; // Reset streak
-            }
-        } else {
-            newState.streak = 1;
-        }
-        newState.lastSessionDate = today;
-    }
-
-    newState.level = Math.floor(newState.xp / XP_PER_LEVEL) + 1;
-
-    ALL_ACHIEVEMENT_DEFS.forEach(ach => {
-        if (!newState.unlockedAchievements.has(ach.id) && ach.isUnlocked(newState)) {
-            newState.unlockedAchievements.add(ach.id);
-        }
-    });
-
-    return newState;
-};
-
-const awardXpForNextSteps = (nextStepCount: number): number => {
-    return nextStepCount * XP_PER_NEXT_STEP;
-};
-
-// File parsing logic
-const GAMIFICATION_COMMENT_REGEX = /<!--\s*do not delete:\s*(.*?)\s*-->/;
-
-const parseGamificationStateFromFile = (fileContent: string, currentUser: User | null): { gamificationState: GamificationState; cleanContext: string; } => {
-    const cleanContext = fileContent.replace(GAMIFICATION_COMMENT_REGEX, '').trim();
-
-    if (currentUser) {
-        return { gamificationState: getInitialGamificationState(), cleanContext };
-    }
-
-    const match = fileContent.match(GAMIFICATION_COMMENT_REGEX);
-    if (match && match[1]) {
-        try {
-            const decodedData = atob(match[1]);
-            return { gamificationState: deserializeGamificationState(decodedData), cleanContext };
-        } catch (error) {
-            console.error("Failed to decode or parse gamification state from file:", error);
-        }
-    }
-    
-    return { gamificationState: getInitialGamificationState(), cleanContext };
+const initialGamificationState: GamificationState = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  totalSessions: 0,
+  lastSessionDate: null,
+  unlockedAchievements: new Set(),
+  coachesUsed: new Set(),
 };
 
 const App: React.FC = () => {
-    const [view, setView] = useState<View>('welcome');
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [view, setView] = useState<View>('loading');
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            const savedTheme = window.localStorage.getItem('theme');
-            return savedTheme === 'dark' ? 'dark' : 'light';
-        }
-        return 'light';
+        const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') as 'light' | 'dark' : null;
+        return savedTheme || 'dark';
     });
-
+    
+    // User and Session State
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [lifeContext, setLifeContext] = useState<string | null>(null);
-    const [gamificationState, setGamificationState] = useState<GamificationState>(getInitialGamificationState());
+    const [lifeContext, setLifeContext] = useState<string>('');
+    const [savedContext, setSavedContext] = useState<string>(''); // Used for context choice screen
     const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
     const [chatHistory, setChatHistory] = useState<Message[]>([]);
     const [sessionAnalysis, setSessionAnalysis] = useState<SessionAnalysis | null>(null);
+    const [gamificationState, setGamificationState] = useState<GamificationState>(initialGamificationState);
+
+    // UI/Flow State
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
+    const [redirectReason, setRedirectReason] = useState<string | null>(null);
+    const [previousView, setPreviousView] = useState<View>('landing');
 
-    const { language, t } = useLocalization();
-
+    // Theme Management
     useEffect(() => {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
         localStorage.setItem('theme', theme);
     }, [theme]);
 
     const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
+    // Initial Load Effect
     useEffect(() => {
-        const initializeApp = async () => {
-            const user = userService.getCurrentUser();
-            if (user) {
+        const initialize = async () => {
+            const session = getSession();
+            if (session) {
+                setCurrentUser(session.user);
                 try {
-                    const userData = await userService.loadUserData();
-                    setCurrentUser(user);
-                    setGamificationState(userData.gamificationState);
-                    setLifeContext(userData.lifeContext);
-                    setView(userData.lifeContext ? 'context-choice' : 'landing');
+                    const data = await userService.loadUserData();
+                    setLifeContext(data.context || '');
+                    setSavedContext(data.context || '');
+                    setGamificationState(deserializeGamificationState(data.gamificationState) || initialGamificationState);
+                    
+                    if (data.context) {
+                        setView('contextChoice');
+                    } else {
+                        setView('landing');
+                    }
                 } catch (error) {
                     console.error("Failed to load user data, logging out.", error);
-                    userService.logout();
-                    setView('auth');
+                    handleLogout();
                 }
             } else {
-                 setView('auth');
+                setView('auth');
             }
-            setTimeout(() => setIsLoading(false), 2000);
         };
-
-        initializeApp();
+        initialize();
     }, []);
 
-    const resetSessionState = useCallback(() => {
-        setSelectedBot(null);
-        setChatHistory([]);
-        setSessionAnalysis(null);
-    }, []);
+    const updateGamificationState = useCallback((analysis: SessionAnalysis) => {
+        setGamificationState(prev => {
+            const newState = { ...prev };
+            newState.xp += 25; // Base XP for session
+            if (analysis.nextSteps.length > 0) newState.xp += 15; // Bonus for action items
+            if (analysis.solutionBlockages.length > 0) newState.xp += 10; // Bonus for insights
+            
+            newState.totalSessions += 1;
+            
+            if (selectedBot) {
+                newState.coachesUsed = new Set(prev.coachesUsed).add(selectedBot.id);
+            }
 
+            const today = new Date().toISOString().split('T')[0];
+            if (prev.lastSessionDate) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                if (prev.lastSessionDate === yesterdayStr) {
+                    newState.streak = prev.streak + 1;
+                } else if (prev.lastSessionDate !== today) {
+                    newState.streak = 1; // Reset if not consecutive days
+                }
+            } else {
+                newState.streak = 1;
+            }
+            newState.lastSessionDate = today;
+
+            // Level up logic
+            let xpForNextLevel = newState.level * 100;
+            while (newState.xp >= (50 * (newState.level - 1) * newState.level) + xpForNextLevel) {
+                newState.level += 1;
+                xpForNextLevel = newState.level * 100;
+            }
+
+            return newState;
+        });
+    }, [selectedBot]);
+    
+    // --- Navigation and Flow Handlers ---
     const handleStartWithContext = (context: string) => {
-        const { gamificationState: parsedState, cleanContext } = parseGamificationStateFromFile(context, currentUser);
-        if (!currentUser) {
-            setGamificationState(parsedState);
+        const data = context.match(/<!-- do not delete: (.*?) -->/);
+        let finalContext = context;
+        if (data && data[1]) {
+            try {
+                const decodedState = atob(data[1]);
+                const loadedState = deserializeGamificationState(decodedState);
+                if (loadedState) {
+                    setGamificationState(loadedState);
+                }
+                finalContext = context.replace(/<!-- do not delete: (.*?) -->\s*/, '');
+            } catch (e) {
+                console.error("Could not parse gamification state from file.", e);
+            }
         }
-        setLifeContext(cleanContext);
-        setView('pii-warning');
+        setLifeContext(finalContext);
+        setView('botSelection');
     };
     
     const handleBotSelection = (bot: Bot) => {
+        setSelectedBot(bot);
         const welcomeMessage: Message = {
             id: `bot-welcome-${Date.now()}`,
-            text: t('chat_welcomeMessage', { botName: bot.name }),
+            text: `Hi, I'm ${bot.name}. How can I help you today?`,
             role: 'bot',
-            timestamp: new Date().toISOString(),
+            timestamp: new Date().toISOString()
         };
         setChatHistory([welcomeMessage]);
-        setSelectedBot(bot);
         setView('chat');
     };
 
-    const handleMessageSent = () => {
-        setGamificationState(prev => updateGamificationState(prev, 'sendMessage', { botId: selectedBot?.id }));
-    };
-
     const handleEndSession = async () => {
+        if (!selectedBot || chatHistory.length <= 1) { // <=1 because of welcome message
+            setView('botSelection');
+            return;
+        }
+
         setIsAnalyzing(true);
         try {
-            const analysis = await geminiService.analyzeSession(chatHistory, lifeContext || '', language);
-            const xpGained = awardXpForNextSteps(analysis.nextSteps.length);
-            setGamificationState(prev => updateGamificationState(prev, 'endSession', { xpGained }));
+            const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, 'en'); // hardcoded lang for now
             setSessionAnalysis(analysis);
-            setView('session-review');
+            updateGamificationState(analysis);
+            setView('sessionReview');
         } catch (error) {
-            console.error("Session analysis failed:", error);
+            console.error("Failed to analyze session:", error);
+            // Fallback: allow user to save manually
             setSessionAnalysis({
-                newFindings: t('sessionReview_error_analysis'),
-                proposedUpdates: [], nextSteps: [], solutionBlockages: [], blockageScore: 0
+                newFindings: "There was an error analyzing the session. Please review the conversation and update your context manually.",
+                proposedUpdates: [],
+                nextSteps: [],
+                solutionBlockages: [],
+                blockageScore: 0,
+                hasConversationalEnd: false,
             });
-            setView('session-review');
+            setView('sessionReview');
         } finally {
             setIsAnalyzing(false);
         }
     };
     
-    const handleContinueSession = async (newContext: string, { preventSave }: { preventSave: boolean }) => {
-        let newGamState = gamificationState;
-        if (currentUser && !preventSave && selectedBot) { // Added null check for selectedBot
-            try {
-                setIsLoading(true);
-                const updatedState = await userService.saveUserData(newContext, gamificationState, selectedBot.id);
-                newGamState = updatedState;
-            } catch (error) {
-                 console.error("Failed to save user data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
+    const handleSessionReviewContinue = async (newContext: string, options: { preventSave: boolean }) => {
         setLifeContext(newContext);
-        setGamificationState(newGamState);
-        resetSessionState();
-        setView('bot-selection');
+        if (currentUser && !options.preventSave) {
+            await userService.saveUserData(newContext, serializeGamificationState(gamificationState));
+        }
+        setView('botSelection');
     };
-    
+
     const handleReturnToStart = () => {
-        setLifeContext(null);
-        if (!currentUser) {
-            setGamificationState(getInitialGamificationState());
-        }
-        resetSessionState();
-        setView(currentUser ? 'landing' : 'auth');
-    };
-    
-    const handleLoginSuccess = async (user: User) => {
-        try {
-            setIsLoading(true);
-            const userData = await userService.loadUserData();
-            setCurrentUser(user);
-            setGamificationState(userData.gamificationState);
-            setLifeContext(userData.lifeContext);
-            setView(userData.lifeContext ? 'context-choice' : 'landing');
-        } catch (error) {
-            console.error("Failed to load data after login", error);
-            userService.logout();
-            setView('auth');
-            setAuthRedirectReason(t('auth_error_load'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    const handleRegisterSuccess = (user: User) => {
-        setCurrentUser(user);
-        setGamificationState(getInitialGamificationState());
-        setLifeContext(null);
+        setLifeContext('');
+        setSelectedBot(null);
+        setChatHistory([]);
+        setSessionAnalysis(null);
+        // Do not reset gamification or user
         setView('landing');
     };
     
+    const handleNavigate = (targetView: string) => {
+        setPreviousView(view);
+        setView(targetView as View);
+    }
+    
+    // --- Auth Handlers ---
+    const handleLoginSuccess = (user: User) => {
+        setCurrentUser(user);
+        // Re-run initialization logic after login
+        const initialize = async () => {
+            try {
+                const data = await userService.loadUserData();
+                setLifeContext(data.context || '');
+                setSavedContext(data.context || '');
+                setGamificationState(deserializeGamificationState(data.gamificationState) || initialGamificationState);
+                if (data.context) {
+                    setView('contextChoice');
+                } else {
+                    setView('landing');
+                }
+            } catch (error) {
+                console.error("Failed to load user data after login.", error);
+                setView('landing'); // Fallback to landing
+            }
+        };
+        initialize();
+    };
+
     const handleLogout = () => {
-        userService.logout();
+        clearSession();
         setCurrentUser(null);
-        setGamificationState(getInitialGamificationState());
-        setLifeContext(null);
-        resetSessionState();
+        setLifeContext('');
+        setSavedContext('');
+        setGamificationState(initialGamificationState);
+        setRedirectReason(null);
         setView('auth');
-        setAuthRedirectReason(null);
     };
     
     const handleDeleteAccountSuccess = () => {
+        setIsDeleteModalOpen(false);
         handleLogout();
     };
 
-    const renderNavView = (view: NavView) => {
-        const goBack = () => setView(selectedBot ? 'chat' : currentUser ? 'landing' : 'auth');
-        switch(view) {
-            case 'achievements': return <AchievementsView gamificationState={gamificationState} onBack={goBack} />;
-            case 'about': return <AboutView onBack={goBack} />;
-            case 'faq': return <FAQView onBack={goBack} />;
-            case 'disclaimer': return <DisclaimerView onBack={goBack} />;
-            case 'terms': return <TermsView onBack={goBack} />;
-            case 'formatting-help': return <FormattingHelpView onBack={goBack} />;
-            case 'user-guide': return <UserGuideView onBack={goBack} />;
-        }
-    }
-
-    const renderContent = () => {
-        if (isLoading) return <WelcomeScreen />;
-        
-        const navViews: NavView[] = ['about', 'achievements', 'disclaimer', 'faq', 'terms', 'formatting-help', 'user-guide'];
-        if (navViews.includes(view as NavView)) {
-            return renderNavView(view as NavView);
-        }
-
+    const renderView = () => {
         switch (view) {
-            case 'welcome': return <WelcomeScreen />;
-            case 'auth': return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={() => setView('landing')} onBetaLogin={handleLoginSuccess} redirectReason={authRedirectReason} />;
-            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setView('register')} onBack={() => setView('auth')} onForgotPassword={() => setView('forgot-password')} />;
-            case 'register': return <RegisterView onRegisterSuccess={handleRegisterSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
-            case 'forgot-password': return <ForgotPasswordView onBack={() => setView('login')} />;
-            case 'landing': return <LandingPage onSubmit={handleStartWithContext} onStartQuestionnaire={() => setView('questionnaire')} />;
+            case 'loading': return <WelcomeScreen />;
+            case 'auth': return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={() => setView('landing')} onLoginSuccess={handleLoginSuccess} redirectReason={redirectReason} />;
+            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => setView('register')} onBack={() => setView('auth')} onForgotPassword={() => setView('forgotPassword')} />;
+            case 'register': return <RegisterView onRegisterSuccess={handleLoginSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
+            case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
+            case 'changePassword': return <ChangePasswordView onBack={() => setView('disclaimer')} currentUser={currentUser!} />;
+            
+            case 'landing': return <LandingPage onSubmit={(context) => { setLifeContext(context); setView('piiWarning'); }} onStartQuestionnaire={() => setView('questionnaire')} />;
+            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={savedContext} onContinue={() => { setLifeContext(savedContext); setView('botSelection'); }} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleStartWithContext} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'pii-warning': return <PIIWarningView onConfirm={() => setView('bot-selection')} onCancel={() => setView('landing')} />;
-            case 'context-choice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext!} onContinue={() => setView('bot-selection')} onStartNew={() => { setLifeContext(null); setView('landing'); }} />;
-            case 'bot-selection': return <BotSelection onSelect={handleBotSelection} currentUser={currentUser} />;
-            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext || ''} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={handleMessageSent} />;
-            case 'session-review': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext || ''} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleContinueSession} onReturnToStart={handleReturnToStart} gamificationState={gamificationState} currentUser={currentUser} />;
-            default: return <p>Unknown view</p>;
+            case 'piiWarning': return <PIIWarningView onConfirm={() => handleStartWithContext(lifeContext)} onCancel={() => setView('landing')} />;
+            case 'botSelection': return <BotSelection onSelect={handleBotSelection} currentUser={currentUser} />;
+            
+            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => {}} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleSessionReviewContinue} onSwitchCoach={handleSessionReviewContinue} onReturnToStart={handleReturnToStart} gamificationState={gamificationState} currentUser={currentUser} />;
+
+            // Menu Views
+            case 'achievements': return <AchievementsView gamificationState={gamificationState} onBack={() => setView(previousView)} />;
+            case 'userGuide': return <UserGuideView onBack={() => setView(previousView)} />;
+            case 'formattingHelp': return <FormattingHelpView onBack={() => setView(previousView)} />;
+            case 'faq': return <FAQView onBack={() => setView(previousView)} />;
+            case 'about': return <AboutView onBack={() => setView(previousView)} />;
+            case 'disclaimer': return <DisclaimerView onBack={() => setView(previousView)} currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
+            case 'terms': return <TermsView onBack={() => setView(previousView)} />;
+            case 'admin': return <AdminView onBack={() => setView(previousView)} />;
+            case 'redeemCode': return <RedeemCodeView onBack={() => setView(previousView)} onRedeemSuccess={(user) => { setCurrentUser(user); setView('botSelection'); }} />;
+
+            default: return <LandingPage onSubmit={(context) => { setLifeContext(context); setView('piiWarning'); }} onStartQuestionnaire={() => setView('questionnaire')} />;
         }
     };
     
-    const showGamificationBar = !isLoading && view !== 'welcome' && !['auth', 'login', 'register', 'forgot-password'].includes(view);
-    const isMinimalBar = ['landing', 'questionnaire', 'pii-warning', 'context-choice', 'about', 'achievements', 'disclaimer', 'faq', 'terms', 'formatting-help', 'user-guide'].includes(view);
+    const showGamificationBar = !['loading', 'auth', 'login', 'register', 'forgotPassword'].includes(view);
 
     return (
-        <div className={`font-sans bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors duration-300 ${theme}`}>
-            {isAnalyzing && <AnalyzingView />}
-            {showGamificationBar && <GamificationBar gamificationState={gamificationState} currentUser={currentUser} onViewAchievements={() => setView('achievements')} onToggleMenu={() => setIsMenuOpen(true)} theme={theme} toggleTheme={toggleTheme} minimal={isMinimalBar} />}
-            <BurgerMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} currentUser={currentUser} onLogout={handleLogout} onNavigate={setView} onDeleteAccountSuccess={handleDeleteAccountSuccess} />
-            <main className="container mx-auto px-4">
-                {renderContent()}
+        <div className={`min-h-screen bg-gray-50 dark:bg-gray-950 font-sans ${theme}`}>
+            {showGamificationBar && (
+                 <GamificationBar 
+                    gamificationState={gamificationState} 
+                    currentUser={currentUser} 
+                    onViewAchievements={() => handleNavigate('achievements')} 
+                    onToggleMenu={() => setIsMenuOpen(true)}
+                    theme={theme}
+                    toggleTheme={toggleTheme}
+                 />
+            )}
+             <BurgerMenu 
+                isOpen={isMenuOpen} 
+                onClose={() => setIsMenuOpen(false)} 
+                currentUser={currentUser}
+                onNavigate={handleNavigate}
+                onLogout={handleLogout}
+             />
+             {isAnalyzing && <AnalyzingView />}
+             <DeleteAccountModal 
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onDeleteSuccess={handleDeleteAccountSuccess}
+             />
+            <main>
+                {renderView()}
             </main>
         </div>
     );

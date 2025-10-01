@@ -18,13 +18,21 @@ interface GamificationBarProps {
     minimal?: boolean;
 }
 
-const XP_PER_LEVEL = 100;
-
 const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, currentUser, onViewAchievements, onToggleMenu, theme, toggleTheme, minimal }) => {
     const { t } = useLocalization();
     const { xp, level, streak } = gamificationState;
-    const currentLevelXp = xp % XP_PER_LEVEL;
-    const progressPercentage = (currentLevelXp / XP_PER_LEVEL) * 100;
+
+    // --- Progressive XP Logic ---
+    // Total XP required to reach the start of the current level.
+    // The formula for the sum of an arithmetic series is used here: 100 * (n*(n-1))/2
+    const xpToReachCurrentLevel = 50 * (level - 1) * level;
+    // The amount of XP needed to get from the current level to the next.
+    const xpForNextLevel = level * 100;
+    // The amount of XP the user has accumulated within the current level.
+    const currentLevelXp = xp - xpToReachCurrentLevel;
+    // The progress percentage for the bar display.
+    const progressPercentage = xpForNextLevel > 0 ? (currentLevelXp / xpForNextLevel) * 100 : 0;
+
 
     const burgerButton = (
         <button 
@@ -79,7 +87,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, cu
                     <div className="w-full bg-gray-200 dark:bg-gray-700 h-2">
                         <div className="bg-green-500 h-2" style={{ width: `${progressPercentage}%` }}></div>
                     </div>
-                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">{currentLevelXp}/{XP_PER_LEVEL} XP</span>
+                    <span className="text-xs font-mono text-gray-500 dark:text-gray-400">{currentLevelXp}/{xpForNextLevel} XP</span>
                 </div>
                 <button 
                     onClick={onViewAchievements} 

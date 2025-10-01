@@ -96,7 +96,7 @@ npx prisma init --datasource-provider mysql
     DATABASE_URL="mysql://<user>:<password>@<host>:<port>/<database_name>"
     ```
 
-2.  **Define Your Data Models**: In the `prisma/schema.prisma` file, define your `User` model. The `datasource` provider should be set to `mysql`.
+2.  **Define Your Data Models**: In the `prisma/schema.prisma` file, define your `User` and `UpgradeCode` models. The `datasource` provider should be set to `mysql`.
 
     ```prisma
     // prisma/schema.prisma
@@ -114,10 +114,23 @@ npx prisma init --datasource-provider mysql
       email             String    @unique
       passwordHash      String
       isBetaTester      Boolean   @default(false)
+      isAdmin           Boolean   @default(false)
       lifeContext       String?   @db.Text
       gamificationState String    @db.Text
       createdAt         DateTime  @default(now())
       updatedAt         DateTime  @updatedAt
+
+      redeemedCodes     UpgradeCode[]
+    }
+
+    model UpgradeCode {
+      id        String   @id @default(cuid())
+      code      String   @unique
+      isUsed    Boolean  @default(false)
+      createdAt DateTime @default(now())
+
+      usedById  String?
+      usedBy    User?    @relation(fields: [usedById], references: [id])
     }
     ```
     *Note: We use `@db.Text` to ensure the `lifeContext` and `gamificationState` fields can store long strings without truncation.*
@@ -172,8 +185,8 @@ router.post('/register', async (req, res) => {
             data: { 
                 email, 
                 passwordHash, 
-                // Use the same initial state as the frontend
-                gamificationState: "0;1;0;0;-1;1;0" 
+                // Use a valid JSON string for the initial state
+                gamificationState: "{}" 
             }
         });
         // Sign and return a JWT for the new session
