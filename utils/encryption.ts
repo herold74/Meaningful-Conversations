@@ -16,19 +16,21 @@ export const hexToUint8Array = (hexString: string): Uint8Array => {
 // --- Client-Side E2EE for User Data ---
 
 // Derives a key from a password and salt using PBKDF2.
+// This version uses a two-step deriveBits -> importKey process for better browser compatibility, especially with Safari.
 export const deriveKey = async (password: string, salt: Uint8Array): Promise<CryptoKey> => {
     const enc = new TextEncoder();
     // Explicitly normalize the password to NFC to ensure cross-browser consistency.
-    // This prevents issues where different browsers handle special characters differently.
     const normalizedPassword = password.normalize('NFC');
+
     const keyMaterial = await window.crypto.subtle.importKey(
         'raw',
         enc.encode(normalizedPassword),
         { name: 'PBKDF2' },
         false,
-        ['deriveKey']
+        ['deriveBits'] // Use 'deriveBits' for the two-step process
     );
-    return window.crypto.subtle.deriveKey(
+
+    const keyBits = await window.crypto.subtle.deriveBits(
         {
             name: 'PBKDF2',
             salt: salt,
@@ -36,7 +38,14 @@ export const deriveKey = async (password: string, salt: Uint8Array): Promise<Cry
             hash: 'SHA-256'
         },
         keyMaterial,
-        { name: 'AES-GCM', length: 256 },
+        256 // Derive 256 bits for an AES-256 key
+    );
+
+    // Import the derived bits as a usable AES-GCM key
+    return await window.crypto.subtle.importKey(
+        'raw',
+        keyBits,
+        { name: 'AES-GCM' },
         true,
         ['encrypt', 'decrypt']
     );

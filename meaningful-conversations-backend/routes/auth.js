@@ -40,7 +40,8 @@ router.post('/register', async (req, res) => {
             return res.status(409).json({ error: 'An account with this email address already exists.' });
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const normalizedPassword = password.normalize('NFC');
+        const passwordHash = await bcrypt.hash(normalizedPassword, 10);
         const salt = crypto.randomBytes(16).toString('hex'); // Generate a 128-bit salt
         
         // Ensure a valid, parsable default state is used.
@@ -83,7 +84,8 @@ router.post('/login', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { email } });
 
-        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+        const normalizedPassword = password.normalize('NFC');
+        if (!user || !(await bcrypt.compare(normalizedPassword, user.passwordHash))) {
             return res.status(401).json({ error: "Invalid credentials." });
         }
 

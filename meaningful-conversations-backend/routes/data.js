@@ -97,11 +97,13 @@ router.put('/user/password', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { id: req.userId } });
 
-        if (!user || !(await bcrypt.compare(oldPassword, user.passwordHash))) {
+        const normalizedOldPassword = oldPassword.normalize('NFC');
+        if (!user || !(await bcrypt.compare(normalizedOldPassword, user.passwordHash))) {
             return res.status(401).json({ error: "Incorrect current password." });
         }
 
-        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        const normalizedNewPassword = newPassword.normalize('NFC');
+        const newPasswordHash = await bcrypt.hash(normalizedNewPassword, 10);
 
         await prisma.user.update({
             where: { id: req.userId },
