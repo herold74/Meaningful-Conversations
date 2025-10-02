@@ -18,9 +18,12 @@ export const hexToUint8Array = (hexString: string): Uint8Array => {
 // Derives a key from a password and salt using PBKDF2.
 export const deriveKey = async (password: string, salt: Uint8Array): Promise<CryptoKey> => {
     const enc = new TextEncoder();
+    // Explicitly normalize the password to NFC to ensure cross-browser consistency.
+    // This prevents issues where different browsers handle special characters differently.
+    const normalizedPassword = password.normalize('NFC');
     const keyMaterial = await window.crypto.subtle.importKey(
         'raw',
-        enc.encode(password),
+        enc.encode(normalizedPassword),
         { name: 'PBKDF2' },
         false,
         ['deriveKey']

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, BotWithAvailability, User, BotAccessTier } from '../types';
+import { Bot, BotWithAvailability, User, BotAccessTier, Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { BOTS } from '../constants';
 import { LockIcon } from './icons/LockIcon';
@@ -9,6 +9,64 @@ interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   currentUser: User | null;
 }
+
+// FIX: Moved BotCard outside the BotSelection component and provided it with all necessary props.
+// This resolves a TypeScript error with the `key` prop and improves performance by preventing re-declaration on each render.
+interface BotCardProps {
+  bot: BotWithAvailability;
+  onSelect: (bot: Bot) => void;
+  language: Language;
+}
+
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
+    const isLocked = !bot.isAvailable;
+    return (
+      <div
+        onClick={() => !isLocked && onSelect(bot)}
+        className={`
+            flex flex-col md:flex-row items-center md:items-start text-center md:text-left 
+            gap-4 md:gap-6 bg-white dark:bg-transparent p-6 border transition-all duration-200
+            ${isLocked
+              ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-900/50 opacity-60 border-gray-200 dark:border-gray-800'
+              : 'cursor-pointer hover:border-green-500 dark:hover:border-green-400 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-gray-200 dark:border-gray-700'
+            }
+        `}
+        aria-disabled={isLocked}
+      >
+        <div className="relative flex-shrink-0">
+            <img 
+                src={bot.avatar} 
+                alt={bot.name} 
+                className={`w-24 h-24 rounded-full ${isLocked ? 'filter grayscale' : ''}`}
+            />
+            {isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
+                    <LockIcon className="w-8 h-8 text-white" />
+                </div>
+            )}
+        </div>
+
+        <div className="mt-4 md:mt-0">
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
+                {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
+                    const isFirstTag = index === 0;
+                    const tagClass = !isLocked && isFirstTag
+                        ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+                    
+                    return (
+                        <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
+                            {tag}
+                        </span>
+                    );
+                })}
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
+            <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed">{language === 'de' ? bot.description_de : bot.description}</p>
+        </div>
+      </div>
+    );
+};
 
 const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) => {
   const { t, language } = useLocalization();
@@ -80,61 +138,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
   const availableBots = bots.filter(b => b.isAvailable);
   const lockedBots = bots.filter(b => !b.isAvailable);
   
-  // FIX: Switched from an inline type to a dedicated interface for component props to resolve TypeScript error with the `key` prop in lists.
-  interface BotCardProps {
-    bot: BotWithAvailability;
-  }
-  
-  const BotCard = ({ bot }: BotCardProps) => {
-      const isLocked = !bot.isAvailable;
-      return (
-        <div
-          onClick={() => !isLocked && onSelect(bot)}
-          className={`
-              flex flex-col md:flex-row items-center md:items-start text-center md:text-left 
-              gap-4 md:gap-6 bg-white dark:bg-transparent p-6 border transition-all duration-200
-              ${isLocked
-                ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-900/50 opacity-60 border-gray-200 dark:border-gray-800'
-                : 'cursor-pointer hover:border-green-500 dark:hover:border-green-400 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-gray-200 dark:border-gray-700'
-              }
-          `}
-          aria-disabled={isLocked}
-        >
-          <div className="relative flex-shrink-0">
-              <img 
-                  src={bot.avatar} 
-                  alt={bot.name} 
-                  className={`w-24 h-24 rounded-full ${isLocked ? 'filter grayscale' : ''}`}
-              />
-              {isLocked && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
-                      <LockIcon className="w-8 h-8 text-white" />
-                  </div>
-              )}
-          </div>
-
-          <div className="mt-4 md:mt-0">
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
-                  {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
-                      const isFirstTag = index === 0;
-                      const tagClass = !isLocked && isFirstTag
-                          ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
-                      
-                      return (
-                          <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
-                              {tag}
-                          </span>
-                      );
-                  })}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
-              <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed">{language === 'de' ? bot.description_de : bot.description}</p>
-          </div>
-        </div>
-      );
-  };
-
   return (
     <div className="flex flex-col items-center justify-center py-10">
       <div className="text-center mb-8">
@@ -145,7 +148,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-        {availableBots.map((bot) => <BotCard key={bot.id} bot={bot} />)}
+        {availableBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
         
         {lockedBots.length > 0 && unlockMessage && (
             <div className="md:col-span-2">
@@ -155,7 +158,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
             </div>
         )}
 
-        {lockedBots.map((bot) => <BotCard key={bot.id} bot={bot} />)}
+        {lockedBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
       </div>
     </div>
   );
