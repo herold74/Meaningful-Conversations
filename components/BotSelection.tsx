@@ -80,7 +80,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
   const availableBots = bots.filter(b => b.isAvailable);
   const lockedBots = bots.filter(b => !b.isAvailable);
   
-  const BotCard = ({ bot }: { bot: BotWithAvailability }) => {
+  // FIX: Switched from an inline type to a dedicated interface for component props to resolve TypeScript error with the `key` prop in lists.
+  interface BotCardProps {
+    bot: BotWithAvailability;
+  }
+  
+  const BotCard = ({ bot }: BotCardProps) => {
       const isLocked = !bot.isAvailable;
       return (
         <div

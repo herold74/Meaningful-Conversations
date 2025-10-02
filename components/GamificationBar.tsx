@@ -84,6 +84,9 @@ const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, cu
                     </div>
                     <span className="text-xs font-mono text-gray-500 dark:text-gray-400">{currentLevelXp}/{xpForNextLevel} XP</span>
                 </div>
+                <div className="md:hidden text-xs font-mono text-gray-500 dark:text-gray-400">
+                    <span>{currentLevelXp}/{xpForNextLevel} XP</span>
+                </div>
                 <button 
                     onClick={onViewAchievements} 
                     className="p-2 text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
