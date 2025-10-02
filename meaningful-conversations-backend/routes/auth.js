@@ -28,7 +28,10 @@ const sendAuthResponse = (res, user, statusCode = 200) => {
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    
+    email = email ? email.trim().toLowerCase() : '';
+    password = password ? password.trim() : '';
 
     if (!email || !password || password.length < 6) {
         return res.status(400).json({ error: 'Please provide a valid email and a password of at least 6 characters.' });
@@ -74,7 +77,10 @@ router.post('/register', async (req, res) => {
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    email = email ? email.trim().toLowerCase() : '';
+    password = password ? password.trim() : '';
 
     if (!email || !password) {
         return res.status(400).json({ error: 'Please provide both email and password.' });
@@ -116,17 +122,17 @@ router.post('/forgot-password', async (req, res) => {
     try {
         // We find the user to ensure the request is for a real account,
         // but we don't leak whether the user exists or not for security.
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
 
         if (user) {
             await prisma.ticket.create({
                 data: {
                     type: 'PASSWORD_RESET',
                     status: 'OPEN',
-                    payload: { email }
+                    payload: { email: user.email }
                 }
             });
-             console.log(`Password reset ticket created for: ${email}`);
+             console.log(`Password reset ticket created for: ${user.email}`);
         } else {
             console.log(`Password reset requested for non-existent email: ${email}`);
         }

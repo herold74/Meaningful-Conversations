@@ -23,24 +23,29 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 6) {
+
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (trimmedPassword.length < 6) {
       setError({ type: 'password', message: t('register_error_short_password') });
       return;
     }
-    if (password !== confirmPassword) {
+    if (trimmedPassword !== trimmedConfirmPassword) {
       setError({ type: 'password', message: t('register_error_mismatch') });
       return;
     }
     setIsLoading(true);
     try {
-      const { user } = await userService.register(email, password);
+      const { user } = await userService.register(trimmedEmail, trimmedPassword);
       
       if (!user.encryptionSalt) {
             throw new Error("Encryption salt was not created for the new user.");
       }
       
       const saltBytes = hexToUint8Array(user.encryptionSalt);
-      const key = await deriveKey(password, saltBytes);
+      const key = await deriveKey(trimmedPassword, saltBytes);
 
       onRegisterSuccess(user, key);
 
@@ -78,6 +83,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'email' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'email'}
               aria-describedby={error?.type === 'email' ? 'email-error' : undefined}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
             {error?.type === 'email' && <p id="email-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
           </div>
@@ -93,6 +101,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
            <div>
@@ -107,6 +118,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
               className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
             {error?.type === 'password' && <p id="password-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
           </div>

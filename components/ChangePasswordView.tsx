@@ -28,11 +28,15 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
     setError('');
     setSuccess(false);
 
-    if (newPassword.length < 6) {
+    const trimmedOldPassword = oldPassword.trim();
+    const trimmedNewPassword = newPassword.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+
+    if (trimmedNewPassword.length < 6) {
       setError(t('changePassword_error_short'));
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (trimmedNewPassword !== trimmedConfirmPassword) {
       setError(t('changePassword_error_mismatch'));
       return;
     }
@@ -44,10 +48,10 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
         }
         // Re-encrypt the life context with a key derived from the new password
         const saltBytes = hexToUint8Array(currentUser.encryptionSalt);
-        const newKey = await deriveKey(newPassword, saltBytes);
+        const newKey = await deriveKey(trimmedNewPassword, saltBytes);
         const newEncryptedLifeContext = await encryptData(newKey, lifeContext);
 
-        await userService.changePassword(oldPassword, newPassword, newEncryptedLifeContext);
+        await userService.changePassword(trimmedOldPassword, trimmedNewPassword, newEncryptedLifeContext);
         
         setSuccess(true);
         // On success, we must log the user out because their in-memory key is now invalid.
@@ -98,6 +102,9 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
                 required
                 disabled={isLoading}
                 className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 />
             </div>
             <div>
@@ -110,6 +117,9 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
                 required
                 disabled={isLoading}
                 className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 />
             </div>
              <div>
@@ -122,6 +132,9 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
                 required
                 disabled={isLoading}
                 className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 />
             </div>
 

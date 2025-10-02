@@ -27,7 +27,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
     setError('');
     setIsLoading(true);
     try {
-        const { user, token } = await userService.login(email, password);
+        const trimmedPassword = password.trim();
+        const trimmedEmail = email.trim().toLowerCase();
+        const { user, token } = await userService.login(trimmedEmail, trimmedPassword);
         
         if (!user.encryptionSalt) {
             throw new Error("Encryption salt is missing for this user.");
@@ -36,7 +38,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
         // The salt is hex-encoded on the backend, decode it to a byte array for the Web Crypto API
         const saltBytes = hexToUint8Array(user.encryptionSalt);
         
-        const key = await deriveKey(password, saltBytes);
+        const key = await deriveKey(trimmedPassword, saltBytes);
         
         onLoginSuccess(user, key);
 
@@ -75,6 +77,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
               required
               disabled={isLoading}
               className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
           <div>
@@ -92,6 +97,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
               required
               disabled={isLoading}
               className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
 

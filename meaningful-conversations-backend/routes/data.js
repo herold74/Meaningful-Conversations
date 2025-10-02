@@ -88,7 +88,10 @@ router.delete('/user', async (req, res) => {
 
 // PUT /api/data/user/password - Change user's password
 router.put('/user/password', async (req, res) => {
-    const { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
+    let { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
+
+    oldPassword = oldPassword ? oldPassword.trim() : '';
+    newPassword = newPassword ? newPassword.trim() : '';
 
     if (!oldPassword || !newPassword || newPassword.length < 6 || typeof newEncryptedLifeContext !== 'string') {
         return res.status(400).json({ error: 'Invalid input. Please provide current password, a new password of at least 6 characters, and the re-encrypted context.' });
@@ -97,13 +100,11 @@ router.put('/user/password', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { id: req.userId } });
 
-        const normalizedOldPassword = oldPassword.normalize('NFC');
-        if (!user || !(await bcrypt.compare(normalizedOldPassword, user.passwordHash))) {
+        if (!user || !(await bcrypt.compare(oldPassword, user.passwordHash))) {
             return res.status(401).json({ error: "Incorrect current password." });
         }
 
-        const normalizedNewPassword = newPassword.normalize('NFC');
-        const newPasswordHash = await bcrypt.hash(normalizedNewPassword, 10);
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
         await prisma.user.update({
             where: { id: req.userId },
