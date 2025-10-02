@@ -19,12 +19,10 @@ export const hexToUint8Array = (hexString: string): Uint8Array => {
 // This version uses a two-step deriveBits -> importKey process for better browser compatibility, especially with Safari.
 export const deriveKey = async (password: string, salt: Uint8Array): Promise<CryptoKey> => {
     const enc = new TextEncoder();
-    // Explicitly normalize the password to NFC to ensure cross-browser consistency.
-    const normalizedPassword = password.normalize('NFC');
 
     const keyMaterial = await window.crypto.subtle.importKey(
         'raw',
-        enc.encode(normalizedPassword),
+        enc.encode(password),
         { name: 'PBKDF2' },
         false,
         ['deriveBits'] // Use 'deriveBits' for the two-step process

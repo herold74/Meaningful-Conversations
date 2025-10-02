@@ -17,14 +17,15 @@ export const loadUserData = async (key: CryptoKey): Promise<DecryptedUserData> =
     const data: EncryptedUserData = await apiFetch('/data/user');
     
     let decryptedContext = '';
+    // If there's context to decrypt, wrap it in a try...catch
     if (data.context) {
         try {
             decryptedContext = await decryptData(key, data.context);
         } catch (error) {
-            console.error("Failed to decrypt life context:", error);
-            // In a real app, you might want to inform the user that their data is corrupt
-            // and offer recovery options (like starting over).
-            // For now, we'll return an empty context to prevent the app from crashing.
+            console.error("Fatal: Failed to decrypt life context. This likely means the password was incorrect or data is corrupt.", error);
+            // Re-throw to prevent the user from continuing with a blank context.
+            // This will be caught by the UI and trigger a logout/error message.
+            throw error;
         }
     }
 
