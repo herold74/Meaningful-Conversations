@@ -14,18 +14,25 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
   const { t } = useLocalization();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
+    setError('');
     try {
       await userService.requestPasswordReset(email);
       setStatus('success');
-    } catch (err) {
-      // In a real app, you might log this error to a monitoring service.
+    } catch (err: any) {
       console.error("Password reset request failed:", err);
-      // For the user, we show a generic success message for security reasons.
-      setStatus('success');
+      // Differentiate network errors from other API errors
+      if (err instanceof TypeError) {
+          setStatus('error');
+          setError(t('error_network_detailed'));
+      } else {
+        // For security on other errors (like 404), still show success to prevent email enumeration.
+        setStatus('success');
+      }
     }
   };
   
@@ -63,6 +70,8 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
               className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
             />
           </div>
+
+          {status === 'error' && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
           
           <button
             type="submit"

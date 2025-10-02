@@ -42,8 +42,15 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
         
         onLoginSuccess(user, key);
 
-    } catch (err) {
-        setError(t('login_error_credentials'));
+    } catch (err: any) {
+        console.error("Login failed:", err);
+        if (err.status === 401) {
+            setError(t('login_error_credentials'));
+        } else if (err instanceof TypeError) { // Catches network errors like "Failed to fetch", "Load failed", CORS issues, etc.
+            setError(t('error_network_detailed'));
+        } else {
+            setError(err.message || 'An unknown error occurred. Please try again.');
+        }
     } finally {
         setIsLoading(false);
     }
@@ -103,7 +110,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
           
           <button
             type="submit"

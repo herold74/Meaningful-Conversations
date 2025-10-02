@@ -31,8 +31,12 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
         try {
             await userService.deleteAccount();
             onDeleteSuccess();
-        } catch (err) {
-            setError(t('deleteAccount_error_api'));
+        } catch (err: any) {
+            if (err instanceof TypeError) {
+                setError(t('error_network_detailed'));
+            } else {
+                setError(err.message || t('deleteAccount_error_api'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +76,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                         className="mt-1 w-full p-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
 
-                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                    {error && <p className="text-red-500 text-sm mt-1 whitespace-pre-wrap">{error}</p>}
                 </div>
 
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">

@@ -396,5 +396,7 @@
 
   "blockageScore_title": "Solution Blockage Score",
   "blockageScore_subtitle": "This score indicates the potential presence of recurring thought patterns that may be hindering progress. A lower score is better.",
-  "modal_close": "Close"
+  "modal_close": "Close",
+
+  "error_network_detailed": "Network Connection Failed. Please open the browser's developer console (Right-click > Inspect > Console) to view detailed connection diagnostics. The most common issues are:\n1. The backend server is not running.\n2. Port 3001 is not forwarded correctly in AI Studio."
 }

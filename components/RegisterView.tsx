@@ -50,11 +50,14 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
       onRegisterSuccess(user, key);
 
     } catch (err: any) {
-      if (err.status === 409) {
-          setError({ type: 'email', message: t('register_error_exists') });
-      } else {
-          setError({ type: 'general', message: err.message || "An unknown error occurred." });
-      }
+        console.error("Registration failed:", err);
+        if (err.status === 409) {
+            setError({ type: 'email', message: t('register_error_exists') });
+        } else if (err instanceof TypeError) { // Catches network errors
+            setError({ type: 'general', message: t('error_network_detailed') });
+        } else {
+            setError({ type: 'general', message: err.message || "An unknown error occurred." });
+        }
     } finally {
         setIsLoading(false);
     }
@@ -125,7 +128,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
             {error?.type === 'password' && <p id="password-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
           </div>
 
-          {error?.type === 'general' && <p className="text-red-500 text-sm">{error.message}</p>}
+          {error?.type === 'general' && <p className="text-red-500 text-sm whitespace-pre-wrap">{error.message}</p>}
           
           <button
             type="submit"

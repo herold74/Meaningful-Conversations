@@ -64,8 +64,10 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
     } catch (err: any) {
         if (err.status === 401) {
              setError(t('changePassword_error_incorrect'));
+        } else if (err instanceof TypeError) {
+            setError(t('error_network_detailed'));
         } else {
-            setError(t('changePassword_error_generic'));
+            setError(err.message || t('changePassword_error_generic'));
         }
     } finally {
         setIsLoading(false);
@@ -138,7 +140,7 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
                 />
             </div>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
             
             <button
                 type="submit"
