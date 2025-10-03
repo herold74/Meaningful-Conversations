@@ -71,8 +71,8 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     )}
 
                     <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => handleNavigate('userGuide')} />
-                    <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => handleNavigate('faq')} />
+                    <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
                     <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
                     
                     {currentUser?.isAdmin && (
