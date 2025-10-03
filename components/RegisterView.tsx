@@ -53,8 +53,6 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
         console.error("Registration failed:", err);
         if (err.status === 409) {
             setError({ type: 'email', message: t('register_error_exists') });
-        } else if (err instanceof TypeError) { // Catches network errors
-            setError({ type: 'general', message: t('error_network_detailed') });
         } else {
             setError({ type: 'general', message: err.message || "An unknown error occurred." });
         }

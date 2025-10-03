@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
-import { BOTS } from '../constants';
+import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
 import Spinner from './shared/Spinner';
 
@@ -74,44 +74,49 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const determineAvailableBots = async () => {
+    const fetchAndSetBots = async () => {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate API call latency
+      try {
+        const fetchedBots: Bot[] = await getBots();
 
-      let userAccessLevel: BotAccessTier = 'guest';
-      const unlockedCoaches = currentUser?.unlockedCoaches || [];
-      
-      if (currentUser) {
-        if (currentUser.isBetaTester) {
-            userAccessLevel = 'premium';
-        } else {
-            userAccessLevel = 'registered';
-        }
-      }
-
-      const accessHierarchy: Record<BotAccessTier, number> = {
-        guest: 0,
-        registered: 1,
-        premium: 2
-      };
-
-      const availableBots: BotWithAvailability[] = BOTS.map(bot => {
-        const requiredLevel = accessHierarchy[bot.accessTier];
-        const userLevel = accessHierarchy[userAccessLevel];
-        const isTierAvailable = userLevel >= requiredLevel;
-        const isIndividuallyUnlocked = unlockedCoaches.includes(bot.id);
+        let userAccessLevel: BotAccessTier = 'guest';
+        const unlockedCoaches = currentUser?.unlockedCoaches || [];
         
-        return {
-          ...bot,
-          isAvailable: isTierAvailable || isIndividuallyUnlocked
-        };
-      });
+        if (currentUser) {
+          if (currentUser.isBetaTester) {
+              userAccessLevel = 'premium';
+          } else {
+              userAccessLevel = 'registered';
+          }
+        }
 
-      setBots(availableBots);
-      setIsLoading(false);
+        const accessHierarchy: Record<BotAccessTier, number> = {
+          guest: 0,
+          registered: 1,
+          premium: 2
+        };
+
+        const availableBots: BotWithAvailability[] = fetchedBots.map(bot => {
+          const requiredLevel = accessHierarchy[bot.accessTier];
+          const userLevel = accessHierarchy[userAccessLevel];
+          const isTierAvailable = userLevel >= requiredLevel;
+          const isIndividuallyUnlocked = unlockedCoaches.includes(bot.id);
+          
+          return {
+            ...bot,
+            isAvailable: isTierAvailable || isIndividuallyUnlocked
+          };
+        });
+        setBots(availableBots);
+      } catch (error) {
+          console.error("Failed to fetch bots:", error);
+          // TODO: Show an error message to the user
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    determineAvailableBots();
+    fetchAndSetBots();
   }, [currentUser]);
 
   if (isLoading) {

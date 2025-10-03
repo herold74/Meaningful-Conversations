@@ -4,7 +4,7 @@ import { apiFetch } from './api';
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
 
 export const sendMessage = async (
-    bot: Bot,
+    botId: string,
     context: string,
     history: Message[], // This is newHistory from ChatView: [bot_welcome, user1, ..., userN]
     lang: Language
@@ -14,7 +14,7 @@ export const sendMessage = async (
 
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ bot, context, history: historyForApi, lang }),
+        body: JSON.stringify({ botId, context, history: historyForApi, lang }),
     });
 };
 

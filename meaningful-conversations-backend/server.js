@@ -3,11 +3,12 @@ const cors = require('cors');
 require('dotenv').config();
 
 // Import route handlers
-const authRoutes = require('./routes/auth');
-const dataRoutes = require('./routes/data');
-const geminiRoutes = require('./routes/gemini');
-const adminRoutes = require('./routes/admin');
-const feedbackRoutes = require('./routes/feedback');
+const authRoutes = require('./routes/auth.js');
+const dataRoutes = require('./routes/data.js');
+const geminiRoutes = require('./routes/gemini.js');
+const adminRoutes = require('./routes/admin.js');
+const feedbackRoutes = require('./routes/feedback.js');
+const botRoutes = require('./routes/bots.js');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/data', dataRoutes);
 app.use('/api/gemini', geminiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/bots', botRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

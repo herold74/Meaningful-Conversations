@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ProposedUpdate, Bot, GamificationState, SolutionBlockage, User } from '../types';
 import { DownloadIcon } from './icons/DownloadIcon';
 import DiffViewer from './DiffViewer';
@@ -151,15 +151,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
 
-    const handleFeedbackSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const submitRating = useCallback(async (ratingToSubmit: number, comments: string) => {
+        if (feedbackStatus === 'submitting' || feedbackStatus === 'submitted') return;
+
         setFeedbackStatus('submitting');
+
         try {
             await userService.submitFeedback({
-                rating,
-                comments: feedbackText,
+                rating: ratingToSubmit,
+                comments,
                 botId: selectedBot.id,
-                isAnonymous: !currentUser, // Guests are always anonymous. Logged in users are not.
+                isAnonymous: !currentUser,
             });
             setFeedbackStatus('submitted');
         } catch (err) {
@@ -167,6 +169,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             alert('Failed to submit feedback. Please try again.');
             setFeedbackStatus('idle');
         }
+    }, [feedbackStatus, selectedBot.id, currentUser]);
+
+    const handleFeedbackSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        submitRating(rating, feedbackText);
     };
 
     const existingHeadlines = useMemo(() => {
@@ -355,11 +362,12 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {[1, 2, 3, 4, 5].map((star) => (
                             <button
                                 key={star}
-                                onClick={() => setRating(star)}
+                                onClick={() => feedbackStatus === 'idle' && setRating(star)}
                                 onMouseEnter={() => setHoverRating(star)}
                                 onMouseLeave={() => setHoverRating(0)}
-                                className="focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-yellow-400 rounded-full"
+                                className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}
                                 aria-label={`Rate ${star} out of 5 stars`}
+                                disabled={feedbackStatus !== 'idle'}
                             >
                                 <StarIcon 
                                     className={`w-10 h-10 transition-colors ${
@@ -373,20 +381,23 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         ))}
                     </div>
 
-                    {rating > 0 && rating <= 3 && feedbackStatus !== 'submitted' && (
+                    {rating > 0 && feedbackStatus !== 'submitted' && (
                         <form onSubmit={handleFeedbackSubmit} className="space-y-3 animate-fadeIn max-w-lg mx-auto">
-                            <label htmlFor="feedback" className="font-semibold text-gray-700 dark:text-gray-300">{t('sessionReview_feedback_prompt')}</label>
+                            <label htmlFor="feedback" className="font-semibold text-gray-700 dark:text-gray-300">
+                                {rating <= 3 ? t('sessionReview_feedback_prompt') : t('sessionReview_feedback_prompt_optional')}
+                            </label>
                             <textarea
                                 id="feedback"
                                 rows={3}
                                 value={feedbackText}
                                 onChange={(e) => setFeedbackText(e.target.value)}
-                                placeholder={t('sessionReview_feedback_placeholder')}
+                                placeholder={rating <= 3 ? t('sessionReview_feedback_placeholder') : t('sessionReview_feedback_placeholder_optional')}
                                 className="w-full p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                required={rating <= 3}
                             />
                             <button
                                 type="submit"
-                                disabled={!feedbackText.trim() || feedbackStatus === 'submitting'}
+                                disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
                                 className="w-full px-4 py-2 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 disabled:bg-gray-300 dark:disabled:bg-gray-700"
                             >
                                 {feedbackStatus === 'submitting' ? <Spinner /> : t('sessionReview_feedback_submit')}

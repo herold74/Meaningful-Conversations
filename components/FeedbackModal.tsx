@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Message } from '../types';
+import { Message, User } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { XIcon } from './icons/XIcon';
 import Spinner from './shared/Spinner';
@@ -11,9 +11,10 @@ interface FeedbackModalProps {
     onSubmit: (feedback: { comments: string; isAnonymous: boolean; email?: string }) => Promise<void>;
     lastUserMessage: Message | null;
     botMessage: Message | null;
+    currentUser: User | null;
 }
 
-const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit, lastUserMessage, botMessage }) => {
+const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit, lastUserMessage, botMessage, currentUser }) => {
     const { t } = useLocalization();
     const [comments, setComments] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(true);
@@ -24,11 +25,16 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
         if (isOpen) {
             // Reset state when modal opens
             setComments('');
-            setIsAnonymous(true);
-            setEmail('');
             setSubmissionStatus('idle');
+            if (currentUser) {
+                setIsAnonymous(false);
+                setEmail(currentUser.email);
+            } else {
+                setIsAnonymous(true);
+                setEmail('');
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, currentUser]);
 
     if (!isOpen) return null;
 

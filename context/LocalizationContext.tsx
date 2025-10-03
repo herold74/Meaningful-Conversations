@@ -1,118 +1,101 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Language } from '../types';
-import WelcomeScreen from '../components/WelcomeScreen'; // Import a loading component
 
-// Define the shape of the context
 interface LocalizationContextType {
     language: Language;
     setLanguage: (language: Language) => void;
     t: (key: string, replacements?: Record<string, string | number>) => string;
 }
 
-// Create the context with a default value
 const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined);
 
-// Define the provider component
 export const LocalizationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [language, setLanguageState] = useState<Language>(() => {
-        if (typeof localStorage === 'undefined') return 'en';
-        const savedLang = localStorage.getItem('language');
-        return (savedLang === 'de' || savedLang === 'en') ? savedLang : 'en';
+    const [language, setLanguage] = useState<Language>(() => {
+        const savedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('language') : null;
+        const browserLang: Language = (typeof navigator !== 'undefined' && navigator.language.startsWith('de')) ? 'de' : 'en';
+        return (savedLang === 'de' || savedLang === 'en') ? savedLang : browserLang;
     });
-    
-    const [translations, setTranslations] = useState<Record<string, string> | null>(null);
-    const [fallback, setFallback] = useState<Record<string, string> | null>(null);
+
+    const [translations, setTranslations] = useState<Record<string, string>>({});
+    const [fallbackTranslations, setFallbackTranslations] = useState<Record<string, string>>({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchTranslations = async () => {
+        const loadTranslations = async () => {
+            setIsLoading(true);
+            setError(null);
             try {
-                // The paths are absolute from the public root where index.html is served.
-                const enResponse = await fetch('/locales/en.json');
-                const deResponse = await fetch('/locales/de.json');
+                const langResponse = await fetch(`/locales/${language}.json`);
+                if (!langResponse.ok) throw new Error(`Failed to load ${language}.json`);
+                const langData = await langResponse.json();
+                setTranslations(langData);
 
-                if (!enResponse.ok || !deResponse.ok) {
-                    throw new Error('Failed to fetch translation files');
-                }
-
-                const enData = await enResponse.json();
-                const deData = await deResponse.json();
-                
-                setFallback(enData); // Always have English as a fallback
-                if (language === 'en') {
-                    setTranslations(enData);
+                if (language !== 'en') {
+                    const fallbackResponse = await fetch(`/locales/en.json`);
+                     if (!fallbackResponse.ok) throw new Error('Failed to load fallback en.json');
+                    const fallbackData = await fallbackResponse.json();
+                    setFallbackTranslations(fallbackData);
                 } else {
-                    setTranslations(deData);
+                    setFallbackTranslations(langData);
                 }
-            } catch (error) {
-                console.error("Error loading translation files:", error);
-                // Try to load at least English as a fallback
+            } catch (err: any) {
+                console.error("Error loading translation files:", err.message);
+                setError(err.message);
                 try {
-                    const enResponse = await fetch('/locales/en.json');
-                    const enData = await enResponse.json();
-                    setFallback(enData);
-                    setTranslations(enData);
-                } catch (fallbackError) {
-                    console.error("Failed to load even the fallback English translations:", fallbackError);
-                    setTranslations({}); // Prevent infinite loading on total failure
-                    setFallback({});
+                    const fallbackResponse = await fetch(`/locales/en.json`);
+                    if (!fallbackResponse.ok) {
+                         const errText = `Failed to load even the fallback English translations: ${fallbackResponse.statusText}`;
+                         console.error(errText);
+                         throw new Error(errText);
+                    }
+                    const fallbackData = await fallbackResponse.json();
+                    setTranslations(fallbackData);
+                    setFallbackTranslations(fallbackData);
+                    setLanguage('en');
+                    setError(null); // Clear error if fallback is successful
+                } catch (fallbackError: any) {
+                    console.error(fallbackError);
+                    const combinedError = `${err.message}\n${fallbackError.message}`;
+                    setError(combinedError);
                 }
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        fetchTranslations();
-    }, []); // Fetch once on mount
-
-    useEffect(() => {
-        // Function to load the new language file when language changes
-        const loadLanguage = async () => {
-            if (!fallback) return; // Don't run if initial fetch failed
-            try {
-                const response = await fetch(`/locales/${language}.json`);
-                if (!response.ok) throw new Error(`Failed to fetch ${language}.json`);
-                const data = await response.json();
-                setTranslations(data);
-            } catch (error) {
-                console.error(`Could not switch to language ${language}:`, error);
-                setTranslations(fallback); // Revert to English on failure
-            }
-        };
-        
-        if (translations) { // Only switch if initial load is complete
-             loadLanguage();
-        }
+        loadTranslations();
         localStorage.setItem('language', language);
+    }, [language]);
 
-    }, [language, fallback]);
-
-    // The translation function
     const t = (key: string, replacements?: Record<string, string | number>): string => {
-        if (!translations) {
-            return key; // Should not happen if loading screen is shown
-        }
-
-        let translation = translations[key] || fallback?.[key] || key;
+        let text = translations[key] || fallbackTranslations[key] || key;
         if (replacements) {
-            Object.keys(replacements).forEach(placeholder => {
-                translation = translation.replace(`{{${placeholder}}}`, String(replacements[placeholder]));
+            Object.entries(replacements).forEach(([placeholder, value]) => {
+                text = text.replace(new RegExp(`{{${placeholder}}}`, 'g'), String(value));
             });
         }
-        return translation;
+        return text;
     };
+
+    if (isLoading) return null;
     
-    // Show a loading screen until the initial translations are ready.
-    // This prevents the app from rendering a blank page (returning null).
-    if (!translations) {
-        return <WelcomeScreen />;
+    if (error) {
+        return (
+            <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'red', textAlign: 'center', background: '#fff1f1' }}>
+                <h1 style={{color: '#c00'}}>Application Error</h1>
+                <pre style={{ whiteSpace: 'pre-wrap', background: '#f9f9f9', border: '1px solid #ddd', padding: '10px' }}>{error}</pre>
+            </div>
+        );
     }
 
     return (
-        <LocalizationContext.Provider value={{ language, setLanguage: setLanguageState, t }}>
+        <LocalizationContext.Provider value={{ language, setLanguage, t }}>
             {children}
         </LocalizationContext.Provider>
     );
 };
 
-// Custom hook to use the localization context
 export const useLocalization = (): LocalizationContextType => {
     const context = useContext(LocalizationContext);
     if (context === undefined) {

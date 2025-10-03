@@ -39,30 +39,6 @@ This approach provides flexibility, allowing users to choose between the conveni
 
 ---
 
-### Troubleshooting Local Development: The "Load Failed" Error
-
-If you see a "Load Failed" or "Network Error" when trying to log in or register, it's a connection issue between the AI Studio frontend and your local backend. Follow this checklist to resolve it:
-
-**1. Is Your Backend Server Running?**
-
-*   Open a terminal, navigate to the `meaningful-conversations-backend` directory.
-*   Run the command `npm start`.
-*   You **must** see the message `Server running on port 3001`.
-*   **Leave this terminal running** while you use the application.
-
-**2. Is Port 3001 Forwarded Correctly?**
-
-*   In AI Studio, ensure you have correctly forwarded port `3001`. The application's code depends on this specific port to find the server.
-
-**3. Check the Browser Console**
-
-*   If the steps above are correct, open your browser's developer console (Right-click > Inspect > Console).
-*   Try to log in again. The console will print the exact backend URL it is trying to connect to (e.g., `Fetching from: https://3001-...aistudio.google.com/api/...`). This can help diagnose URL construction issues.
-
-The app is designed to **automatically detect and use the correct secure URL** when these steps are followed. The error message in the UI will also guide you through this checklist.
-
----
-
 ## Next Steps: Building a Production Backend with MySQL
 
 The current `userService.ts` is a clever simulation using `localStorage`. To move this to a production-ready application, you need a secure backend server. This guide outlines how to build one using a modern stack centered around MySQL.
@@ -120,7 +96,7 @@ npx prisma init --datasource-provider mysql
     DATABASE_URL="mysql://<user>:<password>@<host>:<port>/<database_name>"
     ```
 
-2.  **Define Your Data Models**: In the `prisma/schema.prisma` file, define your `User` and `UpgradeCode` models. The `datasource` provider should be set to `mysql`.
+2.  **Define Your Data Models**: In the `prisma/schema.prisma` file, define your models. The `datasource` provider should be set to `mysql`.
 
     ```prisma
     // prisma/schema.prisma
@@ -139,25 +115,53 @@ npx prisma init --datasource-provider mysql
       passwordHash      String
       isBetaTester      Boolean   @default(false)
       isAdmin           Boolean   @default(false)
+      unlockedCoaches   String?   @db.Text // JSON array of bot IDs
+      encryptionSalt    String?
       lifeContext       String?   @db.Text
-      gamificationState String    @db.Text
+      gamificationState String?   @db.Text
+      loginCount        Int       @default(0)
+      lastLogin         DateTime?
       createdAt         DateTime  @default(now())
       updatedAt         DateTime  @updatedAt
 
       redeemedCodes     UpgradeCode[]
+      feedbacks         Feedback[]
     }
 
     model UpgradeCode {
       id        String   @id @default(cuid())
       code      String   @unique
+      botId     String
       isUsed    Boolean  @default(false)
       createdAt DateTime @default(now())
 
       usedById  String?
       usedBy    User?    @relation(fields: [usedById], references: [id])
     }
+
+    model Ticket {
+      id        String   @id @default(cuid())
+      type      String   // e.g., 'PASSWORD_RESET'
+      status    String   @default("OPEN") // 'OPEN', 'RESOLVED'
+      payload   Json     // e.g., { "email": "user@example.com" }
+      createdAt DateTime @default(now())
+    }
+
+    model Feedback {
+      id              String    @id @default(cuid())
+      rating          Int?
+      comments        String    @db.Text
+      botId           String
+      lastUserMessage String?   @db.Text
+      botResponse     String?   @db.Text
+      isAnonymous     Boolean   @default(false)
+      createdAt       DateTime  @default(now())
+
+      userId String?
+      user   User?   @relation(fields: [userId], references: [id])
+    }
     ```
-    *Note: We use `@db.Text` to ensure the `lifeContext` and `gamificationState` fields can store long strings without truncation.*
+    *Note: We use `@db.Text` to ensure certain fields can store long strings without truncation.*
 
 3.  **Run the Migration**: Execute the following command to create a SQL migration file and apply the schema to your MySQL database. Prisma generates the SQL for you.
     ```bash

@@ -64,8 +64,6 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
     } catch (err: any) {
         if (err.status === 401) {
              setError(t('changePassword_error_incorrect'));
-        } else if (err instanceof TypeError) {
-            setError(t('error_network_detailed'));
         } else {
             setError(err.message || t('changePassword_error_generic'));
         }

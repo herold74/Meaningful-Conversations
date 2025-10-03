@@ -27,16 +27,17 @@ const getApiBaseUrl = (): string => {
     // If the app is not being accessed from localhost, it's a remote environment (like AI Studio).
     // Construct the backend URL by prepending the port. This is crucial for mobile device access.
     const hostname = window.location.hostname;
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    // A truthy hostname that is not a local address indicates a remote environment.
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
         const backendHostname = `3001-${hostname}`;
         const constructedUrl = `https://${backendHostname}`;
         console.log(`Detected remote environment ('${hostname}'). Constructed backend URL: ${constructedUrl}`);
         return constructedUrl;
     }
 
-    // Priority 3: Fallback for standard local development only.
+    // Priority 3: Fallback for standard local development or when hostname is invalid.
     const defaultUrl = 'http://localhost:3001';
-    console.log(`Detected localhost. Defaulting to local development URL: ${defaultUrl}`);
+    console.log(`Detected localhost or invalid hostname. Defaulting to local development URL: ${defaultUrl}`);
     return defaultUrl;
 };
 
@@ -100,26 +101,15 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     let response;
     try {
         response = await fetch(finalUrl, config);
-    } catch (error) {
-        // This block catches total network failures (CORS, DNS, "Load Failed")
-        if (error instanceof TypeError) {
-            console.error("--- NETWORK ERROR DIAGNOSTICS ---");
-            console.error("Timestamp:", new Date().toISOString());
-            console.error("A network error occurred while trying to fetch. This is often a CORS issue, a DNS problem, or a failure to connect to the server.");
-            console.error("1. Window Hostname:", window.location.hostname);
-            
-            if (typeof AISTUDIO_BACKEND_URL !== 'undefined') {
-                console.error("2. AISTUDIO_BACKEND_URL (Global Var):", AISTUDIO_BACKEND_URL);
-            } else {
-                console.error("2. AISTUDIO_BACKEND_URL (Global Var): Not defined.");
-            }
-
-            console.error("3. Detected API Base URL:", API_BASE_URL);
-            console.error("4. Final URL for Fetch:", finalUrl);
-            console.error("5. Full Error Object:", error);
-            console.error("--- END DIAGNOSTICS ---");
+    } catch (error: any) {
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+            const customError = new Error(`Could not connect to the server at ${API_BASE_URL}.`);
+            // Add custom properties to the error for the UI to use
+            (customError as any).isNetworkError = true;
+            (customError as any).backendUrl = API_BASE_URL;
+            throw customError;
         }
-        // Re-throw the original error to be handled by the UI component
+        // Re-throw other types of fetch errors (e.g., CORS issues that aren't TypeErrors)
         throw error;
     }
 

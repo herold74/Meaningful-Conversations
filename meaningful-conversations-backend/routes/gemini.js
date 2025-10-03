@@ -1,7 +1,8 @@
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai');
-const authMiddleware = require('../middleware/auth');
-const { analysisPrompts, contextResponseSchema, blockageAnalysisPrompts, blockageResponseSchema } = require('../services/geminiPrompts');
+const authMiddleware = require('../middleware/auth.js');
+const { analysisPrompts, contextResponseSchema, blockageAnalysisPrompts, blockageResponseSchema } = require('../services/geminiPrompts.js');
+const { BOTS } = require('../constants.js');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -10,10 +11,15 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', async (req, res) => {
-    const { bot, context, history: historyForApi, lang } = req.body;
+    const { botId, context, history: historyForApi, lang } = req.body;
+
+    const bot = BOTS.find(b => b.id === botId);
 
     if (!bot || !context || !historyForApi) {
-        return res.status(400).json({ error: "Missing bot, context, or history." });
+        const errorMessage = !bot 
+            ? `Bot with id '${botId}' not found on the backend.`
+            : "Missing context or history.";
+        return res.status(400).json({ error: errorMessage });
     }
 
     const botSystemPrompt = lang === 'de' ? bot.systemPrompt_de : bot.systemPrompt;

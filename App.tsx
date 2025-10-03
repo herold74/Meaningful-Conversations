@@ -176,8 +176,8 @@ const App: React.FC = () => {
             const session = api.getSession();
             if (session) {
                 // If a session exists, we don't have the encryption key.
-                // Go directly to the login screen with an explanation.
-                setAuthRedirectReason("Welcome back! For your security, please enter your password to continue.");
+                // Go directly to the login screen.
+                setAuthRedirectReason(null);
                 setView('login');
             } else {
                 // No session, start at the auth screen.
@@ -196,9 +196,14 @@ const App: React.FC = () => {
         setEncryptionKey(key);
         try {
             const data = await userService.loadUserData(key);
-            setLifeContext(data.context || ''); // Already decrypted by userService
+            setLifeContext(data.context || '');
             setGamificationState(deserializeGamificationState(data.gamificationState));
-            setView(data.context ? 'contextChoice' : 'landing');
+
+            if (user.isAdmin) {
+                setView('admin');
+            } else {
+                setView(data.context ? 'contextChoice' : 'landing');
+            }
         } catch (error) {
             console.error("Failed to load user data after login, logging out.", error);
             api.clearSession();
@@ -352,7 +357,7 @@ const App: React.FC = () => {
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
-            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} />;
+            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} />;
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={resetToStart} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} onBack={() => setMenuView(null)} />;
             case 'userGuide': return <UserGuideView onBack={() => setMenuView(null)} />;
@@ -362,7 +367,22 @@ const App: React.FC = () => {
             case 'disclaimer': return <DisclaimerView onBack={() => setMenuView(null)} currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'terms': return <TermsView onBack={() => setMenuView(null)} />;
             case 'redeemCode': return <RedeemCodeView onBack={() => setMenuView(null)} onRedeemSuccess={(user) => { setCurrentUser(user); setMenuView(null); }} />;
-            case 'admin': return <AdminView onBack={() => setMenuView(null)} />;
+            case 'admin': {
+                const handleAdminBack = () => {
+                    if (menuView === 'admin') {
+                        // Opened from the side menu, so just close the menu view overlay.
+                        setMenuView(null);
+                    } else if (view === 'admin') {
+                        // This was the initial view after an admin login. Navigate to the main app.
+                        // We can use the same logic as a regular user's post-login navigation.
+                        setView(lifeContext ? 'contextChoice' : 'landing');
+                    } else {
+                        // Fallback case, which shouldn't be reached.
+                        setMenuView(null);
+                    }
+                };
+                return <AdminView onBack={handleAdminBack} />;
+            }
             case 'changePassword': return <ChangePasswordView onBack={() => setMenuView(null)} currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
             default: return <WelcomeScreen />;
         }
@@ -372,7 +392,7 @@ const App: React.FC = () => {
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view);
 
     return (
-        <div className="bg-gray-50 dark:bg-gray-950 min-h-screen font-sans">
+        <div className={`bg-gray-50 dark:bg-gray-950 font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
                 <GamificationBar 
                     gamificationState={gamificationState}
@@ -384,7 +404,7 @@ const App: React.FC = () => {
                     minimal={minimalBar}
                 />
             )}
-            <main className="container mx-auto px-4">
+            <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
                 {renderView()}
             </main>
             <BurgerMenu 

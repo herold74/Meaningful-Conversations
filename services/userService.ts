@@ -1,5 +1,5 @@
 import { apiFetch, setSession, getSession, clearSession } from './api';
-import { User, UpgradeCode, Ticket } from '../types';
+import { User, UpgradeCode, Ticket, Feedback, Bot } from '../types';
 import { encryptData, decryptData } from '../utils/encryption';
 
 
@@ -109,6 +109,10 @@ export const submitFeedback = async (feedbackData: {
     });
 };
 
+export const getBots = async (): Promise<Bot[]> => {
+    return await apiFetch('/bots');
+};
+
 
 // --- Admin Functions ---
 
@@ -149,4 +153,8 @@ export const getAdminTickets = async (): Promise<Ticket[]> => {
 
 export const resolveTicket = async (ticketId: string): Promise<Ticket> => {
     return await apiFetch(`/admin/tickets/${ticketId}/resolve`, { method: 'PUT' });
+};
+
+export const getAdminFeedback = async (): Promise<Feedback[]> => {
+    return await apiFetch('/admin/feedback');
 };

@@ -49,8 +49,6 @@ export interface Bot {
     style: string;
     style_de: string;
     accessTier: BotAccessTier;
-    systemPrompt: string;
-    systemPrompt_de: string;
 }
 
 export interface BotWithAvailability extends Bot {
@@ -118,4 +116,16 @@ export interface Ticket {
     status: 'OPEN' | 'RESOLVED';
     payload: { email: string };
     createdAt: string;
+}
+
+export interface Feedback {
+    id: string;
+    rating: number | null;
+    comments: string;
+    botId: string;
+    lastUserMessage: string | null;
+    botResponse: string | null;
+    isAnonymous: boolean;
+    createdAt: string;
+    user: { email: string } | null;
 }

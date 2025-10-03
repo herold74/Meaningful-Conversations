@@ -50,6 +50,10 @@ const FAQView: React.FC<InfoViewProps> = ({ onBack }) => {
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{t('faq_q6_q')}</h2>
                     <p className="mt-2 leading-relaxed">{t('faq_q6_a')}</p>
                 </div>
+                <div>
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{t('faq_q7_q')}</h2>
+                    <p className="mt-2 leading-relaxed">{t('faq_q7_a')}</p>
+                </div>
             </div>
         </div>
     );

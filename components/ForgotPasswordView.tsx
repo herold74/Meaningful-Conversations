@@ -25,14 +25,9 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
       setStatus('success');
     } catch (err: any) {
       console.error("Password reset request failed:", err);
-      // Differentiate network errors from other API errors
-      if (err instanceof TypeError) {
-          setStatus('error');
-          setError(t('error_network_detailed'));
-      } else {
-        // For security on other errors (like 404), still show success to prevent email enumeration.
-        setStatus('success');
-      }
+      // For security, always show success to prevent email enumeration.
+      // The error is logged for the developer.
+      setStatus('success');
     }
   };
   

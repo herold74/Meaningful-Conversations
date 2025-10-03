@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, Language } from '../types';
+import { Bot, Message, Language, User } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import Spinner from './shared/Spinner';
@@ -12,16 +12,16 @@ import { SpeakerOffIcon } from './icons/SpeakerOffIcon';
 import { PauseIcon } from './icons/PauseIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { RepeatIcon } from './icons/RepeatIcon';
-import { VoiceModeIcon } from './icons/VoiceModeIcon';
-import { TextModeIcon } from './icons/TextModeIcon';
+import { SoundWaveIcon } from './icons/SoundWaveIcon';
+import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { XIcon } from './icons/XIcon';
 import { LogOutIcon } from './icons/LogOutIcon';
 import { GearIcon } from './icons/GearIcon';
 import VoiceSelectionModal from './VoiceSelectionModal';
 import { useLocalization } from '../context/LocalizationContext';
+import { selectVoice } from '../utils/voiceUtils';
 import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
-import { selectVoice } from '../utils/voiceUtils';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -125,10 +125,11 @@ interface ChatViewProps {
   setChatHistory: React.Dispatch<React.SetStateAction<Message[]>>;
   onEndSession: () => void;
   onMessageSent: () => void;
+  currentUser: User | null;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser }) => {
   const { t, language } = useLocalization();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -136,7 +137,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const baseTranscriptRef = useRef<string>('');
 
   const [isListening, setIsListening] = useState(false);
-  const [isTtsEnabled, setIsTtsEnabled] = useState(true); // Default to on for voice mode
+  const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -150,9 +151,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     return savedURI || null;
   });
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
-  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [reportedBotMessage, setReportedBotMessage] = useState<Message | null>(null);
-  const [lastUserMessageForReport, setLastUserMessageForReport] = useState<Message | null>(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackMessages, setFeedbackMessages] = useState<{ user: Message | null; bot: Message | null }>({ user: null, bot: null });
+
 
   const botGender = useMemo((): 'male' | 'female' => {
       switch (bot.id) {
@@ -334,9 +335,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const historyWithUserMessage = [...chatHistory, userMessage];
     setChatHistory(historyWithUserMessage);
     setIsLoading(true);
+    baseTranscriptRef.current = '';
 
     try {
-        const response = await geminiService.sendMessage(bot, lifeContext, historyWithUserMessage, language);
+        const response = await geminiService.sendMessage(bot.id, lifeContext, historyWithUserMessage, language);
         
         const botMessage: Message = {
             id: `bot-${Date.now()}`,
@@ -402,40 +404,35 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         speak(lastSpokenTextRef.current);
     }
   };
-  
+
   const handleOpenFeedbackModal = (botMessage: Message) => {
     const botMessageIndex = chatHistory.findIndex(msg => msg.id === botMessage.id);
+    let lastUserMessage: Message | null = null;
     if (botMessageIndex > 0) {
-        // Find the last user message before this bot message
-        let userMessage: Message | null = null;
         for (let i = botMessageIndex - 1; i >= 0; i--) {
             if (chatHistory[i].role === 'user') {
-                userMessage = chatHistory[i];
+                lastUserMessage = chatHistory[i];
                 break;
             }
         }
-        setLastUserMessageForReport(userMessage);
-        setReportedBotMessage(botMessage);
-        setFeedbackModalOpen(true);
     }
-  };
+    setFeedbackMessages({ user: lastUserMessage, bot: botMessage });
+    setIsFeedbackModalOpen(true);
+};
 
-  const handleSubmitFeedback = async (feedback: { comments: string; isAnonymous: boolean; email?: string }) => {
-      try {
-          await userService.submitFeedback({
-              comments: feedback.comments,
-              isAnonymous: feedback.isAnonymous,
-              botId: bot.id,
-              lastUserMessage: lastUserMessageForReport?.text || undefined,
-              botResponse: reportedBotMessage?.text || undefined,
-          });
-      } catch (error) {
-          console.error("Failed to submit message feedback:", error);
-          // Re-throw the error so the modal can catch it and display an error message
-          throw error;
-      }
-  };
+const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: boolean; email?: string }) => {
+    if (!feedbackMessages.bot) return;
 
+    await userService.submitFeedback({
+        rating: null, // Message reports don't have a star rating
+        comments: feedback.comments,
+        botId: bot.id,
+        lastUserMessage: feedbackMessages.user?.text || null,
+        botResponse: feedbackMessages.bot.text,
+        isAnonymous: feedback.isAnonymous,
+    });
+};
+  
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
@@ -451,37 +448,52 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0">
                     <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-200 truncate">{bot.name}</h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('chat_viewInfo')}</p>
                 </div>
             </button>
         </div>
 
         {/* Right: Controls */}
         <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
-            <button onClick={() => setIsVoiceMode(p => !p)} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isVoiceMode ? t('chat_switchToText') : t('chat_switchToVoice')}>
-                {isVoiceMode ? <TextModeIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <VoiceModeIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
+            <button 
+                onClick={() => {
+                    setIsVoiceMode(p => {
+                        const newIsVoiceMode = !p;
+                        if (newIsVoiceMode) {
+                            setIsTtsEnabled(true);
+                        }
+                        return newIsVoiceMode;
+                    });
+                }} 
+                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" 
+                aria-label={isVoiceMode ? 'Switch to Text Mode' : 'Switch to Voice Mode'}
+            >
+                {isVoiceMode ? <ChatBubbleIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <SoundWaveIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
             </button>
 
             {!isVoiceMode && (
                 <div className="flex items-center justify-end gap-2 border-l border-gray-200 dark:border-gray-700 pl-2 sm:pl-2 md:pl-4">
-                    {ttsStatus === 'speaking' && (
-                        <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_pauseSpeech')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                    {isTtsEnabled && (
+                        <>
+                            {ttsStatus === 'speaking' && (
+                                <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={'Pause Speech'}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                            )}
+                            {ttsStatus === 'paused' && (
+                                <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={'Resume Speech'}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                            )}
+                            {ttsStatus === 'idle' && (
+                                <button className="p-1 text-gray-300 dark:text-gray-700 cursor-not-allowed" aria-label={'Play/Pause'} disabled><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                            )}
+                            <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={'Repeat'}><RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                        </>
                     )}
-                    {ttsStatus === 'paused' && (
-                        <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_resumeSpeech')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
-                    )}
-                    {ttsStatus === 'idle' && (
-                        <button className="p-1 text-gray-300 dark:text-gray-700 cursor-not-allowed" aria-label={t('chat_playPause')} disabled><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
-                    )}
-                    <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat')}><RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
-                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? t('chat_disableVoice') : t('chat_enableVoice')}>
+                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? 'Disable Voice' : 'Enable Voice'}>
                         {isTtsEnabled ? <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </button>
                     {isTtsEnabled && relevantVoices.length > 0 && (
                         <button
                             onClick={() => setIsVoiceModalOpen(true)}
                             className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                            aria-label={t('chat_voiceSettings')}
+                            aria-label={t('chat_voice_settings')}
                         >
                             <GearIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
@@ -497,12 +509,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                 onClick={onEndSession}
                 className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-green-400 bg-transparent border border-red-600 dark:border-green-400 uppercase hover:bg-red-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black"
             >
-                {t('chat_endSession')}
+                {t('chat_end_session')}
             </button>
             <button
                 onClick={onEndSession}
                 className="md:hidden p-2 text-red-600 dark:text-green-400 rounded-full hover:bg-red-50 dark:hover:bg-green-400/10"
-                aria-label={t('chat_endSession')}
+                aria-label={t('chat_end_session')}
             >
                 <LogOutIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
@@ -523,49 +535,47 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
                         isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
                     } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
-                    aria-label={isListening ? t('chat_stopAndSend') : t('chat_startRecording')}
+                    aria-label={isListening ? 'Stop and send' : 'Start recording'}
                 >
                     {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                 </button>
                 <div className="mt-4 h-14 text-lg text-gray-600 dark:text-gray-400 flex items-center justify-center px-4 w-full max-w-md">
-                    <p>{input || (isListening ? t('chat_listening') : t('chat_tapToSpeak'))}</p>
+                    <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
                 </div>
             </div>
 
             <div className="flex items-center justify-center gap-6">
-                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={ttsStatus === 'speaking' ? t('chat_pauseSpeech') : t('chat_resumeSpeech')}>
+                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
                     {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/> : <PlayIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>}
                 </button>
-                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={t('chat_repeat')}>
+                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={'Repeat'}>
                     <RepeatIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>
-                </button>
-                <button onClick={() => setIsTtsEnabled(p => !p)} className="p-4 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={isTtsEnabled ? t('chat_disableVoice') : t('chat_enableVoice')}>
-                    {isTtsEnabled ? <SpeakerOnIcon className="w-8 h-8 text-gray-700 dark:text-gray-200" /> : <SpeakerOffIcon className="w-8 h-8 text-gray-700 dark:text-gray-200" />}
                 </button>
             </div>
         </main>
     ) : (
       <>
         <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6">
-          {chatHistory.map((message) => (
-            <div key={message.id} className={`flex gap-3 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          {chatHistory.map((message, index) => (
+            <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />}
               <div className={`max-w-md p-3 ${message.role === 'user' ? 'bg-green-600 text-white rounded-l-lg rounded-br-lg' : 'prose dark:prose-invert bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 rounded-r-lg rounded-bl-lg'}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
               </div>
-              {message.role === 'bot' && !isLoading && (
-                  <button 
-                      onClick={() => handleOpenFeedbackModal(message)}
-                      className="self-center p-1 text-gray-400 dark:text-gray-500 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-opacity"
-                      aria-label={t('chat_reportIssue')}
-                  >
-                      <FlagIcon className="w-4 h-4" />
-                  </button>
-              )}
+               {message.role === 'bot' && index > 0 && !isLoading && (
+                    <button
+                        onClick={() => handleOpenFeedbackModal(message)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 self-center"
+                        aria-label={t('chat_report_message')}
+                        title={t('chat_report_message')}
+                    >
+                        <FlagIcon className="w-4 h-4" />
+                    </button>
+                )}
             </div>
           ))}
           {isLoading && (
-              <div className="flex gap-3 justify-start">
+              <div className="flex gap-3 justify-start animate-fadeIn">
                   <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />
                   <div className="max-w-md p-3 bg-gray-100 dark:bg-gray-800 rounded-r-lg rounded-bl-lg">
                       <Spinner />
@@ -580,11 +590,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={t('chat_inputPlaceholder')}
+              placeholder={t('chat_placeholder')}
               disabled={isLoading}
               className="flex-1 p-3 bg-gray-100 text-gray-800 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-green-400"
             />
-            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? t('chat_stopAndSend') : t('chat_startRecording')}>
+            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? 'Stop and send' : 'Start recording'}>
                 <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
             </button>
             <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700">
@@ -609,12 +619,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
     />
-    <FeedbackModal
+     <FeedbackModal
         isOpen={isFeedbackModalOpen}
-        onClose={() => setFeedbackModalOpen(false)}
-        onSubmit={handleSubmitFeedback}
-        lastUserMessage={lastUserMessageForReport}
-        botMessage={reportedBotMessage}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        onSubmit={handleFeedbackSubmit}
+        lastUserMessage={feedbackMessages.user}
+        botMessage={feedbackMessages.bot}
+        currentUser={currentUser}
     />
     </div>
   );

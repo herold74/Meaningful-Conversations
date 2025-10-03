@@ -32,11 +32,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
             await userService.deleteAccount();
             onDeleteSuccess();
         } catch (err: any) {
-            if (err instanceof TypeError) {
-                setError(t('error_network_detailed'));
-            } else {
-                setError(err.message || t('deleteAccount_error_api'));
-            }
+            setError(err.message || t('deleteAccount_error_api'));
         } finally {
             setIsLoading(false);
         }

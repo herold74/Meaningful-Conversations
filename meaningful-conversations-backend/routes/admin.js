@@ -2,7 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const authMiddleware = require('../middleware/auth');
+const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -164,6 +164,26 @@ router.put('/tickets/:ticketId/resolve', async (req, res) => {
     } catch (error) {
         console.error("Admin resolve ticket error:", error);
         res.status(500).json({ error: 'Failed to resolve ticket.' });
+    }
+});
+
+// --- Feedback Management ---
+
+// GET /api/admin/feedback
+router.get('/feedback', async (req, res) => {
+    try {
+        const feedback = await prisma.feedback.findMany({
+            include: {
+                user: {
+                    select: { email: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(feedback);
+    } catch (error) {
+        console.error("Admin get feedback error:", error);
+        res.status(500).json({ error: 'Failed to retrieve feedback.' });
     }
 });
 
