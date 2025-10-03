@@ -11,8 +11,25 @@ interface DiffViewerProps {
 const DiffViewer: React.FC<DiffViewerProps> = ({ oldText, newText }) => {
     const diff = useMemo(() => createDiff(oldText, newText), [oldText, newText]);
 
+    // Filter out consecutive empty lines to reduce vertical space.
+    const condensedDiff = useMemo(() => {
+        return diff.reduce((acc, currentLine) => {
+            const isCurrentEmpty = currentLine.value.trim() === '';
+            const lastLine = acc.length > 0 ? acc[acc.length - 1] : null;
+            const isLastEmpty = lastLine ? lastLine.value.trim() === '' : false;
+
+            if (isCurrentEmpty && isLastEmpty) {
+                // Don't add a second consecutive empty line
+                return acc;
+            }
+
+            acc.push(currentLine);
+            return acc;
+        }, [] as DiffResult[]);
+    }, [diff]);
+
     const renderLine = (line: DiffResult, index: number) => {
-        let lineClass = 'flex items-baseline px-4 py-1 font-mono text-sm';
+        let lineClass = 'flex items-baseline px-4 py-1 font-mono text-base';
         let prefix = '  ';
         let lineContent = line.value;
 
@@ -58,7 +75,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ oldText, newText }) => {
 
     return (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
-            {diff.map(renderLine)}
+            {condensedDiff.map(renderLine)}
         </div>
     );
 };

@@ -112,6 +112,11 @@ const buildUpdatedContext = (
     return finalDoc.trim() ? finalDoc + '\n' : '';
 };
 
+const removeGamificationKey = (text: string) => {
+    // Regex to find and remove the key comment, including potential trailing whitespace
+    return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
+};
+
 
 interface SessionReviewProps {
     newFindings: string;
@@ -150,6 +155,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
 
+    const cleanOriginalContext = useMemo(() => removeGamificationKey(originalContext), [originalContext]);
+
     const submitRating = useCallback(async (ratingToSubmit: number, comments: string) => {
         if (feedbackStatus === 'submitting' || feedbackStatus === 'submitted') return;
 
@@ -176,12 +183,12 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     };
 
     const existingHeadlines = useMemo(() => {
-        if (!originalContext) return [];
-        const allHeadlines = originalContext.match(headlineRegex) || [];
+        if (!cleanOriginalContext) return [];
+        const allHeadlines = cleanOriginalContext.match(headlineRegex) || [];
         const headlinesToExclude = ['My Life Context', 'Background'];
         const uniqueHeadlines = [...new Set(allHeadlines.map(h => h.trim()))];
         return uniqueHeadlines.filter(h => !headlinesToExclude.includes(normalizeHeadline(h)));
-    }, [originalContext]);
+    }, [cleanOriginalContext]);
 
     const normalizedToOriginalHeadlineMap = useMemo(() => {
         return new Map(existingHeadlines.map((h): [string, string] => [normalizeHeadline(h), h]));
@@ -267,8 +274,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
 
     const updatedContext = useMemo(() => {
-        return buildUpdatedContext(originalContext, proposedUpdates, appliedUpdates);
-    }, [originalContext, proposedUpdates, appliedUpdates]);
+        return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates);
+    }, [cleanOriginalContext, proposedUpdates, appliedUpdates]);
 
     useEffect(() => {
         setEditableContext(updatedContext);
@@ -520,7 +527,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         <div className="flex items-center gap-2"><span className="w-4 h-4 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-500"></span><span>{t('sessionReview_removed')}</span></div>
                         <div className="flex items-center gap-2"><span className="w-4 h-4 bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-500"></span><span>{t('sessionReview_added')}</span></div>
                     </div>
-                    <DiffViewer oldText={originalContext} newText={updatedContext} />
+                    <DiffViewer oldText={cleanOriginalContext} newText={updatedContext} />
                 </div>
                 
                  <div>
