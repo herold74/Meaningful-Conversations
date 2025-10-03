@@ -120,7 +120,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 name="voice-selection"
                                 checked={selectedURI === null}
                                 onChange={() => setSelectedURI(null)}
-                                className="h-5 w-5 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
+                                className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <div className="ml-3">
                                 <span className="font-semibold text-gray-800 dark:text-gray-200">{t('voiceModal_auto')}</span>
@@ -139,7 +139,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         value={voice.voiceURI}
                                         checked={selectedURI === voice.voiceURI}
                                         onChange={() => setSelectedURI(voice.voiceURI)}
-                                        className="h-5 w-5 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
+                                        className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                                     />
                                     <div className="ml-3 flex-1">
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">{cleanVoiceName(voice.name)}</span>

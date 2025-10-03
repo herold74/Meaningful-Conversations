@@ -3,6 +3,8 @@ import { User } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { UploadIcon } from './icons/UploadIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ContextChoiceViewProps {
   user: User;
@@ -29,9 +31,23 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         
         <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-left">
           <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
-          <pre className="font-mono text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
-            <code>{contextPreview}</code>
-          </pre>
+          <div className="prose prose-sm dark:prose-invert max-w-none max-h-32 overflow-y-auto">
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                    h1: ({node, ...props}) => <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-1" {...props} />,
+                    p: ({node, ...props}) => <p className="text-gray-700 dark:text-gray-400" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold text-gray-800 dark:text-gray-200" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 text-gray-700 dark:text-gray-400" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 text-gray-700 dark:text-gray-400" {...props} />,
+                    li: ({node, ...props}) => <li className="text-gray-700 dark:text-gray-400" {...props} />,
+                    hr: ({node, ...props}) => <hr className="my-6 border-gray-300 dark:border-gray-700" {...props} />,
+                }}
+            >
+                {contextPreview}
+            </ReactMarkdown>
+          </div>
         </div>
 
         <div className="space-y-4 pt-4">

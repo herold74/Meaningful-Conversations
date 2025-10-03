@@ -6,7 +6,6 @@ import * as userService from './services/userService';
 import * as geminiService from './services/geminiService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
-import { simpleCipher } from './utils/simpleGuestCipher';
 import { decryptData } from './utils/encryption';
 
 
@@ -227,22 +226,30 @@ const App: React.FC = () => {
     };
 
     const handleFileUpload = (context: string) => {
-        const dataRegex = /<!-- do not delete: (.*?) -->/;
+        // New regex to find the key "do_not_delete" and handle legacy "gmf-data"
+        const dataRegex = /<!-- (do_not_delete|gmf-data): (.*?) -->/;
         const match = context.match(dataRegex);
-        if (match && match[1]) {
-            let decodedData = '';
-            const payload = match[1];
+
+        let gamificationJson = '{}'; // Default to an empty object string
+        if (match && match[2]) {
             try {
-                // First, attempt to decode as Base64 (for files saved with the `btoa` version)
-                decodedData = atob(payload);
-            } catch (e) {
-                // If atob fails, it's likely not Base64. Assume it's the simple cipher text.
-                decodedData = simpleCipher(payload);
+                // Step 1: Extract the (potentially) obfuscated string
+                const rawData = match[2];
+
+                // Step 2: De-obfuscate by reversing the string before decoding.
+                // This makes the data non-standard and not directly usable by Base64 decoders.
+                const encodedData = rawData.split('').reverse().join('');
+                
+                // Step 3: Decode from Base64
+                gamificationJson = atob(encodedData);
+            } catch (error) {
+                console.error("Failed to decode gamification state from file, using default state.", error);
+                // Fallthrough to use the default state by keeping gamificationJson as '{}'
             }
-            setGamificationState(deserializeGamificationState(decodedData));
-        } else {
-            setGamificationState(DEFAULT_GAMIFICATION_STATE);
         }
+        
+        setGamificationState(deserializeGamificationState(gamificationJson));
+
         setLifeContext(context);
         setView('botSelection');
     };
@@ -279,7 +286,7 @@ const App: React.FC = () => {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, 'en');
             setSessionAnalysis(analysis);
 
-            const awardSessionBonus = (analysis.nextSteps?.length || 0) > 0 && analysis.hasConversationalEnd;
+            const awardSessionBonus = (analysis.nextSteps?.length || 0) > 0;
             const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, awardSessionBonus);
             setNewGamificationState(newState);
 

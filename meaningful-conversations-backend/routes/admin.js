@@ -1,11 +1,10 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Middleware to ensure the user is an admin
 const adminMiddleware = async (req, res, next) => {
@@ -167,6 +166,28 @@ router.put('/tickets/:ticketId/resolve', async (req, res) => {
     }
 });
 
+// DELETE /api/admin/tickets/:ticketId
+router.delete('/tickets/:ticketId', async (req, res) => {
+    try {
+        const ticket = await prisma.ticket.findUnique({ where: { id: req.params.ticketId } });
+
+        if (!ticket) {
+            return res.status(404).json({ error: 'Ticket not found.' });
+        }
+        
+        if (ticket.status !== 'RESOLVED') {
+            return res.status(400).json({ error: 'Only resolved tickets can be deleted.' });
+        }
+
+        await prisma.ticket.delete({ where: { id: req.params.ticketId } });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin delete ticket error:", error);
+        res.status(500).json({ error: 'Failed to delete ticket.' });
+    }
+});
+
+
 // --- Feedback Management ---
 
 // GET /api/admin/feedback
@@ -184,6 +205,21 @@ router.get('/feedback', async (req, res) => {
     } catch (error) {
         console.error("Admin get feedback error:", error);
         res.status(500).json({ error: 'Failed to retrieve feedback.' });
+    }
+});
+
+// DELETE /api/admin/feedback/:feedbackId
+router.delete('/feedback/:feedbackId', async (req, res) => {
+    try {
+        await prisma.feedback.delete({ where: { id: req.params.feedbackId } });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin delete feedback error:", error);
+        // Handle case where feedback might already be deleted (e.g., P2025 in Prisma)
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Feedback not found.' });
+        }
+        res.status(500).json({ error: 'Failed to delete feedback.' });
     }
 });
 

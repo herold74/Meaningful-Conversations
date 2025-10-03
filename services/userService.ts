@@ -155,6 +155,14 @@ export const resolveTicket = async (ticketId: string): Promise<Ticket> => {
     return await apiFetch(`/admin/tickets/${ticketId}/resolve`, { method: 'PUT' });
 };
 
+export const deleteTicket = async (ticketId: string): Promise<void> => {
+    await apiFetch(`/admin/tickets/${ticketId}`, { method: 'DELETE' });
+};
+
 export const getAdminFeedback = async (): Promise<Feedback[]> => {
     return await apiFetch('/admin/feedback');
+};
+
+export const deleteMessageReport = async (feedbackId: string): Promise<void> => {
+    await apiFetch(`/admin/feedback/${feedbackId}`, { method: 'DELETE' });
 };

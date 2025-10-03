@@ -112,7 +112,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                                 type="checkbox"
                                 checked={isAnonymous}
                                 onChange={(e) => setIsAnonymous(e.target.checked)}
-                                className="h-5 w-5 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
+                                className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-2 text-gray-700 dark:text-gray-300">{t('feedback_anonymousCheckbox')}</span>
                         </label>
@@ -130,6 +130,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                                 required={!isAnonymous}
                                 className="mt-1 w-full p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
                             />
+                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                {t('feedback_contact_consent')}
+                            </p>
                         </div>
                     )}
                 </div>

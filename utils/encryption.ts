@@ -1,4 +1,4 @@
-import { simpleCipher } from './simpleGuestCipher';
+
 
 // Helper to convert a hex string to a Uint8Array.
 export const hexToUint8Array = (hexString: string): Uint8Array => {
@@ -91,9 +91,3 @@ export const decryptData = async (key: CryptoKey, encryptedDataB64: string): Pro
     
     return dec.decode(decryptedContent);
 };
-
-
-// --- Guest Obfuscation (Existing Logic) ---
-// This simple XOR cipher is not for security, just for obfuscation.
-// It has been moved to its own file to distinguish it from the new secure encryption.
-export { simpleCipher };

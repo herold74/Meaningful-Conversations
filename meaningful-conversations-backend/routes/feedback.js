@@ -1,10 +1,9 @@
 
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // POST /api/feedback
 router.post('/', optionalAuthMiddleware, async (req, res) => {

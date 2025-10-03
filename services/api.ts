@@ -136,12 +136,22 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
 
     // 2. For all other errors (including a failed login 401), create a structured error to throw.
     let errorData;
-    try {
-        errorData = await response.json();
-    } catch (e) {
-        console.error("Failed to parse API error response as JSON", { status: response.status, statusText: response.statusText });
-        errorData = { message: `HTTP Error: ${response.status} ${response.statusText}` };
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+        try {
+            errorData = await response.json();
+        } catch (e) {
+            const errorText = await response.text();
+            console.error("Failed to parse API error response as JSON, though content-type was JSON.", { status: response.status, text: errorText });
+            errorData = { message: `HTTP Error ${response.status}: Server returned invalid JSON. See console for details.` };
+        }
+    } else {
+        const errorText = await response.text();
+        console.error("API error response was not JSON.", { status: response.status, text: errorText });
+        errorData = { message: `HTTP Error ${response.status}: ${response.statusText}. See console for server response.` };
     }
+
 
     // Create a standard Error object, which is easier to handle than a Response object
     const error = new Error(errorData.error || errorData.message || 'An unknown API error occurred.');

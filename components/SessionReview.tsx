@@ -10,7 +10,6 @@ import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { StarIcon } from './icons/StarIcon';
 import Spinner from './shared/Spinner';
 import * as userService from '../services/userService';
-import { simpleCipher } from '../utils/simpleGuestCipher';
 
 type AppliedUpdatePayload = { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string };
 
@@ -275,11 +274,18 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         setEditableContext(updatedContext);
     }, [updatedContext]);
 
-    const addGamificationDataForGuest = (context: string): string => {
-        let finalContext = context.replace(/<!-- do not delete: (.*?) -->/g, '').trim();
+    const addGamificationDataToContext = (context: string): string => {
+        // Remove any old gamification data comment to ensure a clean slate.
+        let finalContext = context.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->/g, '').trim();
         const dataToSerialize = serializeGamificationState(gamificationState);
-        const encryptedData = simpleCipher(dataToSerialize); 
-        const dataComment = `<!-- do not delete: ${encryptedData} -->`;
+        
+        // 1. Encode to Base64
+        const encodedData = btoa(dataToSerialize);
+        // 2. Obfuscate by reversing the string. This makes it non-standard and not directly decodable.
+        const obfuscatedData = encodedData.split('').reverse().join('');
+        // 3. Embed with the new key.
+        const dataComment = `<!-- do_not_delete: ${obfuscatedData} -->`;
+
         if (finalContext) {
             finalContext = `${finalContext.trimEnd()}\n\n${dataComment}`;
         } else {
@@ -289,11 +295,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     };
 
     const handleDownloadContext = () => {
-        let contentToDownload = editableContext;
-        // For guests, or users opting out of save, embed their progress in the file.
-        if (!currentUser || preventSave) {
-            contentToDownload = addGamificationDataForGuest(editableContext);
-        }
+        // Always embed the latest gamification state to ensure the download is a complete backup.
+        const contentToDownload = addGamificationDataToContext(editableContext);
         const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -392,9 +395,14 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                 value={feedbackText}
                                 onChange={(e) => setFeedbackText(e.target.value)}
                                 placeholder={rating <= 3 ? t('sessionReview_feedback_placeholder') : t('sessionReview_feedback_placeholder_optional')}
-                                className="w-full p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                className="w-full p-2 bg-white dark:bg-gray-800 border text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
                                 required={rating <= 3}
                             />
+                            {currentUser && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 !mt-2 text-center">
+                                    {t('sessionReview_contact_consent')}
+                                </p>
+                            )}
                             <button
                                 type="submit"
                                 disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
@@ -470,7 +478,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
                             return (
                                 <div key={index} className={`flex items-start gap-3 p-3 transition-colors ${isApplied ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-100 dark:bg-gray-800/20 opacity-60'} border border-gray-200 dark:border-gray-700/50`}>
-                                    <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 cursor-pointer" />
+                                    <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 cursor-pointer [color-scheme:light] dark:[color-scheme:dark]" />
                                     <div className="flex-1">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                                             {canChangeType ? (
@@ -526,17 +534,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 </div>
 
                 {currentUser && (
-                    <div className="p-4 bg-yellow-50 dark:bg-gray-900 border border-yellow-200 dark:border-yellow-700 rounded-md">
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-md">
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
                                 checked={preventSave}
                                 onChange={(e) => setPreventSave(e.target.checked)}
-                                className="h-5 w-5 rounded bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
+                                className="h-5 w-5 rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-yellow-600 focus:ring-yellow-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <div className="ml-3">
                                 <span className="font-semibold text-gray-800 dark:text-gray-200">{t('sessionReview_preventSave_label')}</span>
-                                <p className="text-sm text-yellow-700 dark:text-yellow-400">{t('sessionReview_preventSave_desc')}</p>
+                                <p className="text-sm text-yellow-800 dark:text-yellow-300">{t('sessionReview_preventSave_desc')}</p>
                             </div>
                         </label>
                     </div>

@@ -1,10 +1,9 @@
 const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
 const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Apply auth middleware to all routes in this file
 router.use(authMiddleware);
@@ -153,21 +152,32 @@ router.post('/redeem-code', async (req, res) => {
                 data: { isUsed: true, usedById: req.userId }
             });
 
-            const user = await tx.user.findUnique({ where: { id: req.userId } });
-            
-            if(!user) {
-                throw new Error("User not found during transaction.");
-            }
-            
-            const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
-            if (!unlockedCoaches.includes(upgradeCode.botId)) {
-                unlockedCoaches.push(upgradeCode.botId);
-            }
+            let finalUser;
 
-            const finalUser = await tx.user.update({
-                where: { id: req.userId },
-                data: { unlockedCoaches: JSON.stringify(unlockedCoaches) }
-            });
+            if (upgradeCode.botId === 'premium') {
+                // 'premium' code sets the isBetaTester flag to true, granting full access
+                finalUser = await tx.user.update({
+                    where: { id: req.userId },
+                    data: { isBetaTester: true }
+                });
+            } else {
+                // This handles both individual coach IDs and the 'big5' feature ID
+                const user = await tx.user.findUnique({ where: { id: req.userId } });
+                
+                if(!user) {
+                    throw new Error("User not found during transaction.");
+                }
+                
+                const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+                if (!unlockedCoaches.includes(upgradeCode.botId)) {
+                    unlockedCoaches.push(upgradeCode.botId);
+                }
+
+                finalUser = await tx.user.update({
+                    where: { id: req.userId },
+                    data: { unlockedCoaches: JSON.stringify(unlockedCoaches) }
+                });
+            }
 
             return finalUser;
         });

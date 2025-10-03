@@ -57,6 +57,13 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                 </div>
                 
                 <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
+                    {currentUser?.isAdmin && (
+                        <>
+                            <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => handleNavigate('admin')} />
+                             <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                        </>
+                    )}
+
                     {/* Items moved to the top */}
                     <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => handleNavigate('about')} />
                     <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => handleNavigate('disclaimer')} />
@@ -74,10 +81,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => handleNavigate('faq')} />
                     <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
                     <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
-                    
-                    {currentUser?.isAdmin && (
-                        <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => handleNavigate('admin')} />
-                    )}
                 </nav>
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">

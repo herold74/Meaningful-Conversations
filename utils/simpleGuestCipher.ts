@@ -1,9 +1,3 @@
-const KEY = 'meaningful-conversations-guest-key';
-
-// This simple XOR cipher is not for security, just for obfuscation.
-export const simpleCipher = (data: string): string => {
-    if (typeof data !== 'string') return '';
-    return data.split('').map((char, i) => {
-        return String.fromCharCode(char.charCodeAt(0) ^ KEY.charCodeAt(i % KEY.length));
-    }).join('');
-};
+// This file is deprecated and its contents have been removed.
+// The functionality has been replaced by standard Base64 encoding (btoa/atob)
+// for better portability and robustness.

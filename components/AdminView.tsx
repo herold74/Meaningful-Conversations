@@ -129,8 +129,13 @@ const ResetConfirmationModal: React.FC<{
 
 const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
     const { t } = useLocalization();
-    const [isContextVisible, setIsContextVisible] = useState(false);
+    const [isCommentExpanded, setIsCommentExpanded] = useState(false);
     const bot = BOTS.find(b => b.id === item.botId);
+
+    const COMMENT_TRUNCATE_LENGTH = 50;
+    const hasComment = item.comments && item.comments.trim().length > 0;
+    const isLongComment = hasComment && item.comments.length > COMMENT_TRUNCATE_LENGTH;
+
 
     return (
         <>
@@ -144,94 +149,37 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
                         </div>
                     )}
                 </td>
-                <td className="p-3 align-top whitespace-normal break-words max-w-sm">
-                    <p className="text-gray-800 dark:text-gray-200">{item.comments || <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>}</p>
-                </td>
-                <td className="p-3 align-top whitespace-normal break-words">{bot?.name || item.botId}</td>
-                <td className="p-3 align-top whitespace-normal break-all">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
-                <td className="p-3 align-top">{new Date(item.createdAt).toLocaleString()}</td>
-                <td className="p-3 align-top text-center">
-                    {(item.lastUserMessage || item.botResponse) && (
-                        <button onClick={() => setIsContextVisible(p => !p)} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-                            <ChatBubbleIcon className="w-5 h-5"/>
+                <td className="p-3 align-top whitespace-normal break-words text-gray-800 dark:text-gray-200">
+                     {isLongComment ? (
+                        <button onClick={() => setIsCommentExpanded(p => !p)} className="flex items-start gap-2 text-left text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                            <ChatBubbleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <span className="italic">
+                                {item.comments.substring(0, COMMENT_TRUNCATE_LENGTH)}...
+                            </span>
                         </button>
+                    ) : (
+                        hasComment ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>
                     )}
                 </td>
+                <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
+                <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
+                <td className="p-3 align-top text-gray-600 dark:text-gray-400">{new Date(item.createdAt).toLocaleString()}</td>
             </tr>
-            {isContextVisible && (
-                <tr className="bg-gray-50 dark:bg-gray-900/30">
-                    <td colSpan={6} className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <div className="space-y-3 animate-fadeIn text-sm max-w-full">
-                            {item.lastUserMessage && (
-                                <div className="break-words">
-                                    <h5 className="font-bold text-gray-600 dark:text-gray-300">{t('admin_feedback_user_prompt')}</h5>
-                                    <p className="mt-1 text-gray-500 dark:text-gray-400 italic">"{item.lastUserMessage}"</p>
-                                </div>
-                            )}
-                            {item.botResponse && (
-                                <div className="break-words">
-                                    <h5 className="font-bold text-gray-600 dark:text-gray-300">{t('admin_feedback_bot_response')}</h5>
-                                    <p className="mt-1 text-gray-500 dark:text-gray-400">"{item.botResponse}"</p>
-                                </div>
-                            )}
-                        </div>
-                    </td>
-                </tr>
-            )}
-        </>
-    );
-};
-
-const MessageReportTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
-    const { t } = useLocalization();
-    const [isContextVisible, setIsContextVisible] = useState(false);
-    const bot = BOTS.find(b => b.id === item.botId);
-
-    return (
-        <>
-            <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="p-3 align-top whitespace-normal break-words max-w-sm">
-                    <p className="text-gray-800 dark:text-gray-200">{item.comments || <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>}</p>
-                </td>
-                <td className="p-3 align-top whitespace-normal break-words">{bot?.name || item.botId}</td>
-                <td className="p-3 align-top whitespace-normal break-all">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
-                <td className="p-3 align-top">{new Date(item.createdAt).toLocaleString()}</td>
-                <td className="p-3 align-top text-center">
-                    {(item.lastUserMessage || item.botResponse) && (
-                        <button onClick={() => setIsContextVisible(p => !p)} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-                            <ChatBubbleIcon className="w-5 h-5"/>
-                        </button>
-                    )}
-                </td>
-            </tr>
-            {isContextVisible && (
-                <tr className="bg-gray-50 dark:bg-gray-900/30">
+            {isCommentExpanded && (
+                <tr className="bg-gray-50 dark:bg-gray-900/30 animate-fadeIn">
                     <td colSpan={5} className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <div className="space-y-3 animate-fadeIn text-sm max-w-full">
-                            {item.lastUserMessage && (
-                                <div className="break-words">
-                                    <h5 className="font-bold text-gray-600 dark:text-gray-300">{t('admin_feedback_user_prompt')}</h5>
-                                    <p className="mt-1 text-gray-500 dark:text-gray-400 italic">"{item.lastUserMessage}"</p>
-                                </div>
-                            )}
-                            {item.botResponse && (
-                                <div className="break-words">
-                                    <h5 className="font-bold text-gray-600 dark:text-gray-300">{t('admin_feedback_bot_response')}</h5>
-                                    <p className="mt-1 text-gray-500 dark:text-gray-400">"{item.botResponse}"</p>
-                                </div>
-                            )}
-                        </div>
+                        <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">Full Comment</h5>
+                        <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{item.comments}</p>
                     </td>
                 </tr>
             )}
         </>
     );
 };
-
 
 const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const { t } = useLocalization();
-    const [activeTab, setActiveTab] = useState<AdminTab>('feedback');
+    const [activeTab, setActiveTab] = useState<AdminTab>('tickets');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
@@ -245,7 +193,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
         return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'chloe-cbt');
     }, []);
 
-    const [newCodeBotId, setNewCodeBotId] = useState(botsForCodes[0]?.id || '');
+    const [newCodeBotId, setNewCodeBotId] = useState('premium');
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
@@ -291,6 +239,55 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
         }
     };
 
+    const MessageReportTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
+        const bot = BOTS.find(b => b.id === item.botId);
+    
+        const COMMENT_TRUNCATE_LENGTH = 50;
+        const hasComment = item.comments && item.comments.trim().length > 0;
+        const isLongComment = hasComment && item.comments.length > COMMENT_TRUNCATE_LENGTH;
+        const [isCommentExpanded, setIsCommentExpanded] = useState(false);
+    
+        return (
+            <>
+                <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                     <td className="p-3 align-top whitespace-normal break-words text-gray-800 dark:text-gray-200">
+                         {isLongComment ? (
+                            <button onClick={() => setIsCommentExpanded(p => !p)} className="flex items-start gap-2 text-left text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                                <ChatBubbleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <span className="italic">
+                                    {item.comments.substring(0, COMMENT_TRUNCATE_LENGTH)}...
+                                </span>
+                            </button>
+                        ) : (
+                            hasComment ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>
+                        )}
+                    </td>
+                    <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
+                    <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
+                    <td className="p-3 align-top text-gray-600 dark:text-gray-400">{new Date(item.createdAt).toLocaleString()}</td>
+                    <td className="p-3 align-top text-right">
+                        <button 
+                            onClick={() => handleAction(`delete-report-${item.id}`, () => userService.deleteMessageReport(item.id))} 
+                            disabled={actionLoading[`delete-report-${item.id}`]}
+                            className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
+                            title={t('admin_codes_delete')}
+                        >
+                            <DeleteIcon className="w-5 h-5" />
+                        </button>
+                    </td>
+                </tr>
+                {isCommentExpanded && (
+                    <tr className="bg-gray-50 dark:bg-gray-900/30 animate-fadeIn">
+                        <td colSpan={5} className="p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">Full Comment</h5>
+                            <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{item.comments}</p>
+                        </td>
+                    </tr>
+                )}
+            </>
+        );
+    };
+
     const confirmAndResetPassword = async () => {
         if (!userToReset) return;
         const user = userToReset;
@@ -325,6 +322,13 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
         return users.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
     }, [users, userSearchQuery]);
     
+    const getUnlockName = useCallback((botId: string): string => {
+        if (botId === 'premium') return t('admin_codes_unlock_premium');
+        if (botId === 'big5') return t('admin_codes_unlock_big5');
+        const bot = BOTS.find(b => b.id === botId);
+        return bot?.name || botId;
+    }, [t]);
+
     const tabConfig: Record<AdminTab, { icon: React.FC<any>, key: string }> = {
         users: { icon: UsersIcon, key: 'admin_users_tab' },
         codes: { icon: KeyIcon, key: 'admin_codes_tab' },
@@ -337,13 +341,13 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
 
     const renderTabs = () => (
         <div className="flex border-b border-gray-300 dark:border-gray-700">
-            {(['users', 'codes', 'tickets', 'feedback'] as AdminTab[]).map(tab => {
+            {(['users', 'feedback', 'tickets', 'codes'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
                 return (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 px-2 md:px-4 py-3 text-sm font-bold uppercase transition-colors focus:outline-none ${
+                        className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 px-2 md:px-3 py-2 text-sm font-bold uppercase transition-colors focus:outline-none ${
                             activeTab === tab
                                 ? 'border-b-2 border-green-500 text-gray-900 dark:text-gray-100'
                                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -428,7 +432,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                 <form onSubmit={handleCreateCode} className="flex flex-col sm:flex-row items-stretch gap-3">
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
-                        <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
+                            <option value="premium">{t('admin_codes_unlock_premium')}</option>
+                            <option value="big5">{t('admin_codes_unlock_big5')}</option>
+                            <option disabled>---</option>
                             {botsForCodes.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
                         </select>
                     </div>
@@ -443,11 +450,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                          <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th className="p-3">{t('admin_codes_code')}</th>
-                                <th className="p-3">{t('admin_codes_coach')}</th>
-                                <th className="p-3">{t('admin_codes_status')}</th>
-                                <th className="p-3">{t('admin_codes_used_by')}</th>
+                                <th className="p-3">{t('admin_codes_unlocks')}</th>
                                 <th className="p-3">{t('admin_codes_created')}</th>
-                                <th className="p-3 text-right">{t('admin_codes_action')}</th>
+                                <th className="p-3">{t('admin_codes_usage')}</th>
+                                <th className="p-3 text-right">{t('admin_codes_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -461,12 +467,13 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                             </button>
                                         </div>
                                     </td>
-                                    <td className="p-3">{BOTS.find(b => b.id === code.botId)?.name || code.botId}</td>
-                                    <td className="p-3">{code.isUsed 
-                                        ? <span className="px-2 py-1 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">{t('admin_codes_status_used')}</span> 
-                                        : <span className="px-2 py-1 text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full">{t('admin_codes_status_available')}</span>}</td>
-                                    <td className="p-3 break-all">{code.usedBy?.email || '—'}</td>
-                                    <td className="p-3 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-3 break-all text-gray-600 dark:text-gray-400">
+                                        {code.isUsed 
+                                            ? (code.usedBy?.email || <span className="px-2 py-1 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">{t('admin_codes_status_used')}</span>) 
+                                            : <span className="px-2 py-1 text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full">{t('admin_codes_status_available')}</span>}
+                                    </td>
                                     <td className="p-3 text-right">
                                         <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
                                     </td>
@@ -486,7 +493,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const renderTickets = () => (
         <div className="space-y-8">
             <div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">Password Reset Tickets</h3>
+                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_support_tickets_title')}</h3>
                 {tickets.length > 0 ? (
                     <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
                         <table className="w-full text-left text-sm">
@@ -496,7 +503,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                     <th className="p-3">{t('admin_tickets_type')}</th>
                                     <th className="p-3">{t('admin_tickets_created')}</th>
                                     <th className="p-3">{t('admin_tickets_status')}</th>
-                                    <th className="p-3 text-right">{t('admin_tickets_action')}</th>
+                                    <th className="p-3 text-right">{t('admin_tickets_actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -517,6 +524,16 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                                     <CheckIcon className="w-5 h-5"/>
                                                 </button>
                                             )}
+                                            {ticket.status === 'RESOLVED' && (
+                                                <button 
+                                                    onClick={() => handleAction(`delete-ticket-${ticket.id}`, () => userService.deleteTicket(ticket.id))} 
+                                                    disabled={actionLoading[`delete-ticket-${ticket.id}`]}
+                                                    className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
+                                                    title={t('admin_codes_delete')}
+                                                >
+                                                    <DeleteIcon className="w-5 h-5" />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -534,15 +551,15 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
             <div>
                 <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
                 {messageReports.length > 0 ? (
-                    <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
+                    <div className="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-800">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
+                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                 <tr>
                                     <th className="p-3">{t('admin_feedback_comments')}</th>
-                                    <th className="p-3 w-32">{t('admin_feedback_bot')}</th>
+                                    <th className="p-3 w-24">{t('admin_feedback_bot')}</th>
                                     <th className="p-3 w-48">{t('admin_feedback_user')}</th>
                                     <th className="p-3 w-44">{t('admin_feedback_submitted')}</th>
-                                    <th className="p-3 w-20 text-center">{t('admin_feedback_context_short')}</th>
+                                    <th className="p-3 w-20 text-right">{t('admin_tickets_actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -654,10 +671,9 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                     <tr>
                                         <th className="p-3 w-28">{t('admin_feedback_rating')}</th>
                                         <th className="p-3">{t('admin_feedback_comments')}</th>
-                                        <th className="p-3 w-32">{t('admin_feedback_bot')}</th>
+                                        <th className="p-3 w-24">{t('admin_feedback_bot')}</th>
                                         <th className="p-3 w-48">{t('admin_feedback_user')}</th>
                                         <th className="p-3 w-44">{t('admin_feedback_submitted')}</th>
-                                        <th className="p-3 w-20 text-center">{t('admin_feedback_context_short')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
