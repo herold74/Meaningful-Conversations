@@ -10,7 +10,6 @@ module.exports = (req, res, next) => {
         }
     } catch (error) {
         // Invalid token is ignored, just proceed without a user ID
-        console.log("Optional auth: Invalid token provided, proceeding anonymously.");
     }
     next();
 };

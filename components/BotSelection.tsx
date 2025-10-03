@@ -110,7 +110,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
         setBots(availableBots);
       } catch (error) {
           console.error("Failed to fetch bots:", error);
-          // TODO: Show an error message to the user
       } finally {
         setIsLoading(false);
       }

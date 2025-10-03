@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bot, Message, User, GamificationState, SessionAnalysis, NavView } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';

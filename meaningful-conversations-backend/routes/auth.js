@@ -131,9 +131,6 @@ router.post('/forgot-password', async (req, res) => {
                     payload: { email: user.email }
                 }
             });
-             console.log(`Password reset ticket created for: ${user.email}`);
-        } else {
-            console.log(`Password reset requested for non-existent email: ${email}`);
         }
         
         // Always return a success response to prevent email enumeration attacks.
