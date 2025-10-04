@@ -11,21 +11,34 @@ declare global {
   var AISTUDIO_BACKEND_URL: string | undefined;
 }
 
+// --- CONFIGURATION ---
+// If deploying the backend to an external service like Google Cloud Run,
+// paste the service's public URL here. This will override any automatic detection.
+// Example: 'https://my-backend-service-xyz-uc.a.run.app'
+// FIX: Explicitly type as string to prevent TypeScript from inferring the type as an empty literal (''),
+// which would cause the variable's type to be 'never' within the subsequent 'if' block, leading to a type error.
+const EXTERNALLY_HOSTED_BACKEND_URL: string = 'https://meaningful-conversations-backend-650095539575.europe-west6.run.app'; // PASTE YOUR CLOUD RUN URL HERE
+
 
 const getApiBaseUrl = (): string => {
     // This function is only called once, so logging here is fine for initial setup diagnosis.
     console.log("Determining API base URL...");
     
-    // Priority 1: Use the explicit environment variable if provided by AI Studio. This is the most reliable method.
+    // Priority 1: Use the explicitly configured URL if provided for external deployments like Cloud Run.
+    if (EXTERNALLY_HOSTED_BACKEND_URL) {
+        const cleanedUrl = EXTERNALLY_HOSTED_BACKEND_URL.replace(/\/$/, '');
+        console.log(`Using configured EXTERNALLY_HOSTED_BACKEND_URL: ${cleanedUrl}`);
+        return cleanedUrl;
+    }
+
+    // Priority 2: Use the environment variable if injected by the platform (e.g., AI Studio).
     if (typeof AISTUDIO_BACKEND_URL === 'string' && AISTUDIO_BACKEND_URL) {
         const cleanedUrl = AISTUDIO_BACKEND_URL.replace(/\/$/, '');
         console.log(`Using injected AISTUDIO_BACKEND_URL: ${cleanedUrl}`);
         return cleanedUrl;
     }
 
-    // Priority 2: If the global variable is not available, check the hostname.
-    // If the app is not being accessed from localhost, it's a remote environment (like AI Studio).
-    // Construct the backend URL by prepending the port. This is crucial for mobile device access.
+    // Priority 3: Auto-detect based on hostname for specific integrated environments.
     const hostname = window.location.hostname;
     // A truthy hostname that is not a local address indicates a remote environment.
     if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
@@ -35,7 +48,7 @@ const getApiBaseUrl = (): string => {
         return constructedUrl;
     }
 
-    // Priority 3: Fallback for standard local development or when hostname is invalid.
+    // Priority 4: Fallback for standard local development or when hostname is invalid.
     const defaultUrl = 'http://localhost:3001';
     console.log(`Detected localhost or invalid hostname. Defaulting to local development URL: ${defaultUrl}`);
     return defaultUrl;
