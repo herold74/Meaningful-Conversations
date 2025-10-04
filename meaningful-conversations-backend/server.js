@@ -12,8 +12,16 @@ const botRoutes = require('./routes/bots.js');
 
 const app = express();
 
-// Enable CORS for all routes, allowing requests from your frontend
-app.use(cors());
+// --- CORS Configuration ---
+// Be more explicit with CORS options for production environments.
+// This ensures that pre-flight 'OPTIONS' requests with custom headers like 'Authorization' are handled correctly.
+const corsOptions = {
+    origin: '*', // For production, you might want to restrict this to your frontend's actual domain.
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+
 
 // Middleware to parse JSON request bodies
 app.use(express.json({ limit: '5mb' })); // Increase limit for larger context files
