@@ -44,7 +44,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
 
     } catch (err: any) {
         console.error("Login failed:", err);
-        if (err.status === 401) {
+        if (err.isNetworkError) {
+            setError(t('error_network_detailed', { url: err.backendUrl }));
+        } else if (err.status === 401) {
             setError(t('login_error_credentials'));
         } else {
             setError(err.message || 'An unknown error occurred. Please try again.');

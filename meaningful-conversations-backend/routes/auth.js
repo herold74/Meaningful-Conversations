@@ -61,8 +61,13 @@ router.post('/register', async (req, res) => {
                 email,
                 passwordHash,
                 encryptionSalt: salt,
-                lifeContext: '', // Start with an empty (but not null) context
-                gamificationState: defaultGamificationState,
+                lifeContext: '', // Explicitly set default for LongText
+                gamificationState: defaultGamificationState, // Explicitly set default for Text
+                unlockedCoaches: '[]', // Explicitly set default for Text
+                isBetaTester: false,
+                isAdmin: false,
+                loginCount: 1, // Set initial login count
+                lastLogin: new Date(), // Set initial login time
             },
         });
 

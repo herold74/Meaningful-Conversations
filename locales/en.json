@@ -432,5 +432,5 @@
   "blockageScore_subtitle": "This score indicates the potential presence of recurring thought patterns that could hinder progress. A lower score is better.",
 
   "modal_close": "Close",
-  "error_network_detailed": "Could not connect to the server at {{url}}. Please ensure the backend service is running and accessible."
+  "error_network_detailed": "Could not connect to the server at {{url}}. Please ensure the backend service is running and accessible. \n\nYou can test this by opening the following health check URL in a new browser tab: {{url}}/api/health"
 }

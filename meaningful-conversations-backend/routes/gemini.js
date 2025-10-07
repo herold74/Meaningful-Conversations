@@ -1,12 +1,13 @@
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai');
-const authMiddleware = require('../middleware/auth.js');
+const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
 const { analysisPrompts, contextResponseSchema, blockageAnalysisPrompts, blockageResponseSchema } = require('../services/geminiPrompts.js');
 const { BOTS } = require('../constants.js');
 
 const router = express.Router();
-router.use(authMiddleware);
+router.use(optionalAuthMiddleware);
 
+// Initialize the Google Gemini API client
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // POST /api/gemini/chat/send-message

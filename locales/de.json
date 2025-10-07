@@ -402,5 +402,5 @@
   "blockageScore_title": "Lösungsblockaden-Score",
   "blockageScore_subtitle": "Dieser Wert zeigt das potenzielle Vorhandensein wiederkehrender Denkmuster an, die den Fortschritt behindern könnten. Ein niedrigerer Wert ist besser.",
   "modal_close": "Schließen",
-  "error_network_detailed": "Keine Verbindung zum Server unter {{url}} möglich. Bitte stellen Sie sicher, dass der Backend-Dienst läuft und erreichbar ist."
+  "error_network_detailed": "Keine Verbindung zum Server unter {{url}} möglich. Bitte stellen Sie sicher, dass der Backend-Dienst läuft und erreichbar ist. \n\nSie können dies testen, indem Sie die folgende Health-Check-URL in einem neuen Browser-Tab öffnen: {{url}}/api/health"
 }

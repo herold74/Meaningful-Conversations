@@ -344,8 +344,14 @@ const App: React.FC = () => {
         setSessionAnalysis(null);
         setNewGamificationState(null);
         setLifeContext('');
-        setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        setView(currentUser ? 'landing' : 'auth');
+        
+        if (!currentUser) {
+            // For a guest, "Start Over" is a full reset to the beginning.
+            setGamificationState(DEFAULT_GAMIFICATION_STATE);
+        }
+        // For both guests and logged-in users starting a new context from scratch,
+        // navigate to the landing page.
+        setView('landing');
     };
 
     // --- RENDER LOGIC ---
