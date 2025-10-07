@@ -361,7 +361,23 @@ const App: React.FC = () => {
 
         switch (currentView) {
             case 'welcome': return <WelcomeScreen />;
-            case 'auth': return <AuthView onLogin={() => setView('login')} onRegister={() => setView('register')} onGuest={() => setView('landing')} redirectReason={authRedirectReason}/>;
+            case 'auth': {
+                return <AuthView 
+                    onLogin={() => {
+                        setMenuView(null);
+                        setView('login');
+                    }} 
+                    onRegister={() => {
+                        setMenuView(null);
+                        setView('register');
+                    }} 
+                    onGuest={() => {
+                        setMenuView(null);
+                        resetToStart();
+                    }}
+                    redirectReason={authRedirectReason}
+                />;
+            }
             case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
             case 'register': return <RegisterView onRegisterSuccess={handleLoginSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
