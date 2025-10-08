@@ -12,7 +12,8 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', async (req, res) => {
-    const { botId, context, history: historyForApi, lang } = req.body;
+    const { botId, context, history: historyForApi } = req.body;
+    const lang = req.body.lang === 'de' ? 'de' : 'en'; // Defensive check
 
     const bot = BOTS.find(b => b.id === botId);
 
@@ -64,7 +65,8 @@ router.post('/chat/send-message', async (req, res) => {
 
 // POST /api/gemini/session/analyze
 router.post('/session/analyze', async (req, res) => {
-    const { history, context, lang } = req.body;
+    const { history, context } = req.body;
+    const lang = req.body.lang === 'de' ? 'de' : 'en'; // Defensive check
 
     if (!history || !context) {
         return res.status(400).json({ error: "Missing history or context." });

@@ -57,6 +57,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
 
+    const handleRatingClick = (starValue: number) => {
+        if (feedbackStatus !== 'idle') return;
+
+        if (rating === starValue) {
+            setRating(0);
+            setFeedbackText('');
+        } else {
+            setRating(starValue);
+        }
+    };
+
     const cleanOriginalContext = useMemo(() => removeGamificationKey(originalContext), [originalContext]);
     const isGuest = !currentUser;
 
@@ -268,10 +279,15 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center gap-4">
                         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_summary')}</h2>
-                        <button onClick={handleDownloadSummary} className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-transparent border border-green-600 dark:border-green-400 uppercase hover:bg-green-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black">
-                           <DownloadIcon className="w-4 h-4" /> {t('sessionReview_downloadSummary')}
+                        <button 
+                            onClick={handleDownloadSummary} 
+                            className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-transparent border border-green-600 dark:border-green-400 uppercase hover:bg-green-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black"
+                            title={t('sessionReview_downloadSummary')}
+                        >
+                           <DownloadIcon className="w-4 h-4" />
+                           <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
                         </button>
                     </div>
                     <p className="mt-2 text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{newFindings}</p>
@@ -284,7 +300,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {[1, 2, 3, 4, 5].map((star) => (
                             <button
                                 key={star}
-                                onClick={() => feedbackStatus === 'idle' && setRating(star)}
+                                onClick={() => handleRatingClick(star)}
                                 onMouseEnter={() => setHoverRating(star)}
                                 onMouseLeave={() => setHoverRating(0)}
                                 className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}

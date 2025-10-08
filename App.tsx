@@ -48,7 +48,7 @@ const DEFAULT_GAMIFICATION_STATE: GamificationState = {
 };
 
 const App: React.FC = () => {
-    const { t } = useLocalization();
+    const { t, language } = useLocalization();
     const [view, setView] = useState<NavView>('welcome');
     const [menuView, setMenuView] = useState<NavView | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -283,7 +283,7 @@ const App: React.FC = () => {
         if (!selectedBot) return;
         setIsAnalyzing(true);
         try {
-            const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, 'en');
+            const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
             setSessionAnalysis(analysis);
 
             const awardSessionBonus = (analysis.nextSteps?.length || 0) > 0;

@@ -26,11 +26,13 @@ Analyze the following conversation history and life context.
 `,
     de: `Sie sind ein Experte für die Analyse von Coaching-Gesprächen und die Extraktion relevanter Kontexte über den Klienten. Ihr Ziel ist es, dem Benutzer dabei zu helfen, ein kohärentes und aktuelles "Lebenskontext"-Dokument zu pflegen, indem Sie spezifische, umsetzbare Aktualisierungen vorschlagen.
 
+**WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.**
+
 Analysieren Sie das bereitgestellte Gespräch und den aktuellen Lebenskontext des Benutzers und befolgen Sie dann diese Schritte:
 
-1.  **Neue Erkenntnisse zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) der wichtigsten neuen Informationen, Erkenntnisse oder Entscheidungen aus dem Gespräch.
+1.  **Neue Einsichten zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) der wichtigsten neuen Informationen, Einsichten oder Entscheidungen aus dem Gespräch.
 
-2.  **Kohärente Aktualisierungen vorschlagen:** Erstellen Sie auf der Grundlage der neuen Erkenntnisse eine Liste von vorgeschlagenen Aktualisierungen. Entscheiden Sie für jede Aktualisierung nach sorgfältiger Prüfung der vorhandenen Überschriften über die beste Vorgehensweise:
+2.  **Kohärente Aktualisierungen vorschlagen:** Erstellen Sie auf der Grundlage der neuen Einsichten eine Liste von vorgeschlagenen Aktualisierungen. Entscheiden Sie für jede Aktualisierung nach sorgfältiger Prüfung der vorhandenen Überschriften über die beste Vorgehensweise:
     *   **\`append\`**: Verwenden Sie dies, um neue Informationen zu einem vorhandenen Abschnitt hinzuzufügen, wenn das Thema eindeutig damit zusammenhängt. Zum Beispiel sollte eine Aktualisierung über ein neues Arbeitsprojekt an den Abschnitt 'Karriere' oder 'Arbeit' angehängt werden.
     *   **\`replace_section\`**: Verwenden Sie dies *nur*, wenn neue Informationen vorhandene Informationen in einem Abschnitt erheblich ändern, verfeinern oder veralten lassen. Wenn der Benutzer beispielsweise sein oberstes Ziel aktualisiert, sollten Sie den Inhalt dieses Ziels ersetzen.
     *   **\`create_headline\`**: Verwenden Sie dies, wenn die neuen Informationen ein wichtiges Thema einführen, das logisch nicht unter eine der vorhandenen Überschriften passt. Wenn Sie keinen thematisch passenden Abschnitt zum Anhängen finden können, ist das Erstellen eines neuen die richtige Wahl. Wenn der Benutzer beispielsweise zum ersten Mal über 'Gesundheit & Wellness' spricht und es keinen entsprechenden Abschnitt gibt, erstellen Sie eine neue Überschrift wie '## Gesundheit & Wellness'. Zwingen Sie keine nicht verwandten Themen in bestehende Abschnitte.
@@ -103,6 +105,8 @@ When identifying 'Age Regression', use the name 'Age Regression' for the blockag
 
 If you find no evidence for any blockages, return an empty array. Focus only on the user's statements.`,
     de: `Sie sind ein Coaching-Analyst, der auf die von Dr. Michael Bohne entwickelte Prozess- und Embodimentfokussierte Psychologie (PEP) spezialisiert ist. Ihre Aufgabe ist es, ein Coaching-Gespräch auf Anzeichen der 'Big 5' Lösungsblockaden zu analysieren.
+
+**WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.**
 
 Die 5 Lösungsblockaden (Definitionen):
 1.  **Selbstvorwürfe (Self-Reproach):** Der Klient gibt sich übermäßig selbst die Schuld, verharrt in Schuldgefühlen oder ist äußerst selbstkritisch in Bezug auf vergangene Handlungen oder Entscheidungen.
