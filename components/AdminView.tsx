@@ -241,33 +241,26 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
 
     const MessageReportTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
         const bot = BOTS.find(b => b.id === item.botId);
-    
-        const COMMENT_TRUNCATE_LENGTH = 50;
-        const hasComment = item.comments && item.comments.trim().length > 0;
-        const isLongComment = hasComment && item.comments.length > COMMENT_TRUNCATE_LENGTH;
-        const [isCommentExpanded, setIsCommentExpanded] = useState(false);
+        const [isExpanded, setIsExpanded] = useState(false);
     
         return (
             <>
-                <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                     <td className="p-3 align-top whitespace-normal break-words text-gray-800 dark:text-gray-200">
-                         {isLongComment ? (
-                            <button onClick={() => setIsCommentExpanded(p => !p)} className="flex items-start gap-2 text-left text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                                <ChatBubbleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                                <span className="italic">
-                                    {item.comments.substring(0, COMMENT_TRUNCATE_LENGTH)}...
-                                </span>
-                            </button>
-                        ) : (
-                            hasComment ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>
-                        )}
+                <tr 
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                    onClick={() => setIsExpanded(p => !p)}
+                >
+                    <td className="p-3 align-top whitespace-normal break-words text-gray-800 dark:text-gray-200">
+                        {item.comments ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>}
                     </td>
                     <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
                     <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
                     <td className="p-3 align-top text-gray-600 dark:text-gray-400">{new Date(item.createdAt).toLocaleString()}</td>
                     <td className="p-3 align-top text-right">
                         <button 
-                            onClick={() => handleAction(`delete-report-${item.id}`, () => userService.deleteMessageReport(item.id))} 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAction(`delete-report-${item.id}`, () => userService.deleteMessageReport(item.id));
+                            }}
                             disabled={actionLoading[`delete-report-${item.id}`]}
                             className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
                             title={t('admin_codes_delete')}
@@ -276,11 +269,23 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                         </button>
                     </td>
                 </tr>
-                {isCommentExpanded && (
+                {isExpanded && (
                     <tr className="bg-gray-50 dark:bg-gray-900/30 animate-fadeIn">
                         <td colSpan={5} className="p-4 border-b border-gray-200 dark:border-gray-700">
-                            <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">Full Comment</h5>
-                            <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{item.comments}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">{t('admin_feedback_user_prompt')}</h5>
+                                    <div className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                        {item.lastUserMessage || 'N/A'}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">{t('admin_feedback_bot_response')}</h5>
+                                    <div className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                        {item.botResponse || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 )}

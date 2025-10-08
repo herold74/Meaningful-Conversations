@@ -11,6 +11,7 @@ import { StarIcon } from './icons/StarIcon';
 import Spinner from './shared/Spinner';
 import * as userService from '../services/userService';
 import { buildUpdatedContext, normalizeHeadline, getExistingHeadlines, AppliedUpdatePayload } from '../utils/contextUpdater';
+import { WarningIcon } from './icons/WarningIcon';
 
 
 const removeGamificationKey = (text: string) => {
@@ -56,7 +57,19 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
 
+    const handleRatingClick = (starValue: number) => {
+        if (feedbackStatus !== 'idle') return;
+
+        if (rating === starValue) {
+            setRating(0);
+            setFeedbackText('');
+        } else {
+            setRating(starValue);
+        }
+    };
+
     const cleanOriginalContext = useMemo(() => removeGamificationKey(originalContext), [originalContext]);
+    const isGuest = !currentUser;
 
     const submitRating = useCallback(async (ratingToSubmit: number, comments: string) => {
         if (feedbackStatus === 'submitting' || feedbackStatus === 'submitted') return;
@@ -247,16 +260,34 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
             <div className="w-full max-w-4xl p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+                
+                {isGuest && (
+                    <div className="p-4 mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4">
+                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                        <div>
+                            <h3 className="font-bold text-lg">{t('sessionReview_guestWarning_title')}</h3>
+                            <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p1') }} />
+                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p2') }} />
+                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p3') }} />
+                        </div>
+                    </div>
+                )}
+
                 <div className="text-center">
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('sessionReview_title')}</h1>
                     <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">{t('sessionReview_subtitle')}</p>
                 </div>
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center gap-4">
                         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_summary')}</h2>
-                        <button onClick={handleDownloadSummary} className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-transparent border border-green-600 dark:border-green-400 uppercase hover:bg-green-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black">
-                           <DownloadIcon className="w-4 h-4" /> {t('sessionReview_downloadSummary')}
+                        <button 
+                            onClick={handleDownloadSummary} 
+                            className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-transparent border border-green-600 dark:border-green-400 uppercase hover:bg-green-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black"
+                            title={t('sessionReview_downloadSummary')}
+                        >
+                           <DownloadIcon className="w-4 h-4" />
+                           <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
                         </button>
                     </div>
                     <p className="mt-2 text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{newFindings}</p>
@@ -269,7 +300,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {[1, 2, 3, 4, 5].map((star) => (
                             <button
                                 key={star}
-                                onClick={() => feedbackStatus === 'idle' && setRating(star)}
+                                onClick={() => handleRatingClick(star)}
                                 onMouseEnter={() => setHoverRating(star)}
                                 onMouseLeave={() => setHoverRating(0)}
                                 className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}

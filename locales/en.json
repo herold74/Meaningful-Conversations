@@ -184,6 +184,10 @@
   "sessionReview_switchCoach": "Switch Coach",
   "sessionReview_saveAndSwitch": "Save & Switch Coach",
   "sessionReview_startOver": "Start Over (Discard Changes)",
+  "sessionReview_guestWarning_title": "Important Note for Guest Users",
+  "sessionReview_guestWarning_p1": "Your session progress is <strong>not saved automatically</strong>.",
+  "sessionReview_guestWarning_p2": "To keep your new insights, you <strong>must download</strong> your updated context file using the button below.",
+  "sessionReview_guestWarning_p3": "If you decide to register or log in later, you will need to upload this downloaded file to restore your progress.",
 
   "contextUpdater_title": "Context Updater",
 
