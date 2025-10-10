@@ -239,3 +239,13 @@ When deploying, you do **not** need to set the `DATABASE_URL` variable. Instead,
 -   `INSTANCE_UNIX_SOCKET`: This is the crucial variable for connecting to Cloud SQL. It should be set to `/cloudsql/YOUR_PROJECT_ID:YOUR_REGION:YOUR_INSTANCE_NAME`.
 
 The server code (`prismaClient.js`) will automatically detect the `INSTANCE_UNIX_SOCKET` variable and construct the correct database connection string, ignoring `DATABASE_URL`.
+
+### Example: Connecting to a Staging Database
+
+To connect to a staging database with the instance connection name `gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`, you would set the following environment variables in your **staging Cloud Run service**:
+
+-   **`DB_USER`**: `your_staging_database_user`
+-   **`DB_PASSWORD`**: `your_staging_database_password` (preferably from Secret Manager)
+-   **`INSTANCE_UNIX_SOCKET`**: `/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`
+
+With these variables set, the backend code will automatically connect to the correct database when deployed.

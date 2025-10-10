@@ -5,31 +5,30 @@ interface Session {
     user: User;
 }
 
-// TypeScript needs to know about the global variable that might be injected by AI Studio.
-declare global {
-  // Use `var` for global scope declaration that can be checked with `in` or `typeof`
-  var AISTUDIO_BACKEND_URL: string | undefined;
-}
-
 // --- CONFIGURATION ---
+
+// SET THIS TO 'production' BEFORE FINAL DEPLOYMENT.
+// This flag controls the default backend URL for non-local environments.
+// 'staging' is used here to ensure the AI Studio preview connects to the test database.
+const DEFAULT_BACKEND_ENVIRONMENT: 'staging' | 'production' = 'staging';
+
 const BACKEND_URLS = {
     // This is the stable, live backend for real users.
-    production: 'https://meaningful-conversations-backend-650095539575.europe-west6.run.app',
+    production: 'https://meaningful-conversations-backend-0944710545.europe-west6.run.app',
     // This is the testing backend for new features.
-    staging: 'https://meaningful-conversations-backend-staging-650095539575.europe-west6.run.app',
+    staging: 'https://meaningful-conversations-backend-staging-0944710545.europe-west6.run.app',
     // This is for running the backend on your local machine.
     // The backend server defaults to port 3001, while the frontend is usually served on 3000.
     local: 'http://localhost:3001'
 };
 
 const getApiBaseUrl = (): string => {
-    // This function is only called once, so logging here is fine for initial setup diagnosis.
     console.log("Determining API base URL...");
     
     const urlParams = new URLSearchParams(window.location.search);
     const backendParam = urlParams.get('backend');
 
-    // Priority 1: Use URL parameter for explicit override during development.
+    // Priority 1: Use URL parameter for explicit override.
     if (backendParam === 'staging') {
         console.log(`Using 'staging' backend via URL parameter: ${BACKEND_URLS.staging}`);
         return BACKEND_URLS.staging;
@@ -43,23 +42,22 @@ const getApiBaseUrl = (): string => {
         return BACKEND_URLS.production;
     }
 
-    // Priority 2: Use the environment variable if injected by the platform (e.g., AI Studio).
-    if (typeof AISTUDIO_BACKEND_URL === 'string' && AISTUDIO_BACKEND_URL) {
-        const cleanedUrl = AISTUDIO_BACKEND_URL.replace(/\/$/, '');
-        console.log(`Using injected AISTUDIO_BACKEND_URL: ${cleanedUrl}`);
-        return cleanedUrl;
-    }
-
     const hostname = window.location.hostname;
 
-    // Priority 3: If running on localhost without a URL param, default to the 'local' backend for safety.
+    // Priority 2: If running on localhost, default to the 'local' backend.
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        console.log(`Detected local environment. Defaulting to 'local' backend: ${BACKEND_URLS.local}. Use ?backend=staging or ?backend=production to override.`);
+        console.log(`Detected local environment. Defaulting to 'local' backend: ${BACKEND_URLS.local}.`);
         return BACKEND_URLS.local;
     }
 
-    // Priority 4: Default to PRODUCTION for any other case (i.e., the live, deployed application).
-    console.log(`Defaulting to 'production' backend: ${BACKEND_URLS.production}.`);
+    // Priority 3: Default based on the configuration flag for all other environments (like AI Studio or a deployed app).
+    if (DEFAULT_BACKEND_ENVIRONMENT === 'staging') {
+        console.log(`Defaulting to 'staging' backend based on configuration flag: ${BACKEND_URLS.staging}.`);
+        return BACKEND_URLS.staging;
+    } 
+    
+    // Final fallback to production.
+    console.log(`Defaulting to 'production' backend based on configuration flag: ${BACKEND_URLS.production}.`);
     return BACKEND_URLS.production;
 };
 

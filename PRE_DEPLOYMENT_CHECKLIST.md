@@ -6,6 +6,7 @@ This checklist provides a concise summary of steps to ensure a smooth and succes
 
 ### ✅ 1. Code & Configuration
 
+-   [ ] **Frontend Backend URL:** In `services/api.ts`, ensure the `DEFAULT_BACKEND_ENVIRONMENT` constant is set to `'production'`.
 -   [ ] **Final Code Review:** Ensure all new code has been tested locally and is ready for release.
 -   [ ] **Dependencies:** Run `npm install` in the `meaningful-conversations-backend` directory to ensure `package-lock.json` is up-to-date with any new packages.
 -   [ ] **Schema Check:** Verify that the `prisma/schema.prisma` file includes all necessary model changes. The server will handle the migration automatically, but the schema file itself must be correct.
