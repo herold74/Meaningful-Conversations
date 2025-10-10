@@ -66,10 +66,26 @@ router.post('/chat/send-message', async (req, res) => {
 // POST /api/gemini/session/analyze
 router.post('/session/analyze', async (req, res) => {
     const { history, context } = req.body;
-    const lang = req.body.lang === 'de' ? 'de' : 'en'; // Defensive check
+    const lang = req.body.lang === 'de' ? 'de' : 'en'; // UI language
 
     if (!history || !context) {
         return res.status(400).json({ error: "Missing history or context." });
+    }
+    
+    // Determine the language for the proposed updates by checking the context file.
+    const contextLang = context.includes('Lebenskontext') ? 'de' : 'en';
+    
+    // Get the correct prompt template based on the UI language.
+    const promptTemplate = analysisPrompts[lang];
+    let finalPrompt;
+
+    // Inject the explicit language for the updates into the prompt.
+    if (lang === 'de') {
+        const updateLangName = contextLang === 'de' ? 'Deutsch' : 'Englisch';
+        finalPrompt = promptTemplate.replace('{{UPDATE_LANGUAGE}}', updateLangName);
+    } else { // lang === 'en'
+        const updateLangName = contextLang === 'de' ? 'German' : 'English';
+        finalPrompt = promptTemplate.replace('{{UPDATE_LANGUAGE}}', updateLangName);
     }
 
     const chatTranscript = history.map(h => `${h.role === 'user' ? 'Client' : 'Coach'}: ${h.text}`).join('\n');
@@ -80,7 +96,7 @@ router.post('/session/analyze', async (req, res) => {
         const [contextResult, blockageResult] = await Promise.all([
             ai.models.generateContent({
                 model: "gemini-2.5-flash",
-                contents: `${analysisPrompts[lang]}\n\nExisting Headlines:\n${existingHeadlines}\n\nLife Context:\n${context}\n\nConversation Transcript:\n${chatTranscript}`,
+                contents: `${finalPrompt}\n\nExisting Headlines:\n${existingHeadlines}\n\nLife Context:\n${context}\n\nConversation Transcript:\n${chatTranscript}`,
                 config: { responseMimeType: "application/json", responseSchema: contextResponseSchema },
             }),
             ai.models.generateContent({

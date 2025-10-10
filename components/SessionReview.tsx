@@ -276,6 +276,31 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return t(`sessionReview_action_${type.toLowerCase()}`);
     };
 
+    const getActionTypeClasses = (type: 'append' | 'replace_section' | 'create_headline') => {
+        switch (type) {
+            case 'append':
+                return {
+                    bg: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+                    border: 'border-green-200 dark:border-green-700',
+                };
+            case 'replace_section':
+                return {
+                    bg: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+                    border: 'border-yellow-200 dark:border-yellow-700',
+                };
+            case 'create_headline':
+                return {
+                    bg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+                    border: 'border-blue-200 dark:border-blue-700',
+                };
+            default:
+                return {
+                    bg: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+                    border: 'border-gray-200 dark:border-gray-700',
+                };
+        }
+    };
+
     const primaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
     const secondaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
     
@@ -450,13 +475,13 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                                     value={appliedUpdate.type}
                                                     onChange={(e) => handleUpdateTypeChange(index, e.target.value as 'append' | 'replace_section')}
                                                     disabled={!isApplied}
-                                                    className="p-1 text-sm font-mono bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border border-purple-200 dark:border-purple-700 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                                    className={`p-1 text-sm font-mono border ${getActionTypeClasses(appliedUpdate.type).bg} ${getActionTypeClasses(appliedUpdate.type).border} focus:outline-none focus:ring-1 focus:ring-green-500`}
                                                 >
                                                     <option value="append">{t('sessionReview_action_append')}</option>
                                                     <option value="replace_section">{t('sessionReview_action_replace_section')}</option>
                                                 </select>
                                             ) : (
-                                                <span className="text-sm font-mono px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 whitespace-nowrap">
+                                                <span className={`text-sm font-mono px-2 py-0.5 rounded ${getActionTypeClasses(appliedUpdate?.type || update.type).bg} whitespace-nowrap`}>
                                                     {getActionTypeTranslation(appliedUpdate?.type || update.type)}
                                                 </span>
                                             )}

@@ -3,13 +3,16 @@
 const { Type } = require('@google/genai');
 
 const analysisPrompts = {
-    en: `IMPORTANT RULE: Your entire response MUST be in English.
+    en: `You are an expert at analyzing coaching conversations and extracting relevant context about the client. Your goal is to help the user maintain a coherent and up-to-date "Life Context" document by proposing specific, actionable updates.
 
-You are an expert at analyzing coaching conversations and extracting relevant context about the client. Your goal is to help the user maintain a coherent and up-to-date "Life Context" document by proposing specific, actionable updates.
+**CRITICAL LANGUAGE RULES:**
+- The "summary", "nextSteps", and "explanation" fields in your JSON response MUST be in **English**.
+- The "content" field for all proposed "updates" MUST be in **{{UPDATE_LANGUAGE}}**.
+- All "content" for updates MUST be written from the user's first-person perspective (e.g., "I feel...", "My goal is..."). The text should sound like a personal journal entry.
 
 Analyze the provided conversation and the user's current Life Context, then follow these steps:
 
-1.  **Summarize New Findings:** First, write a concise summary (2-4 sentences) of the most important new information, insights, or decisions from the conversation.
+1.  **Summarize New Findings:** First, write a concise summary (2-4 sentences) in **English** of the most important new information, insights, or decisions from the conversation.
 
 2.  **Propose Coherent Updates:** Based on the new findings, generate a list of proposed updates. For each update, decide the best action to take after carefully considering the existing headlines:
     *   **\`append\`**: Use this to add new information to an existing section when the topic is clearly related. For example, an update about a new work project should be appended to the 'Career' or 'Work' section.
@@ -28,11 +31,14 @@ Analyze the following conversation history and life context.
 `,
     de: `Sie sind ein Experte für die Analyse von Coaching-Gesprächen und die Extraktion relevanter Kontexte über den Klienten. Ihr Ziel ist es, dem Benutzer dabei zu helfen, ein kohärentes und aktuelles "Lebenskontext"-Dokument zu pflegen, indem Sie spezifische, umsetzbare Aktualisierungen vorschlagen.
 
-**WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.**
+**KRITISCHE SPRACHREGELN:**
+- Die Felder "summary", "nextSteps" und "explanation" in Ihrer JSON-Antwort MÜSSEN auf **Deutsch** sein.
+- Das Feld "content" für alle vorgeschlagenen "updates" MUSS auf **{{UPDATE_LANGUAGE}}** sein.
+- Der gesamte "content" für Aktualisierungen MUSS aus der Ich-Perspektive des Klienten verfasst sein (z. B. "Ich fühle...", "Mein Ziel ist..."). Der Text sollte wie ein persönlicher Tagebucheintrag klingen.
 
 Analysieren Sie das bereitgestellte Gespräch und den aktuellen Lebenskontext des Benutzers und befolgen Sie dann diese Schritte:
 
-1.  **Neue Einsichten zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) der wichtigsten neuen Informationen, Einsichten oder Entscheidungen aus dem Gespräch.
+1.  **Neue Einsichten zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) auf **Deutsch** der wichtigsten neuen Informationen, Einsichten oder Entscheidungen aus dem Gespräch.
 
 2.  **Kohärente Aktualisierungen vorschlagen:** Erstellen Sie auf der Grundlage der neuen Einsichten eine Liste von vorgeschlagenen Aktualisierungen. Entscheiden Sie für jede Aktualisierung nach sorgfältiger Prüfung der vorhandenen Überschriften über die beste Vorgehensweise:
     *   **\`append\`**: Verwenden Sie dies, um neue Informationen zu einem vorhandenen Abschnitt hinzuzufügen, wenn das Thema eindeutig damit zusammenhängt. Zum Beispiel sollte eine Aktualisierung über ein neues Arbeitsprojekt an den Abschnitt 'Karriere' oder 'Arbeit' angehängt werden.
