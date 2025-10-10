@@ -6,9 +6,11 @@ const validateEnvVars = () => {
     // The presence of INSTANCE_UNIX_SOCKET is the most reliable indicator of a Cloud Run environment.
     const isCloudRun = !!process.env.INSTANCE_UNIX_SOCKET;
     
+    const baseRequired = ['API_KEY', 'JWT_SECRET', 'FRONTEND_URL', 'MAILJET_API_KEY', 'MAILJET_SECRET_KEY', 'MAILJET_SENDER_EMAIL'];
+
     const requiredVars = {
-        cloud: ['API_KEY', 'JWT_SECRET', 'DB_USER', 'DB_PASSWORD', 'INSTANCE_UNIX_SOCKET'],
-        local: ['API_KEY', 'JWT_SECRET', 'DATABASE_URL']
+        cloud: [...baseRequired, 'DB_USER', 'DB_PASSWORD', 'INSTANCE_UNIX_SOCKET'],
+        local: [...baseRequired, 'DATABASE_URL']
     };
 
     const varsToCheck = isCloudRun ? requiredVars.cloud : requiredVars.local;

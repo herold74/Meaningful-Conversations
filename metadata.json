@@ -1,5 +1,5 @@
 {
-  "name": "Meaningful Conversations 1.0.0",
+  "name": "Meaningful Conversations 1.1.0",
   "description": "An application that provides access to several coaching bot characters with different perspectives and coaching styles. \nUsers can create a 'life context' file to personalize conversations and update it with new insights after each session.",
   "requestFramePermissions": [
     "microphone"

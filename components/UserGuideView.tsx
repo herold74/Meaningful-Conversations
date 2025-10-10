@@ -36,6 +36,7 @@ const UserGuideView: React.FC<InfoViewProps> = ({ onBack }) => {
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('userGuide_analysis_title')}</h2>
                     <p>{t('userGuide_analysis_p1')}</p>
                     <p>{t('userGuide_analysis_p2')}</p>
+                    <p>{t('userGuide_analysis_p3')}</p>
                 </section>
 
                 <section>

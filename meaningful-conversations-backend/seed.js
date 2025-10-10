@@ -56,6 +56,7 @@ async function main() {
       encryptionSalt: salt,
       isAdmin: true, // This is the key part for creating an admin
       isBetaTester: true, // Admins should have access to all features
+      status: 'ACTIVE', // Set status to ACTIVE to bypass email confirmation
       lifeContext: '',
       gamificationState: defaultGamificationState,
       unlockedCoaches: '[]',

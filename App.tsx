@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bot, Message, User, GamificationState, SessionAnalysis, NavView } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
 import * as geminiService from './services/geminiService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
-import { decryptData } from './utils/encryption';
 
 
 // Component Imports
@@ -36,6 +35,9 @@ import RedeemCodeView from './components/RedeemCodeView';
 import AdminView from './components/AdminView';
 import ChangePasswordView from './components/ChangePasswordView';
 import DeleteAccountModal from './components/DeleteAccountModal';
+import RegistrationPendingView from './components/RegistrationPendingView';
+import VerifyEmailView from './components/VerifyEmailView';
+import ResetPasswordView from './components/ResetPasswordView';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -70,6 +72,7 @@ const App: React.FC = () => {
     const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userMessageCount, setUserMessageCount] = useState(0);
+    const [initialToken, setInitialToken] = useState<string | null>(null);
 
     // Theme
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -172,6 +175,27 @@ const App: React.FC = () => {
     useEffect(() => {
         // This effect handles app startup.
         const initialize = async () => {
+            // Check for URL-based routes first (email verification, password reset)
+            const urlParams = new URLSearchParams(window.location.search);
+            const route = urlParams.get('route');
+            const token = urlParams.get('token');
+
+            if (token) {
+                // Clear the URL to avoid re-triggering on refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+                setInitialToken(token);
+
+                if (route === 'verify-email') {
+                    setView('verifyEmail');
+                    return;
+                }
+                if (route === 'reset-password') {
+                    setView('resetPassword');
+                    return;
+                }
+            }
+
+            // Standard initialization if no token routes are found
             const session = api.getSession();
             if (session) {
                 // If a session exists, we don't have the encryption key.
@@ -281,6 +305,15 @@ const App: React.FC = () => {
     
     const handleEndSession = async () => {
         if (!selectedBot) return;
+
+        if (userMessageCount === 0) {
+            // No user interaction, simply go back to bot selection without analysis.
+            setSelectedBot(null);
+            setChatHistory([]);
+            setView('botSelection');
+            return;
+        }
+
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
@@ -310,20 +343,30 @@ const App: React.FC = () => {
         }
     };
     
-    const saveData = async (newContext: string, stateToSave: GamificationState, preventSave: boolean) => {
+    const saveData = async (newContext: string, stateToSave: GamificationState, preventCloudSave: boolean) => {
+        // Update local state immediately for a responsive UI.
         setLifeContext(newContext);
         setGamificationState(stateToSave);
-        if (currentUser && encryptionKey && !preventSave) {
+
+        // For registered users, persist data to the cloud.
+        if (currentUser && encryptionKey) {
             try {
-                await userService.saveUserData(newContext, serializeGamificationState(stateToSave), encryptionKey);
+                // Determine which context to save. If the user opted out of saving text changes,
+                // we send the original context back to the server. Otherwise, we send the new one.
+                const contextToSave = preventCloudSave ? lifeContext : newContext;
+                
+                // Crucially, we ALWAYS save the new gamification state to ensure progress is never lost.
+                await userService.saveUserData(contextToSave, serializeGamificationState(stateToSave), encryptionKey);
+
             } catch (error) {
                 console.error("Failed to save user data:", error);
+                // Optionally, add UI feedback for the user here.
             }
         }
     };
 
-    const handleContinueSession = (newContext: string, options: { preventSave: boolean }) => {
-        saveData(newContext, newGamificationState || gamificationState, options.preventSave);
+    const handleContinueSession = (newContext: string, options: { preventCloudSave: boolean }) => {
+        saveData(newContext, newGamificationState || gamificationState, options.preventCloudSave);
         if (selectedBot) {
             setView('chat');
         } else {
@@ -331,8 +374,8 @@ const App: React.FC = () => {
         }
     };
 
-    const handleSwitchCoach = (newContext: string, options: { preventSave: boolean }) => {
-        saveData(newContext, newGamificationState || gamificationState, options.preventSave);
+    const handleSwitchCoach = (newContext: string, options: { preventCloudSave: boolean }) => {
+        saveData(newContext, newGamificationState || gamificationState, options.preventCloudSave);
         setSelectedBot(null);
         setChatHistory([]);
         setView('botSelection');
@@ -379,8 +422,11 @@ const App: React.FC = () => {
                 />;
             }
             case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
-            case 'register': return <RegisterView onRegisterSuccess={handleLoginSuccess} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
+            case 'register': return <RegisterView onShowPending={() => setView('registrationPending')} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
+            case 'registrationPending': return <RegistrationPendingView onGoToLogin={() => setView('login')} />;
+            case 'verifyEmail': return <VerifyEmailView token={initialToken!} onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
+            case 'resetPassword': return <ResetPasswordView token={initialToken!} onResetSuccess={() => setView('login')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => setView('botSelection')} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
@@ -417,7 +463,7 @@ const App: React.FC = () => {
         }
     };
     
-    const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword'].includes(view);
+    const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view);
 
     return (

@@ -5,7 +5,6 @@ import { LogInIcon } from './icons/LogInIcon';
 import { UserIcon } from './icons/UserIcon';
 import { LogOutIcon } from './icons/LogOutIcon';
 import { XIcon } from './icons/XIcon';
-import { TrophyIcon } from './icons/TrophyIcon';
 import { ShieldIcon } from './icons/ShieldIcon';
 import { ListIcon } from './icons/ListIcon';
 import { QuestionMarkCircleIcon } from './icons/QuestionMarkCircleIcon';

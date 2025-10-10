@@ -52,19 +52,34 @@ export const login = async (email: string, password: string): Promise<{ user: Us
     return session;
 };
 
-export const register = async (email: string, password: string): Promise<{ user: User, token: string }> => {
-    const session = await apiFetch('/auth/register', {
+export const register = async (email: string, password: string): Promise<{ message: string }> => {
+    return await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
+    });
+};
+
+export const verifyEmail = async (token: string): Promise<{ user: User, token: string }> => {
+    const session = await apiFetch('/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
     });
     setSession(session);
     return session;
 };
 
+
 export const requestPasswordReset = async (email: string): Promise<void> => {
     await apiFetch('/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email }),
+    });
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<{ message: string }> => {
+    return await apiFetch('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, newPassword }),
     });
 };
 

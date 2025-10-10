@@ -48,7 +48,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
             setError(t('error_network_detailed', { url: err.backendUrl }));
         } else if (err.status === 401) {
             setError(t('login_error_credentials'));
-        } else {
+        } else if (err.status === 403) {
+            setError(err.message || 'An error occurred.'); // The backend sends a specific "pending verification" message.
+        }
+         else {
             setError(err.message || 'An unknown error occurred. Please try again.');
         }
     } finally {

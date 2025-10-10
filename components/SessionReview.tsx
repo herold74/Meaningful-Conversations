@@ -19,6 +19,24 @@ const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
+// This map makes the blockage name translation robust against API variations (e.g., returning German instead of English)
+const blockageApiToKeyMap: Record<string, string> = {
+    // English API names (as they should be)
+    'self-reproach': 'self-reproach',
+    'blaming others': 'blaming_others',
+    'expectational attitudes': 'expectational_attitudes',
+    'age regression': 'age_regression',
+    'dysfunctional loyalties': 'dysfunctional_loyalties',
+    // German variations that might be returned by the API
+    'selbstvorwürfe': 'self-reproach', // plural
+    'selbstvorwurf': 'self-reproach', // singular
+    'fremdbeschuldigung': 'blaming_others',
+    'erwartungshaltungen': 'expectational_attitudes', // plural
+    'erwartungshaltung': 'expectational_attitudes', // singular
+    'altersregression': 'age_regression',
+    'dysfunktionale loyalitäten': 'dysfunctional_loyalties', // plural
+};
+
 
 interface SessionReviewProps {
     newFindings: string;
@@ -28,8 +46,8 @@ interface SessionReviewProps {
     blockageScore: number;
     originalContext: string;
     selectedBot: Bot;
-    onContinueSession: (newContext: string, options: { preventSave: boolean }) => void;
-    onSwitchCoach: (newContext: string, options: { preventSave: boolean }) => void;
+    onContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => void;
+    onSwitchCoach: (newContext: string, options: { preventCloudSave: boolean }) => void;
     onReturnToStart: () => void;
     gamificationState: GamificationState;
     currentUser: User | null;
@@ -119,7 +137,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     });
     const [editableContext, setEditableContext] = useState('');
     const [isFinalContextVisible, setIsFinalContextVisible] = useState(false);
-    const [preventSave, setPreventSave] = useState(false);
+    const [preventCloudSave, setPreventCloudSave] = useState(false);
 
 
     const handleToggleUpdate = (index: number) => {
@@ -226,7 +244,12 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     };
 
     const getBlockageNameTranslation = (blockageName: string) => {
-        const key = `blockage_${blockageName.toLowerCase().replace(/ /g, '_').replace('with', '_with_')}`;
+        // Normalize the name from the API: just lowercase it to match the map keys.
+        const normalizedApiName = (blockageName || '').toLowerCase();
+        // Find the canonical key part from our map, or fall back to a simple transformation
+        const keyPart = blockageApiToKeyMap[normalizedApiName] || normalizedApiName.replace(/ /g, '_');
+        // Construct the final i18n key
+        const key = `blockage_${keyPart}`;
         return t(key);
     };
 
@@ -253,9 +276,10 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return t(`sessionReview_action_${type.toLowerCase()}`);
     };
 
-    const continueDisabled = currentUser && preventSave;
-    const primaryActionText = (currentUser && !preventSave) ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
-    const secondaryActionText = (currentUser && !preventSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
+    const primaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
+    const secondaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
+    
+    const blockageGridClass = "grid grid-cols-1 gap-4";
 
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
@@ -371,6 +395,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                             <div className="flex items-center gap-3">
                                 <UsersIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />
                                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">{t('sessionReview_blockages_title')}</h2>
+                                {!isBlockagesExpanded && solutionBlockages.length > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-bold text-white bg-blue-500 rounded-full animate-fadeIn">
+                                        {solutionBlockages.length}
+                                    </span>
+                                )}
                             </div>
                             <ChevronDownIcon className={`w-6 h-6 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${isBlockagesExpanded ? 'rotate-180' : ''}`} />
                         </button>
@@ -380,7 +409,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                      <p className="text-sm text-blue-700 dark:text-blue-300 italic">{t('sessionReview_blockages_subtitle')}</p>
                                     {solutionBlockages.length > 0 ? (
                                         <>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className={blockageGridClass}>
                                                 {solutionBlockages.map((blockage, index) => (
                                                     <div key={index} className="p-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50">
                                                         <h4 className="font-bold text-blue-800 dark:text-blue-300">{getBlockageNameTranslation(blockage.blockage)}</h4>
@@ -473,8 +502,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
-                                checked={preventSave}
-                                onChange={(e) => setPreventSave(e.target.checked)}
+                                checked={preventCloudSave}
+                                onChange={(e) => setPreventCloudSave(e.target.checked)}
                                 className="h-5 w-5 rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-yellow-600 focus:ring-yellow-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <div className="ml-3">
@@ -492,25 +521,18 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
                     </button>
                     <button
-                        onClick={() => onContinueSession(editableContext, { preventSave })}
-                        disabled={continueDisabled}
-                        className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
+                        onClick={() => onContinueSession(editableContext, { preventCloudSave })}
+                        className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500"
                     >
                         {primaryActionText}
                     </button>
                     <button
-                        onClick={() => onSwitchCoach(editableContext, { preventSave })}
-                        disabled={continueDisabled}
-                        className="flex-1 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
+                        onClick={() => onSwitchCoach(editableContext, { preventCloudSave })}
+                        className="flex-1 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
                         {secondaryActionText}
                     </button>
                 </div>
-                 {continueDisabled && (
-                    <div className="text-center text-sm text-yellow-600 dark:text-yellow-400 -mt-2">
-                        {t('sessionReview_preventSave_continueDisabled_tooltip')}
-                    </div>
-                )}
                  <div className="text-center pt-4">
                     <button onClick={onReturnToStart} className="text-sm text-gray-500 dark:text-gray-400 hover:underline">
                         {t('sessionReview_startOver')}

@@ -345,14 +345,14 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const messageReports = useMemo(() => feedback.filter(item => item.rating === null), [feedback]);
 
     const renderTabs = () => (
-        <div className="flex border-b border-gray-300 dark:border-gray-700">
+        <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
             {(['users', 'feedback', 'tickets', 'codes'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
                 return (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2 px-2 md:px-3 py-2 text-sm font-bold uppercase transition-colors focus:outline-none ${
+                        className={`flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-2 px-2 md:px-3 py-2 text-sm font-bold uppercase transition-colors focus:outline-none ${
                             activeTab === tab
                                 ? 'border-b-2 border-green-500 text-gray-900 dark:text-gray-100'
                                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -360,7 +360,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                         aria-label={t(key)}
                     >
                         <Icon className="w-5 h-5" />
-                        <span className="hidden md:inline">{t(key)}</span>
+                        <span 
+                            className="hidden lg:inline-block text-center leading-tight" 
+                            dangerouslySetInnerHTML={{ __html: t(key) }}
+                        />
                     </button>
                 )
             })}

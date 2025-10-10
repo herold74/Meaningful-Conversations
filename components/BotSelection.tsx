@@ -10,8 +10,6 @@ interface BotSelectionProps {
   currentUser: User | null;
 }
 
-// FIX: Moved BotCard outside the BotSelection component and provided it with all necessary props.
-// This resolves a TypeScript error with the `key` prop and improves performance by preventing re-declaration on each render.
 interface BotCardProps {
   bot: BotWithAvailability;
   onSelect: (bot: Bot) => void;

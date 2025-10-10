@@ -7,12 +7,12 @@ import Spinner from './shared/Spinner';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
 
 interface RegisterViewProps {
-  onRegisterSuccess: (user: User, key: CryptoKey) => void;
+  onShowPending: () => void;
   onSwitchToLogin: () => void;
   onBack: () => void;
 }
 
-const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitchToLogin, onBack }) => {
+const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLogin, onBack }) => {
   const { t } = useLocalization();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,16 +38,8 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
     }
     setIsLoading(true);
     try {
-      const { user } = await userService.register(trimmedEmail, trimmedPassword);
-      
-      if (!user.encryptionSalt) {
-            throw new Error("Encryption salt was not created for the new user.");
-      }
-      
-      const saltBytes = hexToUint8Array(user.encryptionSalt);
-      const key = await deriveKey(trimmedPassword, saltBytes);
-
-      onRegisterSuccess(user, key);
+      await userService.register(trimmedEmail, trimmedPassword);
+      onShowPending();
 
     } catch (err: any) {
         console.error("Registration failed:", err);

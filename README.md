@@ -38,26 +38,21 @@ This is a monorepo-style project containing both the frontend and the backend se
 
 ## 🚀 Getting Started
 
-Follow the steps below to set up and run the application locally.
+This project has two main parts: a **frontend** (the user interface in your browser) and a **backend** (the server that powers it). You need to run both in separate terminals.
 
 ### 1. Backend Setup
 
-The backend server is required for the frontend to function. Please follow the detailed setup instructions in the backend's README file:
+The backend server is required for the frontend to function. Please follow the detailed setup instructions in the backend's README file to install its dependencies, configure your `.env` file, and set up the database.
 
 **➡️ [`meaningful-conversations-backend/README.md`](./meaningful-conversations-backend/README.md)**
 
 ### 2. Frontend Setup
 
-The frontend is a modern React application that runs directly in the browser without a build step, thanks to import maps.
+The frontend is a modern React application that runs directly in the browser without a build step.
 
-1.  **Ensure the backend is running** and accessible (typically at `http://localhost:3001`).
-
-2.  **Configure the API endpoint**:
-    *   Open the `services/api.ts` file.
-    *   Ensure the `EXTERNALLY_HOSTED_BACKEND_URL` constant is either empty or points to your running backend instance. For local development, leaving it empty will cause the app to default to `http://localhost:3001`.
-
-3.  **Serve the frontend**:
-    *   From the project's **root directory**, use a simple static file server. The `serve` package is a good option.
+1.  **Serve the frontend files**:
+    *   **Important:** Make sure you are in the project's **root directory** (`Meaningful-Conversations-Project`), *not* the `meaningful-conversations-backend` subfolder.
+    *   Use a simple static file server. The `serve` package is a good option.
     ```bash
     # If you don't have 'serve' installed globally:
     npx serve .
@@ -66,8 +61,49 @@ The frontend is a modern React application that runs directly in the browser wit
     serve .
     ```
 
-4.  **Open the application**:
-    *   Open your browser to the address provided by the static server (e.g., `http://localhost:3000`).
+2.  **Open the application**:
+    *   Your terminal will show a local URL, typically `http://localhost:3000`. Open this in your browser. This is the **frontend** application.
+
+## ⚙️ Development Workflow: Local vs. Cloud
+
+It's important to understand the two ways you will run the backend.
+
+### Local Development (Your Machine)
+
+This is what you do when writing and testing code. You will need **two separate terminals**.
+
+#### **Terminal 1 (Backend):**
+
+1.  Navigate into the backend folder and start the server. This will run on port **3001**.
+    ```bash
+    cd meaningful-conversations-backend
+    npm run dev
+    ```
+
+#### **Terminal 2 (Frontend):**
+
+1.  Navigate to the **project root folder** and start the frontend server. This will run on port **3000**.
+    ```bash
+    # If you are in the backend folder from the previous step, go back up:
+    cd ..
+
+    # Now serve the files from the root folder:
+    npx serve .
+    ```
+
+#### **Testing in Your Browser:**
+
+Access your frontend at `http://localhost:3000` but add the `?backend=local` parameter to the URL:
+*   **URL**: `http://localhost:3000/?backend=local`
+*   This tells your frontend (running on `localhost:3000`) to send API requests to the backend server running on your local machine (at `localhost:3001`).
+
+### Cloud Deployment (Google Cloud Run)
+
+This is what you do when you are ready to publish your changes to a staging or production environment on the internet.
+
+1.  **Package and Deploy**: Follow the instructions in the **[`deployment_guide.md`](./deployment_guide.md)** to build your backend into a container and deploy it to a service like Google Cloud Run.
+2.  **Test the Deployed Backend**: To test your frontend against a deployed "staging" backend, use the `?backend=staging` parameter:
+    *   **URL**: `http://localhost:3000/?backend=staging`
 
 ## 🧠 Key Concepts
 
@@ -81,8 +117,3 @@ The frontend is a modern React application that runs directly in the browser wit
     5.  **Update**: Review the proposed changes, make manual edits if needed, and save (for registered users) or download your updated file for the next session.
 
 *   **Privacy & E2EE**: Privacy is a core design principle. In guest mode, nothing is stored on the server. For registered users, the Life Context is encrypted *before* it leaves your browser and can only be decrypted by you. **This means if you forget your password, your data is permanently irrecoverable.**
-
-## ☁️ Deployment
-
-*   **Backend**: The backend is designed for deployment on Google Cloud Run with a Cloud SQL instance. See the [backend README](./meaningful-conversations-backend/README.md) for more details.
-*   **Frontend**: The frontend is a static application and can be deployed to any static hosting service (e.g., Firebase Hosting, Vercel, Netlify, or Google Cloud Storage).

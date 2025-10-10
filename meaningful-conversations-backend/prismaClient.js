@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
 
 const getDbUrl = () => {
     // The most reliable way to detect a Cloud Run environment with a Cloud SQL
@@ -21,7 +22,7 @@ const getDbUrl = () => {
     }
 
     // If the socket is not present, assume local development and use DATABASE_URL.
-    console.log("Assuming local/development environment (no INSTANCE_UNIX_SOCKET). Falling back to DATABASE_URL.");
+    console.log("Assuming local/development environment (no INSTANCE_UNIX_SOCKET). Using DATABASE_URL from .env file.");
     const dbUrl = process.env.DATABASE_URL;
 
     if (!dbUrl) {

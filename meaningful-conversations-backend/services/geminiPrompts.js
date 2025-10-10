@@ -3,7 +3,9 @@
 const { Type } = require('@google/genai');
 
 const analysisPrompts = {
-    en: `You are an expert at analyzing coaching conversations and extracting relevant context about the client. Your goal is to help the user maintain a coherent and up-to-date "Life Context" document by proposing specific, actionable updates.
+    en: `IMPORTANT RULE: Your entire response MUST be in English.
+
+You are an expert at analyzing coaching conversations and extracting relevant context about the client. Your goal is to help the user maintain a coherent and up-to-date "Life Context" document by proposing specific, actionable updates.
 
 Analyze the provided conversation and the user's current Life Context, then follow these steps:
 
@@ -90,7 +92,9 @@ const contextResponseSchema = {
 };
 
 const blockageAnalysisPrompts = {
-    en: `You are a coaching analyst specializing in Process and Embodiment-focused Psychology (PEP) developed by Dr. Michael Bohne. Your task is to analyze a coaching conversation for signs of the 'Big 5' solution blockages.
+    en: `IMPORTANT RULE: Your entire response MUST be in English.
+
+You are a coaching analyst specializing in Process and Embodiment-focused Psychology (PEP) developed by Dr. Michael Bohne. Your task is to analyze a coaching conversation for signs of the 'Big 5' solution blockages.
 
 The 5 Solution Blockages (Definitions):
 1.  **Self-Reproach:** The client excessively blames themselves, dwells on feelings of guilt, or is highly self-critical about past actions or decisions.

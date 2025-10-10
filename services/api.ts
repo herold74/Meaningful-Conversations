@@ -12,23 +12,35 @@ declare global {
 }
 
 // --- CONFIGURATION ---
-// If deploying the backend to an external service like Google Cloud Run,
-// paste the service's public URL here. This will override any automatic detection.
-// Example: 'https://my-backend-service-xyz-uc.a.run.app'
-// FIX: Explicitly type as string to prevent TypeScript from inferring the type as an empty literal (''),
-// which would cause the variable's type to be 'never' within the subsequent 'if' block, leading to a type error.
-const EXTERNALLY_HOSTED_BACKEND_URL: string = 'https://meaningful-conversations-backend-650095539575.europe-west6.run.app'; // PASTE YOUR CLOUD RUN URL HERE
-
+const BACKEND_URLS = {
+    // This is the stable, live backend for real users.
+    production: 'https://meaningful-conversations-backend-650095539575.europe-west6.run.app',
+    // This is the testing backend for new features.
+    staging: 'https://meaningful-conversations-backend-staging-650095539575.europe-west6.run.app',
+    // This is for running the backend on your local machine.
+    // The backend server defaults to port 3001, while the frontend is usually served on 3000.
+    local: 'http://localhost:3001'
+};
 
 const getApiBaseUrl = (): string => {
     // This function is only called once, so logging here is fine for initial setup diagnosis.
     console.log("Determining API base URL...");
     
-    // Priority 1: Use the explicitly configured URL if provided for external deployments like Cloud Run.
-    if (EXTERNALLY_HOSTED_BACKEND_URL) {
-        const cleanedUrl = EXTERNALLY_HOSTED_BACKEND_URL.replace(/\/$/, '');
-        console.log(`Using configured EXTERNALLY_HOSTED_BACKEND_URL: ${cleanedUrl}`);
-        return cleanedUrl;
+    const urlParams = new URLSearchParams(window.location.search);
+    const backendParam = urlParams.get('backend');
+
+    // Priority 1: Use URL parameter for explicit override during development.
+    if (backendParam === 'staging') {
+        console.log(`Using 'staging' backend via URL parameter: ${BACKEND_URLS.staging}`);
+        return BACKEND_URLS.staging;
+    }
+    if (backendParam === 'local') {
+        console.log(`Using 'local' backend via URL parameter: ${BACKEND_URLS.local}`);
+        return BACKEND_URLS.local;
+    }
+    if (backendParam === 'production') {
+        console.log(`Using 'production' backend via URL parameter: ${BACKEND_URLS.production}`);
+        return BACKEND_URLS.production;
     }
 
     // Priority 2: Use the environment variable if injected by the platform (e.g., AI Studio).
@@ -38,20 +50,17 @@ const getApiBaseUrl = (): string => {
         return cleanedUrl;
     }
 
-    // Priority 3: Auto-detect based on hostname for specific integrated environments.
     const hostname = window.location.hostname;
-    // A truthy hostname that is not a local address indicates a remote environment.
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        const backendHostname = `3001-${hostname}`;
-        const constructedUrl = `https://${backendHostname}`;
-        console.log(`Detected remote environment ('${hostname}'). Constructed backend URL: ${constructedUrl}`);
-        return constructedUrl;
+
+    // Priority 3: If running on localhost without a URL param, default to the 'local' backend for safety.
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        console.log(`Detected local environment. Defaulting to 'local' backend: ${BACKEND_URLS.local}. Use ?backend=staging or ?backend=production to override.`);
+        return BACKEND_URLS.local;
     }
 
-    // Priority 4: Fallback for standard local development or when hostname is invalid.
-    const defaultUrl = 'http://localhost:3001';
-    console.log(`Detected localhost or invalid hostname. Defaulting to local development URL: ${defaultUrl}`);
-    return defaultUrl;
+    // Priority 4: Default to PRODUCTION for any other case (i.e., the live, deployed application).
+    console.log(`Defaulting to 'production' backend: ${BACKEND_URLS.production}.`);
+    return BACKEND_URLS.production;
 };
 
 const API_BASE_URL = getApiBaseUrl();
