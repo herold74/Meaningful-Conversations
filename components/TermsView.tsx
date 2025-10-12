@@ -24,15 +24,10 @@ Der Dienst bietet Zugang zu KI-gesteuerten Coaching-Gesprächen, die zur Selbstr
 ## 3. Verantwortlichkeiten des Benutzers
 Sie stimmen zu, den Dienst nicht für rechtswidrige Zwecke zu nutzen. Sie sind während und außerhalb der Coaching-Einheiten in jeder Phase der Arbeit mit der Anwendung **eigenverantwortlich**. Sie sind für Ihre körperliche und geistige Gesundheit sowie Ihr Wohlbefinden in vollem Umfang selbst verantwortlich. Sämtliche Maßnahmen, die Sie aufgrund des Coachings durchführen, liegen in Ihrem alleinigen Verantwortungsbereich.
 
-## 4. Haftungsbeschränkung (Schadenersatz)
-(1) Die Haftung des Anbieters für Schäden ist auf Vorsatz oder grobe Fahrlässigkeit beschränkt.
-(2) Die Haftung für **Personenschäden** (Verletzung des Lebens, des Körpers oder der Gesundheit), die auf leichter Fahrlässigkeit beruhen, wird durch diese AGB **nicht** ausgeschlossen oder beschränkt.
-(3) Im Übrigen (reine Vermögensschäden) ist die Haftung des Anbieters bei leichter Fahrlässigkeit ausgeschlossen, sofern es sich dabei nicht um die Verletzung von Kardinalpflichten handelt. In diesem Fall ist die Haftung betragsmäßig auf das vom Anwender für die konkrete Leistung tatsächlich bezahlte Honorar beschränkt.
-
-## 5. Dienstverfügbarkeit und Änderungen
+## 4. Dienstverfügbarkeit und Änderungen
 Wir behalten uns das Recht vor, den Dienst oder einzelne Funktionen jederzeit ohne Vorankündigung zu ändern oder einzustellen. Die gesetzliche Gewährleistung für die **Funktionalität der Anwendung** (wie im Handbuch beschrieben) bleibt hiervon unberührt.
 
-## 6. Änderungen der Bedingungen
+## 5. Änderungen der Bedingungen
 Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Wir werden Sie über alle Änderungen informieren, indem wir die neuen Bedingungen innerhalb des Dienstes veröffentlichen.
 `;
 
@@ -52,15 +47,10 @@ The Service provides access to AI-powered coaching conversations intended for se
 ## 3. User Responsibilities
 You agree not to use the Service for any unlawful purpose. You act **on your own responsibility** during and outside of coaching sessions at every stage of working with the application. You are fully responsible for your physical and mental health and well-being. All measures taken as a result of the coaching are solely your responsibility.
 
-## 4. Limitation of Liability (Damages)
-(1) The provider's liability for damages is limited to intent or gross negligence.
-(2) Liability for **personal injury** (injury to life, body, or health) based on slight negligence is **not** excluded or limited by these terms and conditions.
-(3) In all other respects (pure financial losses), the provider's liability for slight negligence is excluded, provided that it does not involve the violation of cardinal obligations. In this case, the liability is limited to the fee actually paid by the user for the specific service.
-
-## 5. Service Availability and Modifications
+## 4. Service Availability and Modifications
 We reserve the right to modify or discontinue the Service, or any feature thereof, at any time without notice. The statutory warranty for the **functionality of the application** (as described in the user manual) remains unaffected.
 
-## 6. Changes to Terms
+## 5. Changes to Terms
 We reserve the right to modify these Terms at any time. We will notify you of any changes by posting the new Terms within the Service.
 `;
 

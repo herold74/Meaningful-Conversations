@@ -65,6 +65,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
 
                     {/* Items moved to the top */}
                     <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => handleNavigate('about')} />
+                    <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
                     <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => handleNavigate('disclaimer')} />
 
                     <hr className="border-gray-200 dark:border-gray-800 my-2" />
@@ -79,7 +80,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => handleNavigate('userGuide')} />
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => handleNavigate('faq')} />
                     <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
-                    <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
                 </nav>
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
