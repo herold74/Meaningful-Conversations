@@ -204,8 +204,6 @@
   "sessionReview_guestWarning_p2": "To keep your new insights, you <strong>must download</strong> your updated context file using the button below.",
   "sessionReview_guestWarning_p3": "If you decide to register or log in later, you will need to upload this downloaded file to restore your progress.",
 
-  "contextUpdater_title": "Context Updater",
-
   "achievements_title": "Achievements",
   "achievement_beta_pioneer_name": "Beta Pioneer",
   "achievement_beta_pioneer_desc": "Participated in the beta test.",
@@ -302,6 +300,7 @@
   "admin_codes_coach": "Unlocks Coach",
   "admin_codes_unlocks": "Unlocks",
   "admin_codes_unlock_access_pass": "1-Year Access Pass",
+  "admin_codes_unlock_access_pass_1m": "1-Month Access Pass",
   "admin_codes_unlock_premium": "Premium Status",
   "admin_codes_unlock_big5": "Big 5 Analysis",
   "admin_codes_usage": "Usage",

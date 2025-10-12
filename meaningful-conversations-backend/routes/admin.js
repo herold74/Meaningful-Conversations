@@ -159,6 +159,12 @@ router.post('/codes/:id/revoke', async (req, res) => {
                 currentExpiry.setFullYear(currentExpiry.getFullYear() - 1);
                 updateData.accessExpiresAt = currentExpiry;
             }
+        } else if (code.botId === 'ACCESS_PASS_1M') {
+             if (user.accessExpiresAt) {
+                const currentExpiry = new Date(user.accessExpiresAt);
+                currentExpiry.setMonth(currentExpiry.getMonth() - 1);
+                updateData.accessExpiresAt = currentExpiry;
+            }
         } else if (code.botId === 'premium') {
             updateData.isBetaTester = false;
         } else {

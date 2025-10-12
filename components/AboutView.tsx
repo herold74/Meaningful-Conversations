@@ -9,14 +9,16 @@ interface InfoViewProps {
     onBack: () => void;
 }
 
-const de_markdown = `Möchten Sie die Erkenntnisse aus Ihrem Coaching im Alltag vertiefen oder suchen Sie einen unkomplizierten Weg zur Selbstreflexion? "Sinnstiftende Gespräche" wurde genau dafür entwickelt. Die App ist Ihre intelligente Ergänzung zum professionellen Coaching und eine moderne Alternative zum Selbsthilfebuch – ein persönlicher Raum für Ihre Weiterentwicklung, der Ihnen jederzeit zur Verfügung steht.
+const de_markdown_part1 = `Möchten Sie die Erkenntnisse aus Ihrem Coaching im Alltag vertiefen oder suchen Sie einen unkomplizierten Weg zur Selbstreflexion? "Sinnstiftende Gespräche" wurde genau dafür entwickelt. Die App ist Ihre intelligente Ergänzung zum professionellen Coaching und eine moderne Alternative zum Selbsthilfebuch – ein persönlicher Raum für Ihre Weiterentwicklung, der Ihnen jederzeit zur Verfügung steht.
 
 ## Unsere Philosophie: Fragen statt Antworten
 
 Wir sind überzeugt: Die besten Antworten tragen Sie bereits in sich. Unsere Mission ist es, Ihnen zu helfen, diese durch einen klaren und fokussierten Dialog zu finden. Basierend auf der stärkenorientierten Haltung der Positiven Psychologie schaffen wir einen absolut privaten Raum für Ihre Erkenntnisse. Wir stellen die richtigen Fragen, damit Sie wachsen können.
+`;
 
-Ganz im Sinne von: **Do it yourself, but not alone\\!**
+const de_centered_text = `Ganz im Sinne von: **Do it yourself, but not alone\\!**`;
 
+const de_markdown_part2 = `
 ## Wie es funktioniert
 
 "Sinnstiftende Gespräche" verbindet Ihre persönlichen Notizen und Ziele mit der fortschrittlichen KI von Google. Stellen Sie sich einen privaten Coach mit einem großartigen Gedächtnis und vertraulichen Notizen vor: Die App arbeitet mit dem Kontext Ihrer bisherigen Gespräche. Das ermöglicht es Ihnen, Ziele zu verfolgen, Herausforderungen aus verschiedenen Blickwinkeln zu betrachten und Ihren Fortschritt nachhaltig zu reflektieren.
@@ -24,15 +26,16 @@ Ganz im Sinne von: **Do it yourself, but not alone\\!**
 
 const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**manualmode.at**](http://manualmode.at) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
 
-
-const en_markdown = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "Meaningful Conversations" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
+const en_markdown_part1 = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "Meaningful Conversations" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
 
 ## Our philosophy: Questions instead of Answers
 
 We are convinced: You already carry the best answers within you. Our mission is to help you find them through clear and focused dialogue. Based on the strengths-oriented approach of Positive Psychology, we create an absolutely private space for your insights. We ask the right questions so you can grow.
+`;
 
-In the spirit of: **Do it yourself, but not alone\\!**
+const en_centered_text = `In the spirit of: **Do it yourself, but not alone\\!**`;
 
+const en_markdown_part2 = `
 ## How it works
 
 "Meaningful Conversations" connects your personal notes and goals with Google's advanced AI. Imagine a private coach with a great memory and confidential notes: The app works with the context of your previous conversations. This allows you to pursue goals, view challenges from different angles, and sustainably reflect on your progress.
@@ -43,7 +46,9 @@ const en_highlight = `And if you want direct exchange, you can contact a certifi
 
 const AboutView: React.FC<InfoViewProps> = ({ onBack }) => {
     const { t, language } = useLocalization();
-    const markdownContent = language === 'de' ? de_markdown : en_markdown;
+    const markdownPart1 = language === 'de' ? de_markdown_part1 : en_markdown_part1;
+    const centeredText = language === 'de' ? de_centered_text : en_centered_text;
+    const markdownPart2 = language === 'de' ? de_markdown_part2 : en_markdown_part2;
     const highlightContent = language === 'de' ? de_highlight : en_highlight;
 
     return (
@@ -61,7 +66,28 @@ const AboutView: React.FC<InfoViewProps> = ({ onBack }) => {
                         h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
                     }}
                 >
-                    {markdownContent}
+                    {markdownPart1}
+                </ReactMarkdown>
+
+                {/* Fix: Moved className from ReactMarkdown to the parent div. The ReactMarkdown component doesn't accept a className prop. */}
+                <div className="not-prose text-center my-6 text-lg italic text-gray-600 dark:text-gray-400">
+                    <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            p: ({node, ...props}) => <p className="mb-0" {...props} />,
+                        }}
+                    >
+                        {centeredText}
+                    </ReactMarkdown>
+                </div>
+                
+                 <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
+                    }}
+                >
+                    {markdownPart2}
                 </ReactMarkdown>
             </div>
             <div className="p-4 mt-6 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 text-green-800 dark:text-green-300 flex items-start gap-4 not-prose">
