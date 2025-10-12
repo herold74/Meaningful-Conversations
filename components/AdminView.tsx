@@ -16,12 +16,17 @@ import { StarIcon } from './icons/StarIcon';
 import { ShieldIcon } from './icons/ShieldIcon';
 import { WarningIcon } from './icons/WarningIcon';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
+import { RepeatIcon } from './icons/RepeatIcon';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import { ChevronUpIcon } from './icons/ChevronUpIcon';
 
 interface AdminViewProps {
     onBack: () => void;
+    currentUser: User | null;
 }
 
 type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback';
+type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
 
 const ResetPasswordSuccessModal: React.FC<{
     data: { email: string; newPass: string };
@@ -177,7 +182,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
     );
 };
 
-const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
+const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<AdminTab>('tickets');
     const [isLoading, setIsLoading] = useState(true);
@@ -189,12 +194,15 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [feedback, setFeedback] = useState<Feedback[]>([]);
 
+    const [sortConfig, setSortConfig] = useState<{ key: CodeSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
+
     const botsForCodes = useMemo(() => {
         return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'chloe-cbt');
     }, []);
 
-    const [newCodeBotId, setNewCodeBotId] = useState('premium');
+    const [newCodeBotId, setNewCodeBotId] = useState('ACCESS_PASS_1Y');
     const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [codeEmailFilter, setCodeEmailFilter] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
     const [userToReset, setUserToReset] = useState<User | null>(null);
@@ -212,7 +220,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                 userService.getAdminFeedback(),
             ]);
             setUsers(usersData.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()));
-            setCodes(codesData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            setCodes(codesData); // Sorting is now handled in useMemo
             setTickets(ticketsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
             setFeedback(feedbackData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         } catch (err: any) {
@@ -326,13 +334,61 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
         if (!userSearchQuery) return users;
         return users.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
     }, [users, userSearchQuery]);
-    
+
+    const filteredCodes = useMemo(() => {
+        const trimmedFilter = codeEmailFilter.trim().toLowerCase();
+        if (!trimmedFilter) return codes;
+        return codes.filter(code => 
+            code.usedBy && code.usedBy.email.toLowerCase().includes(trimmedFilter)
+        );
+    }, [codes, codeEmailFilter]);
+
     const getUnlockName = useCallback((botId: string): string => {
+        if (botId === 'ACCESS_PASS_1Y') return t('admin_codes_unlock_access_pass');
         if (botId === 'premium') return t('admin_codes_unlock_premium');
         if (botId === 'big5') return t('admin_codes_unlock_big5');
         const bot = BOTS.find(b => b.id === botId);
         return bot?.name || botId;
     }, [t]);
+
+    const sortedAndFilteredCodes = useMemo(() => {
+        let sortableItems = [...filteredCodes];
+        if (sortConfig !== null) {
+            sortableItems.sort((a, b) => {
+                let compare = 0;
+                switch (sortConfig.key) {
+                    case 'unlocks': {
+                        const aValue = getUnlockName(a.botId);
+                        const bValue = getUnlockName(b.botId);
+                        compare = aValue.localeCompare(bValue);
+                        break;
+                    }
+                    case 'createdAt': {
+                        const aValue = new Date(a.createdAt).getTime();
+                        const bValue = new Date(b.createdAt).getTime();
+                        compare = aValue - bValue;
+                        break;
+                    }
+                    case 'usage': {
+                        const aValue = a.isUsed ? (a.usedBy?.email || 'Used') : 'Available';
+                        const bValue = b.isUsed ? (b.usedBy?.email || 'Used') : 'Available';
+                        compare = aValue.localeCompare(bValue);
+                        break;
+                    }
+                }
+                return sortConfig.direction === 'asc' ? compare : -compare;
+            });
+        }
+        return sortableItems;
+    }, [filteredCodes, sortConfig, getUnlockName]);
+
+    const requestSort = (key: CodeSortKeys) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
 
     const tabConfig: Record<AdminTab, { icon: React.FC<any>, key: string }> = {
         users: { icon: UsersIcon, key: 'admin_users_tab' },
@@ -380,9 +436,9 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                 className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
             />
              {filteredUsers.length > 0 ? (
-                <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
+                        <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
                                 <th className="p-3">{t('admin_users_email')}</th>
                                 <th className="p-3">{t('admin_users_joined')}</th>
@@ -393,35 +449,45 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                            {filteredUsers.map(user => (
-                                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                    <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
-                                    <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
-                                    <td className="p-3">
-                                        <div className="flex items-center gap-3">
-                                            {user.isBetaTester && (
-                                                <span title={t('admin_users_premium')}>
-                                                    <StarIcon className="w-5 h-5 text-blue-500" />
-                                                </span>
-                                            )}
-                                            {user.isAdmin && (
-                                                <span title={t('admin_users_admin')}>
-                                                    <ShieldIcon className="w-5 h-5 text-purple-500" />
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
-                                    <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
-                                    <td className="p-3">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
-                                            <button onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} disabled={actionLoading[`toggle-admin-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_admin')}><ShieldIcon className="w-5 h-5" /></button>
-                                            <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {filteredUsers.map(user => {
+                                const isCurrentUser = currentUser?.id === user.id;
+                                return (
+                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}>
+                                        <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
+                                        <td className="p-3">
+                                            <div className="flex items-center gap-3">
+                                                {user.isBetaTester && (
+                                                    <span title={t('admin_users_premium')}>
+                                                        <StarIcon className="w-5 h-5 text-blue-500" />
+                                                    </span>
+                                                )}
+                                                {user.isAdmin && (
+                                                    <span title={t('admin_users_admin')}>
+                                                        <ShieldIcon className="w-5 h-5 text-purple-500" />
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
+                                        <td className="p-3">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
+                                                <button 
+                                                    onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
+                                                    disabled={actionLoading[`toggle-admin-${user.id}`] || isCurrentUser} 
+                                                    className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                                    title={isCurrentUser ? t('admin_users_cannot_change_self') : t('admin_users_toggle_admin')}
+                                                >
+                                                    <ShieldIcon className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -435,12 +501,13 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
     
     const renderCodes = () => (
         <div className="space-y-4">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800">
-                 <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_codes_generate_title')}</h3>
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4">
+                 <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_codes_generate_title')}</h3>
                 <form onSubmit={handleCreateCode} className="flex flex-col sm:flex-row items-stretch gap-3">
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
+                            <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
                             <option disabled>---</option>
@@ -451,21 +518,43 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                         {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
                     </button>
                 </form>
+                 <input 
+                    type="search"
+                    value={codeEmailFilter}
+                    onChange={e => setCodeEmailFilter(e.target.value)}
+                    placeholder={t('admin_codes_filter_email')}
+                    className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
             </div>
             {codes.length > 0 ? (
-                <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${sortedAndFilteredCodes.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
-                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
+                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
                                 <th className="p-3">{t('admin_codes_code')}</th>
-                                <th className="p-3">{t('admin_codes_unlocks')}</th>
-                                <th className="p-3">{t('admin_codes_created')}</th>
-                                <th className="p-3">{t('admin_codes_usage')}</th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('unlocks')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_unlocks')}
+                                        {sortConfig?.key === 'unlocks' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('createdAt')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_created')}
+                                        {sortConfig?.key === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('usage')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_usage')}
+                                        {sortConfig?.key === 'usage' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
                                 <th className="p-3 text-right">{t('admin_codes_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                            {codes.map(code => (
+                            {sortedAndFilteredCodes.map(code => (
                                 <tr key={code.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <td className="p-3 font-mono text-gray-800 dark:text-gray-200">
                                         <div className="flex items-center">
@@ -483,7 +572,18 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                             : <span className="px-2 py-1 text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full">{t('admin_codes_status_available')}</span>}
                                     </td>
                                     <td className="p-3 text-right">
-                                        <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
+                                        {code.isUsed ? (
+                                            <button 
+                                                onClick={() => handleAction(`revoke-code-${code.id}`, () => userService.revokeUpgradeCode(code.id))}
+                                                disabled={actionLoading[`revoke-code-${code.id}`]}
+                                                className="p-2 text-yellow-600 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" 
+                                                title={t('admin_codes_revoke')}
+                                            >
+                                                <RepeatIcon className="w-5 h-5" />
+                                            </button>
+                                        ) : (
+                                            <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -492,7 +592,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                 </div>
             ) : (
                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p>{t('admin_no_codes_yet')}</p>
+                    <p>{codes.length > 0 ? 'No codes found for this filter.' : t('admin_no_codes_yet')}</p>
                 </div>
             )}
         </div>
@@ -503,9 +603,9 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
             <div>
                 <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_support_tickets_title')}</h3>
                 {tickets.length > 0 ? (
-                    <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
+                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${tickets.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
+                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                 <tr>
                                     <th className="p-3">{t('admin_tickets_details')}</th>
                                     <th className="p-3">{t('admin_tickets_type')}</th>
@@ -559,7 +659,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
             <div>
                 <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
                 {messageReports.length > 0 ? (
-                    <div className="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-800">
+                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${messageReports.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                         <table className="w-full text-left text-sm">
                             <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                 <tr>
@@ -673,9 +773,9 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack }) => {
                                 <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
                             )}
                         </div>
-                        <div className="overflow-x-auto border border-gray-200 dark:border-gray-800">
+                        <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredFeedback.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400">
+                                <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                     <tr>
                                         <th className="p-3 w-28">{t('admin_feedback_rating')}</th>
                                         <th className="p-3">{t('admin_feedback_comments')}</th>

@@ -93,17 +93,17 @@ This is what you do when writing and testing code. You will need **two separate 
 
 #### **Testing in Your Browser:**
 
-Access your frontend at `http://localhost:3000` but add the `?backend=local` parameter to the URL:
-*   **URL**: `http://localhost:3000/?backend=local`
-*   This tells your frontend (running on `localhost:3000`) to send API requests to the backend server running on your local machine (at `localhost:3001`).
+Open your frontend at `http://localhost:3000`. It will **automatically connect** to your local backend server running on `localhost:3001`.
 
 ### Cloud Deployment (Google Cloud Run)
 
 This is what you do when you are ready to publish your changes to a staging or production environment on the internet.
 
 1.  **Package and Deploy**: Follow the instructions in the **[`deployment_guide.md`](./deployment_guide.md)** to build your backend into a container and deploy it to a service like Google Cloud Run.
-2.  **Test the Deployed Backend**: To test your frontend against a deployed "staging" backend, use the `?backend=staging` parameter:
+2.  **Test the Deployed Backend**: To test your local frontend against a deployed "staging" backend, use the `?backend=staging` parameter:
     *   **URL**: `http://localhost:3000/?backend=staging`
+
+> **CRITICAL:** Google Cloud Run assigns a unique URL to each service. Before testing a deployed backend, you **must** find this URL in your Google Cloud dashboard and ensure it matches the hardcoded URL in the `services/api.ts` file. If they do not match, you will get a network connection error.
 
 ## 🧠 Key Concepts
 

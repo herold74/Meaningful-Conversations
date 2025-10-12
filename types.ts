@@ -18,6 +18,7 @@ export type NavView =
     | 'chat'
     | 'sessionReview'
     | 'contextChoice'
+    | 'paywall'
     | 'achievements'
     | 'userGuide'
     | 'formattingHelp'
@@ -36,6 +37,7 @@ export interface User {
     isAdmin: boolean;
     unlockedCoaches: string[];
     createdAt?: string;
+    accessExpiresAt?: string;
     loginCount?: number;
     lastLogin?: string;
     encryptionSalt?: string; // Hex-encoded string

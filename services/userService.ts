@@ -162,6 +162,10 @@ export const deleteUpgradeCode = async (codeId: string): Promise<void> => {
     await apiFetch(`/admin/codes/${codeId}`, { method: 'DELETE' });
 };
 
+export const revokeUpgradeCode = async (codeId: string): Promise<void> => {
+    await apiFetch(`/admin/codes/${codeId}/revoke`, { method: 'POST' });
+};
+
 export const getAdminTickets = async (): Promise<Ticket[]> => {
     return await apiFetch('/admin/tickets');
 };

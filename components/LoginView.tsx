@@ -9,13 +9,14 @@ import { InfoIcon } from './icons/InfoIcon';
 
 interface LoginViewProps {
   onLoginSuccess: (user: User, key: CryptoKey) => void;
+  onAccessExpired: (email: string) => void;
   onSwitchToRegister: () => void;
   onBack: () => void;
   onForgotPassword: () => void;
   reason?: string | null;
 }
 
-const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegister, onBack, onForgotPassword, reason }) => {
+const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, onSwitchToRegister, onBack, onForgotPassword, reason }) => {
   const { t } = useLocalization();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,9 +27,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
     try {
-        const trimmedPassword = password.trim();
-        const trimmedEmail = email.trim().toLowerCase();
         const { user, token } = await userService.login(trimmedEmail, trimmedPassword);
         
         if (!user.encryptionSalt) {
@@ -44,14 +46,15 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onSwitchToRegiste
 
     } catch (err: any) {
         console.error("Login failed:", err);
-        if (err.isNetworkError) {
+        if (err.status === 403 && err.data?.errorCode === 'ACCESS_EXPIRED') {
+            onAccessExpired(trimmedEmail);
+        } else if (err.isNetworkError) {
             setError(t('error_network_detailed', { url: err.backendUrl }));
         } else if (err.status === 401) {
             setError(t('login_error_credentials'));
         } else if (err.status === 403) {
             setError(err.message || 'An error occurred.'); // The backend sends a specific "pending verification" message.
-        }
-         else {
+        } else {
             setError(err.message || 'An unknown error occurred. Please try again.');
         }
     } finally {

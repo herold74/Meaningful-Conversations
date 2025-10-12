@@ -1,209 +1,147 @@
 const express = require('express');
+const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
-const authMiddleware = require('../middleware/auth.js');
 
 const router = express.Router();
-
-// Apply auth middleware to all routes in this file
 router.use(authMiddleware);
 
-// GET /api/data/user - Load user's context and gamification state
+// GET /api/data/user - Get the current user's data
 router.get('/user', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.userId },
-            select: { lifeContext: true, gamificationState: true }
         });
-
         if (!user) {
-            return res.status(404).json({ error: 'User not found.' });
+            return res.status(404).json({ error: 'User not found' });
         }
-        
-        // The lifeContext sent from here is encrypted.
-        res.status(200).json({
-            context: user.lifeContext || '',
-            gamificationState: user.gamificationState || '{}'
+        res.json({
+            context: user.lifeContext,
+            gamificationState: user.gamificationState,
         });
-
     } catch (error) {
-        console.error("Error loading user data:", error);
-        res.status(500).json({ error: 'Failed to load user data.' });
+        console.error("Error fetching user data:", error);
+        res.status(500).json({ error: 'Failed to fetch user data.' });
     }
 });
 
-// PUT /api/data/user - Save user's context and gamification state
+// PUT /api/data/user - Update the current user's data
 router.put('/user', async (req, res) => {
-    // The context received here is already encrypted by the client.
     const { context, gamificationState } = req.body;
-
-    if (typeof context !== 'string' || typeof gamificationState !== 'string') {
-        return res.status(400).json({ error: 'Invalid data format. Both context and gamificationState must be strings.' });
-    }
-
     try {
         await prisma.user.update({
             where: { id: req.userId },
             data: {
                 lifeContext: context,
-                gamificationState: gamificationState
-            }
+                gamificationState,
+                updatedAt: new Date(),
+            },
         });
-        res.status(204).send();
+        res.status(200).json({ message: 'User data saved successfully.' });
     } catch (error) {
         console.error("Error saving user data:", error);
         res.status(500).json({ error: 'Failed to save user data.' });
     }
 });
 
-// DELETE /api/data/user - Delete user's account
-router.delete('/user', async (req, res) => {
+// POST /api/data/redeem-code
+router.post('/redeem-code', async (req, res) => {
+    const { code } = req.body;
+    const userId = req.userId;
     try {
-        await prisma.$transaction(async (tx) => {
-            // Unlink any redeemed codes from the user. The code remains 'used'.
-            await tx.upgradeCode.updateMany({
-                where: { usedById: req.userId },
-                data: { usedById: null }
-            });
-            
-            // Delete associated feedback
-            await tx.feedback.deleteMany({
-                where: { userId: req.userId }
-            });
+        const upgradeCode = await prisma.upgradeCode.findUnique({ where: { code } });
+        if (!upgradeCode || upgradeCode.isUsed) {
+            return res.status(404).json({ error: 'Invalid or already used code.' });
+        }
 
-            // Delete the user
-            await tx.user.delete({
-                where: { id: req.userId }
-            });
-        });
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
 
-        res.status(204).send();
+        let updateData = { updatedAt: new Date() };
+
+        if (upgradeCode.botId === 'ACCESS_PASS_1Y') {
+            const now = new Date();
+            const oneYearFromNow = new Date(now.setFullYear(now.getFullYear() + 1));
+            const newExpiry = (user.accessExpiresAt && new Date(user.accessExpiresAt) > new Date())
+                ? new Date(new Date(user.accessExpiresAt).setFullYear(new Date(user.accessExpiresAt).getFullYear() + 1))
+                : oneYearFromNow;
+            updateData.accessExpiresAt = newExpiry;
+        } else if (upgradeCode.botId === 'premium') {
+             updateData.isBetaTester = true;
+        } else {
+            const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+            if (!unlocked.includes(upgradeCode.botId)) {
+                unlocked.push(upgradeCode.botId);
+            }
+            updateData.unlockedCoaches = JSON.stringify(unlocked);
+        }
+
+        const [updatedUser] = await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: updateData,
+            }),
+            prisma.upgradeCode.update({
+                where: { id: upgradeCode.id },
+                data: {
+                    isUsed: true,
+                    usedById: userId,
+                },
+            }),
+        ]);
+
+        const { passwordHash, ...userPayload } = updatedUser;
+        res.status(200).json({ user: userPayload });
+
     } catch (error) {
-        console.error("Error deleting user account:", error);
-        res.status(500).json({ error: 'Failed to delete account.' });
+        console.error("Error redeeming code:", error);
+        res.status(500).json({ error: 'An internal server error occurred.' });
     }
 });
 
-
-// PUT /api/data/user/password - Change user's password
+// PUT /api/data/user/password - Change user password
 router.put('/user/password', async (req, res) => {
-    let { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
-
-    oldPassword = oldPassword ? oldPassword.trim() : '';
-    newPassword = newPassword ? newPassword.trim() : '';
-
-    if (!oldPassword || !newPassword || newPassword.length < 6 || typeof newEncryptedLifeContext !== 'string') {
-        return res.status(400).json({ error: 'Invalid input. Please provide current password, a new password of at least 6 characters, and the re-encrypted context.' });
-    }
+    const { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
 
     try {
         const user = await prisma.user.findUnique({ where: { id: req.userId } });
-
-        if (!user || !(await bcrypt.compare(oldPassword, user.passwordHash))) {
-            return res.status(401).json({ error: "Incorrect current password." });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Incorrect current password.' });
         }
 
-        const newPasswordHash = await bcrypt.hash(newPassword, 10);
-
+        const salt = await bcrypt.genSalt(10);
+        const newPasswordHash = await bcrypt.hash(newPassword, salt);
+        
         await prisma.user.update({
             where: { id: req.userId },
-            data: { 
+            data: {
                 passwordHash: newPasswordHash,
-                lifeContext: newEncryptedLifeContext // Save the re-encrypted context
-            }
+                lifeContext: newEncryptedLifeContext,
+                updatedAt: new Date(),
+            },
         });
-
-        res.status(204).send();
+        res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         console.error("Error changing password:", error);
         res.status(500).json({ error: 'Failed to change password.' });
     }
 });
 
-
-// POST /api/data/redeem-code - Redeem an upgrade code
-router.post('/redeem-code', async (req, res) => {
-    const { code } = req.body;
-
-    if (!code || typeof code !== 'string') {
-        return res.status(400).json({ error: 'A valid code is required.' });
-    }
-
+// DELETE /api/data/user - Delete user account
+router.delete('/user', async (req, res) => {
     try {
-        const updatedUser = await prisma.$transaction(async (tx) => {
-            const upgradeCode = await tx.upgradeCode.findUnique({
-                where: { code: code.trim() }
-            });
-
-            if (!upgradeCode) {
-                const err = new Error("Code not found.");
-                err.name = "NotFound";
-                throw err;
-            }
-
-            if (upgradeCode.isUsed) {
-                const err = new Error("Code has already been used.");
-                err.name = "Conflict";
-                throw err;
-            }
-            
-            await tx.upgradeCode.update({
-                where: { id: upgradeCode.id },
-                data: { isUsed: true, usedById: req.userId }
-            });
-
-            let finalUser;
-
-            if (upgradeCode.botId === 'premium') {
-                // 'premium' code sets the isBetaTester flag to true, granting full access
-                finalUser = await tx.user.update({
-                    where: { id: req.userId },
-                    data: { isBetaTester: true }
-                });
-            } else {
-                // This handles both individual coach IDs and the 'big5' feature ID
-                const user = await tx.user.findUnique({ where: { id: req.userId } });
-                
-                if(!user) {
-                    throw new Error("User not found during transaction.");
-                }
-                
-                const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
-                if (!unlockedCoaches.includes(upgradeCode.botId)) {
-                    unlockedCoaches.push(upgradeCode.botId);
-                }
-
-                finalUser = await tx.user.update({
-                    where: { id: req.userId },
-                    data: { unlockedCoaches: JSON.stringify(unlockedCoaches) }
-                });
-            }
-
-            return finalUser;
-        });
-        
-        res.status(200).json({
-            user: {
-                id: updatedUser.id,
-                email: updatedUser.email,
-                isBetaTester: updatedUser.isBetaTester,
-                isAdmin: updatedUser.isAdmin,
-                unlockedCoaches: JSON.parse(updatedUser.unlockedCoaches || '[]'),
-                encryptionSalt: updatedUser.encryptionSalt
-            }
-        });
-
+        await prisma.user.delete({ where: { id: req.userId } });
+        res.status(204).send();
     } catch (error) {
-        if (error.name === 'NotFound') {
-            return res.status(404).json({ error: 'Invalid or expired code.' });
-        }
-        if (error.name === 'Conflict') {
-            return res.status(409).json({ error: 'This code has already been redeemed.' });
-        }
-        console.error("Error redeeming code:", error);
-        res.status(500).json({ error: 'Failed to redeem code.' });
+        console.error("Error deleting user account:", error);
+        res.status(500).json({ error: 'Failed to delete user account.' });
     }
 });
-
 
 module.exports = router;

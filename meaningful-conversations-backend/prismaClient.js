@@ -6,17 +6,16 @@ const getDbUrl = () => {
     // connection is to check for the INSTANCE_UNIX_SOCKET variable directly.
     if (process.env.INSTANCE_UNIX_SOCKET) {
         console.log("Cloud Run environment detected (INSTANCE_UNIX_SOCKET is present). Building Cloud SQL connection string...");
-        const { DB_USER, DB_PASSWORD, INSTANCE_UNIX_SOCKET } = process.env;
-        const dbName = 'meaningful_convos_db';
+        const { DB_USER, DB_PASSWORD, DB_NAME, INSTANCE_UNIX_SOCKET } = process.env;
         
-        if (!DB_USER || !DB_PASSWORD) {
-            throw new Error("FATAL: In Cloud Run environment, INSTANCE_UNIX_SOCKET is set, but DB_USER or DB_PASSWORD are not. Please check Cloud Run environment variables.");
+        if (!DB_USER || !DB_PASSWORD || !DB_NAME) {
+            throw new Error("FATAL: In Cloud Run environment, INSTANCE_UNIX_SOCKET is set, but DB_USER, DB_PASSWORD, or DB_NAME are not. Please check Cloud Run environment variables.");
         }
 
         const encodedPassword = encodeURIComponent(DB_PASSWORD);
-        const finalUrl = `mysql://${DB_USER}:${encodedPassword}@localhost/${dbName}?socket=${INSTANCE_UNIX_SOCKET}`;
+        const finalUrl = `mysql://${DB_USER}:${encodedPassword}@localhost/${DB_NAME}?socket=${INSTANCE_UNIX_SOCKET}`;
         
-        const redactedUrl = `mysql://${DB_USER}:[REDACTED]@localhost/${dbName}?socket=${INSTANCE_UNIX_SOCKET}`;
+        const redactedUrl = `mysql://${DB_USER}:[REDACTED]@localhost/${DB_NAME}?socket=${INSTANCE_UNIX_SOCKET}`;
         console.log(`Using Cloud SQL connection: ${redactedUrl}`);
         return finalUrl;
     }

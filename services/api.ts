@@ -14,9 +14,10 @@ const DEFAULT_BACKEND_ENVIRONMENT: 'staging' | 'production' = 'staging';
 
 const BACKEND_URLS = {
     // This is the stable, live backend for real users.
-    production: 'https://meaningful-conversations-backend-0944710545.europe-west6.run.app',
+    // IMPORTANT: Verify this URL from your Google Cloud Run dashboard for the '...-prod' service.
+    production: 'https://meaningful-conversations-backend-prod-7kxdyriz2q-oa.a.run.app',
     // This is the testing backend for new features.
-    staging: 'https://meaningful-conversations-backend-staging-0944710545.europe-west6.run.app',
+    staging: 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
     // This is for running the backend on your local machine.
     // The backend server defaults to port 3001, while the frontend is usually served on 3000.
     local: 'http://localhost:3001'

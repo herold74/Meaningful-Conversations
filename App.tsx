@@ -38,6 +38,7 @@ import DeleteAccountModal from './components/DeleteAccountModal';
 import RegistrationPendingView from './components/RegistrationPendingView';
 import VerifyEmailView from './components/VerifyEmailView';
 import ResetPasswordView from './components/ResetPasswordView';
+import PaywallView from './components/PaywallView';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -73,6 +74,7 @@ const App: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userMessageCount, setUserMessageCount] = useState(0);
     const [initialToken, setInitialToken] = useState<string | null>(null);
+    const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
 
     // Theme
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -173,8 +175,8 @@ const App: React.FC = () => {
 
     // --- INITIALIZATION ---
     useEffect(() => {
-        // This effect handles app startup.
-        const initialize = async () => {
+        // This effect runs once on startup.
+        const initializeApp = async () => {
             // Check for URL-based routes first (email verification, password reset)
             const urlParams = new URLSearchParams(window.location.search);
             const route = urlParams.get('route');
@@ -208,8 +210,33 @@ const App: React.FC = () => {
                 setView('auth');
             }
         };
-        const timer = setTimeout(() => initialize(), 1500);
-        return () => clearTimeout(timer);
+
+        let isInitialized = false;
+        let showWelcomeScreen = true;
+
+        // Timer to ensure the welcome screen is shown for at least 1.5 seconds.
+        setTimeout(() => {
+            showWelcomeScreen = false;
+            // If initialization is already done, proceed. Otherwise, wait for it.
+            if (isInitialized) {
+                initializeApp();
+            }
+        }, 1500);
+
+        // Run initialization logic in parallel.
+        const init = async () => {
+            // This is where you would put any async startup logic that needs to run
+            // while the welcome screen is visible (e.g., fetching initial config).
+            // For now, it's just a placeholder.
+            await new Promise(resolve => setTimeout(resolve, 10)); // Simulate some work
+            isInitialized = true;
+            // If welcome screen timer is done, proceed. Otherwise, wait for it.
+            if (!showWelcomeScreen) {
+                initializeApp();
+            }
+        };
+
+        init();
     }, []);
     
     // --- NAVIGATION & STATE HANDLERS ---
@@ -236,6 +263,11 @@ const App: React.FC = () => {
             setAuthRedirectReason("There was an issue loading your profile. Please try logging in again.");
         }
     };
+
+    const handleAccessExpired = (email: string) => {
+        setPaywallUserEmail(email);
+        setView('paywall');
+    };
     
     const handleLogout = () => {
         api.clearSession();
@@ -244,6 +276,8 @@ const App: React.FC = () => {
         setLifeContext('');
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setAuthRedirectReason(null);
+        setPaywallUserEmail(null);
+        setMenuView(null); // Clear any open menu view to prevent being stuck
         // Go to welcome screen first, then to auth screen to mimic app start
         setView('welcome');
         setTimeout(() => setView('auth'), 1500);
@@ -421,13 +455,14 @@ const App: React.FC = () => {
                     redirectReason={authRedirectReason}
                 />;
             }
-            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
+            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onAccessExpired={handleAccessExpired} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
             case 'register': return <RegisterView onShowPending={() => setView('registrationPending')} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
             case 'registrationPending': return <RegistrationPendingView onGoToLogin={() => setView('login')} />;
             case 'verifyEmail': return <VerifyEmailView token={initialToken!} onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
             case 'resetPassword': return <ResetPasswordView token={initialToken!} onResetSuccess={() => setView('login')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => setView('botSelection')} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
+            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => setView('redeemCode')} onLogout={handleLogout} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
@@ -441,7 +476,21 @@ const App: React.FC = () => {
             case 'about': return <AboutView onBack={() => setMenuView(null)} />;
             case 'disclaimer': return <DisclaimerView onBack={() => setMenuView(null)} currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'terms': return <TermsView onBack={() => setMenuView(null)} />;
-            case 'redeemCode': return <RedeemCodeView onBack={() => setMenuView(null)} onRedeemSuccess={(user) => { setCurrentUser(user); setMenuView(null); }} />;
+            case 'redeemCode': return <RedeemCodeView onBack={() => {
+                    if (paywallUserEmail) {
+                        setView('paywall');
+                    } else {
+                        setMenuView(null);
+                    }
+                }} onRedeemSuccess={(user) => { 
+                    setCurrentUser(user); 
+                    setMenuView(null);
+                    if (paywallUserEmail) {
+                        setAuthRedirectReason("Your pass has been applied! Please log in again to continue.");
+                        setPaywallUserEmail(null);
+                        setView('login');
+                    }
+                }} />;
             case 'admin': {
                 const handleAdminBack = () => {
                     if (menuView === 'admin') {
@@ -456,14 +505,14 @@ const App: React.FC = () => {
                         setMenuView(null);
                     }
                 };
-                return <AdminView onBack={handleAdminBack} />;
+                return <AdminView onBack={handleAdminBack} currentUser={currentUser} />;
             }
             case 'changePassword': return <ChangePasswordView onBack={() => setMenuView(null)} currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
             default: return <WelcomeScreen />;
         }
     };
     
-    const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword'].includes(view);
+    const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view);
 
     return (

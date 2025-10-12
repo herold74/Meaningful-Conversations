@@ -4,6 +4,7 @@ interface Field {
     id: string;
     label: string;
     prompt: string;
+    rows?: number;
 }
 
 interface SubSection {
@@ -29,6 +30,7 @@ export const getQuestionnaireStructure = (t: (key: string) => string): Section[]
         level: 2,
         description: t('questionnaire_background_desc'),
         fields: [
+            { id: 'background_name', label: t('questionnaire_background_name_label'), prompt: t('questionnaire_background_name_prompt'), rows: 1 },
             { id: 'background_work', label: t('questionnaire_background_work_label'), prompt: t('questionnaire_background_work_prompt') },
             { id: 'background_family', label: t('questionnaire_background_family_label'), prompt: t('questionnaire_background_family_prompt') },
             { id: 'background_social', label: t('questionnaire_background_social_label'), prompt: t('questionnaire_background_social_prompt') },

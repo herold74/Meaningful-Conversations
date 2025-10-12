@@ -124,7 +124,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                                     <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
                                                     <textarea
                                                         id={field.id}
-                                                        rows={3}
+                                                        rows={field.rows || 3}
                                                         value={answers[field.id] || ''}
                                                         onChange={e => handleChange(field.id, e.target.value)}
                                                         placeholder={field.prompt}
@@ -141,7 +141,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                                             <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
                                                             <textarea
                                                                 id={field.id}
-                                                                rows={3}
+                                                                rows={field.rows || 3}
                                                                 value={answers[field.id] || ''}
                                                                 onChange={e => handleChange(field.id, e.target.value)}
                                                                 placeholder={field.prompt}
@@ -169,7 +169,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                     <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
                                     <textarea
                                         id={field.id}
-                                        rows={3}
+                                        rows={field.rows || 3}
                                         value={answers[field.id] || ''}
                                         onChange={e => handleChange(field.id, e.target.value)}
                                         placeholder={field.prompt}
@@ -187,7 +187,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                             <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
                                             <textarea
                                                 id={field.id}
-                                                rows={3}
+                                                rows={field.rows || 3}
                                                 value={answers[field.id] || ''}
                                                 onChange={e => handleChange(field.id, e.target.value)}
                                                 placeholder={field.prompt}

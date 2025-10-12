@@ -1,55 +1,59 @@
-# Meaningful Conversations - Backend
+# Meaningful Conversations - Backend Server
 
-This directory contains the backend server for the Meaningful Conversations application. It is a Node.js application using Express.js for the API, Prisma as the ORM for database access, and JWT for authentication.
+This directory contains the Node.js/Express backend server for the Meaningful Conversations application. It handles user authentication, data storage, and proxies requests to the Google Gemini API.
 
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
 
--   Node.js (v18 or later recommended)
--   A MySQL-compatible database (e.g., local MySQL server or Google Cloud SQL).
--   Podman or Docker (if running the backend in a container).
+-   Node.js (v20.x or later)
+-   npm (v10.x or later)
+-   A running MySQL database (local or cloud-based).
+-   Podman or Docker (if you plan to run the backend in a container for local development).
 
 ### 2. Installation
 
 1.  Navigate to this directory: `cd meaningful-conversations-backend`
-2.  Install dependencies: `npm install`
+2.  Install all dependencies: `npm install`
+
+    This command will also automatically run `npx prisma generate` to ensure your Prisma Client is in sync with the database schema (see "Database Management" below).
 
 ### 3. Environment Configuration
 
 The server requires a set of environment variables to run. Create a file named `.env` in this directory (`meaningful-conversations-backend/.env`) and populate it with the following keys.
 
-**Example `.env` file for Local Development:**
-
+**`.env` Template for Local Development:**
 ```env
-# --- Security ---
-# A long, random string used to sign authentication tokens. Generate one from a password manager or online tool.
-JWT_SECRET=your_super_secret_jwt_string_here
+# --- Application Environment ---
+# Set to 'development', 'staging', or 'production'. In 'development' or 'staging',
+# potentially destructive database schema changes can be applied automatically.
+ENVIRONMENT_TYPE=development
 
-# --- Google Gemini API ---
-# Your API key for accessing the Gemini models.
-API_KEY=your_google_ai_studio_api_key
+# --- Database Connection (for local development) ---
+# Use the appropriate format based on your setup. See the "Connecting" section below.
+DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE_NAME"
+
+# --- Gemini API Key ---
+API_KEY="YOUR_GEMINI_API_KEY"
+
+# --- JWT Secret for Authentication ---
+JWT_SECRET="YOUR_RANDOMLY_GENERATED_JWT_SECRET"
+
+# --- Server Port ---
+PORT=3001
 
 # --- Mailjet Email Service ---
-MAILJET_API_KEY=your_mailjet_public_api_key
-MAILJET_SECRET_KEY=your_mailjet_secret_api_key
-MAILJET_SENDER_EMAIL=sender@yourdomain.com
+# CRITICAL: The sender email must be a verified sender in your Mailjet account.
+MAILJET_API_KEY="YOUR_MAILJET_PUBLIC_KEY"
+MAILJET_SECRET_KEY="YOUR_MAILJET_SECRET_KEY"
+MAILJET_SENDER_EMAIL="YOUR_VERIFIED_SENDER_EMAIL"
 
 # --- Application URLs ---
-# The public URL of your frontend application. Used for creating links in emails.
-# For local dev, this will typically be the port your 'serve' command is using.
 FRONTEND_URL=http://localhost:3000
 
-# --- Database Connection (for Local Development) ---
-# CHOOSE ONE of the formats below based on how you are running the backend.
-# See the "Connecting to a Local Database" section for details.
-DATABASE_URL="mysql://USER:PASSWORD@localhost:PORT/DATABASE_NAME"
-
 # --- Initial Admin User (for Database Seeding) ---
-# Credentials for the first admin account to be created.
-# This is only used when you run the 'npm run db:seed' command.
 INITIAL_ADMIN_EMAIL=admin@example.com
-INITIAL_ADMIN_PASSWORD=a_strong_temporary_password
+INITIAL_ADMIN_PASSWORD=yoursecurepassword
 ```
 
 #### **Connecting to a Local Database**
@@ -121,40 +125,76 @@ DATABASE_URL="mysql://myuser:mypassword@host.containers.internal:3306/meaningful
 
 ---
 
-### 4. Database Schema Setup
+## 💾 Database Management
 
-Prisma is used to manage the database schema. The schema is defined in `prisma/schema.prisma`.
+### Schema Synchronization
 
-The application is configured to automatically synchronize the schema with the database when the server starts (`npx prisma db push`), so no manual migration is needed for initial setup or schema changes.
+The database schema is managed by Prisma. The schema is defined in `prisma/schema.prisma`.
 
-### 5. Create the First Admin User (Seeding)
+The application is configured to automatically synchronize the schema with the database when the server starts (`npx prisma db push`). This is handled by the `server.js` startup script.
 
-After configuring your `.env` file with `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD`, run the database seed command **once** to create your administrator account.
+#### **Important: The `--accept-data-loss` Flag**
 
+You may have noticed that in non-production environments, the `db push` command is run with the `--accept-data-loss` flag. This is a deliberate choice for this project's development and staging workflow to allow for rapid iteration.
+
+*   **Why is it used?** When you make a "breaking" schema change (like removing a column that has data), Prisma cannot apply the change without this flag. Using it in `staging` and `development` makes prototyping much faster, as you don't need to manually resolve these changes.
+*   **Is it safe?** The `server.js` startup script is configured to **NEVER** use this flag when `ENVIRONMENT_TYPE` is set to `production`. This acts as a critical safety measure to prevent accidental data loss in your live environment.
+
+#### **`prisma db push` vs. `prisma migrate`**
+
+Prisma offers two ways to manage your database schema:
+
+1.  **`prisma db push` (Used in this project):**
+    *   **Purpose:** Intended for prototyping and development.
+    *   **How it works:** It directly synchronizes your database to match the `schema.prisma` file. It does not create migration history files.
+    *   **Benefit:** Very fast and simple for iterating on your schema.
+
+2.  **`prisma migrate dev` (The production-grade alternative):**
+    *   **Purpose:** Intended for production applications and collaborative projects.
+    *   **How it works:** It generates versioned SQL migration files for every schema change. You can review, edit, and apply these migrations in a controlled way (`prisma migrate deploy`).
+    *   **Benefit:** Provides a full history of schema changes, is safer, and is the standard for production workflows.
+
+For this project, `db push` was chosen for its simplicity. For a long-term production application, you should transition to using `prisma migrate`.
+
+### Prisma Client Generation (Important)
+
+The Prisma Client (the code in `node_modules` that lets you talk to the database) is **auto-generated** based on your `prisma/schema.prisma` file. If you change the schema (e.g., add a field to a model), you **must** regenerate the client.
+
+If the client is not in sync with the schema, you will encounter `PrismaClientValidationError` errors, such as `Unknown argument...`.
+
+To make this process robust, this project includes a `postinstall` script in `package.json`. This means that **`npx prisma generate` will run automatically every time you run `npm install`**. This ensures the client is always up-to-date with your schema after you pull new changes.
+
+If you ever need to run it manually, you can use the command:
 ```bash
-npm run db:seed
+npx prisma generate
 ```
 
-This script creates the admin user with an `ACTIVE` status, so **no email confirmation is required**. You can log in immediately after the script finishes. The script is also safe to run multiple times; it will not create a duplicate user.
+### Initial Admin User (Automatic)
 
-### 6. Running the Server for Local Development
+The server is configured to automatically create or verify an administrator account on every startup. This process uses the `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` variables you set in your `.env` file.
 
-These commands run the server directly on your local machine for development and testing.
+-   If the specified user does not exist, it will be created with full admin privileges.
+-   If the user exists but lacks admin privileges, they will be granted.
+-   If the user already exists as an admin, no changes are made.
 
--   **For development (with auto-reloading via `nodemon`):**
+This automated process ensures that your primary admin account is always available and correctly configured, which is especially useful in environments where the database might be reset.
+
+---
+
+## 🏃 Running the Server
+
+*   **For Development (with auto-reloading via `nodemon`):**
     ```bash
     npm run dev
     ```
--   **For production-like local testing:**
+*   **For Production-like start:**
     ```bash
     npm start
     ```
 
-The server will start, typically on port **3001** (unless a `PORT` environment variable is specified). This is the **backend** API. You will access the user interface (the **frontend**) in your browser on its own port, which is usually **3000**.
+The server will start, typically on port **3001**. This is the **backend** API. The **frontend** user interface runs on its own port (usually **3000**).
 
-To deploy the server to a cloud environment, please refer to the main `deployment_guide.md` in the root directory.
-
-## API Health Check
+## 🩺 API Health Check
 
 Once the server is running, you can verify that it's operational and connected to the database by accessing the health check endpoint in your browser:
 
@@ -162,90 +202,66 @@ Once the server is running, you can verify that it's operational and connected t
 
 You should receive a JSON response indicating a successful connection.
 
-## Troubleshooting
+## ⚠️ Troubleshooting
 
 ### Error: `Cannot find module 'some-package'`
 
-This error means a required Node.js package (like `node-mailjet`) is missing. This typically happens after pulling new code that adds a dependency to `package.json`.
+This error means a required Node.js package is missing. This typically happens after pulling new code that adds a dependency to `package.json`.
 
 **Solution:** You need to install the missing package. The correct command depends on how you are running the server.
 
 **➡️ If you are running locally (using `npm start` or `npm run dev`):**
 
-Simply run the `npm install` command in the backend directory to download and install all required packages.
+Simply run `npm install` in the backend directory to download all required packages.
 
-1.  Make sure you are in the backend directory:
-    ```bash
-    cd meaningful-conversations-backend
-    ```
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start your server again:
-    ```bash
-    npm start
-    ```
+```bash
+cd meaningful-conversations-backend
+npm install
+npm run dev
+```
 
 **➡️ If you are running inside a Docker/Podman container:**
 
 This means your container image is outdated. You need to rebuild it to include the new packages.
 
-1.  Follow the steps above to run `npm install` locally first. This updates your `package-lock.json`.
-2.  Rebuild your container image **without using the cache**. This forces the build process to run `npm install` inside the new image.
-
-    *   **For Docker:**
-        ```bash
-        docker build --no-cache -t your-image-name .
-        ```
-    *   **For Podman:**
-        ```bash
-        podman build --no-cache -t your-image-name .
-        ```
-    *(Replace `your-image-name` with the actual name of your image.)*
-
+1.  Run `npm install` locally first to update your `package-lock.json`.
+2.  Rebuild your container image **without using the cache**. This forces a fresh `npm install` inside the new image.
+    ```bash
+    # From the backend directory
+    podman build --no-cache -t your-image-name .
+    ```
 3.  Run the newly built container.
 
 ### Error: `P1001: Can't reach database server`
 
-If you are running the backend in a container and see this error, it means the container cannot connect to your database. This is almost always a configuration issue on your main computer.
+If you are running the backend in a container and see this error, it means the container cannot connect to your database on your host machine.
 
-1.  **Check your `DATABASE_URL`:** Ensure you are using the correct special address for your container runtime (e.g., `host.docker.internal` for Docker, `10.0.2.2` or `host.containers.internal` for Podman) as detailed in the configuration section above. Do not use `localhost`.
+1.  **Check your `DATABASE_URL`:** Ensure you are using the correct special address for your container runtime (e.g., `host.docker.internal` for Docker, `host.containers.internal` for Podman on macOS) as detailed in the configuration section above. Do not use `localhost`.
 
-2.  **Database `bind-address`:** Your MySQL server might only be listening for connections from `localhost` (`127.0.0.1`). To allow connections from a container, you must change this.
+2.  **Database `bind-address`:** Your MySQL server might only be listening for connections from `localhost`. To allow connections from a container, you must change this.
     *   Find your MySQL configuration file (e.g., `my.cnf` or `my.ini`).
     *   Look for the `bind-address` line and change it to `0.0.0.0`. This tells MySQL to listen on all network interfaces.
     *   `bind-address = 0.0.0.0`
     *   **Restart your MySQL server** for the change to take effect.
 
-3.  **Firewall:** A firewall on your host machine (Windows Firewall, macOS Firewall, etc.) might be blocking incoming connections on port 3306 from the container network.
+3.  **Firewall:** A firewall on your host machine might be blocking incoming connections on port 3306 from the container network.
     *   Create a new firewall rule to **allow incoming TCP traffic on port `3306`**.
-
 
 ## ☁️ Deployment to Google Cloud Run
 
-This backend is optimized for deployment on Google Cloud Run with a Cloud SQL (MySQL) instance.
+This backend is optimized for deployment on Google Cloud Run with a Cloud SQL (MySQL) instance. For a complete guide, please see the main **[`deployment_guide.md`](../deployment_guide.md)**.
 
 When deploying, you do **not** need to set the `DATABASE_URL` variable. Instead, configure the following environment variables in your Cloud Run service:
 
 -   `JWT_SECRET`
 -   `API_KEY`
--   `MAILJET_API_KEY`
--   `MAILJET_SECRET_KEY`
--   `MAILJET_SENDER_EMAIL`
+-   `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_SENDER_EMAIL`
 -   `FRONTEND_URL`
--   `DB_USER`: Your Cloud SQL database user.
--   `DB_PASSWORD`: Your Cloud SQL database password.
--   `INSTANCE_UNIX_SOCKET`: This is the crucial variable for connecting to Cloud SQL. It should be set to `/cloudsql/YOUR_PROJECT_ID:YOUR_REGION:YOUR_INSTANCE_NAME`.
+-   `ENVIRONMENT_TYPE`: Critical for safety. Set to `staging` or `production`.
+-   `DB_USER`
+-   `DB_PASSWORD`
+-   `DB_NAME`
+-   `INSTANCE_UNIX_SOCKET`: The crucial variable for connecting to Cloud SQL (e.g., `/cloudsql/YOUR_PROJECT_ID:YOUR_REGION:YOUR_INSTANCE_NAME`).
+-   `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD`: For automatic admin user creation.
 
-The server code (`prismaClient.js`) will automatically detect the `INSTANCE_UNIX_SOCKET` variable and construct the correct database connection string, ignoring `DATABASE_URL`.
-
-### Example: Connecting to a Staging Database
-
-To connect to a staging database with the instance connection name `gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`, you would set the following environment variables in your **staging Cloud Run service**:
-
--   **`DB_USER`**: `your_staging_database_user`
--   **`DB_PASSWORD`**: `your_staging_database_password` (preferably from Secret Manager)
--   **`INSTANCE_UNIX_SOCKET`**: `/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`
-
-With these variables set, the backend code will automatically connect to the correct database when deployed.
+The server code will automatically detect the `INSTANCE_UNIX_SOCKET` variable and construct the correct database connection string.

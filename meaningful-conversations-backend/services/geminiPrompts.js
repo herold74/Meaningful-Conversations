@@ -12,7 +12,7 @@ const analysisPrompts = {
 
 Analyze the provided conversation and the user's current Life Context, then follow these steps:
 
-1.  **Summarize New Findings:** First, write a concise summary (2-4 sentences) in **English** of the most important new information, insights, or decisions from the conversation.
+1.  **Summarize New Findings:** First, write a concise summary (2-4 sentences) in **English** of the most important new information, insights, or decisions from the conversation. This summary should be written in the **second person singular**, addressing the client directly (e.g., "You realized that...", "It seems you discovered...").
 
 2.  **Propose Coherent Updates:** Based on the new findings, generate a list of proposed updates. For each update, decide the best action to take after carefully considering the existing headlines:
     *   **\`append\`**: Use this to add new information to an existing section when the topic is clearly related. For example, an update about a new work project should be appended to the 'Career' or 'Work' section.
@@ -38,7 +38,7 @@ Analyze the following conversation history and life context.
 
 Analysieren Sie das bereitgestellte Gespräch und den aktuellen Lebenskontext des Benutzers und befolgen Sie dann diese Schritte:
 
-1.  **Neue Einsichten zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) auf **Deutsch** der wichtigsten neuen Informationen, Einsichten oder Entscheidungen aus dem Gespräch.
+1.  **Neue Einsichten zusammenfassen:** Verfassen Sie zunächst eine kurze Zusammenfassung (2-4 Sätze) auf **Deutsch** der wichtigsten neuen Informationen, Einsichten oder Entscheidungen aus dem Gespräch. Diese Zusammenfassung muss in der **zweiten Person Singular (formell, "Sie")** verfasst sein und den Klienten direkt ansprechen (z. B. "Sie haben erkannt, dass...", "Es scheint, Sie haben entdeckt...").
 
 2.  **Kohärente Aktualisierungen vorschlagen:** Erstellen Sie auf der Grundlage der neuen Einsichten eine Liste von vorgeschlagenen Aktualisierungen. Entscheiden Sie für jede Aktualisierung nach sorgfältiger Prüfung der vorhandenen Überschriften über die beste Vorgehensweise:
     *   **\`append\`**: Verwenden Sie dies, um neue Informationen zu einem vorhandenen Abschnitt hinzuzufügen, wenn das Thema eindeutig damit zusammenhängt. Zum Beispiel sollte eine Aktualisierung über ein neues Arbeitsprojekt an den Abschnitt 'Karriere' oder 'Arbeit' angehängt werden.

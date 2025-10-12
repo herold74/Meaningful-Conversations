@@ -1,106 +1,142 @@
-# Deploying to Staging and Production Environments
+# Meaningful Conversations - Deployment Guide
 
-> **Note:** This guide is for deploying your **backend** code to a cloud environment (like Google Cloud Run) after you have finished developing and testing it locally. For instructions on running the backend on your own machine for development (using `npm start`), please see the README file in the `meaningful-conversations-backend` directory.
-
-Separating your development/testing environment from your live production environment is a fundamental best practice in software engineering. This guide outlines a clear strategy for creating this separation to prevent any new development from affecting your live users.
-
-## The Core Strategy
-
-The goal is to have two completely independent stacks:
-
-1.  **Production Stack (Your current live app):**
-    *   **Frontend:** The version your users are currently using.
-    *   **Backend:** A stable Cloud Run service (e.g., `meaningful-conversations-backend-prod`).
-    *   **Database:** A dedicated production database (e.g., `meaningful_convos_db_prod`).
-
-2.  **Staging/Test Stack (For new features):**
-    *   **Frontend:** The version you are testing locally.
-    *   **Backend:** A new, separate Cloud Run service (e.g., `meaningful-conversations-backend-staging`).
-    *   **Database:** A separate database for testing (e.g., `meaningful_convos_db_staging`).
-
-This isolation ensures that no matter what happens in your staging environment—bugs, database wipes, etc.—your live production users are never affected.
+This guide provides a comprehensive, step-by-step process for deploying the backend server to Google Cloud Run. It covers the entire workflow, from building the container image to deploying to a staging environment and promoting to production.
 
 ---
 
-## Step-by-Step Implementation Guide
+## 🏛️ Architecture Overview
 
-### Step 1: Create a Separate Production Database
+The application is deployed using two separate, parallel environments:
 
-This is the most critical step. Never use the same database for testing and production.
+1.  **Staging Environment:**
+    *   **Purpose:** A testing ground for new features and bug fixes, connected to a separate staging database (`meaningful-convers-db-staging`).
+    *   **Schema Management:** This environment is configured with `ENVIRONMENT_TYPE=staging`. When the server starts, it automatically runs `npx prisma db push --accept-data-loss`. This flag allows for rapid iteration during development by applying schema changes even if they would cause data loss (e.g., dropping a column). This behavior is **disabled in production** for safety.
 
-1.  In your Cloud SQL instance, create a new database. You can name it something like `meaningful_convos_db_prod`.
-2.  Your existing database can now be considered your development/staging database (you can rename it to `meaningful_convos_db_staging` for clarity if you wish).
-3.  Ensure your live, production backend service is configured to connect to this new `meaningful_convos_db_prod` database.
+2.  **Production Environment:**
+    *   **Purpose:** The live environment for real users. This environment is connected to the production database (`meaningful-convers-db-prod`).
+    *   **Safety:** It is configured with `ENVIRONMENT_TYPE=production`. This acts as a critical safety rail, preventing automatic data-loss operations and ensuring the stability of your user data.
 
-### Step 2: Deploy Two Separate Backend Services
-
-You will deploy your backend code twice to Cloud Run, creating two distinct services.
-
-1.  **Production Service (`...-prod`):**
-    *   This service should run your stable, tested code.
-    *   In its Cloud Run Environment Variables, it should be configured to connect to your **production database**.
-    *   It should also use **production API keys** (for Mailjet, Gemini, etc.). It's wise to have separate, production-only keys.
-
-2.  **Staging Service (`...-staging`):**
-    *   Deploy your new code (with the Mailjet features) to a *new* Cloud Run service. You can name it `meaningful-conversations-backend-staging`.
-    *   In its Environment Variables, configure it to connect to your **staging/development database**.
-    *   Use **test/developer API keys** for Mailjet and other services to avoid sending real emails or incurring production costs during testing.
-
-### Step 3: Connecting Your Local Frontend to the Correct Backend
-
-The frontend code has built-in logic to connect to the correct backend automatically, making development safer and easier.
-
-**How it Works:**
-*   **When running locally:** If you access your frontend from `http://localhost:3000`, it will **automatically default to connecting to your local backend** at `http://localhost:3001`. You no longer need to add `?backend=local`.
-*   **When deployed:** If the application is accessed from any other URL (e.g., `your-app.com`), it will **automatically default to connecting to the production backend**.
-
-This behavior ensures you cannot accidentally send test data to your live database from your local machine.
-
-#### Overriding the Default
-
-You can still manually choose a backend by adding a URL parameter. This is useful for testing your local frontend against your deployed staging backend.
-
-*   **To connect to Staging:**
-    `http://localhost:3000/?backend=staging`
-*   **To explicitly connect to Production (use with caution):**
-    `http://localhost:3000/?backend=production`
+The core principle is: **Never deploy untested code to production.** You will always deploy to staging first, verify everything, and only then promote the exact same, verified container image to production.
 
 ---
 
-## Your New Workflow
+## ✅ Prerequisites
 
-1.  **Develop Locally:** Run your backend using `npm run dev`. It will connect to your local/staging database as defined in your `.env` file.
-2.  **Test Locally:** Run your frontend with `npx serve .`. Open `http://localhost:3000` in your browser. It will automatically connect to your local backend.
-3.  **Deploy to Staging:** When you're ready for integrated testing, deploy the new backend code to your `...-staging` Cloud Run service.
-4.  **Test against Staging:** Open `http://localhost:3000/?backend=staging` in your browser. Your local frontend will now make API calls to your isolated staging environment on Cloud Run.
-5.  **Promote to Production:** Once testing is successful, deploy the exact same backend container/code to your `...-prod` Cloud Run service.
-6.  **Release:** Deploy your frontend code to your static hosting service. When users visit the live frontend URL, it will automatically (by default) connect to your production backend. No code changes are needed to switch the URL.
+Before you begin, ensure you have the following tools installed and configured:
 
-By following this process, you create a safety net. Your live application will continue running smoothly on the stable production stack, completely isolated from the new code you are deploying and testing on the staging stack.
-## ☁️ Deployment to Google Cloud Run
+1.  **Google Cloud SDK (`gcloud`):** [Installation Guide](https://cloud.google.com/sdk/docs/install)
+2.  **Podman or Docker:** You must have a container runtime installed to build the application image.
+3.  **Authentication:** You must be authenticated with Google Cloud for both the `gcloud` CLI and for Application Default Credentials (ADC), which tools like the Cloud SQL Auth Proxy use.
 
-This backend is optimized for deployment on Google Cloud Run with a Cloud SQL (MySQL) instance.
+    Run these commands in your terminal to log in:
+    ```bash
+    # Log in for the gcloud CLI
+    gcloud auth login
 
-When deploying, you do **not** need to set the `DATABASE_URL` variable. Instead, configure the following environment variables in your Cloud Run service:
+    # Set up credentials for other applications like the proxy
+    gcloud auth application-default login
 
--   `JWT_SECRET`
--   `API_KEY`
--   `MAILJET_API_KEY`
--   `MAILJET_SECRET_KEY`
--   `MAILJET_SENDER_EMAIL`
--   `FRONTEND_URL`
--   `DB_USER`: Your Cloud SQL database user.
--   `DB_PASSWORD`: Your Cloud SQL database password.
--   `INSTANCE_UNIX_SOCKET`: This is the crucial variable for connecting to Cloud SQL. It should be set to `/cloudsql/YOUR_PROJECT_ID:YOUR_REGION:YOUR_INSTANCE_NAME`.
+    # Set your default project
+    gcloud config set project gen-lang-client-0944710545
+    ```
 
-The server code (`prismaClient.js`) will automatically detect the `INSTANCE_UNIX_SOCKET` variable and construct the correct database connection string, ignoring `DATABASE_URL`.
+---
 
-### Example: Connecting to Your Staging Database
+## 🚀 Deployment Workflow
 
-To connect to a staging database with the instance connection name `gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`, you would set the following environment variables in your **staging Cloud Run service**:
+### Step 1: Build & Push the Container Image
 
--   **`DB_USER`**: `your_staging_database_user`
--   **`DB_PASSWORD`**: `your_staging_database_password` (preferably from Secret Manager)
--   **`INSTANCE_UNIX_SOCKET`**: `/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging`
+Every time you make code changes to the backend, you must build a new versioned container image.
 
-With these variables set, the backend code will automatically connect to the correct database when deployed.
+1.  **Navigate to the backend directory:**
+    ```bash
+    cd meaningful-conversations-backend
+    ```
+
+2.  **Build the container image:**
+    *   Use the `--no-cache` flag to ensure all your latest changes (especially to `schema.prisma` or `package.json`) are included.
+    *   Use `--platform linux/amd64` to ensure the image is built for the architecture used by Cloud Run.
+    *   Tag the image with a specific version number (e.g., `1.1.0`, `1.2.0`). **Avoid using `:latest`** as it makes tracking and rollbacks difficult.
+
+    ```bash
+    # Replace the version tag (e.g., 1.1.0) with your new version
+    podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.0 .
+    ```
+
+3.  **Push the image to Artifact Registry:**
+    ```bash
+    # Use the same image tag you used in the build step
+    podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.0
+    ```
+
+### Step 2: Deploy to the Staging Environment
+
+Use the `gcloud run deploy` command to deploy your new image to the staging service. This command also sets all the necessary environment variables.
+
+1.  **Prepare your credentials:** Gather all the secrets and configuration values for your **staging** environment.
+
+2.  **Run the deploy command:**
+    *   Replace the `[PLACEHOLDER]` values with your actual staging credentials.
+    *   **Crucially**, ensure that `ENVIRONMENT_TYPE` is set to `staging`.
+    *   The command is wrapped in single quotes (`'`) to prevent your shell from misinterpreting special characters in your passwords or keys.
+
+    ```bash
+    # DEPLOY TO STAGING
+    gcloud run deploy meaningful-conversations-backend-staging \
+        --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.0 \
+        --platform managed \
+        --region europe-west6 \
+        --allow-unauthenticated \
+        --add-cloudsql-instances 'gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging' \
+        --set-env-vars='API_KEY=[YOUR_GEMINI_API_KEY],JWT_SECRET=[YOUR_JWT_SECRET],FRONTEND_URL=[YOUR_STAGING_FRONTEND_URL],MAILJET_API_KEY=[YOUR_MAILJET_KEY],MAILJET_SECRET_KEY=[YOUR_MAILJET_SECRET],MAILJET_SENDER_EMAIL=[YOUR_SENDER_EMAIL],DB_USER=[YOUR_STAGING_DB_USER],DB_PASSWORD=[YOUR_STAGING_DB_PASSWORD],DB_NAME=meaningful-convers-db-staging,INSTANCE_UNIX_SOCKET=/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging,ENVIRONMENT_TYPE=staging,INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL],INITIAL_ADMIN_PASSWORD=[YOUR_ADMIN_PASSWORD]'
+    ```
+
+### Step 3: Test the Staging Environment
+
+1.  **Health Check:** Open the staging backend's URL in your browser and go to the `/api/health` path to confirm it's running. The server startup logs in Google Cloud Logging should also indicate that the schema was pushed and the admin user was checked/created.
+2.  **Frontend Integration:** Run your frontend locally (`npx serve .` from the root directory) and test it against the newly deployed staging backend by using the `?backend=staging` URL parameter.
+    *   Example: `http://localhost:3000/?backend=staging`
+3.  **Full Regression Test:** Thoroughly test all application features: registration, login (especially as the admin user), chat sessions, context updates, etc.
+
+---
+
+## 🏆 The Promotion Workflow: Staging to Production
+
+Once you have thoroughly tested your new version (`1.1.0` in this example) in the staging environment and are confident it is stable and correct, you can promote it to production.
+
+### Step 1: Create Production Resources
+
+If you haven't already, create the parallel resources for your production environment:
+*   A new Cloud SQL instance (e.g., `meaningful-convers-db-prod`).
+*   A new database inside that instance (e.g., `meaningful_convos_db_prod`).
+*   A new Cloud Run service (e.g., `meaningful-conversations-backend-prod`).
+
+### Step 2: Deploy the Verified Image to Production
+
+The most important rule of promotion is to deploy the **exact same container image** that you just tested in staging. **Do not rebuild the container.**
+
+1.  **Prepare your Production Credentials:** Gather all the secrets and configuration values for your **production** environment. Use Google Secret Manager for these.
+
+2.  **Run the Production Deploy Command:**
+    *   Notice that the `--image` flag points to the **same version tag (`1.1.0`)**.
+    *   All environment variables now point to your **production** resources (`DB_NAME`, `INSTANCE_UNIX_SOCKET`, etc.).
+    *   **CRITICALLY**, `ENVIRONMENT_TYPE` is set to `production`.
+
+    ```bash
+    # DEPLOY TO PRODUCTION
+    gcloud run deploy meaningful-conversations-backend-prod \
+        --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.0 \
+        --platform managed \
+        --region europe-west6 \
+        --allow-unauthenticated \
+        --add-cloudsql-instances 'gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod' \
+        --set-env-vars='API_KEY=[YOUR_PROD_GEMINI_KEY],...,DB_USER=[YOUR_PROD_DB_USER],DB_PASSWORD=[YOUR_PROD_DB_PASSWORD],DB_NAME=meaningful-convers-db-prod,INSTANCE_UNIX_SOCKET=/cloudsql/...,ENVIRONMENT_TYPE=production,INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL],INITIAL_ADMIN_PASSWORD=[YOUR_ADMIN_PASSWORD]'
+    ```
+
+### Step 3: Final Verification
+
+1.  **Health Check:** Verify the production backend's `/api/health` endpoint.
+2.  **Deploy Frontend:** Deploy your frontend application to your live domain.
+3.  **Smoke Test:** Perform a final, quick test of the core features (login, a short chat session) on your live production URL.
+
+Your application is now live!

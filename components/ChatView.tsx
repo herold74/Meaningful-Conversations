@@ -297,15 +297,31 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
+      // The 'aborted' error is common and not always a problem (e.g., stopping before speech is detected).
+      // We'll log it as a warning to reduce console noise for non-critical events.
+      if (event.error === 'aborted') {
+        console.warn('Speech recognition was aborted. This can happen if recognition is stopped before speech is detected, or due to a network issue.');
+      } else {
+        console.error("Speech recognition error:", event.error, event);
+      }
       setIsListening(false);
     };
     
     recognition.onresult = (event) => {
-      const newTranscript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('');
-      setInput(baseTranscriptRef.current + newTranscript);
+      let interim_transcript = '';
+      let final_transcript = '';
+      
+      // The event.results list is cumulative. We can build the full transcript from scratch on each event.
+      for (let i = 0; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final_transcript += event.results[i][0].transcript;
+        } else {
+          interim_transcript += event.results[i][0].transcript;
+        }
+      }
+      
+      // Combine the initial text (if any) with the new final and interim parts.
+      setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
     };
 
     recognitionRef.current = recognition;
@@ -322,7 +338,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     window.speechSynthesis.cancel();
     setTtsStatus('idle');
-    if (isListening) recognitionRef.current?.stop();
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -365,6 +380,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // If the user submits the form while recognition is active, stop it first.
+    if (isListening) {
+      recognitionRef.current?.stop();
+    }
     await sendMessage(input);
     setInput('');
   };
