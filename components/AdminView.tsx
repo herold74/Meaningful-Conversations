@@ -391,316 +391,454 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
         setSortConfig({ key, direction });
     };
 
-    const ratingsFeedback = useMemo(() => feedback.filter(f => f.rating != null), [feedback]);
-    const messageReports = useMemo(() => feedback.filter(f => f.rating == null), [feedback]);
-
-    const averageRating = useMemo(() => {
-        if (ratingsFeedback.length === 0) return 0;
-        const total = ratingsFeedback.reduce((sum, item) => sum + item.rating!, 0);
-        return total / ratingsFeedback.length;
-    }, [ratingsFeedback]);
-
-    const filteredRatings = useMemo(() => {
-        if (!selectedBotFilter) return ratingsFeedback;
-        return ratingsFeedback.filter(f => f.botId === selectedBotFilter);
-    }, [ratingsFeedback, selectedBotFilter]);
-
-    const averageRatingForBot = useMemo(() => {
-        if (!selectedBotFilter || filteredRatings.length === 0) return null;
-        const total = filteredRatings.reduce((sum, item) => sum + item.rating!, 0);
-        return (total / filteredRatings.length).toFixed(2);
-    }, [filteredRatings, selectedBotFilter]);
-
-    const allBotsWithFeedback = useMemo(() => {
-        const botIds = new Set(ratingsFeedback.map(f => f.botId));
-        return BOTS.filter(b => botIds.has(b.id));
-    }, [ratingsFeedback]);
-
-    const renderSortArrow = (key: CodeSortKeys) => {
-        if (!sortConfig || sortConfig.key !== key) return null;
-        return sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />;
+    const tabConfig: Record<AdminTab, { icon: React.FC<any>, key: string }> = {
+        users: { icon: UsersIcon, key: 'admin_users_tab' },
+        codes: { icon: KeyIcon, key: 'admin_codes_tab' },
+        tickets: { icon: InboxIcon, key: 'admin_tickets_tab' },
+        feedback: { icon: StarIcon, key: 'admin_ratings_tab' },
     };
 
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 'users':
-                return (
-                    <div className="space-y-4">
-                        <input type="text" value={userSearchQuery} onChange={(e) => setUserSearchQuery(e.target.value)} placeholder={t('admin_search_users_placeholder')} className="w-full p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" />
-                        {filteredUsers.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">{users.length === 0 ? t('admin_no_users_yet') : t('admin_no_users_found')}</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full text-sm">
-                                    <thead className="text-left font-bold uppercase tracking-wider bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                        <tr>
-                                            <th className="p-3">{t('admin_users_email')}</th>
-                                            <th className="p-3">{t('admin_users_joined')}</th>
-                                            <th className="p-3">{t('admin_users_roles')}</th>
-                                            <th className="p-3">{t('admin_users_logins')}</th>
-                                            <th className="p-3">{t('admin_users_last_login')}</th>
-                                            <th className="p-3 text-right">{t('admin_users_actions')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {filteredUsers.map(user => (
-                                            <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                <td className="p-3 whitespace-nowrap break-all font-medium text-gray-800 dark:text-gray-200">{user.email}</td>
-                                                <td className="p-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
-                                                <td className="p-3">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {user.isBetaTester && <span className="px-2 py-0.5 text-xs font-bold text-blue-800 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/50 rounded-full">{t('admin_users_premium')}</span>}
-                                                        {user.isAdmin && <span className="px-2 py-0.5 text-xs font-bold text-red-800 bg-red-100 dark:text-red-200 dark:bg-red-900/50 rounded-full">{t('admin_users_admin')}</span>}
-                                                    </div>
-                                                </td>
-                                                <td className="p-3 text-center text-gray-600 dark:text-gray-400">{user.loginCount}</td>
-                                                <td className="p-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'N/A'}</td>
-                                                <td className="p-3 whitespace-nowrap text-right">
-                                                    <button onClick={() => handleAction(`premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`premium-${user.id}`]} className="p-2 text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5"/></button>
-                                                    <button onClick={() => handleAction(`admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} disabled={actionLoading[`admin-${user.id}`] || (currentUser?.id === user.id)} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_users_toggle_admin')}><ShieldIcon className="w-5 h-5"/></button>
-                                                    <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-yellow-500 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5"/></button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'codes':
-                return (
-                    <div className="space-y-4">
-                        <form onSubmit={handleCreateCode} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-bold md:col-span-3">{t('admin_codes_generate_title')}</h3>
-                            <div className="md:col-span-2">
-                                <label htmlFor="code-type" className="sr-only">{t('admin_codes_for_coach')}</label>
-                                <select id="code-type" value={newCodeBotId} onChange={(e) => setNewCodeBotId(e.target.value)} className="w-full p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
-                                    <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
-                                    <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
-                                    <option value="premium">{t('admin_codes_unlock_premium')}</option>
-                                    {botsForCodes.map(bot => (
-                                        <option key={bot.id} value={bot.id}>{bot.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <button type="submit" disabled={actionLoading['createCode']} className="px-4 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center">
-                                {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
-                            </button>
-                        </form>
-                         <input type="text" value={codeEmailFilter} onChange={(e) => setCodeEmailFilter(e.target.value)} placeholder={t('admin_codes_filter_email')} className="w-full p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200" />
-                        {sortedAndFilteredCodes.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">{codes.length === 0 ? t('admin_no_codes_yet') : t('admin_no_users_found')}</p>
-                        ) : (
-                             <div className="overflow-x-auto">
-                                <table className="min-w-full text-sm">
-                                    <thead className="text-left font-bold uppercase tracking-wider bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                        <tr>
-                                            <th className="p-3">{t('admin_codes_code')}</th>
-                                            <th className="p-3">
-                                                <button onClick={() => requestSort('unlocks')} className="flex items-center gap-1">{t('admin_codes_unlocks')} {renderSortArrow('unlocks')}</button>
-                                            </th>
-                                             <th className="p-3">
-                                                <button onClick={() => requestSort('usage')} className="flex items-center gap-1">{t('admin_codes_usage')} {renderSortArrow('usage')}</button>
-                                            </th>
-                                            <th className="p-3">
-                                                <button onClick={() => requestSort('createdAt')} className="flex items-center gap-1">{t('admin_codes_created')} {renderSortArrow('createdAt')}</button>
-                                            </th>
-                                            <th className="p-3 text-right">{t('admin_codes_actions')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                       {sortedAndFilteredCodes.map(code => (
-                                            <tr key={code.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                <td className="p-3 font-mono text-lg text-gray-800 dark:text-gray-200">
-                                                    <div className="flex items-center gap-2">
-                                                        <span>{code.code}</span>
-                                                        <button onClick={() => handleCopyCode(code.code, code.id)} title={t('admin_copy_code')}>
-                                                            {copiedCodeId === code.id ? <CheckIcon className="w-4 h-4 text-green-500"/> : <ClipboardIcon className="w-4 h-4 text-gray-400 hover:text-gray-600"/>}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
-                                                <td className="p-3">
-                                                    {code.isUsed ? (
-                                                        <span className="px-2 py-0.5 text-xs font-bold text-yellow-800 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900/50 rounded-full whitespace-nowrap">
-                                                            {t('admin_codes_used_by')} {code.usedBy?.email || 'N/A'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2 py-0.5 text-xs font-bold text-green-800 bg-green-100 dark:text-green-200 dark:bg-green-900/50 rounded-full">{t('admin_codes_status_available')}</span>
-                                                    )}
-                                                </td>
-                                                <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(code.createdAt).toLocaleDateString()}</td>
-                                                <td className="p-3 text-right">
-                                                     {code.isUsed && <button onClick={() => handleAction(`revoke-${code.id}`, () => userService.revokeUpgradeCode(code.id))} disabled={actionLoading[`revoke-${code.id}`]} className="p-2 text-yellow-500 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" title={t('admin_codes_revoke')}><RepeatIcon className="w-5 h-5"/></button>}
-                                                    <button onClick={() => handleAction(`delete-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5"/></button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'tickets':
-                const openTickets = tickets.filter(t => t.status === 'OPEN');
+    const sessionFeedback = useMemo(() => feedback.filter(item => item.rating !== null), [feedback]);
+    const messageReports = useMemo(() => feedback.filter(item => item.rating === null), [feedback]);
 
+    const renderTabs = () => (
+        <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
+            {(['users', 'feedback', 'tickets', 'codes'] as AdminTab[]).map(tab => {
+                const { icon: Icon, key } = tabConfig[tab];
                 return (
-                    <div className="space-y-4">
-                         <div className="p-4 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700">
-                             <h3 className="text-lg font-bold">{t('admin_support_tickets_title')}</h3>
-                            {openTickets.length === 0 ? (
-                                <p className="text-center text-gray-500 py-4">{t('admin_tickets_no_tickets')}</p>
-                            ) : (
-                                <div className="overflow-x-auto mt-2">
-                                    <table className="min-w-full text-sm">
-                                        <thead className="text-left font-bold uppercase tracking-wider bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                            <tr>
-                                                <th className="p-3">{t('admin_tickets_details')}</th>
-                                                <th className="p-3">{t('admin_tickets_type')}</th>
-                                                <th className="p-3">{t('admin_tickets_created')}</th>
-                                                <th className="p-3">{t('admin_tickets_status')}</th>
-                                                <th className="p-3 text-right">{t('admin_tickets_actions')}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                            {openTickets.map(ticket => (
-                                                <tr key={ticket.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                    <td className="p-3 font-medium text-gray-800 dark:text-gray-200">{ticket.payload.email}</td>
-                                                    <td className="p-3 text-gray-600 dark:text-gray-400">{ticket.type}</td>
-                                                    <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(ticket.createdAt).toLocaleString()}</td>
-                                                    <td className="p-3"><span className="px-2 py-0.5 text-xs font-bold text-yellow-800 bg-yellow-100 dark:text-yellow-200 dark:bg-yellow-900/50 rounded-full">{ticket.status}</span></td>
-                                                    <td className="p-3 text-right">
-                                                         <button onClick={() => handleAction(`resolve-${ticket.id}`, () => userService.resolveTicket(ticket.id))} disabled={actionLoading[`resolve-${ticket.id}`]} className="p-2 text-green-500 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-50" title={t('admin_tickets_resolve')}><CheckIcon className="w-5 h-5"/></button>
-                                                         <button onClick={() => handleAction(`delete-ticket-${ticket.id}`, () => userService.deleteTicket(ticket.id))} disabled={actionLoading[`delete-ticket-${ticket.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5"/></button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/50 border border-yellow-200 dark:border-yellow-700">
-                            <h3 className="text-lg font-bold">{t('admin_message_reports_title')}</h3>
-                             {messageReports.length === 0 ? (
-                                <p className="text-center text-gray-500 py-4">{t('admin_no_message_reports')}</p>
-                            ) : (
-                                <div className="overflow-x-auto mt-2">
-                                    <table className="min-w-full text-sm">
-                                        <thead className="text-left font-bold uppercase tracking-wider bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                            <tr>
-                                                <th className="p-3 w-1/3">{t('admin_feedback_comments')}</th>
-                                                <th className="p-3">{t('admin_feedback_bot')}</th>
-                                                <th className="p-3">{t('admin_feedback_user')}</th>
-                                                <th className="p-3">{t('admin_feedback_submitted')}</th>
-                                                <th className="p-3 text-right">{t('admin_codes_actions')}</th>
-                                            </tr>
-                                        </thead>
-                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                            {messageReports.map(item => <MessageReportTableRow key={item.id} item={item} />)}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-
-            case 'feedback':
-                 return (
-                    <div className="space-y-4">
-                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-bold mb-2">{t('admin_ratings_overall_avg')}</h3>
-                            {ratingsFeedback.length > 0 ? (
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-4xl font-bold text-gray-800 dark:text-gray-200">{averageRating.toFixed(2)}</span>
-                                    <span className="text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingsFeedback.length })}</span>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500">{t('admin_ratings_no_ratings')}</p>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <select value={selectedBotFilter || ''} onChange={(e) => setSelectedBotFilter(e.target.value)} className="p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200">
-                                <option value="">All Coaches</option>
-                                {allBotsWithFeedback.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
-                            </select>
-                            {selectedBotFilter && (
-                                <>
-                                    <span className="font-bold">{t('admin_ratings_avg_rating')}: {averageRatingForBot}</span>
-                                    <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-red-500 hover:underline">{t('admin_ratings_clear_filter')}</button>
-                                </>
-                            )}
-                        </div>
-                        {filteredRatings.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">{t('admin_feedback_no_feedback')}</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full text-sm">
-                                    <thead className="text-left font-bold uppercase tracking-wider bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                        <tr>
-                                            <th className="p-3">{t('admin_feedback_rating')}</th>
-                                            <th className="p-3 w-1/2">{t('admin_feedback_comments')}</th>
-                                            <th className="p-3">{t('admin_feedback_bot')}</th>
-                                            <th className="p-3">{t('admin_feedback_user')}</th>
-                                            <th className="p-3">{t('admin_feedback_submitted')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {filteredRatings.map(item => <FeedbackTableRow key={item.id} item={item} />)}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                );
-        }
-    };
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-2 px-2 md:px-3 py-2 text-sm font-bold uppercase transition-colors focus:outline-none ${
+                            activeTab === tab
+                                ? 'border-b-2 border-green-500 text-gray-900 dark:text-gray-100'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        }`}
+                        aria-label={t(key)}
+                    >
+                        <Icon className="w-5 h-5" />
+                        <span 
+                            className="hidden md:inline-block text-center leading-tight" 
+                            dangerouslySetInnerHTML={{ __html: t(key) }}
+                        />
+                    </button>
+                )
+            })}
+        </div>
+    );
     
-    const TabButton: React.FC<{ tabId: AdminTab; icon: React.FC<any>; label: string }> = ({ tabId, icon: Icon, label }) => {
-        const isActive = activeTab === tabId;
-        return (
-            <button
-                onClick={() => setActiveTab(tabId)}
-                className={`flex-1 flex flex-col items-center justify-center p-3 text-center transition-colors border-b-4 ${isActive ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-                role="tab"
-                aria-selected={isActive}
-            >
-                <Icon className="w-6 h-6 mb-1" />
-                <span className="text-xs font-bold uppercase" dangerouslySetInnerHTML={{ __html: label }} />
-            </button>
-        );
+    const renderUsers = () => (
+        <div className="space-y-4">
+            <input 
+                type="search"
+                value={userSearchQuery}
+                onChange={e => setUserSearchQuery(e.target.value)}
+                placeholder={t('admin_search_users_placeholder')}
+                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+            />
+             {filteredUsers.length > 0 ? (
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                            <tr>
+                                <th className="p-3">{t('admin_users_email')}</th>
+                                <th className="p-3">{t('admin_users_joined')}</th>
+                                <th className="p-3">Roles</th>
+                                <th className="p-3 text-center">{t('admin_users_logins')}</th>
+                                <th className="p-3">{t('admin_users_last_login')}</th>
+                                <th className="p-3 text-right">{t('admin_users_actions')}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                            {filteredUsers.map(user => {
+                                const isCurrentUser = currentUser?.id === user.id;
+                                return (
+                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}>
+                                        <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
+                                        <td className="p-3">
+                                            <div className="flex items-center gap-3">
+                                                {user.isBetaTester && (
+                                                    <span title={t('admin_users_premium')}>
+                                                        <StarIcon className="w-5 h-5 text-blue-500" />
+                                                    </span>
+                                                )}
+                                                {user.isAdmin && (
+                                                    <span title={t('admin_users_admin')}>
+                                                        <ShieldIcon className="w-5 h-5 text-purple-500" />
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
+                                        <td className="p-3">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
+                                                <button 
+                                                    onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
+                                                    disabled={actionLoading[`toggle-admin-${user.id}`] || isCurrentUser} 
+                                                    className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                                    title={isCurrentUser ? t('admin_users_cannot_change_self') : t('admin_users_toggle_admin')}
+                                                >
+                                                    <ShieldIcon className="w-5 h-5" />
+                                                </button>
+                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <p>{users.length > 0 ? t('admin_no_users_found') : t('admin_no_users_yet')}</p>
+                </div>
+            )}
+        </div>
+    );
+    
+    const renderCodes = () => (
+        <div className="space-y-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4">
+                 <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_codes_generate_title')}</h3>
+                <form onSubmit={handleCreateCode} className="flex flex-col sm:flex-row items-stretch gap-3">
+                    <div className="flex-1">
+                        <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
+                        <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
+                            <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
+                            <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
+                            <option value="premium">{t('admin_codes_unlock_premium')}</option>
+                            <option value="big5">{t('admin_codes_unlock_big5')}</option>
+                            <option disabled>---</option>
+                            {botsForCodes.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
+                        </select>
+                    </div>
+                    <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center">
+                        {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
+                    </button>
+                </form>
+                 <input 
+                    type="search"
+                    value={codeEmailFilter}
+                    onChange={e => setCodeEmailFilter(e.target.value)}
+                    placeholder={t('admin_codes_filter_email')}
+                    className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+            </div>
+            {codes.length > 0 ? (
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${sortedAndFilteredCodes.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                    <table className="w-full text-left text-sm">
+                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                            <tr>
+                                <th className="p-3">{t('admin_codes_code')}</th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('unlocks')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_unlocks')}
+                                        {sortConfig?.key === 'unlocks' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('createdAt')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_created')}
+                                        {sortConfig?.key === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestSort('usage')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_codes_usage')}
+                                        {sortConfig?.key === 'usage' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3 text-right">{t('admin_codes_actions')}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                            {sortedAndFilteredCodes.map(code => (
+                                <tr key={code.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td className="p-3 font-mono text-gray-800 dark:text-gray-200">
+                                        <div className="flex items-center">
+                                            <span className="whitespace-nowrap">{code.code}</span>
+                                            <button onClick={() => handleCopyCode(code.code, code.id)} className="ml-2 p-1 inline-flex align-middle text-gray-400 hover:text-green-500 flex-shrink-0">
+                                                {copiedCodeId === code.id ? <CheckIcon className="w-4 h-4 text-green-500"/> : <ClipboardIcon className="w-4 h-4"/>}
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-3 break-all text-gray-600 dark:text-gray-400">
+                                        {code.isUsed 
+                                            ? (code.usedBy?.email || <span className="px-2 py-1 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">{t('admin_codes_status_used')}</span>) 
+                                            : <span className="px-2 py-1 text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full">{t('admin_codes_status_available')}</span>}
+                                    </td>
+                                    <td className="p-3 text-right">
+                                        {code.isUsed ? (
+                                            <button 
+                                                onClick={() => handleAction(`revoke-code-${code.id}`, () => userService.revokeUpgradeCode(code.id))}
+                                                disabled={actionLoading[`revoke-code-${code.id}`]}
+                                                className="p-2 text-yellow-600 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" 
+                                                title={t('admin_codes_revoke')}
+                                            >
+                                                <RepeatIcon className="w-5 h-5" />
+                                            </button>
+                                        ) : (
+                                            <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <p>{codes.length > 0 ? 'No codes found for this filter.' : t('admin_no_codes_yet')}</p>
+                </div>
+            )}
+        </div>
+    );
+    
+    const renderTickets = () => (
+        <div className="space-y-8">
+            <div>
+                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_support_tickets_title')}</h3>
+                {tickets.length > 0 ? (
+                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${tickets.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                                <tr>
+                                    <th className="p-3">{t('admin_tickets_details')}</th>
+                                    <th className="p-3">{t('admin_tickets_type')}</th>
+                                    <th className="p-3">{t('admin_tickets_created')}</th>
+                                    <th className="p-3">{t('admin_tickets_status')}</th>
+                                    <th className="p-3 text-right">{t('admin_tickets_actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                                {tickets.map(ticket => (
+                                    <tr key={ticket.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                        <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-all">{ticket.payload.email}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400">{ticket.type}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(ticket.createdAt).toLocaleString()}</td>
+                                        <td className="p-3">
+                                            {ticket.status === 'OPEN' 
+                                                ? <span className="px-2 py-1 text-xs font-bold bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 rounded-full">{ticket.status}</span>
+                                                : <span className="px-2 py-1 text-xs font-bold bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200 rounded-full">{ticket.status}</span>
+                                            }
+                                        </td>
+                                        <td className="p-3 text-right">
+                                            {ticket.status === 'OPEN' && (
+                                                <button onClick={() => handleAction(`resolve-ticket-${ticket.id}`, () => userService.resolveTicket(ticket.id))} disabled={actionLoading[`resolve-ticket-${ticket.id}`]} className="p-2 text-green-600 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-50" title={t('admin_tickets_resolve')}>
+                                                    <CheckIcon className="w-5 h-5"/>
+                                                </button>
+                                            )}
+                                            {ticket.status === 'RESOLVED' && (
+                                                <button 
+                                                    onClick={() => handleAction(`delete-ticket-${ticket.id}`, () => userService.deleteTicket(ticket.id))} 
+                                                    disabled={actionLoading[`delete-ticket-${ticket.id}`]}
+                                                    className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
+                                                    title={t('admin_codes_delete')}
+                                                >
+                                                    <DeleteIcon className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="text-center py-16 text-gray-500 dark:text-gray-400 flex flex-col items-center gap-4">
+                        <InboxIcon className="w-12 h-12 text-gray-400" />
+                        <p className="text-lg">{t('admin_tickets_no_tickets')}</p>
+                    </div>
+                )}
+            </div>
+
+            <div>
+                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
+                {messageReports.length > 0 ? (
+                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${messageReports.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                                <tr>
+                                    <th className="p-3">{t('admin_feedback_comments')}</th>
+                                    <th className="p-3 w-24">{t('admin_feedback_bot')}</th>
+                                    <th className="p-3 w-48">{t('admin_feedback_user')}</th>
+                                    <th className="p-3 w-44">{t('admin_feedback_submitted')}</th>
+                                    <th className="p-3 w-20 text-right">{t('admin_tickets_actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                                {messageReports.map(item => <MessageReportTableRow key={item.id} item={item} />)}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="text-center py-16 text-gray-500 dark:text-gray-400 flex flex-col items-center gap-4">
+                        <ChatBubbleIcon className="w-12 h-12 text-gray-400" />
+                        <p className="text-lg">{t('admin_no_message_reports')}</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+    
+    const ratingStats = useMemo(() => {
+        const statsByBot = BOTS.reduce((acc, bot) => {
+            acc[bot.id] = {
+                id: bot.id,
+                name: bot.name,
+                avatar: bot.avatar,
+                ratings: [] as number[],
+                count: 0,
+                distribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
+            };
+            return acc;
+        }, {} as Record<string, { id: string; name: string; avatar: string; ratings: number[]; count: number; distribution: Record<string, number> }>);
+
+        let totalRatings = 0;
+        let totalSum = 0;
+
+        sessionFeedback.forEach(item => {
+            if (item.rating && item.rating >= 1 && item.rating <= 5 && statsByBot[item.botId]) {
+                const ratingKey = String(item.rating);
+                statsByBot[item.botId].ratings.push(item.rating);
+                statsByBot[item.botId].count++;
+                statsByBot[item.botId].distribution[ratingKey]++;
+                totalRatings++;
+                totalSum += item.rating;
+            }
+        });
+
+        const overallAverage = totalRatings > 0 ? (totalSum / totalRatings).toFixed(2) : 'N/A';
+
+        const botStats = Object.values(statsByBot).map(botStat => {
+            const sum = botStat.ratings.reduce((a, b) => a + b, 0);
+            const average = botStat.count > 0 ? (sum / botStat.count).toFixed(2) : 'N/A';
+            return { ...botStat, average };
+        }).sort((a,b) => b.count - a.count);
+
+        return { botStats, overallAverage, totalRatings };
+    }, [sessionFeedback]);
+    
+    const filteredFeedback = useMemo(() => {
+        if (!selectedBotFilter) return sessionFeedback;
+        return sessionFeedback.filter(item => item.botId === selectedBotFilter);
+    }, [sessionFeedback, selectedBotFilter]);
+
+    const renderRatings = () => (
+        <div className="space-y-6">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
+                <p className="text-4xl font-bold text-green-500 dark:text-green-400">{ratingStats.overallAverage}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
+            </div>
+            {ratingStats.totalRatings > 0 ? (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {ratingStats.botStats.map(stat => (
+                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2  transition-all duration-200 cursor-pointer hover:border-green-500 dark:hover:border-green-400 ${selectedBotFilter === stat.id ? 'border-green-500' : 'border-gray-200 dark:border-gray-700/50'}`}>
+                                <div className="flex items-center gap-4 mb-3">
+                                    <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
+                                    <div>
+                                        <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">{stat.name}</h4>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_avg_rating')}: <span className="font-bold text-gray-700 dark:text-gray-300">{stat.average}</span> ({stat.count})</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    {([5, 4, 3, 2, 1]).map(star => {
+                                        const count = stat.distribution[String(star)];
+                                        const percentage = stat.count > 0 ? (count / stat.count) * 100 : 0;
+                                        return (
+                                            <div key={star} className="flex items-center gap-2 text-xs">
+                                                <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">{star} <StarIcon className="w-3 h-3 text-yellow-400"/></span>
+                                                <div className="w-full bg-gray-200 dark:bg-gray-700 h-4 flex-1">
+                                                    <div className="bg-green-400 h-4 text-center text-black font-bold" style={{ width: `${percentage}%` }}>
+                                                        {count > 0 ? count : ''}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div>
+                         <div className="flex justify-between items-center mb-2">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{selectedBotFilter ? `Details for ${ratingStats.botStats.find(b => b.id === selectedBotFilter)?.name}` : 'All Feedback'}</h3>
+                            {selectedBotFilter && (
+                                <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
+                            )}
+                        </div>
+                        <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredFeedback.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                                    <tr>
+                                        <th className="p-3 w-28">{t('admin_feedback_rating')}</th>
+                                        <th className="p-3">{t('admin_feedback_comments')}</th>
+                                        <th className="p-3 w-24">{t('admin_feedback_bot')}</th>
+                                        <th className="p-3 w-48">{t('admin_feedback_user')}</th>
+                                        <th className="p-3 w-44">{t('admin_feedback_submitted')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                                    {filteredFeedback.map(item => <FeedbackTableRow key={item.id} item={item} />)}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="text-center py-16 text-gray-500 dark:text-gray-400 flex flex-col items-center gap-4">
+                    <StarIcon className="w-12 h-12 text-gray-400" />
+                    <p className="text-lg">{t('admin_ratings_no_ratings')}</p>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderContent = () => {
+        if (isLoading) return <div className="flex justify-center p-12"><Spinner /></div>;
+        if (error) return <p className="text-red-500 p-4">{error}</p>;
+
+        const views: Record<AdminTab, React.ReactNode> = {
+            users: renderUsers(),
+            codes: renderCodes(),
+            tickets: renderTickets(),
+            feedback: renderRatings(),
+        };
+
+        return <div className="p-4">{views[activeTab]}</div>;
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
-            <div className="relative text-center">
+        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+            <div className="relative text-center pb-4">
                 <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('admin_title')}</h1>
             </div>
-            {isLoading ? (
-                <div className="flex justify-center items-center py-20"><Spinner /></div>
-            ) : error ? (
-                <p className="text-center text-red-500">{error}</p>
-            ) : (
-                <div className="space-y-6">
-                    <div className="flex border-b border-gray-200 dark:border-gray-700" role="tablist">
-                        <TabButton tabId="users" icon={UsersIcon} label={t('admin_users_tab')} />
-                        <TabButton tabId="codes" icon={KeyIcon} label={t('admin_codes_tab')} />
-                        <TabButton tabId="tickets" icon={InboxIcon} label={t('admin_tickets_tab')} />
-                        <TabButton tabId="feedback" icon={StarIcon} label={t('admin_ratings_tab')} />
-                    </div>
-                    <div role="tabpanel">
-                        {renderTabContent()}
-                    </div>
-                </div>
+            {renderTabs()}
+            {renderContent()}
+            {resetSuccessData && (
+                <ResetPasswordSuccessModal
+                    data={resetSuccessData}
+                    onClose={() => setResetSuccessData(null)}
+                />
             )}
-            {resetSuccessData && <ResetPasswordSuccessModal data={resetSuccessData} onClose={() => setResetSuccessData(null)} />}
-            {userToReset && <ResetConfirmationModal user={userToReset} onConfirm={confirmAndResetPassword} onCancel={() => setUserToReset(null)} />}
+            {userToReset && (
+                <ResetConfirmationModal
+                    user={userToReset}
+                    onConfirm={confirmAndResetPassword}
+                    onCancel={() => setUserToReset(null)}
+                />
+            )}
         </div>
     );
 };

@@ -167,6 +167,10 @@ router.post('/codes/:id/revoke', async (req, res) => {
             }
         } else if (code.botId === 'premium') {
             updateData.isBetaTester = false;
+            // Also revoke big5 analysis access if it exists
+            const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+            const newUnlocked = unlocked.filter(coachId => coachId !== 'big5');
+            updateData.unlockedCoaches = JSON.stringify(newUnlocked);
         } else {
             const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
             const newUnlocked = unlocked.filter(coachId => coachId !== code.botId);
