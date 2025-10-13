@@ -7,7 +7,7 @@ const router = express.Router();
 
 // POST /api/feedback
 router.post('/', optionalAuthMiddleware, async (req, res) => {
-    const { rating, comments, botId, lastUserMessage, botResponse, isAnonymous } = req.body;
+    const { rating, comments, botId, lastUserMessage, botResponse, isAnonymous, email } = req.body;
     
     // For feedback, `botId` is always required.
     // The `comments` field must exist and be a string, but it can be an empty string for high ratings.
@@ -25,6 +25,8 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
             isAnonymous: isAnonymous,
             // Link to user if they are logged in and not submitting anonymously
             userId: req.userId && !isAnonymous ? req.userId : null,
+            // Store the email if provided and the submission is anonymous
+            guestEmail: isAnonymous ? (email || null) : null
         };
 
         const feedback = await prisma.feedback.create({ data: feedbackData });

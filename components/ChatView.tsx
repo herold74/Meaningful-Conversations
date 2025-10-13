@@ -449,6 +449,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         lastUserMessage: feedbackMessages.user?.text || null,
         botResponse: feedbackMessages.bot.text,
         isAnonymous: feedback.isAnonymous,
+        email: feedback.email,
     });
 };
   

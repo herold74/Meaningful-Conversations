@@ -167,7 +167,14 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
                     )}
                 </td>
                 <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
-                <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
+                <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">
+                    {item.isAnonymous 
+                        ? (item.guestEmail 
+                            ? <><span className="break-all">{item.guestEmail}</span><br/><span className="text-xs italic">({t('admin_feedback_anonymous')})</span></>
+                            : <span className="italic">{t('admin_feedback_anonymous')}</span>)
+                        : item.user?.email
+                    }
+                </td>
                 <td className="p-3 align-top text-gray-600 dark:text-gray-400">{new Date(item.createdAt).toLocaleString()}</td>
             </tr>
             {isCommentExpanded && (
@@ -261,7 +268,14 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                         {item.comments ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>}
                     </td>
                     <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
-                    <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">{item.isAnonymous ? <span className="italic">{t('admin_feedback_anonymous')}</span> : item.user?.email}</td>
+                    <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">
+                        {item.isAnonymous 
+                            ? (item.guestEmail 
+                                ? <><span className="break-all">{item.guestEmail}</span><br/><span className="text-xs italic">({t('admin_feedback_anonymous')})</span></>
+                                : <span className="italic">{t('admin_feedback_anonymous')}</span>)
+                            : item.user?.email
+                        }
+                    </td>
                     <td className="p-3 align-top text-gray-600 dark:text-gray-400">{new Date(item.createdAt).toLocaleString()}</td>
                     <td className="p-3 align-top text-right">
                         <button 

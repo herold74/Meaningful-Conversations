@@ -133,4 +133,5 @@ export interface Feedback {
     isAnonymous: boolean;
     createdAt: string;
     user: { email: string } | null;
+    guestEmail?: string | null;
 }

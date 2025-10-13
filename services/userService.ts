@@ -1,3 +1,4 @@
+
 import { apiFetch, setSession, getSession, clearSession } from './api';
 import { User, UpgradeCode, Ticket, Feedback, Bot } from '../types';
 import { encryptData, decryptData } from '../utils/encryption';
@@ -117,6 +118,8 @@ export const submitFeedback = async (feedbackData: {
     lastUserMessage?: string;
     botResponse?: string;
     isAnonymous: boolean;
+    // Fix: Added optional email property to align with its usage in ChatView.tsx and the backend API.
+    email?: string;
 }): Promise<void> => {
     await apiFetch('/feedback', {
         method: 'POST',
