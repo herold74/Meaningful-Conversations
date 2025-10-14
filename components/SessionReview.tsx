@@ -486,12 +486,31 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                                 </span>
                                             )}
                                             {appliedUpdate?.type !== 'create_headline' && <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">{t('sessionReview_to')}</span>}
-                                            <select value={appliedUpdate?.targetHeadline} onChange={(e) => handleActionChange(index, e.target.value)} disabled={!isApplied} className="w-full sm:w-auto p-1 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 dark:disabled:bg-gray-800/50">
+                                            <select value={appliedUpdate?.targetHeadline} onChange={(e) => handleActionChange(index, e.target.value)} disabled={!isApplied} className="w-full sm:w-auto p-1 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-100 dark:disabled:bg-gray-800/50 text-gray-900 dark:text-gray-200 dark:bg-gray-950">
                                                 <optgroup label={t('sessionReview_optgroup_existing')}>
-                                                    {existingHeadlines.map(h => <option key={h} value={h}>{normalizeHeadline(h)}</option>)}
+                                                    {existingHeadlines.map(h => {
+                                                        const isSectionHeadline = h.trim().startsWith('#');
+                                                        return (
+                                                            <option
+                                                                key={h}
+                                                                value={h}
+                                                                className="text-gray-900 dark:text-gray-200"
+                                                            >
+                                                                {isSectionHeadline ? h : normalizeHeadline(h)}
+                                                            </option>
+                                                        );
+                                                    })}
                                                 </optgroup>
                                                 <optgroup label={t('sessionReview_optgroup_new')}>
-                                                    {newHeadlineProposals.map(h => <option key={h} value={h}>{normalizeHeadline(h)} (New)</option>)}
+                                                    {newHeadlineProposals.map(h => (
+                                                        <option
+                                                            key={h}
+                                                            value={h}
+                                                            className="text-gray-900 dark:text-gray-200"
+                                                        >
+                                                            {`## ${normalizeHeadline(h)}`} (New)
+                                                        </option>
+                                                    ))}
                                                 </optgroup>
                                             </select>
                                         </div>

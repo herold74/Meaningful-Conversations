@@ -29,37 +29,40 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
 
     try {
         let userIdForDb = null;
-        let isEffectivelyAnonymous = isAnonymous || !req.userId;
+        let isGuestSubmission = !req.userId;
 
         // Verify user exists if a token was provided
-        if (!isEffectivelyAnonymous && req.userId) {
+        if (!isGuestSubmission) {
             const user = await prisma.user.findUnique({ where: { id: req.userId } });
             if (user) {
                 userIdForDb = req.userId;
             } else {
-                // User from token not found in DB, treat as anonymous.
-                isEffectivelyAnonymous = true;
+                // User from token not found in DB, treat as a guest submission.
+                isGuestSubmission = true;
             }
         }
         
-        // If the submission is anonymous and an email is provided, prepend it to the comments field.
-        if (isEffectivelyAnonymous && email) {
+        // If a GUEST provides an email, prepend it to the comments field.
+        // A logged-in user's email is already known and will be linked via the relation.
+        if (isGuestSubmission && email) {
             comments = `[Guest Email: ${email}]\n\n${comments}`;
         }
         
         const MAX_TEXT_LENGTH = 65535;
 
-        // Base data for the feedback record, without the guestEmail field.
         const feedbackData = {
             rating: rating ?? null,
             comments: truncate(comments, MAX_TEXT_LENGTH),
             botId,
             lastUserMessage: truncate(lastUserMessage, MAX_TEXT_LENGTH) ?? null,
             botResponse: truncate(botResponse, MAX_TEXT_LENGTH) ?? null,
-            isAnonymous: isEffectivelyAnonymous,
+            // isAnonymous now correctly reflects the user's explicit choice.
+            // For guests, this will be true from the client, but their guest status is determined by the null userId.
+            isAnonymous: isAnonymous,
         };
 
-        // Conditionally connect the user relation if they are a registered user.
+        // Conditionally connect the user relation if they are a logged-in user.
+        // This will happen even if they chose to be anonymous, allowing us to distinguish them from guests.
         if (userIdForDb) {
             feedbackData.user = {
                 connect: { id: userIdForDb }

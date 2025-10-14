@@ -69,9 +69,8 @@ export const getQuestionnaireStructure = (t: (key: string) => string): Section[]
         level: 2,
         description: t('questionnaire_routines_desc'),
         fields: [
-            { id: 'routines_focus', label: t('questionnaire_routines_focus_label'), prompt: t('questionnaire_routines_focus_prompt') },
-            { id: 'routines_learning', label: t('questionnaire_routines_learning_label'), prompt: t('questionnaire_routines_learning_prompt') },
             { id: 'routines_p_tm', label: t('questionnaire_routines_ptm_label'), prompt: t('questionnaire_routines_ptm_prompt') },
+            { id: 'routines_learning', label: t('questionnaire_routines_learning_label'), prompt: t('questionnaire_routines_learning_prompt') },
             { id: 'routines_health', label: t('questionnaire_routines_health_label'), prompt: t('questionnaire_routines_health_prompt') },
             { id: 'routines_growth', label: t('questionnaire_routines_growth_label'), prompt: t('questionnaire_routines_growth_prompt') },
         ],
@@ -87,6 +86,7 @@ export const getQuestionnaireStructure = (t: (key: string) => string): Section[]
             { id: 'challenges_wlb', label: t('questionnaire_challenges_wlb_label'), prompt: t('questionnaire_challenges_wlb_prompt') },
             { id: 'challenges_social', label: t('questionnaire_challenges_social_label'), prompt: t('questionnaire_challenges_social_prompt') },
             { id: 'challenges_growth', label: t('questionnaire_challenges_growth_label'), prompt: t('questionnaire_challenges_growth_prompt') },
+            { id: 'challenges_habits', label: t('questionnaire_challenges_habits_label'), prompt: t('questionnaire_challenges_habits_prompt') },
         ],
         collapsedByDefault: true,
         collapseText: t('questionnaire_challenges_collapseText'),

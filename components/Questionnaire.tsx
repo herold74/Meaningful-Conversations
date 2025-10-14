@@ -164,19 +164,36 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">{section.title}</h2>
                             {section.description && <p className="text-gray-600 dark:text-gray-400 italic">{section.description}</p>}
                             
-                            {section.fields?.map(field => (
-                                <div key={field.id}>
-                                    <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
-                                    <textarea
-                                        id={field.id}
-                                        rows={field.rows || 3}
-                                        value={answers[field.id] || ''}
-                                        onChange={e => handleChange(field.id, e.target.value)}
-                                        placeholder={field.prompt}
-                                        className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
-                                    />
-                                </div>
-                            ))}
+                            {section.fields?.map(field => {
+                                if (field.id === 'background_name') {
+                                    return (
+                                        <div key={field.id} className="flex items-center gap-4">
+                                            <label htmlFor={field.id} className="text-lg font-medium text-gray-700 dark:text-gray-300 shrink-0">{field.label}</label>
+                                            <input
+                                                type="text"
+                                                id={field.id}
+                                                value={answers[field.id] || ''}
+                                                onChange={e => handleChange(field.id, e.target.value)}
+                                                placeholder={field.prompt}
+                                                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                            />
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={field.id}>
+                                        <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+                                        <textarea
+                                            id={field.id}
+                                            rows={field.rows || 3}
+                                            value={answers[field.id] || ''}
+                                            onChange={e => handleChange(field.id, e.target.value)}
+                                            placeholder={field.prompt}
+                                            className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                        />
+                                    </div>
+                                );
+                            })}
 
                             {section.subSections?.map((subSection, ssIndex) => (
                                 <div key={ssIndex} className="ml-4 space-y-4">

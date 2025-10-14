@@ -42,6 +42,14 @@ const FormattingHelpView: React.FC<InfoViewProps> = ({ onBack }) => {
                         {t('formatting_lists_code')}
                     </code></pre>
                 </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_separators_title')}</h2>
+                    <p>{t('formatting_separators_p1')}</p>
+                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono"><code>
+                        {t('formatting_separators_code')}
+                    </code></pre>
+                </div>
                 
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_manual_title')}</h2>
