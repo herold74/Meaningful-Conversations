@@ -10,7 +10,7 @@ interface Session {
 const BACKEND_URLS = {
     // This is the stable, live backend for real users.
     // IMPORTANT: Verify this URL from your Google Cloud Run dashboard for the '...-prod' service.
-    production: 'https://meaningful-conversations-backend-prod-7kxdyriz2q-oa.a.run.app',
+    production: 'https://meaningful-conversations-backend-prod-650095539575.us-west1.run.app',
     
     // This is the testing backend for new features.
     // It's the default for any non-local, non-production environment (like AI Studio).
@@ -37,7 +37,7 @@ const getApiBaseUrl = (): string => {
 
     // 2. Production environment
     // This connects the deployed frontend to the production backend.
-    if (hostname === 'meaningful-conversations-1-1-0-7kxdyriz2q-uw.a.run.app') {
+    if (hostname === 'meaningful-conversations-1-1-0-650095539575.us-west1.run.app') {
         console.log(`Detected production environment. Using 'production' backend: ${BACKEND_URLS.production}.`);
         return BACKEND_URLS.production;
     }
