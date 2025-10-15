@@ -103,13 +103,14 @@ async function main() {
 
     // --- Express App Setup ---
     const app = express();
-    // Use the PORT from the environment (injected by Cloud Run) or default to 3001 for local dev.
-    // Cloud Run provides a PORT env var (usually 8080) that this will automatically use.
     const PORT = process.env.PORT || 3001;
     
-    const corsOptions = { origin: '*', methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', allowedHeaders: ['Content-Type', 'Authorization'] };
+    const corsOptions = {
+        origin: [process.env.FRONTEND_URL, 'http://localhost:3000'],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    };
     app.use(cors(corsOptions));
-    app.options('*', cors(corsOptions));
     app.use(express.json());
 
     // --- API Routes ---
@@ -134,7 +135,6 @@ async function main() {
 
     // --- Server Start ---
     const server = app.listen(PORT, () => {
-        // This log message is critical for Cloud Run debugging.
         console.log(`INFO: Accepting connections at http://0.0.0.0:${PORT}`);
     });
 
