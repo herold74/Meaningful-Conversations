@@ -7,60 +7,47 @@ interface Session {
 
 // --- CONFIGURATION ---
 
-// SET THIS TO 'production' BEFORE FINAL DEPLOYMENT.
-// This flag controls the default backend URL for non-local environments.
-// 'staging' is used here to ensure the AI Studio preview connects to the test database.
-const DEFAULT_BACKEND_ENVIRONMENT: 'staging' | 'production' = 'staging';
-
 const BACKEND_URLS = {
     // This is the stable, live backend for real users.
     // IMPORTANT: Verify this URL from your Google Cloud Run dashboard for the '...-prod' service.
     production: 'https://meaningful-conversations-backend-prod-7kxdyriz2q-oa.a.run.app',
+    
     // This is the testing backend for new features.
+    // It's the default for any non-local, non-production environment (like AI Studio).
     staging: 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
+    
     // This is for running the backend on your local machine.
     // The backend server defaults to port 3001, while the frontend is usually served on 3000.
     local: 'http://localhost:3001'
 };
 
+/**
+ * Intelligently determines the correct backend API URL based on the frontend's hostname.
+ * This removes the need for URL parameters like `?backend=staging`.
+ * @returns {string} The base URL for the API.
+ */
 const getApiBaseUrl = (): string => {
-    console.log("Determining API base URL...");
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const backendParam = urlParams.get('backend');
+    const hostname = window.location.hostname;
 
-    // Priority 1: Use URL parameter for explicit override.
-    if (backendParam === 'staging') {
-        console.log(`Using 'staging' backend via URL parameter: ${BACKEND_URLS.staging}`);
-        return BACKEND_URLS.staging;
-    }
-    if (backendParam === 'local') {
-        console.log(`Using 'local' backend via URL parameter: ${BACKEND_URLS.local}`);
+    // 1. Local development environment
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        console.log(`Detected local environment. Using 'local' backend: ${BACKEND_URLS.local}.`);
         return BACKEND_URLS.local;
     }
-    if (backendParam === 'production') {
-        console.log(`Using 'production' backend via URL parameter: ${BACKEND_URLS.production}`);
+
+    // 2. Production environment
+    // This connects the deployed frontend to the production backend.
+    if (hostname === 'meaningful-conversations-1-1-0-7kxdyriz2q-uw.a.run.app') {
+        console.log(`Detected production environment. Using 'production' backend: ${BACKEND_URLS.production}.`);
         return BACKEND_URLS.production;
     }
 
-    const hostname = window.location.hostname;
-
-    // Priority 2: If running on localhost, default to the 'local' backend.
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        console.log(`Detected local environment. Defaulting to 'local' backend: ${BACKEND_URLS.local}.`);
-        return BACKEND_URLS.local;
-    }
-
-    // Priority 3: Default based on the configuration flag for all other environments (like AI Studio or a deployed app).
-    if (DEFAULT_BACKEND_ENVIRONMENT === 'staging') {
-        console.log(`Defaulting to 'staging' backend based on configuration flag: ${BACKEND_URLS.staging}.`);
-        return BACKEND_URLS.staging;
-    } 
-    
-    // Final fallback to production.
-    console.log(`Defaulting to 'production' backend based on configuration flag: ${BACKEND_URLS.production}.`);
-    return BACKEND_URLS.production;
+    // 3. Fallback to Staging for all other hostnames.
+    // This makes it the safe default for any preview or testing environment like AI Studio, Vercel, Netlify, etc.
+    console.log(`Detected a non-local, non-production environment ('${hostname}'). Defaulting to 'staging' backend: ${BACKEND_URLS.staging}.`);
+    return BACKEND_URLS.staging;
 };
+
 
 const API_BASE_URL = getApiBaseUrl();
 const SESSION_KEY = 'user_session';

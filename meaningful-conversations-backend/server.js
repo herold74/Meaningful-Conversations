@@ -42,10 +42,21 @@ async function main() {
         const appEnv = process.env.ENVIRONMENT_TYPE || '';
         const dbUrl = process.env.DATABASE_URL || '';
         const socket = process.env.INSTANCE_UNIX_SOCKET || '';
-        const isNonProduction = appEnv === 'staging' || appEnv === 'development' || dbUrl.includes('staging') || socket.includes('staging');
-        const dbPushCommand = `npx prisma db push${isNonProduction ? ' --accept-data-loss' : ''}`;
+        const forceDbPush = process.env.FORCE_DB_PUSH === 'true';
 
-        console.log(`INFO: Synchronizing database schema... (non-production: ${isNonProduction})`);
+        const isNonProduction = appEnv === 'staging' || appEnv === 'development' || dbUrl.includes('staging') || socket.includes('staging');
+        
+        let dbPushCommand = 'npx prisma db push';
+
+        // The --accept-data-loss flag is added if it's a non-production environment OR if the force flag is explicitly set.
+        if (isNonProduction || forceDbPush) {
+            dbPushCommand += ' --accept-data-loss';
+            if (forceDbPush) {
+                console.warn('WARN: FORCE_DB_PUSH is set to true. Applying potentially destructive database schema changes.');
+            }
+        }
+        
+        console.log(`INFO: Synchronizing database schema... (command: "${dbPushCommand}")`);
         execSync(dbPushCommand, {
             env: { ...process.env, DATABASE_URL: prisma.datasourceUrl },
             stdio: 'inherit',
