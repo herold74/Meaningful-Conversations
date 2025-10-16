@@ -1,24 +1,25 @@
 {
-  "name": "meaningful-conversations-1.1.0",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "meaningful-conversations-frontend",
+  "version": "1.1.0",
+  "description": "Frontend for the Meaningful Conversations application.",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build:js": "esbuild index.tsx --bundle --outfile=dist/bundle.js --format=esm --minify --sourcemap",
+    "build:css": "tailwindcss -i ./index.css -o ./dist/index.css --minify",
+    "build": "npm run build:js && npm run build:css"
   },
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "@google/genai": "^1.20.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.3",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
   }
 }

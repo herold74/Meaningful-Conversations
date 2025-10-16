@@ -10,7 +10,7 @@ interface Session {
 const BACKEND_URLS = {
     // This is the stable, live backend for real users.
     // IMPORTANT: Verify this URL from your Google Cloud Run dashboard for the '...-prod' service.
-    production: 'https://meaningful-conversations-backend-prod-650095539575.us-west1.run.app',
+    production: 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
     
     // This is the testing backend for new features.
     // It's the default for any non-local, non-production environment (like AI Studio).
@@ -36,15 +36,15 @@ const getApiBaseUrl = (): string => {
     }
 
     // 2. Production environment
-    // This connects the deployed frontend to the production backend.
-    if (hostname === 'meaningful-conversations-1-1-0-650095539575.us-west1.run.app') {
-        console.log(`Detected production environment. Using 'production' backend: ${BACKEND_URLS.production}.`);
+    // This is the most robust check. It looks for the specific service name.
+    if (hostname.includes('meaningful-conversations-frontend-prod')) {
+        console.log(`Detected production environment ('${hostname}'). Using 'production' backend: ${BACKEND_URLS.production}.`);
         return BACKEND_URLS.production;
     }
 
     // 3. Fallback to Staging for all other hostnames.
     // This makes it the safe default for any preview or testing environment like AI Studio, Vercel, Netlify, etc.
-    console.log(`Detected a non-local, non-production environment ('${hostname}'). Defaulting to 'staging' backend: ${BACKEND_URLS.staging}.`);
+    console.warn(`Detected a non-local, non-production environment ('${hostname}'). Defaulting to 'staging' backend: ${BACKEND_URLS.staging}.`);
     return BACKEND_URLS.staging;
 };
 
@@ -121,7 +121,6 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         throw error;
     }
 
-
     // --- Success Case ---
     if (response.ok) {
         if (response.status === 204) {
@@ -131,7 +130,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     }
 
     // --- Error Handling ---
-
+    
     // 1. Handle expired sessions (a 401 when a token was sent on a protected route)
     const isAuthEndpoint = endpoint.startsWith('/auth/');
     if (response.status === 401 && session?.token && !isAuthEndpoint) {
@@ -160,10 +159,8 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         errorData = { message: `HTTP Error ${response.status}: ${response.statusText}. See console for server response.` };
     }
 
-
     // Create a standard Error object, which is easier to handle than a Response object
     const error = new Error(errorData.error || errorData.message || 'An unknown API error occurred.');
-    
     // Attach the status and full data payload for more detailed handling if needed
     (error as any).status = response.status;
     (error as any).data = errorData;

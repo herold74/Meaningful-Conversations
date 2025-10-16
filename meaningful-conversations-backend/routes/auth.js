@@ -10,7 +10,13 @@ const router = express.Router();
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
     const { email, password } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
+
+    // Backend validation and sanitization
+    if (!password || typeof password !== 'string' || password.trim().length === 0) {
+        return res.status(400).json({ error: 'Password is required.' });
+    }
+    const lowerCaseEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
@@ -19,7 +25,7 @@ router.post('/register', async (req, res) => {
         }
 
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
+        const passwordHash = await bcrypt.hash(trimmedPassword, salt);
         const encryptionSalt = crypto.randomBytes(16).toString('hex');
         const activationToken = crypto.randomBytes(32).toString('hex');
         const activationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -49,7 +55,13 @@ router.post('/register', async (req, res) => {
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
+
+    // Backend validation and sanitization
+    if (!password || typeof password !== 'string' || password.trim().length === 0) {
+        return res.status(400).json({ error: 'Password is required.' });
+    }
+    const lowerCaseEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
 
     try {
         const user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
@@ -61,7 +73,7 @@ router.post('/login', async (req, res) => {
              return res.status(403).json({ error: 'Account is pending verification. Please check your email.' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        const isMatch = await bcrypt.compare(trimmedPassword, user.passwordHash);
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -131,7 +143,7 @@ router.post('/verify-email', async (req, res) => {
 // POST /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
+    const lowerCaseEmail = email.trim().toLowerCase();
 
     try {
         const user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
