@@ -8,7 +8,7 @@ Programming was performed entirely using Google AI Studio. Therefore, the applic
 
 The intellectual achievement of the publisher thus lies in defining and compiling the functions, the user experience and all considerations regarding real-world implementation in compliance with the legal framework and data security requirements relating to the handling of personal data in the coaching process.
 
-According to the rules and regulations of AI Studio his project is licensed under the Apache Licence 2.0
+According to the rules and regulations of AI Studio this project is licensed under the Apache Licence 2.0
 
 ## ✨ Core Features
 
