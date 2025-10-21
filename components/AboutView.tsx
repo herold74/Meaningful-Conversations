@@ -63,7 +63,7 @@ const AboutView: React.FC<InfoViewProps> = ({ onBack }) => {
                     <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
                 </button>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('about_title')}</h1>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Version 1.4.4</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Version 1.4.5</p>
             </div>
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
                  <ReactMarkdown 

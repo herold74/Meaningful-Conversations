@@ -68,11 +68,11 @@ These commands **must be run from the project's root directory**.
 
 ```bash
 # 1. Build the container image using the frontend Dockerfile.
-#    Replace 1.4.4 with your new version number.
-podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 .
+#    Replace 1.4.5 with your new version number.
+podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.5 .
 
 # 2. Push the newly built image to the Artifact Registry.
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.5
 ```
 
 ### Step 3.2: Deploy to Cloud Run (Staging & Production)
@@ -83,7 +83,7 @@ Deploy the image to the appropriate Cloud Run service.
 ```bash
 # Deploy to the 'staging' frontend service
 gcloud run deploy meaningful-conversations-frontend-staging \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.5 \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
@@ -96,7 +96,7 @@ Once you have tested the staging deployment, deploy the **same image tag** to pr
 ```bash
 # Deploy to the 'prod' frontend service
 gcloud run deploy meaningful-conversations-frontend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.5 \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
@@ -118,11 +118,11 @@ These commands **must be run from within the `meaningful-conversations-backend` 
 cd meaningful-conversations-backend
 
 # 1. Build the container image.
-#    Replace 1.4.4 with your new version number.
-podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 .
+#    Replace 1.4.5 with your new version number.
+podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.5 .
 
 # 2. Push the newly built image to the Artifact Registry
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.5
 
 # 3. IMPORTANT: Go back to the root directory after you're done.
 cd ..
@@ -135,7 +135,7 @@ This command deploys the new image to your **staging** environment. **Crucially,
 ```bash
 # Deploy to the 'staging' backend service
 gcloud run deploy meaningful-conversations-backend-staging \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.5 \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
@@ -151,7 +151,7 @@ Once you have verified that the staging deployment is working correctly, deploy 
 ```bash
 # Deploy to the 'prod' backend service
 gcloud run deploy meaningful-conversations-backend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.5 \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
@@ -175,7 +175,7 @@ If you are certain that the **staging** database can be safely reset, you can us
 Deploy your new image to the staging service, adding **only** the `FORCE_DB_PUSH` variable.
 
 ```bash
-# Replace [YOUR_IMAGE_TAG] with the version you are deploying (e.g., 1.4.4)
+# Replace [YOUR_IMAGE_TAG] with the version you are deploying (e.g., 1.4.5)
 gcloud run deploy meaningful-conversations-backend-staging \
     --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:[YOUR_IMAGE_TAG] \
     --region europe-west6 \
