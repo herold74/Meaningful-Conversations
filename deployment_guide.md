@@ -11,7 +11,7 @@ Before you begin, ensure you have the following tools installed and configured:
 1.  **Google Cloud SDK (`gcloud`):**
     *   [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install).
     *   Authenticate with your Google Cloud account: `gcloud auth login`
-    *   Set your project: `gcloud config set project gen-lang-client-0944710545`
+    *   Set your project: `gcloud config set project gen-lang-client-0944710...`
     *   Configure Docker/Podman authentication: `gcloud auth configure-docker europe-west6-docker.pkg.dev`
 
 2.  **Podman or Docker:**
@@ -63,15 +63,15 @@ These commands **must be run from within the `meaningful-conversations-backend` 
 # Navigate into the backend directory. THIS IS A CRITICAL STEP.
 cd meaningful-conversations-backend
 
-# Build the container image. Replace 1.1.3 with your new version number.
-podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3 .
+# Build the container image. Replace 1.1.x with your new version number.
+podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.x .
 ```
 
 ### Step 3.2: Push the Backend Image
 
 ```bash
 # Push the newly built image to the Artifact Registry
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710.../backend-images/meaningful-conversations:1.1.x
 ```
 
 ### Step 3.3: Deploy to Cloud Run
@@ -80,11 +80,11 @@ This command deploys the new image. **Replace all placeholder values** (`[YOUR_.
 
 ```bash
 gcloud run deploy meaningful-conversations-backend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710.../backend-images/meaningful-conversations:1.1.x \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
-    --add-cloudsql-instances 'gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod' \
+    --add-cloudsql-instances 'gen-lang-client-0944710...:europe-west6:meaningful-convers-db-prod' \
     --set-secrets='API_KEY=API_KEY:latest,JWT_SECRET=JWT_SECRET:latest,MAILJET_API_KEY=MAILJET_API_KEY:latest,MAILJET_SECRET_KEY=MAILJET_SECRET_KEY:latest,DB_PASSWORD=PROD_DB_PASSWORD:latest,INITIAL_ADMIN_PASSWORD=INITIAL_ADMIN_PASSWORD:latest' \
     --set-env-vars='DB_USER=[YOUR_DB_USER],DB_NAME=meaningful-convers-db-prod,INSTANCE_UNIX_SOCKET=/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod,ENVIRONMENT_TYPE=production,FRONTEND_URL=[YOUR_PRODUCTION_FRONTEND_URL],MAILJET_SENDER_EMAIL=[YOUR_VERIFIED_MAILJET_EMAIL],INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL]'
 ```
@@ -103,15 +103,15 @@ These commands **must be run from the project's ROOT directory**.
 # Ensure you are in the project root directory (NOT the backend folder)
 cd /path/to/your/project/root
 
-# Build the container image. Replace 1.1.3 with your new version number.
-podman build --no-cache --platform linux/amd64 -f Dockerfile -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3 .
+# Build the container image. Replace 1.1.x with your new version number.
+podman build --no-cache --platform linux/amd64 -f Dockerfile -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.x .
 ```
 
 ### Step 4.2: Push the Frontend Image
 
 ```bash
 # Push the newly built image to the Artifact Registry
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710.../frontend-images/meaningful-conversations:1.1.x
 ```
 
 ### Step 4.3: Deploy to Cloud Run
@@ -120,7 +120,7 @@ This command creates or updates the frontend service in the correct region.
 
 ```bash
 gcloud run deploy meaningful-conversations-frontend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710.../frontend-images/meaningful-conversations:1.1.x \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated
