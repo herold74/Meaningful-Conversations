@@ -22,7 +22,7 @@ const FormattingHelpView: React.FC<InfoViewProps> = ({ onBack }) => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_headings_title')}</h2>
                     <p>{t('formatting_headings_p1')}</p>
-                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono"><code>
+                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_headings_code')}
                     </code></pre>
                 </div>
@@ -30,7 +30,7 @@ const FormattingHelpView: React.FC<InfoViewProps> = ({ onBack }) => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_bold_title')}</h2>
                     <p>{t('formatting_bold_p1')}</p>
-                     <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono"><code>
+                     <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_bold_code')}
                     </code></pre>
                 </div>
@@ -38,7 +38,7 @@ const FormattingHelpView: React.FC<InfoViewProps> = ({ onBack }) => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_lists_title')}</h2>
                     <p>{t('formatting_lists_p1')}</p>
-                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono"><code>
+                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_lists_code')}
                     </code></pre>
                 </div>
@@ -46,7 +46,7 @@ const FormattingHelpView: React.FC<InfoViewProps> = ({ onBack }) => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_separators_title')}</h2>
                     <p>{t('formatting_separators_p1')}</p>
-                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono"><code>
+                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_separators_code')}
                     </code></pre>
                 </div>

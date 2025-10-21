@@ -56,7 +56,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, cu
 
     if (minimal) {
         return (
-            <div className="flex justify-end items-center">
+            <div className="sticky top-0 z-10 flex justify-end items-center p-2 bg-white/70 dark:bg-gray-900/50 backdrop-blur-sm">
                 {themeToggleButton}
                 {burgerButton}
             </div>
@@ -64,7 +64,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({ gamificationState, cu
     }
 
     return (
-        <div className="flex items-center justify-between gap-6 p-3 bg-white/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-6 p-3 bg-white/70 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm shadow-md">
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <StarIcon className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />

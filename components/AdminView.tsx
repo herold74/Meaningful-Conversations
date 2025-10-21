@@ -52,7 +52,7 @@ const ResetPasswordSuccessModal: React.FC<{
             aria-modal="true"
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-md p-6 border border-gray-300 dark:border-gray-700 shadow-xl"
+                className="bg-white dark:bg-gray-900 w-full max-w-md p-6 border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4">
@@ -101,7 +101,7 @@ const ResetConfirmationModal: React.FC<{
             aria-modal="true"
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-yellow-400 dark:border-yellow-500/50 shadow-xl"
+                className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-yellow-400 dark:border-yellow-500/50 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-start gap-4">
@@ -111,7 +111,7 @@ const ResetConfirmationModal: React.FC<{
                     <div className="flex-1">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">{t('admin_users_reset_password')}</h2>
                         <p className="mt-2 text-gray-600 dark:text-gray-400">
-                          {t('admin_reset_confirm_part1')} <strong>{user.email}</strong>?
+                          {t('admin_reset_confirm_part1')}<strong>{user.email}</strong>{t('admin_reset_confirm_part2')}
                         </p>
                         <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-300">
                            <p className="font-bold">{t('admin_reset_confirm_warning_title')}</p>
@@ -451,7 +451,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                 className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
             />
              {filteredUsers.length > 0 ? (
-                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
@@ -488,16 +488,16 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                                         <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
                                         <td className="p-3">
                                             <div className="flex items-center justify-end gap-1">
-                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
                                                 <button 
                                                     onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
                                                     disabled={actionLoading[`toggle-admin-${user.id}`] || isCurrentUser} 
-                                                    className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                                    className="p-2 text-purple-500 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/50 disabled:opacity-50 disabled:cursor-not-allowed" 
                                                     title={isCurrentUser ? t('admin_users_cannot_change_self') : t('admin_users_toggle_admin')}
                                                 >
                                                     <ShieldIcon className="w-5 h-5" />
                                                 </button>
-                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-yellow-500 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -516,7 +516,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
     
     const renderCodes = () => (
         <div className="space-y-4">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
                  <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_codes_generate_title')}</h3>
                 <form onSubmit={handleCreateCode} className="flex flex-col sm:flex-row items-stretch gap-3">
                     <div className="flex-1">
@@ -543,7 +543,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                 />
             </div>
             {codes.length > 0 ? (
-                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${sortedAndFilteredCodes.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${sortedAndFilteredCodes.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
                          <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
@@ -616,10 +616,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
     
     const renderTickets = () => (
         <div className="space-y-8">
-            <div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_support_tickets_title')}</h3>
+            <div className="bg-white dark:bg-transparent rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <h3 className="font-bold text-lg p-4 border-b border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-200">{t('admin_support_tickets_title')}</h3>
                 {tickets.length > 0 ? (
-                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${tickets.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                    <div className={`overflow-x-auto ${tickets.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                         <table className="w-full text-left text-sm">
                             <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                 <tr>
@@ -672,10 +672,10 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                 )}
             </div>
 
-            <div>
-                <h3 className="font-bold text-lg mb-2 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
+            <div className="bg-white dark:bg-transparent rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <h3 className="font-bold text-lg p-4 border-b border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
                 {messageReports.length > 0 ? (
-                    <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${messageReports.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                    <div className={`overflow-x-auto ${messageReports.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                         <table className="w-full text-left text-sm">
                             <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                 <tr>
@@ -746,7 +746,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
 
     const renderRatings = () => (
         <div className="space-y-6">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
                 <p className="text-4xl font-bold text-green-500 dark:text-green-400">{ratingStats.overallAverage}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
@@ -755,7 +755,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {ratingStats.botStats.map(stat => (
-                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2  transition-all duration-200 cursor-pointer hover:border-green-500 dark:hover:border-green-400 ${selectedBotFilter === stat.id ? 'border-green-500' : 'border-gray-200 dark:border-gray-700/50'}`}>
+                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-green-500 dark:hover:border-green-400 ${selectedBotFilter === stat.id ? 'border-green-500' : 'border-gray-200 dark:border-gray-700/50'}`}>
                                 <div className="flex items-center gap-4 mb-3">
                                     <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
                                     <div>
@@ -789,7 +789,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                                 <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
                             )}
                         </div>
-                        <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 ${filteredFeedback.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
+                        <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredFeedback.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                                     <tr>
@@ -831,7 +831,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="relative text-center pb-4">
                 <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>

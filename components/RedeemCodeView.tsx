@@ -85,7 +85,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onBack, onRedeemSuccess
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+    <div className="w-full max-w-xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
       <div className="relative">
          {status !== 'success' && (
             <button onClick={onBack} className="absolute -left-4 -top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">

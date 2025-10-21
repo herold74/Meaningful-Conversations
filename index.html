@@ -4,40 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meaningful Conversations</title>
-    <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cstyle%3epath,circle{fill:%2322c55e}@media (prefers-color-scheme:dark){path,circle{fill:%234ade80}}%3c/style%3e%3cg transform='rotate(0 12 12)'%3e%3cpath d='M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z'/%3e%3c/g%3e%3cg transform='rotate(45 12 12)'%3e%3cpath d='M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z'/%3e%3c/g%3e%3cg transform='rotate(90 12 12)'%3e%3cpath d='M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z'/%3e%3c/g%3e%3cg transform='rotate(135 12 12)'%3e%3cpath d='M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z'/%3e%3c/g%3e%3cpath fill-rule='evenodd' d='M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z'/%3e%3ccircle cx='12' cy='12' r='1.75'/%3e%3c/svg%3e" type="image/svg+xml" />
-    <link rel="stylesheet" href="/dist/index.css">
-    <style>
-      body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      /* Custom scrollbar styles */
-      ::-webkit-scrollbar { width: 8px; }
-      ::-webkit-scrollbar-track { background: #f1f5f9; }
-      ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #4ade80; }
-      .dark ::-webkit-scrollbar-track { background: #1a1a1a; }
-      .dark ::-webkit-scrollbar-thumb { background: #4a4a4a; }
-      .dark ::-webkit-scrollbar-thumb:hover { background: #00ff00; }
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      .animate-fadeIn { animation: fadeIn 0.5s ease-in-out forwards; }
-      @keyframes slideInFromRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-      .animate-slideInFromRight { animation: slideInFromRight 0.3s ease-out forwards; }
-    </style>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1"
+    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
+    "vite": "https://aistudiocdn.com/vite@^7.1.11",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4",
+    "vite-plugin-static-copy": "https://aistudiocdn.com/vite-plugin-static-copy@^3.1.4"
   }
 }
 </script>
 </head>
-  <body class="bg-gray-100 dark:bg-black">
+  <body>
     <div id="root"></div>
-    <script type="module" src="/dist/bundle.js"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

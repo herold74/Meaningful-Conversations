@@ -6,16 +6,17 @@ import { CheckIcon } from './icons/CheckIcon';
 import { KeyIcon } from './icons/KeyIcon';
 
 interface ResetPasswordViewProps {
-  token: string;
   onResetSuccess: () => void;
 }
 
-const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ token, onResetSuccess }) => {
+const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess }) => {
   const { t } = useLocalization();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  const token = new URLSearchParams(window.location.search).get('token');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +31,12 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ token, onResetSuc
       return;
     }
     
+    if (!token) {
+        setError('No password reset token found.');
+        setStatus('error');
+        return;
+    }
+
     setStatus('loading');
     try {
       await userService.resetPassword(token, newPassword);
@@ -37,6 +44,8 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ token, onResetSuc
     } catch (err: any) {
       setError(err.message || t('changePassword_error_generic'));
       setStatus('error');
+    } finally {
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   };
 

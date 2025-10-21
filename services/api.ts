@@ -1,56 +1,68 @@
 import { User } from '../types';
 
-interface Session {
-    token: string;
-    user: User;
+// Custom error class for API fetch errors.
+// This allows other parts of the app to inspect the error details.
+export class ApiError extends Error {
+    status: number;
+    data: any;
+    isNetworkError: boolean;
+    backendUrl: string;
+
+    constructor(message: string, status: number, data: any, isNetworkError: boolean = false, backendUrl: string) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.data = data;
+        this.isNetworkError = isNetworkError;
+        this.backendUrl = backendUrl;
+    }
 }
 
-// --- CONFIGURATION ---
-
-const BACKEND_URLS = {
-    // This is the stable, live backend for real users.
-    // IMPORTANT: Verify this URL from your Google Cloud Run dashboard for the '...-prod' service.
-    production: 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
-    
-    // This is the testing backend for new features.
-    // It's the default for any non-local, non-production environment (like AI Studio).
-    staging: 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
-    
-    // This is for running the backend on your local machine.
-    // The backend server defaults to port 3001, while the frontend is usually served on 3000.
-    local: 'http://localhost:3001'
-};
 
 /**
- * Intelligently determines the correct backend API URL based on the frontend's hostname.
- * This removes the need for URL parameters like `?backend=staging`.
+ * Determines the backend API URL. This function is robust and handles multiple environments:
+ * 1. Your production build, which will have Vite's `import.meta.env` variables baked in.
+ * 2. This preview environment, which does NOT have `import.meta.env`, so it uses hardcoded fallbacks.
+ * 3. It also allows manual override via the `?backend=` URL parameter for easy testing.
  * @returns {string} The base URL for the API.
  */
 const getApiBaseUrl = (): string => {
-    const hostname = window.location.hostname;
+    // Fallback URLs for environments where Vite .env isn't loaded (like this preview)
+    const fallbackUrls = {
+        production: 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
+        staging: 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
+        local: 'http://localhost:3001'
+    };
 
-    // 1. Local development environment
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        console.log(`Detected local environment. Using 'local' backend: ${BACKEND_URLS.local}.`);
-        return BACKEND_URLS.local;
+    // Vite injects `import.meta.env`. If it's undefined, use an empty object as a fallback.
+    const env = (import.meta as any).env || {};
+
+    const urls = {
+        production: env.VITE_BACKEND_URL_PRODUCTION || fallbackUrls.production,
+        staging: env.VITE_BACKEND_URL_STAGING || fallbackUrls.staging,
+        local: env.VITE_BACKEND_URL_LOCAL || fallbackUrls.local,
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const backendParam = urlParams.get('backend') as keyof typeof urls;
+
+    // 1. Priority: URL parameter for explicit override
+    if (backendParam && urls[backendParam]) {
+        return urls[backendParam];
     }
 
-    // 2. Production environment
-    // This is the most robust check. It looks for the specific service name.
-    if (hostname.includes('meaningful-conversations-frontend-prod')) {
-        console.log(`Detected production environment ('${hostname}'). Using 'production' backend: ${BACKEND_URLS.production}.`);
-        return BACKEND_URLS.production;
-    }
-
-    // 3. Fallback to Staging for all other hostnames.
-    // This makes it the safe default for any preview or testing environment like AI Studio, Vercel, Netlify, etc.
-    console.warn(`Detected a non-local, non-production environment ('${hostname}'). Defaulting to 'staging' backend: ${BACKEND_URLS.staging}.`);
-    return BACKEND_URLS.staging;
+    // 2. Fallback to default staging URL
+    return urls.staging;
 };
 
 
 const API_BASE_URL = getApiBaseUrl();
 const SESSION_KEY = 'user_session';
+
+interface Session {
+    token: string;
+    user: User;
+}
 
 // --- Session Management ---
 
@@ -95,7 +107,7 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         headers.set('Authorization', `Bearer ${session.token}`);
     }
 
-    if (options.body) {
+    if (options.body && !(options.body instanceof FormData)) {
         headers.set('Content-Type', 'application/json');
     }
     
@@ -111,60 +123,38 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         response = await fetch(finalUrl, config);
     } catch (error: any) {
         if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-            const customError = new Error(`Could not connect to the server at ${API_BASE_URL}.`);
-            // Add custom properties to the error for the UI to use
-            (customError as any).isNetworkError = true;
-            (customError as any).backendUrl = API_BASE_URL;
-            throw customError;
+             throw new ApiError(
+                `Could not connect to the server at ${API_BASE_URL}.`, 
+                0, { error: 'Network Error' }, true, API_BASE_URL
+            );
         }
-        // Re-throw other types of fetch errors (e.g., CORS issues that aren't TypeErrors)
         throw error;
     }
 
-    // --- Success Case ---
     if (response.ok) {
-        if (response.status === 204) {
-            return null; // Handle No Content responses
+        if (response.status === 204) return null; // Handle No Content
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
         }
-        return await response.json();
+        return { success: true };
     }
 
     // --- Error Handling ---
-    
-    // 1. Handle expired sessions (a 401 when a token was sent on a protected route)
+    let errorData;
+    try {
+        errorData = await response.json();
+    } catch (e) {
+        errorData = { error: `HTTP Error ${response.status}: ${response.statusText}` };
+    }
+
     const isAuthEndpoint = endpoint.startsWith('/auth/');
     if (response.status === 401 && session?.token && !isAuthEndpoint) {
         console.log("Session expired or invalid. Automatically logging out.");
         clearSession();
         window.location.reload();
-        // Return a promise that never resolves to stop components from trying to handle the error
-        return new Promise(() => {});
+        return new Promise(() => {}); // Prevent further processing
     }
-
-    // 2. For all other errors (including a failed login 401), create a structured error to throw.
-    let errorData;
-    const contentType = response.headers.get('content-type');
     
-    if (contentType && contentType.includes('application/json')) {
-        try {
-            errorData = await response.json();
-        } catch (e) {
-            const errorText = await response.text();
-            console.error("Failed to parse API error response as JSON, though content-type was JSON.", { status: response.status, text: errorText });
-            errorData = { message: `HTTP Error ${response.status}: Server returned invalid JSON. See console for details.` };
-        }
-    } else {
-        const errorText = await response.text();
-        console.error("API error response was not JSON.", { status: response.status, text: errorText });
-        errorData = { message: `HTTP Error ${response.status}: ${response.statusText}. See console for server response.` };
-    }
-
-    // Create a standard Error object, which is easier to handle than a Response object
-    const error = new Error(errorData.error || errorData.message || 'An unknown API error occurred.');
-    // Attach the status and full data payload for more detailed handling if needed
-    (error as any).status = response.status;
-    (error as any).data = errorData;
-    
-    // By throwing here, we let the calling function (in userService, etc.) decide what to do.
-    throw error;
+    throw new ApiError(errorData.error || errorData.message || 'An unknown API error occurred.', response.status, errorData, false, API_BASE_URL);
 };

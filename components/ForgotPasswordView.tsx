@@ -89,7 +89,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+      <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
          {status !== 'success' && (
             <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />

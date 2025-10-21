@@ -1,4 +1,5 @@
 
+
 export type DiffResult = {
     type: 'added' | 'removed' | 'unchanged';
     value: string;

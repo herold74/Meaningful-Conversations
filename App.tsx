@@ -73,7 +73,6 @@ const App: React.FC = () => {
     const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userMessageCount, setUserMessageCount] = useState(0);
-    const [initialToken, setInitialToken] = useState<string | null>(null);
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
 
     // Theme
@@ -83,6 +82,26 @@ const App: React.FC = () => {
         }
         return 'light';
     });
+
+    const setAndProcessUser = (user: User | null) => {
+        if (user) {
+            let processedUser = { ...user };
+            if (typeof processedUser.unlockedCoaches === 'string') {
+                try {
+                    const parsed = JSON.parse(processedUser.unlockedCoaches as any);
+                    processedUser.unlockedCoaches = Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                    console.error("Failed to parse unlockedCoaches, defaulting to empty array.", e);
+                    processedUser.unlockedCoaches = [];
+                }
+            } else if (!Array.isArray(processedUser.unlockedCoaches)) {
+                processedUser.unlockedCoaches = [];
+            }
+            setCurrentUser(processedUser);
+        } else {
+            setCurrentUser(null);
+        }
+    };
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -180,20 +199,15 @@ const App: React.FC = () => {
             // Check for URL-based routes first (email verification, password reset)
             const urlParams = new URLSearchParams(window.location.search);
             const route = urlParams.get('route');
-            const token = urlParams.get('token');
-
-            if (token) {
-                // Clear the URL to avoid re-triggering on refresh
-                window.history.replaceState({}, document.title, window.location.pathname);
-                setInitialToken(token);
-
+            
+            if (route) {
                 if (route === 'verify-email') {
                     setView('verifyEmail');
                     return;
                 }
                 if (route === 'reset-password') {
                     setView('resetPassword');
-                    return;
+                    return; 
                 }
             }
 
@@ -242,7 +256,7 @@ const App: React.FC = () => {
     // --- NAVIGATION & STATE HANDLERS ---
     
     const handleLoginSuccess = async (user: User, key: CryptoKey) => {
-        setCurrentUser(user);
+        setAndProcessUser(user);
         setEncryptionKey(key);
         try {
             const data = await userService.loadUserData(key);
@@ -257,7 +271,7 @@ const App: React.FC = () => {
         } catch (error) {
             console.error("Failed to load user data after login, logging out.", error);
             api.clearSession();
-            setCurrentUser(null);
+            setAndProcessUser(null);
             setEncryptionKey(null);
             setView('auth');
             setAuthRedirectReason("There was an issue loading your profile. Please try logging in again.");
@@ -271,7 +285,7 @@ const App: React.FC = () => {
     
     const handleLogout = () => {
         api.clearSession();
-        setCurrentUser(null);
+        setAndProcessUser(null);
         setEncryptionKey(null);
         setLifeContext('');
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
@@ -458,9 +472,9 @@ const App: React.FC = () => {
             case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onAccessExpired={handleAccessExpired} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
             case 'register': return <RegisterView onShowPending={() => setView('registrationPending')} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
             case 'registrationPending': return <RegistrationPendingView onGoToLogin={() => setView('login')} />;
-            case 'verifyEmail': return <VerifyEmailView token={initialToken!} onVerificationSuccess={handleLoginSuccess} />;
+            case 'verifyEmail': return <VerifyEmailView onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
-            case 'resetPassword': return <ResetPasswordView token={initialToken!} onResetSuccess={() => setView('login')} />;
+            case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => setView('botSelection')} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
             case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => setView('redeemCode')} onLogout={handleLogout} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} />;
@@ -483,7 +497,7 @@ const App: React.FC = () => {
                         setMenuView(null);
                     }
                 }} onRedeemSuccess={(user) => { 
-                    setCurrentUser(user); 
+                    setAndProcessUser(user);
                     setMenuView(null);
                     if (paywallUserEmail) {
                         setAuthRedirectReason("Your pass has been applied! Please log in again to continue.");

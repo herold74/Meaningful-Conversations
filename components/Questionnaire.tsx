@@ -86,7 +86,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
     };
 
     return (
-        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
             <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
             </button>

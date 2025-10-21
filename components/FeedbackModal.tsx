@@ -157,7 +157,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             onClick={onClose}
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl"
+                className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">

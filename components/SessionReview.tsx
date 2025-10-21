@@ -308,7 +308,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
-            <div className="w-full max-w-4xl p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+            <div className="w-full max-w-4xl p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
                 
                 {isGuest && (
                     <div className="p-4 mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4">

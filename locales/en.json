@@ -349,7 +349,8 @@
 
   "admin_reset_success_title": "Password Reset Successful",
   "admin_reset_success_desc": "The password for {{email}} has been reset. Please securely share the new temporary password with the user.",
-  "admin_reset_confirm_part1": "Are you sure you want to reset the password for",
+  "admin_reset_confirm_part1": "Are you sure you want to reset the password for ",
+  "admin_reset_confirm_part2": "?",
   "admin_reset_confirm_warning_title": "CRITICAL WARNING: DATA LOSS WILL OCCUR",
   "admin_reset_confirm_warning_desc": "This user's life context is end-to-end encrypted. Resetting the password will make their existing data permanently unreadable. Their life context file will be cleared. This action cannot be undone.",
 

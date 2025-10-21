@@ -21,7 +21,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
-      <div className="w-full max-w-2xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+      <div className="w-full max-w-2xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">
           {t('contextChoice_welcome_back')}
         </h1>

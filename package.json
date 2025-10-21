@@ -1,25 +1,31 @@
 {
   "name": "meaningful-conversations-frontend",
-  "version": "1.1.0",
+  "version": "1.4.4",
   "description": "Frontend for the Meaningful Conversations application.",
   "scripts": {
-    "build:js": "esbuild index.tsx --bundle --outfile=dist/bundle.js --format=esm --minify --sourcemap",
-    "build:css": "tailwindcss -i ./index.css -o ./dist/index.css --minify",
-    "build": "npm run build:js && npm run build:css"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "express": "^4.19.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "esbuild": "^0.23.0",
-    "typescript": "^5.5.3",
-    "tailwindcss": "^3.4.1",
-    "postcss": "^8.4.31",
-    "autoprefixer": "^10.4.16"
+    "@tailwindcss/typography": "^0.5.13",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10",
+    "vite-plugin-static-copy": "^0.17.0"
   }
 }

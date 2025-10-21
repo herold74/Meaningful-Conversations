@@ -94,7 +94,7 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose })
         aria-labelledby="coach-info-title"
     >
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md m-4 p-6 border border-gray-300 dark:border-gray-700 shadow-xl text-center animate-fadeIn" 
+        className="bg-white dark:bg-gray-900 w-full max-w-md m-4 p-6 border border-gray-300 dark:border-gray-700 shadow-xl text-center animate-fadeIn rounded-lg" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end -mt-2 -mr-2">
@@ -443,10 +443,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     if (!feedbackMessages.bot) return;
 
     await userService.submitFeedback({
-        rating: null, // Message reports don't have a star rating
+        // rating is omitted for message reports, which don't have a star rating.
         comments: feedback.comments,
         botId: bot.id,
-        lastUserMessage: feedbackMessages.user?.text || null,
+        lastUserMessage: feedbackMessages.user?.text,
         botResponse: feedbackMessages.bot.text,
         isAnonymous: feedback.isAnonymous,
         email: feedback.email,
@@ -456,7 +456,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
-    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 shadow-lg">
+    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 gap-2">
         {/* Left: Coach Info (responsive) */}
         <div className="flex-1 min-w-0">

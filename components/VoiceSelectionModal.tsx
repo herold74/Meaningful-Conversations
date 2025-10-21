@@ -102,7 +102,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             onClick={onClose}
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-lg max-h-[80vh] flex flex-col p-6 border border-gray-300 dark:border-gray-700 shadow-xl"
+                className="bg-white dark:bg-gray-900 w-full max-w-lg max-h-[80vh] flex flex-col p-6 border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4">
@@ -114,6 +114,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3">
                     <div className="p-3 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        {/* FIX: Corrected className attribute from a likely boolean to a string. */}
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="radio"
@@ -122,10 +123,10 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 onChange={() => setSelectedURI(null)}
                                 className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
-                            <div className="ml-3">
-                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('voiceModal_auto')}</span>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{t('voiceModal_auto_desc')}</p>
-                            </div>
+                            <span className="ml-3">
+                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('voiceModal_automatic')}</span>
+                                <span className="block text-sm text-gray-500 dark:text-gray-400">{t('voiceModal_automatic_desc')}</span>
+                            </span>
                         </label>
                     </div>
 
@@ -136,23 +137,18 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                     <input
                                         type="radio"
                                         name="voice-selection"
-                                        value={voice.voiceURI}
                                         checked={selectedURI === voice.voiceURI}
                                         onChange={() => setSelectedURI(voice.voiceURI)}
                                         className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                                     />
-                                    <div className="ml-3 flex-1">
+                                    <span className="ml-3 flex-1">
                                         <span className="font-semibold text-gray-800 dark:text-gray-200">{cleanVoiceName(voice.name)}</span>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">{voice.lang}</p>
-                                    </div>
+                                        <span className="block text-sm text-gray-500 dark:text-gray-400">{voice.lang} - {getVoiceGender(voice)}</span>
+                                    </span>
                                     <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            onPreviewVoice(voice);
-                                        }}
+                                        onClick={(e) => { e.preventDefault(); onPreviewVoice(voice); }}
                                         className="p-2 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
-                                        aria-label={t('voiceModal_preview_aria', { name: cleanVoiceName(voice.name) })}
+                                        aria-label={`Preview voice ${voice.name}`}
                                     >
                                         <PlayIcon className="w-5 h-5" />
                                     </button>
@@ -160,24 +156,15 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <p>{t('voiceModal_noVoices', { gender: botGender, language: botLanguage === 'de' ? 'Deutsch' : 'English' })}</p>
-                            <p className="text-sm mt-1">{t('voiceModal_noVoices_advice')}</p>
-                        </div>
+                        <p className="text-center text-gray-500 dark:text-gray-400 py-4">{t('voiceModal_no_voices')}</p>
                     )}
                 </div>
 
-                <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button 
-                        onClick={onClose} 
-                        className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                        {t('voiceModal_cancel')}
+                <div className="flex justify-end gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" onClick={onClose} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                        {t('feedback_cancel')}
                     </button>
-                    <button 
-                        onClick={handleSave} 
-                        className="px-6 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500"
-                    >
+                    <button type="button" onClick={handleSave} className="px-6 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500">
                         {t('voiceModal_save')}
                     </button>
                 </div>

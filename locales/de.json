@@ -338,7 +338,8 @@
   "admin_no_message_reports": "Es wurden keine Nachrichtenmeldungen eingereicht.",
   "admin_reset_success_title": "Passwort erfolgreich zurückgesetzt",
   "admin_reset_success_desc": "Das Passwort für {{email}} wurde zurückgesetzt. Bitte teilen Sie dem Benutzer das neue temporäre Passwort sicher mit.",
-  "admin_reset_confirm_part1": "Sind Sie sicher, dass Sie das Passwort für",
+  "admin_reset_confirm_part1": "Sind Sie sicher, dass Sie das Passwort für ",
+  "admin_reset_confirm_part2": " zurücksetzen wollen?",
   "admin_reset_confirm_warning_title": "KRITISCHE WARNUNG: DATENVERLUST WIRD AUFTRETEN",
   "admin_reset_confirm_warning_desc": "Der Lebenskontext dieses Benutzers ist Ende-zu-Ende verschlüsselt. Das Zurücksetzen des Passworts macht seine vorhandenen Daten dauerhaft unlesbar. Seine Lebenskontext-Datei wird gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
   

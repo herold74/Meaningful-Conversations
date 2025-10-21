@@ -6,7 +6,7 @@ This directory contains the Node.js/Express backend server for the Meaningful Co
 
 ### 1. Prerequisites
 
--   Node.js (v20.x or later)
+-   Node.js (v22.x)
 -   npm (v10.x or later)
 -   A running MySQL database (local or cloud-based).
 -   Podman or Docker (if you plan to run the backend in a container for local development).
@@ -193,6 +193,32 @@ This automated process ensures that your primary admin account is always availab
     ```
 
 The server will start, typically on port **3001**. This is the **backend** API. The **frontend** user interface runs on its own port (usually **3000**).
+
+## 🧑‍💻 Local Development Workflow
+
+When running the frontend locally (`npm run dev`), it connects to the live **staging** backend by default. This is useful for UI development without needing to run the backend yourself. Here's the standard workflow for testing features like user registration.
+
+### Testing User Registration
+
+1.  **Start the frontend:** Run `npm run dev` in the project root directory.
+2.  **Register:** Open `http://localhost:3000`, navigate to the registration page, and sign up with a test email.
+3.  **Check Your Email:** The staging backend will send a real verification email to the address you provided.
+4.  **Handle the Verification Link:** The email contains the full verification URL, which points to the deployed frontend. You must copy this URL and modify it to continue your local session.
+
+#### **Modify the URL**
+
+1.  In the email, find and copy the full verification URL. It will look like this:
+    `https://meaningful-conversations-frontend-staging-....run.app?route=verify-email&token=...`
+2.  Paste the URL into your browser's address bar.
+3.  Change the domain to point to your local server.
+
+    -   **Change this:** `https://meaningful-conversations-frontend-staging-....run.app`
+    -   **To this:** `http://localhost:3000`
+
+4.  The final URL should look like this:
+    `http://localhost:3000?route=verify-email&token=...`
+
+Pressing Enter will now correctly verify the user in your local development session.
 
 ## 🩺 API Health Check
 

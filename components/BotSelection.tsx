@@ -22,8 +22,8 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
       <div
         onClick={() => !isLocked && onSelect(bot)}
         className={`
-            flex flex-col md:flex-row items-center md:items-start text-center md:text-left 
-            gap-4 md:gap-6 bg-white dark:bg-transparent p-6 border transition-all duration-200
+            flex flex-col items-center text-center p-6
+            bg-white dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
             ${isLocked
               ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-900/50 opacity-60 border-gray-200 dark:border-gray-800'
               : 'cursor-pointer hover:border-green-500 dark:hover:border-green-400 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-gray-200 dark:border-gray-700'
@@ -44,8 +44,9 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
             )}
         </div>
 
-        <div className="mt-4 md:mt-0">
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-3">
+        <div className="mt-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
+            <div className="flex flex-wrap justify-center gap-2 my-3">
                 {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
                     const isFirstTag = index === 0;
                     const tagClass = !isLocked && isFirstTag
@@ -59,8 +60,9 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
                     );
                 })}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
-            <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed">{language === 'de' ? bot.description_de : bot.description}</p>
+            <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed text-base">
+                {language === 'de' ? bot.description_de : bot.description}
+            </p>
         </div>
       </div>
     );
@@ -149,11 +151,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
         {availableBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
         
         {lockedBots.length > 0 && unlockMessage && (
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 lg:col-span-3">
                 <p className="text-sm text-yellow-600 dark:text-yellow-400 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 text-center">
                     {unlockMessage}
                 </p>

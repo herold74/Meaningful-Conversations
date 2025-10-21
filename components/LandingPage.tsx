@@ -68,8 +68,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
-      <div className="w-full max-w-2xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+    <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
+      <div className="w-full max-w-3xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('meaningfulConversations')}</h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
           {t('landing_subtitle')}

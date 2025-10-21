@@ -1,6 +1,6 @@
 # Meaningful Conversations - Deployment Guide
 
-This guide provides the complete, final workflow for deploying both the backend and frontend services to Google Cloud Run.
+This guide provides the complete, final workflow for deploying both the frontend and backend services to Google Cloud Run.
 
 ---
 
@@ -19,22 +19,22 @@ Before you begin, ensure you have the following tools installed and configured:
 
 ---
 
-## 2. One-Time Setup
+## 2. One-Time Setup (Infrastructure)
 
 You only need to perform these steps once per project.
 
 ### Create Artifact Registry Repositories
 
-Cloud Run needs a place to store your container images.
+Cloud Run needs a place to store your container images for both frontend and backend.
 
 ```bash
-# Create the repository for backend images
+# Repository for backend images
 gcloud artifacts repositories create backend-images \
     --repository-format=docker \
     --location=europe-west6 \
     --description="Container images for the Meaningful Conversations backend"
 
-# Create the repository for frontend images
+# Repository for frontend images
 gcloud artifacts repositories create frontend-images \
     --repository-format=docker \
     --location=europe-west6 \
@@ -43,19 +43,73 @@ gcloud artifacts repositories create frontend-images \
 
 ### Configure Secrets in Secret Manager
 
-For production, all sensitive data **must** be stored in Google Secret Manager.
+For both staging and production, all sensitive data **must** be stored in Google Secret Manager.
 
 1.  Navigate to **Security > Secret Manager** in your Google Cloud Console.
-2.  Create secrets for each of the following: `API_KEY`, `JWT_SECRET`, `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `PROD_DB_PASSWORD`, `INITIAL_ADMIN_PASSWORD`.
-3.  For **each secret**, you must grant the **Compute Engine default service account** (`[PROJECT_NUMBER]-compute@...`) the `Secret Manager Secret Accessor` role.
+2.  Create secrets for each of the following:
+    *   `API_KEY`
+    *   `JWT_SECRET`
+    *   `MAILJET_API_KEY`
+    *   `MAILJET_SECRET_KEY`
+    *   `INITIAL_ADMIN_PASSWORD`
+    *   `STAGING_DB_PASSWORD` (for your staging database)
+    *   `PROD_DB_PASSWORD` (for your production database)
+3.  For **each secret**, you must grant the **Compute Engine default service account** (`[PROJECT_NUMBER]-compute@...`) the `Secret Manager Secret Accessor` role. This allows your Cloud Run service to access the secret values at runtime.
 
 ---
 
-## 3. Backend Deployment Workflow
+## 3. Frontend Deployment Workflow
 
-Follow these steps to deploy or update the backend server.
+The frontend is a static React application served by a lightweight web server in a container.
 
-### Step 3.1: Build the Backend Image
+### Step 3.1: Build and Push the Frontend Image
+
+These commands **must be run from the project's root directory**.
+
+```bash
+# 1. Build the container image using the frontend Dockerfile.
+#    Replace 1.4.4 with your new version number.
+podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 .
+
+# 2. Push the newly built image to the Artifact Registry.
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4
+```
+
+### Step 3.2: Deploy to Cloud Run (Staging & Production)
+
+Deploy the image to the appropriate Cloud Run service.
+
+#### **Staging Deployment:**
+```bash
+# Deploy to the 'staging' frontend service
+gcloud run deploy meaningful-conversations-frontend-staging \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 \
+    --platform managed \
+    --region europe-west6 \
+    --allow-unauthenticated \
+    --port=8080
+```
+
+#### **Production Deployment:**
+Once you have tested the staging deployment, deploy the **same image tag** to production.
+
+```bash
+# Deploy to the 'prod' frontend service
+gcloud run deploy meaningful-conversations-frontend-prod \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations-frontend:1.4.4 \
+    --platform managed \
+    --region europe-west6 \
+    --allow-unauthenticated \
+    --port=8080
+```
+
+---
+
+## 4. Backend Deployment Workflow
+
+Follow these steps to deploy or update the backend server. The process is the same for both staging and production, but the service name, image tag, and environment variables will differ.
+
+### Step 4.1: Build and Push the Backend Image
 
 These commands **must be run from within the `meaningful-conversations-backend` directory**.
 
@@ -63,89 +117,78 @@ These commands **must be run from within the `meaningful-conversations-backend` 
 # Navigate into the backend directory. THIS IS A CRITICAL STEP.
 cd meaningful-conversations-backend
 
-# Build the container image. Replace 1.1.3 with your new version number.
-podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3 .
+# 1. Build the container image.
+#    Replace 1.4.4 with your new version number.
+podman build --no-cache --platform linux/amd64 -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 .
+
+# 2. Push the newly built image to the Artifact Registry
+podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4
+
+# 3. IMPORTANT: Go back to the root directory after you're done.
+cd ..
 ```
 
-### Step 3.2: Push the Backend Image
+### Step 4.2: Deploy to Cloud Run (Staging)
+
+This command deploys the new image to your **staging** environment. **Crucially, it sets `FRONTEND_URL` to point to the staging frontend service.**
 
 ```bash
-# Push the newly built image to the Artifact Registry
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3
+# Deploy to the 'staging' backend service
+gcloud run deploy meaningful-conversations-backend-staging \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 \
+    --platform managed \
+    --region europe-west6 \
+    --allow-unauthenticated \
+    --add-cloudsql-instances 'gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging' \
+    --set-secrets='API_KEY=API_KEY:latest,JWT_SECRET=JWT_SECRET:latest,MAILJET_API_KEY=MAILJET_API_KEY:latest,MAILJET_SECRET_KEY=MAILJET_SECRET_KEY:latest,DB_PASSWORD=STAGING_DB_PASSWORD:latest,INITIAL_ADMIN_PASSWORD=INITIAL_ADMIN_PASSWORD:latest' \
+    --set-env-vars='DB_USER=[YOUR_STAGING_DB_USER],DB_NAME=meaningful-convers-db-staging,INSTANCE_UNIX_SOCKET=/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-staging,ENVIRONMENT_TYPE=staging,FRONTEND_URL=https://meaningful-conversations-frontend-staging-650095539575.europe-west6.run.app,MAILJET_SENDER_EMAIL=[YOUR_VERIFIED_MAILJET_EMAIL],INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL]'
 ```
 
-### Step 3.3: Deploy to Cloud Run
+### Step 4.3: Deploy to Cloud Run (Production)
 
-This command deploys the new image. **Replace all placeholder values** (`[YOUR_...]`) with your actual configuration. The `FRONTEND_URL` comes from the successful deployment of the frontend in Step 4.
+Once you have verified that the staging deployment is working correctly, deploy the **same image version** to production.
 
 ```bash
+# Deploy to the 'prod' backend service
 gcloud run deploy meaningful-conversations-backend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.1.3 \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:1.4.4 \
     --platform managed \
     --region europe-west6 \
     --allow-unauthenticated \
     --add-cloudsql-instances 'gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod' \
     --set-secrets='API_KEY=API_KEY:latest,JWT_SECRET=JWT_SECRET:latest,MAILJET_API_KEY=MAILJET_API_KEY:latest,MAILJET_SECRET_KEY=MAILJET_SECRET_KEY:latest,DB_PASSWORD=PROD_DB_PASSWORD:latest,INITIAL_ADMIN_PASSWORD=INITIAL_ADMIN_PASSWORD:latest' \
-    --set-env-vars='DB_USER=[YOUR_DB_USER],DB_NAME=meaningful-convers-db-prod,INSTANCE_UNIX_SOCKET=/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod,ENVIRONMENT_TYPE=production,FRONTEND_URL=[YOUR_PRODUCTION_FRONTEND_URL],MAILJET_SENDER_EMAIL=[YOUR_VERIFIED_MAILJET_EMAIL],INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL]'
+    --set-env-vars='DB_USER=[YOUR_PROD_DB_USER],DB_NAME=meaningful-convers-db-prod,INSTANCE_UNIX_SOCKET=/cloudsql/gen-lang-client-0944710545:europe-west6:meaningful-convers-db-prod,ENVIRONMENT_TYPE=production,FRONTEND_URL=https://meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app,MAILJET_SENDER_EMAIL=[YOUR_VERIFIED_MAILJET_EMAIL],INITIAL_ADMIN_EMAIL=[YOUR_ADMIN_EMAIL]'
 ```
 
 ---
 
-## 4. Frontend Deployment Workflow
+## 5. Troubleshooting: Staging Database Schema Recovery
 
-Follow these steps to deploy or update the frontend application.
+In a non-production environment (like staging), you might encounter a situation where a `prisma db push` fails during deployment because it detects a schema change that could cause data loss.
 
-### Step 4.1: Build the Frontend Image
+If you are certain that the **staging** database can be safely reset, you can use the `FORCE_DB_PUSH` environment variable to recover. This special variable tells the server to run `prisma migrate reset --force`, which **deletes all data** and reapplies the schema from scratch.
 
-These commands **must be run from the project's ROOT directory**.
+**⚠️ Warning:** Never use this in a production environment.
 
-```bash
-# Ensure you are in the project root directory (NOT the backend folder)
-cd /path/to/your/project/root
+### Step 5.1: Force the Database Reset
 
-# Build the container image. Replace 1.1.3 with your new version number.
-podman build --no-cache --platform linux/amd64 -f Dockerfile -t europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3 .
-```
-
-### Step 4.2: Push the Frontend Image
+Deploy your new image to the staging service, adding **only** the `FORCE_DB_PUSH` variable.
 
 ```bash
-# Push the newly built image to the Artifact Registry
-podman push europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3
-```
-
-### Step 4.3: Deploy to Cloud Run
-
-This command creates or updates the frontend service in the correct region.
-
-```bash
-gcloud run deploy meaningful-conversations-frontend-prod \
-    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/frontend-images/meaningful-conversations:1.1.3 \
-    --platform managed \
+# Replace [YOUR_IMAGE_TAG] with the version you are deploying (e.g., 1.4.4)
+gcloud run deploy meaningful-conversations-backend-staging \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:[YOUR_IMAGE_TAG] \
     --region europe-west6 \
-    --allow-unauthenticated
+    --update-env-vars='FORCE_DB_PUSH=true'
 ```
-After this command completes, it will output the URL for your frontend service. Copy this URL and use it for the `FRONTEND_URL` variable in your backend deployment (Step 3.3).
 
----
+### Step 5.2: Remove the Variable
 
-## 5. Troubleshooting
+Once the deployment is successful, you **must** redeploy immediately to remove the `FORCE_DB_PUSH` variable.
 
-### Problem: Backend crashes with schema errors after a failed deployment.
-
-When Prisma tries to apply a schema change to a partially created database, it may stop with a "data loss" warning.
-
-**Solution:** If you are certain the database contains no valuable data, you can force the schema push.
-1.  **Deploy the backend once** with the `FORCE_DB_PUSH` variable set to `true`.
-    ```bash
-    gcloud run deploy meaningful-conversations-backend-prod \
-        --image [YOUR_IMAGE_URI] \
-        --region europe-west6 \
-        --update-env-vars="FORCE_DB_PUSH=true"
-    ```
-2.  **CRITICAL:** Once the deployment succeeds, **immediately re-deploy** to remove the flag and restore production safety rails.
-    ```bash
-    gcloud run services update meaningful-conversations-backend-prod \
-        --region europe-west6 \
-        --remove-env-vars="FORCE_DB_PUSH"
-    ```
+```bash
+gcloud run deploy meaningful-conversations-backend-staging \
+    --image europe-west6-docker.pkg.dev/gen-lang-client-0944710545/backend-images/meaningful-conversations:[YOUR_IMAGE_TAG] \
+    --region europe-west6 \
+    --remove-env-vars='FORCE_DB_PUSH'
+```

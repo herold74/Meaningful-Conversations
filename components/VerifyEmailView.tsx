@@ -8,11 +8,10 @@ import { WarningIcon } from './icons/WarningIcon';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
 
 interface VerifyEmailViewProps {
-  token: string;
   onVerificationSuccess: (user: User, key: CryptoKey) => void;
 }
 
-const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ token, onVerificationSuccess }) => {
+const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess }) => {
   const { t } = useLocalization();
   const [status, setStatus] = useState<'verifying' | 'needsPassword' | 'loggingIn' | 'success' | 'error'>('verifying');
   const [error, setError] = useState('');
@@ -21,6 +20,15 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ token, onVerification
 
   useEffect(() => {
     if (status !== 'verifying') return;
+
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+        setError('No verification token found in URL.');
+        setStatus('error');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+    }
+
     const verify = async () => {
       try {
         const { user } = await userService.verifyEmail(token);
@@ -30,9 +38,13 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ token, onVerification
         setError(err.message || 'An unknown error occurred.');
         setStatus('error');
       }
+      finally {
+        // Clean the URL after the verification attempt to prevent re-use on refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     };
     verify();
-  }, [token, status]);
+  }, [status]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

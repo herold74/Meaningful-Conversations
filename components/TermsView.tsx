@@ -59,7 +59,7 @@ const TermsView: React.FC<InfoViewProps> = ({ onBack }) => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="relative text-center">
                 <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                     <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>

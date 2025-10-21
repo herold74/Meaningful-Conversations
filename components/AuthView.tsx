@@ -27,7 +27,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <div className="flex justify-center gap-4">
             <button onClick={() => setLanguage('en')} className={getButtonClass('en')}>English</button>
             <button onClick={() => setLanguage('de')} className={getButtonClass('de')}>Deutsch</button>

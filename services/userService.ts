@@ -1,4 +1,5 @@
 
+
 import { apiFetch, setSession, getSession, clearSession } from './api';
 import { User, UpgradeCode, Ticket, Feedback, Bot } from '../types';
 import { encryptData, decryptData } from '../utils/encryption';
@@ -112,13 +113,12 @@ export const redeemCode = async (code: string): Promise<User> => {
 };
 
 export const submitFeedback = async (feedbackData: {
-    rating?: number;
+    rating?: number | null;
     comments: string;
     botId: string;
-    lastUserMessage?: string;
-    botResponse?: string;
+    lastUserMessage?: string | null;
+    botResponse?: string | null;
     isAnonymous: boolean;
-    // Fix: Added optional email property to align with its usage in ChatView.tsx and the backend API.
     email?: string;
 }): Promise<void> => {
     await apiFetch('/feedback', {
