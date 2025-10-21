@@ -1,1 +1,80 @@
-~�er��z{l���jx������'���jب�ϛi����+&k�����f
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                        String        @id @default(cuid())
+  email                     String        @unique
+  passwordHash              String
+  encryptionSalt            String
+  status                    UserStatus    @default(PENDING)
+  activationToken           String?
+  activationTokenExpires    DateTime?
+  passwordResetToken        String?
+  passwordResetTokenExpires DateTime?
+  isAdmin                   Boolean       @default(false)
+  isBetaTester              Boolean       @default(false)
+  unlockedCoaches           String        @default("[]") // Stored as a JSON string array of bot IDs
+  accessExpiresAt           DateTime?
+  lifeContext               String        @db.Text
+  gamificationState         String        @db.Text
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+  loginCount                Int           @default(0)
+  lastLogin                 DateTime?
+  usedCodes                 UpgradeCode[]
+  feedbacks                 Feedback[]
+}
+
+model UpgradeCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  botId     String
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  usedById  String?
+  usedBy    User?    @relation(fields: [usedById], references: [id])
+}
+
+model Ticket {
+  id        String       @id @default(cuid())
+  type      TicketType
+  status    TicketStatus @default(OPEN)
+  payload   Json // e.g., { email: string } for a password reset request
+  createdAt DateTime     @default(now())
+}
+
+model Feedback {
+  id              String   @id @default(cuid())
+  rating          Int?
+  comments        String   @db.Text
+  botId           String
+  lastUserMessage String?  @db.Text
+  botResponse     String?  @db.Text
+  isAnonymous     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+}
+
+enum TicketType {
+  PASSWORD_RESET
+}
+
+enum TicketStatus {
+  OPEN
+  RESOLVED
+}
