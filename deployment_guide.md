@@ -103,6 +103,16 @@ gcloud run deploy meaningful-conversations-frontend-prod \
     --port=8080
 ```
 
+### Understanding Ports (`--port=8080`)
+
+You might wonder why we use `8080` when websites typically run on port `80`. Here's how it works:
+
+1.  **Public Port (80/443):** Your users will access your app via its public URL, which uses the standard web ports `80` (HTTP) and `443` (HTTPS). Google Cloud Run manages this for you automatically.
+2.  **Container Port (`--port` flag):** The `gcloud run deploy --port=8080` command tells Cloud Run: "My application *inside* the container is listening for traffic on port `8080`." Cloud Run is responsible for routing the public traffic to this internal port.
+3.  **Application Port (`server.js`):** The `server.js` file for both the frontend and backend is configured to listen on the port specified by the `PORT` environment variable, defaulting to `8080` if it's not set (`const port = process.env.PORT || 8080;`).
+
+When you deploy with `--port=8080`, Cloud Run sets the `PORT` environment variable inside your container to `8080`, and your application correctly listens on that port. You could just as easily use `--port=80`, and the application would adapt. The choice of `8080` is a common convention for web applications.
+
 ---
 
 ## 4. Backend Deployment Workflow
