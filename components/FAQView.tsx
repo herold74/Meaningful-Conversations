@@ -5,7 +5,6 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 
 interface InfoViewProps {
-    onBack: () => void;
 }
 
 const de_markdown = `
@@ -18,7 +17,7 @@ Die Lebenskontext-Datei (.md) ist ein zentrales Dokument, das als Gedächtnis Ih
 Ja! Die App bietet einen Gastmodus mit Zugang zu einer Auswahl von Coaches. Im Gastmodus werden alle Ihre Daten, einschließlich Ihrer Lebenskontext-Datei, lokal in Ihrem Browser verarbeitet und niemals an unsere Server gesendet. Sie sind dafür verantwortlich, Ihre Datei für jede Sitzung zu speichern und zu laden. Registrierte Benutzer erhalten Zugang zu mehr Coaches und Funktionen wie verschlüsseltem Cloud-Speicher.
 
 ### Was ist "Gamification"?
-Gamification-Elemente wie XP, Level und Serien sollen Sie motivieren, sich regelmäßig mit Selbstreflexion zu beschäftigen. Das Abschließen von Sitzungen und das Erreichen von Meilensteinen schaltet Erfolge frei und belohnt Ihr Engagement für persönliches Wachstum.
+Gamification-Elemente wie XP, Level und Serien sollen Sie motivieren, sich regelmäßig mit Selbstreflexion zu beschäftigen. Sie verdienen XP für die Teilnahme an Gesprächen und können spezielle Boni erhalten. Ein **50-XP-Bonus** wird für das Führen einer Sitzung zu einem natürlichen Abschluss vergeben, und ein **25-XP-Bonus** wird vergeben, wenn Sie berichten, ein bereits bestehendes Ziel erreicht zu haben. Das Abschließen von Sitzungen und das Erreichen von Meilensteinen schaltet Erfolge frei und belohnt Ihr Engagement für persönliches Wachstum.
 
 ---
 
@@ -51,7 +50,7 @@ The Life Context file (.md) is a central document that serves as your coach's me
 Yes! The app offers a guest mode with access to a selection of coaches. In guest mode, all your data, including your Life Context file, is processed locally in your browser and is never sent to our servers. You are responsible for saving and loading your file for each session. Registered users get access to more coaches and features like encrypted cloud storage.
 
 ### What is Gamification?
-Gamification elements like XP, levels, and streaks are designed to motivate you to engage in regular self-reflection. Completing sessions and achieving milestones unlocks achievements and rewards your commitment to personal growth.
+Gamification elements like XP, levels, and streaks are designed to motivate you to engage in regular self-reflection. You earn XP for participating in conversations, and you can receive special bonuses. A **50 XP bonus** is awarded for guiding a session to a natural conclusion, and a **25 XP bonus** is awarded if you report completing a pre-existing goal. Completing sessions and reaching milestones unlocks achievements and rewards your commitment to personal growth.
 
 ---
 
@@ -74,16 +73,13 @@ AI is a powerful tool, but it's not perfect. If a response is unhelpful, try rep
 You choose a coach at the start of each session. If you feel another coach's style would be more beneficial, you can end the current session. After the session review, you will have the option to "Switch Coach," which will take you back to the coach selection screen with your updated Life Context.
 `;
 
-const FAQView: React.FC<InfoViewProps> = ({ onBack }) => {
+const FAQView: React.FC<InfoViewProps> = () => {
     const { t, language } = useLocalization();
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-            <div className="relative text-center">
-                <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
-                </button>
+            <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('faq_title')}</h1>
             </div>
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">

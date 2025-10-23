@@ -20,18 +20,26 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
     const { t } = useLocalization();
     const questionnaireStructure = getQuestionnaireStructure(t);
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleChange = (id: string, value: string) => {
         onAnswersChange(prev => ({ ...prev, [id]: value }));
+        if (id === 'background_name' && value.trim()) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors['background_name'];
+                return newErrors;
+            });
+        }
     };
 
-    const toggleSection = (title: string) => {
+    const toggleSection = (sectionTitle: string) => {
         setExpandedSections(prev => {
             const newSet = new Set(prev);
-            if (newSet.has(title)) {
-                newSet.delete(title);
+            if (newSet.has(sectionTitle)) {
+                newSet.delete(sectionTitle);
             } else {
-                newSet.add(title);
+                newSet.add(sectionTitle);
             }
             return newSet;
         });
@@ -51,7 +59,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
             if (section.fields) {
                 section.fields.forEach(field => {
                     const answer = answers[field.id]?.trim() || '';
-                    md += `**${field.label}**: ${answer}\n\n`;
+                    // Only include the label in markdown if it's not empty
+                    if (field.label) {
+                        md += `**${field.label}**: ${answer}\n\n`;
+                    } else {
+                        md += `${answer}\n\n`;
+                    }
                 });
             }
 
@@ -65,12 +78,15 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                     }
                     subSection.fields.forEach(field => {
                         const answer = answers[field.id]?.trim() || '';
-                        md += `**${field.label}**: ${answer}\n\n`;
+                         if (field.label) {
+                            md += `**${field.label}**: ${answer}\n\n`;
+                        } else {
+                            md += `${answer}\n\n`;
+                        }
                     });
                 });
             }
 
-            // Add a separator line if it's not the last main section
             if (index < questionnaireStructure.length - 1) {
                 md += '\n---\n\n';
             }
@@ -81,18 +97,23 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!answers['background_name']?.trim()) {
+            setErrors({ 'background_name': t('questionnaire_error_name_required') });
+            return;
+        }
         const markdownContent = generateMarkdown();
         onSubmit(markdownContent);
     };
 
     return (
         <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
             </button>
             <div className="text-center mb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('questionnaire_title')}</h1>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">{t('questionnaire_subtitle')}</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('questionnaire_required_fields')}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -121,14 +142,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                             {section.description && <p className="text-gray-600 dark:text-gray-400 italic">{section.description}</p>}
                                             {section.fields?.map(field => (
                                                 <div key={field.id}>
-                                                    <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+                                                    {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>}
                                                     <textarea
                                                         id={field.id}
                                                         rows={field.rows || 3}
                                                         value={answers[field.id] || ''}
                                                         onChange={e => handleChange(field.id, e.target.value)}
                                                         placeholder={field.prompt}
-                                                        className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                                        className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400`}
                                                     />
                                                 </div>
                                             ))}
@@ -138,14 +159,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                                     {subSection.description && <p className="text-gray-600 dark:text-gray-400 italic">{subSection.description}</p>}
                                                     {subSection.fields.map(field => (
                                                         <div key={field.id}>
-                                                            <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+                                                            {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>}
                                                             <textarea
                                                                 id={field.id}
                                                                 rows={field.rows || 3}
                                                                 value={answers[field.id] || ''}
                                                                 onChange={e => handleChange(field.id, e.target.value)}
                                                                 placeholder={field.prompt}
-                                                                className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                                                className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400`}
                                                             />
                                                         </div>
                                                     ))}
@@ -167,29 +188,37 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                             {section.fields?.map(field => {
                                 if (field.id === 'background_name') {
                                     return (
-                                        <div key={field.id} className="flex items-center gap-4">
-                                            <label htmlFor={field.id} className="text-lg font-medium text-gray-700 dark:text-gray-300 shrink-0">{field.label}</label>
-                                            <input
-                                                type="text"
-                                                id={field.id}
-                                                value={answers[field.id] || ''}
-                                                onChange={e => handleChange(field.id, e.target.value)}
-                                                placeholder={field.prompt}
-                                                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
-                                            />
+                                        <div key={field.id}>
+                                            <div className="flex items-center gap-4">
+                                                <label htmlFor={field.id} className="text-lg font-medium text-gray-700 dark:text-gray-300 shrink-0">
+                                                    {field.label} <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    id={field.id}
+                                                    value={answers[field.id] || ''}
+                                                    onChange={e => handleChange(field.id, e.target.value)}
+                                                    placeholder={field.prompt}
+                                                    className={`w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${errors['background_name'] ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400`}
+                                                    aria-required="true"
+                                                    aria-invalid={!!errors['background_name']}
+                                                    aria-describedby={errors['background_name'] ? 'name-error' : undefined}
+                                                />
+                                            </div>
+                                            {errors['background_name'] && <p id="name-error" className="text-red-500 text-sm mt-1 text-right">{errors['background_name']}</p>}
                                         </div>
                                     );
                                 }
                                 return (
                                     <div key={field.id}>
-                                        <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+                                        {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>}
                                         <textarea
                                             id={field.id}
                                             rows={field.rows || 3}
                                             value={answers[field.id] || ''}
                                             onChange={e => handleChange(field.id, e.target.value)}
                                             placeholder={field.prompt}
-                                            className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                            className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400`}
                                         />
                                     </div>
                                 );
@@ -201,14 +230,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                     {subSection.description && <p className="text-gray-600 dark:text-gray-400 italic">{subSection.description}</p>}
                                     {subSection.fields.map(field => (
                                         <div key={field.id}>
-                                            <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+                                            {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-gray-700 dark:text-gray-300">{field.label}</label>}
                                             <textarea
                                                 id={field.id}
                                                 rows={field.rows || 3}
                                                 value={answers[field.id] || ''}
                                                 onChange={e => handleChange(field.id, e.target.value)}
                                                 placeholder={field.prompt}
-                                                className="mt-2 w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                                className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400`}
                                             />
                                         </div>
                                     ))}
@@ -220,7 +249,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                 
                 <button
                     type="submit"
-                    className="w-full mt-8 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-800 focus:outline-none transition-colors duration-200"
+                    className="w-full mt-8 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-800 focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
                 >
                     {t('questionnaire_generateFile')}
                 </button>

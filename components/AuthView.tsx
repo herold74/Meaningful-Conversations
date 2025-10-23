@@ -18,7 +18,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
   const [isLoading, setIsLoading] = useState(false);
 
   const getButtonClass = (lang: 'en' | 'de') => {
-    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500";
+    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500 rounded-md shadow-sm";
     if (language === lang) {
         return `${baseClass} bg-green-400 text-black`;
     }
@@ -49,7 +49,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
           <button
             onClick={onLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <LogInIcon className="w-6 h-6" />
             {t('auth_login')}
@@ -57,7 +57,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
            <button
             onClick={onRegister}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none transition-colors duration-200 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <UserIcon className="w-6 h-6" />
             {t('auth_register')}
@@ -65,7 +65,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
            <button
             onClick={onGuest}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-md"
           >
             <UsersIcon className="w-6 h-6" />
             {t('auth_guest')}

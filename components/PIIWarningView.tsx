@@ -29,13 +29,13 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <button
             onClick={onCancel}
-            className="flex-1 px-6 py-3 text-base font-bold text-yellow-600 dark:text-yellow-400 bg-transparent border border-yellow-600 dark:border-yellow-400 uppercase hover:bg-yellow-600 dark:hover:bg-yellow-400 hover:text-white dark:hover:text-black focus:outline-none transition-colors"
+            className="flex-1 px-6 py-3 text-base font-bold text-yellow-600 dark:text-yellow-400 bg-transparent border border-yellow-600 dark:border-yellow-400 uppercase hover:bg-yellow-600 dark:hover:bg-yellow-400 hover:text-white dark:hover:text-black focus:outline-none transition-colors rounded-lg shadow-md"
           >
             {t('piiWarning_goBack')}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors"
+            className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors rounded-lg shadow-md"
           >
             {t('piiWarning_continue')}
           </button>

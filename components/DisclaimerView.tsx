@@ -8,7 +8,6 @@ import { DeleteIcon } from './icons/DeleteIcon';
 import { WarningIcon } from './icons/WarningIcon';
 
 interface DisclaimerViewProps {
-    onBack: () => void;
     currentUser: User | null;
     onDeleteAccount: () => void;
 }
@@ -52,17 +51,14 @@ The application and the AI coaches serve as a tool for process support and infor
 (3) In all other respects (pure financial losses), the provider's liability for slight negligence is excluded, provided that it does not involve the violation of cardinal obligations. In this case, the liability is limited to the fee actually paid by the user for the specific service.`;
 
 
-const DisclaimerView: React.FC<DisclaimerViewProps> = ({ onBack, currentUser, onDeleteAccount }) => {
+const DisclaimerView: React.FC<DisclaimerViewProps> = ({ currentUser, onDeleteAccount }) => {
     const { t, language } = useLocalization();
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
 
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-            <div className="relative text-center">
-                <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
-                </button>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('disclaimer_title')}</h1>
+            <div className="text-center">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('disclaimer_title')}</h1>
             </div>
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
                 <ReactMarkdown 
@@ -84,7 +80,7 @@ const DisclaimerView: React.FC<DisclaimerViewProps> = ({ onBack, currentUser, on
                         <div className="mt-4">
                              <button 
                                 onClick={onDeleteAccount} 
-                                className="inline-flex items-center justify-center gap-3 px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-950"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-950 rounded-lg shadow-md"
                             >
                                 <DeleteIcon className="w-5 h-5" />
                                 {t('deleteAccount_confirm')}

@@ -4,6 +4,7 @@ import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
+import { InfoIcon } from './icons/InfoIcon';
 
 interface VoiceSelectionModalProps {
     isOpen: boolean;
@@ -124,8 +125,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-3">
-                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('voiceModal_automatic')}</span>
-                                <span className="block text-sm text-gray-500 dark:text-gray-400">{t('voiceModal_automatic_desc')}</span>
+                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('voiceModal_auto')}</span>
+                                <span className="block text-sm text-gray-500 dark:text-gray-400">{t('voiceModal_auto_desc')}</span>
                             </span>
                         </label>
                     </div>
@@ -156,15 +157,27 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                             </div>
                         ))
                     ) : (
-                        <p className="text-center text-gray-500 dark:text-gray-400 py-4">{t('voiceModal_no_voices')}</p>
+                        <div className="text-left text-gray-500 dark:text-gray-400 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 rounded-lg">
+                            <div className="flex items-start gap-3">
+                                <InfoIcon className="w-6 h-6 text-yellow-500 dark:text-yellow-400 flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="font-semibold text-yellow-800 dark:text-yellow-300">
+                                      {t('voiceModal_no_voices_title')}
+                                    </p>
+                                    <p className="text-sm mt-1 text-yellow-700 dark:text-yellow-300">
+                                        {t('voiceModal_no_voices_desc')}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
 
-                <div className="flex justify-end gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button type="button" onClick={onClose} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
-                        {t('feedback_cancel')}
+                <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button onClick={onClose} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md">
+                        {t('deleteAccount_cancel')}
                     </button>
-                    <button type="button" onClick={handleSave} className="px-6 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500">
+                    <button onClick={handleSave} className="px-6 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md">
                         {t('voiceModal_save')}
                     </button>
                 </div>

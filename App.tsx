@@ -39,6 +39,7 @@ import RegistrationPendingView from './components/RegistrationPendingView';
 import VerifyEmailView from './components/VerifyEmailView';
 import ResetPasswordView from './components/ResetPasswordView';
 import PaywallView from './components/PaywallView';
+import { BOTS } from './constants';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -74,6 +75,7 @@ const App: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userMessageCount, setUserMessageCount] = useState(0);
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
+    const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
 
     // Theme
     const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -117,12 +119,15 @@ const App: React.FC = () => {
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
         analysis: SessionAnalysis | null,
-        botId: string,
-        awardSessionBonus: boolean
+        botId: string
     ): GamificationState => {
         let xpGained = (userMessageCount * 5) + ((analysis?.nextSteps?.length || 0) * 10);
-        if (awardSessionBonus) {
+        
+        if (analysis?.hasConversationalEnd) {
             xpGained += 50;
+        }
+        if (analysis?.hasAccomplishedGoal) {
+            xpGained += 25;
         }
 
         const now = new Date();
@@ -320,6 +325,7 @@ const App: React.FC = () => {
             }
         }
         
+        setCameFromContextChoice(false);
         setGamificationState(deserializeGamificationState(gamificationJson));
 
         setLifeContext(context);
@@ -327,6 +333,7 @@ const App: React.FC = () => {
     };
 
     const handleQuestionnaireSubmit = (context: string) => {
+        setCameFromContextChoice(false);
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setTempContext(context);
         setView('piiWarning');
@@ -341,21 +348,76 @@ const App: React.FC = () => {
     const handleSelectBot = (bot: Bot) => {
         setSelectedBot(bot);
         setUserMessageCount(0);
-        const welcomeMessage: Message = {
-            id: `bot-${Date.now()}`,
-            role: 'bot',
-            text: t('chat_welcome', { botName: bot.name }),
-            timestamp: new Date().toISOString(),
-        };
-        setChatHistory([welcomeMessage]);
+        setChatHistory([]);
         setView('chat');
     };
     
+    const handleStartInterview = () => {
+        const interviewBot = BOTS.find(b => b.id === 'g-interviewer');
+        if (interviewBot) {
+            setLifeContext(''); // Ensure interview starts with a blank slate
+            setGamificationState(DEFAULT_GAMIFICATION_STATE);
+            handleSelectBot(interviewBot);
+        } else {
+            console.error("Interview bot 'g-interviewer' not found in BOTS constant.");
+        }
+    };
+
     const handleEndSession = async () => {
         if (!selectedBot) return;
+        
+        // --- Special Handling for Interview Bot "G." ---
+        if (selectedBot.id === 'g-interviewer') {
+            if (userMessageCount === 0) {
+                // If the user exits immediately, go back to the landing page.
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('landing');
+                return;
+            }
 
+            setIsAnalyzing(true);
+            try {
+                const generatedContext = await geminiService.generateContextFromInterview(chatHistory, language);
+                setTempContext(generatedContext); // Pass the result to the review screen
+
+                // Create a simplified analysis object for the review screen
+                setSessionAnalysis({
+                    newFindings: t('sessionReview_g_summary'),
+                    proposedUpdates: [],
+                    nextSteps: [],
+                    solutionBlockages: [],
+                    blockageScore: 0,
+                    hasConversationalEnd: true,
+                    hasAccomplishedGoal: false,
+                });
+                // Do not change gamification state for an interview session
+                setNewGamificationState(gamificationState);
+                setView('sessionReview');
+
+            } catch (error) {
+                console.error("Failed to generate context from interview:", error);
+                // Show a fallback error message on the review screen
+                setSessionAnalysis({
+                    newFindings: "There was an error generating the context file from the interview.",
+                    proposedUpdates: [],
+                    nextSteps: [],
+                    solutionBlockages: [],
+                    blockageScore: 0,
+                    hasConversationalEnd: false,
+                    hasAccomplishedGoal: false,
+                });
+                setTempContext('');
+                setNewGamificationState(gamificationState);
+                setView('sessionReview');
+            } finally {
+                setIsAnalyzing(false);
+            }
+            return;
+        }
+
+        // --- Standard Session Analysis for all other bots ---
         if (userMessageCount === 0) {
-            // No user interaction, simply go back to bot selection without analysis.
             setSelectedBot(null);
             setChatHistory([]);
             setView('botSelection');
@@ -367,8 +429,7 @@ const App: React.FC = () => {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
             setSessionAnalysis(analysis);
 
-            const awardSessionBonus = (analysis.nextSteps?.length || 0) > 0;
-            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, awardSessionBonus);
+            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id);
             setNewGamificationState(newState);
 
             setView('sessionReview');
@@ -381,9 +442,10 @@ const App: React.FC = () => {
                 solutionBlockages: [],
                 blockageScore: 0,
                 hasConversationalEnd: false,
+                hasAccomplishedGoal: false,
             };
             setSessionAnalysis(fallbackAnalysis);
-            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id, false);
+            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id);
             setNewGamificationState(newState);
             setView('sessionReview');
         } finally {
@@ -445,6 +507,54 @@ const App: React.FC = () => {
         setView('landing');
     };
 
+    const handleStartOver = () => {
+        // Reset session-specific state
+        setSelectedBot(null);
+        setChatHistory([]);
+        setSessionAnalysis(null);
+        setNewGamificationState(null);
+        setUserMessageCount(0);
+        
+        // Close menu
+        setIsMenuOpen(false);
+        setMenuView(null);
+
+        if (currentUser) {
+            // A logged-in user with a saved context goes to the choice screen.
+            // If they are logged-in but started a new session (lifeContext is empty), they go to landing.
+            setView(lifeContext ? 'contextChoice' : 'landing');
+        } else {
+            // A guest user is fully reset to the landing page.
+            setLifeContext('');
+            setGamificationState(DEFAULT_GAMIFICATION_STATE);
+            setView('landing');
+        }
+    };
+
+    // --- Menu Handlers ---
+    // Toggles the slide-out burger menu panel.
+    const handleBurgerIconClick = () => {
+        setIsMenuOpen(p => !p);
+    };
+
+    // This is called when a user selects a sub-menu item from the BurgerMenu
+    const handleNavigateFromMenu = (view: NavView) => {
+        setMenuView(view); // Set the sub-menu view
+        setIsMenuOpen(false); // Close the slide-out panel
+    };
+
+    // This is called from the "Exit" button in the top bar when a sub-menu is open
+    const handleCloseSubMenu = () => {
+        setMenuView(null); // Clear the sub-menu view, returning to the main view
+    };
+
+    // Closes the slide-out menu and also clears any active sub-menu view.
+    const handleCloseAllMenus = () => {
+        setIsMenuOpen(false);
+        setMenuView(null);
+    };
+
+
     // --- RENDER LOGIC ---
     
     const renderView = () => {
@@ -475,59 +585,41 @@ const App: React.FC = () => {
             case 'verifyEmail': return <VerifyEmailView onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
             case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
-            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => setView('botSelection')} onStartNew={() => { setLifeContext(''); setView('landing'); }} />;
-            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => setView('redeemCode')} onLogout={handleLogout} />;
-            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} />;
+            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
+            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView(null); setView('redeemCode'); }} onLogout={handleLogout} />;
+            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
             case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} />;
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={resetToStart} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} />;
-            case 'achievements': return <AchievementsView gamificationState={gamificationState} onBack={() => setMenuView(null)} />;
-            case 'userGuide': return <UserGuideView onBack={() => setMenuView(null)} />;
-            case 'formattingHelp': return <FormattingHelpView onBack={() => setMenuView(null)} />;
-            case 'faq': return <FAQView onBack={() => setMenuView(null)} />;
-            case 'about': return <AboutView onBack={() => setMenuView(null)} />;
-            case 'disclaimer': return <DisclaimerView onBack={() => setMenuView(null)} currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
-            case 'terms': return <TermsView onBack={() => setMenuView(null)} />;
-            case 'redeemCode': return <RedeemCodeView onBack={() => {
-                    if (paywallUserEmail) {
-                        setView('paywall');
-                    } else {
-                        setMenuView(null);
-                    }
-                }} onRedeemSuccess={(user) => { 
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={resetToStart} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} />;
+            case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
+            case 'userGuide': return <UserGuideView />;
+            case 'formattingHelp': return <FormattingHelpView />;
+            case 'faq': return <FAQView />;
+            case 'about': return <AboutView />;
+            case 'disclaimer': return <DisclaimerView currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
+            case 'terms': return <TermsView />;
+            case 'redeemCode': return <RedeemCodeView onRedeemSuccess={(user) => { 
                     setAndProcessUser(user);
                     setMenuView(null);
                     if (paywallUserEmail) {
                         setAuthRedirectReason("Your pass has been applied! Please log in again to continue.");
                         setPaywallUserEmail(null);
                         setView('login');
+                    } else {
+                        // If redeeming without being on the paywall, just close the menu view
+                        handleCloseSubMenu();
                     }
                 }} />;
-            case 'admin': {
-                const handleAdminBack = () => {
-                    if (menuView === 'admin') {
-                        // Opened from the side menu, so just close the menu view overlay.
-                        setMenuView(null);
-                    } else if (view === 'admin') {
-                        // This was the initial view after an admin login. Navigate to the main app.
-                        // We can use the same logic as a regular user's post-login navigation.
-                        setView(lifeContext ? 'contextChoice' : 'landing');
-                    } else {
-                        // Fallback case, which shouldn't be reached.
-                        setMenuView(null);
-                    }
-                };
-                return <AdminView onBack={handleAdminBack} currentUser={currentUser} />;
-            }
-            case 'changePassword': return <ChangePasswordView onBack={() => setMenuView(null)} currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
+            case 'admin': return <AdminView currentUser={currentUser} />;
+            case 'changePassword': return <ChangePasswordView currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
             default: return <WelcomeScreen />;
         }
     };
     
     const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
-    const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view);
+    const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
     return (
         <div className={`bg-gray-50 dark:bg-gray-950 font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
@@ -535,8 +627,11 @@ const App: React.FC = () => {
                 <GamificationBar 
                     gamificationState={gamificationState}
                     currentUser={currentUser}
-                    onViewAchievements={() => setMenuView('achievements')}
-                    onToggleMenu={() => setIsMenuOpen(true)}
+                    onViewAchievements={() => handleNavigateFromMenu('achievements')}
+                    onBurgerClick={handleBurgerIconClick}
+                    onCloseSubMenu={handleCloseSubMenu}
+                    isMenuOpen={isMenuOpen}
+                    isSubMenuOpen={!!menuView}
                     theme={theme}
                     toggleTheme={toggleTheme}
                     minimal={minimalBar}
@@ -547,13 +642,11 @@ const App: React.FC = () => {
             </main>
             <BurgerMenu 
                 isOpen={isMenuOpen}
-                onClose={() => setIsMenuOpen(false)}
+                onClose={handleCloseAllMenus}
                 currentUser={currentUser}
-                onNavigate={(v) => {
-                    setMenuView(v);
-                    setIsMenuOpen(false);
-                }}
+                onNavigate={handleNavigateFromMenu}
                 onLogout={handleLogout}
+                onStartOver={handleStartOver}
             />
             {isAnalyzing && <AnalyzingView />}
              <DeleteAccountModal 

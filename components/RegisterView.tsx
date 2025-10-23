@@ -58,7 +58,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
       <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
             <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
         </button>
         <div className="text-center">
@@ -125,7 +125,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
+            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
           >
             {isLoading ? <Spinner /> : t('register_button')}
           </button>

@@ -8,13 +8,12 @@ import { CheckIcon } from './icons/CheckIcon';
 import { deriveKey, encryptData, hexToUint8Array } from '../utils/encryption';
 
 interface ChangePasswordViewProps {
-  onBack: () => void;
   currentUser: User;
   encryptionKey: CryptoKey;
   lifeContext: string;
 }
 
-const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, currentUser, encryptionKey, lifeContext }) => {
+const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ currentUser, encryptionKey, lifeContext }) => {
   const { t } = useLocalization();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -74,12 +73,9 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-        <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-        </button>
+      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('changePassword_title')}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('changePassword_title')}</h1>
         </div>
         
         {success ? (
@@ -143,7 +139,7 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ onBack, current
             <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
+                className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
             >
                 {isLoading ? <Spinner /> : t('changePassword_button')}
             </button>

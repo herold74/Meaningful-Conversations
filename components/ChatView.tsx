@@ -134,6 +134,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const baseTranscriptRef = useRef<string>('');
 
   const [isListening, setIsListening] = useState(false);
@@ -147,8 +148,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
-    const savedURI = typeof localStorage !== 'undefined' ? localStorage.getItem('selectedVoiceURI') : null;
-    return savedURI || null;
+    if (typeof localStorage === 'undefined') return null;
+    try {
+        const prefsString = localStorage.getItem('coachVoicePreferences');
+        if (prefsString) {
+            const prefs = JSON.parse(prefsString);
+            return prefs[bot.id] ?? null; // Use nullish coalescing for safety
+        }
+    } catch (e) {
+        console.error("Failed to parse coach voice preferences:", e);
+    }
+    return null; // Default to 'Automatic'
   });
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -170,14 +180,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [bot.id]);
 
   useEffect(() => {
-    if (typeof localStorage !== 'undefined') {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        const prefsString = localStorage.getItem('coachVoicePreferences');
+        const prefs = prefsString ? JSON.parse(prefsString) : {};
+
         if (selectedVoiceURI === null) {
-             localStorage.removeItem('selectedVoiceURI');
+            // User selected 'Automatic', remove the specific preference
+            delete prefs[bot.id];
         } else {
-            localStorage.setItem('selectedVoiceURI', selectedVoiceURI);
+            // Save the selected URI for this specific bot
+            prefs[bot.id] = selectedVoiceURI;
         }
+
+        if (Object.keys(prefs).length === 0) {
+            // If no preferences are left, clean up localStorage
+            localStorage.removeItem('coachVoicePreferences');
+        } else {
+            localStorage.setItem('coachVoicePreferences', JSON.stringify(prefs));
+        }
+    } catch (e) {
+        console.error("Failed to save coach voice preference:", e);
     }
-  }, [selectedVoiceURI]);
+  }, [selectedVoiceURI, bot.id]);
 
 
   useEffect(() => {
@@ -189,12 +214,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         setVoices(availableVoices);
       }
     };
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    loadVoices();
+
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    loadVoices(); // Initial attempt to load voices
 
     return () => {
       if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = null;
+        window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
         window.speechSynthesis.cancel();
       }
     };
@@ -275,12 +301,52 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     utterance.pitch = 1;
     window.speechSynthesis.speak(utterance);
   }, [t]);
+  
+  const handleOpenVoiceModal = () => {
+    if (!window.speechSynthesis) return;
+
+    // If voices are already loaded, just open the modal.
+    const availableVoices = window.speechSynthesis.getVoices();
+    if (availableVoices.length > 0) {
+        setVoices(availableVoices);
+        setIsVoiceModalOpen(true);
+        return;
+    }
+
+    // If no voices are loaded (common on iOS on first load),
+    // we need to trigger the browser to populate them.
+    const primeAndOpen = () => {
+        const newVoices = window.speechSynthesis.getVoices();
+        setVoices(newVoices);
+        setIsVoiceModalOpen(true);
+        // Clean up the one-time listener to avoid conflicts.
+        window.speechSynthesis.removeEventListener('voiceschanged', primeAndOpen);
+    };
+
+    // Set up a one-time listener that will open the modal AFTER voices are loaded.
+    window.speechSynthesis.addEventListener('voiceschanged', primeAndOpen);
+
+    // Speak a silent utterance to trigger the `voiceschanged` event.
+    const primingUtterance = new SpeechSynthesisUtterance('');
+    primingUtterance.volume = 0;
+    window.speechSynthesis.speak(primingUtterance);
+};
+
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatHistory]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+        // We need to reset the height to 'auto' to allow it to shrink when text is deleted.
+        textareaRef.current.style.height = 'auto';
+        // Then set it to the scrollHeight to make it grow to fit the content.
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [input]); // This effect runs every time the input value changes.
 
   useEffect(() => {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -327,6 +393,44 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognitionRef.current = recognition;
   }, [language]);
   
+  useEffect(() => {
+    // This effect is specifically to fetch the initial greeting from the bot
+    // when a new session starts (i.e., chatHistory is empty).
+    if (chatHistory.length !== 0) {
+        return;
+    }
+
+    const fetchInitialMessage = async () => {
+        setIsLoading(true);
+        try {
+            // Call with an empty history to trigger the bot's initial message.
+            const response = await geminiService.sendMessage(bot.id, lifeContext, [], language);
+            const initialBotMessage: Message = {
+                id: `bot-${Date.now()}`,
+                text: response.text,
+                role: 'bot',
+                timestamp: new Date().toISOString(),
+            };
+            setChatHistory([initialBotMessage]);
+        } catch (err) {
+            console.error('Error fetching initial message:', err);
+            const errorMessage: Message = {
+                id: `error-${Date.now()}`,
+                text: t('chat_error'),
+                role: 'bot',
+                timestamp: new Date().toISOString(),
+            };
+            setChatHistory([errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchInitialMessage();
+    // This should only run once when the component mounts for a new session.
+    // We include dependencies that are used inside and are necessary for the initial call.
+  }, [bot.id, lifeContext, language, setChatHistory, t]);
+
   useEffect(() => {
       if (chatHistory.length === 1 && chatHistory[0].role === 'bot' && voices.length > 0) {
         speak(chatHistory[0].text);
@@ -386,6 +490,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
     await sendMessage(input);
     setInput('');
+  };
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Prevent adding a new line
+        // Manually create a mock event and call the existing form submit handler
+        const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+        await handleFormSubmit(syntheticEvent);
+    }
   };
   
   const handleVoiceInteraction = async () => {
@@ -485,7 +598,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     });
                 }} 
                 className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" 
-                aria-label={isVoiceMode ? 'Switch to Text Mode' : 'Switch to Voice Mode'}
+                aria-label={isVoiceMode ? t('chat_text_mode') : t('chat_voice_mode')}
             >
                 {isVoiceMode ? <ChatBubbleIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <SoundWaveIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
             </button>
@@ -494,24 +607,21 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <div className="flex items-center justify-end gap-2 border-l border-gray-200 dark:border-gray-700 pl-2 sm:pl-2 md:pl-4">
                     {isTtsEnabled && (
                         <>
-                            {ttsStatus === 'speaking' && (
-                                <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={'Pause Speech'}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
-                            )}
-                            {ttsStatus === 'paused' && (
-                                <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={'Resume Speech'}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
-                            )}
                             {ttsStatus === 'idle' && (
-                                <button className="p-1 text-gray-300 dark:text-gray-700 cursor-not-allowed" aria-label={'Play/Pause'} disabled><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat_tts')}>
+                                    <RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                                </button>
                             )}
-                            <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={'Repeat'}><RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>
+                            {ttsStatus === 'speaking' && <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_pause_tts')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
+                            {ttsStatus === 'paused' && <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_resume_tts')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
                         </>
                     )}
-                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? 'Disable Voice' : 'Enable Voice'}>
+                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? t('chat_disable_tts') : t('chat_enable_tts')}>
                         {isTtsEnabled ? <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </button>
-                    {isTtsEnabled && relevantVoices.length > 0 && (
+                    {isTtsEnabled && (
                         <button
-                            onClick={() => setIsVoiceModalOpen(true)}
+                            onClick={handleOpenVoiceModal}
                             className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                             aria-label={t('chat_voice_settings')}
                         >
@@ -527,7 +637,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             {/* End Session Button/Icon */}
             <button
                 onClick={onEndSession}
-                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-green-400 bg-transparent border border-red-600 dark:border-green-400 uppercase hover:bg-red-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black"
+                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-green-400 bg-transparent border border-red-600 dark:border-green-400 uppercase hover:bg-red-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black rounded-lg shadow-md"
             >
                 {t('chat_end_session')}
             </button>
@@ -605,19 +715,21 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         </main>
         
         <footer className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <form onSubmit={handleFormSubmit} className="flex items-center gap-3">
-            <input
-              type="text"
+          <form onSubmit={handleFormSubmit} className="flex items-end gap-3">
+            <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={t('chat_placeholder')}
               disabled={isLoading}
-              className="flex-1 p-3 bg-gray-100 text-gray-800 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-green-400"
+              rows={1}
+              className="flex-1 p-3 bg-gray-100 text-gray-800 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-green-400 resize-none overflow-y-auto max-h-40"
             />
-            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? 'Stop and send' : 'Start recording'}>
+            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
                 <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
             </button>
-            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700">
+            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
               <PaperPlaneIcon className="w-6 h-6" />
             </button>
           </form>

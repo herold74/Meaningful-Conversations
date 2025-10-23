@@ -7,11 +7,10 @@ import Spinner from './shared/Spinner';
 import { CheckIcon } from './icons/CheckIcon';
 
 interface RedeemCodeViewProps {
-  onBack: () => void;
   onRedeemSuccess: (user: User) => void;
 }
 
-const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onBack, onRedeemSuccess }) => {
+const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
   const { t } = useLocalization();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -51,9 +50,9 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onBack, onRedeemSuccess
 
     return (
       <>
-        <div className="text-center">
+        <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('redeem_title')}</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{t('redeem_subtitle')}</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400 mb-8">{t('redeem_subtitle')}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,7 +74,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onBack, onRedeemSuccess
           <button
             type="submit"
             disabled={status === 'loading' || !code.trim()}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center"
+            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md"
           >
             {status === 'loading' ? <Spinner /> : t('redeem_button')}
           </button>
@@ -86,14 +85,9 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onBack, onRedeemSuccess
 
   return (
     <div className="w-full max-w-xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-      <div className="relative">
-         {status !== 'success' && (
-            <button onClick={onBack} className="absolute -left-4 -top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
-            </button>
-         )}
-        {renderContent()}
-      </div>
+        <div className="w-full mt-4 sm:mt-0">
+            {renderContent()}
+        </div>
     </div>
   );
 };

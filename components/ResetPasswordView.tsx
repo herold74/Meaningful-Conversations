@@ -60,7 +60,7 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('resetPassword_success_title')}</h1>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">{t('resetPassword_success_subtitle')}</p>
-                <button onClick={onResetSuccess} className="mt-6 w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500">
+                <button onClick={onResetSuccess} className="mt-6 w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md">
                     {t('login_button')}
                 </button>
              </div>
@@ -103,7 +103,7 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                     <button
                         type="submit"
                         disabled={status === 'loading'}
-                        className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
+                        className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
                     >
                         {status === 'loading' ? <Spinner /> : t('changePassword_button')}
                     </button>

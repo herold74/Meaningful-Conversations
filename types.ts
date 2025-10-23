@@ -96,6 +96,7 @@ export interface SessionAnalysis {
     solutionBlockages: SolutionBlockage[];
     blockageScore: number;
     hasConversationalEnd: boolean;
+    hasAccomplishedGoal: boolean;
 }
 
 export interface Achievement {

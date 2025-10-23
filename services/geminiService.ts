@@ -6,15 +6,13 @@ import { apiFetch } from './api';
 export const sendMessage = async (
     botId: string,
     context: string,
-    history: Message[], // This is newHistory from ChatView: [bot_welcome, user1, ..., userN]
+    history: Message[],
     lang: Language
 ): Promise<{ text: string }> => {
     
-    const historyForApi = history.slice(1); // Remove initial welcome message.
-
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ botId, context, history: historyForApi, lang }),
+        body: JSON.stringify({ botId, context, history: history, lang }),
     });
 };
 
@@ -47,6 +45,7 @@ export const analyzeSession = async (
             : [];
         
         const hasConversationalEnd: boolean = response && typeof response.hasConversationalEnd === 'boolean' ? response.hasConversationalEnd : false;
+        const hasAccomplishedGoal: boolean = response && typeof response.hasAccomplishedGoal === 'boolean' ? response.hasAccomplishedGoal : false;
 
         const blockageCount = solutionBlockages.length;
         let blockageScore = 0;
@@ -56,7 +55,7 @@ export const analyzeSession = async (
         else if (blockageCount === 4) blockageScore = 8;
         else if (blockageCount >= 5) blockageScore = 10;
 
-        return { newFindings, proposedUpdates, nextSteps, solutionBlockages, blockageScore, hasConversationalEnd };
+        return { newFindings, proposedUpdates, nextSteps, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
 
     } catch (error) {
         console.error("Error analyzing session via backend:", error);
@@ -67,6 +66,23 @@ export const analyzeSession = async (
             solutionBlockages: [],
             blockageScore: 0,
             hasConversationalEnd: false,
+            hasAccomplishedGoal: false,
         };
+    }
+};
+
+export const generateContextFromInterview = async (
+    history: Message[],
+    lang: Language
+): Promise<string> => {
+    try {
+        const response = await apiFetch('/gemini/session/format-interview', {
+            method: 'POST',
+            body: JSON.stringify({ history, lang }),
+        });
+        return response.markdown;
+    } catch (error) {
+        console.error("Error formatting interview via backend:", error);
+        return "There was an error generating the Life Context file from the interview. Please try again.";
     }
 };

@@ -71,7 +71,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
           <button
             type="submit"
             disabled={status === 'loading' || !email.trim()}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center gap-3 transition-colors"
+            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center gap-3 transition-colors rounded-lg shadow-md"
           >
             {status === 'loading' ? <Spinner /> : <><MailIcon className="w-6 h-6" /> {t('forgotPassword_button')}</>}
           </button>
@@ -91,7 +91,7 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
       <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
          {status !== 'success' && (
-            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
             </button>
          )}

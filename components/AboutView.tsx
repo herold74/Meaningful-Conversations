@@ -6,7 +6,6 @@ import { useLocalization } from '../context/LocalizationContext';
 import { InfoIcon } from './icons/InfoIcon';
 
 interface InfoViewProps {
-    onBack: () => void;
 }
 
 const de_markdown_part1 = `Möchten Sie die Erkenntnisse aus Ihrem Coaching im Alltag vertiefen oder suchen Sie einen unkomplizierten Weg zur Selbstreflexion? "Sinnstiftende Gespräche" wurde genau dafür entwickelt. Die App ist Ihre intelligente Ergänzung zum professionellen Coaching und eine moderne Alternative zum Selbsthilfebuch – ein persönlicher Raum für Ihre Weiterentwicklung, der Ihnen jederzeit zur Verfügung steht.
@@ -48,7 +47,7 @@ const en_final_sentence = `This application is a project born from a passion for
 const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**manualmode.at**](http://manualmode.at).`;
 
 
-const AboutView: React.FC<InfoViewProps> = ({ onBack }) => {
+const AboutView: React.FC<InfoViewProps> = () => {
     const { t, language } = useLocalization();
     const markdownPart1 = language === 'de' ? de_markdown_part1 : en_markdown_part1;
     const centeredText = language === 'de' ? de_centered_text : en_centered_text;
@@ -58,10 +57,7 @@ const AboutView: React.FC<InfoViewProps> = ({ onBack }) => {
 
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-            <div className="relative text-center">
-                <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
-                </button>
+            <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('about_title')}</h1>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Version 1.4.5</p>
             </div>

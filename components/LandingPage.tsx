@@ -1,13 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import { UploadIcon } from './icons/UploadIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { InfoIcon } from './icons/InfoIcon';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
   onStartQuestionnaire: () => void;
+  onStartInterview: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview }) => {
   const { t } = useLocalization();
   const [fileContent, setFileContent] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
@@ -89,12 +91,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
             <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".md,text/markdown" onChange={handleFileChange} />
           </label>
           
+          {fileContent && (
+            <div className="p-4 my-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 text-blue-800 dark:text-blue-300 flex items-start gap-3 text-left animate-fadeIn">
+                <InfoIcon className="w-6 h-6 flex-shrink-0 mt-1" />
+                <div>
+                    <p className="text-sm">
+                        {t('landing_editingInfo_text')}
+                    </p>
+                </div>
+            </div>
+          )}
+
           {error && <p className="text-red-500 text-sm">{error}</p>}
           
           <button
             type="submit"
             disabled={!fileContent}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed focus:outline-none transition-colors duration-200"
+            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
           >
             {t('landing_startSession')}
           </button>
@@ -106,12 +119,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
             <hr className="w-full border-gray-300 dark:border-gray-700"/>
         </div>
         
-        <button
-            onClick={onStartQuestionnaire}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FECC78] dark:focus:ring-offset-gray-950 transition-all duration-200"
-        >
-            {t('landing_createFile')}
-        </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+                onClick={onStartQuestionnaire}
+                className="w-full px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FECC78] dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
+            >
+                {t('landing_createFile')}
+            </button>
+             <button
+                onClick={onStartInterview}
+                className="w-full px-6 py-3 text-base font-bold text-black bg-blue-400 uppercase hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
+            >
+                {t('landing_createWithInterview')}
+            </button>
+        </div>
 
         <div className="text-xs text-gray-500 pt-4">
             <p><strong>{t('landing_privacyNote')}</strong> {t('landing_privacyText')}</p>

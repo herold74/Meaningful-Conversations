@@ -4,6 +4,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
 import Spinner from './shared/Spinner';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -96,16 +97,18 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
           premium: 2
         };
 
-        const availableBots: BotWithAvailability[] = fetchedBots.map(bot => {
-          const requiredLevel = accessHierarchy[bot.accessTier];
-          const userLevel = accessHierarchy[userAccessLevel];
-          const isTierAvailable = userLevel >= requiredLevel;
-          const isIndividuallyUnlocked = unlockedCoaches.includes(bot.id);
-          
-          return {
-            ...bot,
-            isAvailable: isTierAvailable || isIndividuallyUnlocked
-          };
+        const availableBots: BotWithAvailability[] = fetchedBots
+          .filter(bot => bot.id !== 'g-interviewer') // Filter out the hidden interview bot
+          .map(bot => {
+            const requiredLevel = accessHierarchy[bot.accessTier];
+            const userLevel = accessHierarchy[userAccessLevel];
+            const isTierAvailable = userLevel >= requiredLevel;
+            const isIndividuallyUnlocked = unlockedCoaches.includes(bot.id);
+            
+            return {
+              ...bot,
+              isAvailable: isTierAvailable || isIndividuallyUnlocked
+            };
         });
         setBots(availableBots);
       } catch (error) {
@@ -143,15 +146,15 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
   const lockedBots = bots.filter(b => !b.isAvailable);
   
   return (
-    <div className="flex flex-col items-center justify-center py-10">
-      <div className="text-center mb-8">
+    <div className="py-10 animate-fadeIn">
+      <div className="w-full max-w-6xl mx-auto mb-8 text-center">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('botSelection_title')}</h1>
         <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-          {t('botSelection_subtitle')}
+        {t('botSelection_subtitle')}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
         {availableBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
         
         {lockedBots.length > 0 && unlockMessage && (

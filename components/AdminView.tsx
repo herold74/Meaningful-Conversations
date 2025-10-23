@@ -21,7 +21,6 @@ import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { ChevronUpIcon } from './icons/ChevronUpIcon';
 
 interface AdminViewProps {
-    onBack: () => void;
     currentUser: User | null;
 }
 
@@ -69,7 +68,7 @@ const ResetPasswordSuccessModal: React.FC<{
                         <span className="font-mono text-lg text-gray-800 dark:text-gray-200">{data.newPass}</span>
                         <button 
                             onClick={handleCopy}
-                            className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-400"
+                            className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-400 rounded-lg shadow-md"
                         >
                             {isCopied ? <CheckIcon className="w-4 h-4" /> : <ClipboardIcon className="w-4 h-4" />}
                             {isCopied ? t('admin_code_copied') : t('admin_copy_code')}
@@ -77,7 +76,7 @@ const ResetPasswordSuccessModal: React.FC<{
                     </div>
                 </div>
                 <div className="mt-6 text-right">
-                    <button onClick={onClose} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button onClick={onClose} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md">
                         {t('modal_close')}
                     </button>
                 </div>
@@ -120,10 +119,10 @@ const ResetConfirmationModal: React.FC<{
                     </div>
                 </div>
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button onClick={onCancel} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button onClick={onCancel} className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md">
                         {t('deleteAccount_cancel')}
                     </button>
-                    <button onClick={onConfirm} className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700">
+                    <button onClick={onConfirm} className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 rounded-lg shadow-md">
                         {t('admin_users_reset_password')}
                     </button>
                 </div>
@@ -189,7 +188,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
     );
 };
 
-const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
+const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<AdminTab>('tickets');
     const [isLoading, setIsLoading] = useState(true);
@@ -530,7 +529,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
                             {botsForCodes.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
                         </select>
                     </div>
-                    <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center">
+                    <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">
                         {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
                     </button>
                 </form>
@@ -832,10 +831,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onBack, currentUser }) => {
 
     return (
         <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
-            <div className="relative text-center pb-4">
-                <button onClick={onBack} className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                    <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400"/>
-                </button>
+             <div className="text-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('admin_title')}</h1>
             </div>
             {renderTabs()}

@@ -79,14 +79,14 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                     <button 
                         onClick={onClose}
                         disabled={isLoading}
-                        className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+                        className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-md"
                     >
                         {t('deleteAccount_cancel')}
                     </button>
                     <button 
                         onClick={handleDelete}
                         disabled={isLoading || confirmationText !== requiredText}
-                        className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 disabled:bg-red-300 dark:disabled:bg-red-800 disabled:cursor-not-allowed flex items-center justify-center w-40"
+                        className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 disabled:bg-red-300 dark:disabled:bg-red-800 disabled:cursor-not-allowed flex items-center justify-center w-40 rounded-lg shadow-md"
                     >
                         {isLoading ? <Spinner /> : t('deleteAccount_confirm')}
                     </button>

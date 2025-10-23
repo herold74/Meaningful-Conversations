@@ -53,14 +53,14 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         <div className="space-y-4 pt-4">
           <button
             onClick={onContinue}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
           >
             <FileTextIcon className="w-6 h-6" />
             {t('contextChoice_continue')}
           </button>
            <button
             onClick={onStartNew}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md"
           >
             <UploadIcon className="w-6 h-6" />
             {t('contextChoice_start_new')}

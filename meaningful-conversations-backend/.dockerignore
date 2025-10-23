@@ -1,16 +1,1 @@
-# Ignore local dependencies, as they will be installed inside the container
-node_modules
-
-# Ignore logs
-npm-debug.log
-*.log
-
-# Ignore OS-specific files
-.DS_Store
-
-# Ignore local environment variables file (VERY IMPORTANT for security)
-.env
-
-# Ignore Git files
-.git
-.gitignore
+��^�j�W������	���rG�~)^����z+x

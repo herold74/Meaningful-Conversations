@@ -13,6 +13,7 @@ import { CodeIcon } from './icons/CodeIcon';
 import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
+import { RepeatIcon } from './icons/RepeatIcon';
 
 interface BurgerMenuProps {
   isOpen: boolean;
@@ -20,66 +21,70 @@ interface BurgerMenuProps {
   currentUser: User | null;
   onNavigate: (view: NavView) => void;
   onLogout: () => void;
+  onStartOver: () => void;
 }
 
-const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout }) => {
+const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver }) => {
     const { t } = useLocalization();
 
     if (!isOpen) return null;
-
-    const handleNavigate = (view: NavView) => {
-        onNavigate(view);
-        onClose();
-    };
     
     const handleLogout = () => {
         onLogout();
         onClose();
     };
 
+    const handleStartOverAndClose = () => {
+        onStartOver();
+        onClose();
+    }
+
     return (
         <div 
-            className="fixed inset-0 z-50 flex justify-end"
+            className="fixed inset-0 z-40 flex justify-start"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
         >
             <div 
-                className="w-full max-w-sm h-full bg-white dark:bg-gray-950 shadow-2xl p-6 flex flex-col animate-slideInFromRight"
+                className="w-full max-w-sm h-full bg-white dark:bg-gray-950 shadow-2xl p-6 flex flex-col animate-slideInFromLeft"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 uppercase">{t('menu_title')}</h2>
-                    <button onClick={onClose} className="p-2 -mr-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <button onClick={onClose} className="p-2 -mr-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
                 
                 <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
+                    <MenuItem icon={RepeatIcon} text={t('menu_start_over')} onClick={handleStartOverAndClose} />
+                    <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                    
                     {currentUser?.isAdmin && (
                         <>
-                            <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => handleNavigate('admin')} />
+                            <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => onNavigate('admin')} />
                              <hr className="border-gray-200 dark:border-gray-800 my-2" />
                         </>
                     )}
 
                     {/* Items moved to the top */}
-                    <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => handleNavigate('about')} />
-                    <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => handleNavigate('terms')} />
-                    <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => handleNavigate('disclaimer')} />
+                    <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => onNavigate('about')} />
+                    <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => onNavigate('terms')} />
+                    <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => onNavigate('disclaimer')} />
 
                     <hr className="border-gray-200 dark:border-gray-800 my-2" />
                     
                     {currentUser && (
                         <>
-                            <MenuItem icon={KeyIcon} text={t('menu_change_password')} onClick={() => handleNavigate('changePassword')} />
-                            <MenuItem icon={ShoppingBagIcon} text={t('menu_redeem_code')} onClick={() => handleNavigate('redeemCode')} />
+                            <MenuItem icon={KeyIcon} text={t('menu_change_password')} onClick={() => onNavigate('changePassword')} />
+                            <MenuItem icon={ShoppingBagIcon} text={t('menu_redeem_code')} onClick={() => onNavigate('redeemCode')} />
                         </>
                     )}
 
-                    <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => handleNavigate('userGuide')} />
-                    <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => handleNavigate('faq')} />
-                    <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => handleNavigate('formattingHelp')} />
+                    <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => onNavigate('userGuide')} />
+                    <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => onNavigate('faq')} />
+                    <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => onNavigate('formattingHelp')} />
                 </nav>
 
                 <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -91,7 +96,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                             <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50" />
                         </>
                     ) : (
-                        <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => handleNavigate('auth')} />
+                        <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
                     <p className="px-4 pt-2 text-xs text-center text-gray-400 dark:text-gray-500">
                         Version 1.4.5

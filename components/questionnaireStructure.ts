@@ -2,7 +2,7 @@
 
 interface Field {
     id: string;
-    label: string;
+    label?: string;
     prompt: string;
     rows?: number;
 }
@@ -44,12 +44,12 @@ export const getQuestionnaireStructure = (t: (key: string) => string): Section[]
         description: t('questionnaire_goals_desc'),
         subSections: [
             {
-                title: t('questionnaire_goals_2025_title'),
+                title: t('questionnaire_goals_midterm_title'),
                 level: 3,
                 fields: [
-                    { id: 'goals_2025_career', label: t('questionnaire_goals_2025_career_label'), prompt: t('questionnaire_goals_2025_career_prompt') },
-                    { id: 'goals_2025_personal', label: t('questionnaire_goals_2025_personal_label'), prompt: t('questionnaire_goals_2025_personal_prompt') },
-                    { id: 'goals_2025_financial', label: t('questionnaire_goals_2025_financial_label'), prompt: t('questionnaire_goals_2025_financial_prompt') },
+                    { id: 'goals_midterm_career', label: t('questionnaire_goals_midterm_career_label'), prompt: t('questionnaire_goals_midterm_career_prompt') },
+                    { id: 'goals_midterm_personal', label: t('questionnaire_goals_midterm_personal_label'), prompt: t('questionnaire_goals_midterm_personal_prompt') },
+                    { id: 'goals_midterm_financial', label: t('questionnaire_goals_midterm_financial_label'), prompt: t('questionnaire_goals_midterm_financial_prompt') },
                 ]
             },
             {
@@ -90,6 +90,14 @@ export const getQuestionnaireStructure = (t: (key: string) => string): Section[]
         ],
         collapsedByDefault: true,
         collapseText: t('questionnaire_challenges_collapseText'),
+    },
+    {
+        title: t('questionnaire_next_steps_title'),
+        level: 2,
+        description: t('questionnaire_next_steps_desc'),
+        fields: [
+            { id: 'next_steps_commitments', prompt: t('questionnaire_next_steps_prompt'), rows: 4 },
+        ]
     }
 ];
 

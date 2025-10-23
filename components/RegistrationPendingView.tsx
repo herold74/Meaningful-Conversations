@@ -26,7 +26,7 @@ const RegistrationPendingView: React.FC<RegistrationPendingViewProps> = ({ onGoT
         <div className="pt-4">
           <button
             onClick={onGoToLogin}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200"
+            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
           >
             {t('login_button')}
           </button>

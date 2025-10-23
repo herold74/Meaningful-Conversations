@@ -33,14 +33,14 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onLogout
         <div className="space-y-4 pt-4">
           <button
             onClick={() => window.open('https://example.com/purchase', '_blank')} // Placeholder URL
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md"
           >
             <ShoppingBagIcon className="w-6 h-6" />
             {t('paywall_purchase_button')}
           </button>
            <button
             onClick={onRedeem}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 rounded-lg shadow-md"
           >
             <KeyIcon className="w-6 h-6" />
             {t('paywall_redeem_button')}

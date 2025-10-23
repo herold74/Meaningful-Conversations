@@ -138,10 +138,10 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                 </div>
 
                 <div className="flex justify-end gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
-                    <button type="button" onClick={onClose} disabled={submissionStatus === 'submitting'} className="px-4 py-1 text-xs font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50">
+                    <button type="button" onClick={onClose} disabled={submissionStatus === 'submitting'} className="px-4 py-1 text-xs font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-sm">
                         {t('feedback_cancel')}
                     </button>
-                    <button type="submit" disabled={submissionStatus === 'submitting' || !comments.trim()} className="px-4 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center w-32">
+                    <button type="submit" disabled={submissionStatus === 'submitting' || !comments.trim()} className="px-4 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center w-32 rounded-lg shadow-sm">
                         {submissionStatus === 'submitting' ? <Spinner /> : t('feedback_submit')}
                     </button>
                 </div>
