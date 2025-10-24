@@ -136,20 +136,15 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
                 </div>
                  <p className="text-gray-600 dark:text-gray-400 text-left mb-6">{t('contextChoice_confirm_warning')}</p>
 
-                 <div className="flex flex-col gap-4">
+                 <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         onClick={handleDownloadContext}
-                        className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 rounded-lg shadow-md"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md"
                     >
                         <DownloadIcon className="w-5 h-5"/>
                         {t('contextChoice_confirm_download')}
                     </button>
-                 </div>
-                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button onClick={() => setIsConfirmingStartNew(false)} className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 uppercase hover:underline">
-                        {t('contextChoice_confirm_cancel')}
-                    </button>
-                    <button onClick={handleConfirmStartNew} className="px-4 py-2 text-sm font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md">
+                    <button onClick={handleConfirmStartNew} className="flex-1 px-4 py-2 text-sm font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 rounded-lg shadow-md">
                         {t('contextChoice_confirm_proceed')}
                     </button>
                  </div>

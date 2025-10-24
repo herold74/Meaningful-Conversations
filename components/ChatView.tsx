@@ -167,6 +167,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const botGender = useMemo((): 'male' | 'female' => {
       switch (bot.id) {
+          case 'g-interviewer':
           case 'ava-strategic':
           case 'chloe-cbt':
               return 'female';
@@ -258,6 +259,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             gender = botGender;
         } else { // 'en'
             switch (bot.id) {
+                case 'g-interviewer':
                 case 'ava-strategic':
                 case 'chloe-cbt':
                     gender = 'female';
@@ -652,7 +654,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
       </header>
       
     {isVoiceMode ? (
-        <main className="flex-1 flex flex-col justify-around items-center p-6 text-center bg-gray-50 dark:bg-gray-900/50">
+        <main className="flex-1 flex flex-col justify-between items-center p-6 text-center bg-gray-50 dark:bg-gray-900/50 overflow-y-auto">
             <div className="animate-fadeIn">
                 <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-white dark:border-gray-700" />
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h1>

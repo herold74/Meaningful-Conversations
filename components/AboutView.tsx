@@ -59,7 +59,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('about_title')}</h1>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Version 1.4.5</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Version 1.4.6</p>
             </div>
             <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
                  <ReactMarkdown 

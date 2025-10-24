@@ -490,24 +490,8 @@ const App: React.FC = () => {
         setChatHistory([]);
         setView('botSelection');
     };
-    
-    const resetToStart = () => {
-        setSelectedBot(null);
-        setChatHistory([]);
-        setSessionAnalysis(null);
-        setNewGamificationState(null);
-        setLifeContext('');
-        
-        if (!currentUser) {
-            // For a guest, "Start Over" is a full reset to the beginning.
-            setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        }
-        // For both guests and logged-in users starting a new context from scratch,
-        // navigate to the landing page.
-        setView('landing');
-    };
 
-    const handleStartOver = () => {
+    const handleStartOver = useCallback(() => {
         // Reset session-specific state
         setSelectedBot(null);
         setChatHistory([]);
@@ -529,7 +513,7 @@ const App: React.FC = () => {
             setGamificationState(DEFAULT_GAMIFICATION_STATE);
             setView('landing');
         }
-    };
+    }, [currentUser, lifeContext]);
 
     // --- Menu Handlers ---
     // Toggles the slide-out burger menu panel.
@@ -574,7 +558,7 @@ const App: React.FC = () => {
                     }} 
                     onGuest={() => {
                         setMenuView(null);
-                        resetToStart();
+                        handleStartOver();
                     }}
                     redirectReason={authRedirectReason}
                 />;
@@ -592,7 +576,7 @@ const App: React.FC = () => {
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
             case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} />;
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={resetToStart} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;

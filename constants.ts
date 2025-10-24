@@ -3,10 +3,10 @@ import { Bot } from './types';
 export const BOTS: Bot[] = [
     {
         id: 'g-interviewer',
-        name: 'G',
+        name: 'Gloria',
         description: 'A friendly guide who helps you create your first Life Context file through a simple conversation.',
         description_de: 'Ein freundlicher Guide, der Ihnen hilft, Ihre erste Lebenskontext-Datei durch ein einfaches Gespräch zu erstellen.',
-        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=G&backgroundColor=d1d4f9&hairColor=818cf8',
+        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Erik&backgroundColor=d1d4f9&hairColor=86efac',
         style: 'Conversational, Structured, Helpful',
         style_de: 'Gesprächsorientiert, Strukturiert, Hilfsbereit',
         accessTier: 'guest',
