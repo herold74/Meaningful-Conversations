@@ -18,11 +18,11 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
   const [isLoading, setIsLoading] = useState(false);
 
   const getButtonClass = (lang: 'en' | 'de') => {
-    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500 rounded-md shadow-sm";
+    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 rounded-md shadow-sm";
     if (language === lang) {
-        return `${baseClass} bg-green-400 text-black`;
+        return `${baseClass} bg-[#1B7272] text-white focus:ring-[#1B7272]`;
     }
-    return `${baseClass} bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700`;
+    return `${baseClass} bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 focus:ring-gray-500`;
   };
 
   return (

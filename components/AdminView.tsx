@@ -414,6 +414,51 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
     const sessionFeedback = useMemo(() => feedback.filter(item => item.rating !== null), [feedback]);
     const messageReports = useMemo(() => feedback.filter(item => item.rating === null), [feedback]);
 
+    const ratingStats = useMemo(() => {
+        const statsByBot = BOTS
+            .filter(bot => bot.id !== 'g-interviewer')
+            .reduce((acc, bot) => {
+            acc[bot.id] = {
+                id: bot.id,
+                name: bot.name,
+                avatar: bot.avatar,
+                ratings: [] as number[],
+                count: 0,
+                distribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
+            };
+            return acc;
+        }, {} as Record<string, { id: string; name: string; avatar: string; ratings: number[]; count: number; distribution: Record<string, number> }>);
+
+        let totalRatings = 0;
+        let totalSum = 0;
+
+        sessionFeedback.forEach(item => {
+            if (item.rating && item.rating >= 1 && item.rating <= 5 && statsByBot[item.botId]) {
+                const ratingKey = String(item.rating);
+                statsByBot[item.botId].ratings.push(item.rating);
+                statsByBot[item.botId].count++;
+                statsByBot[item.botId].distribution[ratingKey]++;
+                totalRatings++;
+                totalSum += item.rating;
+            }
+        });
+
+        const overallAverage = totalRatings > 0 ? (totalSum / totalRatings).toFixed(2) : 'N/A';
+
+        const botStats = Object.values(statsByBot).map(botStat => {
+            const sum = botStat.ratings.reduce((a, b) => a + b, 0);
+            const average = botStat.count > 0 ? (sum / botStat.count).toFixed(2) : 'N/A';
+            return { ...botStat, average };
+        }).sort((a,b) => b.count - a.count);
+
+        return { botStats, overallAverage, totalRatings };
+    }, [sessionFeedback]);
+    
+    const filteredFeedback = useMemo(() => {
+        if (!selectedBotFilter) return sessionFeedback;
+        return sessionFeedback.filter(item => item.botId === selectedBotFilter);
+    }, [sessionFeedback, selectedBotFilter]);
+
     const renderTabs = () => (
         <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
             {(['users', 'feedback', 'tickets', 'codes'] as AdminTab[]).map(tab => {
@@ -700,49 +745,6 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
         </div>
     );
     
-    const ratingStats = useMemo(() => {
-        const statsByBot = BOTS.reduce((acc, bot) => {
-            acc[bot.id] = {
-                id: bot.id,
-                name: bot.name,
-                avatar: bot.avatar,
-                ratings: [] as number[],
-                count: 0,
-                distribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 },
-            };
-            return acc;
-        }, {} as Record<string, { id: string; name: string; avatar: string; ratings: number[]; count: number; distribution: Record<string, number> }>);
-
-        let totalRatings = 0;
-        let totalSum = 0;
-
-        sessionFeedback.forEach(item => {
-            if (item.rating && item.rating >= 1 && item.rating <= 5 && statsByBot[item.botId]) {
-                const ratingKey = String(item.rating);
-                statsByBot[item.botId].ratings.push(item.rating);
-                statsByBot[item.botId].count++;
-                statsByBot[item.botId].distribution[ratingKey]++;
-                totalRatings++;
-                totalSum += item.rating;
-            }
-        });
-
-        const overallAverage = totalRatings > 0 ? (totalSum / totalRatings).toFixed(2) : 'N/A';
-
-        const botStats = Object.values(statsByBot).map(botStat => {
-            const sum = botStat.ratings.reduce((a, b) => a + b, 0);
-            const average = botStat.count > 0 ? (sum / botStat.count).toFixed(2) : 'N/A';
-            return { ...botStat, average };
-        }).sort((a,b) => b.count - a.count);
-
-        return { botStats, overallAverage, totalRatings };
-    }, [sessionFeedback]);
-    
-    const filteredFeedback = useMemo(() => {
-        if (!selectedBotFilter) return sessionFeedback;
-        return sessionFeedback.filter(item => item.botId === selectedBotFilter);
-    }, [sessionFeedback, selectedBotFilter]);
-
     const renderRatings = () => (
         <div className="space-y-6">
             <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">

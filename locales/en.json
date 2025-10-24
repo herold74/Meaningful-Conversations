@@ -1,17 +1,17 @@
 {
   "meaningfulConversations": "Meaningful Conversations",
 
-  "landing_subtitle": "This application provides access to several coaching bot characters with different perspectives and coaching styles. Users can create a 'life context' file to personalize conversations and update it with new insights after each session.",
+  "landing_subtitle": "This application provides access to several coaching bot characters with different perspectives and coaching styles. You can create a 'life context' file to personalize conversations and update it with new insights after each session.",
   "landing_dragDrop": "Drag & drop your Life Context file here, or click to select",
   "landing_startSession": "Start Session",
   "landing_or": "OR",
   "landing_createFile": "Create a New Life Context File",
-  "landing_createWithInterview": "Create with an Interview",
+  "landing_createWithInterview": "Start with an interview",
   "landing_privacyNote": "Privacy Note:",
   "landing_privacyText": "If you continue as a guest, your data is processed locally in your browser. No data is stored on our servers. You are responsible for saving your file at the end of each session.",
   "landing_error_invalidFile": "Invalid file type. Please upload a .md file.",
   "landing_error_emptyFile": "The selected file is empty or could not be read.",
-  "landing_editingInfo_text": "Your file is loaded and ready. Please note: Direct editing isn't available now, as the app adapts to your file's structure. You can review, edit, and apply AI-suggested changes after your session.",
+  "landing_file_loaded_info": "File loaded. You can review and apply AI-suggested changes after your session.",
 
   "auth_title": "Welcome",
   "auth_subtitle": "Create an account to save your progress automatically, or continue as a guest and manage your data manually.",
@@ -61,10 +61,16 @@
   "resetPassword_success_subtitle": "You can now log in with your new password.",
   
   "contextChoice_welcome_back": "Welcome Back!",
-  "contextChoice_subtitle": "You have a saved Life Context. Would you like to continue with it or start fresh?",
-  "contextChoice_preview_title": "Saved Context Preview",
+  "contextChoice_intro": "You have a saved Life Context.",
+  "contextChoice_question": "Would you like to continue with it or start fresh?",
+  "contextChoice_preview_title": "Preview",
   "contextChoice_continue": "Continue with Saved Context",
   "contextChoice_start_new": "Start a New Session",
+  "contextChoice_confirm_title": "Start a New Session?",
+  "contextChoice_confirm_warning": "Starting fresh will clear the context for this session. Your cloud data will be overwritten on the next save. We recommend downloading a backup first.",
+  "contextChoice_confirm_download": "Download Current Context",
+  "contextChoice_confirm_proceed": "Yes, Start New",
+  "contextChoice_confirm_cancel": "Cancel",
 
   "piiWarning_title": "Before You Continue",
   "piiWarning_subtitle": "The file you generated may contain Personally Identifiable Information (PII). Please review it and remove any sensitive data you are not comfortable sharing.",
@@ -270,7 +276,7 @@
   "formatting_separators_code": "## My Top Goals\n\n**Career Goal:** ...\n\n---\n\n## Current Challenges",
   "formatting_manual_title": "Manual Editing",
   "formatting_manual_p1": "You can always manually edit the final context on the <strong>Session Review</strong> screen before saving or downloading. You can also edit the file after downloading it with a .md editor of your choice using the design elements mentioned.",
-  "formatting_manual_p2": "A well-structured document will lead to better coaching insights.",
+  "formatting_manual_p2": "A well-structured document leads to a better quality coaching session.",
 
   "faq_title": "Frequently Asked Questions",
   

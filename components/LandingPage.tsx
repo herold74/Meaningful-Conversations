@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { UploadIcon } from './icons/UploadIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { InfoIcon } from './icons/InfoIcon';
+import { FileTextIcon } from './icons/FileTextIcon';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -73,35 +73,38 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
     <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
       <div className="w-full max-w-3xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('meaningfulConversations')}</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p className="text-sm md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
           {t('landing_subtitle')}
         </p>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <label 
-            htmlFor="file-upload" 
-            className="relative block w-full px-12 py-8 text-center border-2 border-dashed cursor-pointer border-gray-400 hover:border-green-500 dark:border-gray-700 dark:hover:border-green-400 transition-colors"
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-            <UploadIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500" />
-            <span className="mt-2 block text-sm font-semibold text-gray-500 dark:text-gray-400">
-              {fileName ? fileName : t('landing_dragDrop')}
-            </span>
-            <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".md,text/markdown" onChange={handleFileChange} />
-          </label>
-          
-          {fileContent && (
-            <div className="p-4 my-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 text-blue-800 dark:text-blue-300 flex items-start gap-3 text-left animate-fadeIn">
-                <InfoIcon className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                    <p className="text-sm">
-                        {t('landing_editingInfo_text')}
+          {!fileContent ? (
+            <label 
+              htmlFor="file-upload" 
+              className="relative block w-full px-12 py-8 text-center border-2 border-dashed cursor-pointer border-gray-400 hover:border-green-500 dark:border-gray-700 dark:hover:border-green-400 transition-colors"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <UploadIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500" />
+              <span className="mt-2 block text-sm font-semibold text-gray-500 dark:text-gray-400">
+                {fileName ? fileName : t('landing_dragDrop')}
+              </span>
+              <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".md,text/markdown" onChange={handleFileChange} />
+            </label>
+          ) : (
+             <div className="flex items-center justify-center gap-6 p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg animate-fadeIn">
+                <div className="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900/50 rounded-full">
+                    <FileTextIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="text-left flex-1 min-w-0">
+                    <p className="font-bold text-gray-800 dark:text-gray-200 truncate" title={fileName}>{fileName}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {t('landing_file_loaded_info')}
                     </p>
                 </div>
             </div>
           )}
-
+          
           {error && <p className="text-red-500 text-sm">{error}</p>}
           
           <button
@@ -128,7 +131,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
             </button>
              <button
                 onClick={onStartInterview}
-                className="w-full px-6 py-3 text-base font-bold text-black bg-blue-400 uppercase hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
+                className="w-full px-6 py-3 text-base font-bold text-white bg-[#1B7272] uppercase hover:bg-[#165a5a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1B7272] dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
             >
                 {t('landing_createWithInterview')}
             </button>

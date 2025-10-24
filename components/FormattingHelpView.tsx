@@ -50,7 +50,7 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_manual_title')}</h2>
                     <p dangerouslySetInnerHTML={{ __html: t('formatting_manual_p1') }} />
-                    <p>{t('formatting_manual_p2')}</p>
+                    <p><strong>{t('formatting_manual_p2')}</strong></p>
                 </div>
 
             </div>

@@ -85,7 +85,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                             aria-label={t('menu_exit')}
                         >
                             <XIcon className="w-6 h-6" />
-                            <span className="hidden sm:inline font-bold uppercase text-xs">{t('menu_exit')}</span>
+                            <span className="font-bold uppercase text-xs">{t('menu_exit')}</span>
                         </button>
                     </>
                 ) : (

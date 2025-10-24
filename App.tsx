@@ -585,7 +585,7 @@ const App: React.FC = () => {
             case 'verifyEmail': return <VerifyEmailView onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
             case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
-            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
+            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
             case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView(null); setView('redeemCode'); }} onLogout={handleLogout} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;

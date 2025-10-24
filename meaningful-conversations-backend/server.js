@@ -71,7 +71,7 @@ const allowlist = [
     process.env.FRONTEND_URL,
     STAGING_FRONTEND_URL,
     PRODUCTION_FRONTEND_URL,
-    'http://localhost:3000'
+    'http://localhost:5173'
 ].filter(Boolean);
 const uniqueAllowlist = [...new Set(allowlist)];
 
