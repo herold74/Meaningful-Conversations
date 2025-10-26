@@ -1,1 +1,0 @@
-// This component is unused and has been removed to reduce clutter.

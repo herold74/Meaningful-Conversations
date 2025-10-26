@@ -126,42 +126,24 @@ const validateEnvVars = () => {
 };
 
 const synchronizeDbSchema = () => {
-    // Implement the recovery mechanism described in the deployment guide.
-    if (process.env.FORCE_DB_PUSH === 'true' && process.env.ENVIRONMENT_TYPE !== 'production') {
-        console.warn("WARN: FORCE_DB_PUSH is true. Resetting the database. ALL DATA WILL BE LOST.");
-        const command = 'npx prisma migrate reset --force';
-        try {
-            execSync(command, { stdio: 'pipe' });
-            console.log("INFO: Database has been reset successfully via 'migrate reset'.");
-            // After resetting, we don't need to push. The schema is fresh.
-            return;
-        } catch (error) {
-            const stderr = error.stderr ? error.stderr.toString() : 'Unknown error';
-            console.error("FATAL: 'prisma migrate reset' failed. The container will now exit.");
-            console.error("Prisma Error Details:", stderr);
-            throw new Error("Prisma migrate reset failed.");
-        }
-    }
-
-    const isProd = process.env.ENVIRONMENT_TYPE === 'production';
-    // The `--accept-data-loss` flag is used in staging/dev to allow for rapid schema changes.
-    // It is NEVER used in production as a safety measure.
-    const command = `npx prisma db push ${isProd ? '' : '--accept-data-loss'}`;
+    // Use `prisma migrate deploy` for production and staging environments.
+    // This command is non-interactive and applies pending migrations. It's the standard for CI/CD.
+    const command = 'npx prisma migrate deploy';
     
-    console.log(`INFO: Synchronizing database schema... (production: ${isProd}, command: "${command}")`);
+    console.log(`INFO: Applying database migrations with command: "${command}"`);
     try {
         const output = execSync(command, { stdio: 'pipe' }).toString();
-        // Log warnings from Prisma without treating them as fatal errors
-        if (output.includes('warn')) {
-            console.warn("Prisma Warning:", output);
+        // Log output which might contain information about applied migrations.
+        if (output) {
+            console.log("Prisma Migrate Output:", output);
         }
-        console.log("INFO: Database schema synchronized successfully.");
+        console.log("INFO: Database migrations applied successfully.");
     } catch (error) {
-        // execSync throws on non-zero exit codes, which prisma db push uses for errors.
+        // execSync throws on non-zero exit codes, which prisma migrate uses for errors.
         const stderr = error.stderr ? error.stderr.toString() : 'Unknown error';
-        console.error("FATAL: 'prisma db push' failed. The container will now exit.");
+        console.error("FATAL: 'prisma migrate deploy' failed. The container will now exit.");
         console.error("Prisma Error Details:", stderr);
-        throw new Error("Prisma schema push failed.");
+        throw new Error("Prisma migrations failed.");
     }
 };
 

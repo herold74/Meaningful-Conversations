@@ -38,13 +38,27 @@ Sie haben die volle Kontrolle: Überprüfen Sie die vorgeschlagenen Änderungen,
 
 ## Was ist der Lebenskontext?
 
-Ihre **Lebenskontext**-Datei ist eine einfache Textdatei im **Markdown**-Format. Betrachten Sie sie als eine Art persönliches Tagebuch, auf das nur Sie und Ihr KI-Coach während einer Sitzung zugreifen können. Wenn Sie diese Datei aktualisieren, kann sich Ihr Coach wichtige Details über Ihre Ziele, Herausforderungen und Fortschritte besser merken.
+Ihre **Lebenskontext**-Datei ist eine einfache Textdatei im **Markdown**-Format. Betrachten Sie sie als eine Art persönliches Tagebuch, auf das nur Sie und Ihr KI-Coach während einer Sitzung zugreifen können. Wenn Sie diese Datei aktualisieren, kann Ihr Coach auf wichtige Details über Ihre Ziele, Herausforderungen und Fortschritte Bezug nehmen.
 
 ---
 
 ## Gamification
 
-Die App motiviert Sie durch Level, Serien und Erfolge, regelmäßig Zeit für Ihre Selbstreflexion zu finden.
+Die App motiviert Sie durch Level, Serien und Erfolge, regelmäßig Zeit für Ihre Selbstreflexion zu finden. So können Sie Erfahrungspunkte (EP) sammeln:
+
+| Aktion                                              | Erhaltene EP |
+| :-------------------------------------------------- | :----------- |
+| Pro gesendeter Nachricht in einer Sitzung           | 5 EP         |
+| Pro identifiziertem "Nächsten Schritt" in der Analyse | 10 EP        |
+| Erreichen eines bestehenden Ziels                   | 25 EP        |
+| Formeller Abschluss der Sitzung                     | 50 EP        |
+
+Ihre Erfolge und Ihr Fortschritt werden unterschiedlich gehandhabt, je nachdem, ob Sie ein registrierter Benutzer oder ein Gast sind:
+
+| Benutzertyp | Speicherort der Erfolge | Dauerhaftigkeit |
+| :--- | :--- | :--- |
+| **Registrierter Benutzer** | Auf dem Server, an Ihr Benutzerkonto gebunden. | **Ja**, persistent über alle Sitzungen und Kontextdateien hinweg. |
+| **Gast** | In der \`.md\`-Datei als versteckter Kommentar. | **Nein**, nur persistent bei Wiederverwendung derselben Datei. |
 
 ---
 
@@ -83,13 +97,27 @@ You have full control: review the proposed changes, accept or reject them, and a
 
 ## What is the Life Context?
 
-Your **Life Context** file is a simple text file in **Markdown** format. Think of it as a personal diary that only you and your AI coach can access during a session. When you update this file, your coach can better remember important details about your goals, challenges, and progress.
+Your **Life Context** file is a simple text file in **Markdown** format. Think of it as a personal diary that only you and your AI coach can access during a session. By updating this file, your coach will be able to refer to important details about your goals, challenges, and progress.
 
 ---
 
 ## Gamification
 
-The app motivates you through levels, streaks, and achievements to regularly find time for self-reflection.
+The app motivates you through levels, streaks, and achievements to regularly find time for self-reflection. Here is how you can earn Experience Points (XP):
+
+| Action                                        | XP Gained |
+| :-------------------------------------------- | :-------- |
+| For each message you send in a session        | 5 XP      |
+| For each "Next Step" identified in the review | 10 XP     |
+| Accomplishing a pre-existing goal             | 25 XP     |
+| Formally ending the session                   | 50 XP     |
+
+Your achievements and progress are handled differently depending on whether you are a registered user or a guest:
+
+| User Type | Where Achievements are Stored | Is it Persistent? |
+| :--- | :--- | :--- |
+| **Registered** | On the server, tied to your user account. | **Yes**, persistent across all sessions and context files. |
+| **Guest** | Inside the \`.md\` file in a hidden comment. | **No**, only persists if you reuse the same file. |
 
 ---
 

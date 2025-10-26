@@ -21,6 +21,7 @@ router.get('/users', async (req, res) => {
                 loginCount: true,
                 lastLogin: true,
                 accessExpiresAt: true,
+                gamificationState: true,
             }
         });
         res.json(users);

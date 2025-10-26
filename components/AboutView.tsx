@@ -71,7 +71,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     {markdownPart1}
                 </ReactMarkdown>
 
-                <div className="not-prose text-center my-6 text-lg italic text-gray-600 dark:text-gray-400">
+                <div className="not-prose text-center my-6 text-lg italic text-[#1B7272] dark:text-teal-400">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
@@ -102,7 +102,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                         remarkPlugins={[remarkGfm]}
                         components={{
                             p: ({node, ...props}) => <p className="text-left" {...props} />,
-                            a: ({node, ...props}) => <a className="font-semibold text-green-700 dark:text-green-300 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />
+                            a: ({node, ...props}) => <a className="font-semibold hover:underline text-[#1B7272] dark:text-teal-400" target="_blank" rel="noopener noreferrer" {...props} />
                         }}
                     >
                         {highlightContent}

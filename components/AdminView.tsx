@@ -503,6 +503,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                 <th className="p-3">{t('admin_users_joined')}</th>
                                 <th className="p-3">Roles</th>
                                 <th className="p-3 text-center">{t('admin_users_logins')}</th>
+                                <th className="p-3 text-center">{t('admin_users_xp')}</th>
                                 <th className="p-3">{t('admin_users_last_login')}</th>
                                 <th className="p-3 text-right">{t('admin_users_actions')}</th>
                             </tr>
@@ -510,6 +511,15 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                             {filteredUsers.map(user => {
                                 const isCurrentUser = currentUser?.id === user.id;
+                                let userXp = 0;
+                                if (user.gamificationState) {
+                                    try {
+                                        const state = JSON.parse(user.gamificationState);
+                                        userXp = state.xp || 0;
+                                    } catch (e) {
+                                        // Silently fail, userXp remains 0
+                                    }
+                                }
                                 return (
                                     <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}>
                                         <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
@@ -529,6 +539,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                             </div>
                                         </td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 text-center font-bold">{userXp.toLocaleString()}</td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
                                         <td className="p-3">
                                             <div className="flex items-center justify-end gap-1">

@@ -79,6 +79,17 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
             {status === 'loading' ? <Spinner /> : t('redeem_button')}
           </button>
         </form>
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+            {t('redeem_info_text')}
+            <a 
+                href="http://www.manualmode.at" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300"
+            >
+                www.manualmode.at
+            </a>
+        </p>
       </>
     );
   };

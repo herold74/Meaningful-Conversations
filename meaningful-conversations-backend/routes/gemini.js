@@ -123,7 +123,16 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
             contents: fullPrompt,
         });
         
-        const markdown = response.text.trim();
+        let markdown = response.text.trim();
+
+        // Clean up potential markdown code block wrappers from the AI's response.
+        // This regex handles ```markdown ... ``` or just ``` ... ```
+        const codeBlockRegex = /^```(?:markdown)?\s*\n([\s\S]+?)\n```$/;
+        const match = markdown.match(codeBlockRegex);
+        if (match && match[1]) {
+            markdown = match[1].trim();
+        }
+
         res.json({ markdown });
     } catch (error) {
         console.error('Gemini API error in /session/format-interview:', error);

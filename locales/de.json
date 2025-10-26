@@ -1,5 +1,6 @@
 {
   "meaningfulConversations": "Sinnstiftende Gespräche",
+ 
   "landing_subtitle": "Diese Anwendung bietet Zugang zu mehreren Coaching-Bot-Charakteren mit unterschiedlichen Perspektiven und Coaching-Stilen. Sie können eine 'Lebenskontext'-Datei erstellen, um Gespräche zu personalisieren und sie nach jeder Sitzung mit neuen Erkenntnissen zu aktualisieren.",
   "landing_dragDrop": "Ziehen Sie Ihre Lebenskontext-Datei hierher oder klicken Sie zum Auswählen",
   "landing_startSession": "Sitzung starten",
@@ -11,11 +12,13 @@
   "landing_error_invalidFile": "Ungültiger Dateityp. Bitte laden Sie eine .md-Datei hoch.",
   "landing_error_emptyFile": "Die ausgewählte Datei ist leer oder konnte nicht gelesen werden.",
   "landing_file_loaded_info": "Datei geladen. Sie können KI-vorgeschlagene Änderungen nach Ihrer Sitzung überprüfen und anwenden.",
+ 
   "auth_title": "Willkommen",
   "auth_subtitle": "Erstellen Sie ein Konto, um Ihren Fortschritt automatisch zu speichern, oder fahren Sie als Gast fort und verwalten Sie Ihre Daten manuell.",
   "auth_login": "Anmelden",
   "auth_register": "Registrieren",
   "auth_guest": "Als Gast fortfahren",
+  
   "login_title": "Anmelden",
   "login_email_label": "E-Mail",
   "login_password_label": "Passwort",
@@ -24,6 +27,7 @@
   "login_no_account": "Haben Sie noch kein Konto?",
   "login_register_link": "Hier registrieren",
   "login_error_credentials": "Ungültige E-Mail oder ungültiges Passwort. Bitte versuchen Sie es erneut.",
+  
   "register_title": "Konto erstellen",
   "register_email_label": "E-Mail",
   "register_password_label": "Passwort (mind. 6 Zeichen)",
@@ -82,7 +86,7 @@
   "questionnaire_error_name_required": "Bitte geben Sie einen Namen oder Rufnamen an.",
   "questionnaire_generateFile": "Datei erstellen & Weiter",
   "questionnaire_main_title": "Lebenskontext",
-  "questionnaire_background_title": "Background",
+  "questionnaire_background_title": "Hintergrund",
   "questionnaire_background_desc": "Ein Überblick über meine derzeitige Lebenssituation.",
   "questionnaire_background_name_label": "Ich bin...",
   "questionnaire_background_name_prompt": "z.B. Vorname...",
@@ -255,6 +259,7 @@
   "menu_delete_account": "Konto löschen",
   
   "userGuide_title": "Erste Schritte",
+  
   "formatting_title": "Formatierungshilfe",
   "formatting_p1": "Sie können grundlegendes <a href=\"https://www.markdownguide.org/basic-syntax/\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-green-600 dark:text-green-400 hover:underline\">Markdown</a> verwenden, um Ihre Lebenskontext-Datei zu strukturieren. Dies hilft der KI, die Hierarchie des Dokuments zu verstehen.",
   "formatting_headings_title": "Überschriften",
@@ -274,10 +279,14 @@
   "formatting_manual_p2": "Ein gut strukturiertes Dokument verbessert die Qualität der Coachingsitzung.",
   
   "faq_title": "Häufig gestellte Fragen",
+  
   "about_title": "Über diese App",
+  
   "disclaimer_title": "Haftungsausschluss",
   "disclaimer_delete_warning": "Das Löschen Ihres Kontos ist eine <strong>endgültige</strong> Aktion und kann nicht rückgängig gemacht werden. Alle Ihre Daten, einschließlich Ihres verschlüsselten Lebenskontextes und Fortschritts, werden unwiederbringlich gelöscht.",
+  
   "terms_title": "Nutzungsbedingungen",
+  
   "redeem_title": "Code einlösen",
   "redeem_subtitle": "Haben Sie einen Upgrade-Code? Geben Sie ihn hier ein, um neue Funktionen oder Coaches freizuschalten.",
   "redeem_code_placeholder": "Geben Sie Ihren Code ein",
@@ -285,6 +294,7 @@
   "redeem_success": "Code erfolgreich eingelöst!",
   "redeem_error_invalid": "Der Code ist ungültig, abgelaufen oder wurde bereits verwendet.",
   "redeem_error_generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+  "redeem_info_text": "Informationen zu Upgrade Codes finden Sie auf ",
   
   "admin_title": "Admin-Konsole",
   "admin_users_tab": "Benutzer<br>verwaltung",
@@ -302,6 +312,7 @@
   "admin_users_premium": "Premium",
   "admin_users_admin": "Admin",
   "admin_users_logins": "Anmeldungen",
+  "admin_users_xp": "XP",
   "admin_users_last_login": "Letzte Anmeldung",
   "admin_users_actions": "Aktionen",
   "admin_users_toggle_premium": "Premium-Status umschalten",
@@ -351,7 +362,7 @@
   "admin_feedback_hide_context": "Kontext verbergen",
   "admin_feedback_user_prompt": "Benutzer-Anfrage",
   "admin_feedback_bot_response": "Bot-Antwort",
-  "admin_ratings_overall_avg": "Gesamtdurchschnittsbewertung",
+  "admin_ratings_overall_avg": "Ø-Bewertung",
   "admin_ratings_total_ratings": "von {{count}} Gesamtbewertungen",
   "admin_ratings_no_ratings": "Es wurden noch keine Bewertungen abgegeben.",
   "admin_ratings_avg_rating": "Ø",

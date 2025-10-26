@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { InfoIcon } from './icons/InfoIcon';
 
 interface InfoViewProps {
 }
@@ -50,7 +51,10 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_manual_title')}</h2>
                     <p dangerouslySetInnerHTML={{ __html: t('formatting_manual_p1') }} />
-                    <p><strong>{t('formatting_manual_p2')}</strong></p>
+                     <div className="p-4 mt-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 text-green-800 dark:text-green-300 flex items-start gap-4 not-prose">
+                        <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                        <p className="font-bold">{t('formatting_manual_p2')}</p>
+                    </div>
                 </div>
 
             </div>

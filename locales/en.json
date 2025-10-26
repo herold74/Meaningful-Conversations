@@ -294,6 +294,7 @@
   "redeem_success": "Code redeemed successfully!",
   "redeem_error_invalid": "The code is invalid, expired, or has already been used.",
   "redeem_error_generic": "An error occurred. Please try again.",
+  "redeem_info_text": "For information about upgrade codes, visit ",
 
   "admin_title": "Admin Console",
   "admin_users_tab": "User<br>Management",
@@ -311,6 +312,7 @@
   "admin_users_premium": "Premium",
   "admin_users_admin": "Admin",
   "admin_users_logins": "Logins",
+  "admin_users_xp": "XP",
   "admin_users_last_login": "Last Login",
   "admin_users_actions": "Actions",
   "admin_users_toggle_premium": "Toggle Premium Status",

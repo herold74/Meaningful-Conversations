@@ -92,7 +92,9 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
 1.  **Analyze the Conversation:** Read the entire conversation between the Coach and the User.
 2.  **Refer to the Context:** Use the provided "Life Context" file to understand the user's background, goals, and challenges.
 3.  **Extract Key Information:** Identify new insights, proposed changes to the user's context, actionable next steps, and potential psychological blockages.
-4.  **Format Output:** Your entire output MUST be a single, valid JSON object that adheres to the provided schema. Do not include any text or markdown outside of the JSON structure.
+4.  **CRITICAL: Avoid Duplicates:** Compare the conversation against the EXISTING Life Context. Propose an update ONLY if it contains genuinely new information or a significant change in perspective that is NOT already present in the context file. DO NOT propose updates for information that is merely repeated or rephrased.
+5.  **CRITICAL: Update Logic:** If the user provides a clarification, detail, or update to a topic ALREADY mentioned in their Life Context, your default action should be 'replace_section' for that topic, not 'append' or 'create_headline'. This ensures the context evolves rather than accumulating duplicate entries.
+6.  **Format Output:** Your entire output MUST be a single, valid JSON object that adheres to the provided schema. Do not include any text or markdown outside of the JSON structure.
 
 ## Life Context
 \`\`\`markdown
@@ -108,13 +110,15 @@ Now, provide your analysis as a JSON object.`
     },
     de: {
         prompt: ({ conversation, context }) => `
-Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung überprüft. Ihre Aufgabe ist es, das Gespräch zu analysieren und eine strukturierte Zusammenfassung im JSON-Format bereitzustellen.
+Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung überprüft. Ihre Aufgabe ist es, das Gespräch zu analysieren und eine strukturierte Zusammenfassung im JSON-Format bereitzustellen. Alle Textinhalte in der Ausgabe müssen auf Deutsch verfasst sein.
 
 ## Anweisungen:
 1.  **Gespräch analysieren:** Lesen Sie das gesamte Gespräch zwischen dem Coach und dem Benutzer.
 2.  **Kontext berücksichtigen:** Verwenden Sie die bereitgestellte "Lebenskontext"-Datei, um den Hintergrund, die Ziele und die Herausforderungen des Benutzers zu verstehen.
 3.  **Wichtige Informationen extrahieren:** Identifizieren Sie neue Erkenntnisse, vorgeschlagene Änderungen am Kontext des Benutzers, umsetzbare nächste Schritte und potenzielle psychologische Blockaden.
-4.  **Ausgabe formatieren:** Ihre gesamte Ausgabe MUSS ein einziges, gültiges JSON-Objekt sein, das dem bereitgestellten Schema entspricht. Fügen Sie keinen Text oder Markdown außerhalb der JSON-Struktur ein.
+4.  **KRITISCH: Duplikate vermeiden:** Vergleichen Sie das Gespräch mit dem BESTEHENDEN Lebenskontext. Schlagen Sie eine Aktualisierung NUR dann vor, wenn sie wirklich neue Informationen oder eine wesentliche Perspektivänderung enthält, die NICHT bereits in der Kontextdatei vorhanden ist. Schlagen Sie KEINE Aktualisierungen für Informationen vor, die lediglich wiederholt oder umformuliert werden.
+5.  **KRITISCH: Aktualisierungslogik:** Wenn der Benutzer eine Klärung, ein Detail oder eine Aktualisierung zu einem Thema liefert, das BEREITS in seinem Lebenskontext erwähnt wird, sollte Ihre Standardaktion 'replace_section' für dieses Thema sein, nicht 'append' oder 'create_headline'. Dies stellt sicher, dass sich der Kontext weiterentwickelt, anstatt doppelte Einträge anzusammeln.
+6.  **Ausgabe formatieren:** Ihre gesamte Ausgabe MUSS ein einziges, gültiges JSON-Objekt sein, das dem bereitgestellten Schema entspricht. Fügen Sie keinen Text oder Markdown außerhalb der JSON-Struktur ein.
 
 ## Lebenskontext
 \`\`\`markdown
@@ -137,10 +141,15 @@ const templates = {
 *Some general context about my life.*
 
 **I am...**: 
+
 **Work & Career**: 
+
 **Family & Relationships**: 
+
 **Social Life & Hobbies**: 
+
 **Health & Wellness**: 
+
 **General Sentiment**: 
 
 ---
@@ -150,7 +159,9 @@ const templates = {
 
 ### Mid-term (12-18 months)
 **Career Goal**: 
+
 **Personal Goal**: 
+
 **Financial Goal**: 
 
 ### Long-term Vision (5+ yrs)
@@ -163,8 +174,11 @@ const templates = {
 *Habits I learned and implemented to structure my day and engagements.*
 
 **Planning & Time Management**: 
+
 **Learning & Development**: 
+
 **Health Routines**: 
+
 **Personal Growth**: 
 
 ---
@@ -173,9 +187,13 @@ const templates = {
 *Things I want to potentially speak about.*
 
 **Career Direction**: 
+
 **Work-Life Balance**: 
+
 **Social Engagements**: 
+
 **Personal Development**: 
+
 **Change Habits**: 
 
 ---
@@ -186,14 +204,19 @@ const templates = {
 `,
     de: `# Lebenskontext
 
-## Background
+## Hintergrund
 *Ein Überblick über meine derzeitige Lebenssituation.*
 
 **Ich bin...**: 
+
 **Arbeit & Karriere**: 
+
 **Familie & Beziehungen**: 
+
 **Soziales & Hobbies**: 
+
 **Gesundheit & Wohlbefinden**: 
+
 **Allgemeine Stimmung**: 
 
 ---
@@ -203,7 +226,9 @@ const templates = {
 
 ### Mittelfristig (12-18 Monate)
 **Karriereziele**: 
+
 **Persönliche Ziele**: 
+
 **Finanzielle Ziele**: 
 
 ### Langfristige Vision (5+ Jahre)
@@ -216,8 +241,11 @@ const templates = {
 *Welche Gewohnheiten pflege ich aktuell?*
 
 **Planung & Zeitmanagement**: 
+
 **Lernen & Entwicklung**: 
+
 **Gesundheitsroutinen**: 
+
 **Praktiken für persönliches Wachstum**: 
 
 ---
@@ -226,9 +254,13 @@ const templates = {
 *Dinge, über die ich möglicherweise sprechen möchte.*
 
 **Berufliche Herausforderung**: 
+
 **Work-Life Balance**: 
+
 **Beziehungsthemen**: 
+
 **Persönliches Wachstum**: 
+
 **Gewohnheiten ändern**: 
 
 ---
@@ -255,6 +287,7 @@ You are an expert text formatter. Your task is to populate a markdown template b
 3.  **Keep All Headlines:** You MUST include every single headline and label from the original template in your final output, in the correct order.
 4.  **Handle Missing Information:** If a topic was not discussed in the interview, you MUST still include its headline and label from the template, but leave the content area for that specific label empty. Do not write "Not discussed" or make up information.
 5.  **Omit the Guide:** The final output must only contain the user's synthesized information within the template structure. Do NOT include any questions, prompts, or conversational filler from the "Guide".
+6.  **Formatting:** You MUST ensure there are two newlines (a blank line) after each piece of information you fill in. This is critical for the document's structure.
 
 ## TEMPLATE
 \`\`\`markdown
@@ -278,6 +311,7 @@ Sie sind ein Experte für Textformatierung. Ihre Aufgabe ist es, eine Markdown-V
 3.  **Alle Überschriften beibehalten:** Sie MÜSSEN jede einzelne Überschrift und Bezeichnung aus der Originalvorlage in Ihrer endgültigen Ausgabe in der richtigen Reihenfolge beibehalten.
 4.  **Umgang mit fehlenden Informationen:** Wenn ein Thema im Interview nicht besprochen wurde, MÜSSEN Sie dessen Überschrift und Bezeichnung aus der Vorlage trotzdem beibehalten, aber den Inhaltsbereich für diese spezielle Bezeichnung leer lassen. Schreiben Sie nicht "Nicht besprochen" oder erfinden Sie Informationen.
 5.  **Lassen Sie den Guide weg:** Die endgültige Ausgabe darf nur die zusammengefassten Informationen des Benutzers innerhalb der Vorlagenstruktur enthalten. Fügen Sie KEINE Fragen, Aufforderungen oder Gesprächsfüller des "Guide" ein.
+6.  **Formatierung:** Sie MÜSSEN sicherstellen, dass nach jeder eingefügten Information zwei Zeilenumbrüche (eine Leerzeile) vorhanden sind. Dies ist für die Struktur des Dokuments von entscheidender Bedeutung.
 
 ## VORLAGE
 \`\`\`markdown

@@ -81,7 +81,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           {!fileContent ? (
             <label 
               htmlFor="file-upload" 
-              className="relative block w-full px-12 py-8 text-center border-2 border-dashed cursor-pointer border-gray-400 hover:border-green-500 dark:border-gray-700 dark:hover:border-green-400 transition-colors"
+              className="relative block w-full px-6 md:px-12 py-5 md:py-8 text-center border-2 border-dashed cursor-pointer border-gray-400 hover:border-green-500 dark:border-gray-700 dark:hover:border-green-400 transition-colors"
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >

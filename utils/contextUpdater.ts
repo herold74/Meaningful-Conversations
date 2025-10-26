@@ -2,7 +2,7 @@ import { ProposedUpdate } from '../types';
 
 export type AppliedUpdatePayload = { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string };
 
-const headlinePatternString = '^(?:\\s*#{1,6}\\s.*|\\s*\\*\\*.*\\*\\*.*)';
+const headlinePatternString = '^(?:\\s*#{1,6}\\s[^\r\n]*|\\s*\\*\\*.*?\\*\\*:[^\r\n]*)';
 const headlineRegex = new RegExp(headlinePatternString, 'gm');
 const headlineSplitRegex = new RegExp(`(?=${headlinePatternString})`, 'gm');
 const headlineFindRegex = new RegExp(headlinePatternString, 'm');
@@ -26,7 +26,7 @@ export const normalizeHeadline = (headline: unknown): string => {
 export const getExistingHeadlines = (context: string): string[] => {
     if (!context) return [];
     const allHeadlines = context.match(headlineRegex) || [];
-    const headlinesToExclude = ['My Life Context', 'Background'];
+    const headlinesToExclude = ['My Life Context'];
     const uniqueHeadlines = [...new Set(allHeadlines.map(h => h.trim()))];
     return uniqueHeadlines.filter(h => !headlinesToExclude.includes(normalizeHeadline(h)));
 };
@@ -78,17 +78,34 @@ export const buildUpdatedContext = (
             if (choice.type === 'append') {
                 sections[targetIndex] = originalSection.trimEnd() + formatContentForBlock(update.content);
             } else if (choice.type === 'replace_section') {
-                const keyPart = headlineLine.trimEnd();
                 const content = (update.content || '').trim();
                 const separatorMatch = originalSection.match(/\n(\s*---\s*\n*)$/);
                 const separator = separatorMatch ? separatorMatch[0] : null;
                 const sectionWithoutSeparator = separator ? originalSection.substring(0, originalSection.lastIndexOf(separator)) : originalSection;
                 
                 let newSectionBody;
-                if (keyPart.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n')) {
-                    newSectionBody = keyPart + ' ' + content;
+                const isSingleLineBold = headlineLine.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n');
+
+                if (isSingleLineBold) {
+                    const keyPart = headlineLine.trimEnd();
+                    const colonIndex = keyPart.indexOf(':');
+                    if (colonIndex > -1) {
+                        const actualKey = keyPart.substring(0, colonIndex + 1);
+                        newSectionBody = actualKey + ' ' + content;
+                    } else {
+                        newSectionBody = keyPart + ' ' + content;
+                    }
                 } else {
-                    newSectionBody = keyPart + '\n' + content;
+                    // This logic is for multi-line sections (e.g., ## Headline).
+                    // It preserves the main headline and an optional italicized subtitle line that follows it.
+                    const headerBlockRegex = /^(#{1,6}\s[^\r\n]*\r?\n?(?:\s*\*.*?\*\s*\r?\n?)?)/m;
+                    const headerMatch = sectionWithoutSeparator.match(headerBlockRegex);
+                    
+                    // Use the matched header block, or fall back to just the headline if the regex fails.
+                    const headerBlock = headerMatch ? headerMatch[0] : (headlineLine.trimEnd() + '\n');
+                    
+                    // Construct the new section body by preserving the header and adding the new content.
+                    newSectionBody = headerBlock.trimEnd() + '\n\n' + content;
                 }
                 sections[targetIndex] = newSectionBody + (separator || '\n\n');
             }
