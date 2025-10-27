@@ -275,7 +275,7 @@ If you are running the backend in a container and see this error, it means the c
 
 ## ☁️ Deployment to Google Cloud Run
 
-This backend is optimized for deployment on Google Cloud Run with a Cloud SQL (MySQL) instance. For a complete guide, please see the main **[`deployment_guide.md`](../deployment_guide.md)**.
+This backend is optimized for deployment on Google Cloud Run with a Cloud SQL (MySQL) instance. For a complete guide, please see the main **[`migration_guide.md`](../migration_guide.md)**.
 
 When deploying, you do **not** need to set the `DATABASE_URL` variable. Instead, configure the following environment variables in your Cloud Run service:
 

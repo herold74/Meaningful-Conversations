@@ -50,8 +50,17 @@ const getApiBaseUrl = (): string => {
     if (backendParam && urls[backendParam]) {
         return urls[backendParam];
     }
+    
+    // 2. Auto-detect environment based on frontend hostname
+    const hostname = window.location.hostname;
+    if (hostname.includes('frontend-prod')) {
+        return urls.production;
+    }
+    if (hostname.includes('frontend-staging')) {
+        return urls.staging;
+    }
 
-    // 2. Fallback to default staging URL
+    // 3. Fallback for localhost and other environments defaults to staging
     return urls.staging;
 };
 

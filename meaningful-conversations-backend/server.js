@@ -1,212 +1,170 @@
-// Load environment variables from .env file
+// Load environment variables
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
 const { execSync } = require('child_process');
+const prisma = require('./prismaClient.js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-// --- Centralized Database URL Construction ---
-// This logic runs once at the very top to ensure the DATABASE_URL is set
-// before any other module (like prismaClient) tries to access it.
-
-if (!process.env.DATABASE_URL) {
-    // This block is crucial for Google Cloud Run with Cloud SQL
-    if (process.env.INSTANCE_UNIX_SOCKET) {
-        console.log("Cloud Run environment detected (INSTANCE_UNIX_SOCKET is present). Building Cloud SQL connection string...");
-        const dbUser = encodeURIComponent(process.env.DB_USER);
-        const dbPass = encodeURIComponent(process.env.DB_PASSWORD);
-        const dbName = process.env.DB_NAME;
-        const unixSocket = process.env.INSTANCE_UNIX_SOCKET;
-        process.env.DATABASE_URL = `mysql://${dbUser}:${dbPass}@localhost/${dbName}?socket=${unixSocket}`;
-        console.log(`Using Cloud SQL connection: ${process.env.DATABASE_URL.replace(dbPass, '[REDACTED]')}`);
-    } else {
-        // Fallback for local development if DATABASE_URL is not set directly
-        console.warn("DATABASE_URL not set and not in a Cloud Run environment. Ensure your .env file is configured correctly for local development.");
-    }
-}
-
-
-// Now that DATABASE_URL is set, we can safely import modules that use it.
-const prisma = require('./prismaClient.js');
-const authRoutes = require('./routes/auth.js');
-const dataRoutes = require('./routes/data.js');
-const geminiRoutes = require('./routes/gemini.js');
-const adminRoutes = require('./routes/admin.js');
-const feedbackRoutes = require('./routes/feedback.js');
-const botsRoutes = require('./routes/bots.js');
-
-const app = express();
-
-/**
- * Serializes a GamificationState-like object into a JSON string.
- * Converts Sets to arrays for compatibility with JSON.
- * @param {object} state The state object, expected to have `unlockedAchievements` and `coachesUsed` as Sets.
- * @returns {string} A JSON string representation of the state.
- */
-function serializeGamificationState(state) {
-    if (!state || typeof state !== 'object') {
-        return '{}';
-    }
-    const serializableState = {
-        ...state,
-        unlockedAchievements: state.unlockedAchievements instanceof Set ? Array.from(state.unlockedAchievements) : [],
-        coachesUsed: state.coachesUsed instanceof Set ? Array.from(state.coachesUsed) : [],
-    };
-    return JSON.stringify(serializableState);
-}
-
-const PORT = process.env.PORT || 3001;
-
-// --- Middleware ---
-
-// Define known frontend URLs for a more robust CORS configuration.
-const STAGING_FRONTEND_URL = 'https://meaningful-conversations-frontend-staging-650095539575.europe-west6.run.app';
-const PRODUCTION_FRONTEND_URL = 'https://meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app';
-
-// The allowlist includes the URL from the environment variable, the hardcoded URLs as fallbacks,
-// and the local development URL. Using a Set removes duplicates.
-const allowlist = [
-    process.env.FRONTEND_URL,
-    STAGING_FRONTEND_URL,
-    PRODUCTION_FRONTEND_URL,
-    'http://localhost:5173'
-].filter(Boolean);
-const uniqueAllowlist = [...new Set(allowlist)];
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    // origin is undefined for server-to-server requests or tools like Postman
-    if (!origin || uniqueAllowlist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.error(`CORS Error: Origin '${origin}' not allowed. Allowlist: [${uniqueAllowlist.join(', ')}]`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// --- Routes ---
-app.use('/api/auth', authRoutes);
-app.use('/api/data', dataRoutes);
-app.use('/api/gemini', geminiRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/feedback', feedbackRoutes);
-app.use('/api/bots', botsRoutes);
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date() });
-});
-
-// --- Server Startup Logic ---
-
-const validateEnvVars = () => {
-    const requiredVars = [
-        'JWT_SECRET',
-        'API_KEY',
-        'MAILJET_API_KEY',
-        'MAILJET_SECRET_KEY',
-        'MAILJET_SENDER_EMAIL',
-        'FRONTEND_URL',
-        'INITIAL_ADMIN_EMAIL',
-        'INITIAL_ADMIN_PASSWORD',
-    ];
-    const missingVars = requiredVars.filter(v => !process.env[v]);
-    if (missingVars.length > 0) {
-        throw new Error(`FATAL: Missing required environment variables: ${missingVars.join(', ')}`);
-    }
-    console.log("INFO: Environment variables validated successfully.");
-};
-
-const synchronizeDbSchema = () => {
-    // Use `prisma migrate deploy` for production and staging environments.
-    // This command is non-interactive and applies pending migrations. It's the standard for CI/CD.
-    const command = 'npx prisma migrate deploy';
-    
-    console.log(`INFO: Applying database migrations with command: "${command}"`);
+// --- Helper function for running shell commands ---
+function runCommand(command) {
     try {
-        const output = execSync(command, { stdio: 'pipe' }).toString();
-        // Log output which might contain information about applied migrations.
-        if (output) {
-            console.log("Prisma Migrate Output:", output);
-        }
-        console.log("INFO: Database migrations applied successfully.");
+        console.log(`Executing: ${command}`);
+        execSync(command, { stdio: 'inherit' });
     } catch (error) {
-        // execSync throws on non-zero exit codes, which prisma migrate uses for errors.
-        const stderr = error.stderr ? error.stderr.toString() : 'Unknown error';
-        console.error("FATAL: 'prisma migrate deploy' failed. The container will now exit.");
-        console.error("Prisma Error Details:", stderr);
-        throw new Error("Prisma migrations failed.");
+        console.error(`Failed to execute command: ${command}`, error);
+        // In a production environment, a failed migration should stop the server from starting.
+        if (process.env.ENVIRONMENT_TYPE === 'production') {
+            process.exit(1);
+        }
     }
-};
+}
 
-const ensureAdminUser = async () => {
+// --- Main startup function for migrations and seeding ---
+async function runMigrationsAndSeed() {
+    console.log('--- Starting Database Initialization ---');
+
+    // Handle special one-off migration tasks
+    const migrateResolveApplied = process.env.MIGRATE_RESOLVE_APPLIED;
+    if (migrateResolveApplied) {
+        console.log(`Running one-off task: Resolving applied migration '${migrateResolveApplied}'...`);
+        runCommand(`npx prisma migrate resolve --applied "${migrateResolveApplied}"`);
+        console.log('One-off task completed. Exiting to allow for normal restart.');
+        process.exit(0); // Exit after the task is done
+    }
+
+    const forceDbReset = process.env.FORCE_DB_RESET === 'true';
+    if (forceDbReset && process.env.ENVIRONMENT_TYPE !== 'production') {
+        console.warn('WARNING: FORCE_DB_RESET is true. Resetting the database...');
+        // Using `migrate reset` is safer as it also handles the migrations table.
+        runCommand('npx prisma migrate reset --force');
+        console.log('Database has been reset. Exiting to allow for normal restart.');
+        process.exit(0);
+    }
+    
+    // Standard migration flow
+    if (process.env.ENVIRONMENT_TYPE === 'production') {
+        console.log('Production environment detected. Applying migrations...');
+        runCommand('npx prisma migrate deploy');
+    } else {
+        console.log('Development/Staging environment detected. Applying migrations...');
+        runCommand('npx prisma migrate dev');
+    }
+
+    // --- Seed Admin User ---
     const adminEmail = process.env.INITIAL_ADMIN_EMAIL;
     const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
 
-    const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+    if (adminEmail && adminPassword) {
+        console.log('Checking for admin user...');
+        try {
+            const existingAdmin = await prisma.user.findUnique({
+                where: { email: adminEmail.toLowerCase() },
+            });
 
-    if (!existingAdmin) {
-        console.log("INFO: Initial admin user not found. Creating...");
-        const passwordHash = await bcrypt.hash(adminPassword, 10);
-        const encryptionSalt = crypto.randomBytes(16).toString('hex');
-        
-        const farFutureDate = new Date();
-        farFutureDate.setFullYear(farFutureDate.getFullYear() + 100);
+            if (!existingAdmin) {
+                console.log(`Admin user '${adminEmail}' not found. Creating...`);
+                const passwordHash = await bcrypt.hash(adminPassword, 10);
+                const encryptionSalt = crypto.randomBytes(16).toString('hex');
 
-        await prisma.user.create({
-            data: {
-                email: adminEmail,
-                passwordHash,
-                encryptionSalt: encryptionSalt,
-                status: 'ACTIVE',
-                isAdmin: true,
-                isBetaTester: true,
-                accessExpiresAt: farFutureDate,
-                // Set default non-null values for the new fields
-                lifeContext: '',
-                gamificationState: serializeGamificationState({
-                    xp: 0, level: 1, streak: 0, totalSessions: 0, lastSessionDate: null,
-                    unlockedAchievements: new Set(), coachesUsed: new Set()
-                }),
-                unlockedCoaches: JSON.stringify([])
-            },
-        });
-        console.log("INFO: Initial admin user created successfully.");
-    } else if (!existingAdmin.isAdmin) {
-        console.log("INFO: Existing user found, granting admin rights...");
-        await prisma.user.update({
-            where: { email: adminEmail },
-            data: { isAdmin: true, updatedAt: new Date() },
-        });
-        console.log("INFO: Admin rights granted successfully.");
+                await prisma.user.create({
+                    data: {
+                        email: adminEmail.toLowerCase(),
+                        passwordHash,
+                        encryptionSalt,
+                        isAdmin: true,
+                        isBetaTester: true,
+                        status: 'ACTIVE',
+                        unlockedCoaches: '[]',
+                        gamificationState: '{}',
+                        lifeContext: '',
+                    },
+                });
+                console.log('Admin user created successfully.');
+            } else if (!existingAdmin.isAdmin) {
+                console.log(`User '${adminEmail}' exists but is not an admin. Granting admin privileges...`);
+                await prisma.user.update({
+                    where: { id: existingAdmin.id },
+                    data: { isAdmin: true },
+                });
+                console.log('Admin privileges granted.');
+            } else {
+                console.log('Admin user is already configured.');
+            }
+        } catch (error) {
+            console.error('Error during admin user seeding:', error);
+            process.exit(1);
+        }
     } else {
-        console.log("INFO: Initial admin user already exists with admin rights.");
+        console.warn('INITIAL_ADMIN_EMAIL or INITIAL_ADMIN_PASSWORD not set. Skipping admin user seed.');
     }
+    console.log('--- Database Initialization Complete ---');
+}
+
+
+// --- Express App Setup ---
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// CORS configuration
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:3000', // for local frontend dev
+    'http://localhost:5173', // Vite default port
+];
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow any localhost origin during development for flexibility
+        if (process.env.ENVIRONMENT_TYPE !== 'production' && origin && (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+            callback(null, true);
+            return;
+        }
+
+        // For production/staging, enforce the strict list.
+        // Also allow requests with no origin (e.g. server-to-server, mobile apps, or Postman)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS policy does not allow access from the specified origin: ${origin}`));
+        }
+    },
+    credentials: true,
 };
 
-const initializeApp = async () => {
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '5mb' })); // Increase payload size limit
+
+// --- API Routes ---
+app.use('/api/auth', require('./routes/auth.js'));
+app.use('/api/data', require('./routes/data.js'));
+app.use('/api/gemini', require('./routes/gemini.js'));
+app.use('/api/admin', require('./routes/admin.js'));
+app.use('/api/bots', require('./routes/bots.js'));
+app.use('/api/feedback', require('./routes/feedback.js'));
+
+// --- Health Check Endpoint ---
+app.get('/api/health', async (req, res) => {
     try {
-        console.log("INFO: Initializing backend server...");
-        validateEnvVars();
-        synchronizeDbSchema();
-        await ensureAdminUser();
-
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`INFO: Server is ready and accepting connections at http://0.0.0.0:${PORT}`);
-        });
-
+        await prisma.$queryRaw`SELECT 1`;
+        res.status(200).json({ status: 'ok', database: 'connected' });
     } catch (error) {
-        console.error(`FATAL: A critical error occurred during server startup. The process will now exit. Error: ${error.message}`);
-        process.exit(1);
+        console.error('Health check failed:', error);
+        res.status(503).json({ status: 'error', database: 'disconnected', error: error.message });
     }
+});
+
+
+// --- Start Server ---
+const startServer = async () => {
+    await runMigrationsAndSeed();
+    app.listen(PORT, () => {
+        console.log(`Backend server is running on port ${PORT}`);
+    });
 };
 
-initializeApp();
+startServer().catch(e => {
+    console.error('Failed to start server:', e);
+    process.exit(1);
+});
