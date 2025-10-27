@@ -1,6 +1,6 @@
 {
-  "name": "Meaningful Conversations 1.4.7 (Server Edition)",
-  "description": "An application that provides access to several coaching bot characters with different perspectives and coaching styles. \nUsers can create a 'life context' file to personalize conversations and update it with new insights after each session.",
+  "name": "Meaningful Conversations 1.4.8",
+  "description": "Streaming Version",
   "requestFramePermissions": [
     "microphone"
   ]
