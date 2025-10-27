@@ -25,12 +25,41 @@ router.get('/users', async (req, res) => {
                 loginCount: true,
                 lastLogin: true,
                 gamificationState: true,
+                status: true,
             }
         });
         res.json(users);
     } catch (error) {
         console.error("Admin: Error fetching users:", error);
         res.status(500).json({ error: 'Failed to fetch users.' });
+    }
+});
+
+// PUT /api/admin/users/:id/activate
+router.put('/users/:id/activate', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await prisma.user.findUnique({ where: { id } });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        if (user.status !== 'PENDING') {
+            return res.status(400).json({ error: 'User is not pending activation.' });
+        }
+
+        await prisma.user.update({
+            where: { id },
+            data: {
+                status: 'ACTIVE',
+                activationToken: null,
+                activationTokenExpires: null,
+            },
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin: Error activating user:", error);
+        res.status(500).json({ error: 'Operation failed.' });
     }
 });
 

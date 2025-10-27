@@ -83,10 +83,13 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
 router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
     const { history, context, lang } = req.body;
     
+    // Detect the language of the context file. Default to 'en'.
+    const docLang = (context && context.match(/^#\s*Lebenskontext/m)) ? 'de' : 'en';
+
     const analysisPromptConfig = lang === 'de' ? analysisPrompts.de : analysisPrompts.en;
     const conversation = history.map(msg => `${msg.role === 'user' ? 'User' : 'Coach'}: ${msg.text}`).join('\n\n');
 
-    const fullPrompt = analysisPromptConfig.prompt({ conversation, context });
+    const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang });
     
     try {
         const response = await ai.models.generateContent({

@@ -150,6 +150,10 @@ export const resetUserPassword = async (userId: string): Promise<{ newPassword: 
     return await apiFetch(`/admin/users/${userId}/reset-password`, { method: 'POST' });
 };
 
+export const activateUser = async (userId: string): Promise<void> => {
+    await apiFetch(`/admin/users/${userId}/activate`, { method: 'PUT' });
+};
+
 export const getUpgradeCodes = async (): Promise<UpgradeCode[]> => {
     return await apiFetch('/admin/codes');
 };

@@ -85,7 +85,7 @@ const analysisSchema = {
 const analysisPrompts = {
     schema: analysisSchema,
     en: {
-        prompt: ({ conversation, context }) => `
+        prompt: ({ conversation, context, docLang }) => `
 You are an expert life coach reviewing a coaching session transcript. Your task is to analyze the conversation and provide a structured summary in JSON format.
 
 ## Instructions:
@@ -98,6 +98,9 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
     b. **Second Priority (Append to Broader Headline):** If the topic does not match a specific key-value pair but fits logically under a broader existing headline (e.g., a new logistical problem fits under '## Current Challenges'), you MUST propose to 'append' the new information to that broader section. The content for this append operation MUST be formatted as a markdown list item (e.g., "* Relocation Logistics: I need to start planning..."). Do NOT create a new, overly granular bolded key-value pair.
     c. **Last Resort (Create New):** Only propose 'create_headline' if the topic is entirely new and does not fit under any existing headline.
 6.  **Format Output:** Your entire output MUST be a single, valid JSON object that adheres to the provided schema. Do not include any text or markdown outside of the JSON structure.
+7.  **Output Language Rules:**
+    - The content for the 'summary', 'nextSteps', and 'solutionBlockages' fields MUST be written in English.
+    - CRITICAL: The 'content' for each item in the 'updates' array MUST be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
 
 ## Life Context
 \`\`\`markdown
@@ -112,8 +115,8 @@ ${conversation}
 Now, provide your analysis as a JSON object.`
     },
     de: {
-        prompt: ({ conversation, context }) => `
-Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung überprüft. Ihre Aufgabe ist es, das Gespräch zu analysieren und eine strukturierte Zusammenfassung im JSON-Format bereitzustellen. Alle Textinhalte in der Ausgabe müssen auf Deutsch verfasst sein.
+        prompt: ({ conversation, context, docLang }) => `
+Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung überprüft. Ihre Aufgabe ist es, das Gespräch zu analysieren und eine strukturierte Zusammenfassung im JSON-Format bereitzustellen.
 
 ## Anweisungen:
 1.  **Gespräch analysieren:** Lesen Sie das gesamte Gespräch zwischen dem Coach und dem Benutzer.
@@ -125,6 +128,9 @@ Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung ü
     b. **Zweite Priorität (An breitere Überschrift anhängen):** Wenn das Thema nicht mit einem spezifischen Schlüssel-Wert-Paar übereinstimmt, aber logisch unter eine breitere bestehende Überschrift passt (z.B. passt ein neues logistisches Problem unter '## Aktuelle Herausforderungen'), MÜSSEN Sie vorschlagen, die neuen Informationen an diesen breiteren Abschnitt 'append' (anzuhängen). Der Inhalt für diese Anhängeoperation MUSS als Markdown-Listenelement formatiert sein (z.B. "* Relocation Logistics: Ich muss anfangen zu planen..."). Erstellen Sie KEIN neues, übermäßig detailliertes fettgedrucktes Schlüssel-Wert-Paar.
     c. **Letzte Möglichkeit (Neu erstellen):** Schlagen Sie 'create_headline' nur vor, wenn das Thema völlig neu ist und unter keine bestehende Überschrift passt.
 6.  **Ausgabe formatieren:** Ihre gesamte Ausgabe MUSS ein einziges, gültiges JSON-Objekt sein, das dem bereitgestellten Schema entspricht. Fügen Sie keinen Text oder Markdown außerhalb der JSON-Struktur ein.
+7.  **Regeln für die Ausgabesprache:**
+    - Der Inhalt für die Felder 'summary', 'nextSteps' und 'solutionBlockages' MUSS auf Deutsch verfasst sein.
+    - KRITISCH: Der 'content' für jeden Eintrag im 'updates'-Array MUSS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
 
 ## Lebenskontext
 \`\`\`markdown

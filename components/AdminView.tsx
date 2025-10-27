@@ -20,6 +20,7 @@ import { RepeatIcon } from './icons/RepeatIcon';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { ChevronUpIcon } from './icons/ChevronUpIcon';
 import { UserPlusIcon } from './icons/UserPlusIcon';
+import { UnlockIcon } from './icons/UnlockIcon';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -476,10 +477,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                         aria-label={t(key)}
                     >
                         <Icon className="w-5 h-5" />
-                        <span 
-                            className="hidden md:inline-block text-center leading-tight" 
-                            dangerouslySetInnerHTML={{ __html: t(key) }}
-                        />
+                        <span className="hidden md:inline-block text-center leading-tight whitespace-pre-line">
+                            {t(key)}
+                        </span>
                     </button>
                 )
             })}
@@ -502,11 +502,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                             <tr>
                                 <th className="p-3">{t('admin_users_email')}</th>
                                 <th className="p-3">{t('admin_users_joined')}</th>
-                                <th className="p-3">Roles</th>
+                                <th className="p-3">{t('admin_users_roles')}</th>
                                 <th className="p-3 text-center">{t('admin_users_logins')}</th>
                                 <th className="p-3 text-center">{t('admin_users_xp')}</th>
                                 <th className="p-3">{t('admin_users_last_login')}</th>
-                                <th className="p-3 text-right">{t('admin_users_actions')}</th>
+                                <th className="p-3 text-center">{t('admin_users_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -522,7 +522,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                     }
                                 }
                                 return (
-                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''}`}>
+                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''} ${user.status === 'PENDING' ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
                                         <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
                                         <td className="p-3">
@@ -544,6 +544,16 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                         <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
                                         <td className="p-3">
                                             <div className="flex items-center justify-end gap-1">
+                                                {user.status === 'PENDING' && (
+                                                    <button 
+                                                        onClick={() => handleAction(`activate-${user.id}`, () => userService.activateUser(user.id))}
+                                                        disabled={actionLoading[`activate-${user.id}`]}
+                                                        className="p-2 text-green-500 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-50" 
+                                                        title={t('admin_users_activate')}
+                                                    >
+                                                        <UnlockIcon className="w-5 h-5" />
+                                                    </button>
+                                                )}
                                                 <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
                                                 <button 
                                                     onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
@@ -601,28 +611,28 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
             {codes.length > 0 ? (
                 <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${sortedAndFilteredCodes.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
-                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
+                         <thead className="bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
-                                <th className="p-3">{t('admin_codes_code')}</th>
-                                <th className="p-3">
+                                <th className="p-3 uppercase">{t('admin_codes_code')}</th>
+                                <th className="p-3 uppercase">
                                     <button onClick={() => requestSort('unlocks')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                                         {t('admin_codes_unlocks')}
                                         {sortConfig?.key === 'unlocks' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
-                                <th className="p-3">
+                                <th className="p-3 uppercase">
                                     <button onClick={() => requestSort('createdAt')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                                         {t('admin_codes_created')}
                                         {sortConfig?.key === 'createdAt' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
-                                <th className="p-3">
-                                    <button onClick={() => requestSort('usage')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                <th className="p-3 uppercase text-center">
+                                    <button onClick={() => requestSort('usage')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors mx-auto">
                                         {t('admin_codes_usage')}
                                         {sortConfig?.key === 'usage' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
-                                <th className="p-3 text-center">{t('admin_codes_actions')}</th>
+                                <th className="p-3 text-center uppercase">{t('admin_codes_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -638,7 +648,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                     </td>
                                     <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
                                     <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
-                                    <td className="p-3 break-all text-gray-600 dark:text-gray-400">
+                                    <td className="p-3 break-all text-gray-600 dark:text-gray-400 text-center">
                                         {code.usedBy?.email ? (
                                             <span>{code.usedBy.email}</span>
                                         ) : (

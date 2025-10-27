@@ -42,6 +42,7 @@ export interface User {
     lastLogin?: string;
     encryptionSalt?: string; // Hex-encoded string
     gamificationState?: string;
+    status?: 'PENDING' | 'ACTIVE';
 }
 
 export type BotAccessTier = 'guest' | 'registered' | 'premium';
