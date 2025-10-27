@@ -19,6 +19,7 @@ import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { RepeatIcon } from './icons/RepeatIcon';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { ChevronUpIcon } from './icons/ChevronUpIcon';
+import { UserPlusIcon } from './icons/UserPlusIcon';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -621,7 +622,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                         {sortConfig?.key === 'usage' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
-                                <th className="p-3 text-right">{t('admin_codes_actions')}</th>
+                                <th className="p-3 text-center">{t('admin_codes_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -638,11 +639,15 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                     <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
                                     <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
                                     <td className="p-3 break-all text-gray-600 dark:text-gray-400">
-                                        {code.isUsed 
-                                            ? (code.usedBy?.email || <span className="px-2 py-1 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-full">{t('admin_codes_status_used')}</span>) 
-                                            : <span className="px-2 py-1 text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 rounded-full">{t('admin_codes_status_available')}</span>}
+                                        {code.usedBy?.email ? (
+                                            <span>{code.usedBy.email}</span>
+                                        ) : (
+                                            <div className="flex justify-center" title={t('admin_codes_status_available')}>
+                                                <UserPlusIcon className="w-5 h-5 text-green-500 dark:text-green-400" />
+                                            </div>
+                                        )}
                                     </td>
-                                    <td className="p-3 text-right">
+                                    <td className="p-3 text-center">
                                         {code.isUsed ? (
                                             <button 
                                                 onClick={() => handleAction(`revoke-code-${code.id}`, () => userService.revokeUpgradeCode(code.id))}
