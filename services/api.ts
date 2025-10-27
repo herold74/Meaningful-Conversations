@@ -20,48 +20,31 @@ export class ApiError extends Error {
 
 
 /**
- * Determines the backend API URL. This function is robust and handles multiple environments:
- * 1. Your production build, which will have Vite's `import.meta.env` variables baked in.
- * 2. This preview environment, which does NOT have `import.meta.env`, so it uses hardcoded fallbacks.
- * 3. It also allows manual override via the `?backend=` URL parameter for easy testing.
+ * Determines the backend API URL for the new Podman deployment strategy.
+ * It uses a build-time environment variable but allows a URL parameter for local override.
  * @returns {string} The base URL for the API.
  */
 const getApiBaseUrl = (): string => {
-    // Fallback URLs for environments where Vite .env isn't loaded (like this preview)
-    const fallbackUrls = {
-        production: 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
-        staging: 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
-        local: 'http://localhost:3001'
-    };
-
-    // Vite injects `import.meta.env`. If it's undefined, use an empty object as a fallback.
-    const env = (import.meta as any).env || {};
-
-    const urls = {
-        production: env.VITE_BACKEND_URL_PRODUCTION || fallbackUrls.production,
-        staging: env.VITE_BACKEND_URL_STAGING || fallbackUrls.staging,
-        local: env.VITE_BACKEND_URL_LOCAL || fallbackUrls.local,
-    };
-
     const urlParams = new URLSearchParams(window.location.search);
-    const backendParam = urlParams.get('backend') as keyof typeof urls;
+    const backendParam = urlParams.get('backend');
 
-    // 1. Priority: URL parameter for explicit override
-    if (backendParam && urls[backendParam]) {
-        return urls[backendParam];
-    }
-    
-    // 2. Auto-detect environment based on frontend hostname
-    const hostname = window.location.hostname;
-    if (hostname.includes('frontend-prod')) {
-        return urls.production;
-    }
-    if (hostname.includes('frontend-staging')) {
-        return urls.staging;
+    // 1. Priority: URL parameter for local development override.
+    if (backendParam === 'local') {
+        const localUrl = (import.meta as any).env?.VITE_BACKEND_URL_LOCAL || 'http://localhost:3001';
+        return localUrl;
     }
 
-    // 3. Fallback for localhost and other environments defaults to staging
-    return urls.staging;
+    // 2. Default: Use the backend URL that was "baked in" during the build process.
+    // This is the primary method for deployed environments (dev, staging, prod).
+    const deployedUrl = (import.meta as any).env?.VITE_BACKEND_URL;
+    if (deployedUrl) {
+        return deployedUrl;
+    }
+
+    // 3. Final Fallback: If no build-time variable is set (e.g., running `npm run dev` without a .env),
+    // default to the staging backend to allow for UI work without running a local backend.
+    const stagingUrl = (import.meta as any).env?.VITE_BACKEND_URL_STAGING || 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app';
+    return stagingUrl;
 };
 
 
