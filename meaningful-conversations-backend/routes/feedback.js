@@ -64,7 +64,8 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
         // Conditionally connect the user relation if they are a logged-in user.
         // This will happen even if they chose to be anonymous, allowing us to distinguish them from guests.
         if (userIdForDb) {
-            feedbackData.user = {
+            // **FIX**: Use the correct, explicit relation name from the schema.
+            feedbackData.feedbackByUser = {
                 connect: { id: userIdForDb }
             };
         }
