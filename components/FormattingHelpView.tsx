@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { InfoIcon } from './icons/InfoIcon';
+import { WarningIcon } from './icons/WarningIcon';
 
 interface InfoViewProps {
 }
@@ -33,11 +34,23 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                 </div>
 
                 <div>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_emphasis_title')}</h2>
+                    <p>{t('formatting_emphasis_p1')}</p>
+                    <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
+                        {t('formatting_emphasis_code')}
+                    </code></pre>
+                </div>
+
+                <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_lists_title')}</h2>
                     <p>{t('formatting_lists_p1')}</p>
                     <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_lists_code')}
                     </code></pre>
+                    <div className="p-4 mt-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4 not-prose">
+                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                        <p className="text-sm" dangerouslySetInnerHTML={{ __html: t('formatting_lists_warning') }} />
+                    </div>
                 </div>
 
                 <div>
