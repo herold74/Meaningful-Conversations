@@ -8,74 +8,63 @@ interface DiffViewerProps {
     newText: string;
 }
 
+type DiffGroup = {
+    type: 'added' | 'removed' | 'unchanged';
+    content: string;
+};
+
 const DiffViewer: React.FC<DiffViewerProps> = ({ oldText, newText }) => {
     const diff = useMemo(() => createDiff(oldText, newText), [oldText, newText]);
 
-    // Filter out consecutive empty lines to reduce vertical space.
-    const condensedDiff = useMemo(() => {
-        return diff.reduce((acc, currentLine) => {
-            const isCurrentEmpty = currentLine.value.trim() === '';
-            const lastLine = acc.length > 0 ? acc[acc.length - 1] : null;
-            const isLastEmpty = lastLine ? lastLine.value.trim() === '' : false;
+    const groupedDiff = useMemo(() => {
+        if (!diff.length) return [];
 
-            if (isCurrentEmpty && isLastEmpty) {
-                // Don't add a second consecutive empty line
+        return diff.reduce((acc: DiffGroup[], current: DiffResult) => {
+            // Don't add completely empty unchanged lines between blocks, as prose handles margins.
+            if (current.type === 'unchanged' && current.value.trim() === '') {
+                const lastGroup = acc.length > 0 ? acc[acc.length - 1] : null;
+                // Add a single empty line if the last block wasn't also just an empty line, to preserve paragraph breaks
+                if (lastGroup && lastGroup.content.trim() !== '') {
+                    acc.push({ type: 'unchanged', content: '' });
+                }
                 return acc;
             }
 
-            acc.push(currentLine);
+            const lastGroup = acc.length > 0 ? acc[acc.length - 1] : null;
+            if (lastGroup && lastGroup.type === current.type) {
+                lastGroup.content += '\n' + current.value;
+            } else {
+                acc.push({ type: current.type, content: current.value });
+            }
             return acc;
-        }, [] as DiffResult[]);
+        }, []);
     }, [diff]);
 
-    const renderLine = (line: DiffResult, index: number) => {
-        let lineClass = 'flex items-baseline px-4 py-1 font-mono text-base';
-        let prefix = '  ';
-        let lineContent = line.value;
-
-        if (line.type === 'added') {
-            lineClass += ' bg-green-100/50 dark:bg-green-900/40 text-green-800 dark:text-green-300';
-            prefix = '+ ';
-        } else if (line.type === 'removed') {
-            lineClass += ' bg-red-100/50 dark:bg-red-900/40 text-red-800 dark:text-red-300 line-through';
-            prefix = '- ';
-        } else {
-            lineClass += ' text-gray-500 dark:text-gray-400';
-        }
-        
-        // Handle empty lines to ensure they are rendered correctly
-        if (lineContent.trim() === '') {
-            lineContent = '\u00A0'; // Non-breaking space
-        }
-
-        return (
-            <div key={index} className={lineClass}>
-                <span className="select-none mr-2">{prefix}</span>
-                <div className="w-full whitespace-pre-wrap">
-                    <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                            // Render paragraphs as simple spans to inherit parent styles and prevent layout breaks.
-                            p: ({node, ...props}) => <span {...props} />,
-                            h1: ({node, ...props}) => <h1 className="text-xl font-bold" {...props} />,
-                            h2: ({node, ...props}) => <h2 className="text-lg font-bold" {...props} />,
-                            h3: ({node, ...props}) => <h3 className="text-base font-bold" {...props} />,
-                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                            em: ({node, ...props}) => <em className="italic" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc pl-5" {...props} />,
-                            ol: ({node, ...props}) => <ol className="list-decimal pl-5" {...props} />,
-                        }}
-                    >
-                        {lineContent}
-                    </ReactMarkdown>
-                </div>
-            </div>
-        );
-    };
-
     return (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
-            {condensedDiff.map(renderLine)}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 h-96 overflow-y-auto rounded-lg">
+            {groupedDiff.map((group, index) => {
+                let groupClass = 'transition-colors';
+                if (group.type === 'added') {
+                    groupClass += ' bg-green-100/60 dark:bg-green-900/40';
+                } else if (group.type === 'removed') {
+                    groupClass += ' bg-red-100/60 dark:bg-red-900/40 line-through text-gray-500 dark:text-gray-500';
+                }
+                
+                // If content is just whitespace, render a div to preserve the space without prose styling
+                if (group.content.trim() === '') {
+                    return <div key={index} className="h-4" />;
+                }
+
+                return (
+                    <div key={index} className={groupClass}>
+                        <div className="prose prose-sm dark:prose-invert max-w-none px-4 py-1">
+                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {group.content}
+                            </ReactMarkdown>
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     );
 };

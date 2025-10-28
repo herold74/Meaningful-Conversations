@@ -2,7 +2,9 @@
   "meaningfulConversations": "Meaningful Conversations",
 
   "landing_subtitle": "This application provides access to several coaching bot characters with different perspectives and coaching styles. You can create a 'life context' file to personalize conversations and update it with new insights after each session.",
-  "landing_dragDrop": "Drag & drop your Life Context file here, or click to select",
+  "landing_upload_title": "Upload Your Life Context File",
+  "landing_drop_prompt": "Drop your file to begin",
+  "landing_dragDrop": "Drag your .md file here, or click to browse",
   "landing_startSession": "Start Session",
   "landing_or": "OR",
   "landing_createFile": "Create a New Life Context File",
@@ -10,8 +12,10 @@
   "landing_privacyNote": "Privacy Note:",
   "landing_privacyText": "If you continue as a guest, your data is processed locally in your browser. No data is stored on our servers. You are responsible for saving your file at the end of each session.",
   "landing_error_invalidFile": "Invalid file type. Please upload a .md file.",
+  "landing_error_invalidHeader": "Invalid file content. The file must start with the headline '# My Life Context' or '# Lebenskontext'.",
   "landing_error_emptyFile": "The selected file is empty or could not be read.",
-  "landing_file_loaded_info": "File loaded. You can review and apply AI-suggested changes after your session.",
+  "landing_file_preview": "File Preview",
+  "landing_change_file": "Change File",
 
   "auth_title": "Welcome",
   "auth_subtitle": "Create an account to save your progress automatically, or continue as a guest and manage your data manually.",

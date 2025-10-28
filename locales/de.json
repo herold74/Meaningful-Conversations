@@ -2,7 +2,9 @@
   "meaningfulConversations": "Sinnstiftende Gespräche",
  
   "landing_subtitle": "Diese Anwendung bietet Zugang zu mehreren Coaching-Bot-Charakteren mit unterschiedlichen Perspektiven und Coaching-Stilen. Sie können eine 'Lebenskontext'-Datei erstellen, um Gespräche zu personalisieren und sie nach jeder Sitzung mit neuen Erkenntnissen zu aktualisieren.",
-  "landing_dragDrop": "Ziehen Sie Ihre Lebenskontext-Datei hierher oder klicken Sie zum Auswählen",
+  "landing_upload_title": "Lade deine Lebenskontext-Datei hoch",
+  "landing_drop_prompt": "Datei zum Beginnen hier ablegen",
+  "landing_dragDrop": "Ziehe deine `.md`-Datei hierher oder klicke zum Durchsuchen",
   "landing_startSession": "Sitzung starten",
   "landing_or": "ODER",
   "landing_createFile": "Neue Lebenskontext-Datei erstellen",
@@ -10,8 +12,10 @@
   "landing_privacyNote": "Datenschutzhinweis:",
   "landing_privacyText": "Wenn Sie als Gast fortfahren, werden Ihre Daten lokal in Ihrem Browser verarbeitet. Es werden keine Daten auf unseren Servern gespeichert. Sie sind dafür verantwortlich, Ihre Datei am Ende jeder Sitzung zu speichern.",
   "landing_error_invalidFile": "Ungültiger Dateityp. Bitte laden Sie eine .md-Datei hoch.",
+  "landing_error_invalidHeader": "Ungültiger Dateiinhalt. Die Datei muss mit der Überschrift '# My Life Context' oder '# Lebenskontext' beginnen.",
   "landing_error_emptyFile": "Die ausgewählte Datei ist leer oder konnte nicht gelesen werden.",
-  "landing_file_loaded_info": "Datei geladen. Sie können KI-vorgeschlagene Änderungen nach Ihrer Sitzung überprüfen und anwenden.",
+  "landing_file_preview": "Dateivorschau",
+  "landing_change_file": "Datei ändern",
  
   "auth_title": "Willkommen",
   "auth_subtitle": "Erstellen Sie ein Konto, um Ihren Fortschritt automatisch zu speichern, oder fahren Sie als Gast fort und verwalten Sie Ihre Daten manuell.",

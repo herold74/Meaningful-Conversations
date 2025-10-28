@@ -599,7 +599,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 
                  <div>
                     <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-2">{t('sessionReview_finalContext')}</h2>
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('sessionReview_finalContext')}</h2>
                         <button onClick={() => setIsFinalContextVisible(p => !p)} className="text-sm text-green-500 dark:text-green-400 hover:underline">
                             {isFinalContextVisible ? t('sessionReview_hide') : t('sessionReview_showEdit')}
                         </button>

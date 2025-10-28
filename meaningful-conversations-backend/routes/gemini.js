@@ -10,7 +10,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
-    const { botId, context, history, lang } = req.body;
+    const { botId, context, history, lang, isNewSession } = req.body;
     const userId = req.userId; // This will be undefined for guests
 
     const bot = BOTS.find(b => b.id === botId);
@@ -43,8 +43,27 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'You do not have permission to access this coach.' });
     }
 
-    const systemInstruction = lang === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
+    let systemInstruction = lang === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
     
+    // Get and format the current date based on the request language.
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    const formattedDate = new Intl.DateTimeFormat(locale, options).format(today);
+
+    // Replace the date placeholder in the system instruction.
+    systemInstruction = systemInstruction.replace(/\[CURRENT_DATE\]/g, formattedDate);
+
+    const isInitialMessage = history.length === 0;
+
+    if (isInitialMessage && isNewSession) {
+        if (lang === 'de') {
+            systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
+        } else {
+            systemInstruction += "\n\n## Special Instruction for this First Message:\nThis is the user's very first interaction in this session. You MUST ignore any 'Initial Interaction Priority' rules about checking 'Next Steps'. Your first message MUST be your standard, warm welcome, asking what is on their mind. Do not mention anything about 'welcome back' or previous steps.";
+        }
+    }
+
     let finalSystemInstruction = systemInstruction;
     // For all bots EXCEPT the interviewer, add the context.
     // The interviewer's purpose is to CREATE the context, so it doesn't need to read one.
@@ -56,8 +75,6 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         role: msg.role === 'bot' ? 'model' : 'user',
         parts: [{ text: msg.text }],
     }));
-
-    const isInitialMessage = history.length === 0;
 
     try {
         const response = await ai.models.generateContent({

@@ -74,42 +74,51 @@ export const buildUpdatedContext = (
         if (targetIndex !== undefined && typeof originalSection === 'string') {
             const headlineMatch = originalSection.match(headlineFindRegex);
             const headlineLine = headlineMatch?.[0] || choice.targetHeadline;
+            const separatorMatch = originalSection.match(/\n(\s*---\s*\n*)$/);
+            const separator = separatorMatch ? separatorMatch[0] : null;
+            const sectionWithoutSeparator = separator ? originalSection.substring(0, originalSection.lastIndexOf(separator)) : originalSection;
+            
+            const isSingleLineBold = headlineLine.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n');
+            const isBulletedAppend = choice.type === 'append' && ((update.content || '').trim().startsWith('*') || (update.content || '').trim().startsWith('-'));
 
-            if (choice.type === 'append') {
-                sections[targetIndex] = originalSection.trimEnd() + formatContentForBlock(update.content);
-            } else if (choice.type === 'replace_section') {
+            // Smart handling for single-line bold items (e.g., **Career Goal:**).
+            // Both 'append' and 'replace_section' are treated as a value replacement to prevent duplication.
+            // EXCEPTION: If we are appending a bullet point, treat it as a multi-line append to preserve formatting.
+            if (isSingleLineBold && !isBulletedAppend) {
                 const content = (update.content || '').trim();
-                const separatorMatch = originalSection.match(/\n(\s*---\s*\n*)$/);
-                const separator = separatorMatch ? separatorMatch[0] : null;
-                const sectionWithoutSeparator = separator ? originalSection.substring(0, originalSection.lastIndexOf(separator)) : originalSection;
+                const normalizedKey = normalizeHeadline(headlineLine);
+                // Regex to find the key (bold or not, with or without colon) at the start of the content. Case-insensitive.
+                const keyRegex = new RegExp(`^(\\s*\\*\\*\\s*)?${normalizedKey}(\\s*\\*\\*\\s*)?:?`, 'i');
                 
-                let newSectionBody;
-                const isSingleLineBold = headlineLine.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n');
-
-                if (isSingleLineBold) {
-                    const keyPart = headlineLine.trimEnd();
-                    const colonIndex = keyPart.indexOf(':');
-                    if (colonIndex > -1) {
-                        const actualKey = keyPart.substring(0, colonIndex + 1);
-                        newSectionBody = actualKey + ' ' + content;
-                    } else {
-                        newSectionBody = keyPart + ' ' + content;
-                    }
+                let valuePart;
+                if (keyRegex.test(content)) {
+                    // AI's content includes the key. Strip it to get just the new value.
+                    valuePart = content.replace(keyRegex, '').trim();
                 } else {
-                    // This logic is for multi-line sections (e.g., ## Headline).
-                    // It preserves the main headline and an optional italicized subtitle line that follows it.
-                    const headerBlockRegex = /^(#{1,6}\s[^\r\n]*\r?\n?(?:\s*\*.*?\*\s*\r?\n?)?)/m;
-                    const headerMatch = sectionWithoutSeparator.match(headerBlockRegex);
-                    
-                    // Use the matched header block, or fall back to just the headline if the regex fails.
-                    const headerBlock = headerMatch ? headerMatch[0] : (headlineLine.trimEnd() + '\n');
-                    
-                    // Construct the new section body by preserving the header and adding the new content.
-                    newSectionBody = headerBlock.trimEnd() + '\n\n' + content;
+                    // AI's content is just the value.
+                    valuePart = content;
                 }
+                
+                // Reconstruct the line using the original key and the new value.
+                const keyPart = headlineLine.trim().split(':')[0] + ':'; // e.g., "**Career Goal**:"
+                const newSectionBody = keyPart + ' ' + valuePart;
+                
+                sections[targetIndex] = newSectionBody + (separator || '\n\n');
+
+            } else if (choice.type === 'append') {
+                // Standard append for multi-line sections.
+                sections[targetIndex] = originalSection.trimEnd() + formatContentForBlock(update.content);
+
+            } else if (choice.type === 'replace_section') {
+                // Standard replace for multi-line sections.
+                const content = (update.content || '').trim();
+                const headerBlockRegex = /^(#{1,6}\s[^\r\n]*\r?\n?(?:\s*\*.*?\*\s*\r?\n?)?)/m;
+                const headerMatch = sectionWithoutSeparator.match(headerBlockRegex);
+                const headerBlock = headerMatch ? headerMatch[0] : (headlineLine.trimEnd() + '\n');
+                const newSectionBody = headerBlock.trimEnd() + '\n\n' + content;
                 sections[targetIndex] = newSectionBody + (separator || '\n\n');
             }
-        } else { 
+        } else { // Handle 'create_headline'
             const newHeadline = choice.targetHeadline.trim().startsWith('**')
                 ? `**${normalizedTarget}**:`
                 : `## ${normalizedTarget}`;
@@ -120,7 +129,7 @@ export const buildUpdatedContext = (
     
     let finalDoc = prologue + sections.join('');
     if (newSectionsText.length > 0) {
-        finalDoc = finalDoc.trimEnd() + '\n\n' + newSectionsText.join('\n');
+        finalDoc = finalDoc.trimEnd() + '\n\n---\n\n' + newSectionsText.join('\n\n---\n\n');
     }
 
     return finalDoc.trim() ? finalDoc + '\n' : '';

@@ -126,16 +126,18 @@ interface ChatViewProps {
   onEndSession: () => void;
   onMessageSent: () => void;
   currentUser: User | null;
+  isNewSession: boolean;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession }) => {
   const { t, language } = useLocalization();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const baseTranscriptRef = useRef<string>('');
+  const initialFetchInitiated = useRef<boolean>(false);
 
   const [isListening, setIsListening] = useState(false);
   const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
@@ -396,17 +398,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [language]);
   
   useEffect(() => {
-    // This effect is specifically to fetch the initial greeting from the bot
-    // when a new session starts (i.e., chatHistory is empty).
-    if (chatHistory.length !== 0) {
+    // This effect is specifically to fetch the initial greeting from the bot.
+    // The ref guard prevents this from running more than once (e.g., due to StrictMode).
+    if (chatHistory.length !== 0 || initialFetchInitiated.current) {
         return;
     }
+    initialFetchInitiated.current = true; // Set flag immediately to prevent re-entry.
 
     const fetchInitialMessage = async () => {
         setIsLoading(true);
         try {
             // Call with an empty history to trigger the bot's initial message.
-            const response = await geminiService.sendMessage(bot.id, lifeContext, [], language);
+            const response = await geminiService.sendMessage(bot.id, lifeContext, [], language, isNewSession);
             const initialBotMessage: Message = {
                 id: `bot-${Date.now()}`,
                 text: response.text,
@@ -429,9 +432,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
 
     fetchInitialMessage();
-    // This should only run once when the component mounts for a new session.
-    // We include dependencies that are used inside and are necessary for the initial call.
-  }, [bot.id, lifeContext, language, setChatHistory, t]);
+  }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length]);
 
   useEffect(() => {
       if (chatHistory.length === 1 && chatHistory[0].role === 'bot' && voices.length > 0) {
@@ -459,7 +460,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     baseTranscriptRef.current = '';
 
     try {
-        const response = await geminiService.sendMessage(bot.id, lifeContext, historyWithUserMessage, language);
+        const response = await geminiService.sendMessage(bot.id, lifeContext, historyWithUserMessage, language, false);
         
         const botMessage: Message = {
             id: `bot-${Date.now()}`,

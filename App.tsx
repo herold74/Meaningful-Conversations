@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -325,7 +325,7 @@ const App: React.FC = () => {
             }
         }
         
-        setCameFromContextChoice(false);
+        setCameFromContextChoice(true);
         setGamificationState(deserializeGamificationState(gamificationJson));
 
         setLifeContext(context);
@@ -427,6 +427,31 @@ const App: React.FC = () => {
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
+
+            // If the analysis found "Next Steps", programmatically create an update for them.
+            if (analysis.nextSteps && analysis.nextSteps.length > 0) {
+                // Determine the correct headline based on the document's language.
+                const docLang = (lifeContext && lifeContext.match(/^#\s*Lebenskontext/m)) ? 'de' : 'en';
+                const nextStepsHeadline = docLang === 'de' ? 'Realisierbare nächste Schritte' : 'Achievable Next Steps';
+                
+                const deadlineWord = docLang === 'de' ? 'bis' : 'Deadline';
+
+                // Format the next steps into a markdown list.
+                const nextStepsContent = analysis.nextSteps
+                    .map(step => `* ${step.action} (${deadlineWord}: ${step.deadline})`)
+                    .join('\n');
+                
+                // Create a new ProposedUpdate object.
+                const nextStepsUpdate: ProposedUpdate = {
+                    type: 'append',
+                    headline: nextStepsHeadline,
+                    content: nextStepsContent,
+                };
+                
+                // Add the new update to the list of proposed updates from the AI.
+                analysis.proposedUpdates.push(nextStepsUpdate);
+            }
+
             setSessionAnalysis(analysis);
 
             const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id);
@@ -575,7 +600,7 @@ const App: React.FC = () => {
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
-            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} />;
+            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} isNewSession={!cameFromContextChoice} />;
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;

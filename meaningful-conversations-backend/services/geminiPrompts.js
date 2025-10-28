@@ -99,8 +99,9 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
     c. **Last Resort (Create New):** Only propose 'create_headline' if the topic is entirely new and does not fit under any existing headline.
 6.  **Format Output:** Your entire output MUST be a single, valid JSON object that adheres to the provided schema. Do not include any text or markdown outside of the JSON structure.
 7.  **Output Language Rules:**
-    - The content for the 'summary', 'nextSteps', and 'solutionBlockages' fields MUST be written in English.
+    - The content for the 'summary' and 'solutionBlockages' fields MUST be written in English.
     - CRITICAL: The 'content' for each item in the 'updates' array MUST be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
+    - CRITICAL: The content for the 'nextSteps' array MUST ALSO be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
 
 ## Life Context
 \`\`\`markdown
@@ -129,8 +130,9 @@ Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung ü
     c. **Letzte Möglichkeit (Neu erstellen):** Schlagen Sie 'create_headline' nur vor, wenn das Thema völlig neu ist und unter keine bestehende Überschrift passt.
 6.  **Ausgabe formatieren:** Ihre gesamte Ausgabe MUSS ein einziges, gültiges JSON-Objekt sein, das dem bereitgestellten Schema entspricht. Fügen Sie keinen Text oder Markdown außerhalb der JSON-Struktur ein.
 7.  **Regeln für die Ausgabesprache:**
-    - Der Inhalt für die Felder 'summary', 'nextSteps' und 'solutionBlockages' MUSS auf Deutsch verfasst sein.
+    - Der Inhalt für die Felder 'summary' und 'solutionBlockages' MUSS auf Deutsch verfasst sein.
     - KRITISCH: Der 'content' für jeden Eintrag im 'updates'-Array MUSS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
+    - KRITISCH: Der Inhalt für das 'nextSteps'-Array MUSS EBENFALLS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
 
 ## Lebenskontext
 \`\`\`markdown

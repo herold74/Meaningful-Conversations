@@ -7,12 +7,13 @@ export const sendMessage = async (
     botId: string,
     context: string,
     history: Message[],
-    lang: Language
+    lang: Language,
+    isNewSession: boolean
 ): Promise<{ text: string }> => {
     
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ botId, context, history: history, lang }),
+        body: JSON.stringify({ botId, context, history: history, lang, isNewSession }),
     });
 };
 
