@@ -2,7 +2,7 @@ import { ProposedUpdate } from '../types';
 
 export type AppliedUpdatePayload = { type: 'create_headline' | 'append' | 'replace_section', targetHeadline: string };
 
-const headlinePatternString = '^(?:\\s*#{1,6}\\s[^\r\n]*|\\s*\\*\\*.*?\\*\\*:[^\r\n]*)';
+const headlinePatternString = '^(?:\\s*#{1,6}\\s[^\r\n]*|\\s*\\*\\*.*?\\*\\*:)';
 const headlineRegex = new RegExp(headlinePatternString, 'gm');
 const headlineSplitRegex = new RegExp(`(?=${headlinePatternString})`, 'gm');
 const headlineFindRegex = new RegExp(headlinePatternString, 'm');
@@ -76,47 +76,31 @@ export const buildUpdatedContext = (
             const headlineLine = headlineMatch?.[0] || choice.targetHeadline;
             const separatorMatch = originalSection.match(/\n(\s*---\s*\n*)$/);
             const separator = separatorMatch ? separatorMatch[0] : null;
-            const sectionWithoutSeparator = separator ? originalSection.substring(0, originalSection.lastIndexOf(separator)) : originalSection;
             
-            const isSingleLineBold = headlineLine.trim().startsWith('**') && !sectionWithoutSeparator.trim().includes('\n');
-            const isBulletedAppend = choice.type === 'append' && ((update.content || '').trim().startsWith('*') || (update.content || '').trim().startsWith('-'));
-
-            // Smart handling for single-line bold items (e.g., **Career Goal:**).
-            // Both 'append' and 'replace_section' are treated as a value replacement to prevent duplication.
-            // EXCEPTION: If we are appending a bullet point, treat it as a multi-line append to preserve formatting.
-            if (isSingleLineBold && !isBulletedAppend) {
-                const content = (update.content || '').trim();
-                const normalizedKey = normalizeHeadline(headlineLine);
-                // Regex to find the key (bold or not, with or without colon) at the start of the content. Case-insensitive.
-                const keyRegex = new RegExp(`^(\\s*\\*\\*\\s*)?${normalizedKey}(\\s*\\*\\*\\s*)?:?`, 'i');
-                
-                let valuePart;
-                if (keyRegex.test(content)) {
-                    // AI's content includes the key. Strip it to get just the new value.
-                    valuePart = content.replace(keyRegex, '').trim();
-                } else {
-                    // AI's content is just the value.
-                    valuePart = content;
-                }
-                
-                // Reconstruct the line using the original key and the new value.
-                const keyPart = headlineLine.trim().split(':')[0] + ':'; // e.g., "**Career Goal**:"
-                const newSectionBody = keyPart + ' ' + valuePart;
-                
-                sections[targetIndex] = newSectionBody + (separator || '\n\n');
-
-            } else if (choice.type === 'append') {
-                // Standard append for multi-line sections.
+            if (choice.type === 'append') {
                 sections[targetIndex] = originalSection.trimEnd() + formatContentForBlock(update.content);
-
             } else if (choice.type === 'replace_section') {
-                // Standard replace for multi-line sections.
                 const content = (update.content || '').trim();
-                const headerBlockRegex = /^(#{1,6}\s[^\r\n]*\r?\n?(?:\s*\*.*?\*\s*\r?\n?)?)/m;
-                const headerMatch = sectionWithoutSeparator.match(headerBlockRegex);
-                const headerBlock = headerMatch ? headerMatch[0] : (headlineLine.trimEnd() + '\n');
-                const newSectionBody = headerBlock.trimEnd() + '\n\n' + content;
-                sections[targetIndex] = newSectionBody + (separator || '\n\n');
+
+                if (headlineLine.trim().startsWith('**')) {
+                    // This logic now correctly handles both single-line and multi-line bold sections.
+                    const keyPart = headlineLine.trim(); // This is just '**Key**:'
+                    
+                    // The AI's proposed content might sometimes mistakenly include the key.
+                    // We strip it to get just the value.
+                    const normalizedKey = normalizeHeadline(keyPart);
+                    const keyRegex = new RegExp(`^(\\s*\\*\\*\\s*)?${normalizedKey}(\\s*\\*\\*\\s*)?:?`, 'i');
+                    const valuePart = keyRegex.test(content) ? content.replace(keyRegex, '').trim() : content;
+                    
+                    // Reconstruct: key + space + value
+                    const newSectionBody = keyPart + ' ' + valuePart;
+                    sections[targetIndex] = newSectionBody + (separator || '\n\n');
+
+                } else {
+                    // This handles #-style headlines.
+                    const newSectionBody = headlineLine.trim() + '\n\n' + content;
+                    sections[targetIndex] = newSectionBody + (separator || '\n\n');
+                }
             }
         } else { // Handle 'create_headline'
             const newHeadline = choice.targetHeadline.trim().startsWith('**')
