@@ -1,4 +1,5 @@
-# Meaningful Conversations - Migration & Deployment Guide (v1.4.7)
+# Meaningful Conversations 
+Migration & Deployment Guide (v1.4.7)
 
 This guide provides the complete workflow for setting up a local development environment, migrating your existing database schema to use Prisma migrations, and deploying the application to Google Cloud Run.
 
