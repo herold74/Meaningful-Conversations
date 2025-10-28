@@ -132,8 +132,6 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - Dieser Schlüssel wird **niemals** an unsere Server gesendet.
 - Nur die verschlüsselte, unleserliche Version Ihrer Daten wird gespeichert.
 - **Niemand außer Ihnen kann Ihre Daten lesen.**
-
-**Wichtig:** Aufgrund dieses Sicherheitsmodells **ist Ihre Lebenskontext-Datei dauerhaft verloren, wenn Sie Ihr Passwort vergessen.** Bei einer Passwort-Zurücksetzung wird die alte, unlesbare Datei unwiderruflich gelöscht. **Bitte laden Sie regelmäßig eine Sicherungskopie Ihrer Datei herunter.**
 `;
 
 const en_markdown = `## Introduction
@@ -260,8 +258,6 @@ Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life 
 - This key is **never** sent to our servers.
 - Only the scrambled, unreadable version of your data is stored.
 - **No one but you can read your data.**
-
-**Important:** Because of this security model, **if you forget your password, your Life Context data is permanently lost.** When you reset your password, the old, unreadable file is irrevocably deleted. **Please download a backup of your file regularly.**
 `;
 
 const UserGuideView: React.FC<InfoViewProps> = () => {
