@@ -104,9 +104,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
 
   return (
     <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
-      <div className="w-full max-w-3xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('meaningfulConversations')}</h1>
-        <p className="text-sm md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+      <div className="w-full max-w-3xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('meaningfulConversations')}</h1>
+        <p className="text-sm md:text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
           {t('landing_subtitle')}
         </p>
         
@@ -116,8 +116,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               htmlFor="file-upload" 
               className={`relative block w-full p-8 text-center border-2 transition-colors duration-300 rounded-lg cursor-pointer group
                 ${isDragging 
-                  ? 'border-solid bg-green-50 dark:bg-green-900/50 border-green-500' 
-                  : 'bg-gray-50 dark:bg-gray-900/50 border-gray-300 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-400 shadow-inner'
+                  ? 'border-solid bg-status-success-background dark:bg-status-success-background border-status-success-border' 
+                  : 'bg-background-primary dark:bg-background-primary/50 border-border-secondary dark:border-border-primary hover:border-accent-primary dark:hover:border-accent-primary shadow-inner'
                 }
               `}
               onDragEnter={handleDragEnter}
@@ -128,18 +128,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <div className="flex flex-col items-center justify-center space-y-4">
                 {isDragging ? (
                   <>
-                    <UploadIcon className="w-16 h-16 text-green-500 dark:text-green-400" />
-                    <span className="text-lg font-semibold text-green-700 dark:text-green-300">
+                    <UploadIcon className="w-16 h-16 text-accent-primary" />
+                    <span className="text-lg font-semibold text-status-success-foreground">
                       {t('landing_drop_prompt')}
                     </span>
                   </>
                 ) : (
                   <>
-                    <FileTextIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 transition-colors group-hover:text-green-500 dark:group-hover:text-green-400" />
-                    <span className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                    <FileTextIcon className="w-16 h-16 text-content-subtle transition-colors group-hover:text-accent-primary" />
+                    <span className="text-xl font-bold text-content-primary">
                       {t('landing_upload_title')}
                     </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-content-secondary">
                       {t('landing_dragDrop')}
                     </span>
                   </>
@@ -148,22 +148,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".md,text/markdown" onChange={handleFileChange} />
             </label>
           ) : (
-             <div className="p-4 space-y-4 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg animate-fadeIn shadow-md">
+             <div className="p-4 space-y-4 bg-background-secondary dark:bg-background-primary/50 border border-border-primary dark:border-border-primary rounded-lg animate-fadeIn shadow-md">
                 <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
-                        <CheckIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <div className="flex-shrink-0 p-2 bg-status-success-background">
+                        <CheckIcon className="w-6 h-6 text-status-success-foreground" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                        <p className="font-bold text-gray-800 dark:text-gray-200 truncate" title={fileName}>{fileName}</p>
-                        <button type="button" onClick={handleResetFile} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">
+                        <p className="font-bold text-content-primary truncate" title={fileName}>{fileName}</p>
+                        <button type="button" onClick={handleResetFile} className="text-sm text-status-warning-foreground hover:underline">
                             {t('landing_change_file')}
                         </button>
                     </div>
                 </div>
                 {previewContent && (
                     <div className="text-left">
-                        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">{t('landing_file_preview')}</p>
-                        <div className="prose prose-sm dark:prose-invert max-w-none h-48 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                        <p className="text-xs font-bold text-content-subtle uppercase mb-1">{t('landing_file_preview')}</p>
+                        <div className="prose prose-sm dark:prose-invert max-w-none h-48 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-md">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {previewContent}
                             </ReactMarkdown>
@@ -173,39 +173,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
             </div>
           )}
           
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-status-danger-foreground text-sm">{error}</p>}
           
           <button
             type="submit"
             disabled={!fileContent}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
+            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
           >
             {t('landing_startSession')}
           </button>
         </form>
 
         <div className="flex items-center justify-center space-x-4">
-            <hr className="w-full border-gray-300 dark:border-gray-700"/>
-            <span className="font-medium text-gray-400 dark:text-gray-500 text-xs">{t('landing_or')}</span>
-            <hr className="w-full border-gray-300 dark:border-gray-700"/>
+            <hr className="w-full border-border-secondary dark:border-border-primary"/>
+            <span className="font-medium text-content-subtle text-xs">{t('landing_or')}</span>
+            <hr className="w-full border-border-secondary dark:border-border-primary"/>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
                 onClick={onStartQuestionnaire}
-                className="w-full px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FECC78] dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
+                className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-secondary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
             >
                 {t('landing_createFile')}
             </button>
              <button
                 onClick={onStartInterview}
-                className="w-full px-6 py-3 text-base font-bold text-white bg-[#1B7272] uppercase hover:bg-[#165a5a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1B7272] dark:focus:ring-offset-gray-950 transition-all duration-200 rounded-lg shadow-md"
+                className="w-full px-6 py-3 text-base font-bold text-accent-tertiary-foreground bg-accent-tertiary uppercase hover:bg-accent-tertiary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-tertiary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
             >
                 {t('landing_createWithInterview')}
             </button>
         </div>
 
-        <div className="text-xs text-gray-500 pt-4">
+        <div className="text-xs text-content-subtle pt-4">
             <p><strong>{t('landing_privacyNote')}</strong> {t('landing_privacyText')}</p>
         </div>
       </div>

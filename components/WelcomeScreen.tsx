@@ -14,14 +14,14 @@ const WelcomeScreen: React.FC = () => {
     ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950 text-center animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background-primary text-center animate-fadeIn">
       {/* Container for the logo and avatars */}
       <div className="relative w-48 h-48">
         
         {/* Main Logo at the center */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <LogoIcon className="w-32 h-32 text-green-500 dark:text-green-400" />
-            <div className="absolute inset-0 rounded-full border-4 border-green-500/20 dark:border-green-400/20 animate-ping"></div>
+            <LogoIcon className="w-32 h-32 text-accent-primary" />
+            <div className="absolute inset-0 rounded-full border-4 border-accent-primary/20 animate-ping"></div>
         </div>
         
         {/* Bot Avatars positioned around the logo container */}
@@ -34,7 +34,7 @@ const WelcomeScreen: React.FC = () => {
               key={bot.id}
               src={bot.avatar}
               alt={bot.name}
-              className={`absolute w-14 h-14 rounded-full border-2 border-white dark:border-gray-800 shadow-lg opacity-0 animate-fadeIn`}
+              className={`absolute w-14 h-14 rounded-full border-2 border-background-secondary dark:border-background-tertiary shadow-lg opacity-0 animate-fadeIn`}
               style={{ 
                 ...position,
                 animationDelay 
@@ -44,10 +44,10 @@ const WelcomeScreen: React.FC = () => {
         })}
       </div>
 
-      <h1 className="mt-20 text-2xl font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest">
+      <h1 className="mt-20 text-2xl font-bold text-content-primary uppercase tracking-widest">
         Meaningful Conversations
       </h1>
-      <p className="mt-2 text-gray-500 dark:text-gray-400">
+      <p className="mt-2 text-content-secondary">
         Loading your experience...
       </p>
     </div>

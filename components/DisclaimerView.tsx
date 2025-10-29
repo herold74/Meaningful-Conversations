@@ -56,15 +56,15 @@ const DisclaimerView: React.FC<DisclaimerViewProps> = ({ currentUser, onDeleteAc
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('disclaimer_title')}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('disclaimer_title')}</h1>
             </div>
-            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
+            <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
                     }}
                 >
                     {markdownContent}
@@ -72,15 +72,15 @@ const DisclaimerView: React.FC<DisclaimerViewProps> = ({ currentUser, onDeleteAc
             </div>
 
             {currentUser && (
-                <div className="p-4 mt-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-500 text-red-800 dark:text-red-300 flex items-start gap-4 not-prose">
+                <div className="p-4 mt-6 bg-status-danger-background dark:bg-status-danger-background border-l-4 border-status-danger-border text-status-danger-foreground dark:text-status-danger-foreground flex items-start gap-4 not-prose">
                     <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
                     <div>
-                        <h2 className="text-xl font-bold !text-red-700 dark:!text-red-300 !mt-0">{t('menu_delete_account')}</h2>
+                        <h2 className="text-xl font-bold !text-status-danger-foreground !mt-0">{t('menu_delete_account')}</h2>
                         <p className="mt-2" dangerouslySetInnerHTML={{ __html: t('disclaimer_delete_warning') }} />
                         <div className="mt-4">
                              <button 
                                 onClick={onDeleteAccount} 
-                                className="inline-flex items-center justify-center gap-3 px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-950 rounded-lg shadow-md"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-background-primary rounded-lg shadow-md"
                             >
                                 <DeleteIcon className="w-5 h-5" />
                                 {t('deleteAccount_confirm')}

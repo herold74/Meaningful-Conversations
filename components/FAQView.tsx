@@ -78,37 +78,37 @@ const FAQView: React.FC<InfoViewProps> = () => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('faq_title')}</h1>
+                <h1 className="text-3xl font-bold text-content-primary uppercase">{t('faq_title')}</h1>
             </div>
-            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
+            <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-2 not-prose" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose" {...props} />,
                     }}
                 >
                     {markdownContent}
                 </ReactMarkdown>
                 
                 <div className="not-prose">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-2">
+                    <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2">
                         {language === 'de' ? 'Warum funktioniert der Sprachmodus nicht oder warum ist die Sprachqualität schlecht?' : 'Why does voice mode not work or why is the voice quality poor?'}
                     </h3>
-                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                     <p className="text-content-secondary leading-relaxed">
                         {language === 'de' ? 'Der Sprachmodus stützt sich auf die integrierte Web Speech API Ihres Browsers. Unterstützung und Qualität können erheblich variieren:' : 'Voice mode relies on your browser’s built-in Web Speech API. Support and quality can vary significantly:'}
                     </p>
                     <div className="space-y-3 my-4">
-                        <div className="bg-gray-100 dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 text-sm">
-                            <p className="text-gray-700 dark:text-gray-300"><strong>{language === 'de' ? 'Browser:' : 'Browser:'}</strong> {language === 'de' ? 'Chrome und Edge haben im Allgemeinen die beste Unterstützung. Firefox und Safari können Einschränkungen oder Stimmen von geringerer Qualität aufweisen.' : 'Chrome and Edge generally have the best support. Firefox and Safari may have limitations or lower quality voices.'}</p>
+                        <div className="bg-background-tertiary dark:bg-background-tertiary p-3 border border-border-primary dark:border-border-primary text-sm">
+                            <p className="text-content-secondary"><strong>{language === 'de' ? 'Browser:' : 'Browser:'}</strong> {language === 'de' ? 'Chrome und Edge haben im Allgemeinen die beste Unterstützung. Firefox und Safari können Einschränkungen oder Stimmen von geringerer Qualität aufweisen.' : 'Chrome and Edge generally have the best support. Firefox and Safari may have limitations or lower quality voices.'}</p>
                         </div>
-                        <div className="bg-gray-100 dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 text-sm">
-                             <p className="text-gray-700 dark:text-gray-300"><strong>{language === 'de' ? 'Betriebssystem:' : 'Operating System:'}</strong> {language === 'de' ? "Ihr Betriebssystem stellt die Stimmen bereit. Einige Betriebssysteme bieten 'Premium'- oder 'erweiterte' Stimmen an, die Sie in Ihren Systemeinstellungen (Barrierefreiheit/Lesen & Sprechen) herunterladen müssen." : "Your operating system provides the voices. Some operating systems offer 'premium' or 'enhanced' voices that you may need to download in your system settings (Accessibility/Speech)."}</p>
+                        <div className="bg-background-tertiary dark:bg-background-tertiary p-3 border border-border-primary dark:border-border-primary text-sm">
+                             <p className="text-content-secondary"><strong>{language === 'de' ? 'Betriebssystem:' : 'Operating System:'}</strong> {language === 'de' ? "Ihr Betriebssystem stellt die Stimmen bereit. Einige Betriebssysteme bieten 'Premium'- oder 'erweiterte' Stimmen an, die Sie in Ihren Systemeinstellungen (Barrierefreiheit/Lesen & Sprechen) herunterladen müssen." : "Your operating system provides the voices. Some operating systems offer 'premium' or 'enhanced' voices that you may need to download in your system settings (Accessibility/Speech)."}</p>
                         </div>
                     </div>
-                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                     <p className="text-content-secondary leading-relaxed">
                         {language === 'de' ? 'Für die beste Erfahrung empfehlen wir die Verwendung eines modernen Chromium-basierten Browsers (wie Chrome oder Edge) auf einem Desktop-Betriebssystem.' : 'For the best experience, we recommend using a modern Chromium-based browser (like Chrome or Edge) on a desktop operating system.'}
                     </p>
                 </div>

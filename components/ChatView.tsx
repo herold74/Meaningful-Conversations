@@ -94,24 +94,24 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose })
         aria-labelledby="coach-info-title"
     >
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-md m-4 p-6 border border-gray-300 dark:border-gray-700 shadow-xl text-center animate-fadeIn rounded-lg" 
+        className="bg-background-secondary dark:bg-background-tertiary w-full max-w-md m-4 p-6 border border-border-secondary dark:border-border-primary shadow-xl text-center animate-fadeIn rounded-lg" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end -mt-2 -mr-2">
-            <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label="Close">
+            <button onClick={onClose} className="p-2 text-content-secondary hover:text-content-primary" aria-label="Close">
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
-        <img src={bot.avatar} alt={bot.name} className="w-24 h-24 rounded-full mx-auto -mt-6 mb-4 border-4 border-white dark:border-gray-900" />
-        <h2 id="coach-info-title" className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
+        <img src={bot.avatar} alt={bot.name} className="w-24 h-24 rounded-full mx-auto -mt-6 mb-4 border-4 border-background-secondary dark:border-background-tertiary" />
+        <h2 id="coach-info-title" className="text-2xl font-bold text-content-primary">{bot.name}</h2>
         <div className="flex flex-wrap justify-center gap-2 my-3">
           {botStyle.split(', ').map(tag => (
-            <span key={tag} className="px-2.5 py-1 text-xs font-bold tracking-wide uppercase bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300">
+            <span key={tag} className="px-2.5 py-1 text-xs font-bold tracking-wide uppercase bg-background-tertiary text-content-secondary dark:bg-background-tertiary dark:text-content-secondary rounded-full">
               {tag}
             </span>
           ))}
         </div>
-        <p className="mt-2 text-gray-600 dark:text-gray-400 leading-relaxed">{botDescription}</p>
+        <p className="mt-2 text-content-secondary leading-relaxed">{botDescription}</p>
       </div>
     </div>
   );
@@ -572,18 +572,18 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
-    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg overflow-hidden">
-      <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 gap-2">
+    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
+      <header className="flex items-center justify-between p-4 border-b border-border-primary dark:border-border-primary gap-2">
         {/* Left: Coach Info (responsive) */}
         <div className="flex-1 min-w-0">
              <button 
                 onClick={() => setIsCoachInfoOpen(true)} 
-                className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 focus:ring-green-500 rounded-lg p-1 -ml-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-accent-primary rounded-lg p-1 -ml-1 transition-colors hover:bg-background-tertiary dark:hover:bg-background-tertiary/50"
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0">
-                    <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-200 truncate">{bot.name}</h1>
+                    <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                 </div>
             </button>
         </div>
@@ -600,32 +600,32 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         return newIsVoiceMode;
                     });
                 }} 
-                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" 
+                className="p-2 text-content-secondary hover:text-content-primary" 
                 aria-label={isVoiceMode ? t('chat_text_mode') : t('chat_voice_mode')}
             >
                 {isVoiceMode ? <ChatBubbleIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <SoundWaveIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
             </button>
 
             {!isVoiceMode && (
-                <div className="flex items-center justify-end gap-2 border-l border-gray-200 dark:border-gray-700 pl-2 sm:pl-2 md:pl-4">
+                <div className="flex items-center justify-end gap-2 border-l border-border-primary pl-2 sm:pl-2 md:pl-4">
                     {isTtsEnabled && (
                         <>
                             {ttsStatus === 'idle' && (
-                                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat_tts')}>
+                                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current} className="p-1 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat_tts')}>
                                     <RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </button>
                             )}
-                            {ttsStatus === 'speaking' && <button onClick={handlePauseTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_pause_tts')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
-                            {ttsStatus === 'paused' && <button onClick={handleResumeTTS} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('chat_resume_tts')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
+                            {ttsStatus === 'speaking' && <button onClick={handlePauseTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_pause_tts')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
+                            {ttsStatus === 'paused' && <button onClick={handleResumeTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_resume_tts')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
                         </>
                     )}
-                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={isTtsEnabled ? t('chat_disable_tts') : t('chat_enable_tts')}>
+                    <button onClick={() => setIsTtsEnabled(p => !p)} className="p-1 text-content-secondary hover:text-content-primary" aria-label={isTtsEnabled ? t('chat_disable_tts') : t('chat_enable_tts')}>
                         {isTtsEnabled ? <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </button>
                     {isTtsEnabled && (
                         <button
                             onClick={handleOpenVoiceModal}
-                            className="p-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                            className="p-1 text-content-secondary hover:text-content-primary"
                             aria-label={t('chat_voice_settings')}
                         >
                             <GearIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -635,18 +635,18 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             )}
 
             {/* Separator */}
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+            <div className="h-6 w-px bg-border-primary mx-1"></div>
 
             {/* End Session Button/Icon */}
             <button
                 onClick={onEndSession}
-                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-green-400 bg-transparent border border-red-600 dark:border-green-400 uppercase hover:bg-red-600 dark:hover:bg-green-400 hover:text-white dark:hover:text-black rounded-lg shadow-md"
+                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-accent-primary bg-transparent border border-red-600 dark:border-accent-primary uppercase hover:bg-red-600 dark:hover:bg-accent-primary hover:text-white dark:hover:text-black rounded-lg shadow-md"
             >
                 {t('chat_end_session')}
             </button>
             <button
                 onClick={onEndSession}
-                className="md:hidden p-2 text-red-600 dark:text-green-400 rounded-full hover:bg-red-50 dark:hover:bg-green-400/10"
+                className="md:hidden p-2 text-red-600 dark:text-accent-primary rounded-full hover:bg-red-50 dark:hover:bg-accent-primary/10"
                 aria-label={t('chat_end_session')}
             >
                 <LogOutIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -655,10 +655,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
       </header>
       
     {isVoiceMode ? (
-        <main className="flex-1 flex flex-col justify-between items-center p-6 text-center bg-gray-50 dark:bg-gray-900/50 overflow-y-auto">
+        <main className="flex-1 flex flex-col justify-between items-center p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
             <div className="animate-fadeIn">
-                <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-white dark:border-gray-700" />
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h1>
+                <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
+                <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
             </div>
 
             <div className="flex flex-col items-center justify-center my-8 w-full">
@@ -666,23 +666,23 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     onClick={handleVoiceInteraction}
                     disabled={isLoading}
                     className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
-                        isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-green-500 hover:bg-green-600 focus:ring-green-300'
+                        isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
                     } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
                     aria-label={isListening ? 'Stop and send' : 'Start recording'}
                 >
                     {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                 </button>
-                <div className="mt-4 h-14 text-lg text-gray-600 dark:text-gray-400 flex items-center justify-center px-4 w-full max-w-md">
+                <div className="mt-4 h-14 text-lg text-content-secondary flex items-center justify-center px-4 w-full max-w-md">
                     <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
                 </div>
             </div>
 
             <div className="flex items-center justify-center gap-6">
-                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
-                    {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/> : <PlayIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>}
+                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
+                    {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
                 </button>
-                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-white dark:bg-gray-800 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 shadow" aria-label={'Repeat'}>
-                    <RepeatIcon className="w-8 h-8 text-gray-700 dark:text-gray-200"/>
+                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
+                    <RepeatIcon className="w-8 h-8 text-content-primary"/>
                 </button>
             </div>
         </main>
@@ -692,13 +692,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />}
-              <div className={`max-w-md p-3 ${message.role === 'user' ? 'bg-green-600 text-white rounded-l-lg rounded-br-lg' : 'prose dark:prose-invert bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 rounded-r-lg rounded-bl-lg'}`}>
+              <div className={`max-w-md p-3 ${message.role === 'user' ? 'bg-accent-tertiary text-accent-tertiary-foreground rounded-l-lg rounded-br-lg' : 'prose dark:prose-invert bg-background-tertiary text-content-primary dark:bg-background-tertiary dark:text-content-primary rounded-r-lg rounded-bl-lg'}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
               </div>
                {message.role === 'bot' && index > 0 && !isLoading && (
                     <button
                         onClick={() => handleOpenFeedbackModal(message)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 self-center"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-content-subtle hover:text-content-secondary self-center"
                         aria-label={t('chat_report_message')}
                         title={t('chat_report_message')}
                     >
@@ -710,14 +710,14 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {isLoading && (
               <div className="flex gap-3 justify-start animate-fadeIn">
                   <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />
-                  <div className="max-w-md p-3 bg-gray-100 dark:bg-gray-800 rounded-r-lg rounded-bl-lg">
+                  <div className="max-w-md p-3 bg-background-tertiary dark:bg-background-tertiary rounded-r-lg rounded-bl-lg">
                       <Spinner />
                   </div>
               </div>
           )}
         </main>
         
-        <footer className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <footer className="p-4 border-t border-border-primary">
           <form onSubmit={handleFormSubmit} className="flex items-end gap-3">
             <textarea
               ref={textareaRef}
@@ -727,12 +727,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
               placeholder={t('chat_placeholder')}
               disabled={isLoading}
               rows={1}
-              className="flex-1 p-3 bg-gray-100 text-gray-800 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-green-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-green-400 resize-none overflow-y-auto max-h-40"
+              className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
             />
-            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-gray-500 hover:text-gray-900 disabled:text-gray-300 dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
+            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
                 <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
             </button>
-            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
+            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
               <PaperPlaneIcon className="w-6 h-6" />
             </button>
           </form>

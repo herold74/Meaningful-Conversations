@@ -64,16 +64,16 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-        <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+      <div className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+        <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
+            <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
         </button>
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('login_title')}</h1>
+          <h1 className="text-3xl font-bold text-content-primary uppercase">{t('login_title')}</h1>
         </div>
 
         {reason && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 flex items-start gap-3 text-sm text-left">
+            <div className="p-4 bg-status-info-background dark:bg-status-info-background border border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-3 text-sm text-left">
                 <InfoIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <p>{reason}</p>
             </div>
@@ -81,7 +81,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('login_email_label')}</label>
+            <label htmlFor="email" className="block text-sm font-bold text-content-secondary text-left">{t('login_email_label')}</label>
             <input
               type="email"
               id="email"
@@ -89,7 +89,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary disabled:opacity-50"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
@@ -97,8 +97,8 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
           </div>
           <div>
             <div className="flex justify-between items-baseline">
-                <label htmlFor="password"  className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('login_password_label')}</label>
-                <button type="button" onClick={onForgotPassword} disabled={isLoading} className="text-xs text-green-600 hover:underline dark:text-green-400 disabled:opacity-50">
+                <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('login_password_label')}</label>
+                <button type="button" onClick={onForgotPassword} disabled={isLoading} className="text-xs text-accent-primary hover:underline disabled:opacity-50">
                     {t('login_forgot_password')}
                 </button>
             </div>
@@ -109,27 +109,27 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary disabled:opacity-50"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
+          {error && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error}</p>}
           
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
+            className="w-full px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
           >
             {isLoading ? <Spinner /> : t('login_button')}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-content-secondary">
           {t('login_no_account')}{' '}
-          <button onClick={onSwitchToRegister} disabled={isLoading} className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50">
+          <button onClick={onSwitchToRegister} disabled={isLoading} className="font-medium text-accent-primary hover:text-accent-primary-hover disabled:opacity-50">
             {t('login_register_link')}
           </button>
         </p>

@@ -57,17 +57,17 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <ArrowLeftIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+      <div className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
+            <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
         </button>
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('register_title')}</h1>
+          <h1 className="text-3xl font-bold text-content-primary uppercase">{t('register_title')}</h1>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email"  className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('register_email_label')}</label>
+            <label htmlFor="email"  className="block text-sm font-bold text-content-secondary text-left">{t('register_email_label')}</label>
             <input
               type="email"
               id="email"
@@ -75,17 +75,17 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'email' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'email' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'email'}
               aria-describedby={error?.type === 'email' ? 'email-error' : undefined}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
-            {error?.type === 'email' && <p id="email-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
+            {error?.type === 'email' && <p id="email-error" className="text-status-danger-foreground text-sm mt-1">{error.message}</p>}
           </div>
           <div>
-            <label htmlFor="password"  className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('register_password_label')}</label>
+            <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_password_label')}</label>
             <input
               type="password"
               id="password"
@@ -93,7 +93,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'password' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
               autoCapitalize="none"
@@ -102,7 +102,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
             />
           </div>
            <div>
-            <label htmlFor="confirm-password"  className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('register_confirm_password_label')}</label>
+            <label htmlFor="confirm-password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_confirm_password_label')}</label>
             <input
               type="password"
               id="confirm-password"
@@ -110,30 +110,30 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border ${error?.type === 'password' ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-green-500'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'password' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
-            {error?.type === 'password' && <p id="password-error" className="text-red-500 text-sm mt-1">{error.message}</p>}
+            {error?.type === 'password' && <p id="password-error" className="text-status-danger-foreground text-sm mt-1">{error.message}</p>}
           </div>
 
-          {error?.type === 'general' && <p className="text-red-500 text-sm whitespace-pre-wrap">{error.message}</p>}
+          {error?.type === 'general' && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error.message}</p>}
           
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
+            className="w-full px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
           >
             {isLoading ? <Spinner /> : t('register_button')}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-content-secondary">
           {t('register_has_account')}{' '}
-          <button onClick={onSwitchToLogin} disabled={isLoading} className="font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50">
+          <button onClick={onSwitchToLogin} disabled={isLoading} className="font-medium text-accent-primary hover:text-accent-primary-hover disabled:opacity-50">
             {t('register_login_link')}
           </button>
         </p>

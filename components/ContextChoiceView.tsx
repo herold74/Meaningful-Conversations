@@ -64,31 +64,31 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
-      <div className="w-full max-w-2xl p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">
+      <div className="w-full max-w-2xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-content-primary uppercase">
           {t('contextChoice_welcome_back')}
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p className="text-lg text-content-secondary leading-relaxed">
           {t('contextChoice_intro')}
           <span className="hidden md:inline"> {t('contextChoice_question')}</span>
         </p>
         
-        <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-left">
-          <h2 className="text-sm font-bold text-green-600 dark:text-green-400 mb-2 uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
+        <div className="p-4 bg-background-primary dark:bg-background-primary border border-border-primary dark:border-border-primary text-left">
+          <h2 className="text-sm font-bold text-accent-primary mb-2 uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
           
           {/* Full preview is now shown on all screen sizes */}
           <div className="prose prose-sm dark:prose-invert max-w-none max-h-60 overflow-y-auto">
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    h1: ({node, ...props}) => <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-base font-bold text-gray-800 dark:text-gray-200 mb-1" {...props} />,
-                    p: ({node, ...props}) => <p className="text-gray-700 dark:text-gray-400" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-bold text-gray-800 dark:text-gray-200" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-5 text-gray-700 dark:text-gray-400" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 text-gray-700 dark:text-gray-400" {...props} />,
-                    li: ({node, ...props}) => <li className="text-gray-700 dark:text-gray-400" {...props} />,
-                    hr: ({node, ...props}) => <hr className="my-6 border-gray-300 dark:border-gray-700" {...props} />,
+                    h1: ({node, ...props}) => <h1 className="text-lg font-bold text-content-primary mb-2" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-bold text-content-primary mb-1" {...props} />,
+                    p: ({node, ...props}) => <p className="text-content-secondary" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-bold text-content-primary" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 text-content-secondary" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 text-content-secondary" {...props} />,
+                    li: ({node, ...props}) => <li className="text-content-secondary" {...props} />,
+                    hr: ({node, ...props}) => <hr className="my-6 border-border-secondary" {...props} />,
                 }}
             >
                 {contextPreviewFull}
@@ -99,14 +99,14 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         <div className="space-y-4 pt-4">
           <button
             onClick={onContinue}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
           >
             <FileTextIcon className="w-6 h-6" />
             {t('contextChoice_continue')}
           </button>
            <button
             onClick={() => setIsConfirmingStartNew(true)}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary rounded-lg shadow-md"
           >
             <UploadIcon className="w-6 h-6" />
             {t('contextChoice_start_new')}
@@ -122,29 +122,29 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
             aria-modal="true"
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-lg m-4 p-6 border border-yellow-400 dark:border-yellow-500/50 shadow-xl rounded-lg"
+                className="bg-background-secondary dark:bg-background-primary w-full max-w-lg m-4 p-6 border border-status-warning-border dark:border-status-warning-border/50 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200 flex items-center gap-3">
-                        <WarningIcon className="w-6 h-6 text-yellow-500" />
+                    <h2 className="text-2xl font-bold text-content-primary flex items-center gap-3">
+                        <WarningIcon className="w-6 h-6 text-status-warning-foreground" />
                         {t('contextChoice_confirm_title')}
                     </h2>
-                     <button onClick={() => setIsConfirmingStartNew(false)} className="p-2 -mr-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                     <button onClick={() => setIsConfirmingStartNew(false)} className="p-2 -mr-2 text-content-secondary hover:text-content-primary">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
-                 <p className="text-gray-600 dark:text-gray-400 text-left mb-6">{t('contextChoice_confirm_warning')}</p>
+                 <p className="text-content-secondary text-left mb-6">{t('contextChoice_confirm_warning')}</p>
 
                  <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         onClick={handleDownloadContext}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md"
                     >
                         <DownloadIcon className="w-5 h-5"/>
                         {t('contextChoice_confirm_download')}
                     </button>
-                    <button onClick={handleConfirmStartNew} className="flex-1 px-4 py-2 text-sm font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 rounded-lg shadow-md">
+                    <button onClick={handleConfirmStartNew} className="flex-1 px-4 py-2 text-sm font-bold text-content-inverted-dark bg-accent-secondary uppercase hover:bg-accent-secondary-hover rounded-lg shadow-md">
                         {t('contextChoice_confirm_proceed')}
                     </button>
                  </div>

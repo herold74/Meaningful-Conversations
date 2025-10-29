@@ -24,10 +24,10 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
         onClick={() => !isLocked && onSelect(bot)}
         className={`
             flex flex-col items-center text-center p-6
-            bg-white dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
+            bg-background-secondary dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
             ${isLocked
-              ? 'cursor-not-allowed bg-gray-50 dark:bg-gray-900/50 opacity-60 border-gray-200 dark:border-gray-800'
-              : 'cursor-pointer hover:border-green-500 dark:hover:border-green-400 hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-gray-200 dark:border-gray-700'
+              ? 'cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 border-border-primary dark:border-border-primary'
+              : 'cursor-pointer hover:border-accent-primary dark:hover:border-accent-primary hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-border-primary dark:border-border-primary'
             }
         `}
         aria-disabled={isLocked}
@@ -46,13 +46,13 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
         </div>
 
         <div className="mt-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{bot.name}</h2>
+            <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
             <div className="flex flex-wrap justify-center gap-2 my-3">
                 {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
                     const isFirstTag = index === 0;
                     const tagClass = !isLocked && isFirstTag
-                        ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
-                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+                        ? 'bg-accent-primary/20 text-accent-primary-hover'
+                        : 'bg-background-tertiary text-content-secondary dark:bg-background-tertiary dark:text-content-secondary';
                     
                     return (
                         <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
@@ -61,7 +61,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
                     );
                 })}
             </div>
-            <p className="mt-1 text-gray-600 dark:text-gray-400 leading-relaxed text-base">
+            <p className="mt-1 text-content-secondary dark:text-content-secondary leading-relaxed text-base">
                 {language === 'de' ? bot.description_de : bot.description}
             </p>
         </div>
@@ -148,8 +148,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
   return (
     <div className="py-10 animate-fadeIn">
       <div className="w-full max-w-6xl mx-auto mb-8 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('botSelection_title')}</h1>
-        <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('botSelection_title')}</h1>
+        <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
         {t('botSelection_subtitle')}
         </p>
       </div>
@@ -159,7 +159,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
         
         {lockedBots.length > 0 && unlockMessage && (
             <div className="md:col-span-2 lg:col-span-3">
-                <p className="text-sm text-yellow-600 dark:text-yellow-400 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 text-center">
+                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground p-2 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 text-center">
                     {unlockMessage}
                 </p>
             </div>

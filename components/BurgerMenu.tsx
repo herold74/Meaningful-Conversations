@@ -47,24 +47,24 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
             aria-modal="true"
         >
             <div 
-                className="w-full max-w-sm h-full bg-white dark:bg-gray-950 shadow-2xl p-6 flex flex-col animate-slideInFromLeft"
+                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 uppercase">{t('menu_title')}</h2>
-                    <button onClick={onClose} className="p-2 -mr-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                    <h2 className="text-xl font-bold text-content-primary uppercase">{t('menu_title')}</h2>
+                    <button onClick={onClose} className="p-2 -mr-2 text-content-secondary hover:text-content-primary">
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
                 
                 <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
                     <MenuItem icon={RepeatIcon} text={t('menu_start_over')} onClick={handleStartOverAndClose} />
-                    <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                    <hr className="border-border-primary my-2" />
                     
                     {currentUser?.isAdmin && (
                         <>
                             <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => onNavigate('admin')} />
-                             <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                             <hr className="border-border-primary my-2" />
                         </>
                     )}
 
@@ -73,7 +73,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => onNavigate('terms')} />
                     <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => onNavigate('disclaimer')} />
 
-                    <hr className="border-gray-200 dark:border-gray-800 my-2" />
+                    <hr className="border-border-primary my-2" />
                     
                     {currentUser && (
                         <>
@@ -87,18 +87,18 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => onNavigate('formattingHelp')} />
                 </nav>
 
-                <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-800">
+                <div className="mt-auto pt-4 border-t border-border-primary">
                     {currentUser ? (
                         <>
-                            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-left truncate">
+                            <div className="px-4 py-3 text-sm text-content-subtle text-left truncate">
                                 {currentUser.email}
                             </div>
-                            <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50" />
+                            <MenuItem icon={LogOutIcon} text={t('menu_logout')} onClick={handleLogout} specialColor="text-status-danger-foreground hover:bg-status-danger-background" />
                         </>
                     ) : (
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
-                    <p className="px-4 pt-2 text-xs text-center text-gray-400 dark:text-gray-500">
+                    <p className="px-4 pt-2 text-xs text-center text-content-subtle">
                         Version 1.4.7
                     </p>
                 </div>
@@ -113,10 +113,10 @@ const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () =>
         className={`w-full flex items-center gap-4 px-4 py-3 text-left rounded-md transition-colors ${
             specialColor 
                 ? specialColor 
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                : 'text-content-secondary hover:bg-background-tertiary'
         }`}
     >
-        <Icon className={`w-6 h-6 ${specialColor ? '' : 'text-gray-500 dark:text-gray-400'}`} />
+        <Icon className={`w-6 h-6 ${specialColor ? '' : 'text-content-subtle'}`} />
         <span className="font-semibold">{text}</span>
     </button>
 );

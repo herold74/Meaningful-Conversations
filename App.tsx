@@ -77,12 +77,19 @@ const App: React.FC = () => {
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
 
-    // Theme
-    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    // Theme States
+    const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+            return localStorage.getItem('isDarkMode') === 'dark' ? 'dark' : 'light';
         }
         return 'light';
+    });
+    const [colorTheme, setColorTheme] = useState<'autumn' | 'winter'>(() => {
+        if (typeof window !== 'undefined') {
+            const storedTheme = localStorage.getItem('colorTheme');
+            return storedTheme === 'autumn' ? 'autumn' : 'winter';
+        }
+        return 'winter'; // Default to the new theme to showcase it
     });
 
     const setAndProcessUser = (user: User | null) => {
@@ -106,15 +113,21 @@ const App: React.FC = () => {
     };
 
     useEffect(() => {
-        if (theme === 'dark') {
+        if (isDarkMode === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
         }
-        localStorage.setItem('theme', theme);
-    }, [theme]);
+        localStorage.setItem('isDarkMode', isDarkMode);
+    }, [isDarkMode]);
+    
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', colorTheme);
+        localStorage.setItem('colorTheme', colorTheme);
+    }, [colorTheme]);
 
-    const toggleTheme = () => setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    const toggleDarkMode = () => setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
+    const toggleColorTheme = () => setColorTheme(prev => prev === 'winter' ? 'autumn' : 'winter');
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
@@ -631,7 +644,7 @@ const App: React.FC = () => {
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
     return (
-        <div className={`bg-gray-50 dark:bg-gray-950 font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
+        <div className={`bg-background-primary font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
                 <GamificationBar 
                     gamificationState={gamificationState}
@@ -641,8 +654,10 @@ const App: React.FC = () => {
                     onCloseSubMenu={handleCloseSubMenu}
                     isMenuOpen={isMenuOpen}
                     isSubMenuOpen={!!menuView}
-                    theme={theme}
-                    toggleTheme={toggleTheme}
+                    isDarkMode={isDarkMode}
+                    toggleDarkMode={toggleDarkMode}
+                    colorTheme={colorTheme}
+                    toggleColorTheme={toggleColorTheme}
                     minimal={minimalBar}
                 />
             )}

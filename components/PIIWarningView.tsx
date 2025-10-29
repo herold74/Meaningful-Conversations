@@ -11,16 +11,16 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
   const { t } = useLocalization();
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
-      <div className="w-full max-w-2xl p-8 space-y-6 bg-yellow-50 dark:bg-transparent border border-yellow-400 dark:border-yellow-500">
+      <div className="w-full max-w-2xl p-8 space-y-6 bg-status-warning-background dark:bg-transparent border border-status-warning-border">
         <div className="flex flex-col items-center">
-          <WarningIcon className="w-16 h-16 text-yellow-500 dark:text-yellow-400" />
-          <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('piiWarning_title')}</h1>
+          <WarningIcon className="w-16 h-16 text-status-warning-foreground" />
+          <h1 className="mt-4 text-3xl font-bold text-content-primary uppercase">{t('piiWarning_title')}</h1>
         </div>
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p className="text-lg text-content-secondary leading-relaxed">
           {t('piiWarning_subtitle')}
         </p>
-        <div className="p-4 bg-yellow-50/50 dark:bg-gray-900 border border-yellow-200 dark:border-gray-700 text-left text-sm text-gray-600 dark:text-gray-400">
-          <p className="font-bold text-gray-700 dark:text-gray-300">{t('piiWarning_examples')}</p>
+        <div className="p-4 bg-background-secondary/50 dark:bg-background-primary border border-border-primary dark:border-border-primary text-left text-sm text-content-secondary">
+          <p className="font-bold text-content-primary">{t('piiWarning_examples')}</p>
           <ul className="list-disc list-inside mt-2 space-y-1 whitespace-pre-line">
             {t('piiWarning_list').split('\n').map((item, index) => <li key={index}>{item}</li>)}
           </ul>
@@ -29,13 +29,13 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <button
             onClick={onCancel}
-            className="flex-1 px-6 py-3 text-base font-bold text-yellow-600 dark:text-yellow-400 bg-transparent border border-yellow-600 dark:border-yellow-400 uppercase hover:bg-yellow-600 dark:hover:bg-yellow-400 hover:text-white dark:hover:text-black focus:outline-none transition-colors rounded-lg shadow-md"
+            className="flex-1 px-6 py-3 text-base font-bold text-status-warning-foreground bg-transparent border border-status-warning-foreground uppercase hover:bg-status-warning-foreground hover:text-content-inverted-dark dark:hover:text-content-inverted-dark focus:outline-none transition-colors rounded-lg shadow-md"
           >
             {t('piiWarning_goBack')}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors rounded-lg shadow-md"
+            className="flex-1 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors rounded-lg shadow-md"
           >
             {t('piiWarning_continue')}
           </button>

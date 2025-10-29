@@ -18,30 +18,30 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
   const [isLoading, setIsLoading] = useState(false);
 
   const getButtonClass = (lang: 'en' | 'de') => {
-    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-950 rounded-md shadow-sm";
+    const baseClass = "px-4 py-2 text-sm font-bold uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary rounded-md shadow-sm";
     if (language === lang) {
-        return `${baseClass} bg-[#1B7272] text-white focus:ring-[#1B7272]`;
+        return `${baseClass} bg-accent-tertiary text-accent-tertiary-foreground focus:ring-accent-tertiary`;
     }
-    return `${baseClass} bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 focus:ring-gray-500`;
+    return `${baseClass} bg-border-primary dark:bg-border-primary text-content-secondary hover:bg-border-secondary dark:hover:bg-border-secondary focus:ring-border-secondary`;
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
+      <div className="w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
         <div className="flex justify-center gap-4">
             <button onClick={() => setLanguage('en')} className={getButtonClass('en')}>English</button>
             <button onClick={() => setLanguage('de')} className={getButtonClass('de')}>Deutsch</button>
         </div>
         
         {redirectReason && (
-            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-500/30 text-yellow-800 dark:text-yellow-300 flex items-start gap-3">
+            <div className="p-4 bg-status-info-background dark:bg-status-info-background border border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-3">
                 <InfoIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-left">{redirectReason}</p>
             </div>
         )}
 
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('auth_title')}</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+        <h1 className="text-3xl font-bold text-content-primary uppercase">{t('auth_title')}</h1>
+        <p className="text-lg text-content-secondary leading-relaxed">
           {t('auth_subtitle')}
         </p>
         
@@ -49,7 +49,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
           <button
             onClick={onLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <LogInIcon className="w-6 h-6" />
             {t('auth_login')}
@@ -57,7 +57,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
            <button
             onClick={onRegister}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <UserIcon className="w-6 h-6" />
             {t('auth_register')}
@@ -65,7 +65,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
            <button
             onClick={onGuest}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-gray-700 dark:text-gray-300 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary disabled:opacity-50 rounded-lg shadow-md"
           >
             <UsersIcon className="w-6 h-6" />
             {t('auth_guest')}

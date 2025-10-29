@@ -58,15 +58,15 @@ const TermsView: React.FC<InfoViewProps> = () => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('terms_title')}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('terms_title')}</h1>
             </div>
-            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
+            <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
                     }}
                 >
                     {markdownContent}

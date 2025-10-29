@@ -228,71 +228,61 @@ The app uses game-like elements to motivate you to engage in regular self-reflec
 ### 4.1 The Gamification Bar
 At the top of the screen, you will see:
 - **Level:** Your overall progress.
-- **Streak:** The number of consecutive days you have completed a session.
-- **XP Bar:** Shows your progress toward the next level.
+- **Streak:** The number of consecutive days you've completed a session.
+- **XP Bar:** Shows your progress to the next level.
 - **Trophy Icon:** **Click this** to view your **Achievements** page.
 
 ### 4.2 How to Earn XP
 
-| Action | XP Gained |
+| Action | XP Awarded |
 | :--- | :--- |
-| For each message you send in a session | 5 XP |
-| For each "Next Step" identified in the review | 10 XP |
+| Per message sent in a session | 5 XP |
+| Per "Next Step" identified in analysis | 10 XP |
 | Accomplishing a pre-existing goal | 25 XP |
-| Formally ending the session | 50 XP |
+| Formally concluding the session | 50 XP |
 
-### 4.3 Where is Progress Stored?
+### 4.3 Where is Progress Saved?
 
-| User Type | Where Achievements are Stored | Is it Persistent? |
+| User Type | Achievement Storage Location | Persistence |
 | :--- | :--- | :--- |
-| **Registered** | On the server, tied to your user account. | **Yes**, persistent across all sessions and devices. |
-| **Guest** | Inside the \`.md\` file in a hidden comment. | **No**, only persists if you reuse the same file. |
+| **Registered** | On the server, tied to your account. | **Yes**, across all sessions and devices. |
+| **Guest** | In the \`.md\` file in a hidden comment. | **No**, only if you reuse the same file. |
 
 ---
 
-## Chapter 5: For Registered Users - Privacy & Data
+## Chapter 5: Privacy & Security for Registered Users
 
 Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file.
 
 - Your password generates a unique encryption key **on your device**.
 - This key is **never** sent to our servers.
-- Only the scrambled, unreadable version of your data is stored.
+- Only the encrypted, unreadable version of your data is stored.
 - **No one but you can read your data.**
 `;
 
+// Fix: Add the component definition and default export.
 const UserGuideView: React.FC<InfoViewProps> = () => {
     const { t, language } = useLocalization();
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
+    
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('userGuide_title')}</h1>
+                <h1 className="text-3xl font-bold text-content-primary uppercase">{t('user_guide_title')}</h1>
             </div>
-            <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 space-y-4 leading-relaxed">
+            <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-8 mb-4 not-prose" {...props} />,
-                         h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-2 not-prose" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose" {...props} />,
+                        table: ({node, ...props}) => <table className="w-full my-4 text-sm" {...props} />,
+                        th: ({node, ...props}) => <th className="border border-border-secondary p-2 bg-background-tertiary" {...props} />,
+                        td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
                     }}
                 >
                     {markdownContent}
                 </ReactMarkdown>
-                
-                <div className="p-4 mt-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4 not-prose">
-                    <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                    <div>
-                        {language === 'de' ? (
-                            <p>
-                                <strong>Wichtig:</strong> Wenn Sie Ihr Passwort vergessen, geht Ihre verschlüsselte Datei <strong>dauerhaft verloren</strong>. Bei einer Passwort-Zurücksetzung wird die Datei unwiderruflich gelöscht. Sichern Sie Ihre Datei daher regelmäßig, indem Sie sie herunterladen.
-                            </p>
-                        ) : (
-                            <p>
-                                <strong>Important:</strong> If you forget your password, your encrypted file will be <strong>permanently lost</strong>. If you reset your password, the file will be irrevocably deleted. Therefore, back up your file regularly by downloading it.
-                            </p>
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     );
