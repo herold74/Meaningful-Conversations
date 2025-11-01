@@ -150,12 +150,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           ) : (
              <div className="p-4 space-y-4 bg-background-secondary dark:bg-background-primary/50 border border-border-primary dark:border-border-primary rounded-lg animate-fadeIn shadow-md">
                 <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 p-2 bg-status-success-background">
-                        <CheckIcon className="w-6 h-6 text-status-success-foreground" />
+                    <div className="flex-shrink-0 p-2 bg-accent-primary/20">
+                        <CheckIcon className="w-6 h-6 text-accent-primary" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                         <p className="font-bold text-content-primary truncate" title={fileName}>{fileName}</p>
-                        <button type="button" onClick={handleResetFile} className="text-sm text-status-warning-foreground hover:underline">
+                        <button type="button" onClick={handleResetFile} className="text-sm text-accent-primary hover:text-accent-primary-hover hover:underline">
                             {t('landing_change_file')}
                         </button>
                     </div>

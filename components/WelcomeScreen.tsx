@@ -14,7 +14,7 @@ const WelcomeScreen: React.FC = () => {
     ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background-primary text-center animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn">
       {/* Container for the logo and avatars */}
       <div className="relative w-48 h-48">
         

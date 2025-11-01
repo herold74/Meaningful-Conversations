@@ -27,13 +27,13 @@ html[data-theme="winter"] {
   --accent-tertiary-hover: 30 64 175; /* blue-800 */
   --accent-tertiary-foreground: 255 255 255;
 
-  --status-warning-background: 240 249 255; /* sky-50 */
-  --status-warning-border: 56 189 248; /* sky-400 */
-  --status-warning-foreground: 2 132 199; /* sky-600 */
+  --status-warning-background: 254 252 232; /* yellow-50 */
+  --status-warning-border: 250 204 21; /* yellow-400 */
+  --status-warning-foreground: 180 83 9; /* yellow-600 */
 
-  --status-success-background: 236 254 255; /* cyan-50 */
-  --status-success-border: 103 232 249; /* cyan-300 */
-  --status-success-foreground: 15 116 143; /* cyan-700 */
+  --status-success-background: 240 253 244; /* green-50 */
+  --status-success-border: 134 239 172; /* green-300 */
+  --status-success-foreground: 22 101 52; /* green-700 */
   
   --status-danger-background: 254 242 242; /* red-50 */
   --status-danger-border: 248 113 113; /* red-400 */
@@ -41,7 +41,7 @@ html[data-theme="winter"] {
 
   --status-info-background: 239 246 255; /* blue-50 */
   --status-info-border: 147 197 253; /* blue-300 */
-  --status-info-foreground: 30 64 175; /* blue-700 */
+  --status-info-foreground: 30 64 175; /* blue-800 */
 
   --spinner: 56 189 248;
   --button-foreground-on-accent: 17 24 39;
@@ -60,13 +60,13 @@ html[data-theme="winter"] {
   --border-primary: 51 65 85; /* slate-700 */
   --border-secondary: 71 85 105; /* slate-600 */
 
-  --status-warning-background: 14 65 96;
-  --status-warning-border: 56 189 248 / 0.3;
-  --status-warning-foreground: 56 189 248; /* sky-400 */
+  --status-warning-background: 60 43 6;
+  --status-warning-border: 133 76 8 / 0.3;
+  --status-warning-foreground: 234 179 8; /* yellow-400 */
   
-  --status-success-background: 13 60 74;
-  --status-success-border: 34 211 238 / 0.3;
-  --status-success-foreground: 34 211 238; /* cyan-400 */
+  --status-success-background: 5 50 32;
+  --status-success-border: 34 197 94 / 0.3;
+  --status-success-foreground: 74 222 128; /* green-400 */
 
   --status-danger-background: 70 13 13;
   --status-danger-border: 220 38 38 / 0.3;
@@ -115,7 +115,7 @@ html[data-theme="autumn"] {
 
   --status-info-background: 239 246 255; /* blue-50 */
   --status-info-border: 147 197 253; /* blue-300 */
-  --status-info-foreground: 30 64 175; /* blue-700 */
+  --status-info-foreground: 30 64 175; /* blue-800 */
 
   --spinner: 74 222 128;
   --button-foreground-on-accent: 17 24 39;

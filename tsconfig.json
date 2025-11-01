@@ -16,7 +16,25 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["."],
-  "exclude": ["dist", "node_modules", "meaningful-conversations-backend", "vite.config.ts"],
+  "include": [
+    "index.tsx",
+    "App.tsx",
+    "types.ts",
+    "constants.ts",
+    "achievements.ts",
+    "achievementDefs.ts",
+    "vite-env.d.ts",
+    "components/**/*.tsx",
+    "components/**/*.ts",
+    "context/**/*.tsx",
+    "services/**/*.ts",
+    "utils/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "meaningful-conversations-backend",
+    "public/sw.js"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

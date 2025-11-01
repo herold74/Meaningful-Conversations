@@ -65,8 +65,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
         if (submissionStatus === 'success') {
             return (
                 <div className="text-center p-8 flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4">
-                        <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
+                    <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center mb-4">
+                        <CheckIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">{t('feedback_successTitle')}</h3>
                     <p className="mt-2 text-gray-600 dark:text-gray-400">{t('feedback_successMessage')}</p>
@@ -102,7 +102,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                             onChange={(e) => setComments(e.target.value)}
                             placeholder={t('feedback_commentsPlaceholder')}
                             required
-                            className="mt-1 w-full p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                            className="mt-1 w-full p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
                         />
                     </div>
 
@@ -112,7 +112,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                                 type="checkbox"
                                 checked={isAnonymous}
                                 onChange={(e) => setIsAnonymous(e.target.checked)}
-                                className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 [color-scheme:light] dark:[color-scheme:dark]"
+                                className="h-5 w-5 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-2 text-gray-700 dark:text-gray-300">{t('feedback_anonymousCheckbox')}</span>
                         </label>
@@ -128,7 +128,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder={t('feedback_emailPlaceholder')}
                                 required={!isAnonymous}
-                                className="mt-1 w-full p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-400"
+                                className="mt-1 w-full p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
                             />
                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                 {t('feedback_contact_consent')}
@@ -141,7 +141,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                     <button type="button" onClick={onClose} disabled={submissionStatus === 'submitting'} className="px-4 py-1 text-xs font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-sm">
                         {t('feedback_cancel')}
                     </button>
-                    <button type="submit" disabled={submissionStatus === 'submitting' || !comments.trim()} className="px-4 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center w-32 rounded-lg shadow-sm">
+                    <button type="submit" disabled={submissionStatus === 'submitting' || !comments.trim()} className="px-4 py-1 text-xs font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed flex items-center justify-center w-32 rounded-lg shadow-sm">
                         {submissionStatus === 'submitting' ? <Spinner /> : t('feedback_submit')}
                     </button>
                 </div>

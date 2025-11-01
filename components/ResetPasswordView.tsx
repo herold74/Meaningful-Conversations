@@ -55,12 +55,12 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
         
         {status === 'success' ? (
              <div className="text-center p-4">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4 mx-auto">
-                    <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
+                <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <CheckIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('resetPassword_success_title')}</h1>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">{t('resetPassword_success_subtitle')}</p>
-                <button onClick={onResetSuccess} className="mt-6 w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 rounded-lg shadow-md">
+                <button onClick={onResetSuccess} className="mt-6 w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md">
                     {t('login_button')}
                 </button>
              </div>
@@ -103,7 +103,7 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                     <button
                         type="submit"
                         disabled={status === 'loading'}
-                        className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
+                        className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
                     >
                         {status === 'loading' ? <Spinner /> : t('changePassword_button')}
                     </button>

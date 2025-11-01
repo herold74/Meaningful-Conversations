@@ -47,9 +47,9 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                     <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_lists_code')}
                     </code></pre>
-                    <div className="p-4 mt-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4 not-prose">
+                    <div className="p-4 mt-4 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4 not-prose">
                         <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <p className="text-sm" dangerouslySetInnerHTML={{ __html: t('formatting_lists_warning') }} />
+                        <p dangerouslySetInnerHTML={{ __html: t('formatting_lists_warning') }} />
                     </div>
                 </div>
 
@@ -64,9 +64,9 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_manual_title')}</h2>
                     <p dangerouslySetInnerHTML={{ __html: t('formatting_manual_p1') }} />
-                     <div className="p-4 mt-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 text-green-800 dark:text-green-300 flex items-start gap-4 not-prose">
+                     <div className="p-4 mt-4 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
                         <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <p className="font-bold">{t('formatting_manual_p2')}</p>
+                        <p dangerouslySetInnerHTML={{__html: t('formatting_manual_p2')}}/>
                     </div>
                 </div>
 

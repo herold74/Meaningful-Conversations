@@ -5,6 +5,7 @@ interface Field {
     label?: string;
     prompt: string;
     rows?: number;
+    type?: 'list' | 'text';
 }
 
 interface SubSection {
@@ -20,98 +21,72 @@ interface Section {
     description?: string;
     fields?: Field[];
     subSections?: SubSection[];
-    collapsedByDefault?: boolean;
-    collapseText?: string;
 }
 
-export const getQuestionnaireStructure = (t: (key: string) => string): Section[] => [
+export const getQuestionnaireStructure = (t: (key: string, replacements?: Record<string, string | number>) => string): Section[] => [
     {
-        title: t('questionnaire_background_title'),
+        title: t('q_section_profile_title'),
         level: 2,
-        description: t('questionnaire_background_desc'),
+        description: t('q_section_profile_desc'),
         fields: [
-            { id: 'background_name', label: t('questionnaire_background_name_label'), prompt: t('questionnaire_background_name_prompt'), rows: 1 },
-            { id: 'background_work', label: t('questionnaire_background_work_label'), prompt: t('questionnaire_background_work_prompt') },
-            { id: 'background_family', label: t('questionnaire_background_family_label'), prompt: t('questionnaire_background_family_prompt') },
-            { id: 'background_social', label: t('questionnaire_background_social_label'), prompt: t('questionnaire_background_social_prompt') },
-            { id: 'background_health', label: t('questionnaire_background_health_label'), prompt: t('questionnaire_background_health_prompt') },
-            { id: 'background_sentiment', label: t('questionnaire_background_sentiment_label'), prompt: t('questionnaire_background_sentiment_prompt') },
+            { id: 'profile_name', label: t('q_field_name_label'), prompt: t('q_field_name_prompt'), rows: 1 },
+            { id: 'profile_values', label: t('q_field_values_label'), prompt: t('q_field_values_prompt') },
+            { id: 'profile_sentiment', label: t('q_field_sentiment_label'), prompt: t('q_field_sentiment_prompt') },
         ]
     },
     {
-        title: t('questionnaire_goals_title'),
+        title: t('q_section_domains_title'),
         level: 2,
-        description: t('questionnaire_goals_desc'),
+        description: t('q_section_domains_desc'),
         subSections: [
             {
-                title: t('questionnaire_goals_midterm_title'),
+                title: t('q_domain_career_title'),
                 level: 3,
                 fields: [
-                    { id: 'goals_midterm_career', label: t('questionnaire_goals_midterm_career_label'), prompt: t('questionnaire_goals_midterm_career_prompt') },
-                    { id: 'goals_midterm_personal', label: t('questionnaire_goals_midterm_personal_label'), prompt: t('questionnaire_goals_midterm_personal_prompt') },
-                    { id: 'goals_midterm_financial', label: t('questionnaire_goals_midterm_financial_label'), prompt: t('questionnaire_goals_midterm_financial_prompt') },
+                    { id: 'career_situation', label: t('q_field_situation_label'), prompt: t('q_field_career_situation_prompt'), rows: 4 },
+                    { id: 'career_routines', label: t('q_field_routines_label'), prompt: t('q_field_career_routines_prompt'), rows: 4, type: 'list' },
+                    { id: 'career_goals', label: t('q_field_goals_label'), prompt: t('q_field_career_goals_prompt'), rows: 4, type: 'list' },
+                    { id: 'career_challenges', label: t('q_field_challenges_label'), prompt: t('q_field_career_challenges_prompt'), rows: 4, type: 'list' }
                 ]
             },
             {
-                title: t('questionnaire_goals_longterm_title'),
+                title: t('q_domain_growth_title'),
                 level: 3,
-                description: t('questionnaire_goals_longterm_desc'),
                 fields: [
-                    { id: 'goals_longterm_big5', label: t('questionnaire_goals_longterm_big5_label'), prompt: t('questionnaire_goals_longterm_big5_prompt') },
+                    { id: 'growth_situation', label: t('q_field_situation_label'), prompt: t('q_field_growth_situation_prompt'), rows: 4 },
+                    { id: 'growth_routines', label: t('q_field_routines_label'), prompt: t('q_field_growth_routines_prompt'), rows: 4, type: 'list' },
+                    { id: 'growth_goals', label: t('q_field_goals_label'), prompt: t('q_field_growth_goals_prompt'), rows: 4, type: 'list' },
+                    { id: 'growth_challenges', label: t('q_field_challenges_label'), prompt: t('q_field_growth_challenges_prompt'), rows: 4, type: 'list' }
+                ]
+            },
+            {
+                title: t('q_domain_relationships_title'),
+                level: 3,
+                fields: [
+                    { id: 'relationships_situation', label: t('q_field_situation_label'), prompt: t('q_field_relationships_situation_prompt'), rows: 4 },
+                    { id: 'relationships_routines', label: t('q_field_routines_label'), prompt: t('q_field_relationships_routines_prompt'), rows: 4, type: 'list' },
+                    { id: 'relationships_goals', label: t('q_field_goals_label'), prompt: t('q_field_relationships_goals_prompt'), rows: 4, type: 'list' },
+                    { id: 'relationships_challenges', label: t('q_field_challenges_label'), prompt: t('q_field_relationships_challenges_prompt'), rows: 4, type: 'list' }
+                ]
+            },
+            {
+                title: t('q_domain_health_title'),
+                level: 3,
+                fields: [
+                    { id: 'health_situation', label: t('q_field_situation_label'), prompt: t('q_field_health_situation_prompt'), rows: 4 },
+                    { id: 'health_routines', label: t('q_field_routines_label'), prompt: t('q_field_health_routines_prompt'), rows: 4, type: 'list' },
+                    { id: 'health_goals', label: t('q_field_goals_label'), prompt: t('q_field_health_goals_prompt'), rows: 4, type: 'list' },
+                    { id: 'health_challenges', label: t('q_field_challenges_label'), prompt: t('q_field_health_challenges_prompt'), rows: 4, type: 'list' }
                 ]
             }
-        ],
-        collapsedByDefault: true,
-        collapseText: t('questionnaire_goals_collapseText'),
+        ]
     },
     {
-        title: t('questionnaire_routines_title'),
+        title: t('q_section_nextsteps_title'),
         level: 2,
-        description: t('questionnaire_routines_desc'),
+        description: t('q_section_nextsteps_desc'),
         fields: [
-            { id: 'routines_p_tm', label: t('questionnaire_routines_ptm_label'), prompt: t('questionnaire_routines_ptm_prompt') },
-            { id: 'routines_learning', label: t('questionnaire_routines_learning_label'), prompt: t('questionnaire_routines_learning_prompt') },
-            { id: 'routines_health', label: t('questionnaire_routines_health_label'), prompt: t('questionnaire_routines_health_prompt') },
-            { id: 'routines_growth', label: t('questionnaire_routines_growth_label'), prompt: t('questionnaire_routines_growth_prompt') },
-        ],
-        collapsedByDefault: true,
-        collapseText: t('questionnaire_routines_collapseText'),
-    },
-    {
-        title: t('questionnaire_challenges_title'),
-        level: 2,
-        description: t('questionnaire_challenges_desc'),
-        fields: [
-            { id: 'challenges_career', label: t('questionnaire_challenges_career_label'), prompt: t('questionnaire_challenges_career_prompt') },
-            { id: 'challenges_wlb', label: t('questionnaire_challenges_wlb_label'), prompt: t('questionnaire_challenges_wlb_prompt') },
-            { id: 'challenges_social', label: t('questionnaire_challenges_social_label'), prompt: t('questionnaire_challenges_social_prompt') },
-            { id: 'challenges_growth', label: t('questionnaire_challenges_growth_label'), prompt: t('questionnaire_challenges_growth_prompt') },
-            { id: 'challenges_habits', label: t('questionnaire_challenges_habits_label'), prompt: t('questionnaire_challenges_habits_prompt') },
-        ],
-        collapsedByDefault: true,
-        collapseText: t('questionnaire_challenges_collapseText'),
-    },
-    {
-        title: t('questionnaire_next_steps_title'),
-        level: 2,
-        description: t('questionnaire_next_steps_desc'),
-        fields: [
-            { id: 'next_steps_commitments', prompt: t('questionnaire_next_steps_prompt'), rows: 4 },
+            { id: 'next_steps', prompt: t('q_field_nextsteps_prompt_list'), rows: 4, type: 'list' },
         ]
     }
 ];
-
-export const getAllFieldIds = (t: (key: string) => string): string[] => {
-    const ids: string[] = [];
-    getQuestionnaireStructure(t).forEach(section => {
-        if (section.fields) {
-            section.fields.forEach(field => ids.push(field.id));
-        }
-        if (section.subSections) {
-            section.subSections.forEach(subSection => {
-                subSection.fields.forEach(field => ids.push(field.id));
-            });
-        }
-    });
-    return ids;
-}

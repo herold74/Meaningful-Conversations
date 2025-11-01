@@ -355,7 +355,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             <div className="w-full max-w-4xl p-8 space-y-8 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
                 
                 {isGuest && (
-                    <div className="p-4 mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-300 flex items-start gap-4">
+                    <div className="p-4 mb-6 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4">
                         <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
                         <div>
                             <h3 className="font-bold text-lg">{t('sessionReview_guestWarning_title')}</h3>
@@ -463,9 +463,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 {!isInterviewReview && (hasConversationalEnd || hasAccomplishedGoal) && (
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-500/50 space-y-2 rounded-lg">
-                        {hasConversationalEnd && <p className="text-sm text-green-700 dark:text-green-300 font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
-                        {hasAccomplishedGoal && <p className="text-sm text-green-700 dark:text-green-300 font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}
+                    <div className="p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 space-y-2 rounded-lg">
+                        {hasConversationalEnd && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
+                        {hasAccomplishedGoal && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}
                     </div>
                 )}
                 
@@ -608,7 +608,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 </div>
 
                 {currentUser && (
-                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-md">
+                    <div className="p-4 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 rounded-md">
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -617,8 +617,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                 className="h-5 w-5 rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-yellow-600 focus:ring-yellow-500 [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <div className="ml-3">
-                                <span className="font-semibold text-gray-800 dark:text-gray-200">{t('sessionReview_preventSave_label')}</span>
-                                <p className="text-sm text-yellow-800 dark:text-yellow-300">{t('sessionReview_preventSave_desc')}</p>
+                                <span className="font-semibold text-content-primary">{t('sessionReview_preventSave_label')}</span>
+                                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground">{t('sessionReview_preventSave_desc')}</p>
                             </div>
                         </label>
                     </div>

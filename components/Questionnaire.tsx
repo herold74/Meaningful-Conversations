@@ -1,13 +1,9 @@
+
 import React, { useState } from 'react';
 import { getQuestionnaireStructure } from './questionnaireStructure';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-
-const ChevronDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-    </svg>
-);
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 interface QuestionnaireProps {
     onSubmit: (context: string) => void;
@@ -19,15 +15,16 @@ interface QuestionnaireProps {
 const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers, onAnswersChange }) => {
     const { t } = useLocalization();
     const questionnaireStructure = getQuestionnaireStructure(t);
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set([questionnaireStructure[0]?.title]));
+    const [expandedSubSections, setExpandedSubSections] = useState<Set<string>>(new Set());
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleChange = (id: string, value: string) => {
         onAnswersChange(prev => ({ ...prev, [id]: value }));
-        if (id === 'background_name' && value.trim()) {
+        if (id === 'profile_name' && value.trim()) {
             setErrors(prev => {
                 const newErrors = { ...prev };
-                delete newErrors['background_name'];
+                delete newErrors['profile_name'];
                 return newErrors;
             });
         }
@@ -40,6 +37,18 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                 newSet.delete(sectionTitle);
             } else {
                 newSet.add(sectionTitle);
+            }
+            return newSet;
+        });
+    };
+
+    const toggleSubSection = (subSectionTitle: string) => {
+        setExpandedSubSections(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(subSectionTitle)) {
+                newSet.delete(subSectionTitle);
+            } else {
+                newSet.add(subSectionTitle);
             }
             return newSet;
         });
@@ -59,11 +68,11 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
             if (section.fields) {
                 section.fields.forEach(field => {
                     const answer = answers[field.id]?.trim() || '';
-                    // Only include the label in markdown if it's not empty
-                    if (field.label) {
-                        md += `**${field.label}**: ${answer}\n\n`;
-                    } else {
-                        md += `${answer}\n\n`;
+                    if (field.type === 'list') {
+                        const listItems = answer.split('\n').map(line => line.trim()).filter(line => line).map(line => line.startsWith('*') ? line : `* ${line}`).join('\n');
+                        md += field.label ? `**${field.label}**:\n${listItems || ''}\n\n` : `${listItems || ''}\n\n`;
+                    } else { // text type
+                        md += field.label ? `**${field.label}**: ${answer}\n\n` : `${answer}\n\n`;
                     }
                 });
             }
@@ -78,27 +87,29 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                     }
                     subSection.fields.forEach(field => {
                         const answer = answers[field.id]?.trim() || '';
-                         if (field.label) {
-                            md += `**${field.label}**: ${answer}\n\n`;
-                        } else {
-                            md += `${answer}\n\n`;
+                        if (field.type === 'list') {
+                            const listItems = answer.split('\n').map(line => line.trim()).filter(line => line).map(line => line.startsWith('*') ? line : `* ${line}`).join('\n');
+                            md += field.label ? `**${field.label}**:\n${listItems || ''}\n\n` : `${listItems || ''}\n\n`;
+                        } else { // text type
+                            md += field.label ? `**${field.label}**: ${answer}\n\n` : `${answer}\n\n`;
                         }
                     });
                 });
             }
 
             if (index < questionnaireStructure.length - 1) {
-                md += '\n---\n\n';
+                md += '---\n\n';
             }
         });
 
-        return (md.replace(/\n{3,}/g, '\n\n').trim() + '\n');
+        return md.replace(/\n{3,}/g, '\n\n').trim() + '\n';
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!answers['background_name']?.trim()) {
-            setErrors({ 'background_name': t('questionnaire_error_name_required') });
+        if (!answers['profile_name']?.trim()) {
+            setErrors({ 'profile_name': t('questionnaire_error_name_required') });
+            setExpandedSections(prev => new Set(prev).add(questionnaireStructure[0].title));
             return;
         }
         const markdownContent = generateMarkdown();
@@ -116,133 +127,101 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                 <p className="mt-1 text-sm text-content-subtle">{t('questionnaire_required_fields')}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {questionnaireStructure.map((section, sIndex) => {
-
-                    if (section.collapsedByDefault) {
-                        const isExpanded = expandedSections.has(section.title);
-                        return (
-                            <div key={sIndex} className="bg-background-primary dark:bg-background-tertiary/50 border border-border-primary dark:border-border-primary rounded-lg overflow-hidden">
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSection(section.title)}
-                                    className="w-full p-4 flex justify-between items-center text-left hover:bg-background-tertiary dark:hover:bg-background-tertiary transition-colors"
-                                    aria-expanded={isExpanded}
-                                    aria-controls={`section-content-${sIndex}`}
-                                >
-                                    <div>
-                                        <h2 className="text-2xl font-semibold text-content-primary">{section.title}</h2>
-                                        {!isExpanded && section.collapseText && <p className="text-content-subtle italic mt-1 text-sm">{t('questionnaire_collapsible_prompt', { type: section.collapseText })}</p>}
-                                    </div>
-                                    <ChevronDownIcon className={`w-6 h-6 text-content-subtle transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                                </button>
-                                {isExpanded && (
-                                    <div id={`section-content-${sIndex}`} className="p-4 pt-0 space-y-4 animate-fadeIn">
-                                        <div className="border-t border-border-primary dark:border-border-secondary mt-4 pt-4 space-y-4">
-                                            {section.description && <p className="text-content-secondary italic">{section.description}</p>}
-                                            {section.fields?.map(field => (
-                                                <div key={field.id}>
-                                                    {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
-                                                    <textarea
-                                                        id={field.id}
-                                                        rows={field.rows || 3}
-                                                        value={answers[field.id] || ''}
-                                                        onChange={e => handleChange(field.id, e.target.value)}
-                                                        placeholder={field.prompt}
-                                                        className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary`}
-                                                    />
-                                                </div>
-                                            ))}
-                                             {section.subSections?.map((subSection, ssIndex) => (
-                                                <div key={ssIndex} className="ml-4 space-y-4 pt-4">
-                                                    <h3 className="text-xl font-semibold text-content-primary">{subSection.title}</h3>
-                                                    {subSection.description && <p className="text-content-secondary italic">{subSection.description}</p>}
-                                                    {subSection.fields.map(field => (
-                                                        <div key={field.id}>
-                                                            {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
-                                                            <textarea
-                                                                id={field.id}
-                                                                rows={field.rows || 3}
-                                                                value={answers[field.id] || ''}
-                                                                onChange={e => handleChange(field.id, e.target.value)}
-                                                                placeholder={field.prompt}
-                                                                className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary`}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    }
-
-
+                    const isExpanded = expandedSections.has(section.title);
                     return (
-                        <div key={sIndex} className="space-y-4">
-                            <h2 className="text-2xl font-semibold text-content-primary border-b border-border-primary dark:border-border-primary pb-2">{section.title}</h2>
-                            {section.description && <p className="text-content-secondary italic">{section.description}</p>}
+                        <div key={sIndex} className="border border-border-primary dark:border-border-primary rounded-lg overflow-hidden">
+                           <button 
+                                type="button"
+                                onClick={() => toggleSection(section.title)}
+                                className="w-full flex justify-between items-center p-4 text-left bg-background-tertiary dark:bg-background-tertiary/50 hover:bg-border-primary dark:hover:bg-border-primary/50"
+                                aria-expanded={isExpanded}
+                            >
+                                <h2 className="text-xl font-semibold text-content-primary">{section.title}</h2>
+                                <ChevronDownIcon className={`w-6 h-6 text-content-secondary transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                            </button>
                             
-                            {section.fields?.map(field => {
-                                if (field.id === 'background_name') {
-                                    return (
-                                        <div key={field.id}>
-                                            <div className="flex items-center gap-4">
-                                                <label htmlFor={field.id} className="text-lg font-medium text-content-secondary shrink-0">
-                                                    {field.label} <span className="text-status-danger-foreground">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
+                            {isExpanded && (
+                                <div className="p-4 space-y-4 animate-fadeIn">
+                                    {section.description && <p className="text-content-secondary italic">{section.description}</p>}
+                                    
+                                    {section.fields?.map(field => {
+                                        if (field.id === 'profile_name') {
+                                            return (
+                                                <div key={field.id}>
+                                                    <div className="flex items-center gap-4">
+                                                        <label htmlFor={field.id} className="text-lg font-medium text-content-secondary shrink-0">
+                                                            {field.label} <span className="text-status-danger-foreground">*</span>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            id={field.id}
+                                                            value={answers[field.id] || ''}
+                                                            onChange={e => handleChange(field.id, e.target.value)}
+                                                            placeholder={field.prompt}
+                                                            className={`w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border placeholder:italic ${errors['profile_name'] ? 'border-status-danger-border' : 'border-border-secondary dark:border-border-secondary'} focus:outline-none focus:ring-1 focus:ring-accent-primary`}
+                                                            aria-required="true"
+                                                            aria-invalid={!!errors['profile_name']}
+                                                            aria-describedby={errors['profile_name'] ? 'name-error' : undefined}
+                                                        />
+                                                    </div>
+                                                    {errors['profile_name'] && <p id="name-error" className="text-status-danger-foreground text-sm mt-1 text-right">{errors['profile_name']}</p>}
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <div key={field.id}>
+                                                {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
+                                                <textarea
                                                     id={field.id}
+                                                    rows={field.rows || 3}
                                                     value={answers[field.id] || ''}
                                                     onChange={e => handleChange(field.id, e.target.value)}
                                                     placeholder={field.prompt}
-                                                    className={`w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border ${errors['background_name'] ? 'border-status-danger-border' : 'border-border-secondary dark:border-border-secondary'} focus:outline-none focus:ring-1 focus:ring-accent-primary`}
-                                                    aria-required="true"
-                                                    aria-invalid={!!errors['background_name']}
-                                                    aria-describedby={errors['background_name'] ? 'name-error' : undefined}
+                                                    className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary placeholder:italic`}
                                                 />
                                             </div>
-                                            {errors['background_name'] && <p id="name-error" className="text-status-danger-foreground text-sm mt-1 text-right">{errors['background_name']}</p>}
-                                        </div>
-                                    );
-                                }
-                                return (
-                                    <div key={field.id}>
-                                        {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
-                                        <textarea
-                                            id={field.id}
-                                            rows={field.rows || 3}
-                                            value={answers[field.id] || ''}
-                                            onChange={e => handleChange(field.id, e.target.value)}
-                                            placeholder={field.prompt}
-                                            className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary`}
-                                        />
-                                    </div>
-                                );
-                            })}
+                                        );
+                                    })}
 
-                            {section.subSections?.map((subSection, ssIndex) => (
-                                <div key={ssIndex} className="ml-4 space-y-4">
-                                    <h3 className="text-xl font-semibold text-content-primary">{subSection.title}</h3>
-                                    {subSection.description && <p className="text-content-secondary italic">{subSection.description}</p>}
-                                    {subSection.fields.map(field => (
-                                        <div key={field.id}>
-                                            {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
-                                            <textarea
-                                                id={field.id}
-                                                rows={field.rows || 3}
-                                                value={answers[field.id] || ''}
-                                                onChange={e => handleChange(field.id, e.target.value)}
-                                                placeholder={field.prompt}
-                                                className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary`}
-                                            />
-                                        </div>
-                                    ))}
+                                    {section.subSections?.map((subSection, ssIndex) => {
+                                        const isSubSectionExpanded = expandedSubSections.has(subSection.title);
+                                        return (
+                                            <div key={ssIndex} className="space-y-4 border-l-2 border-border-primary pl-4">
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => toggleSubSection(subSection.title)}
+                                                    className="w-full flex justify-between items-center text-left"
+                                                    aria-expanded={isSubSectionExpanded}
+                                                >
+                                                    <h3 className="text-xl font-semibold text-content-primary">{subSection.title}</h3>
+                                                    <ChevronDownIcon className={`w-5 h-5 text-content-secondary transition-transform duration-300 ${isSubSectionExpanded ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                
+                                                {isSubSectionExpanded && (
+                                                    <div className="space-y-4 animate-fadeIn">
+                                                        {subSection.description && <p className="text-content-secondary italic">{subSection.description}</p>}
+                                                        {subSection.fields.map(field => (
+                                                            <div key={field.id}>
+                                                                {field.label && <label htmlFor={field.id} className="block text-lg font-medium text-content-secondary">{field.label}</label>}
+                                                                <textarea
+                                                                    id={field.id}
+                                                                    rows={field.rows || 3}
+                                                                    value={answers[field.id] || ''}
+                                                                    onChange={e => handleChange(field.id, e.target.value)}
+                                                                    placeholder={field.prompt}
+                                                                    className={`${field.label ? 'mt-2' : ''} w-full p-3 bg-background-secondary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary placeholder:italic`}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            ))}
+                            )}
                         </div>
                     );
                 })}

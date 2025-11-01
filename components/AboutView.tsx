@@ -95,7 +95,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     {finalSentence}
                 </ReactMarkdown>
             </div>
-            <div className="p-4 mt-6 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
+            <div className="p-4 mt-6 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
                  <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
                  <div>
                     <ReactMarkdown 

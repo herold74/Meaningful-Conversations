@@ -210,6 +210,26 @@ const App: React.FC = () => {
     }, [userMessageCount, t]);
 
 
+    // --- PWA Service Worker Registration ---
+    useEffect(() => {
+        const registerServiceWorker = () => {
+            if ('serviceWorker' in navigator) {
+                const swUrl = `${window.location.origin}/sw.js`;
+                navigator.serviceWorker.register(swUrl)
+                    .then(registration => console.log('Service Worker registered with scope:', registration.scope))
+                    .catch(error => console.error('Service Worker registration failed from App.tsx:', error));
+            }
+        };
+        // The 'load' event is the most reliable point to register a service worker,
+        // as it ensures the page is fully parsed and rendered, avoiding "invalid state" errors.
+        window.addEventListener('load', registerServiceWorker);
+        
+        return () => {
+            window.removeEventListener('load', registerServiceWorker);
+        };
+    }, []);
+
+
     // --- INITIALIZATION ---
     useEffect(() => {
         // This effect runs once on startup.
@@ -644,7 +664,7 @@ const App: React.FC = () => {
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
     return (
-        <div className={`bg-background-primary font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
+        <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
                 <GamificationBar 
                     gamificationState={gamificationState}

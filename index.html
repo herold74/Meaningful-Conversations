@@ -8,14 +8,21 @@
 
     <!-- PWA and Mobile App Meta Tags -->
     <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Theme color for browser UI. Adapts to light/dark mode. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fafc" /> <!-- slate-50 -->
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a" /> <!-- slate-900 -->
 
     <!-- Apple Specific Tags for "Add to Home Screen" -->
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- 'default' provides a standard white status bar, which is better for app appearance and may resolve icon compositing issues. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Meaningful Conversations">
+    <link rel="apple-touch-icon" href="icon-main.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-main.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-main.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icon-main.png">
 
   <script type="importmap">
 {
@@ -26,13 +33,12 @@
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
     "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
     "vite": "https://aistudiocdn.com/vite@^7.1.11",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4",
-    "vite-plugin-static-copy": "https://aistudiocdn.com/vite-plugin-static-copy@^3.1.4"
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4"
   }
 }
 </script>
 </head>
-  <body>
+  <body class="bg-background-primary text-content-secondary">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

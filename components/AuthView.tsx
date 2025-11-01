@@ -49,7 +49,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
           <button
             onClick={onLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <LogInIcon className="w-6 h-6" />
             {t('auth_login')}
@@ -57,7 +57,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
            <button
             onClick={onRegister}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-inverted-dark bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
           >
             <UserIcon className="w-6 h-6" />
             {t('auth_register')}

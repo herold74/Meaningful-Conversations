@@ -88,8 +88,8 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess
         {(status === 'needsPassword' || status === 'loggingIn') && verifiedUser && (
             <div className="w-full animate-fadeIn">
                 <div className="flex flex-col items-center gap-4 mb-6">
-                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                        <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
+                    <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center">
+                        <CheckIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('verifyEmail_success_title')}</h1>
                 </div>
@@ -115,7 +115,7 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess
                     <button
                         type="submit"
                         disabled={status === 'loggingIn' || !password}
-                        className="w-full px-6 py-3 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
+                        className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
                     >
                         {status === 'loggingIn' ? <Spinner /> : t('login_button')}
                     </button>
@@ -124,8 +124,8 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess
         )}
          {status === 'success' && (
           <div className="flex flex-col items-center gap-4 animate-fadeIn">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-              <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
+            <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center">
+              <CheckIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
             </div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('verifyEmail_login_success')}</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">{t('verifyEmail_redirecting')}</p>

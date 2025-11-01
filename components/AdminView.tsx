@@ -70,7 +70,7 @@ const ResetPasswordSuccessModal: React.FC<{
                         <span className="font-mono text-lg text-gray-800 dark:text-gray-200">{data.newPass}</span>
                         <button 
                             onClick={handleCopy}
-                            className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-400 rounded-lg shadow-md"
+                            className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-400 rounded-lg shadow-md"
                         >
                             {isCopied ? <CheckIcon className="w-4 h-4" /> : <ClipboardIcon className="w-4 h-4" />}
                             {isCopied ? t('admin_code_copied') : t('admin_copy_code')}
@@ -102,19 +102,19 @@ const ResetConfirmationModal: React.FC<{
             aria-modal="true"
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-yellow-400 dark:border-yellow-500/50 shadow-xl rounded-lg"
+                className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-status-warning-border dark:border-status-warning-border/50 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
-                        <WarningIcon className="w-8 h-8 text-yellow-500 dark:text-yellow-400" />
+                        <WarningIcon className="w-8 h-8 text-status-warning-foreground" />
                     </div>
                     <div className="flex-1">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">{t('admin_users_reset_password')}</h2>
                         <p className="mt-2 text-gray-600 dark:text-gray-400">
                           {t('admin_reset_confirm_part1')}<strong>{user.email}</strong>{t('admin_reset_confirm_part2')}
                         </p>
-                        <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 text-yellow-800 dark:text-yellow-300">
+                        <div className="mt-4 p-3 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border text-status-warning-foreground dark:text-status-warning-foreground">
                            <p className="font-bold">{t('admin_reset_confirm_warning_title')}</p>
                            <p className="text-sm">{t('admin_reset_confirm_warning_desc')}</p>
                         </div>
@@ -285,7 +285,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                 handleAction(`delete-report-${item.id}`, () => userService.deleteMessageReport(item.id));
                             }}
                             disabled={actionLoading[`delete-report-${item.id}`]}
-                            className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
+                            className="p-2 text-status-danger-foreground rounded-full hover:bg-status-danger-background disabled:opacity-50" 
                             title={t('admin_codes_delete')}
                         >
                             <DeleteIcon className="w-5 h-5" />
@@ -471,8 +471,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center gap-2 px-2 md:px-3 py-2 text-sm font-bold uppercase transition-colors focus:outline-none ${
                             activeTab === tab
-                                ? 'border-b-2 border-green-500 text-gray-900 dark:text-gray-100'
-                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                ? 'border-b-2 border-accent-primary text-content-primary'
+                                : 'text-content-subtle hover:bg-background-tertiary'
                         }`}
                         aria-label={t(key)}
                     >
@@ -493,7 +493,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                 value={userSearchQuery}
                 onChange={e => setUserSearchQuery(e.target.value)}
                 placeholder={t('admin_search_users_placeholder')}
-                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
             />
              {filteredUsers.length > 0 ? (
                 <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
@@ -522,19 +522,19 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                     }
                                 }
                                 return (
-                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-green-50 dark:bg-green-900/20' : ''} ${user.status === 'PENDING' ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}>
+                                    <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${isCurrentUser ? 'bg-status-success-background' : ''} ${user.status === 'PENDING' ? 'bg-status-warning-background' : ''}`}>
                                         <td className="p-3 font-medium text-gray-800 dark:text-gray-200 break-words">{user.email}</td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
                                         <td className="p-3">
                                             <div className="flex items-center gap-3">
                                                 {user.isBetaTester && (
                                                     <span title={t('admin_users_premium')}>
-                                                        <StarIcon className="w-5 h-5 text-blue-500" />
+                                                        <StarIcon className="w-5 h-5 text-status-info-foreground" />
                                                     </span>
                                                 )}
                                                 {user.isAdmin && (
                                                     <span title={t('admin_users_admin')}>
-                                                        <ShieldIcon className="w-5 h-5 text-purple-500" />
+                                                        <ShieldIcon className="w-5 h-5 text-accent-tertiary" />
                                                     </span>
                                                 )}
                                             </div>
@@ -548,22 +548,22 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                                     <button 
                                                         onClick={() => handleAction(`activate-${user.id}`, () => userService.activateUser(user.id))}
                                                         disabled={actionLoading[`activate-${user.id}`]}
-                                                        className="p-2 text-green-500 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-50" 
+                                                        className="p-2 text-status-success-foreground rounded-full hover:bg-status-success-background disabled:opacity-50" 
                                                         title={t('admin_users_activate')}
                                                     >
                                                         <UnlockIcon className="w-5 h-5" />
                                                     </button>
                                                 )}
-                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-blue-500 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-status-info-foreground rounded-full hover:bg-status-info-background disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
                                                 <button 
                                                     onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
                                                     disabled={actionLoading[`toggle-admin-${user.id}`] || isCurrentUser} 
-                                                    className="p-2 text-purple-500 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/50 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                                    className="p-2 text-accent-tertiary rounded-full hover:bg-accent-tertiary/10 disabled:opacity-50 disabled:cursor-not-allowed" 
                                                     title={isCurrentUser ? t('admin_users_cannot_change_self') : t('admin_users_toggle_admin')}
                                                 >
                                                     <ShieldIcon className="w-5 h-5" />
                                                 </button>
-                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-yellow-500 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
+                                                <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-status-warning-foreground rounded-full hover:bg-status-warning-background disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -587,7 +587,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                 <form onSubmit={handleCreateCode} className="flex flex-col sm:flex-row items-stretch gap-3">
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
-                        <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500">
+                        <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
@@ -596,7 +596,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                             {botsForCodes.map(bot => <option key={bot.id} value={bot.id}>{bot.name}</option>)}
                         </select>
                     </div>
-                    <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-black bg-green-400 uppercase hover:bg-green-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">
+                    <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">
                         {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
                     </button>
                 </form>
@@ -605,7 +605,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                     value={codeEmailFilter}
                     onChange={e => setCodeEmailFilter(e.target.value)}
                     placeholder={t('admin_codes_filter_email')}
-                    className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
                 />
             </div>
             {codes.length > 0 ? (
@@ -653,7 +653,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                             <span>{code.usedBy.email}</span>
                                         ) : (
                                             <div className="flex justify-center" title={t('admin_codes_status_available')}>
-                                                <UserPlusIcon className="w-5 h-5 text-green-500 dark:text-green-400" />
+                                                <UserPlusIcon className="w-5 h-5 text-status-success-foreground" />
                                             </div>
                                         )}
                                     </td>
@@ -662,13 +662,13 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                             <button 
                                                 onClick={() => handleAction(`revoke-code-${code.id}`, () => userService.revokeUpgradeCode(code.id))}
                                                 disabled={actionLoading[`revoke-code-${code.id}`]}
-                                                className="p-2 text-yellow-600 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900/50 disabled:opacity-50" 
+                                                className="p-2 text-status-warning-foreground rounded-full hover:bg-status-warning-background disabled:opacity-50" 
                                                 title={t('admin_codes_revoke')}
                                             >
                                                 <RepeatIcon className="w-5 h-5" />
                                             </button>
                                         ) : (
-                                            <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
+                                            <button onClick={() => handleAction(`delete-code-${code.id}`, () => userService.deleteUpgradeCode(code.id))} disabled={actionLoading[`delete-code-${code.id}`]} className="p-2 text-status-danger-foreground rounded-full hover:bg-status-danger-background disabled:opacity-50" title={t('admin_codes_delete')}><DeleteIcon className="w-5 h-5" /></button>
                                         )}
                                     </td>
                                 </tr>
@@ -714,7 +714,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                         </td>
                                         <td className="p-3 text-right">
                                             {ticket.status === 'OPEN' && (
-                                                <button onClick={() => handleAction(`resolve-ticket-${ticket.id}`, () => userService.resolveTicket(ticket.id))} disabled={actionLoading[`resolve-ticket-${ticket.id}`]} className="p-2 text-green-600 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50 disabled:opacity-50" title={t('admin_tickets_resolve')}>
+                                                <button onClick={() => handleAction(`resolve-ticket-${ticket.id}`, () => userService.resolveTicket(ticket.id))} disabled={actionLoading[`resolve-ticket-${ticket.id}`]} className="p-2 text-status-success-foreground rounded-full hover:bg-status-success-background disabled:opacity-50" title={t('admin_tickets_resolve')}>
                                                     <CheckIcon className="w-5 h-5"/>
                                                 </button>
                                             )}
@@ -722,7 +722,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                                 <button 
                                                     onClick={() => handleAction(`delete-ticket-${ticket.id}`, () => userService.deleteTicket(ticket.id))} 
                                                     disabled={actionLoading[`delete-ticket-${ticket.id}`]}
-                                                    className="p-2 text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-50" 
+                                                    className="p-2 text-status-danger-foreground rounded-full hover:bg-status-danger-background disabled:opacity-50" 
                                                     title={t('admin_codes_delete')}
                                                 >
                                                     <DeleteIcon className="w-5 h-5" />
@@ -775,14 +775,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
         <div className="space-y-6">
             <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">
                 <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
-                <p className="text-4xl font-bold text-green-500 dark:text-green-400">{ratingStats.overallAverage}</p>
+                <p className="text-4xl font-bold text-status-success-foreground">{ratingStats.overallAverage}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
             </div>
             {ratingStats.totalRatings > 0 ? (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {ratingStats.botStats.map(stat => (
-                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-green-500 dark:hover:border-green-400 ${selectedBotFilter === stat.id ? 'border-green-500' : 'border-gray-200 dark:border-gray-700/50'}`}>
+                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-accent-primary ${selectedBotFilter === stat.id ? 'border-accent-primary' : 'border-gray-200 dark:border-gray-700/50'}`}>
                                 <div className="flex items-center gap-4 mb-3">
                                     <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
                                     <div>
@@ -798,7 +798,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser }) => {
                                             <div key={star} className="flex items-center gap-2 text-xs">
                                                 <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">{star} <StarIcon className="w-3 h-3 text-yellow-400"/></span>
                                                 <div className="w-full bg-gray-200 dark:bg-gray-700 h-4 flex-1">
-                                                    <div className="bg-green-400 h-4 text-center text-black font-bold" style={{ width: `${percentage}%` }}>
+                                                    <div className="bg-status-success-foreground h-4 text-center text-black font-bold" style={{ width: `${percentage}%` }}>
                                                         {count > 0 ? count : ''}
                                                     </div>
                                                 </div>

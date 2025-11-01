@@ -284,6 +284,16 @@ const UserGuideView: React.FC<InfoViewProps> = () => {
                     {markdownContent}
                 </ReactMarkdown>
             </div>
+            
+            <div className="p-4 mt-6 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4 not-prose">
+                <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                <div>
+                    <h3 className="font-bold text-lg">{t('user_guide_attention_title')}</h3>
+                    <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_guest') }} />
+                    <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_registered') }} />
+                </div>
+            </div>
+
         </div>
     );
 };
