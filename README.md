@@ -2,8 +2,6 @@
 
 An application that provides access to several coaching bot characters with different perspectives and coaching styles. Users can create a "life context" file to personalize conversations and update it with new insights after each session.
 
-![A screenshot of the bot selection screen in the Meaningful Conversations app.](https://storage.googleapis.com/aistudio-hosting/project-images/21a50a18-d7b3-4f93-b883-85b4f62136e0/readme-screenshot.png)
-
 ## ✨ Core Features
 
 *   **Multiple AI Coaches**: Engage with a variety of AI coaches, each with a unique style (e.g., Stoic, CBT, Strategic Thinking).
