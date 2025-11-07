@@ -109,7 +109,16 @@ ssh root@<YOUR_SERVER_IP>
 dnf update -y
 
 # Install required packages
-dnf install -y podman podman-compose nginx certbot python3-certbot-nginx
+dnf install -y podman nginx certbot python3-certbot-nginx
+
+# Install podman-compose (Python package)
+dnf install -y python3-pip
+pip3 install podman-compose
+
+# Verify installations
+podman --version
+podman-compose --version
+nginx -v
 
 # Enable and start services
 systemctl enable --now podman
