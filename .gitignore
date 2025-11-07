@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+/node_modules
+meaningful-conversations-backend/node_modules/
+
+# Build output
+/dist
+meaningful-conversations-backend/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+server.log
+
+# Vite build cache
+.vite/
+
+# Local Environment Variables
+# Ignore all .env files, but keep .env.example and templates
+.env
+.env.*
+!.env.example
+!env.*.template
+*.summary
+
+# Alternative server environment files (contain secrets)
+.env.staging
+.env.production
+meaningful-conversations-backend/.env
+meaningful-conversations-backend/.env.local
+meaningful-conversations-backend/.env.staging
+meaningful-conversations-backend/.env.production
+
+# Deployment Configuration
+deploy-config.env
+docker-compose.override.yml
+docker-compose.deploy.yml
+
+# Backups
+backups/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.cursor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+
+# Prisma
+meaningful-conversations-backend/prisma/*.db
+meaningful-conversations-backend/prisma/*.db-journal
+
+# Temporary files
+*.tmp
+.cache/

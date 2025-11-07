@@ -1,0 +1,676 @@
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { ProposedUpdate, Bot, GamificationState, SolutionBlockage, User, Message } from '../types';
+import { DownloadIcon } from './icons/DownloadIcon';
+import DiffViewer from './DiffViewer';
+import { useLocalization } from '../context/LocalizationContext';
+import { UsersIcon } from './icons/UsersIcon';
+import BlockageScoreGauge from './BlockageScoreGauge';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import { serializeGamificationState } from '../utils/gamificationSerializer';
+import { StarIcon } from './icons/StarIcon';
+import Spinner from './shared/Spinner';
+import * as userService from '../services/userService';
+import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline } from '../utils/contextUpdater';
+import { WarningIcon } from './icons/WarningIcon';
+import { FileTextIcon } from './icons/FileTextIcon';
+
+
+const removeGamificationKey = (text: string) => {
+    // Regex to find and remove the key comment, including potential trailing whitespace
+    return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
+};
+
+// This map makes the blockage name translation robust against API variations (e.g., returning German instead of English)
+const blockageApiToKeyMap: Record<string, string> = {
+    // English API names (as they should be)
+    'self-reproach': 'self-reproach',
+    'blaming others': 'blaming_others',
+    'expectational attitudes': 'expectational_attitudes',
+    'age regression': 'age_regression',
+    'dysfunctional loyalties': 'dysfunctional_loyalties',
+    // German variations that might be returned by the API
+    'selbstvorwürfe': 'self-reproach', // plural
+    'selbstvorwurf': 'self-reproach', // singular
+    'fremdbeschuldigung': 'blaming_others',
+    'erwartungshaltungen': 'expectational_attitudes', // plural
+    'erwartungshaltung': 'expectational_attitudes', // singular
+    'altersregression': 'age_regression',
+    'dysfunktionale loyalitäten': 'dysfunctional_loyalties', // plural
+};
+
+
+interface SessionReviewProps {
+    newFindings: string;
+    proposedUpdates: ProposedUpdate[];
+    nextSteps: { action: string; deadline: string }[];
+    solutionBlockages: SolutionBlockage[];
+    blockageScore: number;
+    hasConversationalEnd: boolean;
+    hasAccomplishedGoal: boolean;
+    originalContext: string;
+    selectedBot: Bot;
+    onContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
+    onSwitchCoach: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
+    onReturnToStart: () => void;
+    gamificationState: GamificationState;
+    currentUser: User | null;
+    isInterviewReview?: boolean;
+    interviewResult?: string;
+    chatHistory: Message[];
+    isTestMode?: boolean;
+}
+
+const SessionReview: React.FC<SessionReviewProps> = ({
+    newFindings,
+    proposedUpdates,
+    nextSteps,
+    solutionBlockages,
+    blockageScore,
+    hasConversationalEnd,
+    hasAccomplishedGoal,
+    originalContext,
+    selectedBot,
+    onContinueSession,
+    onSwitchCoach,
+    onReturnToStart,
+    gamificationState,
+    currentUser,
+    isInterviewReview,
+    interviewResult,
+    chatHistory,
+    isTestMode,
+}) => {
+    const { t, language } = useLocalization();
+    const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
+    
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [feedbackText, setFeedbackText] = useState('');
+    const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
+    const [isSaving, setIsSaving] = useState(false);
+
+
+    const handleRatingClick = (starValue: number) => {
+        if (feedbackStatus !== 'idle') return;
+
+        if (rating === starValue) {
+            setRating(0);
+            setFeedbackText('');
+        } else {
+            setRating(starValue);
+        }
+    };
+
+    const cleanOriginalContext = useMemo(() => isInterviewReview ? '' : removeGamificationKey(originalContext), [originalContext, isInterviewReview]);
+    const isGuest = !currentUser;
+
+    const submitRating = useCallback(async (ratingToSubmit: number, comments: string) => {
+        if (feedbackStatus === 'submitting' || feedbackStatus === 'submitted') return;
+
+        setFeedbackStatus('submitting');
+
+        try {
+            await userService.submitFeedback({
+                rating: ratingToSubmit,
+                comments,
+                botId: selectedBot.id,
+                isAnonymous: !currentUser,
+            });
+            setFeedbackStatus('submitted');
+        } catch (err) {
+            console.error('Failed to submit session feedback:', err);
+            alert('Failed to submit feedback. Please try again.');
+            setFeedbackStatus('idle');
+        }
+    }, [feedbackStatus, selectedBot.id, currentUser]);
+
+    const handleFeedbackSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        submitRating(rating, feedbackText);
+    };
+
+    const existingHeadlines: HeadlineOption[] = useMemo(() => {
+        return getExistingHeadlines(cleanOriginalContext);
+    }, [cleanOriginalContext]);
+
+    const hierarchicalKeyToValueMap = useMemo(() => {
+        return new Map(existingHeadlines.map(opt => [opt.hierarchicalKey, opt.value]));
+    }, [existingHeadlines]);
+    
+    const canSeeBlockages = useMemo(() => {
+        if (currentUser?.isBetaTester) return true;
+        const unlocked = currentUser?.unlockedCoaches || [];
+        return unlocked.includes('big5');
+    }, [currentUser]);
+
+    const [appliedUpdates, setAppliedUpdates] = useState<Map<number, AppliedUpdatePayload>>(() => {
+        return new Map(proposedUpdates.map((update, index): [number, AppliedUpdatePayload] => {
+            const targetValue = hierarchicalKeyToValueMap.get(update.headline);
+
+            if (targetValue) {
+                // The AI proposed a headline that matches an existing one.
+                const isNextSteps = update.headline.includes(t('q_section_nextsteps_title')) || update.headline.includes('Achievable Next Steps');
+                // Default to 'append' for "Next Steps" or if the AI suggested creating but we found a match. Otherwise, use what the AI suggested.
+                const type = (update.type === 'create_headline' || isNextSteps) ? 'append' : update.type;
+                return [index, { type, targetHeadline: targetValue }];
+            } else {
+                // The AI proposed a new headline.
+                return [index, { type: 'create_headline', targetHeadline: update.headline }];
+            }
+        }));
+    });
+
+    const [editableContext, setEditableContext] = useState('');
+    const [isFinalContextVisible, setIsFinalContextVisible] = useState(false);
+    const [preventCloudSave, setPreventCloudSave] = useState(false);
+
+
+    const handleToggleUpdate = (index: number) => {
+        setAppliedUpdates(prev => {
+            const newMap = new Map(prev);
+            if (newMap.has(index)) {
+                newMap.delete(index);
+            } else {
+                // Re-run the initial state logic for the specific item being toggled on.
+                const originalUpdate = proposedUpdates[index];
+                const targetValue = hierarchicalKeyToValueMap.get(originalUpdate.headline);
+                if (targetValue) {
+                    const isNextSteps = originalUpdate.headline.includes(t('q_section_nextsteps_title')) || originalUpdate.headline.includes('Achievable Next Steps');
+                    const type = (originalUpdate.type === 'create_headline' || isNextSteps) ? 'append' : originalUpdate.type;
+                    newMap.set(index, { type, targetHeadline: targetValue });
+                } else {
+                    newMap.set(index, { type: 'create_headline', targetHeadline: originalUpdate.headline });
+                }
+            }
+            return newMap;
+        });
+    };
+    
+    const handleActionChange = (index: number, newTargetValue: string) => {
+        setAppliedUpdates(prev => {
+            const newMap = new Map<number, AppliedUpdatePayload>(prev);
+            const existingUpdate = newMap.get(index);
+            if (!existingUpdate) return prev;
+            
+            // When switching from a 'create_headline' to an existing one, default to 'append'.
+            const newType = existingUpdate.type === 'create_headline' ? 'append' : existingUpdate.type;
+
+            newMap.set(index, { ...existingUpdate, type: newType, targetHeadline: newTargetValue });
+            return newMap;
+        });
+    };
+
+    const handleUpdateTypeChange = (index: number, newType: 'append' | 'replace_section') => {
+        setAppliedUpdates(prev => {
+            const newMap = new Map<number, AppliedUpdatePayload>(prev);
+            const updatePayload = newMap.get(index);
+            if (updatePayload && (newType === 'append' || newType === 'replace_section')) {
+                newMap.set(index, { ...updatePayload, type: newType });
+            }
+            return newMap;
+        });
+    };
+
+    const updatedContext = useMemo(() => {
+        if (isInterviewReview) {
+            return interviewResult || '';
+        }
+        return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates);
+    }, [isInterviewReview, interviewResult, cleanOriginalContext, proposedUpdates, appliedUpdates]);
+
+
+    useEffect(() => {
+        setEditableContext(updatedContext);
+    }, [updatedContext]);
+
+    const addGamificationDataToContext = (context: string): string => {
+        // Remove any old gamification data comment to ensure a clean slate.
+        let finalContext = context.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->/g, '').trim();
+        const dataToSerialize = serializeGamificationState(gamificationState);
+        
+        // 1. Encode to Base64
+        const encodedData = btoa(dataToSerialize);
+        // 2. Obfuscate by reversing the string. This makes it non-standard and not directly decodable.
+        const obfuscatedData = encodedData.split('').reverse().join('');
+        // 3. Embed with the new key.
+        const dataComment = `<!-- do_not_delete: ${obfuscatedData} -->`;
+
+        if (finalContext) {
+            finalContext = `${finalContext.trimEnd()}\n\n${dataComment}`;
+        } else {
+            finalContext = dataComment;
+        }
+        return finalContext ? `${finalContext.trim()}\n` : '';
+    };
+
+    const handleDownloadContext = () => {
+        // Always embed the latest gamification state to ensure the download is a complete backup.
+        const contentToDownload = addGamificationDataToContext(editableContext);
+        const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Life_Context_Updated.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleContinue = async () => {
+        setIsSaving(true);
+        // Add a small artificial delay to ensure the spinner is visible, enhancing UX.
+        await new Promise(resolve => setTimeout(resolve, 200)); 
+        await onContinueSession(editableContext, { preventCloudSave });
+        // No need to set isSaving back to false as the component unmounts.
+    };
+
+    const handleSwitch = async () => {
+        setIsSaving(true);
+        // Add a small artificial delay to ensure the spinner is visible, enhancing UX.
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await onSwitchCoach(editableContext, { preventCloudSave });
+    };
+
+    const getBlockageNameTranslation = (blockageName: string) => {
+        // Normalize the name from the API: just lowercase it to match the map keys.
+        const normalizedApiName = (blockageName || '').toLowerCase();
+        // Find the canonical key part from our map, or fall back to a simple transformation
+        const keyPart = blockageApiToKeyMap[normalizedApiName] || normalizedApiName.replace(/ /g, '_');
+        // Construct the final i18n key
+        const key = `blockage_${keyPart}`;
+        return t(key);
+    };
+
+    const handleDownloadSummary = () => {
+        let summaryContent = `${t('sessionReview_summary')}\n---------------------------------\n${newFindings}\n\n`;
+        if (solutionBlockages && solutionBlockages.length > 0) {
+            summaryContent += `${t('sessionReview_blockages_title')}\n---------------------------------\n`;
+            solutionBlockages.forEach(blockage => {
+                summaryContent += `Blockage: ${getBlockageNameTranslation(blockage.blockage)}\nExplanation: ${blockage.explanation}\nQuote: "${blockage.quote}"\n\n`;
+            });
+        }
+        const blob = new Blob([summaryContent.trim()], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Session_Summary.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleDownloadTranscript = () => {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-CA'); // YYYY-MM-DD for filename
+        const formattedDateTime = today.toLocaleString(language, { dateStyle: 'long', timeStyle: 'short' });
+
+        let transcriptContent = `Session Transcript\n`;
+        transcriptContent += `Coach: ${selectedBot.name}\n`;
+        transcriptContent += `Date: ${formattedDateTime}\n`;
+        transcriptContent += `---------------------------------\n\n`;
+
+        chatHistory.forEach(message => {
+            const timestamp = new Date(message.timestamp).toLocaleTimeString('en-US', { hour12: false });
+            const role = message.role === 'user' ? 'User' : selectedBot.name;
+            transcriptContent += `[${timestamp}] ${role}: ${message.text}\n\n`;
+        });
+
+        const blob = new Blob([transcriptContent.trim()], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Session_Transcript_${formattedDate}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+    
+    const getActionTypeTranslation = (type: string) => {
+        return t(`sessionReview_action_${type.toLowerCase()}`);
+    };
+
+    const getActionTypeClasses = (type: 'append' | 'replace_section' | 'create_headline') => {
+        switch (type) {
+            case 'append':
+                return {
+                    bg: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+                    border: 'border-green-200 dark:border-green-700',
+                };
+            case 'replace_section':
+                return {
+                    bg: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+                    border: 'border-yellow-200 dark:border-yellow-700',
+                };
+            case 'create_headline':
+                return {
+                    bg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+                    border: 'border-blue-200 dark:border-blue-700',
+                };
+            default:
+                return {
+                    bg: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+                    border: 'border-gray-200 dark:border-gray-700',
+                };
+        }
+    };
+
+    const primaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndContinue', { botName: selectedBot.name }) : t('sessionReview_continueWith', { botName: selectedBot.name });
+    const secondaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
+    
+    const blockageGridClass = "grid grid-cols-1 gap-4";
+
+    return (
+        <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
+            <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+                
+                {isTestMode && (
+                    <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
+                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                        <div>
+                            <h3 className="font-bold text-lg">{t('sessionReview_testMode_warning_title')}</h3>
+                            <p className="mt-2 text-sm md:hidden">{t('sessionReview_testMode_warning_desc_short')}</p>
+                            <p className="mt-2 text-sm hidden md:block">{t('sessionReview_testMode_warning_desc')}</p>
+                        </div>
+                    </div>
+                )}
+
+                {isGuest && (
+                    <div className="p-4 mb-6 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4">
+                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                        <div>
+                            <h3 className="font-bold text-lg">{t('sessionReview_guestWarning_title')}</h3>
+                            <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p1') }} />
+                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p2') }} />
+                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p3') }} />
+                        </div>
+                    </div>
+                )}
+
+                <div className="text-center">
+                    <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('sessionReview_title')}</h1>
+                    <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
+                </div>
+
+                <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                    <div className="flex justify-between items-center gap-4">
+                        <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{isInterviewReview ? t('sessionReview_g_summary_title') : t('sessionReview_summary')}</h2>
+                         {!isInterviewReview && (
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={handleDownloadTranscript} 
+                                    className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-accent-primary bg-transparent border border-accent-primary uppercase hover:bg-accent-primary hover:text-button-foreground-on-accent rounded-lg shadow-sm hover:shadow-md"
+                                    title={t('sessionReview_downloadTranscript')}
+                                >
+                                    <FileTextIcon className="w-4 h-4" />
+                                    <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadTranscript')}</span>
+                                </button>
+                                <button 
+                                    onClick={handleDownloadSummary} 
+                                    className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-accent-primary bg-transparent border border-accent-primary uppercase hover:bg-accent-primary hover:text-button-foreground-on-accent rounded-lg shadow-sm hover:shadow-md"
+                                    title={t('sessionReview_downloadSummary')}
+                                >
+                                    <DownloadIcon className="w-4 h-4" />
+                                    <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <p className="mt-2 text-content-secondary dark:text-content-secondary whitespace-pre-wrap">{newFindings}</p>
+                </div>
+
+                {!isInterviewReview && (
+                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                        <h2 className="text-xl font-semibold text-center text-content-primary dark:text-content-primary">{t('sessionReview_rating_title')}</h2>
+                        <p className="mt-1 text-center text-content-secondary dark:text-content-secondary">{t('sessionReview_rating_prompt', { botName: selectedBot.name })}</p>
+                        <div className="flex justify-center items-center gap-2 my-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    onClick={() => handleRatingClick(star)}
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                    className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}
+                                    aria-label={`Rate ${star} out of 5 stars`}
+                                    disabled={feedbackStatus !== 'idle'}
+                                >
+                                    <StarIcon 
+                                        className={`w-10 h-10 transition-colors ${
+                                            star <= (hoverRating || rating)
+                                            ? 'text-yellow-400'
+                                            : 'text-gray-300 dark:text-gray-600'
+                                        }`}
+                                        fill={star <= (hoverRating || rating) ? 'currentColor' : 'none'}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        {rating > 0 && feedbackStatus !== 'submitted' && (
+                            <form onSubmit={handleFeedbackSubmit} className="space-y-3 animate-fadeIn max-w-lg mx-auto">
+                                <label htmlFor="feedback" className="font-semibold text-content-primary dark:text-content-primary">
+                                    {rating <= 3 ? t('sessionReview_feedback_prompt') : t('sessionReview_feedback_prompt_optional')}
+                                </label>
+                                <textarea
+                                    id="feedback"
+                                    rows={3}
+                                    value={feedbackText}
+                                    onChange={(e) => setFeedbackText(e.target.value)}
+                                    placeholder={rating <= 3 ? t('sessionReview_feedback_placeholder') : t('sessionReview_feedback_placeholder_optional')}
+                                    className="w-full p-2 bg-background-secondary dark:bg-background-secondary text-content-primary dark:text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                                    required={rating <= 3}
+                                />
+                                {currentUser && (
+                                    <p className="text-xs text-content-subtle dark:text-content-subtle !mt-2 text-center">
+                                        {t('sessionReview_contact_consent')}
+                                    </p>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
+                                    className="w-full px-4 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
+                                >
+                                    {feedbackStatus === 'submitting' ? <Spinner /> : t('sessionReview_feedback_submit')}
+                                </button>
+                            </form>
+                        )}
+                        
+                        {feedbackStatus === 'submitted' && (
+                            <div className="text-center p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 max-w-lg mx-auto animate-fadeIn">
+                                <p className="font-semibold text-status-success-foreground dark:text-status-success-foreground">{t('sessionReview_feedback_thanks')}</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {!isInterviewReview && (hasConversationalEnd || hasAccomplishedGoal) && (
+                    <div className="p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 space-y-2 rounded-lg">
+                        {hasConversationalEnd && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
+                        {hasAccomplishedGoal && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}
+                    </div>
+                )}
+                
+                {!isInterviewReview && nextSteps && nextSteps.length > 0 && (
+                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                        <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
+                        <ul className="mt-3 text-content-secondary dark:text-content-secondary space-y-2 list-disc list-inside">
+                            {nextSteps.map((step, index) => ( <li key={index}> <strong>{step.action}</strong> (Deadline: {step.deadline}) </li> ))}
+                        </ul>
+                    </div>
+                )}
+
+                {!isInterviewReview && canSeeBlockages && solutionBlockages && (
+                    <div className="bg-blue-50 dark:bg-background-primary/30 border border-blue-300 dark:border-blue-500/50 rounded-lg overflow-hidden">
+                        <button onClick={() => setIsBlockagesExpanded(p => !p)} className="w-full p-4 flex justify-between items-center text-left hover:bg-blue-100/50 dark:hover:bg-background-tertiary/50 transition-colors" aria-expanded={isBlockagesExpanded} aria-controls="blockages-content">
+                            <div className="flex items-center gap-3">
+                                <UsersIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                                <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_blockages_title')}</h2>
+                                {!isBlockagesExpanded && solutionBlockages.length > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs font-bold text-white bg-blue-500 rounded-full animate-fadeIn">
+                                        {solutionBlockages.length}
+                                    </span>
+                                )}
+                            </div>
+                            <ChevronDownIcon className={`w-6 h-6 text-content-secondary dark:text-content-secondary transition-transform duration-300 ${isBlockagesExpanded ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isBlockagesExpanded && (
+                            <div id="blockages-content" className="p-4 pt-0 space-y-4 animate-fadeIn">
+                                <div className="border-t border-blue-200 dark:border-blue-500/30 mt-4 pt-4 space-y-4">
+                                     <p className="text-sm text-blue-700 dark:text-blue-300 italic">{t('sessionReview_blockages_subtitle')}</p>
+                                    {solutionBlockages.length > 0 ? (
+                                        <>
+                                            <div className={blockageGridClass}>
+                                                {solutionBlockages.map((blockage, index) => (
+                                                    <div key={index} className="p-3 bg-background-secondary dark:bg-background-tertiary/50 border border-border-primary dark:border-border-primary/50">
+                                                        <h4 className="font-bold text-blue-800 dark:text-blue-300">{getBlockageNameTranslation(blockage.blockage)}</h4>
+                                                        <p className="text-sm text-content-secondary dark:text-content-secondary mt-1">{blockage.explanation}</p>
+                                                        <p className="text-sm text-content-subtle dark:text-content-subtle mt-2 border-l-2 border-blue-300 dark:border-blue-500 pl-2 italic">"{blockage.quote}"</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <BlockageScoreGauge score={blockageScore} />
+                                        </>
+                                    ) : ( <p className="text-center text-content-secondary dark:text-content-secondary py-4">{t('sessionReview_no_blockages')}</p> )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {!isInterviewReview && proposedUpdates && proposedUpdates.length > 0 && (
+                    <div>
+                        <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-4 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_proposedUpdates')}</h2>
+                        <div className="flex items-center gap-4 mb-3">
+                            <button onClick={() => setAppliedUpdates(new Map(proposedUpdates.map((update, index) => [index, { type: update.type, targetHeadline: hierarchicalKeyToValueMap.get(update.headline) || update.headline }])))} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
+                            <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
+                        </div>
+                        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                            {proposedUpdates.map((update, index) => {
+                                const appliedUpdate = appliedUpdates.get(index);
+                                const isApplied = !!appliedUpdate;
+                                const isNewHeadline = appliedUpdate?.type === 'create_headline';
+                                const canChangeType = isApplied && !isNewHeadline;
+
+                                return (
+                                    <div key={index} className={`flex items-start gap-3 p-3 transition-colors ${isApplied ? 'bg-background-secondary dark:bg-background-secondary/50' : 'bg-background-primary dark:bg-background-primary/20 opacity-60'} border border-border-secondary dark:border-border-primary/50`}>
+                                        <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-background-secondary dark:bg-background-tertiary border-border-secondary dark:border-border-secondary text-accent-primary focus:ring-accent-primary cursor-pointer [color-scheme:light] dark:[color-scheme:dark]" />
+                                        <div className="flex-1">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                                {canChangeType ? (
+                                                    <select
+                                                        value={appliedUpdate.type}
+                                                        onChange={(e) => handleUpdateTypeChange(index, e.target.value as 'append' | 'replace_section')}
+                                                        disabled={!isApplied}
+                                                        className={`p-1 text-sm font-mono border ${getActionTypeClasses(appliedUpdate.type).bg} ${getActionTypeClasses(appliedUpdate.type).border} focus:outline-none focus:ring-1 focus:ring-green-500`}
+                                                    >
+                                                        <option value="append">{t('sessionReview_action_append')}</option>
+                                                        <option value="replace_section">{t('sessionReview_action_replace_section')}</option>
+                                                    </select>
+                                                ) : (
+                                                    <div className={`inline-flex items-center gap-2 text-sm font-mono px-2 py-0.5 rounded ${getActionTypeClasses(appliedUpdate?.type || update.type).bg} whitespace-nowrap`}>
+                                                        <span>{getActionTypeTranslation(appliedUpdate?.type || update.type)}</span>
+                                                    </div>
+                                                )}
+                                                {!isNewHeadline && <span className="text-sm text-content-subtle dark:text-content-subtle hidden sm:inline">{t('sessionReview_to')}</span>}
+                                                <select value={appliedUpdate?.targetHeadline} onChange={(e) => handleActionChange(index, e.target.value)} disabled={!isApplied} className="w-full sm:w-auto p-1 text-sm bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-background-primary dark:disabled:bg-background-primary/50 text-content-primary dark:text-content-primary">
+                                                    <optgroup label={t('sessionReview_optgroup_existing')}>
+                                                        {existingHeadlines.map(opt => (
+                                                            <option
+                                                                key={opt.value}
+                                                                value={opt.value}
+                                                                className="text-content-primary dark:text-content-primary"
+                                                            >
+                                                                {opt.label.replace(/ /g, '\u00A0')}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                    {isNewHeadline && (
+                                                        <optgroup label={t('sessionReview_optgroup_new')}>
+                                                            <option value={appliedUpdate.targetHeadline}>
+                                                                {`${appliedUpdate.targetHeadline} (New)`}
+                                                            </option>
+                                                        </optgroup>
+                                                    )}
+                                                </select>
+                                            </div>
+                                            <p className="mt-2 text-content-primary dark:text-content-primary text-sm whitespace-pre-wrap font-mono p-2 bg-background-primary dark:bg-background-primary/50 border-l-2 border-border-secondary dark:border-border-secondary">{update.content}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                <div>
+                    <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-2 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_diffView')}</h2>
+                     <div className="flex items-center gap-4 text-sm mb-2 text-content-secondary dark:text-content-secondary">
+                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-500"></span><span>{t('sessionReview_removed')}</span></div>
+                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-500"></span><span>{t('sessionReview_added')}</span></div>
+                    </div>
+                    <DiffViewer oldText={cleanOriginalContext} newText={updatedContext} />
+                </div>
+                
+                 <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{t('sessionReview_finalContext')}</h2>
+                        <button onClick={() => setIsFinalContextVisible(p => !p)} className="text-sm text-accent-primary hover:text-accent-primary-hover hover:underline">
+                            {isFinalContextVisible ? t('sessionReview_hide') : t('sessionReview_showEdit')}
+                        </button>
+                    </div>
+                    {isFinalContextVisible && ( <textarea value={editableContext} onChange={(e) => setEditableContext(e.target.value)} rows={15} className="w-full p-3 font-mono text-sm bg-background-secondary dark:bg-background-tertiary text-content-primary dark:text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary" /> )}
+                </div>
+
+                {currentUser && (
+                    <div className="p-4 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 rounded-md">
+                        <label className="flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={preventCloudSave}
+                                onChange={(e) => setPreventCloudSave(e.target.checked)}
+                                className="h-5 w-5 rounded bg-background-secondary dark:bg-background-tertiary border-border-secondary dark:border-border-secondary text-accent-secondary focus:ring-accent-secondary [color-scheme:light] dark:[color-scheme:dark]"
+                            />
+                            <div className="ml-3">
+                                <span className="font-semibold text-content-primary">{t('sessionReview_preventSave_label')}</span>
+                                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground">{t('sessionReview_preventSave_desc')}</p>
+                            </div>
+                        </label>
+                    </div>
+                )}
+
+
+                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border-primary dark:border-border-primary">
+                    <button onClick={handleDownloadContext} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover rounded-lg shadow-md">
+                        <DownloadIcon className="w-5 h-5"/>
+                        {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
+                    </button>
+                    {!isInterviewReview && (
+                         <button
+                            onClick={handleContinue}
+                            disabled={isSaving}
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md disabled:bg-gray-400 dark:disabled:bg-gray-700 disabled:cursor-wait"
+                        >
+                            {isSaving ? <Spinner /> : primaryActionText}
+                        </button>
+                    )}
+                    <button
+                        onClick={handleSwitch}
+                        disabled={isSaving}
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-content-secondary dark:text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary rounded-lg shadow-md disabled:opacity-50 disabled:cursor-wait"
+                    >
+                        {isSaving ? <Spinner /> : secondaryActionText}
+                    </button>
+                </div>
+                 <div className="text-center pt-4">
+                    <button onClick={onReturnToStart} className="text-sm text-content-subtle dark:text-content-subtle hover:underline">
+                        {t('sessionReview_startOver')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SessionReview;
