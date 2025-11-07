@@ -279,7 +279,7 @@ fi
 # Final summary
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║  Setup Complete!                                       ║${NC}"
+echo -e "${GREEN}║  Setup Complete!                                      ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 
