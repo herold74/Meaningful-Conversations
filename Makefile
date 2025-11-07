@@ -234,72 +234,142 @@ health-check: ## Run health checks on all services
 monitor: ## Show real-time resource usage
 	@$(CONTAINER_ENGINE) stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
 
-# ============ ALTERNATIVE SERVER DEPLOYMENT ============
+# ============ MANUALMODE SERVER DEPLOYMENT ============
 
-deploy-alternative-staging: ## Deploy to alternative server staging
+deploy-manualmode-staging: ## Deploy to manualmode server staging
+	@./deploy-manualmode.sh -e staging
+
+deploy-manualmode-production: ## Deploy to manualmode server production
+	@./deploy-manualmode.sh -e production
+
+deploy-manualmode-staging-frontend: ## Deploy frontend to manualmode staging
+	@./deploy-manualmode.sh -e staging -c frontend
+
+deploy-manualmode-production-frontend: ## Deploy frontend to manualmode production
+	@./deploy-manualmode.sh -e production -c frontend
+
+deploy-manualmode-staging-backend: ## Deploy backend to manualmode staging
+	@./deploy-manualmode.sh -e staging -c backend
+
+deploy-manualmode-production-backend: ## Deploy backend to manualmode production
+	@./deploy-manualmode.sh -e production -c backend
+
+deploy-manualmode-dry-run: ## Test deployment to manualmode server (no changes)
+	@./deploy-manualmode.sh --dry-run
+
+# Legacy command (defaults to staging)
+deploy-manualmode: ## Deploy to manualmode server (defaults to staging)
+	@./deploy-manualmode.sh
+
+logs-manualmode-staging: ## View logs from manualmode server staging
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml logs -f'
+
+logs-manualmode-production: ## View logs from manualmode server production
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
+
+status-manualmode-staging: ## Check status on manualmode server staging
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml ps'
+
+status-manualmode-production: ## Check status on manualmode server production
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
+
+restart-manualmode-staging: ## Restart staging services on manualmode server
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml restart'
+
+restart-manualmode-production: ## Restart production services on manualmode server
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml restart'
+
+stop-manualmode-staging: ## Stop staging services on manualmode server
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
+
+stop-manualmode-production: ## Stop production services on manualmode server
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml down'
+
+pod-status-manualmode: ## Check pod status on manualmode server (both envs)
+	@ssh root@91.99.193.87 'podman pod ps && echo "" && podman ps --pod'
+
+db-shell-manualmode-staging: ## Open MariaDB shell on manualmode staging
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
+
+db-shell-manualmode-production: ## Open MariaDB shell on manualmode production
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
+
+db-backup-manualmode-staging: ## Backup MariaDB on manualmode staging
+	@echo "Backing up staging database..."
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-manualmode-staging-$$(date +%Y%m%d-%H%M%S).sql
+	@echo "Backup saved to: backup-manualmode-staging-$$(date +%Y%m%d-%H%M%S).sql"
+
+db-backup-manualmode-production: ## Backup MariaDB on manualmode production
+	@echo "Backing up production database..."
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql
+	@echo "Backup saved to: backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql"
+
+# ============ ALTERNATIVE SERVER DEPLOYMENT (LEGACY - OLD SERVER) ============
+
+deploy-alternative-staging: ## [LEGACY] Deploy to alternative server staging (OLD: 46.224.37.130)
 	@./deploy-alternative.sh -e staging
 
-deploy-alternative-production: ## Deploy to alternative server production
+deploy-alternative-production: ## [LEGACY] Deploy to alternative server production (OLD: 46.224.37.130)
 	@./deploy-alternative.sh -e production
 
-deploy-alternative-staging-frontend: ## Deploy frontend to alternative staging
+deploy-alternative-staging-frontend: ## [LEGACY] Deploy frontend to alternative staging
 	@./deploy-alternative.sh -e staging -c frontend
 
-deploy-alternative-production-frontend: ## Deploy frontend to alternative production
+deploy-alternative-production-frontend: ## [LEGACY] Deploy frontend to alternative production
 	@./deploy-alternative.sh -e production -c frontend
 
-deploy-alternative-staging-backend: ## Deploy backend to alternative staging
+deploy-alternative-staging-backend: ## [LEGACY] Deploy backend to alternative staging
 	@./deploy-alternative.sh -e staging -c backend
 
-deploy-alternative-production-backend: ## Deploy backend to alternative production
+deploy-alternative-production-backend: ## [LEGACY] Deploy backend to alternative production
 	@./deploy-alternative.sh -e production -c backend
 
-deploy-alternative-dry-run: ## Test deployment to alternative server (no changes)
+deploy-alternative-dry-run: ## [LEGACY] Test deployment to alternative server (no changes)
 	@./deploy-alternative.sh --dry-run
 
 # Legacy command (defaults to staging)
-deploy-alternative: ## Deploy to alternative server (defaults to staging)
+deploy-alternative: ## [LEGACY] Deploy to alternative server (defaults to staging)
 	@./deploy-alternative.sh
 
-logs-alternative-staging: ## View logs from alternative server staging
+logs-alternative-staging: ## [LEGACY] View logs from alternative server staging
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml logs -f'
 
-logs-alternative-production: ## View logs from alternative server production
+logs-alternative-production: ## [LEGACY] View logs from alternative server production
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml logs -f'
 
-status-alternative-staging: ## Check status on alternative server staging
+status-alternative-staging: ## [LEGACY] Check status on alternative server staging
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml ps'
 
-status-alternative-production: ## Check status on alternative server production
+status-alternative-production: ## [LEGACY] Check status on alternative server production
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml ps'
 
-restart-alternative-staging: ## Restart staging services on alternative server
+restart-alternative-staging: ## [LEGACY] Restart staging services on alternative server
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml restart'
 
-restart-alternative-production: ## Restart production services on alternative server
+restart-alternative-production: ## [LEGACY] Restart production services on alternative server
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml restart'
 
-stop-alternative-staging: ## Stop staging services on alternative server
+stop-alternative-staging: ## [LEGACY] Stop staging services on alternative server
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml down'
 
-stop-alternative-production: ## Stop production services on alternative server
+stop-alternative-production: ## [LEGACY] Stop production services on alternative server
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml down'
 
-pod-status-alternative: ## Check pod status on alternative server (both envs)
+pod-status-alternative: ## [LEGACY] Check pod status on alternative server (both envs)
 	@ssh root@46.224.37.130 'podman pod ps && echo "" && podman ps --pod'
 
-db-shell-alternative-staging: ## Open MariaDB shell on alternative staging
+db-shell-alternative-staging: ## [LEGACY] Open MariaDB shell on alternative staging
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
 
-db-shell-alternative-production: ## Open MariaDB shell on alternative production
+db-shell-alternative-production: ## [LEGACY] Open MariaDB shell on alternative production
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
 
-db-backup-alternative-staging: ## Backup MariaDB on alternative staging
+db-backup-alternative-staging: ## [LEGACY] Backup MariaDB on alternative staging
 	@echo "Backing up staging database..."
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-alternative-staging-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-alternative-staging-$$(date +%Y%m%d-%H%M%S).sql"
 
-db-backup-alternative-production: ## Backup MariaDB on alternative production
+db-backup-alternative-production: ## [LEGACY] Backup MariaDB on alternative production
 	@echo "Backing up production database..."
 	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-alternative-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-alternative-production-$$(date +%Y%m%d-%H%M%S).sql"

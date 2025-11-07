@@ -50,11 +50,12 @@ const getApiBaseUrl = (): string => {
         'meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app': 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
         'meaningful-conversations-frontend-staging-650095539575.europe-west6.run.app': 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
         
-        // Alternative Server Deployment (Podman-based with nginx reverse proxy)
+        // Manualmode Server Deployment (Podman-based with nginx reverse proxy)
         // Uses relative paths - nginx on host handles /api routing to backend containers
         'mc-beta.manualmode.at': '',   // Staging: nginx proxies /api to backend pod
         'mc-app.manualmode.at': '',    // Production: nginx proxies /api to backend pod
-        '46.224.37.130': '',           // Fallback for IP access
+        '91.99.193.87': '',            // Manualmode server: IP fallback
+        '46.224.37.130': '',           // Alternative server (legacy): IP fallback
     };
     
     if (backendMap[hostnameWithPort]) {
