@@ -17,12 +17,37 @@ export default defineConfig({
     },
   },
   build: {
+    // Increase chunk size warning limit to 1000 kB (optional, if you still get warnings after chunking)
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       input: {
         // FIX: `__dirname` is not available in ES modules. `path.resolve` without an absolute
         // base path defaults to the current working directory, which is the project root,
         // correctly locating `index.html`.
         main: path.resolve('index.html'),
+      },
+      output: {
+        // Manual chunking to split large bundles
+        manualChunks: (id) => {
+          // React core libraries
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') || 
+              id.includes('node_modules/react-router') ||
+              id.includes('node_modules/scheduler')) {
+            return 'react-vendor';
+          }
+          
+          // UI/Design libraries (if you're using any specific ones)
+          if (id.includes('node_modules/@headlessui') ||
+              id.includes('node_modules/framer-motion')) {
+            return 'ui-vendor';
+          }
+          
+          // Other large vendor libraries
+          if (id.includes('node_modules/')) {
+            return 'vendor';
+          }
+        },
       },
     },
   },
