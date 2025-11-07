@@ -274,6 +274,12 @@ echo -e "${BLUE}Deploying to Remote Server${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 if [[ "$DRY_RUN" == false ]]; then
+    # Ensure remote directories exist
+    echo -e "${YELLOW}Creating remote directories...${NC}"
+    ssh "$REMOTE_HOST" "mkdir -p $REMOTE_ENV_DIR"
+    echo -e "${GREEN}✓ Remote directories ready${NC}"
+    echo ""
+    
     # Create deployment script for remote execution
     cat > /tmp/remote-deploy.sh << 'REMOTE_SCRIPT'
 #!/bin/bash
