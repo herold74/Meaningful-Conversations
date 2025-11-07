@@ -34,6 +34,7 @@ interface AdminViewProps {
 
 type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
+type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'loginCount' | 'xp' | 'lastLogin';
 
 const ResetPasswordSuccessModal: React.FC<{
     data: { email: string; newPass: string };
@@ -209,6 +210,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const [feedback, setFeedback] = useState<Feedback[]>([]);
 
     const [sortConfig, setSortConfig] = useState<{ key: CodeSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
+    const [userSortConfig, setUserSortConfig] = useState<{ key: UserSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
 
     const testScenarios = useMemo(() => getTestScenarios(t), [t]);
 
@@ -359,6 +361,70 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         return users.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
     }, [users, userSearchQuery]);
 
+    const sortedAndFilteredUsers = useMemo(() => {
+        let sortableUsers = [...filteredUsers];
+        if (userSortConfig !== null) {
+            sortableUsers.sort((a, b) => {
+                let compare = 0;
+                switch (userSortConfig.key) {
+                    case 'email': {
+                        compare = a.email.localeCompare(b.email);
+                        break;
+                    }
+                    case 'createdAt': {
+                        const aValue = new Date(a.createdAt!).getTime();
+                        const bValue = new Date(b.createdAt!).getTime();
+                        compare = aValue - bValue;
+                        break;
+                    }
+                    case 'roles': {
+                        // Sort by admin first, then beta tester
+                        const aValue = (a.isAdmin ? 2 : 0) + (a.isBetaTester ? 1 : 0);
+                        const bValue = (b.isAdmin ? 2 : 0) + (b.isBetaTester ? 1 : 0);
+                        compare = aValue - bValue;
+                        break;
+                    }
+                    case 'loginCount': {
+                        const aValue = a.loginCount || 0;
+                        const bValue = b.loginCount || 0;
+                        compare = aValue - bValue;
+                        break;
+                    }
+                    case 'xp': {
+                        let aXp = 0;
+                        let bXp = 0;
+                        try {
+                            if (a.gamificationState) {
+                                const state = JSON.parse(a.gamificationState);
+                                aXp = state.xp || 0;
+                            }
+                        } catch (e) {
+                            // Silent fail
+                        }
+                        try {
+                            if (b.gamificationState) {
+                                const state = JSON.parse(b.gamificationState);
+                                bXp = state.xp || 0;
+                            }
+                        } catch (e) {
+                            // Silent fail
+                        }
+                        compare = aXp - bXp;
+                        break;
+                    }
+                    case 'lastLogin': {
+                        const aValue = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+                        const bValue = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+                        compare = aValue - bValue;
+                        break;
+                    }
+                }
+                return userSortConfig.direction === 'asc' ? compare : -compare;
+            });
+        }
+        return sortableUsers;
+    }, [filteredUsers, userSortConfig]);
+
     const filteredCodes = useMemo(() => {
         const trimmedFilter = codeEmailFilter.trim().toLowerCase();
         if (!trimmedFilter) return codes;
@@ -413,6 +479,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
             direction = 'desc';
         }
         setSortConfig({ key, direction });
+    };
+
+    const requestUserSort = (key: UserSortKeys) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (userSortConfig && userSortConfig.key === key && userSortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setUserSortConfig({ key, direction });
     };
 
     const tabConfig: Record<AdminTab, { icon: React.FC<any>, key: string }> = {
@@ -518,17 +592,47 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
                             <tr>
-                                <th className="p-3">{t('admin_users_email')}</th>
-                                <th className="p-3">{t('admin_users_joined')}</th>
-                                <th className="p-3">{t('admin_users_roles')}</th>
-                                <th className="p-3 text-center">{t('admin_users_logins')}</th>
-                                <th className="p-3 text-center">{t('admin_users_xp')}</th>
-                                <th className="p-3">{t('admin_users_last_login')}</th>
+                                <th className="p-3">
+                                    <button onClick={() => requestUserSort('email')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_users_email')}
+                                        {userSortConfig?.key === 'email' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestUserSort('createdAt')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_users_joined')}
+                                        {userSortConfig?.key === 'createdAt' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestUserSort('roles')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_users_roles')}
+                                        {userSortConfig?.key === 'roles' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3 text-center">
+                                    <button onClick={() => requestUserSort('loginCount')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors mx-auto">
+                                        {t('admin_users_logins')}
+                                        {userSortConfig?.key === 'loginCount' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3 text-center">
+                                    <button onClick={() => requestUserSort('xp')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors mx-auto">
+                                        {t('admin_users_xp')}
+                                        {userSortConfig?.key === 'xp' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3">
+                                    <button onClick={() => requestUserSort('lastLogin')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                        {t('admin_users_last_login')}
+                                        {userSortConfig?.key === 'lastLogin' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
                                 <th className="p-3 text-center">{t('admin_users_actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                            {filteredUsers.map(user => {
+                            {sortedAndFilteredUsers.map(user => {
                                 const isCurrentUser = currentUser?.id === user.id;
                                 let userXp = 0;
                                 if (user.gamificationState) {
