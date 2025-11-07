@@ -2,7 +2,13 @@
 
 An application that provides access to several coaching bot characters with different perspectives and coaching styles. Users can create a "life context" file to personalize conversations and update it with new insights after each session.
 
-![A screenshot of the bot selection screen in the Meaningful Conversations app.](https://storage.googleapis.com/aistudio-hosting/project-images/21a50a18-d7b3-4f93-b883-85b4f62136e0/readme-screenshot.png)
+The fundamental idea of using an .md file to preserve and update information in a structured way using AI was inspired by Chris Lovejoy (https://github.com/chris-lovejoy/personal-ai-coach). This method is very similar to human note-taking during a coaching process, but provides the benefit of creating the summary for the client instantly for further reflections. Meaningful conversations adds the graphical UI, and a reliable non-destructive process of updating the .md file using AI.
+
+Programming was performed entirely using Google AI Studio. Therefore, the application was "composed" using Gemini-PRO.
+
+The intellectual achievement of the publisher thus lies in defining and compiling the functions, the user experience and all considerations regarding real-world implementation in compliance with the legal framework and data security requirements relating to the handling of personal data in the coaching process.
+
+According to the rules and regulations of AI Studio this project is licensed under the Apache Licence 2.0
 
 ## ✨ Core Features
 
