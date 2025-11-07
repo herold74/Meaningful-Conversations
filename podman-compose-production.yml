@@ -1,0 +1,89 @@
+version: '3.8'
+
+# Production Pod Configuration
+x-podman:
+  pod:
+    name: meaningful-conversations-production
+    infra: true
+    ports:
+      - "80:3000"      # Frontend on port 80 (main)
+      - "8082:8080"    # Backend on port 8082
+      - "3308:3306"    # MariaDB on port 3308 (external)
+
+services:
+  mariadb:
+    image: docker.io/library/mariadb:11.2
+    container_name: meaningful-conversations-mariadb-production
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootchangeme}
+      MARIADB_DATABASE: ${DB_NAME:-meaningful_conversations_production}
+      MARIADB_USER: ${DB_USER:-mcuser}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - mariadb_production_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-backend:${VERSION:-latest}
+    container_name: meaningful-conversations-backend-production
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-mcuser}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_NAME: ${DB_NAME:-meaningful_conversations_production}
+      DATABASE_URL: mysql://${DB_USER:-mcuser}:${DB_PASSWORD:-changeme}@mariadb:3306/${DB_NAME:-meaningful_conversations_production}
+      
+      # Application configuration
+      PORT: 8080
+      NODE_ENV: production
+      ENVIRONMENT_TYPE: production
+      FRONTEND_URL: ${FRONTEND_URL:-https://mc-app.manualmode.at}
+      
+      # Secrets (provide these in .env)
+      API_KEY: ${API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      MAILJET_API_KEY: ${MAILJET_API_KEY}
+      MAILJET_SECRET_KEY: ${MAILJET_SECRET_KEY}
+      MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-register@manualmode.at}
+      
+      # Admin configuration
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@manualmode.at}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-frontend:${VERSION:-latest}
+    container_name: meaningful-conversations-frontend-production
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mariadb_production_data:
+    driver: local
+
