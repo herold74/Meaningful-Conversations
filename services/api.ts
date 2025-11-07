@@ -34,28 +34,17 @@ const getApiBaseUrl = (): string => {
     if (backendParam === 'local') {
         return 'http://localhost:3001';
     }
-    if (backendParam === 'staging') {
-        return 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app';
-    }
-    if (backendParam === 'production') {
-        return 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app';
-    }
 
     // 2. Runtime detection based on hostname and port
     // Include port in the key to distinguish between staging and production on the same server
     const hostnameWithPort = port ? `${hostname}:${port}` : hostname;
     
     const backendMap: { [key: string]: string } = {
-        // Google Cloud Run Environments
-        'meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app': 'https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app',
-        'meaningful-conversations-frontend-staging-650095539575.europe-west6.run.app': 'https://meaningful-conversations-backend-staging-7kxdyriz2q-oa.a.run.app',
-        
         // Manualmode Server Deployment (Podman-based with nginx reverse proxy)
         // Uses relative paths - nginx on host handles /api routing to backend containers
         'mc-beta.manualmode.at': '',   // Staging: nginx proxies /api to backend pod
         'mc-app.manualmode.at': '',    // Production: nginx proxies /api to backend pod
         '91.99.193.87': '',            // Manualmode server: IP fallback
-        '46.224.37.130': '',           // Alternative server (legacy): IP fallback
     };
     
     if (backendMap[hostnameWithPort]) {

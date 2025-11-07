@@ -19,26 +19,6 @@ help: ## Show this help message
 	@echo "Targets:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-setup: ## Initial setup - copy config template
-	@if [ ! -f deploy-config.env ]; then \
-		cp deploy-config.env.example deploy-config.env; \
-		echo "$(GREEN)✓ Created deploy-config.env - Please edit with your values$(NC)"; \
-		echo "$(YELLOW)⚠ Don't forget to fill in:$(NC)"; \
-		echo "  - DOCKER_USERNAME"; \
-		echo "  - GCLOUD_PROJECT (if using Cloud Run)"; \
-		echo "  - SSH_HOST (if using SSH)"; \
-	else \
-		echo "$(YELLOW)deploy-config.env already exists$(NC)"; \
-	fi
-	@if [ ! -f .env ]; then \
-		echo "DB_PASSWORD=changeme" > .env; \
-		echo "JWT_SECRET=changeme" >> .env; \
-		echo "GEMINI_API_KEY=changeme" >> .env; \
-		echo "$(GREEN)✓ Created .env - Please edit with your values$(NC)"; \
-	else \
-		echo "$(YELLOW).env already exists$(NC)"; \
-	fi
-
 build: ## Build container images locally
 	@echo "$(GREEN)Building backend...$(NC)"
 	@$(CONTAINER_ENGINE) build -t meaningful-conversations-backend:latest ./meaningful-conversations-backend
@@ -52,38 +32,6 @@ build-no-cache: ## Build container images without cache
 	@echo "$(GREEN)Building frontend (no cache)...$(NC)"
 	@$(CONTAINER_ENGINE) build --no-cache -t meaningful-conversations-frontend:latest .
 	@echo "$(GREEN)✓ Build complete$(NC)"
-
-deploy: ## Full deployment (build, push, deploy)
-	@./deploy.sh
-
-deploy-gcloud: ## Deploy to Google Cloud Run
-	@./deploy.sh --target gcloud
-
-deploy-ssh: ## Deploy via SSH to remote server
-	@./deploy.sh --target ssh
-
-# ============ AUTOMATED DEPLOYMENT (NEW) ============
-
-deploy-staging: ## Deploy all to staging (automated)
-	@./deploy-auto.sh -e staging
-
-deploy-production: ## Deploy all to production (automated)
-	@./deploy-auto.sh -e production
-
-deploy-frontend-staging: ## Deploy only frontend to staging (fast)
-	@./deploy-auto.sh -e staging -c frontend
-
-deploy-frontend-prod: ## Deploy only frontend to production
-	@./deploy-auto.sh -e production -c frontend
-
-deploy-backend-staging: ## Deploy only backend to staging
-	@./deploy-auto.sh -e staging -c backend
-
-deploy-backend-prod: ## Deploy only backend to production
-	@./deploy-auto.sh -e production -c backend
-
-quick-deploy-frontend: ## Quick deploy frontend to staging (no rebuild)
-	@./deploy-auto.sh -e staging -c frontend --skip-build
 
 deploy-compose: ## Deploy with Podman/Docker Compose
 	@$(COMPOSE_CMD) up -d
@@ -133,10 +81,6 @@ validate: ## Validate container files
 	@echo "Backend Dockerfile is valid"
 	@echo "Frontend Dockerfile is valid"
 	@echo "$(GREEN)✓ Validation complete$(NC)"
-
-push: ## Push images to registry
-	@echo "$(GREEN)Pushing images...$(NC)"
-	@./deploy.sh --skip-build
 
 version: ## Show current version
 	@echo "Frontend version: $$(cat package.json | grep version | head -1 | awk -F: '{ print $$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')"
@@ -303,76 +247,6 @@ db-backup-manualmode-production: ## Backup MariaDB on manualmode production
 	@echo "Backing up production database..."
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql"
-
-# ============ ALTERNATIVE SERVER DEPLOYMENT (LEGACY - OLD SERVER) ============
-
-deploy-alternative-staging: ## [LEGACY] Deploy to alternative server staging (OLD: 46.224.37.130)
-	@./deploy-alternative.sh -e staging
-
-deploy-alternative-production: ## [LEGACY] Deploy to alternative server production (OLD: 46.224.37.130)
-	@./deploy-alternative.sh -e production
-
-deploy-alternative-staging-frontend: ## [LEGACY] Deploy frontend to alternative staging
-	@./deploy-alternative.sh -e staging -c frontend
-
-deploy-alternative-production-frontend: ## [LEGACY] Deploy frontend to alternative production
-	@./deploy-alternative.sh -e production -c frontend
-
-deploy-alternative-staging-backend: ## [LEGACY] Deploy backend to alternative staging
-	@./deploy-alternative.sh -e staging -c backend
-
-deploy-alternative-production-backend: ## [LEGACY] Deploy backend to alternative production
-	@./deploy-alternative.sh -e production -c backend
-
-deploy-alternative-dry-run: ## [LEGACY] Test deployment to alternative server (no changes)
-	@./deploy-alternative.sh --dry-run
-
-# Legacy command (defaults to staging)
-deploy-alternative: ## [LEGACY] Deploy to alternative server (defaults to staging)
-	@./deploy-alternative.sh
-
-logs-alternative-staging: ## [LEGACY] View logs from alternative server staging
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml logs -f'
-
-logs-alternative-production: ## [LEGACY] View logs from alternative server production
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml logs -f'
-
-status-alternative-staging: ## [LEGACY] Check status on alternative server staging
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml ps'
-
-status-alternative-production: ## [LEGACY] Check status on alternative server production
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml ps'
-
-restart-alternative-staging: ## [LEGACY] Restart staging services on alternative server
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml restart'
-
-restart-alternative-production: ## [LEGACY] Restart production services on alternative server
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml restart'
-
-stop-alternative-staging: ## [LEGACY] Stop staging services on alternative server
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml down'
-
-stop-alternative-production: ## [LEGACY] Stop production services on alternative server
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml down'
-
-pod-status-alternative: ## [LEGACY] Check pod status on alternative server (both envs)
-	@ssh root@46.224.37.130 'podman pod ps && echo "" && podman ps --pod'
-
-db-shell-alternative-staging: ## [LEGACY] Open MariaDB shell on alternative staging
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
-
-db-shell-alternative-production: ## [LEGACY] Open MariaDB shell on alternative production
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
-
-db-backup-alternative-staging: ## [LEGACY] Backup MariaDB on alternative staging
-	@echo "Backing up staging database..."
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-alternative-staging-$$(date +%Y%m%d-%H%M%S).sql
-	@echo "Backup saved to: backup-alternative-staging-$$(date +%Y%m%d-%H%M%S).sql"
-
-db-backup-alternative-production: ## [LEGACY] Backup MariaDB on alternative production
-	@echo "Backing up production database..."
-	@ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-alternative-production-$$(date +%Y%m%d-%H%M%S).sql
-	@echo "Backup saved to: backup-alternative-production-$$(date +%Y%m%d-%H%M%S).sql"
 
 .DEFAULT_GOAL := help
 
