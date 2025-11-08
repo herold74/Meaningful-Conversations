@@ -255,10 +255,24 @@
   "menu_faq": "FAQ",
   "menu_about": "About This App",
   "menu_disclaimer": "Disclaimer",
-  "menu_terms": "Terms of Service",
+  "menu_legal": "Legal",
+  "menu_account_management": "My Account",
   "menu_redeem_code": "Redeem Code",
   "menu_change_password": "Change Password",
+  "menu_export_data": "Export My Data",
   "menu_delete_account": "Delete Account",
+  
+  "legal_title": "Legal",
+  "legal_tab_imprint": "Imprint",
+  "legal_tab_privacy": "Privacy Policy",
+  "legal_tab_terms": "Terms of Service",
+  
+  "account_management_title": "Account Management",
+  "account_change_password_desc": "Change your password for better security",
+  "account_export_data_desc": "Download all your data (GDPR Art. 20)",
+  "account_redeem_code_desc": "Unlock premium features or coaches",
+  "account_delete_account_desc": "Permanently delete your account (GDPR Art. 17)",
+  "account_management_footer": "All changes take effect immediately. Account deletion is permanent.",
 
   "user_guide_title": "User Guide",
   "user_guide_attention_title": "Attention: Data Security",
@@ -296,6 +310,27 @@
   "disclaimer_delete_warning": "Deleting your account is a <strong>permanent</strong> action and cannot be undone. All of your data, including your encrypted life context and progress, will be irretrievably deleted.",
   
   "terms_title": "Terms of Service",
+  
+  "privacy_policy_title": "Privacy Policy",
+  
+  "imprint_title": "Imprint",
+  
+  "export_data_title": "Export My Data",
+  "export_data_description": "Download a complete copy of all your stored personal data. This complies with your right to data portability under Art. 20 GDPR.",
+  "export_data_includes": "The export includes:",
+  "export_data_includes_account": "Account information (email, registration date, login data)",
+  "export_data_includes_gamification": "Gamification data (XP, level, achievements, streak)",
+  "export_data_includes_context": "Encrypted Life Context",
+  "export_data_includes_feedback": "Your submitted feedback",
+  "export_data_includes_codes": "Upgrade codes you redeemed",
+  "export_data_includes_api": "API usage statistics (last 12 months)",
+  "export_data_note_title": "Note",
+  "export_data_note_encrypted": "Your Life Context is end-to-end encrypted. You can only decrypt it with your password.",
+  "export_data_button": "Export Data Now",
+  "export_data_downloading": "Downloading...",
+  "export_data_success": "Your data has been successfully exported!",
+  "export_data_error": "Error exporting data. Please try again.",
+  "export_data_gdpr_note": "This is your legal right under Art. 15 and 20 GDPR.",
 
   "redeem_title": "Redeem Code",
   "redeem_subtitle": "Have an upgrade code? Enter it here to unlock new features or coaches.",

@@ -25,10 +25,12 @@ export type NavView =
     | 'faq'
     | 'about'
     | 'disclaimer'
-    | 'terms'
+    | 'legal'
+    | 'accountManagement'
     | 'redeemCode'
     | 'admin'
-    | 'changePassword';
+    | 'changePassword'
+    | 'exportData';
 
 export interface User {
     id: string;

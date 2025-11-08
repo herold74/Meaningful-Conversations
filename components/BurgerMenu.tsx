@@ -70,15 +70,15 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
 
                     {/* Items moved to the top */}
                     <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => onNavigate('about')} />
-                    <MenuItem icon={ListIcon} text={t('menu_terms')} onClick={() => onNavigate('terms')} />
+                    <MenuItem icon={ListIcon} text={t('menu_legal')} onClick={() => onNavigate('legal')} />
                     <MenuItem icon={ShieldIcon} text={t('menu_disclaimer')} onClick={() => onNavigate('disclaimer')} />
 
                     <hr className="border-border-primary my-2" />
                     
                     {currentUser && (
                         <>
-                            <MenuItem icon={KeyIcon} text={t('menu_change_password')} onClick={() => onNavigate('changePassword')} />
-                            <MenuItem icon={ShoppingBagIcon} text={t('menu_redeem_code')} onClick={() => onNavigate('redeemCode')} />
+                            <MenuItem icon={UserIcon} text={t('menu_account_management')} onClick={() => onNavigate('accountManagement')} />
+                            <hr className="border-border-primary my-2" />
                         </>
                     )}
 
