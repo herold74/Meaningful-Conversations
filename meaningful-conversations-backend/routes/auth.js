@@ -57,14 +57,13 @@ router.post('/register', async (req, res) => {
         const cutoffDate = new Date('2026-01-01T00:00:00.000Z');
         let accessExpiresAt;
         if (registrationDate < cutoffDate) {
-            // Grant "legacy" access by setting a far-future date
-            const farFutureDate = new Date();
-            farFutureDate.setFullYear(farFutureDate.getFullYear() + 100);
-            accessExpiresAt = farFutureDate;
+            // Users registering in 2025 get access until June 30, 2026
+            accessExpiresAt = new Date('2026-06-30T23:59:59.000Z');
         } else {
-            // For users registering after the cutoff, their access is considered expired immediately,
-            // requiring them to purchase or redeem a pass. Setting it to a past date is more explicit than null.
-            accessExpiresAt = new Date('1970-01-01T00:00:00.000Z');
+            // Users registering from 2026 onwards get 7 days free access
+            const sevenDaysFromNow = new Date(registrationDate);
+            sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+            accessExpiresAt = sevenDaysFromNow;
         }
 
         await prisma.user.create({
