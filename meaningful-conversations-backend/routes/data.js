@@ -111,6 +111,106 @@ router.post('/redeem-code', async (req, res) => {
     }
 });
 
+// GET /api/data/export - Export all user data (DSGVO Art. 20 - Datenübertragbarkeit)
+router.get('/export', async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        // Fetch all user-related data
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                feedbacksByUser: {
+                    select: {
+                        id: true,
+                        rating: true,
+                        comments: true,
+                        botId: true,
+                        lastUserMessage: true,
+                        botResponse: true,
+                        createdAt: true,
+                    },
+                },
+                upgradeCodesUsedByUser: {
+                    select: {
+                        code: true,
+                        botId: true,
+                        createdAt: true,
+                        usedAt: true,
+                    },
+                },
+            },
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Fetch API usage data
+        const apiUsage = await prisma.apiUsage.findMany({
+            where: { userId },
+            select: {
+                id: true,
+                endpoint: true,
+                model: true,
+                botId: true,
+                inputTokens: true,
+                outputTokens: true,
+                durationMs: true,
+                createdAt: true,
+            },
+        });
+
+        // Prepare export data
+        const exportData = {
+            exportDate: new Date().toISOString(),
+            user: {
+                id: user.id,
+                email: user.email,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                lastLogin: user.lastLogin,
+                loginCount: user.loginCount,
+                isEmailVerified: user.isEmailVerified,
+                isBetaTester: user.isBetaTester,
+                isAdmin: user.isAdmin,
+                accessExpiresAt: user.accessExpiresAt,
+                unlockedCoaches: user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [],
+            },
+            gamificationData: user.gamificationState ? JSON.parse(user.gamificationState) : null,
+            lifeContext: {
+                note: "Your Life Context is end-to-end encrypted. Only you can decrypt it with your password.",
+                encryptedData: user.lifeContext || null,
+            },
+            feedback: user.feedbacksByUser.map(f => ({
+                id: f.id,
+                rating: f.rating,
+                comments: f.comments,
+                botId: f.botId,
+                lastUserMessage: f.lastUserMessage,
+                botResponse: f.botResponse,
+                createdAt: f.createdAt,
+            })),
+            upgradeCodes: user.upgradeCodesUsedByUser.map(c => ({
+                code: c.code,
+                botId: c.botId,
+                createdAt: c.createdAt,
+                usedAt: c.usedAt,
+            })),
+            apiUsage: apiUsage,
+        };
+
+        // Set filename for download
+        const filename = `meaningful-conversations-data-export-${user.email}-${new Date().toISOString().split('T')[0]}.json`;
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', 'application/json');
+        res.json(exportData);
+    } catch (error) {
+        console.error("Error exporting user data:", error);
+        res.status(500).json({ error: 'Failed to export user data.' });
+    }
+});
+
 // PUT /api/data/user/password - Change user password
 router.put('/user/password', async (req, res) => {
     const { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
