@@ -255,10 +255,24 @@
   "menu_faq": "FAQ",
   "menu_about": "Über diese App",
   "menu_disclaimer": "Haftungsausschluss",
-  "menu_terms": "Nutzungsbedingungen",
+  "menu_legal": "Rechtliches",
+  "menu_account_management": "Mein Account",
   "menu_redeem_code": "Code einlösen",
   "menu_change_password": "Passwort ändern",
+  "menu_export_data": "Daten exportieren",
   "menu_delete_account": "Konto löschen",
+  
+  "legal_title": "Rechtliches",
+  "legal_tab_imprint": "Impressum",
+  "legal_tab_privacy": "Datenschutz",
+  "legal_tab_terms": "Nutzungsbedingungen",
+  
+  "account_management_title": "Account-Verwaltung",
+  "account_change_password_desc": "Ändern Sie Ihr Passwort für mehr Sicherheit",
+  "account_export_data_desc": "Laden Sie alle Ihre Daten herunter (DSGVO Art. 20)",
+  "account_redeem_code_desc": "Schalten Sie Premium-Funktionen oder Coaches frei",
+  "account_delete_account_desc": "Löschen Sie Ihren Account dauerhaft (DSGVO Art. 17)",
+  "account_management_footer": "Alle Änderungen werden sofort wirksam. Die Account-Löschung ist endgültig.",
 
   "user_guide_title": "Benutzerhandbuch",
   "user_guide_attention_title": "Achtung: Datensicherheit",
@@ -296,6 +310,27 @@
   "disclaimer_delete_warning": "Das Löschen Ihres Kontos ist eine <strong>endgültige</strong> Aktion und kann nicht rückgängig gemacht werden. Alle Ihre Daten, einschließlich Ihres verschlüsselten Lebenskontexts und Fortschritts, werden unwiederbringlich gelöscht.",
  
   "terms_title": "Nutzungsbedingungen",
+  
+  "privacy_policy_title": "Datenschutzerklärung",
+  
+  "imprint_title": "Impressum",
+  
+  "export_data_title": "Daten exportieren",
+  "export_data_description": "Laden Sie eine vollständige Kopie aller Ihrer gespeicherten personenbezogenen Daten herunter. Dies entspricht Ihrem Recht auf Datenübertragbarkeit gemäß Art. 20 DSGVO.",
+  "export_data_includes": "Der Export enthält:",
+  "export_data_includes_account": "Account-Informationen (E-Mail, Registrierungsdatum, Login-Daten)",
+  "export_data_includes_gamification": "Gamification-Daten (XP, Level, Erfolge, Streak)",
+  "export_data_includes_context": "Verschlüsselter Lebenskontext",
+  "export_data_includes_feedback": "Ihre eingereichten Feedbacks",
+  "export_data_includes_codes": "Von Ihnen eingelöste Upgrade-Codes",
+  "export_data_includes_api": "API-Nutzungsstatistiken (letzte 12 Monate)",
+  "export_data_note_title": "Hinweis",
+  "export_data_note_encrypted": "Ihr Lebenskontext ist Ende-zu-Ende-verschlüsselt. Sie können ihn nur mit Ihrem Passwort entschlüsseln.",
+  "export_data_button": "Daten jetzt exportieren",
+  "export_data_downloading": "Wird heruntergeladen...",
+  "export_data_success": "Ihre Daten wurden erfolgreich exportiert!",
+  "export_data_error": "Fehler beim Exportieren der Daten. Bitte versuchen Sie es erneut.",
+  "export_data_gdpr_note": "Dies ist Ihr gesetzliches Recht gemäß Art. 15 und 20 DSGVO.",
   
   "redeem_title": "Code einlösen",
   "redeem_subtitle": "Haben Sie einen Upgrade-Code? Geben Sie ihn hier ein, um neue Funktionen oder Coaches freizuschalten.",

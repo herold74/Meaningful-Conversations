@@ -27,7 +27,9 @@ import FormattingHelpView from './components/FormattingHelpView';
 import FAQView from './components/FAQView';
 import AboutView from './components/AboutView';
 import DisclaimerView from './components/DisclaimerView';
-import TermsView from './components/TermsView';
+import LegalView from './components/LegalView';
+import AccountManagementView from './components/AccountManagementView';
+import DataExportView from './components/DataExportView';
 import AuthView from './components/AuthView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
@@ -738,7 +740,9 @@ const App: React.FC = () => {
             case 'faq': return <FAQView />;
             case 'about': return <AboutView />;
             case 'disclaimer': return <DisclaimerView currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
-            case 'terms': return <TermsView />;
+            case 'legal': return <LegalView />;
+            case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
+            case 'exportData': return <DataExportView />;
             case 'redeemCode': return <RedeemCodeView onRedeemSuccess={(user) => { 
                     setAndProcessUser(user);
                     setMenuView(null);
