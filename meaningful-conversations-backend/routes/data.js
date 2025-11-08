@@ -68,6 +68,11 @@ router.post('/redeem-code', async (req, res) => {
                 ? new Date(new Date(user.accessExpiresAt).setFullYear(new Date(user.accessExpiresAt).getFullYear() + 1))
                 : oneYearFromNow;
             updateData.accessExpiresAt = newExpiry;
+        } else if (upgradeCode.botId === 'ACCESS_PASS_3M') {
+            const now = new Date();
+            const currentExpiry = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now) ? new Date(user.accessExpiresAt) : now;
+            currentExpiry.setMonth(currentExpiry.getMonth() + 3);
+            updateData.accessExpiresAt = currentExpiry;
         } else if (upgradeCode.botId === 'ACCESS_PASS_1M') {
             const now = new Date();
             const currentExpiry = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now) ? new Date(user.accessExpiresAt) : now;
