@@ -739,7 +739,7 @@ const App: React.FC = () => {
             case 'formattingHelp': return <FormattingHelpView />;
             case 'faq': return <FAQView />;
             case 'about': return <AboutView />;
-            case 'disclaimer': return <DisclaimerView currentUser={currentUser} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
+            case 'disclaimer': return <DisclaimerView />;
             case 'legal': return <LegalView />;
             case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'exportData': return <DataExportView />;

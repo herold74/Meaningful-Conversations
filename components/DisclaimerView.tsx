@@ -1,16 +1,9 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { User } from '../types';
-import { DeleteIcon } from './icons/DeleteIcon';
-import { WarningIcon } from './icons/WarningIcon';
 
-interface DisclaimerViewProps {
-    currentUser: User | null;
-    onDeleteAccount: () => void;
-}
+interface DisclaimerViewProps {}
 
 const de_markdown = `Diese Anwendung und die darin enthaltenen KI-Coaches dienen nur zu Informations- und Bildungszwecken.
 
@@ -51,7 +44,7 @@ The application and the AI coaches serve as a tool for process support and infor
 (3) In all other respects (pure financial losses), the provider's liability for slight negligence is excluded, provided that it does not involve the violation of cardinal obligations. In this case, the liability is limited to the fee actually paid by the user for the specific service.`;
 
 
-const DisclaimerView: React.FC<DisclaimerViewProps> = ({ currentUser, onDeleteAccount }) => {
+const DisclaimerView: React.FC<DisclaimerViewProps> = () => {
     const { t, language } = useLocalization();
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
 
@@ -70,25 +63,6 @@ const DisclaimerView: React.FC<DisclaimerViewProps> = ({ currentUser, onDeleteAc
                     {markdownContent}
                 </ReactMarkdown>
             </div>
-
-            {currentUser && (
-                <div className="p-4 mt-6 bg-status-danger-background dark:bg-status-danger-background border-l-4 border-status-danger-border text-status-danger-foreground dark:text-status-danger-foreground flex items-start gap-4 not-prose">
-                    <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                    <div>
-                        <h2 className="text-xl font-bold !text-status-danger-foreground !mt-0">{t('menu_delete_account')}</h2>
-                        <p className="mt-2" dangerouslySetInnerHTML={{ __html: t('disclaimer_delete_warning') }} />
-                        <div className="mt-4">
-                             <button 
-                                onClick={onDeleteAccount} 
-                                className="inline-flex items-center justify-center gap-3 px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-background-primary rounded-lg shadow-md"
-                            >
-                                <DeleteIcon className="w-5 h-5" />
-                                {t('deleteAccount_confirm')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
