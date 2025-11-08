@@ -195,7 +195,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   // Initialize gong audio with fallback to programmatic sound
   useEffect(() => {
-    const audio = new Audio('/sounds/meditation-gong.mp3');
+    const audio = new Audio('/sounds/meditation-gong.ogg');
     audio.addEventListener('error', () => {
       console.log('Gong audio file not found, will use programmatic fallback');
     });
