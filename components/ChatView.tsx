@@ -165,6 +165,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [feedbackMessages, setFeedbackMessages] = useState<{ user: Message | null; bot: Message | null }>({ user: null, bot: null });
+  
+  // Meditation state
+  const [meditationState, setMeditationState] = useState<{
+    isActive: boolean;
+    duration: number;
+    remaining: number;
+    introText: string;
+    closingText: string;
+    originalMode: 'text' | 'voice';
+  } | null>(null);
+  const gongAudioRef = useRef<HTMLAudioElement | null>(null);
 
 
   const botGender = useMemo((): 'male' | 'female' => {
@@ -181,6 +192,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               return 'male';
       }
   }, [bot.id]);
+
+  // Initialize gong audio with fallback to programmatic sound
+  useEffect(() => {
+    const audio = new Audio('/sounds/meditation-gong.mp3');
+    audio.addEventListener('error', () => {
+      console.log('Gong audio file not found, will use programmatic fallback');
+    });
+    gongAudioRef.current = audio;
+  }, []);
 
   useEffect(() => {
     if (typeof localStorage === 'undefined') return;
@@ -207,6 +227,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   }, [selectedVoiceURI, bot.id]);
 
+
+  // Auto-scroll to bottom when switching to text mode
+  useEffect(() => {
+    if (!isVoiceMode && chatContainerRef.current) {
+      setTimeout(() => {
+        chatContainerRef.current?.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
+  }, [isVoiceMode]);
 
   useEffect(() => {
     if (!window.speechSynthesis) return;
@@ -450,6 +482,42 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
   }, [speak, chatHistory, voices]);
   
+  // Parse meditation markers from bot response
+  const parseMeditationMarkers = (text: string): { 
+    hasMeditation: boolean; 
+    duration: number; 
+    introText: string; 
+    closingText: string;
+    displayText: string;
+  } => {
+    const meditationRegex = /\[MEDITATION:(\d+)\]([\s\S]*?)\[MEDITATION_END\]([\s\S]*)/;
+    const match = text.match(meditationRegex);
+    
+    if (match) {
+      const duration = parseInt(match[1], 10);
+      const intro = match[2].trim();
+      const closing = match[3].trim();
+      // Display text is intro + closing (without markers)
+      const displayText = intro + (closing ? '\n\n' + closing : '');
+      
+      return {
+        hasMeditation: true,
+        duration,
+        introText: intro,
+        closingText: closing,
+        displayText
+      };
+    }
+    
+    return {
+      hasMeditation: false,
+      duration: 0,
+      introText: '',
+      closingText: '',
+      displayText: text
+    };
+  };
+  
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
@@ -472,14 +540,43 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     try {
         const response = await geminiService.sendMessage(bot.id, lifeContext, historyWithUserMessage, language, false);
         
+        // Parse for meditation markers
+        const meditationData = parseMeditationMarkers(response.text);
+        
         const botMessage: Message = {
             id: `bot-${Date.now()}`,
-            text: response.text,
+            text: meditationData.displayText, // Use text without markers
             role: 'bot',
             timestamp: new Date().toISOString(),
         };
         setChatHistory(prev => [...prev, botMessage]);
-        speak(botMessage.text);
+        
+        // If meditation detected, handle it
+        if (meditationData.hasMeditation) {
+          // Speak only the intro text
+          speak(meditationData.introText);
+          
+          // Auto-switch to voice mode if not already
+          const wasInTextMode = !isVoiceMode;
+          if (wasInTextMode) {
+            setIsVoiceMode(true);
+          }
+          
+          // Start meditation timer after a brief delay (to let intro start speaking)
+          setTimeout(() => {
+            setMeditationState({
+              isActive: true,
+              duration: meditationData.duration,
+              remaining: meditationData.duration,
+              introText: meditationData.introText,
+              closingText: meditationData.closingText,
+              originalMode: wasInTextMode ? 'text' : 'voice'
+            });
+          }, 1000);
+        } else {
+          // Normal message, speak all of it
+          speak(botMessage.text);
+        }
 
     } catch (err) {
       console.error('Error sending message:', err);
@@ -542,6 +639,105 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const handleResumeTTS = () => {
     window.speechSynthesis.resume();
     setTtsStatus('speaking');
+  };
+  
+  // Meditation timer countdown
+  useEffect(() => {
+    if (!meditationState?.isActive) return;
+    
+    if (meditationState.remaining <= 0) {
+      handleMeditationComplete();
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      setMeditationState(prev => prev ? {
+        ...prev,
+        remaining: prev.remaining - 1
+      } : null);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [meditationState?.remaining, meditationState?.isActive]);
+  
+  // Play gong sound (with Web Audio API fallback if MP3 not available)
+  const playGongSound = async () => {
+    if (gongAudioRef.current) {
+      try {
+        await gongAudioRef.current.play();
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return;
+      } catch (error) {
+        console.log('MP3 gong failed, using Web Audio API fallback');
+      }
+    }
+    
+    // Fallback: Generate gong sound with Web Audio API
+    try {
+      const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Gong-like sound: low frequency with decay
+      oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 1);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 3);
+      
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    } catch (error) {
+      console.error('Error playing fallback gong:', error);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Short delay if all fails
+    }
+  };
+  
+  // Meditation complete handler
+  const handleMeditationComplete = async () => {
+    if (!meditationState) return;
+    
+    // Play gong
+    await playGongSound();
+    
+    // Speak closing text
+    if (meditationState.closingText) {
+      speak(meditationState.closingText);
+    }
+    
+    // Return to original mode
+    if (meditationState.originalMode === 'text') {
+      setIsVoiceMode(false);
+    }
+    
+    // Reset meditation state
+    setMeditationState(null);
+  };
+  
+  // Early stop meditation handler
+  const handleStopMeditation = async () => {
+    if (!meditationState) return;
+    
+    // Play gong immediately
+    await playGongSound();
+    
+    // Speak closing text
+    if (meditationState.closingText) {
+      speak(meditationState.closingText);
+    }
+    
+    // Return to original mode
+    if (meditationState.originalMode === 'text') {
+      setIsVoiceMode(false);
+    }
+    
+    setMeditationState(null);
   };
 
   const handleRepeatTTS = () => {
@@ -672,19 +868,63 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             </div>
 
             <div className="flex flex-col items-center justify-center my-8 w-full">
-                <button
-                    onClick={handleVoiceInteraction}
-                    disabled={isLoading}
-                    className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
-                        isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
-                    } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
-                    aria-label={isListening ? 'Stop and send' : 'Start recording'}
-                >
-                    {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
-                </button>
-                <div className="mt-4 h-14 text-lg text-content-secondary flex items-center justify-center px-4 w-full max-w-md">
-                    <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
-                </div>
+                {meditationState?.isActive ? (
+                    <div className="flex flex-col items-center">
+                        <div className="relative w-40 h-40">
+                            {/* Circular progress ring */}
+                            <svg className="transform -rotate-90 w-40 h-40">
+                                <circle 
+                                    cx="80" 
+                                    cy="80" 
+                                    r="70" 
+                                    stroke="currentColor" 
+                                    strokeWidth="8" 
+                                    fill="none" 
+                                    className="text-gray-300 dark:text-gray-700" 
+                                />
+                                <circle 
+                                    cx="80" 
+                                    cy="80" 
+                                    r="70" 
+                                    stroke="currentColor" 
+                                    strokeWidth="8" 
+                                    fill="none" 
+                                    className="text-accent-primary"
+                                    strokeDasharray={`${2 * Math.PI * 70}`}
+                                    strokeDashoffset={`${2 * Math.PI * 70 * (1 - meditationState.remaining / meditationState.duration)}`}
+                                    style={{ transition: 'stroke-dashoffset 1s linear' }} 
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-3xl font-bold text-content-primary">
+                                    {Math.floor(meditationState.remaining / 60)}:{String(meditationState.remaining % 60).padStart(2, '0')}
+                                </span>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={handleStopMeditation}
+                            className="mt-6 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold uppercase shadow-md"
+                        >
+                            {t('meditation_early_stop')}
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <button
+                            onClick={handleVoiceInteraction}
+                            disabled={isLoading}
+                            className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
+                                isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
+                            } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
+                            aria-label={isListening ? 'Stop and send' : 'Start recording'}
+                        >
+                            {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
+                        </button>
+                        <div className="mt-4 h-14 text-lg text-content-secondary flex items-center justify-center px-4 w-full max-w-md">
+                            <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="flex items-center justify-center gap-6">
