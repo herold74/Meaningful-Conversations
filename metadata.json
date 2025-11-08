@@ -1,5 +1,5 @@
 {
-  "name": "Meaningful Conversations 1.4.9_stream",
+  "name": "Meaningful Conversations 1.5.0_stream",
   "description": "Streaming Version",
   "requestFramePermissions": [
     "microphone"
