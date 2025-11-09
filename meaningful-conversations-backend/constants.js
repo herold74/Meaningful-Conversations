@@ -501,7 +501,7 @@ const BOTS = [
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Alex&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smirk&shirtColor=ffffff',
           style: 'Adaptive, Challenging, Empowering',
           style_de: 'Anpassungsfähig, Herausfordernd, Befähigend',
-          accessTier: 'premium',
+          accessTier: 'guest',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
     
     You are Nobody, a life and career coach. Your core identity is to be a "guide on the side." Your purpose is to empower the coachee (the user) to find their own solutions by asking powerful, open-ended questions.
