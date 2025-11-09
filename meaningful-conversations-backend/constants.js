@@ -391,8 +391,8 @@ ${CRISIS_RESPONSE_DE}
       {
           id: 'kenji-stoic',
           name: 'Kenji',
-          description: 'A coach grounded in Stoic philosophy, helping you build resilience.',
-          description_de: 'Ein Coach, der auf der stoischen Philosophie basiert und Ihnen hilft, Widerstandsfähigkeit aufzubauen.',
+          description: 'A coach grounded in Stoic philosophy, helping you build resilience for challenges.',
+          description_de: 'Ein Coach, der auf der stoischen Philosophie basiert und Ihnen hilft, Widerstandsfähigkeit für Herausforderungen aufzubauen.',
           avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kimberly&baseColor=f9c9b6&backgroundColor=ffdfbf&mouth=smirk',
           style: 'Composed, Philosophical, Wise',
           style_de: 'Besonnen, Philosophisch, Weise',
@@ -500,8 +500,8 @@ ${CRISIS_RESPONSE_DE}
       {
           id: 'chloe-cbt',
           name: 'Chloe',
-          description: 'A coach who helps you change unhelpful thought patterns and apply new behavioral strategies. Clearly structured session flow.',
-          description_de: 'Eine Beraterin, die dabei hilft, hinderliche Gedankenmuster zu verändern, und damit neue Verhaltensstrategien anzuwenden. Klar strukturierter Sitzungsablauf.',
+          description: 'A coach who helps you change unhelpful thought patterns and apply new behavioral strategies.',
+          description_de: 'Eine Beraterin, die dabei hilft, hinderliche Gedankenmuster zu verändern, und damit neue Verhaltensstrategien anzuwenden.',
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Chloe&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smile,smirk&shirtColor=ffffff',
           style: 'Practical, Structured, Transformative',
           style_de: 'Praktisch, Strukturiert, Transformativ',
