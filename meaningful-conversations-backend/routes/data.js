@@ -44,6 +44,53 @@ router.put('/user', async (req, res) => {
     }
 });
 
+// PUT /api/data/user/profile - Update user profile (name, newsletter)
+router.put('/user/profile', async (req, res) => {
+    const { firstName, lastName, newsletterConsent } = req.body;
+    const userId = req.userId;
+    
+    try {
+        const updateData = {
+            updatedAt: new Date(),
+        };
+        
+        // Update name fields if provided
+        if (firstName !== undefined) {
+            updateData.firstName = firstName || null;
+        }
+        if (lastName !== undefined) {
+            updateData.lastName = lastName || null;
+        }
+        
+        // Update newsletter consent
+        if (newsletterConsent !== undefined) {
+            updateData.newsletterConsent = newsletterConsent;
+            // Set consent date when user first opts in, or clear it when opting out
+            if (newsletterConsent) {
+                const user = await prisma.user.findUnique({ where: { id: userId } });
+                if (!user.newsletterConsentDate) {
+                    updateData.newsletterConsentDate = new Date();
+                }
+            } else {
+                updateData.newsletterConsentDate = null;
+            }
+        }
+        
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+        });
+        
+        // Return updated user without sensitive fields
+        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        res.json({ message: 'Profile updated successfully', user: userResponse });
+        
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        res.status(500).json({ error: 'Failed to update profile.' });
+    }
+});
+
 // POST /api/data/redeem-code
 router.post('/redeem-code', async (req, res) => {
     const { code } = req.body;
@@ -169,6 +216,8 @@ router.get('/export', async (req, res) => {
                 email: user.email,
                 firstName: user.firstName || null,
                 lastName: user.lastName || null,
+                newsletterConsent: user.newsletterConsent,
+                newsletterConsentDate: user.newsletterConsentDate,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
                 lastLogin: user.lastLogin,

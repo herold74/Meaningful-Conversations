@@ -27,6 +27,7 @@ export type NavView =
     | 'disclaimer'
     | 'legal'
     | 'accountManagement'
+    | 'editProfile'
     | 'redeemCode'
     | 'admin'
     | 'changePassword'
@@ -35,6 +36,10 @@ export type NavView =
 export interface User {
     id: string;
     email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    newsletterConsent?: boolean;
+    newsletterConsentDate?: string | null;
     isBetaTester: boolean;
     isAdmin: boolean;
     unlockedCoaches: string[];
