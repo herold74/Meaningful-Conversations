@@ -79,7 +79,7 @@ async function runMigrationsAndSeed() {
         runCommand('npx prisma migrate deploy');
     } else {
         console.log('Development environment detected. Applying migrations...');
-        runCommand('npx prisma migrate dev');
+        runCommand('npx prisma migrate deploy');
     }
 
     // Seed the initial admin user if configured
