@@ -45,21 +45,23 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
             )}
         </div>
 
-        <div className="mt-4">
-            <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
-            <div className="flex flex-wrap justify-center gap-2 my-3">
-                {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
-                    const isFirstTag = index === 0;
-                    const tagClass = !isLocked && isFirstTag
-                        ? 'bg-accent-primary/20 text-accent-primary-hover'
-                        : 'bg-background-tertiary text-content-secondary dark:bg-background-tertiary dark:text-content-secondary';
-                    
-                    return (
-                        <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
-                            {tag}
-                        </span>
-                    );
-                })}
+        <div className="mt-4 flex flex-col flex-1 justify-between">
+            <div>
+                <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
+                <div className="flex flex-wrap justify-center gap-2 my-3">
+                    {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
+                        const isFirstTag = index === 0;
+                        const tagClass = !isLocked && isFirstTag
+                            ? 'bg-accent-primary/20 text-accent-primary-hover'
+                            : 'bg-background-tertiary text-content-secondary dark:bg-background-tertiary dark:text-content-secondary';
+                        
+                        return (
+                            <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
+                                {tag}
+                            </span>
+                        );
+                    })}
+                </div>
             </div>
             <p className="mt-1 text-content-secondary dark:text-content-secondary leading-relaxed text-base">
                 {language === 'de' ? bot.description_de : bot.description}
