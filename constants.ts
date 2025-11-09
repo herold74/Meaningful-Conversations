@@ -44,11 +44,11 @@ export const BOTS: Bot[] = [
     {
         id: 'chloe-cbt',
         name: 'Chloe',
-        description: 'A professional coach using Cognitive Behavioral Therapy (CBT) to help you modify unhelpful thought patterns.',
-        description_de: 'Eine professionelle Beraterin, die Kognitive Verhaltenstherapie (KVT) anwendet, um Ihnen zu helfen, hinderliche Gedankenmuster zu verändern.',
+        description: 'A professional coach using cognitive-behavioral coaching techniques to help you modify unhelpful thought patterns.',
+        description_de: 'Eine professionelle Beraterin, die kognitiv-verhaltensorientierte Coaching-Techniken anwendet, um Ihnen zu helfen, hinderliche Gedankenmuster zu verändern.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Chloe&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smile,smirk&shirtColor=ffffff',
-        style: 'CBT, Structured, Evidence-Based',
-        style_de: 'KVT, Strukturiert, Evidenzbasiert',
+        style: 'Cognitive-Behavioral, Structured, Evidence-Based',
+        style_de: 'Kognitiv-Verhaltensorientiert, Strukturiert, Evidenzbasiert',
         accessTier: 'registered',
     },
     {
