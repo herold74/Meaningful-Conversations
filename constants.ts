@@ -34,8 +34,8 @@ export const BOTS: Bot[] = [
     {
         id: 'kenji-stoic',
         name: 'Kenji',
-        description: 'A coach grounded in Stoic philosophy, helping you build resilience and focus on what you control.',
-        description_de: 'Ein Coach, der auf der stoischen Philosophie basiert und Ihnen hilft, Widerstandsfähigkeit aufzubauen und sich auf den eigenen Einflussbereich zu fokussieren.',
+        description: 'A coach grounded in Stoic philosophy, helping you build resilience.',
+        description_de: 'Ein Coach, der auf der stoischen Philosophie basiert und Ihnen hilft, Widerstandsfähigkeit aufzubauen.',
         avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kimberly&baseColor=f9c9b6&backgroundColor=ffdfbf&mouth=smirk',
         style: 'Composed, Philosophical, Wise',
         style_de: 'Besonnen, Philosophisch, Weise',
@@ -44,8 +44,8 @@ export const BOTS: Bot[] = [
     {
         id: 'chloe-cbt',
         name: 'Chloe',
-        description: 'A professional coach using cognitive-behavioral coaching techniques to help you modify unhelpful thought patterns.',
-        description_de: 'Eine professionelle Beraterin, die kognitiv-verhaltensorientierte Coaching-Techniken anwendet, um Ihnen zu helfen, hinderliche Gedankenmuster zu verändern.',
+        description: 'A professional coach using cognitive-behavioral coaching techniques to help you modify unhelpful thought patterns and apply new behavioral strategies.',
+        description_de: 'Eine professionelle Beraterin, die kognitiv-verhaltensorientierte Coaching-Techniken anwendet, um Ihnen zu helfen, hinderliche Gedankenmuster zu verändern, und damit neue Verhaltensstrategien anzuwenden.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Chloe&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smile,smirk&shirtColor=ffffff',
         style: 'Cognitive-Behavioral, Structured, Evidence-Based',
         style_de: 'Kognitiv-Verhaltensorientiert, Strukturiert, Evidenzbasiert',
