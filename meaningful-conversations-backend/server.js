@@ -18,6 +18,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const prisma = require('./prismaClient.js');
+const { initCleanup: initGuestLimitCleanup } = require('./services/guestLimitTracker');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -177,6 +178,7 @@ async function startServer() {
         app.use('/api/feedback', require('./routes/feedback.js'));
         app.use('/api/admin', require('./routes/admin.js'));
         app.use('/api/api-usage', require('./routes/apiUsage.js'));
+        app.use('/api/guest', require('./routes/guest.js'));
 
         // --- Health Check Endpoint ---
         app.get('/api/health', async (req, res) => {
@@ -188,6 +190,9 @@ async function startServer() {
                 res.status(503).json({ status: 'error', database: 'disconnected' });
             }
         });
+
+        // Initialize guest limit cleanup (runs every 24 hours)
+        initGuestLimitCleanup();
 
         app.listen(PORT, () => {
             console.log(`Backend server is running on port ${PORT}`);

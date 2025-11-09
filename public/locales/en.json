@@ -154,6 +154,12 @@
   "botSelection_guestMessage": "To unlock more coaches, please register for an account.",
   "botSelection_registeredMessage": "Unlock premium coaches by redeeming an upgrade code in the menu.",
   "botSelection_goBack": "Go Back",
+  
+  "guest_limit_warning": "You have reached your weekly limit of 50 messages. Register for unlimited access.",
+  "guest_limit_remaining": "Remaining messages this week: {{remaining}}/50",
+  "guest_limit_exceeded_title": "Message Limit Reached",
+  "guest_limit_exceeded_message": "You have reached your weekly limit of 50 messages as a guest. Register for unlimited access to all features.",
+  "guest_register_now": "Register Now",
 
   "chat_welcome": "Hello, I'm {{botName}}. What's on your mind today?",
   "chat_placeholder": "Enter your message here...",

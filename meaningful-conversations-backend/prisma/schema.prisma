@@ -105,3 +105,15 @@ model ApiUsage {
   @@index([model])
   @@index([endpoint])
 }
+
+model GuestUsage {
+  id           String   @id @default(cuid())
+  fingerprint  String   @unique
+  messageCount Int      @default(0)
+  weekStart    DateTime // Start of the current week (Sunday 00:00 UTC)
+  lastUsed     DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  
+  @@index([fingerprint])
+  @@index([weekStart])
+}

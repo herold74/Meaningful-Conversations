@@ -155,6 +155,12 @@
   "botSelection_registeredMessage": "Schalten Sie Premium-Coaches frei, indem Sie einen Upgrade-Code im Menü einlösen.",
   "botSelection_goBack": "Zurück",
   
+  "guest_limit_warning": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten erreicht. Registrieren Sie sich für unbegrenzten Zugang.",
+  "guest_limit_remaining": "Verbleibende Nachrichten diese Woche: {{remaining}}/50",
+  "guest_limit_exceeded_title": "Nachrichtenlimit erreicht",
+  "guest_limit_exceeded_message": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten als Gast erreicht. Registrieren Sie sich für unbegrenzten Zugang zu allen Funktionen.",
+  "guest_register_now": "Jetzt registrieren",
+  
   "chat_welcome": "Hallo, ich bin {{botName}}. Was beschäftigt Sie heute?",
   "chat_placeholder": "Geben Sie hier Ihre Nachricht ein...",
   "chat_end_session": "Sitzung beenden",

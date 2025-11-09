@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Bot, Message, Language, User } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
+import * as guestService from '../services/guestService';
 import Spinner from './shared/Spinner';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import ReactMarkdown from 'react-markdown';
@@ -176,6 +177,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     originalMode: 'text' | 'voice';
   } | null>(null);
   const gongAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Guest limit state
+  const [guestLimitRemaining, setGuestLimitRemaining] = useState<number | null>(null);
+  const [guestFingerprint, setGuestFingerprint] = useState<string | null>(null);
+  const isGuest = !currentUser;
 
 
   const botGender = useMemo((): 'male' | 'female' => {
@@ -239,6 +245,23 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }, 100);
     }
   }, [isVoiceMode]);
+  
+  // Initialize guest limit checking
+  useEffect(() => {
+    if (isGuest) {
+      const fingerprint = guestService.getOrCreateFingerprint();
+      setGuestFingerprint(fingerprint);
+      
+      // Check guest limit
+      guestService.checkGuestLimit(fingerprint).then(result => {
+        setGuestLimitRemaining(result.remaining);
+      }).catch(error => {
+        console.error('Failed to check guest limit:', error);
+        // On error, allow (fail open)
+        setGuestLimitRemaining(50);
+      });
+    }
+  }, [isGuest]);
 
   useEffect(() => {
     if (!window.speechSynthesis) return;
@@ -520,6 +543,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
+    
+    // Check guest limit before sending
+    if (isGuest && guestFingerprint) {
+      const limitCheck = await guestService.checkGuestLimit(guestFingerprint);
+      if (!limitCheck.allowed) {
+        alert(t('guest_limit_exceeded_message'));
+        return;
+      }
+    }
 
     window.speechSynthesis.cancel();
     setTtsStatus('idle');
@@ -576,6 +608,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         } else {
           // Normal message, speak all of it
           speak(botMessage.text);
+        }
+        
+        // Increment guest usage after successful message
+        if (isGuest && guestFingerprint) {
+          guestService.incrementGuestUsage(guestFingerprint).then(result => {
+            setGuestLimitRemaining(result.remaining);
+          }).catch(error => {
+            console.error('Failed to increment guest usage:', error);
+          });
         }
 
     } catch (err) {
@@ -859,6 +900,15 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             </button>
         </div>
       </header>
+      
+      {/* Guest Limit Indicator */}
+      {isGuest && guestLimitRemaining !== null && (
+        <div className="px-4 py-2 bg-status-info-background dark:bg-status-info-background border-b border-status-info-border dark:border-status-info-border/30">
+          <p className="text-sm text-status-info-foreground dark:text-status-info-foreground text-center">
+            {t('guest_limit_remaining', { remaining: guestLimitRemaining })}
+          </p>
+        </div>
+      )}
       
     {isVoiceMode ? (
         <main className="flex-1 flex flex-col justify-between items-center p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
