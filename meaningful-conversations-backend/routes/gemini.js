@@ -5,6 +5,7 @@ const prisma = require('../prismaClient.js');
 const { BOTS } = require('../constants.js');
 const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = require('../services/geminiPrompts.js');
 const { trackApiUsage, extractTokenUsage } = require('../services/apiUsageTracker.js');
+const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
 
 // Asynchronously initialize the AI client because @google/genai is an ES Module
 let ai;
@@ -99,16 +100,34 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const startTime = Date.now();
     const modelName = 'gemini-2.5-flash';
     
+    // Try to use prompt caching for registered users with Life Context
+    let cachedContentName = null;
+    let cacheUsed = false;
+    
+    if (userId && bot.id !== 'g-interviewer' && context) {
+        // Only cache for registered users with actual Life Context
+        cachedContentName = await getOrCreateCache(ai, userId, finalSystemInstruction, modelName);
+        cacheUsed = cachedContentName !== null;
+    }
+    
     try {
+        const config = {
+            temperature: 0.7,
+        };
+        
+        // If cache is available, use it; otherwise use regular systemInstruction
+        if (cachedContentName) {
+            config.cachedContent = cachedContentName;
+        } else {
+            config.systemInstruction = finalSystemInstruction;
+        }
+        
         const response = await ai.models.generateContent({
             model: modelName,
             // For the initial message, we send an empty string to prompt the model's greeting.
             // For subsequent messages, we send the entire chat history.
             contents: isInitialMessage ? "" : modelHistory,
-            config: {
-                systemInstruction: finalSystemInstruction,
-                temperature: 0.7,
-            },
+            config: config,
         });
         
         const durationMs = Date.now() - startTime;
@@ -126,6 +145,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             outputTokens: tokenUsage.outputTokens,
             durationMs,
             success: true,
+            metadata: cacheUsed ? { cacheUsed: true } : undefined,
         });
         
         res.json({ text });
@@ -287,5 +307,22 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
     }
 });
 
+// GET /api/gemini/cache/stats - Admin endpoint for cache statistics
+router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
+    const userId = req.userId;
+    
+    // Only allow admins to view cache stats
+    if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.isAdmin) {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    const stats = getCacheStats();
+    res.json(stats);
+});
 
 module.exports = router;
