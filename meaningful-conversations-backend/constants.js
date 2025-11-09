@@ -415,8 +415,8 @@ const BOTS = [
       {
           id: 'chloe-cbt',
           name: 'Chloe',
-          description: 'A coach who helps you change unhelpful thought patterns.',
-          description_de: 'Eine Beraterin, die dabei hilft, hinderliche Gedankenmuster zu verändern.',
+          description: 'A coach who helps you change unhelpful thought patterns. Clearly structured session flow.',
+          description_de: 'Eine Beraterin, die dabei hilft, hinderliche Gedankenmuster zu verändern. Klar strukturierter Sitzungsablauf.',
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Chloe&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smile,smirk&shirtColor=ffffff',
           style: 'Practical, Structured, Transformative',
           style_de: 'Praktisch, Strukturiert, Transformativ',
