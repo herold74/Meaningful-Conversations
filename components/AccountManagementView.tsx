@@ -5,10 +5,11 @@ import { KeyIcon } from './icons/KeyIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
+import { UserIcon } from './icons/UserIcon';
 
 interface AccountManagementViewProps {
     currentUser: User;
-    onNavigate: (view: 'changePassword' | 'exportData' | 'redeemCode') => void;
+    onNavigate: (view: 'changePassword' | 'exportData' | 'redeemCode' | 'editProfile') => void;
     onDeleteAccount: () => void;
 }
 
@@ -16,6 +17,13 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
     const { t } = useLocalization();
 
     const menuItems = [
+        {
+            icon: UserIcon,
+            title: t('account_edit_profile'),
+            description: t('account_edit_profile_desc'),
+            onClick: () => onNavigate('editProfile'),
+            color: 'text-indigo-600 dark:text-indigo-400',
+        },
         {
             icon: KeyIcon,
             title: t('menu_change_password'),

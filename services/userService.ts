@@ -55,10 +55,17 @@ export const login = async (email: string, password: string): Promise<{ user: Us
     return session;
 };
 
-export const register = async (email: string, password: string, lang: Language, firstName?: string, lastName?: string): Promise<{ message: string }> => {
+export const register = async (email: string, password: string, lang: Language, firstName?: string, lastName?: string, newsletterConsent?: boolean): Promise<{ message: string }> => {
     return await apiFetch('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password, lang, firstName, lastName }),
+        body: JSON.stringify({ email, password, lang, firstName, lastName, newsletterConsent }),
+    });
+};
+
+export const updateProfile = async (firstName?: string, lastName?: string, newsletterConsent?: boolean): Promise<{ message: string, user: User }> => {
+    return await apiFetch('/data/user/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ firstName, lastName, newsletterConsent }),
     });
 };
 

@@ -29,7 +29,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-    const { email, password, firstName, lastName, lang } = req.body;
+    const { email, password, firstName, lastName, newsletterConsent, lang } = req.body;
     const lowerCaseEmail = email.toLowerCase();
 
     try {
@@ -71,6 +71,8 @@ router.post('/register', async (req, res) => {
                 email: lowerCaseEmail,
                 firstName: firstName || null,
                 lastName: lastName || null,
+                newsletterConsent: newsletterConsent || false,
+                newsletterConsentDate: newsletterConsent ? new Date() : null,
                 passwordHash,
                 encryptionSalt: encryptionSalt,
                 activationToken,
