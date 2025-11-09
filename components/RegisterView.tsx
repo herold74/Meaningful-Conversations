@@ -17,6 +17,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<{ type: 'email' | 'password' | 'general', message: string } | null>(null);
@@ -40,7 +41,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
     }
     setIsLoading(true);
     try {
-      await userService.register(trimmedEmail, trimmedPassword, language, firstName.trim() || undefined, lastName.trim() || undefined);
+      await userService.register(trimmedEmail, trimmedPassword, language, firstName.trim() || undefined, lastName.trim() || undefined, newsletterConsent);
       onShowPending();
 
     } catch (err: any) {
@@ -116,6 +117,21 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               autoCorrect="off"
               spellCheck="false"
             />
+          </div>
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="newsletter"
+              checked={newsletterConsent}
+              onChange={(e) => setNewsletterConsent(e.target.checked)}
+              disabled={isLoading}
+              className="mt-1 w-4 h-4 text-accent-primary bg-background-tertiary border-border-secondary rounded focus:ring-accent-primary focus:ring-2 disabled:opacity-50"
+            />
+            <label htmlFor="newsletter" className="ml-3 text-sm text-content-secondary">
+              <span className="font-bold">{t('register_newsletter_label')}</span>
+              <br />
+              <span className="text-xs">{t('register_newsletter_desc')}</span>
+            </label>
           </div>
           <div>
             <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_password_label')}</label>
