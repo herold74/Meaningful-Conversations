@@ -35,6 +35,10 @@
 
   "register_title": "Create Account",
   "register_email_label": "Email",
+  "register_firstName_label": "First Name (optional)",
+  "register_firstName_placeholder": "Your first name",
+  "register_lastName_label": "Last Name (optional)",
+  "register_lastName_placeholder": "Your last name",
   "register_password_label": "Password (min. 6 characters)",
   "register_confirm_password_label": "Confirm Password",
   "register_button": "Register",

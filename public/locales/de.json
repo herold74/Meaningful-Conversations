@@ -35,6 +35,10 @@
   
   "register_title": "Konto erstellen",
   "register_email_label": "E-Mail",
+  "register_firstName_label": "Vorname (optional)",
+  "register_firstName_placeholder": "Ihr Vorname",
+  "register_lastName_label": "Nachname (optional)",
+  "register_lastName_placeholder": "Ihr Nachname",
   "register_password_label": "Passwort (mind. 6 Zeichen)",
   "register_confirm_password_label": "Passwort bestätigen",
   "register_button": "Registrieren",

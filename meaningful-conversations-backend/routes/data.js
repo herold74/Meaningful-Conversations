@@ -167,6 +167,8 @@ router.get('/export', async (req, res) => {
             user: {
                 id: user.id,
                 email: user.email,
+                firstName: user.firstName || null,
+                lastName: user.lastName || null,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
                 lastLogin: user.lastLogin,

@@ -29,7 +29,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-    const { email, password, lang } = req.body;
+    const { email, password, firstName, lastName, lang } = req.body;
     const lowerCaseEmail = email.toLowerCase();
 
     try {
@@ -69,6 +69,8 @@ router.post('/register', async (req, res) => {
         await prisma.user.create({
             data: {
                 email: lowerCaseEmail,
+                firstName: firstName || null,
+                lastName: lastName || null,
                 passwordHash,
                 encryptionSalt: encryptionSalt,
                 activationToken,

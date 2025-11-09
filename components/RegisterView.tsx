@@ -15,6 +15,8 @@ interface RegisterViewProps {
 const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLogin, onBack }) => {
   const { t, language } = useLocalization();
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<{ type: 'email' | 'password' | 'general', message: string } | null>(null);
@@ -38,7 +40,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
     }
     setIsLoading(true);
     try {
-      await userService.register(trimmedEmail, trimmedPassword, language);
+      await userService.register(trimmedEmail, trimmedPassword, language, firstName.trim() || undefined, lastName.trim() || undefined);
       onShowPending();
 
     } catch (err: any) {
@@ -84,6 +86,36 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               spellCheck="false"
             />
             {error?.type === 'email' && <p id="email-error" className="text-status-danger-foreground text-sm mt-1">{error.message}</p>}
+          </div>
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-bold text-content-secondary text-left">{t('register_firstName_label')}</label>
+            <input
+              type="text"
+              id="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder={t('register_firstName_placeholder')}
+              disabled={isLoading}
+              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:ring-accent-primary focus:outline-none focus:ring-1 disabled:opacity-50"
+              autoCapitalize="words"
+              autoCorrect="off"
+              spellCheck="false"
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-bold text-content-secondary text-left">{t('register_lastName_label')}</label>
+            <input
+              type="text"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder={t('register_lastName_placeholder')}
+              disabled={isLoading}
+              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:ring-accent-primary focus:outline-none focus:ring-1 disabled:opacity-50"
+              autoCapitalize="words"
+              autoCorrect="off"
+              spellCheck="false"
+            />
           </div>
           <div>
             <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_password_label')}</label>
