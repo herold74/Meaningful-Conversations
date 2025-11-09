@@ -37,8 +37,8 @@ export const BOTS: Bot[] = [
         description: 'A coach grounded in Stoic philosophy, helping you build resilience and focus on what you control.',
         description_de: 'Ein Coach, der auf der stoischen Philosophie basiert und Ihnen hilft, Widerstandsfähigkeit aufzubauen und sich auf den eigenen Einflussbereich zu fokussieren.',
         avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kimberly&baseColor=f9c9b6&backgroundColor=ffdfbf&mouth=smirk',
-        style: 'Resilient, Stoic, Wise',
-        style_de: 'Belastbar, Stoisch, Weise',
+        style: 'Composed, Philosophical, Wise',
+        style_de: 'Besonnen, Philosophisch, Weise',
         accessTier: 'guest',
     },
     {
