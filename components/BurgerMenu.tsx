@@ -99,7 +99,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
                     <p className="px-4 pt-2 text-xs text-center text-content-subtle">
-                        Version 1.5.3
+                        Version 1.5.4
                     </p>
                 </div>
             </div>
