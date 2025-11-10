@@ -3,11 +3,16 @@ import { useLocalization } from '../context/LocalizationContext';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { getSession } from '../services/api';
 
-const DataExportView: React.FC = () => {
+interface DataExportViewProps {
+    lifeContext?: string; // The decrypted life context from App.tsx
+}
+
+const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => {
     const { t } = useLocalization();
     const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [exportFormat, setExportFormat] = useState<'html' | 'json'>('html'); // Default to HTML
 
     const handleExport = async () => {
         setIsExporting(true);
@@ -33,12 +38,19 @@ const DataExportView: React.FC = () => {
             
             const apiBaseUrl = backendMap[hostnameWithPort] || '';
 
-            const response = await fetch(`${apiBaseUrl}/api/data/export`, {
-                method: 'GET',
+            // Get current language
+            const currentLanguage = localStorage.getItem('language') || 'de';
+
+            // Prepare request body with decrypted life context for GDPR compliance
+            const requestBody = lifeContext ? JSON.stringify({ decryptedLifeContext: lifeContext }) : undefined;
+
+            const response = await fetch(`${apiBaseUrl}/api/data/export?format=${exportFormat}&lang=${currentLanguage}`, {
+                method: 'POST', // Changed to POST to send decrypted context
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.token}`,
                 },
+                body: requestBody,
             });
 
             if (!response.ok) {
@@ -47,7 +59,8 @@ const DataExportView: React.FC = () => {
 
             // Get the filename from Content-Disposition header
             const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = 'meaningful-conversations-data-export.json';
+            const defaultExtension = exportFormat === 'html' ? 'html' : 'json';
+            let filename = `meaningful-conversations-data-export.${defaultExtension}`;
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename="(.+)"/);
                 if (filenameMatch) {
@@ -98,9 +111,53 @@ const DataExportView: React.FC = () => {
                     </ul>
                 </div>
 
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-400 dark:border-yellow-600">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                        <strong>{t('export_data_note_title')}:</strong> {t('export_data_note_encrypted')}
+                {/* Format Selection */}
+                <div className="p-4 bg-background-primary dark:bg-background-secondary rounded-lg border border-border-secondary">
+                    <h3 className="font-semibold text-content-primary mb-4">{t('export_data_format')}</h3>
+                    <div className="space-y-3">
+                        <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            exportFormat === 'html' 
+                                ? 'border-accent-primary bg-accent-secondary dark:bg-accent-secondary-dark' 
+                                : 'border-border-secondary hover:border-accent-primary'
+                        }`}>
+                            <input
+                                type="radio"
+                                name="exportFormat"
+                                value="html"
+                                checked={exportFormat === 'html'}
+                                onChange={(e) => setExportFormat(e.target.value as 'html')}
+                                className="mt-1 mr-3"
+                            />
+                            <div className="flex-1">
+                                <div className="font-semibold text-content-primary">{t('export_data_format_html')}</div>
+                                <div className="text-sm text-content-secondary mt-1">{t('export_data_format_html_desc')}</div>
+                            </div>
+                        </label>
+
+                        <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            exportFormat === 'json' 
+                                ? 'border-accent-primary bg-accent-secondary dark:bg-accent-secondary-dark' 
+                                : 'border-border-secondary hover:border-accent-primary'
+                        }`}>
+                            <input
+                                type="radio"
+                                name="exportFormat"
+                                value="json"
+                                checked={exportFormat === 'json'}
+                                onChange={(e) => setExportFormat(e.target.value as 'json')}
+                                className="mt-1 mr-3"
+                            />
+                            <div className="flex-1">
+                                <div className="font-semibold text-content-primary">{t('export_data_format_json')}</div>
+                                <div className="text-sm text-content-secondary mt-1">{t('export_data_format_json_desc')}</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-400 dark:border-green-600">
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                        {t('export_data_gdpr_compliance')}
                     </p>
                 </div>
 
