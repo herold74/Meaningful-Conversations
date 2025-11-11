@@ -139,14 +139,15 @@
 - **DSGVO-Konformität:** ✅ Einwilligung durch bewusste Auswahl
 
 ### 4. Server-Logs
-- **Status:** ⚠️ DOKUMENTIERT (Verbesserung möglich)
+- **Status:** ✅ DSGVO-KONFORM (IP-Anonymisierung implementiert)
 - **Speicherdauer:** 7 Tage (dokumentiert in Datenschutzerklärung)
-- **Aktuelle Situation:** Vollständige IP-Adressen werden geloggt
-- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse für Sicherheit)
-- **Empfehlung:** IP-Anonymisierung in Nginx-Logs
-- **Anleitung:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
-- **Aufwand:** ~20 Minuten Implementierung
-- **Vorteil:** Datenminimierung (Art. 5 Abs. 1 lit. c DSGVO)
+- **Implementierung:** ✅ IP-Adressen werden anonymisiert
+  - **IPv4:** Letztes Oktett entfernt (z.B. `192.168.1.234` → `192.168.1.0`)
+  - **IPv6:** Nur erste 48 Bits behalten (z.B. `2a01:4f8:...:...` → `2a01:4f8::`)
+  - **Anonymisierte IPs = KEINE personenbezogenen Daten** (DSGVO Recital 26)
+- **Implementierungsdatum:** 11. November 2025
+- **Dokumentation:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
+- **Vorteil:** Best-Practice Datenminimierung (Art. 5 Abs. 1 lit. c DSGVO)
 
 ### 5. Google Gemini API
 - **Status:** ✅ DSGVO-KONFORM (DPA Coverage verified)
@@ -182,15 +183,20 @@
 
 ## 📊 ZUSAMMENFASSUNG
 
-### Konformitäts-Score: 95/100 ⬆️ (+35 Punkte)
+### Konformitäts-Score: 97/100 ⬆️ (+2 Punkte seit letzter Prüfung)
 
 | Kategorie | Status | Note | Änderung |
 |-----------|--------|------|----------|
 | Datensicherheit | ✅ Sehr gut | A | - |
-| Transparenz | ✅ Gut | B+ | ⬆️ (vorher: D) |
-| Nutzerrechte | ✅ Gut | B+ | ⬆️ (vorher: C) |
-| Drittanbieter | ⚠️ Dokumentiert | C+ | ⬆️ (vorher: D) |
-| Technische Maßnahmen | ✅ Sehr gut | A | - |
+| Transparenz | ✅ Gut | B+ | - |
+| Nutzerrechte | ✅ Gut | B+ | - |
+| Drittanbieter | ✅ Dokumentiert | B | ⬆️ (vorher: C+) |
+| Technische Maßnahmen | ✅ Exzellent | A+ | ⬆️ (vorher: A) |
+
+**Grund für Score-Erhöhung:**
+- IP-Anonymisierung in Server-Logs implementiert (+2 Punkte)
+- Best-Practice Datenminimierung umgesetzt
+- Technische Maßnahmen auf höchstem Niveau
 
 ### Rechtliche Risiken
 
@@ -257,17 +263,17 @@
    - Dokumentation: `DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md`
    - DPA-Dokument: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/
 
-### Priorität 3: EMPFOHLEN (Optional)
-6. **Nginx Access-Log Anonymisierung** 📋
-   - **Anleitung:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
-   - **Aufwand:** 20-25 Minuten
-   - **Vorteil:** Best-Practice für Datenminimierung
+### Priorität 3: ~~EMPFOHLEN (Optional)~~ ✅ **ABGESCHLOSSEN**
+6. **~~Nginx Access-Log Anonymisierung~~** ✅ **IMPLEMENTIERT** (11. November 2025)
+   - **Dokumentation:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
+   - **Status:** ✅ Produktiv in Staging & Production
    - **Implementierung:**
-     1. SSH zu Server: `ssh root@<YOUR_SERVER_IP>`
-     2. Map und Log-Format in `/etc/nginx/nginx.conf` hinzufügen
-     3. Server-Configs aktualisieren (staging + production)
-     4. Nginx neu laden: `nginx -t && systemctl reload nginx`
-   - **Ergebnis:** IPs werden anonymisiert (z.B. `192.168.1.0` statt `192.168.1.234`)
+     - IPv4-Anonymisierung: `192.168.1.234` → `192.168.1.0`
+     - IPv6-Anonymisierung: `2a01:4f8:c17:...:...` → `2a01:4f8::`
+     - Nginx Map-Konfiguration in `/etc/nginx/nginx.conf`
+     - Custom Log Format `anonymized` in beiden Umgebungen
+   - **Vorteil:** Best-Practice Datenminimierung (Art. 5 Abs. 1 lit. c DSGVO)
+   - **Verifiziert:** Logs zeigen anonymisierte IPs
 
 7. **~~Feedback-Consent implementieren~~** ✅ **BEREITS VORHANDEN**
    - Anonymisierungs-Checkbox ist standardmäßig aktiviert
