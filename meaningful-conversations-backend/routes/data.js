@@ -184,7 +184,7 @@ function generateHtmlExport(exportData, language = 'de') {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%);
             padding: 20px;
         }
         .container {
@@ -196,7 +196,7 @@ function generateHtmlExport(exportData, language = 'de') {
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -209,10 +209,10 @@ function generateHtmlExport(exportData, language = 'de') {
             padding: 25px;
             background: #f8f9fa;
             border-radius: 8px;
-            border-left: 4px solid #4ade80;
+            border-left: 4px solid #1b7272;
         }
         .section h2 {
-            color: #4ade80;
+            color: #1b7272;
             margin-bottom: 20px;
             font-size: 1.8em;
             padding-bottom: 10px;
@@ -232,7 +232,7 @@ function generateHtmlExport(exportData, language = 'de') {
         }
         .info-label {
             font-weight: 600;
-            color: #4ade80;
+            color: #1b7272;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -279,12 +279,12 @@ function generateHtmlExport(exportData, language = 'de') {
             border-radius: 8px;
             min-width: 150px;
             margin: 10px;
-            border: 2px solid #4ade80;
+            border: 2px solid #1b7272;
         }
         .stat-number {
             font-size: 2.5em;
             font-weight: bold;
-            color: #4ade80;
+            color: #1b7272;
         }
         .stat-label {
             color: #666;
@@ -310,7 +310,7 @@ function generateHtmlExport(exportData, language = 'de') {
             border-bottom: 1px solid #e9ecef;
         }
         th {
-            background: #4ade80;
+            background: #1b7272;
             color: white;
             font-weight: 600;
         }
@@ -416,7 +416,7 @@ function generateHtmlExport(exportData, language = 'de') {
                 </div>
                 ${exportData.gamificationData.unlockedAchievements && exportData.gamificationData.unlockedAchievements.length > 0 ? `
                 <div style="margin-top: 20px;">
-                    <h3 style="color: #4ade80; margin-bottom: 10px;">${isGerman ? '🏆 Erfolge' : '🏆 Achievements'}</h3>
+                    <h3 style="color: #1b7272; margin-bottom: 10px;">${isGerman ? '🏆 Erfolge' : '🏆 Achievements'}</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                         ${exportData.gamificationData.unlockedAchievements.map(a => `
                             <span class="badge badge-info">${a}</span>
@@ -546,7 +546,7 @@ function generateHtmlExport(exportData, language = 'de') {
             <p>${isGerman ? 'Dieser Datenexport entspricht Ihren Rechten gemäß Art. 15 (Auskunftsrecht) und Art. 20 (Recht auf Datenübertragbarkeit) der DSGVO.' : 'This data export complies with your rights under Art. 15 (Right of Access) and Art. 20 (Right to Data Portability) of the GDPR.'}</p>
             <p style="margin-top: 10px;">
                 ${isGerman ? 'Bei Fragen kontaktieren Sie uns unter' : 'For questions, contact us at'}: 
-                <a href="mailto:gherold@manualmode.at" style="color: #4ade80;">gherold@manualmode.at</a>
+                <a href="mailto:gherold@manualmode.at" style="color: #1b7272;">gherold@manualmode.at</a>
             </p>
         </div>
     </div>
