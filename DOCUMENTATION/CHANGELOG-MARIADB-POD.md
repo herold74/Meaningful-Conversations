@@ -175,15 +175,15 @@ npx prisma migrate deploy
 
 ```
 ┌────────────────────────────────┐
-│  Frontend Container (Port 80)   │
+│  Frontend Container (Port 80)  │
 └────────────────────────────────┘
 
 ┌────────────────────────────────┐
-│  Backend Container (Port 8080)  │
+│  Backend Container (Port 8080) │
 └────────────────────────────────┘
 
 ┌────────────────────────────────┐
-│  PostgreSQL Container           │
+│  PostgreSQL Container          │
 └────────────────────────────────┘
 ```
 
