@@ -1,8 +1,8 @@
 # 🔐 DSGVO-KONFORMITÄTSPRÜFUNG
 ## Meaningful Conversations App
 
-**Prüfungsdatum:** 8. November 2025  
-**Geprüfte Version:** 1.4.9  
+**Prüfungsdatum:** 11. November 2025  
+**Geprüfte Version:** 1.5.4  
 **Server-Standort:** Hetzner, Deutschland (EU)
 
 ---
@@ -61,16 +61,25 @@
 - Erfüllt §5 TMG (Deutschland)
 - Verfügbar in Deutsch und Englisch
 
-### 9. **NEU: Datenexport-Funktion**
-- **Status:** ✅ IMPLEMENTIERT (8. Nov. 2025)
-- Backend-Endpoint: `GET /api/data/export`
+### 9. **Datenexport-Funktion**
+- **Status:** ✅ IMPLEMENTIERT & ERWEITERT
+- **Erstimplementierung:** 8. Nov. 2025
+- **Letzte Aktualisierung:** 11. Nov. 2025 (HTML-Export-Styling)
+- Backend-Endpoint: `GET/POST /api/data/export`
 - Frontend-Komponente: `DataExportView.tsx`
-- Exportiert alle personenbezogenen Daten als JSON
+- **Exportformate:**
+  - JSON (maschinenlesbar)
+  - HTML (benutzerfreundlich, gestylt)
 - **Art. 20 DSGVO:** Recht auf Datenübertragbarkeit
+- **Besonderheiten:**
+  - HTML-Export mit professionellem Design
+  - Farbschema angepasst an App-Theme (dunkles Teal)
+  - Mehrsprachig (DE/EN)
+  - Entschlüsselter Lebenskontext bei POST-Request
 - Enthält:
   - Account-Informationen
   - Gamification-Daten
-  - Verschlüsselten Lebenskontext
+  - Verschlüsselten Lebenskontext (oder entschlüsselt bei POST)
   - Feedback
   - Upgrade-Codes
   - API-Nutzungsstatistiken (12 Monate)
@@ -173,13 +182,19 @@
 
 ---
 
-## ✅ ERLEDIGTE AUFGABEN (8. November 2025)
+## ✅ ERLEDIGTE AUFGABEN
 
-### Woche 1 (Kritisch) - ✅ ABGESCHLOSSEN
+### Woche 1 (Kritisch) - ✅ ABGESCHLOSSEN (8. November 2025)
 - [x] Datenschutzerklärung erstellen & einbinden
 - [x] Impressum erstellen & einbinden
 - [x] Datenexport-Funktion implementieren
 - [x] Cookie-Nutzung prüfen (Ergebnis: kein Banner nötig)
+
+### Verbesserungen - ✅ ABGESCHLOSSEN (11. November 2025)
+- [x] HTML-Export-Styling verbessert
+- [x] Farbschema auf dunkles Teal angepasst (weniger aggressiv)
+- [x] Mehrsprachige HTML-Exports (DE/EN)
+- [x] Entschlüsselter Lebenskontext im Export (DSGVO Art. 15 Auskunftsrecht)
 
 ---
 
@@ -253,13 +268,19 @@
 1. ✅ Datenschutzerklärung mit allen Pflichtangaben nach Art. 13, 14 DSGVO
 2. ✅ Impressum nach §5 TMG
 3. ✅ Datenexport-Funktion (Art. 20 DSGVO)
+   - JSON-Format (maschinenlesbar)
+   - HTML-Format (benutzerfreundlich, professionell gestylt)
+   - Mehrsprachig (DE/EN)
+   - Optional mit entschlüsseltem Lebenskontext (Art. 15 DSGVO)
 4. ✅ Cookie-Nutzung geprüft (keine Cookies, kein Banner nötig)
 5. ✅ Transparente Dokumentation aller Datenverarbeitungen
+6. ✅ Benutzerfreundliche Gestaltung (UX) der DSGVO-Funktionen
 
 **Rechtskonformität:**
 - Die App erfüllt nun die **wesentlichen Anforderungen der DSGVO**
 - **Kritische Mängel wurden behoben**
 - Verbleibende Punkte sind **Best-Practice-Empfehlungen** oder **vertragliche Vereinbarungen mit Drittanbietern**
+- **Benutzerfreundlichkeit:** DSGVO-konforme Funktionen sind professionell und ansprechend gestaltet
 
 ---
 
