@@ -429,6 +429,6 @@ The preserved historical branches serve as a testament to the iterative developm
 ---
 
 **Last Updated**: November 6, 2024
-**Current Version**: 1.4.9 (main branch)
+**Current Version**: 1.5.4 (main branch)
 **Historical Branches**: v1.0.0, v1.1.0, v1.4.5, v1.4.7, v1.4.7-(Server-Edition), v1.4.9 (pre-reset)
 
