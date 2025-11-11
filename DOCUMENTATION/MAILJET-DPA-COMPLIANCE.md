@@ -10,45 +10,48 @@
 
 **Provider**: Mailjet (Sinch Mailjet SAS)  
 **Service**: Email Delivery Service (Transactional Emails)  
-**DPA Status**: ⚠️ TO BE REQUESTED
+**DPA Status**: ✅ ACTIVE
 
 ---
 
 ## Data Processing Agreement (DPA) Coverage
 
-### Action Required
+### Coverage Details
 
-**Status**: DPA needs to be requested and signed
+- **DPA Type**: Sinch Data Processing Agreement
+- **Coverage Method**: Automatically applies to all Mailjet/Sinch customers
+- **Legal Basis**: Covered under Mailjet Service Agreement (Art. 28 GDPR)
+- **Account Status**: Active Mailjet account
+- **Accepted on**: When you created Mailjet account and accepted Terms of Service
+- **Last Verified**: November 11, 2025
 
-**Steps to Complete**:
-1. Visit: https://www.mailjet.com/legal/dpa/
-2. Fill out the online DPA request form
-3. Provide required information (see below)
-4. Wait for Mailjet to send signed DPA (1-5 business days)
-5. Store received DPA and update this document
+### Official DPA Document
 
-### Information Needed for DPA Request
-
-**Company/Individual Information**:
-- Name: Gerald Herold / Manualmode
-- Email: gherold@manualmode.at
-- Address: [Your business address]
-- Mailjet Account ID: [Your Mailjet account ID/email]
-
-**Service Details**:
-- Service Used: Transactional Email API
-- Purpose: User registration confirmation, password reset emails
-- Data Processed: Email addresses, user names (if provided)
+- **URL**: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-protection-agreement/
+- **Version**: Version 8 (Released: October 29, 2025)
+- **Downloaded**: November 11, 2025
 
 ---
 
-## Alternative: Contact Support
+## How Sinch/Mailjet DPA Works
 
-If the online form doesn't work:
-1. Login to Mailjet: https://app.mailjet.com/
-2. Go to: Account Settings → Legal
-3. Create support ticket requesting DPA
-4. Email: support@mailjet.com
+Similar to Google Cloud, Sinch's (Mailjet's parent company) DPA:
+
+1. **Automatically applies** to all customers with active Mailjet/Sinch accounts
+2. **Is integrated** into the Principal Service Agreement (Terms of Service)
+3. **Becomes binding** when you create and use a Mailjet account
+4. **Forms part of** the underlying services agreement - no separate signature needed
+
+**Evidence of Coverage**:
+- ✅ Active Mailjet account
+- ✅ Using Mailjet Email API service
+- ✅ Downloaded official DPA document
+- ✅ Accepted Mailjet Terms of Service
+
+**From the DPA (Version 8)**:
+> "This Data Processing Agreement (this "DPA") forms part of and is subject to the underlying services agreement (the "Principal Agreement") between the Sinch entity ("Sinch") and the customer entity ("Customer") that have entered into such Principal Agreement for Sinch's provision of Services to Customer."
+
+This means: **No separate DPA signing required** - it's automatically part of your service agreement!
 
 ---
 
@@ -98,100 +101,74 @@ Mailjet provides:
 
 ## GDPR Compliance Checklist
 
-- [ ] DPA requested via online form
-- [ ] DPA received and signed by Mailjet
-- [ ] DPA stored in secure location
-- [ ] Sub-processor list reviewed
-- [ ] Data processing details documented
+- [x] DPA Coverage verified (automatic through service agreement)
+- [x] DPA document downloaded and stored
+- [x] Sub-processor list reviewed
+- [x] Data processing details documented
 - [x] Security measures verified
 - [x] Mentioned in Privacy Policy
-- [ ] Review DPA annually
-
----
-
-## DPA Request Form Details
-
-When filling out the DPA form at https://www.mailjet.com/legal/dpa/, provide:
-
-1. **Controller Information** (Your details):
-   - Legal name: Gerald Herold / Manualmode
-   - Address: [Your address]
-   - Email: gherold@manualmode.at
-   - Phone: [Your phone number]
-
-2. **Service Information**:
-   - Mailjet account email: [Your Mailjet login email]
-   - Account ID: [Can be found in Mailjet dashboard]
-   - Services used: Transactional Email API
-
-3. **Subject Matter**:
-   - Purpose: User account management emails (registration, password reset)
-   - Duration: Ongoing (as long as service is active)
+- [ ] Review DPA and sub-processors annually
 
 ---
 
 ## Sub-Processors
 
-Mailjet maintains a current list of sub-processors:
-- **URL**: https://www.mailjet.com/legal/sub-processors/
-- **Last Reviewed**: [To be filled after DPA is signed]
+Sinch (Mailjet's parent company) maintains a current list of sub-processors:
+- **URL**: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/sub-processors/
+- **Last Reviewed**: November 11, 2025
+
+**Key Information from DPA**:
+- Sinch may engage sub-processors to process Customer's Personal Data
+- Current list of authorized sub-processors is maintained at the URL above
+- Customers will be notified of any changes to sub-processors
 
 ---
 
 ## Annual Review Schedule
 
-**Next Review Due**: November 2026 (after DPA is signed)
+**Next Review Due**: November 2026
 
 **Review Tasks**:
 1. Verify Mailjet account is still active
-2. Check for DPA updates
+2. Check for DPA updates at https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/
 3. Review sub-processor list changes
 4. Update this document with new dates
-5. Confirm security certifications are current
+5. Confirm security certifications are current (ISO 27001, GDPR compliance)
 
 ---
 
 ## Links & Resources
 
 ### Official Documentation
-- **DPA Request Form**: https://www.mailjet.com/legal/dpa/
-- **Privacy Policy**: https://www.mailjet.com/privacy-policy/
-- **Security & Compliance**: https://www.mailjet.com/security-privacy/
-- **Sub-Processors**: https://www.mailjet.com/legal/sub-processors/
-- **Terms of Service**: https://www.mailjet.com/legal/tos/
+- **Sinch DPA**: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/
+- **Sinch Sub-Processors**: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/sub-processors/
+- **Mailjet Privacy Policy**: https://www.mailjet.com/privacy-policy/
+- **Mailjet Security & Compliance**: https://www.mailjet.com/security-privacy/
+- **Mailjet Terms of Service**: https://www.mailjet.com/legal/tos/
 
 ### Support
 - **Mailjet Dashboard**: https://app.mailjet.com/
 - **Support Email**: support@mailjet.com
 - **Help Center**: https://www.mailjet.com/support/
-
----
-
-## Timeline
-
-**Expected Timeline**:
-- DPA Request: [Date when you submit the form]
-- Expected Response: 1-5 business days
-- DPA Received: [To be filled]
-- Status Updated: [To be filled]
+- **Sinch Legal**: https://sinch.com/legal/
 
 ---
 
 ## Notes
 
-**Important**: This documentation serves as evidence of GDPR Art. 28 compliance preparation for the use of Mailjet email services in the Meaningful Conversations application.
+**Important**: This documentation serves as evidence of GDPR Art. 28 compliance for the use of Mailjet email services in the Meaningful Conversations application.
 
-**Next Steps**:
-1. ⏳ Visit https://www.mailjet.com/legal/dpa/ and submit DPA request
-2. ⏳ Wait for signed DPA from Mailjet
-3. ⏳ Store DPA PDF in secure location
-4. ⏳ Update this document with completion dates
-5. ⏳ Update DSGVO-COMPLIANCE-AUDIT.md to mark Mailjet DPA as completed
+**Key Finding**: 
+- Mailjet (owned by Sinch) follows the same automatic DPA approach as Google Cloud
+- The DPA automatically forms part of the service agreement - no separate signature required
+- Simply having an active Mailjet account means the DPA applies
 
-**Evidence Storage**: After receiving DPA, store:
-1. Signed DPA PDF from Mailjet
-2. Email confirmation from Mailjet
-3. This documentation file (updated)
+**Evidence Storage**: Keep this document along with:
+1. Downloaded Sinch DPA PDF (Version 8, October 29, 2025)
+2. Screenshot of active Mailjet account (optional)
+3. Proof of accepted Terms of Service (optional)
+
+**Verification Date**: November 11, 2025
 
 ---
 
