@@ -175,5 +175,7 @@ Sinch (Mailjet's parent company) maintains a current list of sub-processors:
 **Maintained by**: Gerald Herold / Manualmode  
 **Contact**: gherold@manualmode.at  
 **Project**: Meaningful Conversations  
-**Server**: manualmode.at (Hetzner, Germany)
+**Jurisdiction**: Austria (Österreich)  
+**Server**: manualmode.at (Hetzner, Germany - EU)  
+**Data Protection Authority**: Datenschutzbehörde Österreich (https://www.dsb.gv.at/)
 
