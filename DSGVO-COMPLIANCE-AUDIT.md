@@ -3,7 +3,9 @@
 
 **Prüfungsdatum:** 11. November 2025  
 **Geprüfte Version:** 1.5.4  
-**Server-Standort:** Hetzner, Deutschland (EU)
+**Betreiber-Standort:** Österreich  
+**Server-Standort:** Hetzner, Deutschland (EU)  
+**Zuständige Behörde:** Datenschutzbehörde Österreich (https://www.dsb.gv.at/)
 
 ---
 
@@ -58,7 +60,7 @@
 - **Status:** ✅ IMPLEMENTIERT (8. Nov. 2025)
 - Dedizierte Komponente erstellt (`ImprintView.tsx`)
 - In der App über Menü zugänglich
-- Erfüllt §5 TMG (Deutschland)
+- Erfüllt Impressumspflicht (Österreich: §5 E-Commerce-Gesetz - ECG)
 - Verfügbar in Deutsch und Englisch
 
 ### 9. **Datenexport-Funktion**
@@ -269,14 +271,14 @@
 - **Mailjet DPA Compliance:** `DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md`
 
 ### Externe Ressourcen
-- **DSGVO-Generator:** https://datenschutz-generator.de/
-- **Impressum-Generator:** https://www.e-recht24.de/impressum-generator.html
+- **Datenschutzbehörde Österreich:** https://www.dsb.gv.at/
+- **DSGVO-Info Österreich:** https://www.oesterreich.gv.at/themen/datenschutz.html
+- **WKO Datenschutz (AT):** https://www.wko.at/datenschutz
 - **Google Cloud DPA:** https://cloud.google.com/terms/data-processing-addendum
 - **Google Cloud Sub-Processors:** https://cloud.google.com/terms/subprocessors
 - **Sinch DPA (Mailjet):** https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/
 - **Sinch Sub-Processors:** https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/sub-processors/
 - **Mailjet Security:** https://www.mailjet.com/security-privacy/
-- **Datenschutzbehörde:** https://www.bfdi.bund.de/
 
 ---
 
@@ -284,7 +286,7 @@
 
 **Was wurde erreicht:**
 1. ✅ Datenschutzerklärung mit allen Pflichtangaben nach Art. 13, 14 DSGVO
-2. ✅ Impressum nach §5 TMG
+2. ✅ Impressum nach §5 E-Commerce-Gesetz (ECG, Österreich)
 3. ✅ Datenexport-Funktion (Art. 20 DSGVO)
    - JSON-Format (maschinenlesbar)
    - HTML-Format (benutzerfreundlich, professionell gestylt)
