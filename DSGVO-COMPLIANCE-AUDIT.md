@@ -139,9 +139,14 @@
 - **DSGVO-Konformität:** ✅ Einwilligung durch bewusste Auswahl
 
 ### 4. Server-Logs
-- **Status:** ⚠️ DOKUMENTIERT
+- **Status:** ⚠️ DOKUMENTIERT (Verbesserung möglich)
 - **Speicherdauer:** 7 Tage (dokumentiert in Datenschutzerklärung)
+- **Aktuelle Situation:** Vollständige IP-Adressen werden geloggt
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse für Sicherheit)
 - **Empfehlung:** IP-Anonymisierung in Nginx-Logs
+- **Anleitung:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
+- **Aufwand:** ~20 Minuten Implementierung
+- **Vorteil:** Datenminimierung (Art. 5 Abs. 1 lit. c DSGVO)
 
 ### 5. Google Gemini API
 - **Status:** ✅ DSGVO-KONFORM (DPA Coverage verified)
@@ -253,19 +258,16 @@
    - DPA-Dokument: https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/
 
 ### Priorität 3: EMPFOHLEN (Optional)
-6. **Nginx Access-Log Anonymisierung**
-   ```nginx
-   # nginx.conf
-   log_format anonymized '$remote_addr_anon - [$time_local] '
-                         '"$request" $status $body_bytes_sent';
-
-   # IP anonymisieren (letzte Oktetts entfernen)
-   map $remote_addr $remote_addr_anon {
-       ~(?P<ip>\d+\.\d+\.\d+)\.    $ip.0;
-       ~(?P<ip>[^:]+:[^:]+):       $ip::;
-       default                     0.0.0.0;
-   }
-   ```
+6. **Nginx Access-Log Anonymisierung** 📋
+   - **Anleitung:** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
+   - **Aufwand:** 20-25 Minuten
+   - **Vorteil:** Best-Practice für Datenminimierung
+   - **Implementierung:**
+     1. SSH zu Server: `ssh root@91.99.193.87`
+     2. Map und Log-Format in `/etc/nginx/nginx.conf` hinzufügen
+     3. Server-Configs aktualisieren (staging + production)
+     4. Nginx neu laden: `nginx -t && systemctl reload nginx`
+   - **Ergebnis:** IPs werden anonymisiert (z.B. `192.168.1.0` statt `192.168.1.234`)
 
 7. **~~Feedback-Consent implementieren~~** ✅ **BEREITS VORHANDEN**
    - Anonymisierungs-Checkbox ist standardmäßig aktiviert
@@ -278,6 +280,7 @@
 ### Interne Dokumentation
 - **Google Cloud DPA Compliance:** `DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md`
 - **Mailjet DPA Compliance:** `DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md`
+- **Nginx IP-Anonymisierung (Optional):** `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`
 
 ### Externe Ressourcen
 - **Datenschutzbehörde Österreich:** https://www.dsb.gv.at/
