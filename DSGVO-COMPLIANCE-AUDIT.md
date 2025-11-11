@@ -114,13 +114,16 @@
 ## ⚠️ MODERATE MÄNGEL
 
 ### 2. API-Usage-Tracking
-- **Status:** ⚠️ DATENSCHUTZRECHTLICH BEDENKLICH
-- **Problem:**
-  - User-ID wird bei API-Aufrufen getrackt
+- **Status:** ✅ DSGVO-KONFORM (mit Verbesserungspotential)
+- **Implementierung:**
+  - User-ID wird **NUR LOKAL** getrackt (NICHT an Google gesendet)
+  - Tracking erfolgt in eigener Datenbank für Kostenmonitoring
   - Technische Metadaten (Tokens, Dauer, Bot-ID)
   - **Wird in Datenschutzerklärung erwähnt** ✅
 - **Rechtsgrundlage:** Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)
-- **Speicherdauer:** **IMPLEMENTIERT** - Automatische Löschung nach 12 Monaten (wird im Datenexport transparent gemacht)
+- **Speicherdauer:** **IMPLEMENTIERT** - Automatische Löschung nach 12 Monaten
+- **Wichtig:** Google Gemini erhält KEINE User-IDs, nur Gesprächsinhalte
+- **Optional:** Könnte auf reine Token-Statistik ohne User-ID vereinfacht werden
 
 ### 3. Feedback-System
 - **Status:** ✅ DSGVO-KONFORM
@@ -146,11 +149,17 @@
   - Nutzer-Gespräche werden an Google Gemini gesendet
   - **Google = Auftragsverarbeiter**
   - **DSGVO:** Art. 28
+- **An Google gesendete Daten:**
+  - Gesprächsinhalte (Nutzer-Nachrichten, Bot-Antworten)
+  - Lebenskontext (falls vom Nutzer bereitgestellt)
+  - Bot-ID (z.B. "g-coach", "g-interviewer")
+  - **KEINE** User-IDs, E-Mail-Adressen oder Account-Daten
 - **Aktuell:** 
   - **Erwähnt in Datenschutzerklärung** ✅
   - **DPA Coverage:** Automatisch durch Google Cloud Account ✅
   - **Dokumentation:** `DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md` ✅
 - **Hinweis:** Google Cloud DPA ist automatisch für alle GCP-Kunden aktiv
+- **Datensparsamkeit:** Nur für Service notwendige Daten werden übertragen
 
 ### 6. Mailjet (E-Mail-Versand)
 - **Status:** ✅ DSGVO-KONFORM (DPA Coverage verified)
