@@ -36,13 +36,14 @@ model User {
 }
 
 model UpgradeCode {
-  id         String   @id @default(cuid())
-  code       String   @unique
+  id         String     @id @default(cuid())
+  code       String     @unique
   botId      String
-  isUsed     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  isUsed     Boolean    @default(false)
+  createdAt  DateTime   @default(now())
   usedById   String?
-  usedByUser User?    @relation("UserToUpgradeCodes", fields: [usedById], references: [id])
+  usedByUser User?      @relation("UserToUpgradeCodes", fields: [usedById], references: [id])
+  purchases  Purchase[]
 
   @@index([usedById])
 }
@@ -103,4 +104,22 @@ model GuestUsage {
 
   @@index([fingerprint])
   @@index([weekStart])
+}
+
+model Purchase {
+  id            String       @id @default(cuid())
+  paypalOrderId String       @unique
+  customerEmail String
+  customerName  String?
+  productId     String
+  amount        Decimal      @db.Decimal(10, 2)
+  currency      String       @default("EUR")
+  upgradeCodeId String?
+  upgradeCode   UpgradeCode? @relation(fields: [upgradeCodeId], references: [id])
+  status        String       @default("COMPLETED")
+  paypalPayload Json
+  createdAt     DateTime     @default(now())
+
+  @@index([customerEmail])
+  @@index([paypalOrderId])
 }

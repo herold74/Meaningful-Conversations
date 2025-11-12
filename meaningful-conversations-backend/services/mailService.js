@@ -185,7 +185,149 @@ const sendPasswordResetEmail = async (email, token, lang = 'en') => {
 };
 
 
+// Product names for emails
+const getProductName = (botId) => {
+  const names = {
+    'ACCESS_PASS_1M': { de: '1-Monats-Zugangspass', en: '1-Month Access Pass' },
+    'ACCESS_PASS_3M': { de: '3-Monats-Zugangspass', en: '3-Month Access Pass' },
+    'ACCESS_PASS_1Y': { de: '1-Jahres-Zugangspass', en: '1-Year Access Pass' },
+    'kenji-adhd': { de: 'Kenji - ADHD Coach', en: 'Kenji - ADHD Coach' },
+    'chloe-cbt': { de: 'Chloe - CBT Coach', en: 'Chloe - CBT Coach' }
+  };
+  return names[botId] || { de: botId, en: botId };
+};
+
+const sendPurchaseEmail = async (email, name, code, botId) => {
+  const productName = getProductName(botId);
+  const redeemUrl = `${FRONTEND_URL}?route=redeem&code=${code}`;
+  const firstName = name ? name.split(' ')[0] : '';
+
+  const htmlBody = `
+    <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%); color: white; padding: 30px; text-align: center;">
+        <h1 style="margin: 0; font-size: 28px;">🎉 Vielen Dank für deinen Kauf!</h1>
+      </div>
+      
+      <div style="padding: 30px; background: #f9fafb;">
+        <p style="font-size: 16px;">${firstName ? `Hallo ${firstName},` : 'Hallo,'}</p>
+        <p style="font-size: 16px;">dein <strong>${productName.de}</strong> wurde erfolgreich aktiviert!</p>
+        
+        <div style="background: white; border: 2px solid #1b7272; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+          <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Dein Freischaltcode:</p>
+          <p style="font-size: 32px; font-weight: bold; color: #1b7272; letter-spacing: 4px; margin: 0;">${code}</p>
+        </div>
+
+        <h3 style="color: #1b7272;">So löst du deinen Code ein:</h3>
+        <ol style="line-height: 1.8;">
+          <li>Melde dich bei <strong>Meaningful Conversations</strong> an</li>
+          <li>Öffne das Menü und wähle <strong>"Code einlösen"</strong></li>
+          <li>Gib deinen Code ein: <strong>${code}</strong></li>
+        </ol>
+
+        <p style="margin: 30px 0; text-align: center;">
+          <a href="${redeemUrl}" 
+             style="background-color: #1b7272; color: white; padding: 14px 30px; 
+                    text-decoration: none; display: inline-block; border-radius: 8px; 
+                    font-weight: bold; font-size: 16px;">
+            Jetzt Code einlösen
+          </a>
+        </p>
+
+        <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px;"><strong>💡 Tipp:</strong> Speichere diese E-Mail für deine Unterlagen. Bei Fragen stehe ich dir gerne zur Verfügung!</p>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+        <p style="font-size: 14px; color: #666;">
+          Bei Fragen oder Problemen erreichst du mich unter:<br>
+          <a href="mailto:gherold@manualmode.at" style="color: #1b7272;">gherold@manualmode.at</a>
+        </p>
+      </div>
+
+      <div style="background: #1b7272; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">Meaningful Conversations | www.manualmode.at</p>
+        <p style="margin: 5px 0 0 0;">Gerald Herold</p>
+      </div>
+    </div>
+  `;
+
+  if (!isProductionOrStaging) {
+    console.log('\n--- SIMULATED PURCHASE EMAIL ---');
+    console.log(`To: ${email}`);
+    console.log(`Subject: ✅ Dein ${productName.de} ist aktiviert!`);
+    console.log(`Code: ${code}`);
+    console.log(`Product: ${productName.de}`);
+    console.log('-------------------------------\n');
+    return;
+  }
+
+  if (!mailjet) {
+    console.error('Mailjet client is not initialized. Cannot send purchase email.');
+    throw new Error('Email service is not configured.');
+  }
+
+  const request = mailjet.post('send', { version: 'v3.1' }).request({
+    Messages: [{
+      From: { Email: SENDER_EMAIL, Name: SENDER_NAME },
+      To: [{ Email: email, Name: name }],
+      Subject: `✅ Dein ${productName.de} ist aktiviert!`,
+      TextPart: `Dein Freischaltcode: ${code}\n\nLöse ihn ein unter: ${redeemUrl}`,
+      HTMLPart: htmlBody
+    }]
+  });
+
+  return request;
+};
+
+const sendAdminNotification = async (customerEmail, customerName, code, botId, amount) => {
+  const productName = getProductName(botId);
+  const adminEmail = process.env.ADMIN_EMAIL || 'gherold@manualmode.at';
+
+  const htmlBody = `
+    <div style="font-family: sans-serif; padding: 20px;">
+      <h2 style="color: #1b7272;">🛒 Neuer Kauf</h2>
+      <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Produkt:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${productName.de}</td></tr>
+        <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Kunde:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${customerName} (${customerEmail})</td></tr>
+        <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Code:</strong></td><td style="padding: 8px; border: 1px solid #ddd;"><code>${code}</code></td></tr>
+        <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Betrag:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">€${amount.toFixed(2)}</td></tr>
+        <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Zeitpunkt:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${new Date().toLocaleString('de-DE')}</td></tr>
+      </table>
+    </div>
+  `;
+
+  if (!isProductionOrStaging) {
+    console.log('\n--- SIMULATED ADMIN NOTIFICATION ---');
+    console.log(`To: ${adminEmail}`);
+    console.log(`Subject: 🛒 Neuer Kauf: ${productName.de}`);
+    console.log(`Customer: ${customerName} (${customerEmail})`);
+    console.log(`Code: ${code}`);
+    console.log(`Amount: €${amount.toFixed(2)}`);
+    console.log('-------------------------------------\n');
+    return;
+  }
+
+  if (!mailjet) {
+    console.error('Mailjet client is not initialized. Cannot send admin notification.');
+    throw new Error('Email service is not configured.');
+  }
+
+  const request = mailjet.post('send', { version: 'v3.1' }).request({
+    Messages: [{
+      From: { Email: SENDER_EMAIL, Name: SENDER_NAME },
+      To: [{ Email: adminEmail }],
+      Subject: `🛒 Neuer Kauf: ${productName.de}`,
+      HTMLPart: htmlBody
+    }]
+  });
+
+  return request;
+};
+
 module.exports = {
     sendConfirmationEmail,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendPurchaseEmail,
+    sendAdminNotification
 };

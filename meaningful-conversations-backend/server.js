@@ -179,6 +179,7 @@ async function startServer() {
         app.use('/api/admin', require('./routes/admin.js'));
         app.use('/api/api-usage', require('./routes/apiUsage.js'));
         app.use('/api/guest', require('./routes/guest.js'));
+        app.use('/api/purchase', require('./routes/purchase.js'));
 
         // --- Health Check Endpoint ---
         app.get('/api/health', async (req, res) => {
