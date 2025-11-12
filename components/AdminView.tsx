@@ -219,6 +219,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     }, []);
 
     const [newCodeBotId, setNewCodeBotId] = useState('ACCESS_PASS_1M');
+    const [bulkQuantity, setBulkQuantity] = useState<number>(10);
+    const [generatedBulkCodes, setGeneratedBulkCodes] = useState<Array<{ code: string; botId: string; createdAt: string }> | null>(null);
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [codeEmailFilter, setCodeEmailFilter] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
@@ -348,6 +350,46 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const handleCreateCode = async (e: React.FormEvent) => {
         e.preventDefault();
         await handleAction('createCode', () => userService.createUpgradeCode(newCodeBotId));
+    };
+
+    const handleBulkGenerate = async () => {
+        if (bulkQuantity < 1 || bulkQuantity > 100) {
+            alert('Quantity must be between 1 and 100.');
+            return;
+        }
+
+        setActionLoading(prev => ({ ...prev, 'bulkGenerate': true }));
+        try {
+            const result = await userService.createBulkUpgradeCodes(newCodeBotId, bulkQuantity);
+            setGeneratedBulkCodes(result.codes);
+            await loadData(); // Refresh codes list
+            alert(t('admin_codes_bulk_success', { count: result.count }));
+        } catch (err: any) {
+            alert(`Bulk generation failed: ${err.message}`);
+        } finally {
+            setActionLoading(prev => ({ ...prev, 'bulkGenerate': false }));
+        }
+    };
+
+    const downloadCSV = () => {
+        if (!generatedBulkCodes || generatedBulkCodes.length === 0) return;
+
+        const productName = getUnlockName(generatedBulkCodes[0].botId);
+        const csvContent = [
+            ['Code', 'Product', 'Created', 'Status'].join(','),
+            ...generatedBulkCodes.map(c => [
+                c.code,
+                productName,
+                new Date(c.createdAt).toLocaleString(),
+                'Available'
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `codes_${newCodeBotId}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
     };
     
     const handleCopyCode = (codeValue: string, codeId: string) => {
@@ -734,6 +776,49 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
                     </button>
                 </form>
+                
+                <hr className="border-gray-300 dark:border-gray-700" />
+                
+                <div className="space-y-3">
+                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_codes_bulk_generate')}</h3>
+                    <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                        <div className="flex-1">
+                            <label htmlFor="bulk-quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {t('admin_codes_quantity_label')}
+                            </label>
+                            <input 
+                                id="bulk-quantity"
+                                type="number" 
+                                min="1" 
+                                max="100" 
+                                value={bulkQuantity} 
+                                onChange={e => setBulkQuantity(parseInt(e.target.value) || 1)}
+                                placeholder={t('admin_codes_quantity_placeholder')}
+                                className="w-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                            />
+                        </div>
+                        <div className="flex items-end gap-3">
+                            <button 
+                                type="button"
+                                onClick={handleBulkGenerate}
+                                disabled={actionLoading['bulkGenerate']}
+                                className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md whitespace-nowrap"
+                            >
+                                {actionLoading['bulkGenerate'] ? <Spinner/> : t('admin_codes_bulk_button', { count: bulkQuantity })}
+                            </button>
+                            {generatedBulkCodes && generatedBulkCodes.length > 0 && (
+                                <button 
+                                    type="button"
+                                    onClick={downloadCSV}
+                                    className="px-5 py-2 text-base font-bold text-accent-tertiary-foreground bg-accent-tertiary uppercase hover:bg-accent-tertiary-hover flex items-center gap-2 rounded-lg shadow-md whitespace-nowrap"
+                                >
+                                    <ClipboardIcon className="w-5 h-5" />
+                                    {t('admin_codes_download_csv')}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
                  <input 
                     type="search"
                     value={codeEmailFilter}

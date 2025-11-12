@@ -1,6 +1,6 @@
 {
   "meaningfulConversations": "Sinnstiftende Gespräche",
-  "welcome_loading": "Dein Erlebnis wird geladen...",
+  "welcome_loading": "Deine Sitzung wird geladen...",
  
   "landing_subtitle": "Diese Anwendung bietet Zugang zu mehreren Coaching-Bot-Charakteren mit unterschiedlichen Perspektiven und Coaching-Stilen. Sie können eine 'Lebenskontext'-Datei erstellen, um Gespräche zu personalisieren und sie nach jeder Sitzung mit neuen Erkenntnissen zu aktualisieren.",
   "landing_upload_title": "Lade deine Lebenskontext-Datei hoch",
@@ -406,6 +406,12 @@
   "admin_codes_generate_title": "Neuen Code generieren",
   "admin_codes_for_coach": "Für Coach:",
   "admin_codes_generate": "Generieren",
+  "admin_codes_bulk_generate": "Massengenierung",
+  "admin_codes_quantity_label": "Anzahl",
+  "admin_codes_quantity_placeholder": "1-100",
+  "admin_codes_bulk_button": "{{count}} Codes generieren",
+  "admin_codes_download_csv": "Als CSV herunterladen",
+  "admin_codes_bulk_success": "{{count}} Codes erfolgreich generiert!",
   "admin_no_codes_yet": "Es wurden noch keine Upgrade-Codes generiert.",
   "admin_codes_code": "Code",
   "admin_codes_coach": "Schaltet frei",
