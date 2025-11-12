@@ -162,7 +162,7 @@
   "guest_register_now": "Jetzt registrieren",
   
   "chat_welcome": "Hallo, ich bin {{botName}}. Was beschäftigt Sie heute?",
-  "chat_placeholder": "Geben Sie hier Ihre Nachricht ein...",
+  "chat_placeholder": "Nachricht eingeben...",
   "chat_end_session": "Sitzung beenden",
   "chat_error": "Es tut mir leid, bei der Verarbeitung Ihrer Anfrage ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
   "chat_viewInfo": "Coach-Info anzeigen",

@@ -162,7 +162,7 @@
   "guest_register_now": "Register Now",
 
   "chat_welcome": "Hello, I'm {{botName}}. What's on your mind today?",
-  "chat_placeholder": "Enter your message here...",
+  "chat_placeholder": "Type message...",
   "chat_end_session": "End Session",
   "chat_error": "I'm sorry, an error occurred while processing your request. Please try again.",
   "chat_viewInfo": "View Coach Info",
