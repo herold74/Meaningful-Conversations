@@ -1,5 +1,6 @@
 {
   "meaningfulConversations": "Meaningful Conversations",
+  "welcome_loading": "Loading your experience...",
 
   "landing_subtitle": "This application provides access to several coaching bot characters with different perspectives and coaching styles. You can create a 'life context' file to personalize conversations and update it with new insights after each session.",
   "landing_upload_title": "Upload Your Life Context File",
