@@ -169,6 +169,41 @@ router.post('/codes', async (req, res) => {
     }
 });
 
+// POST /api/admin/codes/bulk
+router.post('/codes/bulk', async (req, res) => {
+    const { botId, quantity } = req.body;
+    
+    if (!botId) {
+        return res.status(400).json({ error: 'botId is required.' });
+    }
+    
+    if (!quantity || quantity < 1 || quantity > 100) {
+        return res.status(400).json({ error: 'Quantity must be between 1 and 100.' });
+    }
+
+    try {
+        const codes = [];
+        
+        // Generate codes in batch
+        for (let i = 0; i < quantity; i++) {
+            const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+            const newCode = await prisma.upgradeCode.create({
+                data: { code, botId },
+            });
+            codes.push({
+                code: newCode.code,
+                botId: newCode.botId,
+                createdAt: newCode.createdAt,
+            });
+        }
+
+        res.json({ codes, count: codes.length });
+    } catch (error) {
+        console.error("Admin: Error creating bulk codes:", error);
+        res.status(500).json({ error: 'Failed to create bulk codes.' });
+    }
+});
+
 // DELETE /api/admin/codes/:id
 router.delete('/codes/:id', async (req, res) => {
     const { id } = req.params;
