@@ -75,8 +75,8 @@ Diese Product IDs müssen **exakt** in PayPal verwendet werden:
 
 **Advanced Settings** (wichtig!):
 - **Custom ID**: `ACCESS_PASS_1Y` ⚠️ **MUSS EXAKT ÜBEREINSTIMMEN**
-- **Return URL**: `https://meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app`
-- **Cancel URL**: `https://meaningful-conversations-frontend-prod-650095539575.europe-west6.run.app`
+- **Return URL**: `https://mc-app.manualmode.at`
+- **Cancel URL**: `https://mc-app.manualmode.at`
 
 **Wichtig:** 
 - Die Custom ID ist **case-sensitive**
@@ -99,7 +99,7 @@ Diese Product IDs müssen **exakt** in PayPal verwendet werden:
 
 **Webhook URL:**
 ```
-https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app/api/purchase/webhook
+https://mc-app.manualmode.at/api/purchase/webhook
 ```
 
 **Event Types:**
@@ -113,22 +113,44 @@ https://meaningful-conversations-backend-prod-650095539575.europe-west6.run.app/
 
 ### Schritt 5: Environment-Variablen setzen
 
-Du musst zwei neue Env-Variablen in Cloud Run setzen:
+Du musst zwei neue Env-Variablen auf dem Manualmode-Server setzen:
 
 #### Für STAGING:
 
 ```bash
-gcloud run services update meaningful-conversations-backend-staging \
-  --region=europe-west6 \
-  --update-env-vars="PAYPAL_WEBHOOK_ID=DEINE_WEBHOOK_ID,ADMIN_EMAIL=gherold@manualmode.at"
+ssh root@91.99.193.87
+cd /opt/manualmode-staging
+nano .env.staging
+```
+
+Füge hinzu:
+```bash
+PAYPAL_WEBHOOK_ID=DEINE_WEBHOOK_ID
+ADMIN_EMAIL=gherold@manualmode.at
+```
+
+Speichern (Ctrl+O, Enter, Ctrl+X), dann:
+```bash
+podman-compose -f podman-compose-staging.yml restart
 ```
 
 #### Für PRODUCTION:
 
 ```bash
-gcloud run services update meaningful-conversations-backend-prod \
-  --region=europe-west6 \
-  --update-env-vars="PAYPAL_WEBHOOK_ID=DEINE_WEBHOOK_ID,ADMIN_EMAIL=gherold@manualmode.at"
+ssh root@91.99.193.87
+cd /opt/manualmode-production
+nano .env.production
+```
+
+Füge hinzu:
+```bash
+PAYPAL_WEBHOOK_ID=DEINE_WEBHOOK_ID
+ADMIN_EMAIL=gherold@manualmode.at
+```
+
+Speichern (Ctrl+O, Enter, Ctrl+X), dann:
+```bash
+podman-compose -f podman-compose-production.yml restart
 ```
 
 **Ersetze `DEINE_WEBHOOK_ID`** mit der ID aus Schritt 4!
@@ -184,7 +206,9 @@ gcloud run services update meaningful-conversations-backend-prod \
 
 4. **Überprüfe Backend-Logs:**
    ```bash
-   gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=meaningful-conversations-backend-prod" --limit 50 --format json | grep -A5 -B5 "Purchase processed"
+   ssh root@91.99.193.87
+   cd /opt/manualmode-production
+   podman-compose -f podman-compose-production.yml logs -f backend | grep "Purchase processed"
    ```
 
 ---
@@ -295,7 +319,7 @@ https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXXXXXXXXX
 Bei Problemen:
 - **PayPal Developer Support**: https://developer.paypal.com/support/
 - **Webhook-Logs**: PayPal Dashboard → Webhooks → Activity
-- **Backend-Logs**: Cloud Run Logs im Google Cloud Console
+- **Backend-Logs**: SSH zum Server und `podman-compose logs -f backend`
 
 ---
 
@@ -305,10 +329,10 @@ Bei Problemen:
 - [ ] Developer App erstellt
 - [ ] 5 PayPal Buttons mit korrekten Custom IDs erstellt
 - [ ] Payment Links gespeichert
-- [ ] Webhook mit Production-URL eingerichtet
+- [ ] Webhook mit Production-URL (`https://mc-app.manualmode.at/api/purchase/webhook`) eingerichtet
 - [ ] Webhook ID kopiert
-- [ ] Env-Variablen in Cloud Run gesetzt (Staging + Production)
-- [ ] Backend neu deployed (optional, wenn Env-Variablen geändert)
+- [ ] Env-Variablen auf Manualmode Server gesetzt (Staging + Production)
+- [ ] Backend Container neu gestartet nach Env-Änderungen
 - [ ] Test-Kauf durchgeführt
 - [ ] E-Mail erhalten und Code funktioniert
 - [ ] Admin-Benachrichtigung erhalten
