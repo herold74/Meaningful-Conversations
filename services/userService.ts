@@ -173,6 +173,13 @@ export const createUpgradeCode = async (botId: string): Promise<UpgradeCode> => 
     });
 };
 
+export const createBulkUpgradeCodes = async (botId: string, quantity: number): Promise<{ codes: Array<{ code: string; botId: string; createdAt: string }>; count: number }> => {
+    return await apiFetch('/admin/codes/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ botId, quantity }),
+    });
+};
+
 export const deleteUpgradeCode = async (codeId: string): Promise<void> => {
     await apiFetch(`/admin/codes/${codeId}`, { method: 'DELETE' });
 };
