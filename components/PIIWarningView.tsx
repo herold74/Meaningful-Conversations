@@ -29,7 +29,7 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <button
             onClick={onCancel}
-            className="flex-1 px-6 py-3 text-base font-bold text-status-warning-foreground bg-transparent border border-status-warning-foreground uppercase hover:bg-status-warning-foreground hover:text-content-inverted-dark dark:hover:text-content-inverted-dark focus:outline-none transition-colors rounded-lg shadow-md"
+            className="flex-1 px-6 py-3 text-base font-bold text-status-warning-foreground bg-transparent border border-status-warning-foreground uppercase hover:bg-status-warning-foreground hover:text-content-inverted focus:outline-none transition-colors rounded-lg shadow-md"
           >
             {t('piiWarning_goBack')}
           </button>
