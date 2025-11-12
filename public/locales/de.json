@@ -30,7 +30,7 @@
   "login_button": "Anmelden",
   "login_no_account": "Haben Sie noch kein Konto?",
   "login_register_link": "Hier registrieren",
-  "login_email_placeholder": "deine@email.de",
+  "login_email_placeholder": "deine@email.at",
   "login_error_credentials": "Ungültige E-Mail oder ungültiges Passwort. Bitte versuchen Sie es erneut.",
   
   "register_title": "Konto erstellen",
