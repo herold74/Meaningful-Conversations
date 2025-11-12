@@ -48,6 +48,10 @@ MAILJET_API_KEY="YOUR_MAILJET_PUBLIC_KEY"
 MAILJET_SECRET_KEY="YOUR_MAILJET_SECRET_KEY"
 MAILJET_SENDER_EMAIL="YOUR_VERIFIED_SENDER_EMAIL"
 
+# --- PayPal Webhook Configuration ---
+PAYPAL_WEBHOOK_ID="your-webhook-id-from-paypal"
+ADMIN_EMAIL="gherold@manualmode.at"
+
 # --- Application URLs ---
 FRONTEND_URL=http://localhost:3000
 
@@ -282,6 +286,7 @@ When deploying, you do **not** need to set the `DATABASE_URL` variable. Instead,
 -   `JWT_SECRET`
 -   `API_KEY`
 -   `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_SENDER_EMAIL`
+-   `PAYPAL_WEBHOOK_ID`, `ADMIN_EMAIL`: For PayPal purchase webhook integration
 -   `FRONTEND_URL`
 -   `ENVIRONMENT_TYPE`: Critical for safety. Set to `staging` or `production`.
 -   `DB_USER`
