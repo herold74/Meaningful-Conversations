@@ -1,8 +1,10 @@
 import React from 'react';
 import { LogoIcon } from './icons/LogoIcon';
 import { BOTS } from '../constants';
+import { useLocalization } from '../context/LocalizationContext';
 
 const WelcomeScreen: React.FC = () => {
+    const { t } = useLocalization();
     // Pre-calculated positions for 6 bots in a hexagon shape around the central logo
     const avatarPositions = [
         { top: '-1.75rem', left: 'calc(50% - 1.75rem)' }, // Top
@@ -45,10 +47,10 @@ const WelcomeScreen: React.FC = () => {
       </div>
 
       <h1 className="mt-20 text-2xl font-bold text-content-primary uppercase tracking-widest">
-        Meaningful Conversations
+        {t('meaningfulConversations')}
       </h1>
       <p className="mt-2 text-content-secondary">
-        Loading your experience...
+        {t('welcome_loading')}
       </p>
     </div>
   );
