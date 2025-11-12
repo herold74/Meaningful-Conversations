@@ -73,6 +73,19 @@ interface CustomWindow extends Window {
 }
 declare let window: CustomWindow;
 
+// Wake Lock API types
+interface WakeLockSentinel extends EventTarget {
+  readonly released: boolean;
+  readonly type: 'screen';
+  release(): Promise<void>;
+}
+
+interface Navigator {
+  wakeLock?: {
+    request(type: 'screen'): Promise<WakeLockSentinel>;
+  };
+}
+
 interface CoachInfoModalProps {
   bot: Bot;
   isOpen: boolean;
@@ -283,6 +296,66 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
     };
   }, []);
+
+  // Wake Lock: Keep screen active in voice mode to prevent interruption
+  useEffect(() => {
+    let wakeLock: WakeLockSentinel | null = null;
+
+    const requestWakeLock = async () => {
+      try {
+        // Check if Wake Lock API is supported
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log('Screen Wake Lock activated (Voice Mode)');
+
+          // Re-acquire wake lock when visibility changes (e.g., switching tabs)
+          const handleVisibilityChange = async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible' && isVoiceMode) {
+              try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Screen Wake Lock re-acquired');
+              } catch (err) {
+                console.error('Failed to re-acquire wake lock:', err);
+              }
+            }
+          };
+
+          document.addEventListener('visibilitychange', handleVisibilityChange);
+
+          // Store cleanup function
+          wakeLock.addEventListener('release', () => {
+            console.log('Screen Wake Lock released');
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+          });
+        } else {
+          console.warn('Screen Wake Lock API not supported on this device');
+        }
+      } catch (err) {
+        console.error('Failed to acquire screen wake lock:', err);
+      }
+    };
+
+    const releaseWakeLock = async () => {
+      if (wakeLock !== null) {
+        try {
+          await wakeLock.release();
+          wakeLock = null;
+        } catch (err) {
+          console.error('Failed to release wake lock:', err);
+        }
+      }
+    };
+
+    // Activate wake lock when entering voice mode
+    if (isVoiceMode) {
+      requestWakeLock();
+    }
+
+    // Cleanup: Release wake lock when leaving voice mode or component unmounts
+    return () => {
+      releaseWakeLock();
+    };
+  }, [isVoiceMode]);
 
   const speak = useCallback((text: string) => {
     if (!isTtsEnabled || !text.trim() || !window.speechSynthesis) return;
