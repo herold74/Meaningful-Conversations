@@ -24,18 +24,33 @@ router.post('/webhook', express.json(), async (req, res) => {
 
     const event = req.body;
     
+    // Log the full webhook for debugging
+    console.log('📥 PayPal Webhook received:', JSON.stringify(event, null, 2));
+    
     // 2. Handle only PAYMENT.CAPTURE.COMPLETED events
     if (event.event_type !== 'PAYMENT.CAPTURE.COMPLETED') {
       console.log(`Ignoring event type: ${event.event_type}`);
       return res.status(200).send('Event ignored');
     }
 
-    const paypalOrderId = event.resource.supplementary_data?.related_ids?.order_id;
-    const customerEmail = event.resource.payer.email_address;
-    const customerName = event.resource.payer.name?.given_name + ' ' + event.resource.payer.name?.surname;
-    const amount = parseFloat(event.resource.amount.value);
-    const currency = event.resource.amount.currency_code;
-    const productId = event.resource.custom_id; // Set in PayPal Button
+    // Extract data with safe navigation
+    const paypalOrderId = event.resource?.supplementary_data?.related_ids?.order_id || event.resource?.id;
+    const customerEmail = event.resource?.payer?.email_address || event.resource?.payee?.email_address;
+    const customerName = (event.resource?.payer?.name?.given_name || 'Customer') + ' ' + (event.resource?.payer?.name?.surname || '');
+    const amount = parseFloat(event.resource?.amount?.value || '0');
+    const currency = event.resource?.amount?.currency_code || 'EUR';
+    const productId = event.resource?.custom_id || event.resource?.purchase_units?.[0]?.custom_id;
+    
+    // Validation
+    if (!customerEmail) {
+      console.error('❌ No customer email found in webhook');
+      return res.status(400).send('Missing customer email');
+    }
+    
+    if (!productId) {
+      console.error('❌ No product ID (custom_id) found in webhook');
+      return res.status(400).send('Missing product ID');
+    }
     
     // 3. Check for duplicate processing
     const existingPurchase = await prisma.purchase.findUnique({
