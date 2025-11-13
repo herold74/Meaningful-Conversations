@@ -14,7 +14,7 @@ const PRODUCT_MAPPING = {
 };
 
 // POST /api/purchase/webhook
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', express.json(), async (req, res) => {
   try {
     // 1. Verify PayPal Webhook Signature
     if (!verifyPayPalSignature(req)) {
@@ -22,7 +22,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       return res.status(401).send('Unauthorized');
     }
 
-    const event = JSON.parse(req.body);
+    const event = req.body;
     
     // 2. Handle only PAYMENT.CAPTURE.COMPLETED events
     if (event.event_type !== 'PAYMENT.CAPTURE.COMPLETED') {
