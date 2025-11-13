@@ -121,9 +121,20 @@ router.post('/login', async (req, res) => {
              return res.status(403).json({ error: 'Your account is currently inactive.' });
         }
 
+        // Check if Beta Tester status should be revoked due to expired access
+        const now = new Date();
+        if (user.isBetaTester && user.accessExpiresAt && new Date(user.accessExpiresAt) < now) {
+            // Beta tester with expired access pass -> revoke premium status
+            user.isBetaTester = false;
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { isBetaTester: false },
+            });
+            console.log(`🔒 Revoked beta tester status for user ${user.email} due to expired access`);
+        }
+
         // Access Pass Check (for non-admins/beta testers)
         if (!user.isAdmin && !user.isBetaTester) {
-            const now = new Date();
             if (!user.accessExpiresAt || new Date(user.accessExpiresAt) < now) {
                 return res.status(403).json({ error: 'Your access pass has expired.', errorCode: 'ACCESS_EXPIRED' });
             }
