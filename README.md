@@ -12,7 +12,7 @@ According to the rules and regulations of AI Studio this project is licensed und
 
 ## ✨ Core Features
 
-*   **Multiple AI Coaches**: Engage with a variety of AI coaches, each with a unique style (e.g., Stoic, CBT, Strategic Thinking).
+*   **Multiple AI Coaches**: Engage with a variety of AI coaches, each with a unique style (e.g., Stoic, Reflective, Strategic Thinking).
 *   **Persistent Memory**: Utilize a "Life Context" file (`.md`) that acts as the AI's long-term memory, enabling continuous and personalized conversations over time.
 *   **Automated Context Updates**: At the end of each session, the AI analyzes the conversation and proposes updates to your Life Context file, helping you track insights and progress.
 *   **Voice & Text Chat**: Interact with your coach via text or a hands-free voice conversation mode.

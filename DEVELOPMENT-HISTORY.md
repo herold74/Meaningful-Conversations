@@ -47,7 +47,7 @@ git checkout v1.4.7
 **New Features:**
 - Multiple AI coaching personas:
   - Stoic Guide
-  - CBT Coach
+  - Reflection Coach
   - Strategic Thinker
 - Bot selection interface
 - Persona-specific system prompts
