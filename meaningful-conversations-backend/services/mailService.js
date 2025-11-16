@@ -191,8 +191,8 @@ const getProductName = (botId) => {
     'ACCESS_PASS_1M': { de: '1-Monats-Zugangspass', en: '1-Month Access Pass' },
     'ACCESS_PASS_3M': { de: '3-Monats-Zugangspass', en: '3-Month Access Pass' },
     'ACCESS_PASS_1Y': { de: '1-Jahres-Zugangspass', en: '1-Year Access Pass' },
-    'kenji-adhd': { de: 'Kenji - ADHD Coach', en: 'Kenji - ADHD Coach' },
-    'chloe-cbt': { de: 'Chloe - CBT Coach', en: 'Chloe - CBT Coach' }
+    'kenji-adhd': { de: 'Kenji - Stoischer Coach', en: 'Kenji - Stoic Coach' },
+    'chloe-cbt': { de: 'Chloe - Reflektions-Coach', en: 'Chloe - Reflection Coach' }
   };
   return names[botId] || { de: botId, en: botId };
 };

@@ -110,7 +110,7 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 
 **Available Coaches:**
 - 🧘 **Stoic Guide** - Resilience and acceptance
-- 🧠 **CBT Coach** - Cognitive behavioral techniques
+- 🧠 **Reflection Coach** - Structured reflection techniques
 - ♟️ **Strategic Thinker** - Problem-solving and planning
 - 💭 **Socratic Questioner** - Deep inquiry
 - 🎭 **Compassionate Listener** - Empathy and validation

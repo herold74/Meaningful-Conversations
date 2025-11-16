@@ -32,8 +32,8 @@ Diese Product IDs müssen **exakt** in PayPal verwendet werden:
 | 1-Monats-Pass | `ACCESS_PASS_1M` | ACCESS_PASS_1M | 30 Tage Zugang |
 | 3-Monats-Pass | `ACCESS_PASS_3M` | ACCESS_PASS_3M | 90 Tage Zugang |
 | 1-Jahres-Pass | `ACCESS_PASS_1Y` | ACCESS_PASS_1Y | 365 Tage Zugang |
-| Kenji Coach | `KENJI_UNLOCK` | kenji-adhd | ADHD Coach freischalten |
-| Chloe Coach | `CHLOE_UNLOCK` | chloe-cbt | CBT Coach freischalten |
+| Kenji Coach | `KENJI_UNLOCK` | kenji-adhd | Stoischer Coach freischalten |
+| Chloe Coach | `CHLOE_UNLOCK` | chloe-cbt | Reflektions-Coach freischalten |
 
 ---
 
