@@ -14,7 +14,7 @@ A gamification feature where users earn badges for reaching milestones like comp
 A secure dashboard for administrators to manage users (activate, toggle roles), generate and view upgrade codes, and review support tickets and user feedback.
 
 ### AI Coach Selection
-Allows users to choose from a variety of AI coaches, each with a distinct personality, coaching style (e.g., Stoic, CBT), and access tier.
+Allows users to choose from a variety of AI coaches, each with a distinct personality, coaching style (e.g., Stoic, Reflective, Strategic), and access tier.
 
 ### Authentication
 A complete system for user registration, login, and secure session management. Includes email verification for new accounts and password reset functionality.

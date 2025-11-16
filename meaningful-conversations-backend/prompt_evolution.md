@@ -13,7 +13,7 @@ Hier sind die wichtigsten Unterschiede im Detail:
     *   **Originalversion:** Enthielt zwar allgemeine Hinweise zum Ton ("empathisch", "unterstützend"), aber nicht diese spezifische negative Einschränkung, was zu robotischer klingenden Antworten führen konnte.
 
 3.  **Klarere Struktur und Methodik vs. lange Frage-Listen**
-    *   **Aktuelle Version:** Die Prompts sind kürzer und konzentrieren sich auf die Kernprinzipien und den Ablauf der jeweiligen Coaching-Methode (z.B. "Core CBT Principles", "Coaching Flow" für PQ).
+    *   **Aktuelle Version:** Die Prompts sind kürzer und konzentrieren sich auf die Kernprinzipien und den Ablauf der jeweiligen Coaching-Methode (z.B. "Core Coaching Principles", "Coaching Flow").
     *   **Originalversion:** Die Prompts waren viel länger und enthielten ausufernde "Question Banks" (Fragenkataloge). Diese wurden entfernt, um der KI mehr Flexibilität zu geben, wie sie die Prinzipien anwendet, anstatt sie an eine starre Liste von Beispielfragen zu binden.
 
 4.  **Umgang mit Fragen zu menschlichen Coaches**
