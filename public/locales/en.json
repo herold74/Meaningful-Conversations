@@ -566,5 +566,11 @@
   "calendar_export_success": "Calendar event created. Open the downloaded .ics file with your calendar app.",
   "calendar_export_success_multiple": "{{count}} calendar events created. Open the downloaded .ics files with your calendar app.",
   "calendar_export_error": "Could not create calendar event: {{error}}",
-  "calendar_event_description": "Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current."
+  "calendar_event_description": "Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current.",
+
+  "datePicker_title": "Select Date for Reminder",
+  "datePicker_action": "Action",
+  "datePicker_selectDate": "Select Date",
+  "datePicker_cancel": "Cancel",
+  "datePicker_confirm": "Confirm"
 }

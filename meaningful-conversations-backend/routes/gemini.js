@@ -181,8 +181,11 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
     const analysisPromptConfig = lang === 'de' ? analysisPrompts.de : analysisPrompts.en;
     const conversation = history.map(msg => `${msg.role === 'user' ? 'User' : 'Coach'}: ${msg.text}`).join('\n\n');
+    
+    // Get current date in ISO format for deadline generation
+    const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang });
+    const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang, currentDate });
     const startTime = Date.now();
     const modelName = 'gemini-2.5-pro';
     const userId = req.userId;

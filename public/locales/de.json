@@ -566,5 +566,11 @@
   "calendar_export_success": "Kalenderereignis erstellt. Öffnen Sie die heruntergeladene .ics-Datei mit Ihrer Kalender-App.",
   "calendar_export_success_multiple": "{{count}} Kalenderereignisse erstellt. Öffnen Sie die heruntergeladenen .ics-Dateien mit Ihrer Kalender-App.",
   "calendar_export_error": "Kalenderereignis konnte nicht erstellt werden: {{error}}",
-  "calendar_event_description": "Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten."
+  "calendar_event_description": "Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten.",
+
+  "datePicker_title": "Datum für Erinnerung auswählen",
+  "datePicker_action": "Aktion",
+  "datePicker_selectDate": "Datum auswählen",
+  "datePicker_cancel": "Abbrechen",
+  "datePicker_confirm": "Bestätigen"
 }
