@@ -13,6 +13,8 @@ import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline } from '../utils/contextUpdater';
 import { WarningIcon } from './icons/WarningIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
+import { CalendarIcon } from './icons/CalendarIcon';
+import { exportSingleEvent, exportAllEvents } from '../utils/calendarExport';
 
 
 const removeGamificationKey = (text: string) => {
@@ -88,6 +90,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
     const [isSaving, setIsSaving] = useState(false);
+    const [calendarExportStatus, setCalendarExportStatus] = useState<string | null>(null);
 
 
     const handleRatingClick = (starValue: number) => {
@@ -127,6 +130,35 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const handleFeedbackSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         submitRating(rating, feedbackText);
+    };
+
+    const handleExportSingleStep = async (action: string, deadline: string) => {
+        const result = await exportSingleEvent(action, deadline, language);
+        if (result.success) {
+            setCalendarExportStatus(t('calendar_export_success'));
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        } else {
+            setCalendarExportStatus(t('calendar_export_error', { error: result.error || 'Unknown error' }));
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        }
+    };
+
+    const handleExportAllSteps = async () => {
+        if (nextSteps.length === 0) return;
+        
+        const result = await exportAllEvents(nextSteps, language);
+        if (result.success) {
+            if (result.count === 1) {
+                setCalendarExportStatus(t('calendar_export_success'));
+            } else {
+                setCalendarExportStatus(t('calendar_export_success_multiple', { count: result.count }));
+            }
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        } else {
+            const errorMsg = result.errors.length > 0 ? result.errors[0] : 'Unknown error';
+            setCalendarExportStatus(t('calendar_export_error', { error: errorMsg }));
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        }
     };
 
     const existingHeadlines: HeadlineOption[] = useMemo(() => {
@@ -494,9 +526,35 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 
                 {!isInterviewReview && nextSteps && nextSteps.length > 0 && (
                     <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
-                        <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
-                        <ul className="mt-3 text-content-secondary dark:text-content-secondary space-y-2 list-disc list-inside">
-                            {nextSteps.map((step, index) => ( <li key={index}> <strong>{step.action}</strong> (Deadline: {step.deadline}) </li> ))}
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
+                            <button
+                                onClick={handleExportAllSteps}
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm text-accent-primary dark:text-accent-secondary hover:bg-accent-primary/10 dark:hover:bg-accent-secondary/10 rounded-md transition-colors"
+                                title={t('calendar_export_all')}
+                            >
+                                <CalendarIcon className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t('calendar_export_all')}</span>
+                            </button>
+                        </div>
+                        {calendarExportStatus && (
+                            <div className="mb-3 p-2 text-sm bg-accent-primary/10 dark:bg-accent-secondary/10 text-content-primary dark:text-content-primary rounded-md">
+                                {calendarExportStatus}
+                            </div>
+                        )}
+                        <ul className="text-content-secondary dark:text-content-secondary space-y-2 list-none">
+                            {nextSteps.map((step, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                    <button
+                                        onClick={() => handleExportSingleStep(step.action, step.deadline)}
+                                        className="flex-shrink-0 mt-0.5 p-1 text-accent-primary dark:text-accent-secondary hover:bg-accent-primary/10 dark:hover:bg-accent-secondary/10 rounded transition-colors"
+                                        title={t('calendar_export_single')}
+                                    >
+                                        <CalendarIcon className="w-4 h-4" />
+                                    </button>
+                                    <span><strong>{step.action}</strong> (Deadline: {step.deadline})</span>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                 )}

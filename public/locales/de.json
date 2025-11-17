@@ -559,5 +559,12 @@
   "scenario_interview_chathistory_bot": "Hallo, um zu beginnen, mit welchem Namen soll ich Sie im Gespräch ansprechen?",
   "scenario_interview_chathistory_user": "Sie können mich Alex nennen.",
   "scenario_interview_chathistory_bot2": "Danke, Alex. Könnten Sie mir zu Beginn etwas über Ihre Grundwerte erzählen?",
-  "scenario_interview_chathistory_user2": "Ich würde sagen, meine Hauptwerte sind Integrität und kontinuierliches persönliches Wachstum."
+  "scenario_interview_chathistory_user2": "Ich würde sagen, meine Hauptwerte sind Integrität und kontinuierliches persönliches Wachstum.",
+
+  "calendar_export_single": "Zum Kalender hinzufügen",
+  "calendar_export_all": "Alle in Kalender exportieren",
+  "calendar_export_success": "Kalenderereignis erstellt. Öffnen Sie die heruntergeladene .ics-Datei mit Ihrer Kalender-App.",
+  "calendar_export_success_multiple": "{{count}} Kalenderereignisse erstellt. Öffnen Sie die heruntergeladenen .ics-Dateien mit Ihrer Kalender-App.",
+  "calendar_export_error": "Kalenderereignis konnte nicht erstellt werden: {{error}}",
+  "calendar_event_description": "Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten."
 }
