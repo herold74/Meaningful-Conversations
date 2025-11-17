@@ -145,3 +145,9 @@ export interface Feedback {
     user: { email: string } | null;
     guestEmail?: string | null;
 }
+
+export interface CalendarEvent {
+    action: string;
+    deadline: string;
+    description?: string;
+}
