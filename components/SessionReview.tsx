@@ -14,7 +14,8 @@ import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, Headli
 import { WarningIcon } from './icons/WarningIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
 import { CalendarIcon } from './icons/CalendarIcon';
-import { exportSingleEvent, exportAllEvents } from '../utils/calendarExport';
+import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '../utils/calendarExport';
+import DatePickerModal from './DatePickerModal';
 
 
 const removeGamificationKey = (text: string) => {
@@ -91,6 +92,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
     const [isSaving, setIsSaving] = useState(false);
     const [calendarExportStatus, setCalendarExportStatus] = useState<string | null>(null);
+    const [datePickerModal, setDatePickerModal] = useState<{ isOpen: boolean; action: string; deadline: string } | null>(null);
 
 
     const handleRatingClick = (starValue: number) => {
@@ -137,10 +139,32 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         if (result.success) {
             setCalendarExportStatus(t('calendar_export_success'));
             setTimeout(() => setCalendarExportStatus(null), 5000);
+        } else if (result.needsManualInput) {
+            // Open date picker modal for manual date selection
+            setDatePickerModal({ isOpen: true, action, deadline });
         } else {
             setCalendarExportStatus(t('calendar_export_error', { error: result.error || 'Unknown error' }));
             setTimeout(() => setCalendarExportStatus(null), 5000);
         }
+    };
+
+    const handleDatePickerConfirm = async (date: Date) => {
+        if (!datePickerModal) return;
+        
+        setDatePickerModal(null);
+        const result = await exportSingleEventWithDate(datePickerModal.action, date, language);
+        
+        if (result.success) {
+            setCalendarExportStatus(t('calendar_export_success'));
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        } else {
+            setCalendarExportStatus(t('calendar_export_error', { error: result.error || 'Unknown error' }));
+            setTimeout(() => setCalendarExportStatus(null), 5000);
+        }
+    };
+
+    const handleDatePickerCancel = () => {
+        setDatePickerModal(null);
     };
 
     const handleExportAllSteps = async () => {
@@ -727,6 +751,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     </button>
                 </div>
             </div>
+
+            {/* Date Picker Modal for manual date selection */}
+            {datePickerModal && (
+                <DatePickerModal
+                    isOpen={datePickerModal.isOpen}
+                    action={datePickerModal.action}
+                    suggestedDate={null}
+                    onConfirm={handleDatePickerConfirm}
+                    onCancel={handleDatePickerCancel}
+                />
+            )}
         </div>
     );
 };
