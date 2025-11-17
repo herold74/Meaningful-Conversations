@@ -55,8 +55,9 @@ const analysisSchema = {
                 type: 'OBJECT',
                 properties: {
                     blockage: { 
-                        type: 'STRING', 
-                        description: 'The name of the blockage (e.g., "Self-Reproach", "Blaming Others", "Expectational Attitudes", "Age Regression", "Dysfunctional Loyalties").' 
+                        type: 'STRING',
+                        enum: ['Self-Reproach', 'Blaming Others', 'Expectational Attitudes', 'Age Regression', 'Dysfunctional Loyalties'],
+                        description: 'CRITICAL: ONLY use one of these exact 5 PEP blockage types. Do not use any other frameworks like Positive Intelligence (no Hyper-Achiever, Avoider, Judge, etc.).' 
                     },
                     explanation: { 
                         type: 'STRING', 
@@ -107,6 +108,7 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
     - The content for the 'summary' and 'solutionBlockages' fields MUST be written in English.
     - CRITICAL: The 'content' for each item in the 'updates' array MUST be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
     - CRITICAL: The content for the 'nextSteps' array MUST ALSO be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
+10. **CRITICAL: PEP Framework Only:** You MUST ONLY identify blockages from the 5 PEP categories listed in the schema: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression, or Dysfunctional Loyalties. DO NOT use concepts from Positive Intelligence (e.g., Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) or any other psychological framework. If the conversation does not clearly demonstrate one of the 5 PEP blockages, return an empty array for solutionBlockages.
 
 ## Life Context
 \`\`\`markdown
@@ -143,6 +145,7 @@ Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung ü
     - Der Inhalt für die Felder 'summary' und 'solutionBlockages' MUSS auf Deutsch verfasst sein.
     - KRITISCH: Der 'content' für jeden Eintrag im 'updates'-Array MUSS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
     - KRITISCH: Der Inhalt für das 'nextSteps'-Array MUSS EBENFALLS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
+10. **KRITISCH: Nur PEP-Framework:** Sie MÜSSEN Blockaden NUR aus den 5 PEP-Kategorien identifizieren, die im Schema aufgeführt sind: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression oder Dysfunctional Loyalties. Verwenden Sie KEINE Konzepte aus Positive Intelligence (z. B. Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) oder einem anderen psychologischen Framework. Wenn das Gespräch keine der 5 PEP-Blockaden klar demonstriert, geben Sie ein leeres Array für solutionBlockages zurück.
 
 ## Lebenskontext
 \`\`\`markdown
