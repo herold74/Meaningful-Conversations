@@ -42,7 +42,7 @@ const analysisSchema = {
                     },
                     deadline: { 
                         type: 'STRING', 
-                        description: 'The deadline for the action (e.g., "by Friday", "this weekend", "in two weeks").' 
+                        description: 'The deadline for the action in ISO date format YYYY-MM-DD (e.g., "2025-11-20"). Calculate from the current date provided in the prompt.' 
                     }
                 },
                 required: ['action', 'deadline']
@@ -86,8 +86,10 @@ const analysisSchema = {
 const analysisPrompts = {
     schema: analysisSchema,
     en: {
-        prompt: ({ conversation, context, docLang }) => `
+        prompt: ({ conversation, context, docLang, currentDate }) => `
 You are an expert life coach reviewing a coaching session transcript. Your task is to analyze the conversation and provide a structured summary in JSON format.
+
+**Today's Date:** ${currentDate}
 
 ## Instructions:
 1.  **Analyze the Conversation:** Read the entire conversation between the Coach and the User.
@@ -109,6 +111,7 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
     - CRITICAL: The 'content' for each item in the 'updates' array MUST be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
     - CRITICAL: The content for the 'nextSteps' array MUST ALSO be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
 10. **CRITICAL: PEP Framework Only:** You MUST ONLY identify blockages from the 5 PEP categories listed in the schema: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression, or Dysfunctional Loyalties. DO NOT use concepts from Positive Intelligence (e.g., Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) or any other psychological framework. If the conversation does not clearly demonstrate one of the 5 PEP blockages, return an empty array for solutionBlockages.
+11. **CRITICAL: Deadline Format:** All deadlines in the 'nextSteps' array MUST be in ISO date format (YYYY-MM-DD). Use today's date (${currentDate}) as reference. Examples: "2025-11-20" for a specific date, or calculate relative dates (e.g., if today is 2025-11-17 and user says "by Wednesday", calculate the actual date). NEVER use natural language like "by Friday" or "next week".
 
 ## Life Context
 \`\`\`markdown
@@ -123,8 +126,10 @@ ${conversation}
 Now, provide your analysis as a JSON object.`
     },
     de: {
-        prompt: ({ conversation, context, docLang }) => `
+        prompt: ({ conversation, context, docLang, currentDate }) => `
 Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung überprüft. Ihre Aufgabe ist es, das Gespräch zu analysieren und eine strukturierte Zusammenfassung im JSON-Format bereitzustellen.
+
+**Heutiges Datum:** ${currentDate}
 
 ## Anweisungen:
 1.  **Gespräch analysieren:** Lesen Sie das gesamte Gespräch zwischen dem Coach und dem Benutzer.
@@ -146,6 +151,7 @@ Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung ü
     - KRITISCH: Der 'content' für jeden Eintrag im 'updates'-Array MUSS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
     - KRITISCH: Der Inhalt für das 'nextSteps'-Array MUSS EBENFALLS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
 10. **KRITISCH: Nur PEP-Framework:** Sie MÜSSEN Blockaden NUR aus den 5 PEP-Kategorien identifizieren, die im Schema aufgeführt sind: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression oder Dysfunctional Loyalties. Verwenden Sie KEINE Konzepte aus Positive Intelligence (z. B. Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) oder einem anderen psychologischen Framework. Wenn das Gespräch keine der 5 PEP-Blockaden klar demonstriert, geben Sie ein leeres Array für solutionBlockages zurück.
+11. **KRITISCH: Datumsformat für Fristen:** Alle Fristen im 'nextSteps'-Array MÜSSEN im ISO-Datumsformat (YYYY-MM-DD) sein. Verwenden Sie das heutige Datum (${currentDate}) als Referenz. Beispiele: "2025-11-20" für ein bestimmtes Datum, oder berechnen Sie relative Daten (z. B. wenn heute der 2025-11-17 ist und der Benutzer sagt "bis Mittwoch", berechnen Sie das tatsächliche Datum). Verwenden Sie NIEMALS natürliche Sprache wie "bis Freitag" oder "nächste Woche".
 
 ## Lebenskontext
 \`\`\`markdown

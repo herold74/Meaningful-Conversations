@@ -1,4 +1,5 @@
 import { createEvent, EventAttributes } from 'ics';
+import { parseDeadline as parseDeadlineUtil } from './dateParser';
 
 export interface CalendarEvent {
   action: string;
@@ -6,41 +7,29 @@ export interface CalendarEvent {
   description?: string;
 }
 
+export interface ParsedDeadlineResult {
+  success: boolean;
+  date: Date | null;
+  originalDeadline: string;
+  needsManualInput: boolean;
+}
+
 /**
- * Parse deadline string from Life Context format
- * Supports formats:
- * - "Deadline: YYYY-MM-DD"
- * - "bis: DD.MM.YYYY" (German)
- * - "YYYY-MM-DD"
- * - "DD.MM.YYYY"
+ * Parse deadline string using the enhanced date parser
+ * Returns detailed information about parsing success
  */
-const parseDeadline = (deadlineStr: string): Date | null => {
+const parseDeadline = (deadlineStr: string): ParsedDeadlineResult => {
   // Remove common prefixes
   let cleaned = deadlineStr.replace(/^(Deadline:|bis:)\s*/i, '').trim();
   
-  // Try ISO format first (YYYY-MM-DD)
-  const isoMatch = cleaned.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (isoMatch) {
-    const [, year, month, day] = isoMatch;
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  }
+  const parsedDate = parseDeadlineUtil(cleaned);
   
-  // Try European format (DD.MM.YYYY)
-  const euroMatch = cleaned.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (euroMatch) {
-    const [, day, month, year] = euroMatch;
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  }
-  
-  // Try slash format (MM/DD/YYYY or DD/MM/YYYY)
-  const slashMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (slashMatch) {
-    const [, first, second, year] = slashMatch;
-    // Assume DD/MM/YYYY format (European)
-    return new Date(parseInt(year), parseInt(second) - 1, parseInt(first));
-  }
-  
-  return null;
+  return {
+    success: parsedDate !== null,
+    date: parsedDate,
+    originalDeadline: deadlineStr,
+    needsManualInput: parsedDate === null
+  };
 };
 
 /**
@@ -55,17 +44,17 @@ const generateSlug = (action: string): string => {
 };
 
 /**
- * Generate ICS calendar event for a single next step
+ * Generate ICS calendar event for a single next step with explicit date
  */
-export const generateCalendarEvent = (
-  event: CalendarEvent,
-  language: 'en' | 'de' = 'en'
+export const generateCalendarEventWithDate = (
+  action: string,
+  deadline: Date,
+  language: 'en' | 'de' = 'en',
+  description?: string
 ): Promise<{ error?: string; value?: string; filename?: string }> => {
   return new Promise((resolve) => {
-    const deadline = parseDeadline(event.deadline);
-    
     if (!deadline || isNaN(deadline.getTime())) {
-      resolve({ error: `Invalid deadline format: ${event.deadline}` });
+      resolve({ error: 'Invalid date provided' });
       return;
     }
     
@@ -73,7 +62,7 @@ export const generateCalendarEvent = (
       ? 'Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten.'
       : 'Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current.';
     
-    const description = event.description || reminderText;
+    const eventDescription = description || reminderText;
     
     // Set event to 9:00 AM on the deadline day
     const eventStart: [number, number, number, number, number] = [
@@ -87,14 +76,14 @@ export const generateCalendarEvent = (
     const eventAttributes: EventAttributes = {
       start: eventStart,
       duration: { minutes: 30 },
-      title: event.action,
-      description: description,
+      title: action,
+      description: eventDescription,
       status: 'CONFIRMED',
       busyStatus: 'FREE',
       alarms: [
         {
           action: 'display',
-          description: event.action,
+          description: action,
           trigger: { hours: 24, before: true } // 1 day before
         }
       ]
@@ -106,9 +95,44 @@ export const generateCalendarEvent = (
         return;
       }
       
-      const filename = `meaningful-conversations-${generateSlug(event.action)}.ics`;
+      const filename = `meaningful-conversations-${generateSlug(action)}.ics`;
       resolve({ value, filename });
     });
+  });
+};
+
+/**
+ * Generate ICS calendar event for a single next step
+ * Returns parsing info if date cannot be parsed
+ */
+export const generateCalendarEvent = (
+  event: CalendarEvent,
+  language: 'en' | 'de' = 'en'
+): Promise<{ error?: string; value?: string; filename?: string; needsManualInput?: boolean }> => {
+  return new Promise(async (resolve) => {
+    const parseResult = parseDeadline(event.deadline);
+    
+    if (parseResult.needsManualInput) {
+      resolve({ 
+        error: `Could not parse deadline: ${event.deadline}`,
+        needsManualInput: true
+      });
+      return;
+    }
+    
+    if (!parseResult.date) {
+      resolve({ error: 'Failed to parse deadline' });
+      return;
+    }
+    
+    const result = await generateCalendarEventWithDate(
+      event.action,
+      parseResult.date,
+      language,
+      event.description
+    );
+    
+    resolve(result);
   });
 };
 
@@ -128,13 +152,36 @@ export const downloadICSFile = (content: string, filename: string): void => {
 
 /**
  * Export a single next step as calendar event
+ * Returns needsManualInput if date parsing fails
  */
 export const exportSingleEvent = async (
   action: string,
   deadline: string,
   language: 'en' | 'de' = 'en'
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean; error?: string; needsManualInput?: boolean }> => {
   const result = await generateCalendarEvent({ action, deadline }, language);
+  
+  if (result.needsManualInput) {
+    return { success: false, needsManualInput: true };
+  }
+  
+  if (result.error || !result.value || !result.filename) {
+    return { success: false, error: result.error || 'Failed to generate calendar event' };
+  }
+  
+  downloadICSFile(result.value, result.filename);
+  return { success: true };
+};
+
+/**
+ * Export a single next step with manually selected date
+ */
+export const exportSingleEventWithDate = async (
+  action: string,
+  deadline: Date,
+  language: 'en' | 'de' = 'en'
+): Promise<{ success: boolean; error?: string }> => {
+  const result = await generateCalendarEventWithDate(action, deadline, language);
   
   if (result.error || !result.value || !result.filename) {
     return { success: false, error: result.error || 'Failed to generate calendar event' };
