@@ -559,5 +559,12 @@
   "scenario_interview_chathistory_bot": "Hello, to start, what name should I call you during our conversation?",
   "scenario_interview_chathistory_user": "You can call me Alex.",
   "scenario_interview_chathistory_bot2": "Thank you, Alex. To begin, could you tell me a little about your core values?",
-  "scenario_interview_chathistory_user2": "I would say my main values are integrity and continuous personal growth."
+  "scenario_interview_chathistory_user2": "I would say my main values are integrity and continuous personal growth.",
+
+  "calendar_export_single": "Add to Calendar",
+  "calendar_export_all": "Export All to Calendar",
+  "calendar_export_success": "Calendar event created. Open the downloaded .ics file with your calendar app.",
+  "calendar_export_success_multiple": "{{count}} calendar events created. Open the downloaded .ics files with your calendar app.",
+  "calendar_export_error": "Could not create calendar event: {{error}}",
+  "calendar_event_description": "Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current."
 }
