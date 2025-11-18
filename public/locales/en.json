@@ -155,6 +155,7 @@
   "botSelection_guestMessage": "To unlock more coaches, please register for an account.",
   "botSelection_registeredMessage": "Unlock premium coaches by redeeming an upgrade code in the menu.",
   "botSelection_goBack": "Go Back",
+  "botSelection_meditationBadge": "Guided meditation support",
   
   "guest_limit_warning": "You have reached your weekly limit of 50 messages. Register for unlimited access.",
   "guest_limit_remaining": "Remaining messages this week: {{remaining}}/50",

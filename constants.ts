@@ -39,7 +39,7 @@ export const BOTS: Bot[] = [
         avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kimberly&baseColor=f9c9b6&backgroundColor=ffdfbf&mouth=smirk',
         style: 'Composed, Philosophical, Wise',
         style_de: 'Besonnen, Philosophisch, Weise',
-        accessTier: 'guest',
+        accessTier: 'premium',
     },
     {
         id: 'chloe-cbt',
@@ -49,7 +49,7 @@ export const BOTS: Bot[] = [
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Chloe&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smile,smirk&shirtColor=ffffff',
         style: 'Reflective, Structured, Evidence-Based',
         style_de: 'Reflektierend, Strukturiert, Evidenzbasiert',
-        accessTier: 'registered',
+        accessTier: 'premium',
     },
     {
         id: 'rob-pq',
@@ -69,6 +69,6 @@ export const BOTS: Bot[] = [
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Alex&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smirk&shirtColor=ffffff',
         style: 'GPS Framework, Inquisitive, Empowering',
         style_de: 'GPS-Framework, Neugierig, Befähigend',
-        accessTier: 'premium',
+        accessTier: 'guest',
     }
 ];

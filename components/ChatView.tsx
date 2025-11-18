@@ -357,7 +357,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, [isVoiceMode]);
 
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, isMeditation: boolean = false) => {
     if (!isTtsEnabled || !text.trim() || !window.speechSynthesis) return;
     
     const cleanText = text
@@ -414,6 +414,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
         
         finalVoice = selectVoice(voices, language, gender);
+    }
+
+    // Apply slower speech rate for meditation (Rob and Kenji)
+    if (isMeditation && (bot.id === 'rob-pq' || bot.id === 'kenji-stoic')) {
+        utterance.rate = 0.9;
     }
 
     if (finalVoice) {
@@ -658,8 +663,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         // If meditation detected, handle it
         if (meditationData.hasMeditation) {
-          // Speak only the intro text
-          speak(meditationData.introText);
+          // Speak only the intro text with meditation mode for slower speech
+          speak(meditationData.introText, true);
           
           // Auto-switch to voice mode if not already
           const wasInTextMode = !isVoiceMode;
