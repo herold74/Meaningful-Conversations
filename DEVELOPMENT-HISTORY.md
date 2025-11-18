@@ -151,12 +151,12 @@ git checkout v1.4.7
 
 ---
 
-### **v1.4.9 - Current (Post-Reset)** ✨
-**Branch:** `main` (current)
+### **v1.4.9 - Post-Reset Base** ✨
+**Branch:** `main` (historical)
 
 **Status:** Clean Git history starting November 6, 2024
 
-**Current Features:**
+**Features:**
 - ✅ All features from historical v1.4.9
 - ✅ **NEW: API Usage Tracking & Cost Monitoring**
   - Comprehensive admin dashboard
@@ -179,6 +179,46 @@ git checkout v1.4.7
 - API-USAGE-TRACKING.md - Technical documentation
 - SCREENSHOT-QUICK-REFERENCE.md - Visual documentation guide
 - Organized DOCUMENTATION/ directory structure
+
+---
+
+### **v1.5.x - Enhanced Features**
+
+#### **v1.5.0 - v1.5.5**
+- Various bug fixes and improvements
+- UI/UX enhancements
+- Performance optimizations
+
+#### **v1.5.6 - Calendar Integration** 🗓️ ✨
+**Branch:** `main` (current)
+
+**Status:** Production-ready (November 2024)
+
+**New Features:**
+- ✅ **Calendar Export for Next Steps**
+  - Export individual action items as .ics calendar files
+  - Batch export all next steps at once
+  - Smart deadline parsing with fallback to manual date picker
+  - Compatible with all major calendar apps (Google Calendar, Outlook, Apple Calendar, etc.)
+  - Events created at 9:00 AM with 24-hour advance reminders
+  - Localized event descriptions (EN/DE)
+
+**Technical Implementation:**
+- `utils/calendarExport.ts` - ICS file generation using `ics` library
+- `utils/dateParser.ts` - Natural language deadline parsing
+- `components/DatePickerModal.tsx` - Fallback for unparseable dates
+- Comprehensive test coverage in `utils/__tests__/calendarExport.test.ts`
+
+**User Experience:**
+- Calendar icon buttons in Session Review screen
+- "Export All to Calendar" option for batch exports
+- Visual feedback with success/error messages
+- Seamless integration with existing next steps workflow
+
+**Documentation Updates:**
+- User Manual updated with calendar integration instructions (both EN/DE)
+- README.md updated with calendar feature description
+- DEVELOPMENT-HISTORY.md updated with v1.5.6 details
 
 ---
 

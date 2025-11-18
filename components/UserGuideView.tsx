@@ -81,6 +81,9 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
 - **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
 - **Bewerten Sie Ihre Sitzung:** Verwenden Sie die Sterne, um Feedback zu geben. Dies hilft uns, die Qualität der Coaches zu verbessern.
 - **Umsetzbare nächste Schritte:** Eine Liste konkreter Aufgaben, zu denen Sie sich während des Gesprächs verpflichtet haben.
+  - **Kalenderintegration:** **Klicken Sie auf das Kalender-Symbol** neben einem einzelnen Schritt, um ihn als .ics-Datei zu exportieren und in Ihre Kalender-App (Google Kalender, Outlook, Apple Kalender, etc.) zu importieren.
+  - **Alle exportieren:** **Klicken Sie auf "Alle in Kalender exportieren"**, um alle nächsten Schritte auf einmal zu exportieren.
+  - Die Kalendereinträge werden standardmäßig um 9:00 Uhr am Fälligkeitsdatum erstellt und enthalten eine Erinnerung 24 Stunden vorher.
 - **Vorgeschlagene Kontext-Aktualisierungen:** Die KI schlägt Änderungen an Ihrer Lebenskontext-Datei basierend auf dem Gespräch vor.
   - **Aktivieren/Deaktivieren:** Verwenden Sie die Kontrollkästchen, um auszuwählen, welche Änderungen Sie übernehmen möchten.
   - **Aktionstyp ändern:** Sie können ändern, ob ein Vorschlag an einen Abschnitt **angehängt** oder den gesamten Abschnitt **ersetzen** soll.
@@ -207,6 +210,9 @@ This is the most important screen for capturing your insights.
 - **New Findings:** An AI-generated summary of your key takeaways from the session.
 - **Rate Your Session:** Use the stars to provide feedback. This helps us improve coach quality.
 - **Actionable Next Steps:** A list of concrete tasks you committed to during the conversation.
+  - **Calendar Integration:** **Click the calendar icon** next to any individual step to export it as a .ics file and import it into your calendar app (Google Calendar, Outlook, Apple Calendar, etc.).
+  - **Export All:** **Click "Export All to Calendar"** to export all next steps at once.
+  - Calendar events are created by default at 9:00 AM on the deadline date and include a reminder 24 hours before.
 - **Proposed Context Updates:** The AI suggests changes to your Life Context file based on the conversation.
   - **Toggle:** Use the checkboxes to select which changes you want to apply.
   - **Change Action Type:** You can change whether a suggestion should **Append** to a section or **Replace** the entire section.
