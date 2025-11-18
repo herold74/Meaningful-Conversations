@@ -44,6 +44,17 @@ const generateSlug = (action: string): string => {
 };
 
 /**
+ * Truncate text to first 3 words, adding ellipsis if truncated
+ */
+const truncateToThreeWords = (text: string): string => {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= 3) {
+    return words.join(' ');
+  }
+  return words.slice(0, 3).join(' ') + '...';
+};
+
+/**
  * Generate ICS calendar event for a single next step with explicit date
  */
 export const generateCalendarEventWithDate = (
@@ -58,11 +69,15 @@ export const generateCalendarEventWithDate = (
       return;
     }
     
+    // Create shortened title (3 words max)
+    const shortTitle = truncateToThreeWords(action);
+    
     const reminderText = language === 'de'
       ? 'Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten.'
       : 'Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current.';
     
-    const eventDescription = description || reminderText;
+    // Build description with full action + reminder + app link
+    const eventDescription = `${action}\n\n${reminderText}\n\nhttps://mc-app.manualmode.at`;
     
     // Set event to 9:00 AM on the deadline day
     const eventStart: [number, number, number, number, number] = [
@@ -76,14 +91,14 @@ export const generateCalendarEventWithDate = (
     const eventAttributes: EventAttributes = {
       start: eventStart,
       duration: { minutes: 30 },
-      title: action,
+      title: shortTitle,
       description: eventDescription,
       status: 'CONFIRMED',
       busyStatus: 'FREE',
       alarms: [
         {
           action: 'display',
-          description: action,
+          description: shortTitle,
           trigger: { hours: 24, before: true } // 1 day before
         }
       ]
