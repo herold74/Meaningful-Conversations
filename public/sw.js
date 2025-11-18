@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meaningful-conversations-cache-v1.5.6-calendar-integration';
+const CACHE_NAME = 'meaningful-conversations-cache-v1.5.7-meditation-indicators';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
