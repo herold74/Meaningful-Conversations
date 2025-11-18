@@ -3,6 +3,7 @@ import { Bot, BotWithAvailability, User, BotAccessTier, Language } from '../type
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
+import { MeditationIcon } from './icons/MeditationIcon';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
@@ -18,7 +19,10 @@ interface BotCardProps {
 }
 
 const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
+    const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
+    const hasMeditation = bot.id === 'rob-pq' || bot.id === 'kenji-stoic';
+    
     return (
       <div
         onClick={() => !isLocked && onSelect(bot)}
@@ -41,6 +45,14 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
             {isLocked && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
                     <LockIcon className="w-8 h-8 text-white" />
+                </div>
+            )}
+            {hasMeditation && (
+                <div 
+                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent-primary flex items-center justify-center shadow-md"
+                    title={t('botSelection_meditationBadge')}
+                >
+                    <MeditationIcon className="w-4 h-4 text-button-foreground-on-accent" />
                 </div>
             )}
         </div>

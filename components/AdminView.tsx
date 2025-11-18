@@ -215,7 +215,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const testScenarios = useMemo(() => getTestScenarios(t), [t]);
 
     const botsForCodes = useMemo(() => {
-        return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'chloe-cbt');
+        return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'nexus-gps');
     }, []);
 
     const [newCodeBotId, setNewCodeBotId] = useState('ACCESS_PASS_1M');
