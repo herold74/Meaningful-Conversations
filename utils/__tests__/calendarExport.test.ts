@@ -66,15 +66,16 @@ describe('calendarExport', () => {
       expect(result.error).toContain('Invalid date');
     });
 
-    test('handles custom description', async () => {
-      const action = 'Team meeting';
+    test('includes full action in description and app link', async () => {
+      const action = 'Team meeting to discuss Q4 goals';
       const deadline = new Date(2025, 10, 20);
-      const customDescription = 'Discuss Q4 goals';
       
-      const result = await generateCalendarEventWithDate(action, deadline, 'en', customDescription);
+      const result = await generateCalendarEventWithDate(action, deadline, 'en');
       
       expect(result.error).toBeUndefined();
-      expect(result.value).toContain(customDescription);
+      expect(result.value).toContain(action); // Full action in description
+      expect(result.value).toContain('https://mc-app.manualmode.at'); // App link
+      expect(result.value).toContain('SUMMARY:Team meeting to...'); // Shortened title
     });
 
     test('truncates long action names in filename', async () => {
@@ -85,6 +86,28 @@ describe('calendarExport', () => {
       
       expect(result.filename).toBeDefined();
       expect(result.filename!.length).toBeLessThan(100); // Reasonable filename length
+    });
+
+    test('truncates title to 3 words with ellipsis', async () => {
+      const action = 'Research and sign up for a local drawing class';
+      const deadline = new Date(2025, 10, 20);
+      
+      const result = await generateCalendarEventWithDate(action, deadline, 'en');
+      
+      expect(result.error).toBeUndefined();
+      expect(result.value).toContain('SUMMARY:Research and sign...'); // Truncated to 3 words
+      expect(result.value).toContain(action); // Full action in description
+    });
+
+    test('does not add ellipsis when action is 3 words or less', async () => {
+      const action = 'Call doctor';
+      const deadline = new Date(2025, 10, 20);
+      
+      const result = await generateCalendarEventWithDate(action, deadline, 'en');
+      
+      expect(result.error).toBeUndefined();
+      expect(result.value).toContain('SUMMARY:Call doctor'); // No ellipsis
+      expect(result.value).not.toContain('...'); // No ellipsis anywhere in title
     });
   });
 
@@ -165,17 +188,17 @@ describe('calendarExport', () => {
       expect(result.needsManualInput).toBe(true);
     });
 
-    test('includes custom description in event', async () => {
+    test('includes action in description and app link', async () => {
       const event: CalendarEvent = {
-        action: 'Workshop',
-        deadline: '2025-11-20',
-        description: 'Bring laptop and notes'
+        action: 'Workshop on advanced topics',
+        deadline: '2025-11-20'
       };
       
       const result = await generateCalendarEvent(event, 'en');
       
       expect(result.error).toBeUndefined();
-      expect(result.value).toContain('Bring laptop and notes');
+      expect(result.value).toContain('Workshop on advanced topics'); // Full action in description
+      expect(result.value).toContain('https://mc-app.manualmode.at'); // App link
     });
   });
 
