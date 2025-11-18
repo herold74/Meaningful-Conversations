@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meaningful-conversations-cache-v1.5.4-guest-limits';
+const CACHE_NAME = 'meaningful-conversations-cache-v1.5.6-calendar-integration';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
