@@ -432,7 +432,7 @@ export const ApiUsageView: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {dailyUsage.map((day) => (
+                                {[...dailyUsage].reverse().map((day) => (
                                     <tr key={day.date} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                         <td className="p-3 font-medium text-content-primary">{day.date}</td>
                                         <td className="p-3 text-right text-content-secondary w-24">{formatNumber(day.calls)}</td>
