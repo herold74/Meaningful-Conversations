@@ -15,6 +15,7 @@ According to the rules and regulations of AI Studio this project is licensed und
 *   **Multiple AI Coaches**: Engage with a variety of AI coaches, each with a unique style (e.g., Stoic, Reflective, Strategic Thinking).
 *   **Persistent Memory**: Utilize a "Life Context" file (`.md`) that acts as the AI's long-term memory, enabling continuous and personalized conversations over time.
 *   **Automated Context Updates**: At the end of each session, the AI analyzes the conversation and proposes updates to your Life Context file, helping you track insights and progress.
+*   **Calendar Integration**: Export your actionable next steps as .ics calendar events that sync with Google Calendar, Outlook, Apple Calendar, and other calendar apps. Set reminders to keep track of your commitments.
 *   **Voice & Text Chat**: Interact with your coach via text or a hands-free voice conversation mode.
 *   **End-to-End Encryption**: For registered users, your Life Context file is end-to-end encrypted. Only you can decrypt it on your device with your password.
 *   **Gamification**: Stay motivated with a system of XP, levels, streaks, and achievements that reward regular self-reflection.
@@ -29,6 +30,7 @@ According to the rules and regulations of AI Studio this project is licensed und
     *   Tailwind CSS
     *   Web Speech API for voice features
     *   Web Crypto API for End-to-End Encryption (E2EE)
+    *   ICS library for calendar event generation
 *   **Backend**:
     *   Node.js & Express.js
     *   Prisma ORM with MySQL
