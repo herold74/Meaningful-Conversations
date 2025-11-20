@@ -168,6 +168,10 @@
   "guest_limit_exceeded_message": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten als Gast erreicht. Registrieren Sie sich für unbegrenzten Zugang zu allen Funktionen.",
   "guest_register_now": "Jetzt registrieren",
   
+  "update_available_title": "Update verfügbar!",
+  "update_available_desc": "Eine neue Version der App ist verfügbar.",
+  "update_now": "Aktualisieren",
+  
   "chat_welcome": "Hallo, ich bin {{botName}}. Was beschäftigt Sie heute?",
   "chat_placeholder": "Nachricht eingeben...",
   "chat_end_session": "Sitzung beenden",
@@ -268,6 +272,7 @@
   "menu_exit": "Beenden",
   "menu_login": "Anmelden / Registrieren",
   "menu_logout": "Abmelden",
+  "menu_refresh_app": "App aktualisieren",
   "menu_achievements": "Erfolge",
   "menu_admin": "Admin-Konsole",
   "menu_user_guide": "Benutzerhandbuch",
