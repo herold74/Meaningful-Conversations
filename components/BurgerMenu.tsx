@@ -14,7 +14,6 @@ import { CodeIcon } from './icons/CodeIcon';
 import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
-import { RepeatIcon } from './icons/RepeatIcon';
 
 interface BurgerMenuProps {
     isOpen: boolean;
