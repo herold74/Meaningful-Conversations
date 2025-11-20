@@ -65,12 +65,17 @@
 
   "forgotPassword_title": "Reset Password",
   "forgotPassword_subtitle": "Enter your email address to receive a password reset link.",
+  "forgotPassword_warning_title": "⚠️ Important Warning",
+  "forgotPassword_warning_text": "Password reset will delete all your stored life context data due to end-to-end encryption. If you still know your password, use the \"Change Password\" feature in the menu instead.",
   "forgotPassword_email_label": "Email",
   "forgotPassword_email_placeholder": "your@email.com",
   "forgotPassword_button": "Send Reset Link",
   "forgotPassword_back_to_login": "Back to Login",
   "forgotPassword_success": "If an account with this email exists, a password reset link has been sent.",
 
+  "resetPassword_title": "Set New Password",
+  "resetPassword_warning_title": "⚠️ Data Loss Due to Encryption",
+  "resetPassword_warning_text": "Due to end-to-end encryption, all your stored life context data will be deleted when you reset your password. You will start with an empty context.",
   "resetPassword_success_title": "Password Reset Successfully",
   "resetPassword_success_subtitle": "You can now log in with your new password.",
   

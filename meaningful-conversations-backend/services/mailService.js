@@ -325,9 +325,88 @@ const sendAdminNotification = async (customerEmail, customerName, code, botId, a
   return request;
 };
 
+const sendNewsletterEmail = async (email, subject, content, lang = 'de') => {
+    // content should contain: { textBody, htmlBody, unsubscribeToken }
+    
+    // Generate unsubscribe link
+    const unsubscribeUrl = content.unsubscribeToken 
+        ? `${FRONTEND_URL}?route=unsubscribe&token=${content.unsubscribeToken}`
+        : null;
+    
+    const unsubscribeTexts = {
+        de: '\n\n---\nSie möchten keine weiteren Newsletter erhalten? Klicken Sie hier zum Abmelden:\n',
+        en: '\n\n---\nDon\'t want to receive further newsletters? Click here to unsubscribe:\n'
+    };
+    
+    // Append unsubscribe link to text body
+    let finalTextBody = content.textBody;
+    if (unsubscribeUrl) {
+        finalTextBody += unsubscribeTexts[lang] || unsubscribeTexts['de'];
+        finalTextBody += unsubscribeUrl;
+    }
+    
+    // Append unsubscribe link to HTML body
+    let finalHtmlBody = content.htmlBody;
+    if (unsubscribeUrl) {
+        const unsubscribeHtml = lang === 'de' 
+            ? `<hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+               <p style="text-align: center; font-size: 12px; color: #6b7280;">
+                 Sie möchten keine weiteren Newsletter erhalten?<br>
+                 <a href="${unsubscribeUrl}" style="color: #1b7272; text-decoration: underline;">Hier klicken zum Abmelden</a>
+               </p>`
+            : `<hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+               <p style="text-align: center; font-size: 12px; color: #6b7280;">
+                 Don't want to receive further newsletters?<br>
+                 <a href="${unsubscribeUrl}" style="color: #1b7272; text-decoration: underline;">Click here to unsubscribe</a>
+               </p>`;
+        finalHtmlBody += unsubscribeHtml;
+    }
+    
+    if (!isProductionOrStaging) {
+        console.log('\n--- SIMULATED NEWSLETTER ---');
+        console.log(`To: ${email}`);
+        console.log(`Subject: ${subject}`);
+        console.log(`Body:\n${finalTextBody}`);
+        if (unsubscribeUrl) {
+            console.log(`Unsubscribe URL: ${unsubscribeUrl}`);
+        }
+        console.log('----------------------------\n');
+        return;
+    }
+
+    if (!mailjet) {
+        console.error('Mailjet client is not initialized. Cannot send newsletter.');
+        throw new Error('Email service is not configured.');
+    }
+
+    const request = mailjet
+        .post('send', { 'version': 'v3.1' })
+        .request({
+            'Messages': [
+                {
+                    'From': {
+                        'Email': SENDER_EMAIL,
+                        'Name': SENDER_NAME
+                    },
+                    'To': [
+                        {
+                            'Email': email
+                        }
+                    ],
+                    'Subject': subject,
+                    'TextPart': finalTextBody,
+                    'HTMLPart': finalHtmlBody
+                }
+            ]
+        });
+
+    return request;
+};
+
 module.exports = {
     sendConfirmationEmail,
     sendPasswordResetEmail,
     sendPurchaseEmail,
-    sendAdminNotification
+    sendAdminNotification,
+    sendNewsletterEmail
 };

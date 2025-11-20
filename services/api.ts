@@ -45,6 +45,12 @@ const getApiBaseUrl = (): string => {
         'mc-beta.manualmode.at': '',   // Staging: nginx proxies /api to backend pod
         'mc-app.manualmode.at': '',    // Production: nginx proxies /api to backend pod
         '91.99.193.87': '',            // Manualmode server: IP fallback
+        
+        // Local development - connect to local backend
+        'localhost:5173': 'http://localhost:3001',  // Vite dev server
+        'localhost:3000': 'http://localhost:3001',  // Alternative dev port
+        '127.0.0.1:5173': 'http://localhost:3001',
+        '127.0.0.1:3000': 'http://localhost:3001',
     };
     
     if (backendMap[hostnameWithPort]) {
@@ -52,7 +58,11 @@ const getApiBaseUrl = (): string => {
     }
 
     // 3. Fallback for localhost and any other unknown domains (e.g., custom deployments).
-    // This defaults to a relative path, assuming a reverse proxy is in place.
+    // For localhost without port or other unknown domains, use local backend
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:3001';
+    }
+    // For deployed environments, assume a reverse proxy is in place
     return '';
 };
 

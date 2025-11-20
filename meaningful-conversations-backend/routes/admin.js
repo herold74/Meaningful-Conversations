@@ -3,6 +3,7 @@ const prisma = require('../prismaClient.js');
 const adminAuth = require('../middleware/adminAuth.js');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { sendNewsletterEmail } = require('../services/mailService.js');
 
 const router = express.Router();
 
@@ -325,6 +326,161 @@ router.delete('/feedback/:id', async (req, res) => {
     } catch (error) {
         console.error("Admin: Error deleting feedback/report:", error);
         res.status(500).json({ error: 'Failed to delete feedback/report.' });
+    }
+});
+
+
+// --- Newsletter Management ---
+
+// GET /api/admin/newsletter-subscribers
+router.get('/newsletter-subscribers', async (req, res) => {
+    try {
+        const subscribers = await prisma.user.findMany({
+            where: {
+                newsletterConsent: true,
+                status: 'ACTIVE'  // Only active users
+            },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                newsletterConsentDate: true,
+                createdAt: true
+            },
+            orderBy: { newsletterConsentDate: 'desc' }
+        });
+        
+        res.json({ 
+            subscribers,
+            count: subscribers.length 
+        });
+    } catch (error) {
+        console.error("Admin: Error fetching newsletter subscribers:", error);
+        res.status(500).json({ error: 'Failed to fetch subscribers.' });
+    }
+});
+
+// GET /api/admin/newsletter-history
+router.get('/newsletter-history', async (req, res) => {
+    try {
+        const history = await prisma.newsletterLog.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 50 // Limit to last 50 sends
+        });
+        
+        res.json(history);
+    } catch (error) {
+        console.error("Admin: Error fetching newsletter history:", error);
+        res.status(500).json({ error: 'Failed to fetch newsletter history.' });
+    }
+});
+
+// POST /api/admin/send-newsletter
+router.post('/send-newsletter', async (req, res) => {
+    const { subjectDE, subjectEN, textBodyDE, textBodyEN, htmlBodyDE, htmlBodyEN } = req.body;
+    const adminId = req.userId;
+    
+    // Validation
+    if (!subjectDE || !subjectEN || !textBodyDE || !textBodyEN) {
+        return res.status(400).json({ error: 'All subject and text body fields are required.' });
+    }
+    
+    try {
+        // Get admin user info for logging
+        const adminUser = await prisma.user.findUnique({
+            where: { id: adminId },
+            select: { email: true }
+        });
+        
+        // Fetch all newsletter subscribers with language preference and unsubscribe token
+        const subscribers = await prisma.user.findMany({
+            where: {
+                newsletterConsent: true,
+                status: 'ACTIVE'
+            },
+            select: {
+                email: true,
+                preferredLanguage: true,
+                unsubscribeToken: true
+            }
+        });
+        
+        if (subscribers.length === 0) {
+            return res.json({ 
+                success: true, 
+                message: 'No subscribers found.',
+                sent: 0,
+                failed: 0,
+                total: 0
+            });
+        }
+        
+        const results = {
+            success: 0,
+            failed: 0,
+            errors: []
+        };
+        
+        // Send emails (sequentially to respect rate limits)
+        for (const subscriber of subscribers) {
+            try {
+                // Use user's preferred language
+                const lang = subscriber.preferredLanguage || 'de';
+                
+                const subject = lang === 'de' ? subjectDE : subjectEN;
+                const content = {
+                    textBody: lang === 'de' ? textBodyDE : textBodyEN,
+                    htmlBody: lang === 'de' ? (htmlBodyDE || textBodyDE) : (htmlBodyEN || textBodyEN),
+                    unsubscribeToken: subscriber.unsubscribeToken
+                };
+                
+                await sendNewsletterEmail(subscriber.email, subject, content, lang);
+                results.success++;
+                
+                // Small delay between emails to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+            } catch (emailError) {
+                console.error(`Failed to send to ${subscriber.email}:`, emailError);
+                results.failed++;
+                results.errors.push({
+                    email: subscriber.email,
+                    error: emailError.message
+                });
+            }
+        }
+        
+        // Log newsletter send to database
+        await prisma.newsletterLog.create({
+            data: {
+                subjectDE,
+                subjectEN,
+                textBodyDE,
+                textBodyEN,
+                htmlBodyDE: htmlBodyDE || null,
+                htmlBodyEN: htmlBodyEN || null,
+                sentBy: adminId,
+                sentByEmail: adminUser.email,
+                recipientCount: subscribers.length,
+                successCount: results.success,
+                failedCount: results.failed,
+                errors: results.errors.length > 0 ? results.errors : null
+            }
+        });
+        
+        res.json({
+            success: true,
+            message: `Newsletter sent to ${results.success} of ${subscribers.length} subscribers.`,
+            sent: results.success,
+            failed: results.failed,
+            total: subscribers.length,
+            errors: results.errors
+        });
+        
+    } catch (error) {
+        console.error("Admin: Error sending newsletter:", error);
+        res.status(500).json({ error: 'Failed to send newsletter.' });
     }
 });
 

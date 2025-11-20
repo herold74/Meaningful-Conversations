@@ -11,6 +11,7 @@ export type NavView =
     | 'verifyEmail'
     | 'forgotPassword'
     | 'resetPassword'
+    | 'unsubscribe'
     | 'landing'
     | 'piiWarning'
     | 'questionnaire'
@@ -38,6 +39,7 @@ export interface User {
     email: string;
     firstName?: string | null;
     lastName?: string | null;
+    preferredLanguage?: string;
     newsletterConsent?: boolean;
     newsletterConsentDate?: string | null;
     isBetaTester: boolean;

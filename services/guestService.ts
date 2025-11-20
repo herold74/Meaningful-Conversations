@@ -3,12 +3,20 @@
 import { apiFetch } from './api';
 
 /**
- * Generate a browser fingerprint using various browser characteristics
- * @returns A base64-encoded fingerprint string (max 64 chars)
+ * Generate a unique identifier for this guest user
+ * Combines browser fingerprint with a unique UUID for better uniqueness
+ * @returns A base64-encoded identifier string (max 64 chars)
  */
-export const generateFingerprint = (): string => {
+export const generateGuestId = (): string => {
     try {
-        // Create canvas fingerprint
+        // Generate a random UUID-like string for this specific user
+        const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+
+        // Create canvas fingerprint for browser characteristics
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -19,45 +27,48 @@ export const generateFingerprint = (): string => {
         }
         const canvasData = canvas.toDataURL();
 
-        // Collect browser characteristics
+        // Collect browser characteristics (to prevent easy spoofing)
         const data = {
+            uuid, // Unique per "guest user"
             userAgent: navigator.userAgent,
             language: navigator.language,
-            languages: navigator.languages ? navigator.languages.join(',') : '',
-            screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+            screen: `${screen.width}x${screen.height}`,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            platform: navigator.platform,
-            canvas: canvasData.substring(0, 50) // Only use first 50 chars of canvas
+            canvas: canvasData.substring(0, 30) // Shortened for better performance
         };
 
         // Create a deterministic hash-like string
-        const fingerprint = btoa(JSON.stringify(data))
+        const guestId = btoa(JSON.stringify(data))
             .replace(/[^A-Za-z0-9+/=]/g, '') // Remove any non-base64 characters
             .substring(0, 64); // Limit to 64 characters
 
-        return fingerprint;
+        return guestId;
 
     } catch (error) {
-        console.error('Error generating fingerprint:', error);
-        // Fallback fingerprint based on minimal data
-        return btoa(navigator.userAgent + screen.width + screen.height).substring(0, 64);
+        console.error('Error generating guest ID:', error);
+        // Fallback: Generate a simple random ID
+        const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        return btoa(randomId).substring(0, 64);
     }
 };
 
 /**
- * Get or create a fingerprint for the current session
- * Stored in sessionStorage so it persists during the browser session
- * @returns The fingerprint string
+ * Get or create a unique guest identifier for this user
+ * Stored in localStorage so it persists across browser sessions
+ * Each guest gets their own unique ID and message limit
+ * @returns The guest ID string
  */
 export const getOrCreateFingerprint = (): string => {
-    let fingerprint = sessionStorage.getItem('guest_fingerprint');
+    // Use localStorage instead of sessionStorage for persistence across sessions
+    let guestId = localStorage.getItem('guest_id');
     
-    if (!fingerprint) {
-        fingerprint = generateFingerprint();
-        sessionStorage.setItem('guest_fingerprint', fingerprint);
+    if (!guestId) {
+        guestId = generateGuestId();
+        localStorage.setItem('guest_id', guestId);
+        console.log('Created new guest ID - each guest user has their own message limit');
     }
     
-    return fingerprint;
+    return guestId;
 };
 
 interface GuestLimitResponse {
