@@ -56,7 +56,7 @@ export const analyzeSession = async (
         else if (blockageCount === 4) blockageScore = 8;
         else if (blockageCount >= 5) blockageScore = 10;
 
-        return { newFindings, proposedUpdates, nextSteps, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
+        return { newFindings, proposedUpdates, nextSteps, completedSteps: [], solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
 
     } catch (error) {
         console.error("Error analyzing session via backend:", error);
@@ -64,6 +64,7 @@ export const analyzeSession = async (
             newFindings: "There was an error analyzing the session. Please review the conversation and update your context manually.",
             proposedUpdates: [],
             nextSteps: [],
+            completedSteps: [],
             solutionBlockages: [],
             blockageScore: 0,
             hasConversationalEnd: false,
