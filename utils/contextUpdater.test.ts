@@ -1,5 +1,5 @@
-import { buildUpdatedContext } from './contextUpdater';
-import { ProposedUpdate, AppliedUpdatePayload } from '../types';
+import { buildUpdatedContext, AppliedUpdatePayload } from './contextUpdater';
+import { ProposedUpdate } from '../types';
 
 describe('contextUpdater - Edge Case: Removing Empty Next Steps Section', () => {
     it('should keep the Next Steps section structure but clear tasks when all tasks are completed', () => {
