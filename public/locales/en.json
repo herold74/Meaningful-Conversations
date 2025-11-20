@@ -167,6 +167,12 @@
   "guest_limit_exceeded_title": "Message Limit Reached",
   "guest_limit_exceeded_message": "You have reached your weekly limit of 50 messages as a guest. Register for unlimited access to all features.",
   "guest_register_now": "Register Now",
+  
+  "menu_refresh_app": "Refresh App",
+  
+  "update_available_title": "Update Available!",
+  "update_available_desc": "A new version of the app is available.",
+  "update_now": "Update Now",
 
   "chat_welcome": "Hello, I'm {{botName}}. What's on your mind today?",
   "chat_placeholder": "Type message...",

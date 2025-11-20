@@ -44,8 +44,10 @@ import RegistrationPendingView from './components/RegistrationPendingView';
 import VerifyEmailView from './components/VerifyEmailView';
 import ResetPasswordView from './components/ResetPasswordView';
 import UnsubscribeView from './components/UnsubscribeView';
+import UpdateNotification from './components/UpdateNotification';
 import PaywallView from './components/PaywallView';
 import { BOTS } from './constants';
+import { updateServiceWorker } from './utils/serviceWorkerUtils';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -801,6 +803,7 @@ const App: React.FC = () => {
                 onLogout={handleLogout}
                 onStartOver={handleStartOver}
             />
+            <UpdateNotification onUpdate={updateServiceWorker} />
             {isAnalyzing && <AnalyzingView />}
              <DeleteAccountModal 
                 isOpen={isDeleteModalOpen} 

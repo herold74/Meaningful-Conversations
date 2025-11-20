@@ -4,6 +4,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { LogInIcon } from './icons/LogInIcon';
 import { UserIcon } from './icons/UserIcon';
 import { LogOutIcon } from './icons/LogOutIcon';
+import { RepeatIcon } from './icons/RepeatIcon';
 import { XIcon } from './icons/XIcon';
 import { ShieldIcon } from './icons/ShieldIcon';
 import { ListIcon } from './icons/ListIcon';
@@ -16,16 +17,27 @@ import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
 import { RepeatIcon } from './icons/RepeatIcon';
 
 interface BurgerMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-  currentUser: User | null;
-  onNavigate: (view: NavView) => void;
-  onLogout: () => void;
-  onStartOver: () => void;
+    isOpen: boolean;
+    onClose: () => void;
+    currentUser: User | null;
+    onNavigate: (view: NavView) => void;
+    onLogout: () => void;
+    onStartOver: () => void;
 }
 
 const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver }) => {
     const { t } = useLocalization();
+    
+    const handleRefresh = async () => {
+        // Dynamic import to avoid issues if module doesn't exist yet
+        try {
+            const { updateServiceWorker } = await import('../utils/serviceWorkerUtils');
+            await updateServiceWorker();
+        } catch (error) {
+            console.error('Update failed, performing normal reload:', error);
+            window.location.reload();
+        }
+    };
 
     if (!isOpen) return null;
     
@@ -98,9 +110,19 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     ) : (
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
-                    <p className="px-4 pt-2 text-xs text-center text-content-subtle">
-                        Version 1.5.8
-                    </p>
+                    
+                    <div className="px-4 pt-2 flex items-center justify-between">
+                        <p className="text-xs text-content-subtle">
+                            Version 1.5.8
+                        </p>
+                        <button
+                            onClick={handleRefresh}
+                            className="p-1.5 rounded-full hover:bg-background-tertiary transition-colors"
+                            title={t('menu_refresh_app') || 'App aktualisieren'}
+                        >
+                            <RepeatIcon className="w-4 h-4 text-content-subtle hover:text-content-primary" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
