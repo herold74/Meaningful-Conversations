@@ -48,6 +48,14 @@ const analysisSchema = {
                 required: ['action', 'deadline']
             }
         },
+        completedSteps: {
+            type: 'ARRAY',
+            description: 'A list of next steps from the EXISTING Life Context that the user explicitly mentioned as completed, accomplished, or done during this conversation. Extract the exact text from the existing context.',
+            items: {
+                type: 'STRING',
+                description: 'The exact text of a completed step from the existing "Achievable Next Steps" section (e.g., "Talk to my manager about workload (Deadline: 2025-11-15)" or "* Talk to my manager about workload (bis: 2025-11-15)"). Include the entire line as it appears in the context.'
+            }
+        },
         solutionBlockages: {
             type: 'ARRAY',
             description: 'Identify up to 5 potential solution blockages based on the PEP methodology by Dr. Michael Bohne. Identify the specific blockage type, explain why it applies, and provide a direct quote from the user that supports your conclusion.',
@@ -80,7 +88,7 @@ const analysisSchema = {
             description: 'Set to true ONLY if the user explicitly mentioned accomplishing a specific goal that was previously stated in their life context file.' 
         }
     },
-    required: ['summary', 'updates', 'nextSteps', 'solutionBlockages', 'hasConversationalEnd', 'hasAccomplishedGoal']
+    required: ['summary', 'updates', 'nextSteps', 'completedSteps', 'solutionBlockages', 'hasConversationalEnd', 'hasAccomplishedGoal']
 };
 
 const analysisPrompts = {
@@ -112,6 +120,7 @@ You are an expert life coach reviewing a coaching session transcript. Your task 
     - CRITICAL: The content for the 'nextSteps' array MUST ALSO be written in ${docLang === 'de' ? 'German' : 'English'} to match the language of the original document.
 10. **CRITICAL: PEP Framework Only:** You MUST ONLY identify blockages from the 5 PEP categories listed in the schema: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression, or Dysfunctional Loyalties. DO NOT use concepts from Positive Intelligence (e.g., Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) or any other psychological framework. If the conversation does not clearly demonstrate one of the 5 PEP blockages, return an empty array for solutionBlockages.
 11. **CRITICAL: Deadline Format:** All deadlines in the 'nextSteps' array MUST be in ISO date format (YYYY-MM-DD). Use today's date (${currentDate}) as reference. Examples: "2025-11-20" for a specific date, or calculate relative dates (e.g., if today is 2025-11-17 and user says "by Wednesday", calculate the actual date). NEVER use natural language like "by Friday" or "next week".
+12. **CRITICAL: Completed Steps Management:** If the Life Context already contains a section "✅ Achievable Next Steps" or "✅ Realisierbare nächste Schritte", you MUST carefully review it. If the user explicitly mentions during the conversation that they have completed, accomplished, or done any of the existing steps, you MUST add those EXACT step texts (as they appear in the context, including any deadline information) to the 'completedSteps' array. This enables the system to remove completed tasks from the list.
 
 ## Life Context
 \`\`\`markdown
@@ -152,6 +161,7 @@ Sie sind ein erfahrener Life Coach, der ein Transkript einer Coaching-Sitzung ü
     - KRITISCH: Der Inhalt für das 'nextSteps'-Array MUSS EBENFALLS auf ${docLang === 'de' ? 'Deutsch' : 'Englisch'} verfasst sein, um der Sprache des Originaldokuments zu entsprechen.
 10. **KRITISCH: Nur PEP-Framework:** Sie MÜSSEN Blockaden NUR aus den 5 PEP-Kategorien identifizieren, die im Schema aufgeführt sind: Self-Reproach, Blaming Others, Expectational Attitudes, Age Regression oder Dysfunctional Loyalties. Verwenden Sie KEINE Konzepte aus Positive Intelligence (z. B. Hyper-Achiever, Avoider, Judge, Controller, Victim, Stickler, Pleaser) oder einem anderen psychologischen Framework. Wenn das Gespräch keine der 5 PEP-Blockaden klar demonstriert, geben Sie ein leeres Array für solutionBlockages zurück.
 11. **KRITISCH: Datumsformat für Fristen:** Alle Fristen im 'nextSteps'-Array MÜSSEN im ISO-Datumsformat (YYYY-MM-DD) sein. Verwenden Sie das heutige Datum (${currentDate}) als Referenz. Beispiele: "2025-11-20" für ein bestimmtes Datum, oder berechnen Sie relative Daten (z. B. wenn heute der 2025-11-17 ist und der Benutzer sagt "bis Mittwoch", berechnen Sie das tatsächliche Datum). Verwenden Sie NIEMALS natürliche Sprache wie "bis Freitag" oder "nächste Woche".
+12. **KRITISCH: Verwaltung erledigter Aufgaben:** Wenn der Lebenskontext bereits einen Abschnitt "✅ Achievable Next Steps" oder "✅ Realisierbare nächste Schritte" enthält, MÜSSEN Sie diesen sorgfältig überprüfen. Wenn der Benutzer während des Gesprächs explizit erwähnt, dass er einen der bestehenden Schritte abgeschlossen, erledigt oder vollbracht hat, MÜSSEN Sie die EXAKTEN Texte dieser Schritte (so wie sie im Kontext erscheinen, einschließlich Fristinformationen) zum 'completedSteps'-Array hinzufügen. Dies ermöglicht es dem System, erledigte Aufgaben aus der Liste zu entfernen.
 
 ## Lebenskontext
 \`\`\`markdown

@@ -246,7 +246,29 @@ export const buildUpdatedContext = (
                 const newSectionContent = content.startsWith('*') ? [key.trim(), ...content.split('\n')] : [`${key} ${content}`];
                 mainDocLines.splice(mod.lineIndex, endLineIndex - mod.lineIndex, ...newSectionContent);
             } else {
-                const newSectionContent = [headlineLine, '', ...content.split('\n')];
+                // For ## headlines: Keep the headline and any descriptive subtitle, even if content is empty
+                const newSectionContent = [headlineLine];
+                
+                // Check if the next line after the headline is a descriptive subtitle (italic line starting with *)
+                if (mod.lineIndex + 1 < mainDocLines.length) {
+                    const nextLine = mainDocLines[mod.lineIndex + 1].trim();
+                    if (nextLine.startsWith('*') && !nextLine.startsWith('* ')) {
+                        // This is a descriptive subtitle like "*Specific, actionable tasks I have committed to.*"
+                        newSectionContent.push(mainDocLines[mod.lineIndex + 1]);
+                    }
+                }
+                
+                // Add an empty line after subtitle if present
+                if (newSectionContent.length > 1) {
+                    newSectionContent.push('');
+                }
+                
+                // Add the content if not empty
+                if (content) {
+                    newSectionContent.push('');
+                    newSectionContent.push(...content.split('\n'));
+                }
+                
                 mainDocLines.splice(mod.lineIndex, endLineIndex - mod.lineIndex, ...newSectionContent);
             }
         } else if (mod.type === 'append') {
