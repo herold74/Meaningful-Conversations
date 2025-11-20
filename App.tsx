@@ -433,6 +433,7 @@ const App: React.FC = () => {
                     newFindings: t('sessionReview_g_summary'),
                     proposedUpdates: [],
                     nextSteps: [],
+                    completedSteps: [],
                     solutionBlockages: [],
                     blockageScore: 0,
                     hasConversationalEnd: true,
@@ -449,6 +450,7 @@ const App: React.FC = () => {
                     newFindings: "There was an error generating the context file from the interview.",
                     proposedUpdates: [],
                     nextSteps: [],
+                    completedSteps: [],
                     solutionBlockages: [],
                     blockageScore: 0,
                     hasConversationalEnd: false,
@@ -475,28 +477,74 @@ const App: React.FC = () => {
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
 
-            // If the analysis found "Next Steps", programmatically create an update for them.
-            if (analysis.nextSteps && analysis.nextSteps.length > 0) {
+            // Handle "Next Steps" and "Completed Steps" logic.
+            const hasNewSteps = analysis.nextSteps && analysis.nextSteps.length > 0;
+            const hasCompletedSteps = analysis.completedSteps && analysis.completedSteps.length > 0;
+            
+            if (hasNewSteps || hasCompletedSteps) {
                 // Determine the correct headline based on the document's language.
                 const docLang = (lifeContext && lifeContext.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
                 const nextStepsHeadline = docLang === 'de' ? 'Realisierbare nächste Schritte' : 'Achievable Next Steps';
-                
                 const deadlineWord = docLang === 'de' ? 'bis' : 'Deadline';
 
-                // Format the next steps into a markdown list.
-                const nextStepsContent = analysis.nextSteps
-                    .map(step => `* ${step.action} (${deadlineWord}: ${step.deadline})`)
-                    .join('\n');
+                // Extract existing next steps from the life context.
+                const existingStepsRegex = /##\s*✅\s*(Achievable Next Steps|Realisierbare nächste Schritte)\s*\n(?:.*?\n)?((?:\* .*(?:\n|$))*)/i;
+                const match = lifeContext?.match(existingStepsRegex);
+                let existingStepsLines: string[] = [];
                 
-                // Create a new ProposedUpdate object.
-                const nextStepsUpdate: ProposedUpdate = {
-                    type: 'append',
-                    headline: nextStepsHeadline,
-                    content: nextStepsContent,
-                };
-                
-                // Add the new update to the list of proposed updates from the AI.
-                analysis.proposedUpdates.push(nextStepsUpdate);
+                if (match && match[2]) {
+                    existingStepsLines = match[2]
+                        .split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.startsWith('*'));
+                }
+
+                // Filter out completed steps from existing steps.
+                let remainingSteps = existingStepsLines;
+                if (hasCompletedSteps) {
+                    const completedStepsNormalized = analysis.completedSteps.map((s: string) => 
+                        s.trim().replace(/^\*\s*/, '').toLowerCase()
+                    );
+                    remainingSteps = existingStepsLines.filter(step => {
+                        const stepNormalized = step.replace(/^\*\s*/, '').toLowerCase();
+                        return !completedStepsNormalized.some(completed => 
+                            stepNormalized.includes(completed) || completed.includes(stepNormalized)
+                        );
+                    });
+                }
+
+                // Format new next steps.
+                const newStepsLines = hasNewSteps 
+                    ? analysis.nextSteps.map((step: { action: string; deadline: string }) => 
+                        `* ${step.action} (${deadlineWord}: ${step.deadline})`
+                    )
+                    : [];
+
+                // Combine remaining + new steps.
+                const allSteps = [...remainingSteps, ...newStepsLines];
+
+                if (allSteps.length > 0) {
+                    // If there were completed steps OR existing steps, use 'replace_section' to ensure clean update.
+                    // Otherwise, use 'append' for first-time creation.
+                    const updateType = (hasCompletedSteps || existingStepsLines.length > 0) ? 'replace_section' : 'append';
+                    
+                    const nextStepsUpdate: ProposedUpdate = {
+                        type: updateType,
+                        headline: nextStepsHeadline,
+                        content: allSteps.join('\n'),
+                    };
+                    
+                    analysis.proposedUpdates.push(nextStepsUpdate);
+                } else if (hasCompletedSteps && existingStepsLines.length > 0) {
+                    // All steps were completed. Clear the task list but keep the section structure (headline + subtitle).
+                    const nextStepsUpdate: ProposedUpdate = {
+                        type: 'replace_section',
+                        headline: nextStepsHeadline,
+                        content: '', // Empty content = no tasks, but section structure remains
+                    };
+                    
+                    analysis.proposedUpdates.push(nextStepsUpdate);
+                }
             }
 
             setSessionAnalysis(analysis);
@@ -511,6 +559,7 @@ const App: React.FC = () => {
                 newFindings: "There was an error analyzing the session.",
                 proposedUpdates: [],
                 nextSteps: [],
+                completedSteps: [],
                 solutionBlockages: [],
                 blockageScore: 0,
                 hasConversationalEnd: false,
@@ -636,7 +685,7 @@ const App: React.FC = () => {
     
                 setSessionAnalysis({
                     newFindings: t('sessionReview_g_summary'),
-                    proposedUpdates: [], nextSteps: [], solutionBlockages: [], blockageScore: 0,
+                    proposedUpdates: [], nextSteps: [], completedSteps: [], solutionBlockages: [], blockageScore: 0,
                     hasConversationalEnd: true, hasAccomplishedGoal: false,
                 });
                 setNewGamificationState(gamificationState); // No gamification change for interviews
@@ -668,7 +717,7 @@ const App: React.FC = () => {
             console.error("Failed to run test session:", error);
             const fallbackAnalysis: SessionAnalysis = {
                 newFindings: `Test failed. Error during execution: ${error instanceof Error ? error.message : String(error)}`,
-                proposedUpdates: [], nextSteps: [], solutionBlockages: [], blockageScore: 0, hasConversationalEnd: false, hasAccomplishedGoal: false,
+                proposedUpdates: [], nextSteps: [], completedSteps: [], solutionBlockages: [], blockageScore: 0, hasConversationalEnd: false, hasAccomplishedGoal: false,
             };
             setSessionAnalysis(fallbackAnalysis);
             setLifeContext(adminLifeContext); // Still show the context that was used
