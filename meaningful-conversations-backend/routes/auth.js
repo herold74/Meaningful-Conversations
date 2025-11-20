@@ -66,13 +66,17 @@ router.post('/register', async (req, res) => {
             accessExpiresAt = sevenDaysFromNow;
         }
 
+        const unsubscribeToken = newsletterConsent ? crypto.randomBytes(32).toString('hex') : null;
+        
         await prisma.user.create({
             data: {
                 email: lowerCaseEmail,
                 firstName: firstName || null,
                 lastName: lastName || null,
+                preferredLanguage: lang || 'de',
                 newsletterConsent: newsletterConsent || false,
                 newsletterConsentDate: newsletterConsent ? new Date() : null,
+                unsubscribeToken,
                 passwordHash,
                 encryptionSalt: encryptionSalt,
                 activationToken,

@@ -65,12 +65,17 @@
 
   "forgotPassword_title": "Passwort zurücksetzen",
   "forgotPassword_subtitle": "Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen des Passworts zu erhalten.",
+  "forgotPassword_warning_title": "⚠️ Wichtige Warnung",
+  "forgotPassword_warning_text": "Bei einem Passwort-Reset gehen alle Ihre gespeicherten Lebensdaten aufgrund der Ende-zu-Ende-Verschlüsselung verloren. Wenn Sie Ihr Passwort noch kennen, verwenden Sie stattdessen die Funktion \"Passwort ändern\" im Menü.",
   "forgotPassword_email_label": "E-Mail",
   "forgotPassword_email_placeholder": "deine@email.de",
   "forgotPassword_button": "Link anfordern",
   "forgotPassword_back_to_login": "Zurück zum Login",
   "forgotPassword_success": "Wenn ein Konto mit dieser E-Mail existiert, wurde ein Link zum Zurücksetzen des Passworts gesendet.",
 
+  "resetPassword_title": "Neues Passwort festlegen",
+  "resetPassword_warning_title": "⚠️ Datenverlust durch Verschlüsselung",
+  "resetPassword_warning_text": "Aufgrund der Ende-zu-Ende-Verschlüsselung werden alle Ihre gespeicherten Lebensdaten beim Passwort-Reset gelöscht. Sie beginnen mit einem leeren Kontext.",
   "resetPassword_success_title": "Passwort erfolgreich zurückgesetzt",
   "resetPassword_success_subtitle": "Sie können sich jetzt mit Ihrem neuen Passwort anmelden.",
 

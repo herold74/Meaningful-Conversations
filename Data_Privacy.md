@@ -49,6 +49,10 @@ This is a direct and important consequence of our E2EE model. Because we never h
 
 When you use the "Forgot Password" feature, the system allows you to create a new password. This new password generates a new encryption key, which cannot decrypt your old data. As a security measure, the old, unreadable data is automatically deleted from our servers.
 
+**Important Distinction:**
+- **Password Reset** (via "Forgot Password"): Use this only when you've truly forgotten your password. ⚠️ **All your Life Context data will be permanently deleted.**
+- **Change Password** (via Account Settings): Use this when you still know your current password but want to change it. ✅ **Your data is preserved** by re-encrypting it with the new password.
+
 **We strongly recommend that all registered users regularly download a backup of their "Life Context" file.**
 
 ### What data does the AI see during a conversation?

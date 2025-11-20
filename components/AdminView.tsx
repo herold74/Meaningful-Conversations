@@ -25,6 +25,7 @@ import { ActivityIcon } from './icons/ActivityIcon';
 import { DollarIcon } from './icons/DollarIcon';
 import { TestScenario, getTestScenarios } from '../utils/testScenarios';
 import { ApiUsageView } from './ApiUsageView';
+import NewsletterPanel from './NewsletterPanel';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -742,6 +743,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     <p>{users.length > 0 ? t('admin_no_users_found') : t('admin_no_users_yet')}</p>
                 </div>
             )}
+            
+            {/* Newsletter Section */}
+            <NewsletterPanel />
         </div>
     );
     
