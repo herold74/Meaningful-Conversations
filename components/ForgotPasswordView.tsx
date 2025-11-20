@@ -53,6 +53,12 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
           <p className="mt-2 text-gray-600 dark:text-gray-400">{t('forgotPassword_subtitle')}</p>
         </div>
         
+        {/* E2EE Warning */}
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+          <h3 className="font-bold text-red-800 dark:text-red-300 mb-2">{t('forgotPassword_warning_title')}</h3>
+          <p className="text-sm text-red-700 dark:text-red-400">{t('forgotPassword_warning_text')}</p>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('forgotPassword_email_label')}</label>

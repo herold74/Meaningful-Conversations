@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
@@ -71,8 +72,13 @@ router.put('/user/profile', async (req, res) => {
                 if (!user.newsletterConsentDate) {
                     updateData.newsletterConsentDate = new Date();
                 }
+                // Generate unsubscribe token if not exists
+                if (!user.unsubscribeToken) {
+                    updateData.unsubscribeToken = crypto.randomBytes(32).toString('hex');
+                }
             } else {
                 updateData.newsletterConsentDate = null;
+                updateData.unsubscribeToken = null;
             }
         }
         

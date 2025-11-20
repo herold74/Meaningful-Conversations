@@ -69,9 +69,16 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase flex items-center justify-center gap-3">
                         <KeyIcon className="w-8 h-8"/>
-                        {t('forgotPassword_title')}
+                        {t('resetPassword_title')}
                     </h1>
                 </div>
+                
+                {/* E2EE Warning */}
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
+                  <h3 className="font-bold text-red-800 dark:text-red-300 mb-2">{t('resetPassword_warning_title')}</h3>
+                  <p className="text-sm text-red-700 dark:text-red-400">{t('resetPassword_warning_text')}</p>
+                </div>
+                
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="newPassword" className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('changePassword_new_label')}</label>

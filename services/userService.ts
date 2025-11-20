@@ -207,3 +207,55 @@ export const getAdminFeedback = async (): Promise<Feedback[]> => {
 export const deleteMessageReport = async (feedbackId: string): Promise<void> => {
     await apiFetch(`/admin/feedback/${feedbackId}`, { method: 'DELETE' });
 };
+
+// --- Newsletter Functions ---
+
+export interface NewsletterSubscriber {
+    id: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    newsletterConsentDate?: string | null;
+    createdAt?: string;
+}
+
+export interface NewsletterContent {
+    subjectDE: string;
+    subjectEN: string;
+    textBodyDE: string;
+    textBodyEN: string;
+    htmlBodyDE?: string;
+    htmlBodyEN?: string;
+}
+
+export interface NewsletterHistoryEntry {
+    id: string;
+    subjectDE: string;
+    subjectEN: string;
+    textBodyDE: string;
+    textBodyEN: string;
+    htmlBodyDE?: string | null;
+    htmlBodyEN?: string | null;
+    sentBy: string;
+    sentByEmail: string;
+    recipientCount: number;
+    successCount: number;
+    failedCount: number;
+    errors?: any;
+    createdAt: string;
+}
+
+export const getNewsletterSubscribers = async (): Promise<{ subscribers: NewsletterSubscriber[], count: number }> => {
+    return await apiFetch('/admin/newsletter-subscribers');
+};
+
+export const getNewsletterHistory = async (): Promise<NewsletterHistoryEntry[]> => {
+    return await apiFetch('/admin/newsletter-history');
+};
+
+export const sendNewsletter = async (content: NewsletterContent): Promise<{ success: boolean, sent: number, failed: number, total: number, message: string }> => {
+    return await apiFetch('/admin/send-newsletter', {
+        method: 'POST',
+        body: JSON.stringify(content),
+    });
+};

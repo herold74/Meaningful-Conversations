@@ -43,6 +43,7 @@ import DeleteAccountModal from './components/DeleteAccountModal';
 import RegistrationPendingView from './components/RegistrationPendingView';
 import VerifyEmailView from './components/VerifyEmailView';
 import ResetPasswordView from './components/ResetPasswordView';
+import UnsubscribeView from './components/UnsubscribeView';
 import PaywallView from './components/PaywallView';
 import { BOTS } from './constants';
 
@@ -253,6 +254,10 @@ const App: React.FC = () => {
                 if (route === 'reset-password') {
                     setView('resetPassword');
                     return; 
+                }
+                if (route === 'unsubscribe') {
+                    setView('unsubscribe');
+                    return;
                 }
             }
 
@@ -727,6 +732,7 @@ const App: React.FC = () => {
             case 'verifyEmail': return <VerifyEmailView onVerificationSuccess={handleLoginSuccess} />;
             case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
             case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
+            case 'unsubscribe': return <UnsubscribeView token={new URLSearchParams(window.location.search).get('token') || ''} onBack={() => setView('auth')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
             case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView(null); setView('redeemCode'); }} onLogout={handleLogout} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;

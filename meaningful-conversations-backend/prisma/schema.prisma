@@ -12,8 +12,10 @@ model User {
   email                     String        @unique
   firstName                 String?
   lastName                  String?
+  preferredLanguage         String        @default("de")
   newsletterConsent         Boolean       @default(false)
   newsletterConsentDate     DateTime?
+  unsubscribeToken          String?       @unique
   passwordHash              String
   encryptionSalt            String        @unique
   lifeContext               String?       @db.Text
@@ -122,4 +124,24 @@ model Purchase {
 
   @@index([customerEmail])
   @@index([paypalOrderId])
+}
+
+model NewsletterLog {
+  id           String   @id @default(cuid())
+  subjectDE    String
+  subjectEN    String
+  textBodyDE   String   @db.Text
+  textBodyEN   String   @db.Text
+  htmlBodyDE   String?  @db.Text
+  htmlBodyEN   String?  @db.Text
+  sentBy       String
+  sentByEmail  String
+  recipientCount Int
+  successCount Int
+  failedCount  Int
+  errors       Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([sentBy])
 }
