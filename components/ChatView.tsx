@@ -23,6 +23,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { selectVoice } from '../utils/voiceUtils';
 import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
+import { synthesizeSpeech, getTtsPreferences, saveTtsPreferences, type TtsMode } from '../services/ttsService';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -162,6 +163,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
   const lastSpokenTextRef = useRef<string>('');
   
+  // TTS Mode: 'local' uses Web Speech API, 'server' uses Piper TTS
+  const [ttsMode, setTtsMode] = useState<TtsMode>(() => {
+    const prefs = getTtsPreferences();
+    return prefs.mode;
+  });
+  
+  // Audio element for server TTS playback
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     if (typeof localStorage === 'undefined') return null;
@@ -294,6 +305,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
         window.speechSynthesis.cancel();
       }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
     };
   }, []);
 
@@ -357,8 +372,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, [isVoiceMode]);
 
-  const speak = useCallback((text: string, isMeditation: boolean = false) => {
-    if (!isTtsEnabled || !text.trim() || !window.speechSynthesis) return;
+  // Initialize audio element for server TTS
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.addEventListener('play', () => setTtsStatus('speaking'));
+      audioRef.current.addEventListener('ended', () => setTtsStatus('idle'));
+      audioRef.current.addEventListener('pause', () => setTtsStatus('paused'));
+      audioRef.current.addEventListener('error', () => {
+        setTtsStatus('idle');
+        setIsLoadingAudio(false);
+        console.error('Audio playback error');
+      });
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
+  }, []);
+
+  const speak = useCallback(async (text: string, isMeditation: boolean = false) => {
+    if (!isTtsEnabled || !text.trim()) return;
     
     const cleanText = text
         .replace(/#{1,6}\s/g, '') // Headers
@@ -368,9 +404,48 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '') // Horizontal rules
         .replace(/^>\s?/gm, '');
 
+    lastSpokenTextRef.current = cleanText;
+
+    // Server TTS mode
+    if (ttsMode === 'server') {
+      try {
+        setIsLoadingAudio(true);
+        
+        // Stop any ongoing playback
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }
+        
+        // Fetch audio from server
+        const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          await audioRef.current.play();
+        }
+        
+        setIsLoadingAudio(false);
+      } catch (error) {
+        console.error('Server TTS error:', error);
+        setIsLoadingAudio(false);
+        setTtsStatus('idle');
+        
+        // Fallback to local TTS if server fails
+        setTtsMode('local');
+        saveTtsPreferences('local', selectedVoiceURI);
+        // Retry with local TTS
+        setTimeout(() => speak(text, isMeditation), 100);
+      }
+      return;
+    }
+
+    // Local TTS mode (Web Speech API)
+    if (!window.speechSynthesis) return;
+    
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    lastSpokenTextRef.current = cleanText;
 
     utterance.onstart = () => setTtsStatus('speaking');
     utterance.onend = () => setTtsStatus('idle');
@@ -426,7 +501,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
 
     window.speechSynthesis.speak(utterance);
-  }, [isTtsEnabled, voices, bot.id, selectedVoiceURI, language, botGender]);
+  }, [isTtsEnabled, voices, bot.id, selectedVoiceURI, language, botGender, ttsMode]);
 
   const handlePreviewVoice = useCallback((voice: SpeechSynthesisVoice) => {
     if (!voice || !window.speechSynthesis) return;
@@ -438,6 +513,35 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     utterance.pitch = 1;
     window.speechSynthesis.speak(utterance);
   }, [t]);
+
+  const handlePreviewServerVoice = useCallback(async (voiceId: string) => {
+    const sampleText = t('voiceModal_preview_text');
+    try {
+      const audioBlob = await synthesizeSpeech(sampleText, bot.id, language, false);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.onended = () => URL.revokeObjectURL(audioUrl);
+      audio.play().catch(console.error);
+    } catch (error) {
+      console.error('Failed to preview server voice:', error);
+    }
+  }, [t, bot.id, language]);
+
+  const handleSelectVoice = useCallback((selection: { type: 'auto' } | { type: 'local'; voiceURI: string } | { type: 'server'; voiceId: string }) => {
+    if (selection.type === 'auto') {
+      setSelectedVoiceURI(null);
+      setTtsMode('local');
+      saveTtsPreferences('local', null);
+    } else if (selection.type === 'local') {
+      setSelectedVoiceURI(selection.voiceURI);
+      setTtsMode('local');
+      saveTtsPreferences('local', selection.voiceURI);
+    } else if (selection.type === 'server') {
+      setSelectedVoiceURI(selection.voiceId);
+      setTtsMode('server');
+      saveTtsPreferences('server', selection.voiceId);
+    }
+  }, []);
   
   const handleOpenVoiceModal = () => {
     if (!window.speechSynthesis) return;
@@ -473,7 +577,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // If TTS is currently enabled, we are turning it off.
         // We should stop any speech that is currently in progress.
         if (isTtsEnabled) {
-            window.speechSynthesis.cancel();
+            if (ttsMode === 'server' && audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = '';
+            } else if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
             setTtsStatus('idle'); // The onend event won't fire, so manually reset.
         }
         setIsTtsEnabled(p => !p);
@@ -631,7 +740,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
     }
 
-    window.speechSynthesis.cancel();
+    // Stop any ongoing TTS (both local and server)
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
     setTtsStatus('idle');
 
     const userMessage: Message = {
@@ -742,7 +858,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
-          window.speechSynthesis.cancel();
+          if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+          }
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+          }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           recognitionRef.current.start();
@@ -751,12 +873,23 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
 
   const handlePauseTTS = () => {
-    window.speechSynthesis.pause();
+    if (ttsMode === 'server' && audioRef.current) {
+      audioRef.current.pause();
+    } else if (window.speechSynthesis) {
+      window.speechSynthesis.pause();
+    }
     setTtsStatus('paused');
   };
 
   const handleResumeTTS = () => {
-    window.speechSynthesis.resume();
+    if (ttsMode === 'server' && audioRef.current) {
+      audioRef.current.play().catch(err => {
+        console.error('Failed to resume audio:', err);
+        setTtsStatus('idle');
+      });
+    } else if (window.speechSynthesis) {
+      window.speechSynthesis.resume();
+    }
     setTtsStatus('speaking');
   };
   
@@ -1122,8 +1255,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         onClose={() => setIsVoiceModalOpen(false)}
         voices={relevantVoices}
         currentVoiceURI={selectedVoiceURI}
-        onSelectVoice={setSelectedVoiceURI}
+        currentTtsMode={ttsMode}
+        onSelectVoice={handleSelectVoice}
         onPreviewVoice={handlePreviewVoice}
+        onPreviewServerVoice={handlePreviewServerVoice}
         botLanguage={language}
         botGender={botGender}
     />

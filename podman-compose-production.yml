@@ -84,8 +84,26 @@ services:
       timeout: 10s
       retries: 3
 
+  tts:
+    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-tts:${VERSION:-latest}
+    container_name: meaningful-conversations-tts-production
+    restart: unless-stopped
+    volumes:
+      - tts_voices_production:/models:ro
+    environment:
+      # Piper will be controlled via direct process calls from the backend
+      # No HTTP server needed - backend will invoke piper directly
+      PIPER_VOICE_DIR: /models
+    healthcheck:
+      test: ["CMD", "test", "-f", "/usr/local/bin/piper"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 volumes:
   mariadb_production_data:
+    driver: local
+  tts_voices_production:
     driver: local
 
 networks:
