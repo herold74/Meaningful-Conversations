@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background: #e3f2fd;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        select {
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ TTS Test</h1>
+        
+        <div id="status" class="status">
+            Überprüfe Browser-Unterstützung...
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Test 1: Web Speech API (Lokal)</h3>
+            <textarea id="testText" rows="3">Hallo, dies ist ein Test der Sprachausgabe.</textarea>
+            <br>
+            <label>Stimme:</label>
+            <select id="voiceSelect"></select>
+            <br>
+            <button onclick="testLocalTTS()">🔊 Lokale TTS testen</button>
+            <button onclick="stopSpeech()">⏹️ Stop</button>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Test 2: Server TTS</h3>
+            <button onclick="testServerTTS()">🖥️ Server TTS testen</button>
+            <div id="serverStatus"></div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Debug Info</h3>
+            <pre id="debugInfo" style="background: #f5f5f5; padding: 10px; border-radius: 4px;"></pre>
+        </div>
+    </div>
+
+    <script>
+        let voices = [];
+
+        // Check browser support
+        function checkSupport() {
+            const status = document.getElementById('status');
+            
+            if (!window.speechSynthesis) {
+                status.innerHTML = '❌ <strong>Fehler:</strong> Web Speech API wird nicht unterstützt!';
+                status.className = 'status error';
+                return false;
+            }
+            
+            status.innerHTML = '✅ <strong>Web Speech API verfügbar!</strong>';
+            status.className = 'status success';
+            return true;
+        }
+
+        // Load voices
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+            const select = document.getElementById('voiceSelect');
+            select.innerHTML = '';
+            
+            const germanVoices = voices.filter(v => v.lang.startsWith('de'));
+            const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+            const otherVoices = voices.filter(v => !v.lang.startsWith('de') && !v.lang.startsWith('en'));
+            
+            if (germanVoices.length > 0) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = 'Deutsch';
+                germanVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    if (voice.default) option.textContent += ' [Standard]';
+                    optgroup.appendChild(option);
+                });
+                select.appendChild(optgroup);
+            }
+            
+            if (englishVoices.length > 0) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = 'English';
+                englishVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    if (voice.default) option.textContent += ' [Default]';
+                    optgroup.appendChild(option);
+                });
+                select.appendChild(optgroup);
+            }
+            
+            updateDebugInfo();
+        }
+
+        // Test local TTS
+        function testLocalTTS() {
+            const text = document.getElementById('testText').value;
+            const selectedVoiceName = document.getElementById('voiceSelect').value;
+            
+            if (!text.trim()) {
+                alert('Bitte Text eingeben!');
+                return;
+            }
+            
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voice = voices.find(v => v.name === selectedVoiceName);
+            
+            if (voice) {
+                utterance.voice = voice;
+            }
+            
+            utterance.onstart = () => {
+                console.log('Speech started');
+                document.getElementById('status').innerHTML = '🔊 <strong>Spricht...</strong>';
+                document.getElementById('status').className = 'status';
+            };
+            
+            utterance.onend = () => {
+                console.log('Speech ended');
+                document.getElementById('status').innerHTML = '✅ <strong>Fertig!</strong>';
+                document.getElementById('status').className = 'status success';
+            };
+            
+            utterance.onerror = (event) => {
+                console.error('Speech error:', event);
+                document.getElementById('status').innerHTML = `❌ <strong>Fehler:</strong> ${event.error}`;
+                document.getElementById('status').className = 'status error';
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Stop speech
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+            document.getElementById('status').innerHTML = '⏹️ <strong>Gestoppt</strong>';
+            document.getElementById('status').className = 'status';
+        }
+
+        // Test server TTS
+        async function testServerTTS() {
+            const serverStatus = document.getElementById('serverStatus');
+            serverStatus.innerHTML = '⏳ Teste Server TTS...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/tts/health');
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    serverStatus.innerHTML = `✅ <strong>Server TTS verfügbar!</strong><br>
+                        Piper: ${data.piperAvailable ? '✅' : '❌'}<br>
+                        Voice Models: ${data.voiceCount}`;
+                } else {
+                    serverStatus.innerHTML = `⚠️ Server TTS nicht vollständig verfügbar<br>
+                        Status: ${data.status}`;
+                }
+            } catch (error) {
+                serverStatus.innerHTML = `❌ <strong>Server nicht erreichbar</strong><br>
+                    ${error.message}<br>
+                    <small>Stelle sicher, dass das Backend läuft (npm start im backend-Ordner)</small>`;
+            }
+        }
+
+        // Update debug info
+        function updateDebugInfo() {
+            const info = {
+                'Browser': navigator.userAgent,
+                'Speech Synthesis': !!window.speechSynthesis,
+                'Verfügbare Stimmen': voices.length,
+                'Deutsche Stimmen': voices.filter(v => v.lang.startsWith('de')).length,
+                'Englische Stimmen': voices.filter(v => v.lang.startsWith('en')).length,
+                'localStorage TTS Mode': localStorage.getItem('ttsMode') || 'nicht gesetzt',
+            };
+            
+            document.getElementById('debugInfo').textContent = JSON.stringify(info, null, 2);
+        }
+
+        // Initialize
+        if (checkSupport()) {
+            // Load voices when available
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+            loadVoices();
+            
+            // Also load after a short delay (Safari workaround)
+            setTimeout(loadVoices, 100);
+        }
+
+        // Test server TTS on load
+        testServerTTS();
+    </script>
+</body>
+</html>
+

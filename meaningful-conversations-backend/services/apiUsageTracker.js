@@ -1,27 +1,36 @@
 const prisma = require('../prismaClient.js');
 
 /**
- * Gemini API Pricing (USD per 1 million tokens)
+ * API Pricing (USD per 1 million tokens/characters)
  * Updated: November 2024
- * Source: https://ai.google.dev/pricing
+ * 
+ * Gemini API Pricing: https://ai.google.dev/pricing
+ * TTS is self-hosted (Piper) and has no API costs
  */
 const PRICING = {
+  // Gemini Models
   'gemini-2.0-flash-exp': { input: 0, output: 0 },           // Free during experimental phase
   'gemini-2.5-flash': { input: 0.075, output: 0.30 },        // Production pricing
   'gemini-2.5-pro': { input: 1.25, output: 5.00 },           // Production pricing
   'gemini-1.5-pro': { input: 1.25, output: 5.00 },
   'gemini-1.5-flash': { input: 0.075, output: 0.30 },
+  
+  // TTS Models (self-hosted, no API costs)
+  'piper-tts': { input: 0, output: 0 },                      // Self-hosted, free
 };
 
 /**
  * Calculate the estimated cost for an API call
  * @param {string} model - The model name
- * @param {number} inputTokens - Number of input tokens
+ * @param {number} inputTokens - Number of input tokens (or characters for TTS)
  * @param {number} outputTokens - Number of output tokens
  * @returns {number} Estimated cost in USD
  */
 function calculateCost(model, inputTokens, outputTokens) {
   const pricing = PRICING[model] || PRICING['gemini-2.5-flash']; // Default to flash pricing
+  
+  // For TTS models, inputTokens represents character count, not tokens
+  // But pricing is still 0, so calculation is the same
   const inputCost = (inputTokens / 1_000_000) * pricing.input;
   const outputCost = (outputTokens / 1_000_000) * pricing.output;
   return inputCost + outputCost;

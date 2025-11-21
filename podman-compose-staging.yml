@@ -84,8 +84,24 @@ services:
       timeout: 10s
       retries: 3
 
+  tts:
+    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-tts:${VERSION:-latest}
+    container_name: meaningful-conversations-tts-staging
+    restart: unless-stopped
+    volumes:
+      - tts_voices_staging:/models:ro
+    environment:
+      PIPER_VOICE_DIR: /models
+    healthcheck:
+      test: ["CMD", "test", "-f", "/usr/local/bin/piper"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 volumes:
   mariadb_staging_data:
+    driver: local
+  tts_voices_staging:
     driver: local
 
 networks:
