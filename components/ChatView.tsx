@@ -24,6 +24,7 @@ import { selectVoice } from '../utils/voiceUtils';
 import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
 import { synthesizeSpeech, getTtsPreferences, saveTtsPreferences, type TtsMode } from '../services/ttsService';
+import { getApiBaseUrl } from '../services/api';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -258,6 +259,31 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [selectedVoiceURI, bot.id]);
 
 
+  // Check TTS server availability on mount and fallback if needed
+  useEffect(() => {
+    const checkServerTtsAvailability = async () => {
+      if (ttsMode === 'server') {
+        try {
+          const apiBaseUrl = getApiBaseUrl();
+          const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, { 
+            signal: AbortSignal.timeout(3000) 
+          });
+          const healthData = await healthResponse.json();
+          
+          if (healthData.status !== 'ok' || !healthData.piperAvailable) {
+            console.warn('[TTS] Server TTS not available, falling back to local mode');
+            setTtsMode('local');
+          }
+        } catch (error) {
+          console.warn('[TTS] Could not reach TTS server, falling back to local mode');
+          setTtsMode('local');
+        }
+      }
+    };
+    
+    checkServerTtsAvailability();
+  }, []); // Only run on mount
+
   // Auto-scroll to bottom when switching to text mode
   useEffect(() => {
     if (!isVoiceMode && chatContainerRef.current) {
@@ -298,16 +324,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
 
     window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-    loadVoices(); // Initial attempt to load voices
+    loadVoices();
 
     return () => {
       if (window.speechSynthesis) {
         window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
-        window.speechSynthesis.cancel();
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+        // Do NOT call cancel() - it interferes with ongoing TTS during StrictMode re-mounts
       }
     };
   }, []);
@@ -376,19 +398,33 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
+      // Set a valid empty data URL to prevent errors when clearing
+      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
       audioRef.current.addEventListener('play', () => setTtsStatus('speaking'));
       audioRef.current.addEventListener('ended', () => setTtsStatus('idle'));
       audioRef.current.addEventListener('pause', () => setTtsStatus('paused'));
-      audioRef.current.addEventListener('error', () => {
+      audioRef.current.addEventListener('error', (e: Event) => {
+        const audioElement = e.target as HTMLAudioElement;
+        // Only log errors for actual blob URLs, not the dummy src
+        if (audioElement.src && !audioElement.src.startsWith('data:')) {
+          const errorDetails = {
+            code: audioElement.error?.code,
+            message: audioElement.error?.message,
+            src: audioElement.src,
+            networkState: audioElement.networkState,
+            readyState: audioElement.readyState
+          };
+          console.error('Audio playback error:', errorDetails);
+        }
         setTtsStatus('idle');
         setIsLoadingAudio(false);
-        console.error('Audio playback error');
       });
     }
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = '';
+        audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+        audioRef.current.load();
       }
     };
   }, []);
@@ -397,11 +433,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     if (!isTtsEnabled || !text.trim()) return;
     
     const cleanText = text
-        .replace(/#{1,6}\s/g, '') // Headers
-        .replace(/(\*\*|__|\*|_|~~|`|```)/g, '') // Emphasis, code
-        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Links
-        .replace(/!\[[^\]]*\]\([^\)]*\)/g, '') // Images
-        .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '') // Horizontal rules
+        .replace(/#{1,6}\s/g, '')
+        .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
+        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+        .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+        .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
         .replace(/^>\s?/gm, '');
 
     lastSpokenTextRef.current = cleanText;
@@ -411,14 +447,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       try {
         setIsLoadingAudio(true);
         
-        // Stop any ongoing playback
         if (audioRef.current) {
           audioRef.current.pause();
-          audioRef.current.src = '';
+          audioRef.current.removeAttribute('src');
+          audioRef.current.load();
         }
         
-        // Fetch audio from server
-        const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation);
+        const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
+        const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
         const audioUrl = URL.createObjectURL(audioBlob);
         
         if (audioRef.current) {
@@ -428,14 +464,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         setIsLoadingAudio(false);
       } catch (error) {
-        console.error('Server TTS error:', error);
+        console.error('[TTS] Server TTS error:', error);
         setIsLoadingAudio(false);
         setTtsStatus('idle');
         
-        // Fallback to local TTS if server fails
+        // Fallback to local mode but don't save preference
+        // This allows retry on next session if server comes back
         setTtsMode('local');
-        saveTtsPreferences('local', selectedVoiceURI);
-        // Retry with local TTS
         setTimeout(() => speak(text, isMeditation), 100);
       }
       return;
@@ -445,11 +480,24 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     if (!window.speechSynthesis) return;
     
     window.speechSynthesis.cancel();
+    
+    // Wait for cancel to complete (browser bug workaround)
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
-    utterance.onstart = () => setTtsStatus('speaking');
-    utterance.onend = () => setTtsStatus('idle');
-    utterance.onerror = () => setTtsStatus('idle');
+    utterance.onstart = () => {
+      console.log('[TTS] Local TTS started');
+      setTtsStatus('speaking');
+    };
+    utterance.onend = () => {
+      console.log('[TTS] Local TTS ended');
+      setTtsStatus('idle');
+    };
+    utterance.onerror = (event) => {
+      console.error('[TTS] Local TTS error:', event);
+      setTtsStatus('idle');
+    };
     
     let finalVoice: SpeechSynthesisVoice | null = null;
     
@@ -462,7 +510,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         if (language === 'de') {
             gender = botGender;
-        } else { // 'en'
+        } else {
             switch (bot.id) {
                 case 'g-interviewer':
                 case 'ava-strategic':
@@ -491,7 +539,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         finalVoice = selectVoice(voices, language, gender);
     }
 
-    // Apply slower speech rate for meditation (Rob and Kenji)
     if (isMeditation && (bot.id === 'rob-pq' || bot.id === 'kenji-stoic')) {
         utterance.rate = 0.9;
     }
@@ -501,29 +548,43 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
 
     window.speechSynthesis.speak(utterance);
+    
+    // Browser bug workaround: force TTS to start if paused
+    setTimeout(() => {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    }, 10);
   }, [isTtsEnabled, voices, bot.id, selectedVoiceURI, language, botGender, ttsMode]);
 
-  const handlePreviewVoice = useCallback((voice: SpeechSynthesisVoice) => {
+  const handlePreviewVoice = useCallback(async (voice: SpeechSynthesisVoice) => {
     if (!voice || !window.speechSynthesis) return;
+    
     window.speechSynthesis.cancel();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const sampleText = t('voiceModal_preview_text');
     const utterance = new SpeechSynthesisUtterance(sampleText);
     utterance.voice = voice;
     utterance.rate = 1;
     utterance.pitch = 1;
+    utterance.onerror = (e) => console.error('[TTS Preview] Error:', e);
+    
     window.speechSynthesis.speak(utterance);
   }, [t]);
 
   const handlePreviewServerVoice = useCallback(async (voiceId: string) => {
     const sampleText = t('voiceModal_preview_text');
     try {
-      const audioBlob = await synthesizeSpeech(sampleText, bot.id, language, false);
+      const audioBlob = await synthesizeSpeech(sampleText, bot.id, language, false, voiceId);
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audio.onended = () => URL.revokeObjectURL(audioUrl);
       audio.play().catch(console.error);
     } catch (error) {
       console.error('Failed to preview server voice:', error);
+      // Show user-friendly error message
+      alert(t('tts_server_unavailable') || 'Server TTS is not available. This feature requires a running backend with Piper TTS installed. You can still use local device voices.');
     }
   }, [t, bot.id, language]);
 
@@ -541,6 +602,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       setTtsMode('server');
       saveTtsPreferences('server', selection.voiceId);
     }
+    console.log('[TTS Select] New state - mode:', selection.type === 'server' ? 'server' : 'local', 'voiceURI:', selection.type === 'local' ? selection.voiceURI : (selection.type === 'server' ? selection.voiceId : null));
   }, []);
   
   const handleOpenVoiceModal = () => {
@@ -574,16 +636,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 };
 
     const handleToggleTts = () => {
-        // If TTS is currently enabled, we are turning it off.
-        // We should stop any speech that is currently in progress.
         if (isTtsEnabled) {
             if (ttsMode === 'server' && audioRef.current) {
                 audioRef.current.pause();
-                audioRef.current.src = '';
+                audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+                audioRef.current.load();
             } else if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
-            setTtsStatus('idle'); // The onend event won't fire, so manually reset.
+            setTtsStatus('idle');
         }
         setIsTtsEnabled(p => !p);
     };
@@ -686,11 +747,25 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     fetchInitialMessage();
   }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length]);
 
+  // Track if we've already spoken the first message
+  const hasSpokenFirstMessageRef = useRef(false);
+  
+  // Reset ref when bot or session changes
   useEffect(() => {
-      if (chatHistory.length === 1 && chatHistory[0].role === 'bot' && voices.length > 0) {
+    hasSpokenFirstMessageRef.current = false;
+  }, [bot.id, isNewSession]);
+  
+  useEffect(() => {
+      if (chatHistory.length === 1 && 
+          chatHistory[0].role === 'bot' && 
+          voices.length > 0 && 
+          isTtsEnabled && 
+          !hasSpokenFirstMessageRef.current) {
+        hasSpokenFirstMessageRef.current = true;
         speak(chatHistory[0].text);
       }
-  }, [speak, chatHistory, voices]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatHistory, voices, isTtsEnabled]);
   
   // Parse meditation markers from bot response
   const parseMeditationMarkers = (text: string): { 
@@ -740,13 +815,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
     }
 
-    // Stop any ongoing TTS (both local and server)
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = '';
+      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+      audioRef.current.load();
     }
     setTtsStatus('idle');
 
@@ -863,7 +938,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           if (audioRef.current) {
             audioRef.current.pause();
-            audioRef.current.src = '';
+            audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+            audioRef.current.load();
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
@@ -1068,20 +1144,29 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <div className="flex items-center justify-end gap-2 border-l border-border-primary pl-2 sm:pl-2 md:pl-4">
                     {isTtsEnabled && (
                         <>
-                            {ttsStatus === 'idle' && (
-                                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current} className="p-1 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat_tts')}>
+                            {isLoadingAudio && (
+                                <div className="p-1 text-content-secondary" aria-label={t('chat_loading_audio')}>
+                                    <svg className="animate-spin w-5 h-5 sm:w-6 sm:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            )}
+                            {!isLoadingAudio && ttsStatus === 'idle' && (
+                                <button type="button" onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current} className="p-1 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={t('chat_repeat_tts')}>
                                     <RepeatIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </button>
                             )}
-                            {ttsStatus === 'speaking' && <button onClick={handlePauseTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_pause_tts')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
-                            {ttsStatus === 'paused' && <button onClick={handleResumeTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_resume_tts')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
+                            {!isLoadingAudio && ttsStatus === 'speaking' && <button type="button" onClick={handlePauseTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_pause_tts')}><PauseIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
+                            {!isLoadingAudio && ttsStatus === 'paused' && <button type="button" onClick={handleResumeTTS} className="p-1 text-content-secondary hover:text-content-primary" aria-label={t('chat_resume_tts')}><PlayIcon className="w-5 h-5 sm:w-6 sm:h-6" /></button>}
                         </>
                     )}
-                    <button onClick={handleToggleTts} className="p-1 text-content-secondary hover:text-content-primary" aria-label={isTtsEnabled ? t('chat_disable_tts') : t('chat_enable_tts')}>
+                    <button type="button" onClick={handleToggleTts} className="p-1 text-content-secondary hover:text-content-primary" aria-label={isTtsEnabled ? t('chat_disable_tts') : t('chat_enable_tts')}>
                         {isTtsEnabled ? <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </button>
                     {isTtsEnabled && (
                         <button
+                            type="button"
                             onClick={handleOpenVoiceModal}
                             className="p-1 text-content-secondary hover:text-content-primary"
                             aria-label={t('chat_voice_settings')}
@@ -1122,13 +1207,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
       )}
       
     {isVoiceMode ? (
-        <main className="flex-1 flex flex-col justify-between items-center p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
-            <div className="animate-fadeIn">
-                <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
-                <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
+        <main className="flex-1 flex flex-col items-center gap-4 p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
+            {/* Top third: Bot Avatar & Name */}
+            <div className="flex-1 flex flex-col items-center justify-center py-4 min-h-[12rem]">
+                <div className="animate-fadeIn">
+                    <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
+                    <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
+                </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center my-8 w-full">
+            {/* Middle third: Microphone/Meditation Timer */}
+            <div className="flex-1 flex flex-col items-center justify-center py-4 w-full min-h-[12rem]">
                 {meditationState?.isActive ? (
                     <div className="flex flex-col items-center">
                         <div className="relative w-40 h-40">
@@ -1188,13 +1277,16 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 )}
             </div>
 
-            <div className="flex items-center justify-center gap-6">
-                <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
-                    {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
-                </button>
-                <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
-                    <RepeatIcon className="w-8 h-8 text-content-primary"/>
-                </button>
+            {/* Bottom third: Control Buttons - Doppelter Abstand nach oben */}
+            <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-4 min-h-[8rem]">
+                <div className="flex items-center justify-center gap-6">
+                    <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
+                        {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
+                    </button>
+                    <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
+                        <RepeatIcon className="w-8 h-8 text-content-primary"/>
+                    </button>
+                </div>
             </div>
         </main>
     ) : (

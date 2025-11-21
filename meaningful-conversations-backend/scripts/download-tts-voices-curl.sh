@@ -64,7 +64,7 @@ download_voice_curl() {
 # Download German voices
 echo "Downloading German voices..."
 echo "-----------------------------------"
-download_voice_curl "de_DE" "eva_k" "x_low"
+download_voice_curl "de_DE" "mls" "medium"
 download_voice_curl "de_DE" "thorsten" "medium"
 
 # Download English voices

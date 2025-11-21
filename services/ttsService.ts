@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch, getApiBaseUrl } from './api';
 
 export type TtsMode = 'local' | 'server';
 
@@ -15,11 +15,11 @@ export interface ServerVoice {
  */
 export const SERVER_VOICES: ServerVoice[] = [
     {
-        id: 'de-eva',
-        name: 'Eva (Deutsch, Weiblich)',
+        id: 'de-mls',
+        name: 'Sophia (Deutsch, Weiblich)',
         language: 'de',
         gender: 'female',
-        model: 'de_DE-eva_k-x_low',
+        model: 'de_DE-mls-medium',
     },
     {
         id: 'de-thorsten',
@@ -45,34 +45,53 @@ export const SERVER_VOICES: ServerVoice[] = [
 ];
 
 /**
+ * Convert voice ID to model name
+ */
+const getModelFromVoiceId = (voiceId: string): string | null => {
+    const voice = SERVER_VOICES.find(v => v.id === voiceId);
+    return voice ? voice.model : null;
+};
+
+/**
  * Synthesize speech using the server TTS
  */
 export const synthesizeSpeech = async (
     text: string,
     botId: string,
     lang: 'de' | 'en',
-    isMeditation: boolean = false
+    isMeditation: boolean = false,
+    voiceId?: string | null
 ): Promise<Blob> => {
-    const response = await apiFetch('/tts/synthesize', {
-        method: 'POST',
-        body: JSON.stringify({ text, botId, lang, isMeditation }),
-    });
+    const requestBody: any = { text, botId, lang, isMeditation };
+    if (voiceId) {
+        const modelName = getModelFromVoiceId(voiceId);
+        if (modelName) {
+            requestBody.voiceId = modelName;
+        } else {
+            console.warn('[TTS Service] No model found for voiceId:', voiceId);
+        }
+    }
 
-    // apiFetch returns JSON by default, but for TTS we need the blob
-    // So we need to use fetch directly here
-    const apiUrl = (import.meta as any).env?.VITE_API_URL || '/api';
-    const rawResponse = await fetch(`${apiUrl}/tts/synthesize`, {
+    const apiBaseUrl = getApiBaseUrl();
+    const apiUrl = apiBaseUrl ? `${apiBaseUrl}/api/tts/synthesize` : '/api/tts/synthesize';
+    
+    const rawResponse = await fetch(apiUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {}),
         },
-        body: JSON.stringify({ text, botId, lang, isMeditation }),
+        body: JSON.stringify(requestBody),
     });
 
     if (!rawResponse.ok) {
         const error = await rawResponse.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || 'Failed to synthesize speech');
+        console.error('[TTS Service] TTS synthesis failed:', {
+            status: rawResponse.status,
+            statusText: rawResponse.statusText,
+            error: error,
+        });
+        throw new Error(error.error || `Failed to synthesize speech (${rawResponse.status})`);
     }
 
     return await rawResponse.blob();
@@ -106,7 +125,13 @@ export const getTtsPreferences = (): {
         const modeStr = localStorage.getItem('ttsMode');
         const mode = (modeStr === 'server' ? 'server' : 'local') as TtsMode;
         
-        const voiceURI = localStorage.getItem('selectedVoiceURI');
+        // Get the appropriate voice URI based on mode
+        let voiceURI: string | null = null;
+        if (mode === 'server') {
+            voiceURI = localStorage.getItem('selectedServerVoice');
+        } else {
+            voiceURI = localStorage.getItem('selectedLocalVoiceURI');
+        }
         
         return { mode, selectedVoiceURI: voiceURI };
     } catch (error) {
@@ -123,10 +148,20 @@ export const saveTtsPreferences = (mode: TtsMode, selectedVoiceURI: string | nul
     
     try {
         localStorage.setItem('ttsMode', mode);
-        if (selectedVoiceURI !== null) {
-            localStorage.setItem('selectedVoiceURI', selectedVoiceURI);
+        
+        // Save voice to mode-specific key
+        if (mode === 'server') {
+            if (selectedVoiceURI !== null) {
+                localStorage.setItem('selectedServerVoice', selectedVoiceURI);
+            } else {
+                localStorage.removeItem('selectedServerVoice');
+            }
         } else {
-            localStorage.removeItem('selectedVoiceURI');
+            if (selectedVoiceURI !== null) {
+                localStorage.setItem('selectedLocalVoiceURI', selectedVoiceURI);
+            } else {
+                localStorage.removeItem('selectedLocalVoiceURI');
+            }
         }
     } catch (error) {
         console.error('Failed to save TTS preferences:', error);

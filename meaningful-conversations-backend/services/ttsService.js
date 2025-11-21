@@ -1,9 +1,14 @@
 // TTS Service for Piper Text-to-Speech
 // Handles communication with the Piper TTS container/process
 
+const axios = require('axios');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+
+// Configuration
+const TTS_SERVICE_URL = process.env.TTS_SERVICE_URL || 'http://tts:8082';
+const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
 
 /**
  * Voice configuration mapping
@@ -11,7 +16,7 @@ const execAsync = promisify(exec);
  */
 const VOICE_MODELS = {
     de: {
-        female: 'de_DE-eva_k-x_low',
+        female: 'de_DE-mls-medium',
         male: 'de_DE-thorsten-medium',
     },
     en: {
@@ -84,14 +89,30 @@ function getSpeechRate(botId, isMeditation) {
 }
 
 /**
+ * Get voice model from voiceId
+ * @param {string} voiceId - The voice ID (e.g., 'de-eva', 'en-ryan')
+ * @returns {string|null} - Voice model name or null if not found
+ */
+function getVoiceModelFromId(voiceId) {
+    const voiceMap = {
+        'de-mls': 'de_DE-mls-medium',
+        'de-thorsten': 'de_DE-thorsten-medium',
+        'en-amy': 'en_US-amy-medium',
+        'en-ryan': 'en_US-ryan-medium',
+    };
+    return voiceMap[voiceId] || null;
+}
+
+/**
  * Synthesize speech using Piper TTS
  * @param {string} text - The text to synthesize
  * @param {string} botId - The bot ID for voice selection
  * @param {string} lang - Language code ('de' or 'en')
  * @param {boolean} isMeditation - Whether to use meditation mode (slower)
+ * @param {string} voiceId - Optional: Specific voice ID to use (overrides bot default)
  * @returns {Promise<Buffer>} - Audio data as WAV buffer
  */
-async function synthesizeSpeech(text, botId, lang, isMeditation = false) {
+async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId = null) {
     if (!text || text.trim().length === 0) {
         throw new Error('Text is required for speech synthesis');
     }
@@ -99,23 +120,63 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false) {
     // Clean the text (remove markdown, etc.)
     const cleanText = cleanTextForSpeech(text);
     
-    // Get voice model for this bot
-    const { model } = getVoiceForBot(botId, lang);
+    // Get voice model - use voiceId if provided, otherwise auto-select
+    let model;
+    if (voiceId) {
+        model = getVoiceModelFromId(voiceId);
+        if (!model) {
+            console.warn(`Unknown voiceId: ${voiceId}, falling back to bot default`);
+            model = getVoiceForBot(botId, lang).model;
+        }
+    } else {
+        model = getVoiceForBot(botId, lang).model;
+    }
     
     // Get speech rate
     const rate = getSpeechRate(botId, isMeditation);
+    // Server TTS voices are 5% slower (lengthScale 1.05x higher)
+    const serverVoiceSlowdown = 1.05;
+    const lengthScale = (1.0 / rate) * serverVoiceSlowdown; // Piper uses length_scale (inverse of rate)
     
-    // Determine voice model path
+    // Try TTS container first (if configured)
+    if (USE_TTS_CONTAINER) {
+        try {
+            const response = await axios.post(
+                `${TTS_SERVICE_URL}/synthesize`,
+                {
+                    text: cleanText,
+                    model: model,
+                    lengthScale: lengthScale
+                },
+                {
+                    timeout: 15000,
+                    responseType: 'arraybuffer'
+                }
+            );
+            
+            console.log(`TTS via container: ${response.headers['x-tts-duration-ms']}ms`);
+            return Buffer.from(response.data);
+            
+        } catch (error) {
+            console.warn('TTS container failed, falling back to local Piper:', error.message);
+            // Fall through to local Piper
+        }
+    }
+    
+    // Fallback: Local Piper (if available)
+    // Check if Piper is available first
+    try {
+        await execAsync('which piper');
+    } catch {
+        // Piper not available - return null so frontend can use Web Speech API
+        console.log('Piper TTS not available, suggesting fallback to Web Speech API');
+        throw new Error('Piper TTS not available: Local Piper not found on system');
+    }
+    
     const voiceDir = process.env.PIPER_VOICE_DIR || '/models';
     const modelPath = `${voiceDir}/${model}.onnx`;
-    
-    // Check if we're running in container or need to call container
     const piperCommand = process.env.PIPER_COMMAND || 'piper';
-    
-    // Build the command
-    // Piper reads text from stdin and outputs WAV to stdout
-    const lengthScale = 1.0 / rate; // Piper uses length_scale (inverse of rate)
-    const command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-raw`;
+    const command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-file -`;
     
     try {
         const { stdout, stderr } = await execAsync(command, {
@@ -127,6 +188,7 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false) {
             console.warn('Piper stderr:', stderr.toString());
         }
         
+        console.log('TTS via local Piper');
         return stdout;
     } catch (error) {
         console.error('Piper TTS error:', error);
@@ -137,11 +199,44 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false) {
 /**
  * Clean text for speech synthesis
  * Removes markdown formatting and other non-spoken elements
+ * Applies phonetic replacements for English words in German TTS
  * @param {string} text - Raw text with possible markdown
  * @returns {string} - Cleaned text ready for TTS
  */
 function cleanTextForSpeech(text) {
-    return text
+    // Phonetic replacements for common English terms
+    // These replacements help German TTS voices pronounce English words correctly
+    // Note: These phonetic versions are ONLY used for audio, never displayed to users
+    const phoneticReplacements = {
+        // Coaching terms
+        'Coach': 'Koutsch',
+        'coach': 'koutsch',
+        'Coaching': 'Koutsching',
+        'coaching': 'koutsching',
+        
+        // Session terms  
+        'Session': 'Seschän',
+        'session': 'seschän',
+        'Sessions': 'Seschäns',
+        'sessions': 'seschäns',
+        
+        // Common business/tech terms
+        'Interview': 'Interwju',
+        'interview': 'interwju',
+        'Meeting': 'Mieting',
+        'meeting': 'mieting',
+        'Feedback': 'Fiedbäck',
+        'feedback': 'fiedbäck',
+        'Team': 'Tiem',
+        'team': 'tiem',
+        'Goal': 'Goul',
+        'goal': 'goul',
+        'Goals': 'Gouls',
+        'goals': 'gouls',
+    };
+    
+    // First, clean markdown and formatting
+    let cleanedText = text
         // Remove headers
         .replace(/#{1,6}\s/g, '')
         // Remove emphasis markers (bold, italic)
@@ -153,7 +248,17 @@ function cleanTextForSpeech(text) {
         // Remove horizontal rules
         .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
         // Remove blockquote markers
-        .replace(/^>\s?/gm, '')
+        .replace(/^>\s?/gm, '');
+    
+    // Apply phonetic replacements for better pronunciation
+    // Use word boundaries to avoid partial replacements
+    for (const [english, phonetic] of Object.entries(phoneticReplacements)) {
+        const regex = new RegExp(`\\b${english}\\b`, 'g');
+        cleanedText = cleanedText.replace(regex, phonetic);
+    }
+    
+    // Final cleanup
+    return cleanedText
         // Normalize whitespace
         .replace(/\s+/g, ' ')
         .trim();
@@ -164,9 +269,22 @@ function cleanTextForSpeech(text) {
  * @returns {Promise<boolean>} - True if Piper is accessible
  */
 async function isPiperAvailable() {
+    // Check TTS container first
+    if (USE_TTS_CONTAINER) {
+        try {
+            const response = await axios.get(`${TTS_SERVICE_URL}/health`, { timeout: 5000 });
+            return response.data.status === 'ok';
+        } catch (error) {
+            console.warn('TTS container not available:', error.message);
+            // Fall through to check local Piper
+        }
+    }
+    
+    // Check local Piper
     try {
         const piperCommand = process.env.PIPER_COMMAND || 'piper';
-        await execAsync(`${piperCommand} --version`, { timeout: 5000 });
+        // Piper --help returns exit code 0, unlike --version which requires --model
+        await execAsync(`${piperCommand} --help`, { timeout: 5000 });
         return true;
     } catch (error) {
         console.warn('Piper TTS not available:', error.message);
@@ -197,6 +315,7 @@ async function getAvailableVoices() {
 module.exports = {
     synthesizeSpeech,
     getVoiceForBot,
+    getVoiceModelFromId,
     cleanTextForSpeech,
     isPiperAvailable,
     getAvailableVoices,

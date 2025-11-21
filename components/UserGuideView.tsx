@@ -62,7 +62,10 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches.
 - **Sprachausgabe (TTS):**
   - **Klicken Sie auf das Lautsprecher-Symbol**, um die Sprachausgabe ein- oder auszuschalten.
   - Wenn sie aktiviert ist, können Sie die Wiedergabe mit den Symbolen **Pause/Wiedergabe** und **Wiederholen** steuern.
-  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen, wo Sie verschiedene Stimmen für Ihren Coach auswählen und vorhören können.
+  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie drei Optionen:
+    - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches. Nutzt hochwertige Server-Stimmen für konsistente Qualität.
+    - **Server-Stimmen (Hohe Qualität):** Professionelle Stimmen, die auf unserem Server generiert werden. Bieten die beste Klangqualität und Natürlichkeit.
+    - **Gerätestimmen (Lokal):** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Deutlich schnellere Reaktionszeiten und funktionieren auch offline. Es lohnt sich, diese alternativ auszuprobieren, besonders für flüssige Gespräche im Sprachmodus.
 - **Sprachmodus:**
   - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
@@ -135,6 +138,41 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - Dieser Schlüssel wird **niemals** an unsere Server gesendet.
 - Nur die verschlüsselte, unleserliche Version Ihrer Daten wird gespeichert.
 - **Niemand außer Ihnen kann Ihre Daten lesen.**
+
+---
+
+## Kapitel 6: App zum Homescreen hinzufügen
+
+Die Meaningful Conversations App ist eine Progressive Web App (PWA) und kann wie eine native App auf Ihrem Gerät installiert werden. So haben Sie schnellen Zugriff und ein App-ähnliches Erlebnis.
+
+### 6.1 Installation auf iOS (iPhone/iPad)
+
+1. Öffnen Sie die App in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
+2. Tippen Sie auf das **Teilen-Symbol** (das Quadrat mit dem Pfeil nach oben) in der unteren Leiste.
+3. Scrollen Sie nach unten und tippen Sie auf **"Zum Home-Bildschirm"**.
+4. Geben Sie der App einen Namen (z.B. "Sinnstiftende Gespräche") und tippen Sie auf **"Hinzufügen"**.
+5. Die App erscheint nun als Icon auf Ihrem Homescreen und öffnet sich im Vollbildmodus ohne Browser-Leiste.
+
+### 6.2 Installation auf Android
+
+1. Öffnen Sie die App in **Chrome** oder einem anderen Browser.
+2. Tippen Sie auf das **Menü-Symbol** (drei Punkte) oben rechts.
+3. Wählen Sie **"Zum Startbildschirm hinzufügen"** oder **"App installieren"**.
+4. Bestätigen Sie mit **"Hinzufügen"** oder **"Installieren"**.
+5. Die App erscheint nun als Icon auf Ihrem Homescreen.
+
+### 6.3 Installation auf Desktop (Windows/Mac/Linux)
+
+1. Öffnen Sie die App in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
+2. Klicken Sie auf das **Install-Symbol** (⊕) in der Adressleiste oder das **Menü** (drei Punkte).
+3. Wählen Sie **"Installieren"** oder **"App installieren"**.
+4. Die App wird wie eine Desktop-Anwendung installiert und kann über Ihr Startmenü/Dock geöffnet werden.
+
+**Vorteile der Installation:**
+- Schnellerer Zugriff über Ihr App-Icon
+- Vollbildansicht ohne Browser-Chrome
+- Push-Benachrichtigungen (falls aktiviert)
+- Funktioniert teilweise auch offline
 `;
 
 const en_markdown = `## Introduction
@@ -191,7 +229,10 @@ On the **Select a Coach** screen, you'll see a list of available coaches.
 - **Voice Output (TTS) Controls:**
   - **Click the Speaker icon** to toggle text-to-speech on or off.
   - When enabled, you can control playback with the **Pause/Play** and **Repeat** icons.
-  - **Click the Gear icon** to open the **Voice Settings** modal, where you can select and preview different voices for your coach.
+  - **Click the Gear icon** to open the **Voice Settings** modal. You have three options:
+    - **Coach Signature Voice:** The best available voice for the coach's language and personality. Uses high-quality server voices for consistent quality.
+    - **Server Voices (High Quality):** Professional voices generated on our server. Offer the best sound quality and naturalness.
+    - **Device Voices (Local):** Voices generated directly on your device. **Advantage:** Significantly faster response times and work offline. Worth trying as an alternative, especially for fluid conversations in voice mode.
 - **Voice Mode:**
   - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
   - **Tap the large microphone icon** to start recording. Speak your message.

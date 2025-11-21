@@ -40,8 +40,8 @@ cd meaningful-conversations-backend
 ./scripts/download-tts-voices.sh ./tts-voices
 ```
 
-This downloads 4 voice models (~250MB total):
-- `de_DE-eva_k-x_low.onnx` (German Female, ~20MB)
+This downloads 4 voice models (~270MB total):
+- `de_DE-mls-medium.onnx` (German Female, ~74MB)
 - `de_DE-thorsten-medium.onnx` (German Male, ~60MB)
 - `en_US-amy-medium.onnx` (English Female, ~60MB)
 - `en_US-ryan-medium.onnx` (English Male, ~60MB)
@@ -77,7 +77,7 @@ Add the following to your `.env.production` or `.env.staging` file:
 TTS_ENABLED=true
 PIPER_VOICE_DIR=/models
 PIPER_COMMAND=piper
-TTS_DEFAULT_VOICE_DE_FEMALE=de_DE-eva_k-x_low
+TTS_DEFAULT_VOICE_DE_FEMALE=de_DE-mls-medium
 TTS_DEFAULT_VOICE_DE_MALE=de_DE-thorsten-medium
 TTS_DEFAULT_VOICE_EN_FEMALE=en_US-amy-medium
 TTS_DEFAULT_VOICE_EN_MALE=en_US-ryan-medium
@@ -117,10 +117,10 @@ Expected response:
 
 | Voice ID | Language | Gender | Quality | Size | Description |
 |----------|----------|--------|---------|------|-------------|
-| `de_DE-eva_k-x_low` | German | Female | Fast | ~20MB | Clear, professional |
-| `de_DE-thorsten-medium` | German | Male | Balanced | ~60MB | Natural, warm |
-| `en_US-amy-medium` | English | Female | Balanced | ~60MB | Friendly, clear |
-| `en_US-ryan-medium` | English | Male | Balanced | ~60MB | Warm, professional |
+| `de_DE-mls-medium` | German | Female | Medium | ~74MB | Clear, warm, professional |
+| `de_DE-thorsten-medium` | German | Male | Medium | ~60MB | Natural, warm |
+| `en_US-amy-medium` | English | Female | Medium | ~60MB | Friendly, clear |
+| `en_US-ryan-medium` | English | Male | Medium | ~60MB | Warm, professional |
 
 ### Quality Levels
 
@@ -146,9 +146,9 @@ Each bot automatically gets assigned an appropriate voice:
 
 | Bot ID | Language | Voice (DE) | Voice (EN) |
 |--------|----------|----------|----------|
-| g-interviewer | Both | eva_k (F) | amy (F) |
-| ava-strategic | Both | eva_k (F) | amy (F) |
-| chloe-cbt | Both | eva_k (F) | amy (F) |
+| g-interviewer | Both | mls (F) | amy (F) |
+| ava-strategic | Both | mls (F) | amy (F) |
+| chloe-cbt | Both | mls (F) | amy (F) |
 | max-ambitious | Both | thorsten (M) | ryan (M) |
 | rob-pq | Both | thorsten (M, slow) | ryan (M, slow) |
 | kenji-stoic | Both | thorsten (M, slow) | ryan (M, slow) |

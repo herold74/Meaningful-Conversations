@@ -108,8 +108,8 @@ if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" ]]; then
 fi
 
 # Validate component
-if [[ "$COMPONENT" != "all" && "$COMPONENT" != "frontend" && "$COMPONENT" != "backend" ]]; then
-    echo -e "${RED}Error: Component must be 'all', 'frontend', or 'backend'${NC}"
+if [[ "$COMPONENT" != "all" && "$COMPONENT" != "frontend" && "$COMPONENT" != "backend" && "$COMPONENT" != "tts" ]]; then
+    echo -e "${RED}Error: Component must be 'all', 'frontend', 'backend', or 'tts'${NC}"
     exit 1
 fi
 
@@ -184,6 +184,26 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo ""
     fi
 
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
+        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${BLUE}Building TTS Image${NC}"
+        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "${YELLOW}[DRY RUN]${NC} Would build: $TTS_IMAGE"
+        else
+            cd meaningful-conversations-backend
+            # Build-Context: current dir (parent von tts-service/)
+            podman build --platform linux/amd64 -f tts-service/Dockerfile -t "$TTS_IMAGE" .
+            podman tag "$TTS_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+            cd ..
+            echo -e "${GREEN}✓ TTS image built${NC}"
+        fi
+        echo ""
+    fi
+
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "frontend" ]]; then
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo -e "${BLUE}Building Frontend Image${NC}"
@@ -201,6 +221,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
         fi
         echo ""
     fi
+
 else
     echo -e "${YELLOW}⏭️  Skipping build phase${NC}"
     echo ""
@@ -243,6 +264,20 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
             podman push "$BACKEND_IMAGE"
             podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:latest"
             echo -e "${GREEN}✓ Backend image pushed${NC}"
+        fi
+        echo ""
+    fi
+    
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "${YELLOW}[DRY RUN]${NC} Would push: $TTS_IMAGE"
+        else
+            echo -e "${YELLOW}Pushing TTS image...${NC}"
+            podman push "$TTS_IMAGE"
+            podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+            echo -e "${GREEN}✓ TTS image pushed${NC}"
         fi
         echo ""
     fi

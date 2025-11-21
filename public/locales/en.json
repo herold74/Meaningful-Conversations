@@ -504,8 +504,9 @@
 
   "voiceModal_title": "Voice Settings",
   "voiceModal_auto": "Coach's Signature Voice",
-  "voiceModal_auto_desc": "The best available voice for this coach's language and personality. Prioritizes high-quality, local voices on your system.",
+  "voiceModal_auto_desc": "The best available voice for this coach's language and personality. Uses high-quality server voices for consistent quality.",
   "voiceModal_server_voices": "Server Voices (High Quality)",
+  "voiceModal_unavailable": "Unavailable",
   "voiceModal_local_voices": "Device Voices",
   "voiceModal_preview_text": "Hello, this is a preview of my voice.",
   "voiceModal_preview_aria": "Preview voice for {{name}}",
