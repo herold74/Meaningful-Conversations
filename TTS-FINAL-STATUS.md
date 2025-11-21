@@ -98,7 +98,7 @@ Dann Seite neu laden und TTS testen!
 echo "Hallo Welt" | podman run --rm -i \
   -v tts_voices_production:/models:ro \
   meaningful-conversations-tts:latest \
-  piper --model /models/de_DE-eva_k-x_low.onnx --output-raw \
+  piper --model /models/de_DE-mls-medium.onnx --output-raw \
   > test.wav
 ```
 

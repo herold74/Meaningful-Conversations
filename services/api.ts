@@ -24,15 +24,21 @@ export class ApiError extends Error {
  * This allows a single build to be deployed to multiple environments.
  * @returns {string} The base URL for the API.
  */
-const getApiBaseUrl = (): string => {
+export const getApiBaseUrl = (): string => {
     const hostname = window.location.hostname;
     const port = window.location.port;
     const urlParams = new URLSearchParams(window.location.search);
     const backendParam = urlParams.get('backend');
 
-    // 1. Priority: URL parameter for explicit override (for local development)
+    // 1. Priority: URL parameter for explicit override (for local development/testing)
     if (backendParam === 'local') {
         return 'http://localhost:3001';
+    }
+    if (backendParam === 'staging') {
+        return 'https://mc-beta.manualmode.at';
+    }
+    if (backendParam === 'production') {
+        return 'https://mc-app.manualmode.at';
     }
 
     // 2. Runtime detection based on hostname and port
@@ -67,7 +73,6 @@ const getApiBaseUrl = (): string => {
 };
 
 
-const API_BASE_URL = getApiBaseUrl();
 const SESSION_KEY = 'user_session';
 
 interface Session {
@@ -127,7 +132,9 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         headers,
     };
 
-    const finalUrl = `${API_BASE_URL}/api${endpoint}`;
+    // Get API base URL dynamically for each request (to support ?backend=staging query param)
+    const apiBaseUrl = getApiBaseUrl();
+    const finalUrl = `${apiBaseUrl}/api${endpoint}`;
 
     let response;
     try {
@@ -135,8 +142,8 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     } catch (error: any) {
         if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
              throw new ApiError(
-                `Could not connect to the server at ${API_BASE_URL}.`, 
-                0, { error: 'Network Error' }, true, API_BASE_URL
+                `Could not connect to the server at ${apiBaseUrl}.`, 
+                0, { error: 'Network Error' }, true, apiBaseUrl
             );
         }
         throw error;
@@ -167,5 +174,5 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
         return new Promise(() => {}); // Prevent further processing
     }
     
-    throw new ApiError(errorData.error || errorData.message || 'An unknown API error occurred.', response.status, errorData, false, API_BASE_URL);
+    throw new ApiError(errorData.error || errorData.message || 'An unknown API error occurred.', response.status, errorData, false, apiBaseUrl);
 };

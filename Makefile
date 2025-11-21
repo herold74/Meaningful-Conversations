@@ -20,14 +20,14 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 build: ## Build container images locally
-	@echo "$(GREEN)Building backend...$(NC)"
+	@echo "$(GREEN)Building backend (with TTS)...$(NC)"
 	@$(CONTAINER_ENGINE) build -t meaningful-conversations-backend:latest ./meaningful-conversations-backend
 	@echo "$(GREEN)Building frontend...$(NC)"
 	@$(CONTAINER_ENGINE) build -t meaningful-conversations-frontend:latest .
 	@echo "$(GREEN)✓ Build complete$(NC)"
 
 build-no-cache: ## Build container images without cache
-	@echo "$(GREEN)Building backend (no cache)...$(NC)"
+	@echo "$(GREEN)Building backend with TTS (no cache)...$(NC)"
 	@$(CONTAINER_ENGINE) build --no-cache -t meaningful-conversations-backend:latest ./meaningful-conversations-backend
 	@echo "$(GREEN)Building frontend (no cache)...$(NC)"
 	@$(CONTAINER_ENGINE) build --no-cache -t meaningful-conversations-frontend:latest .
@@ -92,7 +92,7 @@ update-version: ## Update version everywhere in the application
 		echo "$(YELLOW)Updating version to $$VERSION in all files...$(NC)"; \
 		sed -i.bak "s/\"version\": \"[0-9]*\.[0-9]*\.[0-9]*\"/\"version\": \"$$VERSION\"/" package.json && rm package.json.bak; \
 		sed -i.bak "s/\"version\": \"[0-9]*\.[0-9]*\.[0-9]*\"/\"version\": \"$$VERSION\"/" meaningful-conversations-backend/package.json && rm meaningful-conversations-backend/package.json.bak; \
-		sed -i.bak "s/cache-v[0-9]*\.[0-9]*\.[0-9]*-pwa-fix/cache-v$$VERSION-pwa-fix/" public/sw.js && rm public/sw.js.bak; \
+		sed -i.bak "s/cache-v[0-9]*\.[0-9]*\.[0-9]*/cache-v$$VERSION/" public/sw.js && rm public/sw.js.bak; \
 		sed -i.bak "s/Version [0-9]*\.[0-9]*\.[0-9]*/Version $$VERSION/" components/BurgerMenu.tsx && rm components/BurgerMenu.tsx.bak; \
 		sed -i.bak "s/about_version')} [0-9]*\.[0-9]*\.[0-9]*/about_version')} $$VERSION/" components/AboutView.tsx && rm components/AboutView.tsx.bak; \
 		sed -i.bak "s/Meaningful Conversations [0-9]*\.[0-9]*\.[0-9]*/Meaningful Conversations $$VERSION/" metadata.json && rm metadata.json.bak; \
@@ -197,6 +197,13 @@ deploy-manualmode-staging-backend: ## Deploy backend to manualmode staging
 
 deploy-manualmode-production-backend: ## Deploy backend to manualmode production
 	@./deploy-manualmode.sh -e production -c backend
+
+deploy-manualmode-staging-tts: ## Deploy TTS service to manualmode staging
+	@./deploy-manualmode.sh -e staging -c tts
+
+deploy-manualmode-production-tts: ## Deploy TTS service to manualmode production
+	@./deploy-manualmode.sh -e production -c tts
+
 
 deploy-manualmode-dry-run: ## Test deployment to manualmode server (no changes)
 	@./deploy-manualmode.sh --dry-run

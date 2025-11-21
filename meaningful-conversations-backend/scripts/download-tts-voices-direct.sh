@@ -62,7 +62,7 @@ download_voice_direct() {
 # Download German voices
 echo "Downloading German voices..."
 echo "-----------------------------------"
-download_voice_direct "de_DE" "eva_k" "x_low"
+download_voice_direct "de_DE" "mls" "medium"
 download_voice_direct "de_DE" "thorsten" "medium"
 
 # Download English voices

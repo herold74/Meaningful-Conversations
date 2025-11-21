@@ -72,11 +72,11 @@ See [TTS-SETUP-GUIDE.md](meaningful-conversations-backend/TTS-SETUP-GUIDE.md) fo
 
 | Bot | German Voice | English Voice |
 |-----|-------------|---------------|
-| Gloria (g-interviewer) | Eva (Female) | Amy (Female) |
+| Gloria (g-interviewer) | Sophia (Female) | Amy (Female) |
 | Max (max-ambitious) | Thorsten (Male) | Ryan (Male) |
-| Ava (ava-strategic) | Eva (Female) | Amy (Female) |
+| Ava (ava-strategic) | Sophia (Female) | Amy (Female) |
 | Kenji (kenji-resilience) | Thorsten (Male, slow) | Ryan (Male, slow) |
-| Chloe (chloe-structured-reflection) | Eva (Female) | Amy (Female) |
+| Chloe (chloe-structured-reflection) | Sophia (Female) | Amy (Female) |
 | Rob (rob-pq) | Thorsten (Male, slow) | Ryan (Male, slow) |
 | Nobody (nexus-goal-path-solution) | Thorsten (Male, fast) | Ryan (Male, fast) |
 

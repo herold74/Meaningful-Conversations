@@ -55,7 +55,7 @@
    git lfs pull
    
    # Copy required models
-   cp de_DE/eva_k/x_low/de_DE-eva_k-x_low.* ../tts-voices/
+   cp de_DE/mls/medium/de_DE-mls-medium.* ../tts-voices/
    cp de_DE/thorsten/medium/de_DE-thorsten-medium.* ../tts-voices/
    cp en_US/amy/medium/en_US-amy-medium.* ../tts-voices/
    cp en_US/ryan/medium/en_US-ryan-medium.* ../tts-voices/
