@@ -19,6 +19,7 @@ interface VoiceSelectionModalProps {
     voices: SpeechSynthesisVoice[];
     currentVoiceURI: string | null;
     currentTtsMode: TtsMode;
+    isAutoMode?: boolean;
     onSelectVoice: (selection: VoiceSelection) => void;
     onPreviewVoice: (voice: SpeechSynthesisVoice) => void;
     onPreviewServerVoice: (voiceId: string) => void;
@@ -32,6 +33,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     voices,
     currentVoiceURI,
     currentTtsMode,
+    isAutoMode = false,
     onSelectVoice,
     onPreviewVoice,
     onPreviewServerVoice,
@@ -40,7 +42,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
 }) => {
     const { t } = useLocalization();
     const [selection, setSelection] = useState<VoiceSelection>(
-        currentTtsMode === 'server' && currentVoiceURI 
+        isAutoMode
+            ? { type: 'auto' }
+            : currentTtsMode === 'server' && currentVoiceURI 
             ? { type: 'server', voiceId: currentVoiceURI }
             : currentVoiceURI
             ? { type: 'local', voiceURI: currentVoiceURI }
@@ -66,7 +70,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
-            if (currentTtsMode === 'server' && currentVoiceURI) {
+            if (isAutoMode) {
+                setSelection({ type: 'auto' });
+            } else if (currentTtsMode === 'server' && currentVoiceURI) {
                 setSelection({ type: 'server', voiceId: currentVoiceURI });
             } else if (currentVoiceURI) {
                 setSelection({ type: 'local', voiceURI: currentVoiceURI });
@@ -74,7 +80,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 setSelection({ type: 'auto' });
             }
         }
-    }, [isOpen, currentVoiceURI, currentTtsMode]);
+    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode]);
 
 
     const localVoices = useMemo(() => {
