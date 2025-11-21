@@ -5,14 +5,22 @@ import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
 import { InfoIcon } from './icons/InfoIcon';
+import { SERVER_VOICES, type TtsMode } from '../services/ttsService';
+
+type VoiceSelection = 
+    | { type: 'auto' }
+    | { type: 'local'; voiceURI: string }
+    | { type: 'server'; voiceId: string };
 
 interface VoiceSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
     voices: SpeechSynthesisVoice[];
     currentVoiceURI: string | null;
-    onSelectVoice: (uri: string | null) => void;
+    currentTtsMode: TtsMode;
+    onSelectVoice: (selection: VoiceSelection) => void;
     onPreviewVoice: (voice: SpeechSynthesisVoice) => void;
+    onPreviewServerVoice: (voiceId: string) => void;
     botLanguage: Language;
     botGender: 'male' | 'female';
 }
@@ -22,20 +30,34 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     onClose,
     voices,
     currentVoiceURI,
+    currentTtsMode,
     onSelectVoice,
     onPreviewVoice,
+    onPreviewServerVoice,
     botLanguage,
     botGender,
 }) => {
     const { t } = useLocalization();
-    const [selectedURI, setSelectedURI] = useState(currentVoiceURI);
+    const [selection, setSelection] = useState<VoiceSelection>(
+        currentTtsMode === 'server' && currentVoiceURI 
+            ? { type: 'server', voiceId: currentVoiceURI }
+            : currentVoiceURI
+            ? { type: 'local', voiceURI: currentVoiceURI }
+            : { type: 'auto' }
+    );
 
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
-            setSelectedURI(currentVoiceURI);
+            if (currentTtsMode === 'server' && currentVoiceURI) {
+                setSelection({ type: 'server', voiceId: currentVoiceURI });
+            } else if (currentVoiceURI) {
+                setSelection({ type: 'local', voiceURI: currentVoiceURI });
+            } else {
+                setSelection({ type: 'auto' });
+            }
         }
-    }, [isOpen, currentVoiceURI]);
+    }, [isOpen, currentVoiceURI, currentTtsMode]);
 
 
     const localVoices = useMemo(() => {
@@ -88,8 +110,14 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
 
     }, [voices, botLanguage, botGender]);
 
+    const serverVoices = useMemo(() => {
+        return SERVER_VOICES.filter(v => 
+            v.language === botLanguage && v.gender === botGender
+        );
+    }, [botLanguage, botGender]);
+
     const handleSave = () => {
-        onSelectVoice(selectedURI);
+        onSelectVoice(selection);
         onClose();
     };
 
@@ -119,8 +147,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                             <input
                                 type="radio"
                                 name="voice-selection"
-                                checked={selectedURI === null}
-                                onChange={() => setSelectedURI(null)}
+                                checked={selection.type === 'auto'}
+                                onChange={() => setSelection({ type: 'auto' })}
                                 className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-3">
@@ -130,32 +158,93 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         </label>
                     </div>
 
-                    {localVoices.length > 0 ? (
-                        localVoices.map(voice => (
-                            <div key={voice.voiceURI} className="p-3 border border-border-primary bg-background-tertiary">
-                                <label className="flex items-center cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="voice-selection"
-                                        checked={selectedURI === voice.voiceURI}
-                                        onChange={() => setSelectedURI(voice.voiceURI)}
-                                        className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
-                                    />
-                                    <span className="ml-3 flex-1">
-                                        <span className="font-semibold text-content-primary">{cleanVoiceName(voice.name)}</span>
-                                        <span className="block text-sm text-content-secondary">{voice.lang} - {getVoiceGender(voice)}</span>
-                                    </span>
-                                    <button
-                                        onClick={(e) => { e.preventDefault(); onPreviewVoice(voice); }}
-                                        className="p-2 text-content-secondary hover:text-accent-primary"
-                                        aria-label={`Preview voice ${voice.name}`}
-                                    >
-                                        <PlayIcon className="w-5 h-5" />
-                                    </button>
-                                </label>
+                    {/* Server Voices Section */}
+                    {serverVoices.length > 0 && (
+                        <>
+                            <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
+                                {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
+                            </h3>
+                            {serverVoices.map(voice => (
+                                <div key={voice.id} className="p-3 border border-border-primary bg-background-tertiary">
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="voice-selection"
+                                            checked={selection.type === 'server' && selection.voiceId === voice.id}
+                                            onChange={() => setSelection({ type: 'server', voiceId: voice.id })}
+                                            className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
+                                        />
+                                        <span className="ml-3 flex-1">
+                                            <span className="font-semibold text-content-primary">{voice.name}</span>
+                                            <span className="block text-sm text-content-secondary">
+                                                {voice.language.toUpperCase()} - {voice.gender}
+                                            </span>
+                                        </span>
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); onPreviewServerVoice(voice.id); }}
+                                            className="p-2 text-content-secondary hover:text-accent-primary"
+                                            aria-label={`Preview voice ${voice.name}`}
+                                        >
+                                            <PlayIcon className="w-5 h-5" />
+                                        </button>
+                                    </label>
+                                </div>
+                            ))}
+                        </>
+                    )}
+
+                    {/* Local Voices Section */}
+                    {localVoices.length > 0 && (
+                        <>
+                            <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
+                                {t('voiceModal_local_voices') || 'Device Voices'}
+                            </h3>
+                            {localVoices.map(voice => (
+                                <div key={voice.voiceURI} className="p-3 border border-border-primary bg-background-tertiary">
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="voice-selection"
+                                            checked={selection.type === 'local' && selection.voiceURI === voice.voiceURI}
+                                            onChange={() => setSelection({ type: 'local', voiceURI: voice.voiceURI })}
+                                            className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
+                                        />
+                                        <span className="ml-3 flex-1">
+                                            <span className="font-semibold text-content-primary">{cleanVoiceName(voice.name)}</span>
+                                            <span className="block text-sm text-content-secondary">{voice.lang} - {getVoiceGender(voice)}</span>
+                                        </span>
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); onPreviewVoice(voice); }}
+                                            className="p-2 text-content-secondary hover:text-accent-primary"
+                                            aria-label={`Preview voice ${voice.name}`}
+                                        >
+                                            <PlayIcon className="w-5 h-5" />
+                                        </button>
+                                    </label>
+                                </div>
+                            ))}
+                        </>
+                    )}
+
+                    {/* Warning if no local voices available */}
+                    {localVoices.length === 0 && serverVoices.length > 0 && (
+                        <div className="text-left text-content-secondary p-4 bg-status-info-background border border-status-info-border rounded-lg">
+                            <div className="flex items-start gap-3">
+                                <InfoIcon className="w-6 h-6 text-status-info-foreground flex-shrink-0 mt-1" />
+                                <div>
+                                    <p className="font-semibold text-status-info-foreground">
+                                      {t('voiceModal_no_local_voices_title') || 'No device voices available'}
+                                    </p>
+                                    <p className="text-sm mt-1 text-status-info-foreground">
+                                        {t('voiceModal_no_local_voices_desc') || 'Your device does not have suitable local voices. You can use server voices instead.'}
+                                    </p>
+                                </div>
                             </div>
-                        ))
-                    ) : (
+                        </div>
+                    )}
+
+                    {/* Error if no voices at all */}
+                    {localVoices.length === 0 && serverVoices.length === 0 && (
                         <div className="text-left text-content-secondary p-4 bg-status-warning-background border border-status-warning-border rounded-lg">
                             <div className="flex items-start gap-3">
                                 <InfoIcon className="w-6 h-6 text-status-warning-foreground flex-shrink-0 mt-1" />
