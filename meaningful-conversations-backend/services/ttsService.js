@@ -233,6 +233,8 @@ function cleanTextForSpeech(text) {
         'goal': 'goul',
         'Goals': 'Gouls',
         'goals': 'gouls',
+        'Blog': 'Blogg',
+        'blog': 'blogg',
     };
     
     // First, clean markdown and formatting

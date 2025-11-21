@@ -170,6 +170,32 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     return prefs.mode;
   });
   
+  // Track if user selected "auto" mode
+  const [isAutoMode, setIsAutoMode] = useState<boolean>(() => {
+    if (typeof localStorage === 'undefined') return true; // Default to auto
+    
+    const autoModeSetting = localStorage.getItem('ttsAutoMode');
+    const prefs = getTtsPreferences();
+    
+    // If no setting exists yet, check if user has a saved voice
+    if (autoModeSetting === null) {
+      // No explicit auto mode setting - check if user has a voice saved
+      const hasServerVoice = localStorage.getItem('selectedServerVoice');
+      const hasLocalVoice = localStorage.getItem('selectedLocalVoiceURI');
+      
+      // If no voice is saved, default to auto mode (first start)
+      if (!hasServerVoice && !hasLocalVoice && !prefs.selectedVoiceURI) {
+        localStorage.setItem('ttsAutoMode', 'true');
+        return true;
+      }
+      
+      // User has a saved voice, so not in auto mode
+      return false;
+    }
+    
+    return autoModeSetting === 'true';
+  });
+  
   // Audio element for server TTS playback
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
@@ -259,29 +285,98 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [selectedVoiceURI, bot.id]);
 
 
-  // Check TTS server availability on mount and fallback if needed
+  // Check if saved voice is available, fallback to auto if not
   useEffect(() => {
-    const checkServerTtsAvailability = async () => {
-      if (ttsMode === 'server') {
-        try {
-          const apiBaseUrl = getApiBaseUrl();
-          const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, { 
-            signal: AbortSignal.timeout(3000) 
-          });
-          const healthData = await healthResponse.json();
-          
-          if (healthData.status !== 'ok' || !healthData.piperAvailable) {
-            console.warn('[TTS] Server TTS not available, falling back to local mode');
+    const checkVoiceAvailability = async () => {
+      // Helper function to get best server voice for bot
+      const getBestServerVoice = (botId: string, lang: string): string => {
+        let gender: 'male' | 'female' = 'female';
+        
+        if (lang === 'en') {
+          const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps'];
+          gender = maleBotsEN.includes(botId) ? 'male' : 'female';
+        } else if (lang === 'de') {
+          const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
+          gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
+        }
+        
+        // Map to voice IDs
+        if (lang === 'de') {
+          return gender === 'female' ? 'de-mls' : 'de-thorsten';
+        } else {
+          return gender === 'female' ? 'en-amy' : 'en-ryan';
+        }
+      };
+      
+      try {
+        const apiBaseUrl = getApiBaseUrl();
+        const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, { 
+          signal: AbortSignal.timeout(3000) 
+        });
+        const healthData = await healthResponse.json();
+        const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
+        
+        // Check if current saved selection is available
+        if (ttsMode === 'server' && selectedVoiceURI) {
+          // User has a server voice selected
+          if (!serverAvailable) {
+            // Server not available - switch to auto mode
+            console.warn('[TTS Init] Saved server voice unavailable, switching to auto mode');
+            localStorage.setItem('ttsAutoMode', 'true');
+            setIsAutoMode(true);
+            
+            // Use local fallback
+            setSelectedVoiceURI(null);
             setTtsMode('local');
+            saveTtsPreferences('local', null);
+          } else {
+            // Server available, keep selection
+            console.log('[TTS Init] Saved server voice available:', selectedVoiceURI);
           }
-        } catch (error) {
-          console.warn('[TTS] Could not reach TTS server, falling back to local mode');
+        } else if (ttsMode === 'local' && selectedVoiceURI) {
+          // User has a local voice selected - check if it exists
+          const voiceExists = window.speechSynthesis.getVoices().some(v => v.voiceURI === selectedVoiceURI);
+          if (!voiceExists) {
+            // Local voice not available - switch to auto mode
+            console.warn('[TTS Init] Saved local voice unavailable, switching to auto mode');
+            localStorage.setItem('ttsAutoMode', 'true');
+            setIsAutoMode(true);
+            setSelectedVoiceURI(null);
+            saveTtsPreferences('local', null);
+          } else {
+            console.log('[TTS Init] Saved local voice available:', selectedVoiceURI);
+          }
+        } else if (isAutoMode || (!selectedVoiceURI && ttsMode === 'local')) {
+          // Auto mode or no selection - choose best available
+          if (serverAvailable) {
+            const bestVoice = getBestServerVoice(bot.id, language);
+            setSelectedVoiceURI(bestVoice);
+            setTtsMode('server');
+            saveTtsPreferences('server', bestVoice);
+            console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
+          } else {
+            // Server not available, use local auto-selection (handled by speak function)
+            setSelectedVoiceURI(null);
+            setTtsMode('local');
+            saveTtsPreferences('local', null);
+            console.log('[TTS Init] Auto mode - using local browser voice');
+          }
+        }
+      } catch (error) {
+        console.warn('[TTS Init] Could not check voice availability:', error);
+        // On error, if user had a server voice selected, switch to auto
+        if (ttsMode === 'server') {
+          console.warn('[TTS Init] Switching to auto mode due to error');
+          localStorage.setItem('ttsAutoMode', 'true');
+          setIsAutoMode(true);
           setTtsMode('local');
+          setSelectedVoiceURI(null);
+          saveTtsPreferences('local', null);
         }
       }
     };
     
-    checkServerTtsAvailability();
+    checkVoiceAvailability();
   }, []); // Only run on mount
 
   // Auto-scroll to bottom when switching to text mode
@@ -588,22 +683,75 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   }, [t, bot.id, language]);
 
-  const handleSelectVoice = useCallback((selection: { type: 'auto' } | { type: 'local'; voiceURI: string } | { type: 'server'; voiceId: string }) => {
+  const handleSelectVoice = useCallback(async (selection: { type: 'auto' } | { type: 'local'; voiceURI: string } | { type: 'server'; voiceId: string }) => {
     if (selection.type === 'auto') {
-      setSelectedVoiceURI(null);
-      setTtsMode('local');
-      saveTtsPreferences('local', null);
+      // Save auto mode flag
+      localStorage.setItem('ttsAutoMode', 'true');
+      setIsAutoMode(true);
+      
+      // Auto mode: Try to use best available server voice, fallback to local
+      try {
+        const apiBaseUrl = getApiBaseUrl();
+        const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, { 
+          signal: AbortSignal.timeout(3000) 
+        });
+        const healthData = await healthResponse.json();
+        
+        if (healthData.status === 'ok' && healthData.piperAvailable) {
+          // Server TTS available - select best voice for bot
+          const getBestServerVoice = (botId: string, lang: string): string => {
+            let gender: 'male' | 'female' = 'female';
+            
+            if (lang === 'en') {
+              const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps'];
+              gender = maleBotsEN.includes(botId) ? 'male' : 'female';
+            } else if (lang === 'de') {
+              const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
+              gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
+            }
+            
+            // Map to voice IDs
+            if (lang === 'de') {
+              return gender === 'female' ? 'de-mls' : 'de-thorsten';
+            } else {
+              return gender === 'female' ? 'en-amy' : 'en-ryan';
+            }
+          };
+          
+          const bestVoice = getBestServerVoice(bot.id, language);
+          setSelectedVoiceURI(bestVoice);
+          setTtsMode('server');
+          saveTtsPreferences('server', bestVoice);
+          console.log('[TTS Select] Auto mode - using server voice:', bestVoice);
+        } else {
+          // Server TTS not available - use local
+          setSelectedVoiceURI(null);
+          setTtsMode('local');
+          saveTtsPreferences('local', null);
+          console.log('[TTS Select] Auto mode - server unavailable, using local');
+        }
+      } catch (error) {
+        // Error checking server - fallback to local
+        console.warn('[TTS Select] Auto mode - failed to check server, using local:', error);
+        setSelectedVoiceURI(null);
+        setTtsMode('local');
+        saveTtsPreferences('local', null);
+      }
     } else if (selection.type === 'local') {
+      localStorage.setItem('ttsAutoMode', 'false');
+      setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceURI);
       setTtsMode('local');
       saveTtsPreferences('local', selection.voiceURI);
     } else if (selection.type === 'server') {
+      localStorage.setItem('ttsAutoMode', 'false');
+      setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceId);
       setTtsMode('server');
       saveTtsPreferences('server', selection.voiceId);
     }
-    console.log('[TTS Select] New state - mode:', selection.type === 'server' ? 'server' : 'local', 'voiceURI:', selection.type === 'local' ? selection.voiceURI : (selection.type === 'server' ? selection.voiceId : null));
-  }, []);
+    setIsVoiceModalOpen(false);
+  }, [bot.id, language]);
   
   const handleOpenVoiceModal = () => {
     if (!window.speechSynthesis) return;
@@ -1348,6 +1496,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         voices={relevantVoices}
         currentVoiceURI={selectedVoiceURI}
         currentTtsMode={ttsMode}
+        isAutoMode={isAutoMode}
         onSelectVoice={handleSelectVoice}
         onPreviewVoice={handlePreviewVoice}
         onPreviewServerVoice={handlePreviewServerVoice}
