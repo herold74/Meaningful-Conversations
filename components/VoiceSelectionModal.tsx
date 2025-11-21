@@ -6,6 +6,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode } from '../services/ttsService';
+import { getApiBaseUrl } from '../services/api';
 
 type VoiceSelection = 
     | { type: 'auto' }
@@ -45,6 +46,22 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             ? { type: 'local', voiceURI: currentVoiceURI }
             : { type: 'auto' }
     );
+    const [serverTtsAvailable, setServerTtsAvailable] = useState<boolean>(true);
+
+    // Check TTS server availability
+    useEffect(() => {
+        if (isOpen) {
+            const apiBaseUrl = getApiBaseUrl();
+            fetch(`${apiBaseUrl}/api/tts/health`)
+                .then(res => res.json())
+                .then(data => {
+                    setServerTtsAvailable(data.status === 'ok' && data.piperAvailable);
+                })
+                .catch(() => {
+                    setServerTtsAvailable(false);
+                });
+        }
+    }, [isOpen]);
 
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
@@ -163,26 +180,29 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         <>
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
+                                {!serverTtsAvailable && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
                             </h3>
                             {serverVoices.map(voice => (
-                                <div key={voice.id} className="p-3 border border-border-primary bg-background-tertiary">
-                                    <label className="flex items-center cursor-pointer">
+                                <div key={voice.id} className={`p-3 border border-border-primary ${serverTtsAvailable ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
+                                    <label className={`flex items-center ${serverTtsAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                                         <input
                                             type="radio"
                                             name="voice-selection"
                                             checked={selection.type === 'server' && selection.voiceId === voice.id}
-                                            onChange={() => setSelection({ type: 'server', voiceId: voice.id })}
-                                            className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
+                                            onChange={() => serverTtsAvailable && setSelection({ type: 'server', voiceId: voice.id })}
+                                            disabled={!serverTtsAvailable}
+                                            className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                         <span className="ml-3 flex-1">
-                                            <span className="font-semibold text-content-primary">{voice.name}</span>
+                                            <span className={`font-semibold ${serverTtsAvailable ? 'text-content-primary' : 'text-content-secondary'}`}>{voice.name}</span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.language.toUpperCase()} - {voice.gender}
                                             </span>
                                         </span>
                                         <button
-                                            onClick={(e) => { e.preventDefault(); onPreviewServerVoice(voice.id); }}
-                                            className="p-2 text-content-secondary hover:text-accent-primary"
+                                            onClick={(e) => { e.preventDefault(); serverTtsAvailable && onPreviewServerVoice(voice.id); }}
+                                            disabled={!serverTtsAvailable}
+                                            className="p-2 text-content-secondary hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                             aria-label={`Preview voice ${voice.name}`}
                                         >
                                             <PlayIcon className="w-5 h-5" />

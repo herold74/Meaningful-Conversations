@@ -503,9 +503,10 @@
     
   "voiceModal_title": "Spracheinstellungen",
   "voiceModal_auto": "Signaturstimme des Coaches",
-  "voiceModal_auto_desc": "Die beste verfügbare Stimme für die Sprache und Persönlichkeit dieses Coaches. Priorisiert hochwertige, lokale Stimmen auf Ihrem System.",
+  "voiceModal_auto_desc": "Die beste verfügbare Stimme für die Sprache und Persönlichkeit dieses Coaches. Nutzt hochwertige Server-Stimmen für konsistente Qualität.",
   "voiceModal_server_voices": "Server-Stimmen (Hohe Qualität)",
-  "voiceModal_local_voices": "Gerätestimmen",
+  "voiceModal_unavailable": "Nicht verfügbar",
+  "voiceModal_local_voices": "Geräte-Stimmen",
   "voiceModal_preview_text": "Hallo, dies ist eine Vorschau meiner Stimme.",
   "voiceModal_preview_aria": "Vorschau der Stimme für {{name}}",
   "voiceModal_no_voices_title": "Keine passenden Stimmen gefunden",

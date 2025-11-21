@@ -33,9 +33,10 @@ router.use(checkTtsAvailable);
  * - botId: string (required) - Bot ID for voice selection
  * - lang: string (required) - Language code ('de' or 'en')
  * - isMeditation: boolean (optional) - Use slower meditation voice
+ * - voiceId: string (optional) - Specific voice ID (e.g., 'de-mls', 'en-ryan')
  */
 router.post('/synthesize', optionalAuthMiddleware, async (req, res) => {
-    const { text, botId, lang, isMeditation = false } = req.body;
+    const { text, botId, lang, isMeditation = false, voiceId = null } = req.body;
     const userId = req.userId; // May be undefined for guests
     const startTime = Date.now();
     
@@ -72,7 +73,7 @@ router.post('/synthesize', optionalAuthMiddleware, async (req, res) => {
         }
         
         // Synthesize speech
-        const audioBuffer = await synthesizeSpeech(text, botId, lang, isMeditation);
+        const audioBuffer = await synthesizeSpeech(text, botId, lang, isMeditation, voiceId);
         
         const durationMs = Date.now() - startTime;
         const characterCount = text.length;

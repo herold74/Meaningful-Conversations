@@ -10,10 +10,10 @@ Visit the Piper Voices repository and download models directly:
 
 ### Required Models:
 
-1. **German Female (Eva)**
-   - Navigate to: `de_DE/eva_k/x_low/`
-   - Download: `de_DE-eva_k-x_low.onnx` (~19MB)
-   - Download: `de_DE-eva_k-x_low.onnx.json` (~1KB)
+1. **German Female (Sophia/MLS)**
+   - Navigate to: `de_DE/mls/medium/`
+   - Download: `de_DE-mls-medium.onnx` (~74MB)
+   - Download: `de_DE-mls-medium.onnx.json` (~1KB)
 
 2. **German Male (Thorsten)**
    - Navigate to: `de_DE/thorsten/medium/`
@@ -40,8 +40,8 @@ meaningful-conversations-backend/tts-voices/
 Expected structure:
 ```
 tts-voices/
-├── de_DE-eva_k-x_low.onnx
-├── de_DE-eva_k-x_low.onnx.json
+├── de_DE-mls-medium.onnx
+├── de_DE-mls-medium.onnx.json
 ├── de_DE-thorsten-medium.onnx
 ├── de_DE-thorsten-medium.onnx.json
 ├── en_US-amy-medium.onnx
@@ -50,7 +50,7 @@ tts-voices/
 └── en_US-ryan-medium.onnx.json
 ```
 
-Total size: ~208 MB
+Total size: ~260 MB
 
 ## Option 2: Using Git LFS
 
@@ -63,7 +63,7 @@ cd temp-voices
 git lfs pull
 
 # Copy required models
-cp de_DE/eva_k/x_low/de_DE-eva_k-x_low.* ../tts-voices/
+cp de_DE/mls/medium/de_DE-mls-medium.* ../tts-voices/
 cp de_DE/thorsten/medium/de_DE-thorsten-medium.* ../tts-voices/
 cp en_US/amy/medium/en_US-amy-medium.* ../tts-voices/
 cp en_US/ryan/medium/en_US-ryan-medium.* ../tts-voices/
@@ -82,7 +82,7 @@ ls -lh tts-voices/*.onnx
 
 Expected output (approximate):
 ```
--rw-r--r--  1 user  staff    19M  de_DE-eva_k-x_low.onnx
+-rw-r--r--  1 user  staff    74M  de_DE-mls-medium.onnx
 -rw-r--r--  1 user  staff    63M  de_DE-thorsten-medium.onnx
 -rw-r--r--  1 user  staff    63M  en_US-amy-medium.onnx
 -rw-r--r--  1 user  staff    63M  en_US-ryan-medium.onnx

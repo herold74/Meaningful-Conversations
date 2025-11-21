@@ -53,7 +53,7 @@ download_voice() {
 # Download German voices
 echo "Downloading German voices..."
 echo "-----------------------------------"
-download_voice "de_DE" "eva_k" "x_low"      # Female voice (fastest, ~20MB)
+download_voice "de_DE" "mls" "medium"        # Female voice (professional, ~74MB)
 download_voice "de_DE" "thorsten" "medium"   # Male voice (balanced, ~60MB)
 
 # Download English voices
