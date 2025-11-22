@@ -434,6 +434,7 @@ const App: React.FC = () => {
                     proposedUpdates: [],
                     nextSteps: [],
                     completedSteps: [],
+                    accomplishedGoals: [],
                     solutionBlockages: [],
                     blockageScore: 0,
                     hasConversationalEnd: true,
@@ -451,6 +452,7 @@ const App: React.FC = () => {
                     proposedUpdates: [],
                     nextSteps: [],
                     completedSteps: [],
+                    accomplishedGoals: [],
                     solutionBlockages: [],
                     blockageScore: 0,
                     hasConversationalEnd: false,
@@ -560,6 +562,7 @@ const App: React.FC = () => {
                 proposedUpdates: [],
                 nextSteps: [],
                 completedSteps: [],
+                accomplishedGoals: [],
                 solutionBlockages: [],
                 blockageScore: 0,
                 hasConversationalEnd: false,
@@ -685,7 +688,7 @@ const App: React.FC = () => {
     
                 setSessionAnalysis({
                     newFindings: t('sessionReview_g_summary'),
-                    proposedUpdates: [], nextSteps: [], completedSteps: [], solutionBlockages: [], blockageScore: 0,
+                    proposedUpdates: [], nextSteps: [], completedSteps: [], accomplishedGoals: [], solutionBlockages: [], blockageScore: 0,
                     hasConversationalEnd: true, hasAccomplishedGoal: false,
                 });
                 setNewGamificationState(gamificationState); // No gamification change for interviews
@@ -717,7 +720,7 @@ const App: React.FC = () => {
             console.error("Failed to run test session:", error);
             const fallbackAnalysis: SessionAnalysis = {
                 newFindings: `Test failed. Error during execution: ${error instanceof Error ? error.message : String(error)}`,
-                proposedUpdates: [], nextSteps: [], completedSteps: [], solutionBlockages: [], blockageScore: 0, hasConversationalEnd: false, hasAccomplishedGoal: false,
+                proposedUpdates: [], nextSteps: [], completedSteps: [], accomplishedGoals: [], solutionBlockages: [], blockageScore: 0, hasConversationalEnd: false, hasAccomplishedGoal: false,
             };
             setSessionAnalysis(fallbackAnalysis);
             setLifeContext(adminLifeContext); // Still show the context that was used

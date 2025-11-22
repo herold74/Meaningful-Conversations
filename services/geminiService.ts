@@ -45,6 +45,10 @@ export const analyzeSession = async (
             ? response.completedSteps.filter((s: any): s is string => typeof s === 'string')
             : [];
         
+        const accomplishedGoals: string[] = (response && Array.isArray(response.accomplishedGoals))
+            ? response.accomplishedGoals.filter((g: any): g is string => typeof g === 'string')
+            : [];
+        
         const solutionBlockages: SolutionBlockage[] = (response && Array.isArray(response.solutionBlockages))
             ? response.solutionBlockages.filter((b: any): b is SolutionBlockage => b && typeof b.blockage === 'string' && typeof b.explanation === 'string' && typeof b.quote === 'string')
             : [];
@@ -60,7 +64,7 @@ export const analyzeSession = async (
         else if (blockageCount === 4) blockageScore = 8;
         else if (blockageCount >= 5) blockageScore = 10;
 
-        return { newFindings, proposedUpdates, nextSteps, completedSteps, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
+        return { newFindings, proposedUpdates, nextSteps, completedSteps, accomplishedGoals, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
 
     } catch (error) {
         console.error("Error analyzing session via backend:", error);
@@ -69,6 +73,7 @@ export const analyzeSession = async (
             proposedUpdates: [],
             nextSteps: [],
             completedSteps: [],
+            accomplishedGoals: [],
             solutionBlockages: [],
             blockageScore: 0,
             hasConversationalEnd: false,

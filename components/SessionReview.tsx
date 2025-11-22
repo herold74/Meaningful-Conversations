@@ -46,6 +46,8 @@ interface SessionReviewProps {
     newFindings: string;
     proposedUpdates: ProposedUpdate[];
     nextSteps: { action: string; deadline: string }[];
+    completedSteps: string[];
+    accomplishedGoals: string[];
     solutionBlockages: SolutionBlockage[];
     blockageScore: number;
     hasConversationalEnd: boolean;
@@ -67,6 +69,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     newFindings,
     proposedUpdates,
     nextSteps,
+    completedSteps,
+    accomplishedGoals,
     solutionBlockages,
     blockageScore,
     hasConversationalEnd,
@@ -271,8 +275,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         if (isInterviewReview) {
             return interviewResult || '';
         }
-        return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates);
-    }, [isInterviewReview, interviewResult, cleanOriginalContext, proposedUpdates, appliedUpdates]);
+        return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals);
+    }, [isInterviewReview, interviewResult, cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals]);
 
 
     useEffect(() => {

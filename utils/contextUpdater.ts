@@ -124,6 +124,60 @@ export const getExistingHeadlines = (context: string): HeadlineOption[] => {
 
 
 /**
+ * Removes completed items (steps or goals) from the life context.
+ * @param context The original life context string.
+ * @param completedSteps Array of exact text strings representing completed next steps.
+ * @param accomplishedGoals Array of exact text strings representing accomplished goals.
+ * @returns The updated context with completed items removed.
+ */
+export const removeCompletedItems = (
+    context: string,
+    completedSteps: string[],
+    accomplishedGoals: string[]
+): string => {
+    if (completedSteps.length === 0 && accomplishedGoals.length === 0) {
+        return context;
+    }
+
+    const lines = context.split('\n');
+    const itemsToRemove = new Set([...completedSteps, ...accomplishedGoals]);
+    
+    // Normalize items for matching (remove leading/trailing spaces and bullet points)
+    const normalizedItemsToRemove = new Set(
+        Array.from(itemsToRemove).map(item => 
+            item.trim().replace(/^\*\s*/, '').trim()
+        )
+    );
+
+    const filteredLines = lines.filter(line => {
+        const trimmedLine = line.trim();
+        
+        // Skip empty lines and headings
+        if (!trimmedLine || isHeadline(trimmedLine)) {
+            return true;
+        }
+
+        // Check if this line is a bullet point that matches any completed item
+        if (trimmedLine.startsWith('* ')) {
+            const normalizedLine = trimmedLine.replace(/^\*\s*/, '').trim();
+            
+            // Check for exact match or if the line starts with the item text
+            for (const item of normalizedItemsToRemove) {
+                if (normalizedLine === item || normalizedLine.startsWith(item)) {
+                    console.log('[Context Updater] Removing completed item:', trimmedLine);
+                    return false; // Remove this line
+                }
+            }
+        }
+
+        return true;
+    });
+
+    return filteredLines.join('\n');
+};
+
+
+/**
  * Constructs the new life context string by applying a set of user-approved updates
  * to the original context. This function is robust against duplicate headline names by
  * using line-number-based targeting.
@@ -131,18 +185,25 @@ export const getExistingHeadlines = (context: string): HeadlineOption[] => {
  * @param updates The array of all AI-proposed updates from the session.
  * @param appliedUpdates A Map where keys are indices from the `updates` array and values
  *                       are the user's choices for how and where to apply them.
+ * @param completedSteps Optional array of completed next steps to remove from context.
+ * @param accomplishedGoals Optional array of accomplished goals to remove from context.
  * @returns The new, updated life context string.
  */
 export const buildUpdatedContext = (
     originalContext: string,
     updates: ProposedUpdate[],
-    appliedUpdates: Map<number, AppliedUpdatePayload>
+    appliedUpdates: Map<number, AppliedUpdatePayload>,
+    completedSteps: string[] = [],
+    accomplishedGoals: string[] = []
 ): string => {
+    // First, remove completed items
+    let workingContext = removeCompletedItems(originalContext, completedSteps, accomplishedGoals);
+    
     if (appliedUpdates.size === 0) {
-        return originalContext;
+        return workingContext;
     }
 
-    const originalLines = originalContext.split('\n');
+    const originalLines = workingContext.split('\n');
     const nextStepsRegex = /^\s*##\s*✅\s*(Achievable Next Steps|Realisierbare nächste Schritte)/;
 
     // 1. Isolate nextStepsLines and mainDocLines
