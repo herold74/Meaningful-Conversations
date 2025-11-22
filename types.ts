@@ -105,6 +105,7 @@ export interface SessionAnalysis {
     proposedUpdates: ProposedUpdate[];
     nextSteps: { action: string; deadline: string }[];
     completedSteps: string[];
+    accomplishedGoals: string[];
     solutionBlockages: SolutionBlockage[];
     blockageScore: number;
     hasConversationalEnd: boolean;
