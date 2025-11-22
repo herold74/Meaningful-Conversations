@@ -83,6 +83,8 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
 
 - **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
 - **Bewerten Sie Ihre Sitzung:** Verwenden Sie die Sterne, um Feedback zu geben. Dies hilft uns, die Qualität der Coaches zu verbessern.
+- **Erreichte Ziele:** ⭐ Die KI erkennt automatisch, wenn Sie ein Ziel aus Ihrem Lebenskontext erreicht haben. Erreichte Ziele werden mit ✅ markiert und beim Übernehmen der Updates automatisch aus Ihrem Lebenskontext entfernt. So bleibt Ihre Zielliste aktuell und fokussiert.
+- **Erledigte Aufgaben:** Nächste Schritte aus früheren Sitzungen, die Sie mittlerweile erledigt haben, werden ebenfalls erkannt und automatisch aus der Liste entfernt, wenn Sie die Updates übernehmen.
 - **Umsetzbare nächste Schritte:** Eine Liste konkreter Aufgaben, zu denen Sie sich während des Gesprächs verpflichtet haben.
   - **Kalenderintegration:** **Klicken Sie auf das Kalender-Symbol** neben einem einzelnen Schritt, um ihn als .ics-Datei zu exportieren und in Ihre Kalender-App (Google Kalender, Outlook, Apple Kalender, etc.) zu importieren.
   - **Alle exportieren:** **Klicken Sie auf "Alle in Kalender exportieren"**, um alle nächsten Schritte auf einmal zu exportieren.
@@ -250,6 +252,8 @@ This is the most important screen for capturing your insights.
 
 - **New Findings:** An AI-generated summary of your key takeaways from the session.
 - **Rate Your Session:** Use the stars to provide feedback. This helps us improve coach quality.
+- **Accomplished Goals:** ⭐ The AI automatically detects when you've achieved a goal from your Life Context. Accomplished goals are marked with ✅ and automatically removed from your Life Context when you accept the updates. This keeps your goal list current and focused.
+- **Completed Steps:** Next steps from previous sessions that you've completed are also detected and automatically removed from the list when you accept the updates.
 - **Actionable Next Steps:** A list of concrete tasks you committed to during the conversation.
   - **Calendar Integration:** **Click the calendar icon** next to any individual step to export it as a .ics file and import it into your calendar app (Google Calendar, Outlook, Apple Calendar, etc.).
   - **Export All:** **Click "Export All to Calendar"** to export all next steps at once.
