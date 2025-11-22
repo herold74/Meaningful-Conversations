@@ -164,17 +164,20 @@ const NewsletterPanel: React.FC = () => {
             </div>
             <div>
               <label htmlFor="body-de" className="block text-sm font-semibold text-content-secondary mb-1">
-                Nachricht
+                Nachricht (Markdown unterstützt)
               </label>
               <textarea
                 id="body-de"
-                placeholder="Newsletter-Text auf Deutsch..."
+                placeholder="# Überschrift&#10;&#10;Newsletter-Text mit **Fettdruck** und *Kursiv*...&#10;&#10;- Punkt 1&#10;- Punkt 2"
                 value={textBodyDE}
                 onChange={(e) => setTextBodyDE(e.target.value)}
-                rows={6}
+                rows={8}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none font-mono text-sm"
                 disabled={sending}
               />
+              <p className="text-xs text-content-tertiary mt-1">
+                Markdown-Formatierung wird in HTML konvertiert: **fett**, *kursiv*, # Überschrift, - Liste, etc.
+              </p>
             </div>
           </div>
 
@@ -200,17 +203,20 @@ const NewsletterPanel: React.FC = () => {
             </div>
             <div>
               <label htmlFor="body-en" className="block text-sm font-semibold text-content-secondary mb-1">
-                Message
+                Message (Markdown supported)
               </label>
               <textarea
                 id="body-en"
-                placeholder="Newsletter text in English..."
+                placeholder="# Heading&#10;&#10;Newsletter text with **bold** and *italic*...&#10;&#10;- Item 1&#10;- Item 2"
                 value={textBodyEN}
                 onChange={(e) => setTextBodyEN(e.target.value)}
-                rows={6}
+                rows={8}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none font-mono text-sm"
                 disabled={sending}
               />
+              <p className="text-xs text-content-tertiary mt-1">
+                Markdown formatting will be converted to HTML: **bold**, *italic*, # heading, - list, etc.
+              </p>
             </div>
           </div>
 
@@ -244,6 +250,7 @@ const NewsletterPanel: React.FC = () => {
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-sm text-content-secondary">
             <p className="font-semibold mb-1">ℹ️ Hinweise:</p>
             <ul className="list-disc list-inside space-y-1 text-xs">
+              <li>✨ <strong>Markdown wird automatisch in formatiertes HTML konvertiert</strong></li>
               <li>Nur AKTIVE Nutzer mit Newsletter-Zustimmung erhalten die E-Mail</li>
               <li>Nutzer erhalten die E-Mail in ihrer bevorzugten Sprache</li>
               <li>Jede E-Mail enthält einen Abmelde-Link</li>
