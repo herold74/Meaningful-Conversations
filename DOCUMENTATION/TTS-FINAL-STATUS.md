@@ -78,11 +78,11 @@ Die TTS-Funktionalität ist als **separater Container** implementiert, was folge
   - Metrics in Response Headers
   - Error Handling
   
-- ✅ **Voice Models** (4 Stimmen, ~200MB total)
-  - 🇩🇪 **Sophia** (de_DE-mls-medium, weiblich, 73 MB)
-  - 🇩🇪 **Thorsten** (de_DE-thorsten-medium, männlich, 60 MB)
-  - 🇺🇸 **Amy** (en_US-amy-medium, female, 60 MB)
-  - 🇺🇸 **Ryan** (en_US-ryan-medium, male, 60 MB)
+- ✅ **Voice Models** (3 Server-Stimmen, ~180MB total)
+  - 🇩🇪 **Thorsten** (de_DE-thorsten-medium, männlich, 60 MB) ✅
+  - 🇺🇸 **Amy** (en_US-amy-medium, female, 60 MB) ✅
+  - 🇺🇸 **Ryan** (en_US-ryan-medium, male, 60 MB) ✅
+  - ℹ️ **Deutsche weibliche Bots** nutzen lokale Browser-Stimmen (bessere Qualität)
   
 - ✅ **Container Config**
   - Port: 8082 (intern)
