@@ -14,7 +14,7 @@ const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
 /**
  * Voice configuration mapping
  * Maps bot characteristics to Piper voice models
- * Note: No German female server voice available
+ * Note: No German female server voice available - users will use local browser voices
  */
 const VOICE_MODELS = {
     de: {

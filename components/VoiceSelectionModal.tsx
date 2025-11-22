@@ -291,7 +291,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                     <button onClick={onClose} className="px-6 py-2 text-base font-bold text-content-secondary bg-transparent border border-border-secondary uppercase hover:bg-background-tertiary rounded-lg shadow-md">
                         {t('deleteAccount_cancel')}
                     </button>
-                    <button onClick={handleSave} className="px-6 py-2 text-base font-bold text-content-inverted-dark bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md">
+                    <button onClick={handleSave} className="px-6 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md">
                         {t('voiceModal_save')}
                     </button>
                 </div>
