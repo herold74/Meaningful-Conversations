@@ -41,7 +41,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
     try {
         const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user || user.role !== 'admin') {
+        if (!user || !user.isAdmin) {
             return res.status(403).json({ error: 'Admin access required' });
         }
 
