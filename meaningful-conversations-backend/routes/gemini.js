@@ -49,7 +49,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'At least subject or body must be provided' });
         }
 
-        const modelName = 'gemini-2.0-flash-exp';
+        const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for high-quality translation
         const systemInstruction = 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.';
 
         const translationResults = {};
@@ -242,7 +242,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
     const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang, currentDate });
     const startTime = Date.now();
-    const modelName = 'gemini-2.5-pro';
+    const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for improved reasoning
     const userId = req.userId;
     
     try {
@@ -307,7 +307,7 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
 
     const fullPrompt = formattingPromptConfig.prompt({ conversation, template });
     const startTime = Date.now();
-    const modelName = 'gemini-2.5-pro';
+    const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for improved formatting
     const userId = req.userId;
 
     try {
