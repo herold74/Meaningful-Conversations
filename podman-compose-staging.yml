@@ -34,10 +34,13 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-tts:${VERSION:-latest}
     container_name: meaningful-conversations-tts-staging
     restart: unless-stopped
+    volumes:
+      - tts_xtts_models_staging:/root/.local/share/tts
     environment:
       PORT: 8082
       PIPER_VOICE_DIR: /models
       LOG_LEVEL: info
+      COQUI_TOS_AGREED: "1"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/health"]
       interval: 30s
@@ -113,6 +116,8 @@ volumes:
   mariadb_staging_data:
     driver: local
   tts_voices_staging:
+    driver: local
+  tts_xtts_models_staging:
     driver: local
 
 networks:
