@@ -189,7 +189,7 @@ def synthesize_with_coqui(text, model_name, length_scale=1.0):
         raise NotImplementedError('Only XTTS engine is currently supported for Coqui models')
 
 def synthesize_with_coqui_streaming(text, model_name, length_scale=1.0):
-    """Synthesize speech using Coqui XTTS with streaming (sentence by sentence)"""
+    """Synthesize speech using Coqui XTTS with sentence-by-sentence processing"""
     if model_name not in COQUI_MODELS:
         raise ValueError(f'Unknown Coqui model: {model_name}')
     
@@ -208,8 +208,10 @@ def synthesize_with_coqui_streaming(text, model_name, length_scale=1.0):
         language = model_config.get('language', 'de')
         speed = 1.0 / length_scale if length_scale > 0 else 1.0
         
-        # Split text into sentences for streaming
+        # Split text into sentences for faster perceived response
         import re
+        import wave
+        import struct
         sentences = re.split(r'([.!?]+\s*)', text)
         sentences = [''.join(sentences[i:i+2]).strip() for i in range(0, len(sentences), 2) if sentences[i].strip()]
         
@@ -218,7 +220,10 @@ def synthesize_with_coqui_streaming(text, model_name, length_scale=1.0):
         
         logger.info(f"XTTS Streaming: {len(sentences)} sentence(s)")
         
-        # Generate audio for each sentence and yield as chunks
+        # Collect all audio chunks
+        audio_chunks = []
+        sample_rate = 24000
+        
         for i, sentence in enumerate(sentences):
             if not sentence.strip():
                 continue
@@ -236,17 +241,34 @@ def synthesize_with_coqui_streaming(text, model_name, length_scale=1.0):
                     speed=speed
                 )
                 
-                with open(tmp_path, 'rb') as f:
-                    audio_chunk = f.read()
-                    # For streaming, we need to yield WAV data without headers (except first chunk)
+                # Read WAV file and extract audio data (skip header)
+                with wave.open(tmp_path, 'rb') as wf:
                     if i == 0:
-                        yield audio_chunk  # First chunk includes WAV header
-                    else:
-                        # Skip WAV header (44 bytes) for subsequent chunks
-                        yield audio_chunk[44:] if len(audio_chunk) > 44 else audio_chunk
+                        sample_rate = wf.getframerate()
+                    audio_data = wf.readframes(wf.getnframes())
+                    audio_chunks.append(audio_data)
+                    
             finally:
                 if os.path.exists(tmp_path):
                     os.unlink(tmp_path)
+        
+        # Combine all audio chunks into single WAV file
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as output_file:
+            output_path = output_file.name
+        
+        try:
+            with wave.open(output_path, 'wb') as wf:
+                wf.setnchannels(1)  # Mono
+                wf.setsampwidth(2)  # 16-bit
+                wf.setframerate(sample_rate)
+                for chunk in audio_chunks:
+                    wf.writeframes(chunk)
+            
+            with open(output_path, 'rb') as f:
+                return f.read()
+        finally:
+            if os.path.exists(output_path):
+                os.unlink(output_path)
     else:
         raise NotImplementedError('Only XTTS engine is currently supported for Coqui models')
 
@@ -304,7 +326,7 @@ def synthesize():
 
 @app.route('/synthesize-stream', methods=['POST'])
 def synthesize_stream():
-    """Synthesize speech with streaming (sentence by sentence) for XTTS"""
+    """Synthesize speech with sentence-by-sentence processing for XTTS"""
     start_time = time.time()
     
     try:
@@ -320,20 +342,16 @@ def synthesize_stream():
         
         # Auto-detect engine based on model name
         if model in COQUI_MODELS or model.endswith('-coqui'):
-            # Stream XTTS synthesis
-            def generate():
-                try:
-                    for chunk in synthesize_with_coqui_streaming(text, model, length_scale):
-                        yield chunk
-                    duration_ms = int((time.time() - start_time) * 1000)
-                    logger.info(f"TTS Stream Success: {duration_ms}ms total, engine=coqui")
-                except Exception as e:
-                    logger.error(f"TTS streaming error: {e}", exc_info=True)
+            # Process XTTS sentence-by-sentence
+            audio_data = synthesize_with_coqui_streaming(text, model, length_scale)
+            duration_ms = int((time.time() - start_time) * 1000)
+            logger.info(f"TTS Stream Success: {duration_ms}ms total, {len(audio_data)} bytes, engine=coqui")
             
-            return Response(generate(), mimetype='audio/wav', headers={
+            return Response(audio_data, mimetype='audio/wav', headers={
+                'X-TTS-Duration-Ms': str(duration_ms),
+                'X-Audio-Size-Bytes': str(len(audio_data)),
                 'X-TTS-Engine': 'coqui',
-                'Cache-Control': 'no-cache',
-                'X-Content-Type-Options': 'nosniff'
+                'Cache-Control': 'public, max-age=3600'
             })
         else:
             # Piper doesn't need streaming, just return normal synthesis
