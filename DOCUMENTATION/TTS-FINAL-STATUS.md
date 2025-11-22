@@ -288,6 +288,11 @@ ssh root@91.99.193.87 'podman ps | grep tts'
 - **Check 2**: Container-Status prüfen `podman ps | grep tts`
 - **Lösung**: Container neu starten oder Nginx IPs aktualisieren
 
+**Problem**: 500 Error bei `/api/tts/health` oder `/api/tts/synthesize`
+- **Ursache**: Backend versucht `/models` Verzeichnis zu lesen (nur in Container vorhanden)
+- **Lösung**: `TTS_SERVICE_URL` Umgebungsvariable setzen (z.B. `http://tts:8082`)
+- **Hinweis**: Fixed in v1.6.1 - Backend erkennt automatisch Container-Modus
+
 **Problem**: Audio spielt nicht ab
 - **Check 1**: Browser Console auf Fehler prüfen
 - **Check 2**: Netzwerk-Tab auf 200/500 Status prüfen
