@@ -10,6 +10,7 @@ const NewsletterPanel: React.FC = () => {
   const [history, setHistory] = useState<NewsletterHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [showSubscribers, setShowSubscribers] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   
@@ -85,6 +86,56 @@ const NewsletterPanel: React.FC = () => {
     }
   };
 
+  const handleTranslate = async () => {
+    if (!subjectDE && !textBodyDE) {
+      setResult({ type: 'error', message: 'Bitte mindestens Betreff oder Nachricht auf Deutsch eingeben.' });
+      return;
+    }
+
+    setTranslating(true);
+    setResult(null);
+
+    try {
+      const response = await fetch('/api/gemini/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          subject: subjectDE || undefined,
+          body: textBodyDE || undefined
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Übersetzung fehlgeschlagen');
+      }
+
+      const data = await response.json();
+      
+      if (data.subject) {
+        setSubjectEN(data.subject);
+      }
+      if (data.body) {
+        setTextBodyEN(data.body);
+      }
+
+      setResult({
+        type: 'success',
+        message: 'Übersetzung erfolgreich! Bitte prüfen Sie die englische Version.'
+      });
+
+    } catch (error: any) {
+      setResult({
+        type: 'error',
+        message: error.message || 'Fehler bei der Übersetzung.'
+      });
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 bg-background-secondary dark:bg-background-primary rounded-lg">
@@ -144,9 +195,29 @@ const NewsletterPanel: React.FC = () => {
         <>
           {/* German Version */}
           <div className="space-y-3 mb-4 p-4 border border-border-secondary rounded-lg bg-background-tertiary dark:bg-background-secondary">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🇩🇪</span>
-              <h4 className="font-bold text-content-primary">Deutsche Version</h4>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🇩🇪</span>
+                <h4 className="font-bold text-content-primary">Deutsche Version</h4>
+              </div>
+              <button
+                onClick={handleTranslate}
+                disabled={translating || sending || (!subjectDE && !textBodyDE)}
+                className="px-4 py-2 bg-accent-primary text-white rounded hover:bg-accent-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-semibold transition-colors"
+                title="Deutsche Version automatisch ins Englische übersetzen"
+              >
+                {translating ? (
+                  <>
+                    <Spinner />
+                    <span>Übersetze...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>🌐</span>
+                    <span>Automatisch übersetzen</span>
+                  </>
+                )}
+              </button>
             </div>
             <div>
               <label htmlFor="subject-de" className="block text-sm font-semibold text-content-secondary mb-1">

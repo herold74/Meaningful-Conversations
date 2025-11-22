@@ -1,0 +1,147 @@
+{
+  "version": "1.0.0",
+  "languages": {
+    "de": {
+      "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
+      "patterns": [
+        {
+          "term": "Coach",
+          "phonetic": "Koutsch",
+          "caseSensitive": true,
+          "notes": "Englisches Wort, deutsche Aussprache-Hilfe"
+        },
+        {
+          "term": "coach",
+          "phonetic": "koutsch",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Coaching",
+          "phonetic": "Koutsching",
+          "caseSensitive": true,
+          "notes": "Coaching-Begriff"
+        },
+        {
+          "term": "coaching",
+          "phonetic": "koutsching",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Session",
+          "phonetic": "Seschän",
+          "caseSensitive": true,
+          "notes": "Session-Begriff"
+        },
+        {
+          "term": "session",
+          "phonetic": "seschän",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Sessions",
+          "phonetic": "Seschäns",
+          "caseSensitive": true,
+          "notes": "Plural"
+        },
+        {
+          "term": "sessions",
+          "phonetic": "seschäns",
+          "caseSensitive": true,
+          "notes": "Plural kleingeschrieben"
+        },
+        {
+          "term": "Interview",
+          "phonetic": "Interwju",
+          "caseSensitive": true,
+          "notes": "Business-Begriff"
+        },
+        {
+          "term": "interview",
+          "phonetic": "interwju",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Meeting",
+          "phonetic": "Mieting",
+          "caseSensitive": true,
+          "notes": "Business-Begriff"
+        },
+        {
+          "term": "meeting",
+          "phonetic": "mieting",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Feedback",
+          "phonetic": "Fiedbäck",
+          "caseSensitive": true,
+          "notes": "Business-Begriff"
+        },
+        {
+          "term": "feedback",
+          "phonetic": "fiedbäck",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Team",
+          "phonetic": "Tiem",
+          "caseSensitive": true,
+          "notes": "Team-Begriff"
+        },
+        {
+          "term": "team",
+          "phonetic": "tiem",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Goal",
+          "phonetic": "Goul",
+          "caseSensitive": true,
+          "notes": "Ziel-Begriff"
+        },
+        {
+          "term": "goal",
+          "phonetic": "goul",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Goals",
+          "phonetic": "Gouls",
+          "caseSensitive": true,
+          "notes": "Plural"
+        },
+        {
+          "term": "goals",
+          "phonetic": "gouls",
+          "caseSensitive": true,
+          "notes": "Plural kleingeschrieben"
+        },
+        {
+          "term": "Blog",
+          "phonetic": "Blogg",
+          "caseSensitive": true,
+          "notes": "Doppel-G für korrekte deutsche Aussprache"
+        },
+        {
+          "term": "blog",
+          "phonetic": "blogg",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        }
+      ]
+    },
+    "en": {
+      "description": "Phonetische Ersetzungen für englische TTS-Stimmen (aktuell leer)",
+      "patterns": []
+    }
+  }
+}
+

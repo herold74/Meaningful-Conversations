@@ -29,6 +29,51 @@ const checkAiInitialized = (req, res, next) => {
 // Apply the middleware to all routes in this file to ensure the AI client is ready
 router.use(checkAiInitialized);
 
+// POST /api/gemini/translate
+router.post('/translate', optionalAuthMiddleware, async (req, res) => {
+    const { subject, body } = req.body;
+    const userId = req.userId; // Admin-only access check
+
+    // Only admins can translate
+    if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required' });
+        }
+
+        if (!subject && !body) {
+            return res.status(400).json({ error: 'At least subject or body must be provided' });
+        }
+
+        const model = ai.generativeModel({
+            model: 'gemini-2.0-flash-exp',
+            systemInstruction: 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.',
+        });
+
+        const translationResults = {};
+
+        if (subject) {
+            const subjectResult = await model.generateContent(subject);
+            translationResults.subject = subjectResult.response.text();
+        }
+
+        if (body) {
+            const bodyResult = await model.generateContent(body);
+            translationResults.body = bodyResult.response.text();
+        }
+
+        return res.json(translationResults);
+
+    } catch (error) {
+        console.error('Translation error:', error);
+        return res.status(500).json({ error: 'Translation failed', details: error.message });
+    }
+});
+
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const { botId, context, history, lang, isNewSession } = req.body;
