@@ -14,11 +14,10 @@ const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
 /**
  * Voice configuration mapping
  * Maps bot characteristics to Piper voice models
- * NOTE: XTTS models removed - Piper only for reliability and speed
  */
 const VOICE_MODELS = {
     de: {
-        female: 'de_DE-mls-medium',  // Piper: Sophia medium quality
+        female: 'de_DE-eva-coqui',  // Coqui TTS: High-quality female voice
         male: 'de_DE-thorsten-medium',  // Piper: Thorsten medium quality
     },
     en: {
