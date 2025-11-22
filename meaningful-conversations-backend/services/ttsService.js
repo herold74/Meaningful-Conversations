@@ -129,9 +129,10 @@ function getVoiceModelFromId(voiceId) {
  * @param {string} lang - Language code ('de' or 'en')
  * @param {boolean} isMeditation - Whether to use meditation mode (slower)
  * @param {string} voiceId - Optional: Specific voice ID to use (overrides bot default)
+ * @param {boolean} stream - Whether to use streaming (sentence-by-sentence for XTTS)
  * @returns {Promise<Buffer>} - Audio data as WAV buffer
  */
-async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId = null) {
+async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId = null, stream = true) {
     if (!text || text.trim().length === 0) {
         throw new Error('Text is required for speech synthesis');
     }
@@ -159,6 +160,10 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     const serverVoiceSlowdown = 1.05;
     const lengthScale = (1.0 / rate) * serverVoiceSlowdown; // Piper uses length_scale (inverse of rate)
     
+    // Check if model is XTTS (for streaming)
+    const isXTTS = model.includes('-coqui') || model.includes('xtts');
+    const useStreaming = stream && isXTTS;
+    
     // Try TTS container first (if configured)
     if (USE_TTS_CONTAINER) {
         try {
@@ -168,10 +173,12 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
                 lengthScale: lengthScale
             };
             
-            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}`);
+            // Use streaming endpoint for XTTS, regular for Piper
+            const endpoint = useStreaming ? '/synthesize-stream' : '/synthesize';
+            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}, endpoint=${endpoint}`);
             
             const response = await axios.post(
-                `${TTS_SERVICE_URL}/synthesize`,
+                `${TTS_SERVICE_URL}${endpoint}`,
                 requestPayload,
                 {
                     timeout: 60000, // 60 seconds for XTTS synthesis
