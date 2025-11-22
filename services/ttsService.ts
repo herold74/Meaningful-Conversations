@@ -11,16 +11,10 @@ export interface ServerVoice {
 }
 
 /**
- * Available server voices from Piper TTS and Coqui XTTS
+ * Available server voices from Piper TTS
+ * Note: No German female server voice available - users will use local browser voices
  */
 export const SERVER_VOICES: ServerVoice[] = [
-    {
-        id: 'de-eva-coqui',
-        name: 'Eva (Deutsch, Weiblich)',
-        language: 'de',
-        gender: 'female',
-        model: 'de_DE-eva-coqui',
-    },
     {
         id: 'de-thorsten',
         name: 'Thorsten (Deutsch, Männlich)',
