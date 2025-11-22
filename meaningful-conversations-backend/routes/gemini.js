@@ -49,21 +49,31 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'At least subject or body must be provided' });
         }
 
-        const model = ai.generativeModel({
-            model: 'gemini-2.0-flash-exp',
-            systemInstruction: 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.',
-        });
+        const modelName = 'gemini-2.0-flash-exp';
+        const systemInstruction = 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.';
 
         const translationResults = {};
 
         if (subject) {
-            const subjectResult = await model.generateContent(subject);
-            translationResults.subject = subjectResult.response.text();
+            const subjectResult = await ai.models.generateContent({
+                model: modelName,
+                contents: subject,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
+            });
+            translationResults.subject = subjectResult.text;
         }
 
         if (body) {
-            const bodyResult = await model.generateContent(body);
-            translationResults.body = bodyResult.response.text();
+            const bodyResult = await ai.models.generateContent({
+                model: modelName,
+                contents: body,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
+            });
+            translationResults.body = bodyResult.text;
         }
 
         return res.json(translationResults);
