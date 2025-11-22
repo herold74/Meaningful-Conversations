@@ -289,7 +289,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   useEffect(() => {
     const checkVoiceAvailability = async () => {
       // Helper function to get best server voice for bot
-      const getBestServerVoice = (botId: string, lang: string): string => {
+      const getBestServerVoice = (botId: string, lang: string): string | null => {
         let gender: 'male' | 'female' = 'female';
         
         if (lang === 'en') {
@@ -301,8 +301,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
         
         // Map to voice IDs
+        // Note: No German female server voice available - will use local voice
         if (lang === 'de') {
-          return gender === 'female' ? 'de-mls' : 'de-thorsten';
+          return gender === 'female' ? null : 'de-thorsten';
         } else {
           return gender === 'female' ? 'en-amy' : 'en-ryan';
         }
@@ -350,10 +351,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // Auto mode or no selection - choose best available
           if (serverAvailable) {
             const bestVoice = getBestServerVoice(bot.id, language);
-            setSelectedVoiceURI(bestVoice);
-            setTtsMode('server');
-            saveTtsPreferences('server', bestVoice);
-            console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
+            if (bestVoice) {
+              // Server voice available for this bot
+              setSelectedVoiceURI(bestVoice);
+              setTtsMode('server');
+              saveTtsPreferences('server', bestVoice);
+              console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
+            } else {
+              // No server voice for this bot/language - use local
+              setSelectedVoiceURI(null);
+              setTtsMode('local');
+              saveTtsPreferences('local', null);
+              console.log('[TTS Init] Auto mode - no server voice available, using local browser voice');
+            }
           } else {
             // Server not available, use local auto-selection (handled by speak function)
             setSelectedVoiceURI(null);
