@@ -197,12 +197,23 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
   - ❌ Reject updates
   - 👁️ Preview final document
 
-**3. Next Steps**
+**3. Accomplished Goals** ⭐ *NEW in v1.6.1*
+- AI automatically detects when you've achieved a goal from your Life Context
+- Achieved goals are highlighted with ✅ checkmark
+- **Automatic removal**: Upon accepting session updates, accomplished goals are automatically removed from your Life Context
+- This keeps your goals list focused on current objectives
+- Examples:
+  - "Complete project X" → Project completed → Goal removed
+  - "Run first 5K" → Race completed → Goal removed
+  - "Find new job" → Job secured → Goal removed
+
+**4. Next Steps**
 - Concrete, actionable items
 - Each with specific deadline
 - User can add to calendar/reminders
+- **Automatic cleanup**: Completed next steps from previous sessions are removed from Life Context when acknowledged
 
-**4. Blockage Analysis** (Optional)
+**5. Blockage Analysis** (Optional)
 - Visual gauge showing openness vs. blockage
 - Brief explanation
 - Suggestions for moving forward
@@ -220,6 +231,8 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 - [ ] Session summary screen
 - [ ] Life Context updates list
 - [ ] Individual update card (expanded)
+- [ ] **Accomplished goals display with ✅ checkmark** ⭐
+- [ ] **Completed next steps being removed** ⭐
 - [ ] Diff viewer - side by side comparison
 - [ ] Next steps with deadlines
 - [ ] Blockage score gauge
@@ -597,6 +610,6 @@ After capturing screenshots:
 
 ---
 
-**Last Updated**: November 6, 2024
-**Version**: 1.0 with API Usage Tracking
+**Last Updated**: November 22, 2024
+**Version**: 1.6.1 with Accomplished Goals Management
 
