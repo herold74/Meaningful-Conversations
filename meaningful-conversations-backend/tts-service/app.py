@@ -27,11 +27,6 @@ SPEAKER_SAMPLES = {
 }
 
 COQUI_MODELS = {
-    'de_DE-thorsten-medium': {
-        'engine': 'piper',  # Keep Piper for male voice
-        'gender': 'male',
-        'quality': 'medium'
-    },
     'de_DE-eva-coqui': {
         'engine': 'xtts',
         'model_name': 'tts_models/multilingual/multi-dataset/xtts_v2',
@@ -40,6 +35,8 @@ COQUI_MODELS = {
         'gender': 'female',
         'quality': 'high'
     }
+    # Note: de_DE-thorsten-medium, de_DE-mls-medium, etc. are Piper models
+    # They should NOT be listed here to avoid XTTS initialization
 }
 
 def get_xtts_model():
