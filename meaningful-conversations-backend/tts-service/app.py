@@ -27,14 +27,15 @@ SPEAKER_SAMPLES = {
 }
 
 COQUI_MODELS = {
-    'de_DE-eva-coqui': {
-        'engine': 'xtts',
-        'model_name': 'tts_models/multilingual/multi-dataset/xtts_v2',
-        'speaker_wav': SPEAKER_SAMPLES['female_de'],
-        'language': 'de',
-        'gender': 'female',
-        'quality': 'high'
-    }
+    # XTTS disabled - using Piper only for faster, more reliable TTS
+    # 'de_DE-eva-coqui': {
+    #     'engine': 'xtts',
+    #     'model_name': 'tts_models/multilingual/multi-dataset/xtts_v2',
+    #     'speaker_wav': SPEAKER_SAMPLES['female_de'],
+    #     'language': 'de',
+    #     'gender': 'female',
+    #     'quality': 'high'
+    # }
     # Note: de_DE-thorsten-medium, de_DE-mls-medium, etc. are Piper models
     # They should NOT be listed here to avoid XTTS initialization
 }
