@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 VOICE_DIR = os.getenv('PIPER_VOICE_DIR', '/models')
 
-# Coqui TTS initialization (lazy loading)
+# Coqui TTS initialization
 xtts_model = None
 SPEAKER_SAMPLES = {
     'female_de': '/models/speaker_samples/female_de.wav'
@@ -49,11 +49,16 @@ def get_xtts_model():
             
             from TTS.api import TTS
             logger.info("Initializing XTTS v2 model...")
+            start_time = time.time()
             xtts_model = TTS('tts_models/multilingual/multi-dataset/xtts_v2', gpu=False)
-            logger.info("XTTS v2 initialized successfully")
+            logger.info(f"XTTS v2 initialized successfully in {time.time() - start_time:.2f}s")
         except Exception as e:
             logger.error(f"Failed to initialize XTTS: {e}")
     return xtts_model
+
+# Pre-load XTTS model at startup
+logger.info("Pre-loading XTTS model at startup...")
+get_xtts_model()
 
 @app.route('/health', methods=['GET'])
 def health():
