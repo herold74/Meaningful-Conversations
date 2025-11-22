@@ -91,13 +91,31 @@ function getSpeechRate(botId, isMeditation) {
 
 /**
  * Get voice model from voiceId
- * @param {string} voiceId - The voice ID (e.g., 'de-eva', 'en-ryan')
+ * @param {string} voiceId - The voice ID (e.g., 'de-eva', 'en-ryan', 'de_DE-mls-medium')
  * @returns {string|null} - Voice model name or null if not found
  */
 function getVoiceModelFromId(voiceId) {
+    // If voiceId is already a full model name (contains underscores), return it directly
+    if (voiceId && voiceId.includes('_')) {
+        // Verify it's a valid model name
+        const validModels = [
+            'de_DE-mls-medium',
+            'de_DE-thorsten-medium',
+            'de_DE-eva-coqui',
+            'de_DE-eva_k-x_low',
+            'en_US-amy-medium',
+            'en_US-ryan-medium',
+        ];
+        if (validModels.includes(voiceId)) {
+            return voiceId;
+        }
+    }
+    
+    // Otherwise, map short IDs to full model names
     const voiceMap = {
         'de-mls': 'de_DE-mls-medium',
         'de-thorsten': 'de_DE-thorsten-medium',
+        'de-eva': 'de_DE-eva-coqui',
         'en-amy': 'en_US-amy-medium',
         'en-ryan': 'en_US-ryan-medium',
     };
