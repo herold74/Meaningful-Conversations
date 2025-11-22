@@ -16,17 +16,10 @@ export interface ServerVoice {
 export const SERVER_VOICES: ServerVoice[] = [
     {
         id: 'de-eva-coqui',
-        name: 'Eva (Deutsch, Weiblich, XTTS)',
+        name: 'Eva (Deutsch, Weiblich)',
         language: 'de',
         gender: 'female',
         model: 'de_DE-eva-coqui',
-    },
-    {
-        id: 'de-mls',
-        name: 'Sophia (Deutsch, Weiblich)',
-        language: 'de',
-        gender: 'female',
-        model: 'de_DE-mls-medium',
     },
     {
         id: 'de-thorsten',
