@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as userService from '../services/userService';
 import { NewsletterSubscriber, NewsletterHistoryEntry } from '../services/userService';
+import { apiFetch } from '../services/api';
 import Spinner from './shared/Spinner';
 import { MailIcon } from './icons/MailIcon';
 import { ClockIcon } from './icons/ClockIcon';
@@ -96,23 +97,13 @@ const NewsletterPanel: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await fetch('/api/gemini/translate', {
+      const data = await apiFetch('/gemini/translate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
         body: JSON.stringify({
           subject: subjectDE || undefined,
           body: textBodyDE || undefined
         })
       });
-
-      if (!response.ok) {
-        throw new Error('Übersetzung fehlgeschlagen');
-      }
-
-      const data = await response.json();
       
       if (data.subject) {
         setSubjectEN(data.subject);
@@ -203,7 +194,7 @@ const NewsletterPanel: React.FC = () => {
               <button
                 onClick={handleTranslate}
                 disabled={translating || sending || (!subjectDE && !textBodyDE)}
-                className="px-4 py-2 bg-accent-primary text-white rounded hover:bg-accent-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-semibold transition-colors"
+                className="px-4 py-2 bg-content-tertiary/20 dark:bg-content-tertiary/10 text-content-primary hover:bg-content-tertiary/30 dark:hover:bg-content-tertiary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-semibold transition-colors rounded border border-border-secondary"
                 title="Deutsche Version automatisch ins Englische übersetzen"
               >
                 {translating ? (
