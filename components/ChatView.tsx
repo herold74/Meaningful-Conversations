@@ -699,7 +699,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         if (healthData.status === 'ok' && healthData.piperAvailable) {
           // Server TTS available - select best voice for bot
-          const getBestServerVoice = (botId: string, lang: string): string => {
+          const getBestServerVoice = (botId: string, lang: string): string | null => {
             let gender: 'male' | 'female' = 'female';
             
             if (lang === 'en') {
