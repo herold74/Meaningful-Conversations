@@ -712,17 +712,26 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             
             // Map to voice IDs
             if (lang === 'de') {
-              return gender === 'female' ? 'de-eva-coqui' : 'de-thorsten';
+              // No female German server voice available - use local
+              return gender === 'male' ? 'de-thorsten' : null;
             } else {
               return gender === 'female' ? 'en-amy' : 'en-ryan';
             }
           };
           
           const bestVoice = getBestServerVoice(bot.id, language);
-          setSelectedVoiceURI(bestVoice);
-          setTtsMode('server');
-          saveTtsPreferences('server', bestVoice);
-          console.log('[TTS Select] Auto mode - using server voice:', bestVoice);
+          if (bestVoice) {
+            setSelectedVoiceURI(bestVoice);
+            setTtsMode('server');
+            saveTtsPreferences('server', bestVoice);
+            console.log('[TTS Select] Auto mode - using server voice:', bestVoice);
+          } else {
+            // No server voice available (e.g., female German) - use local
+            setSelectedVoiceURI(null);
+            setTtsMode('local');
+            saveTtsPreferences('local', null);
+            console.log('[TTS Select] Auto mode - no server voice available, using local');
+          }
         } else {
           // Server TTS not available - use local
           setSelectedVoiceURI(null);

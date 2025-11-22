@@ -14,10 +14,11 @@ const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
 /**
  * Voice configuration mapping
  * Maps bot characteristics to Piper voice models
+ * Note: No German female server voice available
  */
 const VOICE_MODELS = {
     de: {
-        female: 'de_DE-eva-coqui',  // Coqui TTS: High-quality female voice
+        // female: not available - users will use local browser voices
         male: 'de_DE-thorsten-medium',  // Piper: Thorsten medium quality
     },
     en: {
@@ -53,14 +54,18 @@ function getVoiceForBot(botId, lang) {
                 gender = 'male';
         }
     }
-    // For German, we would need additional logic if bots have specific genders
-    // For now, using a sensible default based on bot names
+    // For German, check if voice model exists for gender
     else if (lang === 'de') {
         const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
         gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
     }
     
-    const voiceModel = VOICE_MODELS[lang]?.[gender] || VOICE_MODELS['en']['female'];
+    const voiceModel = VOICE_MODELS[lang]?.[gender];
+    
+    // If no voice model available (e.g., German female), return null
+    if (!voiceModel) {
+        return { model: null, gender };
+    }
     
     return { model: voiceModel, gender };
 }
@@ -152,6 +157,12 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     } else {
         const voiceInfo = getVoiceForBot(botId, lang);
         model = voiceInfo.model;
+        
+        // If no server voice available (e.g., German female), return null to use local voice
+        if (!model) {
+            console.log(`No server voice available for botId=${botId}, lang=${lang}, gender=${voiceInfo.gender} - client will use local voice`);
+            return null;
+        }
     }
     
     // Get speech rate
