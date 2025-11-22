@@ -278,6 +278,19 @@ async function isPiperAvailable() {
  * @returns {Promise<string[]>} - Array of available model names
  */
 async function getAvailableVoices() {
+    // If using TTS container, we don't check local files
+    if (USE_TTS_CONTAINER) {
+        // Return the configured voice models without checking filesystem
+        const models = [];
+        for (const lang of Object.keys(VOICE_MODELS)) {
+            for (const gender of Object.keys(VOICE_MODELS[lang])) {
+                models.push(VOICE_MODELS[lang][gender]);
+            }
+        }
+        return models;
+    }
+    
+    // Check local Piper installation
     const voiceDir = process.env.PIPER_VOICE_DIR || '/models';
     const { readdir } = require('fs').promises;
     
