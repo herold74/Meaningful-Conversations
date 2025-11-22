@@ -174,7 +174,7 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
                 `${TTS_SERVICE_URL}/synthesize`,
                 requestPayload,
                 {
-                    timeout: 15000,
+                    timeout: 60000, // 60 seconds for XTTS synthesis
                     responseType: 'arraybuffer'
                 }
             );
