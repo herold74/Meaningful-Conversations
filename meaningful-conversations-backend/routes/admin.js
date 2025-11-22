@@ -3,7 +3,14 @@ const prisma = require('../prismaClient.js');
 const adminAuth = require('../middleware/adminAuth.js');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { marked } = require('marked');
 const { sendNewsletterEmail } = require('../services/mailService.js');
+
+// Configure marked for email-safe HTML
+marked.setOptions({
+    breaks: true, // Convert \n to <br>
+    gfm: true,    // GitHub Flavored Markdown
+});
 
 const router = express.Router();
 
@@ -393,6 +400,26 @@ router.post('/send-newsletter', async (req, res) => {
             select: { email: true }
         });
         
+        // Convert Markdown to HTML for email
+        const convertMarkdownToEmailHtml = (markdown) => {
+            const rawHtml = marked.parse(markdown);
+            // Wrap in email-friendly HTML with basic styling
+            return `
+                <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                    <div style="padding: 20px; background: #f9fafb;">
+                        ${rawHtml}
+                    </div>
+                    <div style="background: #1b7272; color: white; padding: 20px; text-align: center; font-size: 12px;">
+                        <p style="margin: 0;">Meaningful Conversations | www.manualmode.at</p>
+                    </div>
+                </div>
+            `;
+        };
+        
+        // Generate HTML versions from Markdown text bodies
+        const generatedHtmlDE = convertMarkdownToEmailHtml(textBodyDE);
+        const generatedHtmlEN = convertMarkdownToEmailHtml(textBodyEN);
+        
         // Fetch all newsletter subscribers with language preference and unsubscribe token
         const subscribers = await prisma.user.findMany({
             where: {
@@ -431,7 +458,7 @@ router.post('/send-newsletter', async (req, res) => {
                 const subject = lang === 'de' ? subjectDE : subjectEN;
                 const content = {
                     textBody: lang === 'de' ? textBodyDE : textBodyEN,
-                    htmlBody: lang === 'de' ? (htmlBodyDE || textBodyDE) : (htmlBodyEN || textBodyEN),
+                    htmlBody: lang === 'de' ? generatedHtmlDE : generatedHtmlEN,
                     unsubscribeToken: subscriber.unsubscribeToken
                 };
                 
@@ -458,8 +485,8 @@ router.post('/send-newsletter', async (req, res) => {
                 subjectEN,
                 textBodyDE,
                 textBodyEN,
-                htmlBodyDE: htmlBodyDE || null,
-                htmlBodyEN: htmlBodyEN || null,
+                htmlBodyDE: generatedHtmlDE,
+                htmlBodyEN: generatedHtmlEN,
                 sentBy: adminId,
                 sentByEmail: adminUser.email,
                 recipientCount: subscribers.length,
