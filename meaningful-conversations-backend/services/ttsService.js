@@ -5,6 +5,7 @@ const axios = require('axios');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const { getPhoneticReplacements } = require('../utils/phoneticDictionary');
 
 // Configuration
 const TTS_SERVICE_URL = process.env.TTS_SERVICE_URL || 'http://tts:8082';
@@ -16,8 +17,8 @@ const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
  */
 const VOICE_MODELS = {
     de: {
-        female: 'de_DE-mls-medium',
-        male: 'de_DE-thorsten-medium',
+        female: 'de_DE-eva-coqui',  // Coqui TTS: High-quality female voice
+        male: 'de_DE-thorsten-medium',  // Piper: Thorsten medium quality
     },
     en: {
         female: 'en_US-amy-medium',
@@ -117,8 +118,8 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
         throw new Error('Text is required for speech synthesis');
     }
     
-    // Clean the text (remove markdown, etc.)
-    const cleanText = cleanTextForSpeech(text);
+    // Clean the text (remove markdown, apply phonetic replacements)
+    const cleanText = cleanTextForSpeech(text, lang);
     
     // Get voice model - use voiceId if provided, otherwise auto-select
     let model;
@@ -126,10 +127,12 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
         model = getVoiceModelFromId(voiceId);
         if (!model) {
             console.warn(`Unknown voiceId: ${voiceId}, falling back to bot default`);
-            model = getVoiceForBot(botId, lang).model;
+            const voiceInfo = getVoiceForBot(botId, lang);
+            model = voiceInfo.model;
         }
     } else {
-        model = getVoiceForBot(botId, lang).model;
+        const voiceInfo = getVoiceForBot(botId, lang);
+        model = voiceInfo.model;
     }
     
     // Get speech rate
@@ -141,13 +144,17 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     // Try TTS container first (if configured)
     if (USE_TTS_CONTAINER) {
         try {
+            const requestPayload = {
+                text: cleanText,
+                model: model,
+                lengthScale: lengthScale
+            };
+            
+            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}`);
+            
             const response = await axios.post(
                 `${TTS_SERVICE_URL}/synthesize`,
-                {
-                    text: cleanText,
-                    model: model,
-                    lengthScale: lengthScale
-                },
+                requestPayload,
                 {
                     timeout: 15000,
                     responseType: 'arraybuffer'
@@ -199,43 +206,15 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
 /**
  * Clean text for speech synthesis
  * Removes markdown formatting and other non-spoken elements
- * Applies phonetic replacements for English words in German TTS
+ * Applies phonetic replacements from dictionary for better pronunciation
  * @param {string} text - Raw text with possible markdown
+ * @param {string} lang - Language code for phonetic replacements (default: 'de')
  * @returns {string} - Cleaned text ready for TTS
  */
-function cleanTextForSpeech(text) {
-    // Phonetic replacements for common English terms
-    // These replacements help German TTS voices pronounce English words correctly
-    // Note: These phonetic versions are ONLY used for audio, never displayed to users
-    const phoneticReplacements = {
-        // Coaching terms
-        'Coach': 'Koutsch',
-        'coach': 'koutsch',
-        'Coaching': 'Koutsching',
-        'coaching': 'koutsching',
-        
-        // Session terms  
-        'Session': 'Seschän',
-        'session': 'seschän',
-        'Sessions': 'Seschäns',
-        'sessions': 'seschäns',
-        
-        // Common business/tech terms
-        'Interview': 'Interwju',
-        'interview': 'interwju',
-        'Meeting': 'Mieting',
-        'meeting': 'mieting',
-        'Feedback': 'Fiedbäck',
-        'feedback': 'fiedbäck',
-        'Team': 'Tiem',
-        'team': 'tiem',
-        'Goal': 'Goul',
-        'goal': 'goul',
-        'Goals': 'Gouls',
-        'goals': 'gouls',
-        'Blog': 'Blogg',
-        'blog': 'blogg',
-    };
+function cleanTextForSpeech(text, lang = 'de') {
+    // Load phonetic replacements from dictionary
+    // Dictionary is cached, so this has no I/O overhead
+    const phoneticReplacements = getPhoneticReplacements(lang);
     
     // First, clean markdown and formatting
     let cleanedText = text

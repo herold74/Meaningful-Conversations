@@ -2,4 +2,15 @@ piper-tts==1.2.0
 flask==3.0.0
 flask-cors==4.0.0
 gunicorn==21.2.0
-
+TTS==0.22.0
+transformers==4.45.2
+torch==2.3.1
+torchaudio==2.3.1
+numpy==1.26.4
+scipy==1.14.0
+librosa==0.10.2
+onnxruntime==1.18.0
+phonemizer==3.2.1
+gruut==2.2.3
+gruut-ipa==0.13.0
+gruut_lang_de==2.0.1
