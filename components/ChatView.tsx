@@ -712,7 +712,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             
             // Map to voice IDs
             if (lang === 'de') {
-              return gender === 'female' ? 'de-mls' : 'de-thorsten';
+              return gender === 'female' ? 'de-eva-coqui' : 'de-thorsten';
             } else {
               return gender === 'female' ? 'en-amy' : 'en-ryan';
             }
