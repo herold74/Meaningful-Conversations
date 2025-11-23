@@ -111,8 +111,133 @@ export const checkTtsHealth = async (): Promise<boolean> => {
     }
 };
 
+// ============================================================================
+// NEW: Bot-specific voice settings
+// ============================================================================
+
+export interface BotVoiceSettings {
+    mode: TtsMode;
+    voiceId: string | null;
+    isAuto: boolean;
+}
+
+/**
+ * Get voice settings for a specific bot
+ */
+export const getBotVoiceSettings = (botId: string): BotVoiceSettings => {
+    if (typeof localStorage === 'undefined') {
+        return { mode: 'local', voiceId: null, isAuto: true };
+    }
+
+    try {
+        // Try to load from new bot-specific format
+        const settingsStr = localStorage.getItem('botVoiceSettings');
+        if (settingsStr) {
+            const allSettings = JSON.parse(settingsStr);
+            if (allSettings[botId]) {
+                return allSettings[botId];
+            }
+        }
+
+        // Fallback: Try to migrate from legacy format
+        const migrated = migrateLegacySettings(botId);
+        if (migrated) {
+            return migrated;
+        }
+
+        // Default: Auto mode
+        return { mode: 'local', voiceId: null, isAuto: true };
+    } catch (error) {
+        console.error('[TTS] Failed to load bot voice settings:', error);
+        return { mode: 'local', voiceId: null, isAuto: true };
+    }
+};
+
+/**
+ * Save voice settings for a specific bot
+ */
+export const saveBotVoiceSettings = (botId: string, settings: BotVoiceSettings): void => {
+    if (typeof localStorage === 'undefined') return;
+
+    try {
+        const settingsStr = localStorage.getItem('botVoiceSettings');
+        const allSettings = settingsStr ? JSON.parse(settingsStr) : {};
+        
+        allSettings[botId] = settings;
+        
+        localStorage.setItem('botVoiceSettings', JSON.stringify(allSettings));
+        console.log('[TTS] Saved voice settings for', botId, ':', settings);
+    } catch (error) {
+        console.error('[TTS] Failed to save bot voice settings:', error);
+    }
+};
+
+/**
+ * Migrate legacy settings to new bot-specific format
+ * Returns migrated settings or null if no legacy settings found
+ */
+const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
+    if (typeof localStorage === 'undefined') return null;
+
+    try {
+        // Check for legacy coachVoicePreferences
+        const legacyPrefsStr = localStorage.getItem('coachVoicePreferences');
+        const legacyPrefs = legacyPrefsStr ? JSON.parse(legacyPrefsStr) : null;
+        
+        // Check for legacy global settings
+        const legacyMode = localStorage.getItem('ttsMode') as TtsMode | null;
+        const legacyAutoMode = localStorage.getItem('ttsAutoMode') === 'true';
+        const legacyServerVoice = localStorage.getItem('selectedServerVoice');
+        const legacyLocalVoice = localStorage.getItem('selectedLocalVoiceURI');
+
+        // If we have bot-specific legacy preference
+        if (legacyPrefs && legacyPrefs[botId]) {
+            const voiceId = legacyPrefs[botId];
+            const mode: TtsMode = legacyMode || 'local';
+            
+            const settings: BotVoiceSettings = {
+                mode,
+                voiceId,
+                isAuto: legacyAutoMode
+            };
+            
+            // Save to new format
+            saveBotVoiceSettings(botId, settings);
+            console.log('[TTS] Migrated legacy settings for', botId);
+            return settings;
+        }
+
+        // If we have global legacy settings, use them as default
+        if (legacyMode || legacyServerVoice || legacyLocalVoice) {
+            const mode: TtsMode = legacyMode || 'local';
+            const voiceId = mode === 'server' ? legacyServerVoice : legacyLocalVoice;
+            
+            const settings: BotVoiceSettings = {
+                mode,
+                voiceId,
+                isAuto: legacyAutoMode
+            };
+            
+            // Save to new format
+            saveBotVoiceSettings(botId, settings);
+            console.log('[TTS] Migrated global legacy settings for', botId);
+            return settings;
+        }
+
+        return null;
+    } catch (error) {
+        console.error('[TTS] Failed to migrate legacy settings:', error);
+        return null;
+    }
+};
+
+// ============================================================================
+// LEGACY: Keep for backwards compatibility (will be deprecated)
+// ============================================================================
+
 /**
  * Get TTS preferences from localStorage
+ * @deprecated Use getBotVoiceSettings instead
  */
 export const getTtsPreferences = (): {
     mode: TtsMode;
@@ -143,6 +268,7 @@ export const getTtsPreferences = (): {
 
 /**
  * Save TTS preferences to localStorage
+ * @deprecated Use saveBotVoiceSettings instead
  */
 export const saveTtsPreferences = (mode: TtsMode, selectedVoiceURI: string | null): void => {
     if (typeof localStorage === 'undefined') return;
