@@ -139,6 +139,11 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         );
     }, [botLanguage, botGender]);
 
+    // Helper function to check if a server voice is enabled
+    const isVoiceEnabled = (voice: ServerVoice) => {
+        return serverTtsAvailable && voice.model !== '';
+    };
+
     const handleSave = () => {
         onSelectVoice(selection);
         onClose();
@@ -189,25 +194,25 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 {!serverTtsAvailable && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
                             </h3>
                             {serverVoices.map(voice => (
-                                <div key={voice.id} className={`p-3 border border-border-primary ${serverTtsAvailable ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
-                                    <label className={`flex items-center ${serverTtsAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
+                                <div key={voice.id} className={`p-3 border border-border-primary ${isVoiceEnabled(voice) ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
+                                    <label className={`flex items-center ${isVoiceEnabled(voice) ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                                         <input
                                             type="radio"
                                             name="voice-selection"
                                             checked={selection.type === 'server' && selection.voiceId === voice.id}
-                                            onChange={() => serverTtsAvailable && setSelection({ type: 'server', voiceId: voice.id })}
-                                            disabled={!serverTtsAvailable}
+                                            onChange={() => isVoiceEnabled(voice) && setSelection({ type: 'server', voiceId: voice.id })}
+                                            disabled={!isVoiceEnabled(voice)}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                         <span className="ml-3 flex-1">
-                                            <span className={`font-semibold ${serverTtsAvailable ? 'text-content-primary' : 'text-content-secondary'}`}>{voice.name}</span>
+                                            <span className={`font-semibold ${isVoiceEnabled(voice) ? 'text-content-primary' : 'text-content-secondary'}`}>{voice.name}</span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.language.toUpperCase()} - {voice.gender}
                                             </span>
                                         </span>
                                         <button
-                                            onClick={(e) => { e.preventDefault(); serverTtsAvailable && onPreviewServerVoice(voice.id); }}
-                                            disabled={!serverTtsAvailable}
+                                            onClick={(e) => { e.preventDefault(); isVoiceEnabled(voice) && onPreviewServerVoice(voice.id); }}
+                                            disabled={!isVoiceEnabled(voice)}
                                             className="p-2 text-content-secondary hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                             aria-label={`Preview voice ${voice.name}`}
                                         >

@@ -200,12 +200,12 @@ const NewsletterPanel: React.FC = () => {
                 {translating ? (
                   <>
                     <Spinner />
-                    <span>Übersetze...</span>
+                    <span className="hidden sm:inline">Übersetze...</span>
                   </>
                 ) : (
                   <>
                     <span>🌐</span>
-                    <span>Automatisch übersetzen</span>
+                    <span className="hidden sm:inline">Automatisch übersetzen</span>
                   </>
                 )}
               </button>
