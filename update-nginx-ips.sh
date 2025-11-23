@@ -99,9 +99,11 @@ update_staging_configs() {
     
     # Update staging-meaningful-conversations.conf
     if [ -f "/etc/nginx/conf.d/staging-meaningful-conversations.conf" ]; then
-        sed -i "s|server [0-9.]*:8080;|server ${backend_ip}:8080;|g" \
+        # Update backend proxy_pass (handles both /api/ and plain :8080)
+        sed -i "s|proxy_pass http://[0-9.]*:8080|proxy_pass http://${backend_ip}:8080|g" \
             /etc/nginx/conf.d/staging-meaningful-conversations.conf
-        sed -i "s|server [0-9.]*:3000;|server ${frontend_ip}:3000;|g" \
+        # Update frontend proxy_pass
+        sed -i "s|proxy_pass http://[0-9.]*:3000|proxy_pass http://${frontend_ip}:3000|g" \
             /etc/nginx/conf.d/staging-meaningful-conversations.conf
         print_success "Updated staging-meaningful-conversations.conf"
     fi
@@ -141,9 +143,11 @@ update_production_configs() {
     
     # Update production-meaningful-conversations.conf
     if [ -f "/etc/nginx/conf.d/production-meaningful-conversations.conf" ]; then
-        sed -i "s|server [0-9.]*:8080;|server ${backend_ip}:8080;|g" \
+        # Update backend proxy_pass (handles both /api/ and plain :8080)
+        sed -i "s|proxy_pass http://[0-9.]*:8080|proxy_pass http://${backend_ip}:8080|g" \
             /etc/nginx/conf.d/production-meaningful-conversations.conf
-        sed -i "s|server [0-9.]*:3000;|server ${frontend_ip}:3000;|g" \
+        # Update frontend proxy_pass
+        sed -i "s|proxy_pass http://[0-9.]*:3000|proxy_pass http://${frontend_ip}:3000|g" \
             /etc/nginx/conf.d/production-meaningful-conversations.conf
         print_success "Updated production-meaningful-conversations.conf"
     else
