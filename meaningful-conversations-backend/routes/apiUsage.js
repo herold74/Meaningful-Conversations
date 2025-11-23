@@ -245,5 +245,30 @@ router.get('/projections', async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/api-usage/failed
+ * Delete all failed API call records from the database
+ */
+router.delete('/failed', async (req, res) => {
+  try {
+    const result = await prisma.apiUsage.deleteMany({
+      where: {
+        success: false,
+      },
+    });
+
+    console.log(`Deleted ${result.count} failed API call records`);
+
+    res.json({
+      success: true,
+      deletedCount: result.count,
+      message: `Successfully deleted ${result.count} failed API call records`,
+    });
+  } catch (error) {
+    console.error('Error deleting failed API calls:', error);
+    res.status(500).json({ error: 'Failed to delete failed API calls' });
+  }
+});
+
 module.exports = router;
 
