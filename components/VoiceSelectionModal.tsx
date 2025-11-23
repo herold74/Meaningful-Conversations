@@ -5,7 +5,7 @@ import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
 import { InfoIcon } from './icons/InfoIcon';
-import { SERVER_VOICES, type TtsMode } from '../services/ttsService';
+import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 
 type VoiceSelection = 
