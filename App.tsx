@@ -393,6 +393,18 @@ const App: React.FC = () => {
     };
     
     const handleSelectBot = (bot: Bot) => {
+        // Stop any ongoing voice output
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        
+        // Stop server audio if playing
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        
         setSelectedBot(bot);
         setUserMessageCount(0);
         setChatHistory([]);
@@ -606,6 +618,18 @@ const App: React.FC = () => {
     };
 
     const handleContinueSession = async (newContext: string, options: { preventCloudSave: boolean }) => {
+        // Stop any ongoing voice output
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        
+        // Stop server audio if playing
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        
         // For test sessions, immediately exit to the admin panel without saving anything.
         // This prevents the test data from polluting the main application state.
         if (isTestMode) {
@@ -628,6 +652,18 @@ const App: React.FC = () => {
     };
 
     const handleSwitchCoach = async (newContext: string, options: { preventCloudSave: boolean }) => {
+        // Stop any ongoing voice output
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        
+        // Stop server audio if playing
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        
         // For test sessions, immediately exit to the admin panel without saving anything.
         if (isTestMode) {
             setIsTestMode(false);
