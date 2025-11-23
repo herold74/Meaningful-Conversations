@@ -41,12 +41,12 @@ export const selectVoice = (
   // --- Whitelist First Pass ---
   let allowedNames: string[] = [];
   if (langPrefix === 'de') {
-      allowedNames = gender === 'female' ? ['petra', 'anna'] : ['markus', 'viktor'];
+      allowedNames = gender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'martin', 'hans'];
   } else if (langPrefix === 'en') {
       if (gender === 'female') {
-          allowedNames = ['samantha', 'susan', 'serena'];
+          allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa'];
       } else {
-          allowedNames = ['daniel', 'jamie'];
+          allowedNames = ['daniel', 'jamie', 'alex', 'tom'];
       }
   }
 
@@ -74,15 +74,31 @@ export const selectVoice = (
   }
   
   // --- Fallback to Broader Search if Whitelist Fails ---
-  const voicesToScore = voices.filter(v => {
+  // First try: voices that match the gender
+  let voicesToScore = voices.filter(v => {
     if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
     const voiceGender = getVoiceGender(v);
-    return voiceGender === gender || voiceGender === 'unknown';
+    return voiceGender === gender;
   });
 
+  // Second try: voices that are not the opposite gender (include 'unknown')
+  if (voicesToScore.length === 0) {
+    const oppositeGender = gender === 'male' ? 'female' : 'male';
+    voicesToScore = voices.filter(v => {
+      if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
+      const voiceGender = getVoiceGender(v);
+      return voiceGender !== oppositeGender;
+    });
+  }
+
+  // Last resort: any voice for the language
   if (voicesToScore.length === 0) {
      const anyVoiceForLang = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
-     return anyVoiceForLang || null;
+     if (anyVoiceForLang) {
+       console.warn(`[Voice Selection] No gender-matched voice found for ${langPrefix}/${gender}, using any available voice:`, anyVoiceForLang.name);
+       return anyVoiceForLang;
+     }
+     return null;
   }
 
   const score = (voice: SpeechSynthesisVoice): number => {

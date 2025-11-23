@@ -89,12 +89,12 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // --- Whitelist First Pass ---
         let allowedNames: string[] = [];
         if (botLanguage === 'de') {
-            allowedNames = botGender === 'female' ? ['petra', 'anna'] : ['markus', 'viktor'];
+            allowedNames = botGender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'martin', 'hans'];
         } else if (botLanguage === 'en') {
             if (botGender === 'female') {
-                allowedNames = ['samantha', 'susan', 'serena'];
+                allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa'];
             } else {
-                allowedNames = ['daniel', 'jamie'];
+                allowedNames = ['daniel', 'jamie', 'alex', 'tom'];
             }
         }
         
@@ -110,13 +110,24 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         }
 
         // --- Fallback to Broader Search if Whitelist Fails ---
-        const oppositeGender = botGender === 'male' ? 'female' : 'male';
-        const genderFilteredVoices = voices.filter(v => {
+        // First try: voices that match the gender
+        let genderFilteredVoices = voices.filter(v => {
             if (!v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const voiceGender = getVoiceGender(v);
-            return voiceGender !== oppositeGender;
+            return voiceGender === botGender;
         });
+
+        // Second try: voices that are not the opposite gender (include 'unknown')
+        if (genderFilteredVoices.length === 0) {
+            const oppositeGender = botGender === 'male' ? 'female' : 'male';
+            genderFilteredVoices = voices.filter(v => {
+                if (!v.localService) return false;
+                if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
+                const voiceGender = getVoiceGender(v);
+                return voiceGender !== oppositeGender;
+            });
+        }
 
         // De-duplicate and sort the broader list
         const uniqueVoicesMap = new Map<string, SpeechSynthesisVoice>();
