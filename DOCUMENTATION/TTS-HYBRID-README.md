@@ -54,10 +54,28 @@ Users can choose from three options in Settings:
 ### Features
 - ✅ **Automatic Fallback**: Server unavailable → switches to local voices
 - ✅ **Persistent Selection**: Saved preference survives app restarts
+- ✅ **Per-Bot Preferences**: Each bot remembers its own voice settings (v1.6.1+)
 - ✅ **Smart Reset**: Returns to Auto if saved voice unavailable
 - ✅ **Voice Preview**: Test voices before selection
 - ✅ **Visual Feedback**: Server voices greyed out when unavailable
 - ✅ **Playback Controls**: Pause, resume, repeat for all modes
+
+### Per-Bot Voice Preferences (v1.6.1+)
+
+Each bot now maintains its own voice settings independently:
+- **Ava** can use Server Voice (en-amy)
+- **Max** can use Local Voice (Daniel)
+- **Kenji** can be in Auto mode
+- Settings persist per bot across sessions
+- No interference between different bots' preferences
+
+**Use Case Example**:
+```
+Gloria (Interview)    → Auto mode (Server: Sophia when available)
+Max (Ambitious)       → Local: Daniel (works offline)
+Ava (Strategic)       → Server: Amy (consistent quality)
+Kenji (Stoic)         → Auto mode (Server: Thorsten when available)
+```
 
 ## 🏗️ Architecture
 
@@ -171,9 +189,22 @@ export const SERVER_VOICES: ServerVoice[] = [
   { id: 'en-ryan', name: 'Ryan (English, Male)', ... }
 ];
 
-// Functions
+// Bot-specific settings (v1.6.1+)
+export interface BotVoiceSettings {
+  mode: TtsMode;           // 'local' | 'server'
+  voiceId: string | null;  // Voice URI or ID
+  isAuto: boolean;         // Auto mode enabled
+}
+
+// Primary functions (v1.6.1+)
+- getBotVoiceSettings(botId): BotVoiceSettings
+- saveBotVoiceSettings(botId, settings): void
+
+// Core functions
 - synthesizeSpeech(text, botId, lang, isMeditation, voiceId)
 - checkTtsHealth()
+
+// Legacy functions (deprecated, kept for compatibility)
 - getTtsPreferences() / saveTtsPreferences(mode, voiceURI)
 ```
 
@@ -210,6 +241,92 @@ export const SERVER_VOICES: ServerVoice[] = [
 - `de_DE-thorsten-medium.onnx` (60 MB) + `.json`
 - `en_US-amy-medium.onnx` (60 MB) + `.json`
 - `en_US-ryan-medium.onnx` (60 MB) + `.json`
+
+## 💾 Voice Settings Storage
+
+### localStorage Structure
+
+**Legacy Format (v1.6.0 and earlier)**:
+```javascript
+localStorage: {
+  "ttsMode": "server",                    // Global mode
+  "ttsAutoMode": "true",                  // Global auto flag
+  "selectedServerVoice": "en-amy",        // Global server voice
+  "selectedLocalVoiceURI": "com.apple.Samantha",  // Global local voice
+  "coachVoicePreferences": {              // Per-bot voice IDs
+    "ava-strategic": "en-amy",
+    "max-ambitious": "com.apple.Daniel"
+  }
+}
+```
+
+**New Format (v1.6.1+)**:
+```javascript
+localStorage: {
+  "botVoiceSettings": {
+    "ava-strategic": {
+      "mode": "server",                   // Server or local
+      "voiceId": "en-amy",                // Specific voice
+      "isAuto": false                     // Manual selection
+    },
+    "max-ambitious": {
+      "mode": "local",
+      "voiceId": "com.apple.Daniel",
+      "isAuto": false
+    },
+    "kenji-stoic": {
+      "mode": "local",
+      "voiceId": null,                    // Auto-selected
+      "isAuto": true                      // Auto mode
+    }
+  }
+}
+```
+
+### Migration Strategy (v1.6.1+)
+
+**Automatic Migration**: When a user loads a bot for the first time after upgrading to v1.6.1:
+
+1. **Check for new format**: Look for `botVoiceSettings[botId]`
+2. **If not found, migrate from legacy**:
+   - Priority 1: Bot-specific preference from `coachVoicePreferences[botId]`
+   - Priority 2: Global settings (`ttsMode`, `selectedServerVoice`, etc.)
+   - Priority 3: Default to Auto mode
+3. **Save to new format**: Store migrated settings in `botVoiceSettings`
+4. **Legacy keys preserved**: Old keys remain for backwards compatibility
+
+**Migration Logic** (`services/ttsService.ts`):
+```typescript
+const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
+  // Read legacy settings
+  const legacyPrefs = JSON.parse(localStorage.getItem('coachVoicePreferences'));
+  const legacyMode = localStorage.getItem('ttsMode');
+  const legacyAutoMode = localStorage.getItem('ttsAutoMode');
+  
+  // If bot had specific preference
+  if (legacyPrefs?.[botId]) {
+    return {
+      mode: legacyMode || 'local',
+      voiceId: legacyPrefs[botId],
+      isAuto: legacyAutoMode === null ? true : legacyAutoMode === 'true'
+    };
+  }
+  
+  // If global settings exist
+  if (legacyMode || legacyServerVoice || legacyLocalVoice) {
+    return {
+      mode: legacyMode || 'local',
+      voiceId: /* appropriate voice */,
+      isAuto: legacyAutoMode === null ? true : legacyAutoMode === 'true'
+    };
+  }
+  
+  // Default
+  return null; // Will use { mode: 'local', voiceId: null, isAuto: true }
+};
+```
+
+**No User Action Required**: Migration happens transparently on first bot load.
 
 ## 📊 Performance & Monitoring
 
@@ -399,12 +516,14 @@ podman-compose-production.yml         # Production deployment
 
 ## 🎯 Roadmap
 
-### v1.6.1 (Current Staging)
+### v1.6.1 (Current Production)
 - [x] Separate TTS container
 - [x] Auto voice selection
 - [x] Phonetic corrections
 - [x] Server voice UI
-- [ ] Extended staging testing
+- [x] Bot-specific voice preferences
+- [x] Automatic legacy settings migration
+- [x] Extended staging testing
 
 ### v1.7.0 (Future)
 - [ ] Audio caching (reduce server load)
@@ -430,6 +549,6 @@ podman-compose-production.yml         # Production deployment
 
 ---
 
-**Version**: 1.6.0
-**Last Updated**: 22. November 2025
-**Status**: ✅ Production-ready (on Staging)
+**Version**: 1.6.1
+**Last Updated**: 23. November 2025
+**Status**: ✅ Production-ready
