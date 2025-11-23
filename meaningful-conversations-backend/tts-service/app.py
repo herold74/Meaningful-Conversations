@@ -56,9 +56,9 @@ def get_xtts_model():
             logger.error(f"Failed to initialize XTTS: {e}")
     return xtts_model
 
-# Pre-load XTTS model at startup
-logger.info("Pre-loading XTTS model at startup...")
-get_xtts_model()
+# Pre-load XTTS model at startup (DISABLED - only load on demand)
+# logger.info("Pre-loading XTTS model at startup...")
+# get_xtts_model()
 
 @app.route('/health', methods=['GET'])
 def health():
