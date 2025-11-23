@@ -14,13 +14,13 @@ export const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' |
     const maleKeywords = ['male', 'man', 'boy', 'männlich'];
     const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
     
-    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji'];
-    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena'];
+    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji', 'martin', 'hans'];
+    const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena', 'petra', 'helena', 'katja'];
 
     if (maleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'male';
     if (femaleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'female';
     
-    const nameParts = name.replace(/[^a-z\s]/gi, '').split(/\s+/).filter(Boolean);
+    const nameParts = name.replace(/[^a-z\s]/gi, '').toLowerCase().split(/\s+/).filter(Boolean);
     if (nameParts.some(part => femaleNames.includes(part))) return 'female';
     if (nameParts.some(part => maleNames.includes(part))) return 'male';
 
