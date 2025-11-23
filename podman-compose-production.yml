@@ -52,8 +52,7 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-      tts:
-        condition: service_healthy
+      # TTS optional - Backend startet auch wenn TTS nicht verfügbar
     volumes:
       - tts_voices_production:/models:ro
     environment:
