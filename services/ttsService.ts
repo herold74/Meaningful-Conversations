@@ -186,7 +186,8 @@ const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
         
         // Check for legacy global settings
         const legacyMode = localStorage.getItem('ttsMode') as TtsMode | null;
-        const legacyAutoMode = localStorage.getItem('ttsAutoMode') === 'true';
+        const legacyAutoModeSetting = localStorage.getItem('ttsAutoMode');
+        const legacyAutoMode = legacyAutoModeSetting === null ? true : legacyAutoModeSetting === 'true';
         const legacyServerVoice = localStorage.getItem('selectedServerVoice');
         const legacyLocalVoice = localStorage.getItem('selectedLocalVoiceURI');
 
