@@ -23,6 +23,13 @@ export const SERVER_VOICES: ServerVoice[] = [
         model: 'de_DE-thorsten-medium',
     },
     {
+        id: 'de-female',
+        name: 'Deutsch (Weiblich)',
+        language: 'de',
+        gender: 'female',
+        model: '', // Empty - will be disabled until available
+    },
+    {
         id: 'en-amy',
         name: 'Amy (English, Female)',
         language: 'en',
