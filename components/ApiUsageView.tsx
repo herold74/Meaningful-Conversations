@@ -7,6 +7,7 @@ import { ActivityIcon } from './icons/ActivityIcon';
 import { ZapIcon } from './icons/ZapIcon';
 import { ClockIcon } from './icons/ClockIcon';
 import { TrendingUpIcon } from './icons/TrendingUpIcon';
+import { DeleteIcon } from './icons/DeleteIcon';
 
 interface ApiUsageStats {
     totalCalls: number;
@@ -94,6 +95,7 @@ export const ApiUsageView: React.FC = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [deletingFailed, setDeletingFailed] = useState(false);
 
     useEffect(() => {
         fetchUsageData();
@@ -167,6 +169,27 @@ export const ApiUsageView: React.FC = () => {
         return `${(ms / 1000).toFixed(2)}s`;
     };
 
+    const handleDeleteFailedCalls = async () => {
+        if (!confirm('Are you sure you want to delete all failed API call records? This action cannot be undone.')) {
+            return;
+        }
+
+        setDeletingFailed(true);
+        try {
+            const response = await apiFetch('/api-usage/failed', {
+                method: 'DELETE',
+            });
+
+            alert(`Successfully deleted ${response.deletedCount} failed API call records.`);
+            await fetchUsageData(); // Refresh the data
+        } catch (err: any) {
+            console.error('Failed to delete failed API calls:', err);
+            alert(`Failed to delete failed API calls: ${err.message || 'Unknown error'}`);
+        } finally {
+            setDeletingFailed(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -194,7 +217,7 @@ export const ApiUsageView: React.FC = () => {
     return (
         <div className="space-y-6">
             {/* Time Range Selector */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 justify-between">
                 <div className="flex gap-2">
                     {(['7d', '30d', '90d'] as TimeRange[]).map((range) => (
                         <button
@@ -212,6 +235,21 @@ export const ApiUsageView: React.FC = () => {
                         </button>
                     ))}
                 </div>
+
+                {/* Delete Failed Calls Button */}
+                {stats && stats.failedCalls > 0 && (
+                    <button
+                        onClick={handleDeleteFailedCalls}
+                        disabled={deletingFailed}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title={`Delete ${stats.failedCalls} Failed Calls`}
+                    >
+                        <DeleteIcon className="w-5 h-5 flex-shrink-0" />
+                        <span className="hidden sm:inline">
+                            {deletingFailed ? 'Deleting...' : `Delete ${stats.failedCalls} Failed Calls`}
+                        </span>
+                    </button>
+                )}
                 
                 {timeRange === 'custom' && (
                     <div className="flex gap-2 items-center">
