@@ -106,7 +106,6 @@ function getVoiceModelFromId(voiceId) {
         const validModels = [
             'de_DE-mls-medium',
             'de_DE-thorsten-medium',
-            'de_DE-eva-coqui',
             'de_DE-eva_k-x_low',
             'en_US-amy-medium',
             'en_US-ryan-medium',
@@ -120,7 +119,6 @@ function getVoiceModelFromId(voiceId) {
     const voiceMap = {
         'de-mls': 'de_DE-mls-medium',
         'de-thorsten': 'de_DE-thorsten-medium',
-        'de-eva': 'de_DE-eva-coqui',
         'en-amy': 'en_US-amy-medium',
         'en-ryan': 'en_US-ryan-medium',
     };
@@ -134,7 +132,7 @@ function getVoiceModelFromId(voiceId) {
  * @param {string} lang - Language code ('de' or 'en')
  * @param {boolean} isMeditation - Whether to use meditation mode (slower)
  * @param {string} voiceId - Optional: Specific voice ID to use (overrides bot default)
- * @param {boolean} stream - Whether to use streaming (sentence-by-sentence for XTTS)
+ * @param {boolean} stream - Not used (kept for backwards compatibility)
  * @returns {Promise<Buffer>} - Audio data as WAV buffer
  */
 async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId = null, stream = true) {
@@ -171,10 +169,6 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     const serverVoiceSlowdown = 1.05;
     const lengthScale = (1.0 / rate) * serverVoiceSlowdown; // Piper uses length_scale (inverse of rate)
     
-    // Check if model is XTTS (for streaming)
-    const isXTTS = model.includes('-coqui') || model.includes('xtts');
-    const useStreaming = stream && isXTTS;
-    
     // Try TTS container first (if configured)
     if (USE_TTS_CONTAINER) {
         try {
@@ -184,15 +178,13 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
                 lengthScale: lengthScale
             };
             
-            // Use streaming endpoint for XTTS, regular for Piper
-            const endpoint = useStreaming ? '/synthesize-stream' : '/synthesize';
-            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}, endpoint=${endpoint}`);
+            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}`);
             
             const response = await axios.post(
-                `${TTS_SERVICE_URL}${endpoint}`,
+                `${TTS_SERVICE_URL}/synthesize`,
                 requestPayload,
                 {
-                    timeout: 60000, // 60 seconds for XTTS synthesis
+                    timeout: 30000, // 30 seconds for Piper synthesis
                     responseType: 'arraybuffer'
                 }
             );
@@ -269,9 +261,18 @@ function cleanTextForSpeech(text, lang = 'de') {
     
     // Apply phonetic replacements for better pronunciation
     // Use word boundaries to avoid partial replacements
-    for (const [english, phonetic] of Object.entries(phoneticReplacements)) {
-        const regex = new RegExp(`\\b${english}\\b`, 'g');
+    let replacementsApplied = 0;
+    for (const [term, phonetic] of Object.entries(phoneticReplacements)) {
+        const regex = new RegExp(`\\b${term}\\b`, 'g');
+        const before = cleanedText;
         cleanedText = cleanedText.replace(regex, phonetic);
+        if (before !== cleanedText) {
+            replacementsApplied++;
+        }
+    }
+    
+    if (replacementsApplied > 0) {
+        console.log(`  ✓ Applied ${replacementsApplied} phonetic replacements`);
     }
     
     // Final cleanup
