@@ -49,30 +49,44 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'At least subject or body must be provided' });
         }
 
-        const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for high-quality translation
+        const modelName = 'gemini-2.5-flash'; // Gemini 2.5 Flash for fast, high-quality translations
         const systemInstruction = 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.';
 
         const translationResults = {};
 
+        // Timeout helper
+        const withTimeout = (promise, timeoutMs = 25000) => {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Translation timeout - text might be too long')), timeoutMs)
+                )
+            ]);
+        };
+
         if (subject) {
-            const subjectResult = await ai.models.generateContent({
-                model: modelName,
-                contents: subject,
-                config: {
-                    systemInstruction: systemInstruction,
-                },
-            });
+            const subjectResult = await withTimeout(
+                ai.models.generateContent({
+                    model: modelName,
+                    contents: subject,
+                    config: {
+                        systemInstruction: systemInstruction,
+                    },
+                })
+            );
             translationResults.subject = subjectResult.text;
         }
 
         if (body) {
-            const bodyResult = await ai.models.generateContent({
-                model: modelName,
-                contents: body,
-                config: {
-                    systemInstruction: systemInstruction,
-                },
-            });
+            const bodyResult = await withTimeout(
+                ai.models.generateContent({
+                    model: modelName,
+                    contents: body,
+                    config: {
+                        systemInstruction: systemInstruction,
+                    },
+                })
+            );
             translationResults.body = bodyResult.text;
         }
 
@@ -80,6 +94,13 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
     } catch (error) {
         console.error('Translation error:', error);
+        if (error.message.includes('timeout')) {
+            return res.status(504).json({ 
+                error: 'Translation timeout', 
+                message: 'The text is too long. Please try with shorter content.',
+                details: error.message 
+            });
+        }
         return res.status(500).json({ error: 'Translation failed', details: error.message });
     }
 });
@@ -242,7 +263,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
     const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang, currentDate });
     const startTime = Date.now();
-    const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for improved reasoning
+    const modelName = 'gemini-2.5-pro'; // Using Gemini 2.5 Pro for improved reasoning
     const userId = req.userId;
     
     try {
@@ -307,7 +328,7 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
 
     const fullPrompt = formattingPromptConfig.prompt({ conversation, template });
     const startTime = Date.now();
-    const modelName = 'gemini-3-pro-preview'; // Using Gemini 3.0 for improved formatting
+    const modelName = 'gemini-2.5-pro'; // Using Gemini 2.5 Pro for improved formatting
     const userId = req.userId;
 
     try {
