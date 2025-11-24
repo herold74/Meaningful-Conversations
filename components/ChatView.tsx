@@ -168,13 +168,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Load bot-specific settings
   const [ttsMode, setTtsMode] = useState<TtsMode>(() => {
     const settings = getBotVoiceSettings(bot.id);
-    return settings.mode;
+    return settings[language].mode;
   });
   
   // Track if user selected "auto" mode
   const [isAutoMode, setIsAutoMode] = useState<boolean>(() => {
     const settings = getBotVoiceSettings(bot.id);
-    return settings.isAuto;
+    return settings[language].isAuto;
   });
   
   // Audio element for server TTS playback
@@ -184,7 +184,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     const settings = getBotVoiceSettings(bot.id);
-    return settings.voiceId;
+    return settings[language].voiceId;
   });
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -221,6 +221,25 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               return 'male';
       }
   }, [bot.id]);
+
+  // Helper function to save language-specific voice settings
+  const saveLanguageVoiceSettings = useCallback((mode: TtsMode, voiceId: string | null, isAuto: boolean) => {
+    const allSettings = getBotVoiceSettings(bot.id);
+    allSettings[language] = { mode, voiceId, isAuto };
+    saveBotVoiceSettings(bot.id, allSettings);
+  }, [bot.id, language]);
+
+  // Reset voice settings when language changes
+  useEffect(() => {
+    const settings = getBotVoiceSettings(bot.id);
+    const langSettings = settings[language];
+    
+    setSelectedVoiceURI(langSettings.voiceId);
+    setTtsMode(langSettings.mode);
+    setIsAutoMode(langSettings.isAuto);
+    
+    console.log(`[TTS] Language changed to ${language}, loaded voice settings:`, langSettings);
+  }, [language, bot.id]);
 
   // Initialize gong audio with fallback to programmatic sound
   useEffect(() => {
@@ -275,11 +294,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             // Use local fallback
             setSelectedVoiceURI(null);
             setTtsMode('local');
-            saveBotVoiceSettings(bot.id, {
-              mode: 'local',
-              voiceId: null,
-              isAuto: true
-            });
+            saveLanguageVoiceSettings('local', null, true);
           } else {
             // Server available, keep selection
             console.log('[TTS Init] Saved server voice available:', selectedVoiceURI);
@@ -292,11 +307,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             console.warn('[TTS Init] Saved local voice unavailable, switching to auto mode');
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
-            saveBotVoiceSettings(bot.id, {
-              mode: 'local',
-              voiceId: null,
-              isAuto: true
-            });
+            saveLanguageVoiceSettings('local', null, true);
           } else {
             console.log('[TTS Init] Saved local voice available:', selectedVoiceURI);
           }
@@ -308,32 +319,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               // Server voice available for this bot
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
-              saveBotVoiceSettings(bot.id, {
-                mode: 'server',
-                voiceId: bestVoice,
-                isAuto: true
-              });
+              saveLanguageVoiceSettings('server', bestVoice, true);
               console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
             } else {
               // No server voice for this bot/language - use local
               setSelectedVoiceURI(null);
               setTtsMode('local');
-              saveBotVoiceSettings(bot.id, {
-                mode: 'local',
-                voiceId: null,
-                isAuto: true
-              });
+              saveLanguageVoiceSettings('local', null, true);
               console.log('[TTS Init] Auto mode - no server voice available, using local browser voice');
             }
           } else {
             // Server not available, use local auto-selection (handled by speak function)
             setSelectedVoiceURI(null);
             setTtsMode('local');
-            saveBotVoiceSettings(bot.id, {
-              mode: 'local',
-              voiceId: null,
-              isAuto: true
-            });
+            saveLanguageVoiceSettings('local', null, true);
             console.log('[TTS Init] Auto mode - using local browser voice');
           }
         }
@@ -345,11 +344,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setIsAutoMode(true);
           setTtsMode('local');
           setSelectedVoiceURI(null);
-          saveBotVoiceSettings(bot.id, {
-            mode: 'local',
-            voiceId: null,
-            isAuto: true
-          });
+          saveLanguageVoiceSettings('local', null, true);
         }
       }
     };
@@ -700,32 +695,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           if (bestVoice) {
             setSelectedVoiceURI(bestVoice);
             setTtsMode('server');
-            saveBotVoiceSettings(bot.id, {
-              mode: 'server',
-              voiceId: bestVoice,
-              isAuto: true
-            });
+            saveLanguageVoiceSettings('server', bestVoice, true);
             console.log('[TTS Select] Auto mode - using server voice:', bestVoice);
           } else {
             // No server voice available (e.g., female German) - use local
             setSelectedVoiceURI(null);
             setTtsMode('local');
-            saveBotVoiceSettings(bot.id, {
-              mode: 'local',
-              voiceId: null,
-              isAuto: true
-            });
+            saveLanguageVoiceSettings('local', null, true);
             console.log('[TTS Select] Auto mode - no server voice available, using local');
           }
         } else {
           // Server TTS not available - use local
           setSelectedVoiceURI(null);
           setTtsMode('local');
-          saveBotVoiceSettings(bot.id, {
-            mode: 'local',
-            voiceId: null,
-            isAuto: true
-          });
+          saveLanguageVoiceSettings('local', null, true);
           console.log('[TTS Select] Auto mode - server unavailable, using local');
         }
       } catch (error) {
@@ -733,30 +716,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         console.warn('[TTS Select] Auto mode - failed to check server, using local:', error);
         setSelectedVoiceURI(null);
         setTtsMode('local');
-        saveBotVoiceSettings(bot.id, {
-          mode: 'local',
-          voiceId: null,
-          isAuto: true
-        });
+        saveLanguageVoiceSettings('local', null, true);
       }
     } else if (selection.type === 'local') {
       setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceURI);
       setTtsMode('local');
-      saveBotVoiceSettings(bot.id, {
-        mode: 'local',
-        voiceId: selection.voiceURI,
-        isAuto: false
-      });
+      saveLanguageVoiceSettings('local', selection.voiceURI, false);
     } else if (selection.type === 'server') {
       setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceId);
       setTtsMode('server');
-      saveBotVoiceSettings(bot.id, {
-        mode: 'server',
-        voiceId: selection.voiceId,
-        isAuto: false
-      });
+      saveLanguageVoiceSettings('server', selection.voiceId, false);
     }
     setIsVoiceModalOpen(false);
   }, [bot.id, language]);

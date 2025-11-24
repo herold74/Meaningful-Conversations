@@ -115,18 +115,28 @@ export const checkTtsHealth = async (): Promise<boolean> => {
 // NEW: Bot-specific voice settings
 // ============================================================================
 
-export interface BotVoiceSettings {
+export interface LanguageVoiceSettings {
     mode: TtsMode;
     voiceId: string | null;
     isAuto: boolean;
+}
+
+export interface BotVoiceSettings {
+    de: LanguageVoiceSettings;
+    en: LanguageVoiceSettings;
 }
 
 /**
  * Get voice settings for a specific bot
  */
 export const getBotVoiceSettings = (botId: string): BotVoiceSettings => {
+    const defaultSettings: BotVoiceSettings = {
+        de: { mode: 'local', voiceId: null, isAuto: true },
+        en: { mode: 'local', voiceId: null, isAuto: true }
+    };
+
     if (typeof localStorage === 'undefined') {
-        return { mode: 'local', voiceId: null, isAuto: true };
+        return defaultSettings;
     }
 
     try {
@@ -135,7 +145,19 @@ export const getBotVoiceSettings = (botId: string): BotVoiceSettings => {
         if (settingsStr) {
             const allSettings = JSON.parse(settingsStr);
             if (allSettings[botId]) {
-                return allSettings[botId];
+                const settings = allSettings[botId];
+                // Check if already in new format (with de/en keys)
+                if (settings.de && settings.en) {
+                    return settings;
+                }
+                // Old format detected - migrate to language-specific
+                console.log('[TTS] Migrating old bot settings to language-specific format');
+                const migratedSettings: BotVoiceSettings = {
+                    de: { ...settings },
+                    en: { mode: 'local', voiceId: null, isAuto: true }
+                };
+                saveBotVoiceSettings(botId, migratedSettings);
+                return migratedSettings;
             }
         }
 
@@ -146,10 +168,10 @@ export const getBotVoiceSettings = (botId: string): BotVoiceSettings => {
         }
 
         // Default: Auto mode
-        return { mode: 'local', voiceId: null, isAuto: true };
+        return defaultSettings;
     } catch (error) {
         console.error('[TTS] Failed to load bot voice settings:', error);
-        return { mode: 'local', voiceId: null, isAuto: true };
+        return defaultSettings;
     }
 };
 
@@ -173,7 +195,7 @@ export const saveBotVoiceSettings = (botId: string, settings: BotVoiceSettings):
 };
 
 /**
- * Migrate legacy settings to new bot-specific format
+ * Migrate legacy settings to new bot-specific, language-aware format
  * Returns migrated settings or null if no legacy settings found
  */
 const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
@@ -196,15 +218,21 @@ const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
             const voiceId = legacyPrefs[botId];
             const mode: TtsMode = legacyMode || 'local';
             
-            const settings: BotVoiceSettings = {
+            const legacySettings: LanguageVoiceSettings = {
                 mode,
                 voiceId,
                 isAuto: legacyAutoMode
             };
             
+            // Migrate to language-specific format (apply to DE, default for EN)
+            const settings: BotVoiceSettings = {
+                de: legacySettings,
+                en: { mode: 'local', voiceId: null, isAuto: true }
+            };
+            
             // Save to new format
             saveBotVoiceSettings(botId, settings);
-            console.log('[TTS] Migrated legacy settings for', botId);
+            console.log('[TTS] Migrated legacy settings for', botId, 'to language-specific format');
             return settings;
         }
 
@@ -213,15 +241,21 @@ const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
             const mode: TtsMode = legacyMode || 'local';
             const voiceId = mode === 'server' ? legacyServerVoice : legacyLocalVoice;
             
-            const settings: BotVoiceSettings = {
+            const legacySettings: LanguageVoiceSettings = {
                 mode,
                 voiceId,
                 isAuto: legacyAutoMode
             };
             
+            // Migrate to language-specific format
+            const settings: BotVoiceSettings = {
+                de: legacySettings,
+                en: { mode: 'local', voiceId: null, isAuto: true }
+            };
+            
             // Save to new format
             saveBotVoiceSettings(botId, settings);
-            console.log('[TTS] Migrated global legacy settings for', botId);
+            console.log('[TTS] Migrated global legacy settings for', botId, 'to language-specific format');
             return settings;
         }
 
