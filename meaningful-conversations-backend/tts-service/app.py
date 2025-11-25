@@ -137,15 +137,14 @@ def synthesize_stream():
         text = data.get('text', '')
         model = data.get('model', 'de_DE-thorsten-medium')
         length_scale = data.get('lengthScale', 1.0)
-        pitch_shift = data.get('pitchShift', 0)
         
-        logger.info(f"TTS Stream Request: model={model}, pitch_shift={pitch_shift:+d}, text_length={len(text)}")
+        logger.info(f"TTS Stream Request: model={model}, text_length={len(text)}")
         
         if not text:
             return jsonify({'error': 'Text is required'}), 400
         
         # Piper doesn't need streaming, just return normal synthesis
-        audio_data = synthesize_with_piper(text, model, length_scale, None, pitch_shift)
+        audio_data = synthesize_with_piper(text, model, length_scale, None)
         duration_ms = int((time.time() - start_time) * 1000)
         logger.info(f"TTS Success: {duration_ms}ms, {len(audio_data)} bytes, engine=piper")
         

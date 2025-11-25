@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -135,6 +135,30 @@
           "phonetic": "blogg",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "App",
+          "phonetic": "Epp",
+          "caseSensitive": true,
+          "notes": "Anwendungs-Begriff"
+        },
+        {
+          "term": "app",
+          "phonetic": "epp",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "timing",
+          "phonetic": "teiming",
+          "caseSensitive": true,
+          "notes": "Timing-Begriff (englisch)"
+        },
+        {
+          "term": "Timing",
+          "phonetic": "Teiming",
+          "caseSensitive": true,
+          "notes": "Großgeschrieben"
         }
       ]
     },
