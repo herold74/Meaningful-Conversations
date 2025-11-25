@@ -466,7 +466,7 @@
   "admin_feedback_hide_context": "Kontext verbergen",
   "admin_feedback_user_prompt": "Benutzer-Eingabe",
   "admin_feedback_bot_response": "Bot-Antwort",
-  "admin_ratings_overall_avg": "Gesamtdurchschnittsbewertung",
+  "admin_ratings_overall_avg": "Gesamtdurchschnitt",
   "admin_ratings_total_ratings": "von {{count}} Gesamtbewertungen",
   "admin_ratings_no_ratings": "Es wurden noch keine Bewertungen abgegeben.",
   "admin_ratings_avg_rating": "Durchschnitt",

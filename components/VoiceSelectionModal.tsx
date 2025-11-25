@@ -70,7 +70,11 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
-            if (isAutoMode) {
+            // Sync modal state with parent props
+            if (isAutoMode && currentVoiceURI && currentTtsMode === 'server') {
+                // Auto mode selected a server voice - show it as selected
+                setSelection({ type: 'server', voiceId: currentVoiceURI });
+            } else if (isAutoMode) {
                 setSelection({ type: 'auto' });
             } else if (currentTtsMode === 'server' && currentVoiceURI) {
                 setSelection({ type: 'server', voiceId: currentVoiceURI });

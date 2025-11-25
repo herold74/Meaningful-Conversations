@@ -350,7 +350,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     checkVoiceAvailability();
-  }, []); // Only run on mount
+  }, [bot.id, language]); // Re-run when bot or language changes
 
   // Auto-scroll to bottom when switching to text mode
   useEffect(() => {
