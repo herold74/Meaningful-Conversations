@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meaningful Conversations Update v1.6.3</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #1e40af;
+            margin: 0;
+            font-size: 28px;
+        }
+        .emoji {
+            font-size: 32px;
+        }
+        .feature {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature h2 {
+            margin-top: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature-alt {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .feature-alt2 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .feature ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .cta {
+            background-color: #3b82f6;
+            color: white;
+            text-align: center;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .performance-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🎉</div>
+            <h1>Meaningful Conversations v1.6.3</h1>
+            <p style="color: #666; margin: 10px 0 0 0;">Neue Features für noch bessere Coaching-Gespräche</p>
+        </div>
+
+        <p>Liebe Meaningful Conversations Community,</p>
+        
+        <p>wir freuen uns, die neuesten Verbesserungen unserer App vorstellen zu dürfen! In den letzten Wochen haben wir fleißig an Features gearbeitet, die eure Coaching-Erfahrung noch angenehmer und persönlicher machen.</p>
+
+        <!-- Feature 1: Smart Voice Selection -->
+        <div class="feature">
+            <h2><span>🗣️</span> Smarte Sprachauswahl</h2>
+            <p><strong>Problem gelöst:</strong> Beim Wechsel der App-Sprache wurde manchmal die falsche Stimme verwendet – etwa eine deutsche Stimme, die englische Texte vorlas.</p>
+            <p><strong>Jetzt neu:</strong> Die App merkt sich eure bevorzugte Stimme <strong>für jede Sprache separat</strong>!</p>
+            <ul>
+                <li>Deutsch mit Thorsten ✓</li>
+                <li>Englisch mit Amy oder Ryan ✓</li>
+                <li>Automatischer Wechsel bei Sprachwahl ✓</li>
+            </ul>
+            <p>Eure Vorlieben bleiben auch nach dem Schließen der App gespeichert.</p>
+        </div>
+
+        <!-- Feature 2: Phonetic Dictionary -->
+        <div class="feature feature-alt">
+            <h2><span>📖</span> Perfekte Aussprache</h2>
+            <p>Unser <strong>phonetisches Wörterbuch</strong> sorgt für natürliche Aussprache von Fachbegriffen:</p>
+            <ul>
+                <li>"Coaching" → korrekte Aussprache statt "Ko-atsch-ing"</li>
+                <li>"Session" → natürliche Betonung</li>
+                <li>"Mindfulness" → authentische Aussprache</li>
+            </ul>
+            <p>Die App erkennt diese Begriffe automatisch für ein angenehmeres Hörerlebnis!</p>
+        </div>
+
+        <!-- Feature 3: Newsletter -->
+        <div class="feature feature-alt2">
+            <h2><span>📧</span> Newsletter & Community</h2>
+            <p>Bleib auf dem Laufenden mit unserem Newsletter:</p>
+            <ul>
+                <li>Tipps für bessere Coaching-Gespräche</li>
+                <li>Updates zu neuen Features</li>
+                <li>Exklusive Einblicke</li>
+                <li>Inspirierende Gedanken</li>
+            </ul>
+            <p><strong>Anmeldung:</strong> Einstellungen → Account → Newsletter abonnieren</p>
+            <p style="font-size: 14px; margin-top: 15px;"><em>Jederzeit mit einem Klick abmeldbar</em></p>
+        </div>
+
+        <!-- Performance Improvements -->
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="margin-top: 0; color: #1e40af;">⚡ Performance-Verbesserungen</h2>
+            <div class="performance-grid">
+                <div class="performance-item" style="background-color: white;">
+                    <strong>Schnellere Ladezeiten</strong>
+                </div>
+                <div class="performance-item" style="background-color: white;">
+                    <strong>Verbesserte Stabilität</strong>
+                </div>
+                <div class="performance-item" style="background-color: white;">
+                    <strong>Reduzierter Speicherbedarf</strong>
+                </div>
+                <div class="performance-item" style="background-color: white;">
+                    <strong>Optimierte Navigation</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #92400e;">🙏 Danke für euer Feedback!</h3>
+            <p style="color: #78350f; margin-bottom: 0;">Viele dieser Verbesserungen basieren direkt auf <strong>eurem Feedback</strong>. Der Voice-Language Bug wurde beispielsweise von Nutzern gemeldet – danke, dass ihr uns geholfen habt!</p>
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://mc-app.manualmode.at" class="cta">
+                🔄 Jetzt Update durchführen
+            </a>
+            <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                Web: Seite neu laden (Strg+Shift+R / Cmd+Shift+R)<br>
+                Mobile: Update im App Store / Play Store
+            </p>
+        </div>
+
+        <!-- Coming Soon -->
+        <div style="border-top: 2px dashed #ddd; padding-top: 20px; margin-top: 30px;">
+            <h3 style="color: #1e40af;">🔮 Was kommt als Nächstes?</h3>
+            <p>Wir arbeiten bereits an:</p>
+            <ul>
+                <li>Erweiterten Coaching-Modi</li>
+                <li>Personalisierten Gesprächsvorschlägen</li>
+                <li>Mehr Stimmen und Sprachen</li>
+                <li>Verbesserten Fortschritts-Visualisierungen</li>
+            </ul>
+        </div>
+
+        <!-- Closing -->
+        <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+            <p style="font-size: 18px; margin: 0;">Viel Freude mit den neuen Features!</p>
+            <p style="font-size: 16px; margin: 10px 0 0 0;">Euer Meaningful Conversations Team 💙</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Version:</strong> 1.6.3 | <strong>Release:</strong> 24. November 2025</p>
+            <p style="font-size: 12px; margin-top: 15px;">
+                Du erhältst diese E-Mail, weil du dem Newsletter zugestimmt hast.<br>
+                <a href="{{UNSUBSCRIBE_LINK}}" style="color: #3b82f6;">Abmelden</a> | 
+                <a href="https://mc-app.manualmode.at/settings" style="color: #3b82f6;">Einstellungen</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

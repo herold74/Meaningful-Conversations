@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meaningful Conversations - Wie es funktioniert</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration to match Manualmode.at Theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: {
+                            // Mint/Teal color from header background
+                            primary: '#b2d6d3', // Approximate light teal
+                            secondary: '#ffffff', // White cards
+                            tertiary: '#f8f9fa',
+                        },
+                        content: {
+                            primary: '#1a1a1a', // Dark text
+                            secondary: '#4a4a4a', // Slightly lighter text
+                            inverted: '#ffffff', // White text on dark buttons
+                        },
+                        border: {
+                            primary: '#e5e7eb',
+                            secondary: '#d1d5db',
+                        },
+                        accent: {
+                            // Black buttons from screenshot
+                            primary: '#000000', 
+                            'primary-hover': '#333333',
+                            // Using teal for secondary accent to tie it together
+                            secondary: '#8bbbb6', // Slightly darker teal for variety
+                            'secondary-hover': '#6fa9a3',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'], // Standard sans stack matching clean look
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styles to match manualmode.at feel */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-in-out forwards; }
+        
+        /* Smooth transitions */
+        .transition-colors { transition-property: background-color, border-color, color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 font-sans antialiased">
+
+    <!-- START: Embeddable Component -->
+    <!-- Adapted for manualmode.at colors: Light teal background section with white cards and black accents -->
+    <div class="w-full py-16 animate-fadeIn" style="background-color: #b2d6d3;">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 uppercase tracking-wide">
+            Ein Coach, der dich kennt
+          </h2>
+          <p class="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
+            Die meisten KIs vergessen dich, sobald das Fenster geschlossen wird. 
+            <span class="font-bold">Meaningful Conversations</span> baut ein Gedächtnis auf – sicher, privat und transparent.
+          </p>
+        </div>
+
+        <!-- Core Cycle Diagram -->
+        <div class="relative mb-20">
+          <!-- Connecting Lines (Desktop only) -->
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-white/50 -z-10 transform -translate-y-1/2"></div>
+          <div class="hidden md:block absolute left-1/2 top-0 w-1 h-full bg-white/50 -z-10 transform -translate-x-1/2"></div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
+            
+            <!-- Center Piece: Life Context - Hidden on small screens in grid flow, shown via absolute position on MD -->
+            <!-- Using 'flex' here to center it on mobile if we wanted to show it, but pointer-events-none makes it decorative. 
+                 For the requested mobile order, we place this FIRST in the DOM but use flex order utilities to move it.
+                 Wait, actually on mobile (vertical), we likely want:
+                 1. Selection
+                 2. Reflection
+                 3. Action (Erkenntnisse)
+                 4. Growth (Wachstum)
+                 
+                 The "Life Context" center piece usually sits in the middle or top. 
+                 Let's put it at the very top on mobile (order-first) so it acts as the "Heart" introducing the concept, 
+                 or hide it if it takes too much space. The user asked for order 1-4 of the boxes. 
+                 Let's keep the Life Context visible at the top (order-first) or make it flow naturally.
+            -->
+            <div class="order-first md:absolute md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 z-10 mb-8 md:mb-0 pointer-events-none flex justify-center">
+              <div class="bg-black text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-[#b2d6d3]">
+                <!-- FileTextIcon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 mb-1 text-white">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+                <span class="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
+              </div>
+            </div>
+
+            <!-- Step 1: Selection -->
+            <div class="order-1 bg-white p-6 rounded-sm shadow-lg border border-transparent hover:border-black transition-colors relative group">
+              <div class="absolute -top-4 -left-4 w-8 h-8 bg-black rounded-full flex items-center justify-center text-white font-bold shadow-md">1</div>
+              <div class="flex items-center gap-3 mb-3">
+                <!-- UsersIcon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-black">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900">Wähle deinen Coach</h3>
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Stoische Ruhe, strategische Analyse oder empathisches Zuhören? Wähle den Stil, der zu deiner Stimmung passt. Das Wissen kommt aus deinem Life Context.
+              </p>
+            </div>
+
+            <!-- Step 2: Reflection -->
+            <div class="order-2 bg-white p-6 rounded-sm shadow-lg border border-transparent hover:border-black transition-colors relative group md:text-right md:flex md:flex-col md:items-end">
+              <div class="absolute -top-4 -right-4 w-8 h-8 bg-black rounded-full flex items-center justify-center text-white font-bold shadow-md">2</div>
+              <div class="flex items-center gap-3 mb-3 md:flex-row-reverse">
+                <!-- ChatBubbleIcon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-black">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900">Reflektiere & Sprich</h3>
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Nutze den <strong>Voice Mode</strong> für natürliche Gespräche oder schreibe im Chat. Dein Coach stellt Zusammenhänge her, die dir vielleicht entgangen sind.
+              </p>
+            </div>
+
+             <!-- Step 3: Action (Step 4 in Grid flow, but Step 3 logically) -->
+             <!-- We set order-3 for mobile, and keep the md: styles for positioning on desktop -->
+             <div class="order-3 bg-white p-6 rounded-sm shadow-lg border border-transparent hover:border-black transition-colors relative group md:text-right md:flex md:flex-col md:items-end md:mt-12">
+              <div class="absolute -bottom-4 -right-4 w-8 h-8 bg-black rounded-full flex items-center justify-center text-white font-bold shadow-md">3</div>
+              <div class="flex items-center gap-3 mb-3 md:flex-row-reverse">
+                <!-- ClipboardIcon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-black">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a2.25 2.25 0 01-2.25 2.25h-1.5a2.25 2.25 0 01-2.25-2.25v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900">Erkenntnisse sichern</h3>
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Erhalte eine Zusammenfassung und exportiere <strong>Action Items</strong> direkt in deinen Kalender. Lass Vorsätze nicht verpuffen.
+              </p>
+            </div>
+
+            <!-- Step 4: Growth (Step 3 in Grid flow, but Step 4 logically) -->
+            <!-- We set order-4 for mobile, and keep the md: styles for positioning on desktop -->
+            <div class="order-4 bg-white p-6 rounded-sm shadow-lg border border-transparent hover:border-black transition-colors relative group md:mt-12">
+              <div class="absolute -bottom-4 -left-4 w-8 h-8 bg-black rounded-full flex items-center justify-center text-white font-bold shadow-md">4</div>
+              <div class="flex items-center gap-3 mb-3">
+                <!-- TrendingUpIcon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-black">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <h3 class="text-xl font-bold text-gray-900">Das Wachstum</h3>
+              </div>
+              <p class="text-gray-600 text-sm leading-relaxed">
+                Die App schlägt Updates für deinen Life Context vor. Neue Erkenntnisse werden gespeichert – du musst dich beim nächsten Mal nicht wiederholen.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Trust Factors Footer -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 border-t border-white/50 pt-12">
+          <div class="text-center px-4 flex flex-col items-center">
+            <!-- LockIcon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-black mx-auto mb-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <h4 class="font-bold text-gray-900 mb-2">Privacy First</h4>
+            <p class="text-sm text-gray-700">
+              End-to-End Verschlüsselung oder kompletter Gast-Modus. Deine Gedanken gehören dir.
+            </p>
+          </div>
+          <div class="text-center px-4 flex flex-col items-center">
+            <!-- SoundWaveIcon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 text-black mx-auto mb-4">
+                <path d="M2 10v4" />
+                <path d="M6 7v10" />
+                <path d="M10 4v16" />
+                <path d="M14 7v10" />
+                <path d="M18 10v4" />
+                <path d="M22 10v4" />
+            </svg>
+            <h4 class="font-bold text-gray-900 mb-2">Bilingual & Natürlich</h4>
+            <p class="text-sm text-gray-700">
+              Nahtloser Wechsel zwischen DE/EN mit sorgfältig ausgewählten Premium-Stimmen.
+            </p>
+          </div>
+          <div class="text-center px-4 flex flex-col items-center">
+             <!-- TrophyIcon -->
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 text-black mx-auto mb-4">
+                <circle cx="12" cy="8" r="7" />
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+            </svg>
+            <h4 class="font-bold text-gray-900 mb-2">Gamification</h4>
+            <p class="text-sm text-gray-700">
+              Bleib am Ball mit XP, Streaks und Achievements für deine mentale Arbeit.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- END: Embeddable Component -->
+
+</body>
+</html>
