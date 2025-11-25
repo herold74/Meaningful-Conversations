@@ -8,8 +8,8 @@
   },
   "inference": {
     "noise_scale": 0.5,
-    "length_scale": 1,
-    "noise_w": 0.6
+    "length_scale": 0.9,
+    "noise_w": 0.7
   },
   "phoneme_map": {},
   "phoneme_id_map": {
