@@ -12,7 +12,6 @@ export interface ServerVoice {
 
 /**
  * Available server voices from Piper TTS
- * Note: No German female server voice available - users will use local browser voices
  */
 export const SERVER_VOICES: ServerVoice[] = [
     {
@@ -23,11 +22,11 @@ export const SERVER_VOICES: ServerVoice[] = [
         model: 'de_DE-thorsten-medium',
     },
     {
-        id: 'de-female',
-        name: 'Deutsch (Weiblich)',
+        id: 'de-eva',
+        name: 'Eva (Deutsch, Weiblich)',
         language: 'de',
         gender: 'female',
-        model: '', // Empty - will be disabled until available
+        model: 'de_DE-eva_k-x_low',
     },
     {
         id: 'en-amy',
