@@ -264,17 +264,21 @@ function cleanTextForSpeech(text, lang = 'de') {
     // Apply phonetic replacements for better pronunciation
     // Use word boundaries to avoid partial replacements
     let replacementsApplied = 0;
+    const replacementLog = [];
     for (const [term, phonetic] of Object.entries(phoneticReplacements)) {
-        const regex = new RegExp(`\\b${term}\\b`, 'g');
-        const before = cleanedText;
-        cleanedText = cleanedText.replace(regex, phonetic);
-        if (before !== cleanedText) {
+        // Escape special regex characters in the term
+        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b${escapedTerm}\\b`, 'g');
+        const matches = cleanedText.match(regex);
+        if (matches) {
+            cleanedText = cleanedText.replace(regex, phonetic);
             replacementsApplied++;
+            replacementLog.push(`"${term}" → "${phonetic}" (${matches.length}x)`);
         }
     }
     
     if (replacementsApplied > 0) {
-        console.log(`  ✓ Applied ${replacementsApplied} phonetic replacements`);
+        console.log(`  ✓ Applied ${replacementsApplied} phonetic replacements:`, replacementLog.join(', '));
     }
     
     // Final cleanup
