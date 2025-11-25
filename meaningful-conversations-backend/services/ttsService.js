@@ -140,7 +140,7 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     }
     
     // Clean the text (remove markdown, apply phonetic replacements)
-    const cleanText = cleanTextForSpeech(text, lang);
+    let cleanText = cleanTextForSpeech(text, lang);
     
     // Get voice model - use voiceId if provided, otherwise auto-select
     let model;
@@ -161,6 +161,7 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
             return null;
         }
     }
+    
     
     // Get speech rate
     const rate = getSpeechRate(botId, isMeditation);
@@ -210,7 +211,9 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
     const voiceDir = process.env.PIPER_VOICE_DIR || '/models';
     const modelPath = `${voiceDir}/${model}.onnx`;
     const piperCommand = process.env.PIPER_COMMAND || 'piper';
-    const command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-file -`;
+    
+    // Build Piper command
+    let command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-file -`;
     
     try {
         const { stdout, stderr } = await execAsync(command, {
