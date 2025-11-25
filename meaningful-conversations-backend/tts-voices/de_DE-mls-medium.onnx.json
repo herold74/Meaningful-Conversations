@@ -16,7 +16,7 @@
     "country_english": "Germany"
   },
   "inference": {
-    "noise_scale": 0.333,
+    "noise_scale": 0.5,
     "length_scale": 1,
     "noise_w": 0.333
   },
@@ -742,5 +742,5 @@
     "7449": 235
   },
   "piper_version": "1.0.0",
-  "speaker_id": 73
+  "speaker_id": 74
 }

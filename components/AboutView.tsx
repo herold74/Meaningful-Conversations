@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { InfoIcon } from './icons/InfoIcon';
+import { HowItWorks } from './HowItWorks';
 
 interface InfoViewProps {
 }
@@ -56,59 +57,64 @@ const AboutView: React.FC<InfoViewProps> = () => {
     const highlightContent = language === 'de' ? de_highlight : en_highlight;
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
-            <div className="text-center">
-                <h1 className="text-3xl font-bold text-content-primary uppercase">{t('about_title')}</h1>
-                <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.6.3</p>
-            </div>
-            <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
-                 <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
-                    }}
-                >
-                    {markdownPart1}
-                </ReactMarkdown>
+        <div className="flex flex-col items-center w-full space-y-8">
+            <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
+                <div className="text-center">
+                    <h1 className="text-3xl font-bold text-content-primary uppercase">{t('about_title')}</h1>
+                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.6.3</p>
+                </div>
+                <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
+                     <ReactMarkdown 
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
+                        }}
+                    >
+                        {markdownPart1}
+                    </ReactMarkdown>
 
-                <div className="not-prose text-center my-6 text-lg italic text-accent-tertiary dark:text-accent-tertiary">
-                    <ReactMarkdown
+                    <div className="not-prose text-center my-6 text-lg italic text-accent-tertiary dark:text-accent-tertiary">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                p: ({node, ...props}) => <p className="mb-0" {...props} />,
+                            }}
+                        >
+                            {centeredText}
+                        </ReactMarkdown>
+                    </div>
+                    
+                     <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={{
-                            p: ({node, ...props}) => <p className="mb-0" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
                         }}
                     >
-                        {centeredText}
+                        {markdownPart2}
+                    </ReactMarkdown>
+                    
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {finalSentence}
                     </ReactMarkdown>
                 </div>
-                
-                 <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                        h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
-                    }}
-                >
-                    {markdownPart2}
-                </ReactMarkdown>
-                
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {finalSentence}
-                </ReactMarkdown>
-            </div>
-            <div className="p-4 mt-6 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
-                 <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                 <div>
-                    <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                            p: ({node, ...props}) => <p className="text-left" {...props} />,
-                            a: ({node, ...props}) => <a className="font-semibold hover:underline text-accent-tertiary dark:text-accent-tertiary" target="_blank" rel="noopener noreferrer" {...props} />
-                        }}
-                    >
-                        {highlightContent}
-                    </ReactMarkdown>
+                <div className="p-4 mt-6 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
+                     <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
+                     <div>
+                        <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                p: ({node, ...props}) => <p className="text-left" {...props} />,
+                                a: ({node, ...props}) => <a className="font-semibold hover:underline text-accent-tertiary dark:text-accent-tertiary" target="_blank" rel="noopener noreferrer" {...props} />
+                            }}
+                        >
+                            {highlightContent}
+                        </ReactMarkdown>
+                    </div>
                 </div>
             </div>
+            
+            {/* New How It Works Section */}
+            <HowItWorks />
         </div>
     );
 };
