@@ -271,7 +271,7 @@ function cleanTextForSpeech(text, lang = 'de') {
         const regex = new RegExp(`\\b${escapedTerm}\\b`, 'g');
         const matches = cleanedText.match(regex);
         if (matches) {
-            cleanedText = cleanedText.replace(regex, phonetic);
+        cleanedText = cleanedText.replace(regex, phonetic);
             replacementsApplied++;
             replacementLog.push(`"${term}" → "${phonetic}" (${matches.length}x)`);
         }

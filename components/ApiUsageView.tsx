@@ -8,6 +8,9 @@ import { ZapIcon } from './icons/ZapIcon';
 import { ClockIcon } from './icons/ClockIcon';
 import { TrendingUpIcon } from './icons/TrendingUpIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
+import { CheckIcon } from './icons/CheckIcon';
+import { XIcon } from './icons/XIcon';
+import * as userService from '../services/userService';
 
 interface ApiUsageStats {
     totalCalls: number;
@@ -96,10 +99,50 @@ export const ApiUsageView: React.FC = () => {
     const [endDate, setEndDate] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [deletingFailed, setDeletingFailed] = useState(false);
+    
+    // AI Provider Management
+    const [providerConfig, setProviderConfig] = useState<userService.AIProviderConfig | null>(null);
+    const [loadingProvider, setLoadingProvider] = useState(false);
+    const [switchingProvider, setSwitchingProvider] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [targetProvider, setTargetProvider] = useState<'google' | 'mistral'>('google');
 
     useEffect(() => {
         fetchUsageData();
+        fetchProviderConfig();
     }, [timeRange, startDate, endDate]);
+    
+    const fetchProviderConfig = async () => {
+        setLoadingProvider(true);
+        try {
+            const config = await userService.getAIProviderConfig();
+            setProviderConfig(config);
+        } catch (err: any) {
+            console.error('Failed to fetch AI provider config:', err);
+        } finally {
+            setLoadingProvider(false);
+        }
+    };
+    
+    const handleProviderSwitch = (newProvider: 'google' | 'mistral') => {
+        setTargetProvider(newProvider);
+        setShowConfirmDialog(true);
+    };
+    
+    const confirmProviderSwitch = async () => {
+        setSwitchingProvider(true);
+        setShowConfirmDialog(false);
+        try {
+            await userService.setAIProvider(targetProvider);
+            await fetchProviderConfig();
+            alert(`Successfully switched to ${targetProvider === 'google' ? 'Google Gemini' : 'Mistral AI'}`);
+        } catch (err: any) {
+            console.error('Failed to switch provider:', err);
+            alert(`Failed to switch provider: ${err.message || 'Unknown error'}`);
+        } finally {
+            setSwitchingProvider(false);
+        }
+    };
 
     const getDateRange = (): { start: string; end: string } => {
         const end = new Date();
@@ -216,6 +259,146 @@ export const ApiUsageView: React.FC = () => {
 
     return (
         <div className="space-y-6">
+            {/* AI Provider Control Panel */}
+            {providerConfig && (
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <ZapIcon className="w-6 h-6 text-yellow-500" />
+                                AI Provider Management
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Switch between Google Gemini and Mistral AI without restarting
+                            </p>
+                        </div>
+                        {providerConfig.lastUpdated && (
+                            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+                                <p>Last updated: {new Date(providerConfig.lastUpdated).toLocaleString()}</p>
+                                {providerConfig.lastUpdatedBy && <p>By: {providerConfig.lastUpdatedBy}</p>}
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Active Provider Card */}
+                        <div className={`p-4 rounded-lg border-2 ${
+                            providerConfig.activeProvider === 'google'
+                                ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-500'
+                                : 'bg-purple-100 dark:bg-purple-900/30 border-purple-500'
+                        }`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-bold text-gray-900 dark:text-gray-100">Active Provider</h4>
+                                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {providerConfig.activeProvider === 'google' ? 'Google Gemini' : 'Mistral AI'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Requests today: {providerConfig.usageToday[providerConfig.activeProvider]}
+                            </p>
+                        </div>
+                        
+                        {/* Google Provider Status */}
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-bold text-gray-900 dark:text-gray-100">Google Gemini</h4>
+                                {providerConfig.providerHealth.google.available ? (
+                                    <CheckIcon className="w-5 h-5 text-green-500" />
+                                ) : (
+                                    <XIcon className="w-5 h-5 text-red-500" />
+                                )}
+                            </div>
+                            <p className={`text-sm font-medium ${
+                                providerConfig.providerHealth.google.available
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400'
+                            }`}>
+                                {providerConfig.providerHealth.google.available ? 'Available' : 'Unavailable'}
+                            </p>
+                            {providerConfig.providerHealth.google.error && (
+                                <p className="text-xs text-red-500 mt-1">{providerConfig.providerHealth.google.error}</p>
+                            )}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                Today: {providerConfig.usageToday.google} requests
+                            </p>
+                            {providerConfig.activeProvider !== 'google' && (
+                                <button
+                                    onClick={() => handleProviderSwitch('google')}
+                                    disabled={switchingProvider || !providerConfig.providerHealth.google.available}
+                                    className="mt-3 w-full px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    {switchingProvider ? <Spinner /> : 'Switch to Google'}
+                                </button>
+                            )}
+                        </div>
+                        
+                        {/* Mistral Provider Status */}
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-bold text-gray-900 dark:text-gray-100">Mistral AI</h4>
+                                {providerConfig.providerHealth.mistral.available ? (
+                                    <CheckIcon className="w-5 h-5 text-green-500" />
+                                ) : (
+                                    <XIcon className="w-5 h-5 text-red-500" />
+                                )}
+                            </div>
+                            <p className={`text-sm font-medium ${
+                                providerConfig.providerHealth.mistral.available
+                                    ? 'text-green-600 dark:text-green-400'
+                                    : 'text-red-600 dark:text-red-400'
+                            }`}>
+                                {providerConfig.providerHealth.mistral.available ? 'Available' : 'Unavailable'}
+                            </p>
+                            {providerConfig.providerHealth.mistral.error && (
+                                <p className="text-xs text-red-500 mt-1">{providerConfig.providerHealth.mistral.error}</p>
+                            )}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                Today: {providerConfig.usageToday.mistral} requests
+                            </p>
+                            {providerConfig.activeProvider !== 'mistral' && (
+                                <button
+                                    onClick={() => handleProviderSwitch('mistral')}
+                                    disabled={switchingProvider || !providerConfig.providerHealth.mistral.available}
+                                    className="mt-3 w-full px-3 py-2 text-sm font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    {switchingProvider ? <Spinner /> : 'Switch to Mistral'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Confirmation Dialog */}
+            {showConfirmDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white dark:bg-gray-900 w-full max-w-md p-6 border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200 mb-4">
+                            Confirm Provider Switch
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            Are you sure you want to switch to <strong>{targetProvider === 'google' ? 'Google Gemini' : 'Mistral AI'}</strong>?
+                            This will affect all new AI requests immediately.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setShowConfirmDialog(false)}
+                                className="px-4 py-2 text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmProviderSwitch}
+                                className="px-4 py-2 text-white bg-accent-primary rounded-lg hover:bg-accent-primary-hover"
+                            >
+                                Confirm Switch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             {/* Time Range Selector */}
             <div className="flex flex-wrap items-center gap-4 justify-between">
                 <div className="flex gap-2">

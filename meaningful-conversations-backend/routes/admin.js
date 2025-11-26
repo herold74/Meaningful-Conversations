@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { marked } = require('marked');
 const { sendNewsletterEmail } = require('../services/mailService.js');
+const aiProviderService = require('../services/aiProviderService.js');
 
 // Configure marked for email-safe HTML
 marked.setOptions({
@@ -508,6 +509,104 @@ router.post('/send-newsletter', async (req, res) => {
     } catch (error) {
         console.error("Admin: Error sending newsletter:", error);
         res.status(500).json({ error: 'Failed to send newsletter.' });
+    }
+});
+
+// --- AI Provider Management ---
+
+// GET /api/admin/ai-provider
+router.get('/ai-provider', async (req, res) => {
+    try {
+        const stats = await aiProviderService.getProviderStats();
+        const health = await aiProviderService.checkProvidersHealth();
+        
+        // Get recent usage by provider (today)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const usageToday = await prisma.apiUsage.groupBy({
+            by: ['model'],
+            where: {
+                createdAt: {
+                    gte: today,
+                },
+            },
+            _count: {
+                id: true,
+            },
+        });
+        
+        // Categorize by provider
+        const providerUsage = {
+            google: 0,
+            mistral: 0,
+        };
+        
+        usageToday.forEach(record => {
+            if (record.model.startsWith('gemini')) {
+                providerUsage.google += record._count.id;
+            } else if (record.model.startsWith('mistral') || record.model.startsWith('open-mistral') || record.model.startsWith('open-mixtral')) {
+                providerUsage.mistral += record._count.id;
+            }
+        });
+        
+        res.json({
+            activeProvider: stats.activeProvider,
+            lastUpdated: stats.lastUpdated,
+            lastUpdatedBy: stats.lastUpdatedBy,
+            providerHealth: health,
+            usageToday: providerUsage,
+        });
+    } catch (error) {
+        console.error("Admin: Error fetching AI provider config:", error);
+        res.status(500).json({ error: 'Failed to fetch AI provider configuration.' });
+    }
+});
+
+// PUT /api/admin/ai-provider
+router.put('/ai-provider', async (req, res) => {
+    const { provider } = req.body;
+    const adminId = req.userId;
+    
+    if (!['google', 'mistral'].includes(provider)) {
+        return res.status(400).json({ 
+            error: 'Invalid provider. Must be "google" or "mistral".' 
+        });
+    }
+    
+    try {
+        // Get admin email
+        const admin = await prisma.user.findUnique({
+            where: { id: adminId },
+            select: { email: true }
+        });
+        
+        if (!admin) {
+            return res.status(404).json({ error: 'Admin user not found.' });
+        }
+        
+        // Set the active provider
+        await aiProviderService.setActiveProvider(provider, admin.email);
+        
+        res.json({
+            success: true,
+            provider,
+            message: `AI provider switched to ${provider}`,
+        });
+    } catch (error) {
+        console.error("Admin: Error setting AI provider:", error);
+        res.status(500).json({ error: 'Failed to set AI provider.' });
+    }
+});
+
+// GET /api/admin/ai-provider/health
+router.get('/ai-provider/health', async (req, res) => {
+    try {
+        const health = await aiProviderService.checkProvidersHealth();
+        res.json(health);
+    } catch (error) {
+        console.error("Admin: Error checking AI provider health:", error);
+        res.status(500).json({ error: 'Failed to check provider health.' });
     }
 });
 
