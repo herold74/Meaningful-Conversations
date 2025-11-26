@@ -16,6 +16,14 @@ services:
     container_name: meaningful-conversations-mariadb-production
     hostname: mariadb
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1500M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootchangeme}
       MARIADB_DATABASE: ${DB_NAME:-meaningful_conversations_production}
@@ -34,6 +42,14 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-tts:${VERSION:-latest}
     container_name: meaningful-conversations-tts-production
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1800M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     environment:
       PORT: 8082
       PIPER_VOICE_DIR: /models
@@ -49,6 +65,14 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-backend:${VERSION:-latest}
     container_name: meaningful-conversations-backend-production
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1500M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     depends_on:
       mariadb:
         condition: service_healthy
@@ -83,6 +107,10 @@ services:
       MAILJET_SECRET_KEY: ${MAILJET_SECRET_KEY}
       MAILJET_SENDER_EMAIL: ${MAILJET_SENDER_EMAIL:-register@manualmode.at}
       
+      # AI Provider Configuration
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY}
+      
       # Admin configuration
       INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@manualmode.at}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
@@ -97,6 +125,14 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-frontend:${VERSION:-latest}
     container_name: meaningful-conversations-frontend-production
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     depends_on:
       - backend
     environment:

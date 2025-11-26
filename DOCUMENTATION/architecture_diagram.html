@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meaningful Conversations Architecture</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f8f9fa; }
+        .diagram-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; overflow-x: auto; }
+        h1 { color: #333; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Architecture Diagram</h1>
+    <div class="diagram-container">
+        <pre class="mermaid">
+flowchart LR
+    %% Styles
+    classDef client fill:#fffde7,stroke:#fbc02d,stroke-width:2px;
+    classDef server fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+    classDef db fill:#e8f5e9,stroke:#4caf50,stroke-width:2px;
+    classDef ext fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef user fill:#ffffff,stroke:#333,stroke-width:4px;
+
+    %% 1. User Node (Leftmost)
+    User((👤 User)):::user
+
+    %% 2. Client Subgraph
+    subgraph Client ["🖥️ Client (Browser / PWA)"]
+        direction TB
+        Voice[Web Speech API]
+        UI[React Frontend]
+        Crypto[Web Crypto API E2EE]
+        Store[Local Storage]
+    end
+    class Client client
+
+    %% 3. Server Subgraph
+    subgraph Server ["☁️ Backend Server (Node.js)"]
+        direction TB
+        TTS[TTS Service]
+        API[Express API]
+        Auth[JWT Auth]
+        Prisma[Prisma ORM]
+        Email[Email Service]
+    end
+    class Server server
+
+    %% 4. Infrastructure (Rightmost)
+    subgraph Database ["💾 Persistence"]
+        MySQL[(MySQL DB)]
+    end
+    class Database db
+
+    subgraph External ["🌍 External Services"]
+        Gemini[Google Gemini API]
+        SMTP[SMTP Server]
+    end
+    class External ext
+
+    %% Relationships - Real Connections
+    User --> UI
+    User --> Voice
+    Voice --> UI
+    
+    UI --> Store
+    UI --> Crypto
+    
+    UI <--> API
+    
+    API --> Auth
+    API --> TTS
+    API --> Email
+    API --> Prisma
+    
+    Prisma <--> MySQL
+    API <--> Gemini
+    Email --> SMTP
+
+    %% ALIGNMENT HACKS (Invisible Links to force side-by-side layout)
+    %% Link Top of Client to Top of Server
+    Voice ~~~ TTS
+    
+    %% Link Middle of Client to Middle of Server (Reinforce Main Link)
+    UI ~~~ API
+    
+    %% Link Bottom of Client to Bottom of Server
+    Store ~~~ Email
+        </pre>
+    </div>
+</body>
+</html>

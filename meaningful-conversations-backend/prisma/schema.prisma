@@ -145,3 +145,14 @@ model NewsletterLog {
   @@index([createdAt])
   @@index([sentBy])
 }
+
+model AppConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+
+  @@index([key])
+}

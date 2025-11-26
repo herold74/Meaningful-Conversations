@@ -259,3 +259,34 @@ export const sendNewsletter = async (content: NewsletterContent): Promise<{ succ
         body: JSON.stringify(content),
     });
 };
+
+// --- AI Provider Management ---
+
+export interface AIProviderConfig {
+    activeProvider: 'google' | 'mistral';
+    lastUpdated: string;
+    lastUpdatedBy: string | null;
+    providerHealth: {
+        google: { available: boolean; error: string | null };
+        mistral: { available: boolean; error: string | null };
+    };
+    usageToday: {
+        google: number;
+        mistral: number;
+    };
+}
+
+export const getAIProviderConfig = async (): Promise<AIProviderConfig> => {
+    return await apiFetch('/admin/ai-provider');
+};
+
+export const setAIProvider = async (provider: 'google' | 'mistral'): Promise<{ success: boolean; provider: string; message: string }> => {
+    return await apiFetch('/admin/ai-provider', {
+        method: 'PUT',
+        body: JSON.stringify({ provider }),
+    });
+};
+
+export const getAIProviderHealth = async (): Promise<AIProviderConfig['providerHealth']> => {
+    return await apiFetch('/admin/ai-provider/health');
+};

@@ -5,6 +5,7 @@ const prisma = require('../prismaClient.js');
  * Updated: November 2024
  * 
  * Gemini API Pricing: https://ai.google.dev/pricing
+ * Mistral API Pricing: https://mistral.ai/technology/#pricing
  * TTS is self-hosted (Piper) and has no API costs
  */
 const PRICING = {
@@ -15,6 +16,14 @@ const PRICING = {
   'gemini-3-pro-preview': { input: 2.00, output: 12.00 },    // Gemini 3 Pro pricing (up to 200k context)
   'gemini-1.5-pro': { input: 1.25, output: 5.00 },
   'gemini-1.5-flash': { input: 0.075, output: 0.30 },
+  
+  // Mistral Models
+  'mistral-small-latest': { input: 0.2, output: 0.6 },       // Mistral Small (2024)
+  'mistral-medium-latest': { input: 2.7, output: 8.1 },      // Mistral Medium (2024)
+  'mistral-large-latest': { input: 3.0, output: 9.0 },       // Mistral Large (2024)
+  'open-mistral-nemo': { input: 0.15, output: 0.15 },        // Open source Mistral Nemo
+  'open-mixtral-8x7b': { input: 0.7, output: 0.7 },          // Open source Mixtral 8x7B
+  'open-mixtral-8x22b': { input: 2.0, output: 6.0 },         // Open source Mixtral 8x22B
   
   // TTS Models (self-hosted, no API costs)
   'piper-tts': { input: 0, output: 0 },                      // Self-hosted, free
