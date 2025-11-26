@@ -255,5 +255,24 @@ db-backup-manualmode-production: ## Backup MariaDB on manualmode production
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql"
 
+# ============ MONITORING & RESOURCE MANAGEMENT ============
+
+monitor-dashboard: ## Show interactive resource monitoring dashboard (local)
+	@bash scripts/monitor-dashboard.sh
+
+monitor-dashboard-manualmode: ## Show resource dashboard on manualmode server
+	@ssh -t root@91.99.193.87 'bash /opt/manualmode-production/scripts/monitor-dashboard.sh'
+
+monitor-stats-manualmode: ## Show container stats on manualmode server
+	@ssh root@91.99.193.87 'podman stats --no-stream'
+
+monitor-system-manualmode: ## Show system resources on manualmode server
+	@ssh root@91.99.193.87 'free -h && echo "---" && uptime && echo "---" && df -h /'
+
+setup-swap-manualmode: ## Setup 4GB swap on manualmode server
+	@echo "$(YELLOW)Setting up swap on manualmode server...$(NC)"
+	@scp scripts/setup-swap.sh root@91.99.193.87:/tmp/
+	@ssh root@91.99.193.87 'bash /tmp/setup-swap.sh && rm /tmp/setup-swap.sh'
+
 .DEFAULT_GOAL := help
 

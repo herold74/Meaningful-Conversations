@@ -4,30 +4,19 @@ const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
 const prisma = require('../prismaClient.js');
 const { BOTS } = require('../constants.js');
 const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = require('../services/geminiPrompts.js');
-const { trackApiUsage, extractTokenUsage } = require('../services/apiUsageTracker.js');
+const { trackApiUsage } = require('../services/apiUsageTracker.js');
 const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
+const aiProviderService = require('../services/aiProviderService.js');
 
-// Asynchronously initialize the AI client because @google/genai is an ES Module
-let ai;
+// For backward compatibility with prompt cache (which needs direct Google AI access)
+let googleAI;
 import('@google/genai').then(({ GoogleGenAI }) => {
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    console.log('Successfully initialized @google/genai client.');
+    googleAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    console.log('Successfully initialized Google AI client for caching.');
 }).catch(err => {
-    console.error("Failed to initialize @google/genai:", err);
-    ai = null; // Ensure ai is null on failure
+    console.error("Failed to initialize Google AI:", err);
+    googleAI = null;
 });
-
-// Helper middleware to check if the AI client has been initialized
-const checkAiInitialized = (req, res, next) => {
-    if (!ai) {
-        // Return 503 Service Unavailable if the AI client isn't ready
-        return res.status(503).json({ error: 'The AI service is currently initializing or unavailable. Please try again in a moment.' });
-    }
-    next();
-};
-
-// Apply the middleware to all routes in this file to ensure the AI client is ready
-router.use(checkAiInitialized);
 
 // POST /api/gemini/translate
 router.post('/translate', optionalAuthMiddleware, async (req, res) => {
@@ -66,7 +55,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
         if (subject) {
             const subjectResult = await withTimeout(
-                ai.models.generateContent({
+                aiProviderService.generateContent({
                     model: modelName,
                     contents: subject,
                     config: {
@@ -79,7 +68,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
         if (body) {
             const bodyResult = await withTimeout(
-                ai.models.generateContent({
+                aiProviderService.generateContent({
                     model: modelName,
                     contents: body,
                     config: {
@@ -177,12 +166,14 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const modelName = 'gemini-2.5-flash';
     
     // Try to use prompt caching for registered users with Life Context
+    // Note: Caching only works with Google AI currently
     let cachedContentName = null;
     let cacheUsed = false;
+    const activeProvider = await aiProviderService.getActiveProvider();
     
-    if (userId && bot.id !== 'g-interviewer' && context) {
-        // Only cache for registered users with actual Life Context
-        cachedContentName = await getOrCreateCache(ai, userId, finalSystemInstruction, modelName);
+    if (userId && bot.id !== 'g-interviewer' && context && activeProvider === 'google' && googleAI) {
+        // Only cache for registered users with actual Life Context when using Google
+        cachedContentName = await getOrCreateCache(googleAI, userId, finalSystemInstruction, modelName);
         cacheUsed = cachedContentName !== null;
     }
     
@@ -198,7 +189,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             config.systemInstruction = finalSystemInstruction;
         }
         
-        const response = await ai.models.generateContent({
+        const response = await aiProviderService.generateContent({
             model: modelName,
             // For the initial message, we send an empty string to prompt the model's greeting.
             // For subsequent messages, we send the entire chat history.
@@ -209,24 +200,29 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         const durationMs = Date.now() - startTime;
         const text = response.text;
         
-        // Track API usage
-        const tokenUsage = extractTokenUsage(response);
+        // Track API usage with actual model and provider used
+        const actualModel = response.model || modelName;
+        const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+        
         await trackApiUsage({
             userId: userId || null,
             isGuest: !userId,
             endpoint: 'chat',
-            model: modelName,
+            model: actualModel,
             botId: botId,
             inputTokens: tokenUsage.inputTokens,
             outputTokens: tokenUsage.outputTokens,
             durationMs,
             success: true,
-            metadata: cacheUsed ? { cacheUsed: true } : undefined,
+            metadata: { 
+                provider: response.provider,
+                cacheUsed: cacheUsed || undefined,
+            },
         });
         
         res.json({ text });
     } catch (error) {
-        console.error('Gemini API error in /chat/send-message:', error);
+        console.error('AI API error in /chat/send-message:', error);
         
         const durationMs = Date.now() - startTime;
         
@@ -267,7 +263,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
     const userId = req.userId;
     
     try {
-        const response = await ai.models.generateContent({
+        const response = await aiProviderService.generateContent({
             model: modelName, // Use a more powerful model for structured analysis
             contents: fullPrompt,
             config: {
@@ -278,25 +274,72 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
         });
 
         const durationMs = Date.now() - startTime;
-        const jsonResponse = JSON.parse(response.text);
         
-        // Track API usage
-        const tokenUsage = extractTokenUsage(response);
+        // Clean response text: Remove markdown code blocks (common with Mistral)
+        let cleanedText = response.text.trim();
+        
+        // Remove ```json ... ``` or ``` ... ``` wrappers
+        const codeBlockRegex = /^```(?:json)?\s*\n?([\s\S]*?)\n?```$/;
+        const match = cleanedText.match(codeBlockRegex);
+        if (match && match[1]) {
+            cleanedText = match[1].trim();
+            console.log('  🧹 Removed markdown code block wrapper from response');
+        }
+        
+        // Parse JSON response with improved error handling
+        let jsonResponse;
+        try {
+            jsonResponse = JSON.parse(cleanedText);
+        } catch (parseError) {
+            console.error('❌ Failed to parse AI response as JSON:', parseError.message);
+            console.error('   Provider:', response.provider);
+            console.error('   Raw response (first 500 chars):', response.text.substring(0, 500));
+            console.error('   Cleaned text (first 500 chars):', cleanedText.substring(0, 500));
+            
+            // Track API usage with actual model and provider used
+            const actualModel = response.model || modelName;
+            const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+            
+            await trackApiUsage({
+                userId: userId || null,
+                isGuest: !userId,
+                endpoint: 'analyze',
+                model: actualModel,
+                botId: null,
+                inputTokens: tokenUsage.inputTokens,
+                outputTokens: tokenUsage.outputTokens,
+                durationMs,
+                success: false,
+                errorMessage: `JSON parse error: ${parseError.message}`,
+                metadata: { 
+                    provider: response.provider,
+                    rawResponsePreview: response.text.substring(0, 200)
+                },
+            });
+            
+            throw new Error(`AI returned invalid JSON format: ${parseError.message}`);
+        }
+        
+        // Track API usage with actual model and provider used
+        const actualModel = response.model || modelName;
+        const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+        
         await trackApiUsage({
             userId: userId || null,
             isGuest: !userId,
             endpoint: 'analyze',
-            model: modelName,
+            model: actualModel,
             botId: null,
             inputTokens: tokenUsage.inputTokens,
             outputTokens: tokenUsage.outputTokens,
             durationMs,
             success: true,
+            metadata: { provider: response.provider },
         });
         
         res.json(jsonResponse);
     } catch (error) {
-        console.error('Gemini API error in /session/analyze:', error);
+        console.error('AI API error in /session/analyze:', error);
         
         const durationMs = Date.now() - startTime;
         
@@ -332,7 +375,7 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
     const userId = req.userId;
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await aiProviderService.generateContent({
             model: modelName,
             contents: fullPrompt,
         });
@@ -348,23 +391,26 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
             markdown = match[1].trim();
         }
 
-        // Track API usage
-        const tokenUsage = extractTokenUsage(response);
+        // Track API usage with actual model and provider used
+        const actualModel = response.model || modelName;
+        const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+        
         await trackApiUsage({
             userId: userId || null,
             isGuest: !userId,
             endpoint: 'format-interview',
-            model: modelName,
+            model: actualModel,
             botId: 'g-interviewer',
             inputTokens: tokenUsage.inputTokens,
             outputTokens: tokenUsage.outputTokens,
             durationMs,
             success: true,
+            metadata: { provider: response.provider },
         });
 
         res.json({ markdown });
     } catch (error) {
-        console.error('Gemini API error in /session/format-interview:', error);
+        console.error('AI API error in /session/format-interview:', error);
         
         const durationMs = Date.now() - startTime;
         
