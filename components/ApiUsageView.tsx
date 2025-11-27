@@ -268,7 +268,7 @@ export const ApiUsageView: React.FC = () => {
                                 <ZapIcon className="w-6 h-6 text-yellow-500" />
                                 AI Provider Management
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 hidden sm:block">
                                 Switch between Google Gemini and Mistral AI without restarting
                             </p>
                         </div>

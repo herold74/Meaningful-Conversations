@@ -56,11 +56,11 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
         if (subject) {
             const subjectResult = await withTimeout(
                 aiProviderService.generateContent({
-                    model: modelName,
-                    contents: subject,
-                    config: {
-                        systemInstruction: systemInstruction,
-                    },
+                model: modelName,
+                contents: subject,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
                 })
             );
             translationResults.subject = subjectResult.text;
@@ -69,11 +69,11 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
         if (body) {
             const bodyResult = await withTimeout(
                 aiProviderService.generateContent({
-                    model: modelName,
-                    contents: body,
-                    config: {
-                        systemInstruction: systemInstruction,
-                    },
+                model: modelName,
+                contents: body,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
                 })
             );
             translationResults.body = bodyResult.text;
@@ -295,7 +295,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
             console.error('   Provider:', response.provider);
             console.error('   Raw response (first 500 chars):', response.text.substring(0, 500));
             console.error('   Cleaned text (first 500 chars):', cleanedText.substring(0, 500));
-            
+        
             // Track API usage with actual model and provider used
             const actualModel = response.model || modelName;
             const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
