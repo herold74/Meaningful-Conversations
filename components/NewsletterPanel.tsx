@@ -164,11 +164,18 @@ const NewsletterPanel: React.FC = () => {
               <p className="text-sm text-content-secondary italic">Keine Abonnenten vorhanden.</p>
             ) : (
               subscribers.map(sub => (
-                <div key={sub.id} className="text-xs text-content-secondary p-2 bg-background-secondary dark:bg-background-primary rounded">
-                  <span className="font-mono">{sub.email}</span>
-                  {(sub.firstName || sub.lastName) && (
-                    <span className="ml-2 text-content-tertiary">
-                      ({sub.firstName || ''} {sub.lastName || ''})
+                <div key={sub.id} className="text-xs text-content-secondary p-2 bg-background-secondary dark:bg-background-primary rounded flex items-center justify-between">
+                  <div>
+                    <span className="font-mono">{sub.email}</span>
+                    {(sub.firstName || sub.lastName) && (
+                      <span className="ml-2 text-content-tertiary">
+                        ({sub.firstName || ''} {sub.lastName || ''})
+                      </span>
+                    )}
+                  </div>
+                  {(sub as any).status === 'PENDING' && (
+                    <span className="ml-2 px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-500 rounded text-[10px] font-medium">
+                      PENDING
                     </span>
                   )}
                 </div>
