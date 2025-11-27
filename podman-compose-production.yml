@@ -105,7 +105,6 @@ services:
       TTS_ENABLED: ${TTS_ENABLED:-true}
       
       # Secrets (provide these in .env)
-      API_KEY: ${API_KEY}
       JWT_SECRET: ${JWT_SECRET}
       MAILJET_API_KEY: ${MAILJET_API_KEY}
       MAILJET_SECRET_KEY: ${MAILJET_SECRET_KEY}
