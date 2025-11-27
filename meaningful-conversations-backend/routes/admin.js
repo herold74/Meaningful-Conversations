@@ -345,8 +345,8 @@ router.get('/newsletter-subscribers', async (req, res) => {
     try {
         const subscribers = await prisma.user.findMany({
             where: {
-                newsletterConsent: true,
-                status: 'ACTIVE'  // Only active users
+                newsletterConsent: true
+                // No status filter - show all users who consented (PENDING, ACTIVE, etc.)
             },
             select: {
                 id: true,
@@ -354,7 +354,8 @@ router.get('/newsletter-subscribers', async (req, res) => {
                 firstName: true,
                 lastName: true,
                 newsletterConsentDate: true,
-                createdAt: true
+                createdAt: true,
+                status: true  // Include status so admin can see if user is pending
             },
             orderBy: { newsletterConsentDate: 'desc' }
         });
