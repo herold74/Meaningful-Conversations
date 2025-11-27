@@ -34,7 +34,7 @@ services:
       MARIADB_USER: ${DB_USER:-mcuser}
       MARIADB_PASSWORD: ${DB_PASSWORD:-changeme}
     volumes:
-      - mariadb_production_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -82,7 +82,7 @@ services:
         condition: service_healthy
       # TTS optional - Backend startet auch wenn TTS nicht verfügbar
     volumes:
-      - tts_voices_production:/models:ro
+      - tts_voices:/models:ro
     environment:
       # Database configuration
       DB_HOST: mariadb
@@ -149,9 +149,9 @@ services:
       retries: 3
 
 volumes:
-  mariadb_production_data:
+  mariadb_data:
     driver: local
-  tts_voices_production:
+  tts_voices:
     driver: local
 
 networks:
