@@ -19,7 +19,7 @@ let cachedModelMapping = null;
 async function getGoogleClient() {
   if (!googleAI) {
     const { GoogleGenAI } = await import('@google/genai');
-    googleAI = new GoogleGenAI({ apiKey: process.env.API_KEY || process.env.GOOGLE_API_KEY });
+    googleAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
     console.log('✓ Google AI client initialized');
   }
   return googleAI;
