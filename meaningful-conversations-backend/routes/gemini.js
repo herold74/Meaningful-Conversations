@@ -11,7 +11,7 @@ const aiProviderService = require('../services/aiProviderService.js');
 // For backward compatibility with prompt cache (which needs direct Google AI access)
 let googleAI;
 import('@google/genai').then(({ GoogleGenAI }) => {
-    googleAI = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    googleAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
     console.log('Successfully initialized Google AI client for caching.');
 }).catch(err => {
     console.error("Failed to initialize Google AI:", err);
