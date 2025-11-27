@@ -47,6 +47,7 @@ function getVoiceForBot(botId, lang) {
             case 'rob-pq':
             case 'kenji-resilience':
             case 'nexus-goal-path-solution':
+            case 'victor-systemic-coaching':
                 gender = 'male';
                 break;
             default:
