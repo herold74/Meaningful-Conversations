@@ -47,6 +47,7 @@ function getVoiceForBot(botId, lang) {
             case 'rob-pq':
             case 'kenji-stoic':
             case 'nexus-gps':
+            case 'victor-bowen':
                 gender = 'male';
                 break;
             default:
