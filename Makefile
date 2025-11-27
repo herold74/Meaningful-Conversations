@@ -178,57 +178,57 @@ health-check: ## Run health checks on all services
 monitor: ## Show real-time resource usage
 	@$(CONTAINER_ENGINE) stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"
 
-# ============ MANUALMODE SERVER DEPLOYMENT ============
+# ============ MEANINGFUL CONVERSATIONS DEPLOYMENT ============
 
-deploy-manualmode-staging: ## Deploy to manualmode server staging
+deploy-staging: ## Deploy to staging environment
 	@./deploy-manualmode.sh -e staging
 
-deploy-manualmode-production: ## Deploy to manualmode server production
+deploy-production: ## Deploy to production environment
 	@./deploy-manualmode.sh -e production
 
-deploy-manualmode-staging-frontend: ## Deploy frontend to manualmode staging
+deploy-staging-frontend: ## Deploy frontend to staging
 	@./deploy-manualmode.sh -e staging -c frontend
 
-deploy-manualmode-production-frontend: ## Deploy frontend to manualmode production
+deploy-production-frontend: ## Deploy frontend to production
 	@./deploy-manualmode.sh -e production -c frontend
 
-deploy-manualmode-staging-backend: ## Deploy backend to manualmode staging
+deploy-staging-backend: ## Deploy backend to staging
 	@./deploy-manualmode.sh -e staging -c backend
 
-deploy-manualmode-production-backend: ## Deploy backend to manualmode production
+deploy-production-backend: ## Deploy backend to production
 	@./deploy-manualmode.sh -e production -c backend
 
-deploy-manualmode-staging-tts: ## Deploy TTS service to manualmode staging
+deploy-staging-tts: ## Deploy TTS service to staging
 	@./deploy-manualmode.sh -e staging -c tts
 
-deploy-manualmode-production-tts: ## Deploy TTS service to manualmode production
+deploy-production-tts: ## Deploy TTS service to production
 	@./deploy-manualmode.sh -e production -c tts
 
-
-deploy-manualmode-dry-run: ## Test deployment to manualmode server (no changes)
+deploy-dry-run: ## Test deployment (no changes)
 	@./deploy-manualmode.sh --dry-run
 
-# Legacy command (defaults to staging)
-deploy-manualmode: ## Deploy to manualmode server (defaults to staging)
-	@./deploy-manualmode.sh
+# Legacy aliases for backward compatibility
+deploy-manualmode-staging: deploy-staging
+deploy-manualmode-production: deploy-production
+deploy-manualmode: deploy-staging
 
-logs-manualmode-staging: ## View logs from manualmode server staging
+logs-staging: ## View logs from staging
 	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml logs -f'
 
-logs-manualmode-production: ## View logs from manualmode server production
+logs-production: ## View logs from production
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
 
-status-manualmode-staging: ## Check status on manualmode server staging
+status-staging: ## Check status on staging
 	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml ps'
 
-status-manualmode-production: ## Check status on manualmode server production
+status-production: ## Check status on production
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
 
-restart-manualmode-staging: ## Restart staging with automatic Nginx IP update
+restart-staging: ## Restart staging with automatic Nginx IP update
 	@echo "$(GREEN)Restarting staging with automatic Nginx update...$(NC)"
 	@ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging'
 
-restart-manualmode-production: ## Restart production with automatic Nginx IP update
+restart-production: ## Restart production with automatic Nginx IP update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production services!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
@@ -238,11 +238,11 @@ restart-manualmode-production: ## Restart production with automatic Nginx IP upd
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
-restart-manualmode-staging-backend: ## Restart only staging backend with Nginx update
+restart-staging-backend: ## Restart only staging backend with Nginx update
 	@echo "$(GREEN)Restarting staging backend...$(NC)"
 	@ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging backend'
 
-restart-manualmode-production-backend: ## Restart only production backend with Nginx update
+restart-production-backend: ## Restart only production backend with Nginx update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production backend!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
@@ -252,49 +252,72 @@ restart-manualmode-production-backend: ## Restart only production backend with N
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
-stop-manualmode-staging: ## Stop staging services on manualmode server
+stop-staging: ## Stop staging services
 	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
 
-stop-manualmode-production: ## Stop production services on manualmode server
+stop-production: ## Stop production services
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml down'
 
-pod-status-manualmode: ## Check pod status on manualmode server (both envs)
+pod-status: ## Check pod status (both environments)
 	@ssh root@91.99.193.87 'podman pod ps && echo "" && podman ps --pod'
 
-db-shell-manualmode-staging: ## Open MariaDB shell on manualmode staging
+db-shell-staging: ## Open MariaDB shell on staging
 	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
 
-db-shell-manualmode-production: ## Open MariaDB shell on manualmode production
+db-shell-production: ## Open MariaDB shell on production
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
 
-db-backup-manualmode-staging: ## Backup MariaDB on manualmode staging
+db-backup-staging: ## Backup MariaDB on staging
 	@echo "Backing up staging database..."
-	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-manualmode-staging-$$(date +%Y%m%d-%H%M%S).sql
-	@echo "Backup saved to: backup-manualmode-staging-$$(date +%Y%m%d-%H%M%S).sql"
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
+	@echo "Backup saved to: backup-staging-$$(date +%Y%m%d-%H%M%S).sql"
 
-db-backup-manualmode-production: ## Backup MariaDB on manualmode production
+db-backup-production: ## Backup MariaDB on production
 	@echo "Backing up production database..."
-	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql
-	@echo "Backup saved to: backup-manualmode-production-$$(date +%Y%m%d-%H%M%S).sql"
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
+	@echo "Backup saved to: backup-production-$$(date +%Y%m%d-%H%M%S).sql"
+
+# Legacy aliases for backward compatibility
+logs-manualmode-staging: logs-staging
+logs-manualmode-production: logs-production
+status-manualmode-staging: status-staging
+status-manualmode-production: status-production
+restart-manualmode-staging: restart-staging
+restart-manualmode-production: restart-production
+restart-manualmode-staging-backend: restart-staging-backend
+restart-manualmode-production-backend: restart-production-backend
+stop-manualmode-staging: stop-staging
+stop-manualmode-production: stop-production
+pod-status-manualmode: pod-status
+db-shell-manualmode-staging: db-shell-staging
+db-shell-manualmode-production: db-shell-production
+db-backup-manualmode-staging: db-backup-staging
+db-backup-manualmode-production: db-backup-production
 
 # ============ MONITORING & RESOURCE MANAGEMENT ============
 
 monitor-dashboard: ## Show interactive resource monitoring dashboard (local)
 	@bash scripts/monitor-dashboard.sh
 
-monitor-dashboard-manualmode: ## Show resource dashboard on manualmode server
+monitor-dashboard-remote: ## Show resource dashboard on remote server
 	@ssh -t root@91.99.193.87 'bash /opt/manualmode-production/scripts/monitor-dashboard.sh'
 
-monitor-stats-manualmode: ## Show container stats on manualmode server
+monitor-stats: ## Show container stats on remote server
 	@ssh root@91.99.193.87 'podman stats --no-stream'
 
-monitor-system-manualmode: ## Show system resources on manualmode server
+monitor-system: ## Show system resources on remote server
 	@ssh root@91.99.193.87 'free -h && echo "---" && uptime && echo "---" && df -h /'
 
-setup-swap-manualmode: ## Setup 4GB swap on manualmode server
-	@echo "$(YELLOW)Setting up swap on manualmode server...$(NC)"
+setup-swap: ## Setup 4GB swap on remote server
+	@echo "$(YELLOW)Setting up swap on remote server...$(NC)"
 	@scp scripts/setup-swap.sh root@91.99.193.87:/tmp/
 	@ssh root@91.99.193.87 'bash /tmp/setup-swap.sh && rm /tmp/setup-swap.sh'
+
+# Legacy aliases
+monitor-dashboard-manualmode: monitor-dashboard-remote
+monitor-stats-manualmode: monitor-stats
+monitor-system-manualmode: monitor-system
+setup-swap-manualmode: setup-swap
 
 .DEFAULT_GOAL := help
 
