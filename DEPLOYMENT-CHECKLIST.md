@@ -22,6 +22,50 @@
 
 ---
 
+## 🔄 Container Restart Procedures
+
+### ⚠️ CRITICAL RULE: Always Update Nginx After Restarts!
+
+**Every container restart changes IPs → Nginx MUST be updated!**
+
+### ✅ CORRECT Way to Restart:
+
+```bash
+# Production (with confirmation prompt)
+make restart-manualmode-production
+
+# Staging (no confirmation)
+make restart-manualmode-staging
+
+# Backend only (Production)
+make restart-manualmode-production-backend
+
+# Backend only (Staging)
+make restart-manualmode-staging-backend
+```
+
+### ❌ WRONG Way to Restart:
+
+```bash
+# DON'T DO THIS! It will cause 502 errors!
+podman-compose restart
+cd /opt/manualmode-production && podman-compose restart
+ssh root@<YOUR_SERVER_IP> 'podman-compose restart'
+```
+
+**Why?** Container IPs change on restart, but Nginx still points to old IPs!
+
+### 📝 What the Script Does:
+
+1. ✅ Restarts containers
+2. ✅ Waits for health checks
+3. ✅ Updates Nginx IPs automatically
+4. ✅ Reloads Nginx
+5. ✅ Tests connectivity
+6. ✅ Reports success/failure
+
+---
+
 ## ✅ Pre-Deployment Checklist
 
 ### 1. Database Health Check
@@ -179,13 +223,16 @@ podman exec meaningful-conversations-mariadb-production bash -c \
   'echo "UPDATE _prisma_migrations SET finished_at = started_at WHERE migration_name = \"MIGRATION_NAME\" AND finished_at IS NULL;" | \
   /usr/bin/mariadb -u root -p${MARIADB_ROOT_PASSWORD} meaningful_conversations_production'
 
-# 3. Restart backend
-cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml restart backend
+# 3. Restart backend (WITH Nginx update!)
+bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production backend
 ```
 
 ### 502 Bad Gateway
 ```bash
-# Update Nginx IPs and reload
+# CAUSE: Container IP changed but Nginx config not updated
+# SOLUTION: Always use restart-with-nginx-update.sh script!
+
+# Quick fix for existing 502:
 bash /opt/manualmode-production/update-nginx-ips.sh production
 systemctl reload nginx
 ```
