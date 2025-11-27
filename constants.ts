@@ -76,7 +76,7 @@ export const BOTS: Bot[] = [
         name: 'Victor',
         description: 'A systemic coach inspired by family systems theory concepts, helping you recognize patterns and develop differentiated responses.',
         description_de: 'Ein systemischer Coach, inspiriert von Konzepten der Familientheorie, der Ihnen hilft, Muster zu erkennen und differenzierte Reaktionen zu entwickeln.',
-        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Victor&backgroundColor=d1d4f9,c0aede&radius=50&mouth=serious,smirk&shirtColor=ffffff&hair=full&hairColor=4a5568',
+        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=VictorCoSerious&backgroundColor=ff9999&radius=50&mouth=smirk&shirtColor=ffffff',
         style: 'Systemic, Analytical, Neutral',
         style_de: 'Systemisch, Analytisch, Neutral',
         accessTier: 'premium',
