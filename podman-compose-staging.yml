@@ -1,5 +1,9 @@
 version: '3.8'
 
+# Staging Configuration
+# IMPORTANT: Project name is fixed to prevent volume recreation on restart
+name: manualmode-staging
+
 # Staging Pod Configuration
 x-podman:
   pod:

@@ -1,5 +1,9 @@
 version: '3.8'
 
+# Production Configuration
+# IMPORTANT: Project name is fixed to prevent volume recreation on restart
+name: meaningful-conversations-production
+
 # Production Pod Configuration
 x-podman:
   pod:
