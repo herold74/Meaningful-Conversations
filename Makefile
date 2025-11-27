@@ -224,11 +224,33 @@ status-manualmode-staging: ## Check status on manualmode server staging
 status-manualmode-production: ## Check status on manualmode server production
 	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
 
-restart-manualmode-staging: ## Restart staging services on manualmode server
-	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml restart'
+restart-manualmode-staging: ## Restart staging with automatic Nginx IP update
+	@echo "$(GREEN)Restarting staging with automatic Nginx update...$(NC)"
+	@ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging'
 
-restart-manualmode-production: ## Restart production services on manualmode server
-	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml restart'
+restart-manualmode-production: ## Restart production with automatic Nginx IP update
+	@echo "$(YELLOW)⚠ WARNING: This will restart production services!$(NC)"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production'; \
+	else \
+		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
+	fi
+
+restart-manualmode-staging-backend: ## Restart only staging backend with Nginx update
+	@echo "$(GREEN)Restarting staging backend...$(NC)"
+	@ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging backend'
+
+restart-manualmode-production-backend: ## Restart only production backend with Nginx update
+	@echo "$(YELLOW)⚠ WARNING: This will restart production backend!$(NC)"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		ssh root@91.99.193.87 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production backend'; \
+	else \
+		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
+	fi
 
 stop-manualmode-staging: ## Stop staging services on manualmode server
 	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
