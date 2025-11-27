@@ -46,6 +46,7 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-tts:${VERSION:-latest}
     container_name: meaningful-conversations-tts-staging
     restart: unless-stopped
+    stop_grace_period: 30s
     deploy:
       resources:
         limits:
@@ -69,6 +70,7 @@ services:
     image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-backend:${VERSION:-latest}
     container_name: meaningful-conversations-backend-staging
     restart: unless-stopped
+    stop_grace_period: 30s
     deploy:
       resources:
         limits:

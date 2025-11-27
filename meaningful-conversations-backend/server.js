@@ -77,6 +77,9 @@ async function runMigrationsAndSeed() {
     if (isProduction || isStaging) {
         console.log('Production/Staging environment detected. Applying migrations...');
         runCommand('npx prisma migrate deploy');
+        
+        // Verify migrations consistency
+        await verifyMigrationsConsistency();
     } else {
         console.log('Development environment detected. Applying migrations...');
         runCommand('npx prisma migrate deploy');
@@ -86,6 +89,35 @@ async function runMigrationsAndSeed() {
     await seedAdminUser();
     
     console.log('--- Database Initialization Complete ---');
+}
+
+/**
+ * Verifies that all migrations are properly applied and consistent
+ */
+async function verifyMigrationsConsistency() {
+    try {
+        const migrations = await prisma.$queryRaw`
+            SELECT migration_name, finished_at, applied_steps_count, logs
+            FROM _prisma_migrations
+            WHERE applied_steps_count = 0 OR finished_at IS NULL
+            ORDER BY started_at DESC
+            LIMIT 5
+        `;
+        
+        if (migrations && migrations.length > 0) {
+            console.warn('⚠️  Warning: Found potentially failed migrations:');
+            migrations.forEach(m => {
+                console.warn(`  - ${m.migration_name}: steps=${m.applied_steps_count}, finished=${m.finished_at}`);
+            });
+            
+            // In production, this is just a warning - don't fail startup
+            console.warn('⚠️  Continuing startup, but migrations should be reviewed!');
+        } else {
+            console.log('✓ All migrations verified successfully');
+        }
+    } catch (error) {
+        console.warn('Could not verify migrations consistency:', error.message);
+    }
 }
 
 /**
@@ -197,9 +229,41 @@ async function startServer() {
         // Initialize guest limit cleanup (runs every 24 hours)
         initGuestLimitCleanup();
 
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log(`Backend server is running on port ${PORT}`);
         });
+
+        // Graceful shutdown handler
+        const gracefulShutdown = async (signal) => {
+            console.log(`\n${signal} received. Starting graceful shutdown...`);
+            
+            // Stop accepting new connections
+            server.close(async () => {
+                console.log('HTTP server closed');
+                
+                try {
+                    // Disconnect Prisma
+                    await prisma.$disconnect();
+                    console.log('Database connections closed');
+                    
+                    console.log('Graceful shutdown completed');
+                    process.exit(0);
+                } catch (error) {
+                    console.error('Error during shutdown:', error);
+                    process.exit(1);
+                }
+            });
+
+            // Force shutdown after 25 seconds (before podman's 30s timeout)
+            setTimeout(() => {
+                console.error('Forced shutdown after timeout');
+                process.exit(1);
+            }, 25000);
+        };
+
+        // Register shutdown handlers
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (error) {
         console.error('Failed to start server:', error);
