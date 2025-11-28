@@ -199,7 +199,7 @@ systemctl reload nginx
 
 # Manual backup
 podman exec meaningful-conversations-mariadb-production \
-  mysqldump -u root -p${MARIADB_ROOT_PASSWORD} meaningful_conversations_production \
+  mariadb-dump -u root -p${MARIADB_ROOT_PASSWORD} meaningful_conversations_production \
   > backup-$(date +%Y%m%d-%H%M%S).sql
 ```
 

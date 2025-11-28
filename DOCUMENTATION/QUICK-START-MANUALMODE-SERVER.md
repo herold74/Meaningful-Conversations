@@ -398,12 +398,12 @@ mkdir -p $BACKUP_DIR
 # Backup staging
 cd /opt/manualmode-staging
 export $(cat .env | grep DB_ROOT_PASSWORD | xargs)
-podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging | gzip > $BACKUP_DIR/staging-$(date +%Y%m%d-%H%M%S).sql.gz
+podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging | gzip > $BACKUP_DIR/staging-$(date +%Y%m%d-%H%M%S).sql.gz
 
 # Backup production
 cd /opt/manualmode-production
 export $(cat .env | grep DB_ROOT_PASSWORD | xargs)
-podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production | gzip > $BACKUP_DIR/production-$(date +%Y%m%d-%H%M%S).sql.gz
+podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production | gzip > $BACKUP_DIR/production-$(date +%Y%m%d-%H%M%S).sql.gz
 
 # Keep only last 7 days
 find $BACKUP_DIR -name "*.sql.gz" -mtime +7 -delete
