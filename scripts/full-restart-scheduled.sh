@@ -97,7 +97,7 @@ if [[ -z "$LATEST_BACKUP" ]]; then
     log "${RED}⚠ WARNING: No backup found in $BACKUP_DIR${NC}"
     log "${YELLOW}   Creating emergency backup now...${NC}"
     EMERGENCY_BACKUP="$BACKUP_DIR/$ENVIRONMENT-emergency-$(date +%Y%m%d-%H%M%S).sql.gz"
-    podman exec $DB_CONTAINER bash -c "mysqldump -u root -p\${MARIADB_ROOT_PASSWORD} $DB_NAME" | gzip > "$EMERGENCY_BACKUP" 2>&1
+    podman exec $DB_CONTAINER bash -c "mariadb-dump -u root -p\${MARIADB_ROOT_PASSWORD} $DB_NAME" | gzip > "$EMERGENCY_BACKUP" 2>&1
     log "${GREEN}✓ Emergency backup created: $EMERGENCY_BACKUP${NC}"
 else
     BACKUP_AGE=$(($(date +%s) - $(stat -c %Y "$LATEST_BACKUP")))
@@ -109,7 +109,7 @@ else
         log "${YELLOW}⚠ WARNING: Backup is older than 24 hours${NC}"
         log "${YELLOW}   Creating fresh backup...${NC}"
         FRESH_BACKUP="$BACKUP_DIR/$ENVIRONMENT-pre-restart-$(date +%Y%m%d-%H%M%S).sql.gz"
-        podman exec $DB_CONTAINER bash -c "mysqldump -u root -p\${MARIADB_ROOT_PASSWORD} $DB_NAME" | gzip > "$FRESH_BACKUP" 2>&1
+        podman exec $DB_CONTAINER bash -c "mariadb-dump -u root -p\${MARIADB_ROOT_PASSWORD} $DB_NAME" | gzip > "$FRESH_BACKUP" 2>&1
         log "${GREEN}✓ Fresh backup created: $(basename $FRESH_BACKUP)${NC}"
     else
         log "${GREEN}✓ Recent backup available${NC}"

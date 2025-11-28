@@ -66,7 +66,7 @@ make db-backup-alternative-staging
 # Or manually:
 ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
   podman-compose -f podman-compose-staging.yml exec -T mariadb \
-  mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging' \
+  mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging' \
   > backup-staging-$(date +%Y%m%d-%H%M%S).sql
 ```
 
@@ -79,7 +79,7 @@ make db-backup-alternative-production
 # Or manually:
 ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
   podman-compose -f podman-compose-production.yml exec -T mariadb \
-  mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production' \
+  mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production' \
   > backup-production-$(date +%Y%m%d-%H%M%S).sql
 ```
 

@@ -246,12 +246,15 @@ async function generateWithMistral({ model, contents, config }) {
   
   const choice = response.choices[0];
   
+  // Mistral SDK v1.10+ returns camelCase property names (promptTokens, completionTokens)
+  // Older versions used snake_case (prompt_tokens, completion_tokens)
+  // Support both for compatibility
   return {
     text: choice.message.content,
     usage: response.usage ? {
-      inputTokens: response.usage.prompt_tokens || 0,
-      outputTokens: response.usage.completion_tokens || 0,
-      totalTokens: response.usage.total_tokens || 0,
+      inputTokens: response.usage.promptTokens || response.usage.prompt_tokens || 0,
+      outputTokens: response.usage.completionTokens || response.usage.completion_tokens || 0,
+      totalTokens: response.usage.totalTokens || response.usage.total_tokens || 0,
     } : null,
     model: mistralModel,
     provider: 'mistral',

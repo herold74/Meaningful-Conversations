@@ -262,19 +262,19 @@ pod-status: ## Check pod status (both environments)
 	@ssh root@91.99.193.87 'podman pod ps && echo "" && podman ps --pod'
 
 db-shell-staging: ## Open MariaDB shell on staging
-	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_staging'
 
 db-shell-production: ## Open MariaDB shell on production
-	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_production'
 
 db-backup-staging: ## Backup MariaDB on staging
 	@echo "Backing up staging database..."
-	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
+	@ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-staging-$$(date +%Y%m%d-%H%M%S).sql"
 
 db-backup-production: ## Backup MariaDB on production
 	@echo "Backing up production database..."
-	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
+	@ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-production-$$(date +%Y%m%d-%H%M%S).sql"
 
 # Legacy aliases for backward compatibility

@@ -262,18 +262,24 @@ export const ApiUsageView: React.FC = () => {
             {/* AI Provider Control Panel */}
             {providerConfig && (
                 <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                         <div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                 <ZapIcon className="w-6 h-6 text-yellow-500" />
                                 AI Provider Management
                             </h3>
+                            {providerConfig.lastUpdated && (
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:hidden">
+                                    <p>Last updated: {new Date(providerConfig.lastUpdated).toLocaleString()}</p>
+                                    {providerConfig.lastUpdatedBy && <p>By: {providerConfig.lastUpdatedBy}</p>}
+                                </div>
+                            )}
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 hidden sm:block">
                                 Switch between Google Gemini and Mistral AI without restarting
                             </p>
                         </div>
                         {providerConfig.lastUpdated && (
-                            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+                            <div className="hidden sm:block text-right text-xs text-gray-500 dark:text-gray-400">
                                 <p>Last updated: {new Date(providerConfig.lastUpdated).toLocaleString()}</p>
                                 {providerConfig.lastUpdatedBy && <p>By: {providerConfig.lastUpdatedBy}</p>}
                             </div>

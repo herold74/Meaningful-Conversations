@@ -497,7 +497,7 @@ make db-backup-alternative-production
 ssh root@91.99.193.87
 cd /opt/manualmode-staging
 podman-compose -f podman-compose-staging.yml exec -T mariadb \
-  mysqldump -u root -p meaningful_conversations_staging > /tmp/staging-export.sql
+  mariadb-dump -u root -p meaningful_conversations_staging > /tmp/staging-export.sql
 
 # 3. Import to production
 cd /opt/manualmode-production
@@ -515,7 +515,7 @@ rm /tmp/staging-export.sql
 ssh root@91.99.193.87
 cd /opt/manualmode-production
 podman-compose -f podman-compose-production.yml exec -T mariadb \
-  mysqldump -u root -p meaningful_conversations_production users > /tmp/prod-users.sql
+  mariadb-dump -u root -p meaningful_conversations_production users > /tmp/prod-users.sql
 
 # Import to staging
 cd /opt/manualmode-staging
