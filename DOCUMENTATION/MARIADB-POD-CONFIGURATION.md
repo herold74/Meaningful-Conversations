@@ -264,7 +264,7 @@ make db-backup-alternative-staging
 # Or manually
 ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
-  podman-compose -f podman-compose-staging.yml exec -T mariadb mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging | gzip > /backup/staging-backup.sql.gz'
+  podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging | gzip > /backup/staging-backup.sql.gz'
 ```
 
 #### Production Backup
@@ -276,7 +276,7 @@ make db-backup-alternative-production
 # Or manually
 ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
-  podman-compose -f podman-compose-production.yml exec -T mariadb mysqldump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production | gzip > /backup/production-backup.sql.gz'
+  podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production | gzip > /backup/production-backup.sql.gz'
 ```
 
 ### Restore Database
