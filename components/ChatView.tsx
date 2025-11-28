@@ -675,7 +675,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             let gender: 'male' | 'female' = 'female';
             
             if (lang === 'en') {
-              const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps'];
+              const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps', 'victor-bowen'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
             } else if (lang === 'de') {
               const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
@@ -802,7 +802,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const recognition = new SpeechRecognitionAPI();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = language === 'de' ? 'de-DE' : 'en-US';
+    // Determine bot's conversation language (not UI language!)
+    // Gloria (g-interviewer) always speaks English regardless of UI language
+    const botLanguage = bot.id === 'g-interviewer' ? 'en' : language;
+    recognition.lang = botLanguage === 'de' ? 'de-DE' : 'en-US';
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
@@ -835,7 +838,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
 
     recognitionRef.current = recognition;
-  }, [language]);
+  }, [language, bot.id]);
   
   useEffect(() => {
     // This effect is specifically to fetch the initial greeting from the bot.
