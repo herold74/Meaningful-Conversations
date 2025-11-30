@@ -155,6 +155,33 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const baseTranscriptRef = useRef<string>('');
   const initialFetchInitiated = useRef<boolean>(false);
 
+  // Handler to stop audio and end session
+  const handleEndSession = useCallback(() => {
+    // Stop any playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+      audioRef.current.load();
+    }
+    
+    // Stop meditation gong audio if playing
+    if (gongAudioRef.current) {
+      gongAudioRef.current.pause();
+      gongAudioRef.current.currentTime = 0;
+    }
+    
+    // Stop Web Speech API TTS if active
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    
+    // Reset TTS status
+    setTtsStatus('idle');
+    
+    // Call the original onEndSession handler
+    onEndSession();
+  }, [onEndSession]);
+
   const [isListening, setIsListening] = useState(false);
   const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
   const [isVoiceMode, setIsVoiceMode] = useState(false);
@@ -1312,13 +1339,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
 
             {/* End Session Button/Icon */}
             <button
-                onClick={onEndSession}
+                onClick={handleEndSession}
                 className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-accent-primary bg-transparent border border-red-600 dark:border-accent-primary uppercase hover:bg-red-600 dark:hover:bg-accent-primary hover:text-white dark:hover:text-black rounded-lg shadow-md"
             >
                 {t('chat_end_session')}
             </button>
             <button
-                onClick={onEndSession}
+                onClick={handleEndSession}
                 className="md:hidden p-2 text-red-600 dark:text-accent-primary rounded-full hover:bg-red-50 dark:hover:bg-accent-primary/10"
                 aria-label={t('chat_end_session')}
             >
