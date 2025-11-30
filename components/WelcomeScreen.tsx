@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LogoIcon } from './icons/LogoIcon';
 import { BOTS } from '../constants';
 import { useLocalization } from '../context/LocalizationContext';
+import ChristmasSnowflakes from './ChristmasSnowflakes';
+import { isChristmasSeason } from '../utils/dateUtils';
 
 const WelcomeScreen: React.FC = () => {
     const { t } = useLocalization();
+    const showChristmas = useMemo(() => isChristmasSeason(), []);
+    
     // Pre-calculated positions for 6 bots in a hexagon shape around the central logo
     const avatarPositions = [
         { top: '-1.75rem', left: 'calc(50% - 1.75rem)' }, // Top
@@ -17,6 +21,7 @@ const WelcomeScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn">
+      {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
       {/* Container for the logo and avatars */}
       <div className="relative w-48 h-48">
         
