@@ -5,6 +5,8 @@ import { FileTextIcon } from './icons/FileTextIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ChristmasSnowflakes from './ChristmasSnowflakes';
+import { isChristmasSeason } from '../utils/dateUtils';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -22,6 +24,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
+  
+  const showChristmas = useMemo(() => {
+    const result = isChristmasSeason();
+    console.log('[LandingPage] Christmas season check:', result);
+    return result;
+  }, []);
 
   const previewContent = useMemo(() => {
       if (!fileContent) return '';
@@ -104,6 +112,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
 
   return (
     <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
+      {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
       <div className="w-full max-w-3xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('meaningfulConversations')}</h1>
         <p className="text-sm md:text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
