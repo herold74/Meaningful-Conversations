@@ -152,7 +152,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                                 <div key={field.id}>
                                                     <div className="flex items-center gap-4">
                                                         <label htmlFor={field.id} className="text-lg font-medium text-content-secondary shrink-0">
-                                                            {field.label} <span className="text-sm text-content-subtle ml-1">({t('required_field_indicator')})</span>
+                                                            {field.label} <span className="text-sm text-status-danger-foreground font-semibold ml-1">({t('required_field_indicator')})</span>
                                                         </label>
                                                         <input
                                                             type="text"
