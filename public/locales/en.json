@@ -117,7 +117,7 @@
 
   "q_section_formative_events_title": "🗺️ Formative life events",
   "q_section_formative_events_desc": "What milestones and events have shaped you?",
-  "q_field_formative_events_prompt": "* e.g., Moved to a new city for university\n* e.g., Traveled through Southeast Asia for 3 months\n* e.g., Overcame a significant personal challenge",
+  "q_field_formative_events_prompt": "* e.g. 'Moved to a new city for university'\n* e.g. 'Traveled through Southeast Asia for 3 months'\n* e.g. 'Overcame a significant personal challenge'",
   
   "q_section_domains_title": "🧭 Life Domains",
   "q_section_domains_desc": "The main areas of my life, each with its own goals and challenges.",
