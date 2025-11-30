@@ -93,6 +93,13 @@ const App: React.FC = () => {
         }
         return 'light';
     });
+    const [isAutoThemeEnabled, setIsAutoThemeEnabled] = useState<boolean>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('autoThemeEnabled');
+            return stored !== 'false'; // Default to true, only false if explicitly disabled
+        }
+        return true;
+    });
     const [colorTheme, setColorTheme] = useState<'autumn' | 'winter'>(() => {
         if (typeof window !== 'undefined') {
             const storedTheme = localStorage.getItem('colorTheme');
@@ -135,7 +142,39 @@ const App: React.FC = () => {
         localStorage.setItem('colorTheme', colorTheme);
     }, [colorTheme]);
 
-    const toggleDarkMode = () => setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
+    // Automatic theme switching based on time of day (18:00-6:00 = dark, 6:00-18:00 = light)
+    useEffect(() => {
+        if (!isAutoThemeEnabled) return;
+
+        const checkTimeAndUpdateTheme = () => {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            // Dark mode: 18:00 (6 PM) to 6:00 (6 AM)
+            // Light mode: 6:00 (6 AM) to 18:00 (6 PM)
+            const shouldBeDark = hour >= 18 || hour < 6;
+            const desiredMode = shouldBeDark ? 'dark' : 'light';
+            
+            if (isDarkMode !== desiredMode) {
+                setIsDarkMode(desiredMode);
+            }
+        };
+
+        // Check immediately
+        checkTimeAndUpdateTheme();
+
+        // Check every minute for theme changes
+        const intervalId = setInterval(checkTimeAndUpdateTheme, 60000);
+
+        return () => clearInterval(intervalId);
+    }, [isAutoThemeEnabled, isDarkMode]);
+
+    const toggleDarkMode = () => {
+        // When user manually toggles, disable auto-theme
+        setIsAutoThemeEnabled(false);
+        localStorage.setItem('autoThemeEnabled', 'false');
+        setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
+    };
     const toggleColorTheme = () => setColorTheme(prev => prev === 'winter' ? 'autumn' : 'winter');
     
     const calculateNewGamificationState = useCallback((
