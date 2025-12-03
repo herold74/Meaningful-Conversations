@@ -74,4 +74,4 @@ meaningful-conversations-backend/prisma/*.db-journal
 # Personal Information Files
 # Use .example.tsx versions instead (they contain dummy data)
 components/ImprintView.tsx
-components/PrivacyPolicyView.tsx
+components/PrivacyPolicyView.tsxSYSTEM-CONFIG.md
