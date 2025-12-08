@@ -160,10 +160,38 @@ async function getUsageStats(startDate, endDate) {
     // Breakdown by bot
     byBot: {},
     
-    // Guest vs Registered
+    // Guest vs Registered (simple counts - kept for backwards compatibility)
     guestCalls: usageRecords.filter(r => r.isGuest).length,
     registeredCalls: usageRecords.filter(r => !r.isGuest).length,
+    
+    // Detailed breakdown by user type
+    byUserType: {
+      guest: {
+        calls: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        costUSD: 0,
+      },
+      registered: {
+        calls: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        costUSD: 0,
+      },
+    },
   };
+
+  // Group by user type (guest vs registered)
+  usageRecords.forEach(record => {
+    const userType = record.isGuest ? 'guest' : 'registered';
+    stats.byUserType[userType].calls++;
+    stats.byUserType[userType].inputTokens += record.inputTokens;
+    stats.byUserType[userType].outputTokens += record.outputTokens;
+    stats.byUserType[userType].totalTokens += record.totalTokens;
+    stats.byUserType[userType].costUSD += Number(record.estimatedCostUSD);
+  });
 
   // Group by model
   usageRecords.forEach(record => {
