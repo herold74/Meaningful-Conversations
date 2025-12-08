@@ -4,6 +4,7 @@ import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
 import * as geminiService from './services/geminiService';
+import * as analyticsService from './services/analyticsService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
 import { TestScenario } from './utils/testScenarios';
@@ -850,6 +851,7 @@ const App: React.FC = () => {
                     }} 
                     onGuest={() => {
                         setMenuView(null);
+                        analyticsService.trackGuestLogin();
                         handleStartOver();
                     }}
                     redirectReason={authRedirectReason}

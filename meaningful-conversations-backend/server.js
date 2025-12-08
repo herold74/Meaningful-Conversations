@@ -210,6 +210,7 @@ async function startServer() {
         app.use('/api/feedback', require('./routes/feedback.js'));
         app.use('/api/admin', require('./routes/admin.js'));
         app.use('/api/api-usage', require('./routes/apiUsage.js'));
+        app.use('/api/analytics', require('./routes/analytics.js'));
         app.use('/api/guest', require('./routes/guest.js'));
         app.use('/api/purchase', require('./routes/purchase.js'));
         app.use('/api/newsletter', require('./routes/newsletter.js'));
