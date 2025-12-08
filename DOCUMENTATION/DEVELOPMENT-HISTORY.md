@@ -189,8 +189,8 @@ git checkout v1.4.7
 - UI/UX enhancements
 - Performance optimizations
 
-#### **v1.5.6 - Calendar Integration** 🗓️ ✨
-**Branch:** `main` (current)
+#### **v1.5.6 - Calendar Integration** 🗓️
+**Branch:** `main`
 
 **Status:** Production-ready (November 2024)
 
@@ -219,6 +219,217 @@ git checkout v1.4.7
 - User Manual updated with calendar integration instructions (both EN/DE)
 - README.md updated with calendar feature description
 - DEVELOPMENT-HISTORY.md updated with v1.5.6 details
+
+---
+
+### **v1.6.x - Victor, AI Management & Platform Stability**
+
+#### **v1.6.0 - Victor Coach Launch** 🧠 ✨
+**Branch:** `main`
+
+**Status:** Production-ready (November 2024)
+
+**New Features:**
+- ✅ **Victor - Systemic Coach**
+  - New coaching approach based on Bowen Family Systems Theory
+  - Focus on differentiation of self, triangulation, and relational patterns
+  - Questions help users observe emotional reactivity in relationships
+  - DiceBear avatar with neutral, serious expression (red background)
+  - Integrated into coach selection with systemic thinking icon
+
+**Technical Implementation:**
+- Added Victor to `constants.ts` and `meaningful-conversations-backend/constants.js`
+- DiceBear avatar URL: `https://api.dicebear.com/8.x/micah/svg?seed=VictorCoSerious&backgroundColor=ff9999&radius=50&mouth=smirk&shirtColor=ffffff`
+- Systemic coaching system prompt focused on Bowen's eight interlocking concepts
+
+**Coach Lineup (5 Total):**
+1. Max - Ambitious (Sage green background)
+2. Kenji - Stoic (Yellow background)
+3. Chloe - CBT (Beige background)
+4. Rob - Powerful Questions (Light grey background)
+5. Victor - Systemic (Red background)
+
+---
+
+#### **v1.6.1 - Dual AI Provider System** 🤖 ✨
+**Branch:** `main`
+
+**Status:** Production-ready (November 2024)
+
+**New Features:**
+- ✅ **Mistral AI Integration**
+  - Added Mistral AI as alternative provider to Google Gemini
+  - Runtime provider switching without server restart
+  - Model mapping: `mistral-large-latest` for production conversations
+  - Fallback mechanism for provider failures
+
+- ✅ **API Usage Tracking Enhancements**
+  - Extended tracking to support both Google Gemini and Mistral AI
+  - Token count tracking (input/output) for both providers
+  - Fixed Mistral token extraction (supports both camelCase and snake_case)
+  - Provider-specific usage analytics in admin console
+
+- ✅ **Provider Management UI**
+  - Admin console interface for switching AI providers
+  - Real-time usage statistics dashboard
+  - Last updated timestamp and admin user tracking
+  - Responsive design for mobile admin access
+
+**Technical Implementation:**
+- `meaningful-conversations-backend/services/aiProviderService.js` - Unified AI provider interface
+- `meaningful-conversations-backend/routes/admin.js` - Provider management endpoints
+- `components/ApiUsageView.tsx` - Enhanced admin dashboard
+- Database schema: `ProviderConfig` table for persistent provider state
+
+**Cost Optimization:**
+- Ability to switch providers based on usage patterns
+- Real-time cost projection for both providers
+- Usage analytics to inform provider selection decisions
+
+---
+
+#### **v1.6.2 - Database Stability Improvements** 🛠️ ✨
+**Branch:** `main`
+
+**Status:** Production-ready (November 2024)
+
+**Critical Fixes:**
+- ✅ **Graceful Shutdown Implementation**
+  - Node.js backend now handles SIGTERM/SIGINT gracefully
+  - 25-second timeout for clean shutdown
+  - Ensures `prisma.$disconnect()` is called before exit
+  - HTTP server closes cleanly
+
+- ✅ **Podman Container Grace Period**
+  - Increased `stop_grace_period` from 10s to 30s for `backend` and `tts` services
+  - Prevents SIGKILL during deployments
+  - Allows time for database connections to close properly
+
+- ✅ **Migration Consistency Verification**
+  - Added `verifyMigrationsConsistency()` function to backend startup
+  - Uses `prisma migrate diff` to detect schema drift
+  - Logs warnings for pending migrations without blocking startup
+  - Prevents P3009 error crash loops
+
+- ✅ **Migration Recovery Script**
+  - New `scripts/fix-failed-migrations.sh` for emergency migration fixes
+  - Automates `prisma migrate resolve --applied` command
+  - Simplifies recovery from P3009 errors
+
+- ✅ **MariaDB Standardization**
+  - Replaced all `mysql` CLI references with `mariadb`
+  - Updated `mysqldump` to `mariadb-dump` in Makefile and scripts
+  - Consistent tooling across development and production
+
+**Confidence Level:** 95% deployment stability
+
+**Documentation:**
+- `PRISMA-STABILITY-FIXES.md` - Comprehensive stability solutions guide
+
+---
+
+#### **v1.6.3 - Newsletter & Admin Improvements** 📧
+**Branch:** `main`
+
+**Status:** Production-ready (November 2024)
+
+**New Features:**
+- ✅ **Newsletter Management Enhancements**
+  - Fixed PENDING user visibility in admin console
+  - Newsletter subscribers now include users with `status: 'PENDING'`
+  - Added status badges (PENDING, ACTIVE) in subscriber list
+  - Improved subscriber filtering and display
+
+- ✅ **Admin Console Mobile Optimization**
+  - Responsive API Usage dashboard for small screens
+  - "Last updated" info repositioned for mobile devices
+  - Hidden verbose messages on small screens to save space
+  - Improved readability on mobile admin access
+
+- ✅ **Makefile Command Renaming**
+  - Renamed all `manualmode-*` commands to `meaningful-conversations-*`
+  - Shorter aliases: `deploy-staging`, `deploy-production`, etc.
+  - More intuitive command names aligned with project identity
+  - Updated documentation to reflect new command structure
+
+**Technical Changes:**
+- Modified `/newsletter-subscribers` endpoint to remove `status: 'ACTIVE'` filter
+- Enhanced `NewsletterPanel.tsx` with status badge display
+- Responsive layout improvements in `ApiUsageView.tsx`
+
+---
+
+#### **v1.6.4 - UX Refinements** 🎨
+**Branch:** `main`
+
+**Status:** Production-ready (November 2024)
+
+**User Experience Improvements:**
+- ✅ **Required Field Indicator**
+  - Red color for "required field indicator" in questionnaire
+  - Applied to "Ich bin..." field for better visibility
+  - Makes optional nature of other fields clearer
+
+- ✅ **Audio Cleanup on Session Exit**
+  - Stops all TTS playback when leaving chat session
+  - Clears both server-side and Web Speech API audio
+  - Prevents audio continuing after user returns to bot selection
+
+- ✅ **Localization Consistency**
+  - Updated German and English examples in questionnaire
+  - Single quotes (apostrophes) around example sentences
+  - Visual consistency across all prompt fields
+
+**Technical Implementation:**
+- Modified `components/Questionnaire.tsx` for red required indicator
+- Enhanced `components/ChatView.tsx` with `handleEndSession` wrapper
+- Updated `public/locales/de.json` and `public/locales/en.json`
+
+---
+
+#### **v1.6.5 - Christmas Features & Smart Automation** ❄️ 🎄 ✨
+**Branch:** `main` (current)
+
+**Status:** Production-ready (December 2024)
+
+**New Features:**
+- ✅ **Christmas Seasonal Animations**
+  - Animated snowflakes on key pages (Landing, Login, Welcome, Register)
+  - Active period: November 1 - January 6 (configurable via `isChristmasSeason()`)
+  - Dark mode only (conditional rendering based on theme)
+  - 10 snowflakes with randomized positions, speeds, and opacities
+  - Non-intrusive, elegant design using Unicode snowflake symbols (❄)
+
+- ✅ **Automatic Theme Switching**
+  - Time-based dark/light mode switching:
+    - Dark Mode: 18:00 - 6:00
+    - Light Mode: 6:00 - 18:00
+  - Enabled by default, can be overridden by user manual selection
+  - User override persisted in `localStorage` (disables auto-switching)
+  - Checks every 60 seconds for smooth transitions
+
+- ✅ **Automated Production Deployments**
+  - Daily production deployment via cron job at 05:00 AM
+  - Staging deployments remain manual or on-demand
+  - Logging to `/tmp/mc-deploy-production.log` for audit trail
+
+**Technical Implementation:**
+- `utils/dateUtils.ts` - `isChristmasSeason()` date check function
+- `components/ChristmasSnowflakes.tsx` - Snowflake animation component with `MutationObserver` for dark mode detection
+- `index.css` - CSS animations for snowflake falling effect
+- `App.tsx` - Auto theme switching logic with `setInterval` (60s) and `localStorage` persistence
+- `components/LandingPage.tsx`, `LoginView.tsx`, `WelcomeScreen.tsx`, `RegisterView.tsx` - Integrated Christmas component
+
+**User Experience:**
+- Subtle festive touch without disrupting functionality
+- Smart theme switching reduces manual toggling
+- Maintains user preference when manually set
+- Responsive animations perform well on mobile devices
+
+**Deployment Improvements:**
+- Cron job configuration: `0 5 * * * /root/deploy-mc-production.sh >> /tmp/mc-deploy-production.log 2>&1`
+- Automated Nginx IP updates after container restarts
+- Health check verification post-deployment
 
 ---
 
@@ -303,19 +514,31 @@ git checkout v1.4.7
 
 ## 📊 Feature Additions by Version
 
-| Feature | v1.0.0 | v1.1.0 | v1.4.5 | v1.4.7 | v1.4.9 |
-|---------|--------|--------|--------|--------|--------|
-| Basic Chat | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Multiple Bots | ❌ | ✅ | ✅ | ✅ | ✅ |
-| User Accounts | ❌ | ❌ | ✅ | ✅ | ✅ |
-| E2E Encryption | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Voice Mode | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Gamification | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Multi-language | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Dark Mode | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Admin Console | ❌ | ❌ | ✅ | ✅ | ✅ |
-| API Tracking | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Self-Hosting | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Feature | v1.0.0 | v1.1.0 | v1.4.5 | v1.4.7 | v1.4.9 | v1.5.6 | v1.6.5 |
+|---------|--------|--------|--------|--------|--------|--------|--------|
+| Basic Chat | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| Multiple Bots | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| User Accounts | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| E2E Encryption | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Admin Console | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | Enhanced |
+| | | | | | | | |
+| Voice Mode | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Gamification | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Multi-language | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Dark Mode | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | Auto-Switch |
+| Self-Hosting | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| GDPR Compliance | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| | | | | | | | |
+| API Tracking | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | Dual Provider |
+| | | | | | | | |
+| Calendar Export | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Newsletter | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | Enhanced |
+| | | | | | | | |
+| Dual AI Provider | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Christmas Features | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| DB Stability (95%) | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
@@ -325,6 +548,9 @@ git checkout v1.4.7
 - **v1.4.5**: Initial Prisma setup
 - **v1.4.7**: Added gamification tables
 - **v1.4.9**: API usage tracking table
+- **v1.6.1**: ProviderConfig table for AI provider management
+- **v1.6.2**: Migration consistency verification system
+- **v1.6.3**: Newsletter improvements (status filtering)
 
 ### **Environment Configuration**
 - **v1.4.5**: Basic .env files
@@ -335,10 +561,12 @@ git checkout v1.4.7
 - **v1.4.5**: Basic README
 - **v1.4.7**: Comprehensive deployment guides
 - **v1.4.9**: Organized documentation structure with screenshots
+- **v1.6.2**: PRISMA-STABILITY-FIXES.md for deployment reliability
+- **v1.6.5**: FEATURE-DEVELOPMENT-TIMELINE.md for stakeholder presentations
 
 ---
 
-## 🚀 Future Roadmap (Post v1.4.9)
+## 🚀 Future Roadmap (Post v1.6.5)
 
 ### **Planned Features**
 - [ ] Prompt caching for cost optimization
@@ -348,7 +576,11 @@ git checkout v1.4.7
 - [ ] Graphical charts for usage trends
 - [ ] Mobile app (React Native)
 - [ ] Collaborative coaching sessions
-- [ ] Integration with calendar apps
+- [x] ~~Integration with calendar apps~~ ✅ (Completed in v1.5.6)
+- [ ] Additional coach personalities
+- [ ] Voice input for conversations
+- [ ] Progress tracking and goal setting
+- [ ] Community features (anonymized insights)
 
 ### **Technical Improvements**
 - [ ] WebSocket for real-time updates
@@ -357,6 +589,11 @@ git checkout v1.4.7
 - [ ] Improved test coverage
 - [ ] CI/CD pipeline automation
 - [ ] Monitoring and observability stack
+- [x] ~~Dual AI provider support~~ ✅ (Completed in v1.6.1)
+- [x] ~~Database stability improvements~~ ✅ (Completed in v1.6.2)
+- [ ] Multi-region deployment
+- [ ] Automated scaling
+- [ ] Cost optimization alerts
 
 ---
 
@@ -376,13 +613,20 @@ git checkout v1.4.7
 - User guides (EN/DE)
 - FAQ and troubleshooting
 
-### **v1.4.9 (Current)**
+### **v1.4.9**
 - Organized DOCUMENTATION/ directory
 - USER-JOURNEY.md with screenshots
 - API-USAGE-TRACKING.md
 - Version management guide
 - Development history (this document!)
 - Screenshot documentation system
+
+### **v1.6.5 (Current)**
+- Enhanced DEVELOPMENT-HISTORY.md with v1.6.x details
+- PRISMA-STABILITY-FIXES.md for deployment reliability
+- FEATURE-DEVELOPMENT-TIMELINE.md for stakeholder presentations
+- Makefile command documentation updates
+- MariaDB standardization across all documentation
 
 ---
 
@@ -451,6 +695,8 @@ On **November 6, 2024**, the Git repository was reset for several reasons:
 - **API Usage**: See [meaningful-conversations-backend/API-USAGE-TRACKING.md](meaningful-conversations-backend/API-USAGE-TRACKING.md)
 - **User Journey**: See [USER-JOURNEY.md](USER-JOURNEY.md)
 - **Version Management**: See [DOCUMENTATION/VERSION-MANAGEMENT.md](DOCUMENTATION/VERSION-MANAGEMENT.md)
+- **Database Stability**: See [PRISMA-STABILITY-FIXES.md](PRISMA-STABILITY-FIXES.md)
+- **Feature Timeline**: See [FEATURE-DEVELOPMENT-TIMELINE.md](FEATURE-DEVELOPMENT-TIMELINE.md)
 
 ---
 
@@ -468,7 +714,33 @@ The preserved historical branches serve as a testament to the iterative developm
 
 ---
 
-**Last Updated**: November 6, 2024
-**Current Version**: 1.5.4 (main branch)
+**Last Updated**: December 2, 2025
+**Current Version**: 1.6.5 (main branch)
 **Historical Branches**: v1.0.0, v1.1.0, v1.4.5, v1.4.7, v1.4.7-(Server-Edition), v1.4.9 (pre-reset)
+
+---
+
+## 🎯 v1.6.x Highlights Summary
+
+The v1.6.x series represents a major leap in platform maturity:
+
+### **User-Facing:**
+- 🧠 **Victor Coach** - Systemic coaching (5 coaches total)
+- ❄️ **Christmas Features** - Seasonal engagement (Nov 1 - Jan 6)
+- 🌓 **Smart Theme** - Time-based dark/light mode switching
+- 🎨 **UX Refinements** - Red required indicators, audio cleanup, localization
+
+### **Administrator-Facing:**
+- 🤖 **Dual AI Providers** - Google Gemini + Mistral AI with runtime switching
+- 📊 **Enhanced API Tracking** - Token usage for both providers with cost projections
+- 🛠️ **Database Stability** - 95% deployment confidence (graceful shutdown, migration verification)
+- 📧 **Newsletter Management** - PENDING user visibility, status badges
+- ⚙️ **Operational Excellence** - Makefile renaming, MariaDB standardization, automated deployments
+
+### **Key Metrics:**
+- **5 Coaching Personalities** with unique approaches
+- **2 AI Providers** for flexibility and cost optimization
+- **95% Deployment Stability** confidence level
+- **Automated Daily Deployments** at 05:00 AM
+- **10 Snowflakes** for seasonal delight ❄️
 
