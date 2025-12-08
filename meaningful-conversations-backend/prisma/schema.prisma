@@ -156,3 +156,15 @@ model AppConfig {
 
   @@index([key])
 }
+
+model UserEvent {
+  id        String   @id @default(cuid())
+  eventType String   // e.g., 'GUEST_LOGIN', 'PAGE_VIEW', etc.
+  userId    String?  // Optional, for logged-in users
+  metadata  Json?    // Additional event data
+  createdAt DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([userId])
+}

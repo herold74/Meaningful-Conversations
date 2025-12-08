@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import * as userService from '../services/userService';
 import { User, UpgradeCode, Ticket, Feedback } from '../types';
+import { apiFetch } from '../services/api';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
@@ -36,6 +37,18 @@ interface AdminViewProps {
 type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
 type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'loginCount' | 'xp' | 'lastLogin';
+
+interface GuestLoginStats {
+    dateRange: {
+        start: string;
+        end: string;
+    };
+    totalCount: number;
+    daily: Array<{
+        date: string;
+        count: number;
+    }>;
+}
 
 const ResetPasswordSuccessModal: React.FC<{
     data: { email: string; newPass: string };
@@ -209,6 +222,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const [codes, setCodes] = useState<UpgradeCode[]>([]);
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [feedback, setFeedback] = useState<Feedback[]>([]);
+    const [guestLoginStats, setGuestLoginStats] = useState<GuestLoginStats | null>(null);
+    const [showGuestLoginDetails, setShowGuestLoginDetails] = useState(false);
 
     const [sortConfig, setSortConfig] = useState<{ key: CodeSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
     const [userSortConfig, setUserSortConfig] = useState<{ key: UserSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
@@ -235,16 +250,18 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         setIsLoading(true);
         setError('');
         try {
-            const [usersData, codesData, ticketsData, feedbackData] = await Promise.all([
+            const [usersData, codesData, ticketsData, feedbackData, guestLoginData] = await Promise.all([
                 userService.getAdminUsers(),
                 userService.getUpgradeCodes(),
                 userService.getAdminTickets(),
                 userService.getAdminFeedback(),
+                apiFetch('/analytics/guest-logins/stats'),
             ]);
             setUsers(usersData.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()));
             setCodes(codesData); // Sorting is now handled in useMemo
             setTickets(ticketsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
             setFeedback(feedbackData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            setGuestLoginStats(guestLoginData);
         } catch (err: any) {
             setError(err.message || 'Failed to load admin data.');
             console.error(err);
@@ -909,6 +926,66 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     
     const renderTickets = () => (
         <div className="space-y-8">
+            {/* Guest Login Statistics */}
+            <div className="bg-white dark:bg-transparent rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <button
+                    onClick={() => setShowGuestLoginDetails(!showGuestLoginDetails)}
+                    className="w-full flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        <UsersIcon className="w-6 h-6 text-accent-primary" />
+                        <div className="text-left">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+                                Guest Logins (Last 30 Days)
+                            </h3>
+                            {guestLoginStats && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Total: {guestLoginStats.totalCount} logins
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    {showGuestLoginDetails ? (
+                        <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                    ) : (
+                        <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                    )}
+                </button>
+                
+                {showGuestLoginDetails && guestLoginStats && (
+                    <div className="p-4">
+                        {guestLoginStats.daily.length > 0 ? (
+                            <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-gray-50 dark:bg-gray-900/50 text-left text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0">
+                                        <tr>
+                                            <th className="p-3">Date</th>
+                                            <th className="p-3 text-right">Guest Logins</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                                        {[...guestLoginStats.daily].reverse().map((day) => (
+                                            <tr key={day.date} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
+                                                    {new Date(day.date).toLocaleDateString()}
+                                                </td>
+                                                <td className="p-3 text-right text-gray-600 dark:text-gray-400">
+                                                    {day.count}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                No guest logins in this period
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+
             <div className="bg-white dark:bg-transparent rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <h3 className="font-bold text-lg p-4 border-b border-gray-200 dark:border-gray-800 text-gray-800 dark:text-gray-200">{t('admin_message_reports_title')}</h3>
                 {messageReports.length > 0 ? (
