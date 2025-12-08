@@ -23,6 +23,22 @@ interface ApiUsageStats {
     averageDurationMs: number;
     guestCalls: number;
     registeredCalls: number;
+    byUserType: {
+        guest: {
+            calls: number;
+            inputTokens: number;
+            outputTokens: number;
+            totalTokens: number;
+            costUSD: number;
+        };
+        registered: {
+            calls: number;
+            inputTokens: number;
+            outputTokens: number;
+            totalTokens: number;
+            costUSD: number;
+        };
+    };
     byModel: Record<string, {
         calls: number;
         inputTokens: number;
@@ -551,6 +567,61 @@ export const ApiUsageView: React.FC = () => {
                         </div>
                         <ClockIcon className="w-8 h-8 text-orange-600" />
                     </div>
+                </div>
+            </div>
+
+            {/* Usage by User Type */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow p-4">
+                <h3 className="text-lg font-semibold text-content-primary mb-4">Usage by User Type</h3>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-900/50 text-left text-xs uppercase text-content-subtle">
+                            <tr>
+                                <th className="p-3">User Type</th>
+                                <th className="p-3 text-right w-24">Calls</th>
+                                <th className="p-3 text-right w-32">Input Tokens</th>
+                                <th className="p-3 text-right w-32">Output Tokens</th>
+                                <th className="p-3 text-right w-32">Total Tokens</th>
+                                <th className="p-3 text-right w-24">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td className="p-3 font-medium text-content-primary">
+                                    <span className="inline-flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                        Guest
+                                    </span>
+                                </td>
+                                <td className="p-3 text-right text-content-secondary w-24">{formatNumber(stats.byUserType.guest.calls)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.guest.inputTokens)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.guest.outputTokens)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.guest.totalTokens)}</td>
+                                <td className="p-3 text-right font-semibold text-content-primary w-24">{formatCurrency(stats.byUserType.guest.costUSD)}</td>
+                            </tr>
+                            <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td className="p-3 font-medium text-content-primary">
+                                    <span className="inline-flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                        Registered
+                                    </span>
+                                </td>
+                                <td className="p-3 text-right text-content-secondary w-24">{formatNumber(stats.byUserType.registered.calls)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.registered.inputTokens)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.registered.outputTokens)}</td>
+                                <td className="p-3 text-right text-content-secondary w-32">{formatNumber(stats.byUserType.registered.totalTokens)}</td>
+                                <td className="p-3 text-right font-semibold text-content-primary w-24">{formatCurrency(stats.byUserType.registered.costUSD)}</td>
+                            </tr>
+                            <tr className="bg-gray-100 dark:bg-gray-900/30 font-semibold">
+                                <td className="p-3 text-content-primary">Total</td>
+                                <td className="p-3 text-right text-content-primary w-24">{formatNumber(stats.totalCalls)}</td>
+                                <td className="p-3 text-right text-content-primary w-32">{formatNumber(stats.totalInputTokens)}</td>
+                                <td className="p-3 text-right text-content-primary w-32">{formatNumber(stats.totalOutputTokens)}</td>
+                                <td className="p-3 text-right text-content-primary w-32">{formatNumber(stats.totalTokens)}</td>
+                                <td className="p-3 text-right text-content-primary w-24">{formatCurrency(stats.totalCostUSD)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
