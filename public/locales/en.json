@@ -631,5 +631,29 @@
   "personality_survey_success_saved": "PDF downloaded and profile encrypted successfully! You can now use experimental modes with Chloe.",
   "personality_survey_success_downloaded": "PDF downloaded successfully!",
   "personality_survey_error_save": "Error saving profile",
-  "personality_survey_error_pdf": "Error creating PDF. Please try again."
+  "personality_survey_error_pdf": "Error creating PDF. Please try again.",
+
+  "profile_view_title": "My Personality Profile",
+  "profile_view_loading": "Loading profile...",
+  "profile_view_error_title": "Error",
+  "profile_view_error_load": "Error loading profile",
+  "profile_view_retry": "Try again",
+  "profile_view_no_profile_title": "No Profile Available",
+  "profile_view_no_profile_desc": "You haven't completed a personality survey yet. Start now and get access to experimental coaching modes.",
+  "profile_view_start_test": "Start Test",
+  "profile_view_test_type": "Test Type",
+  "profile_view_created": "Created",
+  "profile_view_filter_scores": "Filter Scores",
+  "profile_view_worry": "Worry about Control",
+  "profile_view_control": "Influenceability",
+  "profile_view_results": "Results",
+  "profile_view_beruf": "Professional",
+  "profile_view_privat": "Private",
+  "profile_view_selbst": "Self-Image",
+  "profile_view_download_pdf": "Download as PDF",
+  "profile_view_new_test": "New Test",
+  "profile_view_info_title": "Note",
+  "profile_view_info_text": "This profile is used for experimental coaching modes with Chloe. You can take a new test anytime to update your profile.",
+
+  "menu_personality_profile": "Personality Profile"
 }

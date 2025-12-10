@@ -76,9 +76,12 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     {currentUser?.isAdmin && (
                         <>
                             <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => onNavigate('admin')} />
-                            <MenuItem icon={ClipboardCheckIcon} text="Persönlichkeitstest" onClick={() => onNavigate('personalitySurvey')} />
                              <hr className="border-border-primary my-2" />
                         </>
+                    )}
+                    
+                    {currentUser && (
+                        <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} />
                     )}
 
                     {/* Items moved to the top */}
