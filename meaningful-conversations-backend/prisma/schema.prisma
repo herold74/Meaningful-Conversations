@@ -35,6 +35,8 @@ model User {
   accessExpiresAt           DateTime?
   feedbacksByUser           Feedback[]    @relation("UserToFeedbacks")
   upgradeCodesUsedByUser    UpgradeCode[] @relation("UserToUpgradeCodes")
+  personalityProfile        PersonalityProfile?
+  sessionBehaviorLogs       SessionBehaviorLog[]
 }
 
 model UpgradeCode {
@@ -167,4 +169,51 @@ model UserEvent {
   @@index([eventType])
   @@index([createdAt])
   @@index([userId])
+}
+
+model PersonalityProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metadata (unverschluesselt)
+  testType        String   // "RIEMANN" oder "BIG5"
+  filterWorry     Int      // 1-5 (grober Indikator)
+  filterControl   Int      // 1-5 (grober Indikator)
+  
+  // VERSCHLUESSELT: Alle detaillierten Scores
+  encryptedData   String   @db.Text
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sessionCount    Int      @default(0)
+  
+  @@map("personality_profiles")
+}
+
+model SessionBehaviorLog {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId           String
+  
+  // Anonymisierte Frequenzen (unverschluesselt)
+  dauerFrequency      Int @default(0)
+  wechselFrequency    Int @default(0)
+  naeheFrequency      Int @default(0)
+  distanzFrequency    Int @default(0)
+  
+  // Comfort Check
+  comfortScore        Int?
+  optedOut            Boolean @default(false)
+  
+  // VERSCHLUESSELT: Vollstaendiges Transkript
+  encryptedTranscript String @db.Text
+  
+  createdAt           DateTime @default(now())
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@map("session_behavior_logs")
 }
