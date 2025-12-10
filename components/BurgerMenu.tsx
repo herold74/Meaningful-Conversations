@@ -79,10 +79,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                              <hr className="border-border-primary my-2" />
                         </>
                     )}
-                    
-                    {currentUser && (
-                        <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} />
-                    )}
 
                     {/* Items moved to the top */}
                     <MenuItem icon={UserIcon} text={t('menu_about')} onClick={() => onNavigate('about')} />
@@ -94,6 +90,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     {currentUser && (
                         <>
                             <MenuItem icon={UserIcon} text={t('menu_account_management')} onClick={() => onNavigate('accountManagement')} />
+                            <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} />
                             <hr className="border-border-primary my-2" />
                         </>
                     )}
