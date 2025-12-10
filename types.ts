@@ -33,7 +33,8 @@ export type NavView =
     | 'admin'
     | 'changePassword'
     | 'exportData'
-    | 'personalitySurvey';
+    | 'personalitySurvey'
+    | 'personalityProfile';
 
 export interface User {
     id: string;
