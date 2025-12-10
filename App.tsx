@@ -48,6 +48,7 @@ import UnsubscribeView from './components/UnsubscribeView';
 import UpdateNotification from './components/UpdateNotification';
 import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
+import PersonalityProfileView from './components/PersonalityProfileView';
 import { formatSurveyResultAsHtml } from './utils/surveyResultHtmlFormatter';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGenerator';
 import { encryptPersonalityProfile } from './utils/personalityEncryption';
@@ -937,6 +938,12 @@ const App: React.FC = () => {
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'personalitySurvey': return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} />;
+            case 'personalityProfile': return (
+                <PersonalityProfileView 
+                    encryptionKey={encryptionKey}
+                    onStartNewTest={() => setView('personalitySurvey')}
+                />
+            );
             case 'botSelection': return (
                 <BotSelection 
                     onSelect={handleSelectBot} 

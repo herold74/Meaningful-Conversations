@@ -25,15 +25,13 @@ router.post('/save', authMiddleware, async (req, res) => {
         testType,
         filterWorry: filterWorry || 0,
         filterControl: filterControl || 0,
-        encryptedData,
-        sessionCount: 0
+        encryptedData
       },
       update: {
         testType,
         filterWorry: filterWorry || 0,
         filterControl: filterControl || 0,
-        encryptedData,
-        updatedAt: new Date()
+        encryptedData
       }
     });
     
