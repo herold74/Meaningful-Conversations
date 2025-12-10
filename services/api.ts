@@ -176,3 +176,98 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     
     throw new ApiError(errorData.error || errorData.message || 'An unknown API error occurred.', response.status, errorData, false, apiBaseUrl);
 };
+
+// Helper function to get auth headers
+export const getAuthHeaders = (): HeadersInit => {
+    const session = getSession();
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+    };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+    return headers;
+};
+
+// ============================================================================
+// Personality Profile API
+// ============================================================================
+
+const API_BASE_URL = getApiBaseUrl();
+
+export const savePersonalityProfile = async (data: {
+  testType: string;
+  filterWorry: number;
+  filterControl: number;
+  encryptedData: string;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/save`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to save personality profile');
+  }
+  return response.json();
+};
+
+export const loadPersonalityProfile = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
+    headers: getAuthHeaders()
+  });
+  
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error('Failed to load personality profile');
+  }
+  
+  return response.json();
+};
+
+export const checkPersonalityProfile = async (): Promise<boolean> => {
+  try {
+    const profile = await loadPersonalityProfile();
+    return profile !== null;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const logSessionBehavior = async (data: {
+  sessionId: string;
+  encryptedTranscript: string;
+  frequencies: Record<string, number>;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    throw new Error('Failed to log session behavior');
+  }
+  return response.json();
+};
+
+export const submitComfortCheck = async (sessionId: string, score: number, optOut?: boolean) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ sessionId, score, optOut })
+  });
+  if (!response.ok) {
+    throw new Error('Failed to submit comfort check');
+  }
+  return response.json();
+};
+
+export const getAdaptationSuggestions = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to get adaptation suggestions');
+  }
+  return response.json();
+};

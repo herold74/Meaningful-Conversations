@@ -8,12 +8,22 @@ export const sendMessage = async (
     context: string,
     history: Message[],
     lang: Language,
-    isNewSession: boolean
+    isNewSession: boolean,
+    experimentalMode?: string,
+    decryptedPersonalityProfile?: any
 ): Promise<{ text: string }> => {
     
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ botId, context, history: history, lang, isNewSession }),
+        body: JSON.stringify({ 
+            botId, 
+            context, 
+            history: history, 
+            lang, 
+            isNewSession,
+            experimentalMode,
+            decryptedPersonalityProfile
+        }),
     });
 };
 
