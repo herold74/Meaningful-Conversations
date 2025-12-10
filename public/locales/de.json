@@ -630,5 +630,29 @@
   "personality_survey_success_saved": "PDF heruntergeladen und Profil verschlüsselt gespeichert! Du kannst jetzt experimentelle Modi bei Chloe nutzen.",
   "personality_survey_success_downloaded": "PDF erfolgreich heruntergeladen!",
   "personality_survey_error_save": "Fehler beim Speichern des Profils",
-  "personality_survey_error_pdf": "Fehler beim Erstellen des PDFs. Bitte versuche es erneut."
+  "personality_survey_error_pdf": "Fehler beim Erstellen des PDFs. Bitte versuche es erneut.",
+
+  "profile_view_title": "Mein Persönlichkeitsprofil",
+  "profile_view_loading": "Profil wird geladen...",
+  "profile_view_error_title": "Fehler",
+  "profile_view_error_load": "Fehler beim Laden des Profils",
+  "profile_view_retry": "Erneut versuchen",
+  "profile_view_no_profile_title": "Kein Profil vorhanden",
+  "profile_view_no_profile_desc": "Du hast noch keinen Persönlichkeitstest absolviert. Starte jetzt und erhalte Zugang zu experimentellen Coaching-Modi.",
+  "profile_view_start_test": "Test starten",
+  "profile_view_test_type": "Test-Typ",
+  "profile_view_created": "Erstellt",
+  "profile_view_filter_scores": "Filter Scores",
+  "profile_view_worry": "Sorge um Kontrolle",
+  "profile_view_control": "Beeinflussbarkeit",
+  "profile_view_results": "Ergebnisse",
+  "profile_view_beruf": "Beruflich",
+  "profile_view_privat": "Privat",
+  "profile_view_selbst": "Selbstbild",
+  "profile_view_download_pdf": "Als PDF herunterladen",
+  "profile_view_new_test": "Neuer Test",
+  "profile_view_info_title": "Hinweis",
+  "profile_view_info_text": "Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
+
+  "menu_personality_profile": "Persoenlichkeitsprofil"
 }
