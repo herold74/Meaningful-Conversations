@@ -48,7 +48,8 @@ import UnsubscribeView from './components/UnsubscribeView';
 import UpdateNotification from './components/UpdateNotification';
 import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
-import { formatSurveyResultAsMarkdown } from './utils/surveyResultFormatter';
+import { formatSurveyResultAsHtml } from './utils/surveyResultHtmlFormatter';
+import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGenerator';
 import { encryptPersonalityProfile } from './utils/personalityEncryption';
 import { ExperimentalMode } from './components/ExperimentalModeSelector';
 import { BOTS } from './constants';
@@ -449,41 +450,39 @@ const App: React.FC = () => {
     };
 
     const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
-        // Generate formatted Markdown
-        const markdown = formatSurveyResultAsMarkdown(result);
-        
-        // Create and download file
-        const blob = new Blob([markdown], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const dateStr = new Date().toISOString().split('T')[0];
-        const pathLabel = result.path === 'RIEMANN' ? 'riemann' : 'big5';
-        a.download = `personality-survey-${pathLabel}-${dateStr}.md`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        // NEU: Verschluesseln und speichern (nur fuer registered users)
-        if (currentUser && encryptionKey) {
-            try {
-                const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
-                
-                await api.savePersonalityProfile({
-                    testType: result.path,
-                    filterWorry: result.filter.worry,
-                    filterControl: result.filter.control,
-                    encryptedData
-                });
-                
-                alert('Profil verschluesselt und gespeichert! Sie koennen jetzt experimentelle Chloe-Versionen nutzen.');
-            } catch (error) {
-                console.error('Profile save failed:', error);
-                alert('Fehler beim Speichern des Profils: ' + (error as Error).message);
+        try {
+            // Generate HTML and PDF
+            const htmlContent = formatSurveyResultAsHtml(result, language);
+            const filename = generateSurveyPdfFilename(result.path, language);
+            
+            await generatePDF(htmlContent, filename);
+            
+            // NEU: Verschluesseln und speichern (nur fuer registered users)
+            if (currentUser && encryptionKey) {
+                try {
+                    const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
+                    
+                    await api.savePersonalityProfile({
+                        testType: result.path,
+                        filterWorry: result.filter.worry,
+                        filterControl: result.filter.control,
+                        encryptedData
+                    });
+                    
+                    // Update hasPersonalityProfile state
+                    setHasPersonalityProfile(true);
+                    
+                    alert(t('personality_survey_success_saved'));
+                } catch (error) {
+                    console.error('Profile save failed:', error);
+                    alert(t('personality_survey_error_save') + ': ' + (error as Error).message);
+                }
+            } else {
+                alert(t('personality_survey_success_downloaded'));
             }
-        } else {
-            alert('Auswertung erfolgreich erstellt und heruntergeladen!');
+        } catch (error) {
+            console.error('PDF generation failed:', error);
+            alert(t('personality_survey_error_pdf'));
         }
         
         setView('admin');
