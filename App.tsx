@@ -47,6 +47,10 @@ import ResetPasswordView from './components/ResetPasswordView';
 import UnsubscribeView from './components/UnsubscribeView';
 import UpdateNotification from './components/UpdateNotification';
 import PaywallView from './components/PaywallView';
+import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
+import { formatSurveyResultAsMarkdown } from './utils/surveyResultFormatter';
+import { encryptPersonalityProfile } from './utils/personalityEncryption';
+import { ExperimentalMode } from './components/ExperimentalModeSelector';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 
@@ -86,6 +90,10 @@ const App: React.FC = () => {
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
+    
+    // Experimental Mode States
+    const [experimentalMode, setExperimentalMode] = useState<ExperimentalMode>('OFF');
+    const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -177,6 +185,20 @@ const App: React.FC = () => {
         setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
     };
     const toggleColorTheme = () => setColorTheme(prev => prev === 'winter' ? 'autumn' : 'winter');
+    
+    // Check for personality profile when user logs in
+    useEffect(() => {
+        if (currentUser && encryptionKey) {
+            api.checkPersonalityProfile()
+                .then(setHasPersonalityProfile)
+                .catch(err => {
+                    console.error('Failed to check personality profile:', err);
+                    setHasPersonalityProfile(false);
+                });
+        } else {
+            setHasPersonalityProfile(false);
+        }
+    }, [currentUser, encryptionKey]);
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
@@ -426,6 +448,47 @@ const App: React.FC = () => {
         setView('piiWarning');
     };
 
+    const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
+        // Generate formatted Markdown
+        const markdown = formatSurveyResultAsMarkdown(result);
+        
+        // Create and download file
+        const blob = new Blob([markdown], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().split('T')[0];
+        const pathLabel = result.path === 'RIEMANN' ? 'riemann' : 'big5';
+        a.download = `personality-survey-${pathLabel}-${dateStr}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // NEU: Verschluesseln und speichern (nur fuer registered users)
+        if (currentUser && encryptionKey) {
+            try {
+                const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
+                
+                await api.savePersonalityProfile({
+                    testType: result.path,
+                    filterWorry: result.filter.worry,
+                    filterControl: result.filter.control,
+                    encryptedData
+                });
+                
+                alert('Profil verschluesselt und gespeichert! Sie koennen jetzt experimentelle Chloe-Versionen nutzen.');
+            } catch (error) {
+                console.error('Profile save failed:', error);
+                alert('Fehler beim Speichern des Profils: ' + (error as Error).message);
+            }
+        } else {
+            alert('Auswertung erfolgreich erstellt und heruntergeladen!');
+        }
+        
+        setView('admin');
+    };
+
     const handlePiiConfirm = () => {
         setLifeContext(tempContext);
         setTempContext('');
@@ -448,6 +511,11 @@ const App: React.FC = () => {
         setSelectedBot(bot);
         setUserMessageCount(0);
         setChatHistory([]);
+        
+        // Reset experimental mode when switching bots
+        if (bot.id !== 'chloe') {
+            setExperimentalMode('OFF');
+        }
         setView('chat');
     };
     
@@ -869,8 +937,30 @@ const App: React.FC = () => {
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'botSelection': return <BotSelection onSelect={handleSelectBot} currentUser={currentUser} />;
-            case 'chat': return <ChatView bot={selectedBot!} lifeContext={lifeContext} chatHistory={chatHistory} setChatHistory={setChatHistory} onEndSession={handleEndSession} onMessageSent={() => setUserMessageCount(c => c + 1)} currentUser={currentUser} isNewSession={!cameFromContextChoice} />;
+            case 'personalitySurvey': return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} />;
+            case 'botSelection': return (
+                <BotSelection 
+                    onSelect={handleSelectBot} 
+                    currentUser={currentUser}
+                    hasPersonalityProfile={hasPersonalityProfile}
+                    experimentalMode={experimentalMode}
+                    onExperimentalModeChange={setExperimentalMode}
+                />
+            );
+            case 'chat': return (
+                <ChatView 
+                    bot={selectedBot!} 
+                    lifeContext={lifeContext} 
+                    chatHistory={chatHistory} 
+                    setChatHistory={setChatHistory} 
+                    onEndSession={handleEndSession} 
+                    onMessageSent={() => setUserMessageCount(c => c + 1)} 
+                    currentUser={currentUser} 
+                    isNewSession={!cameFromContextChoice}
+                    experimentalMode={selectedBot?.id === 'chloe' ? experimentalMode : undefined}
+                    encryptionKey={encryptionKey}
+                />
+            );
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;

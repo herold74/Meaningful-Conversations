@@ -25,6 +25,9 @@ import { FlagIcon } from './icons/FlagIcon';
 import FeedbackModal from './FeedbackModal';
 import { synthesizeSpeech, getBotVoiceSettings, saveBotVoiceSettings, type TtsMode, type BotVoiceSettings } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
+import * as api from '../services/api';
+import { ExperimentalMode } from './ExperimentalModeSelector';
+import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -143,13 +146,16 @@ interface ChatViewProps {
   onMessageSent: () => void;
   currentUser: User | null;
   isNewSession: boolean;
+  experimentalMode?: ExperimentalMode;
+  encryptionKey?: CryptoKey | null;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, experimentalMode, encryptionKey }) => {
   const { t, language } = useLocalization();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const baseTranscriptRef = useRef<string>('');
@@ -257,6 +263,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [bot.id, language]);
 
   // Reset voice settings when language changes
+  // Load and decrypt personality profile when experimental mode is active
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (experimentalMode && experimentalMode !== 'OFF' && currentUser && encryptionKey) {
+        try {
+          const profileData = await api.loadPersonalityProfile();
+          if (profileData && profileData.encryptedData) {
+            // Decrypt client-side before sending to backend
+            const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
+            console.log('[DPC] Profile loaded and decrypted for experimental mode:', experimentalMode);
+            setDecryptedProfile(decrypted);
+          }
+        } catch (error) {
+          console.error('Failed to load personality profile:', error);
+          setDecryptedProfile(null);
+        }
+      } else {
+        setDecryptedProfile(null);
+      }
+    };
+    loadProfile();
+  }, [experimentalMode, currentUser, encryptionKey]);
+
   useEffect(() => {
     const settings = getBotVoiceSettings(bot.id);
     const langSettings = settings[language];
@@ -879,7 +908,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         setIsLoading(true);
         try {
             // Call with an empty history to trigger the bot's initial message.
-            const response = await geminiService.sendMessage(bot.id, lifeContext, [], language, isNewSession);
+            const response = await geminiService.sendMessage(
+                bot.id, 
+                lifeContext, 
+                [], 
+                language, 
+                isNewSession,
+                experimentalMode,
+                decryptedProfile
+            );
             const initialBotMessage: Message = {
                 id: `bot-${Date.now()}`,
                 text: response.text,
@@ -996,7 +1033,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     baseTranscriptRef.current = '';
 
     try {
-        const response = await geminiService.sendMessage(bot.id, lifeContext, historyWithUserMessage, language, false);
+        const response = await geminiService.sendMessage(
+            bot.id, 
+            lifeContext, 
+            historyWithUserMessage, 
+            language, 
+            false,
+            experimentalMode,
+            decryptedProfile
+        );
         
         // Parse for meditation markers
         const meditationData = parseMeditationMarkers(response.text);
@@ -1275,6 +1320,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
+                    {experimentalMode && experimentalMode !== 'OFF' && bot.id === 'chloe' && (
+                        <div className="flex items-center gap-1 mt-1">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                {experimentalMode === 'DPC' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </button>
         </div>

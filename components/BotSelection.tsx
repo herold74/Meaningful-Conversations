@@ -4,30 +4,43 @@ import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
 import { MeditationIcon } from './icons/MeditationIcon';
+import ExperimentalIcon from './icons/ExperimentalIcon';
+import ExperimentalModeSelector, { ExperimentalMode } from './ExperimentalModeSelector';
+import ExperimentalModeInfoModal from './ExperimentalModeInfoModal';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   currentUser: User | null;
+  hasPersonalityProfile?: boolean;
+  experimentalMode?: ExperimentalMode;
+  onExperimentalModeChange?: (mode: ExperimentalMode) => void;
 }
 
 interface BotCardProps {
   bot: BotWithAvailability;
   onSelect: (bot: Bot) => void;
   language: Language;
+  hasPersonalityProfile?: boolean;
+  experimentalMode?: ExperimentalMode;
+  onExperimentalModeChange?: (mode: ExperimentalMode) => void;
 }
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, experimentalMode, onExperimentalModeChange }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob-pq' || bot.id === 'kenji-stoic';
+    const showExperimental = bot.id === 'chloe' && hasPersonalityProfile && !isLocked;
+    
+    const [showSelector, setShowSelector] = useState(false);
+    const [showInfoModal, setShowInfoModal] = useState(false);
     
     return (
       <div
         onClick={() => !isLocked && onSelect(bot)}
         className={`
-            flex flex-col items-center text-center p-6
+            relative flex flex-col items-center text-center p-6
             bg-background-secondary dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
             ${isLocked
               ? 'cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 border-border-primary dark:border-border-primary'
@@ -36,6 +49,39 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
         `}
         aria-disabled={isLocked}
       >
+        {/* Experimental Mode Icon */}
+        {showExperimental && (
+          <div className="absolute top-4 right-4 z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSelector(!showSelector);
+              }}
+              className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 transition-colors"
+              title={t('experimental_mode_title')}
+            >
+              <ExperimentalIcon className="w-4 h-4" />
+            </button>
+            
+            {showSelector && onExperimentalModeChange && (
+              <ExperimentalModeSelector
+                currentMode={experimentalMode || 'OFF'}
+                onModeChange={onExperimentalModeChange}
+                onClose={() => setShowSelector(false)}
+                onOpenInfo={() => {
+                  setShowSelector(false);
+                  setShowInfoModal(true);
+                }}
+              />
+            )}
+          </div>
+        )}
+        
+        {/* Info Modal */}
+        {showInfoModal && (
+          <ExperimentalModeInfoModal onClose={() => setShowInfoModal(false)} />
+        )}
+        
         <div className="relative flex-shrink-0">
             <img 
                 src={bot.avatar} 
@@ -83,7 +129,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language }) => {
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, experimentalMode, onExperimentalModeChange }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -169,7 +215,17 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
-        {availableBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
+        {availableBots.map((bot) => (
+          <BotCard 
+            key={bot.id} 
+            bot={bot} 
+            onSelect={onSelect} 
+            language={language}
+            hasPersonalityProfile={hasPersonalityProfile}
+            experimentalMode={experimentalMode}
+            onExperimentalModeChange={onExperimentalModeChange}
+          />
+        ))}
         
         {lockedBots.length > 0 && unlockMessage && (
             <div className="md:col-span-2 lg:col-span-3">
@@ -179,7 +235,17 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser }) =>
             </div>
         )}
 
-        {lockedBots.map((bot) => <BotCard key={bot.id} bot={bot} onSelect={onSelect} language={language} />)}
+        {lockedBots.map((bot) => (
+          <BotCard 
+            key={bot.id} 
+            bot={bot} 
+            onSelect={onSelect} 
+            language={language}
+            hasPersonalityProfile={hasPersonalityProfile}
+            experimentalMode={experimentalMode}
+            onExperimentalModeChange={onExperimentalModeChange}
+          />
+        ))}
       </div>
     </div>
   );
