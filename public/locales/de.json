@@ -625,5 +625,10 @@
   "experimental_info_dpfl_feature4_desc": "Nach jeder Session kannst du angeben, wie authentisch du warst. So behältst du die Kontrolle über die Datenqualität",
   "experimental_info_privacy_title": "Datenschutz",
   "experimental_info_privacy_desc": "Alle Persönlichkeitsdaten und Session-Transkripte werden Ende-zu-Ende verschlüsselt gespeichert. Der Server kann diese Daten nicht lesen. Du kannst jederzeit Sessions von der Profil-Verfeinerung ausschließen.",
-  "experimental_info_requirement": "Voraussetzung: Du musst den Persönlichkeitstest absolviert haben, um diese experimentellen Modi nutzen zu können."
+  "experimental_info_requirement": "Voraussetzung: Du musst den Persönlichkeitstest absolviert haben, um diese experimentellen Modi nutzen zu können.",
+
+  "personality_survey_success_saved": "PDF heruntergeladen und Profil verschlüsselt gespeichert! Du kannst jetzt experimentelle Modi bei Chloe nutzen.",
+  "personality_survey_success_downloaded": "PDF erfolgreich heruntergeladen!",
+  "personality_survey_error_save": "Fehler beim Speichern des Profils",
+  "personality_survey_error_pdf": "Fehler beim Erstellen des PDFs. Bitte versuche es erneut."
 }
