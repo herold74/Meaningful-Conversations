@@ -7,6 +7,7 @@ const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = re
 const { trackApiUsage } = require('../services/apiUsageTracker.js');
 const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
+const dynamicPromptController = require('../services/dynamicPromptController.js');
 
 // For backward compatibility with prompt cache (which needs direct Google AI access)
 let googleAI;
@@ -96,7 +97,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
-    const { botId, context, history, lang, isNewSession } = req.body;
+    const { botId, context, history, lang, isNewSession, experimentalMode, decryptedPersonalityProfile } = req.body;
     const userId = req.userId; // This will be undefined for guests
 
     const bot = BOTS.find(b => b.id === botId);
@@ -151,10 +152,33 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     }
 
     let finalSystemInstruction = systemInstruction;
+    
+    // EXPERIMENTAL: Dynamic Prompt Controller (DPC)
+    if (experimentalMode === 'DPC' || experimentalMode === 'DPFL') {
+        if (decryptedPersonalityProfile) {
+            try {
+                const adaptivePrompt = await dynamicPromptController.generatePromptForUser(
+                    userId || 'guest',
+                    decryptedPersonalityProfile,
+                    lang // Pass language to DPC
+                );
+                if (adaptivePrompt) {
+                    finalSystemInstruction += adaptivePrompt;
+                    console.log(`[DPC] Applied adaptive prompt for ${botId} (Mode: ${experimentalMode}, Lang: ${lang})`);
+                }
+            } catch (error) {
+                console.error('[DPC] Error generating adaptive prompt:', error);
+                // Fail gracefully - continue with standard prompt
+            }
+        } else {
+            console.warn(`[DPC] Experimental mode ${experimentalMode} active but no profile provided`);
+        }
+    }
+    
     // For all bots EXCEPT the interviewer, add the context.
     // The interviewer's purpose is to CREATE the context, so it doesn't need to read one.
     if (bot.id !== 'g-interviewer') {
-        finalSystemInstruction = `${systemInstruction}\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
+        finalSystemInstruction += `\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
     }
 
     const modelHistory = history.map((msg) => ({

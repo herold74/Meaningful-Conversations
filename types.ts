@@ -32,7 +32,8 @@ export type NavView =
     | 'redeemCode'
     | 'admin'
     | 'changePassword'
-    | 'exportData';
+    | 'exportData'
+    | 'personalitySurvey';
 
 export interface User {
     id: string;

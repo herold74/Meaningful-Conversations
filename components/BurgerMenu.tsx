@@ -14,6 +14,7 @@ import { CodeIcon } from './icons/CodeIcon';
 import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface BurgerMenuProps {
     isOpen: boolean;
@@ -75,6 +76,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     {currentUser?.isAdmin && (
                         <>
                             <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => onNavigate('admin')} />
+                            <MenuItem icon={ClipboardCheckIcon} text="Persönlichkeitstest" onClick={() => onNavigate('personalitySurvey')} />
                              <hr className="border-border-primary my-2" />
                         </>
                     )}
@@ -112,7 +114,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     
                     <div className="px-4 pt-2 flex items-center justify-between">
                         <p className="text-xs text-content-subtle">
-                            Version 1.6.6
+                            Version 1.6.7
                         </p>
                         <button
                             onClick={handleRefresh}
