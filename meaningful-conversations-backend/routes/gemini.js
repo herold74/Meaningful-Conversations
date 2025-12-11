@@ -8,6 +8,7 @@ const { trackApiUsage } = require('../services/apiUsageTracker.js');
 const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const dynamicPromptController = require('../services/dynamicPromptController.js');
+const behaviorLogger = require('../services/behaviorLogger.js');
 
 // For backward compatibility with prompt cache (which needs direct Google AI access)
 let googleAI;
@@ -243,6 +244,25 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
                 cacheUsed: cacheUsed || undefined,
             },
         });
+        
+        // DPFL: Async behavior logging (does not block response)
+        // Only active when DPFL mode is enabled and user is registered
+        if (experimentalMode === 'DPFL' && userId) {
+            // Run in background - don't await
+            setImmediate(async () => {
+                try {
+                    // Analyze current user message
+                    const frequencies = behaviorLogger.analyzeMessage(req.body.userMessage || '', lang);
+                    console.log(`[DPFL] Behavior analysis for user ${userId}:`, frequencies);
+                    
+                    // Note: Full conversation logging will be done at session end
+                    // This is just real-time analysis for debugging/monitoring
+                } catch (error) {
+                    console.error('[DPFL] Behavior logging error:', error);
+                    // Fail silently - don't impact user experience
+                }
+            });
+        }
         
         res.json({ text });
     } catch (error) {

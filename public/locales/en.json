@@ -670,5 +670,37 @@
   
   "interpretation_high": "High",
   "interpretation_medium": "Medium",
-  "interpretation_low": "Low"
+  "interpretation_low": "Low",
+  
+  "comfort_check_title": "Session Reflection",
+  "comfort_check_description": "How authentic were you in this session? This helps refine your personality profile over time.",
+  "comfort_check_low": "Not authentic",
+  "comfort_check_high": "Very authentic",
+  "comfort_check_privacy": "Privacy",
+  "comfort_check_privacy_desc": "Session data is end-to-end encrypted. Only you can decrypt it.",
+  "comfort_check_use_session": "Use for Profile Refinement",
+  "comfort_check_skip": "Skip",
+  "comfort_check_submitting": "Saving...",
+  "comfort_check_note": "Sessions with score ≥ 3 will be used for profile refinement",
+  "comfort_check_select_score": "Please select a score",
+  
+  "profile_view_refined_title": "Refined",
+  "profile_view_refined_desc": "This profile has been refined through {count} authentic sessions.",
+  "profile_overwrite_warning_title": "Warning",
+  "profile_overwrite_warning_desc": "Your profile has been refined through {count} sessions.",
+  "profile_overwrite_warning_question": "A new test will overwrite these refinements. Do you really want to continue?",
+  "profile_overwrite_cancel": "Cancel",
+  "profile_overwrite_confirm": "Yes, start new test",
+  
+  "refinement_title": "Profile Refinement",
+  "refinement_description": "Based on {count} authentic sessions, we have the following refinements for your profile:",
+  "refinement_loading": "Loading suggestions...",
+  "refinement_no_suggestions": "Not enough sessions for suggestions (minimum 3 required)",
+  "refinement_error_load": "Error loading suggestions",
+  "refinement_error_apply": "Error applying changes",
+  "refinement_info_title": "Note",
+  "refinement_info_desc": "These suggestions are based on your observed behavior. You decide whether to accept them.",
+  "refinement_cancel": "Decline",
+  "refinement_apply": "Apply Changes",
+  "refinement_close": "Close"
 }
