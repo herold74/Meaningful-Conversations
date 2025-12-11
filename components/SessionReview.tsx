@@ -16,6 +16,8 @@ import { FileTextIcon } from './icons/FileTextIcon';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '../utils/calendarExport';
 import DatePickerModal from './DatePickerModal';
+import ComfortCheckModal from './ComfortCheckModal';
+import DPFLTestSummary from './DPFLTestSummary';
 
 
 const removeGamificationKey = (text: string) => {
@@ -97,6 +99,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [isSaving, setIsSaving] = useState(false);
     const [calendarExportStatus, setCalendarExportStatus] = useState<string | null>(null);
     const [datePickerModal, setDatePickerModal] = useState<{ isOpen: boolean; action: string; deadline: string } | null>(null);
+    const [showComfortCheck, setShowComfortCheck] = useState(false);
+    const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+    
+    // Show comfort check for DPFL (only if not test mode or if registered user)
+    useEffect(() => {
+        if (selectedBot.experimentalMode === 'DPFL' && !isTestMode && currentUser) {
+            // In production: Load actual encryption key from user's stored key
+            // For now, show comfort check after brief delay
+            setTimeout(() => setShowComfortCheck(true), 1000);
+        }
+    }, [currentUser, selectedBot.experimentalMode, isTestMode]);
 
 
     const handleRatingClick = (starValue: number) => {
@@ -425,6 +438,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     return (
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+                
+                {/* DPFL/DPC Test Summary */}
+                <DPFLTestSummary isTestMode={isTestMode} experimentalMode={selectedBot.experimentalMode} />
                 
                 {isTestMode && (
                     <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
@@ -764,6 +780,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     suggestedDate={null}
                     onConfirm={handleDatePickerConfirm}
                     onCancel={handleDatePickerCancel}
+                />
+            )}
+            
+            {/* DPFL Comfort Check Modal */}
+            {showComfortCheck && (
+                <ComfortCheckModal
+                    chatHistory={chatHistory}
+                    sessionId={`test-${Date.now()}`}
+                    experimentalMode={selectedBot.experimentalMode}
+                    onComplete={() => setShowComfortCheck(false)}
+                    encryptionKey={encryptionKey}
                 />
             )}
         </div>

@@ -765,5 +765,25 @@
   
   "validation_std_analysis_complete": "Session analysis was successfully performed",
   "validation_std_updates_formatted": "Context updates are correctly formatted",
-  "validation_std_next_steps": "Next Steps were identified and listed"
+  "validation_std_next_steps": "Next Steps were identified and listed",
+  
+  "dpfl_test_summary_dpc_title": "DPC Test - Profile-Adaptive Coaching",
+  "dpfl_test_summary_dpfl_title": "DPFL Test - Learning Loop & Profile Refinement",
+  "dpfl_test_summary_dpc_desc": "This test checks if the Dynamic Prompt Controller successfully loads the personality profile and adapts coaching accordingly.",
+  "dpfl_test_summary_dpfl_desc": "This test checks the complete DPFL learning loop: Behavior Logging → Comfort Check → Profile Refinement.",
+  "dpfl_test_summary_check_console": "Check in Browser Console",
+  "dpfl_test_summary_dpc_check1": "✓ Profile loaded (DPC Log)",
+  "dpfl_test_summary_dpc_check2": "✓ Prompt adapted (Console Log)",
+  "dpfl_test_summary_dpc_check3": "✓ Coach responses consider personality",
+  "dpfl_test_summary_completed": "Already completed",
+  "dpfl_test_summary_dpfl_step1": "Behavior logging during chat (see Console)",
+  "dpfl_test_summary_dpfl_step2": "Session analysis with keyword counting",
+  "dpfl_test_summary_dpfl_step3": "Coming up: Comfort Check Modal",
+  "dpfl_test_summary_next_steps": "Next Steps",
+  "dpfl_test_summary_dpfl_next1": "Select Comfort Score (1-5)",
+  "dpfl_test_summary_dpfl_next2": "Session will be saved encrypted",
+  "dpfl_test_summary_dpfl_next3": "After 3+ sessions: Check profile refinement (Profile → 'Refined through X sessions')",
+  "dpfl_test_summary_tip": "Tip",
+  "dpfl_test_summary_dpc_tip": "Open DevTools (F12) → Console tab to see how the profile is loaded and the prompt is adapted.",
+  "dpfl_test_summary_dpfl_tip": "After this Comfort Check: Go to 'My Profile' and check if sessionCount was incremented. After 3+ sessions you'll see refinement suggestions."
 }
