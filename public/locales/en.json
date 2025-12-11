@@ -655,5 +655,9 @@
   "profile_view_info_title": "Note",
   "profile_view_info_text": "This profile is used for experimental coaching modes with Chloe. You can take a new test anytime to update your profile.",
 
-  "menu_personality_profile": "Personality Profile"
+  "menu_personality_profile": "Personality Profile",
+  
+  "microphone_permission_denied": "Microphone access denied. Please grant microphone permissions in your browser settings.",
+  "microphone_error": "Microphone error. Please check if your microphone is available and not used by another application.",
+  "microphone_start_error": "Failed to start microphone. Please try again."
 }

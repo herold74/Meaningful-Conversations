@@ -863,16 +863,48 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const botLanguage = bot.id === 'g-interviewer' ? 'en' : language;
     recognition.lang = botLanguage === 'de' ? 'de-DE' : 'en-US';
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setIsListening(true);
+    };
+    
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      setIsListening(false);
+    };
+    
     recognition.onerror = (event) => {
-      // The 'aborted' error is common and not always a problem (e.g., stopping before speech is detected).
-      // We'll log it as a warning to reduce console noise for non-critical events.
-      if (event.error === 'aborted') {
-        console.warn('Speech recognition was aborted. This can happen if recognition is stopped before speech is detected, or due to a network issue.');
-      } else {
-        console.error("Speech recognition error:", event.error, event);
+      // Enhanced error handling for better debugging and user feedback
+      console.error("Speech recognition error:", {
+        error: event.error,
+        message: event.message,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Provide specific error messages for common issues
+      switch (event.error) {
+        case 'not-allowed':
+          console.error('❌ Microphone access denied. Please grant microphone permissions.');
+          alert(t('microphone_permission_denied') || 'Microphone access denied. Please grant permissions in your browser settings.');
+          break;
+        case 'no-speech':
+          console.warn('⚠️ No speech detected. Please try again.');
+          break;
+        case 'audio-capture':
+          console.error('❌ Audio capture failed. Check if microphone is available and not used by another app.');
+          alert(t('microphone_error') || 'Microphone error. Please check if your microphone is available and not used by another application.');
+          break;
+        case 'network':
+          console.error('❌ Network error during speech recognition.');
+          break;
+        case 'aborted':
+          // Common and usually not critical (e.g., user stopped recognition quickly)
+          console.warn('⚠️ Speech recognition was aborted.');
+          break;
+        default:
+          console.error('❌ Speech recognition error:', event.error);
       }
+      
       setIsListening(false);
     };
     
@@ -1135,6 +1167,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
+          // Stop any ongoing audio playback
           if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
           }
@@ -1145,7 +1178,21 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
-          recognitionRef.current.start();
+          
+          // BLUETOOTH FIX: Delay before starting recognition
+          // This gives Bluetooth headphones (EarPods, AirPods, etc.) time to switch
+          // from A2DP (audio output only) to HFP/HSP (with microphone support)
+          // Typical profile switch takes 500-1500ms
+          console.log('⏳ Waiting for audio device switch (Bluetooth support)...');
+          setTimeout(() => {
+            try {
+              console.log('🎤 Starting speech recognition...');
+              recognitionRef.current?.start();
+            } catch (error) {
+              console.error('❌ Failed to start speech recognition:', error);
+              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+            }
+          }, 800); // 800ms delay for reliable Bluetooth profile switching
       }
   };
 
