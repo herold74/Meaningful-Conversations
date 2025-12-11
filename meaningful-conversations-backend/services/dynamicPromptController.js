@@ -303,7 +303,10 @@ async function generatePromptForUser(userId, decryptedProfile, lang = 'de') {
     // Generate adaptive prompt
     const adaptivePrompt = generateAdaptivePrompt(analysis, lang);
 
-    console.log(`DPC: Generated adaptive prompt for user ${userId} (${analysis.testType}, lang: ${lang})`);
+    console.log(`🧪 [DPC] Generated adaptive prompt for user ${userId}`);
+    console.log(`   Profile: ${analysis.testType}, Language: ${lang}`);
+    console.log(`   Dominant: ${analysis.dominant.join(', ')}`);
+    console.log(`   Weak: ${analysis.weak.join(', ')}`);
     return adaptivePrompt;
   } catch (error) {
     console.error('DPC Error:', error);
