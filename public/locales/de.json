@@ -658,5 +658,6 @@
   
   "microphone_permission_denied": "Mikrofon-Zugriff verweigert. Bitte erlaube den Zugriff in deinen Browser-Einstellungen.",
   "microphone_error": "Mikrofon-Fehler. Bitte prüfe, ob dein Mikrofon verfügbar ist und nicht von einer anderen Anwendung verwendet wird.",
-  "microphone_start_error": "Mikrofon konnte nicht gestartet werden. Bitte versuche es erneut."
+  "microphone_start_error": "Mikrofon konnte nicht gestartet werden. Bitte versuche es erneut.",
+  "microphone_not_found": "Kein Mikrofon gefunden. Bitte schließe ein Mikrofon an und versuche es erneut."
 }
