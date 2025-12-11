@@ -669,5 +669,37 @@
   
   "interpretation_high": "Hoch",
   "interpretation_medium": "Mittel",
-  "interpretation_low": "Niedrig"
+  "interpretation_low": "Niedrig",
+  
+  "comfort_check_title": "Session-Reflexion",
+  "comfort_check_description": "Wie authentisch warst du in dieser Session? Dies hilft, dein Persönlichkeitsprofil über Zeit zu verfeinern.",
+  "comfort_check_low": "Nicht authentisch",
+  "comfort_check_high": "Sehr authentisch",
+  "comfort_check_privacy": "Datenschutz",
+  "comfort_check_privacy_desc": "Session-Daten sind Ende-zu-Ende verschlüsselt. Nur du kannst sie entschlüsseln.",
+  "comfort_check_use_session": "Für Profil-Verfeinerung nutzen",
+  "comfort_check_skip": "Überspringen",
+  "comfort_check_submitting": "Speichern...",
+  "comfort_check_note": "Sessions mit Bewertung ≥ 3 werden für Profil-Verfeinerung genutzt",
+  "comfort_check_select_score": "Bitte wähle eine Bewertung",
+  
+  "profile_view_refined_title": "Verfeinert",
+  "profile_view_refined_desc": "Dieses Profil wurde durch {count} authentische Sessions verfeinert.",
+  "profile_overwrite_warning_title": "Warnung",
+  "profile_overwrite_warning_desc": "Dein Profil wurde durch {count} Sessions verfeinert.",
+  "profile_overwrite_warning_question": "Ein neuer Test überschreibt diese Verfeinerungen. Möchtest du wirklich fortfahren?",
+  "profile_overwrite_cancel": "Abbrechen",
+  "profile_overwrite_confirm": "Ja, neuen Test starten",
+  
+  "refinement_title": "Profil-Verfeinerung",
+  "refinement_description": "Basierend auf {count} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:",
+  "refinement_loading": "Lade Vorschläge...",
+  "refinement_no_suggestions": "Noch nicht genug Sessions für Vorschläge (mindestens 3 benötigt)",
+  "refinement_error_load": "Fehler beim Laden der Vorschläge",
+  "refinement_error_apply": "Fehler beim Anwenden der Änderungen",
+  "refinement_info_title": "Hinweis",
+  "refinement_info_desc": "Diese Vorschläge basieren auf deinem beobachteten Verhalten. Du entscheidest, ob du sie übernimmst.",
+  "refinement_cancel": "Ablehnen",
+  "refinement_apply": "Änderungen übernehmen",
+  "refinement_close": "Schließen"
 }

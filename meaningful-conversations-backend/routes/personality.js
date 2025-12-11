@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient.js');
 const authMiddleware = require('../middleware/auth.js');
+const profileRefinement = require('../services/profileRefinement.js');
 
 /**
  * POST /api/personality/save
@@ -117,6 +118,17 @@ router.post('/comfort-check', authMiddleware, async (req, res) => {
       }
     });
     
+    // Increment session count if comfort score >= 3 (authentic session)
+    if (!optOut && score && score >= 3) {
+      await prisma.personalityProfile.updateMany({
+        where: { userId: req.userId },
+        data: {
+          sessionCount: { increment: 1 }
+        }
+      });
+      console.log(`[DPFL] Incremented session count for user ${req.userId} (comfort: ${score})`);
+    }
+    
     res.json({ success: true, updated: updated.count });
   } catch (error) {
     console.error('Error saving comfort check:', error);
@@ -155,25 +167,25 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
       where: { userId }
     });
     
-    if (!profile || profile.testType !== 'RIEMANN') {
-      return res.json({ hasSuggestions: false, message: 'No Riemann profile found' });
+    if (!profile) {
+      return res.json({ hasSuggestions: false, reason: 'No profile found' });
     }
     
-    // Berechne Durchschnittswerte der Frequenzen
-    const avgFrequencies = {
-      dauer: Math.round(recentLogs.reduce((sum, log) => sum + log.dauerFrequency, 0) / recentLogs.length),
-      wechsel: Math.round(recentLogs.reduce((sum, log) => sum + log.wechselFrequency, 0) / recentLogs.length),
-      naehe: Math.round(recentLogs.reduce((sum, log) => sum + log.naeheFrequency, 0) / recentLogs.length),
-      distanz: Math.round(recentLogs.reduce((sum, log) => sum + log.distanzFrequency, 0) / recentLogs.length)
-    };
-    
-    // Note: profile.encryptedData ist verschluesselt
-    // Der Client muss es entschluesseln und die Deltas berechnen
+    // Note: Profile data is encrypted
+    // Return raw session logs so client can decrypt profile and calculate suggestions
+    // We can't calculate deltas server-side because we can't decrypt the profile
     res.json({
       hasSuggestions: true,
-      observedFrequencies: avgFrequencies,
+      sessionLogs: recentLogs.map(log => ({
+        dauerFrequency: log.dauerFrequency,
+        wechselFrequency: log.wechselFrequency,
+        naeheFrequency: log.naeheFrequency,
+        distanzFrequency: log.distanzFrequency,
+        comfortScore: log.comfortScore
+      })),
       sessionCount: recentLogs.length,
-      message: 'Client must decrypt profile and calculate deltas'
+      profileType: profile.testType,
+      message: 'Client must decrypt profile and use profileRefinement service'
     });
     
   } catch (error) {
