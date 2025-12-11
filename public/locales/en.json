@@ -651,7 +651,7 @@
   "profile_view_privat": "Private",
   "profile_view_selbst": "Self-Image",
   "profile_view_download_pdf": "Download as PDF",
-  "profile_view_new_test": "New Test",
+  "profile_view_new_test": "New Evaluation",
   "profile_view_info_title": "Note",
   "profile_view_info_text": "This profile is used for experimental coaching modes with Chloe. You can take a new test anytime to update your profile.",
 
@@ -660,5 +660,15 @@
   "microphone_permission_denied": "Microphone access denied. Please grant microphone permissions in your browser settings.",
   "microphone_error": "Microphone error. Please check if your microphone is available and not used by another application.",
   "microphone_start_error": "Failed to start microphone. Please try again.",
-  "microphone_not_found": "No microphone found. Please connect a microphone and try again."
+  "microphone_not_found": "No microphone found. Please connect a microphone and try again.",
+  
+  "big5_openness": "Openness",
+  "big5_conscientiousness": "Conscientiousness",
+  "big5_extraversion": "Extraversion",
+  "big5_agreeableness": "Agreeableness",
+  "big5_neuroticism": "Neuroticism",
+  
+  "interpretation_high": "High",
+  "interpretation_medium": "Medium",
+  "interpretation_low": "Low"
 }

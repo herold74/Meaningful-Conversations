@@ -252,13 +252,20 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <div className="space-y-3">
               {Object.entries(decryptedData.big5).map(([trait, scoreValue]) => {
                 const score = scoreValue as number;
-                const interpretation = score >= 4 ? 'Hoch' : score >= 3 ? 'Mittel' : 'Niedrig';
+                
+                // Translate interpretation
+                const interpretationKey = score >= 4 ? 'interpretation_high' : score >= 3 ? 'interpretation_medium' : 'interpretation_low';
+                const interpretation = t(interpretationKey);
                 const color = score >= 4 ? 'text-green-600' : score >= 3 ? 'text-yellow-600' : 'text-red-600';
+                
+                // Translate trait name
+                const traitKey = `big5_${trait.toLowerCase()}`;
+                const translatedTrait = t(traitKey) || trait;
                 
                 return (
                   <div key={trait}>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm capitalize text-content-secondary">{trait}</span>
+                      <span className="text-sm text-content-secondary">{translatedTrait}</span>
                       <span className={`text-sm font-bold ${color}`}>
                         {score}/5 ({interpretation})
                       </span>
