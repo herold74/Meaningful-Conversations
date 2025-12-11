@@ -654,5 +654,9 @@
   "profile_view_info_title": "Hinweis",
   "profile_view_info_text": "Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
 
-  "menu_personality_profile": "Persönlichkeitsprofil"
+  "menu_personality_profile": "Persönlichkeitsprofil",
+  
+  "microphone_permission_denied": "Mikrofon-Zugriff verweigert. Bitte erlaube den Zugriff in deinen Browser-Einstellungen.",
+  "microphone_error": "Mikrofon-Fehler. Bitte prüfe, ob dein Mikrofon verfügbar ist und nicht von einer anderen Anwendung verwendet wird.",
+  "microphone_start_error": "Mikrofon konnte nicht gestartet werden. Bitte versuche es erneut."
 }
