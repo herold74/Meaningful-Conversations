@@ -4,7 +4,6 @@ import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
 import { MeditationIcon } from './icons/MeditationIcon';
-import ExperimentalIcon from './icons/ExperimentalIcon';
 import ExperimentalModeSelector, { ExperimentalMode } from './ExperimentalModeSelector';
 import ExperimentalModeInfoModal from './ExperimentalModeInfoModal';
 import Spinner from './shared/Spinner';
@@ -60,7 +59,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
               className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 transition-colors"
               title={t('experimental_mode_title')}
             >
-              <ExperimentalIcon className="w-4 h-4" />
+              <span className="text-lg">🧪</span>
             </button>
             
             {showSelector && onExperimentalModeChange && (
