@@ -67,6 +67,7 @@ export interface Bot {
     style: string;
     style_de: string;
     accessTier: BotAccessTier;
+    experimentalMode?: 'DPC' | 'DPFL' | 'OFF';
 }
 
 export interface BotWithAvailability extends Bot {
