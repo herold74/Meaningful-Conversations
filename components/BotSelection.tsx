@@ -56,8 +56,14 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
                 e.stopPropagation();
                 setShowSelector(!showSelector);
               }}
-              className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 transition-colors"
-              title={t('experimental_mode_title')}
+              className={`p-2 rounded-lg transition-colors ${
+                experimentalMode && experimentalMode !== 'OFF'
+                  ? 'bg-green-200 dark:bg-green-800/50 text-green-700 dark:text-green-300 ring-2 ring-green-400 dark:ring-green-600'
+                  : 'bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400'
+              }`}
+              title={experimentalMode && experimentalMode !== 'OFF' 
+                ? `${t('experimental_mode_title')}: ${experimentalMode}` 
+                : t('experimental_mode_title')}
             >
               <span className="text-lg">🧪</span>
             </button>
@@ -105,6 +111,16 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
         <div className="mt-4 flex flex-col flex-1 justify-between">
             <div>
                 <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
+                
+                {/* Experimental Mode Badge */}
+                {showExperimental && experimentalMode && experimentalMode !== 'OFF' && (
+                  <div className="flex justify-center mt-2">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700">
+                      🧪 {experimentalMode === 'DPC' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
+                    </span>
+                  </div>
+                )}
+                
                 <div className="flex flex-wrap justify-center gap-2 my-3">
                     {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
                         const isFirstTag = index === 0;
