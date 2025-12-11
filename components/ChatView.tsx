@@ -1167,6 +1167,40 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
+          // PERMISSION CHECK: Explicitly request microphone access
+          // This ensures permissions are granted before starting speech recognition
+          // Important for Electron-based previews (like Cursor) and browser security
+          try {
+            console.log('🔐 Checking microphone permissions...');
+            
+            // Request microphone access using getUserMedia
+            // This triggers the browser's permission dialog if not yet granted
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            
+            // Immediately stop the stream - we only needed it for permission check
+            stream.getTracks().forEach(track => track.stop());
+            
+            console.log('✅ Microphone access granted');
+          } catch (error: any) {
+            console.error('❌ Microphone permission denied:', error);
+            
+            // Provide helpful error message based on error type
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+              alert(
+                t('microphone_permission_denied') || 
+                'Microphone access denied. Please allow microphone access in your browser settings:\n\n' +
+                '1. Click the lock/info icon in the address bar\n' +
+                '2. Set Microphone to "Allow"\n' +
+                '3. Reload the page and try again'
+              );
+            } else if (error.name === 'NotFoundError') {
+              alert(t('microphone_not_found') || 'No microphone found. Please connect a microphone and try again.');
+            } else {
+              alert(t('microphone_error') || `Microphone error: ${error.message}`);
+            }
+            return; // Stop here if permission denied
+          }
+          
           // Stop any ongoing audio playback
           if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
