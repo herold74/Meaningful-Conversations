@@ -153,6 +153,15 @@ interface ChatViewProps {
 
 const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, experimentalMode, encryptionKey }) => {
   const { t, language } = useLocalization();
+  
+  // Debug: Log experimental mode on mount
+  useEffect(() => {
+    console.log('🔍 ChatView Debug:', {
+      botId: bot.id,
+      experimentalMode,
+      shouldShowBadge: experimentalMode && experimentalMode !== 'OFF' && bot.id === 'chloe-cbt'
+    });
+  }, [bot.id, experimentalMode]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
@@ -1401,10 +1410,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
-                    {experimentalMode && experimentalMode !== 'OFF' && bot.id === 'chloe-cbt' && (
+                    {/* Always show badge if experimental mode is active (for debugging) */}
+                    {experimentalMode && experimentalMode !== 'OFF' && (
                         <div className="flex items-center gap-1 mt-1">
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                                🧪 {experimentalMode === 'DPC' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
+                                🧪 {experimentalMode === 'DPC' ? 'DPC Modus' : 'DPFL Modus'}
                             </span>
                         </div>
                     )}
