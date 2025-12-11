@@ -266,15 +266,21 @@ function cleanTextForSpeech(text, lang = 'de') {
     // Use word boundaries to avoid partial replacements
     let replacementsApplied = 0;
     const replacementLog = [];
-    for (const [term, phonetic] of Object.entries(phoneticReplacements)) {
+    for (const pattern of phoneticReplacements) {
+        const { term, phonetic, caseSensitive } = pattern;
+        
         // Escape special regex characters in the term
         const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\b${escapedTerm}\\b`, 'g');
+        
+        // Create regex with appropriate flags (case-sensitive or not)
+        const flags = caseSensitive ? 'g' : 'gi';
+        const regex = new RegExp(`\\b${escapedTerm}\\b`, flags);
+        
         const matches = cleanedText.match(regex);
         if (matches) {
-        cleanedText = cleanedText.replace(regex, phonetic);
+            cleanedText = cleanedText.replace(regex, phonetic);
             replacementsApplied++;
-            replacementLog.push(`"${term}" → "${phonetic}" (${matches.length}x)`);
+            replacementLog.push(`"${term}" → "${phonetic}" (${matches.length}x)${caseSensitive ? ' [case-sensitive]' : ''}`);
         }
     }
     

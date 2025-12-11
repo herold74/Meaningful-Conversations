@@ -37,7 +37,7 @@ function loadDictionary() {
  * Get phonetic replacements for a specific language
  * Uses cached dictionary for performance (no I/O on each request)
  * @param {string} lang - Language code ('de', 'en', etc.)
- * @returns {Object} Object with term -> phonetic mappings
+ * @returns {Array} Array of pattern objects with term, phonetic, and caseSensitive
  */
 function getPhoneticReplacements(lang) {
     // Load dictionary on first access (lazy loading)
@@ -47,17 +47,16 @@ function getPhoneticReplacements(lang) {
     
     const languagePatterns = dictionaryCache.languages[lang];
     if (!languagePatterns || !languagePatterns.patterns) {
-        return {};
+        return [];
     }
     
-    // Convert patterns array to simple term->phonetic mapping
-    // This format is optimized for the replacement logic
-    const replacements = {};
-    for (const pattern of languagePatterns.patterns) {
-        replacements[pattern.term] = pattern.phonetic;
-    }
-    
-    return replacements;
+    // Return full pattern objects with metadata (term, phonetic, caseSensitive)
+    // This allows the replacement logic to respect case sensitivity
+    return languagePatterns.patterns.map(pattern => ({
+        term: pattern.term,
+        phonetic: pattern.phonetic,
+        caseSensitive: pattern.caseSensitive !== false  // Default to true if not specified
+    }));
 }
 
 /**
