@@ -513,7 +513,7 @@ const App: React.FC = () => {
         setChatHistory([]);
         
         // Reset experimental mode when switching bots
-        if (bot.id !== 'chloe') {
+        if (bot.id !== 'chloe-cbt') {
             setExperimentalMode('OFF');
         }
         setView('chat');
