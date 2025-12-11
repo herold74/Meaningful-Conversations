@@ -839,7 +839,9 @@ const App: React.FC = () => {
                 setLifeContext(''); // The "original context" for an interview is blank
             } else {
                 // Standard analysis for all other bots using the admin's live context
-                const analysis = await geminiService.analyzeSession(scenario.chatHistory, adminLifeContext, language);
+                // For test scenarios, use a minimal context if admin has none
+                const contextToUse = adminLifeContext || `# Life Context\n\nTest scenario context for ${scenario.name}`;
+                const analysis = await geminiService.analyzeSession(scenario.chatHistory, contextToUse, language);
                 
                 if (analysis.nextSteps && analysis.nextSteps.length > 0) {
                     const docLang = (adminLifeContext && adminLifeContext.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
