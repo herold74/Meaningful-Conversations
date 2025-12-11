@@ -965,7 +965,7 @@ const App: React.FC = () => {
                     onMessageSent={() => setUserMessageCount(c => c + 1)} 
                     currentUser={currentUser} 
                     isNewSession={!cameFromContextChoice}
-                    experimentalMode={selectedBot?.id === 'chloe' ? experimentalMode : undefined}
+                    experimentalMode={selectedBot?.id === 'chloe-cbt' ? experimentalMode : undefined}
                     encryptionKey={encryptionKey}
                 />
             );
