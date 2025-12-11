@@ -764,5 +764,25 @@
   
   "validation_std_analysis_complete": "Session-Analyse wurde erfolgreich durchgeführt",
   "validation_std_updates_formatted": "Context Updates sind korrekt formatiert",
-  "validation_std_next_steps": "Next Steps wurden erkannt und aufgelistet"
+  "validation_std_next_steps": "Next Steps wurden erkannt und aufgelistet",
+  
+  "dpfl_test_summary_dpc_title": "DPC Test - Profil-adaptives Coaching",
+  "dpfl_test_summary_dpfl_title": "DPFL Test - Lern-Schleife & Profil-Verfeinerung",
+  "dpfl_test_summary_dpc_desc": "Dieser Test prüft ob der Dynamic Prompt Controller das Persönlichkeitsprofil erfolgreich lädt und das Coaching daran anpasst.",
+  "dpfl_test_summary_dpfl_desc": "Dieser Test prüft die vollständige DPFL Lern-Schleife: Behavior Logging → Comfort Check → Profil-Verfeinerung.",
+  "dpfl_test_summary_check_console": "Prüfe in der Browser-Console",
+  "dpfl_test_summary_dpc_check1": "✓ Profil geladen (DPC Log)",
+  "dpfl_test_summary_dpc_check2": "✓ Prompt angepasst (Console Log)",
+  "dpfl_test_summary_dpc_check3": "✓ Coach-Antworten berücksichtigen Persönlichkeit",
+  "dpfl_test_summary_completed": "Bereits abgeschlossen",
+  "dpfl_test_summary_dpfl_step1": "Behavior Logging während Chat (siehe Console)",
+  "dpfl_test_summary_dpfl_step2": "Session-Analyse mit Keyword-Zählung",
+  "dpfl_test_summary_dpfl_step3": "Gleich: Comfort Check Modal",
+  "dpfl_test_summary_next_steps": "Nächste Schritte",
+  "dpfl_test_summary_dpfl_next1": "Comfort Score auswählen (1-5)",
+  "dpfl_test_summary_dpfl_next2": "Session wird verschlüsselt gespeichert",
+  "dpfl_test_summary_dpfl_next3": "Nach 3+ Sessions: Profil-Verfeinerung prüfen (Profil → 'Verfeinert durch X Sessions')",
+  "dpfl_test_summary_tip": "Tipp",
+  "dpfl_test_summary_dpc_tip": "Öffne DevTools (F12) → Console Tab um zu sehen, wie das Profil geladen und der Prompt angepasst wird.",
+  "dpfl_test_summary_dpfl_tip": "Nach diesem Comfort Check: Gehe zu 'Mein Profil' und prüfe ob sessionCount erhöht wurde. Nach 3+ Sessions siehst du Refinement-Vorschläge."
 }
