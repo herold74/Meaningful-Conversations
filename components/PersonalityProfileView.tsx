@@ -18,6 +18,7 @@ interface ProfileMetadata {
   filterControl: number;
   createdAt: string;
   updatedAt: string;
+  sessionCount: number;
 }
 
 const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest }) => {
@@ -26,6 +27,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
   const [profileMetadata, setProfileMetadata] = useState<ProfileMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -50,7 +52,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         filterWorry: encryptedProfile.filterWorry,
         filterControl: encryptedProfile.filterControl,
         createdAt: encryptedProfile.createdAt,
-        updatedAt: encryptedProfile.updatedAt
+        updatedAt: encryptedProfile.updatedAt,
+        sessionCount: encryptedProfile.sessionCount || 0
       };
       setProfileMetadata(metadata);
 
@@ -292,10 +295,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
           </button>
           <button
-            onClick={onStartNewTest}
+            onClick={() => {
+              // Warn if profile has been refined through sessions
+              if (profileMetadata && profileMetadata.sessionCount > 0) {
+                setShowOverwriteWarning(true);
+              } else {
+                onStartNewTest();
+              }
+            }}
             className="flex-1 px-6 py-3 bg-background-tertiary hover:bg-background-primary dark:bg-background-tertiary dark:hover:bg-background-secondary text-content-primary dark:text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
           >
-            🔄 {t('profile_view_new_test') || 'Neuer Test'}
+            🔄 {t('profile_view_new_test') || 'Neue Evaluierung'}
           </button>
         </div>
 
@@ -306,7 +316,55 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             {t('profile_view_info_text') || 'Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
           </p>
         </div>
+        
+        {/* Session Refinement Info */}
+        {profileMetadata && profileMetadata.sessionCount > 0 && (
+          <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm text-content-secondary">
+              <strong className="text-green-700 dark:text-green-400">🎯 {t('profile_view_refined_title') || 'Verfeinert'}:</strong>{' '}
+              {t('profile_view_refined_desc') || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
+            </p>
+          </div>
+        )}
       </div>
+      
+      {/* Overwrite Warning Modal */}
+      {showOverwriteWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn">
+            <h3 className="text-xl font-bold mb-4 text-content-primary flex items-center gap-2">
+              ⚠️ {t('profile_overwrite_warning_title') || 'Warnung'}
+            </h3>
+            
+            <p className="text-content-secondary mb-4">
+              {t('profile_overwrite_warning_desc') || `Dein Profil wurde durch ${profileMetadata?.sessionCount || 0} Sessions verfeinert.`}
+            </p>
+            
+            <p className="text-content-secondary mb-6">
+              {t('profile_overwrite_warning_question') || 'Ein neuer Test überschreibt diese Verfeinerungen. Möchtest du wirklich fortfahren?'}
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowOverwriteWarning(false)}
+                className="flex-1 px-4 py-3 bg-background-tertiary hover:bg-background-primary text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
+              >
+                {t('profile_overwrite_cancel') || 'Abbrechen'}
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowOverwriteWarning(false);
+                  onStartNewTest();
+                }}
+                className="flex-1 px-4 py-3 bg-status-error-background hover:bg-red-600 text-white rounded-lg transition-colors font-medium"
+              >
+                {t('profile_overwrite_confirm') || 'Ja, neuen Test starten'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

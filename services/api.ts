@@ -225,6 +225,74 @@ export const loadPersonalityProfile = async () => {
   return response.json();
 };
 
+export const submitSessionLog = async (data: {
+  chatHistory: any[];
+  sessionId: string;
+  comfortScore: number | null;
+  optedOut: boolean;
+  encryptionKey: CryptoKey;
+}) => {
+  const { encryptTranscript } = await import('../utils/personalityEncryption');
+  
+  // Simple frequency analysis (client-side for now)
+  // We'll do full analysis server-side in future iteration
+  const frequencies = {
+    dauer: 0,
+    wechsel: 0,
+    naehe: 0,
+    distanz: 0
+  };
+  
+  // Encrypt chat transcript
+  const transcript = JSON.stringify(data.chatHistory);
+  const encryptedTranscript = await encryptTranscript(transcript, data.encryptionKey);
+  
+  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      sessionId: data.sessionId,
+      frequencies,
+      encryptedTranscript
+    })
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to submit session log');
+  }
+  
+  // Submit comfort check
+  if (!data.optedOut) {
+    const comfortResponse = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        sessionId: data.sessionId,
+        comfortScore: data.comfortScore,
+        optedOut: false
+      })
+    });
+    
+    if (!comfortResponse.ok) {
+      throw new Error('Failed to submit comfort check');
+    }
+  }
+  
+  return { success: true };
+};
+
+export const getProfileRefinementSuggestions = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
+    headers: getAuthHeaders()
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to load refinement suggestions');
+  }
+  
+  return response.json();
+};
+
 export const checkPersonalityProfile = async (): Promise<boolean> => {
   try {
     const profile = await loadPersonalityProfile();
