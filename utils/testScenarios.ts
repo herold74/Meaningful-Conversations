@@ -12,6 +12,7 @@ export interface TestScenario {
 const simpleBot = BOTS.find(b => b.id === 'max-ambitious')!;
 const cbtBot = BOTS.find(b => b.id === 'chloe-cbt')!;
 const interviewBot = BOTS.find(b => b.id === 'g-interviewer')!;
+const chloeBot = BOTS.find(b => b.id === 'chloe')!;
 
 export const getTestScenarios = (t: (key: string) => string): TestScenario[] => [
     {
@@ -59,6 +60,34 @@ export const getTestScenarios = (t: (key: string) => string): TestScenario[] => 
             { id: '1', role: 'user', text: t('scenario_next_steps_user1'), timestamp: new Date().toISOString() },
             { id: '2', role: 'bot', text: t('scenario_next_steps_bot1'), timestamp: new Date().toISOString() },
             { id: '3', role: 'user', text: t('scenario_next_steps_user2'), timestamp: new Date().toISOString() },
+        ],
+    },
+    {
+        id: 'dpc_profile_adaptive',
+        name: '🧪 ' + t('scenario_dpc_name'),
+        description: t('scenario_dpc_desc'),
+        bot: chloeBot,
+        chatHistory: [
+            { id: '1', role: 'user', text: t('scenario_dpc_user1'), timestamp: new Date().toISOString() },
+            { id: '2', role: 'bot', text: t('scenario_dpc_bot1'), timestamp: new Date().toISOString() },
+            { id: '3', role: 'user', text: t('scenario_dpc_user2'), timestamp: new Date().toISOString() },
+            { id: '4', role: 'bot', text: t('scenario_dpc_bot2'), timestamp: new Date().toISOString() },
+            { id: '5', role: 'user', text: t('scenario_dpc_user3'), timestamp: new Date().toISOString() },
+        ],
+    },
+    {
+        id: 'dpfl_learning_loop',
+        name: '🧪 ' + t('scenario_dpfl_name'),
+        description: t('scenario_dpfl_desc'),
+        bot: chloeBot,
+        chatHistory: [
+            { id: '1', role: 'user', text: t('scenario_dpfl_user1'), timestamp: new Date().toISOString() },
+            { id: '2', role: 'bot', text: t('scenario_dpfl_bot1'), timestamp: new Date().toISOString() },
+            { id: '3', role: 'user', text: t('scenario_dpfl_user2'), timestamp: new Date().toISOString() },
+            { id: '4', role: 'bot', text: t('scenario_dpfl_bot2'), timestamp: new Date().toISOString() },
+            { id: '5', role: 'user', text: t('scenario_dpfl_user3'), timestamp: new Date().toISOString() },
+            { id: '6', role: 'bot', text: t('scenario_dpfl_bot3'), timestamp: new Date().toISOString() },
+            { id: '7', role: 'user', text: t('scenario_dpfl_user4'), timestamp: new Date().toISOString() },
         ],
     },
 ];
