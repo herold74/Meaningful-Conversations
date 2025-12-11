@@ -1142,35 +1142,88 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         </div>
     );
     
-    const renderTestRunner = () => (
-        <div className="space-y-4">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
-                 <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')}</h3>
-                 <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
-                 <div className="flex flex-col sm:flex-row items-stretch gap-3">
-                    <div className="flex-1">
-                        <label htmlFor="scenario-select" className="sr-only">{t('admin_runner_select_scenario')}</label>
-                        <select id="scenario-select" value={selectedScenarioId} onChange={e => setSelectedScenarioId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
-                            {testScenarios.map(scenario => (
-                                <option key={scenario.id} value={scenario.id}>{scenario.name}</option>
-                            ))}
-                        </select>
+    const renderTestRunner = () => {
+        const selectedScenario = testScenarios.find(s => s.id === selectedScenarioId);
+        const isDpcTest = selectedScenario?.id === 'dpc_profile_adaptive';
+        const isDpflTest = selectedScenario?.id === 'dpfl_learning_loop';
+        const isExperimentalTest = isDpcTest || isDpflTest;
+        
+        return (
+            <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
+                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
+                    
+                    <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                        <div className="flex-1">
+                            <label htmlFor="scenario-select" className="sr-only">{t('admin_runner_select_scenario')}</label>
+                            <select 
+                                id="scenario-select" 
+                                value={selectedScenarioId} 
+                                onChange={e => setSelectedScenarioId(e.target.value)} 
+                                className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                            >
+                                {testScenarios.map(scenario => (
+                                    <option key={scenario.id} value={scenario.id}>{scenario.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (selectedScenario) {
+                                    onRunTestSession(selectedScenario, lifeContext);
+                                }
+                            }}
+                            className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-md"
+                        >
+                            {t('admin_runner_run')}
+                        </button>
                     </div>
-                    <button
-                        onClick={() => {
-                            const selectedScenario = testScenarios.find(s => s.id === selectedScenarioId);
-                            if (selectedScenario) {
-                                onRunTestSession(selectedScenario, lifeContext);
-                            }
-                        }}
-                        className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-md"
-                    >
-                        {t('admin_runner_run')}
-                    </button>
+                    
+                    {/* Info box for experimental tests */}
+                    {isExperimentalTest && (
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
+                            <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                                🧪 {t('admin_runner_experimental_test')}
+                            </p>
+                            {isDpcTest && (
+                                <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                                    <p><strong>{t('admin_runner_dpc_title')}:</strong></p>
+                                    <ul className="list-disc ml-5 space-y-1">
+                                        <li>{t('admin_runner_dpc_req1')}</li>
+                                        <li>{t('admin_runner_dpc_req2')}</li>
+                                        <li>{t('admin_runner_dpc_check1')}</li>
+                                        <li>{t('admin_runner_dpc_check2')}</li>
+                                    </ul>
+                                </div>
+                            )}
+                            {isDpflTest && (
+                                <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                                    <p><strong>{t('admin_runner_dpfl_title')}:</strong></p>
+                                    <ul className="list-disc ml-5 space-y-1">
+                                        <li>{t('admin_runner_dpfl_req1')}</li>
+                                        <li>{t('admin_runner_dpfl_req2')}</li>
+                                        <li>{t('admin_runner_dpfl_check1')}</li>
+                                        <li>{t('admin_runner_dpfl_check2')}</li>
+                                        <li>{t('admin_runner_dpfl_check3')}</li>
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* Scenario description */}
+                    {selectedScenario && (
+                        <div className="p-3 bg-gray-100 dark:bg-gray-800/50 rounded border border-gray-200 dark:border-gray-700">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                <strong>{t('admin_runner_scenario_desc')}:</strong> {selectedScenario.description}
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const renderContent = () => {
         if (isLoading) return <div className="flex justify-center p-12"><Spinner /></div>;
