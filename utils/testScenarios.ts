@@ -12,7 +12,7 @@ export interface TestScenario {
 const simpleBot = BOTS.find(b => b.id === 'max-ambitious')!;
 const cbtBot = BOTS.find(b => b.id === 'chloe-structured-reflection')!;
 const interviewBot = BOTS.find(b => b.id === 'g-interviewer')!;
-const chloeBot = BOTS.find(b => b.id === 'chloe')!;
+const chloeBot = BOTS.find(b => b.id === 'chloe-structured-reflection')!; // Same as cbtBot for experimental modes
 
 export const getTestScenarios = (t: (key: string) => string): TestScenario[] => [
     {
