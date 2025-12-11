@@ -50,6 +50,7 @@ export const BOTS: Bot[] = [
         style: 'Reflective, Structured, Evidence-Based',
         style_de: 'Reflektierend, Strukturiert, Evidenzbasiert',
         accessTier: 'premium',
+        experimentalMode: 'DPFL', // 🧪 Enable DPFL learning loop
     },
     {
         id: 'rob-pq',
