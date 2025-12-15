@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
-import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
 
 interface RedeemCodeViewProps {
@@ -69,15 +68,11 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
             />
           </div>
 
-          {status === 'error' && <p className="text-red-500 text-sm">{error}</p>}
+          {status === 'error' && <p className="text-status-danger-foreground text-sm">{error}</p>}
           
-          <button
-            type="submit"
-            disabled={status === 'loading' || !code.trim()}
-            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md"
-          >
-            {status === 'loading' ? <Spinner /> : t('redeem_button')}
-          </button>
+          <Button type="submit" disabled={status === 'loading' || !code.trim()} loading={status === 'loading'} size="lg" fullWidth>
+            {t('redeem_button')}
+          </Button>
         </form>
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
             {t('redeem_info_text')}

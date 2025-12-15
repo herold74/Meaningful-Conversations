@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { getSession } from '../services/api';
+import Button from './shared/Button';
 
 interface DataExportViewProps {
     lifeContext?: string; // The decrypted life context from App.tsx
@@ -175,14 +176,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => 
             </div>
 
             <div className="flex justify-center pt-4">
-                <button
-                    onClick={handleExport}
-                    disabled={isExporting}
-                    className="inline-flex items-center justify-center gap-3 px-8 py-3 text-base font-bold text-white bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-accent-disabled disabled:cursor-not-allowed rounded-lg shadow-md transition-colors"
-                >
-                    <DownloadIcon className="w-5 h-5" />
+                <Button onClick={handleExport} disabled={isExporting} size="lg" leftIcon={<DownloadIcon className="w-5 h-5" />}>
                     {isExporting ? t('export_data_downloading') : t('export_data_button')}
-                </button>
+                </Button>
             </div>
 
             <div className="pt-4 text-sm text-content-subtle text-center">
