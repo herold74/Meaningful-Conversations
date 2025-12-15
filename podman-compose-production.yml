@@ -10,8 +10,7 @@ x-podman:
     name: meaningful-conversations-production
     infra: true
     ports:
-      - "80:3000"      # Frontend Blue on port 80 (main)
-      - "8083:3001"    # Frontend Green on port 8083 (blue-green deployment)
+      - "80:3000"      # Frontend on port 80
       - "8082:8080"    # Backend on port 8082
       - "3308:3306"    # MariaDB on port 3308 (external)
 
@@ -130,10 +129,9 @@ services:
       retries: 3
       start_period: 40s
 
-  # Blue-Green Deployment: Frontend Blue (current/stable)
-  frontend-blue:
-    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-frontend:${CURRENT_VERSION:-latest}
-    container_name: meaningful-conversations-frontend-blue
+  frontend:
+    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-frontend:${VERSION:-latest}
+    container_name: meaningful-conversations-frontend-production
     restart: unless-stopped
     deploy:
       resources:
@@ -150,32 +148,6 @@ services:
       NODE_ENV: production
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Blue-Green Deployment: Frontend Green (new version)
-  frontend-green:
-    image: ${REGISTRY_URL:-localhost}/gherold/meaningful-conversations-frontend:${VERSION:-latest}
-    container_name: meaningful-conversations-frontend-green
-    restart: "no"  # Only started manually during deployment
-    profiles:
-      - deployment  # Only starts when explicitly requested
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
-    depends_on:
-      - backend
-    environment:
-      PORT: 3001
-      NODE_ENV: production
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001"]
       interval: 30s
       timeout: 10s
       retries: 3
