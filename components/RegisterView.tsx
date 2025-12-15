@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
 import ChristmasSnowflakes from './ChristmasSnowflakes';
 import { isChristmasSeason } from '../utils/dateUtils';
@@ -176,13 +176,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
 
           {error?.type === 'general' && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error.message}</p>}
           
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
-          >
-            {isLoading ? <Spinner /> : t('register_button')}
-          </button>
+          <Button type="submit" disabled={isLoading} loading={isLoading} size="lg" fullWidth>
+            {t('register_button')}
+          </Button>
         </form>
 
         <p className="text-center text-sm text-content-secondary">

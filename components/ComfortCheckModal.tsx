@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
+import Button from './shared/Button';
 
 interface ComfortCheckModalProps {
   chatHistory: any[];
@@ -109,23 +110,27 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <button
+          <Button
             onClick={() => handleSubmit(false)}
             disabled={comfortScore === null || isSubmitting}
-            className="flex-1 px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            loading={isSubmitting}
+            size="lg"
+            className="flex-1"
           >
             {isSubmitting 
               ? (t('comfort_check_submitting') || 'Saving...') 
               : (t('comfort_check_use_session') || 'Use for Profile Refinement')}
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() => handleSubmit(true)}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-3 bg-background-tertiary hover:bg-background-primary text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
+            variant="secondary"
+            size="lg"
+            className="flex-1"
           >
             {t('comfort_check_skip') || 'Skip'}
-          </button>
+          </Button>
         </div>
 
         <p className="text-xs text-content-secondary mt-4 text-center">

@@ -6,6 +6,7 @@ import { SurveyResult, NarrativeProfile } from './PersonalitySurvey';
 import { formatSurveyResultAsHtml } from '../utils/surveyResultHtmlFormatter';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGenerator';
 import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
 
 // Narrative Profile Display Component
@@ -457,13 +458,10 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       <div className="py-10 animate-fadeIn max-w-4xl mx-auto">
         <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold mb-4 text-content-primary">{t('profile_view_error_title') || 'Fehler'}</h2>
-          <p className="text-status-error-foreground mb-4">{error}</p>
-          <button
-            onClick={loadProfile}
-            className="px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors"
-          >
+          <p className="text-status-danger-foreground mb-4">{error}</p>
+          <Button onClick={loadProfile}>
             {t('profile_view_retry') || 'Erneut versuchen'}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -479,12 +477,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           <p className="text-content-secondary mb-6">
             {t('profile_view_no_profile_desc') || 'Du hast noch keinen Persönlichkeitstest absolviert. Starte jetzt und erhalte Zugang zu experimentellen Coaching-Modi.'}
           </p>
-          <button
-            onClick={onStartNewTest}
-            className="px-6 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium"
-          >
+          <Button onClick={onStartNewTest} size="lg">
             {t('profile_view_start_test') || 'Test starten'}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -767,23 +762,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             
             {/* Update Button - only active after collapse/re-expand */}
             <div className="px-6 pb-4 flex items-center gap-3">
-              <button
+              <Button
                 onClick={handleGenerateNarrative}
                 disabled={isGeneratingNarrative || !canUpdateNarrative}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center gap-2 text-sm"
+                size="sm"
+                loading={isGeneratingNarrative}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400"
                 title={!canUpdateNarrative ? (t('narrative_update_hint') || 'Klappe das Profil ein und wieder auf, um eine Aktualisierung zu ermöglichen') : ''}
               >
-                {isGeneratingNarrative ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t('narrative_generating') || 'Generiere...'}
-                  </>
-                ) : (
-                  <>
-                    🔄 {t('narrative_update_button') || 'Signatur aktualisieren'}
-                  </>
-                )}
-              </button>
+                {isGeneratingNarrative 
+                  ? (t('narrative_generating') || 'Generiere...')
+                  : <>🔄 {t('narrative_update_button') || 'Signatur aktualisieren'}</>
+                }
+              </Button>
               {!canUpdateNarrative && !isGeneratingNarrative && (
                 <span className="text-gray-500 dark:text-gray-400 text-xs">
                   {t('narrative_update_hint_short') || 'Ein-/Ausklappen zum Aktivieren'}
@@ -809,35 +800,28 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </div>
             )}
             
-            <button
+            <Button
               onClick={handleGenerateNarrative}
               disabled={isGeneratingNarrative}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+              size="lg"
+              loading={isGeneratingNarrative}
+              className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400"
             >
-              {isGeneratingNarrative ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t('narrative_generating') || 'Generiere...'}
-                </>
-              ) : (
-                <>
-                  ✨ {t('narrative_generate_button') || 'Signatur generieren'}
-                </>
-              )}
-            </button>
+              {isGeneratingNarrative 
+                ? (t('narrative_generating') || 'Generiere...')
+                : <>✨ {t('narrative_generate_button') || 'Signatur generieren'}</>
+              }
+            </Button>
           </div>
         ) : null}
 
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8">
-          <button
-            onClick={handleDownloadPdf}
-            className="flex-1 px-6 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium"
-          >
+          <Button onClick={handleDownloadPdf} size="lg" className="flex-1">
             📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => {
               // Warn if profile has been refined through sessions
               if (profileMetadata && profileMetadata.sessionCount > 0) {
@@ -846,10 +830,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 onStartNewTest();
               }
             }}
-            className="flex-1 px-6 py-3 bg-background-tertiary hover:bg-background-primary dark:bg-background-tertiary dark:hover:bg-background-secondary text-content-primary dark:text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
+            variant="secondary"
+            size="lg"
+            className="flex-1"
           >
             🔄 {t('profile_view_new_test') || 'Neue Evaluierung'}
-          </button>
+          </Button>
         </div>
 
         {/* Info Box - styled like AboutView */}
@@ -922,22 +908,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
             
             <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setShowOverwriteWarning(false)}
-                className="px-6 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors font-medium"
-              >
+              <Button onClick={() => setShowOverwriteWarning(false)} variant="secondary">
                 {t('profile_overwrite_cancel') || 'Abbrechen'}
-              </button>
+              </Button>
               
-              <button
+              <Button
                 onClick={() => {
                   setShowOverwriteWarning(false);
                   onStartNewTest();
                 }}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                variant="danger"
               >
                 {t('profile_overwrite_confirm') || 'Ja, neuen Test starten'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

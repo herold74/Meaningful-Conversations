@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { XIcon } from './icons/XIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 
 interface DeleteAccountModalProps {
     isOpen: boolean;
@@ -76,20 +76,18 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                 </div>
 
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button 
-                        onClick={onClose}
-                        disabled={isLoading}
-                        className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 rounded-lg shadow-md"
-                    >
+                    <Button onClick={onClose} disabled={isLoading} variant="secondary">
                         {t('deleteAccount_cancel')}
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
                         onClick={handleDelete}
                         disabled={isLoading || confirmationText !== requiredText}
-                        className="px-6 py-2 text-base font-bold text-white bg-red-600 uppercase hover:bg-red-700 disabled:bg-red-300 dark:disabled:bg-red-800 disabled:cursor-not-allowed flex items-center justify-center w-40 rounded-lg shadow-md"
+                        loading={isLoading}
+                        variant="danger"
+                        className="w-40"
                     >
-                        {isLoading ? <Spinner /> : t('deleteAccount_confirm')}
-                    </button>
+                        {t('deleteAccount_confirm')}
+                    </Button>
                 </div>
             </div>
         </div>
