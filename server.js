@@ -32,7 +32,12 @@ app.use((req, res, next) => {
 });
 
 // Serve the static files from the Vite build output directory 'dist'
-app.use(express.static(path.join(__dirname, 'dist')));
+// DISABLE CACHING for express.static to prevent stale file serving
+app.use(express.static(path.join(__dirname, 'dist'), {
+    etag: false,
+    lastModified: false,
+    maxAge: 0
+}));
 
 // For a Single Page Application (SPA), all other routes should fall back to index.html
 app.get('*', (req, res) => {
