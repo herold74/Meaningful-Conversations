@@ -626,7 +626,6 @@
   "experimental_info_dpfl_feature4_desc": "After each session, you can indicate how authentic you were. This keeps you in control of data quality",
   "experimental_info_privacy_title": "Privacy",
   "experimental_info_privacy_desc": "All personality data and session transcripts are stored end-to-end encrypted. The server cannot read this data. You can exclude sessions from profile refinement at any time.",
-  "experimental_info_requirement": "Requirement: You must complete the personality survey to use these experimental modes.",
 
   "personality_survey_success_saved": "PDF downloaded and profile encrypted successfully! You can now use experimental modes with Chloe.",
   "personality_survey_success_downloaded": "PDF downloaded successfully!",
