@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { XIcon } from './icons/XIcon';
+import Button from './shared/Button';
 
 interface ExperimentalModeInfoModalProps {
   onClose: () => void;
@@ -113,12 +114,9 @@ const ExperimentalModeInfoModal: React.FC<ExperimentalModeInfoModalProps> = ({ o
 
         {/* Footer */}
         <div className="flex-shrink-0 bg-background-secondary dark:bg-background-primary border-t border-border-secondary dark:border-border-primary px-6 py-4">
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium text-base"
-          >
+          <Button onClick={onClose} size="lg" fullWidth>
             {t('experimental_info_close')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>,

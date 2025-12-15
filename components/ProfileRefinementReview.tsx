@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
 import { encryptPersonalityProfile } from '../utils/personalityEncryption';
+import Button from './shared/Button';
 
 interface RefinementSuggestion {
   hasSuggestions: boolean;
@@ -122,12 +123,9 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
             🔄 {t('refinement_title') || 'Profil-Verfeinerung'}
           </h3>
           <p className="text-content-secondary mb-6">{error}</p>
-          <button
-            onClick={onCancel}
-            className="w-full px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors"
-          >
+          <Button onClick={onCancel} size="lg" fullWidth>
             {t('refinement_close') || 'Schließen'}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -209,20 +207,13 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-4 py-3 bg-background-tertiary hover:bg-background-primary text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
-          >
+          <Button onClick={onCancel} variant="secondary" size="lg" className="flex-1">
             {t('refinement_cancel') || 'Ablehnen'}
-          </button>
+          </Button>
           
-          <button
-            onClick={handleApply}
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium disabled:opacity-50"
-          >
+          <Button onClick={handleApply} disabled={isLoading} size="lg" className="flex-1">
             {t('refinement_apply') || 'Änderungen übernehmen'}
-          </button>
+          </Button>
         </div>
         
         {error && (
