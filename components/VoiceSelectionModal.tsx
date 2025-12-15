@@ -7,6 +7,7 @@ import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
+import Button from './shared/Button';
 
 type VoiceSelection = 
     | { type: 'auto' }
@@ -308,12 +309,12 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 </div>
 
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-border-primary">
-                    <button onClick={onClose} className="px-6 py-2 text-base font-bold text-content-secondary bg-transparent border border-border-secondary uppercase hover:bg-background-tertiary rounded-lg shadow-md">
+                    <Button onClick={onClose} variant="secondary">
                         {t('deleteAccount_cancel')}
-                    </button>
-                    <button onClick={handleSave} className="px-6 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md">
+                    </Button>
+                    <Button onClick={handleSave}>
                         {t('voiceModal_save')}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

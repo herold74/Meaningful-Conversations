@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
+import Button from './shared/Button';
 
 interface UpdateNotificationProps {
   onUpdate: () => void;
@@ -62,12 +63,13 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => 
             <p className="font-bold text-sm">{t('update_available_title') || 'Update verfügbar!'}</p>
             <p className="text-xs opacity-90">{t('update_available_desc') || 'Eine neue Version der App ist verfügbar.'}</p>
           </div>
-          <button
+          <Button
             onClick={handleUpdate}
-            className="flex-shrink-0 px-4 py-2 bg-white text-accent-primary font-bold text-sm rounded hover:bg-gray-100 transition-colors"
+            size="sm"
+            className="flex-shrink-0 bg-white text-accent-primary hover:bg-gray-100"
           >
             {t('update_now') || 'Aktualisieren'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

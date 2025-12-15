@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
-import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
 import { deriveKey, encryptData, hexToUint8Array } from '../utils/encryption';
 
@@ -134,15 +133,11 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ currentUser, en
                 />
             </div>
 
-            {error && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
+            {error && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error}</p>}
             
-            <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
-            >
-                {isLoading ? <Spinner /> : t('changePassword_button')}
-            </button>
+            <Button type="submit" disabled={isLoading} loading={isLoading} size="lg" fullWidth>
+                {t('changePassword_button')}
+            </Button>
             </form>
         )}
       </div>

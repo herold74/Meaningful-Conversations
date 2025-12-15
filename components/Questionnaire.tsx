@@ -1,10 +1,9 @@
-
-
 import React, { useState } from 'react';
 import { getQuestionnaireStructure } from './questionnaireStructure';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import Button from './shared/Button';
 
 interface QuestionnaireProps {
     onSubmit: (context: string) => void;
@@ -226,12 +225,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                     );
                 })}
                 
-                <button
-                    type="submit"
-                    className="w-full mt-8 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-800 focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
-                >
+                <Button type="submit" size="lg" fullWidth className="mt-8">
                     {t('questionnaire_generateFile')}
-                </button>
+                </Button>
             </form>
         </div>
     );

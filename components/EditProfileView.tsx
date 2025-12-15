@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 
 interface EditProfileViewProps {
   currentUser: User;
@@ -109,21 +109,12 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ currentUser, onBack, 
           )}
 
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              disabled={isLoading}
-              className="flex-1 px-6 py-3 text-base font-bold text-content-primary bg-background-tertiary hover:bg-border-primary focus:outline-none transition-colors duration-200 rounded-lg shadow-md disabled:opacity-50"
-            >
+            <Button type="button" onClick={onBack} disabled={isLoading} variant="secondary" size="lg" className="flex-1">
               {t('profile_cancel_button')}
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
-            >
-              {isLoading ? <Spinner /> : t('profile_save_button')}
-            </button>
+            </Button>
+            <Button type="submit" disabled={isLoading} loading={isLoading} size="lg" className="flex-1">
+              {t('profile_save_button')}
+            </Button>
           </div>
         </form>
       </div>

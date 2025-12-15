@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { apiFetch } from '../services/api';
 import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import { MailIcon } from './icons/MailIcon';
@@ -66,12 +67,9 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
           <p className="text-sm text-content-tertiary">
             Sie erhalten keine weiteren Newsletter-E-Mails von uns.
           </p>
-          <button 
-            onClick={onBack}
-            className="mt-6 px-6 py-3 bg-accent-primary text-button-foreground-on-accent font-bold rounded-lg hover:bg-accent-primary-hover transition-colors"
-          >
+          <Button onClick={onBack} size="lg" className="mt-6">
             Zur Startseite
-          </button>
+          </Button>
         </div>
       );
     }
@@ -86,12 +84,9 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
           <p className="text-content-secondary mb-4">
             Sie sind bereits vom Newsletter abgemeldet.
           </p>
-          <button 
-            onClick={onBack}
-            className="mt-6 px-6 py-3 bg-accent-primary text-button-foreground-on-accent font-bold rounded-lg hover:bg-accent-primary-hover transition-colors"
-          >
+          <Button onClick={onBack} size="lg" className="mt-6">
             Zur Startseite
-          </button>
+          </Button>
         </div>
       );
     }
@@ -109,12 +104,9 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
         <p className="text-sm text-content-tertiary mb-6">
           Bitte kontaktieren Sie uns, wenn Sie weiterhin Probleme haben.
         </p>
-        <button 
-          onClick={onBack}
-          className="px-6 py-3 bg-accent-primary text-button-foreground-on-accent font-bold rounded-lg hover:bg-accent-primary-hover transition-colors"
-        >
+        <Button onClick={onBack} size="lg">
           Zur Startseite
-        </button>
+        </Button>
       </div>
     );
   };
