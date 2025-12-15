@@ -30,6 +30,7 @@ Website: www.manualmode.at
 - **Vorname und Nachname (optional, freiwillig bei Registrierung)**
 - Passwort (verschlüsselt gespeichert mit bcrypt)
 - Ende-zu-Ende-verschlüsselte Lebenskontext-Daten
+- Ende-zu-Ende-verschlüsselte Persönlichkeitsprofil-Daten für registrierte Benutzer (inkl. Testergebnisse, Flow- und Konflikt-Erlebnisse, generierte Persönlichkeits-Signatur)
 - Gamification-Daten (XP, Level, Streak, Achievements)
 - Technische Zugriffsdaten (IP-Adresse, Browser-Typ, Zugriffszeitpunkt)
 - API-Nutzungsdaten (Anzahl API-Aufrufe, verwendete Modelle, Zeitstempel)
@@ -40,6 +41,8 @@ Website: www.manualmode.at
 Die Verarbeitung der Daten erfolgt zu folgenden Zwecken:
 
 - **Bereitstellung der Coaching-Funktionen:** Ermöglichung von KI-gestützten Coaching-Gesprächen
+- **Personalisiertes Coaching:** Nutzung Ihres Persönlichkeitsprofils zur Anpassung der Coaching-Gespräche an Ihre individuellen Bedürfnisse und Kommunikationsstile (nur für registrierte Benutzer mit aktivem Profil)
+- **Generierung der Persönlichkeits-Signatur:** KI-gestützte Analyse Ihrer Testergebnisse und persönlichen Geschichten zur Erstellung einer individuellen Persönlichkeits-Signatur
 - **Account-Verwaltung:** Registrierung, Login, Passwortverwaltung
 - **Personalisierte Ansprache (optional):** Verwendung Ihres Namens für eine persönlichere Coaching-Gesprächsführung, sofern Sie bei der Registrierung einen Namen angegeben haben
 - **E-Mail-Kommunikation:** 
@@ -71,11 +74,24 @@ Der Widerruf wirkt sich nicht auf die Rechtmäßigkeit der bis zum Widerruf erfo
 
 Ihre Daten werden an folgende Empfänger übermittelt:
 
-### 5.1 Google Gemini API (Auftragsverarbeiter)
-- **Zweck:** KI-gestützte Gesprächsverarbeitung
+### 5.1 KI-Dienste (Auftragsverarbeiter)
+
+Wir nutzen verschiedene KI-Dienste für die Verarbeitung Ihrer Coaching-Gespräche und die Generierung Ihrer Persönlichkeits-Signatur:
+
+#### Google Gemini API
+- **Zweck:** KI-gestützte Gesprächsverarbeitung, Generierung der Persönlichkeits-Signatur
 - **Standort:** USA (mit EU-Standardvertragsklauseln)
 - **Rechtsgrundlage:** Art. 28 DSGVO (Auftragsverarbeitungsvertrag)
-- **Hinweis:** Ihre Gespräche werden an Google zur Verarbeitung gesendet. Der verschlüsselte Lebenskontext wird NICHT übertragen.
+
+#### Mistral AI API
+- **Zweck:** Alternative KI-gestützte Gesprächsverarbeitung, Generierung der Persönlichkeits-Signatur
+- **Standort:** Frankreich (EU)
+- **Rechtsgrundlage:** Art. 28 DSGVO (Auftragsverarbeitungsvertrag)
+
+**Hinweis zur Datenübermittlung:**
+- Ihre Gespräche werden an den jeweils konfigurierten KI-Dienst zur Verarbeitung gesendet
+- Der verschlüsselte Lebenskontext und das Persönlichkeitsprofil werden für die Verarbeitung temporär entschlüsselt und an die API übermittelt
+- Die sensiblen Daten werden **nicht** dauerhaft beim KI-Anbieter gespeichert
 
 #### Performance-Optimierung (Prompt Caching)
 Zur Verbesserung der Antwortgeschwindigkeit nutzen wir die Caching-Funktion der Gemini API. Dabei werden Teile Ihres Lebenskontexts (unverschlüsselt, wie bei jeder API-Anfrage) für maximal **5 Minuten** auf Servern von Google LLC (USA) zwischengespeichert. Die gecachten Daten:
@@ -100,17 +116,18 @@ Zur Verbesserung der Antwortgeschwindigkeit nutzen wir die Caching-Funktion der 
 
 Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Daten gegen zufällige oder vorsätzliche Manipulationen, Verlust, Zerstörung oder den Zugriff unberechtigter Personen zu schützen:
 
-- **Ende-zu-Ende-Verschlüsselung (E2EE):** Ihr Lebenskontext wird auf Ihrem Gerät verschlüsselt, bevor er an unsere Server gesendet wird. Nur Sie können die Daten mit Ihrem Passwort entschlüsseln.
+- **Ende-zu-Ende-Verschlüsselung (E2EE):** Ihr Lebenskontext und Ihr Persönlichkeitsprofil werden auf Ihrem Gerät verschlüsselt, bevor sie an unsere Server gesendet werden. Nur Sie können die Daten mit Ihrem Passwort entschlüsseln.
 - **Passwort-Hashing:** Passwörter werden mit bcrypt und 10 Salting Rounds gehashed.
 - **HTTPS/TLS:** Alle Datenübertragungen sind SSL/TLS-verschlüsselt.
 - **Regelmäßige Sicherheitsupdates:** Server und Software werden regelmäßig aktualisiert.
 
-**WICHTIG:** Aufgrund der Ende-zu-Ende-Verschlüsselung können wir Ihr Passwort NICHT wiederherstellen. Bei Verlust Ihres Passworts gehen Ihre verschlüsselten Daten unwiederbringlich verloren.
+**WICHTIG:** Aufgrund der Ende-zu-Ende-Verschlüsselung können wir Ihr Passwort NICHT wiederherstellen. Bei Verlust Ihres Passworts gehen Ihre verschlüsselten Daten (Lebenskontext und Persönlichkeitsprofil) unwiederbringlich verloren.
 
 ## 7. Speicherdauer
 
 - **Account-Daten:** Bis zur Löschung Ihres Accounts durch Sie selbst
 - **Verschlüsselte Lebenskontext-Daten:** Bis zur Löschung Ihres Accounts
+- **Verschlüsselte Persönlichkeitsprofil-Daten:** Bis zur Löschung Ihres Accounts oder bis Sie einen neuen Test durchführen (wobei das alte Profil überschrieben wird)
 - **API-Nutzungsdaten:** 12 Monate, danach automatische Löschung
 - **Feedback:** Bis zur Löschung Ihres Accounts (oder auf Anfrage)
 - **E-Mail-Verifizierungstoken:** 24 Stunden
@@ -139,6 +156,7 @@ Sie können die Löschung Ihrer Daten verlangen. Dies können Sie jederzeit selb
 **Was wird gelöscht:**
 - Alle Ihre Account-Daten (E-Mail, Passwort)
 - Ihr verschlüsselter Lebenskontext
+- Ihr verschlüsseltes Persönlichkeitsprofil (inkl. Testergebnisse und Persönlichkeits-Signatur)
 - Gamification-Daten (XP, Level, Achievements)
 - Alle von Ihnen eingereichten Feedbacks
 - API-Nutzungsdaten mit Ihrer User-ID
@@ -158,11 +176,12 @@ Sie haben das Recht, Ihre Daten in einem maschinenlesbaren Format zu erhalten.
 - Account-Informationen (E-Mail, Name falls angegeben, Registrierungsdatum, Login-Daten)
 - Gamification-Daten (XP, Level, Erfolge, Streak)
 - Verschlüsselter Lebenskontext (nur Sie können ihn mit Ihrem Passwort entschlüsseln)
+- Verschlüsseltes Persönlichkeitsprofil (nur Sie können es mit Ihrem Passwort entschlüsseln)
 - Ihre eingereichten Feedbacks
 - Von Ihnen eingelöste Upgrade-Codes
 - API-Nutzungsstatistiken (letzte 12 Monate)
 
-Sie können Ihre **Lebenskontext-Datei** auch jederzeit direkt in der App herunterladen.
+Sie können Ihre **Lebenskontext-Datei** und Ihr **Persönlichkeitsprofil als PDF** auch jederzeit direkt in der App herunterladen.
 
 ### 8.5 Recht auf Widerspruch (Art. 21 DSGVO)
 Sie können der Verarbeitung Ihrer Daten widersprechen.
@@ -219,6 +238,7 @@ Sie können Ihren Account jederzeit in den Einstellungen löschen. Bei Löschung
 
 - E-Mail-Adresse und Account-Daten
 - Verschlüsselte Lebenskontext-Daten
+- Verschlüsselte Persönlichkeitsprofil-Daten (inkl. Testergebnisse und Persönlichkeits-Signatur)
 - Gamification-Daten (XP, Level, Achievements)
 - Alle von Ihnen eingereichten Feedbacks
 - API-Nutzungsdaten mit Ihrer User-ID
@@ -231,7 +251,7 @@ Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets de
 
 ---
 
-**Stand:** November 2025`;
+**Stand:** Dezember 2025`;
 
 const en_markdown = `This Privacy Policy explains the nature, scope, and purpose of the processing of personal data (hereinafter referred to as "data") within the provision of our services and within our online offering and the websites, functions, and content associated with it (hereinafter collectively referred to as "online offering").
 
@@ -256,6 +276,7 @@ Website: www.manualmode.at
 - **First name and last name (optional, voluntary upon registration)**
 - Password (encrypted with bcrypt)
 - End-to-end encrypted Life Context data
+- End-to-end encrypted Personality Profile data for registered users (including test results, flow and conflict experiences, generated personality signature)
 - Gamification data (XP, Level, Streak, Achievements)
 - Technical access data (IP address, browser type, access time)
 - API usage data (number of API calls, models used, timestamps)
@@ -266,6 +287,8 @@ Website: www.manualmode.at
 Data is processed for the following purposes:
 
 - **Provision of coaching functions:** Enabling AI-powered coaching conversations
+- **Personalized coaching:** Using your personality profile to adapt coaching conversations to your individual needs and communication styles (registered users with active profile only)
+- **Personality signature generation:** AI-assisted analysis of your test results and personal stories to create an individual personality signature
 - **Account management:** Registration, login, password management
 - **Personalized address (optional):** Use of your name for more personal coaching conversation guidance, if you provided a name during registration
 - **Email communication:** 
@@ -297,11 +320,24 @@ Withdrawal does not affect the lawfulness of processing carried out before withd
 
 Your data is transferred to the following recipients:
 
-### 5.1 Google Gemini API (Data Processor)
-- **Purpose:** AI-powered conversation processing
+### 5.1 AI Services (Data Processors)
+
+We use various AI services for processing your coaching conversations and generating your personality signature:
+
+#### Google Gemini API
+- **Purpose:** AI-powered conversation processing, personality signature generation
 - **Location:** USA (with EU Standard Contractual Clauses)
 - **Legal basis:** Art. 28 GDPR (Data Processing Agreement)
-- **Note:** Your conversations are sent to Google for processing. The encrypted Life Context is NOT transmitted.
+
+#### Mistral AI API
+- **Purpose:** Alternative AI-powered conversation processing, personality signature generation
+- **Location:** France (EU)
+- **Legal basis:** Art. 28 GDPR (Data Processing Agreement)
+
+**Note on data transmission:**
+- Your conversations are sent to the configured AI service for processing
+- The encrypted Life Context and personality profile are temporarily decrypted and transmitted to the API for processing
+- Sensitive data is **not** permanently stored by the AI provider
 
 #### Performance Optimization (Prompt Caching)
 To improve response times, we use the caching feature of the Gemini API. Parts of your Life Context (unencrypted, as with every API request) are temporarily stored on Google LLC (USA) servers for up to **5 minutes**. The cached data:
@@ -326,17 +362,18 @@ To improve response times, we use the caching feature of the Gemini API. Parts o
 
 We employ technical and organizational security measures to protect your data against accidental or intentional manipulation, loss, destruction, or access by unauthorized persons:
 
-- **End-to-End Encryption (E2EE):** Your Life Context is encrypted on your device before being sent to our servers. Only you can decrypt the data with your password.
+- **End-to-End Encryption (E2EE):** Your Life Context and your Personality Profile are encrypted on your device before being sent to our servers. Only you can decrypt the data with your password.
 - **Password Hashing:** Passwords are hashed with bcrypt using 10 salting rounds.
 - **HTTPS/TLS:** All data transmissions are SSL/TLS encrypted.
 - **Regular security updates:** Servers and software are regularly updated.
 
-**IMPORTANT:** Due to end-to-end encryption, we CANNOT recover your password. If you lose your password, your encrypted data will be irretrievably lost.
+**IMPORTANT:** Due to end-to-end encryption, we CANNOT recover your password. If you lose your password, your encrypted data (Life Context and Personality Profile) will be irretrievably lost.
 
 ## 7. Storage Duration
 
 - **Account data:** Until deletion of your account by yourself
 - **Encrypted Life Context data:** Until deletion of your account
+- **Encrypted Personality Profile data:** Until deletion of your account or until you take a new test (which overwrites the old profile)
 - **API usage data:** 12 months, then automatic deletion
 - **Feedback:** Until deletion of your account (or upon request)
 - **Email verification tokens:** 24 hours
@@ -365,6 +402,7 @@ You can request deletion of your data. You can do this yourself at any time:
 **What will be deleted:**
 - All your account data (email, password)
 - Your encrypted Life Context
+- Your encrypted Personality Profile (including test results and personality signature)
 - Gamification data (XP, level, achievements)
 - All feedback submitted by you
 - API usage data with your user ID
@@ -384,11 +422,12 @@ You have the right to receive your data in a machine-readable format.
 - Account information (email, name if provided, registration date, login data)
 - Gamification data (XP, level, achievements, streak)
 - Encrypted Life Context (only you can decrypt it with your password)
+- Encrypted Personality Profile (only you can decrypt it with your password)
 - Your submitted feedback
 - Upgrade codes you redeemed
 - API usage statistics (last 12 months)
 
-You can also download your **Life Context file** directly in the app at any time.
+You can also download your **Life Context file** and your **Personality Profile as PDF** directly in the app at any time.
 
 ### 8.5 Right to Object (Art. 21 GDPR)
 You can object to the processing of your data.
@@ -445,6 +484,7 @@ You can delete your account at any time in the settings. Upon deletion, the foll
 
 - Email address and account data
 - Encrypted Life Context data
+- Encrypted Personality Profile data (including test results and personality signature)
 - Gamification data (XP, Level, Achievements)
 - All feedback submitted by you
 - API usage data with your user ID
@@ -457,7 +497,7 @@ We reserve the right to adapt this privacy policy to ensure it always complies w
 
 ---
 
-**Last updated:** November 2025`;
+**Last updated:** December 2025`;
 
 const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({ onBack }) => {
     const { t, language } = useLocalization();

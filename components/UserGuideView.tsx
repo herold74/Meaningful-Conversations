@@ -175,6 +175,76 @@ Die Meaningful Conversations App ist eine Progressive Web App (PWA) und kann wie
 - Vollbildansicht ohne Browser-Chrome
 - Push-Benachrichtigungen (falls aktiviert)
 - Funktioniert teilweise auch offline
+
+---
+
+## Kapitel 7: Persönlichkeitsprofil für registrierte Benutzer
+
+Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
+
+### 7.1 Überblick
+
+Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönlichkeitsmerkmale erfasst. Es wird verwendet, um:
+- Experimentelle Coaching-Modi mit Chloe freizuschalten
+- Eine individuelle **Persönlichkeits-Signatur** zu generieren
+- Das Coaching besser auf Ihre Bedürfnisse abzustimmen
+
+**Zugriff:** Öffnen Sie das Menü (☰) und wählen Sie **"Persönlichkeitsprofil"**.
+
+### 7.2 Die Persönlichkeitstests
+
+Basierend auf Ihren Antworten zu zwei Einstiegsfragen wird automatisch eines von zwei im Coaching bewährten Verfahren für Sie ausgewählt:
+
+**OCEAN-Test (Big Five):**
+- Misst fünf Persönlichkeitsdimensionen: Offenheit, Gewissenhaftigkeit, Extraversion, Verträglichkeit und Emotionale Stabilität
+- Schneller auszufüllen (ca. 5 Minuten)
+- Ideal für einen ersten Überblick
+
+**Riemann-Thomann-Test:**
+- Erfasst Ihre Grundstrebungen: Nähe, Distanz, Dauer und Wechsel
+- Unterscheidet zwischen beruflichem, privatem Kontext und Selbstbild
+- Zeigt Ihr Stress-Reaktionsmuster
+- Umfassender und detaillierter (ca. 10 Minuten)
+
+### 7.3 Die Persönlichkeits-Signatur
+
+Nach dem Test können Sie zwei **"Goldene Fragen"** beantworten:
+- **Flow-Erlebnis:** Eine Situation, in der Sie sich voll in Ihrem Element fühlten
+- **Konflikt-Erlebnis:** Eine Situation, die Sie ungewöhnlich viel Energie gekostet hat
+
+Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI eine einzigartige **Persönlichkeits-Signatur** mit:
+- 🧬 **Ihre Signatur:** Eine prägnante Beschreibung Ihres "Betriebssystems"
+- ⚡ **Geheime Superkräfte:** Ihre verborgenen Stärken
+- 🌑 **Potenzielle Blindspots:** Bereiche, die Aufmerksamkeit verdienen
+- 🌱 **Wachstumsmöglichkeiten:** Konkrete Entwicklungsempfehlungen
+
+**Hinweis:** Die Signatur kann eingeklappt werden. Um sie zu aktualisieren, klappen Sie sie ein und wieder auf – so wird versehentliches Neugenerieren verhindert.
+
+### 7.4 Adaptives vs. Stabiles Profil
+
+Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
+
+**📊 Adaptives Profil:**
+- Lernt aus Ihren Coaching-Sitzungen
+- Verfeinert sich automatisch über Zeit
+- Nach jeder Sitzung werden Sie gefragt, wie authentisch Sie waren
+- Ideal für: Selbstentdeckung & kontinuierliches Wachstum
+
+**🔒 Stabiles Profil:**
+- Bleibt unverändert bis zur nächsten manuellen Evaluierung
+- Sie behalten volle Kontrolle über Änderungen
+- Ideal für: Klare Baseline & gezielte Vergleiche
+
+**Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
+
+### 7.5 Experimentelle Coaching-Modi mit Chloe
+
+Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei:
+- Chloe kann Ihre Persönlichkeitsmerkmale in das Coaching einbeziehen
+- Die Gesprächsführung wird auf Ihren Kommunikationsstil abgestimmt
+- Tiefere Einblicke durch personalisierte Reflexionsfragen
+
+Diese Modi sind als **experimentell** gekennzeichnet und werden kontinuierlich verbessert.
 `;
 
 const en_markdown = `## Introduction
@@ -309,6 +379,111 @@ Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life 
 - This key is **never** sent to our servers.
 - Only the encrypted, unreadable version of your data is stored.
 - **No one but you can read your data.**
+
+---
+
+## Chapter 6: Adding the App to Your Home Screen
+
+The Meaningful Conversations app is a Progressive Web App (PWA) and can be installed like a native app on your device. This gives you quick access and an app-like experience.
+
+### 6.1 Installation on iOS (iPhone/iPad)
+
+1. Open the app in **Safari** (important: must be Safari, Chrome won't work).
+2. Tap the **Share icon** (the square with an arrow pointing up) in the bottom bar.
+3. Scroll down and tap **"Add to Home Screen"**.
+4. Give the app a name (e.g., "Meaningful Conversations") and tap **"Add"**.
+5. The app will now appear as an icon on your home screen and open in full-screen mode without the browser bar.
+
+### 6.2 Installation on Android
+
+1. Open the app in **Chrome** or another browser.
+2. Tap the **Menu icon** (three dots) in the top right.
+3. Select **"Add to Home Screen"** or **"Install App"**.
+4. Confirm with **"Add"** or **"Install"**.
+5. The app will now appear as an icon on your home screen.
+
+### 6.3 Installation on Desktop (Windows/Mac/Linux)
+
+1. Open the app in **Chrome**, **Edge**, or another supported browser.
+2. Click the **Install icon** (⊕) in the address bar or the **Menu** (three dots).
+3. Select **"Install"** or **"Install App"**.
+4. The app will be installed like a desktop application and can be opened from your Start menu/Dock.
+
+**Benefits of Installation:**
+- Faster access via your app icon
+- Full-screen view without browser chrome
+- Push notifications (if enabled)
+- Works partially offline
+
+---
+
+## Chapter 7: Personality Profile for Registered Users
+
+This feature is exclusively available to registered users and enables a personalized coaching experience.
+
+### 7.1 Overview
+
+The Personality Profile is an encrypted document that captures your personality traits. It is used to:
+- Unlock experimental coaching modes with Chloe
+- Generate an individual **Personality Signature**
+- Better tailor coaching to your needs
+
+**Access:** Open the menu (☰) and select **"Personality Profile"**.
+
+### 7.2 The Personality Tests
+
+Based on your answers to two initial questions, one of two methods proven in coaching is automatically selected for you:
+
+**OCEAN Test (Big Five):**
+- Measures five personality dimensions: Openness, Conscientiousness, Extraversion, Agreeableness, and Emotional Stability
+- Quicker to complete (approx. 5 minutes)
+- Ideal for an initial overview
+
+**Riemann-Thomann Test:**
+- Captures your basic drives: Proximity, Distance, Permanence, and Change
+- Distinguishes between professional, private context, and self-image
+- Shows your stress reaction pattern
+- More comprehensive and detailed (approx. 10 minutes)
+
+### 7.3 The Personality Signature
+
+After the test, you can answer two **"Golden Questions"**:
+- **Flow Experience:** A situation where you felt completely in your element
+- **Conflict Experience:** A situation that cost you an unusual amount of energy
+
+Based on your test results and these stories, our AI generates a unique **Personality Signature** with:
+- 🧬 **Your Signature:** A concise description of your "operating system"
+- ⚡ **Secret Superpowers:** Your hidden strengths
+- 🌑 **Potential Blindspots:** Areas that deserve attention
+- 🌱 **Growth Opportunities:** Concrete development recommendations
+
+**Note:** The signature can be collapsed. To update it, collapse and expand it again – this prevents accidental regeneration.
+
+### 7.4 Adaptive vs. Stable Profile
+
+At the end of the test, you choose how your profile should evolve:
+
+**📊 Adaptive Profile:**
+- Learns from your coaching sessions
+- Refines itself automatically over time
+- After each session, you'll be asked how authentic you were
+- Ideal for: Self-discovery & continuous growth
+
+**🔒 Stable Profile:**
+- Remains unchanged until the next manual evaluation
+- You keep full control over changes
+- Ideal for: Clear baseline & targeted comparisons
+
+**Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
+
+### 7.5 Experimental Coaching Modes with Chloe
+
+With an active personality profile, you unlock enhanced coaching modes:
+- Chloe can incorporate your personality traits into coaching
+- Conversation style is adapted to your communication preferences
+- Deeper insights through personalized reflection questions
+
+These modes are marked as **experimental** and are continuously being improved.
 `;
 
 // Fix: Add the component definition and default export.
