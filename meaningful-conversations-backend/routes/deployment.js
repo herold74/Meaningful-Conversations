@@ -6,55 +6,63 @@ const prisma = require('../prismaClient.js');
 const JWT_SECRET = process.env.JWT_SECRET;
 const CURRENT_VERSION = process.env.VERSION || 'unknown';
 
+// In-memory tracking of user deployment versions from heartbeats
+// Map: userId -> { version: string, lastSeen: Date, email: string }
+const userVersions = new Map();
+
+// Cleanup stale entries older than 30 minutes
+const STALE_THRESHOLD_MS = 30 * 60 * 1000;
+
+const cleanupStaleEntries = () => {
+    const now = Date.now();
+    for (const [userId, data] of userVersions.entries()) {
+        if (now - data.lastSeen.getTime() > STALE_THRESHOLD_MS) {
+            userVersions.delete(userId);
+        }
+    }
+};
+
+// Run cleanup every 5 minutes
+setInterval(cleanupStaleEntries, 5 * 60 * 1000);
+
 /**
  * GET /api/deployment/active-sessions
  * Returns count of users with tokens from old deployment versions
- * This is used during blue-green deployments to determine when
- * the old container can be safely shut down.
+ * Uses actual heartbeat data from in-memory tracking for accurate results.
  */
 router.get('/active-sessions', async (req, res) => {
     try {
-        // Get all users with recent activity (within last 7 days - matching token expiry)
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
+        // Cleanup stale entries first
+        cleanupStaleEntries();
         
-        const activeUsers = await prisma.user.findMany({
-            where: {
-                lastLogin: { gte: sevenDaysAgo },
-                status: 'ACTIVE'
-            },
-            select: {
-                id: true,
-                email: true,
-                lastLogin: true
+        // Separate users by deployment version
+        const oldVersionUsers = [];
+        const currentVersionUsers = [];
+        
+        for (const [userId, data] of userVersions.entries()) {
+            if (data.version !== CURRENT_VERSION) {
+                oldVersionUsers.push({
+                    email: data.email,
+                    version: data.version,
+                    lastActivity: data.lastSeen
+                });
+            } else {
+                currentVersionUsers.push({
+                    email: data.email,
+                    version: data.version,
+                    lastActivity: data.lastSeen
+                });
             }
-        });
-
-        // We can't directly check the JWT deployment version from the DB
-        // since tokens are not stored server-side (stateless JWT).
-        // Instead, we estimate: users who logged in BEFORE the current deployment
-        // are likely on the old version.
-        
-        // To make this more accurate, we'll need to track actual token versions
-        // when users make authenticated requests. For now, we return a conservative
-        // estimate based on login timestamps.
-        
-        // If VERSION env var was just updated, assume users logged in before
-        // the last 5 minutes are on the old version (deployment window).
-        const deploymentTime = new Date(Date.now() - 5 * 60000); // 5 minutes ago
-        
-        const oldVersionUsers = activeUsers.filter(user => 
-            user.lastLogin < deploymentTime
-        );
+        }
 
         res.json({
-            totalActiveUsers: activeUsers.length,
+            totalActiveUsers: userVersions.size,
             oldVersionSessions: oldVersionUsers.length,
+            currentVersionSessions: currentVersionUsers.length,
             currentVersion: CURRENT_VERSION,
-            deploymentTime: deploymentTime.toISOString(),
-            users: oldVersionUsers.map(user => ({
-                email: user.email,
-                lastActivity: user.lastLogin
-            }))
+            trackedSince: userVersions.size > 0 ? 'heartbeat-based' : 'no-data',
+            oldVersionUsers: oldVersionUsers,
+            currentVersionUsers: currentVersionUsers.map(u => ({ email: u.email }))
         });
         
     } catch (error) {
@@ -66,7 +74,7 @@ router.get('/active-sessions', async (req, res) => {
 /**
  * POST /api/deployment/heartbeat
  * Users periodically call this to register their deployment version
- * This allows more accurate tracking of which container users are on
+ * This allows accurate tracking of which container users are on
  */
 router.post('/heartbeat', async (req, res) => {
     try {
@@ -81,7 +89,20 @@ router.post('/heartbeat', async (req, res) => {
         // Extract deployment version from token
         const deploymentVersion = decoded.deploymentVersion || 'unknown';
         
-        // Update user's last activity time
+        // Get user email for reporting
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+            select: { email: true }
+        });
+        
+        // Store version in memory for accurate tracking
+        userVersions.set(decoded.userId, {
+            version: deploymentVersion,
+            lastSeen: new Date(),
+            email: user?.email || 'unknown'
+        });
+        
+        // Update user's last activity time in DB
         await prisma.user.update({
             where: { id: decoded.userId },
             data: { lastLogin: new Date() }
@@ -90,7 +111,8 @@ router.post('/heartbeat', async (req, res) => {
         res.json({
             version: deploymentVersion,
             currentVersion: CURRENT_VERSION,
-            isLatest: deploymentVersion === CURRENT_VERSION
+            isLatest: deploymentVersion === CURRENT_VERSION,
+            trackedUsers: userVersions.size
         });
         
     } catch (error) {
