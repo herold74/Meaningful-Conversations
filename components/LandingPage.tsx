@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ChristmasSnowflakes from './ChristmasSnowflakes';
 import { isChristmasSeason } from '../utils/dateUtils';
+import Button from './shared/Button';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -184,13 +185,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           
           {error && <p className="text-status-danger-foreground text-sm">{error}</p>}
           
-          <button
-            type="submit"
-            disabled={!fileContent}
-            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
-          >
+          <Button type="submit" disabled={!fileContent} size="lg" fullWidth>
             {t('landing_startSession')}
-          </button>
+          </Button>
         </form>
 
         <div className="flex items-center justify-center space-x-4">

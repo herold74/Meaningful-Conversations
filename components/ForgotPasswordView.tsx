@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { MailIcon } from './icons/MailIcon';
 import { CheckIcon } from './icons/CheckIcon';
 
@@ -73,15 +73,18 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
             />
           </div>
 
-          {status === 'error' && <p className="text-red-500 text-sm whitespace-pre-wrap">{error}</p>}
+          {status === 'error' && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error}</p>}
           
-          <button
+          <Button
             type="submit"
             disabled={status === 'loading' || !email.trim()}
-            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center gap-3 transition-colors rounded-lg shadow-md"
+            loading={status === 'loading'}
+            size="lg"
+            fullWidth
+            leftIcon={status !== 'loading' ? <MailIcon className="w-6 h-6" /> : undefined}
           >
-            {status === 'loading' ? <Spinner /> : <><MailIcon className="w-6 h-6" /> {t('forgotPassword_button')}</>}
-          </button>
+            {t('forgotPassword_button')}
+          </Button>
         </form>
 
         <p className="text-center text-sm">
