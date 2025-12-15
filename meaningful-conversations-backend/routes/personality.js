@@ -55,10 +55,19 @@ router.post('/save', authMiddleware, async (req, res) => {
  * Holt verschluesseltes Profil (Client muss entschluesseln)
  */
 router.get('/profile', authMiddleware, async (req, res) => {
+  // #region agent log
+  console.log('[DEBUG-A] GET /profile entry, userId:', req.userId);
+  // #endregion
   try {
+    // #region agent log
+    console.log('[DEBUG-B] About to query prisma for userId:', req.userId);
+    // #endregion
     const profile = await prisma.personalityProfile.findUnique({
       where: { userId: req.userId }
     });
+    // #region agent log
+    console.log('[DEBUG-C] Prisma query completed, profile found:', !!profile, profile ? { id: profile.id, testType: profile.testType, hasAdaptationMode: 'adaptationMode' in profile } : null);
+    // #endregion
     
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
@@ -66,6 +75,9 @@ router.get('/profile', authMiddleware, async (req, res) => {
     
     res.json(profile);
   } catch (error) {
+    // #region agent log
+    console.error('[DEBUG-D] Prisma error:', error.message, error.code, error.meta);
+    // #endregion
     console.error('Error fetching profile:', error);
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
