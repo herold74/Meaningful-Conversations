@@ -54,7 +54,8 @@ get_container_ip() {
         awk -F'"' '{print $4}')
     
     if [ -z "$ip" ]; then
-        print_error "Could not find IP for container: $container_name"
+        # Use stderr for error messages to avoid polluting stdout
+        echo "Could not find IP for container: $container_name" >&2
         return 1
     fi
     
@@ -83,19 +84,19 @@ update_nginx_config() {
 
 # Function to update staging nginx configs
 update_staging_configs() {
-    print_info "Updating staging nginx configurations..."
+    print_info "Updating staging nginx configurations..." >&2
     
     # Get container IPs
     local backend_ip=$(get_container_ip "meaningful-conversations-backend-staging")
     local frontend_ip=$(get_container_ip "meaningful-conversations-frontend-staging")
     
     if [ -z "$backend_ip" ] || [ -z "$frontend_ip" ]; then
-        print_error "Failed to get staging container IPs"
+        print_error "Failed to get staging container IPs" >&2
         return 1
     fi
     
-    print_info "Staging Backend IP: $backend_ip"
-    print_info "Staging Frontend IP: $frontend_ip"
+    echo "Staging Backend IP: $backend_ip" >&2
+    echo "Staging Frontend IP: $frontend_ip" >&2
     
     # Update staging-meaningful-conversations.conf
     if [ -f "/etc/nginx/conf.d/staging-meaningful-conversations.conf" ]; then
@@ -105,7 +106,7 @@ update_staging_configs() {
         # Update frontend proxy_pass
         sed -i "s|proxy_pass http://[0-9.]*:3000|proxy_pass http://${frontend_ip}:3000|g" \
             /etc/nginx/conf.d/staging-meaningful-conversations.conf
-        print_success "Updated staging-meaningful-conversations.conf"
+        print_success "Updated staging-meaningful-conversations.conf" >&2
     fi
     
     # Update staging-frontend-8080.conf
@@ -114,20 +115,20 @@ update_staging_configs() {
             /etc/nginx/conf.d/staging-frontend-8080.conf
         sed -i "s|proxy_pass http://[0-9.]*:3000;|proxy_pass http://${frontend_ip}:3000;|g" \
             /etc/nginx/conf.d/staging-frontend-8080.conf
-        print_success "Updated staging-frontend-8080.conf"
+        print_success "Updated staging-frontend-8080.conf" >&2
     fi
     
     # Update staging-backend-8081.conf
     if [ -f "/etc/nginx/conf.d/staging-backend-8081.conf" ]; then
         sed -i "s|proxy_pass http://[0-9.]*:8080;|proxy_pass http://${backend_ip}:8080;|g" \
             /etc/nginx/conf.d/staging-backend-8081.conf
-        print_success "Updated staging-backend-8081.conf"
+        print_success "Updated staging-backend-8081.conf" >&2
     fi
 }
 
 # Function to update production nginx configs
 update_production_configs() {
-    print_info "Updating production nginx configurations..."
+    print_info "Updating production nginx configurations..." >&2
     
     # Get container IPs
     local backend_ip=$(get_container_ip "meaningful-conversations-backend-production")
@@ -142,12 +143,12 @@ update_production_configs() {
     fi
     
     if [ -z "$backend_ip" ] || [ -z "$frontend_ip" ]; then
-        print_error "Failed to get production container IPs"
+        print_error "Failed to get production container IPs" >&2
         return 1
     fi
     
-    print_info "Production Backend IP: $backend_ip"
-    print_info "Production Frontend IP: $frontend_ip"
+    echo "Production Backend IP: $backend_ip" >&2
+    echo "Production Frontend IP: $frontend_ip" >&2
     
     # Update production-meaningful-conversations.conf
     if [ -f "/etc/nginx/conf.d/production-meaningful-conversations.conf" ]; then
@@ -157,35 +158,35 @@ update_production_configs() {
         # Update frontend proxy_pass
         sed -i "s|proxy_pass http://[0-9.]*:3000|proxy_pass http://${frontend_ip}:3000|g" \
             /etc/nginx/conf.d/production-meaningful-conversations.conf
-        print_success "Updated production-meaningful-conversations.conf"
+        print_success "Updated production-meaningful-conversations.conf" >&2
     else
-        print_warning "Production nginx config not found. It will be created on first production deployment."
+        print_warning "Production nginx config not found. It will be created on first production deployment." >&2
     fi
 }
 
 # Function to test nginx configuration
 test_nginx_config() {
-    print_info "Testing nginx configuration..."
+    print_info "Testing nginx configuration..." >&2
     
     if nginx -t 2>&1 | grep -q "successful"; then
-        print_success "Nginx configuration is valid"
+        print_success "Nginx configuration is valid" >&2
         return 0
     else
-        print_error "Nginx configuration test failed!"
-        nginx -t
+        print_error "Nginx configuration test failed!" >&2
+        nginx -t >&2
         return 1
     fi
 }
 
 # Function to reload nginx
 reload_nginx() {
-    print_info "Reloading nginx..."
+    print_info "Reloading nginx..." >&2
     
     if systemctl reload nginx; then
-        print_success "Nginx reloaded successfully"
+        print_success "Nginx reloaded successfully" >&2
         return 0
     else
-        print_error "Failed to reload nginx"
+        print_error "Failed to reload nginx" >&2
         return 1
     fi
 }
@@ -195,18 +196,18 @@ main() {
     local environment=$1
     
     if [ -z "$environment" ]; then
-        print_error "Usage: $0 {staging|production|all}"
+        print_error "Usage: $0 {staging|production|all}" >&2
         exit 1
     fi
     
     # Check if running as root
     if [ "$EUID" -ne 0 ]; then
-        print_error "This script must be run as root (it modifies /etc/nginx/)"
+        print_error "This script must be run as root (it modifies /etc/nginx/)" >&2
         exit 1
     fi
     
-    print_info "Starting nginx IP update for: $environment"
-    echo ""
+    print_info "Starting nginx IP update for: $environment" >&2
+    echo "" >&2
     
     case "$environment" in
         staging)
@@ -217,27 +218,27 @@ main() {
             ;;
         all)
             update_staging_configs
-            echo ""
+            echo "" >&2
             update_production_configs
             ;;
         *)
-            print_error "Invalid environment: $environment"
-            print_error "Usage: $0 {staging|production|all}"
+            print_error "Invalid environment: $environment" >&2
+            print_error "Usage: $0 {staging|production|all}" >&2
             exit 1
             ;;
     esac
     
-    echo ""
+    echo "" >&2
     
     # Test nginx configuration
     if test_nginx_config; then
-        echo ""
+        echo "" >&2
         reload_nginx
-        echo ""
-        print_success "Nginx IP update completed successfully!"
+        echo "" >&2
+        print_success "Nginx IP update completed successfully!" >&2
     else
-        print_error "Nginx configuration has errors. Not reloading."
-        print_warning "Backup files are available: /etc/nginx/conf.d/*.bak"
+        print_error "Nginx configuration has errors. Not reloading." >&2
+        print_warning "Backup files are available: /etc/nginx/conf.d/*.bak" >&2
         exit 1
     fi
 }
