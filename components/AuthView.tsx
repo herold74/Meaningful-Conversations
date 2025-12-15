@@ -4,7 +4,7 @@ import { LogInIcon } from './icons/LogInIcon';
 import { UserIcon } from './icons/UserIcon';
 import { UsersIcon } from './icons/UsersIcon';
 import { InfoIcon } from './icons/InfoIcon';
-import { User } from '../types';
+import Button from './shared/Button';
 
 interface AuthViewProps {
   onLogin: () => void;
@@ -46,30 +46,15 @@ const AuthView: React.FC<AuthViewProps> = ({ onLogin, onRegister, onGuest, redir
         </p>
         
         <div className="space-y-4 pt-4">
-          <button
-            onClick={onLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
-          >
-            <LogInIcon className="w-6 h-6" />
+          <Button onClick={onLogin} disabled={isLoading} size="lg" fullWidth leftIcon={<LogInIcon className="w-6 h-6" />}>
             {t('auth_login')}
-          </button>
-           <button
-            onClick={onRegister}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none transition-colors duration-200 disabled:opacity-50 rounded-lg shadow-md"
-          >
-            <UserIcon className="w-6 h-6" />
+          </Button>
+          <Button onClick={onRegister} disabled={isLoading} size="lg" fullWidth leftIcon={<UserIcon className="w-6 h-6" />} className="bg-accent-secondary hover:bg-accent-secondary-hover">
             {t('auth_register')}
-          </button>
-           <button
-            onClick={onGuest}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary disabled:opacity-50 rounded-lg shadow-md"
-          >
-            <UsersIcon className="w-6 h-6" />
+          </Button>
+          <Button onClick={onGuest} disabled={isLoading} variant="outline" size="lg" fullWidth leftIcon={<UsersIcon className="w-6 h-6" />}>
             {t('auth_guest')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

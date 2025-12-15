@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
 import { KeyIcon } from './icons/KeyIcon';
 
@@ -60,9 +60,9 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('resetPassword_success_title')}</h1>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">{t('resetPassword_success_subtitle')}</p>
-                <button onClick={onResetSuccess} className="mt-6 w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md">
+                <Button onClick={onResetSuccess} size="lg" fullWidth className="mt-6">
                     {t('login_button')}
-                </button>
+                </Button>
              </div>
         ) : (
             <>
@@ -105,15 +105,11 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                         />
                     </div>
 
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    {error && <p className="text-status-danger-foreground text-sm">{error}</p>}
                     
-                    <button
-                        type="submit"
-                        disabled={status === 'loading'}
-                        className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
-                    >
-                        {status === 'loading' ? <Spinner /> : t('changePassword_button')}
-                    </button>
+                    <Button type="submit" disabled={status === 'loading'} loading={status === 'loading'} size="lg" fullWidth>
+                        {t('changePassword_button')}
+                    </Button>
                 </form>
             </>
         )}

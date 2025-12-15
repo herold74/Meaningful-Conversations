@@ -8,7 +8,7 @@ import BlockageScoreGauge from './BlockageScoreGauge';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { StarIcon } from './icons/StarIcon';
-import Spinner from './shared/Spinner';
+import Button from './shared/Button';
 import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline } from '../utils/contextUpdater';
 import { WarningIcon } from './icons/WarningIcon';
@@ -543,13 +543,15 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                         {t('sessionReview_contact_consent')}
                                     </p>
                                 )}
-                                <button
+                                <Button
                                     type="submit"
                                     disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
-                                    className="w-full px-4 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg shadow-md"
+                                    loading={feedbackStatus === 'submitting'}
+                                    fullWidth
+                                    className="bg-accent-secondary hover:bg-accent-secondary-hover"
                                 >
-                                    {feedbackStatus === 'submitting' ? <Spinner /> : t('sessionReview_feedback_submit')}
-                                </button>
+                                    {t('sessionReview_feedback_submit')}
+                                </Button>
                             </form>
                         )}
                         
@@ -744,26 +746,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border-primary dark:border-border-primary">
-                    <button onClick={handleDownloadContext} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover rounded-lg shadow-md">
-                        <DownloadIcon className="w-5 h-5"/>
+                    <Button onClick={handleDownloadContext} size="lg" className="flex-1 bg-accent-secondary hover:bg-accent-secondary-hover" leftIcon={<DownloadIcon className="w-5 h-5"/>}>
                         {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
-                    </button>
+                    </Button>
                     {!isInterviewReview && (
-                         <button
-                            onClick={handleContinue}
-                            disabled={isSaving}
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md disabled:bg-gray-400 dark:disabled:bg-gray-700 disabled:cursor-wait"
-                        >
-                            {isSaving ? <Spinner /> : primaryActionText}
-                        </button>
+                        <Button onClick={handleContinue} disabled={isSaving} loading={isSaving} size="lg" className="flex-1">
+                            {primaryActionText}
+                        </Button>
                     )}
-                    <button
-                        onClick={handleSwitch}
-                        disabled={isSaving}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-base font-bold text-content-secondary dark:text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary rounded-lg shadow-md disabled:opacity-50 disabled:cursor-wait"
-                    >
-                        {isSaving ? <Spinner /> : secondaryActionText}
-                    </button>
+                    <Button onClick={handleSwitch} disabled={isSaving} loading={isSaving} variant="outline" size="lg" className="flex-1">
+                        {secondaryActionText}
+                    </Button>
                 </div>
                  <div className="text-center pt-4">
                     <button onClick={onReturnToStart} className="text-sm text-content-subtle dark:text-content-subtle hover:underline">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { MailIcon } from './icons/MailIcon';
-import { CheckIcon } from './icons/CheckIcon';
+import Button from './shared/Button';
 
 interface RegistrationPendingViewProps {
   onGoToLogin: () => void;
@@ -24,12 +24,9 @@ const RegistrationPendingView: React.FC<RegistrationPendingViewProps> = ({ onGoT
           {t('register_pending_spam')}
         </p>
         <div className="pt-4">
-          <button
-            onClick={onGoToLogin}
-            className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
-          >
+          <Button onClick={onGoToLogin} size="lg" fullWidth>
             {t('login_button')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
