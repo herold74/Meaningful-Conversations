@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
+import Button from './shared/Button';
 
 // --- TYPEN & INTERFACES ---
 
@@ -121,20 +122,19 @@ const getBig5Questions = (t: TranslateFunc) => [
 // --- HILFSKOMPONENTEN (UI) ---
 
 const Card: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => (
-  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px', maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-    <h2 style={{ marginBottom: '16px', fontSize: '1.25rem', fontWeight: 'bold', color: '#2d3748' }}>{title}</h2>
+  <div className="border border-border-secondary dark:border-border-primary rounded-lg p-6 max-w-xl mx-auto font-sans shadow-md bg-background-secondary dark:bg-background-secondary">
+    <h2 className="mb-4 text-xl font-bold text-content-primary">{title}</h2>
     {children}
   </div>
 );
 
-const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (props) => (
-  <button 
-    {...props} 
-    style={{ 
-      backgroundColor: props.disabled ? '#cbd5e0' : '#3182ce', 
-      color: 'white', padding: '10px 20px', borderRadius: '6px', border: 'none', cursor: props.disabled ? 'not-allowed' : 'pointer', marginTop: '20px', fontWeight: 600 
-    }} 
-  />
+// Use the shared Button component with a wrapper for consistent styling
+const SurveyButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }> = ({ children, disabled, onClick }) => (
+  <div className="mt-5">
+    <Button variant="primary" disabled={disabled} onClick={onClick as any}>
+      {children}
+    </Button>
+  </div>
 );
 
 // --- LOGIK KOMPONENTEN ---
@@ -149,31 +149,30 @@ const LikertBlock = ({ questions, onComplete, t }: { questions: any[], onComplet
   return (
     <div>
       {questions.map(q => (
-        <div key={q.id} style={{ marginBottom: '24px' }}>
-          <p style={{ fontWeight: 500, marginBottom: '8px' }}>{q.text}</p>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+        <div key={q.id} className="mb-6">
+          <p className="font-medium mb-2 text-content-primary">{q.text}</p>
+          <div className="flex gap-2 justify-between">
             {[1, 2, 3, 4, 5].map(val => (
               <button
                 key={val}
                 onClick={() => handleChange(q.id, val)}
-                style={{
-                  flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e0',
-                  backgroundColor: answers[q.id] === val ? '#3182ce' : 'white',
-                  color: answers[q.id] === val ? 'white' : 'black',
-                  cursor: 'pointer'
-                }}
+                className={`flex-1 py-2.5 px-2 rounded border transition-colors cursor-pointer
+                  ${answers[q.id] === val 
+                    ? 'bg-accent-primary border-accent-primary text-white' 
+                    : 'bg-background-secondary border-border-secondary text-content-primary hover:bg-background-tertiary'
+                  }`}
               >
                 {val}
               </button>
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#718096', marginTop: '4px' }}>
+          <div className="flex justify-between text-xs text-content-secondary mt-1">
             <span>{t('survey_likert_low')}</span>
             <span>{t('survey_likert_high')}</span>
           </div>
         </div>
       ))}
-      <Button disabled={!isComplete} onClick={() => onComplete(answers)}>{t('survey_btn_next')}</Button>
+      <SurveyButton disabled={!isComplete} onClick={() => onComplete(answers)}>{t('survey_btn_next')}</SurveyButton>
     </div>
   );
 };
@@ -188,7 +187,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle
   const remaining = 10 - total;
 
   const increment = (id: string) => {
-    if (remaining <= 0) return; // No points left to distribute
+    if (remaining <= 0) return;
     setValues(prev => ({ ...prev, [id]: Math.min(10, prev[id] + 1) }));
   };
 
@@ -203,120 +202,72 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle
       dots.push(
         <span
           key={i}
-          style={{
-            display: 'inline-block',
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            backgroundColor: i < value ? '#3182ce' : '#e2e8f0',
-            margin: '0 2px',
-            transition: 'background-color 0.15s ease'
-          }}
+          className={`inline-block w-2.5 h-2.5 rounded-full mx-0.5 transition-colors
+            ${i < value ? 'bg-accent-primary' : 'bg-gray-200 dark:bg-gray-600'}`}
         />
       );
     }
     return dots;
   };
 
-  // Stepper button style
-  const stepperBtnStyle = (disabled: boolean): React.CSSProperties => ({
-    width: '48px',
-    height: '48px',
-    borderRadius: '50%',
-    border: 'none',
-    backgroundColor: disabled ? '#e2e8f0' : '#3182ce',
-    color: disabled ? '#a0aec0' : 'white',
-    fontSize: '24px',
-    fontWeight: 'bold',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.15s ease',
-    touchAction: 'manipulation', // Prevents double-tap zoom on mobile
-    userSelect: 'none',
-    WebkitTapHighlightColor: 'transparent'
-  });
-
   return (
     <div>
       {/* Remaining points indicator */}
-      <div style={{ 
-        backgroundColor: remaining === 0 ? '#c6f6d5' : '#ebf8ff', 
-        padding: '16px', 
-        borderRadius: '8px', 
-        marginBottom: '20px', 
-        border: `2px solid ${remaining === 0 ? '#68d391' : '#63b3ed'}`,
-        textAlign: 'center',
-        transition: 'all 0.2s ease'
-      }}>
-        <div style={{ fontSize: '0.9rem', color: '#4a5568', marginBottom: '8px' }}
+      <div className={`p-4 rounded-lg mb-5 text-center transition-all border-2
+        ${remaining === 0 
+          ? 'bg-green-100 dark:bg-green-900/30 border-green-400 dark:border-green-600' 
+          : 'bg-accent-primary/10 border-accent-primary'}`}
+      >
+        <div className="text-sm text-gray-600 dark:text-gray-300 mb-2"
              dangerouslySetInnerHTML={{ __html: t('survey_points_distribute') }}
         />
-        <div style={{ 
-          fontSize: '2rem', 
-          fontWeight: 'bold', 
-          color: remaining === 0 ? '#38a169' : remaining < 0 ? '#e53e3e' : '#3182ce'
-        }}>
+        <div className={`text-3xl font-bold
+          ${remaining === 0 ? 'text-green-600 dark:text-green-400' : remaining < 0 ? 'text-red-600 dark:text-red-400' : 'text-accent-primary'}`}
+        >
           {remaining}
         </div>
-        <div style={{ fontSize: '0.85rem', color: '#718096' }}>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {remaining === 0 ? t('survey_points_all_distributed') : remaining === 1 ? t('survey_points_remaining_one') : t('survey_points_remaining')}
         </div>
       </div>
       
       {/* Items with steppers */}
       {items.map(item => (
-        <div key={item.id} style={{ 
-          marginBottom: '16px', 
-          padding: '16px', 
-          border: '1px solid #e2e8f0', 
-          borderRadius: '12px',
-          backgroundColor: values[item.id] > 0 ? '#f7fafc' : 'white',
-          transition: 'background-color 0.15s ease'
-        }}>
+        <div key={item.id} className={`mb-4 p-4 border rounded-xl transition-colors
+          ${values[item.id] > 0 
+            ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600' 
+            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
+        >
           {/* Label */}
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '1rem', color: '#2d3748' }}>{item.label}</strong>
-            <div style={{ fontSize: '0.85rem', color: '#718096', marginTop: '4px' }}>{item.text}</div>
+          <div className="mb-3">
+            <strong className="text-base text-gray-800 dark:text-gray-100">{item.label}</strong>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.text}</div>
           </div>
           
           {/* Stepper controls */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            gap: '12px'
-          }}>
+          <div className="flex items-center justify-between gap-3">
             {/* Minus button */}
             <button
               type="button"
               onClick={() => decrement(item.id)}
               disabled={values[item.id] <= 0}
-              style={stepperBtnStyle(values[item.id] <= 0)}
+              className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
+                ${values[item.id] <= 0 
+                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+                  : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_remove')}
             >
               −
             </button>
             
             {/* Value display with dots */}
-            <div style={{ 
-              flex: 1, 
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <div style={{ 
-                fontSize: '1.5rem', 
-                fontWeight: 'bold', 
-                color: values[item.id] > 0 ? '#3182ce' : '#a0aec0',
-                minWidth: '40px'
-              }}>
+            <div className="flex-1 text-center flex flex-col items-center gap-1.5">
+              <div className={`text-2xl font-bold min-w-[40px]
+                ${values[item.id] > 0 ? 'text-accent-primary' : 'text-gray-400 dark:text-gray-500'}`}
+              >
                 {values[item.id]}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div className="flex flex-wrap justify-center">
                 {renderDots(values[item.id])}
               </div>
             </div>
@@ -326,7 +277,10 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle
               type="button"
               onClick={() => increment(item.id)}
               disabled={remaining <= 0}
-              style={stepperBtnStyle(remaining <= 0)}
+              className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
+                ${remaining <= 0 
+                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+                  : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_add')}
             >
               +
@@ -335,7 +289,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle
         </div>
       ))}
       
-      <Button disabled={remaining !== 0} onClick={() => onComplete(values)}>{t('survey_btn_next')}</Button>
+      <SurveyButton disabled={remaining !== 0} onClick={() => onComplete(values)}>{t('survey_btn_next')}</SurveyButton>
     </div>
   );
 };
@@ -353,92 +307,76 @@ const NarrativeQuestionsBlock = ({ onComplete, t }: {
   const frictionValid = frictionStory.trim().length >= MIN_CHARS;
   const isComplete = flowValid && frictionValid;
 
+  const getTextareaBorderClass = (isValid: boolean, hasContent: boolean) => {
+    if (isValid) return 'border-green-400 dark:border-green-500';
+    if (hasContent) return 'border-orange-400 dark:border-orange-500';
+    return 'border-gray-200 dark:border-gray-600';
+  };
+
   return (
     <div>
-      <p style={{ marginBottom: '24px', color: '#4a5568', lineHeight: 1.6 }}
+      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed"
          dangerouslySetInnerHTML={{ __html: t('survey_narrative_intro') }}
       />
 
       {/* Frage A: Flow */}
-      <div style={{ marginBottom: '28px' }}>
-        <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2d3748' }}>
+      <div className="mb-7">
+        <label className="block font-semibold mb-2 text-gray-800 dark:text-gray-100">
           {t('survey_narrative_flow_label')}
         </label>
-        <p style={{ fontSize: '0.9rem', color: '#718096', marginBottom: '12px', lineHeight: 1.5 }}>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
           {t('survey_narrative_flow_desc')}
         </p>
         <textarea
           value={flowStory}
           onChange={(e) => setFlowStory(e.target.value)}
           placeholder={t('survey_narrative_flow_placeholder')}
-          style={{
-            width: '100%',
-            minHeight: '120px',
-            padding: '12px',
-            borderRadius: '8px',
-            border: `2px solid ${flowValid ? '#68d391' : flowStory.length > 0 ? '#ed8936' : '#e2e8f0'}`,
-            fontSize: '0.95rem',
-            lineHeight: 1.5,
-            resize: 'vertical',
-            fontFamily: 'inherit',
-            transition: 'border-color 0.2s'
-          }}
+          className={`w-full min-h-[120px] p-3 rounded-lg border-2 text-sm leading-relaxed resize-y font-inherit transition-colors
+            bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+            placeholder-gray-400 dark:placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-accent-primary/50
+            ${getTextareaBorderClass(flowValid, flowStory.length > 0)}`}
         />
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          fontSize: '0.8rem', 
-          marginTop: '6px',
-          color: flowValid ? '#38a169' : '#718096'
-        }}>
+        <div className={`flex justify-between text-xs mt-1.5
+          ${flowValid ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}
+        >
           <span>{flowValid ? t('survey_narrative_sufficient') : t('survey_narrative_min_chars', { count: MIN_CHARS })}</span>
           <span>{flowStory.length} / {MIN_CHARS}+</span>
         </div>
       </div>
 
       {/* Frage B: Friction */}
-      <div style={{ marginBottom: '24px' }}>
-        <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#2d3748' }}>
+      <div className="mb-6">
+        <label className="block font-semibold mb-2 text-gray-800 dark:text-gray-100">
           {t('survey_narrative_friction_label')}
         </label>
-        <p style={{ fontSize: '0.9rem', color: '#718096', marginBottom: '12px', lineHeight: 1.5 }}>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
           {t('survey_narrative_friction_desc')}
         </p>
         <textarea
           value={frictionStory}
           onChange={(e) => setFrictionStory(e.target.value)}
           placeholder={t('survey_narrative_friction_placeholder')}
-          style={{
-            width: '100%',
-            minHeight: '120px',
-            padding: '12px',
-            borderRadius: '8px',
-            border: `2px solid ${frictionValid ? '#68d391' : frictionStory.length > 0 ? '#ed8936' : '#e2e8f0'}`,
-            fontSize: '0.95rem',
-            lineHeight: 1.5,
-            resize: 'vertical',
-            fontFamily: 'inherit',
-            transition: 'border-color 0.2s'
-          }}
+          className={`w-full min-h-[120px] p-3 rounded-lg border-2 text-sm leading-relaxed resize-y font-inherit transition-colors
+            bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
+            placeholder-gray-400 dark:placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-accent-primary/50
+            ${getTextareaBorderClass(frictionValid, frictionStory.length > 0)}`}
         />
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          fontSize: '0.8rem', 
-          marginTop: '6px',
-          color: frictionValid ? '#38a169' : '#718096'
-        }}>
+        <div className={`flex justify-between text-xs mt-1.5
+          ${frictionValid ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}
+        >
           <span>{frictionValid ? t('survey_narrative_sufficient') : t('survey_narrative_min_chars', { count: MIN_CHARS })}</span>
           <span>{frictionStory.length} / {MIN_CHARS}+</span>
         </div>
       </div>
 
-      <Button 
+      <SurveyButton 
         disabled={!isComplete} 
         onClick={() => onComplete({ flowStory: flowStory.trim(), frictionStory: frictionStory.trim() })}
       >
         {t('questionnaire_generateFile').split('&')[0].trim() || 'Weiter'}
-      </Button>
+      </SurveyButton>
     </div>
   );
 };
@@ -450,110 +388,72 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
 }) => {
   const [selected, setSelected] = useState<'adaptive' | 'stable' | null>(null);
 
-  const optionStyle = (isSelected: boolean): React.CSSProperties => ({
-    padding: '20px',
-    border: `2px solid ${isSelected ? '#3182ce' : '#e2e8f0'}`,
-    borderRadius: '12px',
-    backgroundColor: isSelected ? '#ebf8ff' : 'white',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    marginBottom: '16px'
-  });
+  const OptionCard = ({ value, title, descKey, idealKey }: { value: 'adaptive' | 'stable', title: string, descKey: string, idealKey: string }) => {
+    const isSelected = selected === value;
+    return (
+      <div 
+        className={`p-5 border-2 rounded-xl cursor-pointer transition-all mb-4
+          ${isSelected 
+            ? 'border-accent-primary bg-accent-primary/10' 
+            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'}`}
+        onClick={() => setSelected(value)}
+      >
+        <div className="flex items-center mb-3">
+          <div className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center
+            ${isSelected 
+              ? 'border-accent-primary bg-accent-primary' 
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'}`}
+          >
+            {isSelected && <span className="text-white text-sm">✓</span>}
+          </div>
+          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+            {title}
+          </span>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 ml-9 leading-relaxed"
+           dangerouslySetInnerHTML={{ __html: t(descKey) }}
+        />
+        <div className={`ml-9 mt-3 py-2 px-3 rounded-md text-sm
+          ${isSelected 
+            ? 'bg-accent-primary/20 text-gray-700 dark:text-gray-300' 
+            : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}
+        >
+          {t(idealKey)}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
-      <p style={{ marginBottom: '24px', color: '#4a5568', lineHeight: 1.6 }}>
+      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
         {t('survey_adaptation_intro')}
       </p>
 
-      {/* Option A: Adaptive */}
-      <div 
-        style={optionStyle(selected === 'adaptive')}
-        onClick={() => setSelected('adaptive')}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-          <div style={{
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            border: `2px solid ${selected === 'adaptive' ? '#3182ce' : '#cbd5e0'}`,
-            backgroundColor: selected === 'adaptive' ? '#3182ce' : 'white',
-            marginRight: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            {selected === 'adaptive' && <span style={{ color: 'white', fontSize: '14px' }}>✓</span>}
-          </div>
-          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#2d3748' }}>
-            {t('survey_adaptation_adaptive_title')}
-          </span>
-        </div>
-        <p style={{ fontSize: '0.9rem', color: '#718096', marginLeft: '36px', lineHeight: 1.5 }}
-           dangerouslySetInnerHTML={{ __html: t('survey_adaptation_adaptive_desc') }}
-        />
-        <div style={{ 
-          marginLeft: '36px', 
-          marginTop: '12px', 
-          padding: '8px 12px', 
-          backgroundColor: selected === 'adaptive' ? '#bee3f8' : '#f7fafc', 
-          borderRadius: '6px',
-          fontSize: '0.85rem',
-          color: '#4a5568'
-        }}>
-          {t('survey_adaptation_adaptive_ideal')}
-        </div>
-      </div>
+      <OptionCard 
+        value="adaptive"
+        title={t('survey_adaptation_adaptive_title')}
+        descKey="survey_adaptation_adaptive_desc"
+        idealKey="survey_adaptation_adaptive_ideal"
+      />
 
-      {/* Option B: Stable */}
-      <div 
-        style={optionStyle(selected === 'stable')}
-        onClick={() => setSelected('stable')}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-          <div style={{
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            border: `2px solid ${selected === 'stable' ? '#3182ce' : '#cbd5e0'}`,
-            backgroundColor: selected === 'stable' ? '#3182ce' : 'white',
-            marginRight: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            {selected === 'stable' && <span style={{ color: 'white', fontSize: '14px' }}>✓</span>}
-          </div>
-          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#2d3748' }}>
-            {t('survey_adaptation_stable_title')}
-          </span>
-        </div>
-        <p style={{ fontSize: '0.9rem', color: '#718096', marginLeft: '36px', lineHeight: 1.5 }}
-           dangerouslySetInnerHTML={{ __html: t('survey_adaptation_stable_desc') }}
-        />
-        <div style={{ 
-          marginLeft: '36px', 
-          marginTop: '12px', 
-          padding: '8px 12px', 
-          backgroundColor: selected === 'stable' ? '#bee3f8' : '#f7fafc', 
-          borderRadius: '6px',
-          fontSize: '0.85rem',
-          color: '#4a5568'
-        }}>
-          {t('survey_adaptation_stable_ideal')}
-        </div>
-      </div>
+      <OptionCard 
+        value="stable"
+        title={t('survey_adaptation_stable_title')}
+        descKey="survey_adaptation_stable_desc"
+        idealKey="survey_adaptation_stable_ideal"
+      />
 
-      <p style={{ fontSize: '0.85rem', color: '#718096', marginBottom: '16px', textAlign: 'center' }}>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center">
         {t('survey_adaptation_changeable')}
       </p>
 
-      <Button 
+      <SurveyButton 
         disabled={selected === null} 
         onClick={() => selected && onComplete(selected)}
       >
         {t('survey_adaptation_submit')}
-      </Button>
+      </SurveyButton>
     </div>
   );
 };
@@ -575,58 +475,53 @@ const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids
 
   return (
     <div>
-      <p style={{ marginBottom: '16px', fontSize: '0.9rem', color: '#4a5568' }}>
+      <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
         {t('survey_ranking_intro')} <br/>
         <span dangerouslySetInnerHTML={{ __html: t('survey_ranking_hint') }} />
       </p>
 
       {/* Die Rangliste */}
-      <div style={{ marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>{t('survey_ranking_your_priority', { count: items.length })}</h3>
-        <div style={{ minHeight: '50px', border: '2px dashed #cbd5e0', borderRadius: '8px', padding: '8px', backgroundColor: '#f7fafc' }}>
+      <div className="mb-5">
+        <h3 className="text-base font-semibold mb-2 text-gray-800 dark:text-gray-100">{t('survey_ranking_your_priority', { count: items.length })}</h3>
+        <div className="min-h-[50px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
           {ranked.map((item, index) => (
             <div 
               key={item.id} 
               onClick={() => moveToPool(item)}
-              style={{ 
-                padding: '10px', marginBottom: '8px', backgroundColor: '#3182ce', color: 'white', 
-                borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center' 
-              }}
+              className="p-2.5 mb-2 last:mb-0 bg-accent-primary text-white rounded cursor-pointer flex items-center hover:bg-accent-secondary transition-colors"
             >
-              <span style={{ fontWeight: 'bold', marginRight: '10px', backgroundColor: 'rgba(255,255,255,0.3)', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>{index + 1}</span>
+              <span className="font-bold mr-2.5 bg-white/30 w-6 h-6 flex items-center justify-center rounded-full text-sm">{index + 1}</span>
               <div>
-                <div style={{ fontWeight: 600 }}>{item.label}</div>
-                <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>{item.text}</div>
+                <div className="font-semibold">{item.label}</div>
+                <div className="text-xs opacity-90">{item.text}</div>
               </div>
             </div>
           ))}
-          {ranked.length === 0 && <div style={{ color: '#a0aec0', textAlign: 'center', padding: '10px' }}>{t('survey_ranking_nothing_selected')}</div>}
+          {ranked.length === 0 && <div className="text-gray-400 dark:text-gray-500 text-center py-2.5">{t('survey_ranking_nothing_selected')}</div>}
         </div>
       </div>
 
       {/* Der Pool */}
       {pool.length > 0 && (
         <div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>{t('survey_ranking_options')}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <h3 className="text-base font-semibold mb-2 text-gray-800 dark:text-gray-100">{t('survey_ranking_options')}</h3>
+          <div className="flex flex-col gap-2">
             {pool.map(item => (
               <div 
                 key={item.id} 
                 onClick={() => moveToRanked(item)}
-                style={{ 
-                  padding: '12px', border: '1px solid #e2e8f0', borderRadius: '4px', 
-                  backgroundColor: 'white', cursor: 'pointer', transition: 'background 0.2s'
-                }}
+                className="p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-800 cursor-pointer 
+                  hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
               >
-                <div style={{ fontWeight: 600, color: '#2d3748' }}>{item.label}</div>
-                <div style={{ fontSize: '0.85rem', color: '#718096' }}>{item.text}</div>
+                <div className="font-semibold text-gray-800 dark:text-gray-100">{item.label}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{item.text}</div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <Button disabled={pool.length > 0} onClick={() => onComplete(ranked.map(r => r.id))}>{t('survey_btn_finish')}</Button>
+      <SurveyButton disabled={pool.length > 0} onClick={() => onComplete(ranked.map(r => r.id))}>{t('survey_btn_finish')}</SurveyButton>
     </div>
   );
 };
@@ -715,7 +610,7 @@ export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => v
   else if (currentStepId === 'BIG5_QUESTIONS') {
     content = (
       <Card title={t('survey_big5_title')}>
-        <p style={{marginBottom:'15px', color:'#666'}}>{t('survey_big5_intro')}</p>
+        <p className="mb-4 text-gray-600 dark:text-gray-400">{t('survey_big5_intro')}</p>
         <LikertBlock 
           questions={BIG5_QUESTIONS} 
           t={t}
@@ -787,7 +682,7 @@ export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => v
     );
   }
 
-  return <div style={{ padding: '40px', backgroundColor: '#f7fafc', minHeight: '100vh' }}>{content}</div>;
+  return <div className="p-6 sm:p-10 bg-background-primary min-h-screen">{content}</div>;
 };
 
 export default PersonalitySurvey;
