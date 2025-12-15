@@ -79,12 +79,13 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
       
       const encryptedData = await encryptPersonalityProfile(surveyResult as any, encryptionKey);
       
-      // Save to backend
+      // Save to backend - preserve adaptationMode (refinement only works for adaptive)
       await api.savePersonalityProfile({
         testType: profileType,
         filterWorry: currentProfile.filterWorry || 0,
         filterControl: currentProfile.filterControl || 0,
-        encryptedData
+        encryptedData,
+        adaptationMode: currentProfile.adaptationMode || 'adaptive'
       });
       
       console.log('[DPFL] Profile refinement applied successfully');
@@ -194,9 +195,9 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
         </div>
 
         {/* Info Box */}
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg">
           <p className="text-xs text-content-secondary">
-            <strong className="text-blue-700 dark:text-blue-400">ℹ️ {t('refinement_info_title') || 'Hinweis'}:</strong>{' '}
+            <strong className="text-green-700 dark:text-green-400">ℹ️ {t('refinement_info_title') || 'Hinweis'}:</strong>{' '}
             {t('refinement_info_desc') || 
               `Diese Vorschläge basieren auf deinem beobachteten Verhalten in ${suggestions.sessionCount} Sessions. Du entscheidest, ob du sie übernimmst.`}
           </p>

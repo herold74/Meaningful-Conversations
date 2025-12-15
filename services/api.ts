@@ -200,6 +200,7 @@ export const savePersonalityProfile = async (data: {
   filterWorry: number;
   filterControl: number;
   encryptedData: string;
+  adaptationMode?: 'adaptive' | 'stable';
 }) => {
   const response = await fetch(`${API_BASE_URL}/api/personality/save`, {
     method: 'POST',
@@ -300,6 +301,28 @@ export const checkPersonalityProfile = async (): Promise<boolean> => {
   } catch (error) {
     return false;
   }
+};
+
+export const generateNarrativeProfile = async (data: {
+  quantitativeData: {
+    testType: string;
+    filter: { worry: number; control: number };
+    riemann?: any;
+    big5?: any;
+  };
+  narratives: { flowStory: string; frictionStory: string };
+  language: string;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/generate-narrative`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate narrative profile');
+  }
+  return response.json();
 };
 
 export const logSessionBehavior = async (data: {

@@ -458,7 +458,7 @@ const App: React.FC = () => {
             
             await generatePDF(htmlContent, filename);
             
-            // NEU: Verschluesseln und speichern (nur fuer registered users)
+            // Verschluesseln und speichern (nur fuer registered users)
             if (currentUser && encryptionKey) {
                 try {
                     const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
@@ -467,12 +467,11 @@ const App: React.FC = () => {
                         testType: result.path,
                         filterWorry: result.filter.worry,
                         filterControl: result.filter.control,
-                        encryptedData
+                        encryptedData,
+                        adaptationMode: result.adaptationMode || 'adaptive'
                     });
                     
-                    // Update hasPersonalityProfile state
                     setHasPersonalityProfile(true);
-                    
                     alert(t('personality_survey_success_saved'));
                 } catch (error) {
                     console.error('Profile save failed:', error);
@@ -486,7 +485,8 @@ const App: React.FC = () => {
             alert(t('personality_survey_error_pdf'));
         }
         
-        setView('admin');
+        // Navigate based on authentication status
+        setView(currentUser ? 'personalityProfile' : 'chat');
     };
 
     const handlePiiConfirm = () => {
@@ -943,7 +943,10 @@ const App: React.FC = () => {
             case 'personalityProfile': return (
                 <PersonalityProfileView 
                     encryptionKey={encryptionKey}
-                    onStartNewTest={() => setView('personalitySurvey')}
+                    onStartNewTest={() => {
+                        setMenuView(null);
+                        setView('personalitySurvey');
+                    }}
                 />
             );
             case 'botSelection': return (
