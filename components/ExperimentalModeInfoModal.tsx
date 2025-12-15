@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
+import { XIcon } from './icons/XIcon';
 
 interface ExperimentalModeInfoModalProps {
   onClose: () => void;
@@ -27,10 +28,10 @@ const ExperimentalModeInfoModal: React.FC<ExperimentalModeInfoModalProps> = ({ o
               </h2>
               <button
                 onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center text-content-secondary hover:text-content-primary hover:bg-background-tertiary rounded-full transition-colors text-2xl leading-none"
+                className="p-2 text-content-secondary hover:text-content-primary"
                 aria-label="Close"
               >
-                ×
+                <XIcon className="w-6 h-6" />
               </button>
             </div>
           </div>
