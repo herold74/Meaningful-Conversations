@@ -131,7 +131,15 @@ update_production_configs() {
     
     # Get container IPs
     local backend_ip=$(get_container_ip "meaningful-conversations-backend-production")
-    local frontend_ip=$(get_container_ip "meaningful-conversations-frontend-production")
+    
+    # Try blue-green container names first (frontend-blue, frontend-green), then fallback to -production
+    local frontend_ip=$(get_container_ip "meaningful-conversations-frontend-blue" 2>/dev/null)
+    if [ -z "$frontend_ip" ]; then
+        frontend_ip=$(get_container_ip "meaningful-conversations-frontend-green" 2>/dev/null)
+    fi
+    if [ -z "$frontend_ip" ]; then
+        frontend_ip=$(get_container_ip "meaningful-conversations-frontend-production" 2>/dev/null)
+    fi
     
     if [ -z "$backend_ip" ] || [ -z "$frontend_ip" ]; then
         print_error "Failed to get production container IPs"
