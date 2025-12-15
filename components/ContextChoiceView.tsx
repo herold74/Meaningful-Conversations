@@ -9,6 +9,7 @@ import { DownloadIcon } from './icons/DownloadIcon';
 import { WarningIcon } from './icons/WarningIcon';
 import { XIcon } from './icons/XIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
+import Button from './shared/Button';
 
 interface ContextChoiceViewProps {
   user: User;
@@ -101,20 +102,12 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         </div>
 
         <div className="space-y-4 pt-4">
-          <button
-            onClick={onContinue}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 rounded-lg shadow-md"
-          >
-            <FileTextIcon className="w-6 h-6" />
+          <Button onClick={onContinue} size="lg" fullWidth leftIcon={<FileTextIcon className="w-6 h-6" />}>
             {t('contextChoice_continue')}
-          </button>
-           <button
-            onClick={() => setIsConfirmingStartNew(true)}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-content-secondary bg-transparent border border-border-secondary dark:border-border-primary uppercase hover:bg-background-tertiary dark:hover:bg-background-tertiary rounded-lg shadow-md"
-          >
-            <UploadIcon className="w-6 h-6" />
+          </Button>
+          <Button onClick={() => setIsConfirmingStartNew(true)} variant="outline" size="lg" fullWidth leftIcon={<UploadIcon className="w-6 h-6" />}>
             {t('contextChoice_start_new')}
-          </button>
+          </Button>
         </div>
       </div>
       
@@ -141,16 +134,12 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
                  <p className="text-content-secondary text-left mb-6">{t('contextChoice_confirm_warning')}</p>
 
                  <div className="flex flex-col sm:flex-row gap-4">
-                    <button
-                        onClick={handleDownloadContext}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md"
-                    >
-                        <DownloadIcon className="w-5 h-5"/>
+                    <Button onClick={handleDownloadContext} size="sm" className="flex-1" leftIcon={<DownloadIcon className="w-5 h-5"/>}>
                         {t('contextChoice_confirm_download')}
-                    </button>
-                    <button onClick={handleConfirmStartNew} className="flex-1 px-4 py-2 text-sm font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover rounded-lg shadow-md">
+                    </Button>
+                    <Button onClick={handleConfirmStartNew} size="sm" className="flex-1 bg-accent-secondary hover:bg-accent-secondary-hover">
                         {t('contextChoice_confirm_proceed')}
-                    </button>
+                    </Button>
                  </div>
             </div>
         </div>

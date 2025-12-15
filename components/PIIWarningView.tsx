@@ -1,6 +1,7 @@
 import React from 'react';
 import { WarningIcon } from './icons/WarningIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import Button from './shared/Button';
 
 interface PIIWarningViewProps {
   onConfirm: () => void;
@@ -27,18 +28,12 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
            <p className="mt-4">{t('piiWarning_advice')}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-          <button
-            onClick={onCancel}
-            className="flex-1 px-6 py-3 text-base font-bold text-status-warning-foreground bg-transparent border border-status-warning-foreground uppercase hover:bg-status-warning-foreground hover:text-content-inverted focus:outline-none transition-colors rounded-lg shadow-md"
-          >
+          <Button onClick={onCancel} variant="outline" size="lg" className="flex-1">
             {t('piiWarning_goBack')}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors rounded-lg shadow-md"
-          >
+          </Button>
+          <Button onClick={onConfirm} size="lg" className="flex-1">
             {t('piiWarning_continue')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

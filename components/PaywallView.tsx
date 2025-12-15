@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { LockIcon } from './icons/LockIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
-import { LogOutIcon } from './icons/LogOutIcon';
+import Button from './shared/Button';
 
 interface PaywallViewProps {
   userEmail: string | null;
@@ -31,20 +31,23 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onLogout
         <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: description }} />
         
         <div className="space-y-4 pt-4">
-          <button
+          <Button
             onClick={() => window.open('https://guenter-herold.jimdosite.com/de/leistungen/mc-app/', '_blank')}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-md"
+            size="lg"
+            fullWidth
+            leftIcon={<ShoppingBagIcon className="w-6 h-6" />}
           >
-            <ShoppingBagIcon className="w-6 h-6" />
             {t('paywall_purchase_button')}
-          </button>
-           <button
+          </Button>
+          <Button
             onClick={onRedeem}
-            className="w-full flex items-center justify-center gap-3 px-6 py-3 text-base font-bold text-black bg-[#FECC78] uppercase hover:brightness-95 rounded-lg shadow-md"
+            size="lg"
+            fullWidth
+            leftIcon={<KeyIcon className="w-6 h-6" />}
+            className="bg-[#FECC78] text-black hover:brightness-95"
           >
-            <KeyIcon className="w-6 h-6" />
             {t('paywall_redeem_button')}
-          </button>
+          </Button>
         </div>
 
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">

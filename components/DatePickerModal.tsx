@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { formatDateToISO } from '../utils/dateParser';
+import Button from './shared/Button';
 
 interface DatePickerModalProps {
     isOpen: boolean;
@@ -82,19 +83,12 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
                 </div>
 
                 <div className="flex gap-3 justify-end">
-                    <button
-                        onClick={onCancel}
-                        className="px-4 py-2 text-content-secondary dark:text-content-secondary hover:bg-background-tertiary dark:hover:bg-background-tertiary rounded-md transition-colors"
-                    >
+                    <Button onClick={onCancel} variant="ghost">
                         {t('datePicker_cancel')}
-                    </button>
-                    <button
-                        onClick={handleConfirm}
-                        disabled={!selectedDate}
-                        className="px-4 py-2 bg-accent-primary dark:bg-accent-secondary text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    </Button>
+                    <Button onClick={handleConfirm} disabled={!selectedDate}>
                         {t('datePicker_confirm')}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

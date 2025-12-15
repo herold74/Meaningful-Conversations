@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
+import Button from './shared/Button';
 import Spinner from './shared/Spinner';
 import { CheckIcon } from './icons/CheckIcon';
 import { WarningIcon } from './icons/WarningIcon';
@@ -110,15 +111,11 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess
                         />
                     </div>
 
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    {error && <p className="text-status-danger-foreground text-sm">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={status === 'loggingIn' || !password}
-                        className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover focus:outline-none transition-colors duration-200 flex items-center justify-center disabled:bg-gray-300 dark:disabled:bg-gray-700"
-                    >
-                        {status === 'loggingIn' ? <Spinner /> : t('login_button')}
-                    </button>
+                    <Button type="submit" disabled={status === 'loggingIn' || !password} loading={status === 'loggingIn'} size="lg" fullWidth>
+                        {t('login_button')}
+                    </Button>
                 </form>
             </div>
         )}
