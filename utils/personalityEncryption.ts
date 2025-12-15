@@ -1,5 +1,5 @@
 import { encryptData, decryptData } from './encryption';
-import { SurveyResult } from '../components/PersonalitySurvey';
+import { SurveyResult, NarrativeProfile } from '../components/PersonalitySurvey';
 
 export interface EncryptedPersonalityData {
   riemann?: {
@@ -15,6 +15,13 @@ export interface EncryptedPersonalityData {
     agreeableness: number;
     neuroticism: number;
   };
+  // NEW: Narrative data
+  narratives?: {
+    flowStory: string;
+    frictionStory: string;
+  };
+  adaptationMode?: 'adaptive' | 'stable';
+  narrativeProfile?: NarrativeProfile;
 }
 
 export const encryptPersonalityProfile = async (
@@ -23,7 +30,11 @@ export const encryptPersonalityProfile = async (
 ): Promise<string> => {
   const sensitiveData: EncryptedPersonalityData = {
     riemann: surveyResult.riemann || undefined,
-    big5: surveyResult.big5 || undefined
+    big5: surveyResult.big5 || undefined,
+    // NEW: Include narrative data
+    narratives: surveyResult.narratives || undefined,
+    adaptationMode: surveyResult.adaptationMode || undefined,
+    narrativeProfile: surveyResult.narrativeProfile || undefined
   };
   
   const jsonString = JSON.stringify(sensitiveData);
