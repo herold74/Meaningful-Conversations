@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require('../prismaClient.js');
 const authMiddleware = require('../middleware/auth.js');
 const profileRefinement = require('../services/profileRefinement.js');
+const aiProvider = require('../services/aiProviderService.js');
 
 /**
  * POST /api/personality/save
@@ -10,13 +11,16 @@ const profileRefinement = require('../services/profileRefinement.js');
  */
 router.post('/save', authMiddleware, async (req, res) => {
   try {
-    const { testType, filterWorry, filterControl, encryptedData } = req.body;
+    const { testType, filterWorry, filterControl, encryptedData, adaptationMode } = req.body;
     const userId = req.userId;
     
     // Validation
     if (!testType || !encryptedData) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    
+    // Validate adaptationMode
+    const validMode = adaptationMode === 'stable' ? 'stable' : 'adaptive';
     
     // Upsert (create or update)
     const profile = await prisma.personalityProfile.upsert({
@@ -26,13 +30,16 @@ router.post('/save', authMiddleware, async (req, res) => {
         testType,
         filterWorry: filterWorry || 0,
         filterControl: filterControl || 0,
+        adaptationMode: validMode,
         encryptedData
       },
       update: {
         testType,
         filterWorry: filterWorry || 0,
         filterControl: filterControl || 0,
-        encryptedData
+        adaptationMode: validMode,
+        encryptedData,
+        sessionCount: 0 // Reset session count when profile is recreated
       }
     });
     
@@ -118,15 +125,25 @@ router.post('/comfort-check', authMiddleware, async (req, res) => {
       }
     });
     
-    // Increment session count if comfort score >= 3 (authentic session)
+    // Only increment session count for ADAPTIVE profiles and authentic sessions
     if (!optOut && score && score >= 3) {
-      await prisma.personalityProfile.updateMany({
+      // Check if user has adaptive profile
+      const profile = await prisma.personalityProfile.findUnique({
         where: { userId: req.userId },
-        data: {
-          sessionCount: { increment: 1 }
-        }
+        select: { adaptationMode: true }
       });
-      console.log(`[DPFL] Incremented session count for user ${req.userId} (comfort: ${score})`);
+      
+      if (profile && profile.adaptationMode === 'adaptive') {
+        await prisma.personalityProfile.updateMany({
+          where: { userId: req.userId },
+          data: {
+            sessionCount: { increment: 1 }
+          }
+        });
+        console.log(`[DPFL] Incremented session count for user ${req.userId} (comfort: ${score}, adaptive mode)`);
+      } else {
+        console.log(`[DPFL] Skipping session count - user ${req.userId} has stable profile`);
+      }
     }
     
     res.json({ success: true, updated: updated.count });
@@ -139,10 +156,29 @@ router.post('/comfort-check', authMiddleware, async (req, res) => {
 /**
  * GET /api/personality/adaptation-suggestions
  * Berechnet Profil-Update-Vorschlaege basierend auf Session-Logs
+ * Nur fuer adaptive Profile
  */
 router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
+    
+    // Hole aktuelles Profil und pruefe adaptationMode
+    const profile = await prisma.personalityProfile.findUnique({
+      where: { userId }
+    });
+    
+    if (!profile) {
+      return res.json({ hasSuggestions: false, reason: 'No profile found' });
+    }
+    
+    // Check adaptation mode - stable profiles don't get suggestions
+    if (profile.adaptationMode === 'stable') {
+      return res.json({ 
+        hasSuggestions: false, 
+        reason: 'Profile is set to stable mode',
+        adaptationMode: 'stable'
+      });
+    }
     
     // Hole die letzten 5 Sessions (nicht opted-out)
     const recentLogs = await prisma.sessionBehaviorLog.findMany({
@@ -158,17 +194,9 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
     if (recentLogs.length < 3) {
       return res.json({ 
         hasSuggestions: false, 
-        message: 'Not enough data yet (minimum 3 sessions)' 
+        message: 'Not enough data yet (minimum 3 sessions)',
+        adaptationMode: 'adaptive'
       });
-    }
-    
-    // Hole aktuelles Profil
-    const profile = await prisma.personalityProfile.findUnique({
-      where: { userId }
-    });
-    
-    if (!profile) {
-      return res.json({ hasSuggestions: false, reason: 'No profile found' });
     }
     
     // Note: Profile data is encrypted
@@ -185,6 +213,7 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
       })),
       sessionCount: recentLogs.length,
       profileType: profile.testType,
+      adaptationMode: 'adaptive',
       message: 'Client must decrypt profile and use profileRefinement service'
     });
     
@@ -193,6 +222,159 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Failed to calculate suggestions' });
   }
 });
+
+/**
+ * POST /api/personality/generate-narrative
+ * Generates a narrative personality profile using AI
+ */
+router.post('/generate-narrative', authMiddleware, async (req, res) => {
+  try {
+    const { quantitativeData, narratives, language } = req.body;
+    
+    // Validation
+    if (!quantitativeData || !narratives || !narratives.flowStory || !narratives.frictionStory) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    const lang = language === 'en' ? 'en' : 'de';
+    
+    // Build the synthesis prompt
+    const synthesisPrompt = NARRATIVE_SYNTHESIS_PROMPTS[lang]
+      .replace('{{quantitativeData}}', JSON.stringify(quantitativeData, null, 2))
+      .replace('{{flowStory}}', narratives.flowStory)
+      .replace('{{frictionStory}}', narratives.frictionStory);
+    
+    console.log(`[Narrative] Generating narrative profile for user ${req.userId} in ${lang}`);
+    
+    // Call AI provider
+    const result = await aiProvider.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: synthesisPrompt,
+      config: {
+        temperature: 0.8,
+        maxOutputTokens: 2500,
+        responseMimeType: 'application/json',
+        systemInstruction: lang === 'de' 
+          ? 'Antworte ausschließlich mit validem JSON gemäß dem angeforderten Schema. Keine Erklärungen außerhalb des JSON.'
+          : 'Respond only with valid JSON matching the requested schema. No explanations outside the JSON.'
+      }
+    });
+    
+    // Parse the response - strip markdown code fences if present
+    let narrativeProfile;
+    try {
+      let jsonText = result.text.trim();
+      // Remove markdown code fences if present
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.slice(7); // Remove ```json
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.slice(3); // Remove ```
+      }
+      if (jsonText.endsWith('```')) {
+        jsonText = jsonText.slice(0, -3); // Remove trailing ```
+      }
+      jsonText = jsonText.trim();
+      
+      narrativeProfile = JSON.parse(jsonText);
+      narrativeProfile.generatedAt = new Date().toISOString();
+    } catch (parseError) {
+      console.error('[Narrative] Failed to parse AI response:', result.text);
+      return res.status(500).json({ error: 'Failed to parse narrative profile' });
+    }
+    
+    console.log(`[Narrative] Successfully generated profile with ${narrativeProfile.superpowers?.length || 0} superpowers`);
+    
+    res.json({ 
+      success: true, 
+      narrativeProfile,
+      model: result.model,
+      provider: result.provider
+    });
+    
+  } catch (error) {
+    console.error('Error generating narrative profile:', error);
+    res.status(500).json({ error: 'Failed to generate narrative profile' });
+  }
+});
+
+// Narrative Synthesis Prompts (Bilingual)
+const NARRATIVE_SYNTHESIS_PROMPTS = {
+  de: `Du bist ein psychologischer Profiler mit der sprachlichen Eleganz eines Romanautors. 
+Dein Ziel: Ein tiefgehendes Persönlichkeitsprofil, das quantitative Daten mit qualitativen Erzählungen verwebt.
+
+REGELN:
+1. Synthetisiere Paradoxien: Zeigen die Daten widersprüchliche Eigenschaften (z.B. Wunsch nach Freiheit UND Wunsch nach Struktur), nenne es ein "Betriebssystem". Erkläre, wie beide Pole zusammenarbeiten (z.B. "Du brauchst Struktur, um wild sein zu können").
+2. Kein Psychobabble und NUR deutsche Wörter: Keine englischen Fachbegriffe. Übersetze immer: openness→Offenheit, agreeableness→Verträglichkeit, conscientiousness→Gewissenhaftigkeit, extraversion→Extraversion, neuroticism→Emotionale Stabilität. Erfinde metaphorische Titel für Talente (z.B. "Prototypen-Alchemie" statt "Hohe Offenheit").
+3. Nutze die User-Story als MUSTER: Beschreibe das dahinterliegende Muster (z.B. "kreative Autonomie"), NICHT das konkrete Ereignis (z.B. "App-Entwicklung"). Keine Projektnamen, Personennamen oder spezifische Situationen.
+4. Tone: Empathisch, direkt, leicht poetisch, aber geerdet ("Du enthältst Multituden").
+5. Auf Deutsch schreiben. Verwende "Du" als Anrede.
+6. Zeitlosigkeit: Das Profil soll in 2 Jahren noch relevant klingen. Vermeide Referenzen auf aktuelle Ereignisse.
+
+QUANTITATIVE DATEN (Testergebnisse):
+{{quantitativeData}}
+
+FLOW-ERLEBNIS (Was energetisiert diese Person):
+{{flowStory}}
+
+KONFLIKT-ERLEBNIS (Was kostet Energie):
+{{frictionStory}}
+
+Erstelle ein JSON mit exakt dieser Struktur:
+{
+  "operatingSystem": "1 packender Einleitungssatz + 1 Absatz über die Dynamik der Widersprüche. Maximal 100 Wörter. Keine konkreten Projekt- oder Personen-Referenzen.",
+  "superpowers": [
+    { "name": "Kreativer metaphorischer Titel auf Deutsch", "description": "Beschreibung des MUSTERS, das sich in der Flow-Story zeigt" },
+    { "name": "Zweiter Titel", "description": "Zweite Stärke" },
+    { "name": "Dritter Titel", "description": "Dritte Stärke" }
+  ],
+  "blindspots": [
+    { "name": "Metaphorischer deutscher Name", "description": "Geframed als Unwucht der Talente oder falsche Umgebung, NICHT als Schwäche. Beschreibe das Muster aus der Konflikt-Story." },
+    { "name": "Zweiter Blindspot", "description": "Zweites Risiko" }
+  ],
+  "growthOpportunities": [
+    { "title": "Konkrete Übung mit kreativem Namen", "recommendation": "Praktische Handlungsempfehlung, die direkt aus den Blindspots abgeleitet ist" },
+    { "title": "Zweite Übung", "recommendation": "Zweite Empfehlung" }
+  ]
+}`,
+
+  en: `You are a psychological profiler with the linguistic elegance of a novelist.
+Your goal: A deep personality profile that weaves quantitative data with qualitative narratives.
+
+RULES:
+1. Synthesize Paradoxes: If data shows contradictory traits (e.g., desire for freedom AND desire for structure), call it an "operating system". Explain how both poles work together (e.g., "You need structure to be wild").
+2. No Psychobabble: No technical jargon. Use friendly terms: neuroticism→Emotional Stability. Invent metaphorical titles for talents (e.g., "Prototype Alchemy" instead of "High Openness").
+3. Use the User-Story as PATTERN: Describe the underlying pattern (e.g., "creative autonomy"), NOT the specific event (e.g., "app development"). No project names, person names, or specific situations.
+4. Tone: Empathetic, direct, slightly poetic, but grounded ("You contain multitudes").
+5. Write in English. Use "You" as the form of address.
+6. Timelessness: The profile should still be relevant in 2 years. Avoid references to current events.
+
+QUANTITATIVE DATA (Test Results):
+{{quantitativeData}}
+
+FLOW EXPERIENCE (What energizes this person):
+{{flowStory}}
+
+CONFLICT EXPERIENCE (What drains energy):
+{{frictionStory}}
+
+Create a JSON with exactly this structure:
+{
+  "operatingSystem": "1 compelling opening sentence + 1 paragraph about the dynamics of contradictions. Maximum 100 words. No specific project or person references.",
+  "superpowers": [
+    { "name": "Creative metaphorical title", "description": "Description of the PATTERN shown in the flow story" },
+    { "name": "Second title", "description": "Second strength" },
+    { "name": "Third title", "description": "Third strength" }
+  ],
+  "blindspots": [
+    { "name": "Metaphorical name", "description": "Framed as imbalance of talents or wrong environment, NOT as weakness. Describe the pattern from the conflict story." },
+    { "name": "Second blindspot", "description": "Second risk" }
+  ],
+  "growthOpportunities": [
+    { "title": "Concrete exercise with creative name", "recommendation": "Practical recommendation directly derived from the blindspots" },
+    { "title": "Second exercise", "recommendation": "Second recommendation" }
+  ]
+}`
+};
 
 module.exports = router;
 

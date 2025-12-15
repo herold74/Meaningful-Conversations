@@ -180,6 +180,7 @@ model PersonalityProfile {
   testType        String   // "RIEMANN" oder "BIG5"
   filterWorry     Int      // 1-5 (grober Indikator)
   filterControl   Int      // 1-5 (grober Indikator)
+  adaptationMode  String   @default("adaptive") // "adaptive" oder "stable"
   
   // VERSCHLUESSELT: Alle detaillierten Scores
   encryptedData   String   @db.Text
