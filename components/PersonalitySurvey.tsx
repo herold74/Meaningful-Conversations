@@ -52,69 +52,70 @@ export interface NarrativeProfile {
   generatedAt: string;
 }
 
-// --- TEXT DATEN (KONFIGURATION) ---
+// --- TEXT DATEN (KONFIGURATION) - Lokalisiert ---
 
-const FILTER_QUESTIONS = [
-  { id: 'worry', text: 'Wie häufig beschäftigen Sie sich gedanklich mit Sorgen, Bedenken oder möglichen negativen Ausgängen?' },
-  { id: 'control', text: 'Wenn Dinge unvorhergesehen außer Kontrolle geraten: Wie stark ist Ihr Impuls, sofort einzugreifen oder dies als Bedrohung zu empfinden?' }
+type TranslateFunc = (key: string, replacements?: Record<string, string | number>) => string;
+
+const getFilterQuestions = (t: TranslateFunc) => [
+  { id: 'worry', text: t('survey_filter_worry') },
+  { id: 'control', text: t('survey_filter_control') }
 ];
 
-const RIEMANN_BLOCKS = {
+const getRiemannBlocks = (t: TranslateFunc) => ({
   beruf: {
-    title: 'Kontext: BERUF',
+    title: t('survey_riemann_beruf_title'),
     items: [
-      { id: 'distanz', label: 'Distanz (Autonomie)', text: 'Beste Leistung bei Eigenständigkeit, Sachlichkeit vor Befindlichkeit.' },
-      { id: 'naehe', label: 'Nähe (Zugehörigkeit)', text: 'Harmonie und Teamgeist sind wichtiger als reine Sachziele.' },
-      { id: 'dauer', label: 'Dauer (Struktur)', text: 'Klare Prozesse und Planungssicherheit sind zwingend.' },
-      { id: 'wechsel', label: 'Wechsel (Impuls)', text: 'Abwechslung und kreative Freiräume; Routine langweilt.' }
+      { id: 'distanz', label: t('survey_riemann_distanz_beruf_label'), text: t('survey_riemann_distanz_beruf_text') },
+      { id: 'naehe', label: t('survey_riemann_naehe_beruf_label'), text: t('survey_riemann_naehe_beruf_text') },
+      { id: 'dauer', label: t('survey_riemann_dauer_beruf_label'), text: t('survey_riemann_dauer_beruf_text') },
+      { id: 'wechsel', label: t('survey_riemann_wechsel_beruf_label'), text: t('survey_riemann_wechsel_beruf_text') }
     ]
   },
   privat: {
-    title: 'Kontext: PRIVAT',
+    title: t('survey_riemann_privat_title'),
     items: [
-      { id: 'distanz', label: 'Distanz (Rückzug)', text: 'Brauche viel Zeit allein (Me-Time) zum Aufladen.' },
-      { id: 'naehe', label: 'Nähe (Harmonie)', text: 'Konfliktvermeidung, fühle mich wohl, wenn alle mich mögen.' },
-      { id: 'dauer', label: 'Dauer (Beständigkeit)', text: 'Liebe Rituale und Verlässlichkeit; hasse spontane Planänderungen.' },
-      { id: 'wechsel', label: 'Wechsel (Erlebnis)', text: 'Will Neues erleben, spontan sein; Pläne fühlen sich wie Fesseln an.' }
+      { id: 'distanz', label: t('survey_riemann_distanz_privat_label'), text: t('survey_riemann_distanz_privat_text') },
+      { id: 'naehe', label: t('survey_riemann_naehe_privat_label'), text: t('survey_riemann_naehe_privat_text') },
+      { id: 'dauer', label: t('survey_riemann_dauer_privat_label'), text: t('survey_riemann_dauer_privat_text') },
+      { id: 'wechsel', label: t('survey_riemann_wechsel_privat_label'), text: t('survey_riemann_wechsel_privat_text') }
     ]
   },
   selbst: {
-    title: 'Kontext: SELBSTBILD',
+    title: t('survey_riemann_selbst_title'),
     items: [
-      { id: 'distanz', label: 'Distanz (Rational)', text: 'Rationaler Kopfmensch, lasse mich nicht von Gefühlen leiten.' },
-      { id: 'naehe', label: 'Nähe (Empathisch)', text: 'Gefühlsmensch, definiere mich über Beziehungen.' },
-      { id: 'dauer', label: 'Dauer (Prinzipien)', text: 'Feste Grundsätze, vorsichtig, langfristig denkend.' },
-      { id: 'wechsel', label: 'Wechsel (Vielseitig)', text: 'Lebendig, charmant, lebe im Hier und Jetzt.' }
+      { id: 'distanz', label: t('survey_riemann_distanz_selbst_label'), text: t('survey_riemann_distanz_selbst_text') },
+      { id: 'naehe', label: t('survey_riemann_naehe_selbst_label'), text: t('survey_riemann_naehe_selbst_text') },
+      { id: 'dauer', label: t('survey_riemann_dauer_selbst_label'), text: t('survey_riemann_dauer_selbst_text') },
+      { id: 'wechsel', label: t('survey_riemann_wechsel_selbst_label'), text: t('survey_riemann_wechsel_selbst_text') }
     ]
   }
-};
+});
 
-export const STRESS_ITEMS = [
-  { id: 'distanz', label: 'Rückzug', text: 'Tür zu, Kommunikation einstellen, Problem alleine lösen.' },
-  { id: 'naehe', label: 'Anpassung', text: 'Unterstützung suchen, nachgeben, es allen recht machen.' },
-  { id: 'dauer', label: 'Kontrolle', text: 'Auf Regeln pochen, dogmatisch werden, Fehler suchen.' },
-  { id: 'wechsel', label: 'Aktionismus', text: 'Hektisch werden, ausweichen, viele Dinge gleichzeitig anfangen.' }
+export const getStressItems = (t: TranslateFunc) => [
+  { id: 'distanz', label: t('survey_stress_distanz_label'), text: t('survey_stress_distanz_text') },
+  { id: 'naehe', label: t('survey_stress_naehe_label'), text: t('survey_stress_naehe_text') },
+  { id: 'dauer', label: t('survey_stress_dauer_label'), text: t('survey_stress_dauer_text') },
+  { id: 'wechsel', label: t('survey_stress_wechsel_label'), text: t('survey_stress_wechsel_text') }
 ];
 
-const BIG5_QUESTIONS = [
-  // 1. Offenheit (O)
-  { id: 'openness_high', label: 'Offenheit (Neuheit)', text: 'Ich habe eine lebhafte Fantasie und probiere gerne neue Ideen aus.', inverse: false },
-  { id: 'openness_low', label: 'Offenheit (Bewährtes)', text: 'Ich ziehe bewährte, vertraute Vorgehensweisen Experimenten vor.', inverse: true },
+// Legacy export for compatibility
+export const STRESS_ITEMS = [
+  { id: 'distanz', label: 'Withdrawal', text: 'Close the door, stop communication, solve the problem alone.' },
+  { id: 'naehe', label: 'Adaptation', text: 'Seek support, give in, try to please everyone.' },
+  { id: 'dauer', label: 'Control', text: 'Insist on rules, become dogmatic, look for mistakes.' },
+  { id: 'wechsel', label: 'Actionism', text: 'Become hectic, evade, start many things at once.' }
+];
 
-  // 2. Gewissenhaftigkeit (C)
-  { id: 'conscientiousness_high', label: 'Gewissenhaftigkeit (Ordnung)', text: 'Ich arbeite gründlich, effizient und verfolge meine Ziele diszipliniert.', inverse: false },
-  { id: 'conscientiousness_low', label: 'Gewissenhaftigkeit (Verschiebung)', text: 'Ich neige dazu, Aufgaben zu verschieben (prokrastinieren) und kann chaotisch sein.', inverse: true },
-
-  // 3. Extraversion (E)
-  { id: 'extraversion_high', label: 'Extraversion (Geselligkeit)', text: 'Ich bin gesellig, gehe aus mir heraus und tanke Energie unter Menschen.', inverse: false },
-  { id: 'extraversion_low', label: 'Extraversion (Vermeidung)', text: 'Wenn ich erschöpft bin, bleibe ich am liebsten allein und gehe Konflikten aus dem Weg.', inverse: true },
-  
-  // 4. Verträglichkeit (A)
-  { id: 'agreeableness_high', label: 'Verträglichkeit (Kooperation)', text: 'Ich bin rücksichtsvoll, kooperativ und vertraue anderen schnell.', inverse: false },
-  { id: 'agreeableness_low', label: 'Verträglichkeit (Konkurrenz)', text: 'Ich bin schnell bereit, für meine Ziele in Konkurrenz zu treten und andere zu kritisieren.', inverse: true },
-
-  // 5. Emotionale Stabilität (N - Invertiert)
-  { id: 'neuroticism_low', label: 'Stabilität (Gelassenheit)', text: 'Ich bleibe auch in stressigen Situationen gelassen, mache mir selten Sorgen.', inverse: false }
+const getBig5Questions = (t: TranslateFunc) => [
+  { id: 'openness_high', label: t('survey_big5_openness_high_label'), text: t('survey_big5_openness_high_text'), inverse: false },
+  { id: 'openness_low', label: t('survey_big5_openness_low_label'), text: t('survey_big5_openness_low_text'), inverse: true },
+  { id: 'conscientiousness_high', label: t('survey_big5_conscientiousness_high_label'), text: t('survey_big5_conscientiousness_high_text'), inverse: false },
+  { id: 'conscientiousness_low', label: t('survey_big5_conscientiousness_low_label'), text: t('survey_big5_conscientiousness_low_text'), inverse: true },
+  { id: 'extraversion_high', label: t('survey_big5_extraversion_high_label'), text: t('survey_big5_extraversion_high_text'), inverse: false },
+  { id: 'extraversion_low', label: t('survey_big5_extraversion_low_label'), text: t('survey_big5_extraversion_low_text'), inverse: true },
+  { id: 'agreeableness_high', label: t('survey_big5_agreeableness_high_label'), text: t('survey_big5_agreeableness_high_text'), inverse: false },
+  { id: 'agreeableness_low', label: t('survey_big5_agreeableness_low_label'), text: t('survey_big5_agreeableness_low_text'), inverse: true },
+  { id: 'neuroticism_low', label: t('survey_big5_neuroticism_low_label'), text: t('survey_big5_neuroticism_low_text'), inverse: false }
 ];
 
 // --- HILFSKOMPONENTEN (UI) ---
@@ -139,7 +140,7 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (props) 
 // --- LOGIK KOMPONENTEN ---
 
 // 1. LIKERT SCALE (1-5)
-const LikertBlock = ({ questions, onComplete }: { questions: any[], onComplete: (res: any) => void }) => {
+const LikertBlock = ({ questions, onComplete, t }: { questions: any[], onComplete: (res: any) => void, t: TranslateFunc }) => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   const handleChange = (id: string, val: number) => setAnswers(prev => ({ ...prev, [id]: val }));
@@ -167,18 +168,18 @@ const LikertBlock = ({ questions, onComplete }: { questions: any[], onComplete: 
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#718096', marginTop: '4px' }}>
-            <span>Trifft gar nicht zu</span>
-            <span>Trifft voll zu</span>
+            <span>{t('survey_likert_low')}</span>
+            <span>{t('survey_likert_high')}</span>
           </div>
         </div>
       ))}
-      <Button disabled={!isComplete} onClick={() => onComplete(answers)}>Weiter</Button>
+      <Button disabled={!isComplete} onClick={() => onComplete(answers)}>{t('survey_btn_next')}</Button>
     </div>
   );
 };
 
 // 2. CONSTANT SUM (Verteile 10 Punkte) - Touch-friendly Stepper Version
-const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: string, items: any[], onComplete: (res: any) => void }) => {
+const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle: string, items: any[], onComplete: (res: any) => void, t: TranslateFunc }) => {
   const [values, setValues] = useState<Record<string, number>>(
     items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
   );
@@ -249,9 +250,9 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: s
         textAlign: 'center',
         transition: 'all 0.2s ease'
       }}>
-        <div style={{ fontSize: '0.9rem', color: '#4a5568', marginBottom: '8px' }}>
-          Verteile <strong>10 Punkte</strong> auf die Aussagen
-        </div>
+        <div style={{ fontSize: '0.9rem', color: '#4a5568', marginBottom: '8px' }}
+             dangerouslySetInnerHTML={{ __html: t('survey_points_distribute') }}
+        />
         <div style={{ 
           fontSize: '2rem', 
           fontWeight: 'bold', 
@@ -260,7 +261,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: s
           {remaining}
         </div>
         <div style={{ fontSize: '0.85rem', color: '#718096' }}>
-          {remaining === 0 ? '✓ Alle Punkte verteilt!' : remaining === 1 ? 'Punkt verbleibend' : 'Punkte verbleibend'}
+          {remaining === 0 ? t('survey_points_all_distributed') : remaining === 1 ? t('survey_points_remaining_one') : t('survey_points_remaining')}
         </div>
       </div>
       
@@ -293,7 +294,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: s
               onClick={() => decrement(item.id)}
               disabled={values[item.id] <= 0}
               style={stepperBtnStyle(values[item.id] <= 0)}
-              aria-label="Punkt entfernen"
+              aria-label={t('survey_points_remove')}
             >
               −
             </button>
@@ -326,7 +327,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: s
               onClick={() => increment(item.id)}
               disabled={remaining <= 0}
               style={stepperBtnStyle(remaining <= 0)}
-              aria-label="Punkt hinzufügen"
+              aria-label={t('survey_points_add')}
             >
               +
             </button>
@@ -334,7 +335,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete }: { contextTitle: s
         </div>
       ))}
       
-      <Button disabled={remaining !== 0} onClick={() => onComplete(values)}>Weiter</Button>
+      <Button disabled={remaining !== 0} onClick={() => onComplete(values)}>{t('survey_btn_next')}</Button>
     </div>
   );
 };
@@ -558,7 +559,7 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
 };
 
 // 5. RANKING (Drag & Drop Simulation via Click)
-const RankingBlock = ({ items, onComplete }: { items: any[], onComplete: (ids: string[]) => void }) => {
+const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids: string[]) => void, t: TranslateFunc }) => {
   const [pool, setPool] = useState(items);
   const [ranked, setRanked] = useState<any[]>([]);
 
@@ -575,13 +576,13 @@ const RankingBlock = ({ items, onComplete }: { items: any[], onComplete: (ids: s
   return (
     <div>
       <p style={{ marginBottom: '16px', fontSize: '0.9rem', color: '#4a5568' }}>
-        Klicken Sie auf die Optionen, um sie zu sortieren. <br/>
-        <strong>Platz 1 (Oben)</strong> = Erste Reaktion unter Stress.
+        {t('survey_ranking_intro')} <br/>
+        <span dangerouslySetInnerHTML={{ __html: t('survey_ranking_hint') }} />
       </p>
 
       {/* Die Rangliste */}
       <div style={{ marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>Ihre Priorität (1 bis {items.length})</h3>
+        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>{t('survey_ranking_your_priority', { count: items.length })}</h3>
         <div style={{ minHeight: '50px', border: '2px dashed #cbd5e0', borderRadius: '8px', padding: '8px', backgroundColor: '#f7fafc' }}>
           {ranked.map((item, index) => (
             <div 
@@ -599,14 +600,14 @@ const RankingBlock = ({ items, onComplete }: { items: any[], onComplete: (ids: s
               </div>
             </div>
           ))}
-          {ranked.length === 0 && <div style={{ color: '#a0aec0', textAlign: 'center', padding: '10px' }}>Noch nichts ausgewählt</div>}
+          {ranked.length === 0 && <div style={{ color: '#a0aec0', textAlign: 'center', padding: '10px' }}>{t('survey_ranking_nothing_selected')}</div>}
         </div>
       </div>
 
       {/* Der Pool */}
       {pool.length > 0 && (
         <div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>Optionen (Klicken zum Auswählen)</h3>
+          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>{t('survey_ranking_options')}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {pool.map(item => (
               <div 
@@ -625,7 +626,7 @@ const RankingBlock = ({ items, onComplete }: { items: any[], onComplete: (ids: s
         </div>
       )}
 
-      <Button disabled={pool.length > 0} onClick={() => onComplete(ranked.map(r => r.id))}>Abschließen</Button>
+      <Button disabled={pool.length > 0} onClick={() => onComplete(ranked.map(r => r.id))}>{t('survey_btn_finish')}</Button>
     </div>
   );
 };
@@ -695,22 +696,29 @@ export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => v
     }
   };
 
+  // Get localized data
+  const FILTER_QUESTIONS = getFilterQuestions(t);
+  const RIEMANN_BLOCKS = getRiemannBlocks(t);
+  const STRESS_ITEMS_LOCALIZED = getStressItems(t);
+  const BIG5_QUESTIONS = getBig5Questions(t);
+
   // Renderer
   let content;
 
   if (currentStepId === 'FILTER') {
     content = (
-      <Card title="Einstieg: Ihre Wahrnehmung">
-        <LikertBlock questions={FILTER_QUESTIONS} onComplete={handleFilterComplete} />
+      <Card title={t('survey_filter_title')}>
+        <LikertBlock questions={FILTER_QUESTIONS} onComplete={handleFilterComplete} t={t} />
       </Card>
     );
   } 
   else if (currentStepId === 'BIG5_QUESTIONS') {
     content = (
-      <Card title="Persönliche Eigenschaften (Erweitert)">
-        <p style={{marginBottom:'15px', color:'#666'}}>Bitte bewerten Sie folgende Aussagen auf einer Skala von 1 (Trifft gar nicht zu) bis 5 (Trifft voll zu).</p>
+      <Card title={t('survey_big5_title')}>
+        <p style={{marginBottom:'15px', color:'#666'}}>{t('survey_big5_intro')}</p>
         <LikertBlock 
           questions={BIG5_QUESTIONS} 
+          t={t}
           onComplete={(data) => {
             const calculatedScores = calculateBig5(data);
             setResult(prev => ({ ...prev, big5: calculatedScores as any }));
@@ -724,25 +732,25 @@ export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => v
     if (currentStepId === 'RIEMANN_BERUF') {
       content = (
         <Card title={RIEMANN_BLOCKS.beruf.title}>
-          <ConstantSumBlock contextTitle="Beruf" items={RIEMANN_BLOCKS.beruf.items} onComplete={(d) => updateRiemann('beruf', d)} />
+          <ConstantSumBlock contextTitle="Beruf" items={RIEMANN_BLOCKS.beruf.items} onComplete={(d) => updateRiemann('beruf', d)} t={t} />
         </Card>
       );
     } else if (currentStepId === 'RIEMANN_PRIVAT') {
       content = (
         <Card title={RIEMANN_BLOCKS.privat.title}>
-          <ConstantSumBlock contextTitle="Privat" items={RIEMANN_BLOCKS.privat.items} onComplete={(d) => updateRiemann('privat', d)} />
+          <ConstantSumBlock contextTitle="Privat" items={RIEMANN_BLOCKS.privat.items} onComplete={(d) => updateRiemann('privat', d)} t={t} />
         </Card>
       );
     } else if (currentStepId === 'RIEMANN_SELBST') {
       content = (
         <Card title={RIEMANN_BLOCKS.selbst.title}>
-          <ConstantSumBlock contextTitle="Selbst" items={RIEMANN_BLOCKS.selbst.items} onComplete={(d) => updateRiemann('selbst', d)} />
+          <ConstantSumBlock contextTitle="Selbst" items={RIEMANN_BLOCKS.selbst.items} onComplete={(d) => updateRiemann('selbst', d)} t={t} />
         </Card>
       );
     } else if (currentStepId === 'RIEMANN_STRESS') {
       content = (
-        <Card title="Stress-Reaktion (Ranking)">
-          <RankingBlock items={STRESS_ITEMS} onComplete={(d) => {
+        <Card title={t('survey_riemann_stress_title')}>
+          <RankingBlock items={STRESS_ITEMS_LOCALIZED} t={t} onComplete={(d) => {
              setResult(prev => ({ ...prev, riemann: { ...prev.riemann, stressRanking: d } as any }));
              next(); // Weiter zu NARRATIVE_QUESTIONS
           }} />
