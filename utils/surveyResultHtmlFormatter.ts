@@ -166,11 +166,17 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       background: #ffffff;
     }
     .header {
-      background: linear-gradient(135deg, #1e3a5f 0%, #0d9488 100%);
+      background: linear-gradient(135deg, #1B7272 0%, #4ADE80 100%);
       color: white;
       text-align: center;
       padding: 40px 30px;
       margin-bottom: 30px;
+    }
+    .header .brand {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+      font-weight: 300;
     }
     .header h1 {
       font-size: 32px;
@@ -198,10 +204,10 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     .section-title {
       font-size: 18px;
       font-weight: 700;
-      color: #1e3a5f;
+      color: #111827;
       margin-bottom: 15px;
       padding-bottom: 8px;
-      border-bottom: 3px solid #0d9488;
+      border-bottom: 3px solid #4ADE80;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -215,11 +221,12 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .filter-scores {
-      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-      border: 1px solid #86efac;
+      background: white;
+      border: 1px solid #e5e7eb;
       padding: 20px;
       border-radius: 12px;
       margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .score-item {
       margin-bottom: 15px;
@@ -232,25 +239,25 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     }
     .score-label {
       font-weight: 600;
-      color: #166534;
+      color: #374151;
       min-width: 180px;
     }
     .score-bar {
       flex: 1;
-      background: #dcfce7;
+      background: #f3f4f6;
       height: 24px;
       border-radius: 12px;
       position: relative;
       overflow: hidden;
     }
     .score-fill {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
+      background: linear-gradient(90deg, #4ADE80, #22C55E);
       height: 100%;
       border-radius: 12px;
     }
     .score-value {
       font-weight: 700;
-      color: #166534;
+      color: #374151;
       min-width: 40px;
       text-align: right;
     }
@@ -265,7 +272,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     th {
-      background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+      background: linear-gradient(135deg, #1B7272 0%, #14b8a6 100%);
       color: white;
       padding: 14px 16px;
       text-align: left;
@@ -282,15 +289,15 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       background: #f9fafb;
     }
     .interpretation {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
       padding: 20px;
       border-radius: 12px;
-      border-left: 5px solid #0d9488;
+      border-left: 5px solid #4ADE80;
       margin-bottom: 15px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .interpretation h3 {
-      color: #1e3a5f;
+      color: #166534;
       font-size: 16px;
       margin-bottom: 10px;
       font-weight: 600;
@@ -324,16 +331,37 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     .footer p {
       margin-bottom: 5px;
     }
-    .test-type {
-      display: inline-block;
-      background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-      color: white;
-      padding: 8px 20px;
-      border-radius: 25px;
+    .footer .brand-name {
       font-size: 14px;
       font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 3px;
+    }
+    .footer .brand-by {
+      font-size: 11px;
+      color: #16A34A;
+      margin-bottom: 15px;
+    }
+    .footer a {
+      color: #16A34A;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .footer .copyright {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 12px;
+    }
+    .test-type {
+      display: inline-block;
+      background: #f9fafb;
+      color: #374151;
+      padding: 8px 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+      font-weight: 600;
       margin: 10px 0;
-      box-shadow: 0 2px 4px rgba(13,148,136,0.3);
     }
     .high { color: #059669; font-weight: 700; }
     .medium { color: #d97706; font-weight: 700; }
@@ -353,6 +381,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
 </head>
 <body>
   <div class="header">
+    <div class="brand">${language === 'de' ? 'manualmode.at präsentiert' : 'manualmode.at presents'}</div>
     <h1>🧠 ${t.title}</h1>
     <div class="subtitle">Meaningful Conversations</div>
     <div class="date">${date}</div>
@@ -393,7 +422,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
   // Riemann Results - Radar Chart
   if (result.path === 'RIEMANN' && result.riemann) {
     const r = result.riemann;
-    
+
     // Generate radar chart SVG with dynamic scaling
     const radarSvg = generateRiemannRadarSvg(r, language);
     
@@ -402,7 +431,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     <div class="section-title">🎯 Riemann-Thomann Profil</div>
     <div style="display: flex; justify-content: center; margin: 15px 0;">
       ${radarSvg}
-    </div>
+  </div>
     
     <!-- Compact score table -->
     <div style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px;">
@@ -445,7 +474,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
         wechsel: { label: 'Actionism', description: 'Become hectic, start many things' }
       };
       
-      html += `
+    html += `
   <div class="section">
     <div class="section-title">⚡ ${t.stressReaction || 'Stress-Reaktionsmuster'}</div>
     <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">${t.stressDescription || 'So reagieren Sie typischerweise unter Druck (1 = erste Reaktion):'}</p>
@@ -522,20 +551,20 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
   if (result.narrativeProfile) {
     const np = result.narrativeProfile;
     
-    html += `
+  html += `
   <div class="section" style="page-break-before: always;">
-    <div class="section-title" style="color: #7c3aed; border-color: #a78bfa;">🧬 ${t.narrativeOS}</div>
-    <div class="card" style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #c4b5fd; border-left: 5px solid #7c3aed;">
+    <div class="section-title" style="color: #1B7272; border-color: #5EEAD4;">🧬 ${t.narrativeOS}</div>
+    <div class="card" style="background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%); border: 1px solid #5EEAD4; border-left: 5px solid #1B7272;">
       <p style="font-size: 14px; line-height: 1.8; color: #374151; white-space: pre-line; margin: 0;">${np.operatingSystem}</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title" style="color: #b45309; border-color: #fbbf24;">⚡ ${t.narrativeSuperpowers}</div>
+    <div class="section-title" style="color: #EA580C; border-color: #FDBA74;">⚡ ${t.narrativeSuperpowers}</div>
     <div style="display: flex; flex-direction: column; gap: 12px;">
       ${np.superpowers.map((power: { name: string; description: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fcd34d; border-left: 5px solid #f59e0b; padding: 16px;">
-        <div style="font-weight: 700; color: #92400e; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${power.name}</div>
+      <div class="card" style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border: 1px solid #FDBA74; border-left: 5px solid #FB923C; padding: 16px;">
+        <div style="font-weight: 700; color: #9A3412; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${power.name}</div>
         <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${power.description}</p>
       </div>
       `).join('')}
@@ -543,11 +572,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
   </div>
 
   <div class="section">
-    <div class="section-title" style="color: #dc2626; border-color: #f87171;">🌑 ${t.narrativeBlindspots}</div>
+    <div class="section-title" style="color: #DC2626; border-color: #FCA5A5;">🌑 ${t.narrativeBlindspots}</div>
     <div style="display: flex; flex-direction: column; gap: 12px;">
       ${np.blindspots.map((spot: { name: string; description: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 1px solid #fca5a5; border-left: 5px solid #ef4444; padding: 16px;">
-        <div style="font-weight: 700; color: #b91c1c; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${spot.name}</div>
+      <div class="card" style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid #FCA5A5; border-left: 5px solid #F87171; padding: 16px;">
+        <div style="font-weight: 700; color: #DC2626; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${spot.name}</div>
         <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${spot.description}</p>
       </div>
       `).join('')}
@@ -555,11 +584,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
   </div>
 
   <div class="section">
-    <div class="section-title" style="color: #059669; border-color: #34d399;">🌱 ${t.narrativeGrowth}</div>
+    <div class="section-title" style="color: #16A34A; border-color: #86EFAC;">🌱 ${t.narrativeGrowth}</div>
     <div style="display: flex; flex-direction: column; gap: 12px;">
       ${np.growthOpportunities.map((opp: { title: string; recommendation: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #6ee7b7; border-left: 5px solid #10b981; padding: 16px;">
-        <div style="font-weight: 700; color: #047857; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${opp.title}</div>
+      <div class="card" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid #86EFAC; border-left: 5px solid #4ADE80; padding: 16px;">
+        <div style="font-weight: 700; color: #16A34A; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${opp.title}</div>
         <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${opp.recommendation}</p>
       </div>
       `).join('')}
@@ -572,9 +601,12 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
   html += `
   </div>
   <div class="footer">
-    <p>${t.confidential}</p>
-    <p>${t.validityNote}</p>
-    <p>Meaningful Conversations © ${new Date().getFullYear()}</p>
+    <p class="brand-name">Meaningful Conversations</p>
+    <p class="brand-by">${language === 'de' ? 'von' : 'by'} manualmode.at</p>
+    <p style="margin-bottom: 10px;">${t.confidential}</p>
+    <p style="margin-bottom: 15px;">${t.validityNote}</p>
+    <p><a href="https://manualmode.at" target="_blank">www.manualmode.at</a></p>
+    <p class="copyright">© ${new Date().getFullYear()} manualmode.at</p>
   </div>
 </body>
 </html>

@@ -42,7 +42,7 @@ const RIEMANN_DATA: Record<Language, Record<string, { ressource: string; blindSp
     ressource: 'Innovativ, begeisternd, flexibel und schnell im Anstoßen neuer Ideen.',
     blindSpot: 'Detailtreue, langfristige Planung, das Zuende-Bringen von Routinen.',
     overdone: 'Unzuverlässig, theatralisch, fängt viel an und springt schnell ab.'
-    }
+  }
   },
   en: {
     distanz: {
@@ -118,7 +118,7 @@ const BIG5_DATA: Record<Language, Record<string, { high: string; low: string; bl
     low: 'Extrem ausgeglichen, gelassen, resilient.',
     blindSpotHigh: 'Überraschende emotionale Ausbrüche oder Panik (nicht primär unser Fokus).',
     blindSpotLow: 'Wirkt sorglos/risikofreudig, übersieht reale Risiken.'
-    }
+  }
   },
   en: {
     openness: {
