@@ -140,9 +140,7 @@ router.post('/comfort-check', authMiddleware, async (req, res) => {
             sessionCount: { increment: 1 }
           }
         });
-        console.log(`[DPFL] Incremented session count for user ${req.userId} (comfort: ${score}, adaptive mode)`);
       } else {
-        console.log(`[DPFL] Skipping session count - user ${req.userId} has stable profile`);
       }
     }
     
@@ -244,7 +242,6 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       .replace('{{flowStory}}', narratives.flowStory)
       .replace('{{frictionStory}}', narratives.frictionStory);
     
-    console.log(`[Narrative] Generating narrative profile for user ${req.userId} in ${lang}`);
     
     // Call AI provider
     const result = await aiProvider.generateContent({
@@ -282,7 +279,6 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Failed to parse narrative profile' });
     }
     
-    console.log(`[Narrative] Successfully generated profile with ${narrativeProfile.superpowers?.length || 0} superpowers`);
     
     res.json({ 
       success: true, 

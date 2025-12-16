@@ -46,7 +46,6 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         encryptionKey
       });
 
-      console.log(`[DPFL] Comfort check submitted: ${optOut ? 'opted-out' : `score ${comfortScore}`}`);
       onComplete();
     } catch (error) {
       console.error('[DPFL] Failed to submit comfort check:', error);

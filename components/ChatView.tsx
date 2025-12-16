@@ -154,14 +154,6 @@ interface ChatViewProps {
 const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, experimentalMode, encryptionKey }) => {
   const { t, language } = useLocalization();
   
-  // Debug: Log experimental mode on mount
-  useEffect(() => {
-    console.log('🔍 ChatView Debug:', {
-      botId: bot.id,
-      experimentalMode,
-      shouldShowBadge: experimentalMode && experimentalMode !== 'OFF' && bot.id === 'chloe-cbt'
-    });
-  }, [bot.id, experimentalMode]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
@@ -281,7 +273,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           if (profileData && profileData.encryptedData) {
             // Decrypt client-side before sending to backend
             const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
-            console.log('[DPC] Profile loaded and decrypted for experimental mode:', experimentalMode);
             setDecryptedProfile(decrypted);
           }
         } catch (error) {
@@ -302,15 +293,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     setSelectedVoiceURI(langSettings.voiceId);
     setTtsMode(langSettings.mode);
     setIsAutoMode(langSettings.isAuto);
-    
-    console.log(`[TTS] Language changed to ${language}, loaded voice settings:`, langSettings);
   }, [language, bot.id]);
 
   // Initialize gong audio with fallback to programmatic sound
   useEffect(() => {
     const audio = new Audio('/sounds/meditation-gong.ogg');
     audio.addEventListener('error', () => {
-      console.log('Gong audio file not found, will use programmatic fallback');
+      // Fallback to programmatic gong if file not found
     });
     gongAudioRef.current = audio;
   }, []);
@@ -362,7 +351,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             saveLanguageVoiceSettings('local', null, true);
           } else {
             // Server available, keep selection
-            console.log('[TTS Init] Saved server voice available:', selectedVoiceURI);
           }
         } else if (ttsMode === 'local' && selectedVoiceURI) {
           // User has a local voice selected - check if it exists
@@ -373,8 +361,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
             saveLanguageVoiceSettings('local', null, true);
-          } else {
-            console.log('[TTS Init] Saved local voice available:', selectedVoiceURI);
           }
         } else if (isAutoMode || (!selectedVoiceURI && ttsMode === 'local')) {
           // Auto mode or no selection - choose best available
@@ -385,20 +371,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
               saveLanguageVoiceSettings('server', bestVoice, true);
-              console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
             } else {
               // No server voice for this bot/language - use local
               setSelectedVoiceURI(null);
               setTtsMode('local');
               saveLanguageVoiceSettings('local', null, true);
-              console.log('[TTS Init] Auto mode - no server voice available, using local browser voice');
             }
           } else {
             // Server not available, use local auto-selection (handled by speak function)
             setSelectedVoiceURI(null);
             setTtsMode('local');
             saveLanguageVoiceSettings('local', null, true);
-            console.log('[TTS Init] Auto mode - using local browser voice');
           }
         }
       } catch (error) {
@@ -476,14 +459,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // Check if Wake Lock API is supported
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
-          console.log('Screen Wake Lock activated (Voice Mode)');
 
           // Re-acquire wake lock when visibility changes (e.g., switching tabs)
           const handleVisibilityChange = async () => {
             if (wakeLock !== null && document.visibilityState === 'visible' && isVoiceMode) {
               try {
                 wakeLock = await navigator.wakeLock.request('screen');
-                console.log('Screen Wake Lock re-acquired');
               } catch (err) {
                 console.error('Failed to re-acquire wake lock:', err);
               }
@@ -494,7 +475,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
           // Store cleanup function
           wakeLock.addEventListener('release', () => {
-            console.log('Screen Wake Lock released');
             document.removeEventListener('visibilitychange', handleVisibilityChange);
           });
         } else {
@@ -620,11 +600,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
     utterance.onstart = () => {
-      console.log('[TTS] Local TTS started');
       setTtsStatus('speaking');
     };
     utterance.onend = () => {
-      console.log('[TTS] Local TTS ended');
       setTtsStatus('idle');
     };
     utterance.onerror = (event) => {
@@ -761,20 +739,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             setSelectedVoiceURI(bestVoice);
             setTtsMode('server');
             saveLanguageVoiceSettings('server', bestVoice, true);
-            console.log('[TTS Select] Auto mode - using server voice:', bestVoice);
           } else {
             // No server voice available (e.g., female German) - use local
             setSelectedVoiceURI(null);
             setTtsMode('local');
             saveLanguageVoiceSettings('local', null, true);
-            console.log('[TTS Select] Auto mode - no server voice available, using local');
           }
         } else {
           // Server TTS not available - use local
           setSelectedVoiceURI(null);
           setTtsMode('local');
           saveLanguageVoiceSettings('local', null, true);
-          console.log('[TTS Select] Auto mode - server unavailable, using local');
         }
       } catch (error) {
         // Error checking server - fallback to local
@@ -873,12 +848,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.lang = botLanguage === 'de' ? 'de-DE' : 'en-US';
 
     recognition.onstart = () => {
-      console.log('Speech recognition started');
       setIsListening(true);
     };
     
     recognition.onend = () => {
-      console.log('Speech recognition ended');
       setIsListening(false);
     };
     
@@ -1180,16 +1153,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // This ensures permissions are granted before starting speech recognition
           // Important for Electron-based previews (like Cursor) and browser security
           try {
-            console.log('🔐 Checking microphone permissions...');
-            
             // Request microphone access using getUserMedia
             // This triggers the browser's permission dialog if not yet granted
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
             // Immediately stop the stream - we only needed it for permission check
             stream.getTracks().forEach(track => track.stop());
-            
-            console.log('✅ Microphone access granted');
           } catch (error: any) {
             console.error('❌ Microphone permission denied:', error);
             
@@ -1226,10 +1195,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // This gives Bluetooth headphones (EarPods, AirPods, etc.) time to switch
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
           // Typical profile switch takes 500-1500ms
-          console.log('⏳ Waiting for audio device switch (Bluetooth support)...');
           setTimeout(() => {
             try {
-              console.log('🎤 Starting speech recognition...');
               recognitionRef.current?.start();
             } catch (error) {
               console.error('❌ Failed to start speech recognition:', error);
@@ -1288,7 +1255,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         await new Promise(resolve => setTimeout(resolve, 3000));
         return;
       } catch (error) {
-        console.log('MP3 gong failed, using Web Audio API fallback');
+        // MP3 gong failed, using Web Audio API fallback
       }
     }
     
