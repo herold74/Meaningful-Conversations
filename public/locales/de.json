@@ -627,6 +627,7 @@
   "experimental_info_privacy_desc": "Alle Persönlichkeitsdaten und Session-Transkripte werden Ende-zu-Ende verschlüsselt gespeichert. Der Server kann diese Daten nicht lesen. Du kannst jederzeit Sessions von der Profil-Verfeinerung ausschließen.",
 
   "personality_survey_success_saved": "PDF heruntergeladen und Profil verschlüsselt gespeichert! Du kannst jetzt experimentelle Modi bei Chloe nutzen.",
+  "personality_survey_success_saved_no_download": "Profil verschlüsselt gespeichert! ✨ Du kannst jetzt deine persönliche Signatur generieren und das PDF herunterladen.",
   "personality_survey_success_downloaded": "PDF erfolgreich heruntergeladen!",
   "personality_survey_error_save": "Fehler beim Speichern des Profils",
   "personality_survey_error_pdf": "Fehler beim Erstellen des PDFs. Bitte versuche es erneut.",

@@ -628,6 +628,7 @@
   "experimental_info_privacy_desc": "All personality data and session transcripts are stored end-to-end encrypted. The server cannot read this data. You can exclude sessions from profile refinement at any time.",
 
   "personality_survey_success_saved": "PDF downloaded and profile encrypted successfully! You can now use experimental modes with Chloe.",
+  "personality_survey_success_saved_no_download": "Profile encrypted and saved! ✨ You can now generate your personal signature and download the PDF.",
   "personality_survey_success_downloaded": "PDF downloaded successfully!",
   "personality_survey_error_save": "Error saving profile",
   "personality_survey_error_pdf": "Error creating PDF. Please try again.",
