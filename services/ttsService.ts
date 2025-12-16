@@ -150,7 +150,6 @@ export const getBotVoiceSettings = (botId: string): BotVoiceSettings => {
                     return settings;
                 }
                 // Old format detected - migrate to language-specific
-                console.log('[TTS] Migrating old bot settings to language-specific format');
                 const migratedSettings: BotVoiceSettings = {
                     de: { ...settings },
                     en: { mode: 'local', voiceId: null, isAuto: true }
@@ -187,7 +186,6 @@ export const saveBotVoiceSettings = (botId: string, settings: BotVoiceSettings):
         allSettings[botId] = settings;
         
         localStorage.setItem('botVoiceSettings', JSON.stringify(allSettings));
-        console.log('[TTS] Saved voice settings for', botId, ':', settings);
     } catch (error) {
         console.error('[TTS] Failed to save bot voice settings:', error);
     }
@@ -231,7 +229,6 @@ const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
             
             // Save to new format
             saveBotVoiceSettings(botId, settings);
-            console.log('[TTS] Migrated legacy settings for', botId, 'to language-specific format');
             return settings;
         }
 
@@ -254,7 +251,6 @@ const migrateLegacySettings = (botId: string): BotVoiceSettings | null => {
             
             // Save to new format
             saveBotVoiceSettings(botId, settings);
-            console.log('[TTS] Migrated global legacy settings for', botId, 'to language-specific format');
             return settings;
         }
 

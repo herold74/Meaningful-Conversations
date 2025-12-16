@@ -164,7 +164,6 @@ export const removeCompletedItems = (
             // Check for exact match or if the line starts with the item text
             for (const item of normalizedItemsToRemove) {
                 if (normalizedLine === item || normalizedLine.startsWith(item)) {
-                    console.log('[Context Updater] Removing completed item:', trimmedLine);
                     return false; // Remove this line
                 }
             }

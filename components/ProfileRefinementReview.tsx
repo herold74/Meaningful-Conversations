@@ -93,7 +93,6 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
         adaptationMode: currentProfile.adaptationMode || 'adaptive'
       });
       
-      console.log('[DPFL] Profile refinement applied successfully');
       onComplete();
     } catch (err) {
       console.error('[DPFL] Failed to apply refinement:', err);

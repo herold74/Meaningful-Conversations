@@ -429,7 +429,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               encryptedData,
               adaptationMode: updatedData.adaptationMode
             });
-            console.log('Narrative profile saved to backend');
           } catch (saveErr) {
             console.error('Failed to save narrative profile:', saveErr);
             // Don't show error to user - local state is still updated

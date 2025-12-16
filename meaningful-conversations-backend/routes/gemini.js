@@ -14,7 +14,6 @@ const behaviorLogger = require('../services/behaviorLogger.js');
 let googleAI;
 import('@google/genai').then(({ GoogleGenAI }) => {
     googleAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
-    console.log('Successfully initialized Google AI client for caching.');
 }).catch(err => {
     console.error("Failed to initialize Google AI:", err);
     googleAI = null;
@@ -165,7 +164,6 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
                 );
                 if (adaptivePrompt) {
                     finalSystemInstruction += adaptivePrompt;
-                    console.log(`[DPC] Applied adaptive prompt for ${botId} (Mode: ${experimentalMode}, Lang: ${lang})`);
                 }
             } catch (error) {
                 console.error('[DPC] Error generating adaptive prompt:', error);
@@ -253,7 +251,6 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
                 try {
                     // Analyze current user message
                     const frequencies = behaviorLogger.analyzeMessage(req.body.userMessage || '', lang);
-                    console.log(`[DPFL] Behavior analysis for user ${userId}:`, frequencies);
                     
                     // Note: Full conversation logging will be done at session end
                     // This is just real-time analysis for debugging/monitoring
@@ -327,7 +324,6 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
         const match = cleanedText.match(codeBlockRegex);
         if (match && match[1]) {
             cleanedText = match[1].trim();
-            console.log('  🧹 Removed markdown code block wrapper from response');
         }
         
         // Parse JSON response with improved error handling
