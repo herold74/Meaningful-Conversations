@@ -190,7 +190,7 @@ function generateHtmlExport(exportData, language = 'de') {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%);
+            background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
             padding: 20px;
         }
         .container {
@@ -202,12 +202,13 @@ function generateHtmlExport(exportData, language = 'de') {
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%);
+            background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
         }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header .brand { font-size: 0.85em; opacity: 0.8; margin-bottom: 8px; font-weight: 300; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }
         .header p { opacity: 0.9; font-size: 1.1em; }
         .content { padding: 40px 30px; }
         .section {
@@ -215,10 +216,10 @@ function generateHtmlExport(exportData, language = 'de') {
             padding: 25px;
             background: #f8f9fa;
             border-radius: 8px;
-            border-left: 4px solid #1b7272;
+            border-left: 4px solid #4ADE80;
         }
         .section h2 {
-            color: #1b7272;
+            color: #16A34A;
             margin-bottom: 20px;
             font-size: 1.8em;
             padding-bottom: 10px;
@@ -238,7 +239,7 @@ function generateHtmlExport(exportData, language = 'de') {
         }
         .info-label {
             font-weight: 600;
-            color: #1b7272;
+            color: #16A34A;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -285,12 +286,12 @@ function generateHtmlExport(exportData, language = 'de') {
             border-radius: 8px;
             min-width: 150px;
             margin: 10px;
-            border: 2px solid #1b7272;
+            border: 2px solid #4ADE80;
         }
         .stat-number {
             font-size: 2.5em;
             font-weight: bold;
-            color: #1b7272;
+            color: #16A34A;
         }
         .stat-label {
             color: #666;
@@ -316,7 +317,7 @@ function generateHtmlExport(exportData, language = 'de') {
             border-bottom: 1px solid #e9ecef;
         }
         th {
-            background: #1b7272;
+            background: #16A34A;
             color: white;
             font-weight: 600;
         }
@@ -340,6 +341,7 @@ function generateHtmlExport(exportData, language = 'de') {
 <body>
     <div class="container">
         <div class="header">
+            <div class="brand">manualmode.at ${isGerman ? 'präsentiert' : 'presents'}</div>
             <h1>📊 ${isGerman ? 'Ihr Datenexport' : 'Your Data Export'}</h1>
             <p>${isGerman ? 'Erstellt am' : 'Created on'}: ${formatDate(exportData.exportDate)}</p>
             <p style="margin-top: 10px; font-size: 0.9em;">
@@ -422,7 +424,7 @@ function generateHtmlExport(exportData, language = 'de') {
                 </div>
                 ${exportData.gamificationData.unlockedAchievements && exportData.gamificationData.unlockedAchievements.length > 0 ? `
                 <div style="margin-top: 20px;">
-                    <h3 style="color: #1b7272; margin-bottom: 10px;">${isGerman ? '🏆 Erfolge' : '🏆 Achievements'}</h3>
+                    <h3 style="color: #16A34A; margin-bottom: 10px;">${isGerman ? '🏆 Erfolge' : '🏆 Achievements'}</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                         ${exportData.gamificationData.unlockedAchievements.map(a => `
                             <span class="badge badge-info">${a}</span>
@@ -548,12 +550,13 @@ function generateHtmlExport(exportData, language = 'de') {
         </div>
 
         <div class="footer">
-            <p><strong>Meaningful Conversations</strong></p>
-            <p>${isGerman ? 'Dieser Datenexport entspricht Ihren Rechten gemäß Art. 15 (Auskunftsrecht) und Art. 20 (Recht auf Datenübertragbarkeit) der DSGVO.' : 'This data export complies with your rights under Art. 15 (Right of Access) and Art. 20 (Right to Data Portability) of the GDPR.'}</p>
-            <p style="margin-top: 10px;">
-                ${isGerman ? 'Bei Fragen kontaktieren Sie uns unter' : 'For questions, contact us at'}: 
-                <a href="mailto:gherold@manualmode.at" style="color: #1b7272;">gherold@manualmode.at</a>
+            <p style="font-size: 1.2em; font-weight: 600; margin-bottom: 5px;">Meaningful Conversations</p>
+            <p style="font-size: 0.9em; color: #16A34A; margin-bottom: 20px;">${isGerman ? 'von' : 'by'} manualmode.at</p>
+            <p style="margin-bottom: 15px;">${isGerman ? 'Dieser Datenexport entspricht Ihren Rechten gemäß Art. 15 (Auskunftsrecht) und Art. 20 (Recht auf Datenübertragbarkeit) der DSGVO.' : 'This data export complies with your rights under Art. 15 (Right of Access) and Art. 20 (Right to Data Portability) of the GDPR.'}</p>
+            <p>
+                <a href="https://manualmode.at" style="color: #16A34A; text-decoration: none; font-weight: 500;">www.manualmode.at</a>
             </p>
+            <p style="font-size: 0.85em; opacity: 0.7; margin-top: 15px;">© ${new Date().getFullYear()} manualmode.at</p>
         </div>
     </div>
 </body>
