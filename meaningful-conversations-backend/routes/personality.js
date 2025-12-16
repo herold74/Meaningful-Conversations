@@ -249,7 +249,7 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       contents: synthesisPrompt,
       config: {
         temperature: 0.8,
-        maxOutputTokens: 2500,
+        maxOutputTokens: 4096,
         responseMimeType: 'application/json',
         systemInstruction: lang === 'de' 
           ? 'Antworte ausschließlich mit validem JSON gemäß dem angeforderten Schema. Keine Erklärungen außerhalb des JSON.'
