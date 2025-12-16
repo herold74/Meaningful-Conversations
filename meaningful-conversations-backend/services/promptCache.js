@@ -35,18 +35,15 @@ async function getOrCreateCache(ai, userId, systemInstruction, modelName = 'gemi
     if (existingCache && existingCache.expireTime > now) {
         // Check if the system instruction hasn't changed
         if (existingCache.systemInstruction === systemInstruction) {
-            console.log(`[Cache HIT] Using existing cache for user ${userId}`);
             return existingCache.cacheName;
         } else {
             // System instruction changed, delete old cache
-            console.log(`[Cache INVALIDATE] System instruction changed for user ${userId}`);
             await deleteCache(ai, cacheKey);
         }
     }
     
     // Create new cache
     try {
-        console.log(`[Cache CREATE] Creating new cache for user ${userId} with TTL ${CACHE_TTL_SECONDS}s`);
         
         const cachedContent = await ai.caches.create({
             model: modelName,
@@ -64,7 +61,6 @@ async function getOrCreateCache(ai, userId, systemInstruction, modelName = 'gemi
             createdAt: now,
         });
         
-        console.log(`[Cache CREATED] Cache ${cachedContent.name} expires at ${expireTime.toISOString()}`);
         return cachedContent.name;
         
     } catch (error) {
@@ -83,7 +79,6 @@ async function deleteCache(ai, cacheKey) {
     if (cache) {
         try {
             await ai.caches.delete(cache.cacheName);
-            console.log(`[Cache DELETE] Deleted cache ${cache.cacheName}`);
         } catch (error) {
             console.error(`[Cache DELETE ERROR] Failed to delete cache ${cache.cacheName}:`, error.message);
         }
@@ -106,7 +101,6 @@ function cleanupExpiredCaches() {
     }
     
     if (cleanedCount > 0) {
-        console.log(`[Cache CLEANUP] Removed ${cleanedCount} expired cache(s) from registry`);
     }
 }
 
@@ -131,7 +125,6 @@ function getCacheStats() {
  * @param {object} ai - The Google AI client
  */
 async function clearAllCaches(ai) {
-    console.log(`[Cache CLEAR] Clearing all ${cacheRegistry.size} caches`);
     
     const promises = [];
     for (const [key, cache] of cacheRegistry.entries()) {
@@ -143,7 +136,6 @@ async function clearAllCaches(ai) {
     
     await Promise.all(promises);
     cacheRegistry.clear();
-    console.log('[Cache CLEAR] All caches cleared');
 }
 
 // Start cleanup interval

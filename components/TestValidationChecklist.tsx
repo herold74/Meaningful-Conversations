@@ -147,7 +147,7 @@ const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testT
           <button
             onClick={() => {
               // Log results to console for debugging
-              console.log('[Test Validation]', {
+              // Test validation complete - {
                 testType,
                 results: checklist,
                 notes,

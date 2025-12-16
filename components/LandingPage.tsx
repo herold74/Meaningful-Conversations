@@ -28,7 +28,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   
   const showChristmas = useMemo(() => {
     const result = isChristmasSeason();
-    console.log('[LandingPage] Christmas season check:', result);
     return result;
   }, []);
 

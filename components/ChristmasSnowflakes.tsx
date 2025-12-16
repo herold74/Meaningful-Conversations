@@ -31,8 +31,6 @@ const ChristmasSnowflakes: React.FC<ChristmasSnowflakesProps> = ({ darkModeOnly 
     return null;
   }
   
-  console.log('[ChristmasSnowflakes] Rendering snowflakes...', { darkModeOnly, isDarkMode });
-  
   return (
     <div className="christmas-snow-container" aria-hidden="true">
       {Array.from({ length: 10 }, (_, i) => (
