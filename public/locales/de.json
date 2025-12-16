@@ -651,6 +651,8 @@
   "profile_view_privat": "Privat",
   "profile_view_selbst": "Selbstbild",
   "profile_view_download_pdf": "Als PDF herunterladen",
+  "profile_view_pdf_requires_signature": "PDF-Download verfügbar nach Signatur-Generierung",
+  "profile_view_pdf_hint": "Generiere zuerst deine persönliche Signatur oben ↑",
   "profile_view_new_test": "Neue Evaluierung",
   "profile_view_info_title": "Hinweis",
   "profile_view_info_text": "Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",

@@ -817,9 +817,22 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8">
-          <Button onClick={handleDownloadPdf} size="lg" className="flex-1">
-            📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
-          </Button>
+          {/* PDF Download - nur verfügbar wenn Signatur generiert wurde */}
+          {decryptedData?.narrativeProfile ? (
+            <Button onClick={handleDownloadPdf} size="lg" className="flex-1">
+              📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
+            </Button>
+          ) : (
+            <div className="flex-1 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+              <p className="text-blue-700 dark:text-blue-300 text-sm mb-1">
+                💡 {t('profile_view_pdf_requires_signature') || 'PDF-Download verfügbar nach Signatur-Generierung'}
+              </p>
+              <p className="text-blue-600 dark:text-blue-400 text-xs">
+                {t('profile_view_pdf_hint') || 'Generiere zuerst deine persönliche Signatur oben ↑'}
+              </p>
+            </div>
+          )}
+          
           <Button
             onClick={() => {
               // Warn if profile has been refined through sessions
