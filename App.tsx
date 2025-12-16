@@ -451,42 +451,48 @@ const App: React.FC = () => {
     };
 
     const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
-        try {
-            // Generate HTML and PDF
-            const htmlContent = formatSurveyResultAsHtml(result, language);
-            const filename = generateSurveyPdfFilename(result.path, language);
-            
-            await generatePDF(htmlContent, filename);
-            
-            // Verschluesseln und speichern (nur fuer registered users)
-            if (currentUser && encryptionKey) {
-                try {
-                    const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
-                    
-                    await api.savePersonalityProfile({
-                        testType: result.path,
-                        filterWorry: result.filter.worry,
-                        filterControl: result.filter.control,
-                        encryptedData,
-                        adaptationMode: result.adaptationMode || 'adaptive'
-                    });
-                    
-                    setHasPersonalityProfile(true);
-                    alert(t('personality_survey_success_saved'));
-                } catch (error) {
-                    console.error('Profile save failed:', error);
-                    alert(t('personality_survey_error_save') + ': ' + (error as Error).message);
-                }
-            } else {
-                alert(t('personality_survey_success_downloaded'));
+        // Registered users: Save profile without automatic PDF download
+        if (currentUser && encryptionKey) {
+            try {
+                const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
+                
+                await api.savePersonalityProfile({
+                    testType: result.path,
+                    filterWorry: result.filter.worry,
+                    filterControl: result.filter.control,
+                    encryptedData,
+                    adaptationMode: result.adaptationMode || 'adaptive'
+                });
+                
+                setHasPersonalityProfile(true);
+                alert(t('personality_survey_success_saved_no_download') || 'Profil gespeichert! Du kannst jetzt deine Signatur generieren und das PDF herunterladen.');
+                
+                // Navigate to profile view where user can generate signature and download PDF
+                setView('personalityProfile');
+            } catch (error) {
+                console.error('Profile save failed:', error);
+                alert(t('personality_survey_error_save') + ': ' + (error as Error).message);
+                // Still navigate to profile view so user can try again
+                setView('personalityProfile');
             }
-        } catch (error) {
-            console.error('PDF generation failed:', error);
-            alert(t('personality_survey_error_pdf'));
+        } 
+        // Guest users: Generate and download PDF automatically (they can't save profile)
+        else {
+            try {
+                const htmlContent = formatSurveyResultAsHtml(result, language);
+                const filename = generateSurveyPdfFilename(result.path, language);
+                
+                await generatePDF(htmlContent, filename);
+                alert(t('personality_survey_success_downloaded'));
+                
+                // Navigate back to chat
+                setView('chat');
+            } catch (error) {
+                console.error('PDF generation failed:', error);
+                alert(t('personality_survey_error_pdf'));
+                setView('chat');
+            }
         }
-        
-        // Navigate based on authentication status
-        setView(currentUser ? 'personalityProfile' : 'chat');
     };
 
     const handlePiiConfirm = () => {
