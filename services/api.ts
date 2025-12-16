@@ -168,7 +168,6 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
 
     const isAuthEndpoint = endpoint.startsWith('/auth/');
     if (response.status === 401 && session?.token && !isAuthEndpoint) {
-        console.log("Session expired or invalid. Automatically logging out.");
         clearSession();
         window.location.reload();
         return new Promise(() => {}); // Prevent further processing

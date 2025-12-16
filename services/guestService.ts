@@ -65,7 +65,6 @@ export const getOrCreateFingerprint = (): string => {
     if (!guestId) {
         guestId = generateGuestId();
         localStorage.setItem('guest_id', guestId);
-        console.log('Created new guest ID - each guest user has their own message limit');
     }
     
     return guestId;

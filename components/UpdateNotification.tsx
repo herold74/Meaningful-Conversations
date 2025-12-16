@@ -26,7 +26,6 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => 
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New service worker is ready to take over
-                console.log('New version available!');
                 setShow(true);
               }
             });

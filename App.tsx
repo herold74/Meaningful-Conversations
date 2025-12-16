@@ -290,7 +290,7 @@ const App: React.FC = () => {
             if ('serviceWorker' in navigator) {
                 const swUrl = `${window.location.origin}/sw.js`;
                 navigator.serviceWorker.register(swUrl)
-                    .then(registration => console.log('Service Worker registered with scope:', registration.scope))
+                    .then(() => {})
                     .catch(error => console.error('Service Worker registration failed from App.tsx:', error));
             }
         };

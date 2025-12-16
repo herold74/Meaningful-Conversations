@@ -77,7 +77,6 @@ router.post('/synthesize', optionalAuthMiddleware, async (req, res) => {
         
         // If no server voice available (returns null), fallback to local
         if (!audioBuffer) {
-            console.log('No server voice available for this bot/language combination, using local voice');
             return res.status(503).json({
                 error: 'No server voice available for this combination',
                 fallbackToWebSpeech: true
