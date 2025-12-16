@@ -131,10 +131,9 @@ print_info "Updating production nginx configurations..." >&2
 - [ ] Create pre-flight check: `nginx -t` before and after IP updates
 
 ### Long-Term (To Do)
-- [ ] Implement blue-green deployment fully (already started, prevents such outages)
 - [ ] Add monitoring/alerting for nginx config errors
 - [ ] Consider using nginx config templates instead of sed replacements
-- [ ] Implement canary deployments with automatic rollback on health check failures
+- [ ] Implement automatic rollback on health check failures
 
 ---
 
