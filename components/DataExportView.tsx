@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { DownloadIcon } from './icons/DownloadIcon';
-import { getSession } from '../services/api';
+import { getSession, getApiBaseUrl } from '../services/api';
 import Button from './shared/Button';
 
 interface DataExportViewProps {
@@ -26,18 +26,8 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => 
                 throw new Error('Not authenticated');
             }
 
-            // Determine API base URL (same logic as in api.ts)
-            const hostname = window.location.hostname;
-            const port = window.location.port;
-            const hostnameWithPort = port ? `${hostname}:${port}` : hostname;
-            
-            const backendMap: { [key: string]: string } = {
-                'mc-beta.manualmode.at': '',
-                'mc-app.manualmode.at': '',
-                '91.99.193.87': '',
-            };
-            
-            const apiBaseUrl = backendMap[hostnameWithPort] || '';
+            // Get API base URL using the same logic as other API calls
+            const apiBaseUrl = getApiBaseUrl();
 
             // Get current language
             const currentLanguage = localStorage.getItem('language') || 'de';
