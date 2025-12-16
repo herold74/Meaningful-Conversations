@@ -146,13 +146,7 @@ const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testT
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => {
-              // Log results to console for debugging
-              // Test validation complete - {
-                testType,
-                results: checklist,
-                notes,
-                timestamp: new Date().toISOString()
-              });
+              // Test validation complete
               onClose();
             }}
             className="flex-1 px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium"
