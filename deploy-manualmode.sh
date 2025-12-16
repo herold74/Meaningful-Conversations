@@ -378,9 +378,14 @@ podman-compose -f "$COMPOSE_FILE" ps
 # Update nginx reverse proxy IPs
 echo "Updating nginx reverse proxy configuration..."
 if [ -f "/usr/local/bin/update-nginx-ips.sh" ]; then
-    /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT
+    /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT || {
+        echo "ERROR: Nginx IP update failed!"
+        exit 1
+    }
 else
-    echo "Warning: nginx IP update script not found. Skipping nginx update."
+    echo "ERROR: nginx IP update script not found at /usr/local/bin/update-nginx-ips.sh"
+    echo "This is critical - nginx will not route to the new containers!"
+    exit 1
 fi
 
 echo "Deployment complete for $ENVIRONMENT!"
