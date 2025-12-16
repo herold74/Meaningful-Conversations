@@ -790,7 +790,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               🧬 {t('narrative_profile_title') || 'Persönlichkeits-Signatur'}
             </h3>
             <p className="text-content-secondary mb-6">
-              {t('narrative_profile_generate_desc') || 'Basierend auf deinen Test-Ergebnissen und persönlichen Geschichten können wir eine einzigartige Persönlichkeits-Signatur für dich erstellen.'}
+              {t('narrative_profile_generate_desc') || 'Basierend auf deinen Test-Ergebnissen und persönlichen Erfahrungen können wir eine einzigartige Persönlichkeits-Signatur für dich erstellen.'}
             </p>
             
             {narrativeError && (
