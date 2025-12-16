@@ -42,7 +42,7 @@ Die Verarbeitung der Daten erfolgt zu folgenden Zwecken:
 
 - **Bereitstellung der Coaching-Funktionen:** Ermöglichung von KI-gestützten Coaching-Gesprächen
 - **Personalisiertes Coaching:** Nutzung Ihres Persönlichkeitsprofils zur Anpassung der Coaching-Gespräche an Ihre individuellen Bedürfnisse und Kommunikationsstile (nur für registrierte Benutzer mit aktivem Profil)
-- **Generierung der Persönlichkeits-Signatur:** KI-gestützte Analyse Ihrer Testergebnisse und persönlichen Geschichten zur Erstellung einer individuellen Persönlichkeits-Signatur
+- **Generierung der Persönlichkeits-Signatur:** KI-gestützte Analyse Ihrer Testergebnisse und persönlichen Erfahrungen zur Erstellung einer individuellen Persönlichkeits-Signatur
 - **Account-Verwaltung:** Registrierung, Login, Passwortverwaltung
 - **Personalisierte Ansprache (optional):** Verwendung Ihres Namens für eine persönlichere Coaching-Gesprächsführung, sofern Sie bei der Registrierung einen Namen angegeben haben
 - **E-Mail-Kommunikation:** 
@@ -288,7 +288,7 @@ Data is processed for the following purposes:
 
 - **Provision of coaching functions:** Enabling AI-powered coaching conversations
 - **Personalized coaching:** Using your personality profile to adapt coaching conversations to your individual needs and communication styles (registered users with active profile only)
-- **Personality signature generation:** AI-assisted analysis of your test results and personal stories to create an individual personality signature
+- **Personality signature generation:** AI-assisted analysis of your test results and personal experiences to create an individual personality signature
 - **Account management:** Registration, login, password management
 - **Personalized address (optional):** Use of your name for more personal coaching conversation guidance, if you provided a name during registration
 - **Email communication:** 
