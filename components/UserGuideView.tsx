@@ -51,6 +51,7 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches.
 - Lesen Sie ihre Beschreibungen und Stile, um denjenigen zu finden, der am besten zu Ihren aktuellen Bedürfnissen passt.
 - Einige Coaches sind nur für registrierte oder Premium-Benutzer verfügbar.
+- **Besondere Features:** Coaches wie Rob und Kenji (gekennzeichnet mit einem Glocken-Symbol 🔔) bieten geführte Meditationsübungen während der Sitzung an.
 - **Wenn Sie auf eine Coach-Karte klicken**, beginnt Ihre Sitzung sofort.
 
 ### 2.2 Die Chat-Oberfläche
@@ -290,6 +291,7 @@ If you are a registered user returning with a saved context, you will see the **
 On the **Select a Coach** screen, you'll see a list of available coaches.
 - Read their descriptions and styles to find one that best fits your current needs.
 - Some coaches are only available to registered or premium users.
+- **Special Features:** Coaches like Rob and Kenji (marked with a bell icon 🔔) offer guided meditation exercises during the session.
 - **Clicking on a coach card** will start your session immediately.
 
 ### 2.2 The Chat Interface
