@@ -114,7 +114,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     
                     <div className="px-4 pt-2 flex items-center justify-between">
                         <p className="text-xs text-content-subtle">
-                            Version 1.7.1
+                            Version 1.7.2
                         </p>
                         <button
                             onClick={handleRefresh}

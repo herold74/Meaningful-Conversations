@@ -3,7 +3,7 @@ import { Bot, BotWithAvailability, User, BotAccessTier, Language } from '../type
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
-import { MeditationIcon } from './icons/MeditationIcon';
+import { MediationIcon } from './icons/MediationIcon';
 import ExperimentalModeSelector, { ExperimentalMode } from './ExperimentalModeSelector';
 import ExperimentalModeInfoModal from './ExperimentalModeInfoModal';
 import Spinner from './shared/Spinner';
@@ -106,7 +106,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
                     className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent-primary flex items-center justify-center shadow-md"
                     title={t('botSelection_meditationBadge')}
                 >
-                    <MeditationIcon className="w-4 h-4 text-button-foreground-on-accent" />
+                    <MediationIcon className="w-4 h-4 text-button-foreground-on-accent" />
                 </div>
             )}
         </div>
