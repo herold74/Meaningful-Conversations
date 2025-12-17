@@ -194,6 +194,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
+  const justStoppedRecording = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   // iOS/iPadOS detection
@@ -517,6 +518,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
       }
+      
+      // Reset recording flag
+      justStoppedRecording.current = false;
     };
   }, [isVoiceMode]);
 
@@ -567,6 +571,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         .replace(/^>\s?/gm, '');
 
     lastSpokenTextRef.current = cleanText;
+
+    // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
+    // After recording, iOS needs time to switch Bluetooth profile from HFP/HSP → A2DP
+    // Without this delay, TTS will play through iPhone speaker instead of EarPods
+    if (justStoppedRecording.current) {
+      const switchDelay = 1200; // 1.2 seconds for reliable profile switching
+      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
+      await new Promise(resolve => setTimeout(resolve, switchDelay));
+      justStoppedRecording.current = false; // Reset flag
+      console.log('✅ Bluetooth profile switch complete, starting TTS playback');
+    }
 
     // Server TTS mode
     if (ttsMode === 'server') {
@@ -1161,6 +1176,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             recognitionStreamRef.current.getTracks().forEach(track => track.stop());
             recognitionStreamRef.current = null;
             console.log('🔇 Recording stream released');
+          }
+          
+          // iOS: Flag that we need a delay before next TTS playback
+          // This gives iOS time to switch Bluetooth profile back from HFP/HSP (recording) to A2DP (playback)
+          if (isIOS) {
+            justStoppedRecording.current = true;
+            console.log('⏳ TTS delay flagged (Bluetooth profile switching)');
           }
           
           setTimeout(async () => {
