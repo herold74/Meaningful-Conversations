@@ -194,8 +194,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const needsBluetoothSwitchDelay = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   // iOS/iPadOS detection
@@ -514,22 +512,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     return () => {
       releaseWakeLock();
       
-      // Clean up AudioContext (iOS)
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(err => {
-          console.error('Failed to close AudioContext:', err);
-        });
-        audioContextRef.current = null;
-      }
-      
       // Clean up microphone stream if still active
       if (recognitionStreamRef.current) {
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
       }
-      
-      // Reset Bluetooth delay flag
-      needsBluetoothSwitchDelay.current = false;
     };
   }, [isVoiceMode]);
 
@@ -580,16 +567,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         .replace(/^>\s?/gm, '');
 
     lastSpokenTextRef.current = cleanText;
-
-    // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
-    // After recording, iOS devices need time for Bluetooth profile switching
-    if (needsBluetoothSwitchDelay.current) {
-      const switchDelay = 1000; // 1 second for HFP/HSP → A2DP switching
-      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
-      await new Promise(resolve => setTimeout(resolve, switchDelay));
-      needsBluetoothSwitchDelay.current = false; // Reset flag
-      console.log('✅ Bluetooth profile switch complete, starting TTS playback');
-    }
 
     // Server TTS mode
     if (ttsMode === 'server') {
@@ -1179,22 +1156,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       if (isListening) {
           recognitionRef.current.stop();
           
-          // iOS BLUETOOTH FIX: Immediately release microphone resources
-          // This allows EarPods/AirPods to switch back from HFP/HSP (recording) to A2DP (playback)
+          // Release microphone stream after recording
           if (recognitionStreamRef.current) {
             recognitionStreamRef.current.getTracks().forEach(track => track.stop());
             recognitionStreamRef.current = null;
             console.log('🔇 Recording stream released');
-          }
-          
-          // IMPORTANT: DO NOT close AudioContext here!
-          // Closing it breaks iOS audio routing - TTS will not play through EarPods
-          // AudioContext stays open to maintain audio route to EarPods/AirPods
-          
-          // Flag that we need a delay before next TTS playback (Bluetooth profile switching)
-          if (isIOS) {
-            needsBluetoothSwitchDelay.current = true;
-            console.log('⏳ Bluetooth switch delay flagged for next TTS playback');
           }
           
           setTimeout(async () => {
@@ -1204,27 +1170,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
-          // iOS/SAFARI AUDIO UNLOCK
-          // iOS requires user gesture to unlock audio and must be done synchronously
-          if (isIOS) {
-            try {
-              // Create or resume AudioContext - this MUST happen in direct response to user gesture
-              if (!audioContextRef.current) {
-                const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
-                audioContextRef.current = new AudioContextClass();
-                console.log('🎵 AudioContext created for iOS');
-              }
-              
-              // Resume AudioContext to unlock audio on iOS
-              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-                await audioContextRef.current.resume();
-                console.log('🎵 AudioContext resumed for iOS');
-              }
-            } catch (error) {
-              console.error('❌ Failed to initialize AudioContext:', error);
-            }
-          }
-          
           // PERMISSION CHECK & AUDIO DEVICE WARM-UP
           // Keeps microphone stream active to ensure correct device selection (especially for EarPods/AirPods)
           let warmupStream: MediaStream | null = null;
