@@ -193,6 +193,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionStreamRef = useRef<MediaStream | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
@@ -450,6 +451,40 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, []);
 
+  // EarPods/Headset Media Key Integration
+  // Allows users to start/stop recording using Play/Pause button on their EarPods/headset
+  useEffect(() => {
+    if (!isVoiceMode || !('mediaSession' in navigator)) return;
+    
+    // Register Play handler: Start recording
+    navigator.mediaSession.setActionHandler('play', () => {
+      console.log('🎧 EarPods Play button pressed');
+      if (!isListening && !isLoading) {
+        handleVoiceInteraction();
+      }
+    });
+    
+    // Register Pause handler: Stop recording & send
+    navigator.mediaSession.setActionHandler('pause', () => {
+      console.log('🎧 EarPods Pause button pressed');
+      if (isListening) {
+        handleVoiceInteraction();
+      }
+    });
+    
+    // Cleanup handlers when leaving voice mode
+    return () => {
+      if ('mediaSession' in navigator) {
+        try {
+          navigator.mediaSession.setActionHandler('play', null);
+          navigator.mediaSession.setActionHandler('pause', null);
+        } catch (error) {
+          console.warn('Failed to clear media session handlers:', error);
+        }
+      }
+    };
+  }, [isVoiceMode, isListening, isLoading]);
+  
   // Wake Lock: Keep screen active in voice mode to prevent interruption
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
@@ -1166,8 +1201,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             
             console.log('🎤 Microphone stream acquired:', warmupStream.getAudioTracks()[0].label);
             
-            // DON'T stop the stream yet - keep it alive for device warm-up
-            // Stream will be stopped after recognition starts or if error occurs
+            // Store the stream to keep it active during Bluetooth profile switching
+            recognitionStreamRef.current = warmupStream;
           } catch (error: any) {
             console.error('❌ Microphone permission denied:', error);
             
@@ -1212,16 +1247,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               
               // Now that recognition has started, stop the warmup stream
               // Recognition API will handle microphone access from here
-              if (warmupStream) {
-                warmupStream.getTracks().forEach(track => track.stop());
+              if (recognitionStreamRef.current) {
+                recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+                recognitionStreamRef.current = null;
                 console.log('🔇 Warmup stream released');
               }
             } catch (error) {
               console.error('❌ Failed to start speech recognition:', error);
               
               // Clean up warmup stream on error
-              if (warmupStream) {
-                warmupStream.getTracks().forEach(track => track.stop());
+              if (recognitionStreamRef.current) {
+                recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+                recognitionStreamRef.current = null;
               }
               
               alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
@@ -1399,15 +1436,21 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex items-center gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
-                    {/* Always show badge if experimental mode is active (for debugging) */}
+                    {/* Responsive experimental mode badge */}
                     {experimentalMode && experimentalMode !== 'OFF' && (
-                        <div className="flex items-center gap-1 mt-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                        <span 
+                            className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shrink-0"
+                            title={experimentalMode === 'DPC' ? 'DPC Modus' : 'DPFL Modus'}
+                        >
+                            {/* Mobile: Only icon */}
+                            <span className="sm:hidden">🧪</span>
+                            {/* Desktop: Icon + Text */}
+                            <span className="hidden sm:inline">
                                 🧪 {experimentalMode === 'DPC' ? 'DPC Modus' : 'DPFL Modus'}
                             </span>
-                        </div>
+                        </span>
                     )}
                 </div>
             </button>
