@@ -1217,7 +1217,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
               
               // Resume AudioContext to unlock audio on iOS
-              if (audioContextRef.current.state === 'suspended') {
+              if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
                 await audioContextRef.current.resume();
                 console.log('🎵 AudioContext resumed for iOS');
               }
