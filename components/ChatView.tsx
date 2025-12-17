@@ -225,6 +225,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   
+  // Separate audio element for iOS Bluetooth "keep-alive" silent loop
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     const settings = getBotVoiceSettings(bot.id);
@@ -529,13 +532,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   // iOS Bluetooth Audio Fix: Keep audio connection "warm" with silent loop
   // This prevents iOS from closing the Bluetooth audio route between TTS responses
+  // Uses a SEPARATE audio element to avoid interfering with actual TTS playback
   useEffect(() => {
-    if (!isVoiceMode || !audioRef.current) return;
+    if (!isVoiceMode) return;
     
-    const silentAudio = audioRef.current;
-    const originalLoop = silentAudio.loop;
-    const originalVolume = silentAudio.volume;
-    const originalSrc = silentAudio.src;
+    // Create a separate audio element for the silent loop
+    if (!silentAudioRef.current) {
+      silentAudioRef.current = new Audio();
+    }
+    
+    const silentAudio = silentAudioRef.current;
     
     console.log('[iOS Audio Fix] Activating silent audio loop to keep Bluetooth route open');
     
@@ -550,13 +556,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.warn('[iOS Audio Fix] Could not start silent loop:', err);
     });
     
-    // Cleanup: Restore original state when leaving voice mode
+    // Cleanup: Stop and cleanup the silent loop when leaving voice mode
     return () => {
       console.log('[iOS Audio Fix] Deactivating silent audio loop');
-      silentAudio.loop = originalLoop;
-      silentAudio.volume = originalVolume;
-      silentAudio.pause();
-      silentAudio.src = originalSrc;
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current.src = '';
+        silentAudioRef.current = null;
+      }
     };
   }, [isVoiceMode]);
 
