@@ -530,16 +530,30 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, [isVoiceMode]);
 
-  // iOS Bluetooth Audio Fix: Keep audio connection "warm" with silent loop
+  // Initialize silent audio element for iOS Bluetooth keep-alive (one-time setup)
+  useEffect(() => {
+    if (!silentAudioRef.current) {
+      silentAudioRef.current = new Audio();
+      // Set initial empty data URL
+      silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+      silentAudioRef.current.volume = 0; // Always silent
+    }
+    
+    return () => {
+      if (silentAudioRef.current) {
+        silentAudioRef.current.pause();
+        silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+        silentAudioRef.current.load();
+        // Don't null the ref - let it persist across component lifetime
+      }
+    };
+  }, []);
+
+  // iOS Bluetooth Audio Fix: Activate/deactivate silent loop based on voice mode
   // This prevents iOS from closing the Bluetooth audio route between TTS responses
   // Uses a SEPARATE audio element to avoid interfering with actual TTS playback
   useEffect(() => {
-    if (!isVoiceMode) return;
-    
-    // Create a separate audio element for the silent loop
-    if (!silentAudioRef.current) {
-      silentAudioRef.current = new Audio();
-    }
+    if (!isVoiceMode || !silentAudioRef.current) return;
     
     const silentAudio = silentAudioRef.current;
     
@@ -556,13 +570,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.warn('[iOS Audio Fix] Could not start silent loop:', err);
     });
     
-    // Cleanup: Stop and cleanup the silent loop when leaving voice mode
+    // Cleanup: Stop the silent loop when leaving voice mode, but keep the element
     return () => {
       console.log('[iOS Audio Fix] Deactivating silent audio loop');
       if (silentAudioRef.current) {
         silentAudioRef.current.pause();
-        silentAudioRef.current.src = '';
-        silentAudioRef.current = null;
+        silentAudioRef.current.loop = false;
+        silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+        silentAudioRef.current.load();
+        // Don't null the ref - reuse the element on next voice mode toggle
       }
     };
   }, [isVoiceMode]);
