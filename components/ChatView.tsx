@@ -884,11 +884,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
       
-      // Cleanup: Release warmup stream if still active
+      // Cleanup: Release warmup stream if still active (fallback)
+      // This handles unexpected stops (errors, timeouts, etc.)
       if (recognitionStreamRef.current) {
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
-        console.log('🔇 Warmup stream released (in onend)');
+        console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
       }
     };
     
@@ -942,13 +943,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       
       console.log('🎤 Recognition result:', { final: final_transcript, interim: interim_transcript });
       
-      // On first recognition result, release the warmup stream
-      // This ensures recognition is fully working before we stop the stream
-      if (recognitionStreamRef.current) {
-        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-        recognitionStreamRef.current = null;
-        console.log('🔇 Warmup stream released (after first result)');
-      }
+      // DON'T release the warmup stream here!
+      // Releasing it during recognition causes iOS to stop the recognition
+      // The stream will be released when user manually stops recording
       
       // Combine the initial text (if any) with the new final and interim parts.
       setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
