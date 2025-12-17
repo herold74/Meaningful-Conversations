@@ -194,6 +194,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
+  const recognitionStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const justStoppedRecording = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
   const hasRecordedBefore = useRef<boolean>(false); // Track if we've successfully recorded before
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
