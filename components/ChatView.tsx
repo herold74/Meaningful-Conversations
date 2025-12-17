@@ -228,6 +228,33 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Separate audio element for iOS Bluetooth "keep-alive" silent loop
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
   
+  // HFP Continuous Mode: Keep mic stream open to prevent iOS Bluetooth profile switching
+  const persistentMicStreamRef = useRef<MediaStream | null>(null);
+  const [isHFPMode, setIsHFPMode] = useState(false);
+  
+  // Detect Bluetooth audio devices (AirPods, EarPods, etc.)
+  const detectBluetoothAudio = useCallback(async (): Promise<boolean> => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+      
+      // Search for Bluetooth devices by common keywords
+      const bluetoothKeywords = ['bluetooth', 'airpods', 'earpods', 'wireless', 'bt', 'beats', 'bose', 'sony', 'jabra'];
+      const hasBluetoothAudio = audioOutputs.some(device => 
+        bluetoothKeywords.some(keyword => 
+          device.label.toLowerCase().includes(keyword)
+        )
+      );
+      
+      console.log('[Audio] Bluetooth detection:', hasBluetoothAudio, 'Devices:', audioOutputs.map(d => d.label));
+      return hasBluetoothAudio;
+    } catch (error) {
+      console.warn('[Audio] Could not enumerate devices:', error);
+      // Fallback: On iOS, assume Bluetooth might be used
+      return isIOS;
+    }
+  }, [isIOS]);
+  
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     const settings = getBotVoiceSettings(bot.id);
@@ -519,7 +546,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       releaseWakeLock();
       
       // Clean up microphone stream if still active
-      if (recognitionStreamRef.current) {
+      // IMPORTANT: Don't close the persistent HFP stream here - it's managed by its own useEffect
+      if (recognitionStreamRef.current && recognitionStreamRef.current !== persistentMicStreamRef.current) {
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
       }
@@ -529,6 +557,69 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       hasRecordedBefore.current = false; // Reset for next session
     };
   }, [isVoiceMode]);
+
+  // HFP Continuous Mode: Keep mic stream open during entire voice session
+  // This prevents iOS from switching Bluetooth profiles (HFP ↔ A2DP)
+  // Result: Both recording and TTS playback work reliably over AirPods/EarPods
+  useEffect(() => {
+    if (!isVoiceMode) {
+      // Cleanup when leaving voice mode
+      if (persistentMicStreamRef.current) {
+        console.log('[HFP Mode] Closing persistent mic stream');
+        persistentMicStreamRef.current.getTracks().forEach(track => track.stop());
+        persistentMicStreamRef.current = null;
+        setIsHFPMode(false);
+      }
+      return;
+    }
+    
+    const initHFPMode = async () => {
+      // Only activate HFP mode on iOS with Bluetooth audio
+      if (!isIOS) {
+        console.log('[HFP Mode] Not iOS, skipping HFP mode');
+        return;
+      }
+      
+      const hasBluetooth = await detectBluetoothAudio();
+      
+      if (hasBluetooth) {
+        try {
+          // Open mic stream and KEEP IT OPEN - this forces iOS to stay in HFP profile
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 16000, // HFP-typical sample rate (phone quality)
+              channelCount: 1,   // Mono
+            }
+          });
+          
+          persistentMicStreamRef.current = stream;
+          setIsHFPMode(true);
+          console.log('[HFP Mode] ✅ Persistent mic stream opened - iOS will stay in HFP profile');
+          console.log('[HFP Mode] Audio track:', stream.getAudioTracks()[0].label);
+        } catch (error) {
+          console.warn('[HFP Mode] Could not open persistent stream:', error);
+          // Fall back to standard mode with delays
+          setIsHFPMode(false);
+        }
+      } else {
+        console.log('[HFP Mode] No Bluetooth detected, using standard mode');
+        setIsHFPMode(false);
+      }
+    };
+    
+    initHFPMode();
+    
+    return () => {
+      if (persistentMicStreamRef.current) {
+        console.log('[HFP Mode] Cleanup: Closing persistent mic stream');
+        persistentMicStreamRef.current.getTracks().forEach(track => track.stop());
+        persistentMicStreamRef.current = null;
+      }
+    };
+  }, [isVoiceMode, isIOS, detectBluetoothAudio]);
 
   // Initialize silent audio element for iOS Bluetooth keep-alive (one-time setup)
   useEffect(() => {
@@ -552,12 +643,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // iOS Bluetooth Audio Fix: Activate/deactivate silent loop based on voice mode
   // This prevents iOS from closing the Bluetooth audio route between TTS responses
   // Uses a SEPARATE audio element to avoid interfering with actual TTS playback
+  // NOTE: In HFP Mode, this is NOT needed - the persistent mic stream keeps the connection open
   useEffect(() => {
-    if (!isVoiceMode || !silentAudioRef.current) return;
+    // Skip silent audio loop if HFP Mode is active (mic stream keeps connection open)
+    if (!isVoiceMode || !silentAudioRef.current || isHFPMode) {
+      if (isHFPMode && isVoiceMode) {
+        console.log('[HFP Mode] Silent audio loop not needed - mic stream keeps Bluetooth connection');
+      }
+      return;
+    }
     
     const silentAudio = silentAudioRef.current;
     
-    console.log('[iOS Audio Fix] Activating silent audio loop to keep Bluetooth route open');
+    console.log('[Standard Mode] Activating silent audio loop to keep Bluetooth route open');
     
     // Use a very short silent audio data URL (50ms of silence)
     const silentDataURL = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
@@ -567,12 +665,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     // Start silent playback (iOS will route this to EarPods/AirPods)
     silentAudio.play().catch(err => {
-      console.warn('[iOS Audio Fix] Could not start silent loop:', err);
+      console.warn('[Standard Mode] Could not start silent loop:', err);
     });
     
     // Cleanup: Stop the silent loop when leaving voice mode, but keep the element
     return () => {
-      console.log('[iOS Audio Fix] Deactivating silent audio loop');
+      console.log('[Standard Mode] Deactivating silent audio loop');
       if (silentAudioRef.current) {
         silentAudioRef.current.pause();
         silentAudioRef.current.loop = false;
@@ -581,12 +679,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // Don't null the ref - reuse the element on next voice mode toggle
       }
     };
-  }, [isVoiceMode]);
+  }, [isVoiceMode, isHFPMode]);
 
   // iOS Bluetooth Audio Fix: Use MediaSession API to signal this is an audio app
   // This helps iOS maintain a stable Bluetooth audio route
   useEffect(() => {
-    if (!isVoiceMode || !('mediaSession' in navigator)) return;
+    // Check both mediaSession and MediaMetadata availability
+    if (!isVoiceMode || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
     
     console.log('[iOS Audio Fix] Activating MediaSession to signal audio app');
     
@@ -659,11 +758,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     lastSpokenTextRef.current = cleanText;
 
-    // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
-    // After recording, iOS needs time to switch Bluetooth profile from HFP/HSP → A2DP
-    // Without this delay, TTS will play through iPhone speaker instead of EarPods
-    // Dynamic delay: shorter after first successful recording
-    if (justStoppedRecording.current) {
+    // HFP Mode: No Bluetooth profile switching delay needed!
+    // The mic stream stays open, so iOS stays in HFP profile for both recording AND playback
+    if (isHFPMode) {
+      console.log('[HFP Mode] ✅ No TTS delay needed - staying in HFP profile');
+      justStoppedRecording.current = false; // Reset flag
+    } else if (justStoppedRecording.current) {
+      // Standard Mode: Wait for iOS to switch Bluetooth profile from HFP/HSP → A2DP
+      // Without this delay, TTS will play through iPhone speaker instead of EarPods
       const switchDelay = hasRecordedBefore.current ? 1200 : 2000;
       console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
       await new Promise(resolve => setTimeout(resolve, switchDelay));
@@ -974,10 +1076,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       
       // Cleanup: Release warmup stream if still active (fallback)
       // This handles unexpected stops (errors, timeouts, etc.)
+      // IMPORTANT: In HFP Mode, do NOT close the persistent stream - it must stay open!
       if (recognitionStreamRef.current) {
-        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-        recognitionStreamRef.current = null;
-        console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
+        // Check if this is the persistent HFP stream - if so, don't close it!
+        if (recognitionStreamRef.current === persistentMicStreamRef.current) {
+          console.log('[HFP Mode] 🎤 Keeping persistent mic stream open (not closing)');
+          // Just clear the reference, but don't stop the tracks
+          recognitionStreamRef.current = null;
+        } else {
+          // Standard mode: close the stream
+          recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+          recognitionStreamRef.current = null;
+          console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
+        }
       }
     };
     
@@ -1285,11 +1396,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // It MUST stay active until onend event fires
           // Otherwise iOS will abort recognition before processing speech
           
-          // iOS: Flag that we need a delay before next TTS playback
-          // This gives iOS time to switch Bluetooth profile back from HFP/HSP (recording) to A2DP (playback)
-          if (isIOS) {
+          // HFP Mode: No profile switching delay needed - we stay in HFP mode
+          // Standard Mode: Flag that we need a delay before next TTS playback
+          if (isIOS && !isHFPMode) {
             justStoppedRecording.current = true;
             console.log('⏳ TTS delay flagged (Bluetooth profile switching)');
+          } else if (isHFPMode) {
+            console.log('[HFP Mode] No TTS delay needed - staying in HFP profile');
           }
           
           setTimeout(async () => {
@@ -1299,6 +1412,43 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
+          // ============================================================
+          // HFP MODE: Reuse persistent mic stream (no getUserMedia needed)
+          // ============================================================
+          if (isHFPMode && persistentMicStreamRef.current) {
+            console.log('[HFP Mode] ✅ Reusing persistent mic stream - no delays needed');
+            
+            // Reuse the persistent stream
+            recognitionStreamRef.current = persistentMicStreamRef.current;
+            
+            // Stop any ongoing audio playback
+            if (window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+            }
+            if (audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+              audioRef.current.load();
+            }
+            setTtsStatus('idle');
+            baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
+            
+            // Start recognition IMMEDIATELY - no Bluetooth delay needed in HFP mode
+            try {
+              recognitionRef.current?.start();
+              console.log('[HFP Mode] 🎙️ Speech recognition started immediately');
+            } catch (error) {
+              console.error('[HFP Mode] ❌ Failed to start speech recognition:', error);
+              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+            }
+            return;
+          }
+          
+          // ============================================================
+          // STANDARD MODE: Full getUserMedia with Bluetooth delays
+          // ============================================================
+          console.log('[Standard Mode] Requesting microphone access...');
+          
           // PERMISSION CHECK & AUDIO DEVICE WARM-UP
           // Keeps microphone stream active to ensure correct device selection (especially for EarPods/AirPods)
           let warmupStream: MediaStream | null = null;
@@ -1375,8 +1525,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             } catch (error) {
               console.error('❌ Failed to start speech recognition:', error);
               
-              // Clean up warmup stream on error
-              if (recognitionStreamRef.current) {
+              // Clean up warmup stream on error - but NOT in HFP mode
+              if (recognitionStreamRef.current && recognitionStreamRef.current !== persistentMicStreamRef.current) {
                 recognitionStreamRef.current.getTracks().forEach(track => track.stop());
                 recognitionStreamRef.current = null;
               }
