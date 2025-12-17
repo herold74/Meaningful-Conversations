@@ -469,8 +469,11 @@ if [[ "$DRY_RUN" == false ]]; then
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${YELLOW}🧹 Cleanup: Removing unused images...${NC}"
-    ssh "$REMOTE_HOST" "podman image prune -f" 2>/dev/null
-    echo -e "${GREEN}✓ Cleanup complete${NC}"
+    if ssh "$REMOTE_HOST" "podman image prune -f" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ Cleanup complete${NC}"
+    else
+        echo -e "${YELLOW}⚠ Cleanup skipped (no unused images or command failed)${NC}"
+    fi
     echo ""
     echo -e "${YELLOW}Useful commands:${NC}"
     echo -e "  View logs:    ${BLUE}ssh $REMOTE_HOST 'cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE logs -f'${NC}"
