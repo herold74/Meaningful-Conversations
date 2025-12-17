@@ -195,6 +195,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
   const justStoppedRecording = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
+  const hasRecordedBefore = useRef<boolean>(false); // Track if we've successfully recorded before
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   // iOS/iPadOS detection
@@ -521,6 +522,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       
       // Reset recording flag
       justStoppedRecording.current = false;
+      hasRecordedBefore.current = false; // Reset for next session
     };
   }, [isVoiceMode]);
 
@@ -575,9 +577,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
     // After recording, iOS needs time to switch Bluetooth profile from HFP/HSP → A2DP
     // Without this delay, TTS will play through iPhone speaker instead of EarPods
+    // Dynamic delay: shorter after first successful recording
     if (justStoppedRecording.current) {
-      const switchDelay = 2000; // 2 seconds for reliable profile switching
-      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
+      const switchDelay = hasRecordedBefore.current ? 1200 : 2000;
+      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
       await new Promise(resolve => setTimeout(resolve, switchDelay));
       justStoppedRecording.current = false; // Reset flag
       console.log('✅ Bluetooth profile switch complete, starting TTS playback');
@@ -878,29 +881,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.onstart = () => {
       console.log('🎙️ Recognition started (onstart event fired)');
       setIsListening(true);
-      
-      // Audio feedback: Play a short "ready" beep so user knows microphone is active
-      // This is especially helpful on iOS with Bluetooth delays
-      try {
-        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
-        const audioContext = new AudioContextClass();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800; // 800 Hz tone
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // 30% volume
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1); // Fade out
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.1); // 100ms beep
-        
-        console.log('🔔 Audio feedback: Ready beep played');
-      } catch (error) {
-        console.warn('Failed to play audio feedback:', error);
-      }
     };
     
     recognition.onend = () => {
@@ -965,6 +945,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
       
       console.log('🎤 Recognition result:', { final: final_transcript, interim: interim_transcript });
+      
+      // Mark that we've successfully recorded (for future delay optimization)
+      if (!hasRecordedBefore.current && (final_transcript || interim_transcript)) {
+        hasRecordedBefore.current = true;
+        console.log('✅ First successful recording detected - future delays will be shorter');
+      }
       
       // DON'T release the warmup stream here!
       // Releasing it during recognition causes iOS to stop the recognition
@@ -1289,12 +1275,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
-          // BLUETOOTH/EARPODS FIX: Delay for device switching
-          // iOS devices need time for Bluetooth profile switching
-          // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          // First recording needs MORE time (3000ms) to establish reliable connection
-          const bluetoothDelay = isIOS ? 3000 : 600;
-          console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...`);
+          // BLUETOOTH/EARPODS FIX: Dynamic delay based on whether we've recorded before
+          // First recording needs MORE time (3000ms) to establish audio route and permissions
+          // Subsequent recordings are faster (1000ms) since connection is already established
+          const bluetoothDelay = isIOS ? (hasRecordedBefore.current ? 1000 : 3000) : 600;
+          console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
           
           setTimeout(() => {
             try {
