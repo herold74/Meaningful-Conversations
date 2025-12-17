@@ -160,7 +160,7 @@
   "botSelection_guestMessage": "Um weitere Coaches freizuschalten, registrieren Sie sich bitte.",
   "botSelection_registeredMessage": "Schalten Sie Premium-Coaches frei, indem Sie einen Upgrade-Code im Menü einlösen.",
   "botSelection_goBack": "Zurück",
-  "botSelection_meditationBadge": "Mediationstechniken unterstützt",
+  "botSelection_meditationBadge": "Bietet geführte Meditation 🔔",
   
   "guest_limit_warning": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten erreicht. Registrieren Sie sich für unbegrenzten Zugang.",
   "guest_limit_remaining": "Verbleibende Nachrichten diese Woche: {{remaining}}/50",
