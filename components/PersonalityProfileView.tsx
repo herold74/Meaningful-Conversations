@@ -760,7 +760,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             {/* Update Button - only active after collapse/re-expand */}
             <div className="px-6 pb-4 flex items-center gap-3">
               <Button
-                onClick={handleGenerateNarrative}
+                onClick={() => setShowNarrativeStoriesModal(true)}
                 disabled={isGeneratingNarrative || !canUpdateNarrative}
                 size="sm"
                 loading={isGeneratingNarrative}
