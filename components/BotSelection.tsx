@@ -15,6 +15,7 @@ interface BotSelectionProps {
   hasPersonalityProfile?: boolean;
   experimentalMode?: ExperimentalMode;
   onExperimentalModeChange?: (mode: ExperimentalMode) => void;
+  adaptationMode?: 'adaptive' | 'stable'; // From personality profile
 }
 
 interface BotCardProps {
@@ -24,9 +25,10 @@ interface BotCardProps {
   hasPersonalityProfile?: boolean;
   experimentalMode?: ExperimentalMode;
   onExperimentalModeChange?: (mode: ExperimentalMode) => void;
+  adaptationMode?: 'adaptive' | 'stable';
 }
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, experimentalMode, onExperimentalModeChange }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, experimentalMode, onExperimentalModeChange, adaptationMode }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob-pq' || bot.id === 'kenji-stoic';
@@ -77,6 +79,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
                   setShowSelector(false);
                   setShowInfoModal(true);
                 }}
+                adaptationMode={adaptationMode}
               />
             )}
           </div>
@@ -144,7 +147,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, experimentalMode, onExperimentalModeChange }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, experimentalMode, onExperimentalModeChange, adaptationMode }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -239,6 +242,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             hasPersonalityProfile={hasPersonalityProfile}
             experimentalMode={experimentalMode}
             onExperimentalModeChange={onExperimentalModeChange}
+            adaptationMode={adaptationMode}
           />
         ))}
         
@@ -259,6 +263,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             hasPersonalityProfile={hasPersonalityProfile}
             experimentalMode={experimentalMode}
             onExperimentalModeChange={onExperimentalModeChange}
+            adaptationMode={adaptationMode}
           />
         ))}
       </div>

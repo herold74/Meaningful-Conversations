@@ -8,6 +8,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGenerator';
 import Spinner from './shared/Spinner';
 import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
+import NarrativeStoriesModal from './NarrativeStoriesModal';
 
 // Narrative Profile Display Component
 interface NarrativeProfileSectionProps {
@@ -291,6 +292,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isNarrativeExpanded, setIsNarrativeExpanded] = useState(false);
   const [canUpdateNarrative, setCanUpdateNarrative] = useState(false);
   const [wasNarrativeCollapsed, setWasNarrativeCollapsed] = useState(false);
+  const [showNarrativeStoriesModal, setShowNarrativeStoriesModal] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -361,17 +363,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
     }
   };
 
-  const handleGenerateNarrative = async () => {
+  const handleGenerateNarrative = async (newStories: { flowStory: string; frictionStory: string }) => {
     if (!decryptedData || !profileMetadata) return;
-    
-    // Check if we have narrative answers
-    if (!decryptedData.narratives?.flowStory || !decryptedData.narratives?.frictionStory) {
-      setNarrativeError(t('narrative_missing_stories') || 'Narrative-Daten fehlen. Bitte führe den Test erneut durch.');
-      return;
-    }
     
     setIsGeneratingNarrative(true);
     setNarrativeError(null);
+    setShowNarrativeStoriesModal(false); // Close modal
     
     try {
       // Prepare quantitative data
@@ -385,17 +382,18 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         big5: profileMetadata.testType === 'BIG5' ? decryptedData.big5 : undefined
       };
       
-      // Call API to generate narrative
+      // Call API to generate narrative with NEW stories
       const response = await api.generateNarrativeProfile({
         quantitativeData,
-        narratives: decryptedData.narratives,
+        narratives: newStories,
         language
       });
       
       if (response.narrativeProfile) {
-        // Update local state
+        // Update local state with NEW stories and narrativeProfile
         const updatedData = {
           ...decryptedData,
+          narratives: newStories, // Save the NEW stories!
           narrativeProfile: response.narrativeProfile
         };
         setDecryptedData(updatedData);
@@ -417,7 +415,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               },
               riemann: updatedData.riemann,
               big5: updatedData.big5,
-              narratives: updatedData.narratives,
+              narratives: newStories, // Save NEW stories to DB
               adaptationMode: updatedData.adaptationMode,
               narrativeProfile: response.narrativeProfile
             };
@@ -800,7 +798,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             )}
             
             <Button
-              onClick={handleGenerateNarrative}
+              onClick={() => setShowNarrativeStoriesModal(true)}
               disabled={isGeneratingNarrative}
               size="lg"
               loading={isGeneratingNarrative}
@@ -936,6 +934,15 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
           </div>
         </div>
+      )}
+
+      {/* Narrative Stories Modal */}
+      {showNarrativeStoriesModal && (
+        <NarrativeStoriesModal
+          onComplete={handleGenerateNarrative}
+          onCancel={() => setShowNarrativeStoriesModal(false)}
+          oldStories={decryptedData?.narratives}
+        />
       )}
     </div>
   );

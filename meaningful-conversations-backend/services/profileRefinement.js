@@ -186,10 +186,10 @@ function calculateProfileRefinement(currentProfile, profileType, sessionLogs, we
     !log.optedOut && log.comfortScore && log.comfortScore >= 3
   );
   
-  if (authenticSessions.length < 3) {
+  if (authenticSessions.length < 2) {
     return { 
       hasSuggestions: false, 
-      reason: `Need at least 3 authentic sessions (have ${authenticSessions.length})` 
+      reason: `Need at least 2 authentic sessions (have ${authenticSessions.length})` 
     };
   }
   
