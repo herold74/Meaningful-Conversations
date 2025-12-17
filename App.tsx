@@ -96,6 +96,15 @@ const App: React.FC = () => {
     // Experimental Mode States
     const [experimentalMode, setExperimentalMode] = useState<ExperimentalMode>('OFF');
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
+    const [adaptationMode, setAdaptationMode] = useState<'adaptive' | 'stable'>('adaptive');
+
+    // Safety: If experimentalMode is DPFL but adaptationMode is 'stable', downgrade to DPC
+    useEffect(() => {
+        if (experimentalMode === 'DPFL' && adaptationMode === 'stable') {
+            console.warn('[DPFL] Downgrading to DPC because profile is set to stable mode');
+            setExperimentalMode('DPC');
+        }
+    }, [experimentalMode, adaptationMode]);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -192,13 +201,26 @@ const App: React.FC = () => {
     useEffect(() => {
         if (currentUser && encryptionKey) {
             api.checkPersonalityProfile()
-                .then(setHasPersonalityProfile)
+                .then(exists => {
+                    setHasPersonalityProfile(exists);
+                    // Load full profile to get adaptationMode
+                    if (exists) {
+                        api.loadPersonalityProfile()
+                            .then(profile => {
+                                if (profile && profile.adaptationMode) {
+                                    setAdaptationMode(profile.adaptationMode as 'adaptive' | 'stable');
+                                }
+                            })
+                            .catch(err => console.error('Failed to load adaptation mode:', err));
+                    }
+                })
                 .catch(err => {
                     console.error('Failed to check personality profile:', err);
                     setHasPersonalityProfile(false);
                 });
         } else {
             setHasPersonalityProfile(false);
+            setAdaptationMode('adaptive'); // Reset to default
         }
     }, [currentUser, encryptionKey]);
     
@@ -962,6 +984,7 @@ const App: React.FC = () => {
                     hasPersonalityProfile={hasPersonalityProfile}
                     experimentalMode={experimentalMode}
                     onExperimentalModeChange={setExperimentalMode}
+                    adaptationMode={adaptationMode}
                 />
             );
             case 'chat': return (
