@@ -459,40 +459,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, []);
 
-  // EarPods/Headset Media Key Integration
-  // Allows users to start/stop recording using Play/Pause button on their EarPods/headset
-  useEffect(() => {
-    if (!isVoiceMode || !('mediaSession' in navigator)) return;
-    
-    // Register Play handler: Start recording
-    navigator.mediaSession.setActionHandler('play', () => {
-      console.log('🎧 EarPods Play button pressed');
-      if (!isListening && !isLoading) {
-        handleVoiceInteraction();
-      }
-    });
-    
-    // Register Pause handler: Stop recording & send
-    navigator.mediaSession.setActionHandler('pause', () => {
-      console.log('🎧 EarPods Pause button pressed');
-      if (isListening) {
-        handleVoiceInteraction();
-      }
-    });
-    
-    // Cleanup handlers when leaving voice mode
-    return () => {
-      if ('mediaSession' in navigator) {
-        try {
-          navigator.mediaSession.setActionHandler('play', null);
-          navigator.mediaSession.setActionHandler('pause', null);
-        } catch (error) {
-          console.warn('Failed to clear media session handlers:', error);
-        }
-      }
-    };
-  }, [isVoiceMode, isListening, isLoading]);
-  
   // Wake Lock: Keep screen active in voice mode to prevent interruption
   useEffect(() => {
     let wakeLock: WakeLockSentinel | null = null;
@@ -616,9 +582,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     lastSpokenTextRef.current = cleanText;
 
     // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
-    // After recording, iOS devices need 1.5-2 seconds for Bluetooth profile switching
+    // After recording, iOS devices need time for Bluetooth profile switching
     if (needsBluetoothSwitchDelay.current) {
-      const switchDelay = 1500; // 1.5 seconds for HFP/HSP → A2DP switching
+      const switchDelay = 1000; // 1 second for HFP/HSP → A2DP switching
       console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
       await new Promise(resolve => setTimeout(resolve, switchDelay));
       needsBluetoothSwitchDelay.current = false; // Reset flag
@@ -1323,11 +1289,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
-          // BLUETOOTH/EARPODS FIX: Extended delay for device switching
-          // iOS devices need significantly more time for Bluetooth profile switching
+          // BLUETOOTH/EARPODS FIX: Delay for device switching
+          // iOS devices need time for Bluetooth profile switching
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          // iOS/EarPods can take 2000-2500ms for reliable profile switching
-          const bluetoothDelay = isIOS ? 2000 : 1200;
+          const bluetoothDelay = isIOS ? 800 : 600;
           console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...`);
           
           setTimeout(() => {
