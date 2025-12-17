@@ -527,6 +527,67 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, [isVoiceMode]);
 
+  // iOS Bluetooth Audio Fix: Keep audio connection "warm" with silent loop
+  // This prevents iOS from closing the Bluetooth audio route between TTS responses
+  useEffect(() => {
+    if (!isVoiceMode || !audioRef.current) return;
+    
+    const silentAudio = audioRef.current;
+    const originalLoop = silentAudio.loop;
+    const originalVolume = silentAudio.volume;
+    const originalSrc = silentAudio.src;
+    
+    console.log('[iOS Audio Fix] Activating silent audio loop to keep Bluetooth route open');
+    
+    // Use a very short silent audio data URL (50ms of silence)
+    const silentDataURL = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+    silentAudio.loop = true;
+    silentAudio.volume = 0; // Completely silent
+    silentAudio.src = silentDataURL;
+    
+    // Start silent playback (iOS will route this to EarPods/AirPods)
+    silentAudio.play().catch(err => {
+      console.warn('[iOS Audio Fix] Could not start silent loop:', err);
+    });
+    
+    // Cleanup: Restore original state when leaving voice mode
+    return () => {
+      console.log('[iOS Audio Fix] Deactivating silent audio loop');
+      silentAudio.loop = originalLoop;
+      silentAudio.volume = originalVolume;
+      silentAudio.pause();
+      silentAudio.src = originalSrc;
+    };
+  }, [isVoiceMode]);
+
+  // iOS Bluetooth Audio Fix: Use MediaSession API to signal this is an audio app
+  // This helps iOS maintain a stable Bluetooth audio route
+  useEffect(() => {
+    if (!isVoiceMode || !('mediaSession' in navigator)) return;
+    
+    console.log('[iOS Audio Fix] Activating MediaSession to signal audio app');
+    
+    // Set metadata to signal this is a media/audio session
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: 'Meaningful Conversations',
+      artist: bot.name || 'Coach',
+      album: 'Voice Chat'
+    });
+    
+    // Don't bind action handlers - we don't want EarPods buttons to control anything
+    // Just the presence of MediaSession helps iOS prioritize audio routing
+    navigator.mediaSession.setActionHandler('play', null);
+    navigator.mediaSession.setActionHandler('pause', null);
+    
+    // Cleanup: Clear MediaSession when leaving voice mode
+    return () => {
+      console.log('[iOS Audio Fix] Deactivating MediaSession');
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+    };
+  }, [isVoiceMode, bot.name]);
+
   // Initialize audio element for server TTS
   useEffect(() => {
     if (!audioRef.current) {
