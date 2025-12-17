@@ -1629,14 +1629,26 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
 
             {/* Bottom third: Control Buttons - Doppelter Abstand nach oben */}
             <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-4 min-h-[8rem]">
-                <div className="flex items-center justify-center gap-6">
-                    <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
-                        {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
-                    </button>
-                    <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
-                        <RepeatIcon className="w-8 h-8 text-content-primary"/>
-                    </button>
-                </div>
+                {isLoadingAudio ? (
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary shadow">
+                            <svg className="animate-spin w-8 h-8 text-content-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                        <p className="text-sm text-content-secondary">{t('chat_loading_audio') || 'Loading audio...'}</p>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center gap-6">
+                        <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
+                            {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
+                        </button>
+                        <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
+                            <RepeatIcon className="w-8 h-8 text-content-primary"/>
+                        </button>
+                    </div>
+                )}
             </div>
         </main>
     ) : (
