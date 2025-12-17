@@ -576,7 +576,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // After recording, iOS needs time to switch Bluetooth profile from HFP/HSP → A2DP
     // Without this delay, TTS will play through iPhone speaker instead of EarPods
     if (justStoppedRecording.current) {
-      const switchDelay = 1500; // 1.5 seconds for reliable profile switching
+      const switchDelay = 2000; // 2 seconds for reliable profile switching
       console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
       await new Promise(resolve => setTimeout(resolve, switchDelay));
       justStoppedRecording.current = false; // Reset flag
@@ -878,6 +878,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.onstart = () => {
       console.log('🎙️ Recognition started (onstart event fired)');
       setIsListening(true);
+      
+      // Audio feedback: Play a short "ready" beep so user knows microphone is active
+      // This is especially helpful on iOS with Bluetooth delays
+      try {
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContextClass();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800; // 800 Hz tone
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime); // 30% volume
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1); // Fade out
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1); // 100ms beep
+        
+        console.log('🔔 Audio feedback: Ready beep played');
+      } catch (error) {
+        console.warn('Failed to play audio feedback:', error);
+      }
     };
     
     recognition.onend = () => {
@@ -1269,8 +1292,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // BLUETOOTH/EARPODS FIX: Delay for device switching
           // iOS devices need time for Bluetooth profile switching
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          // First recording needs more time (2000ms) to establish reliable connection
-          const bluetoothDelay = isIOS ? 2000 : 600;
+          // First recording needs MORE time (3000ms) to establish reliable connection
+          const bluetoothDelay = isIOS ? 3000 : 600;
           console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...`);
           
           setTimeout(() => {
