@@ -883,6 +883,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.onend = () => {
       console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
+      
+      // Cleanup: Release warmup stream if still active
+      if (recognitionStreamRef.current) {
+        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+        recognitionStreamRef.current = null;
+        console.log('🔇 Warmup stream released (in onend)');
+      }
     };
     
     recognition.onerror = (event) => {
@@ -934,6 +941,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
       
       console.log('🎤 Recognition result:', { final: final_transcript, interim: interim_transcript });
+      
+      // On first recognition result, release the warmup stream
+      // This ensures recognition is fully working before we stop the stream
+      if (recognitionStreamRef.current) {
+        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+        recognitionStreamRef.current = null;
+        console.log('🔇 Warmup stream released (after first result)');
+      }
       
       // Combine the initial text (if any) with the new final and interim parts.
       setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
@@ -1265,13 +1280,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               recognitionRef.current?.start();
               console.log('🎙️ Speech recognition started');
               
-              // Now that recognition has started, stop the warmup stream
-              // Recognition API will handle microphone access from here
-              if (recognitionStreamRef.current) {
-                recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-                recognitionStreamRef.current = null;
-                console.log('🔇 Warmup stream released');
-              }
+              // DON'T stop the warmup stream immediately!
+              // Keep it active until first recognition result to avoid "aborted" errors on iOS
+              // The stream will be released in the onresult handler or onend handler
             } catch (error) {
               console.error('❌ Failed to start speech recognition:', error);
               
