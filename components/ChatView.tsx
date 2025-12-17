@@ -195,6 +195,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const needsBluetoothSwitchDelay = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   
   // iOS/iPadOS detection
@@ -560,6 +561,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
       }
+      
+      // Reset Bluetooth delay flag
+      needsBluetoothSwitchDelay.current = false;
     };
   }, [isVoiceMode]);
 
@@ -610,6 +614,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         .replace(/^>\s?/gm, '');
 
     lastSpokenTextRef.current = cleanText;
+
+    // iOS BLUETOOTH FIX: Wait for EarPods/AirPods to switch back to A2DP (playback) profile
+    // After recording, iOS devices need 1.5-2 seconds for Bluetooth profile switching
+    if (needsBluetoothSwitchDelay.current) {
+      const switchDelay = 1500; // 1.5 seconds for HFP/HSP → A2DP switching
+      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...`);
+      await new Promise(resolve => setTimeout(resolve, switchDelay));
+      needsBluetoothSwitchDelay.current = false; // Reset flag
+      console.log('✅ Bluetooth profile switch complete, starting TTS playback');
+    }
 
     // Server TTS mode
     if (ttsMode === 'server') {
@@ -1198,6 +1212,31 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
       if (isListening) {
           recognitionRef.current.stop();
+          
+          // iOS BLUETOOTH FIX: Immediately release microphone resources
+          // This allows EarPods/AirPods to switch back from HFP/HSP (recording) to A2DP (playback)
+          if (recognitionStreamRef.current) {
+            recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+            recognitionStreamRef.current = null;
+            console.log('🔇 Recording stream released');
+          }
+          
+          if (isIOS && audioContextRef.current) {
+            try {
+              audioContextRef.current.close();
+              audioContextRef.current = null;
+              console.log('🎵 AudioContext closed after recording');
+            } catch (error) {
+              console.warn('Failed to close AudioContext:', error);
+            }
+          }
+          
+          // Flag that we need a delay before next TTS playback (Bluetooth profile switching)
+          if (isIOS) {
+            needsBluetoothSwitchDelay.current = true;
+            console.log('⏳ Bluetooth switch delay flagged for next TTS playback');
+          }
+          
           setTimeout(async () => {
               if (input.trim()) {
                   await sendMessage(input);
