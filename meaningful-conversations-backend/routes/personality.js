@@ -189,10 +189,10 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
       take: 5
     });
     
-    if (recentLogs.length < 3) {
+    if (recentLogs.length < 2) {
       return res.json({ 
         hasSuggestions: false, 
-        message: 'Not enough data yet (minimum 3 sessions)',
+        message: 'Not enough data yet (minimum 2 sessions)',
         adaptationMode: 'adaptive'
       });
     }

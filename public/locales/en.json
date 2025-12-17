@@ -699,7 +699,7 @@
   "refinement_title": "Profile Refinement",
   "refinement_description": "Based on {count} authentic sessions, we have the following refinements for your profile:",
   "refinement_loading": "Loading suggestions...",
-  "refinement_no_suggestions": "Not enough sessions for suggestions (minimum 3 required)",
+  "refinement_no_suggestions": "Not enough sessions for suggestions (minimum 2 required)",
   "refinement_error_load": "Error loading suggestions",
   "refinement_error_apply": "Error applying changes",
   "refinement_info_title": "Note",
@@ -914,5 +914,18 @@
   "survey_ranking_hint": "<strong>Rank 1 (Top)</strong> = First reaction under stress.",
   "survey_ranking_your_priority": "Your Priority (1 to {count})",
   "survey_ranking_nothing_selected": "Nothing selected yet",
-  "survey_ranking_options": "Options (Click to select)"
+  "survey_ranking_options": "Options (Click to select)",
+
+  "narrative_stories_modal_title": "Update Your Experiences",
+  "narrative_stories_modal_desc": "To create a current and relevant personality signature, please describe two concrete experiences from your current life.",
+  "narrative_stories_modal_why": "Why?",
+  "narrative_stories_modal_reason": "Your personality evolves. New experiences lead to more relevant insights than old stories.",
+  "narrative_stories_modal_show_old": "Show your previous answers (for inspiration)",
+  "narrative_stories_modal_generate": "Generate signature now",
+  "narrative_stories_modal_cancel": "Cancel",
+  "narrative_stories_modal_privacy": "Your stories are encrypted and only used for signature generation.",
+
+  "experimental_mode_dpfl_disabled_title": "DPFL not available",
+  "experimental_mode_dpfl_disabled_msg": "Your profile is set to 'Static'. DPFL requires an adaptive profile that can learn from sessions.",
+  "experimental_mode_dpfl_disabled_tooltip": "DPFL requires an adaptive personality profile"
 }

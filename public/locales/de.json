@@ -698,7 +698,7 @@
   "refinement_title": "Profil-Verfeinerung",
   "refinement_description": "Basierend auf {count} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:",
   "refinement_loading": "Lade Vorschläge...",
-  "refinement_no_suggestions": "Noch nicht genug Sessions für Vorschläge (mindestens 3 benötigt)",
+  "refinement_no_suggestions": "Noch nicht genug Sessions für Vorschläge (mindestens 2 benötigt)",
   "refinement_error_load": "Fehler beim Laden der Vorschläge",
   "refinement_error_apply": "Fehler beim Anwenden der Änderungen",
   "refinement_info_title": "Hinweis",
@@ -913,5 +913,18 @@
   "survey_ranking_hint": "<strong>Platz 1 (Oben)</strong> = Erste Reaktion unter Stress.",
   "survey_ranking_your_priority": "Ihre Priorität (1 bis {count})",
   "survey_ranking_nothing_selected": "Noch nichts ausgewählt",
-  "survey_ranking_options": "Optionen (Klicken zum Auswählen)"
+  "survey_ranking_options": "Optionen (Klicken zum Auswählen)",
+
+  "narrative_stories_modal_title": "Aktualisiere deine Erfahrungen",
+  "narrative_stories_modal_desc": "Um eine aktuelle und relevante Persönlichkeits-Signatur zu erstellen, beschreibe bitte zwei konkrete Erlebnisse aus deinem aktuellen Leben.",
+  "narrative_stories_modal_why": "Warum?",
+  "narrative_stories_modal_reason": "Deine Persönlichkeit entwickelt sich weiter. Neue Erfahrungen führen zu relevanteren Einsichten als alte Stories.",
+  "narrative_stories_modal_show_old": "Deine vorherigen Antworten anzeigen (als Inspiration)",
+  "narrative_stories_modal_generate": "Signatur jetzt generieren",
+  "narrative_stories_modal_cancel": "Abbrechen",
+  "narrative_stories_modal_privacy": "Deine Geschichten werden verschlüsselt gespeichert und nur für die Signatur-Generierung verwendet.",
+
+  "experimental_mode_dpfl_disabled_title": "DPFL nicht verfügbar",
+  "experimental_mode_dpfl_disabled_msg": "Dein Profil ist auf 'Statisch' eingestellt. DPFL benötigt ein adaptives Profil, das aus Sessions lernen kann.",
+  "experimental_mode_dpfl_disabled_tooltip": "DPFL benötigt ein adaptives Persönlichkeitsprofil"
 }
