@@ -231,6 +231,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // HFP Continuous Mode: Keep mic stream open to prevent iOS Bluetooth profile switching
   const persistentMicStreamRef = useRef<MediaStream | null>(null);
   const [isHFPMode, setIsHFPMode] = useState(false);
+  const [isHFPInitializing, setIsHFPInitializing] = useState(false);
+  const hfpInitPromiseRef = useRef<Promise<void> | null>(null);
   
   // Detect Bluetooth audio devices (AirPods, EarPods, etc.)
   const detectBluetoothAudio = useCallback(async (): Promise<boolean> => {
@@ -570,6 +572,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         persistentMicStreamRef.current = null;
         setIsHFPMode(false);
       }
+      setIsHFPInitializing(false);
+      hfpInitPromiseRef.current = null;
       return;
     }
     
@@ -577,13 +581,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       // Only activate HFP mode on iOS with Bluetooth audio
       if (!isIOS) {
         console.log('[HFP Mode] Not iOS, skipping HFP mode');
+        setIsHFPInitializing(false);
         return;
       }
       
-      const hasBluetooth = await detectBluetoothAudio();
+      setIsHFPInitializing(true);
+      console.log('[HFP Mode] Starting initialization...');
       
-      if (hasBluetooth) {
-        try {
+      try {
+        const hasBluetooth = await detectBluetoothAudio();
+        
+        if (hasBluetooth) {
           // Open mic stream and KEEP IT OPEN - this forces iOS to stay in HFP profile
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -599,18 +607,22 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setIsHFPMode(true);
           console.log('[HFP Mode] ✅ Persistent mic stream opened - iOS will stay in HFP profile');
           console.log('[HFP Mode] Audio track:', stream.getAudioTracks()[0].label);
-        } catch (error) {
-          console.warn('[HFP Mode] Could not open persistent stream:', error);
-          // Fall back to standard mode with delays
+        } else {
+          console.log('[HFP Mode] No Bluetooth detected, using standard mode');
           setIsHFPMode(false);
         }
-      } else {
-        console.log('[HFP Mode] No Bluetooth detected, using standard mode');
+      } catch (error) {
+        console.warn('[HFP Mode] Could not open persistent stream:', error);
+        // Fall back to standard mode with delays
         setIsHFPMode(false);
+      } finally {
+        setIsHFPInitializing(false);
+        console.log('[HFP Mode] Initialization complete');
       }
     };
     
-    initHFPMode();
+    // Store the promise so handleVoiceInteraction can wait for it
+    hfpInitPromiseRef.current = initHFPMode();
     
     return () => {
       if (persistentMicStreamRef.current) {
@@ -618,6 +630,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         persistentMicStreamRef.current.getTracks().forEach(track => track.stop());
         persistentMicStreamRef.current = null;
       }
+      hfpInitPromiseRef.current = null;
     };
   }, [isVoiceMode, isIOS, detectBluetoothAudio]);
 
@@ -1412,6 +1425,23 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
+          // ============================================================
+          // WAIT FOR HFP INITIALIZATION IF STILL IN PROGRESS
+          // ============================================================
+          if (isHFPInitializing && hfpInitPromiseRef.current) {
+            console.log('[HFP Mode] ⏳ Waiting for HFP initialization to complete...');
+            try {
+              // Wait for HFP init with a 3 second timeout
+              await Promise.race([
+                hfpInitPromiseRef.current,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('HFP init timeout')), 3000))
+              ]);
+              console.log('[HFP Mode] ✅ HFP initialization completed');
+            } catch (error) {
+              console.warn('[HFP Mode] HFP init timed out, proceeding with current state');
+            }
+          }
+          
           // ============================================================
           // HFP MODE: Reuse persistent mic stream (no getUserMedia needed)
           // ============================================================
