@@ -194,7 +194,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const recognitionStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  
+  // iOS/iPadOS detection
+  const isIOS = useMemo(() => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad with "Request Desktop Site"
+  }, []);
 
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
   const lastSpokenTextRef = useRef<string>('');
@@ -539,6 +546,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // Cleanup: Release wake lock when leaving voice mode or component unmounts
     return () => {
       releaseWakeLock();
+      
+      // Clean up AudioContext (iOS)
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(err => {
+          console.error('Failed to close AudioContext:', err);
+        });
+        audioContextRef.current = null;
+      }
+      
+      // Clean up microphone stream if still active
+      if (recognitionStreamRef.current) {
+        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
+        recognitionStreamRef.current = null;
+      }
     };
   }, [isVoiceMode]);
 
@@ -1184,19 +1205,47 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
+          // iOS/SAFARI AUDIO UNLOCK
+          // iOS requires user gesture to unlock audio and must be done synchronously
+          if (isIOS) {
+            try {
+              // Create or resume AudioContext - this MUST happen in direct response to user gesture
+              if (!audioContextRef.current) {
+                const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+                audioContextRef.current = new AudioContextClass();
+                console.log('🎵 AudioContext created for iOS');
+              }
+              
+              // Resume AudioContext to unlock audio on iOS
+              if (audioContextRef.current.state === 'suspended') {
+                await audioContextRef.current.resume();
+                console.log('🎵 AudioContext resumed for iOS');
+              }
+            } catch (error) {
+              console.error('❌ Failed to initialize AudioContext:', error);
+            }
+          }
+          
           // PERMISSION CHECK & AUDIO DEVICE WARM-UP
           // Keeps microphone stream active to ensure correct device selection (especially for EarPods/AirPods)
           let warmupStream: MediaStream | null = null;
           try {
-            // Request microphone access with optimized constraints for Bluetooth headsets
+            // iOS-optimized audio constraints
+            const audioConstraints = isIOS ? {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 44100, // iOS native sample rate
+              channelCount: 1, // Mono for speech
+            } : {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            };
+            
+            // Request microphone access with optimized constraints
             warmupStream = await navigator.mediaDevices.getUserMedia({ 
-              audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                // Safari/iOS: Let the system choose the best available microphone
-                // This ensures EarPods/AirPods microphone is selected when available
-              } 
+              audio: audioConstraints
             });
             
             console.log('🎤 Microphone stream acquired:', warmupStream.getAudioTracks()[0].label);
@@ -1236,10 +1285,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
           // BLUETOOTH/EARPODS FIX: Extended delay for device switching
-          // Keeps warmup stream alive during delay to maintain audio routing
-          // This gives Bluetooth headphones (EarPods, AirPods, etc.) time to switch
+          // iOS devices need significantly more time for Bluetooth profile switching
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          // EarPods can take 1000-1500ms for reliable profile switching
+          // iOS/EarPods can take 2000-2500ms for reliable profile switching
+          const bluetoothDelay = isIOS ? 2000 : 1200;
+          console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...`);
+          
           setTimeout(() => {
             try {
               recognitionRef.current?.start();
@@ -1263,7 +1314,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               
               alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
             }
-          }, 1200); // Increased to 1200ms for more reliable EarPods switching
+          }, bluetoothDelay);
       }
   };
 
