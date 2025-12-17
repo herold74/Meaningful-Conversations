@@ -771,19 +771,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     lastSpokenTextRef.current = cleanText;
 
-    // HFP Mode: No Bluetooth profile switching delay needed!
-    // The mic stream stays open, so iOS stays in HFP profile for both recording AND playback
-    if (isHFPMode) {
-      console.log('[HFP Mode] ✅ No TTS delay needed - staying in HFP profile');
-      justStoppedRecording.current = false; // Reset flag
-    } else if (justStoppedRecording.current) {
-      // Standard Mode: Wait for iOS to switch Bluetooth profile from HFP/HSP → A2DP
-      // Without this delay, TTS will play through iPhone speaker instead of EarPods
-      const switchDelay = hasRecordedBefore.current ? 1200 : 2000;
-      console.log(`⏳ Waiting ${switchDelay}ms for Bluetooth profile switch (HFP/HSP → A2DP)...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
-      await new Promise(resolve => setTimeout(resolve, switchDelay));
-      justStoppedRecording.current = false; // Reset flag
-      console.log('✅ Bluetooth profile switch complete, starting TTS playback');
+    // NO TTS DELAYS NEEDED in either mode:
+    // - HFP Mode: Mic stream stays open, iOS stays in HFP profile
+    // - Standard Mode: No Bluetooth = No profile switching
+    // The old Bluetooth delay logic is now obsolete
+    if (justStoppedRecording.current) {
+      justStoppedRecording.current = false; // Reset flag, but no delay needed
+      console.log('[Audio] Recording flag reset - no TTS delay needed');
     }
 
     // Server TTS mode
@@ -1409,14 +1403,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // It MUST stay active until onend event fires
           // Otherwise iOS will abort recognition before processing speech
           
-          // HFP Mode: No profile switching delay needed - we stay in HFP mode
-          // Standard Mode: Flag that we need a delay before next TTS playback
-          if (isIOS && !isHFPMode) {
-            justStoppedRecording.current = true;
-            console.log('⏳ TTS delay flagged (Bluetooth profile switching)');
-          } else if (isHFPMode) {
-            console.log('[HFP Mode] No TTS delay needed - staying in HFP profile');
-          }
+          // NO TTS DELAYS NEEDED:
+          // - HFP Mode: Mic stream stays open, iOS stays in HFP profile
+          // - Standard Mode: No Bluetooth = No profile switching
+          console.log('[Voice] Recording stopped - no TTS delay needed');
           
           setTimeout(async () => {
               if (input.trim()) {
@@ -1537,25 +1527,22 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
-          // BLUETOOTH/EARPODS FIX: Dynamic delay based on whether we've recorded before
-          // First recording needs MORE time (3000ms) to establish audio route and permissions
-          // Subsequent recordings are faster (1000ms) since connection is already established
-          const bluetoothDelay = isIOS ? (hasRecordedBefore.current ? 1000 : 3000) : 600;
-          console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
+          // STANDARD MODE: No Bluetooth = No profile switching = No delays needed!
+          // HFP Mode handles iOS Bluetooth separately with persistent stream
+          // Standard Mode is for: Mac/PC, Android, iOS with built-in mic (no headphones)
+          // Minimal delay (100ms) just for UI state to settle
+          const startDelay = 100; // No Bluetooth delay needed in standard mode!
+          console.log('[Standard Mode] 🎙️ Starting recognition (no Bluetooth delay needed)');
           
           recognitionStartTimeoutRef.current = setTimeout(() => {
             recognitionStartTimeoutRef.current = null; // Clear ref after execution
             try {
               recognitionRef.current?.start();
-              console.log('🎙️ Speech recognition started');
-              
-              // DON'T stop the warmup stream immediately!
-              // Keep it active until first recognition result to avoid "aborted" errors on iOS
-              // The stream will be released in the onresult handler or onend handler
+              console.log('[Standard Mode] ✅ Speech recognition started');
             } catch (error) {
-              console.error('❌ Failed to start speech recognition:', error);
+              console.error('[Standard Mode] ❌ Failed to start speech recognition:', error);
               
-              // Clean up warmup stream on error - but NOT in HFP mode
+              // Clean up warmup stream on error
               if (recognitionStreamRef.current && recognitionStreamRef.current !== persistentMicStreamRef.current) {
                 recognitionStreamRef.current.getTracks().forEach(track => track.stop());
                 recognitionStreamRef.current = null;
@@ -1563,7 +1550,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               
               alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
             }
-          }, bluetoothDelay);
+          }, startDelay);
       }
   };
 
