@@ -887,12 +887,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
       
-      // Cleanup: Release warmup stream if still active (fallback)
-      // This handles unexpected stops (errors, timeouts, etc.)
+      // ALWAYS release the stream when recognition ends
+      // This is the ONLY place we should release it
       if (recognitionStreamRef.current) {
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
-        console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
+        console.log('🔇 Recording stream released (in onend)');
       }
     };
     
