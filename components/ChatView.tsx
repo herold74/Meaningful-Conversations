@@ -1279,7 +1279,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           const bluetoothDelay = isIOS ? (hasRecordedBefore.current ? 1000 : 3000) : 600;
           console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...${hasRecordedBefore.current ? ' (optimized)' : ' (first time)'}`);
           
-          setTimeout(() => {
+          recognitionStartTimeoutRef.current = setTimeout(() => {
+            recognitionStartTimeoutRef.current = null; // Clear ref after execution
             try {
               recognitionRef.current?.start();
               console.log('🎙️ Speech recognition started');
