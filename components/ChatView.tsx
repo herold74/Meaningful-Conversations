@@ -1187,15 +1187,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             console.log('🔇 Recording stream released');
           }
           
-          if (isIOS && audioContextRef.current) {
-            try {
-              audioContextRef.current.close();
-              audioContextRef.current = null;
-              console.log('🎵 AudioContext closed after recording');
-            } catch (error) {
-              console.warn('Failed to close AudioContext:', error);
-            }
-          }
+          // IMPORTANT: DO NOT close AudioContext here!
+          // Closing it breaks iOS audio routing - TTS will not play through EarPods
+          // AudioContext stays open to maintain audio route to EarPods/AirPods
           
           // Flag that we need a delay before next TTS playback (Bluetooth profile switching)
           if (isIOS) {
