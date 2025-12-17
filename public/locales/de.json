@@ -184,6 +184,7 @@
   "chat_pause_tts": "Sprache anhalten",
   "chat_resume_tts": "Sprache fortsetzen",
   "chat_repeat_tts": "Letzte Nachricht wiederholen",
+  "chat_loading_audio": "Audio wird geladen...",
   "chat_voice_settings": "Spracheinstellungen",
   "chat_send_message": "Nachricht senden",
   "chat_report_message": "Ein Problem mit dieser Nachricht melden",
