@@ -876,10 +876,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     recognition.lang = botLanguage === 'de' ? 'de-DE' : 'en-US';
 
     recognition.onstart = () => {
+      console.log('🎙️ Recognition started (onstart event fired)');
       setIsListening(true);
     };
     
     recognition.onend = () => {
+      console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
     };
     
@@ -930,6 +932,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           interim_transcript += event.results[i][0].transcript;
         }
       }
+      
+      console.log('🎤 Recognition result:', { final: final_transcript, interim: interim_transcript });
       
       // Combine the initial text (if any) with the new final and interim parts.
       setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
@@ -1253,7 +1257,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // BLUETOOTH/EARPODS FIX: Delay for device switching
           // iOS devices need time for Bluetooth profile switching
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          const bluetoothDelay = isIOS ? 800 : 600;
+          const bluetoothDelay = isIOS ? 1500 : 600;
           console.log(`⏳ Waiting ${bluetoothDelay}ms for Bluetooth profile switching...`);
           
           setTimeout(() => {
