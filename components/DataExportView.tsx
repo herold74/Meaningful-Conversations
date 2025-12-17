@@ -6,9 +6,10 @@ import Button from './shared/Button';
 
 interface DataExportViewProps {
     lifeContext?: string; // The decrypted life context from App.tsx
+    colorTheme?: 'autumn' | 'winter';
 }
 
-const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => {
+const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', colorTheme = 'winter' }) => {
     const { t } = useLocalization();
     const [isExporting, setIsExporting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -90,7 +91,11 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => 
             <div className="space-y-4 text-content-secondary">
                 <p>{t('export_data_description')}</p>
 
-                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-400 dark:border-orange-600">
+                <div className={`p-4 rounded-lg border ${
+                    colorTheme === 'winter' 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-600' 
+                        : 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 dark:border-orange-600'
+                }`}>
                     <h3 className="font-semibold text-content-primary mb-2">{t('export_data_includes')}</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-content-primary">
                         <li>{t('export_data_includes_account')}</li>
@@ -108,7 +113,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => 
                     <div className="space-y-3">
                         <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
                             exportFormat === 'html' 
-                                ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20' 
+                                ? colorTheme === 'winter'
+                                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20'
                                 : 'border-border-secondary hover:border-accent-primary'
                         }`}>
                             <input
@@ -127,7 +134,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '' }) => 
 
                         <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
                             exportFormat === 'json' 
-                                ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20' 
+                                ? colorTheme === 'winter'
+                                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20'
                                 : 'border-border-secondary hover:border-accent-primary'
                         }`}>
                             <input

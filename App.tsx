@@ -1011,7 +1011,7 @@ const App: React.FC = () => {
             case 'legal': return <LegalView />;
             case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'editProfile': return <EditProfileView currentUser={currentUser!} onBack={() => setMenuView('accountManagement')} onProfileUpdated={(user) => setAndProcessUser(user)} />;
-            case 'exportData': return <DataExportView lifeContext={lifeContext} />;
+            case 'exportData': return <DataExportView lifeContext={lifeContext} colorTheme={colorTheme} />;
             case 'redeemCode': return <RedeemCodeView onRedeemSuccess={(user) => { 
                     setAndProcessUser(user);
                     setMenuView(null);
