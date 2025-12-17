@@ -467,6 +467,11 @@ if [[ "$DRY_RUN" == false ]]; then
     fi
     
     echo ""
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${YELLOW}🧹 Cleanup: Removing unused images...${NC}"
+    ssh "$REMOTE_HOST" "podman image prune -f" 2>/dev/null
+    echo -e "${GREEN}✓ Cleanup complete${NC}"
+    echo ""
     echo -e "${YELLOW}Useful commands:${NC}"
     echo -e "  View logs:    ${BLUE}ssh $REMOTE_HOST 'cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE logs -f'${NC}"
     echo -e "  Check status: ${BLUE}ssh $REMOTE_HOST 'cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE ps'${NC}"
