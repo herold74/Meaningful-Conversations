@@ -887,12 +887,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
       
-      // ALWAYS release the stream when recognition ends
-      // This is the ONLY place we should release it
+      // Cleanup: Release warmup stream if still active (fallback)
+      // This handles unexpected stops (errors, timeouts, etc.)
       if (recognitionStreamRef.current) {
         recognitionStreamRef.current.getTracks().forEach(track => track.stop());
         recognitionStreamRef.current = null;
-        console.log('🔇 Recording stream released (in onend)');
+        console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
       }
     };
     
@@ -1196,12 +1196,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       if (isListening) {
           recognitionRef.current.stop();
           
-          // Release microphone stream after recording
-          if (recognitionStreamRef.current) {
-            recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-            recognitionStreamRef.current = null;
-            console.log('🔇 Recording stream released');
-          }
+          // DON'T release the stream here!
+          // It MUST stay active until onend event fires
+          // Otherwise iOS will abort recognition before processing speech
           
           // iOS: Flag that we need a delay before next TTS playback
           // This gives iOS time to switch Bluetooth profile back from HFP/HSP (recording) to A2DP (playback)
