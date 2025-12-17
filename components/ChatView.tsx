@@ -1149,16 +1149,25 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }
           }, 300);
       } else {
-          // PERMISSION CHECK: Explicitly request microphone access
-          // This ensures permissions are granted before starting speech recognition
-          // Important for Electron-based previews (like Cursor) and browser security
+          // PERMISSION CHECK & AUDIO DEVICE WARM-UP
+          // Keeps microphone stream active to ensure correct device selection (especially for EarPods/AirPods)
+          let warmupStream: MediaStream | null = null;
           try {
-            // Request microphone access using getUserMedia
-            // This triggers the browser's permission dialog if not yet granted
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // Request microphone access with optimized constraints for Bluetooth headsets
+            warmupStream = await navigator.mediaDevices.getUserMedia({ 
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                // Safari/iOS: Let the system choose the best available microphone
+                // This ensures EarPods/AirPods microphone is selected when available
+              } 
+            });
             
-            // Immediately stop the stream - we only needed it for permission check
-            stream.getTracks().forEach(track => track.stop());
+            console.log('🎤 Microphone stream acquired:', warmupStream.getAudioTracks()[0].label);
+            
+            // DON'T stop the stream yet - keep it alive for device warm-up
+            // Stream will be stopped after recognition starts or if error occurs
           } catch (error: any) {
             console.error('❌ Microphone permission denied:', error);
             
@@ -1191,18 +1200,33 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
-          // BLUETOOTH FIX: Delay before starting recognition
+          // BLUETOOTH/EARPODS FIX: Extended delay for device switching
+          // Keeps warmup stream alive during delay to maintain audio routing
           // This gives Bluetooth headphones (EarPods, AirPods, etc.) time to switch
           // from A2DP (audio output only) to HFP/HSP (with microphone support)
-          // Typical profile switch takes 500-1500ms
+          // EarPods can take 1000-1500ms for reliable profile switching
           setTimeout(() => {
             try {
               recognitionRef.current?.start();
+              console.log('🎙️ Speech recognition started');
+              
+              // Now that recognition has started, stop the warmup stream
+              // Recognition API will handle microphone access from here
+              if (warmupStream) {
+                warmupStream.getTracks().forEach(track => track.stop());
+                console.log('🔇 Warmup stream released');
+              }
             } catch (error) {
               console.error('❌ Failed to start speech recognition:', error);
+              
+              // Clean up warmup stream on error
+              if (warmupStream) {
+                warmupStream.getTracks().forEach(track => track.stop());
+              }
+              
               alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
             }
-          }, 800); // 800ms delay for reliable Bluetooth profile switching
+          }, 1200); // Increased to 1200ms for more reliable EarPods switching
       }
   };
 
