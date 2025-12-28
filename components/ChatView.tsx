@@ -167,8 +167,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // Stop any playing audio
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-      audioRef.current.load();
     }
     
     // Stop meditation gong audio if playing
@@ -182,6 +180,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       window.speechSynthesis.cancel();
     }
     
+    // Stop speech recognition if active
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // Ignore errors - recognition might already be stopped
+      }
+    }
+    
+    // Reset voice-related states
+    setIsListening(false);
+    setIsVoiceMode(false);
+    
     // Reset TTS status
     setTtsStatus('idle');
     
@@ -193,17 +204,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const recognitionStreamRef = useRef<MediaStream | null>(null);
-  const recognitionStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const justStoppedRecording = useRef<boolean>(false); // Track if we just stopped recording (need delay before TTS)
-  const hasRecordedBefore = useRef<boolean>(false); // Track if we've successfully recorded before
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  
-  // iOS/iPadOS detection
-  const isIOS = useMemo(() => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad with "Request Desktop Site"
-  }, []);
 
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
   const lastSpokenTextRef = useRef<string>('');
@@ -225,37 +226,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   
-  // Separate audio element for iOS Bluetooth "keep-alive" silent loop
-  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
-  
-  // HFP Continuous Mode: Keep mic stream open to prevent iOS Bluetooth profile switching
-  const persistentMicStreamRef = useRef<MediaStream | null>(null);
-  const [isHFPMode, setIsHFPMode] = useState(false);
-  const [isHFPInitializing, setIsHFPInitializing] = useState(false);
-  const hfpInitPromiseRef = useRef<Promise<void> | null>(null);
-  
-  // Detect Bluetooth audio devices (AirPods, EarPods, etc.)
-  const detectBluetoothAudio = useCallback(async (): Promise<boolean> => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
-      
-      // Search for Bluetooth devices by common keywords
-      const bluetoothKeywords = ['bluetooth', 'airpods', 'earpods', 'wireless', 'bt', 'beats', 'bose', 'sony', 'jabra'];
-      const hasBluetoothAudio = audioOutputs.some(device => 
-        bluetoothKeywords.some(keyword => 
-          device.label.toLowerCase().includes(keyword)
-        )
-      );
-      
-      console.log('[Audio] Bluetooth detection:', hasBluetoothAudio, 'Devices:', audioOutputs.map(d => d.label));
-      return hasBluetoothAudio;
-    } catch (error) {
-      console.warn('[Audio] Could not enumerate devices:', error);
-      // Fallback: On iOS, assume Bluetooth might be used
-      return isIOS;
-    }
-  }, [isIOS]);
+  // iOS/iPadOS detection (for Bluetooth profile switching delay)
+  const isIOS = useMemo(() => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }, []);
   
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
@@ -546,153 +521,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // Cleanup: Release wake lock when leaving voice mode or component unmounts
     return () => {
       releaseWakeLock();
-      
-      // Clean up microphone stream if still active
-      // IMPORTANT: Don't close the persistent HFP stream here - it's managed by its own useEffect
-      if (recognitionStreamRef.current && recognitionStreamRef.current !== persistentMicStreamRef.current) {
-        recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-        recognitionStreamRef.current = null;
-      }
-      
-      // Reset recording flag
-      justStoppedRecording.current = false;
-      hasRecordedBefore.current = false; // Reset for next session
     };
   }, [isVoiceMode]);
-
-  // HFP Continuous Mode: Keep mic stream open during entire voice session
-  // This prevents iOS from switching Bluetooth profiles (HFP ↔ A2DP)
-  // Result: Both recording and TTS playback work reliably over AirPods/EarPods
-  useEffect(() => {
-    if (!isVoiceMode) {
-      // Cleanup when leaving voice mode
-      if (persistentMicStreamRef.current) {
-        console.log('[HFP Mode] Closing persistent mic stream');
-        persistentMicStreamRef.current.getTracks().forEach(track => track.stop());
-        persistentMicStreamRef.current = null;
-        setIsHFPMode(false);
-      }
-      setIsHFPInitializing(false);
-      hfpInitPromiseRef.current = null;
-      return;
-    }
-    
-    const initHFPMode = async () => {
-      // Only activate HFP mode on iOS with Bluetooth audio
-      if (!isIOS) {
-        console.log('[HFP Mode] Not iOS, skipping HFP mode');
-        setIsHFPInitializing(false);
-        return;
-      }
-      
-      setIsHFPInitializing(true);
-      console.log('[HFP Mode] Starting initialization...');
-      
-      try {
-        const hasBluetooth = await detectBluetoothAudio();
-        
-        if (hasBluetooth) {
-          // Open mic stream and KEEP IT OPEN - this forces iOS to stay in HFP profile
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              sampleRate: 16000, // HFP-typical sample rate (phone quality)
-              channelCount: 1,   // Mono
-            }
-          });
-          
-          persistentMicStreamRef.current = stream;
-          setIsHFPMode(true);
-          console.log('[HFP Mode] ✅ Persistent mic stream opened - iOS will stay in HFP profile');
-          console.log('[HFP Mode] Audio track:', stream.getAudioTracks()[0].label);
-        } else {
-          console.log('[HFP Mode] No Bluetooth detected, using standard mode');
-          setIsHFPMode(false);
-        }
-      } catch (error) {
-        console.warn('[HFP Mode] Could not open persistent stream:', error);
-        // Fall back to standard mode with delays
-        setIsHFPMode(false);
-      } finally {
-        setIsHFPInitializing(false);
-        console.log('[HFP Mode] Initialization complete');
-      }
-    };
-    
-    // Store the promise so handleVoiceInteraction can wait for it
-    hfpInitPromiseRef.current = initHFPMode();
-    
-    return () => {
-      if (persistentMicStreamRef.current) {
-        console.log('[HFP Mode] Cleanup: Closing persistent mic stream');
-        persistentMicStreamRef.current.getTracks().forEach(track => track.stop());
-        persistentMicStreamRef.current = null;
-      }
-      hfpInitPromiseRef.current = null;
-    };
-  }, [isVoiceMode, isIOS, detectBluetoothAudio]);
-
-  // Initialize silent audio element for iOS Bluetooth keep-alive (one-time setup)
-  useEffect(() => {
-    if (!silentAudioRef.current) {
-      silentAudioRef.current = new Audio();
-      // Set initial empty data URL
-      silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-      silentAudioRef.current.volume = 0; // Always silent
-    }
-    
-    return () => {
-      if (silentAudioRef.current) {
-        silentAudioRef.current.pause();
-        silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-        silentAudioRef.current.load();
-        // Don't null the ref - let it persist across component lifetime
-      }
-    };
-  }, []);
-
-  // iOS Bluetooth Audio Fix: Activate/deactivate silent loop based on voice mode
-  // This prevents iOS from closing the Bluetooth audio route between TTS responses
-  // Uses a SEPARATE audio element to avoid interfering with actual TTS playback
-  // NOTE: In HFP Mode, this is NOT needed - the persistent mic stream keeps the connection open
-  useEffect(() => {
-    // Skip silent audio loop if HFP Mode is active (mic stream keeps connection open)
-    if (!isVoiceMode || !silentAudioRef.current || isHFPMode) {
-      if (isHFPMode && isVoiceMode) {
-        console.log('[HFP Mode] Silent audio loop not needed - mic stream keeps Bluetooth connection');
-      }
-      return;
-    }
-    
-    const silentAudio = silentAudioRef.current;
-    
-    console.log('[Standard Mode] Activating silent audio loop to keep Bluetooth route open');
-    
-    // Use a very short silent audio data URL (50ms of silence)
-    const silentDataURL = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
-    silentAudio.loop = true;
-    silentAudio.volume = 0; // Completely silent
-    silentAudio.src = silentDataURL;
-    
-    // Start silent playback (iOS will route this to EarPods/AirPods)
-    silentAudio.play().catch(err => {
-      console.warn('[Standard Mode] Could not start silent loop:', err);
-    });
-    
-    // Cleanup: Stop the silent loop when leaving voice mode, but keep the element
-    return () => {
-      console.log('[Standard Mode] Deactivating silent audio loop');
-      if (silentAudioRef.current) {
-        silentAudioRef.current.pause();
-        silentAudioRef.current.loop = false;
-        silentAudioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-        silentAudioRef.current.load();
-        // Don't null the ref - reuse the element on next voice mode toggle
-      }
-    };
-  }, [isVoiceMode, isHFPMode]);
 
   // iOS Bluetooth Audio Fix: Use MediaSession API to signal this is an audio app
   // This helps iOS maintain a stable Bluetooth audio route
@@ -723,37 +553,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, [isVoiceMode, bot.name]);
 
-  // Initialize audio element for server TTS
+  // Track current audio blob URL for cleanup
+  const currentAudioUrlRef = useRef<string | null>(null);
+  
+  // Cleanup audio on unmount
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      // Set a valid empty data URL to prevent errors when clearing
-      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-      audioRef.current.addEventListener('play', () => setTtsStatus('speaking'));
-      audioRef.current.addEventListener('ended', () => setTtsStatus('idle'));
-      audioRef.current.addEventListener('pause', () => setTtsStatus('paused'));
-      audioRef.current.addEventListener('error', (e: Event) => {
-        const audioElement = e.target as HTMLAudioElement;
-        // Only log errors for actual blob URLs, not the dummy src
-        if (audioElement.src && !audioElement.src.startsWith('data:')) {
-          const errorDetails = {
-            code: audioElement.error?.code,
-            message: audioElement.error?.message,
-            src: audioElement.src,
-            networkState: audioElement.networkState,
-            readyState: audioElement.readyState
-          };
-          console.error('Audio playback error:', errorDetails);
-        }
-        setTtsStatus('idle');
-        setIsLoadingAudio(false);
-      });
-    }
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-        audioRef.current.load();
+        audioRef.current = null;
+      }
+      if (currentAudioUrlRef.current) {
+        URL.revokeObjectURL(currentAudioUrlRef.current);
+        currentAudioUrlRef.current = null;
       }
     };
   }, []);
@@ -771,34 +583,57 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     lastSpokenTextRef.current = cleanText;
 
-    // NO TTS DELAYS NEEDED in either mode:
-    // - HFP Mode: Mic stream stays open, iOS stays in HFP profile
-    // - Standard Mode: No Bluetooth = No profile switching
-    // The old Bluetooth delay logic is now obsolete
-    if (justStoppedRecording.current) {
-      justStoppedRecording.current = false; // Reset flag, but no delay needed
-      console.log('[Audio] Recording flag reset - no TTS delay needed');
-    }
-
     // Server TTS mode
     if (ttsMode === 'server') {
       try {
         setIsLoadingAudio(true);
         
+        // Stop and cleanup any existing audio
         if (audioRef.current) {
           audioRef.current.pause();
-          audioRef.current.removeAttribute('src');
-          audioRef.current.load();
+          audioRef.current.src = '';
+          audioRef.current = null;
+        }
+        
+        // Revoke previous blob URL to prevent memory leaks
+        if (currentAudioUrlRef.current) {
+          URL.revokeObjectURL(currentAudioUrlRef.current);
+          currentAudioUrlRef.current = null;
         }
         
         const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
         const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
         const audioUrl = URL.createObjectURL(audioBlob);
+        currentAudioUrlRef.current = audioUrl;
         
-        if (audioRef.current) {
-          audioRef.current.src = audioUrl;
-          await audioRef.current.play();
-        }
+        // Create a FRESH audio element for each playback
+        // This resets iOS audio session and ensures consistent quality
+        const audio = new Audio();
+        audioRef.current = audio;
+        
+        // Set up event handlers
+        audio.addEventListener('play', () => setTtsStatus('speaking'));
+        audio.addEventListener('pause', () => {
+          // Only set paused if not ended (ended also triggers pause)
+          if (!audio.ended) setTtsStatus('paused');
+        });
+        audio.addEventListener('ended', () => {
+          setTtsStatus('idle');
+          // Cleanup after playback to reset iOS audio session
+          if (currentAudioUrlRef.current === audioUrl) {
+            URL.revokeObjectURL(audioUrl);
+            currentAudioUrlRef.current = null;
+          }
+          // Don't null audioRef here - it's still needed for pause/resume
+        });
+        audio.addEventListener('error', () => {
+          console.error('[TTS] Audio playback error');
+          setTtsStatus('idle');
+          setIsLoadingAudio(false);
+        });
+        
+        audio.src = audioUrl;
+        await audio.play();
         
         setIsLoadingAudio(false);
       } catch (error) {
@@ -1031,8 +866,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         if (isTtsEnabled) {
             if (ttsMode === 'server' && audioRef.current) {
                 audioRef.current.pause();
-                audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-                audioRef.current.load();
             } else if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
@@ -1081,22 +914,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.log('🎙️ Recognition ended (onend event fired)');
       setIsListening(false);
       
-      // Cleanup: Release warmup stream if still active (fallback)
-      // This handles unexpected stops (errors, timeouts, etc.)
-      // IMPORTANT: In HFP Mode, do NOT close the persistent stream - it must stay open!
-      if (recognitionStreamRef.current) {
-        // Check if this is the persistent HFP stream - if so, don't close it!
-        if (recognitionStreamRef.current === persistentMicStreamRef.current) {
-          console.log('[HFP Mode] 🎤 Keeping persistent mic stream open (not closing)');
-          // Just clear the reference, but don't stop the tracks
-          recognitionStreamRef.current = null;
-        } else {
-          // Standard mode: close the stream
-          recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-          recognitionStreamRef.current = null;
-          console.log('🔇 Warmup stream released (in onend - fallback cleanup)');
-        }
-      }
     };
     
     recognition.onerror = (event) => {
@@ -1146,18 +963,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           interim_transcript += event.results[i][0].transcript;
         }
       }
-      
-      console.log('🎤 Recognition result:', { final: final_transcript, interim: interim_transcript });
-      
-      // Mark that we've successfully recorded (for future delay optimization)
-      if (!hasRecordedBefore.current && (final_transcript || interim_transcript)) {
-        hasRecordedBefore.current = true;
-        console.log('✅ First successful recording detected - future delays will be shorter');
-      }
-      
-      // DON'T release the warmup stream here!
-      // Releasing it during recognition causes iOS to stop the recognition
-      // The stream will be released when user manually stops recording
       
       // Combine the initial text (if any) with the new final and interim parts.
       setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
@@ -1284,8 +1089,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-      audioRef.current.load();
     }
     setTtsStatus('idle');
 
@@ -1397,160 +1200,35 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       if (isLoading || !recognitionRef.current) return;
 
       if (isListening) {
+          // Stop recording
           recognitionRef.current.stop();
           
-          // DON'T release the stream here!
-          // It MUST stay active until onend event fires
-          // Otherwise iOS will abort recognition before processing speech
-          
-          // NO TTS DELAYS NEEDED:
-          // - HFP Mode: Mic stream stays open, iOS stays in HFP profile
-          // - Standard Mode: No Bluetooth = No profile switching
-          console.log('[Voice] Recording stopped - no TTS delay needed');
+          // iOS needs extra time to switch Bluetooth profile back to A2DP (high quality)
+          // Without this delay, TTS audio plays through HFP (phone quality)
+          const profileSwitchDelay = isIOS ? 1000 : 300;
           
           setTimeout(async () => {
               if (input.trim()) {
                   await sendMessage(input);
                   setInput('');
               }
-          }, 300);
+          }, profileSwitchDelay);
       } else {
-          // ============================================================
-          // WAIT FOR HFP INITIALIZATION IF STILL IN PROGRESS
-          // ============================================================
-          if (isHFPInitializing && hfpInitPromiseRef.current) {
-            console.log('[HFP Mode] ⏳ Waiting for HFP initialization to complete...');
-            try {
-              // Wait for HFP init with a 3 second timeout
-              await Promise.race([
-                hfpInitPromiseRef.current,
-                new Promise((_, reject) => setTimeout(() => reject(new Error('HFP init timeout')), 3000))
-              ]);
-              console.log('[HFP Mode] ✅ HFP initialization completed');
-            } catch (error) {
-              console.warn('[HFP Mode] HFP init timed out, proceeding with current state');
-            }
-          }
-          
-          // ============================================================
-          // HFP MODE: Reuse persistent mic stream (no getUserMedia needed)
-          // ============================================================
-          if (isHFPMode && persistentMicStreamRef.current) {
-            console.log('[HFP Mode] ✅ Reusing persistent mic stream - no delays needed');
-            
-            // Reuse the persistent stream
-            recognitionStreamRef.current = persistentMicStreamRef.current;
-            
-            // Stop any ongoing audio playback
-            if (window.speechSynthesis) {
-              window.speechSynthesis.cancel();
-            }
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-              audioRef.current.load();
-            }
-            setTtsStatus('idle');
-            baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
-            
-            // Start recognition IMMEDIATELY - no Bluetooth delay needed in HFP mode
-            try {
-              recognitionRef.current?.start();
-              console.log('[HFP Mode] 🎙️ Speech recognition started immediately');
-            } catch (error) {
-              console.error('[HFP Mode] ❌ Failed to start speech recognition:', error);
-              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
-            }
-            return;
-          }
-          
-          // ============================================================
-          // STANDARD MODE: Full getUserMedia with Bluetooth delays
-          // ============================================================
-          console.log('[Standard Mode] Requesting microphone access...');
-          
-          // PERMISSION CHECK & AUDIO DEVICE WARM-UP
-          // Keeps microphone stream active to ensure correct device selection (especially for EarPods/AirPods)
-          let warmupStream: MediaStream | null = null;
-          try {
-            // iOS-optimized audio constraints
-            const audioConstraints = isIOS ? {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              sampleRate: 44100, // iOS native sample rate
-              channelCount: 1, // Mono for speech
-            } : {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            };
-            
-            // Request microphone access with optimized constraints
-            warmupStream = await navigator.mediaDevices.getUserMedia({ 
-              audio: audioConstraints
-            });
-            
-            console.log('🎤 Microphone stream acquired:', warmupStream.getAudioTracks()[0].label);
-            
-            // Store the stream to keep it active during Bluetooth profile switching
-            recognitionStreamRef.current = warmupStream;
-          } catch (error: any) {
-            console.error('❌ Microphone permission denied:', error);
-            
-            // Provide helpful error message based on error type
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-              alert(
-                t('microphone_permission_denied') || 
-                'Microphone access denied. Please allow microphone access in your browser settings:\n\n' +
-                '1. Click the lock/info icon in the address bar\n' +
-                '2. Set Microphone to "Allow"\n' +
-                '3. Reload the page and try again'
-              );
-            } else if (error.name === 'NotFoundError') {
-              alert(t('microphone_not_found') || 'No microphone found. Please connect a microphone and try again.');
-            } else {
-              alert(t('microphone_error') || `Microphone error: ${error.message}`);
-            }
-            return; // Stop here if permission denied
-          }
-          
-          // Stop any ongoing audio playback
-          if (window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-          }
+          // Stop any ongoing TTS playback
+          window.speechSynthesis?.cancel();
           if (audioRef.current) {
             audioRef.current.pause();
-            audioRef.current.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-            audioRef.current.load();
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           
-          // STANDARD MODE: No Bluetooth = No profile switching = No delays needed!
-          // HFP Mode handles iOS Bluetooth separately with persistent stream
-          // Standard Mode is for: Mac/PC, Android, iOS with built-in mic (no headphones)
-          // Minimal delay (100ms) just for UI state to settle
-          const startDelay = 100; // No Bluetooth delay needed in standard mode!
-          console.log('[Standard Mode] 🎙️ Starting recognition (no Bluetooth delay needed)');
-          
-          recognitionStartTimeoutRef.current = setTimeout(() => {
-            recognitionStartTimeoutRef.current = null; // Clear ref after execution
-            try {
-              recognitionRef.current?.start();
-              console.log('[Standard Mode] ✅ Speech recognition started');
-            } catch (error) {
-              console.error('[Standard Mode] ❌ Failed to start speech recognition:', error);
-              
-              // Clean up warmup stream on error
-              if (recognitionStreamRef.current && recognitionStreamRef.current !== persistentMicStreamRef.current) {
-                recognitionStreamRef.current.getTracks().forEach(track => track.stop());
-                recognitionStreamRef.current = null;
-              }
-              
-              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
-            }
-          }, startDelay);
+          // Start recognition directly - let the browser handle mic permission (like v1.5.8)
+          try {
+            recognitionRef.current.start();
+          } catch (error) {
+            console.error('Failed to start speech recognition:', error);
+            alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+          }
       }
   };
 
