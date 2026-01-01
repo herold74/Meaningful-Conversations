@@ -240,10 +240,21 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 ### 7.5 Experimentelle Coaching-Modi mit Chloe
 
-Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei:
-- Chloe kann Ihre Persönlichkeitsmerkmale in das Coaching einbeziehen
-- Die Gesprächsführung wird auf Ihren Kommunikationsstil abgestimmt
-- Tiefere Einblicke durch personalisierte Reflexionsfragen
+Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei. Diese aktivieren Sie über das **🧪 Reagenzglas-Symbol** auf Chloes Coach-Karte.
+
+**Verfügbare Modi:**
+
+| Modus | Beschreibung | Voraussetzung |
+| :--- | :--- | :--- |
+| **OFF** | Standard-Coaching ohne Persönlichkeitsdaten | Keine |
+| **DPC** (Dynamic Personality Coaching) | Chloe bezieht Ihre Persönlichkeitsmerkmale in das Coaching ein | Persönlichkeitsprofil |
+| **DPFL** (Dynamic Personality Feedback Loop) | Zusätzlich lernt Ihr Profil aus den Sitzungen und verfeinert sich | Adaptives Profil |
+
+**Hinweise:**
+- Bei einem **adaptiven Profil** ist DPC standardmäßig aktiviert
+- Bei einem **stabilen Profil** sind die Modi deaktiviert (OFF)
+- DPFL ist nur verfügbar, wenn Ihr Profil auf "Adaptiv" eingestellt ist
+- Nach DPFL-Sitzungen werden Sie gefragt, wie authentisch Sie waren – diese Rückmeldung verfeinert Ihr Profil
 
 Diese Modi sind als **experimentell** gekennzeichnet und werden kontinuierlich verbessert.
 `;
@@ -480,10 +491,21 @@ At the end of the test, you choose how your profile should evolve:
 
 ### 7.5 Experimental Coaching Modes with Chloe
 
-With an active personality profile, you unlock enhanced coaching modes:
-- Chloe can incorporate your personality traits into coaching
-- Conversation style is adapted to your communication preferences
-- Deeper insights through personalized reflection questions
+With an active personality profile, you unlock enhanced coaching modes. Activate them via the **🧪 test tube icon** on Chloe's coach card.
+
+**Available Modes:**
+
+| Mode | Description | Requirement |
+| :--- | :--- | :--- |
+| **OFF** | Standard coaching without personality data | None |
+| **DPC** (Dynamic Personality Coaching) | Chloe incorporates your personality traits into coaching | Personality Profile |
+| **DPFL** (Dynamic Personality Feedback Loop) | Additionally, your profile learns from sessions and refines itself | Adaptive Profile |
+
+**Notes:**
+- With an **adaptive profile**, DPC is enabled by default
+- With a **stable profile**, modes are disabled (OFF)
+- DPFL is only available when your profile is set to "Adaptive"
+- After DPFL sessions, you'll be asked how authentic you were – this feedback refines your profile
 
 These modes are marked as **experimental** and are continuously being improved.
 `;
