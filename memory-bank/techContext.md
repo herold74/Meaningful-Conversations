@@ -27,8 +27,35 @@
 
 ## Infrastructure & Deployment
 - **Containerization:** Docker / Podman
-- **Cloud Provider:** Google Cloud Platform (Cloud Run, Cloud SQL) proposed.
-- **CI/CD:** Scripts provided (`deploy-manualmode.sh`, `validate-pwa.sh`).
+- **Cloud Provider:** Hetzner VPS (91.99.193.87)
+- **Reverse Proxy:** Nginx with auto-generated configs per environment
+- **CI/CD:** Scripts in `/scripts/` directory
+
+### Deployment Workflow (WICHTIG!)
+
+**Prinzip: "Build once, deploy everywhere"**
+
+1. **Staging Deployment** (`./deploy-manualmode.sh -e staging`):
+   - Baut neue Images lokal
+   - Pusht zur Registry (ghcr.io)
+   - Deployed auf Staging-Umgebung
+   - Aktualisiert Nginx IPs
+
+2. **Production Deployment** (`./scripts/deploy-production-scheduled.sh [VERSION]`):
+   - **NIEMALS neu bauen!**
+   - Pullt die bereits getesteten Images von der Registry
+   - Dieselben Images wie auf Staging
+   - Deployed auf Production-Umgebung
+   - Aktualisiert Nginx IPs
+
+**Versionierung:**
+- Falls Staging eine neuere Version testet, kann Production mit expliziter Versionsnummer deployed werden
+- Beispiel: `./scripts/deploy-production-scheduled.sh 1.7.3`
+
+**Wichtige Scripts:**
+- `deploy-manualmode.sh` - Staging (mit Build)
+- `scripts/deploy-production-scheduled.sh` - Production (nur Pull)
+- `server-scripts/update-nginx-ips.sh` - Nginx IP-Update nach Container-Restart
 
 ## External Services
 - **Google Gemini:** LLM provider.
