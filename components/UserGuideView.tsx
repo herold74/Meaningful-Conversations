@@ -238,6 +238,8 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
+**Gut zu wissen:** Wenn Sie eine neue Evaluierung **desselben Test-Typs** durchführen (z.B. Riemann-Thomann erneut), bleiben Ihre bisherigen DPFL-Verfeinerungen erhalten. Nur bei einem Wechsel des Test-Typs (z.B. von Riemann-Thomann zu OCEAN) werden die Verfeinerungsdaten zurückgesetzt.
+
 ### 7.5 Experimentelle Coaching-Modi mit Chloe und Kenji
 
 Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei. Diese aktivieren Sie über das **🧪 Reagenzglas-Symbol** auf der Coach-Karte von Chloe oder Kenji.
@@ -488,6 +490,8 @@ At the end of the test, you choose how your profile should evolve:
 - Ideal for: Clear baseline & targeted comparisons
 
 **Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
+
+**Good to know:** If you take a new evaluation of the **same test type** (e.g., Riemann-Thomann again), your existing DPFL refinements are preserved. Only when switching test types (e.g., from Riemann-Thomann to OCEAN) will the refinement data be reset.
 
 ### 7.5 Experimental Coaching Modes with Chloe and Kenji
 
