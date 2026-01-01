@@ -203,12 +203,18 @@ const App: React.FC = () => {
             api.checkPersonalityProfile()
                 .then(exists => {
                     setHasPersonalityProfile(exists);
-                    // Load full profile to get adaptationMode
+                    // Load full profile to get adaptationMode and set default experimental mode
                     if (exists) {
                         api.loadPersonalityProfile()
                             .then(profile => {
                                 if (profile && profile.adaptationMode) {
                                     setAdaptationMode(profile.adaptationMode as 'adaptive' | 'stable');
+                                    // Set default experimental mode based on profile setting
+                                    if (profile.adaptationMode === 'adaptive') {
+                                        setExperimentalMode('DPC');
+                                    } else {
+                                        setExperimentalMode('OFF');
+                                    }
                                 }
                             })
                             .catch(err => console.error('Failed to load adaptation mode:', err));
