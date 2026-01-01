@@ -22,6 +22,22 @@ router.post('/save', authMiddleware, async (req, res) => {
     // Validate adaptationMode
     const validMode = adaptationMode === 'stable' ? 'stable' : 'adaptive';
     
+    // Check if existing profile has different test type
+    const existingProfile = await prisma.personalityProfile.findUnique({
+      where: { userId },
+      select: { testType: true, sessionCount: true }
+    });
+    
+    const testTypeChanged = existingProfile && existingProfile.testType !== testType;
+    
+    // If test type changed, clear SessionBehaviorLogs (Fremdsicht reset)
+    if (testTypeChanged) {
+      await prisma.sessionBehaviorLog.deleteMany({
+        where: { userId }
+      });
+      console.log(`[Profile] Test type changed from ${existingProfile.testType} to ${testType} - cleared session logs`);
+    }
+    
     // Upsert (create or update)
     const profile = await prisma.personalityProfile.upsert({
       where: { userId },
@@ -39,11 +55,16 @@ router.post('/save', authMiddleware, async (req, res) => {
         filterControl: filterControl || 0,
         adaptationMode: validMode,
         encryptedData,
-        sessionCount: 0 // Reset session count when profile is recreated
+        // Keep sessionCount if test type unchanged, reset if changed
+        sessionCount: testTypeChanged ? 0 : (existingProfile?.sessionCount || 0)
       }
     });
     
-    res.json({ success: true, profileId: profile.id });
+    res.json({ 
+      success: true, 
+      profileId: profile.id,
+      logsPreserved: !testTypeChanged && existingProfile !== null
+    });
   } catch (error) {
     console.error('Error saving personality profile:', error);
     res.status(500).json({ error: 'Failed to save profile' });
