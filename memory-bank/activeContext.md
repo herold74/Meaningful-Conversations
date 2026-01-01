@@ -1,16 +1,51 @@
 # Active Context
 
 ## Current Status
-The project is initialized and appears to be feature-complete for a "v1.0" release or late beta. The core functionality (chat, context management, gamification, backend sync) is implemented.
+**Version:** 1.7.3
+**Staging:** Deployed and tested ✓
+**Production:** Scheduled for 2. Januar 2026, 06:00 Uhr
 
-## Recent Focus
-- **Memory Bank Initialization:** Establishing the project context documentation.
-- **Documentation:** The presence of `DOCUMENTATION/` and `INCIDENT-REPORTS/` suggests a focus on stability and process maturity.
+## Recent Changes (v1.7.3)
+
+### DPFL Logging Bug Fix
+- **Problem:** `encryptionKey` wurde nicht an `SessionReview.tsx` übergeben
+- **Auswirkung:** `ComfortCheckModal` wurde nicht angezeigt → keine Authentizitätsabfrage nach DPFL-Sessions
+- **Fix:** `SessionReview.tsx` akzeptiert jetzt `encryptionKey` als Prop, `App.tsx` übergibt den Key
+
+### DPFL Datenerhalt bei Profilneuanalyse
+- `SessionBehaviorLogs` bleiben erhalten wenn gleicher Test-Typ
+- Backend prüft Test-Typ-Wechsel und löscht Logs nur bei Änderung
+
+### Experimentelle Modi für Kenji
+- DPC/DPFL auch für Kenji-Stoic verfügbar
+- Test-Tube Icon erscheint auch bei Kenji
+
+### User Manual Updates
+- Experimentelle Modi dokumentiert (Kapitel 7.5)
+- DPFL Datenerhalt dokumentiert (Kapitel 7.4)
+
+## Deployment-Prozess
+
+### Neues Production-Deployment-Script
+**`scripts/deploy-production-scheduled.sh`** erstellt mit wichtigem Prinzip:
+
+- **NIEMALS** neu bauen für Production
+- **IMMER** die bereits auf Staging getesteten Images verwenden
+- Versionierung über Parameter: `./scripts/deploy-production-scheduled.sh 1.7.3`
+
+### Für morgen früh (06:00 Uhr):
+```bash
+cd /Users/gherold/Meaningful-Conversations-Project
+./scripts/deploy-production-scheduled.sh 1.7.3
+```
 
 ## Active Tasks
-- [ ] **Verify Environment:** Ensure local development environment is correctly configured.
-- [ ] **Codebase Exploration:** Deepen understanding of specific implementations (e.g., how the "diff" view is rendered, how E2EE key management works).
+- [x] DPFL Logging Bug Fix implementiert
+- [x] Experimentelle Modi für Kenji implementiert
+- [x] User Manual aktualisiert
+- [x] Staging deployed
+- [x] Production Deployment Script erstellt
+- [ ] Production Deployment (geplant: 2.1.2026, 06:00)
 
 ## Decision Log
-- **Initialization:** Created Memory Bank files (`projectbrief`, `productContext`, `systemPatterns`, `techContext`, `progress`, `activeContext`) to structure development context.
-
+- **2026-01-01:** Production Deployments verwenden ab jetzt IMMER die bereits gebauten Staging-Images (kein Rebuild). Script `deploy-production-scheduled.sh` erstellt.

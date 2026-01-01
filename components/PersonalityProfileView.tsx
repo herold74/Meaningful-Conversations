@@ -854,7 +854,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           <div>
             <p className="text-sm">
               <strong>{t('profile_view_info_title') || 'Hinweis'}:</strong>{' '}
-              {t('profile_view_info_text') || 'Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
+              {t('profile_view_info_text') || 'Dieses Profil hilft Chloe und Kenji, dich besser zu verstehen und individueller auf dich einzugehen. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
             </p>
           </div>
         </div>
@@ -865,8 +865,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
             <div>
               <p className="text-sm">
-                <strong>{t('profile_view_refined_title') || 'Verfeinert'}:</strong>{' '}
-                {t('profile_view_refined_desc') || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
+                <strong>{t('profile_view_refined_title') || 'Personalisierung'}:</strong>{' '}
+                {t('profile_view_refined_desc', { count: profileMetadata.sessionCount }) || `Dein Profil hat dich durch ${profileMetadata.sessionCount} Gespräch(e) besser kennengelernt.`}
               </p>
             </div>
           </div>
