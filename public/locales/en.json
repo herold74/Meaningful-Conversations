@@ -657,7 +657,7 @@
   "profile_view_pdf_hint": "Generate your personal signature first ↑",
   "profile_view_new_test": "New Evaluation",
   "profile_view_info_title": "Note",
-  "profile_view_info_text": "This profile is used for experimental coaching modes with Chloe. You can take a new test anytime to update your profile.",
+  "profile_view_info_text": "This profile helps Chloe and Kenji understand you better and respond more individually to your needs. You can take a new test anytime to update your profile.",
 
   "menu_personality_profile": "Personality Profile",
   
@@ -688,8 +688,8 @@
   "comfort_check_note": "Sessions with score ≥ 3 will be used for profile refinement",
   "comfort_check_select_score": "Please select a score",
   
-  "profile_view_refined_title": "Refined",
-  "profile_view_refined_desc": "This profile has been refined through {count} authentic sessions.",
+  "profile_view_refined_title": "Personalization",
+  "profile_view_refined_desc": "Your profile has gotten to know you better through {{count}} conversation(s).",
   "profile_overwrite_warning_title": "Warning: Data Loss",
   "profile_overwrite_sessions": "📊 Your profile has been refined through {{count}} coaching sessions.",
   "profile_overwrite_loss_warning": "These individual adaptations are based on your actual behavior and cannot be recovered.",
