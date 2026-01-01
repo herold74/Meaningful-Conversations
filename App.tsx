@@ -547,7 +547,7 @@ const App: React.FC = () => {
         setChatHistory([]);
         
         // Reset experimental mode when switching bots
-        if (bot.id !== 'chloe-structured-reflection') {
+        if (bot.id !== 'chloe-structured-reflection' && bot.id !== 'kenji-resilience') {
             setExperimentalMode('OFF');
         }
         setView('chat');
@@ -1003,7 +1003,7 @@ const App: React.FC = () => {
                     onMessageSent={() => setUserMessageCount(c => c + 1)} 
                     currentUser={currentUser} 
                     isNewSession={!cameFromContextChoice}
-                    experimentalMode={selectedBot?.id === 'chloe-structured-reflection' ? experimentalMode : undefined}
+                    experimentalMode={(selectedBot?.id === 'chloe-structured-reflection' || selectedBot?.id === 'kenji-resilience') ? experimentalMode : undefined}
                     encryptionKey={encryptionKey}
                 />
             );

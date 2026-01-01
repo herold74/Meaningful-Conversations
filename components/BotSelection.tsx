@@ -32,7 +32,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob-pq' || bot.id === 'kenji-resilience';
-    const showExperimental = bot.id.startsWith('chloe') && hasPersonalityProfile && !isLocked;
+    const showExperimental = (bot.id.startsWith('chloe') || bot.id === 'kenji-resilience') && hasPersonalityProfile && !isLocked;
     
     const [showSelector, setShowSelector] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
