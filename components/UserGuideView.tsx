@@ -238,9 +238,9 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
-### 7.5 Experimentelle Coaching-Modi mit Chloe
+### 7.5 Experimentelle Coaching-Modi mit Chloe und Kenji
 
-Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei. Diese aktivieren Sie über das **🧪 Reagenzglas-Symbol** auf Chloes Coach-Karte.
+Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei. Diese aktivieren Sie über das **🧪 Reagenzglas-Symbol** auf der Coach-Karte von Chloe oder Kenji.
 
 **Verfügbare Modi:**
 
@@ -489,9 +489,9 @@ At the end of the test, you choose how your profile should evolve:
 
 **Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
 
-### 7.5 Experimental Coaching Modes with Chloe
+### 7.5 Experimental Coaching Modes with Chloe and Kenji
 
-With an active personality profile, you unlock enhanced coaching modes. Activate them via the **🧪 test tube icon** on Chloe's coach card.
+With an active personality profile, you unlock enhanced coaching modes. Activate them via the **🧪 test tube icon** on Chloe's or Kenji's coach card.
 
 **Available Modes:**
 
