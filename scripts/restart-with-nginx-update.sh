@@ -88,7 +88,7 @@ echo "   Testing: $HEALTH_URL"
 
 RESPONSE=$(curl -s -w "\n%{http_code}" "$HEALTH_URL" --max-time 10)
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-BODY=$(echo "$RESPONSE" | head -n -1)
+BODY=$(echo "$RESPONSE" | sed "$d")
 
 if [[ "$HTTP_CODE" == "200" ]]; then
     echo -e "${GREEN}✓ Health check passed: $BODY${NC}"
