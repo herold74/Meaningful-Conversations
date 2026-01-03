@@ -98,13 +98,28 @@ const App: React.FC = () => {
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
     const [adaptationMode, setAdaptationMode] = useState<'adaptive' | 'stable'>('adaptive');
 
+    // Helper: localStorage key for experimental mode (per user)
+    const getExperimentalModeKey = (userId: string) => `experimentalMode_${userId}`;
+
+    // Handler: Set experimental mode AND persist to localStorage
+    const handleExperimentalModeChange = (mode: ExperimentalMode) => {
+        setExperimentalMode(mode);
+        if (currentUser) {
+            localStorage.setItem(getExperimentalModeKey(currentUser.id), mode);
+        }
+    };
+
     // Safety: If experimentalMode is DPFL but adaptationMode is 'stable', downgrade to DPC
     useEffect(() => {
         if (experimentalMode === 'DPFL' && adaptationMode === 'stable') {
             console.warn('[DPFL] Downgrading to DPC because profile is set to stable mode');
             setExperimentalMode('DPC');
+            // Also update localStorage
+            if (currentUser) {
+                localStorage.setItem(getExperimentalModeKey(currentUser.id), 'DPC');
+            }
         }
-    }, [experimentalMode, adaptationMode]);
+    }, [experimentalMode, adaptationMode, currentUser]);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -203,17 +218,29 @@ const App: React.FC = () => {
             api.checkPersonalityProfile()
                 .then(exists => {
                     setHasPersonalityProfile(exists);
-                    // Load full profile to get adaptationMode and set default experimental mode
+                    // Load full profile to get adaptationMode and restore experimental mode
                     if (exists) {
                         api.loadPersonalityProfile()
                             .then(profile => {
                                 if (profile && profile.adaptationMode) {
                                     setAdaptationMode(profile.adaptationMode as 'adaptive' | 'stable');
-                                    // Set default experimental mode based on profile setting
-                                    if (profile.adaptationMode === 'adaptive') {
-                                        setExperimentalMode('DPC');
+                                    
+                                    // Check localStorage for saved preference first
+                                    const savedMode = localStorage.getItem(getExperimentalModeKey(currentUser.id));
+                                    if (savedMode && ['OFF', 'DPC', 'DPFL'].includes(savedMode)) {
+                                        // Validate: DPFL only allowed if adaptationMode is 'adaptive'
+                                        if (savedMode === 'DPFL' && profile.adaptationMode === 'stable') {
+                                            setExperimentalMode('DPC');
+                                        } else {
+                                            setExperimentalMode(savedMode as ExperimentalMode);
+                                        }
                                     } else {
-                                        setExperimentalMode('OFF');
+                                        // No saved preference → use default based on adaptationMode
+                                        if (profile.adaptationMode === 'adaptive') {
+                                            setExperimentalMode('DPC');
+                                        } else {
+                                            setExperimentalMode('OFF');
+                                        }
                                     }
                                 }
                             })
@@ -989,7 +1016,7 @@ const App: React.FC = () => {
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     experimentalMode={experimentalMode}
-                    onExperimentalModeChange={setExperimentalMode}
+                    onExperimentalModeChange={handleExperimentalModeChange}
                     adaptationMode={adaptationMode}
                 />
             );
