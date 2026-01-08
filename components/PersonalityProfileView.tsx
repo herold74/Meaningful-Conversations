@@ -98,7 +98,7 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
       {/* Generation timestamp */}
       {narrativeProfile.generatedAt && (
         <div className="mt-6 text-xs text-content-tertiary text-right">
-          Generiert: {new Date(narrativeProfile.generatedAt).toLocaleDateString()}
+          {t('narrative_generated_at') || 'Generiert'}: {new Date(narrativeProfile.generatedAt).toLocaleDateString()}
         </div>
       )}
     </div>
@@ -112,9 +112,10 @@ interface RiemannRadarChartProps {
     privat: Record<string, number>;
     selbst: Record<string, number>;
   };
+  t: (key: string) => string;
 }
 
-const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data }) => {
+const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
   // Responsive size - larger on bigger screens
   const size = 320;
   const center = size / 2;
@@ -123,10 +124,10 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data }) => {
   // Dimensions in order: Dauer (top), Nähe (right), Wechsel (bottom), Distanz (left)
   const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
   const dimensionLabels: Record<string, string> = {
-    dauer: 'Dauer',
-    naehe: 'Nähe', 
-    wechsel: 'Wechsel',
-    distanz: 'Distanz'
+    dauer: t('riemann_dimension_dauer') || 'Dauer',
+    naehe: t('riemann_dimension_naehe') || 'Nähe', 
+    wechsel: t('riemann_dimension_wechsel') || 'Wechsel',
+    distanz: t('riemann_dimension_distanz') || 'Distanz'
   };
   
   // Calculate point position on the radar
@@ -149,9 +150,9 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data }) => {
   
   // Context colors
   const contextColors = {
-    beruf: { fill: 'rgba(59, 130, 246, 0.25)', stroke: '#3b82f6', name: 'Beruf' },
-    privat: { fill: 'rgba(34, 197, 94, 0.25)', stroke: '#22c55e', name: 'Privat' },
-    selbst: { fill: 'rgba(249, 115, 22, 0.25)', stroke: '#f97316', name: 'Selbst' }
+    beruf: { fill: 'rgba(59, 130, 246, 0.25)', stroke: '#3b82f6', name: t('profile_view_beruf') || 'Beruf' },
+    privat: { fill: 'rgba(34, 197, 94, 0.25)', stroke: '#22c55e', name: t('profile_view_privat') || 'Privat' },
+    selbst: { fill: 'rgba(249, 115, 22, 0.25)', stroke: '#f97316', name: t('profile_view_selbst') || 'Selbst' }
   };
 
   return (
@@ -585,7 +586,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </h3>
             
             <div className="p-4 bg-background-tertiary dark:bg-background-tertiary rounded-lg">
-              <RiemannRadarChart data={decryptedData.riemann} />
+              <RiemannRadarChart data={decryptedData.riemann} t={t} />
             </div>
             
             {/* Detailed score breakdown */}
@@ -596,12 +597,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   privat: { border: 'border-green-500', bg: 'bg-green-500', text: 'text-green-600 dark:text-green-400' },
                   selbst: { border: 'border-orange-500', bg: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400' }
                 };
-                const contextLabels = { beruf: 'Beruflich', privat: 'Privat', selbst: 'Selbstbild' };
+                const contextLabels = { 
+                  beruf: t('profile_view_beruf') || 'Beruflich', 
+                  privat: t('profile_view_privat') || 'Privat', 
+                  selbst: t('profile_view_selbst') || 'Selbstbild' 
+                };
                 const dimensionLabels: Record<string, string> = {
-                  dauer: 'Dauer (Struktur)',
-                  naehe: 'Nähe (Harmonie)',
-                  wechsel: 'Wechsel (Veränderung)',
-                  distanz: 'Distanz (Rationalität)'
+                  dauer: t('riemann_dimension_dauer_full') || 'Dauer (Struktur)',
+                  naehe: t('riemann_dimension_naehe_full') || 'Nähe (Harmonie)',
+                  wechsel: t('riemann_dimension_wechsel_full') || 'Wechsel (Veränderung)',
+                  distanz: t('riemann_dimension_distanz_full') || 'Distanz (Rationalität)'
                 };
                 
                 return (
@@ -635,18 +640,18 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               <div className="mt-6 p-4 rounded-lg bg-background-secondary dark:bg-background-tertiary border border-border-primary">
                 <h4 className="font-semibold text-content-primary mb-3 flex items-center gap-2">
                   <span>⚡</span>
-                  Stress-Reaktionsmuster
+                  {t('stress_reaction_title') || 'Stress-Reaktionsmuster'}
                 </h4>
                 <p className="text-sm text-content-secondary mb-3">
-                  So reagierst du typischerweise unter Druck (1 = erste Reaktion):
+                  {t('stress_reaction_description') || 'So reagierst du typischerweise unter Druck (1 = erste Reaktion):'}
                 </p>
                 <div className="space-y-2">
                   {decryptedData.riemann.stressRanking.map((reactionId: string, index: number) => {
                     const stressLabels: Record<string, { label: string; description: string; emoji: string }> = {
-                      distanz: { label: 'Rückzug', description: 'Tür zu, Problem alleine lösen', emoji: '🚪' },
-                      naehe: { label: 'Anpassung', description: 'Unterstützung suchen, nachgeben', emoji: '🤝' },
-                      dauer: { label: 'Kontrolle', description: 'Auf Regeln pochen, Ordnung schaffen', emoji: '📋' },
-                      wechsel: { label: 'Aktionismus', description: 'Hektisch werden, viele Dinge anfangen', emoji: '⚡' }
+                      distanz: { label: t('stress_reaction_distanz_label') || 'Rückzug', description: t('stress_reaction_distanz_desc') || 'Tür zu, Problem alleine lösen', emoji: '🚪' },
+                      naehe: { label: t('stress_reaction_naehe_label') || 'Anpassung', description: t('stress_reaction_naehe_desc') || 'Unterstützung suchen, nachgeben', emoji: '🤝' },
+                      dauer: { label: t('stress_reaction_dauer_label') || 'Kontrolle', description: t('stress_reaction_dauer_desc') || 'Auf Regeln pochen, Ordnung schaffen', emoji: '📋' },
+                      wechsel: { label: t('stress_reaction_wechsel_label') || 'Aktionismus', description: t('stress_reaction_wechsel_desc') || 'Hektisch werden, viele Dinge anfangen', emoji: '⚡' }
                     };
                     const reaction = stressLabels[reactionId] || { label: reactionId, description: '', emoji: '❓' };
                     const isFirst = index === 0;
@@ -854,7 +859,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           <div>
             <p className="text-sm">
               <strong>{t('profile_view_info_title') || 'Hinweis'}:</strong>{' '}
-              {t('profile_view_info_text') || 'Dieses Profil hilft Chloe und Kenji, dich besser zu verstehen und individueller auf dich einzugehen. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
+              {t('profile_view_info_text') || 'Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
             </p>
           </div>
         </div>
@@ -865,8 +870,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
             <div>
               <p className="text-sm">
-                <strong>{t('profile_view_refined_title') || 'Personalisierung'}:</strong>{' '}
-                {t('profile_view_refined_desc', { count: profileMetadata.sessionCount }) || `Dein Profil hat dich durch ${profileMetadata.sessionCount} Gespräch(e) besser kennengelernt.`}
+                <strong>{t('profile_view_refined_title') || 'Verfeinert'}:</strong>{' '}
+                {t('profile_view_refined_desc') || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
               </p>
             </div>
           </div>
