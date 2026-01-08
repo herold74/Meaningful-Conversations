@@ -647,7 +647,7 @@
   "profile_view_updated": "Updated",
   "profile_view_filter_scores": "Filter Scores",
   "profile_view_worry": "Worry about Control",
-  "profile_view_control": "Influenceability",
+  "profile_view_control": "Sense of agency",
   "profile_view_results": "Results",
   "profile_view_beruf": "Professional",
   "profile_view_privat": "Private",
@@ -657,7 +657,7 @@
   "profile_view_pdf_hint": "Generate your personal signature first ↑",
   "profile_view_new_test": "New Evaluation",
   "profile_view_info_title": "Note",
-  "profile_view_info_text": "This profile helps Chloe and Kenji understand you better and respond more individually to your needs. You can take a new test anytime to update your profile.",
+  "profile_view_info_text": "This profile is used for experimental coaching modes with Chloe. You can take a new test anytime to update your profile.",
 
   "menu_personality_profile": "Personality Profile",
   
@@ -688,8 +688,31 @@
   "comfort_check_note": "Sessions with score ≥ 3 will be used for profile refinement",
   "comfort_check_select_score": "Please select a score",
   
-  "profile_view_refined_title": "Personalization",
-  "profile_view_refined_desc": "Your profile has gotten to know you better through {{count}} conversation(s).",
+  "profile_view_refined_title": "Refined",
+  "profile_view_refined_desc": "This profile has been refined through {count} authentic sessions.",
+  
+  "riemann_dimension_dauer": "Duration",
+  "riemann_dimension_naehe": "Closeness",
+  "riemann_dimension_wechsel": "Change",
+  "riemann_dimension_distanz": "Distance",
+  "riemann_dimension_dauer_full": "Duration (Structure)",
+  "riemann_dimension_naehe_full": "Closeness (Harmony)",
+  "riemann_dimension_wechsel_full": "Change (Transformation)",
+  "riemann_dimension_distanz_full": "Distance (Rationality)",
+  
+  "stress_reaction_title": "Stress Reaction Pattern",
+  "stress_reaction_description": "How you typically react under pressure (1 = first reaction):",
+  "stress_reaction_distanz_label": "Withdrawal",
+  "stress_reaction_distanz_desc": "Close the door, solve problems alone",
+  "stress_reaction_naehe_label": "Adaptation",
+  "stress_reaction_naehe_desc": "Seek support, give in",
+  "stress_reaction_dauer_label": "Control",
+  "stress_reaction_dauer_desc": "Insist on rules, create order",
+  "stress_reaction_wechsel_label": "Activism",
+  "stress_reaction_wechsel_desc": "Become hectic, start many things",
+  
+  "narrative_generated_at": "Generated",
+  
   "profile_overwrite_warning_title": "Warning: Data Loss",
   "profile_overwrite_sessions": "📊 Your profile has been refined through {{count}} coaching sessions.",
   "profile_overwrite_loss_warning": "These individual adaptations are based on your actual behavior and cannot be recovered.",

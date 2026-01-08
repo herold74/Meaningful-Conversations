@@ -657,7 +657,7 @@ const translations = {
     title: 'Personality Analysis',
     filterScores: 'Filter Scores',
     worryLabel: 'Worry about Control',
-    controlLabel: 'Influenceability',
+    controlLabel: 'Sense of agency',
     testType: 'Test Type',
     professionalContext: 'Professional Context',
     privateContext: 'Private Context',

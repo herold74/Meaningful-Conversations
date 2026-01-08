@@ -65,7 +65,6 @@ interface SessionReviewProps {
     interviewResult?: string;
     chatHistory: Message[];
     isTestMode?: boolean;
-    encryptionKey?: CryptoKey | null;
 }
 
 const SessionReview: React.FC<SessionReviewProps> = ({
@@ -89,7 +88,6 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     interviewResult,
     chatHistory,
     isTestMode,
-    encryptionKey,
 }) => {
     const { t, language } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
@@ -102,14 +100,16 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [calendarExportStatus, setCalendarExportStatus] = useState<string | null>(null);
     const [datePickerModal, setDatePickerModal] = useState<{ isOpen: boolean; action: string; deadline: string } | null>(null);
     const [showComfortCheck, setShowComfortCheck] = useState(false);
+    const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
     
-    // Show comfort check for DPFL (only if not test mode, registered user, and has encryption key)
+    // Show comfort check for DPFL (only if not test mode or if registered user)
     useEffect(() => {
-        if (selectedBot.experimentalMode === 'DPFL' && !isTestMode && currentUser && encryptionKey) {
-            // Show comfort check after brief delay
+        if (selectedBot.experimentalMode === 'DPFL' && !isTestMode && currentUser) {
+            // In production: Load actual encryption key from user's stored key
+            // For now, show comfort check after brief delay
             setTimeout(() => setShowComfortCheck(true), 1000);
         }
-    }, [currentUser, selectedBot.experimentalMode, isTestMode, encryptionKey]);
+    }, [currentUser, selectedBot.experimentalMode, isTestMode]);
 
 
     const handleRatingClick = (starValue: number) => {
@@ -777,10 +777,10 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             )}
             
             {/* DPFL Comfort Check Modal */}
-            {showComfortCheck && encryptionKey && (
+            {showComfortCheck && (
                 <ComfortCheckModal
                     chatHistory={chatHistory}
-                    sessionId={`session-${Date.now()}`}
+                    sessionId={`test-${Date.now()}`}
                     experimentalMode={selectedBot.experimentalMode}
                     onComplete={() => setShowComfortCheck(false)}
                     encryptionKey={encryptionKey}

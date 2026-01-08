@@ -656,7 +656,7 @@
   "profile_view_pdf_hint": "Generiere zuerst deine persönliche Signatur oben ↑",
   "profile_view_new_test": "Neue Evaluierung",
   "profile_view_info_title": "Hinweis",
-  "profile_view_info_text": "Dieses Profil hilft Chloe und Kenji, dich besser zu verstehen und individueller auf dich einzugehen. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
+  "profile_view_info_text": "Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
 
   "menu_personality_profile": "Persönlichkeitsprofil",
   
@@ -687,8 +687,31 @@
   "comfort_check_note": "Sessions mit Bewertung ≥ 3 werden für Profil-Verfeinerung genutzt",
   "comfort_check_select_score": "Bitte wähle eine Bewertung",
   
-  "profile_view_refined_title": "Personalisierung",
-  "profile_view_refined_desc": "Dein Profil hat dich durch {{count}} Gespräch(e) besser kennengelernt.",
+  "profile_view_refined_title": "Verfeinert",
+  "profile_view_refined_desc": "Dieses Profil wurde durch {count} authentische Sessions verfeinert.",
+  
+  "riemann_dimension_dauer": "Dauer",
+  "riemann_dimension_naehe": "Nähe",
+  "riemann_dimension_wechsel": "Wechsel",
+  "riemann_dimension_distanz": "Distanz",
+  "riemann_dimension_dauer_full": "Dauer (Struktur)",
+  "riemann_dimension_naehe_full": "Nähe (Harmonie)",
+  "riemann_dimension_wechsel_full": "Wechsel (Veränderung)",
+  "riemann_dimension_distanz_full": "Distanz (Rationalität)",
+  
+  "stress_reaction_title": "Stress-Reaktionsmuster",
+  "stress_reaction_description": "So reagierst du typischerweise unter Druck (1 = erste Reaktion):",
+  "stress_reaction_distanz_label": "Rückzug",
+  "stress_reaction_distanz_desc": "Tür zu, Problem alleine lösen",
+  "stress_reaction_naehe_label": "Anpassung",
+  "stress_reaction_naehe_desc": "Unterstützung suchen, nachgeben",
+  "stress_reaction_dauer_label": "Kontrolle",
+  "stress_reaction_dauer_desc": "Auf Regeln pochen, Ordnung schaffen",
+  "stress_reaction_wechsel_label": "Aktionismus",
+  "stress_reaction_wechsel_desc": "Hektisch werden, viele Dinge anfangen",
+  
+  "narrative_generated_at": "Generiert",
+  
   "profile_overwrite_warning_title": "Achtung: Datenverlust",
   "profile_overwrite_sessions": "📊 Dein Profil wurde durch {{count}} Coaching-Sessions verfeinert.",
   "profile_overwrite_loss_warning": "Diese individuellen Anpassungen basieren auf deinem echten Verhalten und können nicht wiederhergestellt werden.",

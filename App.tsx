@@ -98,28 +98,13 @@ const App: React.FC = () => {
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
     const [adaptationMode, setAdaptationMode] = useState<'adaptive' | 'stable'>('adaptive');
 
-    // Helper: localStorage key for experimental mode (per user)
-    const getExperimentalModeKey = (userId: string) => `experimentalMode_${userId}`;
-
-    // Handler: Set experimental mode AND persist to localStorage
-    const handleExperimentalModeChange = (mode: ExperimentalMode) => {
-        setExperimentalMode(mode);
-        if (currentUser) {
-            localStorage.setItem(getExperimentalModeKey(currentUser.id), mode);
-        }
-    };
-
     // Safety: If experimentalMode is DPFL but adaptationMode is 'stable', downgrade to DPC
     useEffect(() => {
         if (experimentalMode === 'DPFL' && adaptationMode === 'stable') {
             console.warn('[DPFL] Downgrading to DPC because profile is set to stable mode');
             setExperimentalMode('DPC');
-            // Also update localStorage
-            if (currentUser) {
-                localStorage.setItem(getExperimentalModeKey(currentUser.id), 'DPC');
-            }
         }
-    }, [experimentalMode, adaptationMode, currentUser]);
+    }, [experimentalMode, adaptationMode]);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -218,30 +203,12 @@ const App: React.FC = () => {
             api.checkPersonalityProfile()
                 .then(exists => {
                     setHasPersonalityProfile(exists);
-                    // Load full profile to get adaptationMode and restore experimental mode
+                    // Load full profile to get adaptationMode
                     if (exists) {
                         api.loadPersonalityProfile()
                             .then(profile => {
                                 if (profile && profile.adaptationMode) {
                                     setAdaptationMode(profile.adaptationMode as 'adaptive' | 'stable');
-                                    
-                                    // Check localStorage for saved preference first
-                                    const savedMode = localStorage.getItem(getExperimentalModeKey(currentUser.id));
-                                    if (savedMode && ['OFF', 'DPC', 'DPFL'].includes(savedMode)) {
-                                        // Validate: DPFL only allowed if adaptationMode is 'adaptive'
-                                        if (savedMode === 'DPFL' && profile.adaptationMode === 'stable') {
-                                            setExperimentalMode('DPC');
-                                        } else {
-                                            setExperimentalMode(savedMode as ExperimentalMode);
-                                        }
-                                    } else {
-                                        // No saved preference → use default based on adaptationMode
-                                        if (profile.adaptationMode === 'adaptive') {
-                                            setExperimentalMode('DPC');
-                                        } else {
-                                            setExperimentalMode('OFF');
-                                        }
-                                    }
                                 }
                             })
                             .catch(err => console.error('Failed to load adaptation mode:', err));
@@ -574,7 +541,7 @@ const App: React.FC = () => {
         setChatHistory([]);
         
         // Reset experimental mode when switching bots
-        if (bot.id !== 'chloe-cbt' && bot.id !== 'kenji-stoic') {
+        if (bot.id !== 'chloe-cbt') {
             setExperimentalMode('OFF');
         }
         setView('chat');
@@ -1016,7 +983,7 @@ const App: React.FC = () => {
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     experimentalMode={experimentalMode}
-                    onExperimentalModeChange={handleExperimentalModeChange}
+                    onExperimentalModeChange={setExperimentalMode}
                     adaptationMode={adaptationMode}
                 />
             );
@@ -1030,11 +997,11 @@ const App: React.FC = () => {
                     onMessageSent={() => setUserMessageCount(c => c + 1)} 
                     currentUser={currentUser} 
                     isNewSession={!cameFromContextChoice}
-                    experimentalMode={(selectedBot?.id === 'chloe-cbt' || selectedBot?.id === 'kenji-stoic') ? experimentalMode : undefined}
+                    experimentalMode={selectedBot?.id === 'chloe-cbt' ? experimentalMode : undefined}
                     encryptionKey={encryptionKey}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} encryptionKey={encryptionKey} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
