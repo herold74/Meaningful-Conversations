@@ -21,7 +21,7 @@ import('@google/genai').then(({ GoogleGenAI }) => {
 
 // POST /api/gemini/translate
 router.post('/translate', optionalAuthMiddleware, async (req, res) => {
-    const { subject, body } = req.body;
+    const { subject, body, sourceLang = 'de', targetLang = 'en' } = req.body;
     const userId = req.userId; // Admin-only access check
 
     // Only admins can translate
@@ -39,8 +39,13 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'At least subject or body must be provided' });
         }
 
+        // Language names for system instruction
+        const langNames = { de: 'German', en: 'English' };
+        const sourceLanguage = langNames[sourceLang] || 'German';
+        const targetLanguage = langNames[targetLang] || 'English';
+
         const modelName = 'gemini-2.5-flash'; // Gemini 2.5 Flash for fast, high-quality translations
-        const systemInstruction = 'You are a professional translator. Translate the following German text to English. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.';
+        const systemInstruction = `You are a professional translator. Translate the following ${sourceLanguage} text to ${targetLanguage}. Preserve all Markdown formatting (e.g., **bold**, *italic*, # headings, - lists). Return ONLY the translated text without any additional explanation or commentary.`;
 
         const translationResults = {};
 
