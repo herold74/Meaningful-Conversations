@@ -5,8 +5,10 @@ import { apiFetch } from '../services/api';
 import Spinner from './shared/Spinner';
 import { MailIcon } from './icons/MailIcon';
 import { ClockIcon } from './icons/ClockIcon';
+import { useLocalization } from '../context/LocalizationContext';
 
 const NewsletterPanel: React.FC = () => {
+  const { language, t } = useLocalization();
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [history, setHistory] = useState<NewsletterHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,10 +17,17 @@ const NewsletterPanel: React.FC = () => {
   const [showSubscribers, setShowSubscribers] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   
-  const [subjectDE, setSubjectDE] = useState('');
-  const [subjectEN, setSubjectEN] = useState('');
-  const [textBodyDE, setTextBodyDE] = useState('');
-  const [textBodyEN, setTextBodyEN] = useState('');
+  // Primary language is the current UI language, secondary is the other
+  const primaryLang = language;
+  const secondaryLang = language === 'de' ? 'en' : 'de';
+  const primaryFlag = language === 'de' ? '🇩🇪' : '🇬🇧';
+  const secondaryFlag = language === 'de' ? '🇬🇧' : '🇩🇪';
+  
+  // State for primary and secondary content
+  const [subjectPrimary, setSubjectPrimary] = useState('');
+  const [subjectSecondary, setSubjectSecondary] = useState('');
+  const [textBodyPrimary, setTextBodyPrimary] = useState('');
+  const [textBodySecondary, setTextBodySecondary] = useState('');
   
   const [result, setResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -42,12 +51,12 @@ const NewsletterPanel: React.FC = () => {
   };
 
   const handleSend = async () => {
-    if (!subjectDE || !subjectEN || !textBodyDE || !textBodyEN) {
-      setResult({ type: 'error', message: 'Bitte alle Felder ausfüllen.' });
+    if (!subjectPrimary || !subjectSecondary || !textBodyPrimary || !textBodySecondary) {
+      setResult({ type: 'error', message: t('newsletter_fill_all_fields') });
       return;
     }
 
-    if (!window.confirm(`Newsletter an ${subscribers.length} Abonnenten versenden?\n\nDieser Vorgang kann nicht rückgängig gemacht werden.`)) {
+    if (!window.confirm(t('newsletter_confirm_send', { count: subscribers.length }))) {
       return;
     }
 
@@ -55,23 +64,28 @@ const NewsletterPanel: React.FC = () => {
     setResult(null);
 
     try {
-      const response = await userService.sendNewsletter({
-        subjectDE,
-        subjectEN,
-        textBodyDE,
-        textBodyEN,
-      });
+      // Map primary/secondary back to DE/EN for the backend
+      const content = {
+        subjectDE: primaryLang === 'de' ? subjectPrimary : subjectSecondary,
+        subjectEN: primaryLang === 'en' ? subjectPrimary : subjectSecondary,
+        textBodyDE: primaryLang === 'de' ? textBodyPrimary : textBodySecondary,
+        textBodyEN: primaryLang === 'en' ? textBodyPrimary : textBodySecondary,
+      };
+      
+      const response = await userService.sendNewsletter(content);
 
-      setResult({
-        type: 'success',
-        message: `Newsletter erfolgreich versendet! ${response.sent} von ${response.total} E-Mails gesendet.${response.failed > 0 ? ` (${response.failed} fehlgeschlagen)` : ''}`
-      });
+      let message = t('newsletter_send_success', { sent: response.sent, total: response.total });
+      if (response.failed > 0) {
+        message += ` (${t('newsletter_send_failed', { failed: response.failed })})`;
+      }
+      
+      setResult({ type: 'success', message });
 
       // Clear fields after successful send
-      setSubjectDE('');
-      setSubjectEN('');
-      setTextBodyDE('');
-      setTextBodyEN('');
+      setSubjectPrimary('');
+      setSubjectSecondary('');
+      setTextBodyPrimary('');
+      setTextBodySecondary('');
       
       // Reload history
       const historyData = await userService.getNewsletterHistory();
@@ -80,7 +94,7 @@ const NewsletterPanel: React.FC = () => {
     } catch (error: any) {
       setResult({
         type: 'error',
-        message: error.message || 'Fehler beim Versenden des Newsletters.'
+        message: error.message || t('newsletter_translate_error')
       });
     } finally {
       setSending(false);
@@ -88,8 +102,8 @@ const NewsletterPanel: React.FC = () => {
   };
 
   const handleTranslate = async () => {
-    if (!subjectDE && !textBodyDE) {
-      setResult({ type: 'error', message: 'Bitte mindestens Betreff oder Nachricht auf Deutsch eingeben.' });
+    if (!subjectPrimary && !textBodyPrimary) {
+      setResult({ type: 'error', message: t('newsletter_fill_all_fields') });
       return;
     }
 
@@ -100,27 +114,29 @@ const NewsletterPanel: React.FC = () => {
       const data = await apiFetch('/gemini/translate', {
         method: 'POST',
         body: JSON.stringify({
-          subject: subjectDE || undefined,
-          body: textBodyDE || undefined
+          subject: subjectPrimary || undefined,
+          body: textBodyPrimary || undefined,
+          sourceLang: primaryLang,
+          targetLang: secondaryLang
         })
       });
       
       if (data.subject) {
-        setSubjectEN(data.subject);
+        setSubjectSecondary(data.subject);
       }
       if (data.body) {
-        setTextBodyEN(data.body);
+        setTextBodySecondary(data.body);
       }
 
       setResult({
         type: 'success',
-        message: 'Übersetzung erfolgreich! Bitte prüfen Sie die englische Version.'
+        message: t('newsletter_translate_success')
       });
 
     } catch (error: any) {
       setResult({
         type: 'error',
-        message: error.message || 'Fehler bei der Übersetzung.'
+        message: error.message || t('newsletter_translate_error')
       });
     } finally {
       setTranslating(false);
@@ -142,9 +158,9 @@ const NewsletterPanel: React.FC = () => {
       <div className="flex items-center gap-3 mb-4">
         <MailIcon className="w-6 h-6 text-accent-primary" />
         <div>
-          <h3 className="text-xl font-bold text-content-primary">Newsletter versenden</h3>
+          <h3 className="text-xl font-bold text-content-primary">{t('newsletter_panel_title')}</h3>
           <p className="text-sm text-content-secondary">
-            Aktuell {subscribers.length} Abonnent{subscribers.length !== 1 ? 'en' : ''}
+            {t('newsletter_subscribers_count', { count: subscribers.length })}
           </p>
         </div>
       </div>
@@ -155,13 +171,13 @@ const NewsletterPanel: React.FC = () => {
           onClick={() => setShowSubscribers(!showSubscribers)}
           className="text-sm text-accent-primary hover:underline"
         >
-          {showSubscribers ? '▼' : '▶'} Abonnenten anzeigen ({subscribers.length})
+          {showSubscribers ? '▼' : '▶'} {t('newsletter_show_subscribers')} ({subscribers.length})
         </button>
         
         {showSubscribers && (
           <div className="mt-3 space-y-2 max-h-64 overflow-y-auto bg-background-tertiary dark:bg-background-secondary p-3 rounded border border-border-secondary">
             {subscribers.length === 0 ? (
-              <p className="text-sm text-content-secondary italic">Keine Abonnenten vorhanden.</p>
+              <p className="text-sm text-content-secondary italic">{t('newsletter_no_subscribers_found')}</p>
             ) : (
               subscribers.map(sub => (
                 <div key={sub.id} className="text-xs text-content-secondary p-2 bg-background-secondary dark:bg-background-primary rounded flex items-center justify-between">
@@ -187,104 +203,104 @@ const NewsletterPanel: React.FC = () => {
 
       {subscribers.length === 0 ? (
         <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded text-sm text-content-secondary">
-          Keine Newsletter-Abonnenten vorhanden. Nutzer können sich über ihre Profil-Einstellungen für den Newsletter anmelden.
+          {t('newsletter_no_subscribers_warning')}
         </div>
       ) : (
         <>
-          {/* German Version */}
+          {/* Primary Language Version */}
           <div className="space-y-3 mb-4 p-4 border border-border-secondary rounded-lg bg-background-tertiary dark:bg-background-secondary">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-lg">🇩🇪</span>
-                <h4 className="font-bold text-content-primary">Deutsche Version</h4>
+                <span className="text-lg">{primaryFlag}</span>
+                <h4 className="font-bold text-content-primary">{t('newsletter_primary_version')}</h4>
               </div>
               <button
                 onClick={handleTranslate}
-                disabled={translating || sending || (!subjectDE && !textBodyDE)}
+                disabled={translating || sending || (!subjectPrimary && !textBodyPrimary)}
                 className="px-4 py-2 bg-content-tertiary/20 dark:bg-content-tertiary/10 text-content-primary hover:bg-content-tertiary/30 dark:hover:bg-content-tertiary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-semibold transition-colors rounded border border-border-secondary"
-                title="Deutsche Version automatisch ins Englische übersetzen"
+                title={t('newsletter_translate_button')}
               >
                 {translating ? (
                   <>
                     <Spinner />
-                    <span className="hidden sm:inline">Übersetze...</span>
+                    <span className="hidden sm:inline">{t('newsletter_translating')}</span>
                   </>
                 ) : (
                   <>
                     <span>🌐</span>
-                    <span className="hidden sm:inline">Automatisch übersetzen</span>
+                    <span className="hidden sm:inline">{t('newsletter_translate_button')}</span>
                   </>
                 )}
               </button>
             </div>
             <div>
-              <label htmlFor="subject-de" className="block text-sm font-semibold text-content-secondary mb-1">
-                Betreff
+              <label htmlFor="subject-primary" className="block text-sm font-semibold text-content-secondary mb-1">
+                {t('newsletter_subject_label')}
               </label>
               <input
-                id="subject-de"
+                id="subject-primary"
                 type="text"
-                placeholder="z.B. Neuigkeiten von Meaningful Conversations"
-                value={subjectDE}
-                onChange={(e) => setSubjectDE(e.target.value)}
+                placeholder={t('newsletter_subject_placeholder')}
+                value={subjectPrimary}
+                onChange={(e) => setSubjectPrimary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"
                 disabled={sending}
               />
             </div>
             <div>
-              <label htmlFor="body-de" className="block text-sm font-semibold text-content-secondary mb-1">
-                Nachricht (Markdown unterstützt)
+              <label htmlFor="body-primary" className="block text-sm font-semibold text-content-secondary mb-1">
+                {t('newsletter_body_label')}
               </label>
               <textarea
-                id="body-de"
-                placeholder="# Überschrift&#10;&#10;Newsletter-Text mit **Fettdruck** und *Kursiv*...&#10;&#10;- Punkt 1&#10;- Punkt 2"
-                value={textBodyDE}
-                onChange={(e) => setTextBodyDE(e.target.value)}
+                id="body-primary"
+                placeholder={t('newsletter_body_placeholder')}
+                value={textBodyPrimary}
+                onChange={(e) => setTextBodyPrimary(e.target.value)}
                 rows={8}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none font-mono text-sm"
                 disabled={sending}
               />
               <p className="text-xs text-content-tertiary mt-1">
-                Markdown-Formatierung wird in HTML konvertiert: **fett**, *kursiv*, # Überschrift, - Liste, etc.
+                {t('newsletter_markdown_hint')}
               </p>
             </div>
           </div>
 
-          {/* English Version */}
+          {/* Secondary Language Version */}
           <div className="space-y-3 mb-4 p-4 border border-border-secondary rounded-lg bg-background-tertiary dark:bg-background-secondary">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-lg">🇬🇧</span>
-              <h4 className="font-bold text-content-primary">English Version</h4>
+              <span className="text-lg">{secondaryFlag}</span>
+              <h4 className="font-bold text-content-primary">{t('newsletter_secondary_version')}</h4>
             </div>
             <div>
-              <label htmlFor="subject-en" className="block text-sm font-semibold text-content-secondary mb-1">
-                Subject
+              <label htmlFor="subject-secondary" className="block text-sm font-semibold text-content-secondary mb-1">
+                {t('newsletter_subject_label')}
               </label>
               <input
-                id="subject-en"
+                id="subject-secondary"
                 type="text"
-                placeholder="e.g. News from Meaningful Conversations"
-                value={subjectEN}
-                onChange={(e) => setSubjectEN(e.target.value)}
+                placeholder={t('newsletter_subject_placeholder')}
+                value={subjectSecondary}
+                onChange={(e) => setSubjectSecondary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"
                 disabled={sending}
               />
             </div>
             <div>
-              <label htmlFor="body-en" className="block text-sm font-semibold text-content-secondary mb-1">
-                Message (Markdown supported)
+              <label htmlFor="body-secondary" className="block text-sm font-semibold text-content-secondary mb-1">
+                {t('newsletter_body_label')}
               </label>
               <textarea
-                id="body-en"
-                placeholder="# Heading&#10;&#10;Newsletter text with **bold** and *italic*...&#10;&#10;- Item 1&#10;- Item 2"
-                value={textBodyEN}
-                onChange={(e) => setTextBodyEN(e.target.value)}
+                id="body-secondary"
+                placeholder={t('newsletter_body_placeholder')}
+                value={textBodySecondary}
+                onChange={(e) => setTextBodySecondary(e.target.value)}
                 rows={8}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none font-mono text-sm"
                 disabled={sending}
               />
               <p className="text-xs text-content-tertiary mt-1">
-                Markdown formatting will be converted to HTML: **bold**, *italic*, # heading, - list, etc.
+                {t('newsletter_markdown_hint')}
               </p>
             </div>
           </div>
@@ -299,32 +315,32 @@ const NewsletterPanel: React.FC = () => {
           {/* Send Button */}
           <button
             onClick={handleSend}
-            disabled={sending || !subjectDE || !subjectEN || !textBodyDE || !textBodyEN}
+            disabled={sending || !subjectPrimary || !subjectSecondary || !textBodyPrimary || !textBodySecondary}
             className="w-full px-6 py-3 bg-accent-primary text-button-foreground-on-accent font-bold rounded-lg hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shadow-md"
           >
             {sending ? (
               <>
                 <Spinner />
-                <span>Newsletter wird versendet...</span>
+                <span>{t('newsletter_sending')}</span>
               </>
             ) : (
               <>
                 <MailIcon className="w-5 h-5" />
-                <span>Newsletter an {subscribers.length} Abonnent{subscribers.length !== 1 ? 'en' : ''} versenden</span>
+                <span>{t('newsletter_send_button', { count: subscribers.length })}</span>
               </>
             )}
           </button>
 
           {/* Info Box */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-sm text-content-secondary">
-            <p className="font-semibold mb-1">ℹ️ Hinweise:</p>
+            <p className="font-semibold mb-1">ℹ️ {t('newsletter_info_title')}</p>
             <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>✨ <strong>Markdown wird automatisch in formatiertes HTML konvertiert</strong></li>
-              <li>Nur AKTIVE Nutzer mit Newsletter-Zustimmung erhalten die E-Mail</li>
-              <li>Nutzer erhalten die E-Mail in ihrer bevorzugten Sprache</li>
-              <li>Jede E-Mail enthält einen Abmelde-Link</li>
-              <li>Der Versand erfolgt sequenziell, um Rate-Limits zu beachten</li>
-              <li>In Development-Umgebungen wird der Versand nur simuliert</li>
+              <li>✨ <strong>{t('newsletter_info_markdown')}</strong></li>
+              <li>{t('newsletter_info_active_only')}</li>
+              <li>{t('newsletter_info_language')}</li>
+              <li>{t('newsletter_info_unsubscribe')}</li>
+              <li>{t('newsletter_info_rate_limit')}</li>
+              <li>{t('newsletter_info_dev_simulation')}</li>
             </ul>
           </div>
         </>
@@ -338,14 +354,14 @@ const NewsletterPanel: React.FC = () => {
             onClick={() => setShowHistory(!showHistory)}
             className="text-sm font-semibold text-content-primary hover:text-accent-primary"
           >
-            {showHistory ? '▼' : '▶'} Versand-Historie ({history.length})
+            {showHistory ? '▼' : '▶'} {t('newsletter_history_title')} ({history.length})
           </button>
         </div>
         
         {showHistory && (
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {history.length === 0 ? (
-              <p className="text-sm text-content-secondary italic">Noch keine Newsletter versendet.</p>
+              <p className="text-sm text-content-secondary italic">{t('newsletter_history_empty')}</p>
             ) : (
               history.map(entry => (
                 <div key={entry.id} className="p-3 bg-background-primary dark:bg-background-tertiary rounded border border-border-secondary">
@@ -355,12 +371,12 @@ const NewsletterPanel: React.FC = () => {
                         🇩🇪 {entry.subjectDE} / 🇬🇧 {entry.subjectEN}
                       </p>
                       <p className="text-xs text-content-secondary mt-1">
-                        Versendet von: {entry.sentByEmail}
+                        {t('newsletter_history_sent_by')}: {entry.sentByEmail}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-content-tertiary">
-                        {new Date(entry.createdAt).toLocaleString('de-DE', {
+                        {new Date(entry.createdAt).toLocaleString(language === 'de' ? 'de-DE' : 'en-US', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -373,22 +389,22 @@ const NewsletterPanel: React.FC = () => {
                   
                   <div className="flex gap-4 text-xs mt-2">
                     <span className="text-green-600 dark:text-green-400">
-                      ✓ {entry.successCount} erfolgreich
+                      ✓ {entry.successCount} {t('newsletter_history_successful')}
                     </span>
                     {entry.failedCount > 0 && (
                       <span className="text-red-600 dark:text-red-400">
-                        ✗ {entry.failedCount} fehlgeschlagen
+                        ✗ {entry.failedCount} {t('newsletter_history_failed')}
                       </span>
                     )}
                     <span className="text-content-tertiary">
-                      von {entry.recipientCount} Empfängern
+                      {t('newsletter_history_of_recipients', { count: entry.recipientCount })}
                     </span>
                   </div>
                   
                   {entry.errors && (
                     <details className="mt-2">
                       <summary className="text-xs text-red-600 dark:text-red-400 cursor-pointer">
-                        Fehler anzeigen
+                        {t('newsletter_history_show_errors')}
                       </summary>
                       <pre className="text-xs mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded overflow-x-auto">
                         {JSON.stringify(entry.errors, null, 2)}
@@ -406,4 +422,3 @@ const NewsletterPanel: React.FC = () => {
 };
 
 export default NewsletterPanel;
-
