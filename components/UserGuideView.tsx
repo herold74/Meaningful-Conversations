@@ -238,25 +238,12 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
-**Gut zu wissen:** Wenn Sie eine neue Evaluierung **desselben Test-Typs** durchführen (z.B. Riemann-Thomann erneut), bleiben Ihre bisherigen DPFL-Verfeinerungen erhalten. Nur bei einem Wechsel des Test-Typs (z.B. von Riemann-Thomann zu OCEAN) werden die Verfeinerungsdaten zurückgesetzt.
+### 7.5 Experimentelle Coaching-Modi mit Chloe
 
-### 7.5 Experimentelle Coaching-Modi mit Chloe und Kenji
-
-Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei. Diese aktivieren Sie über das **🧪 Reagenzglas-Symbol** auf der Coach-Karte von Chloe oder Kenji.
-
-**Verfügbare Modi:**
-
-| Modus | Beschreibung | Voraussetzung |
-| :--- | :--- | :--- |
-| **OFF** | Standard-Coaching ohne Persönlichkeitsdaten | Keine |
-| **DPC** (Dynamic Personality Coaching) | Chloe bezieht Ihre Persönlichkeitsmerkmale in das Coaching ein | Persönlichkeitsprofil |
-| **DPFL** (Dynamic Personality Feedback Loop) | Zusätzlich lernt Ihr Profil aus den Sitzungen und verfeinert sich | Adaptives Profil |
-
-**Hinweise:**
-- Bei einem **adaptiven Profil** ist DPC standardmäßig aktiviert
-- Bei einem **stabilen Profil** sind die Modi deaktiviert (OFF)
-- DPFL ist nur verfügbar, wenn Ihr Profil auf "Adaptiv" eingestellt ist
-- Nach DPFL-Sitzungen werden Sie gefragt, wie authentisch Sie waren – diese Rückmeldung verfeinert Ihr Profil
+Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei:
+- Chloe kann Ihre Persönlichkeitsmerkmale in das Coaching einbeziehen
+- Die Gesprächsführung wird auf Ihren Kommunikationsstil abgestimmt
+- Tiefere Einblicke durch personalisierte Reflexionsfragen
 
 Diese Modi sind als **experimentell** gekennzeichnet und werden kontinuierlich verbessert.
 `;
@@ -491,25 +478,12 @@ At the end of the test, you choose how your profile should evolve:
 
 **Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
 
-**Good to know:** If you take a new evaluation of the **same test type** (e.g., Riemann-Thomann again), your existing DPFL refinements are preserved. Only when switching test types (e.g., from Riemann-Thomann to OCEAN) will the refinement data be reset.
+### 7.5 Experimental Coaching Modes with Chloe
 
-### 7.5 Experimental Coaching Modes with Chloe and Kenji
-
-With an active personality profile, you unlock enhanced coaching modes. Activate them via the **🧪 test tube icon** on Chloe's or Kenji's coach card.
-
-**Available Modes:**
-
-| Mode | Description | Requirement |
-| :--- | :--- | :--- |
-| **OFF** | Standard coaching without personality data | None |
-| **DPC** (Dynamic Personality Coaching) | Chloe incorporates your personality traits into coaching | Personality Profile |
-| **DPFL** (Dynamic Personality Feedback Loop) | Additionally, your profile learns from sessions and refines itself | Adaptive Profile |
-
-**Notes:**
-- With an **adaptive profile**, DPC is enabled by default
-- With a **stable profile**, modes are disabled (OFF)
-- DPFL is only available when your profile is set to "Adaptive"
-- After DPFL sessions, you'll be asked how authentic you were – this feedback refines your profile
+With an active personality profile, you unlock enhanced coaching modes:
+- Chloe can incorporate your personality traits into coaching
+- Conversation style is adapted to your communication preferences
+- Deeper insights through personalized reflection questions
 
 These modes are marked as **experimental** and are continuously being improved.
 `;
