@@ -240,7 +240,7 @@ const NewsletterPanel: React.FC = () => {
               <input
                 id="subject-primary"
                 type="text"
-                placeholder={t('newsletter_subject_placeholder')}
+                placeholder={t(`newsletter_subject_placeholder_${primaryLang}`)}
                 value={subjectPrimary}
                 onChange={(e) => setSubjectPrimary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"
@@ -253,7 +253,7 @@ const NewsletterPanel: React.FC = () => {
               </label>
               <textarea
                 id="body-primary"
-                placeholder={t('newsletter_body_placeholder')}
+                placeholder={t(`newsletter_body_placeholder_${primaryLang}`)}
                 value={textBodyPrimary}
                 onChange={(e) => setTextBodyPrimary(e.target.value)}
                 rows={8}
@@ -279,7 +279,7 @@ const NewsletterPanel: React.FC = () => {
               <input
                 id="subject-secondary"
                 type="text"
-                placeholder={t('newsletter_subject_placeholder')}
+                placeholder={t(`newsletter_subject_placeholder_${secondaryLang}`)}
                 value={subjectSecondary}
                 onChange={(e) => setSubjectSecondary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"
@@ -292,7 +292,7 @@ const NewsletterPanel: React.FC = () => {
               </label>
               <textarea
                 id="body-secondary"
-                placeholder={t('newsletter_body_placeholder')}
+                placeholder={t(`newsletter_body_placeholder_${secondaryLang}`)}
                 value={textBodySecondary}
                 onChange={(e) => setTextBodySecondary(e.target.value)}
                 rows={8}
