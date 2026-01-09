@@ -49,6 +49,14 @@
    - Aktualisiert Nginx IPs
 
 **Versionierung:**
+- **WICHTIG:** Versionsänderungen müssen mit `make update-version` eingeleitet werden!
+- Dieser Befehl aktualisiert alle Versionsnummern konsistent:
+  - `package.json` (Frontend)
+  - `meaningful-conversations-backend/package.json` (Backend)
+  - `public/sw.js` (Service Worker Cache)
+  - `components/BurgerMenu.tsx` (UI-Anzeige)
+  - `memory-bank/activeContext.md`
+- Falls Versionsnummern manuell geändert werden, entstehen Inkonsistenzen in der App
 - Falls Staging eine neuere Version testet, kann Production mit expliziter Versionsnummer deployed werden
 - Beispiel: `./scripts/deploy-production-scheduled.sh 1.7.3`
 

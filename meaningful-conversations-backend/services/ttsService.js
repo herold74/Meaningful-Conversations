@@ -44,7 +44,7 @@ function getVoiceForBot(botId, lang) {
                 gender = 'female';
                 break;
             case 'max-ambitious':
-            case 'rob-pq':
+            case 'rob':
             case 'kenji-stoic':
             case 'nexus-gps':
             case 'victor-bowen':
@@ -78,14 +78,14 @@ function getVoiceForBot(botId, lang) {
  */
 function getSpeechRate(botId, isMeditation) {
     // Meditation mode (Rob and Kenji) uses slower rate
-    if (isMeditation && (botId === 'rob-pq' || botId === 'kenji-stoic')) {
+    if (isMeditation && (botId === 'rob' || botId === 'kenji-stoic')) {
         return 0.9;
     }
     
     // Bot-specific rate adjustments (matches ChatView.tsx)
     switch (botId) {
         case 'max-ambitious':
-        case 'rob-pq':
+        case 'rob':
             return 1.05;
         case 'nexus-gps':
             return 1.1;

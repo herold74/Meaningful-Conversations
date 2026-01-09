@@ -9,7 +9,7 @@ export const sendMessage = async (
     history: Message[],
     lang: Language,
     isNewSession: boolean,
-    experimentalMode?: string,
+    coachingMode?: string,
     decryptedPersonalityProfile?: any
 ): Promise<{ text: string }> => {
     
@@ -21,7 +21,7 @@ export const sendMessage = async (
             history: history, 
             lang, 
             isNewSession,
-            experimentalMode,
+            coachingMode,
             decryptedPersonalityProfile
         }),
     });

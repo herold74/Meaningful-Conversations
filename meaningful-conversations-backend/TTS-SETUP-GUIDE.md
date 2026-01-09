@@ -150,7 +150,7 @@ Each bot automatically gets assigned an appropriate voice:
 | ava-strategic | Both | mls (F) | amy (F) |
 | chloe-cbt | Both | mls (F) | amy (F) |
 | max-ambitious | Both | thorsten (M) | ryan (M) |
-| rob-pq | Both | thorsten (M, slow) | ryan (M, slow) |
+| rob | Both | thorsten (M, slow) | ryan (M, slow) |
 | kenji-stoic | Both | thorsten (M, slow) | ryan (M, slow) |
 | nexus-gps | Both | thorsten (M, fast) | ryan (M, fast) |
 

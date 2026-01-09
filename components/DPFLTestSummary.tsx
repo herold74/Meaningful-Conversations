@@ -3,19 +3,19 @@ import { useLocalization } from '../context/LocalizationContext';
 
 interface DPFLTestSummaryProps {
   isTestMode?: boolean;
-  experimentalMode?: string;
+  coachingMode?: string;
 }
 
-const DPFLTestSummary: React.FC<DPFLTestSummaryProps> = ({ isTestMode, experimentalMode }) => {
+const DPFLTestSummary: React.FC<DPFLTestSummaryProps> = ({ isTestMode, coachingMode }) => {
   const { t } = useLocalization();
   
   // Only show for test mode with DPC or DPFL
-  if (!isTestMode || (experimentalMode !== 'DPC' && experimentalMode !== 'DPFL')) {
+  if (!isTestMode || (coachingMode !== 'dpc' && coachingMode !== 'dpfl')) {
     return null;
   }
   
-  const isDPC = experimentalMode === 'DPC';
-  const isDPFL = experimentalMode === 'DPFL';
+  const isDPC = coachingMode === 'dpc';
+  const isDPFL = coachingMode === 'dpfl';
   
   return (
     <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-800 rounded-lg">

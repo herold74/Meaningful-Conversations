@@ -1,51 +1,45 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.7.4
-**Staging:** Deployed and tested ✓
-**Production:** Scheduled for 2. Januar 2026, 06:00 Uhr
+**Version:** 1.7.5
+**Staging:** Pending deployment
+**Production:** v1.7.4 deployed
 
-## Recent Changes (v1.7.3)
+## Recent Changes (v1.7.5)
 
-### DPFL Logging Bug Fix
-- **Problem:** `encryptionKey` wurde nicht an `SessionReview.tsx` übergeben
-- **Auswirkung:** `ComfortCheckModal` wurde nicht angezeigt → keine Authentizitätsabfrage nach DPFL-Sessions
-- **Fix:** `SessionReview.tsx` akzeptiert jetzt `encryptionKey` als Prop, `App.tsx` übergibt den Key
+### Coaching Mode Vereinfachung
+- **Zentrale Modus-Auswahl:** Off/DPC/DPFL wird jetzt im Persönlichkeitsprofil eingestellt
+- **Entfernte Komponenten:** ExperimentalModeSelector und ExperimentalModeInfoModal
+- **Alle Bots unterstützen DPC/DPFL:** Nicht mehr nur Chloe und Kenji
+- **Datenpersistenz:** Beim Modus-Wechsel bleiben alle DPFL-Verfeinerungen erhalten
 
-### DPFL Datenerhalt bei Profilneuanalyse
-- `SessionBehaviorLogs` bleiben erhalten wenn gleicher Test-Typ
-- Backend prüft Test-Typ-Wechsel und löscht Logs nur bei Änderung
+### Rob Umbenennung
+- **Vorher:** `rob-pq` (PQ ist urheberrechtlich geschützt)
+- **Nachher:** `rob` - einfach nur "Rob"
+- Alle Referenzen in Frontend, Backend und Dokumentation aktualisiert
 
-### Experimentelle Modi für Kenji
-- DPC/DPFL auch für Kenji-Stoic verfügbar
-- Test-Tube Icon erscheint auch bei Kenji
+### Chloe Meditation
+- Chloe kann jetzt Meditationen anleiten (wie Rob und Kenji)
+- Meditation-Icon erscheint auf Chloe's Bot-Karte
+- CBT-fokussierte Meditationsinhalte (Gedankenbeobachtung, Erdung)
 
-### User Manual Updates
-- Experimentelle Modi dokumentiert (Kapitel 7.5)
-- DPFL Datenerhalt dokumentiert (Kapitel 7.4)
-
-## Deployment-Prozess
-
-### Neues Production-Deployment-Script
-**`scripts/deploy-production-scheduled.sh`** erstellt mit wichtigem Prinzip:
-
-- **NIEMALS** neu bauen für Production
-- **IMMER** die bereits auf Staging getesteten Images verwenden
-- Versionierung über Parameter: `./scripts/deploy-production-scheduled.sh 1.7.3`
-
-### Für morgen früh (06:00 Uhr):
-```bash
-cd /Users/gherold/Meaningful-Conversations-Project
-./scripts/deploy-production-scheduled.sh 1.7.3
-```
+### Technische Änderungen
+- Neues Feld `coachingMode` in User-Model (Prisma)
+- Neue API-Route `PUT /data/user/coaching-mode`
+- Frontend verwendet `currentUser.coachingMode` statt separatem State
 
 ## Active Tasks
-- [x] DPFL Logging Bug Fix implementiert
-- [x] Experimentelle Modi für Kenji implementiert
-- [x] User Manual aktualisiert
-- [x] Staging deployed
-- [x] Production Deployment Script erstellt
-- [ ] Production Deployment (geplant: 2.1.2026, 06:00)
+- [x] Coaching Mode UI in PersonalityProfileView
+- [x] ExperimentalModeSelector entfernt
+- [x] Session-Logik auf coachingMode umgestellt
+- [x] Rob-PQ zu Rob umbenannt
+- [x] Chloe Meditation hinzugefügt
+- [x] Lokalisierung aktualisiert (DE/EN)
+- [x] Backend angepasst
+- [x] Dokumentation aktualisiert
+- [ ] Staging Deployment
+- [ ] Production Deployment
 
 ## Decision Log
-- **2026-01-01:** Production Deployments verwenden ab jetzt IMMER die bereits gebauten Staging-Images (kein Rebuild). Script `deploy-production-scheduled.sh` erstellt.
+- **2026-01-09:** Coaching-Modus wird zentral im Persönlichkeitsprofil verwaltet, nicht mehr pro Bot. Ermöglicht Nutzung für alle Bots.
+- **2026-01-09:** "Rob-PQ" zu "Rob" umbenannt wegen Urheberrecht auf "PQ".

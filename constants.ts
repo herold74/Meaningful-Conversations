@@ -50,10 +50,10 @@ export const BOTS: Bot[] = [
         style: 'Reflective, Structured, Evidence-Based',
         style_de: 'Reflektierend, Strukturiert, Evidenzbasiert',
         accessTier: 'premium',
-        // experimentalMode wird vom User gewählt via 🧪 Button
+        // coachingMode wird im Persönlichkeitsprofil eingestellt
     },
     {
-        id: 'rob-pq',
+        id: 'rob',
         name: 'Rob',
         description: 'An experienced coach helping you build mental fitness and resilience by recognizing self-sabotaging patterns.',
         description_de: 'Ein erfahrener Coach, der Ihnen hilft, mentale Fitness und Resilienz aufzubauen, indem Sie selbstsabotierende Muster erkennen.',

@@ -781,7 +781,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
                             <option disabled>---</option>
                             {botsForCodes.map(bot => {
-                                const key = bot.id === 'rob-pq'
+                                const key = bot.id === 'rob'
                                     ? 'admin_codes_unlock_rob'
                                     : bot.id === 'nexus-gps'
                                     ? 'admin_codes_unlock_nobody'
