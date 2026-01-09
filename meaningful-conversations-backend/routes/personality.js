@@ -293,6 +293,77 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/personality/preview-refinement
+ * Preview profile refinement based on chat history (dry-run, no save)
+ * Used by admin tests to see how a session would affect the profile
+ * ALWAYS runs regardless of user's coachingMode setting (test override)
+ */
+router.post('/preview-refinement', authMiddleware, async (req, res) => {
+  try {
+    const { chatHistory, decryptedProfile, profileType, lang } = req.body;
+    
+    // Validation
+    if (!chatHistory || !Array.isArray(chatHistory)) {
+      return res.status(400).json({ error: 'chatHistory is required and must be an array' });
+    }
+    
+    if (!decryptedProfile || !profileType) {
+      return res.status(400).json({ error: 'decryptedProfile and profileType are required' });
+    }
+    
+    // Import behavior logger
+    const behaviorLogger = require('../services/behaviorLogger.js');
+    
+    // Analyze the conversation for Riemann keyword frequencies
+    const language = lang === 'en' ? 'en' : 'de';
+    const frequencies = behaviorLogger.analyzeConversation(chatHistory, language);
+    const normalizedFrequencies = behaviorLogger.normalizeFrequencies(frequencies);
+    
+    // Create a mock session log for the refinement calculation
+    const mockSessionLogs = [{
+      dauerFrequency: normalizedFrequencies.dauer,
+      wechselFrequency: normalizedFrequencies.wechsel,
+      naeheFrequency: normalizedFrequencies.naehe,
+      distanzFrequency: normalizedFrequencies.distanz,
+      comfortScore: 5, // Assume authentic for preview
+      optedOut: false
+    }];
+    
+    // Calculate refinement suggestions
+    let refinementResult;
+    if (profileType === 'RIEMANN') {
+      refinementResult = profileRefinement.calculateRiemannRefinement(
+        decryptedProfile,
+        mockSessionLogs,
+        0.3 // Standard weight
+      );
+    } else if (profileType === 'BIG5') {
+      refinementResult = profileRefinement.calculateBig5Refinement(
+        decryptedProfile.big5 || decryptedProfile,
+        mockSessionLogs,
+        0.3
+      );
+    } else {
+      return res.status(400).json({ error: 'Unknown profileType. Use RIEMANN or BIG5.' });
+    }
+    
+    res.json({
+      success: true,
+      isPreviewOnly: true,
+      observedFrequencies: normalizedFrequencies,
+      rawFrequencies: frequencies,
+      refinementResult,
+      profileType,
+      message: 'This is a preview. No changes were saved.'
+    });
+    
+  } catch (error) {
+    console.error('Error previewing refinement:', error);
+    res.status(500).json({ error: 'Failed to preview refinement' });
+  }
+});
+
 // Narrative Synthesis Prompts (Bilingual)
 const NARRATIVE_SYNTHESIS_PROMPTS = {
   de: `Du bist ein psychologischer Profiler mit der sprachlichen Eleganz eines Romanautors. 

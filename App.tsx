@@ -51,7 +51,7 @@ import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey'
 import PersonalityProfileView from './components/PersonalityProfileView';
 import { formatSurveyResultAsHtml } from './utils/surveyResultHtmlFormatter';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGenerator';
-import { encryptPersonalityProfile } from './utils/personalityEncryption';
+import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 
@@ -91,6 +91,9 @@ const App: React.FC = () => {
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
+    const [refinementPreview, setRefinementPreview] = useState<api.RefinementPreviewResult | null>(null);
+    const [isLoadingRefinementPreview, setIsLoadingRefinementPreview] = useState(false);
+    const [refinementPreviewError, setRefinementPreviewError] = useState<string | null>(null);
     
     // Personality Profile States
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
@@ -819,6 +822,14 @@ const App: React.FC = () => {
         setIsTestMode(true);
         setIsAnalyzing(true);
         setMenuView(null); // Close admin menu
+        
+        // Reset refinement preview state
+        setRefinementPreview(null);
+        setRefinementPreviewError(null);
+        setIsLoadingRefinementPreview(false);
+        
+        // Check if this is a DPFL/DPC test scenario that should show profile refinement
+        const isDPFLTest = scenario.id.startsWith('dpfl_') || scenario.id.startsWith('dpc_');
     
         try {
             setChatHistory(scenario.chatHistory);
@@ -860,6 +871,53 @@ const App: React.FC = () => {
             }
     
             setView('sessionReview');
+            
+            // For DPFL/DPC tests, calculate refinement preview (override coachingMode setting)
+            if (isDPFLTest && hasPersonalityProfile && encryptionKey) {
+                setIsLoadingRefinementPreview(true);
+                try {
+                    // Load and decrypt the personality profile
+                    const encryptedProfile = await api.loadPersonalityProfile();
+                    if (encryptedProfile && encryptedProfile.encryptedData) {
+                        const decryptedData = await decryptPersonalityProfile(encryptedProfile.encryptedData, encryptionKey);
+                        
+                        // Determine profile type
+                        const profileType = encryptedProfile.testType === 'BIG5' ? 'BIG5' : 'RIEMANN';
+                        
+                        // Get the profile data in the correct format
+                        const profileForRefinement = profileType === 'RIEMANN' 
+                            ? decryptedData.riemann 
+                            : decryptedData.big5 || decryptedData;
+                        
+                        if (!profileForRefinement) {
+                            setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
+                            setIsLoadingRefinementPreview(false);
+                            return;
+                        }
+                        
+                        // Call preview-refinement API (always runs, regardless of coachingMode)
+                        const preview = await api.previewProfileRefinement({
+                            chatHistory: scenario.chatHistory.map(m => ({ role: m.role, text: m.text })),
+                            decryptedProfile: profileForRefinement as Record<string, unknown>,
+                            profileType: profileType as 'RIEMANN' | 'BIG5',
+                            lang: language
+                        });
+                        
+                        setRefinementPreview(preview);
+                    } else {
+                        setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
+                    }
+                } catch (previewError) {
+                    console.error('Failed to calculate refinement preview:', previewError);
+                    setRefinementPreviewError(
+                        previewError instanceof Error 
+                            ? previewError.message 
+                            : t('dpfl_test_preview_error') || 'Fehler bei der Berechnung der Profil-Vorschau.'
+                    );
+                } finally {
+                    setIsLoadingRefinementPreview(false);
+                }
+            }
     
         } catch (error) {
             console.error("Failed to run test session:", error);
@@ -971,7 +1029,7 @@ const App: React.FC = () => {
                     encryptionKey={encryptionKey}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;

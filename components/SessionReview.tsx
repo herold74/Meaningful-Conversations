@@ -18,6 +18,7 @@ import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '.
 import DatePickerModal from './DatePickerModal';
 import ComfortCheckModal from './ComfortCheckModal';
 import DPFLTestSummary from './DPFLTestSummary';
+import { RefinementPreviewResult } from '../services/api';
 
 
 const removeGamificationKey = (text: string) => {
@@ -65,6 +66,9 @@ interface SessionReviewProps {
     interviewResult?: string;
     chatHistory: Message[];
     isTestMode?: boolean;
+    refinementPreview?: RefinementPreviewResult | null;
+    isLoadingRefinementPreview?: boolean;
+    refinementPreviewError?: string | null;
 }
 
 const SessionReview: React.FC<SessionReviewProps> = ({
@@ -88,6 +92,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     interviewResult,
     chatHistory,
     isTestMode,
+    refinementPreview,
+    isLoadingRefinementPreview,
+    refinementPreviewError,
 }) => {
     const { t, language } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
@@ -440,7 +447,13 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
                 
                 {/* DPFL/DPC Test Summary */}
-                <DPFLTestSummary isTestMode={isTestMode} coachingMode={currentUser?.coachingMode} />
+                <DPFLTestSummary 
+                    isTestMode={isTestMode} 
+                    coachingMode={currentUser?.coachingMode}
+                    refinementPreview={refinementPreview}
+                    isLoadingPreview={isLoadingRefinementPreview}
+                    previewError={refinementPreviewError}
+                />
                 
                 {isTestMode && (
                     <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
