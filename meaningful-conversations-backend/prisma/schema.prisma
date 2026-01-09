@@ -23,6 +23,7 @@ model User {
   unlockedCoaches           String?       @db.Text
   isBetaTester              Boolean       @default(false)
   isAdmin                   Boolean       @default(false)
+  coachingMode              String        @default("off") // off, dpc, dpfl
   createdAt                 DateTime      @default(now())
   updatedAt                 DateTime      @updatedAt
   loginCount                Int           @default(0)

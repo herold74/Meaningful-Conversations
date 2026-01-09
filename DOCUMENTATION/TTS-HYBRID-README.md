@@ -131,7 +131,7 @@ Auto mode selects voices based on bot personality and language:
 | **Ava** (ava-strategic) | Female | Sophia | Amy |
 | **Kenji** (kenji-resilience) | Male | Thorsten | Ryan |
 | **Chloe** (chloe-structured-reflection) | Female | Sophia | Amy |
-| **Rob** (rob-pq) | Male | Thorsten | Ryan |
+| **Rob** (rob) | Male | Thorsten | Ryan |
 | **Nobody** (nexus-goal-path-solution) | Male | Thorsten | Ryan |
 
 ### Speech Rate Adjustments

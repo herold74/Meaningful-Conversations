@@ -69,6 +69,13 @@ export const updateProfile = async (firstName?: string, lastName?: string, newsl
     });
 };
 
+export const updateCoachingMode = async (coachingMode: 'off' | 'dpc' | 'dpfl'): Promise<{ message: string, user: User }> => {
+    return await apiFetch('/data/user/coaching-mode', {
+        method: 'PUT',
+        body: JSON.stringify({ coachingMode }),
+    });
+};
+
 export const verifyEmail = async (token: string): Promise<{ user: User, token: string }> => {
     const session = await apiFetch('/auth/verify-email', {
         method: 'POST',

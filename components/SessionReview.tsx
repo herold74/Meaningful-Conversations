@@ -104,12 +104,12 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     
     // Show comfort check for DPFL (only if not test mode or if registered user)
     useEffect(() => {
-        if (selectedBot.experimentalMode === 'DPFL' && !isTestMode && currentUser) {
+        if (currentUser?.coachingMode === 'dpfl' && !isTestMode) {
             // In production: Load actual encryption key from user's stored key
             // For now, show comfort check after brief delay
             setTimeout(() => setShowComfortCheck(true), 1000);
         }
-    }, [currentUser, selectedBot.experimentalMode, isTestMode]);
+    }, [currentUser, currentUser?.coachingMode, isTestMode]);
 
 
     const handleRatingClick = (starValue: number) => {
@@ -440,7 +440,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
                 
                 {/* DPFL/DPC Test Summary */}
-                <DPFLTestSummary isTestMode={isTestMode} experimentalMode={selectedBot.experimentalMode} />
+                <DPFLTestSummary isTestMode={isTestMode} coachingMode={currentUser?.coachingMode} />
                 
                 {isTestMode && (
                     <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
@@ -781,7 +781,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 <ComfortCheckModal
                     chatHistory={chatHistory}
                     sessionId={`test-${Date.now()}`}
-                    experimentalMode={selectedBot.experimentalMode}
+                    coachingMode={currentUser?.coachingMode}
                     onComplete={() => setShowComfortCheck(false)}
                     encryptionKey={encryptionKey}
                 />
