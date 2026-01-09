@@ -361,3 +361,57 @@ export const getAdaptationSuggestions = async () => {
   }
   return response.json();
 };
+
+/**
+ * Preview profile refinement based on chat history (dry-run, no save)
+ * Used for admin tests to see how a session would affect the profile
+ */
+export interface RefinementPreviewResult {
+  success: boolean;
+  isPreviewOnly: boolean;
+  observedFrequencies: {
+    dauer: number;
+    wechsel: number;
+    naehe: number;
+    distanz: number;
+  };
+  rawFrequencies: {
+    dauer: number;
+    wechsel: number;
+    naehe: number;
+    distanz: number;
+    messageCount: number;
+  };
+  refinementResult: {
+    hasSuggestions: boolean;
+    suggestions?: Record<string, {
+      current: Record<string, number>;
+      suggested: Record<string, number>;
+      deltas: Record<string, number>;
+    }>;
+    observedFrequencies?: Record<string, number>;
+    sessionCount?: number;
+    weight?: number;
+    reason?: string;
+  };
+  profileType: string;
+  message: string;
+}
+
+export const previewProfileRefinement = async (data: {
+  chatHistory: Array<{ role: string; text: string }>;
+  decryptedProfile: Record<string, unknown>;
+  profileType: 'RIEMANN' | 'BIG5';
+  lang: string;
+}): Promise<RefinementPreviewResult> => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/preview-refinement`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to preview refinement');
+  }
+  return response.json();
+};
