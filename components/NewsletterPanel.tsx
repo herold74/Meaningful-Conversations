@@ -94,7 +94,7 @@ const NewsletterPanel: React.FC = () => {
     } catch (error: any) {
       setResult({
         type: 'error',
-        message: error.message || t('newsletter_translate_error')
+        message: error.message || t('newsletter_send_error')
       });
     } finally {
       setSending(false);

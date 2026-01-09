@@ -953,7 +953,7 @@
   "experimental_mode_dpfl_disabled_tooltip": "DPFL benötigt ein adaptives Persönlichkeitsprofil",
 
   "newsletter_panel_title": "Newsletter versenden",
-  "newsletter_subscribers_count": "Aktuell {{count}} Abonnent(en)",
+  "newsletter_subscribers_count": "Aktuell {{count}} Abonnenten",
   "newsletter_show_subscribers": "Abonnenten anzeigen",
   "newsletter_no_subscribers_warning": "Keine Newsletter-Abonnenten vorhanden. Nutzer können sich über ihre Profil-Einstellungen für den Newsletter anmelden.",
   "newsletter_no_subscribers_found": "Keine Abonnenten vorhanden.",
@@ -970,7 +970,8 @@
   "newsletter_translating": "Übersetze...",
   "newsletter_translate_success": "Übersetzung erfolgreich! Bitte prüfen Sie die übersetzte Version.",
   "newsletter_translate_error": "Fehler bei der Übersetzung.",
-  "newsletter_send_button": "Newsletter an {{count}} Abonnent(en) versenden",
+  "newsletter_send_error": "Fehler beim Versenden des Newsletters.",
+  "newsletter_send_button": "Newsletter an {{count}} Abonnenten versenden",
   "newsletter_sending": "Newsletter wird versendet...",
   "newsletter_send_success": "Newsletter erfolgreich versendet! {{sent}} von {{total}} E-Mails gesendet.",
   "newsletter_send_failed": "{{failed}} fehlgeschlagen",
