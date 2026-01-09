@@ -15,6 +15,17 @@ interface ProfileRefinementModalProps {
   isTestMode?: boolean;
 }
 
+// Type for bidirectional analysis result
+interface BidirectionalDimension {
+  high: number;
+  low: number;
+  delta: number;
+  foundKeywords: {
+    high: string[];
+    low: string[];
+  };
+}
+
 const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
   isOpen,
   refinementPreview,
@@ -65,6 +76,14 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
   };
   
   const hasChanges = refinementPreview?.refinementResult?.hasSuggestions;
+  
+  // Get bidirectional analysis data
+  const bidirectionalAnalysis = refinementPreview?.bidirectionalAnalysis as Record<string, BidirectionalDimension> | undefined;
+  
+  // Check if we have any found keywords at all
+  const hasAnyKeywords = bidirectionalAnalysis && Object.values(bidirectionalAnalysis).some(
+    dim => dim?.foundKeywords && (dim.foundKeywords.high?.length > 0 || dim.foundKeywords.low?.length > 0)
+  );
   
   return (
     <div 
@@ -123,26 +142,76 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
                 </div>
               )}
               
-              {/* Observed Keywords */}
-              <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded border border-gray-200 dark:border-gray-700">
-                <h3 className="font-bold mb-3 text-content-primary flex items-center gap-2">
-                  📊 {t('refinement_modal_observed') || 'Erkannte Schlüsselwörter'}
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {Object.entries(refinementPreview.rawFrequencies)
-                    .filter(([key]) => key !== 'messageCount')
-                    .map(([dimension, count]) => (
-                      <div key={dimension} className="bg-white dark:bg-gray-900 p-3 rounded text-center border border-gray-100 dark:border-gray-700">
-                        <div className="text-xs text-content-secondary mb-1">{formatDimension(dimension)}</div>
-                        <div className="text-2xl font-bold text-content-primary">{count as number}</div>
-                      </div>
-                    ))}
+              {/* Bidirectional Keyword Analysis */}
+              {bidirectionalAnalysis && (
+                <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded border border-gray-200 dark:border-gray-700">
+                  <h3 className="font-bold mb-3 text-content-primary flex items-center gap-2">
+                    📊 {t('refinement_modal_keywords_found') || 'Erkannte Schlüsselwörter'}
+                  </h3>
+                  
+                  {hasAnyKeywords ? (
+                    <div className="space-y-3">
+                      {Object.entries(bidirectionalAnalysis)
+                        .filter(([key, dim]) => key !== 'messageCount' && dim?.foundKeywords)
+                        .map(([dimension, data]) => {
+                          const hasHigh = data.foundKeywords?.high?.length > 0;
+                          const hasLow = data.foundKeywords?.low?.length > 0;
+                          
+                          if (!hasHigh && !hasLow) return null;
+                          
+                          return (
+                            <div key={dimension} className="bg-white dark:bg-gray-900 p-3 rounded border border-gray-100 dark:border-gray-700">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-content-primary text-sm">
+                                  {formatDimension(dimension)}
+                                </span>
+                                <span className="text-xs">
+                                  {data.delta > 0 ? (
+                                    <span className="text-green-600 dark:text-green-400">↑ +{data.delta}</span>
+                                  ) : data.delta < 0 ? (
+                                    <span className="text-orange-600 dark:text-orange-400">↓ {data.delta}</span>
+                                  ) : (
+                                    <span className="text-gray-500">±0</span>
+                                  )}
+                                </span>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-1.5">
+                                {hasHigh && data.foundKeywords.high.map((kw: string) => (
+                                  <span 
+                                    key={`high-${kw}`}
+                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                    title={t('keyword_high_hint') || 'Erhöht den Wert'}
+                                  >
+                                    ↑ {kw}
+                                  </span>
+                                ))}
+                                {hasLow && data.foundKeywords.low.map((kw: string) => (
+                                  <span 
+                                    key={`low-${kw}`}
+                                    className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
+                                    title={t('keyword_low_hint') || 'Senkt den Wert'}
+                                  >
+                                    ↓ {kw}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <p className="text-content-secondary text-sm italic">
+                      {t('refinement_modal_no_keywords') || 'Keine relevanten Schlüsselwörter gefunden. Profil bleibt unverändert.'}
+                    </p>
+                  )}
+                  
+                  <p className="mt-3 text-xs text-content-secondary">
+                    {t('refinement_modal_message_count', { count: (bidirectionalAnalysis as { messageCount?: number }).messageCount || 0 }) || 
+                     `Analysiert aus ${(bidirectionalAnalysis as { messageCount?: number }).messageCount || 0} Nachrichten`}
+                  </p>
                 </div>
-                <p className="mt-3 text-xs text-content-secondary">
-                  {t('refinement_modal_message_count', { count: refinementPreview.rawFrequencies.messageCount }) || 
-                   `Analysiert aus ${refinementPreview.rawFrequencies.messageCount} Nachrichten`}
-                </p>
-              </div>
+              )}
               
               {/* Profile Changes */}
               {hasChanges ? (

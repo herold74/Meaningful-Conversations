@@ -1,31 +1,31 @@
 // Profile Refinement Service for DPFL
 // Calculates profile update suggestions based on observed session behavior
-// Uses weighted averaging to gradually refine personality profiles
+// Uses bidirectional keywords: only explicit mentions cause changes
 
 /**
  * Calculate profile refinement suggestions for Riemann-Thomann profiles
+ * Uses bidirectional keywords (high/low) for accurate refinement
+ * 
  * @param {object} currentProfile - Current Riemann profile (decrypted)
- * @param {array} sessionLogs - Array of SessionBehaviorLog objects
- * @param {number} weight - Weight for new data (0-1), default 0.3
- * @returns {object} - Suggested updates with deltas
+ * @param {array} sessionLogs - Array with behavior analysis including high/low/delta
+ * @param {number} weight - Weight for adjustments (0-1), default 0.3
+ * @returns {object} - Suggested updates with deltas and found keywords
  */
 function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
   if (!currentProfile || !sessionLogs || sessionLogs.length === 0) {
     return { hasSuggestions: false, reason: 'Insufficient data' };
   }
   
-  // Calculate average frequencies from sessions
-  const avgFrequencies = {
-    dauer: Math.round(sessionLogs.reduce((sum, log) => sum + log.dauerFrequency, 0) / sessionLogs.length),
-    wechsel: Math.round(sessionLogs.reduce((sum, log) => sum + log.wechselFrequency, 0) / sessionLogs.length),
-    naehe: Math.round(sessionLogs.reduce((sum, log) => sum + log.naeheFrequency, 0) / sessionLogs.length),
-    distanz: Math.round(sessionLogs.reduce((sum, log) => sum + log.distanzFrequency, 0) / sessionLogs.length)
-  };
+  // Get the first (and typically only) session log for preview mode
+  // In real usage, this would aggregate multiple sessions
+  const sessionLog = sessionLogs[0];
   
-  // Convert frequencies (0-10 scale) to Riemann scores (1-10 scale)
-  // We'll update all three contexts (beruf, privat, selbst)
+  // Maximum adjustment per session (in profile scale points)
+  const maxAdjustment = 2; // Max 2 points change per session on 1-10 scale
+  
   const suggestions = {};
   let hasSignificantChanges = false;
+  const allFoundKeywords = {};
   
   for (const context of ['beruf', 'privat', 'selbst']) {
     if (!currentProfile[context]) continue;
@@ -34,22 +34,49 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
     const updatedScores = {};
     const deltas = {};
     
-    for (const [dimension, freq] of Object.entries(avgFrequencies)) {
+    for (const dimension of ['naehe', 'distanz', 'dauer', 'wechsel']) {
       const currentScore = currentScores[dimension] || 5;
-      const observedScore = Math.max(1, Math.min(10, freq + 1)); // Convert 0-10 to 1-10
       
-      // Weighted average: 70% old, 30% new (configurable via weight param)
-      const newScore = Math.round((currentScore * (1 - weight)) + (observedScore * weight));
+      // Get delta from bidirectional analysis
+      const dimKey = `${dimension}Delta`;
+      const dimHighKey = `${dimension}High`;
+      const dimLowKey = `${dimension}Low`;
+      const foundHighKey = `${dimension}FoundHigh`;
+      const foundLowKey = `${dimension}FoundLow`;
       
-      // Only suggest change if delta >= 0.5 (to avoid noise)
-      const delta = newScore - currentScore;
-      if (Math.abs(delta) >= 0.5) {
-        updatedScores[dimension] = newScore;
-        deltas[dimension] = delta;
-        hasSignificantChanges = true;
-      } else {
-        updatedScores[dimension] = currentScore; // No change
+      const delta = sessionLog[dimKey] || 0;
+      const highCount = sessionLog[dimHighKey] || 0;
+      const lowCount = sessionLog[dimLowKey] || 0;
+      const foundHigh = sessionLog[foundHighKey] || [];
+      const foundLow = sessionLog[foundLowKey] || [];
+      
+      // Store found keywords for UI display
+      if (foundHigh.length > 0 || foundLow.length > 0) {
+        allFoundKeywords[dimension] = { high: foundHigh, low: foundLow };
       }
+      
+      // No keywords found = no change
+      if (delta === 0 && highCount === 0 && lowCount === 0) {
+        updatedScores[dimension] = currentScore;
+        deltas[dimension] = 0;
+        continue;
+      }
+      
+      // Calculate adjustment based on delta
+      // Positive delta → increase value, negative delta → decrease value
+      const rawAdjustment = delta * weight;
+      const clampedAdjustment = Math.max(-maxAdjustment, Math.min(maxAdjustment, rawAdjustment));
+      
+      const newScore = Math.max(1, Math.min(10, Math.round((currentScore + clampedAdjustment) * 10) / 10));
+      const actualDelta = Math.round((newScore - currentScore) * 10) / 10;
+      
+      // Only flag as significant if there's an actual change
+      if (Math.abs(actualDelta) >= 0.1) {
+        hasSignificantChanges = true;
+      }
+      
+      updatedScores[dimension] = newScore;
+      deltas[dimension] = actualDelta;
     }
     
     suggestions[context] = {
@@ -62,7 +89,7 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
   return {
     hasSuggestions: hasSignificantChanges,
     suggestions,
-    observedFrequencies: avgFrequencies,
+    foundKeywords: allFoundKeywords,
     sessionCount: sessionLogs.length,
     weight
   };
@@ -70,58 +97,86 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
 
 /**
  * Calculate profile refinement suggestions for Big5 profiles
- * Uses actual Big5/OCEAN keyword frequencies from session logs
+ * Uses bidirectional keywords (high/low) for accurate refinement
+ * 
  * @param {object} currentProfile - Current Big5 profile (decrypted)
- * @param {array} sessionLogs - Array of SessionBehaviorLog objects with Big5 frequencies
- * @param {number} weight - Weight for new data (0-1), default 0.3
- * @returns {object} - Suggested updates with deltas
+ * @param {array} sessionLogs - Array with behavior analysis including high/low/delta
+ * @param {number} weight - Weight for adjustments (0-1), default 0.3
+ * @returns {object} - Suggested updates with deltas and found keywords
  */
 function calculateBig5Refinement(currentProfile, sessionLogs, weight = 0.3) {
   if (!currentProfile || !sessionLogs || sessionLogs.length === 0) {
     return { hasSuggestions: false, reason: 'Insufficient data' };
   }
   
-  // Calculate average frequencies from sessions (Big5 frequencies on 0-10 scale)
-  const avgFrequencies = {
-    openness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.opennessFrequency || 0), 0) / sessionLogs.length),
-    conscientiousness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.conscientiousnessFrequency || 0), 0) / sessionLogs.length),
-    extraversion: Math.round(sessionLogs.reduce((sum, log) => sum + (log.extraversionFrequency || 0), 0) / sessionLogs.length),
-    agreeableness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.agreeablenessFrequency || 0), 0) / sessionLogs.length),
-    neuroticism: Math.round(sessionLogs.reduce((sum, log) => sum + (log.neuroticismFrequency || 0), 0) / sessionLogs.length)
-  };
+  // Get the first session log for preview mode
+  const sessionLog = sessionLogs[0];
   
-  const suggested = { ...currentProfile };
-  const deltas = {};
-  let hasSignificantChanges = false;
+  // Maximum adjustment per session (in Big5 scale points 1-5)
+  const maxAdjustment = 0.5; // Max 0.5 points change per session
   
-  // Big5 traits: openness, conscientiousness, extraversion, agreeableness, neuroticism
   const traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
   
+  const suggested = { ...currentProfile };
+  const current = { ...currentProfile };
+  const deltas = {};
+  const foundKeywords = {};
+  let hasSignificantChanges = false;
+  
   for (const trait of traits) {
-    if (currentProfile[trait] !== undefined) {
-      const currentScore = currentProfile[trait];
-      // Convert 0-10 frequency scale to 1-5 Big5 scale
-      const observedScore = Math.max(1, Math.min(5, 1 + (avgFrequencies[trait] / 10) * 4));
-      
-      // Weighted average: combine current profile with observed behavior
-      const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
-      
-      // Only suggest change if delta >= 0.3 (to avoid noise)
-      const delta = Math.round((newScore - currentScore) * 10) / 10;
-      if (Math.abs(delta) >= 0.3) {
-        suggested[trait] = newScore;
-        deltas[trait] = delta;
-        hasSignificantChanges = true;
-      }
+    if (currentProfile[trait] === undefined) continue;
+    
+    const currentScore = currentProfile[trait];
+    
+    // Get delta from bidirectional analysis
+    const deltaKey = `${trait}Delta`;
+    const highKey = `${trait}High`;
+    const lowKey = `${trait}Low`;
+    const foundHighKey = `${trait}FoundHigh`;
+    const foundLowKey = `${trait}FoundLow`;
+    
+    const delta = sessionLog[deltaKey] || 0;
+    const highCount = sessionLog[highKey] || 0;
+    const lowCount = sessionLog[lowKey] || 0;
+    const foundHigh = sessionLog[foundHighKey] || [];
+    const foundLow = sessionLog[foundLowKey] || [];
+    
+    // Store found keywords for UI display
+    if (foundHigh.length > 0 || foundLow.length > 0) {
+      foundKeywords[trait] = { high: foundHigh, low: foundLow };
+    }
+    
+    // No keywords found = no change
+    if (delta === 0 && highCount === 0 && lowCount === 0) {
+      deltas[trait] = 0;
+      continue;
+    }
+    
+    // Calculate adjustment based on delta
+    // Scale from keyword count to Big5 scale (1-5)
+    // Positive delta → increase value, negative delta → decrease value
+    const rawAdjustment = (delta / 3) * weight; // Divide by 3 to scale keyword count to reasonable adjustment
+    const clampedAdjustment = Math.max(-maxAdjustment, Math.min(maxAdjustment, rawAdjustment));
+    
+    const newScore = Math.max(1, Math.min(5, Math.round((currentScore + clampedAdjustment) * 10) / 10));
+    const actualDelta = Math.round((newScore - currentScore) * 10) / 10;
+    
+    // Only flag as significant if there's an actual change
+    if (Math.abs(actualDelta) >= 0.1) {
+      suggested[trait] = newScore;
+      deltas[trait] = actualDelta;
+      hasSignificantChanges = true;
+    } else {
+      deltas[trait] = 0;
     }
   }
   
   return {
     hasSuggestions: hasSignificantChanges,
-    current: currentProfile,
+    current,
     suggested,
     deltas,
-    observedFrequencies: avgFrequencies,
+    foundKeywords,
     sessionCount: sessionLogs.length,
     weight
   };
@@ -130,10 +185,11 @@ function calculateBig5Refinement(currentProfile, sessionLogs, weight = 0.3) {
 /**
  * Main entry point for profile refinement
  * Determines profile type and delegates to appropriate calculator
+ * 
  * @param {object} currentProfile - Current profile (decrypted)
  * @param {string} profileType - 'RIEMANN' or 'BIG5'
- * @param {array} sessionLogs - Array of SessionBehaviorLog objects
- * @param {number} weight - Weight for new data (0-1), default 0.3
+ * @param {array} sessionLogs - Array with behavior analysis
+ * @param {number} weight - Weight for adjustments (0-1), default 0.3
  * @returns {object} - Refinement suggestions
  */
 function calculateProfileRefinement(currentProfile, profileType, sessionLogs, weight = 0.3) {
@@ -142,23 +198,30 @@ function calculateProfileRefinement(currentProfile, profileType, sessionLogs, we
     return { hasSuggestions: false, reason: 'Missing required parameters' };
   }
   
-  // Filter for authentic sessions only (comfortScore >= 3)
-  const authenticSessions = sessionLogs.filter(log => 
-    !log.optedOut && log.comfortScore && log.comfortScore >= 3
-  );
+  // For preview mode (single session), don't filter by comfort score
+  // In real usage with multiple sessions, filter for authentic sessions only
+  let sessionsToUse = sessionLogs;
   
-  if (authenticSessions.length < 2) {
-    return { 
-      hasSuggestions: false, 
-      reason: `Need at least 2 authentic sessions (have ${authenticSessions.length})` 
-    };
+  if (sessionLogs.length > 1) {
+    // Filter for authentic sessions only (comfortScore >= 3) when we have multiple
+    const authenticSessions = sessionLogs.filter(log => 
+      !log.optedOut && (!log.comfortScore || log.comfortScore >= 3)
+    );
+    
+    if (authenticSessions.length < 2) {
+      return { 
+        hasSuggestions: false, 
+        reason: `Need at least 2 authentic sessions (have ${authenticSessions.length})` 
+      };
+    }
+    sessionsToUse = authenticSessions;
   }
   
   // Delegate to appropriate calculator
   if (profileType === 'RIEMANN') {
-    return calculateRiemannRefinement(currentProfile, authenticSessions, weight);
+    return calculateRiemannRefinement(currentProfile, sessionsToUse, weight);
   } else if (profileType === 'BIG5') {
-    return calculateBig5Refinement(currentProfile.big5 || currentProfile, authenticSessions, weight);
+    return calculateBig5Refinement(currentProfile.big5 || currentProfile, sessionsToUse, weight);
   } else {
     return { hasSuggestions: false, reason: 'Unknown profile type' };
   }
@@ -169,4 +232,3 @@ module.exports = {
   calculateRiemannRefinement,
   calculateBig5Refinement
 };
-

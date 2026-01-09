@@ -317,18 +317,40 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
     const language = lang === 'en' ? 'en' : 'de';
     
     // Analyze conversation using appropriate keyword set based on profile type
-    let frequencies, normalizedFrequencies, mockSessionLogs, refinementResult;
+    // New bidirectional format: each dimension has high/low counts and delta
+    let analysis, mockSessionLogs, refinementResult;
     
     if (profileType === 'RIEMANN') {
-      // Use Riemann-Thomann keywords
-      frequencies = behaviorLogger.analyzeConversation(chatHistory, language);
-      normalizedFrequencies = behaviorLogger.normalizeFrequencies(frequencies);
+      // Use Riemann-Thomann keywords (bidirectional)
+      analysis = behaviorLogger.analyzeConversation(chatHistory, language);
       
+      // Convert bidirectional analysis to session log format
       mockSessionLogs = [{
-        dauerFrequency: normalizedFrequencies.dauer,
-        wechselFrequency: normalizedFrequencies.wechsel,
-        naeheFrequency: normalizedFrequencies.naehe,
-        distanzFrequency: normalizedFrequencies.distanz,
+        // High/Low counts and deltas for each dimension
+        naeheHigh: analysis.naehe?.high || 0,
+        naeheLow: analysis.naehe?.low || 0,
+        naeheDelta: analysis.naehe?.delta || 0,
+        naeheFoundHigh: analysis.naehe?.foundKeywords?.high || [],
+        naeheFoundLow: analysis.naehe?.foundKeywords?.low || [],
+        
+        distanzHigh: analysis.distanz?.high || 0,
+        distanzLow: analysis.distanz?.low || 0,
+        distanzDelta: analysis.distanz?.delta || 0,
+        distanzFoundHigh: analysis.distanz?.foundKeywords?.high || [],
+        distanzFoundLow: analysis.distanz?.foundKeywords?.low || [],
+        
+        dauerHigh: analysis.dauer?.high || 0,
+        dauerLow: analysis.dauer?.low || 0,
+        dauerDelta: analysis.dauer?.delta || 0,
+        dauerFoundHigh: analysis.dauer?.foundKeywords?.high || [],
+        dauerFoundLow: analysis.dauer?.foundKeywords?.low || [],
+        
+        wechselHigh: analysis.wechsel?.high || 0,
+        wechselLow: analysis.wechsel?.low || 0,
+        wechselDelta: analysis.wechsel?.delta || 0,
+        wechselFoundHigh: analysis.wechsel?.foundKeywords?.high || [],
+        wechselFoundLow: analysis.wechsel?.foundKeywords?.low || [],
+        
         comfortScore: 5, // Assume authentic for preview
         optedOut: false
       }];
@@ -339,16 +361,41 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
         0.3 // Standard weight
       );
     } else if (profileType === 'BIG5') {
-      // Use Big5/OCEAN keywords
-      frequencies = behaviorLogger.analyzeBig5Conversation(chatHistory, language);
-      normalizedFrequencies = behaviorLogger.normalizeBig5Frequencies(frequencies);
+      // Use Big5/OCEAN keywords (bidirectional)
+      analysis = behaviorLogger.analyzeBig5Conversation(chatHistory, language);
       
+      // Convert bidirectional analysis to session log format
       mockSessionLogs = [{
-        opennessFrequency: normalizedFrequencies.openness,
-        conscientiousnessFrequency: normalizedFrequencies.conscientiousness,
-        extraversionFrequency: normalizedFrequencies.extraversion,
-        agreeablenessFrequency: normalizedFrequencies.agreeableness,
-        neuroticismFrequency: normalizedFrequencies.neuroticism,
+        opennessHigh: analysis.openness?.high || 0,
+        opennessLow: analysis.openness?.low || 0,
+        opennessDelta: analysis.openness?.delta || 0,
+        opennessFoundHigh: analysis.openness?.foundKeywords?.high || [],
+        opennessFoundLow: analysis.openness?.foundKeywords?.low || [],
+        
+        conscientiousnessHigh: analysis.conscientiousness?.high || 0,
+        conscientiousnessLow: analysis.conscientiousness?.low || 0,
+        conscientiousnessDelta: analysis.conscientiousness?.delta || 0,
+        conscientiousnessFoundHigh: analysis.conscientiousness?.foundKeywords?.high || [],
+        conscientiousnessFoundLow: analysis.conscientiousness?.foundKeywords?.low || [],
+        
+        extraversionHigh: analysis.extraversion?.high || 0,
+        extraversionLow: analysis.extraversion?.low || 0,
+        extraversionDelta: analysis.extraversion?.delta || 0,
+        extraversionFoundHigh: analysis.extraversion?.foundKeywords?.high || [],
+        extraversionFoundLow: analysis.extraversion?.foundKeywords?.low || [],
+        
+        agreeablenessHigh: analysis.agreeableness?.high || 0,
+        agreeablenessLow: analysis.agreeableness?.low || 0,
+        agreeablenessDelta: analysis.agreeableness?.delta || 0,
+        agreeablenessFoundHigh: analysis.agreeableness?.foundKeywords?.high || [],
+        agreeablenessFoundLow: analysis.agreeableness?.foundKeywords?.low || [],
+        
+        neuroticismHigh: analysis.neuroticism?.high || 0,
+        neuroticismLow: analysis.neuroticism?.low || 0,
+        neuroticismDelta: analysis.neuroticism?.delta || 0,
+        neuroticismFoundHigh: analysis.neuroticism?.foundKeywords?.high || [],
+        neuroticismFoundLow: analysis.neuroticism?.foundKeywords?.low || [],
+        
         comfortScore: 5, // Assume authentic for preview
         optedOut: false
       }];
@@ -365,8 +412,7 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
     res.json({
       success: true,
       isPreviewOnly: true,
-      observedFrequencies: normalizedFrequencies,
-      rawFrequencies: frequencies,
+      bidirectionalAnalysis: analysis,
       refinementResult,
       profileType,
       message: 'This is a preview. No changes were saved.'
