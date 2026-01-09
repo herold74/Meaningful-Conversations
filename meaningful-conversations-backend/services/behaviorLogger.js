@@ -1,178 +1,330 @@
 // Behavior Logger for DPFL (Dynamic Profile Feedback Loop)
 // Analyzes user messages for personality dimension markers
-// Used to refine personality profiles over time
+// Uses bidirectional keywords (high/low) for accurate profile refinement
 
 /**
- * Keyword dictionaries for Riemann-Thomann dimensions
- * Each dimension has markers that indicate tendency towards that pole
+ * Bidirectional keyword dictionaries for Riemann-Thomann dimensions
+ * - high: Keywords that indicate high tendency towards this dimension
+ * - low: Keywords that indicate low tendency (opposite pole behavior)
+ * 
+ * Important: Only explicit mentions cause changes. No keywords = no change.
  */
 const RIEMANN_KEYWORDS = {
   de: {
-    dauer: [
-      'planung', 'plan', 'struktur', 'routine', 'gewohnheit', 'sicherheit',
-      'langfristig', 'beständig', 'verlässlich', 'stabilität', 'ordnung',
-      'kontinuität', 'vorhersehbar', 'systematisch', 'organisiert', 'disziplin'
-    ],
-    wechsel: [
-      'spontan', 'flexibel', 'abwechslung', 'neu', 'anders', 'veränderung',
-      'improvisation', 'anpassung', 'experimentier', 'variieren', 'abenteuer',
-      'überraschung', 'kreativ', 'innovation', 'dynamisch', 'beweglich'
-    ],
-    naehe: [
-      'gefühl', 'emotion', 'beziehung', 'zusammen', 'verbindung', 'team',
-      'gemeinsam', 'persönlich', 'empathie', 'vertrauen', 'nähe', 'intimität',
-      'harmonie', 'verbunden', 'zugehörigkeit', 'miteinander', 'fürsorge'
-    ],
-    distanz: [
-      'analyse', 'logik', 'objektiv', 'rational', 'fakten', 'daten',
-      'allein', 'unabhängig', 'eigenständig', 'sachlich', 'kritisch',
-      'distanz', 'neutral', 'professionell', 'effizient', 'fokussiert'
-    ]
+    naehe: {
+      high: [
+        'verbundenheit', 'beziehung', 'harmonie', 'zusammenhalt', 'geborgenheit',
+        'wärme', 'vertrauen', 'nähe', 'intimität', 'gemeinsam', 'team',
+        'empathie', 'fürsorge', 'zugehörigkeit', 'miteinander', 'emotional',
+        'gefühl', 'persönlich', 'herzlich', 'liebevoll'
+      ],
+      low: [
+        'distanziert', 'abstand', 'zurückgezogen', 'isoliert', 'einsam',
+        'kühl', 'unpersönlich', 'gleichgültig', 'oberflächlich'
+      ]
+    },
+    distanz: {
+      high: [
+        'autonomie', 'freiheit', 'unabhängigkeit', 'eigenständig', 'abgrenzung',
+        'privatsphäre', 'selbstständig', 'allein', 'rational', 'logik',
+        'objektiv', 'sachlich', 'analyse', 'fakten', 'daten', 'professionell',
+        'neutral', 'kritisch', 'fokussiert', 'effizient'
+      ],
+      low: [
+        'abhängig', 'angewiesen', 'gebunden', 'verpflichtet', 'eingeengt',
+        'klammern', 'unselbstständig', 'hilflos'
+      ]
+    },
+    dauer: {
+      high: [
+        'sicherheit', 'stabilität', 'planung', 'ordnung', 'verlässlichkeit',
+        'routine', 'struktur', 'beständig', 'vorhersehbar', 'systematisch',
+        'organisiert', 'disziplin', 'kontinuität', 'tradition', 'gewohnheit',
+        'langfristig', 'zuverlässig', 'konstant', 'methodisch'
+      ],
+      low: [
+        'unsicherheit', 'chaos', 'planlos', 'unbeständig', 'wechselhaft',
+        'unzuverlässig', 'unstrukturiert', 'instabil', 'unberechenbar'
+      ]
+    },
+    wechsel: {
+      high: [
+        'veränderung', 'abwechslung', 'neues', 'spontaneität', 'flexibilität',
+        'dynamik', 'improvisation', 'experimentier', 'kreativ', 'innovation',
+        'abenteuer', 'überraschung', 'anpassung', 'beweglich', 'variieren',
+        'anders', 'aufregend', 'neugierig', 'wandel'
+      ],
+      low: [
+        'festgefahren', 'starr', 'monoton', 'langweilig', 'eingerostet',
+        'unflexibel', 'stur', 'träge', 'statisch'
+      ]
+    }
   },
   en: {
-    dauer: [
-      'planning', 'plan', 'structure', 'routine', 'habit', 'security',
-      'long-term', 'stable', 'reliable', 'stability', 'order',
-      'continuity', 'predictable', 'systematic', 'organized', 'discipline'
-    ],
-    wechsel: [
-      'spontaneous', 'flexible', 'variety', 'new', 'different', 'change',
-      'improvisation', 'adaptation', 'experiment', 'vary', 'adventure',
-      'surprise', 'creative', 'innovation', 'dynamic', 'agile'
-    ],
-    naehe: [
-      'feeling', 'emotion', 'relationship', 'together', 'connection', 'team',
-      'shared', 'personal', 'empathy', 'trust', 'closeness', 'intimacy',
-      'harmony', 'connected', 'belonging', 'collaboration', 'care'
-    ],
-    distanz: [
-      'analysis', 'logic', 'objective', 'rational', 'facts', 'data',
-      'alone', 'independent', 'autonomous', 'factual', 'critical',
-      'distance', 'neutral', 'professional', 'efficient', 'focused'
-    ]
+    naehe: {
+      high: [
+        'connection', 'relationship', 'harmony', 'togetherness', 'belonging',
+        'warmth', 'trust', 'closeness', 'intimacy', 'together', 'team',
+        'empathy', 'care', 'community', 'emotional', 'feeling', 'personal',
+        'heartfelt', 'loving', 'bonding'
+      ],
+      low: [
+        'distant', 'detached', 'withdrawn', 'isolated', 'lonely',
+        'cold', 'impersonal', 'indifferent', 'superficial'
+      ]
+    },
+    distanz: {
+      high: [
+        'autonomy', 'freedom', 'independence', 'self-reliant', 'boundaries',
+        'privacy', 'autonomous', 'alone', 'rational', 'logic',
+        'objective', 'factual', 'analysis', 'facts', 'data', 'professional',
+        'neutral', 'critical', 'focused', 'efficient'
+      ],
+      low: [
+        'dependent', 'reliant', 'bound', 'obligated', 'constrained',
+        'clingy', 'helpless', 'needy'
+      ]
+    },
+    dauer: {
+      high: [
+        'security', 'stability', 'planning', 'order', 'reliability',
+        'routine', 'structure', 'consistent', 'predictable', 'systematic',
+        'organized', 'discipline', 'continuity', 'tradition', 'habit',
+        'long-term', 'dependable', 'constant', 'methodical'
+      ],
+      low: [
+        'insecurity', 'chaos', 'unplanned', 'unstable', 'erratic',
+        'unreliable', 'unstructured', 'volatile', 'unpredictable'
+      ]
+    },
+    wechsel: {
+      high: [
+        'change', 'variety', 'novelty', 'spontaneity', 'flexibility',
+        'dynamic', 'improvisation', 'experiment', 'creative', 'innovation',
+        'adventure', 'surprise', 'adaptation', 'agile', 'diverse',
+        'different', 'exciting', 'curious', 'transformation'
+      ],
+      low: [
+        'stuck', 'rigid', 'monotonous', 'boring', 'stagnant',
+        'inflexible', 'stubborn', 'sluggish', 'static'
+      ]
+    }
   }
 };
 
 /**
- * Keyword dictionaries for Big5/OCEAN dimensions
- * Each dimension has markers that indicate tendency towards that trait
+ * Bidirectional keyword dictionaries for Big5/OCEAN dimensions
+ * - high: Keywords indicating high trait expression
+ * - low: Keywords indicating low trait expression (opposite behavior)
  */
 const BIG5_KEYWORDS = {
   de: {
-    openness: [
-      'kreativ', 'neugierig', 'fantasie', 'kunst', 'ideen', 'experimentier',
-      'originell', 'unkonventionell', 'philosophisch', 'abstrakt', 'vision',
-      'inspirier', 'erfind', 'künstlerisch', 'intellektuell', 'tiefgründig',
-      'offen', 'aufgeschlossen', 'innovativ', 'vorstellung', 'träum'
-    ],
-    conscientiousness: [
-      'organisiert', 'zuverlässig', 'pflicht', 'disziplin', 'sorgfältig',
-      'gewissenhaft', 'pünktlich', 'ordentlich', 'verantwortung', 'gründlich',
-      'systematisch', 'effizient', 'zielorientiert', 'fleißig', 'genau',
-      'methodisch', 'konsequent', 'akribisch', 'termingerecht', 'strukturiert'
-    ],
-    extraversion: [
-      'gesellig', 'energie', 'begeister', 'unterhalten', 'aktiv',
-      'gesprächig', 'lebhaft', 'kontaktfreudig', 'aufgeschlossen', 'dominant',
-      'durchsetzung', 'enthusias', 'optimist', 'selbstbewusst', 'redselig',
-      'party', 'leute', 'treffen', 'ausgeh', 'sozial'
-    ],
-    agreeableness: [
-      'hilfsbereit', 'kooperativ', 'vertrauen', 'mitgefühl', 'freundlich',
-      'warmherzig', 'großzügig', 'rücksichtsvoll', 'nachgiebig', 'tolerant',
-      'verständnisvoll', 'geduldig', 'fürsorglich', 'einfühlsam', 'harmonie',
-      'friedlich', 'bescheiden', 'höflich', 'respektvoll', 'unterstütz'
-    ],
-    neuroticism: [
-      'angst', 'sorge', 'stress', 'nervös', 'unsicher', 'ängstlich',
-      'besorgt', 'unruhig', 'gestresst', 'überwältigt', 'frustriert',
-      'gereizt', 'empfindlich', 'verletzlich', 'zweifel', 'pessimist',
-      'belastet', 'erschöpft', 'überfordert', 'verzweifelt', 'panisch'
-    ]
+    openness: {
+      high: [
+        'kreativ', 'neugierig', 'experimentierfreudig', 'fantasievoll', 'künstlerisch',
+        'offen', 'innovativ', 'visionär', 'originell', 'unkonventionell',
+        'philosophisch', 'abstrakt', 'inspiriert', 'intellektuell', 'tiefgründig',
+        'aufgeschlossen', 'ideenreich', 'träumerisch', 'erfindungsreich'
+      ],
+      low: [
+        'traditionell', 'konventionell', 'konservativ', 'praktisch', 'routiniert',
+        'bodenständig', 'realistisch', 'pragmatisch', 'gewohnt', 'bewährt',
+        'einfach', 'unkompliziert', 'nüchtern'
+      ]
+    },
+    conscientiousness: {
+      high: [
+        'organisiert', 'pünktlich', 'strukturiert', 'diszipliniert', 'gewissenhaft',
+        'zuverlässig', 'ordentlich', 'geplant', 'sorgfältig', 'pflichtbewusst',
+        'verantwortungsvoll', 'gründlich', 'systematisch', 'methodisch', 'genau',
+        'akribisch', 'termingerecht', 'effizient', 'zielorientiert'
+      ],
+      low: [
+        'spontan', 'chaotisch', 'impulsiv', 'aufschieben', 'vergesslich',
+        'unorganisiert', 'nachlässig', 'planlos', 'unordentlich', 'schlampig',
+        'unpünktlich', 'unzuverlässig', 'zerstreut'
+      ]
+    },
+    extraversion: {
+      high: [
+        'gesellig', 'gesprächig', 'energiegeladen', 'enthusiastisch', 'aktiv',
+        'kontaktfreudig', 'aufgeschlossen', 'lebhaft', 'unternehmungslustig',
+        'redselig', 'selbstbewusst', 'dominant', 'party', 'ausgehen',
+        'menschen', 'treffen', 'sozial', 'kommunikativ'
+      ],
+      low: [
+        'ruhig', 'zurückhaltend', 'introvertiert', 'nachdenklich', 'still',
+        'beobachtend', 'schüchtern', 'reserviert', 'verschlossen', 'einzelgänger',
+        'allein', 'in sich gekehrt', 'wortkarg'
+      ]
+    },
+    agreeableness: {
+      high: [
+        'hilfsbereit', 'kooperativ', 'vertrauensvoll', 'freundlich', 'mitfühlend',
+        'harmoniebedürftig', 'einfühlsam', 'warmherzig', 'großzügig', 'nachgiebig',
+        'rücksichtsvoll', 'tolerant', 'verständnisvoll', 'geduldig', 'fürsorglich',
+        'bescheiden', 'höflich', 'respektvoll', 'unterstützend'
+      ],
+      low: [
+        'kritisch', 'wettbewerbsorientiert', 'skeptisch', 'direkt', 'konfrontativ',
+        'durchsetzungsstark', 'streitlustig', 'misstrauisch', 'egozentrisch',
+        'kompromisslos', 'hartnäckig', 'unnachgiebig', 'fordernd'
+      ]
+    },
+    neuroticism: {
+      high: [
+        'ängstlich', 'nervös', 'unsicher', 'besorgt', 'gestresst',
+        'emotional', 'verletzlich', 'überfordert', 'unruhig', 'angespannt',
+        'frustriert', 'gereizt', 'empfindlich', 'zweifelnd', 'pessimistisch',
+        'belastet', 'erschöpft', 'verzweifelt', 'panisch', 'sorge'
+      ],
+      low: [
+        'gelassen', 'entspannt', 'stabil', 'selbstsicher', 'ausgeglichen',
+        'ruhig', 'belastbar', 'zuversichtlich', 'unerschütterlich', 'gefasst',
+        'souverän', 'resilient', 'robust', 'optimistisch'
+      ]
+    }
   },
   en: {
-    openness: [
-      'creative', 'curious', 'imagination', 'art', 'ideas', 'experiment',
-      'original', 'unconventional', 'philosophical', 'abstract', 'vision',
-      'inspire', 'invent', 'artistic', 'intellectual', 'profound',
-      'open', 'receptive', 'innovative', 'imagine', 'dream'
-    ],
-    conscientiousness: [
-      'organized', 'reliable', 'duty', 'discipline', 'thorough',
-      'conscientious', 'punctual', 'orderly', 'responsibility', 'careful',
-      'systematic', 'efficient', 'goal-oriented', 'diligent', 'precise',
-      'methodical', 'consistent', 'meticulous', 'deadline', 'structured'
-    ],
-    extraversion: [
-      'social', 'energy', 'enthusiastic', 'outgoing', 'active',
-      'talkative', 'lively', 'gregarious', 'assertive', 'dominant',
-      'confident', 'optimistic', 'cheerful', 'expressive', 'bold',
-      'party', 'people', 'meeting', 'hangout', 'sociable'
-    ],
-    agreeableness: [
-      'helpful', 'cooperative', 'trust', 'compassion', 'friendly',
-      'warmhearted', 'generous', 'considerate', 'yielding', 'tolerant',
-      'understanding', 'patient', 'caring', 'empathetic', 'harmony',
-      'peaceful', 'modest', 'polite', 'respectful', 'supportive'
-    ],
-    neuroticism: [
-      'anxiety', 'worry', 'stress', 'nervous', 'insecure', 'anxious',
-      'concerned', 'restless', 'stressed', 'overwhelmed', 'frustrated',
-      'irritated', 'sensitive', 'vulnerable', 'doubt', 'pessimistic',
-      'burdened', 'exhausted', 'struggling', 'desperate', 'panic'
-    ]
+    openness: {
+      high: [
+        'creative', 'curious', 'experimental', 'imaginative', 'artistic',
+        'open', 'innovative', 'visionary', 'original', 'unconventional',
+        'philosophical', 'abstract', 'inspired', 'intellectual', 'profound',
+        'receptive', 'inventive', 'dreamy', 'idealistic'
+      ],
+      low: [
+        'traditional', 'conventional', 'conservative', 'practical', 'routine',
+        'down-to-earth', 'realistic', 'pragmatic', 'familiar', 'proven',
+        'simple', 'straightforward', 'sober'
+      ]
+    },
+    conscientiousness: {
+      high: [
+        'organized', 'punctual', 'structured', 'disciplined', 'conscientious',
+        'reliable', 'orderly', 'planned', 'careful', 'dutiful',
+        'responsible', 'thorough', 'systematic', 'methodical', 'precise',
+        'meticulous', 'timely', 'efficient', 'goal-oriented'
+      ],
+      low: [
+        'spontaneous', 'chaotic', 'impulsive', 'procrastinate', 'forgetful',
+        'disorganized', 'careless', 'unplanned', 'messy', 'sloppy',
+        'late', 'unreliable', 'scattered'
+      ]
+    },
+    extraversion: {
+      high: [
+        'sociable', 'talkative', 'energetic', 'enthusiastic', 'active',
+        'outgoing', 'gregarious', 'lively', 'adventurous',
+        'confident', 'assertive', 'party', 'going out',
+        'people', 'meeting', 'social', 'communicative'
+      ],
+      low: [
+        'quiet', 'reserved', 'introverted', 'reflective', 'silent',
+        'observant', 'shy', 'withdrawn', 'private', 'solitary',
+        'alone', 'introspective', 'taciturn'
+      ]
+    },
+    agreeableness: {
+      high: [
+        'helpful', 'cooperative', 'trusting', 'friendly', 'compassionate',
+        'harmony-seeking', 'empathetic', 'warmhearted', 'generous', 'yielding',
+        'considerate', 'tolerant', 'understanding', 'patient', 'caring',
+        'modest', 'polite', 'respectful', 'supportive'
+      ],
+      low: [
+        'critical', 'competitive', 'skeptical', 'direct', 'confrontational',
+        'assertive', 'argumentative', 'distrustful', 'self-centered',
+        'uncompromising', 'stubborn', 'unyielding', 'demanding'
+      ]
+    },
+    neuroticism: {
+      high: [
+        'anxious', 'nervous', 'insecure', 'worried', 'stressed',
+        'emotional', 'vulnerable', 'overwhelmed', 'restless', 'tense',
+        'frustrated', 'irritated', 'sensitive', 'doubtful', 'pessimistic',
+        'burdened', 'exhausted', 'desperate', 'panicky', 'worry'
+      ],
+      low: [
+        'calm', 'relaxed', 'stable', 'confident', 'balanced',
+        'serene', 'resilient', 'optimistic', 'unflappable', 'composed',
+        'poised', 'robust', 'steady', 'secure'
+      ]
+    }
   }
 };
 
 /**
- * Analyze a user message for personality dimension markers
+ * Analyze a user message for Riemann personality markers (bidirectional)
  * @param {string} message - User's message text
  * @param {string} lang - Language code ('de' or 'en')
- * @returns {object} - Frequency counts for each dimension
+ * @returns {object} - High/Low counts and found keywords for each dimension
  */
 function analyzeMessage(message, lang = 'de') {
   if (!message || typeof message !== 'string') {
-    return { dauer: 0, wechsel: 0, naehe: 0, distanz: 0 };
+    return {
+      naehe: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      distanz: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      dauer: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      wechsel: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } }
+    };
   }
   
   const keywords = RIEMANN_KEYWORDS[lang] || RIEMANN_KEYWORDS.de;
   const lowerMessage = message.toLowerCase();
   
-  const frequencies = {
-    dauer: 0,
-    wechsel: 0,
-    naehe: 0,
-    distanz: 0
-  };
+  const results = {};
   
-  // Count keyword occurrences for each dimension
-  for (const [dimension, wordList] of Object.entries(keywords)) {
-    for (const word of wordList) {
-      // Use word boundaries to avoid partial matches
+  for (const [dimension, directions] of Object.entries(keywords)) {
+    const foundHigh = [];
+    const foundLow = [];
+    let highCount = 0;
+    let lowCount = 0;
+    
+    // Count high keywords
+    for (const word of directions.high) {
       const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
       const matches = lowerMessage.match(regex);
       if (matches) {
-        frequencies[dimension] += matches.length;
+        highCount += matches.length;
+        foundHigh.push(word);
       }
     }
+    
+    // Count low keywords
+    for (const word of directions.low) {
+      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const matches = lowerMessage.match(regex);
+      if (matches) {
+        lowCount += matches.length;
+        foundLow.push(word);
+      }
+    }
+    
+    results[dimension] = {
+      high: highCount,
+      low: lowCount,
+      delta: highCount - lowCount,
+      foundKeywords: { high: foundHigh, low: foundLow }
+    };
   }
   
-  return frequencies;
+  return results;
 }
 
 /**
- * Analyze an entire conversation history
- * Returns aggregated frequencies for user messages only
+ * Analyze an entire conversation history for Riemann markers (bidirectional)
+ * Returns aggregated high/low counts for user messages only
  * @param {Array} chatHistory - Array of message objects with role and text
  * @param {string} lang - Language code
- * @returns {object} - Aggregated frequency counts
+ * @returns {object} - Aggregated analysis with deltas and found keywords
  */
 function analyzeConversation(chatHistory, lang = 'de') {
   const aggregated = {
-    dauer: 0,
-    wechsel: 0,
-    naehe: 0,
-    distanz: 0,
+    naehe: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+    distanz: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+    dauer: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+    wechsel: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
     messageCount: 0
   };
   
@@ -184,93 +336,112 @@ function analyzeConversation(chatHistory, lang = 'de') {
   const userMessages = chatHistory.filter(msg => msg.role === 'user');
   
   for (const message of userMessages) {
-    const frequencies = analyzeMessage(message.text, lang);
-    aggregated.dauer += frequencies.dauer;
-    aggregated.wechsel += frequencies.wechsel;
-    aggregated.naehe += frequencies.naehe;
-    aggregated.distanz += frequencies.distanz;
+    const analysis = analyzeMessage(message.text, lang);
+    
+    for (const dimension of ['naehe', 'distanz', 'dauer', 'wechsel']) {
+      aggregated[dimension].high += analysis[dimension].high;
+      aggregated[dimension].low += analysis[dimension].low;
+      
+      // Collect unique found keywords
+      for (const kw of analysis[dimension].foundKeywords.high) {
+        if (!aggregated[dimension].foundKeywords.high.includes(kw)) {
+          aggregated[dimension].foundKeywords.high.push(kw);
+        }
+      }
+      for (const kw of analysis[dimension].foundKeywords.low) {
+        if (!aggregated[dimension].foundKeywords.low.includes(kw)) {
+          aggregated[dimension].foundKeywords.low.push(kw);
+        }
+      }
+    }
     aggregated.messageCount++;
+  }
+  
+  // Calculate final deltas
+  for (const dimension of ['naehe', 'distanz', 'dauer', 'wechsel']) {
+    aggregated[dimension].delta = aggregated[dimension].high - aggregated[dimension].low;
   }
   
   return aggregated;
 }
 
 /**
- * Get normalized frequencies (per message) for Riemann
- * Useful for comparing sessions of different lengths
- * @param {object} frequencies - Raw frequency counts
- * @returns {object} - Normalized frequencies (0-10 scale)
- */
-function normalizeFrequencies(frequencies) {
-  if (!frequencies.messageCount || frequencies.messageCount === 0) {
-    return { dauer: 0, wechsel: 0, naehe: 0, distanz: 0 };
-  }
-  
-  // Calculate average per message, then scale to 0-10
-  // Typical range is 0-5 keywords per message, so we scale accordingly
-  const scaleFactor = 2; // 5 keywords/message → 10 on scale
-  
-  return {
-    dauer: Math.min(10, Math.round((frequencies.dauer / frequencies.messageCount) * scaleFactor)),
-    wechsel: Math.min(10, Math.round((frequencies.wechsel / frequencies.messageCount) * scaleFactor)),
-    naehe: Math.min(10, Math.round((frequencies.naehe / frequencies.messageCount) * scaleFactor)),
-    distanz: Math.min(10, Math.round((frequencies.distanz / frequencies.messageCount) * scaleFactor))
-  };
-}
-
-/**
- * Analyze a user message for Big5/OCEAN personality markers
+ * Analyze a user message for Big5/OCEAN personality markers (bidirectional)
  * @param {string} message - User's message text
  * @param {string} lang - Language code ('de' or 'en')
- * @returns {object} - Frequency counts for each Big5 dimension
+ * @returns {object} - High/Low counts and found keywords for each dimension
  */
 function analyzeBig5Message(message, lang = 'de') {
   if (!message || typeof message !== 'string') {
-    return { openness: 0, conscientiousness: 0, extraversion: 0, agreeableness: 0, neuroticism: 0 };
+    return {
+      openness: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      conscientiousness: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      extraversion: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      agreeableness: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
+      neuroticism: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } }
+    };
   }
   
   const keywords = BIG5_KEYWORDS[lang] || BIG5_KEYWORDS.de;
   const lowerMessage = message.toLowerCase();
   
-  const frequencies = {
-    openness: 0,
-    conscientiousness: 0,
-    extraversion: 0,
-    agreeableness: 0,
-    neuroticism: 0
-  };
+  const results = {};
   
-  // Count keyword occurrences for each dimension
-  for (const [dimension, wordList] of Object.entries(keywords)) {
-    for (const word of wordList) {
-      // Use word boundaries to avoid partial matches
+  for (const [dimension, directions] of Object.entries(keywords)) {
+    const foundHigh = [];
+    const foundLow = [];
+    let highCount = 0;
+    let lowCount = 0;
+    
+    // Count high keywords
+    for (const word of directions.high) {
       const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
       const matches = lowerMessage.match(regex);
       if (matches) {
-        frequencies[dimension] += matches.length;
+        highCount += matches.length;
+        foundHigh.push(word);
       }
     }
+    
+    // Count low keywords
+    for (const word of directions.low) {
+      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const matches = lowerMessage.match(regex);
+      if (matches) {
+        lowCount += matches.length;
+        foundLow.push(word);
+      }
+    }
+    
+    results[dimension] = {
+      high: highCount,
+      low: lowCount,
+      delta: highCount - lowCount,
+      foundKeywords: { high: foundHigh, low: foundLow }
+    };
   }
   
-  return frequencies;
+  return results;
 }
 
 /**
- * Analyze an entire conversation history for Big5/OCEAN markers
- * Returns aggregated frequencies for user messages only
+ * Analyze an entire conversation history for Big5/OCEAN markers (bidirectional)
+ * Returns aggregated high/low counts for user messages only
  * @param {Array} chatHistory - Array of message objects with role and text
  * @param {string} lang - Language code
- * @returns {object} - Aggregated frequency counts for Big5 dimensions
+ * @returns {object} - Aggregated analysis with deltas and found keywords
  */
 function analyzeBig5Conversation(chatHistory, lang = 'de') {
+  const dimensions = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+  
   const aggregated = {
-    openness: 0,
-    conscientiousness: 0,
-    extraversion: 0,
-    agreeableness: 0,
-    neuroticism: 0,
     messageCount: 0
   };
+  
+  // Initialize all dimensions
+  for (const dim of dimensions) {
+    aggregated[dim] = { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } };
+  }
   
   if (!Array.isArray(chatHistory)) {
     return aggregated;
@@ -280,37 +451,81 @@ function analyzeBig5Conversation(chatHistory, lang = 'de') {
   const userMessages = chatHistory.filter(msg => msg.role === 'user');
   
   for (const message of userMessages) {
-    const frequencies = analyzeBig5Message(message.text, lang);
-    aggregated.openness += frequencies.openness;
-    aggregated.conscientiousness += frequencies.conscientiousness;
-    aggregated.extraversion += frequencies.extraversion;
-    aggregated.agreeableness += frequencies.agreeableness;
-    aggregated.neuroticism += frequencies.neuroticism;
+    const analysis = analyzeBig5Message(message.text, lang);
+    
+    for (const dimension of dimensions) {
+      aggregated[dimension].high += analysis[dimension].high;
+      aggregated[dimension].low += analysis[dimension].low;
+      
+      // Collect unique found keywords
+      for (const kw of analysis[dimension].foundKeywords.high) {
+        if (!aggregated[dimension].foundKeywords.high.includes(kw)) {
+          aggregated[dimension].foundKeywords.high.push(kw);
+        }
+      }
+      for (const kw of analysis[dimension].foundKeywords.low) {
+        if (!aggregated[dimension].foundKeywords.low.includes(kw)) {
+          aggregated[dimension].foundKeywords.low.push(kw);
+        }
+      }
+    }
     aggregated.messageCount++;
+  }
+  
+  // Calculate final deltas
+  for (const dimension of dimensions) {
+    aggregated[dimension].delta = aggregated[dimension].high - aggregated[dimension].low;
   }
   
   return aggregated;
 }
 
 /**
- * Get normalized frequencies (per message) for Big5
- * @param {object} frequencies - Raw frequency counts
- * @returns {object} - Normalized frequencies (0-10 scale)
+ * Get normalized frequencies (per message) for Riemann - LEGACY COMPATIBILITY
+ * @deprecated Use the new bidirectional analysis instead
  */
-function normalizeBig5Frequencies(frequencies) {
-  if (!frequencies.messageCount || frequencies.messageCount === 0) {
-    return { openness: 0, conscientiousness: 0, extraversion: 0, agreeableness: 0, neuroticism: 0 };
+function normalizeFrequencies(frequencies) {
+  // Legacy format - extract just the counts for backward compatibility
+  const result = { dauer: 0, wechsel: 0, naehe: 0, distanz: 0 };
+  
+  for (const dim of ['dauer', 'wechsel', 'naehe', 'distanz']) {
+    if (frequencies[dim]) {
+      // New format: has high/low
+      if (typeof frequencies[dim] === 'object' && 'high' in frequencies[dim]) {
+        result[dim] = frequencies[dim].high + frequencies[dim].low;
+      } else {
+        // Old format: just a number
+        result[dim] = frequencies[dim];
+      }
+    }
   }
   
-  const scaleFactor = 2; // 5 keywords/message → 10 on scale
+  return result;
+}
+
+/**
+ * Get normalized frequencies (per message) for Big5 - LEGACY COMPATIBILITY
+ * @deprecated Use the new bidirectional analysis instead
+ */
+function normalizeBig5Frequencies(frequencies) {
+  const dimensions = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+  const result = {};
   
-  return {
-    openness: Math.min(10, Math.round((frequencies.openness / frequencies.messageCount) * scaleFactor)),
-    conscientiousness: Math.min(10, Math.round((frequencies.conscientiousness / frequencies.messageCount) * scaleFactor)),
-    extraversion: Math.min(10, Math.round((frequencies.extraversion / frequencies.messageCount) * scaleFactor)),
-    agreeableness: Math.min(10, Math.round((frequencies.agreeableness / frequencies.messageCount) * scaleFactor)),
-    neuroticism: Math.min(10, Math.round((frequencies.neuroticism / frequencies.messageCount) * scaleFactor))
-  };
+  for (const dim of dimensions) {
+    if (frequencies[dim]) {
+      // New format: has high/low
+      if (typeof frequencies[dim] === 'object' && 'high' in frequencies[dim]) {
+        result[dim] = frequencies[dim].high + frequencies[dim].low;
+      } else {
+        // Old format: just a number
+        result[dim] = frequencies[dim];
+      }
+    } else {
+      result[dim] = 0;
+    }
+  }
+  
+  return result;
 }
 
 module.exports = {
@@ -325,4 +540,3 @@ module.exports = {
   normalizeBig5Frequencies,
   BIG5_KEYWORDS
 };
-

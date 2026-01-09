@@ -868,7 +868,8 @@
   "refinement_modal_title": "Profil-Anpassung",
   "refinement_modal_loading": "Berechne Profil-Änderungen...",
   "refinement_modal_test_notice": "Dies ist ein Test. Das Profil wird NICHT verändert.",
-  "refinement_modal_observed": "Erkannte Schlüsselwörter",
+  "refinement_modal_keywords_found": "Erkannte Schlüsselwörter",
+  "refinement_modal_no_keywords": "Keine relevanten Schlüsselwörter gefunden. Profil bleibt unverändert.",
   "refinement_modal_message_count": "Analysiert aus {{count}} Nachrichten",
   "refinement_modal_changes": "Vorgeschlagene Änderungen",
   "refinement_modal_dimension": "Dimension",
@@ -882,6 +883,8 @@
   "refinement_modal_reject": "Ablehnen",
   "refinement_modal_saved": "Profil wurde aktualisiert.",
   "refinement_modal_test_saved": "Vorschau: Änderungen würden hier gespeichert werden.",
+  "keyword_high_hint": "Erhöht den Wert",
+  "keyword_low_hint": "Senkt den Wert",
   
   "dimension_dauer": "Dauer",
   "dimension_wechsel": "Wechsel",
