@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import * as userService from '../services/userService';
 import { User, UpgradeCode, Ticket, Feedback } from '../types';
-import { apiFetch } from '../services/api';
+import { apiFetch, loadPersonalityProfile } from '../services/api';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
@@ -244,6 +244,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const [userToReset, setUserToReset] = useState<User | null>(null);
     const [selectedBotFilter, setSelectedBotFilter] = useState<string | null>(null);
     const [selectedScenarioId, setSelectedScenarioId] = useState<string>(testScenarios[0].id);
+    const [adminProfileType, setAdminProfileType] = useState<'RIEMANN' | 'BIG5' | null>(null);
+    const [showMismatchWarning, setShowMismatchWarning] = useState(false);
+    const [pendingScenario, setPendingScenario] = useState<TestScenario | null>(null);
 
 
     const loadData = useCallback(async () => {
@@ -273,6 +276,24 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // Load admin's profile type for test scenario matching
+    useEffect(() => {
+        const loadProfileType = async () => {
+            try {
+                const profile = await loadPersonalityProfile();
+                if (profile && profile.testType) {
+                    setAdminProfileType(profile.testType as 'RIEMANN' | 'BIG5');
+                }
+            } catch (err) {
+                // No profile - that's okay
+                setAdminProfileType(null);
+            }
+        };
+        if (currentUser) {
+            loadProfileType();
+        }
+    }, [currentUser]);
 
     const handleAction = async (id: string, action: () => Promise<any>) => {
         setActionLoading(prev => ({ ...prev, [id]: true }));
@@ -1144,9 +1165,37 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     
     const renderTestRunner = () => {
         const selectedScenario = testScenarios.find(s => s.id === selectedScenarioId);
-        const isDpcTest = selectedScenario?.id === 'dpc_profile_adaptive';
-        const isDpflTest = selectedScenario?.id === 'dpfl_learning_loop';
-        const isExperimentalTest = isDpcTest || isDpflTest;
+        const isDpcOrDpflTest = selectedScenario?.id.startsWith('dpc_') || selectedScenario?.id.startsWith('dpfl_');
+        
+        // Determine expected profile type from scenario ID
+        const getScenarioProfileType = (scenarioId: string): 'RIEMANN' | 'BIG5' | null => {
+            if (scenarioId.includes('_riemann')) return 'RIEMANN';
+            if (scenarioId.includes('_ocean')) return 'BIG5';
+            return null; // Generic scenario
+        };
+        
+        const scenarioProfileType = selectedScenario ? getScenarioProfileType(selectedScenario.id) : null;
+        const hasMismatch = adminProfileType && scenarioProfileType && adminProfileType !== scenarioProfileType;
+        
+        const handleRunClick = () => {
+            if (!selectedScenario) return;
+            
+            // Check for profile type mismatch
+            if (hasMismatch) {
+                setPendingScenario(selectedScenario);
+                setShowMismatchWarning(true);
+            } else {
+                onRunTestSession(selectedScenario, lifeContext);
+            }
+        };
+        
+        const handleConfirmMismatch = () => {
+            if (pendingScenario) {
+                onRunTestSession(pendingScenario, lifeContext);
+            }
+            setShowMismatchWarning(false);
+            setPendingScenario(null);
+        };
         
         return (
             <div className="space-y-4">
@@ -1169,46 +1218,39 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                             </select>
                         </div>
                         <button
-                            onClick={() => {
-                                if (selectedScenario) {
-                                    onRunTestSession(selectedScenario, lifeContext);
-                                }
-                            }}
+                            onClick={handleRunClick}
                             className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-md"
                         >
                             {t('admin_runner_run')}
                         </button>
                     </div>
                     
-                    {/* Info box for experimental tests */}
-                    {isExperimentalTest && (
+                    {/* Profile type indicator */}
+                    {adminProfileType && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {t('admin_runner_your_profile')}: <span className="font-bold">{adminProfileType}</span>
+                            {hasMismatch && (
+                                <span className="ml-2 text-status-warning-foreground">
+                                    ⚠️ {t('admin_runner_profile_mismatch')}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                    {!adminProfileType && isDpcOrDpflTest && (
+                        <div className="text-xs text-status-warning-foreground">
+                            ⚠️ {t('admin_runner_no_profile')}
+                        </div>
+                    )}
+                    
+                    {/* Info box for DPC/DPFL tests */}
+                    {isDpcOrDpflTest && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
                             <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
                                 🧪 {t('admin_runner_experimental_test')}
                             </p>
-                            {isDpcTest && (
-                                <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
-                                    <p><strong>{t('admin_runner_dpc_title')}:</strong></p>
-                                    <ul className="list-disc ml-5 space-y-1">
-                                        <li>{t('admin_runner_dpc_req1')}</li>
-                                        <li>{t('admin_runner_dpc_req2')}</li>
-                                        <li>{t('admin_runner_dpc_check1')}</li>
-                                        <li>{t('admin_runner_dpc_check2')}</li>
-                                    </ul>
-                                </div>
-                            )}
-                            {isDpflTest && (
-                                <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
-                                    <p><strong>{t('admin_runner_dpfl_title')}:</strong></p>
-                                    <ul className="list-disc ml-5 space-y-1">
-                                        <li>{t('admin_runner_dpfl_req1')}</li>
-                                        <li>{t('admin_runner_dpfl_req2')}</li>
-                                        <li>{t('admin_runner_dpfl_check1')}</li>
-                                        <li>{t('admin_runner_dpfl_check2')}</li>
-                                        <li>{t('admin_runner_dpfl_check3')}</li>
-                                    </ul>
-                                </div>
-                            )}
+                            <div className="text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                                <p>{t('admin_runner_dpfl_info')}</p>
+                            </div>
                         </div>
                     )}
                     
@@ -1221,6 +1263,57 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         </div>
                     )}
                 </div>
+                
+                {/* Profile Mismatch Warning Modal */}
+                {showMismatchWarning && (
+                    <div 
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+                        onClick={() => setShowMismatchWarning(false)}
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <div 
+                            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-status-warning-border dark:border-status-warning-border/50 shadow-xl rounded-lg"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="flex-shrink-0">
+                                    <WarningIcon className="w-8 h-8 text-status-warning-foreground" />
+                                </div>
+                                <div className="flex-1">
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">
+                                        {t('admin_runner_mismatch_title')}
+                                    </h2>
+                                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                                        {t('admin_runner_mismatch_desc', {
+                                            yourProfile: adminProfileType || 'Unknown',
+                                            scenarioType: scenarioProfileType || 'Unknown'
+                                        })}
+                                    </p>
+                                    <div className="mt-4 p-3 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border text-status-warning-foreground dark:text-status-warning-foreground">
+                                        <p className="text-sm">
+                                            {t('admin_runner_mismatch_hint')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <button 
+                                    onClick={() => setShowMismatchWarning(false)} 
+                                    className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md"
+                                >
+                                    {t('deleteAccount_cancel')}
+                                </button>
+                                <button 
+                                    onClick={handleConfirmMismatch} 
+                                    className="px-6 py-2 text-base font-bold text-white bg-status-warning-foreground uppercase hover:opacity-80 rounded-lg shadow-md"
+                                >
+                                    {t('admin_runner_continue_anyway')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     };
