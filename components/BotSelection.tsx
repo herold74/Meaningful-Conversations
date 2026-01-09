@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, BotWithAvailability, User, BotAccessTier, Language } from '../types';
+import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
-import ExperimentalModeSelector, { ExperimentalMode } from './ExperimentalModeSelector';
-import ExperimentalModeInfoModal from './ExperimentalModeInfoModal';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
@@ -13,9 +11,7 @@ interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
-  experimentalMode?: ExperimentalMode;
-  onExperimentalModeChange?: (mode: ExperimentalMode) => void;
-  adaptationMode?: 'adaptive' | 'stable'; // From personality profile
+  coachingMode?: CoachingMode;
 }
 
 interface BotCardProps {
@@ -23,19 +19,15 @@ interface BotCardProps {
   onSelect: (bot: Bot) => void;
   language: Language;
   hasPersonalityProfile?: boolean;
-  experimentalMode?: ExperimentalMode;
-  onExperimentalModeChange?: (mode: ExperimentalMode) => void;
-  adaptationMode?: 'adaptive' | 'stable';
+  coachingMode?: CoachingMode;
 }
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, experimentalMode, onExperimentalModeChange, adaptationMode }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, coachingMode }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
-    const hasMeditation = bot.id === 'rob-pq' || bot.id === 'kenji-stoic';
-    const showExperimental = (bot.id.startsWith('chloe') || bot.id === 'kenji-stoic') && hasPersonalityProfile && !isLocked;
-    
-    const [showSelector, setShowSelector] = useState(false);
-    const [showInfoModal, setShowInfoModal] = useState(false);
+    const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
+    // Show coaching mode badge for all bots if profile exists and mode is active
+    const showCoachingBadge = hasPersonalityProfile && coachingMode && coachingMode !== 'off' && !isLocked;
     
     return (
       <div
@@ -50,44 +42,14 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
         `}
         aria-disabled={isLocked}
       >
-        {/* Experimental Mode Icon */}
-        {showExperimental && (
-          <div className="absolute top-4 right-4 z-10">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowSelector(!showSelector);
-              }}
-              className={`p-2 rounded-lg transition-colors ${
-                experimentalMode && experimentalMode !== 'OFF'
-                  ? 'bg-green-200 dark:bg-green-800/50 text-green-700 dark:text-green-300 ring-2 ring-green-400 dark:ring-green-600'
-                  : 'bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400'
-              }`}
-              title={experimentalMode && experimentalMode !== 'OFF' 
-                ? `${t('experimental_mode_title')}: ${experimentalMode}` 
-                : t('experimental_mode_title')}
-            >
-              <span className="text-lg">🧪</span>
-            </button>
-            
-            {showSelector && onExperimentalModeChange && (
-              <ExperimentalModeSelector
-                currentMode={experimentalMode || 'OFF'}
-                onModeChange={onExperimentalModeChange}
-                onClose={() => setShowSelector(false)}
-                onOpenInfo={() => {
-                  setShowSelector(false);
-                  setShowInfoModal(true);
-                }}
-                adaptationMode={adaptationMode}
-              />
-            )}
+        {/* Coaching Mode Badge (non-interactive) */}
+        {showCoachingBadge && (
+          <div 
+            className="absolute top-4 right-4 z-10 p-2 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+            title={`${t('profile_coaching_mode_title')}: ${coachingMode?.toUpperCase()}`}
+          >
+            <span className="text-lg">🧪</span>
           </div>
-        )}
-        
-        {/* Info Modal */}
-        {showInfoModal && (
-          <ExperimentalModeInfoModal onClose={() => setShowInfoModal(false)} />
         )}
         
         <div className="relative flex-shrink-0">
@@ -115,11 +77,11 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
             <div>
                 <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
                 
-                {/* Experimental Mode Badge */}
-                {showExperimental && experimentalMode && experimentalMode !== 'OFF' && (
+                {/* Coaching Mode Badge */}
+                {showCoachingBadge && (
                   <div className="flex justify-center mt-2">
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700">
-                      🧪 {experimentalMode === 'DPC' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
+                      🧪 {coachingMode === 'dpc' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
                     </span>
                   </div>
                 )}
@@ -147,7 +109,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, experimentalMode, onExperimentalModeChange, adaptationMode }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, coachingMode }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -240,9 +202,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             onSelect={onSelect} 
             language={language}
             hasPersonalityProfile={hasPersonalityProfile}
-            experimentalMode={experimentalMode}
-            onExperimentalModeChange={onExperimentalModeChange}
-            adaptationMode={adaptationMode}
+            coachingMode={coachingMode}
           />
         ))}
         
@@ -261,9 +221,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             onSelect={onSelect} 
             language={language}
             hasPersonalityProfile={hasPersonalityProfile}
-            experimentalMode={experimentalMode}
-            onExperimentalModeChange={onExperimentalModeChange}
-            adaptationMode={adaptationMode}
+            coachingMode={coachingMode}
           />
         ))}
       </div>

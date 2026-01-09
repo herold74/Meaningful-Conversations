@@ -52,7 +52,6 @@ import PersonalityProfileView from './components/PersonalityProfileView';
 import { formatSurveyResultAsHtml } from './utils/surveyResultHtmlFormatter';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGenerator';
 import { encryptPersonalityProfile } from './utils/personalityEncryption';
-import { ExperimentalMode } from './components/ExperimentalModeSelector';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 
@@ -93,18 +92,8 @@ const App: React.FC = () => {
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
     
-    // Experimental Mode States
-    const [experimentalMode, setExperimentalMode] = useState<ExperimentalMode>('OFF');
+    // Personality Profile States
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
-    const [adaptationMode, setAdaptationMode] = useState<'adaptive' | 'stable'>('adaptive');
-
-    // Safety: If experimentalMode is DPFL but adaptationMode is 'stable', downgrade to DPC
-    useEffect(() => {
-        if (experimentalMode === 'DPFL' && adaptationMode === 'stable') {
-            console.warn('[DPFL] Downgrading to DPC because profile is set to stable mode');
-            setExperimentalMode('DPC');
-        }
-    }, [experimentalMode, adaptationMode]);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -201,26 +190,13 @@ const App: React.FC = () => {
     useEffect(() => {
         if (currentUser && encryptionKey) {
             api.checkPersonalityProfile()
-                .then(exists => {
-                    setHasPersonalityProfile(exists);
-                    // Load full profile to get adaptationMode
-                    if (exists) {
-                        api.loadPersonalityProfile()
-                            .then(profile => {
-                                if (profile && profile.adaptationMode) {
-                                    setAdaptationMode(profile.adaptationMode as 'adaptive' | 'stable');
-                                }
-                            })
-                            .catch(err => console.error('Failed to load adaptation mode:', err));
-                    }
-                })
+                .then(exists => setHasPersonalityProfile(exists))
                 .catch(err => {
                     console.error('Failed to check personality profile:', err);
                     setHasPersonalityProfile(false);
                 });
         } else {
             setHasPersonalityProfile(false);
-            setAdaptationMode('adaptive'); // Reset to default
         }
     }, [currentUser, encryptionKey]);
     
@@ -539,11 +515,6 @@ const App: React.FC = () => {
         setSelectedBot(bot);
         setUserMessageCount(0);
         setChatHistory([]);
-        
-        // Reset experimental mode when switching bots
-        if (bot.id !== 'chloe-cbt') {
-            setExperimentalMode('OFF');
-        }
         setView('chat');
     };
     
@@ -975,6 +946,8 @@ const App: React.FC = () => {
                         setMenuView(null);
                         setView('personalitySurvey');
                     }}
+                    currentUser={currentUser}
+                    onUserUpdate={setCurrentUser}
                 />
             );
             case 'botSelection': return (
@@ -982,9 +955,7 @@ const App: React.FC = () => {
                     onSelect={handleSelectBot} 
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
-                    experimentalMode={experimentalMode}
-                    onExperimentalModeChange={setExperimentalMode}
-                    adaptationMode={adaptationMode}
+                    coachingMode={currentUser?.coachingMode || 'off'}
                 />
             );
             case 'chat': return (
@@ -997,7 +968,6 @@ const App: React.FC = () => {
                     onMessageSent={() => setUserMessageCount(c => c + 1)} 
                     currentUser={currentUser} 
                     isNewSession={!cameFromContextChoice}
-                    experimentalMode={selectedBot?.id === 'chloe-cbt' ? experimentalMode : undefined}
                     encryptionKey={encryptionKey}
                 />
             );

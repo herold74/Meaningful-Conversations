@@ -102,7 +102,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
-    const { botId, context, history, lang, isNewSession, experimentalMode, decryptedPersonalityProfile } = req.body;
+    const { botId, context, history, lang, isNewSession, coachingMode, decryptedPersonalityProfile } = req.body;
     const userId = req.userId; // This will be undefined for guests
 
     const bot = BOTS.find(b => b.id === botId);
@@ -158,8 +158,8 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
 
     let finalSystemInstruction = systemInstruction;
     
-    // EXPERIMENTAL: Dynamic Prompt Controller (DPC)
-    if (experimentalMode === 'DPC' || experimentalMode === 'DPFL') {
+    // DPC/DPFL: Dynamic Personality Coaching - inject profile context into prompt
+    if (coachingMode === 'dpc' || coachingMode === 'dpfl') {
         if (decryptedPersonalityProfile) {
             try {
                 const adaptivePrompt = await dynamicPromptController.generatePromptForUser(
@@ -175,7 +175,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
                 // Fail gracefully - continue with standard prompt
             }
         } else {
-            console.warn(`[DPC] Experimental mode ${experimentalMode} active but no profile provided`);
+            console.warn(`[DPC] Coaching mode ${coachingMode} active but no profile provided`);
         }
     }
     
@@ -250,7 +250,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         
         // DPFL: Async behavior logging (does not block response)
         // Only active when DPFL mode is enabled and user is registered
-        if (experimentalMode === 'DPFL' && userId) {
+        if (coachingMode === 'dpfl' && userId) {
             // Run in background - don't await
             setImmediate(async () => {
                 try {

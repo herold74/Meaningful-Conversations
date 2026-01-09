@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, Language, User } from '../types';
+import { Bot, Message, Language, User, CoachingMode } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
@@ -26,7 +26,6 @@ import FeedbackModal from './FeedbackModal';
 import { synthesizeSpeech, getBotVoiceSettings, saveBotVoiceSettings, type TtsMode, type BotVoiceSettings } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import * as api from '../services/api';
-import { ExperimentalMode } from './ExperimentalModeSelector';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 
 interface SpeechRecognitionAlternative {
@@ -146,12 +145,11 @@ interface ChatViewProps {
   onMessageSent: () => void;
   currentUser: User | null;
   isNewSession: boolean;
-  experimentalMode?: ExperimentalMode;
   encryptionKey?: CryptoKey | null;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, experimentalMode, encryptionKey }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey }) => {
   const { t, language } = useLocalization();
   
   const [input, setInput] = useState('');
@@ -265,7 +263,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           case 'chloe-cbt':
               return 'female';
           case 'max-ambitious':
-          case 'rob-pq':
+          case 'rob':
           case 'kenji-stoic':
           case 'nexus-gps':
           default:
@@ -281,10 +279,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [bot.id, language]);
 
   // Reset voice settings when language changes
-  // Load and decrypt personality profile when experimental mode is active
+  // Derive coaching mode from user profile
+  const coachingMode = currentUser?.coachingMode || 'off';
+  
+  // Load and decrypt personality profile when coaching mode is active
   useEffect(() => {
     const loadProfile = async () => {
-      if (experimentalMode && experimentalMode !== 'OFF' && currentUser && encryptionKey) {
+      if (coachingMode && coachingMode !== 'off' && currentUser && encryptionKey) {
         try {
           const profileData = await api.loadPersonalityProfile();
           if (profileData && profileData.encryptedData) {
@@ -301,7 +302,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
     };
     loadProfile();
-  }, [experimentalMode, currentUser, encryptionKey]);
+  }, [coachingMode, currentUser, encryptionKey]);
 
   useEffect(() => {
     const settings = getBotVoiceSettings(bot.id);
@@ -330,7 +331,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         let gender: 'male' | 'female' = 'female';
         
         if (lang === 'en') {
-          const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps'];
+          const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps'];
           gender = maleBotsEN.includes(botId) ? 'male' : 'female';
         } else if (lang === 'de') {
           const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
@@ -689,7 +690,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     gender = 'female';
                     break;
                 case 'max-ambitious':
-                case 'rob-pq':
+                case 'rob':
                     gender = 'male';
                     utterance.rate = 1.05;
                     utterance.pitch = 1.0;
@@ -710,7 +711,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         finalVoice = selectVoice(voices, language, gender);
     }
 
-    if (isMeditation && (bot.id === 'rob-pq' || bot.id === 'kenji-stoic')) {
+    if (isMeditation && (bot.id === 'rob' || bot.id === 'kenji-stoic')) {
         utterance.rate = 0.9;
     }
 
@@ -778,7 +779,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             let gender: 'male' | 'female' = 'female';
             
             if (lang === 'en') {
-              const maleBotsEN = ['max-ambitious', 'rob-pq', 'kenji-stoic', 'nexus-gps', 'victor-bowen'];
+              const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps', 'victor-bowen'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
             } else if (lang === 'de') {
               const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
@@ -989,7 +990,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                 [], 
                 language, 
                 isNewSession,
-                experimentalMode,
+                coachingMode,
                 decryptedProfile
             );
             const initialBotMessage: Message = {
@@ -1112,7 +1113,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             historyWithUserMessage, 
             language, 
             false,
-            experimentalMode,
+            coachingMode,
             decryptedProfile
         );
         
@@ -1403,17 +1404,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0 flex items-center gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
-                    {/* Responsive experimental mode badge */}
-                    {experimentalMode && experimentalMode !== 'OFF' && (
+                    {/* Responsive coaching mode badge */}
+                    {coachingMode && coachingMode !== 'off' && (
                         <span 
                             className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shrink-0"
-                            title={experimentalMode === 'DPC' ? 'DPC Modus' : 'DPFL Modus'}
+                            title={coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
                         >
                             {/* Mobile: Only icon */}
                             <span className="sm:hidden">🧪</span>
                             {/* Desktop: Icon + Text */}
                             <span className="hidden sm:inline">
-                                🧪 {experimentalMode === 'DPC' ? 'DPC Modus' : 'DPFL Modus'}
+                                🧪 {coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
                             </span>
                         </span>
                     )}

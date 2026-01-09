@@ -97,6 +97,48 @@ router.put('/user/profile', async (req, res) => {
     }
 });
 
+// PUT /api/data/user/coaching-mode - Update user coaching mode
+router.put('/user/coaching-mode', async (req, res) => {
+    const { coachingMode } = req.body;
+    const userId = req.userId;
+    
+    // Validate coaching mode
+    const validModes = ['off', 'dpc', 'dpfl'];
+    if (!validModes.includes(coachingMode)) {
+        return res.status(400).json({ error: 'Invalid coaching mode. Must be one of: off, dpc, dpfl' });
+    }
+    
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                coachingMode,
+                updatedAt: new Date(),
+            },
+        });
+        
+        // Return updated user without sensitive fields
+        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        
+        // Parse unlockedCoaches from JSON string
+        if (userResponse.unlockedCoaches) {
+            try {
+                userResponse.unlockedCoaches = JSON.parse(userResponse.unlockedCoaches);
+            } catch {
+                userResponse.unlockedCoaches = [];
+            }
+        } else {
+            userResponse.unlockedCoaches = [];
+        }
+        
+        res.json({ message: 'Coaching mode updated successfully', user: userResponse });
+        
+    } catch (error) {
+        console.error('Error updating coaching mode:', error);
+        res.status(500).json({ error: 'Failed to update coaching mode.' });
+    }
+});
+
 // POST /api/data/redeem-code
 router.post('/redeem-code', async (req, res) => {
     const { code } = req.body;
