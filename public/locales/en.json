@@ -659,7 +659,7 @@
   "comfort_check_select_score": "Please select a score",
   
   "profile_view_refined_title": "Refined",
-  "profile_view_refined_desc": "This profile has been refined through {count} authentic sessions.",
+  "profile_view_refined_desc": "This profile has been refined through {{count}} authentic sessions.",
   
   "riemann_dimension_dauer": "Duration",
   "riemann_dimension_naehe": "Closeness",
@@ -691,7 +691,7 @@
   "profile_overwrite_confirm": "Yes, start new test",
   
   "refinement_title": "Profile Refinement",
-  "refinement_description": "Based on {count} authentic sessions, we have the following refinements for your profile:",
+  "refinement_description": "Based on {{count}} authentic sessions, we have the following refinements for your profile:",
   "refinement_loading": "Loading suggestions...",
   "refinement_no_suggestions": "Not enough sessions for suggestions (minimum 2 required)",
   "refinement_error_load": "Error loading suggestions",
@@ -1022,7 +1022,7 @@
   
   "survey_ranking_intro": "Click on the options to sort them.",
   "survey_ranking_hint": "<strong>Rank 1 (Top)</strong> = First reaction under stress.",
-  "survey_ranking_your_priority": "Your Priority (1 to {count})",
+  "survey_ranking_your_priority": "Your Priority (1 to {{count}})",
   "survey_ranking_nothing_selected": "Nothing selected yet",
   "survey_ranking_options": "Options (Click to select)",
 
