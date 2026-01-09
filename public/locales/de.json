@@ -844,13 +844,13 @@
   "dpfl_test_summary_dpc_tip": "Öffne DevTools (F12) → Console Tab um zu sehen, wie das Profil geladen und der Prompt angepasst wird.",
   "dpfl_test_summary_dpfl_tip": "Nach diesem Comfort Check: Gehe zu 'Mein Profil' und prüfe ob sessionCount erhöht wurde. Nach 3+ Sessions siehst du Refinement-Vorschläge.",
   
-  "dpfl_test_summary_title": "🧪 DPFL Test-Ergebnis",
+  "dpfl_test_summary_title": "DPFL Test-Ergebnis",
   "dpfl_test_loading": "Berechne Profil-Änderungen...",
   "dpfl_test_observed_keywords": "Erkannte Schlüsselwörter",
   "dpfl_test_message_count": "Analysiert aus {{count}} Nachrichten",
   "dpfl_test_profile_changes": "Vorgeschlagene Profil-Änderungen",
   "dpfl_test_no_changes": "Keine signifikanten Änderungen erkannt.",
-  "dpfl_test_preview_notice": "Dies ist eine Vorschau. Das echte Profil wurde NICHT verändert.",
+  "dpfl_test_preview_notice": "Dies ist eine Vorschau. Das echte Profil wird NICHT verändert.",
   "dpfl_test_no_profile": "Kein Persönlichkeitsprofil gefunden.",
   "dpfl_test_preview_error": "Fehler bei der Berechnung der Profil-Vorschau.",
   
