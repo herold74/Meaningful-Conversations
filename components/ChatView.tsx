@@ -146,10 +146,11 @@ interface ChatViewProps {
   currentUser: User | null;
   isNewSession: boolean;
   encryptionKey?: CryptoKey | null;
+  isTestMode?: boolean;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode }) => {
   const { t, language } = useLocalization();
   
   const [input, setInput] = useState('');
@@ -1506,6 +1507,15 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         </div>
       )}
       
+      {/* Test Mode Banner */}
+      {isTestMode && chatHistory.length > 0 && (
+        <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700/50">
+          <p className="text-sm text-amber-700 dark:text-amber-300 text-center font-medium">
+            🧪 {t('test_mode_banner')}
+          </p>
+        </div>
+      )}
+      
     {isVoiceMode ? (
         <main className="flex-1 flex flex-col items-center gap-4 p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
             {/* Top third: Bot Avatar & Name */}
@@ -1633,24 +1643,30 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         </main>
         
         <footer className="p-4 border-t border-border-primary">
-          <form onSubmit={handleFormSubmit} className="flex items-end gap-3">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={t('chat_placeholder')}
-              disabled={isLoading}
-              rows={1}
-              className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
-            />
-            <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
-                <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
-            </button>
-            <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
-              <PaperPlaneIcon className="w-6 h-6" />
-            </button>
-          </form>
+          {isTestMode ? (
+            <div className="text-center py-2 text-content-secondary">
+              <p className="text-sm">{t('test_mode_input_disabled')}</p>
+            </div>
+          ) : (
+            <form onSubmit={handleFormSubmit} className="flex items-end gap-3">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={t('chat_placeholder')}
+                disabled={isLoading}
+                rows={1}
+                className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
+              />
+              <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
+                  <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+              </button>
+              <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
+                <PaperPlaneIcon className="w-6 h-6" />
+              </button>
+            </form>
+          )}
         </footer>
       </>
     )}

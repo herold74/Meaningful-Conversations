@@ -166,6 +166,9 @@
   "guest_limit_remaining": "Verbleibende Nachrichten diese Woche: {{remaining}}/50",
   "guest_limit_exceeded_title": "Nachrichtenlimit erreicht",
   "guest_limit_exceeded_message": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten als Gast erreicht. Registrieren Sie sich für unbegrenzten Zugang zu allen Funktionen.",
+  
+  "test_mode_banner": "Test-Modus: Simuliertes Gespräch – Klicke \"Session beenden\" um die Analyse zu starten",
+  "test_mode_input_disabled": "Im Test-Modus können keine neuen Nachrichten gesendet werden.",
   "guest_register_now": "Jetzt registrieren",
   
   "update_available_title": "Update verfügbar!",
