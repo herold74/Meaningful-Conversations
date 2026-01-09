@@ -971,6 +971,7 @@
   "newsletter_translating": "Translating...",
   "newsletter_translate_success": "Translation successful! Please review the translated version.",
   "newsletter_translate_error": "Error during translation.",
+  "newsletter_send_error": "Error sending newsletter.",
   "newsletter_send_button": "Send newsletter to {{count}} subscriber(s)",
   "newsletter_sending": "Sending newsletter...",
   "newsletter_send_success": "Newsletter sent successfully! {{sent}} of {{total}} emails sent.",
