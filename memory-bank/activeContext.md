@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.7.3
+**Version:** 1.7.4
 **Staging:** Deployed and tested ✓
 **Production:** Scheduled for 2. Januar 2026, 06:00 Uhr
 
