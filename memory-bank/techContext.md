@@ -65,6 +65,33 @@
 - `scripts/deploy-production-scheduled.sh` - Production (nur Pull)
 - `server-scripts/update-nginx-ips.sh` - Nginx IP-Update nach Container-Restart
 
+### Prisma Datenbank-Migrationen (KRITISCH!)
+
+**Bei jeder Änderung am `schema.prisma` MUSS eine Migration erstellt werden!**
+
+1. **Schema ändern:** `meaningful-conversations-backend/prisma/schema.prisma`
+2. **Migration erstellen:** 
+   ```bash
+   cd meaningful-conversations-backend
+   npx prisma migrate dev --name beschreibender_name
+   ```
+   Falls nicht-interaktiv, manuell erstellen:
+   ```bash
+   mkdir -p prisma/migrations/YYYYMMDDHHMMSS_name
+   # SQL-Datei mit ALTER TABLE Befehlen erstellen
+   ```
+3. **Migrationsordner committen!**
+
+**Automatische Anwendung beim Deployment:**
+- Der Backend-Container führt `npx prisma migrate deploy` beim Start aus
+- Neue Migrationen werden automatisch angewendet
+- Bei fehlenden Migrationen crasht der Container in einer Endlosschleife!
+
+**Prüfen welche Migrationen angewendet sind:**
+```bash
+ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec backend npx prisma migrate status'
+```
+
 ## External Services
 - **Google Gemini:** LLM provider.
 - **Mailjet:** Transactional emails (verification, resets).
