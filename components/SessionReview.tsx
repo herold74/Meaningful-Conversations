@@ -109,14 +109,18 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [showComfortCheck, setShowComfortCheck] = useState(false);
     const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
     
-    // Show comfort check for DPFL (only if not test mode or if registered user)
+    // Show comfort check for DPFL
+    // - In production: when user has coachingMode === 'dpfl'
+    // - In test mode: when refinementPreview is available (indicates DPFL test scenario)
     useEffect(() => {
-        if (currentUser?.coachingMode === 'dpfl' && !isTestMode) {
-            // In production: Load actual encryption key from user's stored key
-            // For now, show comfort check after brief delay
+        const isDPFLTest = isTestMode && refinementPreview;
+        const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode;
+        
+        if (isDPFLTest || isDPFLProduction) {
+            // Show comfort check after brief delay
             setTimeout(() => setShowComfortCheck(true), 1000);
         }
-    }, [currentUser, currentUser?.coachingMode, isTestMode]);
+    }, [currentUser?.coachingMode, isTestMode, refinementPreview]);
 
 
     const handleRatingClick = (starValue: number) => {
