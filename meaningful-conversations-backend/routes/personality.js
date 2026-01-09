@@ -314,31 +314,45 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
     
     // Import behavior logger
     const behaviorLogger = require('../services/behaviorLogger.js');
-    
-    // Analyze the conversation for Riemann keyword frequencies
     const language = lang === 'en' ? 'en' : 'de';
-    const frequencies = behaviorLogger.analyzeConversation(chatHistory, language);
-    const normalizedFrequencies = behaviorLogger.normalizeFrequencies(frequencies);
     
-    // Create a mock session log for the refinement calculation
-    const mockSessionLogs = [{
-      dauerFrequency: normalizedFrequencies.dauer,
-      wechselFrequency: normalizedFrequencies.wechsel,
-      naeheFrequency: normalizedFrequencies.naehe,
-      distanzFrequency: normalizedFrequencies.distanz,
-      comfortScore: 5, // Assume authentic for preview
-      optedOut: false
-    }];
+    // Analyze conversation using appropriate keyword set based on profile type
+    let frequencies, normalizedFrequencies, mockSessionLogs, refinementResult;
     
-    // Calculate refinement suggestions
-    let refinementResult;
     if (profileType === 'RIEMANN') {
+      // Use Riemann-Thomann keywords
+      frequencies = behaviorLogger.analyzeConversation(chatHistory, language);
+      normalizedFrequencies = behaviorLogger.normalizeFrequencies(frequencies);
+      
+      mockSessionLogs = [{
+        dauerFrequency: normalizedFrequencies.dauer,
+        wechselFrequency: normalizedFrequencies.wechsel,
+        naeheFrequency: normalizedFrequencies.naehe,
+        distanzFrequency: normalizedFrequencies.distanz,
+        comfortScore: 5, // Assume authentic for preview
+        optedOut: false
+      }];
+      
       refinementResult = profileRefinement.calculateRiemannRefinement(
         decryptedProfile,
         mockSessionLogs,
         0.3 // Standard weight
       );
     } else if (profileType === 'BIG5') {
+      // Use Big5/OCEAN keywords
+      frequencies = behaviorLogger.analyzeBig5Conversation(chatHistory, language);
+      normalizedFrequencies = behaviorLogger.normalizeBig5Frequencies(frequencies);
+      
+      mockSessionLogs = [{
+        opennessFrequency: normalizedFrequencies.openness,
+        conscientiousnessFrequency: normalizedFrequencies.conscientiousness,
+        extraversionFrequency: normalizedFrequencies.extraversion,
+        agreeablenessFrequency: normalizedFrequencies.agreeableness,
+        neuroticismFrequency: normalizedFrequencies.neuroticism,
+        comfortScore: 5, // Assume authentic for preview
+        optedOut: false
+      }];
+      
       refinementResult = profileRefinement.calculateBig5Refinement(
         decryptedProfile.big5 || decryptedProfile,
         mockSessionLogs,
