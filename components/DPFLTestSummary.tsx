@@ -102,14 +102,14 @@ const DPFLTestSummary: React.FC<DPFLTestSummaryProps> = ({
           </div>
           
           {/* Profile Changes */}
-          {refinementPreview.refinementResult.hasSuggestions && refinementPreview.refinementResult.suggestions && (
+          {refinementPreview.refinementResult.hasSuggestions && (
             <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded border border-green-200 dark:border-green-700">
               <p className="font-bold mb-3 text-green-700 dark:text-green-400 flex items-center gap-2">
                 📈 {t('dpfl_test_profile_changes') || 'Vorgeschlagene Profil-Änderungen'}
               </p>
               
-              {refinementPreview.profileType === 'RIEMANN' ? (
-                // Riemann profile has beruf, privat, selbst contexts
+              {refinementPreview.profileType === 'RIEMANN' && refinementPreview.refinementResult.suggestions ? (
+                // Riemann profile has beruf, privat, selbst contexts in suggestions object
                 <div className="space-y-4">
                   {Object.entries(refinementPreview.refinementResult.suggestions).map(([context, data]) => (
                     <div key={context} className="bg-white dark:bg-background-tertiary p-3 rounded">
@@ -138,24 +138,47 @@ const DPFLTestSummary: React.FC<DPFLTestSummaryProps> = ({
                   ))}
                 </div>
               ) : (
-                // Big5 profile
+                // Big5 profile has current, suggested, deltas at the top level (flat structure)
                 <div className="bg-white dark:bg-background-tertiary p-3 rounded">
                   <div className="space-y-2 text-sm">
-                    {Object.entries(refinementPreview.refinementResult.suggestions).map(([dim, data]) => {
-                      const suggestion = data as { current: Record<string, number>; suggested: Record<string, number>; deltas: Record<string, number> };
-                      const current = suggestion.current[dim] || 0;
-                      const suggested = suggestion.suggested[dim] || current;
-                      const delta = suggestion.deltas[dim] || 0;
+                    {(() => {
+                      const result = refinementPreview.refinementResult as {
+                        current?: Record<string, number>;
+                        suggested?: Record<string, number>;
+                        deltas?: Record<string, number>;
+                      };
+                      const currentProfile = result.current || {};
+                      const suggestedProfile = result.suggested || {};
+                      const deltas = result.deltas || {};
                       
-                      return (
-                        <div key={dim} className="flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-700">
-                          <span className="text-content-secondary">{formatDimension(dim)}</span>
-                          <span className="font-mono">
-                            {current.toFixed(1)} → {suggested.toFixed(1)} {renderDelta(delta)}
-                          </span>
-                        </div>
+                      // Only show dimensions that have deltas (changed)
+                      const changedDimensions = Object.keys(deltas).filter(dim => 
+                        ['conscientiousness', 'openness', 'agreeableness', 'extraversion', 'neuroticism'].includes(dim)
                       );
-                    })}
+                      
+                      if (changedDimensions.length === 0) {
+                        return (
+                          <p className="text-content-secondary italic">
+                            {t('dpfl_test_no_changes') || 'Keine signifikanten Änderungen erkannt.'}
+                          </p>
+                        );
+                      }
+                      
+                      return changedDimensions.map(dim => {
+                        const current = currentProfile[dim] ?? 0;
+                        const suggested = suggestedProfile[dim] ?? current;
+                        const delta = deltas[dim] ?? 0;
+                        
+                        return (
+                          <div key={dim} className="flex justify-between items-center py-1 border-b border-gray-100 dark:border-gray-700">
+                            <span className="text-content-secondary">{formatDimension(dim)}</span>
+                            <span className="font-mono">
+                              {current.toFixed(1)} → {suggested.toFixed(1)} {renderDelta(delta)}
+                            </span>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               )}
