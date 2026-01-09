@@ -91,6 +91,7 @@ const App: React.FC = () => {
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
+    const [testScenarioId, setTestScenarioId] = useState<string | null>(null);
     const [refinementPreview, setRefinementPreview] = useState<api.RefinementPreviewResult | null>(null);
     const [isLoadingRefinementPreview, setIsLoadingRefinementPreview] = useState(false);
     const [refinementPreviewError, setRefinementPreviewError] = useState<string | null>(null);
@@ -537,7 +538,7 @@ const App: React.FC = () => {
         
         // --- Special Handling for Interview Bot "G." ---
         if (selectedBot.id === 'g-interviewer') {
-            if (userMessageCount === 0) {
+            if (userMessageCount === 0 && !isTestMode) {
                 // If the user exits immediately, go back to the landing page.
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -590,7 +591,8 @@ const App: React.FC = () => {
         }
 
         // --- Standard Session Analysis for all other bots ---
-        if (userMessageCount === 0) {
+        // In test mode, skip the "no messages" check since test scenarios always have messages
+        if (userMessageCount === 0 && !isTestMode) {
             setSelectedBot(null);
             setChatHistory([]);
             setView('botSelection');
@@ -673,10 +675,52 @@ const App: React.FC = () => {
 
             setSessionAnalysis(analysis);
 
-            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, userMessageCount);
+            const messageCount = isTestMode ? chatHistory.length : userMessageCount;
+            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, messageCount);
             setNewGamificationState(newState);
 
             setView('sessionReview');
+            
+            // For test mode with DPFL/DPC scenarios, calculate refinement preview
+            if (isTestMode && testScenarioId) {
+                const isDPFLTest = testScenarioId.startsWith('dpfl_') || testScenarioId.startsWith('dpc_');
+                if (isDPFLTest && hasPersonalityProfile && encryptionKey) {
+                    setIsLoadingRefinementPreview(true);
+                    try {
+                        const encryptedProfile = await api.loadPersonalityProfile();
+                        if (encryptedProfile && encryptedProfile.encryptedData) {
+                            const decryptedData = await decryptPersonalityProfile(encryptedProfile.encryptedData, encryptionKey);
+                            const profileType = encryptedProfile.testType === 'BIG5' ? 'BIG5' : 'RIEMANN';
+                            const profileForRefinement = profileType === 'RIEMANN' 
+                                ? decryptedData.riemann 
+                                : decryptedData.big5 || decryptedData;
+                            
+                            if (profileForRefinement) {
+                                const preview = await api.previewProfileRefinement({
+                                    chatHistory: chatHistory.map(m => ({ role: m.role, text: m.text })),
+                                    decryptedProfile: profileForRefinement as Record<string, unknown>,
+                                    profileType: profileType as 'RIEMANN' | 'BIG5',
+                                    lang: language
+                                });
+                                setRefinementPreview(preview);
+                            } else {
+                                setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
+                            }
+                        } else {
+                            setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
+                        }
+                    } catch (previewError) {
+                        console.error('Failed to calculate refinement preview:', previewError);
+                        setRefinementPreviewError(
+                            previewError instanceof Error 
+                                ? previewError.message 
+                                : t('dpfl_test_preview_error') || 'Fehler bei der Berechnung der Profil-Vorschau.'
+                        );
+                    } finally {
+                        setIsLoadingRefinementPreview(false);
+                    }
+                }
+            }
         } catch (error) {
             console.error("Failed to analyze session:", error);
             const fallbackAnalysis: SessionAnalysis = {
@@ -691,7 +735,8 @@ const App: React.FC = () => {
                 hasAccomplishedGoal: false,
             };
             setSessionAnalysis(fallbackAnalysis);
-            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id, userMessageCount);
+            const messageCount = isTestMode ? chatHistory.length : userMessageCount;
+            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id, messageCount);
             setNewGamificationState(newState);
             setView('sessionReview');
         } finally {
@@ -744,6 +789,7 @@ const App: React.FC = () => {
         // This prevents the test data from polluting the main application state.
         if (isTestMode) {
             setIsTestMode(false);
+            setTestScenarioId(null);
             setView('admin');
             return;
         }
@@ -777,6 +823,7 @@ const App: React.FC = () => {
         // For test sessions, immediately exit to the admin panel without saving anything.
         if (isTestMode) {
             setIsTestMode(false);
+            setTestScenarioId(null);
             setView('admin');
             return;
         }
@@ -800,6 +847,7 @@ const App: React.FC = () => {
         setNewGamificationState(null);
         setUserMessageCount(0);
         setIsTestMode(false);
+        setTestScenarioId(null);
         
         // Close menu
         setIsMenuOpen(false);
@@ -819,8 +867,8 @@ const App: React.FC = () => {
     }, [currentUser, lifeContext]);
 
     const handleRunTestSession = async (scenario: TestScenario, adminLifeContext: string) => {
+        // Set up test mode state
         setIsTestMode(true);
-        setIsAnalyzing(true);
         setMenuView(null); // Close admin menu
         
         // Reset refinement preview state
@@ -828,110 +876,17 @@ const App: React.FC = () => {
         setRefinementPreviewError(null);
         setIsLoadingRefinementPreview(false);
         
-        // Check if this is a DPFL/DPC test scenario that should show profile refinement
-        const isDPFLTest = scenario.id.startsWith('dpfl_') || scenario.id.startsWith('dpc_');
-    
-        try {
-            setChatHistory(scenario.chatHistory);
-            setSelectedBot(scenario.bot);
-    
-            // Handle special case for interview test, which formats a new context
-            if (scenario.bot.id === 'g-interviewer') {
-                const generatedContext = await geminiService.generateContextFromInterview(scenario.chatHistory, language);
-                setTempContext(generatedContext); // This is what SessionReview will display
-    
-                setSessionAnalysis({
-                    newFindings: t('sessionReview_g_summary'),
-                    proposedUpdates: [], nextSteps: [], completedSteps: [], accomplishedGoals: [], solutionBlockages: [], blockageScore: 0,
-                    hasConversationalEnd: true, hasAccomplishedGoal: false,
-                });
-                setNewGamificationState(gamificationState); // No gamification change for interviews
-                setLifeContext(''); // The "original context" for an interview is blank
-            } else {
-                // Standard analysis for all other bots using the admin's live context
-                // For test scenarios, use a minimal context if admin has none
-                const contextToUse = adminLifeContext || `# Life Context\n\nTest scenario context for ${scenario.name}`;
-                const analysis = await geminiService.analyzeSession(scenario.chatHistory, contextToUse, language);
-                
-                if (analysis.nextSteps && analysis.nextSteps.length > 0) {
-                    const docLang = (adminLifeContext && adminLifeContext.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
-                    const nextStepsHeadline = docLang === 'de' ? 'Realisierbare nächste Schritte' : 'Achievable Next Steps';
-                    const deadlineWord = docLang === 'de' ? 'bis' : 'Deadline';
-                    const nextStepsContent = analysis.nextSteps.map(step => `* ${step.action} (${deadlineWord}: ${step.deadline})`).join('\n');
-                    analysis.proposedUpdates.push({ type: 'append', headline: nextStepsHeadline, content: nextStepsContent });
-                }
-    
-                setSessionAnalysis(analysis);
-                setLifeContext(adminLifeContext); // The context for the test was the admin's context
-                setTempContext(''); // Not an interview
-                
-                const mockMessageCount = scenario.chatHistory.length;
-                const testGamificationState = calculateNewGamificationState(gamificationState, analysis, scenario.bot.id, mockMessageCount);
-                setNewGamificationState(testGamificationState);
-            }
-    
-            setView('sessionReview');
-            
-            // For DPFL/DPC tests, calculate refinement preview (override coachingMode setting)
-            if (isDPFLTest && hasPersonalityProfile && encryptionKey) {
-                setIsLoadingRefinementPreview(true);
-                try {
-                    // Load and decrypt the personality profile
-                    const encryptedProfile = await api.loadPersonalityProfile();
-                    if (encryptedProfile && encryptedProfile.encryptedData) {
-                        const decryptedData = await decryptPersonalityProfile(encryptedProfile.encryptedData, encryptionKey);
-                        
-                        // Determine profile type
-                        const profileType = encryptedProfile.testType === 'BIG5' ? 'BIG5' : 'RIEMANN';
-                        
-                        // Get the profile data in the correct format
-                        const profileForRefinement = profileType === 'RIEMANN' 
-                            ? decryptedData.riemann 
-                            : decryptedData.big5 || decryptedData;
-                        
-                        if (!profileForRefinement) {
-                            setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
-                            setIsLoadingRefinementPreview(false);
-                            return;
-                        }
-                        
-                        // Call preview-refinement API (always runs, regardless of coachingMode)
-                        const preview = await api.previewProfileRefinement({
-                            chatHistory: scenario.chatHistory.map(m => ({ role: m.role, text: m.text })),
-                            decryptedProfile: profileForRefinement as Record<string, unknown>,
-                            profileType: profileType as 'RIEMANN' | 'BIG5',
-                            lang: language
-                        });
-                        
-                        setRefinementPreview(preview);
-                    } else {
-                        setRefinementPreviewError(t('dpfl_test_no_profile') || 'Kein Persönlichkeitsprofil gefunden.');
-                    }
-                } catch (previewError) {
-                    console.error('Failed to calculate refinement preview:', previewError);
-                    setRefinementPreviewError(
-                        previewError instanceof Error 
-                            ? previewError.message 
-                            : t('dpfl_test_preview_error') || 'Fehler bei der Berechnung der Profil-Vorschau.'
-                    );
-                } finally {
-                    setIsLoadingRefinementPreview(false);
-                }
-            }
-    
-        } catch (error) {
-            console.error("Failed to run test session:", error);
-            const fallbackAnalysis: SessionAnalysis = {
-                newFindings: `Test failed. Error during execution: ${error instanceof Error ? error.message : String(error)}`,
-                proposedUpdates: [], nextSteps: [], completedSteps: [], accomplishedGoals: [], solutionBlockages: [], blockageScore: 0, hasConversationalEnd: false, hasAccomplishedGoal: false,
-            };
-            setSessionAnalysis(fallbackAnalysis);
-            setLifeContext(adminLifeContext); // Still show the context that was used
-            setNewGamificationState(gamificationState);
-            setView('sessionReview');
-        } finally {
-            setIsAnalyzing(false);
-        }
+        // Load the scenario's chat history and bot
+        setChatHistory(scenario.chatHistory);
+        setSelectedBot(scenario.bot);
+        setLifeContext(adminLifeContext);
+        
+        // Store scenario info for later use in handleEndSession
+        setTestScenarioId(scenario.id);
+        
+        // Navigate to ChatView to show the simulated conversation
+        // Admin can review the chat, then click "End Session" to trigger analysis
+        setView('chat');
     };
 
 
@@ -1027,6 +982,7 @@ const App: React.FC = () => {
                     currentUser={currentUser} 
                     isNewSession={!cameFromContextChoice}
                     encryptionKey={encryptionKey}
+                    isTestMode={isTestMode}
                 />
             );
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} />;
