@@ -70,8 +70,9 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
 
 /**
  * Calculate profile refinement suggestions for Big5 profiles
+ * Uses actual Big5/OCEAN keyword frequencies from session logs
  * @param {object} currentProfile - Current Big5 profile (decrypted)
- * @param {array} sessionLogs - Array of SessionBehaviorLog objects
+ * @param {array} sessionLogs - Array of SessionBehaviorLog objects with Big5 frequencies
  * @param {number} weight - Weight for new data (0-1), default 0.3
  * @returns {object} - Suggested updates with deltas
  */
@@ -80,85 +81,45 @@ function calculateBig5Refinement(currentProfile, sessionLogs, weight = 0.3) {
     return { hasSuggestions: false, reason: 'Insufficient data' };
   }
   
-  // Calculate average frequencies from sessions
+  // Calculate average frequencies from sessions (Big5 frequencies on 0-10 scale)
   const avgFrequencies = {
-    dauer: Math.round(sessionLogs.reduce((sum, log) => sum + log.dauerFrequency, 0) / sessionLogs.length),
-    wechsel: Math.round(sessionLogs.reduce((sum, log) => sum + log.wechselFrequency, 0) / sessionLogs.length),
-    naehe: Math.round(sessionLogs.reduce((sum, log) => sum + log.naeheFrequency, 0) / sessionLogs.length),
-    distanz: Math.round(sessionLogs.reduce((sum, log) => sum + log.distanzFrequency, 0) / sessionLogs.length)
+    openness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.opennessFrequency || 0), 0) / sessionLogs.length),
+    conscientiousness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.conscientiousnessFrequency || 0), 0) / sessionLogs.length),
+    extraversion: Math.round(sessionLogs.reduce((sum, log) => sum + (log.extraversionFrequency || 0), 0) / sessionLogs.length),
+    agreeableness: Math.round(sessionLogs.reduce((sum, log) => sum + (log.agreeablenessFrequency || 0), 0) / sessionLogs.length),
+    neuroticism: Math.round(sessionLogs.reduce((sum, log) => sum + (log.neuroticismFrequency || 0), 0) / sessionLogs.length)
   };
   
-  // Map Riemann dimensions to Big5 traits (rough mapping)
-  // High Dauer → High Conscientiousness
-  // High Wechsel → High Openness
-  // High Nähe → High Agreeableness, Low Neuroticism
-  // High Distanz → Low Agreeableness, Low Extraversion
-  
-  const suggestions = {};
+  const suggested = { ...currentProfile };
   const deltas = {};
   let hasSignificantChanges = false;
   
-  // Conscientiousness: influenced by Dauer vs Wechsel
-  if (currentProfile.conscientiousness !== undefined) {
-    const currentScore = currentProfile.conscientiousness;
-    const balance = (avgFrequencies.dauer - avgFrequencies.wechsel) / 10; // -1 to +1
-    const observedScore = Math.max(1, Math.min(5, 3 + balance * 2)); // 1-5 scale
-    const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
-    
-    if (Math.abs(newScore - currentScore) >= 0.3) {
-      suggestions.conscientiousness = newScore;
-      deltas.conscientiousness = newScore - currentScore;
-      hasSignificantChanges = true;
+  // Big5 traits: openness, conscientiousness, extraversion, agreeableness, neuroticism
+  const traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+  
+  for (const trait of traits) {
+    if (currentProfile[trait] !== undefined) {
+      const currentScore = currentProfile[trait];
+      // Convert 0-10 frequency scale to 1-5 Big5 scale
+      const observedScore = Math.max(1, Math.min(5, 1 + (avgFrequencies[trait] / 10) * 4));
+      
+      // Weighted average: combine current profile with observed behavior
+      const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
+      
+      // Only suggest change if delta >= 0.3 (to avoid noise)
+      const delta = Math.round((newScore - currentScore) * 10) / 10;
+      if (Math.abs(delta) >= 0.3) {
+        suggested[trait] = newScore;
+        deltas[trait] = delta;
+        hasSignificantChanges = true;
+      }
     }
   }
-  
-  // Openness: influenced by Wechsel
-  if (currentProfile.openness !== undefined) {
-    const currentScore = currentProfile.openness;
-    const observedScore = Math.max(1, Math.min(5, (avgFrequencies.wechsel / 10) * 5));
-    const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
-    
-    if (Math.abs(newScore - currentScore) >= 0.3) {
-      suggestions.openness = newScore;
-      deltas.openness = newScore - currentScore;
-      hasSignificantChanges = true;
-    }
-  }
-  
-  // Agreeableness: influenced by Nähe vs Distanz
-  if (currentProfile.agreeableness !== undefined) {
-    const currentScore = currentProfile.agreeableness;
-    const balance = (avgFrequencies.naehe - avgFrequencies.distanz) / 10;
-    const observedScore = Math.max(1, Math.min(5, 3 + balance * 2));
-    const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
-    
-    if (Math.abs(newScore - currentScore) >= 0.3) {
-      suggestions.agreeableness = newScore;
-      deltas.agreeableness = newScore - currentScore;
-      hasSignificantChanges = true;
-    }
-  }
-  
-  // Extraversion: influenced by Nähe
-  if (currentProfile.extraversion !== undefined) {
-    const currentScore = currentProfile.extraversion;
-    const observedScore = Math.max(1, Math.min(5, (avgFrequencies.naehe / 10) * 5));
-    const newScore = Math.round(((currentScore * (1 - weight)) + (observedScore * weight)) * 10) / 10;
-    
-    if (Math.abs(newScore - currentScore) >= 0.3) {
-      suggestions.extraversion = newScore;
-      deltas.extraversion = newScore - currentScore;
-      hasSignificantChanges = true;
-    }
-  }
-  
-  // Note: Neuroticism is harder to infer from conversation keywords alone
-  // We'll leave it unchanged for now
   
   return {
     hasSuggestions: hasSignificantChanges,
     current: currentProfile,
-    suggested: { ...currentProfile, ...suggestions },
+    suggested,
     deltas,
     observedFrequencies: avgFrequencies,
     sessionCount: sessionLogs.length,

@@ -17,7 +17,7 @@ import { CalendarIcon } from './icons/CalendarIcon';
 import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '../utils/calendarExport';
 import DatePickerModal from './DatePickerModal';
 import ComfortCheckModal from './ComfortCheckModal';
-import DPFLTestSummary from './DPFLTestSummary';
+import ProfileRefinementModal from './ProfileRefinementModal';
 import { RefinementPreviewResult } from '../services/api';
 
 
@@ -107,6 +107,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [calendarExportStatus, setCalendarExportStatus] = useState<string | null>(null);
     const [datePickerModal, setDatePickerModal] = useState<{ isOpen: boolean; action: string; deadline: string } | null>(null);
     const [showComfortCheck, setShowComfortCheck] = useState(false);
+    const [showRefinementModal, setShowRefinementModal] = useState(false);
     const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
     
     // Show comfort check for DPFL
@@ -450,15 +451,6 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
                 
-                {/* DPFL/DPC Test Summary */}
-                <DPFLTestSummary 
-                    isTestMode={isTestMode} 
-                    coachingMode={currentUser?.coachingMode}
-                    refinementPreview={refinementPreview}
-                    isLoadingPreview={isLoadingRefinementPreview}
-                    previewError={refinementPreviewError}
-                />
-                
                 {isTestMode && (
                     <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
                         <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
@@ -799,8 +791,34 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     chatHistory={chatHistory}
                     sessionId={`test-${Date.now()}`}
                     coachingMode={currentUser?.coachingMode}
-                    onComplete={() => setShowComfortCheck(false)}
+                    onComplete={() => {
+                        setShowComfortCheck(false);
+                        // After comfort check, show refinement modal if there are suggestions
+                        if (refinementPreview?.refinementResult?.hasSuggestions) {
+                            setShowRefinementModal(true);
+                        }
+                    }}
                     encryptionKey={encryptionKey}
+                />
+            )}
+            
+            {/* DPFL Profile Refinement Modal */}
+            {showRefinementModal && (
+                <ProfileRefinementModal
+                    isOpen={showRefinementModal}
+                    refinementPreview={refinementPreview || null}
+                    isLoading={isLoadingRefinementPreview}
+                    error={refinementPreviewError}
+                    isTestMode={isTestMode}
+                    onAccept={() => {
+                        // In test mode: just show feedback, no actual save
+                        // In production: would save the refinement via API
+                        setShowRefinementModal(false);
+                        // Toast or notification could be added here
+                    }}
+                    onReject={() => {
+                        setShowRefinementModal(false);
+                    }}
                 />
             )}
         </div>
