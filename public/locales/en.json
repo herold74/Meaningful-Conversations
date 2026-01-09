@@ -869,7 +869,8 @@
   "refinement_modal_title": "Profile Adjustment",
   "refinement_modal_loading": "Calculating profile changes...",
   "refinement_modal_test_notice": "This is a test. Your profile will NOT be changed.",
-  "refinement_modal_observed": "Detected Keywords",
+  "refinement_modal_keywords_found": "Detected Keywords",
+  "refinement_modal_no_keywords": "No relevant keywords found. Profile remains unchanged.",
   "refinement_modal_message_count": "Analyzed from {{count}} messages",
   "refinement_modal_changes": "Suggested Changes",
   "refinement_modal_dimension": "Dimension",
@@ -883,6 +884,8 @@
   "refinement_modal_reject": "Reject",
   "refinement_modal_saved": "Profile has been updated.",
   "refinement_modal_test_saved": "Preview: Changes would be saved here.",
+  "keyword_high_hint": "Increases the value",
+  "keyword_low_hint": "Decreases the value",
   
   "dimension_dauer": "Duration",
   "dimension_wechsel": "Change",

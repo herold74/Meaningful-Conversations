@@ -366,20 +366,35 @@ export const getAdaptationSuggestions = async () => {
  * Preview profile refinement based on chat history (dry-run, no save)
  * Used for admin tests to see how a session would affect the profile
  */
+
+// Bidirectional keyword analysis result for a single dimension
+interface BidirectionalDimensionAnalysis {
+  high: number;
+  low: number;
+  delta: number;
+  foundKeywords: {
+    high: string[];
+    low: string[];
+  };
+}
+
 export interface RefinementPreviewResult {
   success: boolean;
   isPreviewOnly: boolean;
-  observedFrequencies: {
-    dauer: number;
-    wechsel: number;
-    naehe: number;
-    distanz: number;
-  };
-  rawFrequencies: {
-    dauer: number;
-    wechsel: number;
-    naehe: number;
-    distanz: number;
+  // New bidirectional analysis format
+  bidirectionalAnalysis: {
+    // Riemann dimensions
+    naehe?: BidirectionalDimensionAnalysis;
+    distanz?: BidirectionalDimensionAnalysis;
+    dauer?: BidirectionalDimensionAnalysis;
+    wechsel?: BidirectionalDimensionAnalysis;
+    // Big5 dimensions
+    openness?: BidirectionalDimensionAnalysis;
+    conscientiousness?: BidirectionalDimensionAnalysis;
+    extraversion?: BidirectionalDimensionAnalysis;
+    agreeableness?: BidirectionalDimensionAnalysis;
+    neuroticism?: BidirectionalDimensionAnalysis;
+    // Metadata
     messageCount: number;
   };
   refinementResult: {
@@ -394,8 +409,9 @@ export interface RefinementPreviewResult {
     current?: Record<string, number>;
     suggested?: Record<string, number>;
     deltas?: Record<string, number>;
+    // Found keywords (from refinement service)
+    foundKeywords?: Record<string, { high: string[]; low: string[] }>;
     // Common fields
-    observedFrequencies?: Record<string, number>;
     sessionCount?: number;
     weight?: number;
     reason?: string;
