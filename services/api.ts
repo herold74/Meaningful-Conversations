@@ -384,11 +384,17 @@ export interface RefinementPreviewResult {
   };
   refinementResult: {
     hasSuggestions: boolean;
+    // Riemann: nested structure with contexts (beruf, privat, selbst)
     suggestions?: Record<string, {
       current: Record<string, number>;
       suggested: Record<string, number>;
       deltas: Record<string, number>;
     }>;
+    // Big5: flat structure at top level
+    current?: Record<string, number>;
+    suggested?: Record<string, number>;
+    deltas?: Record<string, number>;
+    // Common fields
     observedFrequencies?: Record<string, number>;
     sessionCount?: number;
     weight?: number;
