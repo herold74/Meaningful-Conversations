@@ -658,7 +658,7 @@
   "comfort_check_select_score": "Bitte wähle eine Bewertung",
   
   "profile_view_refined_title": "Verfeinert",
-  "profile_view_refined_desc": "Dieses Profil wurde durch {count} authentische Sessions verfeinert.",
+  "profile_view_refined_desc": "Dieses Profil wurde durch {{count}} authentische Sessions verfeinert.",
   
   "riemann_dimension_dauer": "Dauer",
   "riemann_dimension_naehe": "Nähe",
@@ -690,7 +690,7 @@
   "profile_overwrite_confirm": "Ja, neuen Test starten",
   
   "refinement_title": "Profil-Verfeinerung",
-  "refinement_description": "Basierend auf {count} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:",
+  "refinement_description": "Basierend auf {{count}} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:",
   "refinement_loading": "Lade Vorschläge...",
   "refinement_no_suggestions": "Noch nicht genug Sessions für Vorschläge (mindestens 2 benötigt)",
   "refinement_error_load": "Fehler beim Laden der Vorschläge",
@@ -1021,7 +1021,7 @@
   
   "survey_ranking_intro": "Klicken Sie auf die Optionen, um sie zu sortieren.",
   "survey_ranking_hint": "<strong>Platz 1 (Oben)</strong> = Erste Reaktion unter Stress.",
-  "survey_ranking_your_priority": "Ihre Priorität (1 bis {count})",
+  "survey_ranking_your_priority": "Ihre Priorität (1 bis {{count}})",
   "survey_ranking_nothing_selected": "Noch nichts ausgewählt",
   "survey_ranking_options": "Optionen (Klicken zum Auswählen)",
 
