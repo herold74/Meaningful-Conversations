@@ -166,6 +166,9 @@
   "guest_limit_remaining": "Remaining messages this week: {{remaining}}/50",
   "guest_limit_exceeded_title": "Message Limit Reached",
   "guest_limit_exceeded_message": "You have reached your weekly limit of 50 messages as a guest. Register for unlimited access to all features.",
+  
+  "test_mode_banner": "Test Mode: Simulated conversation – Click \"End Session\" to start analysis",
+  "test_mode_input_disabled": "In test mode, no new messages can be sent.",
   "guest_register_now": "Register Now",
   
   "menu_refresh_app": "Refresh App",
