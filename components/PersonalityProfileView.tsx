@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
+import { updateCoachingMode } from '../services/userService';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile } from './PersonalitySurvey';
 import { formatSurveyResultAsHtml } from '../utils/surveyResultHtmlFormatter';
@@ -9,6 +10,7 @@ import Spinner from './shared/Spinner';
 import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
 import NarrativeStoriesModal from './NarrativeStoriesModal';
+import { User, CoachingMode } from '../types';
 
 // Narrative Profile Display Component
 interface NarrativeProfileSectionProps {
@@ -269,6 +271,8 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
 interface PersonalityProfileViewProps {
   encryptionKey: CryptoKey | null;
   onStartNewTest: () => void;
+  currentUser: User | null;
+  onUserUpdate: (user: User) => void;
 }
 
 interface ProfileMetadata {
@@ -281,7 +285,7 @@ interface ProfileMetadata {
   adaptationMode: 'adaptive' | 'stable';
 }
 
-const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest }) => {
+const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate }) => {
   const { t, language } = useLocalization();
   const [isLoading, setIsLoading] = useState(true);
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
@@ -294,6 +298,24 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [canUpdateNarrative, setCanUpdateNarrative] = useState(false);
   const [wasNarrativeCollapsed, setWasNarrativeCollapsed] = useState(false);
   const [showNarrativeStoriesModal, setShowNarrativeStoriesModal] = useState(false);
+  const [isUpdatingCoachingMode, setIsUpdatingCoachingMode] = useState(false);
+  
+  // Get current coaching mode from user, default to 'off'
+  const currentCoachingMode = currentUser?.coachingMode || 'off';
+  
+  const handleCoachingModeChange = async (newMode: CoachingMode) => {
+    if (!currentUser || isUpdatingCoachingMode) return;
+    
+    setIsUpdatingCoachingMode(true);
+    try {
+      const { user } = await updateCoachingMode(newMode);
+      onUserUpdate(user);
+    } catch (err) {
+      console.error('Failed to update coaching mode:', err);
+    } finally {
+      setIsUpdatingCoachingMode(false);
+    }
+  };
 
   useEffect(() => {
     loadProfile();
@@ -535,6 +557,108 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               )}
             </div>
           </div>
+        </div>
+
+        {/* Coaching Mode Selection */}
+        <div className="mb-6 p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
+          <h3 className="text-lg font-semibold mb-4 text-content-primary flex items-center gap-2">
+            🧪 {t('profile_coaching_mode_title') || 'Coaching-Modus'}
+          </h3>
+          
+          <div className="space-y-3">
+            {/* Off Mode */}
+            <label 
+              className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                currentCoachingMode === 'off' 
+                  ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
+              } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''}`}
+            >
+              <input
+                type="radio"
+                name="coachingMode"
+                value="off"
+                checked={currentCoachingMode === 'off'}
+                onChange={() => handleCoachingModeChange('off')}
+                disabled={isUpdatingCoachingMode}
+                className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-content-primary">
+                  {t('profile_coaching_mode_off') || 'Aus (Standard)'}
+                </div>
+                <p className="text-sm text-content-secondary mt-0.5">
+                  {t('profile_coaching_mode_off_desc') || 'Dein Profil wird nicht verwendet. Klassisches Coaching ohne Personalisierung.'}
+                </p>
+              </div>
+            </label>
+            
+            {/* DPC Mode */}
+            <label 
+              className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                currentCoachingMode === 'dpc' 
+                  ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
+              } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''}`}
+            >
+              <input
+                type="radio"
+                name="coachingMode"
+                value="dpc"
+                checked={currentCoachingMode === 'dpc'}
+                onChange={() => handleCoachingModeChange('dpc')}
+                disabled={isUpdatingCoachingMode}
+                className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-content-primary">
+                  DPC <span className="font-normal text-content-secondary">({t('profile_coaching_mode_dpc') || 'Dynamic Personality Coaching'})</span>
+                </div>
+                <p className="text-sm text-content-secondary mt-0.5">
+                  {t('profile_coaching_mode_dpc_desc') || 'Dein Profil wird während Sessions genutzt, aber nicht verändert.'}
+                </p>
+              </div>
+            </label>
+            
+            {/* DPFL Mode */}
+            <label 
+              className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                currentCoachingMode === 'dpfl' 
+                  ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
+                  : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
+              } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''} ${
+                decryptedData?.adaptationMode === 'stable' ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <input
+                type="radio"
+                name="coachingMode"
+                value="dpfl"
+                checked={currentCoachingMode === 'dpfl'}
+                onChange={() => handleCoachingModeChange('dpfl')}
+                disabled={isUpdatingCoachingMode || decryptedData?.adaptationMode === 'stable'}
+                className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-content-primary">
+                  DPFL <span className="font-normal text-content-secondary">({t('profile_coaching_mode_dpfl') || 'Dynamic Personality-Focused Learning'})</span>
+                </div>
+                <p className="text-sm text-content-secondary mt-0.5">
+                  {t('profile_coaching_mode_dpfl_desc') || 'Dein Profil wird genutzt UND kann nach jeder Session verfeinert werden.'}
+                </p>
+                {decryptedData?.adaptationMode === 'stable' && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                    ⚠️ {t('profile_coaching_mode_dpfl_requires_adaptive') || 'Erfordert ein adaptives Profil'}
+                  </p>
+                )}
+              </div>
+            </label>
+          </div>
+          
+          {/* Info text */}
+          <p className="mt-4 text-xs text-content-tertiary flex items-center gap-1">
+            ℹ️ {t('profile_coaching_mode_info') || 'Du kannst jederzeit wechseln. Gesammelte Verfeinerungen bleiben erhalten.'}
+          </p>
         </div>
 
         {/* Filter Scores */}

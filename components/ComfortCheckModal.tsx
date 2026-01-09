@@ -6,7 +6,7 @@ import Button from './shared/Button';
 interface ComfortCheckModalProps {
   chatHistory: any[];
   sessionId: string;
-  experimentalMode?: string;
+  coachingMode?: string;
   onComplete: () => void;
   encryptionKey: CryptoKey | null;
 }
@@ -14,7 +14,7 @@ interface ComfortCheckModalProps {
 const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   chatHistory,
   sessionId,
-  experimentalMode,
+  coachingMode,
   onComplete,
   encryptionKey
 }) => {
@@ -23,7 +23,7 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Only show if DPFL mode and encryption key available
-  if (experimentalMode !== 'DPFL' || !encryptionKey) {
+  if (coachingMode !== 'dpfl' || !encryptionKey) {
     // Silently skip comfort check
     onComplete();
     return null;

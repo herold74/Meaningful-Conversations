@@ -36,6 +36,8 @@ export type NavView =
     | 'personalitySurvey'
     | 'personalityProfile';
 
+export type CoachingMode = 'off' | 'dpc' | 'dpfl';
+
 export interface User {
     id: string;
     email: string;
@@ -54,6 +56,7 @@ export interface User {
     encryptionSalt?: string; // Hex-encoded string
     gamificationState?: string;
     status?: 'PENDING' | 'ACTIVE';
+    coachingMode?: CoachingMode; // off = standard coaching, dpc = profile used but not refined, dpfl = profile used and refined
 }
 
 export type BotAccessTier = 'guest' | 'registered' | 'premium';
@@ -67,7 +70,6 @@ export interface Bot {
     style: string;
     style_de: string;
     accessTier: BotAccessTier;
-    experimentalMode?: 'DPC' | 'DPFL' | 'OFF';
 }
 
 export interface BotWithAvailability extends Bot {
