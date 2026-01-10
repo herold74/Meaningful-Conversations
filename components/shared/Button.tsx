@@ -19,7 +19,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary: `
-    bg-accent-primary hover:bg-accent-secondary 
+    bg-accent-primary hover:bg-accent-primary-hover 
     text-button-foreground-on-accent
     border border-transparent
   `,
