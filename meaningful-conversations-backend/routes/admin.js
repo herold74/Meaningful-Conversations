@@ -31,6 +31,7 @@ router.get('/users', async (req, res) => {
                 createdAt: true,
                 isAdmin: true,
                 isBetaTester: true,
+                isClient: true,
                 loginCount: true,
                 lastLogin: true,
                 gamificationState: true,
@@ -109,6 +110,25 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling admin:", error);
+        res.status(500).json({ error: 'Operation failed.' });
+    }
+});
+
+// PUT /api/admin/users/:id/toggle-client
+router.put('/users/:id/toggle-client', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id } });
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        await prisma.user.update({
+            where: { id },
+            data: { isClient: !user.isClient },
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin: Error toggling client:", error);
         res.status(500).json({ error: 'Operation failed.' });
     }
 });
@@ -239,6 +259,8 @@ router.post('/codes/:id/revoke', async (req, res) => {
             let updateData = {};
             if (code.botId === 'premium') {
                 updateData.isBetaTester = false;
+            } else if (code.botId === 'client') {
+                updateData.isClient = false;
             } else {
                 const unlocked = JSON.parse(user.unlockedCoaches || '[]');
                 const newUnlocked = unlocked.filter(coachId => coachId !== code.botId);

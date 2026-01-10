@@ -20,14 +20,26 @@ interface BotCardProps {
   language: Language;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
+  isClientOnly?: boolean;
 }
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, coachingMode }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
     // Show coaching mode badge for all bots if profile exists and mode is active
     const showCoachingBadge = hasPersonalityProfile && coachingMode && coachingMode !== 'off' && !isLocked;
+    
+    // Determine border styling based on client-only status
+    const getBorderClass = () => {
+        if (isLocked) {
+            return 'border-border-primary dark:border-border-primary';
+        }
+        if (isClientOnly) {
+            return 'border-amber-400 dark:border-amber-500 border-2 hover:border-amber-500 dark:hover:border-amber-400';
+        }
+        return 'border-border-primary dark:border-border-primary hover:border-accent-primary dark:hover:border-accent-primary';
+    };
     
     return (
       <div
@@ -36,19 +48,29 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
             relative flex flex-col items-center text-center p-6
             bg-background-secondary dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
             ${isLocked
-              ? 'cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 border-border-primary dark:border-border-primary'
-              : 'cursor-pointer hover:border-accent-primary dark:hover:border-accent-primary hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 border-border-primary dark:border-border-primary'
+              ? `cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 ${getBorderClass()}`
+              : `cursor-pointer hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 ${getBorderClass()}`
             }
         `}
         aria-disabled={isLocked}
       >
-        {/* Coaching Mode Badge (non-interactive) */}
+        {/* Client-Only Badge - shown for unlocked client-tier bots */}
+        {isClientOnly && !isLocked && (
+          <div 
+            className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center gap-1"
+            title={t('botSelection_clientOnlyBadge')}
+          >
+            <span>🎓</span>
+          </div>
+        )}
+        
+        {/* Coaching Mode Badge (non-interactive) - Text badge in top right */}
         {showCoachingBadge && (
           <div 
-            className="absolute top-4 right-4 z-10 p-2 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+            className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold"
             title={`${t('profile_coaching_mode_title')}: ${coachingMode?.toUpperCase()}`}
           >
-            <span className="text-lg">🧪</span>
+            {coachingMode?.toUpperCase()}
           </div>
         )}
         
@@ -77,14 +99,6 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
             <div>
                 <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
                 
-                {/* Coaching Mode Badge */}
-                {showCoachingBadge && (
-                  <div className="flex justify-center mt-2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700">
-                      🧪 {coachingMode === 'dpc' ? t('experimental_mode_badge_dpc') : t('experimental_mode_badge_dpfl')}
-                    </span>
-                  </div>
-                )}
                 
                 <div className="flex flex-wrap justify-center gap-2 my-3">
                     {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
@@ -124,7 +138,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
         const unlockedCoaches = currentUser?.unlockedCoaches || [];
         
         if (currentUser) {
-          if (currentUser.isBetaTester) {
+          if (currentUser.isClient) {
+              userAccessLevel = 'client';
+          } else if (currentUser.isBetaTester) {
               userAccessLevel = 'premium';
           } else {
               userAccessLevel = 'registered';
@@ -134,7 +150,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
         const accessHierarchy: Record<BotAccessTier, number> = {
           guest: 0,
           registered: 1,
-          premium: 2
+          premium: 2,
+          client: 3
         };
 
         const availableBots: BotWithAvailability[] = fetchedBots
@@ -170,9 +187,13 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
   }
 
   const getUnlockMessage = () => {
-      // isBetaTester provides access to all coaches, so no message is needed.
-      if (currentUser?.isBetaTester) {
+      // isClient provides access to all coaches, so no message is needed.
+      if (currentUser?.isClient) {
           return null;
+      }
+      // isBetaTester (Premium) can see some locked bots (Rob, Victor) - show client message
+      if (currentUser?.isBetaTester) {
+          return t('botSelection_premiumMessage');
       }
       if (!currentUser) {
           return t('botSelection_guestMessage');
@@ -182,8 +203,14 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
   }
 
   const unlockMessage = getUnlockMessage();
-  const availableBots = bots.filter(b => b.isAvailable);
-  const lockedBots = bots.filter(b => !b.isAvailable);
+  
+  // Separate client-only bots (Rob, Victor) from regular bots
+  const clientOnlyBotIds = ['rob', 'victor-bowen'];
+  const regularBots = bots.filter(b => !clientOnlyBotIds.includes(b.id));
+  const clientOnlyBots = bots.filter(b => clientOnlyBotIds.includes(b.id));
+  
+  const availableRegularBots = regularBots.filter(b => b.isAvailable);
+  const lockedRegularBots = regularBots.filter(b => !b.isAvailable);
   
   return (
     <div className="py-10 animate-fadeIn">
@@ -194,8 +221,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
         </p>
       </div>
 
+      {/* Regular Bots Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
-        {availableBots.map((bot) => (
+        {availableRegularBots.map((bot) => (
           <BotCard 
             key={bot.id} 
             bot={bot} 
@@ -206,7 +234,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
           />
         ))}
         
-        {lockedBots.length > 0 && unlockMessage && (
+        {lockedRegularBots.length > 0 && unlockMessage && !currentUser?.isBetaTester && !currentUser?.isClient && (
             <div className="md:col-span-2 lg:col-span-3">
                 <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground p-2 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 text-center">
                     {unlockMessage}
@@ -214,7 +242,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             </div>
         )}
 
-        {lockedBots.map((bot) => (
+        {lockedRegularBots.map((bot) => (
           <BotCard 
             key={bot.id} 
             bot={bot} 
@@ -225,6 +253,44 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
           />
         ))}
       </div>
+
+      {/* Client-Only Section Divider */}
+      <div className="w-full max-w-6xl mx-auto my-12">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+            <span className="text-lg">🎓</span>
+            <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+              {t('botSelection_clientOnlySection')}
+            </span>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+        </div>
+      </div>
+
+      {/* Client-Only Bots Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto">
+        {clientOnlyBots.map((bot) => (
+          <BotCard 
+            key={bot.id} 
+            bot={bot} 
+            onSelect={onSelect} 
+            language={language}
+            hasPersonalityProfile={hasPersonalityProfile}
+            coachingMode={coachingMode}
+            isClientOnly={true}
+          />
+        ))}
+      </div>
+      
+      {/* Client access message for non-clients */}
+      {!currentUser?.isClient && (
+        <div className="w-full max-w-4xl mx-auto mt-6">
+          <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
+            {t('botSelection_clientAccessMessage')}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

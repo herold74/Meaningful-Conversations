@@ -47,6 +47,7 @@ export interface User {
     newsletterConsent?: boolean;
     newsletterConsentDate?: string | null;
     isBetaTester: boolean;
+    isClient?: boolean;
     isAdmin: boolean;
     unlockedCoaches: string[];
     createdAt?: string;
@@ -59,7 +60,7 @@ export interface User {
     coachingMode?: CoachingMode; // off = standard coaching, dpc = profile used but not refined, dpfl = profile used and refined
 }
 
-export type BotAccessTier = 'guest' | 'registered' | 'premium';
+export type BotAccessTier = 'guest' | 'registered' | 'premium' | 'client';
 
 export interface Bot {
     id: string;
