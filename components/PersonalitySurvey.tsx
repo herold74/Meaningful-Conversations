@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
+import { User } from '../types';
 
 // --- TYPEN & INTERFACES ---
 
@@ -528,7 +529,12 @@ const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids
 
 // --- MAIN ORCHESTRATOR ---
 
-export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => void }> = ({ onFinish }) => {
+interface PersonalitySurveyProps {
+  onFinish: (result: SurveyResult) => void;
+  currentUser?: User | null;
+}
+
+export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, currentUser }) => {
   const { t } = useLocalization();
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<Partial<SurveyResult>>({ path: 'UNDECIDED' });
@@ -545,9 +551,15 @@ export const PersonalitySurvey: React.FC<{ onFinish: (result: SurveyResult) => v
 
   const handleFilterComplete = (answers: any) => {
     // LOGIK: Wenn Sorgen (worry) ODER Kontrolle (control) >= 4 (auf 5er Skala), dann Riemann.
+    // Big5 ist nur für Klienten (isClient) verfügbar
     const isRiemann = answers.worry >= 4 || answers.control >= 4;
+    const canAccessBig5 = currentUser?.isClient === true;
+    
+    // Non-clients always get Riemann, even if filter suggests Big5
+    const finalPath = (!canAccessBig5 || isRiemann) ? 'RIEMANN' : 'BIG5';
+    
     setResult({ 
-      path: isRiemann ? 'RIEMANN' : 'BIG5', 
+      path: finalPath, 
       filter: answers 
     });
     setStep(0); // Reset step index for the new path

@@ -60,7 +60,7 @@ export const BOTS: Bot[] = [
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Rob&backgroundColor=E8E8E8&radius=50&mouth=smile&shirtColor=ffffff',
         style: 'Mental Fitness, Empathetic, Mindful',
         style_de: 'Mentale Fitness, Empathisch, Achtsam',
-        accessTier: 'premium',
+        accessTier: 'client',
     },
     {
         id: 'nexus-gps',
@@ -80,6 +80,6 @@ export const BOTS: Bot[] = [
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=VictorCoSerious&backgroundColor=ff9999&radius=50&mouth=smirk&shirtColor=ffffff',
         style: 'Systemic, Analytical, Neutral',
         style_de: 'Systemisch, Analytisch, Neutral',
-        accessTier: 'premium',
+        accessTier: 'client',
     }
 ];

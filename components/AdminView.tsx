@@ -459,9 +459,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         break;
                     }
                     case 'roles': {
-                        // Sort by admin first, then beta tester
-                        const aValue = (a.isAdmin ? 2 : 0) + (a.isBetaTester ? 1 : 0);
-                        const bValue = (b.isAdmin ? 2 : 0) + (b.isBetaTester ? 1 : 0);
+                        // Sort by admin first, then client, then beta tester
+                        const aValue = (a.isAdmin ? 4 : 0) + (a.isClient ? 2 : 0) + (a.isBetaTester ? 1 : 0);
+                        const bValue = (b.isAdmin ? 4 : 0) + (b.isClient ? 2 : 0) + (b.isBetaTester ? 1 : 0);
                         compare = aValue - bValue;
                         break;
                     }
@@ -519,6 +519,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         if (botId === 'ACCESS_PASS_3M') return t('admin_codes_unlock_access_pass_3m');
         if (botId === 'ACCESS_PASS_1M') return t('admin_codes_unlock_access_pass_1m');
         if (botId === 'premium') return t('admin_codes_unlock_premium');
+        if (botId === 'client') return t('admin_codes_unlock_client');
         if (botId === 'big5') return t('admin_codes_unlock_big5');
         const bot = BOTS.find(b => b.id === botId);
         return bot?.name || botId;
@@ -736,6 +737,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                                                         <StarIcon className="w-5 h-5 text-status-info-foreground" />
                                                     </span>
                                                 )}
+                                                {user.isClient && (
+                                                    <span title={t('admin_users_client')} className="text-xs font-bold px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                                                        K
+                                                    </span>
+                                                )}
                                                 {user.isAdmin && (
                                                     <span title={t('admin_users_admin')}>
                                                         <ShieldIcon className="w-5 h-5 text-accent-tertiary" />
@@ -759,6 +765,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                                                     </button>
                                                 )}
                                                 <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-status-info-foreground rounded-full hover:bg-status-info-background disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
+                                                <button 
+                                                    onClick={() => handleAction(`toggle-client-${user.id}`, () => userService.toggleUserClient(user.id))} 
+                                                    disabled={actionLoading[`toggle-client-${user.id}`]} 
+                                                    className="p-2 text-purple-600 dark:text-purple-400 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30 disabled:opacity-50" 
+                                                    title={t('admin_users_toggle_client')}
+                                                >
+                                                    <span className="text-xs font-bold">K</span>
+                                                </button>
                                                 <button 
                                                     onClick={() => handleAction(`toggle-admin-${user.id}`, () => userService.toggleUserAdmin(user.id))} 
                                                     disabled={actionLoading[`toggle-admin-${user.id}`] || isCurrentUser} 
@@ -812,6 +826,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                             })}
                             <option disabled>---</option>
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
+                            <option value="client">{t('admin_codes_unlock_client')}</option>
                         </select>
                     </div>
                     <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">

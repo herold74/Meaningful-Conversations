@@ -175,6 +175,8 @@ router.post('/redeem-code', async (req, res) => {
             updateData.accessExpiresAt = currentExpiry;
         } else if (upgradeCode.botId === 'premium') {
              updateData.isBetaTester = true;
+        } else if (upgradeCode.botId === 'client') {
+             updateData.isClient = true;
         } else {
             const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
             if (!unlocked.includes(upgradeCode.botId)) {
