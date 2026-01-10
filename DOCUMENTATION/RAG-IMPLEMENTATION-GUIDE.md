@@ -73,7 +73,7 @@ Optionale Felder:
 │                    │                │                           │
 │                    │ ┌────────────┐ │                           │
 │                    │ │ Vector DB  │ │ ◀── Erweiterte Ressourcen│
-│                    │ │ (pgvector) │ │     (semantische Suche)  │
+│                    │ │ (Qdrant)   │ │     (semantische Suche)  │
 │                    │ └────────────┘ │                           │
 │                    └────────────────┘                           │
 │                                                                  │
@@ -138,13 +138,25 @@ Optionale Felder:
 ### Phase 3: Semantische Suche (RAG)
 **Geschätzter Aufwand: 4-5 Tage Entwicklung**
 
+> **Hinweis:** Da das Projekt MariaDB verwendet (nicht PostgreSQL), kommt pgvector nicht in Frage. 
+> Stattdessen wird **Qdrant** (self-hosted) oder **ChromaDB** (in-process) empfohlen.
+
 | Aufgabe | Beschreibung | Aufwand |
 |---------|--------------|---------|
-| pgvector Setup | Vector-Extension für PostgreSQL | 4h |
-| Embedding-Service | Texte zu Vektoren konvertieren | 6h |
+| Qdrant Setup | Vector-DB Container aufsetzen (Docker) | 4h |
+| Embedding-Service | Texte zu Vektoren konvertieren (OpenAI/Gemini) | 6h |
 | Semantic Search | Ähnlichkeitssuche implementieren | 6h |
 | Kontext-Optimierung | Relevanz-Scoring verbessern | 8h |
 | Performance-Tuning | Caching, Indexierung | 4h |
+
+**Alternative Optionen für Vector-Suche (MariaDB-kompatibel):**
+
+| Lösung | Typ | Vorteile | Nachteile |
+|--------|-----|----------|-----------|
+| **Qdrant** | Self-hosted | Schnell, einfache API, Docker-ready | Separater Container |
+| **ChromaDB** | In-process | Kein separater Service, Python-native | Nur für kleine Datensätze |
+| **Pinecone** | Cloud | Managed, skalierbar | Kosten, Vendor-Lock-in |
+| **FAISS** | Library | Schnell, etabliert | Komplexere Integration |
 
 ---
 
@@ -215,7 +227,7 @@ Woche 7-8:  Phase 3 (optional, bei Bedarf)
 |--------|----------|---------|
 | Entwicklung Phase 1-2 | ~40-60h | - |
 | Entwicklung Phase 3 | ~30-40h | - |
-| Server (Vector DB) | - | ~€10-20/Monat |
+| Server (Qdrant Container) | - | ~€10-20/Monat |
 | Datenrecherche | ~30-40h | ~2-4h/Quartal |
 | AI-Kosten (Embeddings) | - | ~€5-10/Monat |
 
