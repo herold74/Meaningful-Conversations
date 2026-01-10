@@ -683,12 +683,12 @@
   
   "narrative_generated_at": "Generated",
   
-  "profile_overwrite_warning_title": "Warning: Data Loss",
+  "profile_overwrite_warning_title": "Warning: Fresh Start",
   "profile_overwrite_sessions": "📊 Your profile has been refined through {{count}} coaching sessions.",
-  "profile_overwrite_loss_warning": "These individual adaptations are based on your actual behavior and cannot be recovered.",
-  "profile_overwrite_warning_question": "A new test will overwrite ALL previous refinements. Are you sure?",
-  "profile_overwrite_cancel": "Cancel",
-  "profile_overwrite_confirm": "Yes, start new test",
+  "profile_overwrite_loss_warning": "These individual adaptations are based on your actual behavior and will be considered when creating a new personality signature.",
+  "profile_overwrite_warning_question": "A new test means a FRESH START. Your current profile cannot be restored afterwards. Are you sure, or would you like to create a new signature first?",
+  "profile_overwrite_cancel": "Back to Signature",
+  "profile_overwrite_confirm": "Yes, start fresh",
   
   "refinement_title": "Profile Refinement",
   "refinement_description": "Based on {{count}} authentic sessions, we have the following refinements for your profile:",
