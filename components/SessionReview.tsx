@@ -287,15 +287,35 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return unlocked.includes('big5');
     }, [currentUser]);
 
+    // Headlines that should default to 'append' (adding new items) rather than 'replace_section'
+    const appendDefaultHeadlines = useMemo(() => [
+        'Achievable Next Steps',
+        '✅ Achievable Next Steps',
+        'Realisierbare nächste Schritte',
+        '✅ Realisierbare nächste Schritte'
+    ], []);
+
     const [appliedUpdates, setAppliedUpdates] = useState<Map<number, AppliedUpdatePayload>>(() => {
         return new Map(proposedUpdates.map((update, index): [number, AppliedUpdatePayload] => {
             const targetValue = hierarchicalKeyToValueMap.get(update.headline);
 
             if (targetValue) {
                 // The AI proposed a headline that matches an existing one.
-                // Use what the AI suggested, but convert 'create_headline' to 'append' since the headline exists.
-                // IMPORTANT: Do NOT override 'replace_section' to 'append' - this causes duplicates!
-                const type = update.type === 'create_headline' ? 'append' : update.type;
+                // For Next Steps: default to 'append' since we're adding new goals
+                // For other sections: use what the AI suggested
+                const isAppendDefault = appendDefaultHeadlines.some(h => 
+                    update.headline.toLowerCase().includes(h.toLowerCase())
+                );
+                
+                let type: 'append' | 'replace_section' | 'create_headline';
+                if (update.type === 'create_headline') {
+                    type = 'append';
+                } else if (isAppendDefault) {
+                    type = 'append'; // Default to append for Next Steps
+                } else {
+                    type = update.type;
+                }
+                
                 return [index, { type, targetHeadline: targetValue }];
             } else {
                 // The AI proposed a new headline.
@@ -319,9 +339,20 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 const originalUpdate = proposedUpdates[index];
                 const targetValue = hierarchicalKeyToValueMap.get(originalUpdate.headline);
                 if (targetValue) {
-                    // Use what the AI suggested, but convert 'create_headline' to 'append' since the headline exists.
-                    // IMPORTANT: Do NOT override 'replace_section' to 'append' - this causes duplicates!
-                    const type = originalUpdate.type === 'create_headline' ? 'append' : originalUpdate.type;
+                    // For Next Steps: default to 'append' since we're adding new goals
+                    const isAppendDefault = appendDefaultHeadlines.some(h => 
+                        originalUpdate.headline.toLowerCase().includes(h.toLowerCase())
+                    );
+                    
+                    let type: 'append' | 'replace_section' | 'create_headline';
+                    if (originalUpdate.type === 'create_headline') {
+                        type = 'append';
+                    } else if (isAppendDefault) {
+                        type = 'append';
+                    } else {
+                        type = originalUpdate.type;
+                    }
+                    
                     newMap.set(index, { type, targetHeadline: targetValue });
                 } else {
                     newMap.set(index, { type: 'create_headline', targetHeadline: originalUpdate.headline });
@@ -693,7 +724,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         </ul>
                         {selectedNextSteps.size < nextSteps.length && (
                             <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
-                                {t('sessionReview_nextSteps_partial') || `${nextSteps.length - selectedNextSteps.size} Schritt(e) werden nicht übernommen.`}
+                                ⚠️ {t('sessionReview_nextSteps_partial', { count: nextSteps.length - selectedNextSteps.size })}
                             </p>
                         )}
                     </div>
