@@ -22,6 +22,7 @@ model User {
   gamificationState         String?       @db.Text
   unlockedCoaches           String?       @db.Text
   isBetaTester              Boolean       @default(false)
+  isClient                  Boolean       @default(false)
   isAdmin                   Boolean       @default(false)
   coachingMode              String        @default("off") // off, dpc, dpfl
   createdAt                 DateTime      @default(now())
