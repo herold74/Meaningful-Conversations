@@ -372,6 +372,13 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
         return jsonResponse;
     }
     
+    // Log raw nextSteps section from context for debugging
+    const nextStepsMatch = context.match(/(?:✅\s*)?(?:Achievable Next Steps|Realisierbare nächste Schritte)[\s\S]*?(?=##|$)/i);
+    if (nextStepsMatch) {
+        console.log('📄 Raw Next Steps section from context:');
+        console.log(nextStepsMatch[0].substring(0, 500));
+    }
+    
     // Extract existing next steps from context
     const existingNextSteps = extractExistingItems(
         context, 
@@ -380,12 +387,15 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
     
     console.log(`📋 Found ${existingNextSteps.length} existing next steps in context`);
     if (existingNextSteps.length > 0) {
-        console.log('   Existing steps:', existingNextSteps.map(s => s.substring(0, 50) + '...'));
+        console.log('   Existing steps (full):', JSON.stringify(existingNextSteps, null, 2));
     }
     
     // Deduplicate nextSteps
     if (jsonResponse.nextSteps && Array.isArray(jsonResponse.nextSteps)) {
-        console.log(`📝 AI proposed ${jsonResponse.nextSteps.length} next steps`);
+        console.log(`📝 AI proposed ${jsonResponse.nextSteps.length} next steps:`);
+        jsonResponse.nextSteps.forEach((step, i) => {
+            console.log(`   ${i+1}. "${step.action}" (Deadline: ${step.deadline})`);
+        });
         const originalCount = jsonResponse.nextSteps.length;
         
         // First: Remove internal duplicates (AI proposing same step twice)
