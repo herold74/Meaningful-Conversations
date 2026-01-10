@@ -342,12 +342,21 @@ function extractExistingItems(context, sectionPattern) {
     const match = context.match(regex);
     if (!match) return [];
     
-    // Extract bullet points
+    // Extract bullet points, but filter out description lines and metadata
     const items = [];
     const bulletRegex = /^\s*[*\-•]\s*(.+)$/gm;
     let bulletMatch;
     while ((bulletMatch = bulletRegex.exec(match[0])) !== null) {
-        items.push(bulletMatch[1].trim());
+        const item = bulletMatch[1].trim();
+        
+        // Skip description/metadata lines (italic text, short generic phrases)
+        if (item.startsWith('*') && item.endsWith('*')) continue; // Italic markdown
+        if (item.toLowerCase().includes('specific, actionable')) continue;
+        if (item.toLowerCase().includes('tasks i have committed')) continue;
+        if (item.toLowerCase().includes('aufgaben, zu denen ich mich')) continue;
+        if (item.length < 20) continue; // Too short to be a real action item
+        
+        items.push(item);
     }
     return items;
 }
@@ -378,20 +387,35 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
     if (jsonResponse.nextSteps && Array.isArray(jsonResponse.nextSteps)) {
         console.log(`📝 AI proposed ${jsonResponse.nextSteps.length} next steps`);
         const originalCount = jsonResponse.nextSteps.length;
+        
+        // First: Remove internal duplicates (AI proposing same step twice)
+        const seenActions = new Set();
+        jsonResponse.nextSteps = jsonResponse.nextSteps.filter(step => {
+            const normalized = normalizeForComparison(step.action);
+            if (seenActions.has(normalized)) {
+                console.log(`🔄 Filtered internal duplicate: "${step.action.substring(0, 50)}..."`);
+                return false;
+            }
+            seenActions.add(normalized);
+            return true;
+        });
+        
+        // Second: Remove duplicates against existing context
         jsonResponse.nextSteps = jsonResponse.nextSteps.filter(step => {
             console.log(`   Checking: "${step.action.substring(0, 60)}..."`);
             const isDuplicate = existingNextSteps.some(existing => {
                 const similar = isSimilarText(step.action, existing);
                 if (similar) {
-                    console.log(`   ↳ MATCH with: "${existing.substring(0, 60)}..."`);
+                    console.log(`   ↳ MATCH with existing: "${existing.substring(0, 60)}..."`);
                 }
                 return similar;
             });
             if (isDuplicate) {
-                console.log(`🔄 Filtered duplicate nextStep: "${step.action.substring(0, 50)}..."`);
+                console.log(`🔄 Filtered context duplicate: "${step.action.substring(0, 50)}..."`);
             }
             return !isDuplicate;
         });
+        
         if (originalCount !== jsonResponse.nextSteps.length) {
             console.log(`✓ Deduplicated nextSteps: ${originalCount} → ${jsonResponse.nextSteps.length}`);
         } else {
