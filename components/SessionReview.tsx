@@ -151,9 +151,36 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     };
 
     // Get only selected next steps for context update
-    const getSelectedNextSteps = () => {
+    const getSelectedNextSteps = useCallback(() => {
         return nextSteps.filter((_, index) => selectedNextSteps.has(index));
-    };
+    }, [nextSteps, selectedNextSteps]);
+
+    // Create effective proposed updates that respect next step selection
+    const effectiveProposedUpdates = useMemo(() => {
+        const nextStepsHeadlines = [
+            'Achievable Next Steps',
+            '✅ Achievable Next Steps',
+            'Realisierbare nächste Schritte',
+            '✅ Realisierbare nächste Schritte'
+        ];
+        
+        return proposedUpdates.map(update => {
+            const isNextStepsUpdate = nextStepsHeadlines.some(headline => 
+                update.headline.toLowerCase().includes(headline.toLowerCase())
+            );
+            
+            if (isNextStepsUpdate && nextSteps.length > 0) {
+                // Only include selected steps in content
+                const selectedSteps = getSelectedNextSteps();
+                const selectedStepsContent = selectedSteps
+                    .map(step => `* ${step.action} (Deadline: ${step.deadline})`)
+                    .join('\n');
+                
+                return { ...update, content: selectedStepsContent };
+            }
+            return update;
+        });
+    }, [proposedUpdates, nextSteps, getSelectedNextSteps]);
 
     const handleRatingClick = (starValue: number) => {
         if (feedbackStatus !== 'idle') return;
@@ -228,9 +255,10 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     };
 
     const handleExportAllSteps = async () => {
-        if (nextSteps.length === 0) return;
+        const stepsToExport = getSelectedNextSteps();
+        if (stepsToExport.length === 0) return;
         
-        const result = await exportAllEvents(nextSteps, language);
+        const result = await exportAllEvents(stepsToExport, language);
         if (result.success) {
             if (result.count === 1) {
                 setCalendarExportStatus(t('calendar_export_success'));
@@ -332,47 +360,14 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         if (isInterviewReview) {
             return interviewResult || '';
         }
-        return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals);
-    }, [isInterviewReview, interviewResult, cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals]);
+        // Use effectiveProposedUpdates to respect next step selection
+        return buildUpdatedContext(cleanOriginalContext, effectiveProposedUpdates, appliedUpdates, completedSteps, accomplishedGoals);
+    }, [isInterviewReview, interviewResult, cleanOriginalContext, effectiveProposedUpdates, appliedUpdates, completedSteps, accomplishedGoals]);
 
-    // Filter context to include only selected next steps
-    const filteredContext = useMemo(() => {
-        if (!updatedContext || !nextSteps || nextSteps.length === 0) {
-            return updatedContext;
-        }
-        
-        // If all steps are selected, no filtering needed
-        if (selectedNextSteps.size === nextSteps.length) {
-            return updatedContext;
-        }
-        
-        // Get the action text of deselected steps
-        const deselectedActions = nextSteps
-            .filter((_, index) => !selectedNextSteps.has(index))
-            .map(step => step.action);
-        
-        if (deselectedActions.length === 0) {
-            return updatedContext;
-        }
-        
-        // Filter out deselected steps from the context
-        const lines = updatedContext.split('\n');
-        const filteredLines = lines.filter(line => {
-            const trimmedLine = line.trim();
-            // Check if this line is a bullet point that matches a deselected action
-            if (trimmedLine.startsWith('* ')) {
-                const lineContent = trimmedLine.substring(2); // Remove "* "
-                return !deselectedActions.some(action => lineContent.includes(action));
-            }
-            return true;
-        });
-        
-        return filteredLines.join('\n');
-    }, [updatedContext, nextSteps, selectedNextSteps]);
-
+    // updatedContext now already respects selectedNextSteps via effectiveProposedUpdates
     useEffect(() => {
-        setEditableContext(filteredContext);
-    }, [filteredContext]);
+        setEditableContext(updatedContext);
+    }, [updatedContext]);
 
     const addGamificationDataToContext = (context: string): string => {
         // Remove any old gamification data comment to ensure a clean slate.
@@ -742,15 +737,15 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     </div>
                 )}
 
-                {!isInterviewReview && proposedUpdates && proposedUpdates.length > 0 && (
+                {!isInterviewReview && effectiveProposedUpdates && effectiveProposedUpdates.length > 0 && (
                     <div>
                         <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-4 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_proposedUpdates')}</h2>
                         <div className="flex items-center gap-4 mb-3">
-                            <button onClick={() => setAppliedUpdates(new Map(proposedUpdates.map((update, index) => [index, { type: update.type, targetHeadline: hierarchicalKeyToValueMap.get(update.headline) || update.headline }])))} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
+                            <button onClick={() => setAppliedUpdates(new Map(effectiveProposedUpdates.map((update, index) => [index, { type: update.type, targetHeadline: hierarchicalKeyToValueMap.get(update.headline) || update.headline }])))} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
                             <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
                         </div>
                         <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
-                            {proposedUpdates.map((update, index) => {
+                            {effectiveProposedUpdates.map((update, index) => {
                                 const appliedUpdate = appliedUpdates.get(index);
                                 const isApplied = !!appliedUpdate;
                                 const isNewHeadline = appliedUpdate?.type === 'create_headline';
