@@ -951,7 +951,7 @@ const App: React.FC = () => {
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'personalitySurvey': return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} />;
+            case 'personalitySurvey': return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} currentUser={currentUser} />;
             case 'personalityProfile': return (
                 <PersonalityProfileView 
                     encryptionKey={encryptionKey}
