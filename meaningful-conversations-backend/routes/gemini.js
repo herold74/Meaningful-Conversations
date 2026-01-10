@@ -290,6 +290,125 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     }
 });
 
+/**
+ * Helper function to normalize text for comparison (remove punctuation, lowercase, trim)
+ */
+function normalizeForComparison(text) {
+    if (!text) return '';
+    return text
+        .toLowerCase()
+        .replace(/[.,!?;:()"\-–—]/g, '') // Remove punctuation
+        .replace(/\s+/g, ' ')            // Normalize whitespace
+        .trim();
+}
+
+/**
+ * Check if two strings are similar enough to be considered duplicates
+ * Uses normalized comparison with optional deadline stripping
+ */
+function isSimilarText(text1, text2, threshold = 0.85) {
+    // Strip deadline patterns like "(Deadline: 2026-01-11)" or "(bis: 2026-01-11)"
+    const stripDeadline = (t) => t.replace(/\s*\((?:Deadline|bis):\s*\d{4}-\d{2}-\d{2}\)/gi, '');
+    
+    const norm1 = normalizeForComparison(stripDeadline(text1));
+    const norm2 = normalizeForComparison(stripDeadline(text2));
+    
+    // Exact match after normalization
+    if (norm1 === norm2) return true;
+    
+    // Check if one contains the other (for slight variations)
+    if (norm1.includes(norm2) || norm2.includes(norm1)) return true;
+    
+    // Simple similarity check: compare word overlap
+    const words1 = new Set(norm1.split(' ').filter(w => w.length > 3));
+    const words2 = new Set(norm2.split(' ').filter(w => w.length > 3));
+    
+    if (words1.size === 0 || words2.size === 0) return false;
+    
+    const intersection = [...words1].filter(w => words2.has(w)).length;
+    const union = new Set([...words1, ...words2]).size;
+    const jaccardSimilarity = intersection / union;
+    
+    return jaccardSimilarity >= threshold;
+}
+
+/**
+ * Extract existing items from a markdown section
+ */
+function extractExistingItems(context, sectionPattern) {
+    if (!context) return [];
+    
+    const regex = new RegExp(sectionPattern + '[\\s\\S]*?(?=##|$)', 'i');
+    const match = context.match(regex);
+    if (!match) return [];
+    
+    // Extract bullet points
+    const items = [];
+    const bulletRegex = /^\s*[*\-•]\s*(.+)$/gm;
+    let bulletMatch;
+    while ((bulletMatch = bulletRegex.exec(match[0])) !== null) {
+        items.push(bulletMatch[1].trim());
+    }
+    return items;
+}
+
+/**
+ * Deduplicate AI analysis response against existing context
+ */
+function deduplicateAnalysisResponse(jsonResponse, context) {
+    if (!context || !jsonResponse) return jsonResponse;
+    
+    // Extract existing next steps from context
+    const existingNextSteps = extractExistingItems(
+        context, 
+        '(?:✅\\s*)?(?:Achievable Next Steps|Realisierbare nächste Schritte)'
+    );
+    
+    // Deduplicate nextSteps
+    if (jsonResponse.nextSteps && Array.isArray(jsonResponse.nextSteps)) {
+        const originalCount = jsonResponse.nextSteps.length;
+        jsonResponse.nextSteps = jsonResponse.nextSteps.filter(step => {
+            const isDuplicate = existingNextSteps.some(existing => 
+                isSimilarText(step.action, existing)
+            );
+            if (isDuplicate) {
+                console.log(`🔄 Filtered duplicate nextStep: "${step.action.substring(0, 50)}..."`);
+            }
+            return !isDuplicate;
+        });
+        if (originalCount !== jsonResponse.nextSteps.length) {
+            console.log(`✓ Deduplicated nextSteps: ${originalCount} → ${jsonResponse.nextSteps.length}`);
+        }
+    }
+    
+    // Deduplicate append updates
+    if (jsonResponse.updates && Array.isArray(jsonResponse.updates)) {
+        const originalCount = jsonResponse.updates.length;
+        jsonResponse.updates = jsonResponse.updates.filter(update => {
+            if (update.type !== 'append') return true;
+            
+            // Extract existing items from the target section
+            const existingInSection = extractExistingItems(context, update.headline.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            
+            // Check if the new content is a duplicate
+            const newContent = update.content.replace(/^\s*[*\-•]\s*/, '').trim();
+            const isDuplicate = existingInSection.some(existing => 
+                isSimilarText(newContent, existing)
+            );
+            
+            if (isDuplicate) {
+                console.log(`🔄 Filtered duplicate append to "${update.headline}": "${newContent.substring(0, 50)}..."`);
+            }
+            return !isDuplicate;
+        });
+        if (originalCount !== jsonResponse.updates.length) {
+            console.log(`✓ Deduplicated updates: ${originalCount} → ${jsonResponse.updates.length}`);
+        }
+    }
+    
+    return jsonResponse;
+}
+
 // POST /api/gemini/session/analyze
 router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
     const { history, context, lang } = req.body;
@@ -406,7 +525,10 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
             metadata: { provider: response.provider },
         });
         
-        res.json(jsonResponse);
+        // Deduplicate response against existing context before sending
+        const deduplicatedResponse = deduplicateAnalysisResponse(jsonResponse, context);
+        
+        res.json(deduplicatedResponse);
     } catch (error) {
         console.error('AI API error in /session/analyze:', error);
         
