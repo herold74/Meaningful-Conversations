@@ -110,6 +110,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [showRefinementModal, setShowRefinementModal] = useState(false);
     const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
     
+    // Track which next steps are selected (all selected by default)
+    const [selectedNextSteps, setSelectedNextSteps] = useState<Set<number>>(
+        new Set(nextSteps.map((_, index) => index))
+    );
+    
     // Show comfort check for DPFL
     // - In production: when user has coachingMode === 'dpfl'
     // - In test mode: when refinementPreview is available (indicates DPFL test scenario)
@@ -123,6 +128,32 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         }
     }, [currentUser?.coachingMode, isTestMode, refinementPreview]);
 
+    // Toggle individual next step selection
+    const toggleNextStep = (index: number) => {
+        setSelectedNextSteps(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(index)) {
+                newSet.delete(index);
+            } else {
+                newSet.add(index);
+            }
+            return newSet;
+        });
+    };
+
+    // Select/deselect all next steps
+    const toggleAllNextSteps = (selectAll: boolean) => {
+        if (selectAll) {
+            setSelectedNextSteps(new Set(nextSteps.map((_, index) => index)));
+        } else {
+            setSelectedNextSteps(new Set());
+        }
+    };
+
+    // Get only selected next steps for context update
+    const getSelectedNextSteps = () => {
+        return nextSteps.filter((_, index) => selectedNextSteps.has(index));
+    };
 
     const handleRatingClick = (starValue: number) => {
         if (feedbackStatus !== 'idle') return;
@@ -234,9 +265,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
             if (targetValue) {
                 // The AI proposed a headline that matches an existing one.
-                const isNextSteps = update.headline.includes(t('q_section_nextsteps_title')) || update.headline.includes('Achievable Next Steps');
-                // Default to 'append' for "Next Steps" or if the AI suggested creating but we found a match. Otherwise, use what the AI suggested.
-                const type = (update.type === 'create_headline' || isNextSteps) ? 'append' : update.type;
+                // Use what the AI suggested, but convert 'create_headline' to 'append' since the headline exists.
+                // IMPORTANT: Do NOT override 'replace_section' to 'append' - this causes duplicates!
+                const type = update.type === 'create_headline' ? 'append' : update.type;
                 return [index, { type, targetHeadline: targetValue }];
             } else {
                 // The AI proposed a new headline.
@@ -260,8 +291,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 const originalUpdate = proposedUpdates[index];
                 const targetValue = hierarchicalKeyToValueMap.get(originalUpdate.headline);
                 if (targetValue) {
-                    const isNextSteps = originalUpdate.headline.includes(t('q_section_nextsteps_title')) || originalUpdate.headline.includes('Achievable Next Steps');
-                    const type = (originalUpdate.type === 'create_headline' || isNextSteps) ? 'append' : originalUpdate.type;
+                    // Use what the AI suggested, but convert 'create_headline' to 'append' since the headline exists.
+                    // IMPORTANT: Do NOT override 'replace_section' to 'append' - this causes duplicates!
+                    const type = originalUpdate.type === 'create_headline' ? 'append' : originalUpdate.type;
                     newMap.set(index, { type, targetHeadline: targetValue });
                 } else {
                     newMap.set(index, { type: 'create_headline', targetHeadline: originalUpdate.headline });
@@ -303,10 +335,44 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return buildUpdatedContext(cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals);
     }, [isInterviewReview, interviewResult, cleanOriginalContext, proposedUpdates, appliedUpdates, completedSteps, accomplishedGoals]);
 
+    // Filter context to include only selected next steps
+    const filteredContext = useMemo(() => {
+        if (!updatedContext || !nextSteps || nextSteps.length === 0) {
+            return updatedContext;
+        }
+        
+        // If all steps are selected, no filtering needed
+        if (selectedNextSteps.size === nextSteps.length) {
+            return updatedContext;
+        }
+        
+        // Get the action text of deselected steps
+        const deselectedActions = nextSteps
+            .filter((_, index) => !selectedNextSteps.has(index))
+            .map(step => step.action);
+        
+        if (deselectedActions.length === 0) {
+            return updatedContext;
+        }
+        
+        // Filter out deselected steps from the context
+        const lines = updatedContext.split('\n');
+        const filteredLines = lines.filter(line => {
+            const trimmedLine = line.trim();
+            // Check if this line is a bullet point that matches a deselected action
+            if (trimmedLine.startsWith('* ')) {
+                const lineContent = trimmedLine.substring(2); // Remove "* "
+                return !deselectedActions.some(action => lineContent.includes(action));
+            }
+            return true;
+        });
+        
+        return filteredLines.join('\n');
+    }, [updatedContext, nextSteps, selectedNextSteps]);
 
     useEffect(() => {
-        setEditableContext(updatedContext);
-    }, [updatedContext]);
+        setEditableContext(filteredContext);
+    }, [filteredContext]);
 
     const addGamificationDataToContext = (context: string): string => {
         // Remove any old gamification data comment to ensure a clean slate.
@@ -583,23 +649,42 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
-                            <button
-                                onClick={handleExportAllSteps}
-                                className="flex items-center gap-2 px-3 py-1.5 text-sm text-accent-primary dark:text-accent-secondary hover:bg-accent-primary/10 dark:hover:bg-accent-secondary/10 rounded-md transition-colors"
-                                title={t('calendar_export_all')}
-                            >
-                                <CalendarIcon className="w-4 h-4" />
-                                <span className="hidden sm:inline">{t('calendar_export_all')}</span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => toggleAllNextSteps(selectedNextSteps.size !== nextSteps.length)}
+                                    className="text-xs text-accent-primary dark:text-accent-secondary hover:underline"
+                                >
+                                    {selectedNextSteps.size === nextSteps.length 
+                                        ? t('sessionReview_deselect_all') || 'Alle abwählen'
+                                        : t('sessionReview_select_all') || 'Alle auswählen'}
+                                </button>
+                                <button
+                                    onClick={handleExportAllSteps}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-accent-primary dark:text-accent-secondary hover:bg-accent-primary/10 dark:hover:bg-accent-secondary/10 rounded-md transition-colors"
+                                    title={t('calendar_export_all')}
+                                >
+                                    <CalendarIcon className="w-4 h-4" />
+                                    <span className="hidden sm:inline">{t('calendar_export_all')}</span>
+                                </button>
+                            </div>
                         </div>
                         {calendarExportStatus && (
                             <div className="mb-3 p-2 text-sm bg-accent-primary/10 dark:bg-accent-secondary/10 text-content-primary dark:text-content-primary rounded-md">
                                 {calendarExportStatus}
                             </div>
                         )}
+                        <p className="text-xs text-content-subtle dark:text-content-subtle mb-3 italic">
+                            {t('sessionReview_nextSteps_hint') || 'Wähle aus, welche Schritte übernommen werden sollen:'}
+                        </p>
                         <ul className="text-content-secondary dark:text-content-secondary space-y-2 list-none">
                             {nextSteps.map((step, index) => (
-                                <li key={index} className="flex items-start gap-2">
+                                <li key={index} className={`flex items-start gap-3 p-2 rounded-md transition-colors ${selectedNextSteps.has(index) ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800/50 opacity-60'}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedNextSteps.has(index)}
+                                        onChange={() => toggleNextStep(index)}
+                                        className="mt-1 w-4 h-4 accent-green-600 cursor-pointer"
+                                    />
                                     <button
                                         onClick={() => handleExportSingleStep(step.action, step.deadline)}
                                         className="flex-shrink-0 mt-0.5 p-1 text-accent-primary dark:text-accent-secondary hover:bg-accent-primary/10 dark:hover:bg-accent-secondary/10 rounded transition-colors"
@@ -607,10 +692,15 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                     >
                                         <CalendarIcon className="w-4 h-4" />
                                     </button>
-                                    <span><strong>{step.action}</strong> (Deadline: {step.deadline})</span>
+                                    <span className={selectedNextSteps.has(index) ? '' : 'line-through'}><strong>{step.action}</strong> (Deadline: {step.deadline})</span>
                                 </li>
                             ))}
                         </ul>
+                        {selectedNextSteps.size < nextSteps.length && (
+                            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+                                {t('sessionReview_nextSteps_partial') || `${nextSteps.length - selectedNextSteps.size} Schritt(e) werden nicht übernommen.`}
+                            </p>
+                        )}
                     </div>
                 )}
 
