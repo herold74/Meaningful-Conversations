@@ -626,7 +626,7 @@
   "profile_view_pdf_hint": "Generiere zuerst deine persönliche Signatur oben ↑",
   "profile_view_new_test": "Neue Evaluierung",
   "profile_view_info_title": "Hinweis",
-  "profile_view_info_text": "Dieses Profil wird für experimentelle Coaching-Modi mit Chloe verwendet. Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
+  "profile_view_info_text": "Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.",
 
   "menu_personality_profile": "Persönlichkeitsprofil",
   
@@ -1036,6 +1036,7 @@
 
   "profile_coaching_mode_title": "Coaching-Modus",
   "profile_coaching_mode_off": "Aus (Standard)",
+  "profile_coaching_mode_off_short": "Aus",
   "profile_coaching_mode_off_desc": "Dein Profil wird nicht verwendet. Klassisches Coaching ohne Personalisierung.",
   "profile_coaching_mode_dpc": "Dynamic Personality Coaching",
   "profile_coaching_mode_dpc_desc": "Dein Profil wird während Sessions genutzt, aber nicht verändert.",
