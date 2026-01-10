@@ -336,33 +336,57 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
         try {
             jsonResponse = JSON.parse(cleanedText);
         } catch (parseError) {
-            console.error('❌ Failed to parse AI response as JSON:', parseError.message);
-            console.error('   Provider:', response.provider);
-            console.error('   Raw response (first 500 chars):', response.text.substring(0, 500));
-            console.error('   Cleaned text (first 500 chars):', cleanedText.substring(0, 500));
-        
-            // Track API usage with actual model and provider used
-            const actualModel = response.model || modelName;
-            const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+            // First parse attempt failed - try Mistral-specific sanitization
+            // Mistral sometimes outputs malformed escape sequences like: "quote": \"text\"
+            // instead of: "quote": "text"
+            console.log('⚠️ First JSON parse failed, attempting Mistral sanitization...');
             
-            await trackApiUsage({
-                userId: userId || null,
-                isGuest: !userId,
-                endpoint: 'analyze',
-                model: actualModel,
-                botId: null,
-                inputTokens: tokenUsage.inputTokens,
-                outputTokens: tokenUsage.outputTokens,
-                durationMs,
-                success: false,
-                errorMessage: `JSON parse error: ${parseError.message}`,
-                metadata: { 
-                    provider: response.provider,
-                    rawResponsePreview: response.text.substring(0, 200)
-                },
-            });
+            try {
+                // Fix malformed escaped quotes outside of strings
+                // Pattern: ": \" at the start of a value should be ": "
+                // Pattern: \" at end of value before comma/newline should be "
+                let sanitizedText = cleanedText
+                    // Fix ": \" (colon followed by escaped quote) -> ": "
+                    .replace(/:\s*\\"/g, ': "')
+                    // Fix \", (escaped quote before comma) -> ",
+                    .replace(/\\",/g, '",')
+                    // Fix \" at end of line before } or ] -> "
+                    .replace(/\\"(\s*[}\]])/g, '"$1')
+                    // Fix \"\n (escaped quote before newline) -> "\n
+                    .replace(/\\"\s*\n/g, '"\n');
+                
+                jsonResponse = JSON.parse(sanitizedText);
+                console.log('✓ Mistral sanitization successful');
+            } catch (secondParseError) {
+                // Both attempts failed - log and throw
+                console.error('❌ Failed to parse AI response as JSON:', parseError.message);
+                console.error('   Provider:', response.provider);
+                console.error('   Raw response (first 500 chars):', response.text.substring(0, 500));
+                console.error('   Cleaned text (first 500 chars):', cleanedText.substring(0, 500));
             
-            throw new Error(`AI returned invalid JSON format: ${parseError.message}`);
+                // Track API usage with actual model and provider used
+                const actualModel = response.model || modelName;
+                const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
+                
+                await trackApiUsage({
+                    userId: userId || null,
+                    isGuest: !userId,
+                    endpoint: 'analyze',
+                    model: actualModel,
+                    botId: null,
+                    inputTokens: tokenUsage.inputTokens,
+                    outputTokens: tokenUsage.outputTokens,
+                    durationMs,
+                    success: false,
+                    errorMessage: `JSON parse error: ${parseError.message}`,
+                    metadata: { 
+                        provider: response.provider,
+                        rawResponsePreview: response.text.substring(0, 200)
+                    },
+                });
+                
+                throw new Error(`AI returned invalid JSON format: ${parseError.message}`);
+            }
         }
         
         // Track API usage with actual model and provider used
