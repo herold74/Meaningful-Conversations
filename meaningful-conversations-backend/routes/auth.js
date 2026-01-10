@@ -60,10 +60,10 @@ router.post('/register', async (req, res) => {
             // Users registering in 2025 get access until June 30, 2026
             accessExpiresAt = new Date('2026-06-30T23:59:59.000Z');
         } else {
-            // Users registering from 2026 onwards get 7 days free access
-            const sevenDaysFromNow = new Date(registrationDate);
-            sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-            accessExpiresAt = sevenDaysFromNow;
+            // Users registering from 2026 onwards get 4 weeks (28 days) free access
+            const fourWeeksFromNow = new Date(registrationDate);
+            fourWeeksFromNow.setDate(fourWeeksFromNow.getDate() + 28);
+            accessExpiresAt = fourWeeksFromNow;
         }
 
         const unsubscribeToken = newsletterConsent ? crypto.randomBytes(32).toString('hex') : null;
