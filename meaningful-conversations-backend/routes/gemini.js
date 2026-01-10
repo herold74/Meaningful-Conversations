@@ -356,7 +356,12 @@ function extractExistingItems(context, sectionPattern) {
  * Deduplicate AI analysis response against existing context
  */
 function deduplicateAnalysisResponse(jsonResponse, context) {
-    if (!context || !jsonResponse) return jsonResponse;
+    console.log('🔍 Starting deduplication check...');
+    
+    if (!context || !jsonResponse) {
+        console.log('⚠️ No context or response to deduplicate');
+        return jsonResponse;
+    }
     
     // Extract existing next steps from context
     const existingNextSteps = extractExistingItems(
@@ -364,13 +369,24 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
         '(?:✅\\s*)?(?:Achievable Next Steps|Realisierbare nächste Schritte)'
     );
     
+    console.log(`📋 Found ${existingNextSteps.length} existing next steps in context`);
+    if (existingNextSteps.length > 0) {
+        console.log('   Existing steps:', existingNextSteps.map(s => s.substring(0, 50) + '...'));
+    }
+    
     // Deduplicate nextSteps
     if (jsonResponse.nextSteps && Array.isArray(jsonResponse.nextSteps)) {
+        console.log(`📝 AI proposed ${jsonResponse.nextSteps.length} next steps`);
         const originalCount = jsonResponse.nextSteps.length;
         jsonResponse.nextSteps = jsonResponse.nextSteps.filter(step => {
-            const isDuplicate = existingNextSteps.some(existing => 
-                isSimilarText(step.action, existing)
-            );
+            console.log(`   Checking: "${step.action.substring(0, 60)}..."`);
+            const isDuplicate = existingNextSteps.some(existing => {
+                const similar = isSimilarText(step.action, existing);
+                if (similar) {
+                    console.log(`   ↳ MATCH with: "${existing.substring(0, 60)}..."`);
+                }
+                return similar;
+            });
             if (isDuplicate) {
                 console.log(`🔄 Filtered duplicate nextStep: "${step.action.substring(0, 50)}..."`);
             }
@@ -378,6 +394,8 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
         });
         if (originalCount !== jsonResponse.nextSteps.length) {
             console.log(`✓ Deduplicated nextSteps: ${originalCount} → ${jsonResponse.nextSteps.length}`);
+        } else {
+            console.log(`✓ No duplicates found in nextSteps`);
         }
     }
     
