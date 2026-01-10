@@ -228,7 +228,7 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 **📊 Adaptives Profil:**
 - Lernt aus Ihren Coaching-Sitzungen
 - Verfeinert sich automatisch über Zeit
-- Nach jeder Sitzung werden Sie gefragt, wie authentisch Sie waren
+- Nach jeder Sitzung werden Sie gefragt, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
 
 **🔒 Stabiles Profil:**
@@ -466,7 +466,7 @@ At the end of the test, you choose how your profile should evolve:
 **📊 Adaptive Profile:**
 - Learns from your coaching sessions
 - Refines itself automatically over time
-- After each session, you'll be asked how authentic you were
+- After each session, you'll be asked how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
 - Ideal for: Self-discovery & continuous growth
 
 **🔒 Stable Profile:**
