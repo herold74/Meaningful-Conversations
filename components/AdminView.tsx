@@ -809,12 +809,13 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
+                            <option disabled>── {t('admin_codes_section_passes')} ──</option>
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="ACCESS_PASS_3M">{t('admin_codes_unlock_access_pass_3m')}</option>
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
-                            <option disabled>---</option>
+                            <option disabled>── Features ──</option>
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
-                            <option disabled>---</option>
+                            <option disabled>── Coaches ──</option>
                             {botsForCodes.map(bot => {
                                 const key = bot.id === 'rob'
                                     ? 'admin_codes_unlock_rob'
@@ -824,7 +825,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                                 const displayName = key ? t(key) : bot.name;
                                 return <option key={bot.id} value={bot.id}>{displayName}</option>;
                             })}
-                            <option disabled>---</option>
+                            <option disabled>── Status ──</option>
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
                             <option value="client">{t('admin_codes_unlock_client')}</option>
                         </select>
