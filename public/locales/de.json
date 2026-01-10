@@ -1037,6 +1037,8 @@
   "profile_coaching_mode_title": "Coaching-Modus",
   "profile_coaching_mode_off": "Aus (Standard)",
   "profile_coaching_mode_off_short": "Aus",
+  "profile_session_singular": "Session",
+  "profile_session_plural": "Sessions",
   "profile_coaching_mode_off_desc": "Dein Profil wird nicht verwendet. Klassisches Coaching ohne Personalisierung.",
   "profile_coaching_mode_dpc": "Dynamic Personality Coaching",
   "profile_coaching_mode_dpc_desc": "Dein Profil wird während Sessions genutzt, aber nicht verändert.",
