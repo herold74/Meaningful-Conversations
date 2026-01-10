@@ -1,0 +1,13 @@
+id,name,category,region,country,phone,website,availability,description,cost,target_group,languages,tags,last_updated
+at-crisis-001,Telefonseelsorge Österreich,crisis,Österreich (bundesweit),AT,142,https://www.telefonseelsorge.at,24/7,Kostenlose anonyme Beratung bei Krisen und Einsamkeit,kostenlos,alle Altersgruppen,Deutsch,"Krise,Suizid,Einsamkeit,Angst,Depression",2026-01-10
+at-crisis-002,Psychiatrische Soforthilfe Wien,crisis,Wien,AT,01/31330,https://www.psd-wien.at,24/7,Psychiatrischer Notdienst für akute psychische Krisen,Kassenleistung,Erwachsene,"Deutsch,Englisch","Psychiatrie,Notfall,Krise,Psychose",2026-01-10
+at-crisis-003,Rat auf Draht,crisis,Österreich (bundesweit),AT,147,https://www.rataufdraht.at,24/7,Notruf für Kinder und Jugendliche,kostenlos,"Kinder,Jugendliche,Eltern",Deutsch,"Jugend,Familie,Mobbing,Gewalt",2026-01-10
+de-crisis-001,Telefonseelsorge Deutschland,crisis,Deutschland (bundesweit),DE,0800 111 0 111,https://www.telefonseelsorge.de,24/7,Kostenlose anonyme Beratung in Lebenskrisen,kostenlos,alle Altersgruppen,Deutsch,"Krise,Suizid,Einsamkeit,Depression",2026-01-10
+at-therapy-001,ÖGK Psychotherapie,therapy,Österreich (bundesweit),AT,,https://www.gesundheitskasse.at/psychotherapie,Reguläre Öffnungszeiten,Informationen zu kassenfinanzierten Therapieplätzen,Kassenleistung,ÖGK-Versicherte,Deutsch,"Therapie,Kasse,Psychotherapie",2026-01-10
+at-therapy-002,Psychologische Studierendenberatung,therapy,Österreich (bundesweit),AT,01/402 30 91,https://www.studierendenberatung.at,Mo-Fr Terminvereinbarung,Kostenlose psychologische Beratung für Studierende,kostenlos,Studierende,"Deutsch,Englisch","Studium,Prüfungsangst,Stress",2026-01-10
+at-counseling-001,Schuldnerberatung Wien,counseling,Wien,AT,01/330 88 13,https://www.schuldnerberatung-wien.at,"Mo-Fr 9-12, Di+Do 13-18",Kostenlose Beratung bei Schulden und finanziellen Problemen,kostenlos,Erwachsene in Wien,Deutsch,"Schulden,Finanzen,Privatkonkurs",2026-01-10
+at-counseling-002,Familienberatung Österreich,counseling,Österreich (bundesweit),AT,,https://www.familienberatung.gv.at,je nach Standort,Verzeichnis geförderter Familienberatungsstellen,kostenlos,"Familien,Paare,Eltern",Deutsch,"Familie,Erziehung,Trennung,Partnerschaft",2026-01-10
+at-selfhelp-001,Anonyme Alkoholiker Österreich,selfhelp,Österreich (bundesweit),AT,01/799 55 99,https://www.anonyme-alkoholiker.at,Meetings siehe Website,Selbsthilfegruppen für Menschen mit Alkoholproblemen,kostenlos,"Betroffene,Angehörige","Deutsch,Englisch","Alkohol,Sucht,Selbsthilfe",2026-01-10
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
