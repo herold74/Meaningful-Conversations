@@ -995,7 +995,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <div>
               <p className="text-sm">
                 <strong>{t('profile_view_refined_title') || 'Verfeinert'}:</strong>{' '}
-                {t('profile_view_refined_desc') || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
+                {t('profile_view_refined_desc', { count: profileMetadata.sessionCount }) || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
               </p>
             </div>
           </div>
