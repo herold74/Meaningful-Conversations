@@ -559,7 +559,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
         {/* Narrative Profile Section - Moved up */}
         {decryptedData.narrativeProfile ? (
-          <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden">
+          <div data-signature-section className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden">
             {/* Collapsible Header */}
             <button
               onClick={() => setIsNarrativeExpanded(!isNarrativeExpanded)}
@@ -600,7 +600,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
           </div>
         ) : decryptedData.narratives?.flowStory && decryptedData.narratives?.frictionStory ? (
-          <div className="mb-6 p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+          <div data-signature-section className="mb-6 p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
             <h3 className="text-xl font-bold mb-4 text-content-primary flex items-center gap-2">
               🧬 {t('narrative_profile_title') || 'Persönlichkeits-Signatur'}
             </h3>
@@ -971,8 +971,18 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
             
             <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Button onClick={() => setShowOverwriteWarning(false)} variant="secondary">
-                {t('profile_overwrite_cancel') || 'Abbrechen'}
+              <Button 
+                onClick={() => {
+                  setShowOverwriteWarning(false);
+                  setIsNarrativeExpanded(true); // Expand signature section
+                  // Scroll to signature section
+                  setTimeout(() => {
+                    document.querySelector('[data-signature-section]')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }} 
+                variant="secondary"
+              >
+                {t('profile_overwrite_cancel') || 'Zurück zur Signatur'}
               </Button>
               
               <Button
