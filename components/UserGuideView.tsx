@@ -238,14 +238,12 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
-### 7.5 Experimentelle Coaching-Modi mit Chloe
+### 7.5 Personalisiertes Coaching
 
-Mit einem aktiven Persönlichkeitsprofil schalten Sie erweiterte Coaching-Modi frei:
-- Chloe kann Ihre Persönlichkeitsmerkmale in das Coaching einbeziehen
-- Die Gesprächsführung wird auf Ihren Kommunikationsstil abgestimmt
-- Tiefere Einblicke durch personalisierte Reflexionsfragen
-
-Diese Modi sind als **experimentell** gekennzeichnet und werden kontinuierlich verbessert.
+Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches** auf Sie zugeschnitten:
+- Jeder Coach passt seinen Kommunikationsstil an Ihre Persönlichkeitsmerkmale an
+- Die Gesprächsführung berücksichtigt Ihre bevorzugte Art der Kommunikation
+- Bei einem adaptiven Profil schlagen die Coaches kontinuierlich Anpassungen Ihres Persönlichkeitsprofils vor, die auf Basis des Gesprächsverlaufs gewonnen werden. Auf diese Weise bieten die Coaches "Fremdbild"-Feedback, welches Ihr "Selbstbild" optimal ergänzt.
 `;
 
 const en_markdown = `## Introduction
@@ -478,14 +476,12 @@ At the end of the test, you choose how your profile should evolve:
 
 **Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
 
-### 7.5 Experimental Coaching Modes with Chloe
+### 7.5 Personalized Coaching
 
-With an active personality profile, you unlock enhanced coaching modes:
-- Chloe can incorporate your personality traits into coaching
-- Conversation style is adapted to your communication preferences
-- Deeper insights through personalized reflection questions
-
-These modes are marked as **experimental** and are continuously being improved.
+With an active personality profile, coaching is tailored to you with **all coaches**:
+- Every coach adapts their communication style to your personality traits
+- Conversation guidance considers your preferred way of communicating
+- With an adaptive profile, coaches continuously suggest adjustments to your personality profile based on conversation insights. This way, coaches provide "external perspective" feedback that optimally complements your "self-image".
 `;
 
 // Fix: Add the component definition and default export.
