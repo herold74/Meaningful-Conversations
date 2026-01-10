@@ -142,7 +142,7 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
         </h3>
 
         <p className="text-content-secondary mb-6">
-          {t('refinement_description') || `Basierend auf ${suggestions.sessionCount} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:`}
+          {t('refinement_description', { count: suggestions.sessionCount || 0 }) || `Basierend auf ${suggestions.sessionCount || 0} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:`}
         </p>
 
         {/* Show Changes */}
