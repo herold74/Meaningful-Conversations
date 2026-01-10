@@ -295,11 +295,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isGeneratingNarrative, setIsGeneratingNarrative] = useState(false);
   const [narrativeError, setNarrativeError] = useState<string | null>(null);
   const [isNarrativeExpanded, setIsNarrativeExpanded] = useState(false);
-  const [canUpdateNarrative, setCanUpdateNarrative] = useState(false);
-  const [wasNarrativeCollapsed, setWasNarrativeCollapsed] = useState(false);
   const [showNarrativeStoriesModal, setShowNarrativeStoriesModal] = useState(false);
   const [isUpdatingCoachingMode, setIsUpdatingCoachingMode] = useState(false);
-  const [isCoachingModeExpanded, setIsCoachingModeExpanded] = useState(false);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
@@ -422,10 +419,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         };
         setDecryptedData(updatedData);
         
-        // Auto-expand to show results and disable update button
+        // Auto-expand to show results
         setIsNarrativeExpanded(true);
-        setCanUpdateNarrative(false);
-        setWasNarrativeCollapsed(false);
         
         // Persist to backend - re-encrypt and save
         if (encryptionKey && profileMetadata) {
@@ -517,46 +512,48 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   return (
     <div className="py-10 animate-fadeIn max-w-4xl mx-auto">
       <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-content-primary">
-            {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
-          </h2>
-          {decryptedData?.adaptationMode && (
-            <span 
-              className="text-2xl cursor-help" 
-              title={decryptedData.adaptationMode === 'adaptive' 
-                ? (t('adaptation_adaptive_title') || 'Adaptives Profil') 
-                : (t('adaptation_stable_title') || 'Stabiles Profil')}
-            >
-              {decryptedData.adaptationMode === 'adaptive' ? '📊' : '🔒'}
-            </span>
-          )}
-        </div>
-        {/* Metadata */}
-        <div className="mb-6 p-4 bg-background-tertiary dark:bg-background-tertiary rounded-lg">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-content-secondary">{t('profile_view_test_type') || 'Test-Typ'}:</span>
-              <span className="ml-2 font-bold text-content-primary">
-                {profileMetadata.testType === 'RIEMANN' ? 'Riemann-Thomann' : 'OCEAN'}
+        {/* Compact Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-content-primary">
+              {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
+            </h2>
+            {decryptedData?.adaptationMode && (
+              <span 
+                className="text-2xl cursor-help" 
+                title={decryptedData.adaptationMode === 'adaptive' 
+                  ? (t('adaptation_adaptive_title') || 'Adaptives Profil') 
+                  : (t('adaptation_stable_title') || 'Stabiles Profil')}
+              >
+                {decryptedData.adaptationMode === 'adaptive' ? '📊' : '🔒'}
               </span>
-            </div>
-            <div className="space-y-1 text-right">
-              <div>
-                <span className="text-content-secondary">{t('profile_view_created') || 'Erstellt'}:</span>
-                <span className="ml-2 font-medium text-content-primary">
-                  {formatDate(profileMetadata.createdAt)}
+            )}
+          </div>
+          {/* Compact metadata line */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-content-secondary">
+            <span className="font-medium text-content-primary">
+              {profileMetadata.testType === 'RIEMANN' ? 'Riemann-Thomann' : 'OCEAN'}
+            </span>
+            <span className="text-content-tertiary">•</span>
+            <span>{t('profile_view_created') || 'Erstellt'}: {formatDate(profileMetadata.createdAt)}</span>
+            {profileMetadata.updatedAt && profileMetadata.updatedAt !== profileMetadata.createdAt && (
+              <>
+                <span className="text-content-tertiary">•</span>
+                <span className="text-green-600 dark:text-green-400">
+                  {t('profile_view_updated') || 'Aktualisiert'}: {formatDate(profileMetadata.updatedAt)}
                 </span>
-              </div>
-              {profileMetadata.updatedAt && profileMetadata.updatedAt !== profileMetadata.createdAt && (
-                <div>
-                  <span className="text-content-secondary">{t('profile_view_updated') || 'Aktualisiert'}:</span>
-                  <span className="ml-2 font-medium text-green-600 dark:text-green-400">
-                    {formatDate(profileMetadata.updatedAt)}
-                  </span>
-                </div>
-              )}
-            </div>
+              </>
+            )}
+            {profileMetadata.sessionCount > 0 && (
+              <>
+                <span className="text-content-tertiary">•</span>
+                <span className="text-green-600 dark:text-green-400">
+                  ✓ {profileMetadata.sessionCount} {profileMetadata.sessionCount === 1 
+                    ? (t('profile_session_singular') || 'Session') 
+                    : (t('profile_session_plural') || 'Sessions')}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -565,16 +562,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden">
             {/* Collapsible Header */}
             <button
-              onClick={() => {
-                if (isNarrativeExpanded) {
-                  // Collapsing - mark as collapsed
-                  setWasNarrativeCollapsed(true);
-                } else if (wasNarrativeCollapsed) {
-                  // Re-expanding after collapse - enable update button
-                  setCanUpdateNarrative(true);
-                }
-                setIsNarrativeExpanded(!isNarrativeExpanded);
-              }}
+              onClick={() => setIsNarrativeExpanded(!isNarrativeExpanded)}
               className="w-full p-4 flex items-center justify-between hover:bg-purple-100/50 dark:hover:bg-purple-900/30 transition-colors"
             >
               <h3 className="text-xl font-bold text-content-primary flex items-center gap-2">
@@ -592,26 +580,20 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </div>
             )}
             
-            {/* Update Button - only active after collapse/re-expand */}
+            {/* Update Button - always visible and active */}
             <div className="px-6 pb-4 flex items-center gap-3">
               <Button
                 onClick={() => setShowNarrativeStoriesModal(true)}
-                disabled={isGeneratingNarrative || !canUpdateNarrative}
+                disabled={isGeneratingNarrative}
                 size="sm"
                 loading={isGeneratingNarrative}
                 className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400"
-                title={!canUpdateNarrative ? (t('narrative_update_hint') || 'Klappe das Profil ein und wieder auf, um eine Aktualisierung zu ermöglichen') : ''}
               >
                 {isGeneratingNarrative 
                   ? (t('narrative_generating') || 'Generiere...')
                   : <>🔄 {t('narrative_update_button') || 'Signatur aktualisieren'}</>
                 }
               </Button>
-              {!canUpdateNarrative && !isGeneratingNarrative && (
-                <span className="text-gray-500 dark:text-gray-400 text-xs">
-                  {t('narrative_update_hint_short') || 'Ein-/Ausklappen zum Aktivieren'}
-                </span>
-              )}
               {narrativeError && (
                 <span className="text-red-600 dark:text-red-400 text-sm">{narrativeError}</span>
               )}
@@ -840,125 +822,67 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           </div>
         )}
 
-        {/* Coaching Mode Selection - Collapsible */}
-        <div className="mb-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800 overflow-hidden">
-          {/* Collapsible Header */}
-          <button
-            onClick={() => setIsCoachingModeExpanded(!isCoachingModeExpanded)}
-            className="w-full p-4 flex items-center justify-between hover:bg-green-100/50 dark:hover:bg-green-900/30 transition-colors"
-          >
-            <h3 className="text-lg font-semibold text-content-primary flex items-center gap-2">
-              🧪 {t('profile_coaching_mode_title') || 'Coaching-Modus'}
-              <span className="text-sm font-normal text-content-secondary">
-                ({currentCoachingMode === 'off' 
-                  ? (t('profile_coaching_mode_off_short') || 'Aus')
-                  : currentCoachingMode.toUpperCase()})
+        {/* Coaching Mode - Compact Segment Control */}
+        <div className="mb-6 p-4 bg-background-tertiary dark:bg-background-tertiary rounded-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">⚙️</span>
+              <span className="font-medium text-content-primary">
+                {t('profile_coaching_mode_title') || 'Coaching-Modus'}
               </span>
-            </h3>
-            <span className={`text-2xl transition-transform ${isCoachingModeExpanded ? 'rotate-180' : ''}`}>
-              ▼
-            </span>
-          </button>
-          
-          {/* Collapsible Content */}
-          {isCoachingModeExpanded && (
-            <div className="px-4 pb-4">
-              <div className="space-y-3">
-                {/* Off Mode */}
-                <label 
-                  className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    currentCoachingMode === 'off' 
-                      ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
-                      : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
-                  } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="coachingMode"
-                    value="off"
-                    checked={currentCoachingMode === 'off'}
-                    onChange={() => handleCoachingModeChange('off')}
-                    disabled={isUpdatingCoachingMode}
-                    className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-content-primary">
-                      {t('profile_coaching_mode_off') || 'Aus (Standard)'}
-                    </div>
-                    <p className="text-sm text-content-secondary mt-0.5">
-                      {t('profile_coaching_mode_off_desc') || 'Dein Profil wird nicht verwendet. Klassisches Coaching ohne Personalisierung.'}
-                    </p>
-                  </div>
-                </label>
-                
-                {/* DPC Mode */}
-                <label 
-                  className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    currentCoachingMode === 'dpc' 
-                      ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
-                      : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
-                  } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="coachingMode"
-                    value="dpc"
-                    checked={currentCoachingMode === 'dpc'}
-                    onChange={() => handleCoachingModeChange('dpc')}
-                    disabled={isUpdatingCoachingMode}
-                    className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-content-primary">
-                      DPC <span className="font-normal text-content-secondary">({t('profile_coaching_mode_dpc') || 'Dynamic Personality Coaching'})</span>
-                    </div>
-                    <p className="text-sm text-content-secondary mt-0.5">
-                      {t('profile_coaching_mode_dpc_desc') || 'Dein Profil wird während Sessions genutzt, aber nicht verändert.'}
-                    </p>
-                  </div>
-                </label>
-                
-                {/* DPFL Mode */}
-                <label 
-                  className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    currentCoachingMode === 'dpfl' 
-                      ? 'bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400' 
-                      : 'bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600'
-                  } ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''} ${
-                    decryptedData?.adaptationMode === 'stable' ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="coachingMode"
-                    value="dpfl"
-                    checked={currentCoachingMode === 'dpfl'}
-                    onChange={() => handleCoachingModeChange('dpfl')}
-                    disabled={isUpdatingCoachingMode || decryptedData?.adaptationMode === 'stable'}
-                    className="mt-1 w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-content-primary">
-                      DPFL <span className="font-normal text-content-secondary">({t('profile_coaching_mode_dpfl') || 'Dynamic Personality-Focused Learning'})</span>
-                    </div>
-                    <p className="text-sm text-content-secondary mt-0.5">
-                      {t('profile_coaching_mode_dpfl_desc') || 'Dein Profil wird genutzt UND kann nach jeder Session verfeinert werden.'}
-                    </p>
-                    {decryptedData?.adaptationMode === 'stable' && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                        ⚠️ {t('profile_coaching_mode_dpfl_requires_adaptive') || 'Erfordert ein adaptives Profil'}
-                      </p>
-                    )}
-                  </div>
-                </label>
-              </div>
-              
-              {/* Info text */}
-              <p className="mt-4 text-xs text-content-tertiary flex items-center gap-1">
-                ℹ️ {t('profile_coaching_mode_info') || 'Du kannst jederzeit wechseln. Gesammelte Verfeinerungen bleiben erhalten.'}
-              </p>
             </div>
-          )}
+            
+            {/* Segment Control */}
+            <div className={`flex rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 ${isUpdatingCoachingMode ? 'opacity-50' : ''}`}>
+              <button
+                onClick={() => handleCoachingModeChange('off')}
+                disabled={isUpdatingCoachingMode}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  currentCoachingMode === 'off'
+                    ? 'bg-gray-600 text-white dark:bg-gray-500'
+                    : 'bg-white dark:bg-gray-800 text-content-secondary hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title={t('profile_coaching_mode_off_desc') || 'Klassisches Coaching ohne Personalisierung'}
+              >
+                {t('profile_coaching_mode_off_short') || 'Aus'}
+              </button>
+              <button
+                onClick={() => handleCoachingModeChange('dpc')}
+                disabled={isUpdatingCoachingMode}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                  currentCoachingMode === 'dpc'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-content-secondary hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title={t('profile_coaching_mode_dpc_desc') || 'Profil wird genutzt, aber nicht verändert'}
+              >
+                DPC
+              </button>
+              <button
+                onClick={() => handleCoachingModeChange('dpfl')}
+                disabled={isUpdatingCoachingMode || decryptedData?.adaptationMode === 'stable'}
+                className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                  currentCoachingMode === 'dpfl'
+                    ? 'bg-green-600 text-white'
+                    : decryptedData?.adaptationMode === 'stable'
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                      : 'bg-white dark:bg-gray-800 text-content-secondary hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title={decryptedData?.adaptationMode === 'stable' 
+                  ? (t('profile_coaching_mode_dpfl_requires_adaptive') || 'Erfordert adaptives Profil')
+                  : (t('profile_coaching_mode_dpfl_desc') || 'Profil wird genutzt und verfeinert')}
+              >
+                DPFL
+              </button>
+            </div>
+          </div>
+          
+          {/* Mode description */}
+          <p className="mt-2 text-xs text-content-tertiary">
+            {currentCoachingMode === 'off' && (t('profile_coaching_mode_off_desc') || 'Klassisches Coaching ohne Personalisierung')}
+            {currentCoachingMode === 'dpc' && (t('profile_coaching_mode_dpc_desc') || 'Profil wird während Sessions genutzt, aber nicht verändert')}
+            {currentCoachingMode === 'dpfl' && (t('profile_coaching_mode_dpfl_desc') || 'Profil wird genutzt UND nach jeder Session verfeinert')}
+          </p>
         </div>
 
         {/* Actions */}
@@ -996,25 +920,10 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           </Button>
         </div>
 
-        {/* Info Box - styled like AboutView, vertically centered */}
-        <div className="mt-6 p-4 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-center gap-3">
-          <InfoIcon className="w-6 h-6 flex-shrink-0" />
-          <p className="text-sm">
-            <strong>{t('profile_view_info_title') || 'Hinweis'}:</strong>{' '}
-            {t('profile_view_info_text') || 'Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
-          </p>
-        </div>
-        
-        {/* Session Refinement Info - styled like AboutView, vertically centered */}
-        {profileMetadata && profileMetadata.sessionCount > 0 && (
-          <div className="mt-4 p-4 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-center gap-3">
-            <InfoIcon className="w-6 h-6 flex-shrink-0" />
-            <p className="text-sm">
-              <strong>{t('profile_view_refined_title') || 'Verfeinert'}:</strong>{' '}
-              {t('profile_view_refined_desc', { count: profileMetadata.sessionCount }) || `Dieses Profil wurde durch ${profileMetadata.sessionCount} authentische Sessions verfeinert.`}
-            </p>
-          </div>
-        )}
+        {/* Compact Info Line */}
+        <p className="mt-6 text-center text-xs text-content-tertiary">
+          {t('profile_view_info_text') || 'Du kannst jederzeit einen neuen Test machen, um dein Profil zu aktualisieren.'}
+        </p>
       </div>
       
       {/* Overwrite Warning Modal */}
