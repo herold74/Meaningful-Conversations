@@ -682,12 +682,12 @@
   
   "narrative_generated_at": "Generiert",
   
-  "profile_overwrite_warning_title": "Achtung: Datenverlust",
+  "profile_overwrite_warning_title": "Achtung: Neubeginn",
   "profile_overwrite_sessions": "📊 Dein Profil wurde durch {{count}} Coaching-Sessions verfeinert.",
-  "profile_overwrite_loss_warning": "Diese individuellen Anpassungen basieren auf deinem echten Verhalten und können nicht wiederhergestellt werden.",
-  "profile_overwrite_warning_question": "Ein neuer Test überschreibt ALLE bisherigen Verfeinerungen. Bist du sicher?",
-  "profile_overwrite_cancel": "Abbrechen",
-  "profile_overwrite_confirm": "Ja, neuen Test starten",
+  "profile_overwrite_loss_warning": "Diese individuellen Anpassungen basieren auf deinem echten Verhalten und werden bei der Erstellung einer neuen Persönlichkeits-Signatur berücksichtigt.",
+  "profile_overwrite_warning_question": "Ein neuer Test bedeutet einen NEUBEGINN. Das bisherige Profil kann nachträglich nicht wieder hergestellt werden. Bist du sicher, oder möchtest du vorher eine neue Signatur erstellen?",
+  "profile_overwrite_cancel": "Zurück zur Signatur",
+  "profile_overwrite_confirm": "Ja, Neubeginn starten",
   
   "refinement_title": "Profil-Verfeinerung",
   "refinement_description": "Basierend auf {{count}} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:",
