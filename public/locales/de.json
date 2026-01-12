@@ -408,6 +408,8 @@
   "admin_runner_run": "Test starten",
   "admin_support_tickets_title": "Support-Tickets",
   "admin_feedback_tab": "Feedback",
+  "admin_users_title": "Benutzer",
+  "admin_newsletter_title": "Newsletter",
   "admin_search_users_placeholder": "Benutzer nach E-Mail suchen...",
   "admin_no_users_yet": "Es haben sich noch keine Benutzer registriert.",
   "admin_no_users_found": "Keine Benutzer gefunden, die Ihrer Suche entsprechen.",
@@ -1134,5 +1136,11 @@
   "newsletter_history_successful": "erfolgreich",
   "newsletter_history_failed": "fehlgeschlagen",
   "newsletter_history_of_recipients": "von {{count}} Empfängern",
-  "newsletter_history_show_errors": "Fehler anzeigen"
+  "newsletter_history_show_errors": "Fehler anzeigen",
+  
+  "context_region": "Region / Land",
+  "context_region_placeholder": "z.B. Österreich - Wien, Deutschland - Bayern, Schweiz",
+  "context_region_hint": "Optional: Hilft uns, bei Bedarf auf lokale Hilfsangebote zu verweisen",
+  "crisis_contact_manualmode": "Persönliches Coaching - manualmode.at",
+  "crisis_regional_resources": "Lokale Ressourcen für {{region}}"
 }
