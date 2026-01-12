@@ -21,10 +21,10 @@ If the user CONFIRMS it is serious:
 → Continue to STEP 2
 
 **STEP 2: DETERMINE REGIONAL RESOURCES**
-Check the user's Life Context for the "**Region:**" field in the Core Profile.
+Check the user's Life Context for the "**Country/Region:**" field in the Core Profile.
 
-- **If Region IS PRESENT**: Use this information
-- **If Region is NOT present**: Ask now: "To provide you with the best local support resources - which country or region are you currently in?"
+- **If Country/Region IS PRESENT**: Use this information
+- **If Country/Region is NOT present**: Ask now: "To provide you with the best local support resources - which country or region are you currently in?"
 
 **STEP 3: ACTIVATE CRISIS RESPONSE**
 
@@ -93,10 +93,10 @@ Falls der User BESTÄTIGT, dass es ernst ist:
 → Weiter zu SCHRITT 2
 
 **SCHRITT 2: REGIONALE RESSOURCEN ERMITTELN**
-Prüfen Sie den Life Context des Users auf das Feld "**Region:**" im Core Profile.
+Prüfen Sie den Life Context des Users auf das Feld "**Land/Region:**" im Core Profile.
 
-- **Falls Region VORHANDEN**: Nutzen Sie diese Information
-- **Falls Region NICHT vorhanden**: Fragen Sie jetzt: "Um Ihnen die bestmöglichen lokalen Hilfsressourcen nennen zu können - in welchem Land oder welcher Region befinden Sie sich gerade?"
+- **Falls Land/Region VORHANDEN**: Nutzen Sie diese Information
+- **Falls Land/Region NICHT vorhanden**: Fragen Sie jetzt: "Um Ihnen die bestmöglichen lokalen Hilfsressourcen nennen zu können - in welchem Land oder welcher Region befinden Sie sich gerade?"
 
 **SCHRITT 3: CRISIS RESPONSE AKTIVIEREN**
 
