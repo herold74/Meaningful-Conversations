@@ -1094,7 +1094,7 @@
   "profile_coaching_mode_dpc": "Dynamic Personality Coaching",
   "profile_coaching_mode_dpc_desc": "Dein Profil wird während Sessions genutzt, aber nicht verändert.",
   "profile_coaching_mode_dpfl": "Dynamic Personality-Focused Learning",
-  "profile_coaching_mode_dpfl_desc": "Dein Profil wird genutzt UND kann nach jeder Session verfeinert werden.",
+  "profile_coaching_mode_dpfl_desc": "Dein Profil wird genutzt UND kann ab der zweiten Session vollständig verfeinert werden.",
   "profile_coaching_mode_dpfl_requires_adaptive": "Erfordert ein adaptives Profil",
   "profile_coaching_mode_info": "Du kannst jederzeit wechseln. Gesammelte Verfeinerungen bleiben erhalten.",
 
@@ -1138,12 +1138,12 @@
   "newsletter_history_of_recipients": "von {{count}} Empfängern",
   "newsletter_history_show_errors": "Fehler anzeigen",
   
-  "context_region": "Land/Region",
-  "context_region_placeholder": "z.B. Österreich - Wien, Deutschland - Bayern, Schweiz",
-  "context_region_hint": "Optional: Hilft uns, bei Bedarf auf lokale Hilfsangebote zu verweisen",
+  "context_region": "Land / Bundesland",
+  "context_region_placeholder": "z.B. Österreich - Wien",
+  "context_region_hint": "Das hilft uns, bei Bedarf lokale Hilfsangebote zu nennen.",
   "crisis_contact_manualmode": "Persönliches Coaching - manualmode.at",
   "crisis_regional_resources": "Lokale Ressourcen für {{region}}",
   
-  "q_field_region_label": "Land/Region",
-  "q_field_region_prompt": "Optional: In welchem Land oder welcher Region leben Sie? (z.B. Österreich - Wien, Deutschland - Bayern, Schweiz). Hilft uns, bei Bedarf lokale Hilfsangebote zu nennen."
+  "q_field_region_label": "Land / Bundesland",
+  "q_field_region_prompt": "z.B. Österreich - Wien. Das hilft uns, bei Bedarf lokale Hilfsangebote zu nennen."
 }

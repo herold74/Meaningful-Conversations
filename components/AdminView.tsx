@@ -216,6 +216,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const [activeTab, setActiveTab] = useState<AdminTab>('users');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isUsersExpanded, setIsUsersExpanded] = useState(false);
+    const [isNewsletterExpanded, setIsNewsletterExpanded] = useState(false);
     const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
     const [users, setUsers] = useState<User[]>([]);
@@ -663,14 +665,29 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     
     const renderUsers = () => (
         <div className="space-y-4">
-            <input 
-                type="search"
-                value={userSearchQuery}
-                onChange={e => setUserSearchQuery(e.target.value)}
-                placeholder={t('admin_search_users_placeholder')}
-                className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
-            />
-             {filteredUsers.length > 0 ? (
+            {/* Users Section Header */}
+            <button
+                onClick={() => setIsUsersExpanded(!isUsersExpanded)}
+                className="w-full flex items-center justify-between p-4 bg-background-secondary dark:bg-background-tertiary border border-border-primary rounded-lg hover:bg-background-tertiary dark:hover:bg-gray-800 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <UsersIcon className="w-6 h-6 text-content-primary" />
+                    <h2 className="text-lg font-bold text-content-primary">{t('admin_users_title')}</h2>
+                    <span className="text-sm text-content-subtle">({users.length})</span>
+                </div>
+                {isUsersExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+            </button>
+
+            {isUsersExpanded && (
+                <div className="space-y-4 animate-fadeIn">
+                    <input 
+                        type="search"
+                        value={userSearchQuery}
+                        onChange={e => setUserSearchQuery(e.target.value)}
+                        placeholder={t('admin_search_users_placeholder')}
+                        className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                    />
+                    {filteredUsers.length > 0 ? (
                 <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-900/50 uppercase text-xs text-gray-500 dark:text-gray-400 sticky top-0">
@@ -790,14 +807,31 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         </tbody>
                     </table>
                 </div>
-            ) : (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p>{users.length > 0 ? t('admin_no_users_found') : t('admin_no_users_yet')}</p>
+                    ) : (
+                        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                            <p>{users.length > 0 ? t('admin_no_users_found') : t('admin_no_users_yet')}</p>
+                        </div>
+                    )}
                 </div>
             )}
             
-            {/* Newsletter Section */}
-            <NewsletterPanel />
+            {/* Newsletter Section Header */}
+            <button
+                onClick={() => setIsNewsletterExpanded(!isNewsletterExpanded)}
+                className="w-full flex items-center justify-between p-4 bg-background-secondary dark:bg-background-tertiary border border-border-primary rounded-lg hover:bg-background-tertiary dark:hover:bg-gray-800 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <InboxIcon className="w-6 h-6 text-content-primary" />
+                    <h2 className="text-lg font-bold text-content-primary">{t('admin_newsletter_title')}</h2>
+                </div>
+                {isNewsletterExpanded ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+            </button>
+
+            {isNewsletterExpanded && (
+                <div className="animate-fadeIn">
+                    <NewsletterPanel />
+                </div>
+            )}
         </div>
     );
     

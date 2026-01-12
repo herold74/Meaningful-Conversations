@@ -196,7 +196,7 @@ const templates = {
 *High-level, stable information about me.*
 
 **I am...**: 
-**Country/Region**: 
+**Country / State**: 
 **Core Values**: 
 **General Sentiment**: 
 
@@ -260,7 +260,7 @@ const templates = {
 *Allgemeine, stabile Informationen über mich.*
 
 **Ich bin...**: 
-**Land/Region**: 
+**Land / Bundesland**: 
 **Grundwerte**: 
 **Allgemeine Stimmung**: 
 

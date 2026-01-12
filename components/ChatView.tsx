@@ -94,10 +94,11 @@ interface CoachInfoModalProps {
   bot: Bot;
   isOpen: boolean;
   onClose: () => void;
+  coachingMode: 'off' | 'dpc' | 'dpfl';
 }
 
-const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose }) => {
-    const { language } = useLocalization();
+const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, coachingMode }) => {
+    const { language, t } = useLocalization();
     if (!isOpen) return null;
 
     const botDescription = language === 'de' ? bot.description_de : bot.description;
@@ -130,6 +131,23 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose })
           ))}
         </div>
         <p className="mt-2 text-content-secondary leading-relaxed">{botDescription}</p>
+        
+        {/* Coaching Mode Info */}
+        {coachingMode !== 'off' && (
+          <div className="mt-4 p-3 bg-background-tertiary dark:bg-background-primary border border-border-primary rounded-lg">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-lg font-bold text-content-primary">
+                {coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
+              </span>
+            </div>
+            <p className="text-xs text-content-secondary leading-relaxed">
+              {coachingMode === 'dpc' 
+                ? t('profile_coaching_mode_dpc_desc')
+                : t('profile_coaching_mode_dpfl_desc')
+              }
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -360,14 +378,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         if (ttsMode === 'server' && selectedVoiceURI) {
           // User has a server voice selected
           if (!serverAvailable) {
-            // Server not available - switch to auto mode
-            console.warn('[TTS Init] Saved server voice unavailable, switching to auto mode');
-            setIsAutoMode(true);
+            // Server not available - temporarily use local fallback
+            console.warn('[TTS Init] Server unavailable, temporarily using local (keeping saved preference)');
             
-            // Use local fallback
-            setSelectedVoiceURI(null);
+            // Temporarily use local fallback for this session
             setTtsMode('local');
-            saveLanguageVoiceSettings('local', null, true);
+            // DO NOT clear selectedVoiceURI or overwrite localStorage
+            // The user's server voice preference stays saved and will be retried next time
           } else {
             // Server available, keep selection
           }
@@ -375,8 +392,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // User has a local voice selected - check if it exists
           const voiceExists = window.speechSynthesis.getVoices().some(v => v.voiceURI === selectedVoiceURI);
           if (!voiceExists) {
-            // Local voice not available - switch to auto mode
-            console.warn('[TTS Init] Saved local voice unavailable, switching to auto mode');
+            // Local voice not available anymore (browser update, different device, etc.)
+            // Clear it permanently since local voices are device-specific
+            console.warn('[TTS Init] Saved local voice no longer exists, resetting to auto mode');
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
             saveLanguageVoiceSettings('local', null, true);
@@ -405,13 +423,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
       } catch (error) {
         console.warn('[TTS Init] Could not check voice availability:', error);
-        // On error, if user had a server voice selected, switch to auto
+        // On error, if user had a server voice selected, temporarily fall back to local
+        // BUT: Keep the saved preference in localStorage for next time!
         if (ttsMode === 'server') {
-          console.warn('[TTS Init] Switching to auto mode due to error');
-          setIsAutoMode(true);
+          console.warn('[TTS Init] Temporarily switching to local mode (keeping saved preference)');
+          // Temporarily use local mode for this session
           setTtsMode('local');
-          setSelectedVoiceURI(null);
-          saveLanguageVoiceSettings('local', null, true);
+          // DO NOT clear selectedVoiceURI or overwrite localStorage
+          // The user's preference stays saved and will be retried next session
         }
       }
     };
@@ -614,7 +633,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         audioRef.current = audio;
         
         // Set up event handlers
-        audio.addEventListener('play', () => setTtsStatus('speaking'));
+        audio.addEventListener('play', () => {
+          setTtsStatus('speaking');
+          setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
+        });
         audio.addEventListener('pause', () => {
           // Only set paused if not ended (ended also triggers pause)
           if (!audio.ended) setTtsStatus('paused');
@@ -636,8 +658,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         audio.src = audioUrl;
         await audio.play();
-        
-        setIsLoadingAudio(false);
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
         setIsLoadingAudio(false);
@@ -654,6 +674,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // Local TTS mode (Web Speech API)
     if (!window.speechSynthesis) return;
     
+    setIsLoadingAudio(true); // Show spinner while preparing local TTS
+    
     window.speechSynthesis.cancel();
     
     // Wait for cancel to complete (browser bug workaround)
@@ -663,6 +685,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     utterance.onstart = () => {
       setTtsStatus('speaking');
+      setIsLoadingAudio(false); // Hide spinner when speech starts
     };
     utterance.onend = () => {
       setTtsStatus('idle');
@@ -670,6 +693,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     utterance.onerror = (event) => {
       console.error('[TTS] Local TTS error:', event);
       setTtsStatus('idle');
+      setIsLoadingAudio(false); // Hide spinner on error
     };
     
     let finalVoice: SpeechSynthesisVoice | null = null;
@@ -1405,20 +1429,6 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
                 <div className="min-w-0 flex items-center gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
-                    {/* Responsive coaching mode badge */}
-                    {coachingMode && coachingMode !== 'off' && (
-                        <span 
-                            className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shrink-0"
-                            title={coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
-                        >
-                            {/* Mobile: Only icon */}
-                            <span className="sm:hidden">🧪</span>
-                            {/* Desktop: Icon + Text */}
-                            <span className="hidden sm:inline">
-                                🧪 {coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
-                            </span>
-                        </span>
-                    )}
                 </div>
             </button>
         </div>
@@ -1687,6 +1697,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         bot={bot}
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
+        coachingMode={coachingMode}
     />
      <FeedbackModal
         isOpen={isFeedbackModalOpen}
