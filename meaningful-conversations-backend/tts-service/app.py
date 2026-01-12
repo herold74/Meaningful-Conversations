@@ -73,7 +73,7 @@ def synthesize_with_piper(text, model, length_scale, speaker=None):
             cmd,
             input=text.encode('utf-8'),
             capture_output=True,
-            timeout=15
+            timeout=45  # Increased from 15s to handle longer texts (Gunicorn timeout is 60s)
         )
         
         if result.returncode != 0:
@@ -103,7 +103,7 @@ def synthesize():
             return jsonify({'error': 'Text is required'}), 400
         
         # Synthesize with Piper
-            audio_data = synthesize_with_piper(text, model, length_scale, speaker)
+        audio_data = synthesize_with_piper(text, model, length_scale, speaker)
         
         # Metrics
         duration_ms = int((time.time() - start_time) * 1000)
@@ -143,17 +143,17 @@ def synthesize_stream():
         if not text:
             return jsonify({'error': 'Text is required'}), 400
         
-            # Piper doesn't need streaming, just return normal synthesis
-            audio_data = synthesize_with_piper(text, model, length_scale, None)
-            duration_ms = int((time.time() - start_time) * 1000)
-            logger.info(f"TTS Success: {duration_ms}ms, {len(audio_data)} bytes, engine=piper")
-            
-            return Response(audio_data, mimetype='audio/wav', headers={
-                'X-TTS-Duration-Ms': str(duration_ms),
-                'X-Audio-Size-Bytes': str(len(audio_data)),
-                'X-TTS-Engine': 'piper',
-                'Cache-Control': 'public, max-age=3600'
-            })
+        # Piper doesn't need streaming, just return normal synthesis
+        audio_data = synthesize_with_piper(text, model, length_scale, None)
+        duration_ms = int((time.time() - start_time) * 1000)
+        logger.info(f"TTS Success: {duration_ms}ms, {len(audio_data)} bytes, engine=piper")
+        
+        return Response(audio_data, mimetype='audio/wav', headers={
+            'X-TTS-Duration-Ms': str(duration_ms),
+            'X-Audio-Size-Bytes': str(len(audio_data)),
+            'X-TTS-Engine': 'piper',
+            'Cache-Control': 'public, max-age=3600'
+        })
     
     except Exception as e:
         logger.error(f"TTS stream synthesis error: {e}", exc_info=True)
