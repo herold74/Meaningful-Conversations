@@ -30,6 +30,7 @@ export const getQuestionnaireStructure = (t: (key: string, replacements?: Record
         description: t('q_section_profile_desc'),
         fields: [
             { id: 'profile_name', label: t('q_field_name_label'), prompt: t('q_field_name_prompt'), rows: 1, type: 'text' },
+            { id: 'profile_region', label: t('q_field_region_label'), prompt: t('q_field_region_prompt'), rows: 1, type: 'text' },
             { id: 'profile_values', label: t('q_field_values_label'), prompt: t('q_field_values_prompt'), type: 'text' },
             { id: 'profile_sentiment', label: t('q_field_sentiment_label'), prompt: t('q_field_sentiment_prompt'), type: 'text' },
         ]
