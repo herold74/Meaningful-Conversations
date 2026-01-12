@@ -1139,12 +1139,12 @@
   "newsletter_history_of_recipients": "of {{count}} recipients",
   "newsletter_history_show_errors": "Show errors",
   
-  "context_region": "Country / Region",
+  "context_region": "Country/Region",
   "context_region_placeholder": "e.g. Austria - Vienna, Germany - Bavaria, Switzerland",
   "context_region_hint": "Optional: Helps us provide local support resources if needed",
   "crisis_contact_manualmode": "Personal Coaching - manualmode.at",
   "crisis_regional_resources": "Local Resources for {{region}}",
   
-  "q_field_region_label": "Country / Region (optional)",
-  "q_field_region_prompt": "Which country or region do you live in? (e.g. Austria - Vienna, Germany - Bavaria, Switzerland). Helps us provide local support resources if needed."
+  "q_field_region_label": "Country/Region",
+  "q_field_region_prompt": "Optional: Which country or region do you live in? (e.g. Austria - Vienna, Germany - Bavaria, Switzerland). Helps us provide local support resources if needed."
 }
