@@ -28,5 +28,10 @@ EXPOSE 8082
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8082/health || exit 1
 
-CMD ["python", "app.py"]
+# Gunicorn with optimized settings for TTS workload
+# - 2 workers: Balance between parallelism and resource usage (Piper is CPU-intensive)
+# - 2 threads per worker: Better handling of parallel requests
+# - 60s timeout: Give Piper enough time for longer texts (was 15s in subprocess)
+# - keep-alive 5s: Keep connections alive for health checks
+CMD ["gunicorn", "-w", "2", "--threads", "2", "-b", "0.0.0.0:8082", "--timeout", "60", "--keep-alive", "5", "--access-logfile", "-", "--error-logfile", "-", "app:app"]
 

@@ -93,18 +93,88 @@ update-version: ## Update version everywhere in the application
 		sed -i.bak "s/\"version\": \"[0-9]*\.[0-9]*\.[0-9]*\"/\"version\": \"$$VERSION\"/" package.json && rm package.json.bak; \
 		sed -i.bak "s/\"version\": \"[0-9]*\.[0-9]*\.[0-9]*\"/\"version\": \"$$VERSION\"/" meaningful-conversations-backend/package.json && rm meaningful-conversations-backend/package.json.bak; \
 		sed -i.bak "s/cache-v[0-9]*\.[0-9]*\.[0-9]*/cache-v$$VERSION/" public/sw.js && rm public/sw.js.bak; \
-		sed -i.bak "s/Version [0-9]*\.[0-9]*\.[0-9]*/Version $$VERSION/" components/BurgerMenu.tsx && rm components/BurgerMenu.tsx.bak; \
 		sed -i.bak "s/about_version')} [0-9]*\.[0-9]*\.[0-9]*/about_version')} $$VERSION/" components/AboutView.tsx && rm components/AboutView.tsx.bak; \
 		sed -i.bak "s/Meaningful Conversations [0-9]*\.[0-9]*\.[0-9]*/Meaningful Conversations $$VERSION/" metadata.json && rm metadata.json.bak; \
+		echo "1" > BUILD_NUMBER; \
 		echo "$(GREEN)✓ Version updated to $$VERSION in:$(NC)"; \
 		echo "  - package.json"; \
 		echo "  - meaningful-conversations-backend/package.json"; \
 		echo "  - public/sw.js (Service Worker cache)"; \
-		echo "  - components/BurgerMenu.tsx (UI)"; \
 		echo "  - components/AboutView.tsx (UI)"; \
 		echo "  - metadata.json"; \
+		echo "  - BUILD_NUMBER (reset to 1)"; \
 		echo "$(YELLOW)⚠ Don't forget to commit these changes!$(NC)"; \
 	fi
+
+# Registry configuration
+REGISTRY_URL := quay.myandi.de
+REGISTRY_USER := gherold
+
+build-release: ## Build release images (requires VERSION=x.y.z)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "$(YELLOW)ERROR: VERSION is required$(NC)"; \
+		echo "Usage: make build-release VERSION=1.7.7"; \
+		exit 1; \
+	fi
+	@PKG_VERSION=$$(cat package.json | grep '"version"' | head -1 | sed 's/.*"version": "\([^"]*\)".*/\1/'); \
+	if [ "$$PKG_VERSION" != "$(VERSION)" ]; then \
+		echo "$(YELLOW)ERROR: package.json version ($$PKG_VERSION) does not match VERSION=$(VERSION)$(NC)"; \
+		echo "Run 'make update-version' first and enter $(VERSION)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)=== Building Release $(VERSION) ===$(NC)"
+	@BUILD=$$(cat BUILD_NUMBER); \
+	NEW_BUILD=$$((BUILD + 1)); \
+	echo $$NEW_BUILD > BUILD_NUMBER; \
+	echo "$(BLUE)Build Number: $$NEW_BUILD$(NC)"; \
+	echo ""; \
+	echo "$(GREEN)Building Backend...$(NC)"; \
+	$(CONTAINER_ENGINE) build \
+		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION) \
+		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD \
+		-f meaningful-conversations-backend/Dockerfile \
+		meaningful-conversations-backend/; \
+	echo ""; \
+	echo "$(GREEN)Building Frontend...$(NC)"; \
+	$(CONTAINER_ENGINE) build \
+		--build-arg BUILD_NUMBER=$$NEW_BUILD \
+		--build-arg APP_VERSION=$(VERSION) \
+		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION) \
+		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD \
+		-f Dockerfile .; \
+	echo ""; \
+	echo "$(GREEN)✓ Build complete: $(VERSION) (Build $$NEW_BUILD)$(NC)"; \
+	echo ""; \
+	echo "Images created:"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD"; \
+	echo ""; \
+	echo "$(YELLOW)Next: make push-release VERSION=$(VERSION)$(NC)"
+
+push-release: ## Push release images to registry (requires VERSION=x.y.z)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "$(YELLOW)ERROR: VERSION is required$(NC)"; \
+		echo "Usage: make push-release VERSION=1.7.7"; \
+		exit 1; \
+	fi
+	@BUILD=$$(cat BUILD_NUMBER); \
+	echo "$(GREEN)=== Pushing $(VERSION) (Build $$BUILD) to $(REGISTRY_URL) ===$(NC)"; \
+	echo ""; \
+	echo "Pushing Backend..."; \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION); \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$BUILD; \
+	echo ""; \
+	echo "Pushing Frontend..."; \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION); \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$BUILD; \
+	echo ""; \
+	echo "$(GREEN)✓ Push complete$(NC)"; \
+	echo ""; \
+	echo "$(YELLOW)Don't forget to commit BUILD_NUMBER changes!$(NC)"
+
+release: build-release push-release ## Build and push release (requires VERSION=x.y.z)
 
 stop: ## Stop all services
 	@$(COMPOSE_CMD) down
