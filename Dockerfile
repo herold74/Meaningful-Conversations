@@ -2,6 +2,10 @@
 # Use a Node.js image to get the tools needed for building the app.
 FROM node:22-bullseye AS builder
 
+# Build arguments for version tracking
+ARG BUILD_NUMBER=0
+ARG APP_VERSION=0.0.0
+
 # Set the working directory inside the container.
 WORKDIR /app
 
@@ -16,6 +20,10 @@ RUN npm install
 
 # Copy the rest of the frontend application source code.
 COPY . .
+
+# Set build-time environment variables for Vite
+ENV VITE_BUILD_NUMBER=$BUILD_NUMBER
+ENV VITE_APP_VERSION=$APP_VERSION
 
 # Run the production build script defined in package.json.
 # This creates the optimized static files in the /app/dist directory.

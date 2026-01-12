@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_BACKEND_URL_STAGING: string;
   readonly VITE_BACKEND_URL_PRODUCTION: string;
   readonly VITE_BACKEND_URL_LOCAL: string;
+  readonly VITE_APP_VERSION?: string;
+  readonly VITE_BUILD_NUMBER?: string;
 }
 
 interface ImportMeta {

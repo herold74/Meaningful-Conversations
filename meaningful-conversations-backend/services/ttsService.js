@@ -185,7 +185,7 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
                 `${TTS_SERVICE_URL}/synthesize`,
                 requestPayload,
                 {
-                    timeout: 30000, // 30 seconds for Piper synthesis
+                    timeout: 65000, // 65 seconds (Gunicorn timeout is 60s, Piper subprocess timeout is 45s)
                     responseType: 'arraybuffer'
                 }
             );

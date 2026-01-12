@@ -31,39 +31,104 @@
 - **Reverse Proxy:** Nginx with auto-generated configs per environment
 - **CI/CD:** Scripts in `/scripts/` directory
 
-### Deployment Workflow (WICHTIG!)
+### Deployment Workflow (OBLIGATORISCH!)
 
-**Prinzip: "Build once, deploy everywhere"**
+**Prinzip: "Build once, deploy everywhere" mit konsistenter Versionierung**
 
-1. **Staging Deployment** (`./deploy-manualmode.sh -e staging`):
-   - Baut neue Images lokal
-   - Pusht zur Registry (ghcr.io)
-   - Deployed auf Staging-Umgebung
-   - Aktualisiert Nginx IPs
+#### Release-Workflow (IMMER befolgen!)
 
-2. **Production Deployment** (`./scripts/deploy-production-scheduled.sh [VERSION]`):
-   - **NIEMALS neu bauen!**
-   - Pullt die bereits getesteten Images von der Registry
-   - Dieselben Images wie auf Staging
-   - Deployed auf Production-Umgebung
-   - Aktualisiert Nginx IPs
+```bash
+# 1. Bei neuer Version: Version aktualisieren
+make update-version    # Eingabe: z.B. 1.7.8
 
-**Versionierung:**
-- **WICHTIG:** Versionsänderungen müssen mit `make update-version` eingeleitet werden!
-- Dieser Befehl aktualisiert alle Versionsnummern konsistent:
-  - `package.json` (Frontend)
-  - `meaningful-conversations-backend/package.json` (Backend)
-  - `public/sw.js` (Service Worker Cache)
-  - `components/BurgerMenu.tsx` (UI-Anzeige)
-  - `memory-bank/activeContext.md`
-- Falls Versionsnummern manuell geändert werden, entstehen Inkonsistenzen in der App
-- Falls Staging eine neuere Version testet, kann Production mit expliziter Versionsnummer deployed werden
-- Beispiel: `./scripts/deploy-production-scheduled.sh 1.7.3`
+# 2. Release bauen (prüft Version automatisch, erhöht Build-Nummer)
+make build-release VERSION=1.7.8
 
-**Wichtige Scripts:**
-- `deploy-manualmode.sh` - Staging (mit Build)
-- `scripts/deploy-production-scheduled.sh` - Production (nur Pull)
-- `server-scripts/update-nginx-ips.sh` - Nginx IP-Update nach Container-Restart
+# 3. Zur Registry pushen
+make push-release VERSION=1.7.8
+
+# 4. Auf Server deployen
+ssh root@91.99.193.87 'cd /opt/manualmode-staging && ...'
+```
+
+#### Versionierung mit Build-Nummer
+
+- **VERSION:** Semantische Version (z.B. `1.7.8`)
+- **BUILD_NUMBER:** Fortlaufende Nummer pro Version (z.B. `3`)
+- **Anzeige in UI:** `Version 1.7.8 (Build 3)`
+- **Image-Tags:** `1.7.8` und `1.7.8-build3`
+
+**Wichtige Dateien:**
+- `BUILD_NUMBER` - Fortlaufende Build-Nummer (wird automatisch erhöht)
+- `package.json` - Versions-Source-of-Truth
+
+**`make update-version` aktualisiert:**
+- `package.json` (Frontend + Backend)
+- `public/sw.js` (Service Worker Cache)
+- `components/AboutView.tsx` (UI)
+- `metadata.json`
+- `BUILD_NUMBER` (wird auf 1 zurückgesetzt)
+
+**NIEMALS:**
+- Images manuell taggen ohne `make build-release`
+- Version in package.json manuell ändern
+- BUILD_NUMBER manuell ändern
+
+#### Server-Deployment
+
+**Server-Pfade:**
+- **Staging:** `/opt/manualmode-staging/`
+- **Production:** `/opt/manualmode-production/`
+
+**1. Staging-Deployment (vollständig):**
+```bash
+# Images pullen
+ssh root@91.99.193.87 'cd /opt/manualmode-staging && \
+  podman pull quay.myandi.de/gherold/meaningful-conversations-backend:VERSION && \
+  podman pull quay.myandi.de/gherold/meaningful-conversations-frontend:VERSION'
+
+# VERSION in .env aktualisieren (falls nötig)
+ssh root@91.99.193.87 "sed -i 's/VERSION=.*/VERSION=1.7.7/' /opt/manualmode-staging/.env"
+
+# Container neu starten
+ssh root@91.99.193.87 'cd /opt/manualmode-staging && \
+  podman-compose -f podman-compose-staging.yml down && \
+  podman-compose -f podman-compose-staging.yml up -d'
+
+# Nginx IPs aktualisieren (WICHTIG!)
+ssh root@91.99.193.87 'bash /opt/manualmode-production/update-nginx-ips.sh staging'
+```
+
+**2. Production-Deployment:** Erst nach erfolgreichem Staging-Test!
+```bash
+# Analog zu Staging, aber mit production statt staging
+ssh root@91.99.193.87 'bash /opt/manualmode-production/update-nginx-ips.sh production'
+```
+
+**3. TTS-Service (separat, ändert sich selten):**
+```bash
+# Nur bei Änderungen an tts-service/
+podman build -t quay.myandi.de/gherold/meaningful-conversations-tts:VERSION \
+  -f meaningful-conversations-backend/tts-service/Dockerfile \
+  meaningful-conversations-backend/tts-service/
+podman push quay.myandi.de/gherold/meaningful-conversations-tts:VERSION
+
+# Auf Server: TTS-Container separat neu starten
+ssh root@91.99.193.87 'cd /opt/manualmode-staging && \
+  podman pull quay.myandi.de/gherold/meaningful-conversations-tts:VERSION && \
+  podman stop meaningful-conversations-tts-staging && \
+  podman rm meaningful-conversations-tts-staging && \
+  podman run -d --name meaningful-conversations-tts-staging --pod staging-pod \
+    quay.myandi.de/gherold/meaningful-conversations-tts:VERSION'
+```
+
+**Wichtige Scripts (lokal):**
+- `make build-release VERSION=x.y.z` - Release bauen
+- `make push-release VERSION=x.y.z` - Zur Registry pushen
+- `make release VERSION=x.y.z` - Beides in einem Schritt
+
+**Wichtige Scripts (Server):**
+- `/opt/manualmode-production/update-nginx-ips.sh [staging|production]` - Nginx IPs aktualisieren
 
 ### Prisma Datenbank-Migrationen (KRITISCH!)
 
