@@ -27,7 +27,7 @@ Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Si
 
 - **Option A: Mit einem Fragebogen erstellen**
   - **Wenn Sie auf "Neue Lebenskontext-Datei erstellen" klicken**, gelangen Sie zu einem geführten Fragebogen.
-  - Füllen Sie die Felder zu Ihrem Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist ein Pflichtfeld.
+  - Füllen Sie die Felder zu Ihrem Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist ein Pflichtfeld. Optional können Sie Ihr **Land / Bundesland** angeben (z.B. "Österreich - Wien"), um bei Bedarf lokale Hilfsangebote zu erhalten.
   - **Wenn Sie auf "Datei erstellen & Weiter" klicken**, wird Ihr Lebenskontext formatiert und Sie werden zur Coach-Auswahl weitergeleitet.
 
 - **Option B: Mit einem Interview erstellen**
@@ -55,7 +55,7 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches.
 - **Wenn Sie auf eine Coach-Karte klicken**, beginnt Ihre Sitzung sofort.
 
 ### 2.2 Die Chat-Oberfläche
-- **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
+- **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
   - **Klicken Sie auf das Papierflieger-Symbol**, um Ihre Nachricht zu senden.
@@ -186,7 +186,7 @@ Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und 
 ### 7.1 Überblick
 
 Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönlichkeitsmerkmale erfasst. Es wird verwendet, um:
-- Experimentelle Coaching-Modi mit Chloe freizuschalten
+- **Coaching-Modi** für personalisiertes Coaching mit allen Coaches freizuschalten
 - Eine individuelle **Persönlichkeits-Signatur** zu generieren
 - Das Coaching besser auf Ihre Bedürfnisse abzustimmen
 
@@ -238,7 +238,29 @@ Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
-### 7.5 Personalisiertes Coaching
+### 7.5 Coaching-Modi
+
+Mit einem Persönlichkeitsprofil können Sie zwischen drei Coaching-Modi wählen:
+
+**Aus (Standard):**
+- Klassisches Coaching ohne Personalisierung
+- Ihr Profil wird nicht verwendet
+
+**DPC (Dynamic Personality Coaching):**
+- Ihr Profil wird während der Sessions genutzt
+- Der Coach passt seinen Stil an Ihre Persönlichkeit an
+- Das Profil wird **nicht** verändert
+
+**DPFL (Dynamic Personality-Focused Learning):**
+- Ihr Profil wird genutzt UND kann ab der **zweiten Session** vollständig verfeinert werden
+- Der Coach schlägt Profilanpassungen basierend auf dem Gespräch vor
+- Erfordert ein **adaptives Profil**
+
+**Modus wechseln:** Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil ändern. Gesammelte Verfeinerungen bleiben erhalten.
+
+**Anzeige:** Der aktive Coaching-Modus wird im **Coach-Info-Modal** angezeigt (klicken Sie auf den Coach-Namen im Chat).
+
+### 7.6 Personalisiertes Coaching
 
 Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches** auf Sie zugeschnitten:
 - Jeder Coach passt seinen Kommunikationsstil an Ihre Persönlichkeitsmerkmale an
@@ -265,7 +287,7 @@ After making your choice, you'll arrive at the landing page with three options:
 
 - **Option A: Create with a Questionnaire**
   - **If you click "Create a New Life Context File,"** you'll be taken to a guided questionnaire.
-  - Fill out the fields about your background, goals, and challenges. Only your name is a required field.
+  - Fill out the fields about your background, goals, and challenges. Only your name is a required field. Optionally, you can specify your **Country / State** (e.g., "Austria - Vienna") to receive local support resources if needed.
   - **When you click "Generate File & Continue,"** your Life Context will be formatted, and you'll proceed to coach selection.
 
 - **Option B: Create with an Interview**
@@ -293,7 +315,7 @@ On the **Select a Coach** screen, you'll see a list of available coaches.
 - **Clicking on a coach card** will start your session immediately.
 
 ### 2.2 The Chat Interface
-- **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. On the right is the red **End Session** button.
+- **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
 - **Text Mode (Default):**
   - Type your message in the text area at the bottom.
   - **Click the paper plane icon** to send your message.
@@ -424,7 +446,7 @@ This feature is exclusively available to registered users and enables a personal
 ### 7.1 Overview
 
 The Personality Profile is an encrypted document that captures your personality traits. It is used to:
-- Unlock experimental coaching modes with Chloe
+- Unlock **coaching modes** for personalized coaching with all coaches
 - Generate an individual **Personality Signature**
 - Better tailor coaching to your needs
 
@@ -476,7 +498,29 @@ At the end of the test, you choose how your profile should evolve:
 
 **Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
 
-### 7.5 Personalized Coaching
+### 7.5 Coaching Modes
+
+With a personality profile, you can choose between three coaching modes:
+
+**Off (Default):**
+- Classic coaching without personalization
+- Your profile is not used
+
+**DPC (Dynamic Personality Coaching):**
+- Your profile is used during sessions
+- The coach adapts their style to your personality
+- The profile is **not** modified
+
+**DPFL (Dynamic Personality-Focused Learning):**
+- Your profile is used AND can be fully refined from the **second session** onwards
+- The coach suggests profile adjustments based on the conversation
+- Requires an **adaptive profile**
+
+**Switching Modes:** You can change the mode at any time in your personality profile. Collected refinements are preserved.
+
+**Display:** The active coaching mode is shown in the **Coach Info Modal** (click on the coach's name in the chat).
+
+### 7.6 Personalized Coaching
 
 With an active personality profile, coaching is tailored to you with **all coaches**:
 - Every coach adapts their communication style to your personality traits
