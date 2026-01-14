@@ -255,6 +255,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
   
+  // Track when voice input stopped - used to delay TTS on iOS for Bluetooth profile switch
+  // iOS switches from A2DP (high quality) to HFP (phone quality) when mic is active
+  // After mic stops, iOS needs ~1.5s to switch back to A2DP for high quality audio
+  const lastVoiceInputStopRef = useRef<number>(0);
+  
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     const settings = getBotVoiceSettings(bot.id);
@@ -650,6 +655,21 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     console.log('[DEBUG-A]', JSON.stringify({location:'speak',data:{textLen:text?.length,isTtsEnabled,ttsMode,isMeditation,isIOS},ts:Date.now()}));
     // #endregion
     if (!isTtsEnabled || !text.trim()) return;
+    
+    // iOS Bluetooth profile switch delay:
+    // When mic was recently used, iOS needs time to switch from HFP (phone quality) back to A2DP (stereo quality)
+    // Without this delay, TTS plays through HFP resulting in low quality audio
+    if (isIOS && lastVoiceInputStopRef.current > 0) {
+      const timeSinceVoiceStop = Date.now() - lastVoiceInputStopRef.current;
+      const requiredDelay = 1500; // 1.5 seconds for Bluetooth profile switch
+      if (timeSinceVoiceStop < requiredDelay) {
+        const remainingDelay = requiredDelay - timeSinceVoiceStop;
+        // #region agent log
+        console.log('[DEBUG-A]', JSON.stringify({location:'speak-bluetooth-delay',data:{timeSinceVoiceStop,remainingDelay},ts:Date.now()}));
+        // #endregion
+        await new Promise(resolve => setTimeout(resolve, remainingDelay));
+      }
+    }
     
     const cleanText = text
         .replace(/#{1,6}\s/g, '')
@@ -1318,6 +1338,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction-stop',data:{inputLen:input?.length},ts:Date.now()}));
           // #endregion
           recognitionRef.current.stop();
+          
+          // Track when voice input stopped for iOS Bluetooth profile switch timing
+          // This allows speak() to delay TTS until iOS switches back to A2DP (high quality)
+          lastVoiceInputStopRef.current = Date.now();
           
           // Unlock audio session DURING user interaction
           // This allows audio.play() to work after the async API call completes

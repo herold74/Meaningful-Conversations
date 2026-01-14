@@ -210,14 +210,17 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        BUILD_NUM=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE"
         else
-            npm run build
-            podman build --platform linux/amd64 -t "$FRONTEND_IMAGE" .
+            podman build --platform linux/amd64 \
+                --build-arg BUILD_NUMBER="$BUILD_NUM" \
+                --build-arg APP_VERSION="$VERSION" \
+                -t "$FRONTEND_IMAGE" .
             podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
-            echo -e "${GREEN}✓ Frontend image built${NC}"
+            echo -e "${GREEN}✓ Frontend image built (v$VERSION, Build $BUILD_NUM)${NC}"
         fi
         echo ""
     fi
