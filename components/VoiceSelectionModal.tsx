@@ -230,7 +230,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
                                 {!serverTtsAvailable && !isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
-                                {isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
+                                {isIOS && <span className="block sm:inline sm:ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
                             </h3>
                             
                             {/* iOS Warning Banner */}
