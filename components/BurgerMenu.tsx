@@ -114,7 +114,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     
                     <div className="px-4 pt-2 flex items-center justify-between">
                         <p className="text-xs text-content-subtle">
-                            Version {import.meta.env.VITE_APP_VERSION || '1.7.7'}
+                            Version {import.meta.env.VITE_APP_VERSION || '1.7.8'}
                             {import.meta.env.VITE_BUILD_NUMBER && ` (Build ${import.meta.env.VITE_BUILD_NUMBER})`}
                         </p>
                         <button
