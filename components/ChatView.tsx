@@ -1377,7 +1377,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           
           // iOS: Reset audio session after recording to restore high-quality TTS output
           // Without this, iOS stays in "playAndRecord" mode causing tinny/telephony audio
-          resetAudioSessionAfterRecording();
+          // Must await to avoid race condition with unlockAudioSession() below
+          await resetAudioSessionAfterRecording();
           
           // Unlock audio session DURING user interaction
           // This allows audio.play() to work after the async API call completes
