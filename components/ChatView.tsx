@@ -626,6 +626,62 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       // #endregion
     });
   }, []);
+
+  // iOS Audio Session Reset: After speech recognition, iOS may be stuck in "playAndRecord" mode
+  // which causes TTS to sound "tinny/telephony". This function resets the audio session by:
+  // 1. Closing the existing AudioContext (releases the recording session)
+  // 2. Creating a fresh AudioContext configured for playback only
+  // 3. Playing a short tone to force iOS to switch to normal playback mode
+  const resetAudioSessionAfterRecording = useCallback(async () => {
+    if (!isIOS) return;
+    
+    // #region agent log
+    console.log('[DEBUG-FIX]', JSON.stringify({location:'resetAudioSession-start',ts:Date.now()}));
+    // #endregion
+    
+    // Close existing context to release recording session
+    if (audioContextRef.current) {
+      try {
+        await audioContextRef.current.close();
+        // #region agent log
+        console.log('[DEBUG-FIX]', JSON.stringify({location:'resetAudioSession-closed',ts:Date.now()}));
+        // #endregion
+      } catch (e) {
+        // Ignore close errors
+      }
+      audioContextRef.current = null;
+    }
+    
+    // Create fresh AudioContext - this should use standard playback mode
+    try {
+      const freshCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = freshCtx;
+      
+      // Play a very short tone to force iOS to initialize the new audio session
+      // Using 44100 Hz sample rate (CD quality) to signal we want high-quality output
+      const oscillator = freshCtx.createOscillator();
+      const gainNode = freshCtx.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(freshCtx.destination);
+      
+      // Very quiet, very short tone (nearly inaudible)
+      gainNode.gain.setValueAtTime(0.01, freshCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, freshCtx.currentTime + 0.1);
+      
+      oscillator.frequency.setValueAtTime(440, freshCtx.currentTime); // A4 note
+      oscillator.start(freshCtx.currentTime);
+      oscillator.stop(freshCtx.currentTime + 0.1);
+      
+      // #region agent log
+      console.log('[DEBUG-FIX]', JSON.stringify({location:'resetAudioSession-tone-played',sampleRate:freshCtx.sampleRate,ts:Date.now()}));
+      // #endregion
+    } catch (e) {
+      // #region agent log
+      console.log('[DEBUG-FIX]', JSON.stringify({location:'resetAudioSession-error',error:String(e),ts:Date.now()}));
+      // #endregion
+    }
+  }, [isIOS]);
   
   // Cleanup audio on unmount
   useEffect(() => {
@@ -1318,6 +1374,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction-stop',data:{inputLen:input?.length},ts:Date.now()}));
           // #endregion
           recognitionRef.current.stop();
+          
+          // iOS: Reset audio session after recording to restore high-quality TTS output
+          // Without this, iOS stays in "playAndRecord" mode causing tinny/telephony audio
+          resetAudioSessionAfterRecording();
           
           // Unlock audio session DURING user interaction
           // This allows audio.play() to work after the async API call completes
