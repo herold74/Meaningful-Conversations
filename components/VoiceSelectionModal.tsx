@@ -42,15 +42,30 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     botGender,
 }) => {
     const { t } = useLocalization();
-    const [selection, setSelection] = useState<VoiceSelection>(
-        isAutoMode
-            ? { type: 'auto' }
-            : currentTtsMode === 'server' && currentVoiceURI 
-            ? { type: 'server', voiceId: currentVoiceURI }
-            : currentVoiceURI
-            ? { type: 'local', voiceURI: currentVoiceURI }
-            : { type: 'auto' }
-    );
+    
+    // iOS detection - server TTS doesn't work reliably on iOS due to autoplay restrictions
+    const isIOS = useMemo(() => {
+        if (typeof navigator === 'undefined') return false;
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }, []);
+    
+    const [selection, setSelection] = useState<VoiceSelection>(() => {
+        // On iOS, always default to auto since server voices don't work
+        if (isIOS && currentTtsMode === 'server') {
+            return { type: 'auto' };
+        }
+        if (isAutoMode) {
+            return { type: 'auto' };
+        }
+        if (currentTtsMode === 'server' && currentVoiceURI) {
+            return { type: 'server', voiceId: currentVoiceURI };
+        }
+        if (currentVoiceURI) {
+            return { type: 'local', voiceURI: currentVoiceURI };
+        }
+        return { type: 'auto' };
+    });
     const [serverTtsAvailable, setServerTtsAvailable] = useState<boolean>(true);
 
     // Check TTS server availability
@@ -71,9 +86,15 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
+            // On iOS, server voices are not available - switch to auto if server voice was selected
+            if (isIOS && currentTtsMode === 'server') {
+                setSelection({ type: 'auto' });
+                return;
+            }
+            
             // Sync modal state with parent props
             if (isAutoMode && currentVoiceURI && currentTtsMode === 'server') {
-                // Auto mode selected a server voice - show it as selected
+                // Auto mode selected a server voice - show it as selected (not on iOS)
                 setSelection({ type: 'server', voiceId: currentVoiceURI });
             } else if (isAutoMode) {
                 setSelection({ type: 'auto' });
@@ -85,7 +106,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 setSelection({ type: 'auto' });
             }
         }
-    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode]);
+    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOS]);
 
 
     const localVoices = useMemo(() => {
@@ -156,8 +177,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     }, [botLanguage, botGender]);
 
     // Helper function to check if a server voice is enabled
+    // Server voices are disabled on iOS due to autoplay restrictions
     const isVoiceEnabled = (voice: ServerVoice) => {
-        return serverTtsAvailable && voice.model !== '';
+        return serverTtsAvailable && voice.model !== '' && !isIOS;
     };
 
     const handleSave = () => {
@@ -207,8 +229,21 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         <>
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
-                                {!serverTtsAvailable && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
+                                {!serverTtsAvailable && !isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
+                                {isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
                             </h3>
+                            
+                            {/* iOS Warning Banner */}
+                            {isIOS && (
+                                <div className="p-3 mb-2 bg-status-info-background border border-status-info-border rounded-lg">
+                                    <div className="flex items-start gap-2">
+                                        <InfoIcon className="w-5 h-5 text-status-info-foreground flex-shrink-0 mt-0.5" />
+                                        <p className="text-sm text-status-info-foreground">
+                                            {t('voiceModal_ios_hint') || 'Server voices are not available on iOS due to browser audio restrictions. Please select a device voice instead.'}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                             {serverVoices.map(voice => (
                                 <div key={voice.id} className={`p-3 border border-border-primary ${isVoiceEnabled(voice) ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
                                     <label className={`flex items-center ${isVoiceEnabled(voice) ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
