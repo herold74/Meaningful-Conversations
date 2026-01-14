@@ -65,11 +65,11 @@ export const BOTS: Bot[] = [
     {
         id: 'nexus-gps',
         name: 'Nobody',
-        description: 'A life and career coach using the GPS (Goals, Present, Strategy) framework to help you find your own solutions.',
-        description_de: 'Ein Lebens- und Karrierecoach, der das GPS-Framework (Ziele, Gegenwart, Strategie) verwendet, um Ihnen zu helfen, Ihre eigenen Lösungen zu finden.',
+        description: 'An efficient life and career coach who helps you find your own solutions - with tips when you need them.',
+        description_de: 'Ein effizienter Lebens- und Karrierecoach, der Ihnen hilft, eigene Lösungen zu finden - mit Tipps, wenn Sie sie brauchen.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Alex&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smirk&shirtColor=ffffff',
-        style: 'GPS Framework, Inquisitive, Empowering',
-        style_de: 'GPS-Framework, Neugierig, Befähigend',
+        style: 'Efficient, Adaptive, Solution-Focused',
+        style_de: 'Effizient, Anpassungsfähig, Lösungsorientiert',
         accessTier: 'guest',
     },
     {

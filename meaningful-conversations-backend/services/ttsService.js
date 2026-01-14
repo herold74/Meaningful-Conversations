@@ -88,7 +88,7 @@ function getSpeechRate(botId, isMeditation) {
         case 'rob':
             return 1.05;
         case 'nexus-gps':
-            return 1.1;
+            return 1.0; // Nobody: normal speed (was 1.1)
         default:
             return 1.0;
     }
