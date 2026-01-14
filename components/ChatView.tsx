@@ -70,10 +70,12 @@ interface SpeechRecognitionConstructor {
 declare var SpeechRecognition: SpeechRecognitionConstructor;
 declare var webkitSpeechRecognition: SpeechRecognitionConstructor;
 
-// For SpeechRecognition API
+// For SpeechRecognition API and AudioContext
 interface CustomWindow extends Window {
   SpeechRecognition: typeof SpeechRecognition;
   webkitSpeechRecognition: typeof webkitSpeechRecognition;
+  AudioContext: typeof AudioContext;
+  webkitAudioContext: typeof AudioContext;
 }
 declare let window: CustomWindow;
 
@@ -242,6 +244,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Audio element for server TTS playback
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  
+  // Web Audio API context for iOS audio session management
+  // Once resumed during user interaction, allows audio playback without further interaction
+  const audioContextRef = useRef<AudioContext | null>(null);
   
   // iOS/iPadOS detection (for Bluetooth profile switching delay)
   const isIOS = useMemo(() => {
@@ -577,6 +583,50 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Track current audio blob URL for cleanup
   const currentAudioUrlRef = useRef<string | null>(null);
   
+  // iOS Audio Session Unlock: Resume AudioContext during user interaction
+  // This allows audio.play() to work later without requiring another user interaction
+  const unlockAudioSession = useCallback(() => {
+    // #region agent log
+    console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-start',ts:Date.now()}));
+    // #endregion
+    
+    // Create AudioContext if it doesn't exist
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // #region agent log
+      console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-created',state:audioContextRef.current?.state,ts:Date.now()}));
+      // #endregion
+    }
+    
+    const ctx = audioContextRef.current;
+    // Resume if suspended (required for iOS)
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().then(() => {
+        // #region agent log
+        console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-resumed',state:ctx?.state,ts:Date.now()}));
+        // #endregion
+      }).catch(() => {
+        // #region agent log
+        console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-resume-failed',ts:Date.now()}));
+        // #endregion
+      });
+    }
+    
+    // Also play a silent audio to warm up the HTML5 Audio element
+    const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+    silentAudio.volume = 0.01;
+    silentAudio.play().then(() => {
+      // #region agent log
+      console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-silent-played',ts:Date.now()}));
+      // #endregion
+      silentAudio.pause();
+    }).catch(() => {
+      // #region agent log
+      console.log('[DEBUG-FIX]', JSON.stringify({location:'unlockAudioSession-silent-failed',ts:Date.now()}));
+      // #endregion
+    });
+  }, []);
+  
   // Cleanup audio on unmount
   useEffect(() => {
     return () => {
@@ -588,10 +638,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         URL.revokeObjectURL(currentAudioUrlRef.current);
         currentAudioUrlRef.current = null;
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
     };
   }, []);
 
   const speak = useCallback(async (text: string, isMeditation: boolean = false) => {
+    // #region agent log
+    console.log('[DEBUG-A]', JSON.stringify({location:'speak',data:{textLen:text?.length,isTtsEnabled,ttsMode,isMeditation,isIOS},ts:Date.now()}));
+    // #endregion
     if (!isTtsEnabled || !text.trim()) return;
     
     const cleanText = text
@@ -604,8 +661,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     lastSpokenTextRef.current = cleanText;
 
-    // Server TTS mode
-    if (ttsMode === 'server') {
+    // iOS Safari has strict autoplay policies that prevent audio.play() outside of
+    // direct user interaction. Server TTS requires async API calls which break this.
+    // Solution: Force local TTS on iOS for reliable audio playback.
+    const effectiveTtsMode = isIOS ? 'local' : ttsMode;
+    
+    // #region agent log
+    console.log('[DEBUG-A]', JSON.stringify({location:'speak-effective-mode',data:{ttsMode,effectiveTtsMode,isIOS},ts:Date.now()}));
+    // #endregion
+
+    // Server TTS mode (disabled on iOS due to autoplay restrictions)
+    if (effectiveTtsMode === 'server') {
+      // #region agent log
+      console.log('[DEBUG-A]', JSON.stringify({location:'speak-server',data:{selectedVoiceURI,textLen:cleanText.length},ts:Date.now()}));
+      // #endregion
       try {
         setIsLoadingAudio(true);
         
@@ -634,6 +703,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         // Set up event handlers
         audio.addEventListener('play', () => {
+          // #region agent log
+          console.log('[DEBUG-D]', JSON.stringify({location:'audio-play',ts:Date.now()}));
+          // #endregion
           setTtsStatus('speaking');
           setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
         });
@@ -642,6 +714,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           if (!audio.ended) setTtsStatus('paused');
         });
         audio.addEventListener('ended', () => {
+          // #region agent log
+          console.log('[DEBUG-D]', JSON.stringify({location:'audio-ended',ts:Date.now()}));
+          // #endregion
           setTtsStatus('idle');
           // Cleanup after playback to reset iOS audio session
           if (currentAudioUrlRef.current === audioUrl) {
@@ -650,7 +725,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           // Don't null audioRef here - it's still needed for pause/resume
         });
-        audio.addEventListener('error', () => {
+        audio.addEventListener('error', (e) => {
+          // #region agent log
+          console.log('[DEBUG-A]', JSON.stringify({location:'audio-error',data:{error:String(e)},ts:Date.now()}));
+          // #endregion
           console.error('[TTS] Audio playback error');
           setTtsStatus('idle');
           setIsLoadingAudio(false);
@@ -659,6 +737,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         audio.src = audioUrl;
         await audio.play();
       } catch (error) {
+        // #region agent log
+        console.log('[DEBUG-A]', JSON.stringify({location:'speak-catch',data:{error:String(error)},ts:Date.now()}));
+        // #endregion
         console.error('[TTS] Server TTS error:', error);
         setIsLoadingAudio(false);
         setTtsStatus('idle');
@@ -943,6 +1024,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     recognition.onerror = (event) => {
+      // #region agent log
+      console.log('[DEBUG-C]', JSON.stringify({location:'recognition-onerror',data:{error:event.error,errorMsg:event.message},ts:Date.now()}));
+      // #endregion
       // Enhanced error handling for better debugging and user feedback
       console.error("Speech recognition error:", {
         error: event.error,
@@ -1223,22 +1307,41 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
   
   const handleVoiceInteraction = async () => {
+      // #region agent log
+      console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction',data:{isListening,isLoading,hasRecognition:!!recognitionRef.current},ts:Date.now()}));
+      // #endregion
       if (isLoading || !recognitionRef.current) return;
 
       if (isListening) {
           // Stop recording
+          // #region agent log
+          console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction-stop',data:{inputLen:input?.length},ts:Date.now()}));
+          // #endregion
           recognitionRef.current.stop();
           
-          // iOS needs extra time to switch Bluetooth profile back to A2DP (high quality)
-          // Without this delay, TTS audio plays through HFP (phone quality)
-          const profileSwitchDelay = isIOS ? 1000 : 300;
+          // Unlock audio session DURING user interaction
+          // This allows audio.play() to work after the async API call completes
+          if (ttsMode === 'server') {
+              unlockAudioSession();
+          }
           
-          setTimeout(async () => {
-              if (input.trim()) {
-                  await sendMessage(input);
+          // Capture the current input value before any async operations
+          const currentInput = input;
+          
+          // #region agent log
+          console.log('[DEBUG-FIX]', JSON.stringify({location:'immediate-send-start',data:{inputLen:currentInput?.length},ts:Date.now()}));
+          // #endregion
+          
+          // Send message after a small delay for recognition to fully stop
+          if (currentInput.trim()) {
+              setTimeout(async () => {
+                  // #region agent log
+                  console.log('[DEBUG-FIX]', JSON.stringify({location:'immediate-send-execute',ts:Date.now()}));
+                  // #endregion
+                  await sendMessage(currentInput);
                   setInput('');
-              }
-          }, profileSwitchDelay);
+              }, 100);
+          }
       } else {
           // Stop any ongoing TTS playback
           window.speechSynthesis?.cancel();
@@ -1250,8 +1353,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           
           // Start recognition directly - let the browser handle mic permission (like v1.5.8)
           try {
+            // #region agent log
+            console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction-start',ts:Date.now()}));
+            // #endregion
             recognitionRef.current.start();
           } catch (error) {
+            // #region agent log
+            console.log('[DEBUG-C]', JSON.stringify({location:'handleVoiceInteraction-error',data:{error:String(error)},ts:Date.now()}));
+            // #endregion
             console.error('Failed to start speech recognition:', error);
             alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
           }
@@ -1437,6 +1546,16 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
             <button 
                 onClick={() => {
+                    // #region agent log
+                    console.log('[DEBUG-B]', JSON.stringify({location:'voiceToggle',data:{currentIsVoiceMode:isVoiceMode,isListening,isLoadingAudio,ttsStatus},ts:Date.now()}));
+                    // #endregion
+                    
+                    // iOS Audio Session Unlock: When entering voice mode, unlock audio session
+                    // so that the first greeting can be spoken (useEffect calls speak() asynchronously)
+                    if (!isVoiceMode && ttsMode === 'server') {
+                        unlockAudioSession();
+                    }
+                    
                     setIsVoiceMode(p => {
                         const newIsVoiceMode = !p;
                         if (newIsVoiceMode) {
