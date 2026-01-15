@@ -116,7 +116,8 @@ fi
 # Load environment-specific configuration
 ENV_FILE=".env.$ENVIRONMENT"
 if [ -f "$ENV_FILE" ]; then
-    export $(grep -E '^REGISTRY_URL=|^REGISTRY_USER=|^VERSION=' "$ENV_FILE" | xargs)
+    # Note: VERSION is intentionally NOT imported from env file - it comes from package.json
+    export $(grep -E '^REGISTRY_URL=|^REGISTRY_USER=' "$ENV_FILE" | xargs)
     echo -e "${GREEN}✓ Loaded configuration from $ENV_FILE${NC}"
 else
     echo -e "${YELLOW}⚠ Warning: $ENV_FILE not found${NC}"
