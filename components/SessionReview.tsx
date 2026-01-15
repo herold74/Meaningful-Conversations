@@ -10,7 +10,7 @@ import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { StarIcon } from './icons/StarIcon';
 import Button from './shared/Button';
 import * as userService from '../services/userService';
-import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline } from '../utils/contextUpdater';
+import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline, fuzzyMatchHeadline, getEmojiForHeadline } from '../utils/contextUpdater';
 import { WarningIcon } from './icons/WarningIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
 import { CalendarIcon } from './icons/CalendarIcon';
@@ -297,7 +297,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 
     const [appliedUpdates, setAppliedUpdates] = useState<Map<number, AppliedUpdatePayload>>(() => {
         return new Map(proposedUpdates.map((update, index): [number, AppliedUpdatePayload] => {
-            const targetValue = hierarchicalKeyToValueMap.get(update.headline);
+            // Use fuzzy matching to find the best match for AI-proposed headlines
+            const targetValue = fuzzyMatchHeadline(update.headline, hierarchicalKeyToValueMap);
 
             if (targetValue) {
                 // The AI proposed a headline that matches an existing one.
@@ -337,7 +338,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             } else {
                 // Re-run the initial state logic for the specific item being toggled on.
                 const originalUpdate = proposedUpdates[index];
-                const targetValue = hierarchicalKeyToValueMap.get(originalUpdate.headline);
+                // Use fuzzy matching to find the best match
+                const targetValue = fuzzyMatchHeadline(originalUpdate.headline, hierarchicalKeyToValueMap);
                 if (targetValue) {
                     // For Next Steps: default to 'append' since we're adding new goals
                     const isAppendDefault = appendDefaultHeadlines.some(h => 
@@ -772,7 +774,30 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     <div>
                         <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-4 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_proposedUpdates')}</h2>
                         <div className="flex items-center gap-4 mb-3">
-                            <button onClick={() => setAppliedUpdates(new Map(effectiveProposedUpdates.map((update, index) => [index, { type: update.type, targetHeadline: hierarchicalKeyToValueMap.get(update.headline) || update.headline }])))} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
+                            <button onClick={() => {
+                                const newUpdates = effectiveProposedUpdates.map((update, index) => {
+                                    // Use fuzzy matching for Select All as well
+                                    const targetValue = fuzzyMatchHeadline(update.headline, hierarchicalKeyToValueMap);
+                                    
+                                    // Apply the same type conversion logic as initial state
+                                    let type: 'append' | 'replace_section' | 'create_headline' = update.type;
+                                    if (targetValue) {
+                                        const isAppendDefault = appendDefaultHeadlines.some(h => 
+                                            update.headline.toLowerCase().includes(h.toLowerCase())
+                                        );
+                                        if (update.type === 'create_headline') {
+                                            type = 'append';
+                                        } else if (isAppendDefault) {
+                                            type = 'append';
+                                        }
+                                    } else {
+                                        type = 'create_headline';
+                                    }
+                                    
+                                    return [index, { type, targetHeadline: targetValue || update.headline }] as [number, AppliedUpdatePayload];
+                                });
+                                setAppliedUpdates(new Map(newUpdates));
+                            }} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
                             <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
                         </div>
                         <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
