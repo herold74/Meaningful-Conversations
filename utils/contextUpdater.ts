@@ -13,8 +13,9 @@ export type HeadlineOption = {
  * @param headline The clean headline string.
  * @returns An emoji string.
  */
-const getEmojiForHeadline = (headline: string): string => {
+export const getEmojiForHeadline = (headline: string): string => {
     const lowerHeadline = headline.toLowerCase();
+    if (lowerHeadline.includes('core profile') || lowerHeadline.includes('kernprofil')) return '👤';
     if (lowerHeadline.includes('career') || lowerHeadline.includes('work') || lowerHeadline.includes('beruf')) return '💼';
     if (lowerHeadline.includes('growth') || lowerHeadline.includes('learning') || lowerHeadline.includes('wachstum')) return '💡';
     if (lowerHeadline.includes('relationship') || lowerHeadline.includes('social') || lowerHeadline.includes('beziehung')) return '👨‍👩‍👧‍👦';
@@ -23,7 +24,65 @@ const getEmojiForHeadline = (headline: string): string => {
     if (lowerHeadline.includes('finance') || lowerHeadline.includes('finanzen')) return '💰';
     if (lowerHeadline.includes('project') || lowerHeadline.includes('projekt')) return '🛠️';
     if (lowerHeadline.includes('hobby') || lowerHeadline.includes('leisure') || lowerHeadline.includes('freizeit')) return '🎨';
+    if (lowerHeadline.includes('next step') || lowerHeadline.includes('nächste schritte')) return '✅';
     return '📌'; // A generic pin as a fallback
+};
+
+/**
+ * Finds the best matching headline from a map using fuzzy matching.
+ * First tries exact match, then tries partial match (AI headline contained in existing key or vice versa).
+ * @param aiHeadline The headline proposed by the AI.
+ * @param keyToValueMap A Map of hierarchicalKey -> value.
+ * @returns The matched value or undefined if no match found.
+ */
+export const fuzzyMatchHeadline = (aiHeadline: string, keyToValueMap: Map<string, string>): string | undefined => {
+    // 1. Try exact match first
+    const exactMatch = keyToValueMap.get(aiHeadline);
+    if (exactMatch) return exactMatch;
+    
+    // 2. Normalize for comparison (lowercase, trim)
+    const normalizedAi = aiHeadline.toLowerCase().trim();
+    
+    // 3. Try to find a partial match
+    let bestMatch: { key: string; value: string; score: number } | null = null;
+    
+    for (const [existingKey, value] of keyToValueMap.entries()) {
+        const normalizedExisting = existingKey.toLowerCase().trim();
+        
+        // Check if AI headline is contained in existing key or vice versa
+        if (normalizedExisting.includes(normalizedAi) || normalizedAi.includes(normalizedExisting)) {
+            // Calculate a simple similarity score (longer match = better)
+            const score = Math.min(normalizedAi.length, normalizedExisting.length) / 
+                         Math.max(normalizedAi.length, normalizedExisting.length);
+            
+            if (!bestMatch || score > bestMatch.score) {
+                bestMatch = { key: existingKey, value, score };
+            }
+        }
+        
+        // Also check if the last part matches (e.g., "Current" matches "Current Situation")
+        const aiParts = normalizedAi.split(' > ');
+        const existingParts = normalizedExisting.split(' > ');
+        
+        if (aiParts.length === existingParts.length && aiParts.length > 1) {
+            // Same depth, check if parent matches exactly and child is a partial match
+            const aiParent = aiParts.slice(0, -1).join(' > ');
+            const existingParent = existingParts.slice(0, -1).join(' > ');
+            const aiChild = aiParts[aiParts.length - 1];
+            const existingChild = existingParts[existingParts.length - 1];
+            
+            if (aiParent === existingParent && 
+                (existingChild.includes(aiChild) || aiChild.includes(existingChild))) {
+                const score = 0.9; // High score for parent match + partial child match
+                if (!bestMatch || score > bestMatch.score) {
+                    bestMatch = { key: existingKey, value, score };
+                }
+            }
+        }
+    }
+    
+    // Only return if we have a reasonably good match (score > 0.5)
+    return bestMatch && bestMatch.score > 0.5 ? bestMatch.value : undefined;
 };
 
 
@@ -93,9 +152,12 @@ export const getExistingHeadlines = (context: string): HeadlineOption[] => {
             // SET the current parent key.
             currentParentKey = normalizedName;
             
+            // Use emoji based on headline content
+            const emoji = getEmojiForHeadline(normalizedName);
+            
             allHeadlines.push({
                 value: uniqueIdentifier,
-                label: h2HeadlineRegex.test(trimmedLine) ? `- ${normalizedName}` : `  - ${normalizedName}`,
+                label: `${emoji} ${normalizedName}`,
                 hierarchicalKey: normalizedName, // For H2/H3, the key is just its own name
             });
     
@@ -109,9 +171,12 @@ export const getExistingHeadlines = (context: string): HeadlineOption[] => {
                 ? `${currentParentKey} > ${normalizedName}` 
                 : normalizedName;
             
+            // Use parent emoji for sub-headlines, or generic for standalone
+            const parentEmoji = currentParentKey ? getEmojiForHeadline(currentParentKey) : '📌';
+            
             allHeadlines.push({
                 value: uniqueIdentifier,
-                label: `   ${normalizedName}`,
+                label: `     ${parentEmoji} ${normalizedName}`,
                 hierarchicalKey: hierarchicalKey,
             });
         }

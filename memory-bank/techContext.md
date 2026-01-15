@@ -12,6 +12,12 @@
 - **Routing:** React Router (inferred from standard patterns, to be verified)
 - **Crypto:** Native Web Crypto API (SubtleCrypto)
 - **Voice:** Native Web Speech API (SpeechRecognition, SpeechSynthesis)
+- **iOS Audio Fix (v1.7.8):** 
+    - iOS stays in "playAndRecord" mode after microphone use, degrading TTS quality
+    - Fix: Play HTML5 audio element (100ms 440Hz tone, volume 0.3) immediately after mic stops
+    - This forces iOS back to stereo/A2DP mode before TTS starts
+    - Location: `ChatView.tsx` in `handleVoiceInteraction()` after `recognitionRef.current.stop()`
+    - Server TTS is disabled on iOS (autoplay restrictions) - uses local Web Speech API instead
 - **Utilities:**
     - `diff`: Text diffing.
     - `ics`: Calendar generation.
