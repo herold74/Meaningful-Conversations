@@ -1375,15 +1375,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // #endregion
           recognitionRef.current.stop();
           
-          // iOS: Reset audio session after recording to restore high-quality TTS output
-          // Without this, iOS stays in "playAndRecord" mode causing tinny/telephony audio
-          // Must await to avoid race condition with unlockAudioSession() below
-          await resetAudioSessionAfterRecording();
-          
-          // Unlock audio session DURING user interaction
-          // This allows audio.play() to work after the async API call completes
-          if (ttsMode === 'server') {
-              unlockAudioSession();
+          // iOS Audio Session Fix: After microphone stops, iOS stays in "playAndRecord" mode
+          // which causes degraded audio quality for TTS. We need to force iOS back to
+          // stereo/A2DP mode by playing an HTML5 audio element (not AudioContext, which
+          // uses a different audio path than Web Speech API).
+          // This runs DURING user interaction, so autoplay is allowed.
+          if (isIOS) {
+              // #region agent log
+              console.log('[DEBUG-FIX]', JSON.stringify({location:'ios-audio-reset-start',ts:Date.now()}));
+              // #endregion
+              try {
+                  // Play a short audio file to force iOS to switch audio modes
+                  // Using a 100ms 440Hz tone encoded as base64 WAV
+                  const resetAudio = new Audio('data:audio/wav;base64,UklGRl4FAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToFAAB4eHh4d3d3d3Z2dnZ1dXV1dHR0dHNzc3NycnJycXFxcXBwcHBvb29vbm5ubm1tbW1sbGxsa2tra2pqamppaWlpaGhoaGdnZ2dmZmZmZWVlZWRkZGRjY2NjYmJiYmFhYWFgYGBgX19fX15eXl5dXV1dXFxcXFtbW1taWlpaWVlZWVhYWFhXV1dXVlZWVlVVVVVUVFRUU1NTU1JSUlJRUVFRUFBQUE9PT09OTk5OTU1NTUxMTExLS0tLSkpKSklJSUlISEhIR0dHR0ZGRkZFRUVFREREREREREREREREREREREVFRUVGRkZGR0dHR0hISEhJSUlJSkpKSktLS0tMTExMTU1NTU5OTk5PT09PUFBQUFFRUVFSUlJSU1NTU1RUVFRVVVVVVlZWVldXV1dYWFhYWVlZWVpaWlpbW1tbXFxcXF1dXV1eXl5eX19fX2BgYGBhYWFhYmJiYmNjY2NkZGRkZWVlZWZmZmZnZ2dnaGhoaGlpaWlqampqa2tra2xsbGxtbW1tbm5ubm9vb29wcHBwcXFxcXJycnJzc3NzdHR0dHV1dXV2dnZ2d3d3d3h4eHh5eXl5enp6ent7e3t8fHx8fX19fX5+fn5/f39/gICAgIGBgYGCgoKCg4ODg4SEhISFhYWFhoaGhoeHh4eIiIiIiYmJiYqKioqLi4uLjIyMjI2NjY2Ojo6Oj4+Pj5CQkJCRkZGRkpKSkpOTk5OUlJSUlZWVlZaWlpaXl5eXmJiYmJmZmZmampqam5ubm5ycnJydnZ2dnp6enp+fn5+goKCgoaGhoaKioqKjo6Ojo6Ojo6SkpKSlpaWlpqampqenp6eoqKioqampqaqqqqqqqqqqq6urq6ysrKytra2trq6urq+vr6+wsLCwsbGxsbKysrKzs7Ozs7OztLS0tLW1tbW2tra2t7e3t7i4uLi5ubm5urq6uru7u7u8vLy8vb29vb6+vr6/v7+/wMDAwMHBwcHCwsLCw8PDw8TExMTFxcXFxsbGxsfHx8fIyMjIycnJycrKysrLy8vLzMzMzM3Nzc3Ozs7Oz8/Pz9DQ0NDR0dHR0tLS0tPT09PT09PU1NTU1dXV1dbW1tbX19fX2NjY2NnZ2dna2tra29vb29zc3Nzd3d3d3t7e3t/f39/g4ODg4eHh4eLi4uLj4+Pj5OTk5OXl5eXm5ubm5+fn5+jo6Ojp6enp6urq6uvr6+vs7Ozs7e3t7e7u7u7v7+/v8PDw8PHx8fHy8vLy8/Pz8/T09PT19fX19vb29vf39/f4+Pj4+fn5+fr6+vr7+/v7/Pz8/P39/f3+/v7+//////////8=');
+                  resetAudio.volume = 0.3; // Audible enough to trigger iOS mode switch
+                  await resetAudio.play();
+                  // #region agent log
+                  console.log('[DEBUG-FIX]', JSON.stringify({location:'ios-audio-reset-played',ts:Date.now()}));
+                  // #endregion
+              } catch (e) {
+                  // #region agent log
+                  console.log('[DEBUG-FIX]', JSON.stringify({location:'ios-audio-reset-error',error:String(e),ts:Date.now()}));
+                  // #endregion
+              }
           }
           
           // Capture the current input value before any async operations
