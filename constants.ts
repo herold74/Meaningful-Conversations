@@ -14,8 +14,8 @@ export const BOTS: Bot[] = [
     {
         id: 'max-ambitious',
         name: 'Max',
-        description: 'A performance coach who helps you think bigger by asking the right questions to unlock your potential.',
-        description_de: 'Ein Leistungscoach, der Ihnen hilft, größer zu denken, indem er die richtigen Fragen stellt, um Ihr Potenzial freizusetzen.',
+        description: 'An inspiring coach who helps you think bigger by asking the right questions to unlock your potential.',
+        description_de: 'Ein inspirierender Coach, der Ihnen hilft, größer zu denken, indem er die richtigen Fragen stellt, um Ihr Potenzial freizusetzen.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Elara&backgroundColor=B8D4B8&radius=50&mouth=smile&shirtColor=ffffff',
         style: 'Motivational, Inquisitive, Reflective',
         style_de: 'Motivierend, Neugierig, Reflektierend',
@@ -65,8 +65,8 @@ export const BOTS: Bot[] = [
     {
         id: 'nexus-gps',
         name: 'Nobody',
-        description: 'An efficient life and career coach who helps you find your own solutions - with tips when you need them.',
-        description_de: 'Ein effizienter Lebens- und Karrierecoach, der Ihnen hilft, eigene Lösungen zu finden - mit Tipps, wenn Sie sie brauchen.',
+        description: 'An efficient manager who helps you find your own solutions - with tips when you need them.',
+        description_de: 'Ein effizienter Manager, der Ihnen hilft, eigene Lösungen zu finden - mit Tipps, wenn Sie sie brauchen.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Alex&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smirk&shirtColor=ffffff',
         style: 'Efficient, Adaptive, Solution-Focused',
         style_de: 'Effizient, Anpassungsfähig, Lösungsorientiert',
