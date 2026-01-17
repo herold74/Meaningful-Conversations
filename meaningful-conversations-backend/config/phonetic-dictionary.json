@@ -159,6 +159,30 @@
           "phonetic": "Teiming",
           "caseSensitive": true,
           "notes": "Großgeschrieben"
+        },
+        {
+          "term": "Win-Win",
+          "phonetic": "Winn-Winn",
+          "caseSensitive": true,
+          "notes": "Win-Win-Situation"
+        },
+        {
+          "term": "win-win",
+          "phonetic": "winn-winn",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Win-Wins",
+          "phonetic": "Winn-Winns",
+          "caseSensitive": true,
+          "notes": "Plural"
+        },
+        {
+          "term": "win-wins",
+          "phonetic": "winn-winns",
+          "caseSensitive": true,
+          "notes": "Plural kleingeschrieben"
         }
       ]
     },

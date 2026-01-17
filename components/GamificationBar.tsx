@@ -20,7 +20,7 @@ interface GamificationBarProps {
     isSubMenuOpen: boolean;
     isDarkMode: 'light' | 'dark';
     toggleDarkMode: () => void;
-    colorTheme: 'autumn' | 'winter';
+    colorTheme: 'summer' | 'autumn' | 'winter';
     toggleColorTheme: () => void;
     minimal?: boolean;
 }

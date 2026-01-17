@@ -67,6 +67,7 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches.
     - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches. Nutzt hochwertige Server-Stimmen für konsistente Qualität.
     - **Server-Stimmen (Hohe Qualität):** Professionelle Stimmen, die auf unserem Server generiert werden. Bieten die beste Klangqualität und Natürlichkeit.
     - **Gerätestimmen (Lokal):** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Deutlich schnellere Reaktionszeiten und funktionieren auch offline. Es lohnt sich, diese alternativ auszuprobieren, besonders für flüssige Gespräche im Sprachmodus.
+  - **Hinweis für iOS:** Auf iPhone und iPad sind Server-Stimmen aufgrund von Browser-Einschränkungen nicht verfügbar. Gerätestimmen werden automatisch verwendet.
 - **Sprachmodus:**
   - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
@@ -196,8 +197,15 @@ Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönli
 
 Basierend auf Ihren Antworten zu zwei Einstiegsfragen wird automatisch eines von zwei im Coaching bewährten Verfahren für Sie ausgewählt:
 
-**OCEAN-Test (Big Five):**
-- Misst fünf Persönlichkeitsdimensionen: Offenheit, Gewissenhaftigkeit, Extraversion, Verträglichkeit und Emotionale Stabilität
+**OCEAN-Test:**
+OCEAN ist ein Akronym für die fünf wissenschaftlich fundierten Persönlichkeitsdimensionen:
+- **O**ffenheit (Openness) - Neugier und Kreativität
+- **C**onscientiousness (Gewissenhaftigkeit) - Ordnung und Zielstrebigkeit
+- **E**xtraversion - Geselligkeit und Energie
+- **A**greeableness (Verträglichkeit) - Kooperation und Empathie
+- **N**eurotizismus / Emotionale Stabilität - Stressresistenz
+
+Das OCEAN-Modell ist das weltweit am besten erforschte Persönlichkeitsmodell.
 - Schneller auszufüllen (ca. 5 Minuten)
 - Ideal für einen ersten Überblick
 
@@ -266,6 +274,7 @@ Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches**
 - Jeder Coach passt seinen Kommunikationsstil an Ihre Persönlichkeitsmerkmale an
 - Die Gesprächsführung berücksichtigt Ihre bevorzugte Art der Kommunikation
 - Bei einem adaptiven Profil schlagen die Coaches kontinuierlich Anpassungen Ihres Persönlichkeitsprofils vor, die auf Basis des Gesprächsverlaufs gewonnen werden. Auf diese Weise bieten die Coaches "Fremdbild"-Feedback, welches Ihr "Selbstbild" optimal ergänzt.
+- Im DPC/DPFL-Modus nutzen die Coaches Ihre **Persönlichkeits-Signatur** aktiv: Sie erkennen, wenn Herausforderungen mit Ihren **Stärken** bewältigt werden können, und weisen behutsam auf **potenzielle Blind Spots** hin - besonders bei Motivations- und Beziehungsthemen.
 `;
 
 const en_markdown = `## Introduction
@@ -327,6 +336,7 @@ On the **Select a Coach** screen, you'll see a list of available coaches.
     - **Coach Signature Voice:** The best available voice for the coach's language and personality. Uses high-quality server voices for consistent quality.
     - **Server Voices (High Quality):** Professional voices generated on our server. Offer the best sound quality and naturalness.
     - **Device Voices (Local):** Voices generated directly on your device. **Advantage:** Significantly faster response times and work offline. Worth trying as an alternative, especially for fluid conversations in voice mode.
+  - **Note for iOS:** Server voices are not available on iPhone and iPad due to browser restrictions. Device voices are automatically used instead.
 - **Voice Mode:**
   - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
   - **Tap the large microphone icon** to start recording. Speak your message.
@@ -456,8 +466,15 @@ The Personality Profile is an encrypted document that captures your personality 
 
 Based on your answers to two initial questions, one of two methods proven in coaching is automatically selected for you:
 
-**OCEAN Test (Big Five):**
-- Measures five personality dimensions: Openness, Conscientiousness, Extraversion, Agreeableness, and Emotional Stability
+**OCEAN Test:**
+OCEAN is an acronym for the five scientifically validated personality dimensions:
+- **O**penness - Curiosity and creativity
+- **C**onscientiousness - Organization and goal-orientation
+- **E**xtraversion - Sociability and energy
+- **A**greeableness - Cooperation and empathy
+- **N**euroticism / Emotional Stability - Stress resilience
+
+The OCEAN model is the most extensively researched personality model worldwide.
 - Quicker to complete (approx. 5 minutes)
 - Ideal for an initial overview
 
@@ -526,6 +543,7 @@ With an active personality profile, coaching is tailored to you with **all coach
 - Every coach adapts their communication style to your personality traits
 - Conversation guidance considers your preferred way of communicating
 - With an adaptive profile, coaches continuously suggest adjustments to your personality profile based on conversation insights. This way, coaches provide "external perspective" feedback that optimally complements your "self-image".
+- In DPC/DPFL mode, coaches actively use your **Personality Signature**: They recognize when challenges can be addressed with your **strengths**, and gently point out **potential blind spots** - especially for motivation and relationship topics.
 `;
 
 // Fix: Add the component definition and default export.

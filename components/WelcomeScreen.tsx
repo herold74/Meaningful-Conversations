@@ -3,11 +3,17 @@ import { LogoIcon } from './icons/LogoIcon';
 import { BOTS } from '../constants';
 import { useLocalization } from '../context/LocalizationContext';
 import ChristmasSnowflakes from './ChristmasSnowflakes';
-import { isChristmasSeason } from '../utils/dateUtils';
+import SpringBlossoms from './SpringBlossoms';
+import SummerButterflies from './SummerButterflies';
+import AutumnLeaves from './AutumnLeaves';
+import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 
 const WelcomeScreen: React.FC = () => {
     const { t } = useLocalization();
     const showChristmas = useMemo(() => isChristmasSeason(), []);
+    const showSpring = useMemo(() => isSpringSeason(), []);
+    const showSummer = useMemo(() => isSummerSeason(), []);
+    const showAutumn = useMemo(() => isAutumnSeason(), []);
     
     // Pre-calculated positions for 6 bots in a hexagon shape around the central logo
     const avatarPositions = [
@@ -22,6 +28,9 @@ const WelcomeScreen: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
+      {showSpring && <SpringBlossoms lightModeOnly={true} />}
+      {showSummer && <SummerButterflies lightModeOnly={true} />}
+      {showAutumn && <AutumnLeaves />}
       {/* Container for the logo and avatars */}
       <div className="relative w-48 h-48">
         
