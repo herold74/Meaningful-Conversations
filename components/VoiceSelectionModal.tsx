@@ -115,7 +115,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // --- Whitelist First Pass ---
         let allowedNames: string[] = [];
         if (botLanguage === 'de') {
-            allowedNames = botGender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'martin', 'hans'];
+            allowedNames = botGender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'victor', 'martin', 'hans', 'yannick'];
         } else if (botLanguage === 'en') {
             if (botGender === 'female') {
                 allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa'];
@@ -125,7 +125,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         }
         
         const whitelistedVoices = voices.filter(v => {
-            if (!v.localService) return false;
+            // On iOS, enhanced/premium voices may have localService: false
+            // because they're downloaded from Apple servers, so skip this check on iOS
+            if (!isIOS && !v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const name = v.name.toLowerCase();
             return allowedNames.some(allowedName => name.includes(allowedName));
@@ -138,7 +140,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // --- Fallback to Broader Search if Whitelist Fails ---
         // First try: voices that match the gender
         let genderFilteredVoices = voices.filter(v => {
-            if (!v.localService) return false;
+            // On iOS, skip localService check (see above)
+            if (!isIOS && !v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const voiceGender = getVoiceGender(v);
             return voiceGender === botGender;
@@ -148,7 +151,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         if (genderFilteredVoices.length === 0) {
             const oppositeGender = botGender === 'male' ? 'female' : 'male';
             genderFilteredVoices = voices.filter(v => {
-                if (!v.localService) return false;
+                // On iOS, skip localService check (see above)
+                if (!isIOS && !v.localService) return false;
                 if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
                 const voiceGender = getVoiceGender(v);
                 return voiceGender !== oppositeGender;

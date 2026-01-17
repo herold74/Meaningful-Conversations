@@ -65,8 +65,14 @@ ssh root@91.99.193.87 'cd /opt/manualmode-staging && ...'
 - **Image-Tags:** `1.7.8` und `1.7.8-build3`
 
 **Wichtige Dateien:**
-- `BUILD_NUMBER` - Fortlaufende Build-Nummer (wird automatisch erhöht)
-- `package.json` - Versions-Source-of-Truth
+- `BUILD_NUMBER` - Fortlaufende Build-Nummer (manuell erhöhen vor Deploy)
+- `package.json` - **EINZIGE** Versions-Source-of-Truth
+
+**VERSION Handling (KRITISCH!):**
+- VERSION kommt **NUR** aus `package.json`
+- `.env.staging` und `.env.production` dürfen **KEINE** VERSION Variable enthalten!
+- Das Deploy-Script (`deploy-manualmode.sh`) setzt VERSION automatisch auf dem Server
+- Falls VERSION in einer .env-Datei gefunden wird, wird sie ignoriert und überschrieben
 
 **`make update-version` aktualisiert:**
 - `package.json` (Frontend + Backend)
@@ -77,8 +83,8 @@ ssh root@91.99.193.87 'cd /opt/manualmode-staging && ...'
 
 **NIEMALS:**
 - Images manuell taggen ohne `make build-release`
-- Version in package.json manuell ändern
-- BUILD_NUMBER manuell ändern
+- VERSION in .env-Dateien setzen (wird ignoriert!)
+- BUILD_NUMBER vergessen zu erhöhen vor Deploy
 
 #### Server-Deployment
 

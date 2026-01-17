@@ -14,7 +14,7 @@ export const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' |
     const maleKeywords = ['male', 'man', 'boy', 'männlich'];
     const femaleKeywords = ['female', 'woman', 'girl', 'weiblich'];
     
-    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'kenji', 'martin', 'hans'];
+    const maleNames = ['alex', 'daniel', 'david', 'tom', 'oliver', 'jamie', 'max', 'rob', 'lee', 'ryan', 'aaron', 'nexus', 'markus', 'yannick', 'stefan', 'viktor', 'victor', 'kenji', 'martin', 'hans'];
     const femaleNames = ['samantha', 'zira', 'fiona', 'ava', 'chloe', 'susan', 'allison', 'cora', 'kathy', 'anna', 'hedda', 'serena', 'petra', 'helena', 'katja'];
 
     if (maleKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(name))) return 'male';
@@ -41,7 +41,7 @@ export const selectVoice = (
   // --- Whitelist First Pass ---
   let allowedNames: string[] = [];
   if (langPrefix === 'de') {
-      allowedNames = gender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'martin', 'hans'];
+      allowedNames = gender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'victor', 'martin', 'hans', 'yannick'];
   } else if (langPrefix === 'en') {
       if (gender === 'female') {
           allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa'];
@@ -61,8 +61,10 @@ export const selectVoice = (
           const score = (voice: SpeechSynthesisVoice): number => {
               let score = 0;
               const name = voice.name.toLowerCase();
-              if (voice.localService) score += 100;
-              if (name.includes('enhanced') || name.includes('premium') || name.includes('erweitert')) score += 80;
+              // localService is now a preference, not a requirement
+              // iOS enhanced voices may have localService: false
+              if (voice.localService) score += 50;
+              if (name.includes('enhanced') || name.includes('premium') || name.includes('erweitert')) score += 100;
               if (voice.default) score += 1;
               return score;
           };
@@ -105,8 +107,10 @@ export const selectVoice = (
     let score = 0;
     const name = voice.name.toLowerCase();
     
-    if (voice.localService) score += 100;
-    if (name.includes('enhanced') || name.includes('premium') || name.includes('wavenet') || name.includes('erweitert')) score += 80;
+    // localService is now a preference, not a requirement
+    // iOS enhanced voices may have localService: false
+    if (voice.localService) score += 50;
+    if (name.includes('enhanced') || name.includes('premium') || name.includes('wavenet') || name.includes('erweitert')) score += 100;
     if (voice.default) score += 1;
 
     return score;
