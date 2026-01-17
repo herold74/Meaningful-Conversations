@@ -1,8 +1,8 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.7.8 (Build 5)
-**Staging:** Deployed
+**Version:** 1.7.8 (Build 13)
+**Staging:** Deployed ✅
 **Production:** Pending
 
 ## Recent Changes (v1.7.8)
@@ -16,16 +16,36 @@
 - Added "Respect Competence" principle - don't drill down when user knows what to do
 - Added "Move On Signals" detection (frustration/competence signals)
 - Added "Topic Pivot" handling - fully commit to new topic when user reprioritizes
+- Added "Closure Signals" detection - recognize gratitude, self-sufficiency, plan confirmation
+- Don't drill into implementation details after user confirms a plan
 - Reduced speech rate from 1.1 to 1.0
+
+### Bot Descriptions (Synced)
+- **Nobody:** "Ein effizienter Manager, der Ihnen hilft..."
+- **Max:** "Ein inspirierender Coach, der Ihnen hilft..."
 
 ### iOS Voice Selection UI
 - Server voices show "(Not available on iOS)" with info tooltip
 - Auto-switches to local voice if server voice was selected
 - Hint text on separate line for small screens
 
-### Deploy Script Fix
-- VERSION no longer imported from .env files - always from package.json
-- Fixed "1.7.8 latest" display bug
+### OCEAN Naming Consistency
+- Renamed "Big5" profile references to "OCEAN" throughout the app
+- Added OCEAN acronym explanation in user guide
+- Note: "Big 5 Analyse" (Dr. Bohne's 5 blockages) remains unchanged
+
+### Seasonal Themes
+- Automatic theme switching based on meteorological calendar
+- Spring (Mar-May): Summer theme + falling blossoms (light mode only)
+- Summer (Jun-Aug): Summer theme + butterflies (light mode only)
+- Autumn (Sep-Nov): Autumn theme + falling leaves (both modes)
+- Winter (Dec-Feb): Winter theme + snowflakes (Dec 1 - Jan 6, dark mode only)
+
+### Deploy Process Fix (IMPORTANT!)
+- VERSION now comes **ONLY** from `package.json`
+- Removed VERSION from `.env.staging` and `.env.production`
+- Deploy script explicitly sets VERSION on server after .env transfer
+- This prevents "Version latest" display bug permanently
 
 ## Previous Changes (v1.7.5)
 

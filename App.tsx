@@ -8,6 +8,7 @@ import * as analyticsService from './services/analyticsService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
 import { TestScenario } from './utils/testScenarios';
+import { getSeasonalColorTheme, getCurrentSeason } from './utils/dateUtils';
 
 
 // Component Imports
@@ -113,12 +114,28 @@ const App: React.FC = () => {
         }
         return true;
     });
-    const [colorTheme, setColorTheme] = useState<'autumn' | 'winter'>(() => {
+    const [colorTheme, setColorTheme] = useState<'summer' | 'autumn' | 'winter'>(() => {
         if (typeof window !== 'undefined') {
+            const currentSeason = getCurrentSeason();
+            const lastAppliedSeason = localStorage.getItem('lastAppliedSeason');
             const storedTheme = localStorage.getItem('colorTheme');
-            return storedTheme === 'autumn' ? 'autumn' : 'winter';
+            
+            // Check if season has changed since last visit
+            if (currentSeason !== lastAppliedSeason) {
+                // New season! Apply seasonal theme once and save
+                const newTheme = getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
+                localStorage.setItem('lastAppliedSeason', currentSeason);
+                localStorage.setItem('colorTheme', newTheme);
+                return newTheme;
+            }
+            
+            // Same season - use stored preference if valid
+            if (storedTheme === 'summer' || storedTheme === 'autumn' || storedTheme === 'winter') {
+                return storedTheme;
+            }
         }
-        return 'winter'; // Default to the new theme to showcase it
+        // Default to seasonal theme
+        return getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
     });
 
     const setAndProcessUser = (user: User | null) => {
@@ -156,6 +173,7 @@ const App: React.FC = () => {
     }, [colorTheme]);
 
     // Automatic theme switching based on time of day (18:00-6:00 = dark, 6:00-18:00 = light)
+    // and season (spring/summer → summer theme, autumn → autumn theme, winter → winter theme)
     useEffect(() => {
         if (!isAutoThemeEnabled) return;
 
@@ -171,6 +189,12 @@ const App: React.FC = () => {
             if (isDarkMode !== desiredMode) {
                 setIsDarkMode(desiredMode);
             }
+            
+            // Seasonal color theme switching
+            const seasonalTheme = getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
+            if (colorTheme !== seasonalTheme) {
+                setColorTheme(seasonalTheme);
+            }
         };
 
         // Check immediately
@@ -180,7 +204,7 @@ const App: React.FC = () => {
         const intervalId = setInterval(checkTimeAndUpdateTheme, 60000);
 
         return () => clearInterval(intervalId);
-    }, [isAutoThemeEnabled, isDarkMode]);
+    }, [isAutoThemeEnabled, isDarkMode]); // Removed colorTheme to prevent override loops
 
     const toggleDarkMode = () => {
         // When user manually toggles, disable auto-theme
@@ -188,7 +212,18 @@ const App: React.FC = () => {
         localStorage.setItem('autoThemeEnabled', 'false');
         setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
     };
-    const toggleColorTheme = () => setColorTheme(prev => prev === 'winter' ? 'autumn' : 'winter');
+    
+    // Cycle through color themes: summer → autumn → winter → summer
+    const toggleColorTheme = () => {
+        // When user manually toggles color theme, disable auto-theme
+        setIsAutoThemeEnabled(false);
+        localStorage.setItem('autoThemeEnabled', 'false');
+        setColorTheme(prev => {
+            if (prev === 'summer') return 'autumn';
+            if (prev === 'autumn') return 'winter';
+            return 'summer';
+        });
+    };
     
     // Check for personality profile when user logs in
     useEffect(() => {

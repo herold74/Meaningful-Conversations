@@ -78,8 +78,8 @@ html[data-theme="winter"] {
   --button-foreground-on-accent: 0 0 0;
 }
 
-/* --- Autumn Theme --- */
-html[data-theme="autumn"] {
+/* --- Summer Theme (Spring & Summer seasons) --- */
+html[data-theme="summer"] {
   --bg-primary: 249 250 251; /* gray-50 */
   --bg-secondary: 255 255 255; /* white */
   --bg-tertiary: 243 244 246; /* gray-100 */
@@ -119,7 +119,7 @@ html[data-theme="autumn"] {
   --button-foreground-on-accent: 17 24 39;
 }
 
-.dark[data-theme="autumn"] {
+.dark[data-theme="summer"] {
   --bg-primary: 3 7 18; /* gray-950 */
   --bg-secondary: 3 7 18;
   --bg-tertiary: 31 41 55; /* gray-800 */
@@ -149,6 +149,79 @@ html[data-theme="autumn"] {
   --status-info-foreground: 96 165 250; /* blue-400 */
 
   --button-foreground-on-accent: 0 0 0;
+}
+
+/* --- Autumn Theme (warm orange/brown tones) --- */
+html[data-theme="autumn"] {
+  --bg-primary: 255 251 245; /* warm white */
+  --bg-secondary: 255 255 255; /* white */
+  --bg-tertiary: 254 243 230; /* warm cream */
+
+  --content-primary: 67 20 7; /* brown-900 */
+  --content-secondary: 120 53 15; /* amber-800 */
+  --content-subtle: 146 64 14; /* amber-700 */
+  --content-inverted: 255 255 255; /* white */
+
+  --border-primary: 253 230 200; /* warm beige */
+  --border-secondary: 251 213 170; /* amber-200 */
+  
+  --accent-primary: 249 115 22; /* orange-500 */
+  --accent-primary-hover: 234 88 12; /* orange-600 */
+  --accent-secondary: 251 191 36; /* amber-400 */
+  --accent-secondary-hover: 245 158 11; /* amber-500 */
+  --accent-tertiary: 146 64 14; /* amber-700 */
+  --accent-tertiary-hover: 120 53 15; /* amber-800 */
+  --accent-tertiary-foreground: 255 255 255;
+
+  --status-warning-background: 254 252 232; /* yellow-50 */
+  --status-warning-border: 250 204 21; /* yellow-400 */
+  --status-warning-foreground: 180 83 9; /* yellow-600 */
+  
+  --status-success-background: 240 253 244; /* green-50 */
+  --status-success-border: 134 239 172; /* green-300 */
+  --status-success-foreground: 22 101 52; /* green-700 */
+
+  --status-danger-background: 254 242 242; /* red-50 */
+  --status-danger-border: 248 113 113; /* red-400 */
+  --status-danger-foreground: 185 28 28; /* red-700 */
+
+  --status-info-background: 255 247 237; /* orange-50 */
+  --status-info-border: 253 186 116; /* orange-300 */
+  --status-info-foreground: 154 52 18; /* orange-800 */
+
+  --button-foreground-on-accent: 255 255 255;
+}
+
+.dark[data-theme="autumn"] {
+  --bg-primary: 28 16 10; /* dark brown */
+  --bg-secondary: 28 16 10;
+  --bg-tertiary: 55 32 18; /* warm dark */
+
+  --content-primary: 254 243 230; /* warm cream */
+  --content-secondary: 253 186 116; /* orange-300 */
+  --content-subtle: 194 120 69; /* muted orange */
+  --content-inverted: 28 16 10; /* dark brown */
+
+  --border-primary: 82 48 26; /* warm brown */
+  --border-secondary: 120 53 15; /* amber-800 */
+
+  --status-warning-background: 60 43 6;
+  --status-warning-border: 133 76 8 / 0.3;
+  --status-warning-foreground: 234 179 8; /* yellow-400 */
+  
+  --status-success-background: 5 50 32;
+  --status-success-border: 34 197 94 / 0.3;
+  --status-success-foreground: 74 222 128; /* green-400 */
+  
+  --status-danger-background: 70 13 13;
+  --status-danger-border: 220 38 38 / 0.3;
+  --status-danger-foreground: 239 68 68; /* red-500 */
+  
+  --status-info-background: 67 28 8;
+  --status-info-border: 249 115 22 / 0.3;
+  --status-info-foreground: 251 146 60; /* orange-400 */
+
+  --button-foreground-on-accent: 255 255 255;
 }
 
 /* === END THEME DEFINITIONS === */
@@ -232,3 +305,144 @@ html[data-theme="autumn"] {
 .snowflake:nth-child(8) { left: 80%; animation-duration: 13s; animation-delay: 4s; font-size: 1.1em; }
 .snowflake:nth-child(9) { left: 90%; animation-duration: 14s; animation-delay: 1s; }
 .snowflake:nth-child(10) { left: 25%; animation-duration: 16s; animation-delay: 6s; font-size: 0.7em; }
+
+/* Spring blossoms animation - active Mar 1 to May 31 (semi-transparent) */
+@keyframes blossom-fall {
+  0% {
+    transform: translateY(-10vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(50vh) translateX(30px) rotate(180deg);
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(110vh) translateX(-20px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.blossom {
+  position: fixed;
+  top: -10vh;
+  font-size: 1.2em;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+  animation: blossom-fall ease-in-out infinite;
+}
+
+/* Varied positions, speeds, and delays for natural floating look */
+.blossom:nth-child(1) { left: 5%; animation-duration: 18s; animation-delay: 0s; }
+.blossom:nth-child(2) { left: 15%; animation-duration: 22s; animation-delay: 3s; font-size: 0.9em; }
+.blossom:nth-child(3) { left: 25%; animation-duration: 19s; animation-delay: 1s; }
+.blossom:nth-child(4) { left: 35%; animation-duration: 24s; animation-delay: 5s; font-size: 1.1em; }
+.blossom:nth-child(5) { left: 45%; animation-duration: 20s; animation-delay: 2s; }
+.blossom:nth-child(6) { left: 55%; animation-duration: 23s; animation-delay: 4s; font-size: 0.8em; }
+.blossom:nth-child(7) { left: 65%; animation-duration: 18s; animation-delay: 6s; }
+.blossom:nth-child(8) { left: 75%; animation-duration: 21s; animation-delay: 1s; font-size: 1.0em; }
+.blossom:nth-child(9) { left: 85%; animation-duration: 25s; animation-delay: 3s; }
+.blossom:nth-child(10) { left: 10%; animation-duration: 19s; animation-delay: 7s; font-size: 0.7em; }
+.blossom:nth-child(11) { left: 50%; animation-duration: 22s; animation-delay: 8s; }
+.blossom:nth-child(12) { left: 95%; animation-duration: 20s; animation-delay: 2s; font-size: 1.2em; }
+
+/* Autumn leaves animation - active Sep 1 to Nov 30 (semi-transparent) */
+@keyframes leaf-fall {
+  0% {
+    transform: translateY(-10vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(25vh) translateX(40px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(-20px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(75vh) translateX(30px) rotate(270deg);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(110vh) translateX(10px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.leaf {
+  position: fixed;
+  top: -10vh;
+  font-size: 1.3em;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.6;
+  animation: leaf-fall ease-in-out infinite;
+}
+
+/* Varied positions, speeds, and delays for tumbling leaf effect */
+.leaf:nth-child(1) { left: 8%; animation-duration: 16s; animation-delay: 0s; }
+.leaf:nth-child(2) { left: 18%; animation-duration: 20s; animation-delay: 2s; font-size: 1.1em; }
+.leaf:nth-child(3) { left: 28%; animation-duration: 17s; animation-delay: 4s; }
+.leaf:nth-child(4) { left: 38%; animation-duration: 22s; animation-delay: 1s; font-size: 1.4em; }
+.leaf:nth-child(5) { left: 48%; animation-duration: 18s; animation-delay: 3s; }
+.leaf:nth-child(6) { left: 58%; animation-duration: 21s; animation-delay: 5s; font-size: 1.0em; }
+.leaf:nth-child(7) { left: 68%; animation-duration: 16s; animation-delay: 2s; }
+.leaf:nth-child(8) { left: 78%; animation-duration: 19s; animation-delay: 6s; font-size: 1.2em; }
+.leaf:nth-child(9) { left: 88%; animation-duration: 23s; animation-delay: 1s; }
+.leaf:nth-child(10) { left: 15%; animation-duration: 17s; animation-delay: 7s; font-size: 0.9em; }
+
+/* Summer butterflies animation - active Jun 1 to Aug 31 (semi-transparent, fluttering) */
+@keyframes butterfly-flutter {
+  0% {
+    transform: translateX(-10vw) translateY(30vh) rotate(0deg) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateX(20vw) translateY(20vh) rotate(15deg) scale(1.1);
+  }
+  50% {
+    transform: translateX(50vw) translateY(40vh) rotate(-10deg) scale(0.9);
+  }
+  75% {
+    transform: translateX(80vw) translateY(25vh) rotate(20deg) scale(1.05);
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(110vw) translateY(35vh) rotate(5deg) scale(1);
+    opacity: 0;
+  }
+}
+
+.butterfly {
+  position: fixed;
+  left: -10vw;
+  font-size: 1.5em;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
+  animation: butterfly-flutter ease-in-out infinite;
+}
+
+/* Varied positions, speeds, and delays for natural fluttering */
+.butterfly:nth-child(1) { top: 15%; animation-duration: 25s; animation-delay: 0s; }
+.butterfly:nth-child(2) { top: 35%; animation-duration: 30s; animation-delay: 4s; font-size: 1.3em; }
+.butterfly:nth-child(3) { top: 55%; animation-duration: 22s; animation-delay: 8s; }
+.butterfly:nth-child(4) { top: 25%; animation-duration: 28s; animation-delay: 2s; font-size: 1.6em; }
+.butterfly:nth-child(5) { top: 65%; animation-duration: 26s; animation-delay: 12s; }
+.butterfly:nth-child(6) { top: 45%; animation-duration: 32s; animation-delay: 6s; font-size: 1.2em; }
+.butterfly:nth-child(7) { top: 75%; animation-duration: 24s; animation-delay: 10s; }
+.butterfly:nth-child(8) { top: 20%; animation-duration: 29s; animation-delay: 15s; font-size: 1.4em; }
