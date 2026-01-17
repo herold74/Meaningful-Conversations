@@ -24,7 +24,9 @@ ENV_FILE=""
 REGISTRY_URL="${REGISTRY_URL:-localhost}"
 REGISTRY_USER="${REGISTRY_USER:-gherold}"
 
-# Version from package.json
+# Version from package.json (SINGLE SOURCE OF TRUTH)
+# IMPORTANT: Do NOT add VERSION to .env files - it will be ignored!
+# The version is always read from package.json and explicitly set on the server.
 VERSION=$(grep -m1 '"version"' package.json | awk -F'"' '{print $4}')
 
 # Parse arguments
@@ -411,6 +413,10 @@ REMOTE_SCRIPT
     # Check if environment-specific .env exists
     if [ -f "$ENV_FILE" ]; then
         scp "$ENV_FILE" "$REMOTE_HOST:$REMOTE_ENV_DIR/.env"
+        # IMPORTANT: Ensure VERSION is always set correctly from package.json
+        # This prevents any stale VERSION values in .env files from causing issues
+        ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && sed -i '/^VERSION=/d' .env && echo 'VERSION=$VERSION' >> .env"
+        echo -e "${GREEN}✓ VERSION set to $VERSION on server${NC}"
     else
         echo -e "${YELLOW}⚠ Warning: $ENV_FILE not found. Using template.${NC}"
         echo -e "${YELLOW}   Create $ENV_FILE from env.$ENVIRONMENT.template before deploying!${NC}"

@@ -6,7 +6,10 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Button from './shared/Button';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
 import ChristmasSnowflakes from './ChristmasSnowflakes';
-import { isChristmasSeason } from '../utils/dateUtils';
+import SpringBlossoms from './SpringBlossoms';
+import SummerButterflies from './SummerButterflies';
+import AutumnLeaves from './AutumnLeaves';
+import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 
 interface RegisterViewProps {
   onShowPending: () => void;
@@ -26,6 +29,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
   const [isLoading, setIsLoading] = useState(false);
   
   const showChristmas = useMemo(() => isChristmasSeason(), []);
+  const showSpring = useMemo(() => isSpringSeason(), []);
+  const showSummer = useMemo(() => isSummerSeason(), []);
+  const showAutumn = useMemo(() => isAutumnSeason(), []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +71,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
   return (
     <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
+      {showSpring && <SpringBlossoms lightModeOnly={true} />}
+      {showSummer && <SummerButterflies lightModeOnly={true} />}
+      {showAutumn && <AutumnLeaves />}
       <div className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
          <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
             <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />

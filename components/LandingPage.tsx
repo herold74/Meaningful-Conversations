@@ -6,7 +6,10 @@ import { CheckIcon } from './icons/CheckIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ChristmasSnowflakes from './ChristmasSnowflakes';
-import { isChristmasSeason } from '../utils/dateUtils';
+import SpringBlossoms from './SpringBlossoms';
+import SummerButterflies from './SummerButterflies';
+import AutumnLeaves from './AutumnLeaves';
+import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 import Button from './shared/Button';
 
 interface LandingPageProps {
@@ -26,10 +29,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   const [error, setError] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   
-  const showChristmas = useMemo(() => {
-    const result = isChristmasSeason();
-    return result;
-  }, []);
+  const showChristmas = useMemo(() => isChristmasSeason(), []);
+  const showSpring = useMemo(() => isSpringSeason(), []);
+  const showSummer = useMemo(() => isSummerSeason(), []);
+  const showAutumn = useMemo(() => isAutumnSeason(), []);
 
   const previewContent = useMemo(() => {
       if (!fileContent) return '';
@@ -113,6 +116,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   return (
     <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
+      {showSpring && <SpringBlossoms lightModeOnly={true} />}
+      {showSummer && <SummerButterflies lightModeOnly={true} />}
+      {showAutumn && <AutumnLeaves />}
       <div className="w-full max-w-3xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('meaningfulConversations')}</h1>
         <p className="text-sm md:text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
