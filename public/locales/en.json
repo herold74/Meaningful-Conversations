@@ -1112,6 +1112,7 @@
   "sd_tension_integration_vs_holism": "Integration vs. Holism",
 
   "survey_progress": "Step {{current}} of {{total}}",
+  "survey_cancel": "Cancel",
   
   "narrative_profile_title": "Your Signature",
   "narrative_profile_regenerate": "Regenerate",
@@ -1121,6 +1122,8 @@
   "narrative_profile_blindspots_title": "⚪ Potential Blindspots",
   "narrative_profile_growth_title": "🌱 Growth Opportunities",
   "narrative_profile_generate_desc": "Based on your test results and personal experiences, we can create a unique personality signature for you.",
+  "narrative_profile_create_desc": "Share two brief experiences with us to create a unique personality signature based on your test results.",
+  "narrative_create_button": "Create Signature",
   "narrative_generate_button": "Generate Signature",
   "narrative_update_button": "Update Signature",
   "narrative_update_hint": "Collapse and re-expand the profile to enable an update",

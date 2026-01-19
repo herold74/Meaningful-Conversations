@@ -1111,6 +1111,7 @@
   "sd_tension_integration_vs_holism": "Integration vs. Ganzheit",
 
   "survey_progress": "Schritt {{current}} von {{total}}",
+  "survey_cancel": "Abbrechen",
   
   "narrative_profile_title": "Deine Signatur",
   "narrative_profile_regenerate": "Neu generieren",
@@ -1120,6 +1121,8 @@
   "narrative_profile_blindspots_title": "⚪ Potenzielle Blindspots",
   "narrative_profile_growth_title": "🌱 Wachstumsmöglichkeiten",
   "narrative_profile_generate_desc": "Basierend auf deinen Test-Ergebnissen und persönlichen Erfahrungen können wir eine einzigartige Persönlichkeits-Signatur für dich erstellen.",
+  "narrative_profile_create_desc": "Teile zwei kurze Erlebnisse mit uns, um eine einzigartige Persönlichkeits-Signatur basierend auf deinen Test-Ergebnissen zu erstellen.",
+  "narrative_create_button": "Signatur erstellen",
   "narrative_generate_button": "Signatur generieren",
   "narrative_update_button": "Signatur aktualisieren",
   "narrative_update_hint": "Klappe das Profil ein und wieder auf, um eine Aktualisierung zu ermöglichen",

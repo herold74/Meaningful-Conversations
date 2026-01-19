@@ -423,6 +423,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const handleDownloadPdf = async () => {
     if (!decryptedData || !profileMetadata) return;
     
+    // Detect Safari - known issues with html2canvas
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      const proceed = window.confirm(
+        language === 'de' 
+          ? 'Safari hat bekannte Kompatibilitätsprobleme mit der PDF-Generierung. Das Layout könnte fehlerhaft sein.\n\nFür beste Ergebnisse verwende bitte Chrome, Firefox oder Edge.\n\nTrotzdem fortfahren?'
+          : 'Safari has known compatibility issues with PDF generation. The layout may be incorrect.\n\nFor best results, please use Chrome, Firefox, or Edge.\n\nContinue anyway?'
+      );
+      if (!proceed) return;
+    }
+    
     try {
       // Determine completedLenses from profile data
       const completedLenses: LensType[] = [];
@@ -790,6 +801,56 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 {isGeneratingNarrative 
                   ? (t('narrative_generating') || 'Generiere...')
                   : <>✨ {t('narrative_generate_button') || 'Signatur generieren'}</>
+                }
+              </Button>
+              <Button
+                onClick={() => {
+                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
+                    setShowOverwriteWarning(true);
+                  } else {
+                    onStartNewTest({
+                      completedLenses: profileMetadata?.completedLenses || [],
+                      spiralDynamics: decryptedData?.spiralDynamics,
+                      riemann: decryptedData?.riemann,
+                      big5: decryptedData?.big5,
+                      narratives: decryptedData?.narratives,
+                      adaptationMode: profileMetadata?.adaptationMode,
+                    });
+                  }
+                }}
+                size="sm"
+                variant="secondary"
+              >
+                🔧 {t('profile_update_facet_button') || 'Facette aktualisieren'}
+              </Button>
+            </div>
+          </div>
+        ) : (decryptedData.spiralDynamics || decryptedData.riemann || decryptedData.big5) ? (
+          // User has test results but no narratives yet - prompt to add stories
+          <div data-signature-section className="mb-6 p-4 sm:p-5 bg-background-tertiary dark:bg-background-tertiary rounded-lg border border-border-secondary dark:border-border-primary">
+            <h3 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
+              🧬 {t('narrative_profile_title') || 'Deine Signatur'}
+            </h3>
+            <p className="text-sm text-content-secondary mb-4">
+              {t('narrative_profile_create_desc') || 'Teile zwei kurze Erlebnisse mit uns, um eine einzigartige Persönlichkeits-Signatur basierend auf deinen Test-Ergebnissen zu erstellen.'}
+            </p>
+            
+            {narrativeError && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
+                {narrativeError}
+              </div>
+            )}
+            
+            <div className="flex flex-wrap items-center justify-evenly gap-2 pt-3">
+              <Button
+                onClick={() => setShowNarrativeStoriesModal(true)}
+                disabled={isGeneratingNarrative}
+                loading={isGeneratingNarrative}
+                variant="primary"
+              >
+                {isGeneratingNarrative 
+                  ? (t('narrative_generating') || 'Generiere...')
+                  : <>✨ {t('narrative_create_button') || 'Signatur erstellen'}</>
                 }
               </Button>
               <Button
