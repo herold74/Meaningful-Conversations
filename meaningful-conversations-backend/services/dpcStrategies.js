@@ -233,8 +233,206 @@ const BIG5_STRATEGIES = {
   }
 };
 
+// Spiral Dynamics Strategies
+// For coaching adaptation based on SD level rankings
+const SD_STRATEGIES = {
+  beige: {
+    high: {
+      de: {
+        language: 'einfach, direkt, auf Grundbedürfnisse fokussiert',
+        tone: 'beruhigend, sicherheitsgebend, präsent',
+        approach: 'Fokussiere auf unmittelbare, praktische Lösungen. Biete Stabilität und Sicherheit.'
+      },
+      en: {
+        language: 'simple, direct, focused on basic needs',
+        tone: 'calming, security-providing, present',
+        approach: 'Focus on immediate, practical solutions. Offer stability and security.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Körperliche Bedürfnisse, Selbstfürsorge, Instinkte',
+        challenge: 'Achte auf deine körperlichen Signale. Was braucht dein Körper gerade?'
+      },
+      en: {
+        blindspot: 'Physical needs, self-care, instincts',
+        challenge: 'Pay attention to your physical signals. What does your body need right now?'
+      }
+    }
+  },
+  purple: {
+    high: {
+      de: {
+        language: 'gemeinschaftlich, traditionsverbunden, symbolisch',
+        tone: 'warm, zugehörigkeitsbetonend, ritualisiert',
+        approach: 'Betone Verbindungen zu Familie und Gemeinschaft. Nutze Geschichten und Rituale.'
+      },
+      en: {
+        language: 'communal, tradition-connected, symbolic',
+        tone: 'warm, belonging-emphasizing, ritualized',
+        approach: 'Emphasize connections to family and community. Use stories and rituals.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Zugehörigkeit, Traditionen, emotionale Bindungen',
+        challenge: 'Welche Traditionen oder Gemeinschaften könnten dir Halt geben?'
+      },
+      en: {
+        blindspot: 'Belonging, traditions, emotional bonds',
+        challenge: 'Which traditions or communities could provide you support?'
+      }
+    }
+  },
+  red: {
+    high: {
+      de: {
+        language: 'direkt, kraftvoll, herausfordernd',
+        tone: 'respektvoll-konfrontativ, anerkennend von Stärke',
+        approach: 'Sprich Macht und Durchsetzung direkt an. Biete schnelle, aktionsorientierte Optionen.'
+      },
+      en: {
+        language: 'direct, powerful, challenging',
+        tone: 'respectfully-confrontational, acknowledging strength',
+        approach: 'Address power and assertiveness directly. Offer quick, action-oriented options.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Durchsetzungskraft, Selbstbehauptung, Grenzen setzen',
+        challenge: 'Wann hast du zuletzt klar Nein gesagt oder dich durchgesetzt?'
+      },
+      en: {
+        blindspot: 'Assertiveness, self-advocacy, setting boundaries',
+        challenge: 'When did you last clearly say no or stand up for yourself?'
+      }
+    }
+  },
+  blue: {
+    high: {
+      de: {
+        language: 'strukturiert, prinzipientreu, ordnungsbetont',
+        tone: 'zuverlässig, regelkonform, ethisch',
+        approach: 'Biete klare Strukturen, Regeln und Sinn. Betone Pflicht und Verantwortung.'
+      },
+      en: {
+        language: 'structured, principled, order-emphasizing',
+        tone: 'reliable, rule-following, ethical',
+        approach: 'Offer clear structures, rules, and meaning. Emphasize duty and responsibility.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Struktur, Disziplin, langfristige Planung',
+        challenge: 'Welche Regeln oder Prinzipien könnten dir Orientierung geben?'
+      },
+      en: {
+        blindspot: 'Structure, discipline, long-term planning',
+        challenge: 'Which rules or principles could give you guidance?'
+      }
+    }
+  },
+  orange: {
+    high: {
+      de: {
+        language: 'erfolgsorientiert, strategisch, ergebnisorientiert',
+        tone: 'motivierend, wettbewerbsorientiert, anerkennend',
+        approach: 'Fokussiere auf messbare Ergebnisse und Effizienz. Biete Strategien zur Zielerreichung.'
+      },
+      en: {
+        language: 'success-oriented, strategic, results-focused',
+        tone: 'motivating, competitive, acknowledging',
+        approach: 'Focus on measurable results and efficiency. Offer strategies for goal achievement.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Ehrgeiz, Leistung, strategisches Denken',
+        challenge: 'Welches Ziel würdest du gerne erreichen? Was hält dich davon ab?'
+      },
+      en: {
+        blindspot: 'Ambition, achievement, strategic thinking',
+        challenge: 'What goal would you like to achieve? What holds you back?'
+      }
+    }
+  },
+  green: {
+    high: {
+      de: {
+        language: 'empathisch, inklusiv, konsenssuchend',
+        tone: 'verständnisvoll, verbindend, egalitär',
+        approach: 'Betone Gefühle und Beziehungen. Suche nach gemeinsamen Lösungen und Harmonie.'
+      },
+      en: {
+        language: 'empathetic, inclusive, consensus-seeking',
+        tone: 'understanding, connecting, egalitarian',
+        approach: 'Emphasize feelings and relationships. Seek common solutions and harmony.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Empathie, Teamarbeit, emotionale Intelligenz',
+        challenge: 'Wie fühlen sich andere in dieser Situation? Was brauchen sie?'
+      },
+      en: {
+        blindspot: 'Empathy, teamwork, emotional intelligence',
+        challenge: 'How do others feel in this situation? What do they need?'
+      }
+    }
+  },
+  yellow: {
+    high: {
+      de: {
+        language: 'systemisch, integrativ, perspektivenreich',
+        tone: 'neugierig, flexibel, komplexitätsbejahend',
+        approach: 'Biete multiple Perspektiven an. Ermutige systemisches Denken und Komplexität.'
+      },
+      en: {
+        language: 'systemic, integrative, perspective-rich',
+        tone: 'curious, flexible, complexity-affirming',
+        approach: 'Offer multiple perspectives. Encourage systems thinking and embracing complexity.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Systemdenken, Perspektivenwechsel, Komplexitätstoleranz',
+        challenge: 'Welche anderen Sichtweisen könnten auf diese Situation zutreffen?'
+      },
+      en: {
+        blindspot: 'Systems thinking, perspective-taking, complexity tolerance',
+        challenge: 'What other viewpoints might apply to this situation?'
+      }
+    }
+  },
+  turquoise: {
+    high: {
+      de: {
+        language: 'ganzheitlich, verbindend, transpersonal',
+        tone: 'spirituell, achtsam, global denkend',
+        approach: 'Verbinde persönliche Ziele mit größeren Zusammenhängen. Betone Verbundenheit mit allem.'
+      },
+      en: {
+        language: 'holistic, connecting, transpersonal',
+        tone: 'spiritual, mindful, globally thinking',
+        approach: 'Connect personal goals with larger contexts. Emphasize connection with everything.'
+      }
+    },
+    low: {
+      de: {
+        blindspot: 'Ganzheitliches Bewusstsein, globale Perspektive, Spiritualität',
+        challenge: 'Wie passt diese Situation in das größere Ganze deines Lebens?'
+      },
+      en: {
+        blindspot: 'Holistic awareness, global perspective, spirituality',
+        challenge: 'How does this situation fit into the bigger picture of your life?'
+      }
+    }
+  }
+};
+
 module.exports = {
   RIEMANN_STRATEGIES,
-  BIG5_STRATEGIES
+  BIG5_STRATEGIES,
+  SD_STRATEGIES
 };
 

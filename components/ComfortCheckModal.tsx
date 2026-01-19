@@ -18,7 +18,7 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   onComplete,
   encryptionKey
 }) => {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const [comfortScore, setComfortScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,7 +43,8 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         sessionId,
         comfortScore: optOut ? null : comfortScore!,
         optedOut: optOut,
-        encryptionKey
+        encryptionKey,
+        language: language as 'de' | 'en'
       });
 
       onComplete();

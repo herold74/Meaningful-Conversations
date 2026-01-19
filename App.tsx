@@ -99,6 +99,8 @@ const App: React.FC = () => {
     
     // Personality Profile States
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
+    const [existingProfileForExtension, setExistingProfileForExtension] = useState<Partial<SurveyResult> | null>(null);
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -490,23 +492,90 @@ const App: React.FC = () => {
     const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
         // Registered users: Save profile without automatic PDF download
         if (currentUser && encryptionKey) {
+            setIsSavingProfile(true); // Show loading spinner
             try {
-                const encryptedData = await encryptPersonalityProfile(result, encryptionKey);
+                // First, save the profile without signature
+                let encryptedData = await encryptPersonalityProfile(result, encryptionKey);
                 
                 await api.savePersonalityProfile({
                     testType: result.path,
-                    filterWorry: result.filter.worry,
-                    filterControl: result.filter.control,
+                    completedLenses: result.completedLenses,
+                    filterWorry: result.filter?.worry,
+                    filterControl: result.filter?.control,
                     encryptedData,
                     adaptationMode: result.adaptationMode || 'adaptive'
                 });
                 
-                setHasPersonalityProfile(true);
-                alert(t('personality_survey_success_saved_no_download') || 'Profil gespeichert! Du kannst jetzt deine Signatur generieren und das PDF herunterladen.');
+                // Automatically set coaching mode based on adaptation choice
+                // adaptive → DPFL (profile learns from sessions)
+                // stable → DPC (profile used but not modified)
+                const newCoachingMode = result.adaptationMode === 'adaptive' ? 'dpfl' : 'dpc';
+                try {
+                    const { user: updatedUser } = await userService.updateCoachingMode(newCoachingMode);
+                    setCurrentUser(updatedUser);
+                } catch (coachingModeError) {
+                    console.error('Failed to set coaching mode:', coachingModeError);
+                    // Non-critical error - profile is saved, coaching mode can be set later
+                }
                 
-                // Navigate to profile view where user can generate signature and download PDF
+                setHasPersonalityProfile(true);
+                
+                // Automatically generate signature since narratives are already available
+                // This provides a complete profile experience without requiring an extra manual step
+                let signatureGenerated = false;
+                if (result.narratives && result.narratives.flowStory && result.narratives.frictionStory) {
+                    try {
+                        const narrativeResponse = await api.generateNarrativeProfile({
+                            quantitativeData: {
+                                testType: result.path,
+                                completedLenses: result.completedLenses,
+                                filter: result.filter,
+                                spiralDynamics: result.spiralDynamics,
+                                riemann: result.riemann,
+                                big5: result.big5
+                            },
+                            narratives: result.narratives,
+                            language
+                        });
+                        
+                        if (narrativeResponse.narrativeProfile) {
+                            // Update result with generated signature
+                            result.narrativeProfile = narrativeResponse.narrativeProfile;
+                            
+                            // Re-encrypt and save with signature
+                            encryptedData = await encryptPersonalityProfile(result, encryptionKey);
+                            await api.savePersonalityProfile({
+                                testType: result.path,
+                                completedLenses: result.completedLenses,
+                                filterWorry: result.filter?.worry,
+                                filterControl: result.filter?.control,
+                                encryptedData,
+                                adaptationMode: result.adaptationMode || 'adaptive'
+                            });
+                            signatureGenerated = true;
+                        }
+                    } catch (signatureError) {
+                        console.error('Automatic signature generation failed:', signatureError);
+                        // Non-critical - user can generate signature manually later
+                    }
+                }
+                
+                setIsSavingProfile(false); // Hide loading spinner
+                
+                // Inform user about saved profile AND activated coaching mode
+                const modeLabel = newCoachingMode === 'dpfl' ? 'DPFL' : 'DPC';
+                if (signatureGenerated) {
+                    alert(t('personality_survey_success_with_signature', { mode: modeLabel }) || 
+                        `Profil und Signatur erstellt! ✨ Coaching-Modus „${modeLabel}" wurde aktiviert.`);
+                } else {
+                    alert(t('personality_survey_success_with_coaching_mode', { mode: modeLabel }) || 
+                        `Profil gespeichert! Coaching-Modus "${modeLabel}" wurde aktiviert. Du kannst jetzt deine Signatur generieren.`);
+                }
+                
+                // Navigate to profile view where user can view signature and download PDF
                 setView('personalityProfile');
             } catch (error) {
+                setIsSavingProfile(false); // Hide loading spinner on error
                 console.error('Profile save failed:', error);
                 alert(t('personality_survey_error_save') + ': ' + (error as Error).message);
                 // Still navigate to profile view so user can try again
@@ -986,12 +1055,17 @@ const App: React.FC = () => {
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'personalitySurvey': return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} currentUser={currentUser} />;
+            case 'personalitySurvey': {
+                console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension);
+                return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} currentUser={currentUser} existingProfile={existingProfileForExtension} />;
+            }
             case 'personalityProfile': return (
                 <PersonalityProfileView 
                     encryptionKey={encryptionKey}
-                    onStartNewTest={() => {
+                    onStartNewTest={(existingProfile?: Partial<SurveyResult>) => {
+                        console.log('[App] onStartNewTest called with:', existingProfile);
                         setMenuView(null);
+                        setExistingProfileForExtension(existingProfile || null);
                         setView('personalitySurvey');
                     }}
                     currentUser={currentUser}
@@ -1020,7 +1094,7 @@ const App: React.FC = () => {
                     isTestMode={isTestMode}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
@@ -1083,6 +1157,17 @@ const App: React.FC = () => {
             />
             <UpdateNotification onUpdate={updateServiceWorker} />
             {isAnalyzing && <AnalyzingView />}
+            {isSavingProfile && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center">
+                    <div className="w-12 h-12 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
+                    <h1 className="mt-6 text-2xl font-bold text-gray-200">
+                        {t('saving_profile_title') || 'Profil wird erstellt...'}
+                    </h1>
+                    <p className="mt-2 text-lg text-gray-400">
+                        {t('saving_profile_subtitle') || 'Deine Signatur wird generiert. Das kann einen Moment dauern.'}
+                    </p>
+                </div>
+            )}
              <DeleteAccountModal 
                 isOpen={isDeleteModalOpen} 
                 onClose={() => setIsDeleteModalOpen(false)}

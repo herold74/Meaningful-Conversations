@@ -198,6 +198,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
+    // Stop speech status polling
+    if (speechPollingRef.current) {
+      clearInterval(speechPollingRef.current);
+      speechPollingRef.current = null;
+    }
     
     // Stop speech recognition if active
     if (recognitionRef.current) {
@@ -244,6 +249,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Audio element for server TTS playback
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  
+  // Polling interval for reliable Web Speech API status detection
+  // The onstart/onend events are unreliable in some browsers (especially Chrome)
+  const speechPollingRef = useRef<number | null>(null);
   
   // Web Audio API context for iOS audio session management
   // Once resumed during user interaction, allows audio playback without further interaction
@@ -306,6 +315,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Reset voice settings when language changes
   // Derive coaching mode from user profile
   const coachingMode = currentUser?.coachingMode || 'off';
+  
+  // Nobody (nexus-gps) doesn't support DPFL - downgrade to DPC
+  // DPFL requires full coaching sessions which Nobody doesn't conduct
+  const effectiveCoachingMode = (bot.id === 'nexus-gps' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
   
   // Load and decrypt personality profile when coaching mode is active
   useEffect(() => {
@@ -773,6 +786,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     const loadingStartTime = Date.now();
     
+    // Stop any existing polling
+    if (speechPollingRef.current) {
+      clearInterval(speechPollingRef.current);
+      speechPollingRef.current = null;
+    }
+    
     window.speechSynthesis.cancel();
     
     // Wait for cancel to complete (browser bug workaround)
@@ -780,21 +799,57 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
+    // Start polling to reliably detect speech status
+    // Web Speech API events (onstart/onend) are unreliable in Chrome and other browsers
+    let hasStartedSpeaking = false;
+    speechPollingRef.current = window.setInterval(() => {
+      const synth = window.speechSynthesis;
+      
+      if (synth.speaking && !synth.paused && !hasStartedSpeaking) {
+        // Speech has started - ensure minimum loading time then show speaking status
+        hasStartedSpeaking = true;
+        const elapsed = Date.now() - loadingStartTime;
+        const remainingTime = Math.max(0, 300 - elapsed);
+        setTimeout(() => {
+          setTtsStatus('speaking');
+          setIsLoadingAudio(false);
+        }, remainingTime);
+      } else if (!synth.speaking && !synth.pending && hasStartedSpeaking) {
+        // Speech has ended
+        setTtsStatus('idle');
+        if (speechPollingRef.current) {
+          clearInterval(speechPollingRef.current);
+          speechPollingRef.current = null;
+        }
+      }
+    }, 50);
+
+    // Keep event handlers as backup (some browsers may fire them reliably)
     utterance.onstart = () => {
-      // Ensure loading spinner is visible for at least 300ms
-      const elapsed = Date.now() - loadingStartTime;
-      const remainingTime = Math.max(0, 300 - elapsed);
-      setTimeout(() => {
-        setTtsStatus('speaking');
-        setIsLoadingAudio(false); // Hide spinner when speech starts
-      }, remainingTime);
+      if (!hasStartedSpeaking) {
+        hasStartedSpeaking = true;
+        const elapsed = Date.now() - loadingStartTime;
+        const remainingTime = Math.max(0, 300 - elapsed);
+        setTimeout(() => {
+          setTtsStatus('speaking');
+          setIsLoadingAudio(false);
+        }, remainingTime);
+      }
     };
     utterance.onend = () => {
       setTtsStatus('idle');
+      if (speechPollingRef.current) {
+        clearInterval(speechPollingRef.current);
+        speechPollingRef.current = null;
+      }
     };
     utterance.onerror = () => {
       setTtsStatus('idle');
-      setIsLoadingAudio(false); // Hide spinner on error
+      setIsLoadingAudio(false);
+      if (speechPollingRef.current) {
+        clearInterval(speechPollingRef.current);
+        speechPollingRef.current = null;
+      }
     };
     
     let finalVoice: SpeechSynthesisVoice | null = null;
@@ -1021,6 +1076,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             } else if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
+            // Stop speech status polling
+            if (speechPollingRef.current) {
+                clearInterval(speechPollingRef.current);
+                speechPollingRef.current = null;
+            }
             setTtsStatus('idle');
         } else {
             // ENABLING TTS: Prime speechSynthesis with user gesture (Safari iOS requirement)
@@ -1114,22 +1174,50 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     recognition.onresult = (event) => {
+      // On some platforms (notably Android), interim results are CUMULATIVE - they contain
+      // the full transcript including already-finalized text. On other platforms (desktop Chrome),
+      // interim results only contain the new, not-yet-finalized portion.
+      // 
+      // To handle both cases correctly:
+      // 1. If we have an interim result, check if it starts with the final transcript
+      // 2. If it does (cumulative platform), use only the interim result
+      // 3. If not (standard platform), combine final + interim
+      
       let interim_transcript = '';
       let final_transcript = '';
       
-      // Process all results - final results are accumulated, interim results are replaced.
-      // Note: We use '=' for interim (not '+=') because on Android, each interim result
-      // already contains the full transcript so far. Using '+=' would cause duplication.
+      // Process all results
       for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           final_transcript += event.results[i][0].transcript;
         } else {
-          interim_transcript = event.results[i][0].transcript; // Use last interim only
+          // Take only the last interim result (there should only be one anyway)
+          interim_transcript = event.results[i][0].transcript;
         }
       }
       
-      // Combine the initial text (if any) with the new final and interim parts.
-      setInput(baseTranscriptRef.current + final_transcript + interim_transcript);
+      // Determine the combined transcript, avoiding duplication on cumulative platforms
+      let combined_transcript: string;
+      
+      if (interim_transcript && final_transcript) {
+        // Check if interim already contains the final text (cumulative platform like Android)
+        const normalizedFinal = final_transcript.trim().toLowerCase();
+        const normalizedInterim = interim_transcript.trim().toLowerCase();
+        
+        if (normalizedInterim.startsWith(normalizedFinal)) {
+          // Cumulative platform: interim contains everything, use it directly
+          combined_transcript = interim_transcript;
+        } else {
+          // Standard platform: interim only has new text, combine both
+          combined_transcript = final_transcript + interim_transcript;
+        }
+      } else {
+        // Only one of them exists, use whichever is available
+        combined_transcript = final_transcript || interim_transcript;
+      }
+      
+      // Combine with any text that existed before speech recognition started
+      setInput(baseTranscriptRef.current + combined_transcript);
     };
 
     recognitionRef.current = recognition;
@@ -1153,7 +1241,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                 [], 
                 language, 
                 isNewSession,
-                coachingMode,
+                effectiveCoachingMode,
                 decryptedProfile
             );
             const initialBotMessage: Message = {
@@ -1254,6 +1342,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     if (audioRef.current) {
       audioRef.current.pause();
     }
+    // Stop speech status polling
+    if (speechPollingRef.current) {
+      clearInterval(speechPollingRef.current);
+      speechPollingRef.current = null;
+    }
     setTtsStatus('idle');
 
     const userMessage: Message = {
@@ -1276,7 +1369,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             historyWithUserMessage, 
             language, 
             false,
-            coachingMode,
+            effectiveCoachingMode,
             decryptedProfile
         );
         
@@ -1402,6 +1495,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           window.speechSynthesis?.cancel();
           if (audioRef.current) {
             audioRef.current.pause();
+          }
+          // Stop speech status polling
+          if (speechPollingRef.current) {
+            clearInterval(speechPollingRef.current);
+            speechPollingRef.current = null;
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
@@ -1870,7 +1968,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         bot={bot}
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
-        coachingMode={coachingMode}
+        coachingMode={effectiveCoachingMode}
     />
      <FeedbackModal
         isOpen={isFeedbackModalOpen}

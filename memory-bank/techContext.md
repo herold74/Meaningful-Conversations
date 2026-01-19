@@ -59,13 +59,22 @@ ssh root@91.99.193.87 'cd /opt/manualmode-staging && ...'
 
 #### Versionierung mit Build-Nummer
 
-- **VERSION:** Semantische Version (z.B. `1.7.8`)
+- **VERSION:** Semantische Version (z.B. `1.7.9`)
 - **BUILD_NUMBER:** Fortlaufende Nummer pro Version (z.B. `3`)
-- **Anzeige in UI:** `Version 1.7.8 (Build 3)`
-- **Image-Tags:** `1.7.8` und `1.7.8-build3`
+- **Anzeige in UI:** `Version 1.7.9 (Build 3)`
+- **Image-Tags:** `1.7.9` und `1.7.9-build3`
+
+**⚠️ KRITISCHE REGEL: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
+```
+Bei Version 1.7.8 → 1.7.9:
+  BUILD_NUMBER MUSS auf 1 zurückgesetzt werden!
+  
+FALSCH: 1.7.8 (Build 39) → 1.7.9 (Build 40)
+RICHTIG: 1.7.8 (Build 39) → 1.7.9 (Build 1)
+```
 
 **Wichtige Dateien:**
-- `BUILD_NUMBER` - Fortlaufende Build-Nummer (manuell erhöhen vor Deploy)
+- `BUILD_NUMBER` - Fortlaufende Build-Nummer (bei neuem Minor/Major Release → zurück auf 1!)
 - `package.json` - **EINZIGE** Versions-Source-of-Truth
 
 **VERSION Handling (KRITISCH!):**
