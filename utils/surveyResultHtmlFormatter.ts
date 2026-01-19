@@ -56,7 +56,7 @@ function generateRiemannRadarSvg(data: {
     gridCircles += `<circle cx="${center}" cy="${center}" r="${(level / scale) * maxRadius}" fill="none" stroke="#e5e7eb" stroke-width="${isOuter ? '1.5' : '1'}" ${!isOuter ? 'stroke-dasharray="3,3"' : ''}/>`;
     // Add scale number label (top-right of circle)
     const labelRadius = (level / scale) * maxRadius;
-    gridCircles += `<text x="${center + 5}" y="${center - labelRadius + 4}" font-size="9" fill="#9ca3af">${level}</text>`;
+    gridCircles += `<text x="${center + 5}" y="${center - labelRadius + 4}" font-size="9px" fill="#9ca3af">${level}</text>`;
   });
   
   // Generate axis lines
@@ -109,16 +109,16 @@ function generateRiemannRadarSvg(data: {
   const labelPadding = 14; // Distance from radar edge to label
   const labelPos = center - maxRadius - labelPadding;
   
-  // Top and bottom labels (horizontal)
+  // Top and bottom labels (horizontal) - use px units for Safari compatibility
   let labels = '';
-  labels += `<text x="${center}" y="${labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151">${dimLabels.dauer}</text>`;
-  labels += `<text x="${center}" y="${size - labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151">${dimLabels.wechsel}</text>`;
+  labels += `<text x="${center}" y="${labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}px" font-weight="600" fill="#374151">${dimLabels.dauer}</text>`;
+  labels += `<text x="${center}" y="${size - labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}px" font-weight="600" fill="#374151">${dimLabels.wechsel}</text>`;
   
   // Left label (Distance) - vertical, reading bottom to top
-  labels += `<text x="${labelPos + 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151" transform="rotate(-90, ${labelPos + 4}, ${center})">${dimLabels.distanz}</text>`;
+  labels += `<text x="${labelPos + 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}px" font-weight="600" fill="#374151" transform="rotate(-90, ${labelPos + 4}, ${center})">${dimLabels.distanz}</text>`;
   
   // Right label (Proximity) - vertical, reading top to bottom
-  labels += `<text x="${size - labelPos - 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151" transform="rotate(90, ${size - labelPos - 4}, ${center})">${dimLabels.naehe}</text>`;
+  labels += `<text x="${size - labelPos - 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}px" font-weight="600" fill="#374151" transform="rotate(90, ${size - labelPos - 4}, ${center})">${dimLabels.naehe}</text>`;
   
   // Legend (translated) - only show if not hidden
   const legendLabels = language === 'de'
@@ -131,11 +131,11 @@ function generateRiemannRadarSvg(data: {
   const legend = hideLegend ? '' : `
     <g transform="translate(0, ${legendY})">
       <rect x="${legendStartX}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#3b82f6" rx="2"/>
-      <text x="${legendStartX + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.beruf}</text>
+      <text x="${legendStartX + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}px" fill="#374151">${legendLabels.beruf}</text>
       <rect x="${legendStartX + legendSpacing}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#22c55e" rx="2"/>
-      <text x="${legendStartX + legendSpacing + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.privat}</text>
+      <text x="${legendStartX + legendSpacing + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}px" fill="#374151">${legendLabels.privat}</text>
       <rect x="${legendStartX + legendSpacing * 2}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#f97316" rx="2"/>
-      <text x="${legendStartX + legendSpacing * 2 + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.selbst}</text>
+      <text x="${legendStartX + legendSpacing * 2 + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}px" fill="#374151">${legendLabels.selbst}</text>
     </g>
   `;
 
@@ -177,19 +177,25 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 10px !important; -webkit-text-size-adjust: 100%; }
     body {
       font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
       color: #1f2937;
       line-height: 1.4;
       background: #ffffff;
-      font-size: 10px;
+      font-size: 10px !important;
     }
+    /* Force consistent font sizing across browsers */
+    table, td, th, tr, span, div, p { font-size: inherit; }
+    svg text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif !important; }
     .page {
       padding: 12px;
       max-width: 210mm;
       margin: 0 auto;
+      box-sizing: border-box;
     }
     /* Compact Header */
     .header {
@@ -241,6 +247,9 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     .box-warm { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fcd34d; }
     .box-rose { background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border-color: #fda4af; }
     .box-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac; }
+    .box-placeholder { background: #f3f4f6; border-color: #d1d5db; opacity: 0.6; }
+    .box-placeholder .box-title { color: #9ca3af; border-color: #d1d5db; }
+    .placeholder-text { color: #9ca3af; font-size: 9px; font-style: italic; text-align: center; padding: 20px 10px; }
     /* Signature Box */
     .signature-text {
       font-size: 11px;
@@ -370,7 +379,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     </div>
 `;
 
-  // ROW 1: Signature + Superpowers (if narrative exists)
+  // ROW 1: Signature + Superpowers (if narrative exists, else placeholder)
   if (hasNarrative && result.narrativeProfile) {
     const np = result.narrativeProfile;
     html += `
@@ -391,6 +400,20 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
             </div>
           `).join('')}
         </div>
+      </div>
+    </div>
+`;
+  } else {
+    // Placeholder for missing narrative
+    html += `
+    <div class="grid-2">
+      <div class="box box-placeholder">
+        <div class="box-title">🧬 ${t.narrativeOS}</div>
+        <div class="placeholder-text">${language === 'de' ? 'Signatur noch nicht erstellt' : 'Signature not yet created'}</div>
+      </div>
+      <div class="box box-placeholder">
+        <div class="box-title">⚡ ${t.narrativeSuperpowers}</div>
+        <div class="placeholder-text">${language === 'de' ? 'Verfügbar nach Signatur-Erstellung' : 'Available after signature creation'}</div>
       </div>
     </div>
 `;
@@ -455,6 +478,14 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       </div>
     </div>
 `;
+  } else {
+    // Placeholder for missing Spiral Dynamics
+    html += `
+    <div class="box box-placeholder" style="margin-bottom: 10px;">
+      <div class="box-title">🌀 ${language === 'de' ? 'Was dich antreibt' : 'What Drives You'}</div>
+      <div class="placeholder-text">${language === 'de' ? 'Spiral Dynamics Test noch nicht abgeschlossen' : 'Spiral Dynamics test not yet completed'}</div>
+    </div>
+`;
   }
 
   // ROW 3: Riemann - Full width with radar and explanation (no legend)
@@ -516,6 +547,14 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       </div>
     </div>
     `;
+  } else {
+    // Placeholder for missing Riemann
+    html += `
+    <div class="box box-placeholder" style="margin-bottom: 10px;">
+      <div class="box-title">🎯 ${language === 'de' ? 'Wie du interagierst' : 'How You Interact'}</div>
+      <div class="placeholder-text">${language === 'de' ? 'Riemann-Thomann Test noch nicht abgeschlossen' : 'Riemann-Thomann test not yet completed'}</div>
+    </div>
+    `;
   }
   
   // ROW 4: OCEAN - Ultra compact inline layout
@@ -546,9 +585,17 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       </div>
     </div>
     `;
+  } else {
+    // Placeholder for missing OCEAN
+    html += `
+    <div class="box box-placeholder" style="margin-bottom: 10px;">
+      <div class="box-title">🧬 ${language === 'de' ? 'Was dich ausmacht' : 'What Defines You'}</div>
+      <div class="placeholder-text">${language === 'de' ? 'OCEAN/Big Five Test noch nicht abgeschlossen' : 'OCEAN/Big Five test not yet completed'}</div>
+    </div>
+    `;
   }
 
-  // ROW 4: Full Blindspots and Growth Opportunities (if narrative exists)
+  // ROW 5: Full Blindspots and Growth Opportunities (if narrative exists)
   if (hasNarrative && result.narrativeProfile) {
     const np = result.narrativeProfile;
     html += `
@@ -583,6 +630,20 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
             <div style="font-size: 8px; color: #6b7280; line-height: 1.4;">${g.recommendation}</div>
           </div>
         `).join('')}
+      </div>
+    </div>
+    `;
+  } else {
+    // Placeholder for missing Blindspots/Growth
+    html += `
+    <div class="grid-2" style="margin-top: 10px;">
+      <div class="box box-placeholder">
+        <div class="box-title">⚪ ${t.narrativeBlindspots}</div>
+        <div class="placeholder-text">${language === 'de' ? 'Verfügbar nach Signatur-Erstellung' : 'Available after signature creation'}</div>
+      </div>
+      <div class="box box-placeholder">
+        <div class="box-title">🌱 ${t.narrativeGrowth}</div>
+        <div class="placeholder-text">${language === 'de' ? 'Verfügbar nach Signatur-Erstellung' : 'Available after signature creation'}</div>
       </div>
     </div>
     `;
