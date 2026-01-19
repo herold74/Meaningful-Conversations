@@ -224,7 +224,7 @@ Nach dem Test können Sie zwei **"Goldene Fragen"** beantworten:
 Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI eine einzigartige **Persönlichkeits-Signatur** mit:
 - 🧬 **Ihre Signatur:** Eine prägnante Beschreibung Ihres "Betriebssystems"
 - ⚡ **Geheime Superkräfte:** Ihre verborgenen Stärken
-- 🌑 **Potenzielle Blindspots:** Bereiche, die Aufmerksamkeit verdienen
+- ⚪ **Potenzielle Blindspots:** Bereiche, die Aufmerksamkeit verdienen
 - 🌱 **Wachstumsmöglichkeiten:** Konkrete Entwicklungsempfehlungen
 
 **Hinweis:** Die Signatur kann eingeklappt werden. Um sie zu aktualisieren, klappen Sie sie ein und wieder auf – so wird versehentliches Neugenerieren verhindert.
@@ -493,7 +493,7 @@ After the test, you can answer two **"Golden Questions"**:
 Based on your test results and these stories, our AI generates a unique **Personality Signature** with:
 - 🧬 **Your Signature:** A concise description of your "operating system"
 - ⚡ **Secret Superpowers:** Your hidden strengths
-- 🌑 **Potential Blindspots:** Areas that deserve attention
+- ⚪ **Potential Blindspots:** Areas that deserve attention
 - 🌱 **Growth Opportunities:** Concrete development recommendations
 
 **Note:** The signature can be collapsed. To update it, collapse and expand it again – this prevents accidental regeneration.

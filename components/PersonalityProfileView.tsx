@@ -23,9 +23,6 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
   return (
     <div>
       {/* Operating System - The main paradox synthesis */}
-      <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
-        {t('narrative_profile_os_title') || '💡 Deine Signatur'}
-      </h4>
       <div className="prose prose-sm dark:prose-invert max-w-none mb-8">
         <div className="text-content-primary leading-relaxed whitespace-pre-line">
           {narrativeProfile.operatingSystem}
@@ -575,9 +572,10 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const chipBase = 'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium';
   const chipMuted = `${chipBase} bg-background-secondary text-content-tertiary border-border-secondary dark:border-border-primary`;
   const chipMutedInteractive = `${chipMuted} opacity-70 hover:opacity-100 hover:bg-background-tertiary hover:text-content-primary transition-colors`;
-  const chipAccent = `${chipBase} bg-accent-primary/10 text-accent-primary border-accent-primary/30`;
-  const chipBlue = `${chipBase} bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200/70 dark:border-blue-800/60`;
-  const chipGreen = `${chipBase} bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200/70 dark:border-green-800/60`;
+  // Fall-inspired color palette
+  const chipAmber = `${chipBase} bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-300/70 dark:border-amber-700/60`;  // What Drives You - golden warmth
+  const chipRose = `${chipBase} bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 border-rose-300/70 dark:border-rose-700/60`;  // How You Interact - warm connection
+  const chipTeal = `${chipBase} bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-300/70 dark:border-teal-700/60`;  // What Defines You - grounded depth
 
   const coachingSelectBase =
     'px-3 py-1.5 text-sm font-semibold rounded-lg border bg-background-secondary dark:bg-background-secondary/60 cursor-pointer transition-colors appearance-none bg-no-repeat bg-right pr-8';
@@ -617,67 +615,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 <option value="dpfl" disabled={decryptedData?.adaptationMode === 'stable'}>DPFL</option>
               </select>
           </div>
-          {/* All facets indicators - completed ones colorful, pending ones clickable to add */}
-          <div className="mt-3 flex flex-wrap items-center justify-evenly gap-2">
-            {profileMetadata.completedLenses.includes('sd') ? (
-              <span className={chipAccent}>
-                ✓ {t('lens_sd_name') || 'Was dich antreibt'}
-              </span>
-            ) : (
-              <button
-                onClick={() => onStartNewTest({
-                  completedLenses: profileMetadata.completedLenses,
-                  spiralDynamics: decryptedData?.spiralDynamics,
-                  riemann: decryptedData?.riemann,
-                  big5: decryptedData?.big5,
-                  narratives: decryptedData?.narratives,
-                  adaptationMode: profileMetadata.adaptationMode,
-                })}
-                className={`${chipMutedInteractive} hover:border-accent-primary/30 hover:text-accent-primary`}
-              >
-                + {t('lens_sd_name') || 'Was dich antreibt'}
-              </button>
-            )}
-            {profileMetadata.completedLenses.includes('riemann') ? (
-              <span className={chipBlue}>
-                ✓ {t('lens_riemann_name') || 'Wie du interagierst'}
-              </span>
-            ) : (
-              <button
-                onClick={() => onStartNewTest({
-                  completedLenses: profileMetadata.completedLenses,
-                  spiralDynamics: decryptedData?.spiralDynamics,
-                  riemann: decryptedData?.riemann,
-                  big5: decryptedData?.big5,
-                  narratives: decryptedData?.narratives,
-                  adaptationMode: profileMetadata.adaptationMode,
-                })}
-                className={`${chipMutedInteractive} hover:border-blue-300/70 hover:text-blue-700 dark:hover:text-blue-300`}
-              >
-                + {t('lens_riemann_name') || 'Wie du interagierst'}
-              </button>
-            )}
-            {profileMetadata.completedLenses.includes('ocean') ? (
-              <span className={chipGreen}>
-                ✓ {t('lens_ocean_name') || 'Was dich ausmacht'}
-              </span>
-            ) : (
-              <button
-                onClick={() => onStartNewTest({
-                  completedLenses: profileMetadata.completedLenses,
-                  spiralDynamics: decryptedData?.spiralDynamics,
-                  riemann: decryptedData?.riemann,
-                  big5: decryptedData?.big5,
-                  narratives: decryptedData?.narratives,
-                  adaptationMode: profileMetadata.adaptationMode,
-                })}
-                className={`${chipMutedInteractive} hover:border-green-300/70 hover:text-green-700 dark:hover:text-green-300`}
-              >
-                + {t('lens_ocean_name') || 'Was dich ausmacht'}
-              </button>
-            )}
-          </div>
-          
           {/* Compact metadata line */}
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-content-secondary mt-3">
             <span>{t('profile_view_created') || 'Erstellt'}: {formatDate(profileMetadata.createdAt)}</span>
@@ -696,18 +633,79 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               )}
             </div>
           </div>
+          
+          {/* All facets indicators - completed ones colorful, pending ones clickable to add */}
+          <div className="mt-5 flex flex-wrap items-center justify-evenly gap-2">
+            {profileMetadata.completedLenses.includes('sd') ? (
+              <span className={chipAmber}>
+                ✓ {t('lens_sd_name') || 'Was dich antreibt'}
+              </span>
+            ) : (
+              <button
+                onClick={() => onStartNewTest({
+                  completedLenses: profileMetadata.completedLenses,
+                  spiralDynamics: decryptedData?.spiralDynamics,
+                  riemann: decryptedData?.riemann,
+                  big5: decryptedData?.big5,
+                  narratives: decryptedData?.narratives,
+                  adaptationMode: profileMetadata.adaptationMode,
+                })}
+                className={`${chipMutedInteractive} hover:border-amber-300/70 hover:text-amber-700 dark:hover:text-amber-300`}
+              >
+                + {t('lens_sd_name') || 'Was dich antreibt'}
+              </button>
+            )}
+            {profileMetadata.completedLenses.includes('riemann') ? (
+              <span className={chipRose}>
+                ✓ {t('lens_riemann_name') || 'Wie du interagierst'}
+              </span>
+            ) : (
+              <button
+                onClick={() => onStartNewTest({
+                  completedLenses: profileMetadata.completedLenses,
+                  spiralDynamics: decryptedData?.spiralDynamics,
+                  riemann: decryptedData?.riemann,
+                  big5: decryptedData?.big5,
+                  narratives: decryptedData?.narratives,
+                  adaptationMode: profileMetadata.adaptationMode,
+                })}
+                className={`${chipMutedInteractive} hover:border-rose-300/70 hover:text-rose-700 dark:hover:text-rose-300`}
+              >
+                + {t('lens_riemann_name') || 'Wie du interagierst'}
+              </button>
+            )}
+            {profileMetadata.completedLenses.includes('ocean') ? (
+              <span className={chipTeal}>
+                ✓ {t('lens_ocean_name') || 'Was dich ausmacht'}
+              </span>
+            ) : (
+              <button
+                onClick={() => onStartNewTest({
+                  completedLenses: profileMetadata.completedLenses,
+                  spiralDynamics: decryptedData?.spiralDynamics,
+                  riemann: decryptedData?.riemann,
+                  big5: decryptedData?.big5,
+                  narratives: decryptedData?.narratives,
+                  adaptationMode: profileMetadata.adaptationMode,
+                })}
+                className={`${chipMutedInteractive} hover:border-teal-300/70 hover:text-teal-700 dark:hover:text-teal-300`}
+              >
+                + {t('lens_ocean_name') || 'Was dich ausmacht'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Narrative Profile Section - Moved up */}
         {decryptedData.narrativeProfile ? (
-          <div data-signature-section className="mb-6 bg-background-tertiary dark:bg-background-tertiary rounded-xl border border-border-secondary dark:border-border-primary overflow-hidden">
+          <div data-signature-section className="mb-6 bg-background-tertiary dark:bg-background-tertiary rounded-lg border border-border-secondary dark:border-border-primary overflow-hidden">
             {/* Collapsible Header */}
             <button
               onClick={() => setIsNarrativeExpanded(!isNarrativeExpanded)}
-              className="w-full p-4 flex items-center justify-between hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors"
+              className="w-full px-4 sm:px-5 py-4 flex items-center justify-between hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors"
             >
               <h3 className="text-lg font-semibold text-content-primary flex items-center gap-2">
-                🧬 {t('narrative_profile_title') || 'Persönlichkeits-Signatur'}
+                🧬 {t('narrative_profile_title') || 'Deine Signatur'}
               </h3>
               <span className={`text-xl text-content-tertiary transition-transform ${isNarrativeExpanded ? 'rotate-180' : ''}`}>
                 ▼
@@ -716,13 +714,13 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             
             {/* Collapsible Content */}
             {isNarrativeExpanded && (
-              <div className="p-6 pt-2">
+              <div className="px-4 sm:px-5 pb-4">
                 <NarrativeProfileSection narrativeProfile={decryptedData.narrativeProfile} t={t} />
               </div>
             )}
             
-            {/* Update Button - always visible and active */}
-            <div className="px-6 pb-4 flex flex-col items-center gap-3">
+            {/* Action Buttons Row */}
+            <div className="px-4 sm:px-5 pb-4 pt-3 flex flex-wrap items-center justify-evenly gap-2 border-t border-border-secondary/50 dark:border-border-primary/50">
               <Button
                 onClick={() => setShowNarrativeStoriesModal(true)}
                 disabled={isGeneratingNarrative}
@@ -735,15 +733,42 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   : <>🔄 {t('narrative_update_button') || 'Aktualisieren'}</>
                 }
               </Button>
+              <Button
+                onClick={handleDownloadPdf}
+                size="sm"
+                variant="secondary"
+              >
+                📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
+              </Button>
+              <Button
+                onClick={() => {
+                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
+                    setShowOverwriteWarning(true);
+                  } else {
+                    onStartNewTest({
+                      completedLenses: profileMetadata?.completedLenses || [],
+                      spiralDynamics: decryptedData?.spiralDynamics,
+                      riemann: decryptedData?.riemann,
+                      big5: decryptedData?.big5,
+                      narratives: decryptedData?.narratives,
+                      adaptationMode: profileMetadata?.adaptationMode,
+                    });
+                  }
+                }}
+                size="sm"
+                variant="secondary"
+              >
+                🔧 {t('profile_update_facet_button') || 'Facette aktualisieren'}
+              </Button>
               {narrativeError && (
-                <span className="text-red-600 dark:text-red-400 text-sm">{narrativeError}</span>
+                <span className="text-red-600 dark:text-red-400 text-sm w-full text-center">{narrativeError}</span>
               )}
             </div>
           </div>
         ) : decryptedData.narratives?.flowStory && decryptedData.narratives?.frictionStory ? (
-          <div data-signature-section className="mb-6 p-5 bg-background-tertiary dark:bg-background-tertiary rounded-xl border border-border-secondary dark:border-border-primary">
+          <div data-signature-section className="mb-6 p-4 sm:p-5 bg-background-tertiary dark:bg-background-tertiary rounded-lg border border-border-secondary dark:border-border-primary">
             <h3 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
-              🧬 {t('narrative_profile_title') || 'Persönlichkeits-Signatur'}
+              🧬 {t('narrative_profile_title') || 'Deine Signatur'}
             </h3>
             <p className="text-sm text-content-secondary mb-4">
               {t('narrative_profile_generate_desc') || 'Basierend auf deinen Test-Ergebnissen und persönlichen Erfahrungen können wir eine einzigartige Persönlichkeits-Signatur für dich erstellen.'}
@@ -755,7 +780,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </div>
             )}
             
-            <div className="flex justify-center">
+            <div className="flex flex-wrap items-center justify-evenly gap-2 pt-3">
               <Button
                 onClick={() => setShowNarrativeStoriesModal(true)}
                 disabled={isGeneratingNarrative}
@@ -766,6 +791,26 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   ? (t('narrative_generating') || 'Generiere...')
                   : <>✨ {t('narrative_generate_button') || 'Signatur generieren'}</>
                 }
+              </Button>
+              <Button
+                onClick={() => {
+                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
+                    setShowOverwriteWarning(true);
+                  } else {
+                    onStartNewTest({
+                      completedLenses: profileMetadata?.completedLenses || [],
+                      spiralDynamics: decryptedData?.spiralDynamics,
+                      riemann: decryptedData?.riemann,
+                      big5: decryptedData?.big5,
+                      narratives: decryptedData?.narratives,
+                      adaptationMode: profileMetadata?.adaptationMode,
+                    });
+                  }
+                }}
+                size="sm"
+                variant="secondary"
+              >
+                🔧 {t('profile_update_facet_button') || 'Facette aktualisieren'}
               </Button>
             </div>
           </div>
@@ -910,85 +955,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           </section>
         )}
 
-        {/* PDF Download - nur verfügbar wenn Signatur generiert wurde */}
-        {decryptedData?.narrativeProfile ? (
-          <div className="mt-8 flex justify-center">
-            <Button onClick={handleDownloadPdf} size="lg">
-              📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-            <p className="text-blue-700 dark:text-blue-300 text-sm mb-1">
-              💡 {t('profile_view_pdf_requires_signature') || 'PDF-Download verfügbar nach Signatur-Generierung'}
-            </p>
-            <p className="text-blue-600 dark:text-blue-400 text-xs">
-              {t('profile_view_pdf_hint') || 'Generiere zuerst deine persönliche Signatur oben ↑'}
-            </p>
-          </div>
-        )}
-
-        {/* Profile Management Section */}
-        <div className="mt-6 p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-secondary rounded-lg">
-          {profileMetadata.completedLenses.length < 3 ? (
-            // Not all facets completed - encourage expansion
-            <div className="flex items-start gap-3">
-              <span className="text-accent-primary text-lg">💡</span>
-              <div className="flex-1">
-                <p className="text-sm text-content-secondary mb-2">
-                  {t('profile_add_facet_hint') || 'Erweitere dein Profil um weitere Facetten für tiefere Einblicke.'}
-                </p>
-                <button
-                  onClick={() => {
-                    const existingData = {
-                      completedLenses: profileMetadata.completedLenses,
-                      spiralDynamics: decryptedData?.spiralDynamics,
-                      riemann: decryptedData?.riemann,
-                      big5: decryptedData?.big5,
-                      narratives: decryptedData?.narratives,
-                      adaptationMode: profileMetadata.adaptationMode,
-                    };
-                    console.log('[ProfileView] Passing existingData to survey:', existingData);
-                    onStartNewTest(existingData);
-                  }}
-                  className="text-sm font-medium text-accent-primary hover:text-accent-primary/80 transition-colors"
-                >
-                  + {t('profile_add_facet_button') || 'Weitere Facette hinzufügen'}
-                </button>
-              </div>
-            </div>
-          ) : (
-            // All facets completed - show prominent completion message
-            <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800 text-center">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <span className="text-2xl">✨</span>
-                <p className="text-base font-semibold text-green-800 dark:text-green-300">
-                  {t('profile_complete_hint') || 'Dein Profil ist vollständig! Du kannst einzelne Facetten jederzeit aktualisieren.'}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  // Show warning if profile has been refined through sessions
-                  if (profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
-                    setShowOverwriteWarning(true);
-                  } else {
-                    onStartNewTest({
-                      completedLenses: profileMetadata.completedLenses,
-                      spiralDynamics: decryptedData?.spiralDynamics,
-                      riemann: decryptedData?.riemann,
-                      big5: decryptedData?.big5,
-                      narratives: decryptedData?.narratives,
-                      adaptationMode: profileMetadata.adaptationMode,
-                    });
-                  }
-                }}
-                className="px-4 py-2 bg-accent-primary hover:bg-accent-primary/90 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                {t('profile_update_facet_button') || 'Facette aktualisieren'}
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Delete Profile - Very subtle, at the bottom */}
         <div className="mt-8 pt-4 border-t border-border-secondary text-center">

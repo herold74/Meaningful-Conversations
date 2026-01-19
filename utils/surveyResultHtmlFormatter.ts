@@ -8,10 +8,10 @@ function generateRiemannRadarSvg(data: {
   beruf: Record<string, number>;
   privat: Record<string, number>;
   selbst: Record<string, number>;
-}, language: 'de' | 'en' = 'de'): string {
-  const size = 280; // Increased size for better visibility
+}, language: 'de' | 'en' = 'de', customSize?: number, hideLegend?: boolean): string {
+  const size = customSize || 280; // Use custom size or default
   const center = size / 2;
-  const maxRadius = (size / 2) - 40;
+  const maxRadius = (size / 2) - 25; // Reduced padding for tighter layout
   
   // Dimensions: Beständigkeit (top), Nähe (right), Spontanität (bottom), Distanz (left)
   const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
@@ -23,8 +23,8 @@ function generateRiemannRadarSvg(data: {
     ...Object.values(data.selbst)
   ];
   const maxValue = Math.max(...allValues);
-  // Scale = max value + 20% padding, minimum 5, rounded up to nice number
-  const scale = Math.max(5, Math.ceil(maxValue * 1.2));
+  // Scale = ceiling of max value (matching app behavior), minimum 1 to avoid division by zero
+  const scale = Math.max(1, Math.ceil(maxValue));
   
   // Generate grid levels based on scale
   const gridLevels: number[] = [];
@@ -89,42 +89,61 @@ function generateRiemannRadarSvg(data: {
     });
   });
   
-  // Dimension labels (translated)
+  // Scale factor for compact mode (threshold lowered so 180px gets normal fonts)
+  const isCompact = size < 160;
+  const isMedium = size >= 160 && size < 240;
+  const labelFontSize = isCompact ? 8 : isMedium ? 10 : 12;
+  const legendFontSize = isCompact ? 7 : isMedium ? 9 : 10;
+  const legendRectSize = isCompact ? 8 : isMedium ? 10 : 12;
+  
+  // Dimension labels (translated) - shorter for compact
   const dimLabels = language === 'de' 
-    ? { dauer: 'Beständigkeit', naehe: 'Nähe', wechsel: 'Spontanität', distanz: 'Distanz' }
-    : { dauer: 'Duration', naehe: 'Proximity', wechsel: 'Change', distanz: 'Distance' };
+    ? (isCompact 
+        ? { dauer: 'Dauer', naehe: 'Nähe', wechsel: 'Wechsel', distanz: 'Distanz' }
+        : { dauer: 'Beständigkeit', naehe: 'Nähe', wechsel: 'Spontanität', distanz: 'Distanz' })
+    : (isCompact
+        ? { dauer: 'Duration', naehe: 'Proximity', wechsel: 'Change', distanz: 'Distance' }
+        : { dauer: 'Duration', naehe: 'Proximity', wechsel: 'Change', distanz: 'Distance' });
   
-  const labelPositions = [
-    { dim: dimLabels.dauer, x: center, y: 12, anchor: 'middle' },
-    { dim: dimLabels.naehe, x: size - 8, y: center + 5, anchor: 'end' },
-    { dim: dimLabels.wechsel, x: center, y: size - 6, anchor: 'middle' },
-    { dim: dimLabels.distanz, x: 8, y: center + 5, anchor: 'start' }
-  ];
+  // Labels positioned just outside the radar
+  const labelPadding = 14; // Distance from radar edge to label
+  const labelPos = center - maxRadius - labelPadding;
   
+  // Top and bottom labels (horizontal)
   let labels = '';
-  labelPositions.forEach(lbl => {
-    labels += `<text x="${lbl.x}" y="${lbl.y}" text-anchor="${lbl.anchor}" font-size="12" font-weight="600" fill="#374151">${lbl.dim}</text>`;
-  });
+  labels += `<text x="${center}" y="${labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151">${dimLabels.dauer}</text>`;
+  labels += `<text x="${center}" y="${size - labelPos + 4}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151">${dimLabels.wechsel}</text>`;
   
-  // Legend (translated)
+  // Left label (Distance) - vertical, reading bottom to top
+  labels += `<text x="${labelPos + 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151" transform="rotate(-90, ${labelPos + 4}, ${center})">${dimLabels.distanz}</text>`;
+  
+  // Right label (Proximity) - vertical, reading top to bottom
+  labels += `<text x="${size - labelPos - 4}" y="${center}" text-anchor="middle" font-size="${labelFontSize}" font-weight="600" fill="#374151" transform="rotate(90, ${size - labelPos - 4}, ${center})">${dimLabels.naehe}</text>`;
+  
+  // Legend (translated) - only show if not hidden
   const legendLabels = language === 'de'
     ? { beruf: 'Beruf', privat: 'Privat', selbst: 'Selbst' }
     : { beruf: 'Work', privat: 'Private', selbst: 'Self' };
   
-  const legendY = size + 15;
-  const legend = `
+  const legendY = size + (isCompact ? 8 : 12);
+  const legendSpacing = size / 3.5;
+  const legendStartX = size * 0.08;
+  const legend = hideLegend ? '' : `
     <g transform="translate(0, ${legendY})">
-      <rect x="30" y="0" width="12" height="12" fill="#3b82f6" rx="2"/>
-      <text x="47" y="10" font-size="10" fill="#374151">${legendLabels.beruf}</text>
-      <rect x="105" y="0" width="12" height="12" fill="#22c55e" rx="2"/>
-      <text x="122" y="10" font-size="10" fill="#374151">${legendLabels.privat}</text>
-      <rect x="180" y="0" width="12" height="12" fill="#f97316" rx="2"/>
-      <text x="197" y="10" font-size="10" fill="#374151">${legendLabels.selbst}</text>
+      <rect x="${legendStartX}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#3b82f6" rx="2"/>
+      <text x="${legendStartX + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.beruf}</text>
+      <rect x="${legendStartX + legendSpacing}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#22c55e" rx="2"/>
+      <text x="${legendStartX + legendSpacing + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.privat}</text>
+      <rect x="${legendStartX + legendSpacing * 2}" y="0" width="${legendRectSize}" height="${legendRectSize}" fill="#f97316" rx="2"/>
+      <text x="${legendStartX + legendSpacing * 2 + legendRectSize + 4}" y="${legendRectSize - 2}" font-size="${legendFontSize}" fill="#374151">${legendLabels.selbst}</text>
     </g>
   `;
 
+  // Adjust SVG height - no extra space needed when legend is hidden
+  const svgHeight = hideLegend ? size : size + (isCompact ? 20 : 30);
+
   return `
-    <svg width="${size}" height="${size + 30}" xmlns="http://www.w3.org/2000/svg">
+    <svg width="${size}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
       ${gridCircles}
       ${axisLines}
       ${polygons}
@@ -136,7 +155,8 @@ function generateRiemannRadarSvg(data: {
 }
 
 /**
- * Formats survey results as styled HTML for PDF generation
+ * Formats survey results as styled HTML for PDF generation - POSTER STYLE
+ * Dense, single-page infographic layout
  */
 export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 'en' = 'de'): string {
   const t = language === 'de' ? translations.de : translations.en;
@@ -146,6 +166,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     day: 'numeric'
   });
 
+  // Check what data we have
+  const hasSD = !!result.spiralDynamics;
+  const hasRiemann = !!result.riemann;
+  const hasOcean = !!result.big5;
+  const hasNarrative = !!result.narrativeProfile;
 
   let html = `
 <!DOCTYPE html>
@@ -153,566 +178,448 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
 <head>
   <meta charset="UTF-8">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
       color: #1f2937;
-      line-height: 1.6;
-      padding: 0;
+      line-height: 1.4;
       background: #ffffff;
+      font-size: 10px;
     }
-    .header {
-      background: #1B7272;
-      color: white;
-      text-align: center;
-      padding: 35px 30px 30px;
-      margin-bottom: 30px;
-    }
-    .header .logo-container {
-      margin-bottom: 12px;
-    }
-    .header .logo {
-      width: 48px;
-      height: 48px;
+    .page {
+      padding: 12px;
+      max-width: 210mm;
       margin: 0 auto;
     }
-    .header .brand {
-      font-size: 11px;
-      opacity: 0.7;
-      margin-bottom: 6px;
-      font-weight: 400;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+    /* Compact Header */
+    .header {
+      background: linear-gradient(135deg, #1B7272 0%, #0F5858 100%);
+      color: white;
+      padding: 6px 16px 10px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .header h1 {
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 4px;
+    .header-left h1 {
+      font-size: 16px;
+      font-weight: 700;
       letter-spacing: -0.3px;
     }
-    .header .subtitle {
-      font-size: 15px;
-      opacity: 0.85;
-      font-weight: 300;
+    .header-left .subtitle {
+      font-size: 9px;
+      opacity: 0.8;
     }
-    .header .date {
-      font-size: 12px;
-      opacity: 0.6;
-      margin-top: 12px;
-    }
-    .content {
-      padding: 0 30px 30px;
-    }
-    .section {
-      margin-bottom: 25px;
-      page-break-inside: avoid;
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #111827;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 3px solid #1B7272;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .filter-scores {
-      background: white;
-      border: 1px solid #e5e7eb;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .score-item {
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .score-item:last-child {
-      margin-bottom: 0;
-    }
-    .score-label {
-      font-weight: 600;
-      color: #374151;
-      min-width: 180px;
-    }
-    .score-bar {
-      flex: 1;
-      background: #f3f4f6;
-      height: 24px;
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-    .score-fill {
-      background: #1B7272;
-      height: 100%;
-      border-radius: 12px;
-    }
-    .score-value {
-      font-weight: 700;
-      color: #374151;
-      min-width: 40px;
+    .header-right {
       text-align: right;
+      font-size: 8px;
+      opacity: 0.7;
     }
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      margin: 15px 0;
-      font-size: 14px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    th {
-      background: #1B7272;
-      color: white;
-      padding: 14px 16px;
-      text-align: left;
-      font-weight: 600;
-    }
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    tr:nth-child(even) {
-      background: #f9fafb;
-    }
-    .interpretation {
-      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-      padding: 20px;
-      border-radius: 12px;
-      border-left: 5px solid #1B7272;
-      margin-bottom: 15px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .interpretation h3 {
-      color: #134e4a;
-      font-size: 16px;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    .interpretation p {
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: #374151;
-    }
-    .interpretation .action {
-      background: white;
-      padding: 12px 15px;
+    /* Grid Layout */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+    /* Box Styles */
+    .box {
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      margin-top: 12px;
-      font-size: 12px;
-      border: 1px solid #bae6fd;
-      color: #0369a1;
+      padding: 3px 10px 10px 10px;
+      background: #fafafa;
     }
-    .interpretation .action strong {
+    .box-title {
+      font-size: 10px;
+      font-weight: 700;
       color: #1B7272;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border-bottom: 2px solid #1B7272;
+      padding-bottom: 4px;
     }
-    .footer {
-      margin-top: 40px;
-      padding: 25px 30px;
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      text-align: center;
+    .box-accent { background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border-color: #5eead4; }
+    .box-warm { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fcd34d; }
+    .box-rose { background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border-color: #fda4af; }
+    .box-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac; }
+    /* Signature Box */
+    .signature-text {
       font-size: 11px;
-      color: #6b7280;
+      line-height: 1.5;
+      color: #374151;
+      font-style: italic;
     }
-    .footer p {
+    /* Compact Lists */
+    .compact-list { font-size: 9px; }
+    .compact-list-item {
+      padding: 2px 6px;
+      margin-bottom: 2px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.7);
+    }
+    .compact-list-item:last-child { margin-bottom: 0; }
+    .compact-list-title {
+      font-weight: 700;
+      color: #374151;
+      font-size: 9px;
+    }
+    .compact-list-desc {
+      color: #6b7280;
+      font-size: 8px;
+      margin-top: 0px;
+    }
+    /* Mini Bars */
+    .mini-bar-container { margin-bottom: 4px; }
+    .mini-bar-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+    .mini-bar-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .mini-bar-name { font-size: 8px; color: #6b7280; }
+    .mini-bar {
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 5px;
+    }
+    .mini-bar-value {
+      font-size: 8px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    }
+    /* OCEAN Compact */
+    .ocean-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 5px;
     }
-    .footer .brand-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 3px;
+    .ocean-row:last-child { margin-bottom: 0; }
+    .ocean-letter {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 9px;
+      color: white;
     }
-    .footer .brand-by {
-      font-size: 11px;
-      color: #1B7272;
-      margin-bottom: 15px;
-    }
-    .footer a {
-      color: #1B7272;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .footer .copyright {
-      font-size: 10px;
-      opacity: 0.7;
-      margin-top: 12px;
-    }
-    .test-type {
-      display: inline-block;
-      background: #f9fafb;
-      color: #374151;
-      padding: 8px 20px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      font-size: 13px;
-      font-weight: 600;
-      margin: 10px 0;
-    }
-    .high { color: #1B7272; font-weight: 700; }
-    .medium { color: #d97706; font-weight: 700; }
-    .low { color: #dc2626; font-weight: 700; }
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
+    .ocean-name { font-size: 8px; color: #6b7280; flex: 1; }
+    .ocean-bar {
+      width: 60px;
+      height: 12px;
+      background: #e5e7eb;
       border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
+      overflow: hidden;
     }
-    .badge-high { background: #ccfbf1; color: #134e4a; }
-    .badge-medium { background: #fef3c7; color: #92400e; }
-    .badge-low { background: #fee2e2; color: #991b1b; }
+    .ocean-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+    }
+    .ocean-score { font-size: 8px; font-weight: 600; width: 20px; text-align: right; }
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 8px;
+      color: #9ca3af;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 10px;
+    }
+    .footer a { color: #1B7272; text-decoration: none; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo-container">
-      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-        <g transform="rotate(0 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
-        <g transform="rotate(45 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
-        <g transform="rotate(90 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
-        <g transform="rotate(135 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
-        <path fill-rule="evenodd" d="M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"/>
-        <circle cx="12" cy="12" r="1.75"/>
-      </svg>
-    </div>
-    <div class="brand">manualmode.at</div>
-    <h1>${t.title}</h1>
-    <div class="subtitle">Meaningful Conversations</div>
-    <div class="date">${date}</div>
-  </div>
-  <div class="content">
-`;
-
-  // Introduction text
-  html += `
-  <div class="section">
-    <p style="font-size: 13px; color: #4b5563; line-height: 1.7; margin-bottom: 15px;">
-      ${t.introText}
-    </p>
-  </div>
-`;
-
-  // Completed Analyses Overview - show all completed lenses
-  const lensInfo = {
-    sd: { 
-      icon: '🌀', 
-      name: language === 'de' ? 'Spiral Dynamics' : 'Spiral Dynamics',
-      desc: language === 'de' ? 'Werte & Antriebskräfte' : 'Values & Motivations'
-    },
-    riemann: { 
-      icon: '🔄', 
-      name: 'Riemann-Thomann', 
-      desc: language === 'de' ? 'Interaktionsstil & Beziehungen' : 'Interaction Style & Relationships'
-    },
-    ocean: { 
-      icon: '🧬', 
-      name: 'OCEAN / Big Five', 
-      desc: language === 'de' ? 'Persönlichkeitsmerkmale' : 'Personality Traits'
-    }
-  };
-  
-  // Determine which lenses are completed
-  const completedLenses = result.completedLenses || [];
-  const hasSD = completedLenses.includes('sd') || !!result.spiralDynamics;
-  const hasRiemann = completedLenses.includes('riemann') || !!result.riemann;
-  const hasOcean = completedLenses.includes('ocean') || !!result.big5;
-  
-  const completedTests: string[] = [];
-  if (hasSD) completedTests.push('sd');
-  if (hasRiemann) completedTests.push('riemann');
-  if (hasOcean) completedTests.push('ocean');
-  
-  html += `
-  <div class="section">
-    <div class="section-title">📋 ${t.includedAnalyses}</div>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-      ${completedTests.map(lens => {
-        const info = lensInfo[lens as keyof typeof lensInfo];
-        return `
-        <div style="flex: 1; min-width: 150px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 12px;">
-          <div style="font-size: 18px; margin-bottom: 4px;">${info.icon}</div>
-          <div style="font-weight: 600; color: #134e4a; font-size: 13px;">${info.name}</div>
-          <div style="font-size: 11px; color: #5eead4;">${info.desc}</div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>
-`;
-
-  // Spiral Dynamics Results (show if spiralDynamics data exists)
-  if (result.spiralDynamics) {
-    const sd = result.spiralDynamics;
-    
-    // SD Level info with colors and keywords
-    const sdLevels: Record<string, { color: string; keyword: string; keywordEn: string }> = {
-      turquoise: { color: '#06b6d4', keyword: 'Ganzheitlichkeit', keywordEn: 'Holistic' },
-      yellow: { color: '#eab308', keyword: 'Integration', keywordEn: 'Integration' },
-      green: { color: '#22c55e', keyword: 'Gemeinschaft', keywordEn: 'Community' },
-      orange: { color: '#f97316', keyword: 'Erfolg', keywordEn: 'Achievement' },
-      blue: { color: '#3b82f6', keyword: 'Ordnung', keywordEn: 'Order' },
-      red: { color: '#ef4444', keyword: 'Macht', keywordEn: 'Power' },
-      purple: { color: '#a855f7', keyword: 'Zugehörigkeit', keywordEn: 'Belonging' },
-      beige: { color: '#d4a574', keyword: 'Überleben', keywordEn: 'Survival' }
-    };
-    
-    // Order levels from top (turquoise) to bottom (beige)
-    const levelOrder = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
-    
-    html += `
-  <div class="section">
-    <div class="section-title">🌀 Spiral Dynamics</div>
-    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
-      ${language === 'de' 
-        ? 'Spiral Dynamics beschreibt verschiedene Wertesysteme und Weltanschauungen. Ihre Werte zeigen, welche Ebenen in Ihrem Denken und Handeln dominieren.'
-        : 'Spiral Dynamics describes different value systems and worldviews. Your scores show which levels dominate your thinking and behavior.'}
-    </p>
-    <div style="display: flex; flex-direction: column; gap: 6px;">
-      ${levelOrder.map(level => {
-        const value = (sd.levels as Record<string, number>)[level] || 0;
-        const info = sdLevels[level];
-        const percentage = Math.min(100, value * 20); // Assuming 5-point scale
-        const keyword = language === 'de' ? info.keyword : info.keywordEn;
-        
-        return `
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 90px; font-size: 11px; font-weight: 500; color: ${info.color};">${keyword}</div>
-          <div style="flex: 1; background: #f3f4f6; border-radius: 6px; height: 20px; position: relative; overflow: hidden;">
-            <div style="background: ${info.color}; height: 100%; width: ${percentage}%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">
-              ${percentage > 20 ? `<span style="color: white; font-size: 10px; font-weight: 600;">${value.toFixed(1)}</span>` : ''}
-            </div>
-            ${percentage <= 20 ? `<span style="position: absolute; left: ${percentage + 2}%; top: 50%; transform: translateY(-50%); font-size: 10px; color: #6b7280;">${value.toFixed(1)}</span>` : ''}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>
-`;
-  }
-
-  // Riemann Results - Radar Chart (show if riemann data exists, regardless of path)
-  if (result.riemann) {
-    const r = result.riemann;
-
-    // Generate radar chart SVG with dynamic scaling
-    const radarSvg = generateRiemannRadarSvg(r, language);
-    
-    html += `
-  <div class="section">
-    <div class="section-title">🎯 Riemann-Thomann Profil</div>
-    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
-      ${language === 'de' 
-        ? 'Das Riemann-Thomann-Modell zeigt Ihre Präferenzen entlang vier Grundstrebungen: Nähe (Verbundenheit), Distanz (Autonomie), Beständigkeit (Struktur) und Spontanität (Veränderung). Die Visualisierung vergleicht Ihr Verhalten in verschiedenen Kontexten.'
-        : 'The Riemann-Thomann model shows your preferences along four basic tendencies: Proximity (connection), Distance (autonomy), Duration (structure) and Change (flexibility). The visualization compares your behavior across different contexts.'}
-    </p>
-    <div style="display: flex; justify-content: center; margin: 15px 0;">
-      ${radarSvg}
-  </div>
-    
-    <!-- Compact score table -->
-    <div style="display: flex; gap: 10px; justify-content: space-between; margin-top: 15px;">
-      <div style="flex: 1; text-align: center;">
-        <div style="font-weight: bold; color: #3b82f6; margin-bottom: 5px; font-size: 12px;">${t.professionalContext}</div>
-        <div style="font-size: 11px; color: #4a5568;">
-          ${t.dauer}: ${r.beruf.dauer} | ${t.naehe}: ${r.beruf.naehe}<br/>
-          ${t.wechsel}: ${r.beruf.wechsel} | ${t.distanz}: ${r.beruf.distanz}
+  <div class="page">
+    <!-- Compact Header with Shipswheel Logo -->
+    <div class="header">
+      <div class="header-left" style="display: flex; align-items: center; gap: 10px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="32" height="32">
+          <g transform="rotate(0 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+          <g transform="rotate(45 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+          <g transform="rotate(90 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+          <g transform="rotate(135 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+          <path fill-rule="evenodd" d="M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"/>
+          <circle cx="12" cy="12" r="1.75"/>
+        </svg>
+        <div>
+          <h1>${t.title}</h1>
+          <div class="subtitle">Meaningful Conversations</div>
         </div>
       </div>
-      <div style="flex: 1; text-align: center;">
-        <div style="font-weight: bold; color: #22c55e; margin-bottom: 5px; font-size: 12px;">${t.privateContext}</div>
-        <div style="font-size: 11px; color: #4a5568;">
-          ${t.dauer}: ${r.privat.dauer} | ${t.naehe}: ${r.privat.naehe}<br/>
-          ${t.wechsel}: ${r.privat.wechsel} | ${t.distanz}: ${r.privat.distanz}
-        </div>
-      </div>
-      <div style="flex: 1; text-align: center;">
-        <div style="font-weight: bold; color: #f97316; margin-bottom: 5px; font-size: 12px;">${t.selfImage}</div>
-        <div style="font-size: 11px; color: #4a5568;">
-          ${t.dauer}: ${r.selbst.dauer} | ${t.naehe}: ${r.selbst.naehe}<br/>
-          ${t.wechsel}: ${r.selbst.wechsel} | ${t.distanz}: ${r.selbst.distanz}
-        </div>
+      <div class="header-right">
+        <div>${date}</div>
+        <div>manualmode.at</div>
       </div>
     </div>
-  </div>
 `;
 
-    // Stress Ranking Section
-    if (r.stressRanking && r.stressRanking.length > 0) {
-      const stressLabels: Record<string, { label: string; description: string }> = language === 'de' ? {
-        distanz: { label: 'Rückzug', description: 'Tür zu, Problem alleine lösen' },
-        naehe: { label: 'Anpassung', description: 'Unterstützung suchen, nachgeben' },
-        dauer: { label: 'Kontrolle', description: 'Auf Regeln pochen, Ordnung schaffen' },
-        wechsel: { label: 'Aktionismus', description: 'Hektisch werden, viele Dinge anfangen' }
-      } : {
-        distanz: { label: 'Withdrawal', description: 'Close the door, solve the problem alone' },
-        naehe: { label: 'Adaptation', description: 'Seek support, give in' },
-        dauer: { label: 'Control', description: 'Insist on rules, create order' },
-        wechsel: { label: 'Actionism', description: 'Become hectic, start many things' }
-      };
-      
-    html += `
-  <div class="section">
-    <div class="section-title">⚡ ${t.stressReaction || 'Stress-Reaktionsmuster'}</div>
-    <p style="font-size: 12px; color: #6b7280; margin-bottom: 10px;">${t.stressDescription || 'So reagieren Sie typischerweise unter Druck (1 = erste Reaktion):'}</p>
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      ${r.stressRanking.map((id: string, idx: number) => {
-        const reaction = stressLabels[id] || { label: id, description: '' };
-        const isFirst = idx === 0;
-        return `
-        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; ${isFirst ? 'background: #fef2f2; border: 1px solid #fecaca;' : 'background: #f9fafb;'}">
-          <div style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; ${isFirst ? 'background: #ef4444; color: white;' : 'background: #d1d5db; color: #374151;'}">${idx + 1}</div>
-          <div>
-            <span style="font-weight: 600; ${isFirst ? 'color: #b91c1c;' : 'color: #374151;'}">${reaction.label}</span>
-            <span style="font-size: 11px; color: #6b7280; margin-left: 8px;">– ${reaction.description}</span>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>
-`;
-    }
-  }
-
-  // Big5 Results - Show if big5 data exists (regardless of path)
-  if (result.big5) {
-    const b = result.big5;
-    
-    const getInterpretation = (score: number): string => {
-      if (score >= 4) return `<span class="high">${t.high}</span>`;
-      if (score >= 3) return `<span class="medium">${t.medium}</span>`;
-      return `<span class="low">${t.low}</span>`;
-    };
-
-    html += `
-  <div class="section">
-    <div class="section-title">🧬 ${t.big5Traits}</div>
-    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
-      ${language === 'de' 
-        ? 'Das OCEAN-Modell (Big Five) misst fünf grundlegende Persönlichkeitsdimensionen, die in der psychologischen Forschung umfassend validiert wurden. Ihre Werte zeigen, wo Sie auf jeder Skala liegen.'
-        : 'The OCEAN model (Big Five) measures five fundamental personality dimensions that have been extensively validated in psychological research. Your scores show where you fall on each scale.'}
-    </p>
-    <table>
-      <tr>
-        <th>${t.trait}</th>
-        <th>${t.score}</th>
-        <th>${t.interpretation}</th>
-      </tr>
-      <tr>
-        <td>${t.openness}</td>
-        <td>${b.openness}/5</td>
-        <td>${getInterpretation(b.openness)}</td>
-      </tr>
-      <tr>
-        <td>${t.conscientiousness}</td>
-        <td>${b.conscientiousness}/5</td>
-        <td>${getInterpretation(b.conscientiousness)}</td>
-      </tr>
-      <tr>
-        <td>${t.extraversion}</td>
-        <td>${b.extraversion}/5</td>
-        <td>${getInterpretation(b.extraversion)}</td>
-      </tr>
-      <tr>
-        <td>${t.agreeableness}</td>
-        <td>${b.agreeableness}/5</td>
-        <td>${getInterpretation(b.agreeableness)}</td>
-      </tr>
-      <tr>
-        <td>${t.neuroticism}</td>
-        <td>${b.neuroticism}/5</td>
-        <td>${getInterpretation(b.neuroticism)}</td>
-      </tr>
-    </table>
-  </div>
-`;
-  }
-
-
-  // Narrative Profile Section (if available)
-  if (result.narrativeProfile) {
+  // ROW 1: Signature + Superpowers (if narrative exists)
+  if (hasNarrative && result.narrativeProfile) {
     const np = result.narrativeProfile;
-    
-  html += `
-  <div class="section" style="page-break-before: always;">
-    <div class="section-title" style="color: #1B7272; border-color: #5EEAD4;">🧬 ${t.narrativeOS}</div>
-    <div class="card" style="background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%); border: 1px solid #5EEAD4; border-left: 5px solid #1B7272;">
-      <p style="font-size: 14px; line-height: 1.8; color: #374151; white-space: pre-line; margin: 0;">${np.operatingSystem}</p>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title" style="color: #EA580C; border-color: #FDBA74;">⚡ ${t.narrativeSuperpowers}</div>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      ${np.superpowers.map((power: { name: string; description: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border: 1px solid #FDBA74; border-left: 5px solid #FB923C; padding: 16px;">
-        <div style="font-weight: 700; color: #9A3412; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${power.name}</div>
-        <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${power.description}</p>
+    html += `
+    <div class="grid-2">
+      <!-- Signature -->
+      <div class="box box-accent">
+        <div class="box-title">🧬 ${t.narrativeOS}</div>
+        <div class="signature-text">${np.operatingSystem}</div>
       </div>
-      `).join('')}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title" style="color: #DC2626; border-color: #FCA5A5;">🌑 ${t.narrativeBlindspots}</div>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      ${np.blindspots.map((spot: { name: string; description: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 1px solid #FCA5A5; border-left: 5px solid #F87171; padding: 16px;">
-        <div style="font-weight: 700; color: #DC2626; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${spot.name}</div>
-        <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${spot.description}</p>
+      <!-- Superpowers -->
+      <div class="box box-warm">
+        <div class="box-title" style="color: #b45309; border-color: #f59e0b;">⚡ ${t.narrativeSuperpowers}</div>
+        <div class="compact-list">
+          ${np.superpowers.slice(0, 3).map((p: { name: string; description: string }, i: number) => `
+            <div class="compact-list-item">
+              <div class="compact-list-title">${i + 1}. ${p.name}</div>
+              <div class="compact-list-desc">${p.description}</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
-      `).join('')}
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title" style="color: #16A34A; border-color: #86EFAC;">🌱 ${t.narrativeGrowth}</div>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-      ${np.growthOpportunities.map((opp: { title: string; recommendation: string }, idx: number) => `
-      <div class="card" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border: 1px solid #86EFAC; border-left: 5px solid #4ADE80; padding: 16px;">
-        <div style="font-weight: 700; color: #16A34A; margin-bottom: 8px; font-size: 15px;">${idx + 1}. ${opp.title}</div>
-        <p style="font-size: 13px; color: #57534e; margin: 0; line-height: 1.6;">${opp.recommendation}</p>
-      </div>
-      `).join('')}
-    </div>
-  </div>
 `;
   }
 
-  // Close content div and add Footer
+  // ROW 2: Spiral Dynamics (full width, compact two-column)
+  if (hasSD && result.spiralDynamics) {
+    const sd = result.spiralDynamics;
+    const sdLevels: Record<string, { color: string; keyword: string; keywordEn: string }> = {
+      yellow: { color: '#EAB308', keyword: 'Integration', keywordEn: 'Integration' },
+      orange: { color: '#F97316', keyword: 'Erfolg', keywordEn: 'Achievement' },
+      red: { color: '#EF4444', keyword: 'Macht', keywordEn: 'Power' },
+      beige: { color: '#C4A66B', keyword: 'Sicherheit', keywordEn: 'Safety' },
+      turquoise: { color: '#14B8A6', keyword: 'Ganzheit', keywordEn: 'Holism' },
+      green: { color: '#22C55E', keyword: 'Harmonie', keywordEn: 'Harmony' },
+      blue: { color: '#3B82F6', keyword: 'Ordnung', keywordEn: 'Order' },
+      purple: { color: '#8B5CF6', keyword: 'Zugehörigkeit', keywordEn: 'Belonging' }
+    };
+    const ichLevels = ['yellow', 'orange', 'red', 'beige'];
+    const wirLevels = ['turquoise', 'green', 'blue', 'purple'];
+    
+    const renderMiniBar = (level: string) => {
+      const value = (sd.levels as Record<string, number>)[level] || 0;
+      const info = sdLevels[level];
+      const percentage = Math.min(100, Math.max(25, value * 20));
+      const keyword = language === 'de' ? info.keyword : info.keywordEn;
+      return `
+        <div style="margin-bottom: 6px;">
+          <table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="width: 80px; vertical-align: middle;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${info.color}; vertical-align: middle; margin-right: 6px;"></span>
+                <span style="font-size: 9px; color: #374151; vertical-align: middle;">${keyword}</span>
+              </td>
+              <td style="vertical-align: middle;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%; height: 20px; background: #e5e7eb; border-radius: 10px;">
+                  <tr>
+                    <td style="width: ${percentage}%; background: ${info.color}; border-radius: 10px; text-align: right; vertical-align: middle; padding-right: 8px;">
+                      <span style="font-size: 10px; font-weight: bold; color: white;">${value.toFixed(1)}</span>
+                    </td>
+                    <td style="width: ${100 - percentage}%;"></td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>`;
+    };
+    
+    html += `
+    <div class="box" style="margin-bottom: 10px;">
+      <div class="box-title">🌀 ${language === 'de' ? 'Was dich antreibt' : 'What Drives You'}</div>
+      <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+          <div style="font-size: 8px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${language === 'de' ? 'Ich-orientiert' : 'Self-oriented'}</div>
+          ${ichLevels.map(l => renderMiniBar(l)).join('')}
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 8px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${language === 'de' ? 'Wir-orientiert' : 'Community-oriented'}</div>
+          ${wirLevels.map(l => renderMiniBar(l)).join('')}
+        </div>
+      </div>
+    </div>
+`;
+  }
+
+  // ROW 3: Riemann - Full width with radar and explanation (no legend)
+  if (hasRiemann && result.riemann) {
+    const r = result.riemann;
+    const radarSvg = generateRiemannRadarSvg(r, language, 170, true); // Compact radar, hide SVG legend
+    
+    // Stress ranking labels with more detailed descriptions
+    const stressLabels: Record<string, { label: string; desc: string }> = language === 'de' 
+      ? { 
+          distanz: { label: 'Rückzug', desc: 'Tür zu, Probleme alleine lösen, Abstand gewinnen' }, 
+          naehe: { label: 'Anpassung', desc: 'Unterstützung suchen, Harmonie wiederherstellen' }, 
+          dauer: { label: 'Kontrolle', desc: 'Struktur schaffen, Regeln & Ordnung einführen' }, 
+          wechsel: { label: 'Aktionismus', desc: 'Viel anfangen, hektisch werden, Ablenkung suchen' } 
+        }
+      : { 
+          distanz: { label: 'Withdrawal', desc: 'Close door, solve problems alone, gain distance' }, 
+          naehe: { label: 'Adaptation', desc: 'Seek support, restore harmony with others' }, 
+          dauer: { label: 'Control', desc: 'Create structure, establish rules & order' }, 
+          wechsel: { label: 'Actionism', desc: 'Start many things, become hectic, seek distraction' } 
+        };
+    
+    html += `
+    <div class="box" style="margin-bottom: 10px;">
+      <div class="box-title">🎯 ${language === 'de' ? 'Wie du interagierst' : 'How You Interact'}</div>
+      <div style="display: flex; gap: 15px; align-items: flex-start;">
+        <div style="flex-shrink: 0;">${radarSvg}</div>
+        <div style="flex: 1; font-size: 9px; color: #4b5563; line-height: 1.4;">
+          ${r.stressRanking && r.stressRanking.length > 0 ? `
+          <div style="margin-bottom: 8px;">
+            <div style="font-weight: 700; color: #374151; margin-bottom: 6px;">⚡ ${language === 'de' ? 'Dein Stress-Reaktionsmuster:' : 'Your Stress Reaction Pattern:'}</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+              ${r.stressRanking.map((id: string, i: number) => `
+                <div style="font-size: 8px; padding: 0px 6px 3px 6px; border-radius: 4px; ${i === 0 ? 'background: #fef2f2; border: 1px solid #fecaca;' : 'background: #f9fafb; border: 1px solid #e5e7eb;'}">
+                  <div style="${i === 0 ? 'color: #dc2626; font-weight: 600;' : 'color: #374151; font-weight: 600;'}">${i + 1}. ${stressLabels[id]?.label || id}</div>
+                  <div style="color: #6b7280; font-size: 7px;">${stressLabels[id]?.desc || ''}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+          <p style="margin-bottom: 5px;">
+            ${language === 'de' 
+              ? '<strong>Unterschiede</strong> zwischen den Bereichen zeigen, wie du dich an verschiedene Situationen anpasst. Große Unterschiede können auf Flexibilität oder innere Spannung hindeuten.' 
+              : '<strong>Differences</strong> between areas show how you adapt to different situations. Large differences may indicate flexibility or inner tension.'}
+          </p>
+          <p style="margin-bottom: 5px;">
+            ${language === 'de' 
+              ? '<strong>Die 4 Achsen:</strong> Beständigkeit (Struktur & Sicherheit), Wechsel (Flexibilität & Spontanität), Nähe (Verbundenheit & Harmonie), Distanz (Autonomie & Unabhängigkeit).' 
+              : '<strong>The 4 axes:</strong> Duration (structure & security), Change (flexibility & spontaneity), Proximity (connection & harmony), Distance (autonomy & independence).'}
+          </p>
+          <p style="margin-top: 16px; font-size: 9px;">
+            <strong>${language === 'de' ? 'Das Radar zeigt dein Verhalten in 3 Kontexten:' : 'The radar shows your behavior in 3 contexts:'}</strong>
+            <span style="color: #3b82f6; margin-left: 4px;">■</span> ${language === 'de' ? 'Beruf' : 'Work'} 
+            <span style="color: #22c55e; margin-left: 6px;">■</span> ${language === 'de' ? 'Privat' : 'Private'} 
+            <span style="color: #f97316; margin-left: 6px;">■</span> ${language === 'de' ? 'Selbstbild' : 'Self-image'}
+          </p>
+        </div>
+      </div>
+    </div>
+    `;
+  }
+  
+  // ROW 4: OCEAN - Ultra compact inline layout
+  if (hasOcean && result.big5) {
+    const b = result.big5;
+    const traits = [
+      { key: 'O', name: language === 'de' ? 'Offenheit' : 'Openness', score: b.openness },
+      { key: 'C', name: language === 'de' ? 'Gewissenhaftigkeit' : 'Conscientiousness', score: b.conscientiousness },
+      { key: 'E', name: language === 'de' ? 'Extraversion' : 'Extraversion', score: b.extraversion },
+      { key: 'A', name: language === 'de' ? 'Verträglichkeit' : 'Agreeableness', score: b.agreeableness },
+      { key: 'N', name: language === 'de' ? 'Emot. Stabilität' : 'Emotional Stability', score: b.neuroticism }
+    ];
+    
+    const getColor = (score: number) => score >= 4 ? '#14B8A6' : score >= 3 ? '#F59E0B' : '#EF4444';
+    const getLabel = (score: number) => score >= 4 ? (language === 'de' ? 'Hoch' : 'High') : score >= 3 ? (language === 'de' ? 'Mittel' : 'Med') : (language === 'de' ? 'Niedrig' : 'Low');
+    
+    html += `
+    <div class="box" style="margin-bottom: 10px;">
+      <div class="box-title">🧬 ${language === 'de' ? 'Was dich ausmacht' : 'What Defines You'}</div>
+      <div style="display: flex; gap: 10px; justify-content: space-between;">
+        ${traits.map(trait => `
+          <div style="text-align: center; flex: 1;">
+            <div style="font-size: 8px; color: #6b7280; margin-bottom: 2px;">${trait.name}</div>
+            <div style="font-size: 14px; font-weight: 700; color: ${getColor(trait.score)};">${trait.score}/5</div>
+            <div style="font-size: 7px; color: ${getColor(trait.score)}; font-weight: 600;">${getLabel(trait.score)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    `;
+  }
+
+  // ROW 4: Full Blindspots and Growth Opportunities (if narrative exists)
+  if (hasNarrative && result.narrativeProfile) {
+    const np = result.narrativeProfile;
+    html += `
+    <div class="grid-2" style="margin-top: 10px;">
+      <!-- Blindspots - Full -->
+      <div class="box box-rose">
+        <div class="box-title" style="color: #be123c; border-color: #fb7185;">⚪ ${t.narrativeBlindspots}</div>
+        <div style="font-size: 8px; color: #6b7280; margin-bottom: 3px; font-style: italic;">
+          ${language === 'de' 
+            ? 'Bereiche, die dir möglicherweise nicht bewusst sind und die dein Wachstum einschränken könnten:' 
+            : 'Areas you may not be aware of that could limit your growth:'}
+        </div>
+        ${np.blindspots.map((s: { name: string; description: string }, i: number) => `
+          <div style="margin-bottom: 3px; padding: 2px 6px; background: rgba(255,255,255,0.6); border-radius: 4px;">
+            <div style="font-size: 9px; font-weight: 700; color: #9f1239; margin-bottom: 0px;">${i + 1}. ${s.name}</div>
+            <div style="font-size: 8px; color: #6b7280; line-height: 1.4;">${s.description}</div>
+          </div>
+        `).join('')}
+      </div>
+      
+      <!-- Growth - Full -->
+      <div class="box box-green">
+        <div class="box-title" style="color: #15803d; border-color: #4ade80;">🌱 ${t.narrativeGrowth}</div>
+        <div style="font-size: 8px; color: #6b7280; margin-bottom: 3px; font-style: italic;">
+          ${language === 'de' 
+            ? 'Konkrete Schritte, die dir helfen können, dein volles Potenzial zu entfalten:' 
+            : 'Concrete steps that can help you reach your full potential:'}
+        </div>
+        ${np.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => `
+          <div style="margin-bottom: 3px; padding: 2px 6px; background: rgba(255,255,255,0.6); border-radius: 4px;">
+            <div style="font-size: 9px; font-weight: 700; color: #166534; margin-bottom: 0px;">${i + 1}. ${g.title}</div>
+            <div style="font-size: 8px; color: #6b7280; line-height: 1.4;">${g.recommendation}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    `;
+  }
+
+  // Compact Interpretation Guide - fits on page
   html += `
-  </div>
-  <div class="footer">
-    <p class="brand-name">Meaningful Conversations</p>
-    <p class="brand-by">${language === 'de' ? 'von' : 'by'} manualmode.at</p>
-    <p style="margin-bottom: 10px;">${t.confidential}</p>
-    <p style="margin-bottom: 15px;">${t.validityNote}</p>
-    <p><a href="https://manualmode.at" target="_blank">www.manualmode.at</a></p>
-    <p class="copyright">© ${new Date().getFullYear()} manualmode.at</p>
+    <div style="margin-top: 10px; padding: 3px 12px 16px 12px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #7dd3fc; border-radius: 8px;">
+      <div style="font-size: 10px; font-weight: 700; color: #0c4a6e; margin-bottom: 5px; border-bottom: 2px solid #0ea5e9; padding-bottom: 3px;">
+        📖 ${language === 'de' ? 'So nutzt du dieses Profil' : 'How to Use This Profile'}
+      </div>
+      <div style="display: flex; gap: 15px; font-size: 8px; color: #1e3a5f; line-height: 1.4;">
+        <div style="flex: 1;">
+          <strong style="color: #0369a1;">${language === 'de' ? '1. Reflektiere:' : '1. Reflect:'}</strong> 
+          ${language === 'de' ? 'Erkennst du dich wieder? Was überrascht dich? Denke an konkrete Situationen.' : 'Do you recognize yourself? What surprises you? Think of concrete situations.'}
+        </div>
+        <div style="flex: 1;">
+          <strong style="color: #0369a1;">${language === 'de' ? '2. Keine Wertung:' : '2. No judgment:'}</strong> 
+          ${language === 'de' ? 'Es gibt kein "gut" oder "schlecht" – nur Muster, die kontextabhängig wirken.' : 'There is no "good" or "bad" – just patterns that work differently in context.'}
+        </div>
+        <div style="flex: 1;">
+          <strong style="color: #0369a1;">${language === 'de' ? '3. Dialog suchen:' : '3. Seek dialogue:'}</strong> 
+          ${language === 'de' ? 'Teile Erkenntnisse mit Vertrauenspersonen und frage nach ihrer Perspektive.' : 'Share insights with trusted people and ask for their perspective.'}
+        </div>
+        <div style="flex: 1;">
+          <strong style="color: #0369a1;">${language === 'de' ? '4. Sanft wachsen:' : '4. Grow gently:'}</strong> 
+          ${language === 'de' ? 'Blindspots sind Einladungen, keine Fehler. Wachse in deinem Tempo.' : 'Blindspots are invitations, not flaws. Grow at your own pace.'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Compact Footer
+  html += `
+    <div class="footer">
+      <strong>Meaningful Conversations</strong> by manualmode.at • ${t.confidential} • © ${new Date().getFullYear()}
+    </div>
   </div>
 </body>
 </html>
@@ -723,7 +630,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
 
 const translations = {
   de: {
-    title: 'Persönlichkeitsanalyse',
+    title: 'Persönlichkeitssignatur',
     introText: 'Dieses Dokument fasst Ihre persönliche Analyse zusammen, basierend auf wissenschaftlich fundierten Persönlichkeitsmodellen. Die Ergebnisse bieten wertvolle Einblicke in Ihre Werte, Ihren Interaktionsstil und Ihre Persönlichkeitsmerkmale. Nutzen Sie diese Erkenntnisse als Ausgangspunkt für Selbstreflexion und persönliches Wachstum.',
     includedAnalyses: 'Enthaltene Analysen',
     filterScores: 'Filter-Werte',
@@ -762,7 +669,7 @@ const translations = {
     narrativeGrowth: 'Wachstumsmöglichkeiten'
   },
   en: {
-    title: 'Personality Analysis',
+    title: 'Personality Signature',
     introText: 'This document summarizes your personal analysis based on scientifically validated personality models. The results provide valuable insights into your values, interaction style, and personality traits. Use these findings as a starting point for self-reflection and personal growth.',
     includedAnalyses: 'Included Analyses',
     filterScores: 'Filter Scores',
