@@ -13,7 +13,9 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
     html2canvas: { 
       scale: 2,
       useCORS: true,
-      logging: false
+      logging: false,
+      letterRendering: true,
+      foreignObjectRendering: false // Disable foreignObject which can cause Safari issues
     },
     jsPDF: { 
       unit: 'mm' as const, 

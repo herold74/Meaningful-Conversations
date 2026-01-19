@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
 import { User } from '../types';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 // --- TYPEN & INTERFACES ---
 
@@ -1035,12 +1036,14 @@ const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids
 
 interface PersonalitySurveyProps {
   onFinish: (result: SurveyResult) => void;
+  onCancel?: () => void; // Optional: allows returning to profile view
   currentUser?: User | null;
   existingProfile?: Partial<SurveyResult> | null; // For adding additional lenses
 }
 
 export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ 
   onFinish, 
+  onCancel,
   currentUser,
   existingProfile 
 }) => {
@@ -1318,7 +1321,17 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const progressPercent = selectedLens ? Math.round(((step + 1) / totalSteps) * 100) : 0;
 
   return (
-    <div className="p-6 sm:p-10 bg-background-primary min-h-screen">
+    <div className="relative p-6 sm:p-10 bg-background-primary min-h-screen">
+      {/* Back button - consistent with app pattern */}
+      {onCancel && (
+        <button 
+          onClick={onCancel} 
+          className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors"
+          aria-label={t('survey_cancel') || 'Zurück'}
+        >
+          <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
+        </button>
+      )}
       {selectedLens && (
         <div className="max-w-xl mx-auto mb-4">
           <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
