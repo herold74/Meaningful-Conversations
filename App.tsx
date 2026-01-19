@@ -1057,7 +1057,12 @@ const App: React.FC = () => {
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'personalitySurvey': {
                 console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension);
-                return <PersonalitySurvey onFinish={handlePersonalitySurveyComplete} currentUser={currentUser} existingProfile={existingProfileForExtension} />;
+                return <PersonalitySurvey 
+                    onFinish={handlePersonalitySurveyComplete} 
+                    onCancel={existingProfileForExtension ? () => setView('personalityProfile') : undefined}
+                    currentUser={currentUser} 
+                    existingProfile={existingProfileForExtension} 
+                />;
             }
             case 'personalityProfile': return (
                 <PersonalityProfileView 

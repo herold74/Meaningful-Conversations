@@ -29,8 +29,9 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-background-primary dark:bg-background-secondary rounded-xl shadow-2xl max-w-3xl w-full p-8 my-8 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/60 z-50 overflow-y-auto">
+      <div className="min-h-full flex items-start justify-center p-4 pt-20 pb-8">
+        <div className="bg-background-primary dark:bg-background-secondary rounded-xl shadow-2xl max-w-3xl w-full p-8 animate-fadeIn">
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-content-primary mb-2">
@@ -152,6 +153,7 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
           🔒 {t('narrative_stories_modal_privacy') || 
             'Deine Geschichten werden verschlüsselt gespeichert und nur für die Signatur-Generierung verwendet.'}
         </p>
+        </div>
       </div>
     </div>
   );
