@@ -2,12 +2,20 @@ import { encryptData, decryptData } from './encryption';
 import { SurveyResult, NarrativeProfile } from '../components/PersonalitySurvey';
 
 export interface EncryptedPersonalityData {
+  // Spiral Dynamics results
+  spiralDynamics?: {
+    levels: Record<string, number>;
+    dominantLevels: string[];
+    underdevelopedLevels: string[];
+  };
+  // Riemann-Thomann results
   riemann?: {
     beruf: Record<string, number>;
     privat: Record<string, number>;
     selbst: Record<string, number>;
     stressRanking: string[];
   };
+  // OCEAN/Big5 results
   big5?: {
     openness: number;
     conscientiousness: number;
@@ -15,7 +23,7 @@ export interface EncryptedPersonalityData {
     agreeableness: number;
     neuroticism: number;
   };
-  // NEW: Narrative data
+  // Narrative data
   narratives?: {
     flowStory: string;
     frictionStory: string;
@@ -29,9 +37,9 @@ export const encryptPersonalityProfile = async (
   key: CryptoKey
 ): Promise<string> => {
   const sensitiveData: EncryptedPersonalityData = {
+    spiralDynamics: surveyResult.spiralDynamics || undefined,
     riemann: surveyResult.riemann || undefined,
     big5: surveyResult.big5 || undefined,
-    // NEW: Include narrative data
     narratives: surveyResult.narratives || undefined,
     adaptationMode: surveyResult.adaptationMode || undefined,
     narrativeProfile: surveyResult.narrativeProfile || undefined
