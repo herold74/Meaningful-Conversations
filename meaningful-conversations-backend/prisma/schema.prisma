@@ -179,12 +179,13 @@ model PersonalityProfile {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Metadata (unverschluesselt)
-  testType        String   // "RIEMANN" oder "BIG5"
-  filterWorry     Int      // 1-5 (grober Indikator)
-  filterControl   Int      // 1-5 (grober Indikator)
+  testType        String   // Legacy: "RIEMANN", "BIG5", or "SD"
+  completedLenses String   @default("[]") // JSON array: ["sd", "riemann", "ocean"]
+  filterWorry     Int?     // Optional: 1-5 (legacy, no longer collected)
+  filterControl   Int?     // Optional: 1-5 (legacy, no longer collected)
   adaptationMode  String   @default("adaptive") // "adaptive" oder "stable"
   
-  // VERSCHLUESSELT: Alle detaillierten Scores
+  // VERSCHLUESSELT: Alle detaillierten Scores (SD, Riemann, Big5)
   encryptedData   String   @db.Text
   
   // Metadata
@@ -201,11 +202,28 @@ model SessionBehaviorLog {
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   sessionId           String
   
-  // Anonymisierte Frequenzen (unverschluesselt)
+  // Riemann-Thomann Frequenzen (bidirektional: high - low = delta)
   dauerFrequency      Int @default(0)
   wechselFrequency    Int @default(0)
   naeheFrequency      Int @default(0)
   distanzFrequency    Int @default(0)
+  
+  // Big5/OCEAN Frequenzen (bidirektional)
+  opennessFrequency         Int @default(0)
+  conscientiousnessFrequency Int @default(0)
+  extraversionFrequency     Int @default(0)
+  agreeablenessFrequency    Int @default(0)
+  neuroticismFrequency      Int @default(0)
+  
+  // Spiral Dynamics Frequenzen (bidirektional)
+  beigeFrequency     Int @default(0)
+  purpleFrequency    Int @default(0)
+  redFrequency       Int @default(0)
+  blueFrequency      Int @default(0)
+  orangeFrequency    Int @default(0)
+  greenFrequency     Int @default(0)
+  yellowFrequency    Int @default(0)
+  turquoiseFrequency Int @default(0)
   
   // Comfort Check
   comfortScore        Int?

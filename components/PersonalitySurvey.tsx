@@ -1,37 +1,79 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
 import { User } from '../types';
 
 // --- TYPEN & INTERFACES ---
 
-type Path = 'UNDECIDED' | 'RIEMANN' | 'BIG5';
+// Lens types for the unified profile system
+export type LensType = 'sd' | 'riemann' | 'ocean';
+
+// Legacy path type for backwards compatibility
+type Path = 'UNDECIDED' | 'RIEMANN' | 'BIG5' | 'SD';
 type Modality = 'LIKERT' | 'CONSTANT_SUM' | 'RANKING';
 
-// Die Struktur eines Datensatzes für die Auswertung
+// Spiral Dynamics Result (8 levels ranked by personal relevance)
+export interface SpiralDynamicsResult {
+  // Ranking positions (1-8, lower = more dominant)
+  levels: {
+    beige: number;      // Überleben / Survival
+    purple: number;     // Zugehörigkeit / Belonging
+    red: number;        // Macht / Power
+    blue: number;       // Ordnung / Order
+    orange: number;     // Erfolg / Achievement
+    green: number;      // Gemeinschaft / Community
+    yellow: number;     // Integration / Integration
+    turquoise: number;  // Ganzheit / Holism
+  };
+  // Derived from ranking (positions 1-3)
+  dominantLevels: string[];
+  // Derived from ranking (positions 6-8)
+  underdevelopedLevels: string[];
+}
+
+// Riemann Result (unchanged structure)
+export interface RiemannResult {
+  beruf: Record<string, number>;
+  privat: Record<string, number>;
+  selbst: Record<string, number>;
+  stressRanking: string[]; // IDs der Items in Reihenfolge 1-4
+}
+
+// Big5/OCEAN Result (unchanged structure)
+export interface Big5Result {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+}
+
+// Die Struktur eines Datensatzes für die Auswertung (Unified Profile)
 export interface SurveyResult {
+  // NEW: Which lenses are completed in this profile
+  completedLenses: LensType[];
+  
+  // Legacy field for backwards compatibility
   path: Path;
-  filter: { worry: number; control: number };
-  riemann?: {
-    beruf: Record<string, number>;
-    privat: Record<string, number>;
-    selbst: Record<string, number>;
-    stressRanking: string[]; // IDs der Items in Reihenfolge 1-4
-  };
-  big5?: {
-    openness: number;
-    conscientiousness: number;
-    extraversion: number;
-    agreeableness: number;
-    neuroticism: number;
-  };
-  // Qualitative Narrative Data (PFLICHT)
-  narratives: {
+  
+  // REMOVED: Filter questions no longer needed
+  // filter field kept optional for migration
+  filter?: { worry: number; control: number };
+  
+  // Lens-specific data (all optional, filled based on completedLenses)
+  spiralDynamics?: SpiralDynamicsResult;
+  riemann?: RiemannResult;
+  big5?: Big5Result;
+  
+  // Qualitative Narrative Data (global, asked once, optionally updatable)
+  narratives?: {
     flowStory: string;      // Flow-Erlebnis (min. 50 Zeichen)
     frictionStory: string;  // Reibungs-Erlebnis (min. 50 Zeichen)
   };
+  
   // Anpassungs-Präferenz: Soll das Profil aus Sitzungen lernen?
   adaptationMode: 'adaptive' | 'stable';
+  
   // Generiertes Narrativ-Profil (optional, wird nach der Umfrage generiert)
   narrativeProfile?: NarrativeProfile;
 }
@@ -53,6 +95,102 @@ export interface NarrativeProfile {
   }[];
   generatedAt: string;
 }
+
+// --- SPIRAL DYNAMICS LEVEL DEFINITIONS ---
+
+export const SD_LEVELS = [
+  { id: 'beige', color: '#D4A574', nameKey: 'sd_level_beige_name', descKey: 'sd_level_beige_desc' },
+  { id: 'purple', color: '#8B5CF6', nameKey: 'sd_level_purple_name', descKey: 'sd_level_purple_desc' },
+  { id: 'red', color: '#EF4444', nameKey: 'sd_level_red_name', descKey: 'sd_level_red_desc' },
+  { id: 'blue', color: '#3B82F6', nameKey: 'sd_level_blue_name', descKey: 'sd_level_blue_desc' },
+  { id: 'orange', color: '#F97316', nameKey: 'sd_level_orange_name', descKey: 'sd_level_orange_desc' },
+  { id: 'green', color: '#22C55E', nameKey: 'sd_level_green_name', descKey: 'sd_level_green_desc' },
+  { id: 'yellow', color: '#EAB308', nameKey: 'sd_level_yellow_name', descKey: 'sd_level_yellow_desc' },
+  { id: 'turquoise', color: '#14B8A6', nameKey: 'sd_level_turquoise_name', descKey: 'sd_level_turquoise_desc' },
+] as const;
+
+// SD Levels with colors
+const SD_LEVEL_COLORS: Record<string, string> = {
+  beige: '#D4A574',
+  purple: '#8B5CF6',
+  red: '#EF4444',
+  blue: '#3B82F6',
+  orange: '#F97316',
+  green: '#22C55E',
+  yellow: '#EAB308',
+  turquoise: '#14B8A6',
+};
+
+// SD Questions (3 per level, 24 total) - contextualized to current challenges
+const getSDQuestions = (t: TranslateFunc) => [
+  // Beige - Survival
+  { id: 'beige_1', level: 'beige', text: t('survey_sd_q_beige_1') },
+  { id: 'beige_2', level: 'beige', text: t('survey_sd_q_beige_2') },
+  { id: 'beige_3', level: 'beige', text: t('survey_sd_q_beige_3') },
+  // Purple - Belonging  
+  { id: 'purple_1', level: 'purple', text: t('survey_sd_q_purple_1') },
+  { id: 'purple_2', level: 'purple', text: t('survey_sd_q_purple_2') },
+  { id: 'purple_3', level: 'purple', text: t('survey_sd_q_purple_3') },
+  // Red - Power
+  { id: 'red_1', level: 'red', text: t('survey_sd_q_red_1') },
+  { id: 'red_2', level: 'red', text: t('survey_sd_q_red_2') },
+  { id: 'red_3', level: 'red', text: t('survey_sd_q_red_3') },
+  // Blue - Order
+  { id: 'blue_1', level: 'blue', text: t('survey_sd_q_blue_1') },
+  { id: 'blue_2', level: 'blue', text: t('survey_sd_q_blue_2') },
+  { id: 'blue_3', level: 'blue', text: t('survey_sd_q_blue_3') },
+  // Orange - Achievement
+  { id: 'orange_1', level: 'orange', text: t('survey_sd_q_orange_1') },
+  { id: 'orange_2', level: 'orange', text: t('survey_sd_q_orange_2') },
+  { id: 'orange_3', level: 'orange', text: t('survey_sd_q_orange_3') },
+  // Green - Community
+  { id: 'green_1', level: 'green', text: t('survey_sd_q_green_1') },
+  { id: 'green_2', level: 'green', text: t('survey_sd_q_green_2') },
+  { id: 'green_3', level: 'green', text: t('survey_sd_q_green_3') },
+  // Yellow - Integration
+  { id: 'yellow_1', level: 'yellow', text: t('survey_sd_q_yellow_1') },
+  { id: 'yellow_2', level: 'yellow', text: t('survey_sd_q_yellow_2') },
+  { id: 'yellow_3', level: 'yellow', text: t('survey_sd_q_yellow_3') },
+  // Turquoise - Holism
+  { id: 'turquoise_1', level: 'turquoise', text: t('survey_sd_q_turquoise_1') },
+  { id: 'turquoise_2', level: 'turquoise', text: t('survey_sd_q_turquoise_2') },
+  { id: 'turquoise_3', level: 'turquoise', text: t('survey_sd_q_turquoise_3') },
+];
+
+// Helper to shuffle an array (Fisher-Yates)
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Lens display information
+const getLensInfo = (t: TranslateFunc) => ({
+  sd: {
+    id: 'sd' as LensType,
+    name: t('lens_sd_name'),
+    description: t('lens_sd_description'),
+    icon: '🌀',
+    recommended: true,
+  },
+  riemann: {
+    id: 'riemann' as LensType,
+    name: t('lens_riemann_name'),
+    description: t('lens_riemann_description'),
+    icon: '🔄',
+    recommended: false,
+  },
+  ocean: {
+    id: 'ocean' as LensType,
+    name: t('lens_ocean_name'),
+    description: t('lens_ocean_description'),
+    icon: '🌊',
+    recommended: false,
+  },
+});
 
 // --- TEXT DATEN (KONFIGURATION) - Lokalisiert ---
 
@@ -459,7 +597,373 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
   );
 };
 
-// 5. RANKING (Drag & Drop Simulation via Click)
+// 5. LENS SELECTION (Choose which questionnaire to fill)
+const LensSelectionBlock = ({ 
+  onSelect, 
+  completedLenses,
+  t 
+}: { 
+  onSelect: (lens: LensType) => void;
+  completedLenses: LensType[];
+  t: TranslateFunc;
+}) => {
+  const lensInfo = getLensInfo(t);
+  const availableLenses = Object.values(lensInfo).filter(
+    lens => !completedLenses.includes(lens.id)
+  );
+
+  // All lenses completed - show option to redo any
+  if (availableLenses.length === 0) {
+    const allLenses = Object.values(lensInfo);
+    
+    return (
+      <div className="py-6">
+        {/* Success message */}
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-3">✨</div>
+          <p className="text-lg font-semibold text-green-700 dark:text-green-400 mb-2">
+            {t('survey_all_lenses_complete')}
+          </p>
+          <p className="text-sm text-content-secondary">
+            {t('survey_redo_hint') || 'Du kannst jede Facette erneut ausfüllen, um dein Profil zu aktualisieren:'}
+          </p>
+        </div>
+        
+        {/* Redo buttons for each lens */}
+        <div className="space-y-3 max-w-md mx-auto">
+          {allLenses.map(lens => (
+            <button
+              key={lens.id}
+              onClick={() => onSelect(lens.id)}
+              className="w-full p-4 bg-background-secondary dark:bg-background-tertiary border border-border-secondary rounded-lg text-left hover:border-accent-primary hover:bg-accent-primary/5 transition-all group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{lens.icon}</span>
+                  <div>
+                    <div className="font-medium text-content-primary group-hover:text-accent-primary transition-colors">
+                      {lens.name}
+                    </div>
+                    <div className="text-xs text-content-tertiary">
+                      {t('survey_lens_redo_hint')}
+                    </div>
+                  </div>
+                </div>
+                <span className="text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // First time - show inviting intro focused on recommended lens (SD)
+  if (completedLenses.length === 0) {
+    const recommendedLens = availableLenses.find(l => l.recommended) || availableLenses[0];
+    const otherLenses = availableLenses.filter(l => l.id !== recommendedLens.id);
+
+    return (
+      <div>
+        {/* Main recommendation card */}
+        <div className="mb-6 p-6 bg-gradient-to-br from-accent-primary/10 to-accent-primary/5 dark:from-accent-primary/20 dark:to-accent-primary/10 border border-accent-primary/30 rounded-xl">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">💡</span>
+            <span className="font-semibold text-content-primary">
+              {t('survey_lens_start_with')}
+            </span>
+          </div>
+          
+          <h3 className="text-xl font-bold text-content-primary mb-3">
+            {recommendedLens.icon} {recommendedLens.name}
+          </h3>
+          
+          <p className="text-content-secondary mb-4 leading-relaxed">
+            {recommendedLens.description}
+          </p>
+          
+          <div className="flex items-center gap-2 text-sm text-content-tertiary mb-5">
+            <span>⏱️</span>
+            <span>{t('survey_lens_duration')}</span>
+          </div>
+          
+          <button
+            onClick={() => onSelect(recommendedLens.id)}
+            className="w-full py-3 px-6 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors shadow-sm"
+          >
+            {t('survey_lens_start_button')} →
+          </button>
+        </div>
+
+        {/* Other lenses hint */}
+        {otherLenses.length > 0 && (
+          <div className="pt-4 border-t border-border-secondary">
+            <p className="text-sm text-content-tertiary mb-3 text-center">
+              {t('survey_lens_add_later')}
+            </p>
+            <div className="flex justify-center gap-4 text-sm text-content-secondary">
+              {otherLenses.map(lens => (
+                <button
+                  key={lens.id}
+                  onClick={() => onSelect(lens.id)}
+                  className="flex items-center gap-1.5 hover:text-accent-primary transition-colors"
+                >
+                  <span>{lens.icon}</span>
+                  <span>{lens.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Has existing profile - show available lenses prominently
+  const completedLensInfo = completedLenses.map(id => lensInfo[id]);
+  
+  return (
+    <div>
+      {/* Header */}
+      <p className="mb-5 text-content-secondary">
+        {t('survey_lens_intro_additional')}
+      </p>
+
+      {/* Available lenses - PROMINENT */}
+      <div className="space-y-4 mb-6">
+        {availableLenses.map((lens, index) => (
+          <div 
+            key={lens.id}
+            className={`p-5 border-2 rounded-xl transition-all
+              ${index === 0 
+                ? 'border-accent-primary bg-accent-primary/5 dark:bg-accent-primary/10' 
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+              }`}
+          >
+            <div className="flex items-start gap-4">
+              <span className="text-3xl">{lens.icon}</span>
+              <div className="flex-1">
+                <h3 className="font-bold text-content-primary text-lg mb-1">
+                  {lens.name}
+                </h3>
+                <p className="text-sm text-content-secondary mb-3">
+                  {lens.description}
+                </p>
+                <button
+                  onClick={() => onSelect(lens.id)}
+                  className={`py-2 px-4 rounded-lg font-medium text-sm transition-colors
+                    ${index === 0 
+                      ? 'bg-accent-primary text-white hover:bg-accent-primary/90' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-content-primary hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                >
+                  {t('survey_lens_start_button')} →
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Already completed - subtle hint */}
+      <div className="pt-4 border-t border-border-secondary">
+        <p className="text-xs text-content-tertiary mb-2">
+          {t('survey_lens_already_completed')}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {completedLensInfo.map(lens => (
+            <button
+              key={lens.id}
+              onClick={() => onSelect(lens.id)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-content-secondary bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+            >
+              <span className="text-green-600 dark:text-green-400">✓</span>
+              <span>{lens.icon}</span>
+              <span>{lens.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-content-tertiary mt-2 italic">
+          {t('survey_lens_redo_hint')}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// 6. SD QUESTIONNAIRE (24 Likert questions, 3 per level)
+const SDQuestionnaireBlock = ({ 
+  onComplete, 
+  t 
+}: { 
+  onComplete: (result: SpiralDynamicsResult) => void;
+  t: TranslateFunc;
+}) => {
+  // Shuffle questions once on mount to avoid pattern recognition
+  const [questions] = useState(() => shuffleArray(getSDQuestions(t)));
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+
+  const currentQuestion = questions[currentIndex];
+  const isLastQuestion = currentIndex === questions.length - 1;
+  const progress = ((currentIndex + 1) / questions.length) * 100;
+
+  const handleAnswer = (value: number) => {
+    setAnswers(prev => ({ ...prev, [currentQuestion.id]: value }));
+    
+    if (isLastQuestion) {
+      // Calculate results
+      const newAnswers = { ...answers, [currentQuestion.id]: value };
+      calculateAndComplete(newAnswers);
+    } else {
+      // Auto-advance to next question after brief delay
+      setTimeout(() => setCurrentIndex(prev => prev + 1), 200);
+    }
+  };
+
+  const calculateAndComplete = (allAnswers: Record<string, number>) => {
+    // Calculate average score per level (3 questions each)
+    const levelScores: Record<string, number> = {
+      beige: 0, purple: 0, red: 0, blue: 0,
+      orange: 0, green: 0, yellow: 0, turquoise: 0
+    };
+
+    const levelCounts: Record<string, number> = {
+      beige: 0, purple: 0, red: 0, blue: 0,
+      orange: 0, green: 0, yellow: 0, turquoise: 0
+    };
+
+    // Sum up scores per level
+    questions.forEach(q => {
+      const answer = allAnswers[q.id] || 3; // Default to neutral if somehow missing
+      levelScores[q.level] += answer;
+      levelCounts[q.level]++;
+    });
+
+    // Calculate averages (1-5 scale)
+    const levels: SpiralDynamicsResult['levels'] = {
+      beige: 3, purple: 3, red: 3, blue: 3,
+      orange: 3, green: 3, yellow: 3, turquoise: 3
+    };
+
+    Object.keys(levelScores).forEach(level => {
+      if (levelCounts[level] > 0) {
+        levels[level as keyof typeof levels] = 
+          Math.round((levelScores[level] / levelCounts[level]) * 10) / 10;
+      }
+    });
+
+    // Sort levels by score to determine dominant and underdeveloped
+    const sortedLevels = Object.entries(levels)
+      .sort(([, a], [, b]) => b - a)
+      .map(([level]) => level);
+
+    // Top 3 are dominant, bottom 3 have growth potential
+    const dominantLevels = sortedLevels.slice(0, 3);
+    const underdevelopedLevels = sortedLevels.slice(5, 8);
+
+    onComplete({
+      levels,
+      dominantLevels,
+      underdevelopedLevels
+    });
+  };
+
+  const goBack = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  return (
+    <div>
+      {/* Intro text on first question */}
+      {currentIndex === 0 && (
+        <div className="mb-6 p-4 bg-accent-primary/10 rounded-lg border border-accent-primary/20">
+          <p className="text-sm text-content-primary mb-2">
+            {t('survey_sd_intro')}
+          </p>
+          <p className="text-xs text-content-secondary italic">
+            {t('survey_sd_context_hint')}
+          </p>
+        </div>
+      )}
+
+      {/* Progress bar */}
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-content-secondary">
+            {t('survey_sd_progress', { current: currentIndex + 1, total: questions.length })}
+          </span>
+          <span className="text-xs text-content-secondary">
+            {Math.round(progress)}%
+          </span>
+        </div>
+        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-accent-primary transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Current question */}
+      <div className="mb-6">
+        <div 
+          className="w-2 h-2 rounded-full inline-block mr-2 mb-0.5"
+          style={{ backgroundColor: SD_LEVEL_COLORS[currentQuestion.level] }}
+        />
+        <p className="inline font-medium text-content-primary text-lg">
+          {currentQuestion.text}
+        </p>
+      </div>
+
+      {/* Likert scale */}
+      <div className="space-y-3">
+        {[1, 2, 3, 4, 5].map(val => (
+          <button
+            key={val}
+            onClick={() => handleAnswer(val)}
+            className={`w-full p-4 rounded-lg border-2 transition-all text-left flex items-center gap-4
+              ${answers[currentQuestion.id] === val
+                ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 text-content-primary'
+              }`}
+          >
+            <span className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold
+              ${answers[currentQuestion.id] === val
+                ? 'bg-accent-primary text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-content-secondary'
+              }`}>
+              {val}
+            </span>
+            <span className="text-sm">
+              {val === 1 && t('survey_likert_strongly_disagree')}
+              {val === 2 && t('survey_likert_disagree')}
+              {val === 3 && t('survey_likert_neutral')}
+              {val === 4 && t('survey_likert_agree')}
+              {val === 5 && t('survey_likert_strongly_agree')}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Navigation - Back button only */}
+      {currentIndex > 0 && (
+        <div className="mt-6">
+          <button
+            onClick={goBack}
+            className="px-4 py-2 text-sm rounded-lg transition-colors text-content-secondary hover:text-content-primary hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            ← {t('survey_btn_back')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 7. RANKING (Drag & Drop Simulation via Click) - for Riemann stress ranking
 const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids: string[]) => void, t: TranslateFunc }) => {
   const [pool, setPool] = useState(items);
   const [ranked, setRanked] = useState<any[]>([]);
@@ -532,65 +1036,110 @@ const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids
 interface PersonalitySurveyProps {
   onFinish: (result: SurveyResult) => void;
   currentUser?: User | null;
+  existingProfile?: Partial<SurveyResult> | null; // For adding additional lenses
 }
 
-export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, currentUser }) => {
+export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ 
+  onFinish, 
+  currentUser,
+  existingProfile 
+}) => {
   const { t } = useLocalization();
   const [step, setStep] = useState(0);
-  const [result, setResult] = useState<Partial<SurveyResult>>({ path: 'UNDECIDED' });
+  const [selectedLens, setSelectedLens] = useState<LensType | null>(null);
+  
+  // Initialize result with existing profile data or empty
+  const [result, setResult] = useState<Partial<SurveyResult>>(() => {
+    console.log('[PersonalitySurvey] Initializing with existingProfile:', existingProfile);
+    console.log('[PersonalitySurvey] completedLenses:', existingProfile?.completedLenses);
+    return {
+      completedLenses: existingProfile?.completedLenses || [],
+      path: existingProfile?.completedLenses?.[0] === 'sd' ? 'SD' 
+          : existingProfile?.completedLenses?.[0] === 'riemann' ? 'RIEMANN' 
+          : existingProfile?.completedLenses?.[0] === 'ocean' ? 'BIG5' 
+          : 'UNDECIDED',
+      spiralDynamics: existingProfile?.spiralDynamics,
+      riemann: existingProfile?.riemann,
+      big5: existingProfile?.big5,
+      narratives: existingProfile?.narratives,
+      adaptationMode: existingProfile?.adaptationMode || 'adaptive',
+    };
+  });
 
-  // Schritte definieren basierend auf dem Pfad
-  // BEIDE Pfade enden mit NARRATIVE_QUESTIONS und ADAPTATION_CHOICE
+  // Track if narratives existed at the START of lens selection (not during!)
+  // This prevents the flow from changing mid-survey when narratives are added
+  const [hadNarrativesAtStart, setHadNarrativesAtStart] = useState<boolean | null>(null);
+
+  // IMPORTANT: Refs to store pending lens results
+  // React state updates are async, so when we call next() immediately after setResult(),
+  // the state hasn't updated yet. These refs ensure finishSurvey() has access to the latest values.
+  const pendingSDResult = useRef<SpiralDynamicsResult | null>(null);
+  const pendingBig5Result = useRef<Big5Result | null>(null);
+  const pendingRiemannResult = useRef<RiemannResult | null>(null);
+  const pendingNarratives = useRef<{ flowStory: string; frictionStory: string } | null>(null);
+  const pendingAdaptationMode = useRef<'adaptive' | 'stable' | null>(null);
+
+  // Define flow based on selected lens
   const flow = useMemo(() => {
-    if (result.path === 'UNDECIDED') return ['FILTER'];
-    if (result.path === 'BIG5') return ['BIG5_QUESTIONS', 'NARRATIVE_QUESTIONS', 'ADAPTATION_CHOICE'];
-    return ['RIEMANN_BERUF', 'RIEMANN_PRIVAT', 'RIEMANN_SELBST', 'RIEMANN_STRESS', 'NARRATIVE_QUESTIONS', 'ADAPTATION_CHOICE'];
-  }, [result.path]);
+    if (!selectedLens) return ['LENS_SELECTION'];
+    
+    const lensSteps: Record<LensType, string[]> = {
+      sd: ['SD_RANKING'],
+      riemann: ['RIEMANN_BERUF', 'RIEMANN_PRIVAT', 'RIEMANN_SELBST', 'RIEMANN_STRESS'],
+      ocean: ['BIG5_QUESTIONS'],
+    };
+    
+    const steps = [...lensSteps[selectedLens]];
+    
+    // Add narrative questions only if they didn't exist at the START of this lens
+    // (hadNarrativesAtStart is set when lens is selected, not when narratives are filled)
+    if (hadNarrativesAtStart === false) {
+      steps.push('NARRATIVE_QUESTIONS');
+    }
+    
+    // Always end with adaptation choice
+    steps.push('ADAPTATION_CHOICE');
+    
+    return steps;
+  }, [selectedLens, hadNarrativesAtStart]);
 
   const currentStepId = flow[step] || 'DONE';
 
-  const handleFilterComplete = (answers: any) => {
-    // LOGIK: Wenn Sorgen (worry) ODER Kontrolle (control) >= 4 (auf 5er Skala), dann Riemann.
-    // Big5 ist nur für Klienten (isClient) verfügbar
-    const isRiemann = answers.worry >= 4 || answers.control >= 4;
-    const canAccessBig5 = currentUser?.isClient === true;
+  const handleLensSelect = (lens: LensType) => {
+    // Capture narrative state at this moment - this determines if we show narrative questions
+    // The flow should NOT change mid-survey when narratives are filled in
+    const hasNarrativesNow = Boolean(result.narratives?.flowStory && result.narratives?.frictionStory);
+    setHadNarrativesAtStart(hasNarrativesNow);
     
-    // Non-clients always get Riemann, even if filter suggests Big5
-    const finalPath = (!canAccessBig5 || isRiemann) ? 'RIEMANN' : 'BIG5';
-    
-    setResult({ 
-      path: finalPath, 
-      filter: answers 
-    });
-    setStep(0); // Reset step index for the new path
+    setSelectedLens(lens);
+    setStep(0); // This will now show the first step of the selected lens
   };
 
-  const calculateBig5 = (data: Record<string, number>): Record<string, number> => {
-    const scores: Record<string, number> = {};
+  const calculateBig5 = (data: Record<string, number>): Big5Result => {
+    const calcTrait = (trait: string) => {
+      const high = data[`${trait}_high`] || 0;
+      const low = 6 - (data[`${trait}_low`] || 0);
+      return Math.round((high + low) / 2);
+    };
     
-    // Aggregation und Invertierung
-    const traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness'];
-    
-    traits.forEach(trait => {
-        // High Score
-        const high = data[`${trait}_high`] || 0;
-        // Low Score muss invertiert werden: 5 -> 1, 1 -> 5
-        const low = 6 - (data[`${trait}_low`] || 0); 
-        
-        // Durchschnitt beider Items für den finalen Trait-Score (max 5)
-        scores[trait] = Math.round((high + low) / 2);
-    });
-
-    // Neurotizismus (N) behalten wir als reinen Wert (Stabilität)
-    scores['neuroticism'] = data['neuroticism_low'] || 0;
-    
-    return scores;
+    return {
+      openness: calcTrait('openness'),
+      conscientiousness: calcTrait('conscientiousness'),
+      extraversion: calcTrait('extraversion'),
+      agreeableness: calcTrait('agreeableness'),
+      neuroticism: data['neuroticism_low'] || 0
+    };
   };
 
   const updateRiemann = (key: string, data: any) => {
+    // Build updated Riemann result
+    const updatedRiemann = { ...result.riemann, [key]: data } as RiemannResult;
+    // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+    pendingRiemannResult.current = updatedRiemann;
+    // Then update state (async)
     setResult(prev => ({
       ...prev,
-      riemann: { ...prev.riemann, [key]: data } as any
+      riemann: { ...prev.riemann, [key]: data } as RiemannResult
     }));
     next();
   };
@@ -599,12 +1148,45 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, 
     if (step < flow.length - 1) {
       setStep(step + 1);
     } else {
-      onFinish(result as SurveyResult);
+      finishSurvey();
     }
   };
 
+  const finishSurvey = () => {
+    if (!selectedLens) return;
+    
+    // Build final result with updated completedLenses
+    const newCompletedLenses = [...(result.completedLenses || [])];
+    if (!newCompletedLenses.includes(selectedLens)) {
+      newCompletedLenses.push(selectedLens);
+    }
+    
+    // Determine legacy path field for backwards compatibility
+    const pathMap: Record<LensType, Path> = {
+      sd: 'SD',
+      riemann: 'RIEMANN',
+      ocean: 'BIG5'
+    };
+    
+    // IMPORTANT: Use pending refs for values that may have been set in the same render cycle
+    // React state updates are async, so result.spiralDynamics etc. may not be updated yet
+    // when finishSurvey is called immediately after setResult()
+    const finalResult: SurveyResult = {
+      completedLenses: newCompletedLenses,
+      path: pathMap[newCompletedLenses[0]] || 'SD',
+      spiralDynamics: pendingSDResult.current || result.spiralDynamics,
+      riemann: pendingRiemannResult.current || result.riemann,
+      big5: pendingBig5Result.current || result.big5,
+      narratives: pendingNarratives.current || result.narratives,
+      adaptationMode: pendingAdaptationMode.current || result.adaptationMode || 'adaptive',
+      narrativeProfile: result.narrativeProfile,
+    };
+    
+    console.log('[PersonalitySurvey] finishSurvey - finalResult:', finalResult);
+    onFinish(finalResult);
+  };
+
   // Get localized data
-  const FILTER_QUESTIONS = getFilterQuestions(t);
   const RIEMANN_BLOCKS = getRiemannBlocks(t);
   const STRESS_ITEMS_LOCALIZED = getStressItems(t);
   const BIG5_QUESTIONS = getBig5Questions(t);
@@ -612,13 +1194,33 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, 
   // Renderer
   let content;
 
-  if (currentStepId === 'FILTER') {
+  if (currentStepId === 'LENS_SELECTION') {
     content = (
-      <Card title={t('survey_filter_title')}>
-        <LikertBlock questions={FILTER_QUESTIONS} onComplete={handleFilterComplete} t={t} />
+      <Card title={t('survey_lens_title')}>
+        <LensSelectionBlock 
+          onSelect={handleLensSelect}
+          completedLenses={result.completedLenses || []}
+          t={t}
+        />
       </Card>
     );
-  } 
+  }
+  else if (currentStepId === 'SD_RANKING') {
+    content = (
+      <Card title={t('survey_sd_title')}>
+        <SDQuestionnaireBlock 
+          t={t}
+          onComplete={(sdResult) => {
+            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+            pendingSDResult.current = sdResult;
+            // Then update state (async)
+            setResult(prev => ({ ...prev, spiralDynamics: sdResult }));
+            next();
+          }} 
+        />
+      </Card>
+    );
+  }
   else if (currentStepId === 'BIG5_QUESTIONS') {
     content = (
       <Card title={t('survey_big5_title')}>
@@ -628,8 +1230,11 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, 
           t={t}
           onComplete={(data) => {
             const calculatedScores = calculateBig5(data);
-            setResult(prev => ({ ...prev, big5: calculatedScores as any }));
-            next(); // Weiter zu NARRATIVE_QUESTIONS
+            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+            pendingBig5Result.current = calculatedScores;
+            // Then update state (async)
+            setResult(prev => ({ ...prev, big5: calculatedScores }));
+            next();
           }} 
         />
       </Card>
@@ -658,43 +1263,79 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ onFinish, 
       content = (
         <Card title={t('survey_riemann_stress_title')}>
           <RankingBlock items={STRESS_ITEMS_LOCALIZED} t={t} onComplete={(d) => {
-             setResult(prev => ({ ...prev, riemann: { ...prev.riemann, stressRanking: d } as any }));
-             next(); // Weiter zu NARRATIVE_QUESTIONS
+             // Build updated Riemann result with stressRanking
+             const updatedRiemann = { ...result.riemann, stressRanking: d } as RiemannResult;
+             // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+             pendingRiemannResult.current = updatedRiemann;
+             // Then update state (async)
+             setResult(prev => ({ 
+               ...prev, 
+               riemann: { ...prev.riemann, stressRanking: d } as RiemannResult 
+             }));
+             next();
           }} />
         </Card>
       );
     }
   }
-  // Narrative Questions (PFLICHT für beide Pfade)
+  // Narrative Questions (only if not already provided)
   else if (currentStepId === 'NARRATIVE_QUESTIONS') {
     content = (
       <Card title={t('survey_narrative_title')}>
         <NarrativeQuestionsBlock 
           t={t}
           onComplete={(narratives) => {
+            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+            pendingNarratives.current = narratives;
+            // Then update state (async)
             setResult(prev => ({ ...prev, narratives }));
-            next(); // Weiter zu ADAPTATION_CHOICE
+            next();
           }} 
         />
       </Card>
     );
   }
-  // Adaptation Choice (Letzter Schritt)
+  // Adaptation Choice (Final step)
   else if (currentStepId === 'ADAPTATION_CHOICE') {
     content = (
       <Card title={t('survey_adaptation_title')}>
         <AdaptationChoiceBlock 
           t={t}
           onComplete={(adaptationMode) => {
-            const final = { ...result, adaptationMode } as SurveyResult;
-            onFinish(final);
+            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+            pendingAdaptationMode.current = adaptationMode;
+            // Then update state (async) - note: this may not be used since finishSurvey reads from ref
+            setResult(prev => ({ ...prev, adaptationMode }));
+            finishSurvey();
           }} 
         />
       </Card>
     );
   }
 
-  return <div className="p-6 sm:p-10 bg-background-primary min-h-screen">{content}</div>;
+  // Progress indicator
+  const totalSteps = flow.length;
+  const progressPercent = selectedLens ? Math.round(((step + 1) / totalSteps) * 100) : 0;
+
+  return (
+    <div className="p-6 sm:p-10 bg-background-primary min-h-screen">
+      {selectedLens && (
+        <div className="max-w-xl mx-auto mb-4">
+          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
+            <span>{t('survey_progress', { current: step + 1, total: totalSteps })}</span>
+            <span>{progressPercent}%</span>
+          </div>
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-accent-primary transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      )}
+      {content}
+    </div>
+  );
 };
 
 export default PersonalitySurvey;

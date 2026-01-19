@@ -96,6 +96,96 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, weight = 0.3) {
 }
 
 /**
+ * Calculate profile refinement suggestions for Spiral Dynamics profiles
+ * Uses bidirectional keywords (high/low) for accurate refinement
+ * 
+ * SD levels are on a 0-100 scale (percentage)
+ * 
+ * @param {object} currentProfile - Current SD profile with levels object
+ * @param {array} sessionLogs - Array with behavior analysis including high/low/delta
+ * @param {number} weight - Weight for adjustments (0-1), default 0.25
+ * @returns {object} - Suggested updates with deltas and found keywords
+ */
+function calculateSDRefinement(currentProfile, sessionLogs, weight = 0.25) {
+  if (!currentProfile || !currentProfile.levels || !sessionLogs || sessionLogs.length === 0) {
+    return { hasSuggestions: false, reason: 'Insufficient data' };
+  }
+  
+  // Get the first session log for preview mode
+  const sessionLog = sessionLogs[0];
+  
+  // Maximum adjustment per session (in percentage points)
+  // SD levels range 0-100, so max 5% change per session is reasonable
+  const maxAdjustment = 5;
+  
+  const levels = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
+  
+  const suggested = { ...currentProfile.levels };
+  const current = { ...currentProfile.levels };
+  const deltas = {};
+  const foundKeywords = {};
+  let hasSignificantChanges = false;
+  
+  for (const level of levels) {
+    if (currentProfile.levels[level] === undefined) continue;
+    
+    const currentScore = currentProfile.levels[level];
+    
+    // Get delta from bidirectional analysis
+    const deltaKey = `${level}Delta`;
+    const highKey = `${level}High`;
+    const lowKey = `${level}Low`;
+    const foundHighKey = `${level}FoundHigh`;
+    const foundLowKey = `${level}FoundLow`;
+    
+    const delta = sessionLog[deltaKey] || 0;
+    const highCount = sessionLog[highKey] || 0;
+    const lowCount = sessionLog[lowKey] || 0;
+    const foundHigh = sessionLog[foundHighKey] || [];
+    const foundLow = sessionLog[foundLowKey] || [];
+    
+    // Store found keywords for UI display
+    if (foundHigh.length > 0 || foundLow.length > 0) {
+      foundKeywords[level] = { high: foundHigh, low: foundLow };
+    }
+    
+    // No keywords found = no change
+    if (delta === 0 && highCount === 0 && lowCount === 0) {
+      deltas[level] = 0;
+      continue;
+    }
+    
+    // Calculate adjustment based on delta
+    // Scale from keyword count to percentage points
+    // Positive delta → increase value, negative delta → decrease value
+    const rawAdjustment = delta * weight * 2; // Multiply by 2 because SD scale is larger (0-100)
+    const clampedAdjustment = Math.max(-maxAdjustment, Math.min(maxAdjustment, rawAdjustment));
+    
+    const newScore = Math.max(0, Math.min(100, Math.round(currentScore + clampedAdjustment)));
+    const actualDelta = newScore - currentScore;
+    
+    // Only flag as significant if there's an actual change
+    if (Math.abs(actualDelta) >= 1) {
+      suggested[level] = newScore;
+      deltas[level] = actualDelta;
+      hasSignificantChanges = true;
+    } else {
+      deltas[level] = 0;
+    }
+  }
+  
+  return {
+    hasSuggestions: hasSignificantChanges,
+    current,
+    suggested,
+    deltas,
+    foundKeywords,
+    sessionCount: sessionLogs.length,
+    weight
+  };
+}
+
+/**
  * Calculate profile refinement suggestions for Big5 profiles
  * Uses bidirectional keywords (high/low) for accurate refinement
  * 
@@ -222,6 +312,8 @@ function calculateProfileRefinement(currentProfile, profileType, sessionLogs, we
     return calculateRiemannRefinement(currentProfile, sessionsToUse, weight);
   } else if (profileType === 'BIG5') {
     return calculateBig5Refinement(currentProfile.big5 || currentProfile, sessionsToUse, weight);
+  } else if (profileType === 'SD') {
+    return calculateSDRefinement(currentProfile.spiralDynamics || currentProfile, sessionsToUse, weight);
   } else {
     return { hasSuggestions: false, reason: 'Unknown profile type' };
   }
@@ -230,5 +322,6 @@ function calculateProfileRefinement(currentProfile, profileType, sessionLogs, we
 module.exports = {
   calculateProfileRefinement,
   calculateRiemannRefinement,
-  calculateBig5Refinement
+  calculateBig5Refinement,
+  calculateSDRefinement
 };

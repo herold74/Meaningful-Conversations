@@ -13,7 +13,7 @@ function generateRiemannRadarSvg(data: {
   const center = size / 2;
   const maxRadius = (size / 2) - 40;
   
-  // Dimensions: Dauer (top), Nähe (right), Wechsel (bottom), Distanz (left)
+  // Dimensions: Beständigkeit (top), Nähe (right), Spontanität (bottom), Distanz (left)
   const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
   
   // Dynamic scaling: Find max value and add padding
@@ -91,7 +91,7 @@ function generateRiemannRadarSvg(data: {
   
   // Dimension labels (translated)
   const dimLabels = language === 'de' 
-    ? { dauer: 'Dauer', naehe: 'Nähe', wechsel: 'Wechsel', distanz: 'Distanz' }
+    ? { dauer: 'Beständigkeit', naehe: 'Nähe', wechsel: 'Spontanität', distanz: 'Distanz' }
     : { dauer: 'Duration', naehe: 'Proximity', wechsel: 'Change', distanz: 'Distance' };
   
   const labelPositions = [
@@ -166,33 +166,43 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       background: #ffffff;
     }
     .header {
-      background: linear-gradient(135deg, #1B7272 0%, #4ADE80 100%);
+      background: #1B7272;
       color: white;
       text-align: center;
-      padding: 40px 30px;
+      padding: 35px 30px 30px;
       margin-bottom: 30px;
     }
+    .header .logo-container {
+      margin-bottom: 12px;
+    }
+    .header .logo {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto;
+    }
     .header .brand {
-      font-size: 13px;
-      opacity: 0.8;
-      margin-bottom: 8px;
-      font-weight: 300;
+      font-size: 11px;
+      opacity: 0.7;
+      margin-bottom: 6px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
     .header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
     }
     .header .subtitle {
-      font-size: 16px;
-      opacity: 0.9;
+      font-size: 15px;
+      opacity: 0.85;
       font-weight: 300;
     }
     .header .date {
-      font-size: 13px;
-      opacity: 0.7;
-      margin-top: 15px;
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 12px;
     }
     .content {
       padding: 0 30px 30px;
@@ -207,7 +217,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       color: #111827;
       margin-bottom: 15px;
       padding-bottom: 8px;
-      border-bottom: 3px solid #4ADE80;
+      border-bottom: 3px solid #1B7272;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -251,7 +261,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       overflow: hidden;
     }
     .score-fill {
-      background: linear-gradient(90deg, #4ADE80, #22C55E);
+      background: #1B7272;
       height: 100%;
       border-radius: 12px;
     }
@@ -272,7 +282,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     th {
-      background: linear-gradient(135deg, #1B7272 0%, #14b8a6 100%);
+      background: #1B7272;
       color: white;
       padding: 14px 16px;
       text-align: left;
@@ -289,15 +299,15 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       background: #f9fafb;
     }
     .interpretation {
-      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
       padding: 20px;
       border-radius: 12px;
-      border-left: 5px solid #4ADE80;
+      border-left: 5px solid #1B7272;
       margin-bottom: 15px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .interpretation h3 {
-      color: #166534;
+      color: #134e4a;
       font-size: 16px;
       margin-bottom: 10px;
       font-weight: 600;
@@ -317,7 +327,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       color: #0369a1;
     }
     .interpretation .action strong {
-      color: #0d9488;
+      color: #1B7272;
     }
     .footer {
       margin-top: 40px;
@@ -339,11 +349,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     }
     .footer .brand-by {
       font-size: 11px;
-      color: #16A34A;
+      color: #1B7272;
       margin-bottom: 15px;
     }
     .footer a {
-      color: #16A34A;
+      color: #1B7272;
       text-decoration: none;
       font-weight: 500;
     }
@@ -363,7 +373,7 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       font-weight: 600;
       margin: 10px 0;
     }
-    .high { color: #059669; font-weight: 700; }
+    .high { color: #1B7272; font-weight: 700; }
     .medium { color: #d97706; font-weight: 700; }
     .low { color: #dc2626; font-weight: 700; }
     .badge {
@@ -374,53 +384,139 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
       font-weight: 600;
       text-transform: uppercase;
     }
-    .badge-high { background: #dcfce7; color: #166534; }
+    .badge-high { background: #ccfbf1; color: #134e4a; }
     .badge-medium { background: #fef3c7; color: #92400e; }
     .badge-low { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="brand">${language === 'de' ? 'manualmode.at präsentiert' : 'manualmode.at presents'}</div>
-    <h1>🧠 ${t.title}</h1>
+    <div class="logo-container">
+      <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+        <g transform="rotate(0 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+        <g transform="rotate(45 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+        <g transform="rotate(90 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+        <g transform="rotate(135 12 12)"><path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" /></g>
+        <path fill-rule="evenodd" d="M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"/>
+        <circle cx="12" cy="12" r="1.75"/>
+      </svg>
+    </div>
+    <div class="brand">manualmode.at</div>
+    <h1>${t.title}</h1>
     <div class="subtitle">Meaningful Conversations</div>
     <div class="date">${date}</div>
   </div>
   <div class="content">
 `;
 
-  // Filter Scores (scale is 1-5, not 1-10)
+  // Introduction text
   html += `
   <div class="section">
-    <div class="section-title">📊 ${t.filterScores}</div>
-    <div class="filter-scores">
-      <div class="score-item">
-        <span class="score-label">${t.worryLabel}</span>
-        <div class="score-bar">
-          <div class="score-fill" style="width: ${result.filter.worry * 20}%"></div>
-        </div>
-        <span class="score-value">${result.filter.worry}/5</span>
-      </div>
-      <div class="score-item">
-        <span class="score-label">${t.controlLabel}</span>
-        <div class="score-bar">
-          <div class="score-fill" style="width: ${result.filter.control * 20}%"></div>
-        </div>
-        <span class="score-value">${result.filter.control}/5</span>
-      </div>
+    <p style="font-size: 13px; color: #4b5563; line-height: 1.7; margin-bottom: 15px;">
+      ${t.introText}
+    </p>
+  </div>
+`;
+
+  // Completed Analyses Overview - show all completed lenses
+  const lensInfo = {
+    sd: { 
+      icon: '🌀', 
+      name: language === 'de' ? 'Spiral Dynamics' : 'Spiral Dynamics',
+      desc: language === 'de' ? 'Werte & Antriebskräfte' : 'Values & Motivations'
+    },
+    riemann: { 
+      icon: '🔄', 
+      name: 'Riemann-Thomann', 
+      desc: language === 'de' ? 'Interaktionsstil & Beziehungen' : 'Interaction Style & Relationships'
+    },
+    ocean: { 
+      icon: '🧬', 
+      name: 'OCEAN / Big Five', 
+      desc: language === 'de' ? 'Persönlichkeitsmerkmale' : 'Personality Traits'
+    }
+  };
+  
+  // Determine which lenses are completed
+  const completedLenses = result.completedLenses || [];
+  const hasSD = completedLenses.includes('sd') || !!result.spiralDynamics;
+  const hasRiemann = completedLenses.includes('riemann') || !!result.riemann;
+  const hasOcean = completedLenses.includes('ocean') || !!result.big5;
+  
+  const completedTests: string[] = [];
+  if (hasSD) completedTests.push('sd');
+  if (hasRiemann) completedTests.push('riemann');
+  if (hasOcean) completedTests.push('ocean');
+  
+  html += `
+  <div class="section">
+    <div class="section-title">📋 ${t.includedAnalyses}</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      ${completedTests.map(lens => {
+        const info = lensInfo[lens as keyof typeof lensInfo];
+        return `
+        <div style="flex: 1; min-width: 150px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 12px;">
+          <div style="font-size: 18px; margin-bottom: 4px;">${info.icon}</div>
+          <div style="font-weight: 600; color: #134e4a; font-size: 13px;">${info.name}</div>
+          <div style="font-size: 11px; color: #5eead4;">${info.desc}</div>
+        </div>`;
+      }).join('')}
     </div>
   </div>
 `;
 
-  // Test Type
-  html += `
+  // Spiral Dynamics Results (show if spiralDynamics data exists)
+  if (result.spiralDynamics) {
+    const sd = result.spiralDynamics;
+    
+    // SD Level info with colors and keywords
+    const sdLevels: Record<string, { color: string; keyword: string; keywordEn: string }> = {
+      turquoise: { color: '#06b6d4', keyword: 'Ganzheitlichkeit', keywordEn: 'Holistic' },
+      yellow: { color: '#eab308', keyword: 'Integration', keywordEn: 'Integration' },
+      green: { color: '#22c55e', keyword: 'Gemeinschaft', keywordEn: 'Community' },
+      orange: { color: '#f97316', keyword: 'Erfolg', keywordEn: 'Achievement' },
+      blue: { color: '#3b82f6', keyword: 'Ordnung', keywordEn: 'Order' },
+      red: { color: '#ef4444', keyword: 'Macht', keywordEn: 'Power' },
+      purple: { color: '#a855f7', keyword: 'Zugehörigkeit', keywordEn: 'Belonging' },
+      beige: { color: '#d4a574', keyword: 'Überleben', keywordEn: 'Survival' }
+    };
+    
+    // Order levels from top (turquoise) to bottom (beige)
+    const levelOrder = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
+    
+    html += `
   <div class="section">
-    <span class="test-type">${t.testType}: ${result.path === 'RIEMANN' ? 'Riemann-Thomann' : 'OCEAN'}</span>
+    <div class="section-title">🌀 Spiral Dynamics</div>
+    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
+      ${language === 'de' 
+        ? 'Spiral Dynamics beschreibt verschiedene Wertesysteme und Weltanschauungen. Ihre Werte zeigen, welche Ebenen in Ihrem Denken und Handeln dominieren.'
+        : 'Spiral Dynamics describes different value systems and worldviews. Your scores show which levels dominate your thinking and behavior.'}
+    </p>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      ${levelOrder.map(level => {
+        const value = (sd.levels as Record<string, number>)[level] || 0;
+        const info = sdLevels[level];
+        const percentage = Math.min(100, value * 20); // Assuming 5-point scale
+        const keyword = language === 'de' ? info.keyword : info.keywordEn;
+        
+        return `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 90px; font-size: 11px; font-weight: 500; color: ${info.color};">${keyword}</div>
+          <div style="flex: 1; background: #f3f4f6; border-radius: 6px; height: 20px; position: relative; overflow: hidden;">
+            <div style="background: ${info.color}; height: 100%; width: ${percentage}%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;">
+              ${percentage > 20 ? `<span style="color: white; font-size: 10px; font-weight: 600;">${value.toFixed(1)}</span>` : ''}
+            </div>
+            ${percentage <= 20 ? `<span style="position: absolute; left: ${percentage + 2}%; top: 50%; transform: translateY(-50%); font-size: 10px; color: #6b7280;">${value.toFixed(1)}</span>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
   </div>
 `;
+  }
 
-  // Riemann Results - Radar Chart
-  if (result.path === 'RIEMANN' && result.riemann) {
+  // Riemann Results - Radar Chart (show if riemann data exists, regardless of path)
+  if (result.riemann) {
     const r = result.riemann;
 
     // Generate radar chart SVG with dynamic scaling
@@ -429,6 +525,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     html += `
   <div class="section">
     <div class="section-title">🎯 Riemann-Thomann Profil</div>
+    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
+      ${language === 'de' 
+        ? 'Das Riemann-Thomann-Modell zeigt Ihre Präferenzen entlang vier Grundstrebungen: Nähe (Verbundenheit), Distanz (Autonomie), Beständigkeit (Struktur) und Spontanität (Veränderung). Die Visualisierung vergleicht Ihr Verhalten in verschiedenen Kontexten.'
+        : 'The Riemann-Thomann model shows your preferences along four basic tendencies: Proximity (connection), Distance (autonomy), Duration (structure) and Change (flexibility). The visualization compares your behavior across different contexts.'}
+    </p>
     <div style="display: flex; justify-content: center; margin: 15px 0;">
       ${radarSvg}
   </div>
@@ -497,8 +598,8 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     }
   }
 
-  // Big5 Results
-  if (result.path === 'BIG5' && result.big5) {
+  // Big5 Results - Show if big5 data exists (regardless of path)
+  if (result.big5) {
     const b = result.big5;
     
     const getInterpretation = (score: number): string => {
@@ -510,6 +611,11 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
     html += `
   <div class="section">
     <div class="section-title">🧬 ${t.big5Traits}</div>
+    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px; line-height: 1.5;">
+      ${language === 'de' 
+        ? 'Das OCEAN-Modell (Big Five) misst fünf grundlegende Persönlichkeitsdimensionen, die in der psychologischen Forschung umfassend validiert wurden. Ihre Werte zeigen, wo Sie auf jeder Skala liegen.'
+        : 'The OCEAN model (Big Five) measures five fundamental personality dimensions that have been extensively validated in psychological research. Your scores show where you fall on each scale.'}
+    </p>
     <table>
       <tr>
         <th>${t.trait}</th>
@@ -618,17 +724,19 @@ export function formatSurveyResultAsHtml(result: SurveyResult, language: 'de' | 
 const translations = {
   de: {
     title: 'Persönlichkeitsanalyse',
+    introText: 'Dieses Dokument fasst Ihre persönliche Analyse zusammen, basierend auf wissenschaftlich fundierten Persönlichkeitsmodellen. Die Ergebnisse bieten wertvolle Einblicke in Ihre Werte, Ihren Interaktionsstil und Ihre Persönlichkeitsmerkmale. Nutzen Sie diese Erkenntnisse als Ausgangspunkt für Selbstreflexion und persönliches Wachstum.',
+    includedAnalyses: 'Enthaltene Analysen',
     filterScores: 'Filter-Werte',
     worryLabel: 'Sorge um Kontrolle',
-    controlLabel: 'Beeinflussbarkeit',
+    controlLabel: 'Kontrollbedürfnis',
     testType: 'Test-Typ',
     professionalContext: 'Beruflicher Kontext',
     privateContext: 'Privater Kontext',
     selfImage: 'Selbstbild',
     dimension: 'Dimension',
     score: 'Score',
-    dauer: 'Dauer (Struktur)',
-    wechsel: 'Wechsel (Veränderung)',
+    dauer: 'Beständigkeit (Struktur)',
+    wechsel: 'Spontanität (Veränderung)',
     naehe: 'Nähe (Harmonie)',
     distanz: 'Distanz (Rationalität)',
     big5Traits: 'OCEAN Persönlichkeitsmerkmale',
@@ -655,6 +763,8 @@ const translations = {
   },
   en: {
     title: 'Personality Analysis',
+    introText: 'This document summarizes your personal analysis based on scientifically validated personality models. The results provide valuable insights into your values, interaction style, and personality traits. Use these findings as a starting point for self-reflection and personal growth.',
+    includedAnalyses: 'Included Analyses',
     filterScores: 'Filter Scores',
     worryLabel: 'Worry about Control',
     controlLabel: 'Sense of agency',

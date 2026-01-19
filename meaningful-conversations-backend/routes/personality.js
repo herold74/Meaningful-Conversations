@@ -11,7 +11,7 @@ const aiProvider = require('../services/aiProviderService.js');
  */
 router.post('/save', authMiddleware, async (req, res) => {
   try {
-    const { testType, filterWorry, filterControl, encryptedData, adaptationMode } = req.body;
+    const { testType, completedLenses, filterWorry, filterControl, encryptedData, adaptationMode } = req.body;
     const userId = req.userId;
     
     // Validation
@@ -22,28 +22,57 @@ router.post('/save', authMiddleware, async (req, res) => {
     // Validate adaptationMode
     const validMode = adaptationMode === 'stable' ? 'stable' : 'adaptive';
     
+    // Validate and serialize completedLenses
+    const validLenses = ['sd', 'riemann', 'ocean'];
+    let lensesJson = '[]';
+    if (Array.isArray(completedLenses)) {
+      const filtered = completedLenses.filter(l => validLenses.includes(l));
+      lensesJson = JSON.stringify(filtered);
+    }
+    
+    // Check if profile exists to determine if we should merge lenses
+    const existingProfile = await prisma.personalityProfile.findUnique({
+      where: { userId }
+    });
+    
+    // If profile exists and we're adding a lens, merge the completedLenses
+    if (existingProfile && existingProfile.completedLenses) {
+      try {
+        const existingLenses = JSON.parse(existingProfile.completedLenses);
+        const newLenses = Array.isArray(completedLenses) ? completedLenses : [];
+        const mergedLenses = [...new Set([...existingLenses, ...newLenses])].filter(l => validLenses.includes(l));
+        lensesJson = JSON.stringify(mergedLenses);
+      } catch (e) {
+        // If parsing fails, just use the new lenses
+        console.warn('Failed to parse existing completedLenses, using new value');
+      }
+    }
+    
     // Upsert (create or update)
     const profile = await prisma.personalityProfile.upsert({
       where: { userId },
       create: {
         userId,
         testType,
-        filterWorry: filterWorry || 0,
-        filterControl: filterControl || 0,
+        completedLenses: lensesJson,
+        filterWorry: filterWorry || null,
+        filterControl: filterControl || null,
         adaptationMode: validMode,
         encryptedData
       },
       update: {
         testType,
-        filterWorry: filterWorry || 0,
-        filterControl: filterControl || 0,
+        completedLenses: lensesJson,
+        filterWorry: filterWorry || null,
+        filterControl: filterControl || null,
         adaptationMode: validMode,
         encryptedData,
-        sessionCount: 0 // Reset session count when profile is recreated
+        // Don't reset session count when adding a lens
+        // sessionCount: 0
       }
     });
     
-    res.json({ success: true, profileId: profile.id });
+    res.json({ success: true, profileId: profile.id, completedLenses: JSON.parse(lensesJson) });
   } catch (error) {
     console.error('Error saving personality profile:', error);
     res.status(500).json({ error: 'Failed to save profile' });
@@ -72,8 +101,51 @@ router.get('/profile', authMiddleware, async (req, res) => {
 });
 
 /**
+ * DELETE /api/personality/profile
+ * Löscht das Persönlichkeitsprofil eines Benutzers vollständig
+ */
+router.delete('/profile', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId;
+    
+    // Check if profile exists
+    const existingProfile = await prisma.personalityProfile.findUnique({
+      where: { userId }
+    });
+    
+    if (!existingProfile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    
+    // Delete associated session behavior logs first (foreign key constraint)
+    await prisma.sessionBehaviorLog.deleteMany({
+      where: { userId }
+    });
+    
+    // Delete the personality profile
+    await prisma.personalityProfile.delete({
+      where: { userId }
+    });
+    
+    // Reset user's coaching mode to 'off'
+    await prisma.user.update({
+      where: { id: userId },
+      data: { coachingMode: 'off' }
+    });
+    
+    console.log(`[Personality] Profile deleted for user ${userId}`);
+    
+    res.json({ success: true, message: 'Profile deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting personality profile:', error);
+    res.status(500).json({ error: 'Failed to delete profile' });
+  }
+});
+
+/**
  * POST /api/personality/session-log
  * Loggt Session-Verhalten mit verschluesseltem Transkript
+ * Speichert Frequenzen für alle drei Profile-Typen: Riemann, Big5, SD
  */
 router.post('/session-log', authMiddleware, async (req, res) => {
   try {
@@ -83,17 +155,40 @@ router.post('/session-log', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
+    // Extract frequencies for all profile types
+    const riemann = frequencies?.riemann || {};
+    const big5 = frequencies?.big5 || {};
+    const sd = frequencies?.sd || {};
+    
     const log = await prisma.sessionBehaviorLog.create({
       data: {
         userId: req.userId,
         sessionId,
         encryptedTranscript,
-        dauerFrequency: frequencies?.dauer || 0,
-        wechselFrequency: frequencies?.wechsel || 0,
-        naeheFrequency: frequencies?.naehe || 0,
-        distanzFrequency: frequencies?.distanz || 0
+        // Riemann-Thomann (delta values: high - low)
+        dauerFrequency: riemann.dauer || frequencies?.dauer || 0,
+        wechselFrequency: riemann.wechsel || frequencies?.wechsel || 0,
+        naeheFrequency: riemann.naehe || frequencies?.naehe || 0,
+        distanzFrequency: riemann.distanz || frequencies?.distanz || 0,
+        // Big5/OCEAN (delta values)
+        opennessFrequency: big5.openness || 0,
+        conscientiousnessFrequency: big5.conscientiousness || 0,
+        extraversionFrequency: big5.extraversion || 0,
+        agreeablenessFrequency: big5.agreeableness || 0,
+        neuroticismFrequency: big5.neuroticism || 0,
+        // Spiral Dynamics (delta values)
+        beigeFrequency: sd.beige || 0,
+        purpleFrequency: sd.purple || 0,
+        redFrequency: sd.red || 0,
+        blueFrequency: sd.blue || 0,
+        orangeFrequency: sd.orange || 0,
+        greenFrequency: sd.green || 0,
+        yellowFrequency: sd.yellow || 0,
+        turquoiseFrequency: sd.turquoise || 0
       }
     });
+    
+    console.log(`[DPFL] Session logged for user ${req.userId}, session ${sessionId}`);
     
     res.json({ success: true, logId: log.id });
   } catch (error) {
@@ -200,17 +295,49 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
     // Note: Profile data is encrypted
     // Return raw session logs so client can decrypt profile and calculate suggestions
     // We can't calculate deltas server-side because we can't decrypt the profile
+    
+    // Parse completedLenses to determine which profile types are relevant
+    let completedLenses = [];
+    try {
+      completedLenses = JSON.parse(profile.completedLenses || '[]');
+    } catch (e) {
+      completedLenses = [];
+    }
+    
     res.json({
       hasSuggestions: true,
       sessionLogs: recentLogs.map(log => ({
-        dauerFrequency: log.dauerFrequency,
-        wechselFrequency: log.wechselFrequency,
-        naeheFrequency: log.naeheFrequency,
-        distanzFrequency: log.distanzFrequency,
+        // Riemann-Thomann frequencies
+        riemann: {
+          dauer: log.dauerFrequency,
+          wechsel: log.wechselFrequency,
+          naehe: log.naeheFrequency,
+          distanz: log.distanzFrequency
+        },
+        // Big5/OCEAN frequencies
+        big5: {
+          openness: log.opennessFrequency,
+          conscientiousness: log.conscientiousnessFrequency,
+          extraversion: log.extraversionFrequency,
+          agreeableness: log.agreeablenessFrequency,
+          neuroticism: log.neuroticismFrequency
+        },
+        // Spiral Dynamics frequencies
+        sd: {
+          beige: log.beigeFrequency,
+          purple: log.purpleFrequency,
+          red: log.redFrequency,
+          blue: log.blueFrequency,
+          orange: log.orangeFrequency,
+          green: log.greenFrequency,
+          yellow: log.yellowFrequency,
+          turquoise: log.turquoiseFrequency
+        },
         comfortScore: log.comfortScore
       })),
       sessionCount: recentLogs.length,
       profileType: profile.testType,
+      completedLenses,
       adaptationMode: 'adaptive',
       message: 'Client must decrypt profile and use profileRefinement service'
     });

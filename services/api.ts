@@ -195,9 +195,10 @@ export const getAuthHeaders = (): HeadersInit => {
 const API_BASE_URL = getApiBaseUrl();
 
 export const savePersonalityProfile = async (data: {
-  testType: string;
-  filterWorry: number;
-  filterControl: number;
+  testType?: string; // Legacy - optional
+  completedLenses?: string[];
+  filterWorry?: number;
+  filterControl?: number;
   encryptedData: string;
   adaptationMode?: 'adaptive' | 'stable';
 }) => {
@@ -225,23 +226,35 @@ export const loadPersonalityProfile = async () => {
   return response.json();
 };
 
+export const deletePersonalityProfile = async (): Promise<{ success: boolean; message: string }> => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to delete personality profile');
+  }
+  
+  return response.json();
+};
+
 export const submitSessionLog = async (data: {
   chatHistory: any[];
   sessionId: string;
   comfortScore: number | null;
   optedOut: boolean;
   encryptionKey: CryptoKey;
+  language?: 'de' | 'en';
 }) => {
   const { encryptTranscript } = await import('../utils/personalityEncryption');
+  const { analyzeSession } = await import('../utils/sessionBehaviorAnalyzer');
   
-  // Simple frequency analysis (client-side for now)
-  // We'll do full analysis server-side in future iteration
-  const frequencies = {
-    dauer: 0,
-    wechsel: 0,
-    naehe: 0,
-    distanz: 0
-  };
+  // Analyze chat history for all three profile types (Riemann, Big5, SD)
+  // This extracts delta values (high - low keyword counts) for DPFL refinement
+  const lang = data.language || 'de';
+  const frequencies = analyzeSession(data.chatHistory, lang);
   
   // Encrypt chat transcript
   const transcript = JSON.stringify(data.chatHistory);
@@ -304,8 +317,10 @@ export const checkPersonalityProfile = async (): Promise<boolean> => {
 
 export const generateNarrativeProfile = async (data: {
   quantitativeData: {
-    testType: string;
-    filter: { worry: number; control: number };
+    testType?: string; // Legacy - optional
+    completedLenses?: string[];
+    filter?: { worry: number; control: number };
+    spiralDynamics?: any;
     riemann?: any;
     big5?: any;
   };
