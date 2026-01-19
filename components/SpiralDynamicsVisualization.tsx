@@ -89,7 +89,7 @@ const SpiralDynamicsVisualization: React.FC<SpiralDynamicsVisualizationProps> = 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ICH-orientiert Column */}
-        <div className="p-4 bg-background-tertiary dark:bg-background-tertiary rounded-lg border border-border-secondary">
+        <div className="p-4 rounded-lg border border-border-secondary dark:border-border-primary bg-background-primary dark:bg-background-primary">
           <div className="mb-3">
             <h4 className="text-sm font-semibold text-content-primary">
               {t('sd_strand_ich') || 'Ich-orientiert'}
@@ -104,7 +104,7 @@ const SpiralDynamicsVisualization: React.FC<SpiralDynamicsVisualizationProps> = 
         </div>
 
         {/* WIR-orientiert Column */}
-        <div className="p-4 bg-background-tertiary dark:bg-background-tertiary rounded-lg border border-border-secondary">
+        <div className="p-4 rounded-lg border border-border-secondary dark:border-border-primary bg-background-primary dark:bg-background-primary">
           <div className="mb-3">
             <h4 className="text-sm font-semibold text-content-primary">
               {t('sd_strand_wir') || 'Wir-orientiert'}

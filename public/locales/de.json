@@ -1112,12 +1112,12 @@
 
   "survey_progress": "Schritt {{current}} von {{total}}",
   
-  "narrative_profile_title": "✨ Persönlichkeits-Signatur",
+  "narrative_profile_title": "Deine Signatur",
   "narrative_profile_regenerate": "Neu generieren",
   "narrative_profile_generating": "Profil wird generiert...",
   "narrative_profile_os_title": "🧬 Deine Signatur",
   "narrative_profile_superpowers_title": "⚡ Deine geheimen Superkräfte",
-  "narrative_profile_blindspots_title": "🌑 Potenzielle Blindspots",
+  "narrative_profile_blindspots_title": "⚪ Potenzielle Blindspots",
   "narrative_profile_growth_title": "🌱 Wachstumsmöglichkeiten",
   "narrative_profile_generate_desc": "Basierend auf deinen Test-Ergebnissen und persönlichen Erfahrungen können wir eine einzigartige Persönlichkeits-Signatur für dich erstellen.",
   "narrative_generate_button": "Signatur generieren",

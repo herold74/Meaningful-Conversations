@@ -1174,6 +1174,21 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     recognition.onresult = (event) => {
+      // #region agent log - Detailed logging for Android debugging
+      const resultsDebug = Array.from(event.results).map((r, idx) => ({
+        idx,
+        isFinal: r.isFinal,
+        transcript: r[0].transcript,
+        confidence: r[0].confidence
+      }));
+      console.log('[SR-DEBUG] onresult', {
+        resultIndex: event.resultIndex,
+        resultsLength: event.results.length,
+        baseTranscript: baseTranscriptRef.current,
+        results: resultsDebug
+      });
+      // #endregion
+      
       // On some platforms (notably Android), interim results are CUMULATIVE - they contain
       // the full transcript including already-finalized text. On other platforms (desktop Chrome),
       // interim results only contain the new, not-yet-finalized portion.
@@ -1196,6 +1211,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
       }
       
+      // #region agent log
+      console.log('[SR-DEBUG] after loop', { final_transcript, interim_transcript });
+      // #endregion
+      
       // Determine the combined transcript, avoiding duplication on cumulative platforms
       let combined_transcript: string;
       
@@ -1203,6 +1222,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // Check if interim already contains the final text (cumulative platform like Android)
         const normalizedFinal = final_transcript.trim().toLowerCase();
         const normalizedInterim = interim_transcript.trim().toLowerCase();
+        
+        // #region agent log
+        console.log('[SR-DEBUG] startsWith check', {
+          normalizedFinal,
+          normalizedInterim,
+          startsWithResult: normalizedInterim.startsWith(normalizedFinal)
+        });
+        // #endregion
         
         if (normalizedInterim.startsWith(normalizedFinal)) {
           // Cumulative platform: interim contains everything, use it directly
@@ -1215,6 +1242,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // Only one of them exists, use whichever is available
         combined_transcript = final_transcript || interim_transcript;
       }
+      
+      // #region agent log
+      console.log('[SR-DEBUG] final output', {
+        combined_transcript,
+        fullOutput: baseTranscriptRef.current + combined_transcript
+      });
+      // #endregion
       
       // Combine with any text that existed before speech recognition started
       setInput(baseTranscriptRef.current + combined_transcript);
@@ -1467,9 +1501,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // This runs DURING user interaction, so autoplay is allowed.
           if (isIOS) {
               try {
-                  // Play a silent audio file to force iOS to switch audio modes
-                  // The playback itself triggers the mode switch, volume can be 0
-                  const resetAudio = new Audio('data:audio/wav;base64,UklGRl4FAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToFAAB4eHh4d3d3d3Z2dnZ1dXV1dHR0dHNzc3NycnJycXFxcXBwcHBvb29vbm5ubm1tbW1sbGxsa2tra2pqamppaWlpaGhoaGdnZ2dmZmZmZWVlZWRkZGRjY2NjYmJiYmFhYWFgYGBgX19fX15eXl5dXV1dXFxcXFtbW1taWlpaWVlZWVhYWFhXV1dXVlZWVlVVVVVUVFRUU1NTU1JSUlJRUVFRUFBQUE9PT09OTk5OTU1NTUxMTExLS0tLSkpKSklJSUlISEhIR0dHR0ZGRkZFRUVFREREREREREREREREREREREVFRUVGRkZGR0dHR0hISEhJSUlJSkpKSktLS0tMTExMTU1NTU5OTk5PT09PUFBQUFFRUVFSUlJSU1NTU1RUVFRVVVVVVlZWVldXV1dYWFhYWVlZWVpaWlpbW1tbXFxcXF1dXV1eXl5eX19fX2BgYGBhYWFhYmJiYmNjY2NkZGRkZWVlZWZmZmZnZ2dnaGhoaGlpaWlqampqa2tra2xsbGxtbW1tbm5ubm9vb29wcHBwcXFxcXJycnJzc3NzdHR0dHV1dXV2dnZ2d3d3d3h4eHh5eXl5enp6ent7e3t8fHx8fX19fX5+fn5/f39/gICAgIGBgYGCgoKCg4ODg4SEhISFhYWFhoaGhoeHh4eIiIiIiYmJiYqKioqLi4uLjIyMjI2NjY2Ojo6Oj4+Pj5CQkJCRkZGRkpKSkpOTk5OUlJSUlZWVlZaWlpaXl5eXmJiYmJmZmZmampqam5ubm5ycnJydnZ2dnp6enp+fn5+goKCgoaGhoaKioqKjo6Ojo6Ojo6SkpKSlpaWlpqampqenp6eoqKioqampqaqqqqqqqqqqq6urq6ysrKytra2trq6urq+vr6+wsLCwsbGxsbKysrKzs7Ozs7OztLS0tLW1tbW2tra2t7e3t7i4uLi5ubm5urq6uru7u7u8vLy8vb29vb6+vr6/v7+/wMDAwMHBwcHCwsLCw8PDw8TExMTFxcXFxsbGxsfHx8fIyMjIycnJycrKysrLy8vLzMzMzM3Nzc3Ozs7Oz8/Pz9DQ0NDR0dHR0tLS0tPT09PT09PU1NTU1dXV1dbW1tbX19fX2NjY2NnZ2dna2tra29vb29zc3Nzd3d3d3t7e3t/f39/g4ODg4eHh4eLi4uLj4+Pj5OTk5OXl5eXm5ubm5+fn5+jo6Ojp6enp6urq6uvr6+vs7Ozs7e3t7e7u7u7v7+/v8PDw8PHx8fHy8vLy8/Pz8/T09PT19fX19vb29vf39/f4+Pj4+fn5+fr6+vr7+/v7/Pz8/P39/f3+/v7+//////////8=');
+                  // Play a truly silent audio file to force iOS to switch audio modes
+                  // This is a minimal valid WAV: 44.1kHz, 16-bit mono, 100 samples of silence (all zeros)
+                  // The playback triggers the mode switch, the volume is 0 as extra safety
+                  // Previous version had non-silent samples (0x78 instead of 0x00) causing clicks
+                  const resetAudio = new Audio('data:audio/wav;base64,UklGRtQAAABXQVZFZm10IBAAAAABAAEARKwAAESsAAACABAAZGF0YbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=');
                   resetAudio.volume = 0; // Silent - playback itself triggers iOS mode switch
                   await resetAudio.play();
               } catch (e) {
@@ -1503,6 +1539,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
+          // #region agent log
+          console.log('[SR-DEBUG] baseTranscriptRef set on recognition start', { value: baseTranscriptRef.current, inputWas: input });
+          // #endregion
           
           // Start recognition directly - let the browser handle mic permission (like v1.5.8)
           try {
