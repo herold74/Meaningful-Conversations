@@ -69,6 +69,132 @@ interface SessionReviewProps {
     refinementPreview?: RefinementPreviewResult | null;
     isLoadingRefinementPreview?: boolean;
     refinementPreviewError?: string | null;
+    hasPersonalityProfile?: boolean;
+    onStartPersonalitySurvey?: () => void;
+}
+
+// Questionnaire recommendation based on session content
+type QuestionnaireType = 'sd' | 'riemann' | 'ocean';
+
+interface QuestionnaireRecommendation {
+    type: QuestionnaireType;
+    reason: string;
+    confidence: number;
+}
+
+const TOPIC_KEYWORDS: Record<string, QuestionnaireType[]> = {
+    // Interpersonal conflict keywords → Riemann
+    'konflikt': ['riemann'],
+    'conflict': ['riemann'],
+    'chef': ['riemann'],
+    'boss': ['riemann'],
+    'kollege': ['riemann'],
+    'colleague': ['riemann'],
+    'team': ['riemann'],
+    'beziehung': ['riemann'],
+    'relationship': ['riemann'],
+    'partner': ['riemann'],
+    'kommunikation': ['riemann'],
+    'communication': ['riemann'],
+    'streit': ['riemann'],
+    'argument': ['riemann'],
+    'missverständnis': ['riemann'],
+    'misunderstanding': ['riemann'],
+    
+    // Meaning & motivation keywords → SD
+    'sinn': ['sd'],
+    'meaning': ['sd'],
+    'purpose': ['sd'],
+    'werte': ['sd'],
+    'values': ['sd'],
+    'motivation': ['sd'],
+    'antrieb': ['sd'],
+    'drive': ['sd'],
+    'erfüllung': ['sd'],
+    'fulfillment': ['sd'],
+    'unzufrieden': ['sd'],
+    'dissatisfied': ['sd'],
+    'orientierungslos': ['sd'],
+    'lost': ['sd'],
+    'frustriert': ['sd'],
+    'frustrated': ['sd'],
+    'warum': ['sd'],
+    'why': ['sd'],
+    
+    // Self-understanding keywords → OCEAN (lower priority)
+    'persönlichkeit': ['ocean'],
+    'personality': ['ocean'],
+    'eigenschaften': ['ocean'],
+    'traits': ['ocean'],
+    'muster': ['ocean', 'riemann'],
+    'pattern': ['ocean', 'riemann'],
+};
+
+function analyzeSessionForRecommendation(
+    newFindings: string,
+    chatHistory: Message[],
+    language: string
+): QuestionnaireRecommendation | null {
+    const allText = [
+        newFindings,
+        ...chatHistory.map(m => m.text)
+    ].join(' ').toLowerCase();
+    
+    const scores: Record<QuestionnaireType, number> = {
+        sd: 0,
+        riemann: 0,
+        ocean: 0
+    };
+    
+    // Count keyword matches
+    for (const [keyword, types] of Object.entries(TOPIC_KEYWORDS)) {
+        const regex = new RegExp(keyword, 'gi');
+        const matches = (allText.match(regex) || []).length;
+        if (matches > 0) {
+            types.forEach(type => {
+                scores[type] += matches;
+            });
+        }
+    }
+    
+    // Find highest score
+    const entries = Object.entries(scores) as [QuestionnaireType, number][];
+    entries.sort((a, b) => b[1] - a[1]);
+    
+    const [topType, topScore] = entries[0];
+    
+    // Only recommend if there's meaningful signal
+    if (topScore < 2) {
+        // Default to SD if no clear signal (most motivating)
+        return {
+            type: 'sd',
+            reason: language === 'de' 
+                ? 'Verstehe, was dich wirklich antreibt'
+                : 'Understand what truly drives you',
+            confidence: 0.3
+        };
+    }
+    
+    const reasons: Record<QuestionnaireType, Record<string, string>> = {
+        riemann: {
+            de: 'Verstehe, warum es in Beziehungen manchmal knirscht',
+            en: 'Understand why relationships sometimes struggle'
+        },
+        sd: {
+            de: 'Verstehe, was dich wirklich antreibt und motiviert',
+            en: 'Understand what truly drives and motivates you'
+        },
+        ocean: {
+            de: 'Entdecke deine stabilen Persönlichkeitszüge',
+            en: 'Discover your stable personality traits'
+        }
+    };
+    
+    return {
+        type: topType,
+        reason: reasons[topType][language === 'de' ? 'de' : 'en'],
+        confidence: Math.min(topScore / 10, 1)
+    };
 }
 
 const SessionReview: React.FC<SessionReviewProps> = ({
@@ -95,6 +221,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
+    hasPersonalityProfile,
+    onStartPersonalitySurvey,
 }) => {
     const { t, language } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
@@ -118,15 +246,17 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     // Show comfort check for DPFL
     // - In production: when user has coachingMode === 'dpfl'
     // - In test mode: when refinementPreview is available (indicates DPFL test scenario)
+    // - NEVER for Nobody (nexus-gps) as it doesn't conduct full coaching sessions
     useEffect(() => {
-        const isDPFLTest = isTestMode && refinementPreview;
-        const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode;
+        const isNobodyBot = selectedBot.id === 'nexus-gps';
+        const isDPFLTest = isTestMode && refinementPreview && !isNobodyBot;
+        const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode && !isNobodyBot;
         
         if (isDPFLTest || isDPFLProduction) {
             // Show comfort check after brief delay
             setTimeout(() => setShowComfortCheck(true), 1000);
         }
-    }, [currentUser?.coachingMode, isTestMode, refinementPreview]);
+    }, [currentUser?.coachingMode, isTestMode, refinementPreview, selectedBot.id]);
 
     // Toggle individual next step selection
     const toggleNextStep = (index: number) => {
@@ -894,6 +1024,42 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     </div>
                 )}
 
+                {/* Questionnaire Recommendation - Variante B: Subtler Hinweis */}
+                {currentUser && !hasPersonalityProfile && !isInterviewReview && onStartPersonalitySurvey && (() => {
+                    const recommendation = analyzeSessionForRecommendation(newFindings, chatHistory, language);
+                    if (!recommendation) return null;
+                    
+                    const questionnaireLabels: Record<QuestionnaireType, Record<string, string>> = {
+                        riemann: {
+                            de: 'Wie du interagierst',
+                            en: 'How you interact'
+                        },
+                        sd: {
+                            de: 'Was dich antreibt',
+                            en: 'What drives you'
+                        },
+                        ocean: {
+                            de: 'Was dich ausmacht',
+                            en: 'What defines you'
+                        }
+                    };
+                    
+                    const label = questionnaireLabels[recommendation.type][language === 'de' ? 'de' : 'en'];
+                    
+                    return (
+                        <div className="py-3 px-4 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-500 text-sm">
+                            <span className="text-purple-700 dark:text-purple-300">
+                                💡 {t('sessionReview_questionnaire_hint') || 'Tipp'}: {t('sessionReview_questionnaire_recommendation') || 'Der Fragebogen'} „{label}" {t('sessionReview_questionnaire_could_help') || 'könnte bei deinem Thema helfen'}.{' '}
+                            </span>
+                            <button 
+                                onClick={onStartPersonalitySurvey}
+                                className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline font-medium"
+                            >
+                                {t('sessionReview_questionnaire_learn_more') || 'Mehr erfahren'}
+                            </button>
+                        </div>
+                    );
+                })()}
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border-primary dark:border-border-primary">
                     <Button onClick={handleDownloadContext} size="lg" className="flex-1 bg-accent-secondary hover:bg-accent-secondary-hover" leftIcon={<DownloadIcon className="w-5 h-5"/>}>

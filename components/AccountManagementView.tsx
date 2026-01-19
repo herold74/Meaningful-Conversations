@@ -15,6 +15,10 @@ interface AccountManagementViewProps {
 
 const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUser, onNavigate, onDeleteAccount }) => {
     const { t } = useLocalization();
+    const menuItemBase =
+        'w-full p-4 text-left rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors';
+    const menuIconWrap =
+        'flex h-10 w-10 items-center justify-center rounded-full border border-border-secondary/70 dark:border-border-primary/70 bg-background-secondary dark:bg-background-secondary';
 
     const menuItems = [
         {
@@ -55,23 +59,25 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
     ];
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-md">
             <div className="text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('account_management_title')}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary">{t('account_management_title')}</h1>
                 <p className="text-sm text-content-subtle mt-2">{currentUser.email}</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
                 {menuItems.map((item, index) => (
                     <button
                         key={index}
                         onClick={item.onClick}
-                        className="w-full p-4 bg-white dark:bg-gray-800 border border-border-secondary dark:border-border-primary rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                        className={menuItemBase}
                     >
                         <div className="flex items-start gap-4">
-                            <item.icon className={`w-6 h-6 flex-shrink-0 mt-1 ${item.color}`} />
+                            <div className={menuIconWrap}>
+                                <item.icon className={`w-5 h-5 ${item.color}`} />
+                            </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-content-primary">{item.title}</h3>
+                                <h3 className="text-base font-semibold text-content-primary">{item.title}</h3>
                                 <p className="text-sm text-content-secondary mt-1">{item.description}</p>
                             </div>
                         </div>

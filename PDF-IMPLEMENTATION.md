@@ -67,7 +67,7 @@
 ├────────────────────────────────────────┤
 │  FILTER SCORES                         │
 │  Sorge um Kontrolle:    [███] 7/10    │
-│  Beeinflussbarkeit:     [████] 8/10   │
+│  Kontrollbedürfnis:     [████] 8/10   │
 ├────────────────────────────────────────┤
 │  TEST-TYP: Riemann-Thomann            │
 ├────────────────────────────────────────┤

@@ -117,6 +117,181 @@ const RIEMANN_KEYWORDS = {
  * - high: Keywords indicating high trait expression
  * - low: Keywords indicating low trait expression (opposite behavior)
  */
+/**
+ * Bidirectional keyword dictionaries for Spiral Dynamics levels
+ * - high: Keywords indicating resonance with this value level
+ * - low: Keywords indicating tension/rejection of this level's values
+ * 
+ * SD levels represent evolving value systems, not personality traits.
+ * Each level has a characteristic worldview and set of priorities.
+ */
+const SD_KEYWORDS = {
+  de: {
+    turquoise: {
+      high: [
+        'ganzheitlich', 'global', 'vernetzt', 'ökologisch', 'kollektiv', 'spirituell',
+        'bewusstsein', 'transzendent', 'planetar', 'synthese', 'integral', 'holistisch',
+        'universell', 'kosmos', 'einheit', 'verbunden', 'ökosystem', 'symbiose'
+      ],
+      low: [
+        'isoliert', 'fragmentiert', 'kurzfristig', 'materialistisch', 'egoistisch'
+      ]
+    },
+    yellow: {
+      high: [
+        'systemisch', 'komplex', 'integriert', 'flexibel', 'multiperspektiv', 'autonom',
+        'wissen', 'kompetenz', 'funktional', 'adaptiv', 'paradox', 'emergent',
+        'dynamisch', 'vernetzt', 'meta-ebene', 'kontextabhängig', 'selbstorganisiert'
+      ],
+      low: [
+        'dogmatisch', 'starr', 'eindimensional', 'simplifiziert', 'ideologisch'
+      ]
+    },
+    green: {
+      high: [
+        'gemeinschaft', 'gleichheit', 'harmonie', 'konsens', 'inklusion', 'empathie',
+        'vielfalt', 'partizipation', 'dialog', 'wertschätzung', 'kooperation', 'fair',
+        'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität', 'gefühl'
+      ],
+      low: [
+        'hierarchie', 'ausgrenzung', 'konkurrenz', 'dominanz', 'elitär', 'ausbeutung'
+      ]
+    },
+    orange: {
+      high: [
+        'erfolg', 'leistung', 'fortschritt', 'wettbewerb', 'gewinn', 'effizienz',
+        'strategie', 'innovation', 'karriere', 'optimierung', 'ziele', 'achievement',
+        'professionell', 'wissenschaft', 'rationalität', 'wachstum', 'technologie'
+      ],
+      low: [
+        'mittelmäßigkeit', 'stagnation', 'ineffizient', 'unprofessionell', 'amateurhaft'
+      ]
+    },
+    blue: {
+      high: [
+        'ordnung', 'regeln', 'pflicht', 'disziplin', 'autorität', 'tradition',
+        'prinzipien', 'verantwortung', 'loyal', 'struktur', 'moral', 'gesetz',
+        'rechtmäßig', 'korrekt', 'wahrheit', 'glauben', 'sinn', 'zweck'
+      ],
+      low: [
+        'chaos', 'regellos', 'unverantwortlich', 'undiszipliniert', 'anarchisch'
+      ]
+    },
+    red: {
+      high: [
+        'macht', 'stärke', 'durchsetzung', 'kontrolle', 'dominanz', 'respekt',
+        'sofort', 'impuls', 'aktion', 'eroberung', 'unabhängig', 'mutig',
+        'direkt', 'kämpfen', 'willen', 'energie', 'spontan', 'ungeduld'
+      ],
+      low: [
+        'schwach', 'unterwürfig', 'machtlos', 'ohnmächtig', 'passiv'
+      ]
+    },
+    purple: {
+      high: [
+        'zugehörigkeit', 'ritual', 'tradition', 'ahnen', 'mystisch', 'stamm',
+        'sippe', 'familie', 'schutz', 'magie', 'opfer', 'gemeinschaft',
+        'brauch', 'zeremonie', 'heilig', 'verbunden', 'geborgenheit'
+      ],
+      low: [
+        'entwurzelt', 'traditionslos', 'heimatlos', 'entfremdet'
+      ]
+    },
+    beige: {
+      high: [
+        'überleben', 'instinkt', 'grundbedürfnis', 'sicherheit', 'schutz',
+        'nahrung', 'schlaf', 'gesundheit', 'körper', 'existenz', 'physisch',
+        'wohlbefinden', 'lebensnotwendig', 'überlebenswichtig'
+      ],
+      low: [
+        'überfluss', 'komfort', 'luxus'
+      ]
+    }
+  },
+  en: {
+    turquoise: {
+      high: [
+        'holistic', 'global', 'interconnected', 'ecological', 'collective', 'spiritual',
+        'consciousness', 'transcendent', 'planetary', 'synthesis', 'integral',
+        'universal', 'cosmos', 'unity', 'ecosystem', 'symbiosis'
+      ],
+      low: [
+        'isolated', 'fragmented', 'short-term', 'materialistic', 'selfish'
+      ]
+    },
+    yellow: {
+      high: [
+        'systemic', 'complex', 'integrated', 'flexible', 'multiperspective', 'autonomous',
+        'knowledge', 'competence', 'functional', 'adaptive', 'paradox', 'emergent',
+        'dynamic', 'networked', 'meta-level', 'contextual', 'self-organized'
+      ],
+      low: [
+        'dogmatic', 'rigid', 'one-dimensional', 'simplified', 'ideological'
+      ]
+    },
+    green: {
+      high: [
+        'community', 'equality', 'harmony', 'consensus', 'inclusion', 'empathy',
+        'diversity', 'participation', 'dialogue', 'appreciation', 'cooperation', 'fair',
+        'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity', 'feeling'
+      ],
+      low: [
+        'hierarchy', 'exclusion', 'competition', 'dominance', 'elitist', 'exploitation'
+      ]
+    },
+    orange: {
+      high: [
+        'success', 'achievement', 'progress', 'competition', 'profit', 'efficiency',
+        'strategy', 'innovation', 'career', 'optimization', 'goals',
+        'professional', 'science', 'rationality', 'growth', 'technology'
+      ],
+      low: [
+        'mediocrity', 'stagnation', 'inefficient', 'unprofessional', 'amateur'
+      ]
+    },
+    blue: {
+      high: [
+        'order', 'rules', 'duty', 'discipline', 'authority', 'tradition',
+        'principles', 'responsibility', 'loyal', 'structure', 'moral', 'law',
+        'rightful', 'correct', 'truth', 'belief', 'meaning', 'purpose'
+      ],
+      low: [
+        'chaos', 'lawless', 'irresponsible', 'undisciplined', 'anarchic'
+      ]
+    },
+    red: {
+      high: [
+        'power', 'strength', 'assertion', 'control', 'dominance', 'respect',
+        'immediate', 'impulse', 'action', 'conquest', 'independent', 'brave',
+        'direct', 'fight', 'will', 'energy', 'spontaneous', 'impatient'
+      ],
+      low: [
+        'weak', 'submissive', 'powerless', 'helpless', 'passive'
+      ]
+    },
+    purple: {
+      high: [
+        'belonging', 'ritual', 'tradition', 'ancestors', 'mystical', 'tribe',
+        'clan', 'family', 'protection', 'magic', 'sacrifice', 'community',
+        'custom', 'ceremony', 'sacred', 'connected', 'security'
+      ],
+      low: [
+        'uprooted', 'traditionless', 'homeless', 'alienated'
+      ]
+    },
+    beige: {
+      high: [
+        'survival', 'instinct', 'basic needs', 'safety', 'protection',
+        'food', 'sleep', 'health', 'body', 'existence', 'physical',
+        'wellbeing', 'essential', 'vital'
+      ],
+      low: [
+        'abundance', 'comfort', 'luxury'
+      ]
+    }
+  }
+};
+
 const BIG5_KEYWORDS = {
   de: {
     openness: {
@@ -481,6 +656,121 @@ function analyzeBig5Conversation(chatHistory, lang = 'de') {
 }
 
 /**
+ * Analyze a user message for Spiral Dynamics level markers (bidirectional)
+ * @param {string} message - User's message text
+ * @param {string} lang - Language code ('de' or 'en')
+ * @returns {object} - High/Low counts and found keywords for each SD level
+ */
+function analyzeSDMessage(message, lang = 'de') {
+  const levels = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
+  
+  if (!message || typeof message !== 'string') {
+    const empty = {};
+    for (const level of levels) {
+      empty[level] = { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } };
+    }
+    return empty;
+  }
+  
+  const keywords = SD_KEYWORDS[lang] || SD_KEYWORDS.de;
+  const lowerMessage = message.toLowerCase();
+  
+  const results = {};
+  
+  for (const [level, directions] of Object.entries(keywords)) {
+    const foundHigh = [];
+    const foundLow = [];
+    let highCount = 0;
+    let lowCount = 0;
+    
+    // Count high keywords
+    for (const word of directions.high) {
+      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const matches = lowerMessage.match(regex);
+      if (matches) {
+        highCount += matches.length;
+        foundHigh.push(word);
+      }
+    }
+    
+    // Count low keywords
+    for (const word of directions.low) {
+      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const matches = lowerMessage.match(regex);
+      if (matches) {
+        lowCount += matches.length;
+        foundLow.push(word);
+      }
+    }
+    
+    results[level] = {
+      high: highCount,
+      low: lowCount,
+      delta: highCount - lowCount,
+      foundKeywords: { high: foundHigh, low: foundLow }
+    };
+  }
+  
+  return results;
+}
+
+/**
+ * Analyze an entire conversation history for Spiral Dynamics markers (bidirectional)
+ * Returns aggregated high/low counts for user messages only
+ * @param {Array} chatHistory - Array of message objects with role and text
+ * @param {string} lang - Language code
+ * @returns {object} - Aggregated analysis with deltas and found keywords
+ */
+function analyzeSDConversation(chatHistory, lang = 'de') {
+  const levels = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
+  
+  const aggregated = {
+    messageCount: 0
+  };
+  
+  // Initialize all levels
+  for (const level of levels) {
+    aggregated[level] = { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } };
+  }
+  
+  if (!Array.isArray(chatHistory)) {
+    return aggregated;
+  }
+  
+  // Only analyze user messages (not bot responses)
+  const userMessages = chatHistory.filter(msg => msg.role === 'user');
+  
+  for (const message of userMessages) {
+    const analysis = analyzeSDMessage(message.text, lang);
+    
+    for (const level of levels) {
+      aggregated[level].high += analysis[level].high;
+      aggregated[level].low += analysis[level].low;
+      
+      // Collect unique found keywords
+      for (const kw of analysis[level].foundKeywords.high) {
+        if (!aggregated[level].foundKeywords.high.includes(kw)) {
+          aggregated[level].foundKeywords.high.push(kw);
+        }
+      }
+      for (const kw of analysis[level].foundKeywords.low) {
+        if (!aggregated[level].foundKeywords.low.includes(kw)) {
+          aggregated[level].foundKeywords.low.push(kw);
+        }
+      }
+    }
+    aggregated.messageCount++;
+  }
+  
+  // Calculate final deltas
+  for (const level of levels) {
+    aggregated[level].delta = aggregated[level].high - aggregated[level].low;
+  }
+  
+  return aggregated;
+}
+
+/**
  * Get normalized frequencies (per message) for Riemann - LEGACY COMPATIBILITY
  * @deprecated Use the new bidirectional analysis instead
  */
@@ -538,5 +828,9 @@ module.exports = {
   analyzeBig5Message,
   analyzeBig5Conversation,
   normalizeBig5Frequencies,
-  BIG5_KEYWORDS
+  BIG5_KEYWORDS,
+  // Spiral Dynamics analysis
+  analyzeSDMessage,
+  analyzeSDConversation,
+  SD_KEYWORDS
 };

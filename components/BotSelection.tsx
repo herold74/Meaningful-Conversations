@@ -27,8 +27,11 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
+    // Nobody (nexus-gps) doesn't support DPFL - show DPC instead
+    // DPFL requires full coaching sessions which Nobody doesn't conduct
+    const effectiveCoachingMode = (bot.id === 'nexus-gps' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
     // Show coaching mode badge for all bots if profile exists and mode is active
-    const showCoachingBadge = hasPersonalityProfile && coachingMode && coachingMode !== 'off' && !isLocked;
+    const showCoachingBadge = hasPersonalityProfile && effectiveCoachingMode && effectiveCoachingMode !== 'off' && !isLocked;
     
     // Determine border styling based on client-only status
     const getBorderClass = () => {
@@ -68,9 +71,9 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
         {showCoachingBadge && (
           <div 
             className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold"
-            title={`${t('profile_coaching_mode_title')}: ${coachingMode?.toUpperCase()}`}
+            title={`${t('profile_coaching_mode_title')}: ${effectiveCoachingMode?.toUpperCase()}`}
           >
-            {coachingMode?.toUpperCase()}
+            {effectiveCoachingMode?.toUpperCase()}
           </div>
         )}
         
