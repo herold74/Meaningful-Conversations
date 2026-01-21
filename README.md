@@ -12,30 +12,55 @@ According to the rules and regulations of AI Studio this project is licensed und
 
 ## ✨ Core Features
 
-*   **Multiple AI Coaches**: Engage with a variety of AI coaches, each with a unique style (e.g., Stoic, Reflective, Strategic Thinking).
-*   **Persistent Memory**: Utilize a "Life Context" file (`.md`) that acts as the AI's long-term memory, enabling continuous and personalized conversations over time.
-*   **Automated Context Updates**: At the end of each session, the AI analyzes the conversation and proposes updates to your Life Context file, helping you track insights and progress.
-*   **Calendar Integration**: Export your actionable next steps as .ics calendar events that sync with Google Calendar, Outlook, Apple Calendar, and other calendar apps. Set reminders to keep track of your commitments.
-*   **Voice & Text Chat**: Interact with your coach via text or a hands-free voice conversation mode.
-*   **End-to-End Encryption**: For registered users, your Life Context file is end-to-end encrypted. Only you can decrypt it on your device with your password.
-*   **Gamification**: Stay motivated with a system of XP, levels, streaks, and achievements that reward regular self-reflection.
-*   **Guest Mode**: Try the app without an account. Your data is processed entirely in your browser and you manage your file manually.
-*   **Multi-language Support**: Available in English and German.
+*   **Multiple AI Coaches**: Choose from 7 distinct AI coaches:
+    - **Nobody** - Efficient problem-solving with GPS framework
+    - **Max** - Ambitious, goal-oriented coaching
+    - **Ava** - Empathetic, supportive guidance
+    - **Kenji** - Mindful, Zen-inspired reflection
+    - **Chloe** - CBT-focused cognitive coaching
+    - **Rob** - Positive Intelligence approach
+    - **G-Interviewer** - Structured reflection interviews
+*   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations.
+*   **Personality Profile & Adaptive Coaching**:
+    - Complete personality surveys (Riemann-Thomann, Big Five/OCEAN, Spiral Dynamics)
+    - DPC (Dynamic Prompt Composition) - Profile-informed coaching
+    - DPFL (Dynamic Prompt & Feedback Learning) - Adaptive learning from sessions
+*   **Voice & Text Chat**: 
+    - Text input with Markdown rendering
+    - Voice input via Web Speech API
+    - High-quality TTS output (Server voices: Thorsten, Amy, Ryan)
+    - Local TTS fallback for all platforms
+*   **End-to-End Encryption**: Life Context and personality profiles are encrypted client-side. Only you can decrypt your data.
+*   **Automated Context Updates**: AI proposes updates to your Life Context after each session.
+*   **Calendar Integration**: Export actionable next steps as .ics calendar events.
+*   **Gamification**: XP, levels, streaks, and achievements for regular self-reflection.
+*   **Seasonal Themes**: Automatic visual themes (Spring blossoms, Summer butterflies, Autumn leaves, Winter snowflakes).
+*   **Guest Mode**: Full functionality without account. Data stays in your browser.
+*   **Multi-language Support**: English and German.
 
 ## 🛠️ Technology Stack
 
 *   **Frontend**:
-    *   React 18 & Vite
+    *   React 18 & Vite 7
     *   TypeScript
     *   Tailwind CSS
-    *   Web Speech API for voice features
+    *   Web Speech API for voice input/output
     *   Web Crypto API for End-to-End Encryption (E2EE)
-    *   ICS library for calendar event generation
+    *   html2pdf.js for PDF export
+    *   ICS library for calendar events
 *   **Backend**:
     *   Node.js & Express.js
-    *   Prisma ORM with MySQL
+    *   Prisma ORM with MariaDB
     *   JSON Web Tokens (JWT) for authentication
-    *   Google Gemini API (`@google/genai`) for proxied chat and analysis
+    *   Google Gemini API (`@google/genai`) for AI coaching
+*   **TTS Service**:
+    *   Piper TTS (Python/Flask container)
+    *   High-quality neural voices
+    *   Automatic fallback to Web Speech API
+*   **Infrastructure**:
+    *   Podman containerization
+    *   Nginx reverse proxy
+    *   Dual environment (Staging/Production)
 
 ## 📂 Project Structure
 

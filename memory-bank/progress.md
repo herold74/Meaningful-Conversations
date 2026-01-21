@@ -1,33 +1,102 @@
 # Progress Status
 
 ## Core Features
-- [x] **Frontend Base:** Vite + React setup.
-- [x] **Backend Base:** Express + Prisma setup.
-- [x] **User Authentication:** Registration, Login, Email Verification.
+- [x] **Frontend Base:** Vite + React 18, TypeScript, Tailwind CSS
+- [x] **Backend Base:** Express + Prisma + MariaDB
+- [x] **User Authentication:** Registration, Login, Email Verification, Password Reset
 - [x] **Life Context Management:**
-    - [x] Creation (Questionnaire).
-    - [x] Rendering (Markdown).
-    - [x] Updating (Diff view).
+    - [x] Creation (Questionnaire)
+    - [x] Rendering (Markdown)
+    - [x] Updating (Diff view with AI-proposed changes)
+    - [x] End-to-End Encryption (E2EE)
 - [x] **Chat Interface:**
-    - [x] Text input.
-    - [x] Voice input/output (Web Speech API).
-    - [x] Bot selection.
+    - [x] Text input with Markdown rendering
+    - [x] Voice input (Web Speech API)
+    - [x] Voice output (TTS - Server + Local)
+    - [x] Bot selection with personality descriptions
+- [x] **AI Coaches:**
+    - [x] Nobody (GPS-Framework, efficient problem-solving)
+    - [x] Max (Ambitious, goal-oriented)
+    - [x] Ava (Empathetic, supportive)
+    - [x] Kenji (Mindful, Zen-inspired)
+    - [x] Chloe (CBT-focused)
+    - [x] Rob (Positive Intelligence)
+    - [x] G-Interviewer (Reflection interviews)
 - [x] **Data Privacy:**
-    - [x] Guest Mode (Local only).
-    - [x] E2EE for Registered Users.
-- [x] **Gamification:**
-    - [x] XP / Levels.
-    - [x] Achievements system.
-- [x] **Integrations:**
-    - [x] Calendar (ICS export).
-    - [x] Google Gemini API.
+    - [x] Guest Mode (Local only, no server storage)
+    - [x] E2EE for Registered Users
+    - [x] GDPR/DSGVO compliant
+
+## Personality & Adaptive Coaching
+- [x] **Personality Survey:**
+    - [x] Filter Questions (Worry/Control)
+    - [x] Riemann-Thomann Model
+    - [x] Big Five (OCEAN) Model
+    - [x] Spiral Dynamics (24 Likert questions)
+    - [x] PDF Export with professional formatting
+- [x] **Coaching Modes:**
+    - [x] DPC (Dynamic Prompt Composition) - Profile-based prompts
+    - [x] DPFL (Dynamic Prompt & Feedback Learning) - Adaptive learning
+    - [x] Comfort Check after sessions
+    - [x] Profile Refinement suggestions
+- [x] **Narrative Profile (Signature):**
+    - [x] AI-generated personality summary
+    - [x] Superpowers & Blindspots
+    - [x] Growth opportunities
+    - [x] Auto-generated after survey
+
+## Voice & TTS
+- [x] **Speech Recognition:**
+    - [x] Web Speech API integration
+    - [x] Continuous mode with interim results
+    - [x] Multi-platform support (Chrome, Safari, Mobile)
+- [x] **Text-to-Speech:**
+    - [x] Server TTS (Piper voices: Thorsten DE, Amy/Ryan EN)
+    - [x] Local TTS (Web Speech API fallback)
+    - [x] Voice Selection Modal
+    - [x] Automatic voice selection based on bot/language
+    - [x] iOS forced to local TTS (autoplay restrictions)
+- [x] **Voice Mode UX:**
+    - [x] Loading spinner during AI response
+    - [x] Play/Pause/Repeat controls
+    - [x] Wake lock to prevent screen timeout
+
+## Gamification
+- [x] **XP System:** Points for sessions, updates, streaks
+- [x] **Levels:** Progress visualization
+- [x] **Achievements:** Badges for milestones
+- [x] **Streaks:** Daily conversation tracking
+
+## Integrations
+- [x] **Calendar (ICS export):** Actionable next steps as events
+- [x] **Google Gemini API:** AI provider (proxied through backend)
+- [x] **Mailjet:** Transactional emails
+- [x] **PayPal:** Donations/Payments
+
+## UI/UX
+- [x] **Seasonal Themes:**
+    - [x] Spring: Falling blossoms
+    - [x] Summer: Butterflies
+    - [x] Autumn: Falling leaves
+    - [x] Winter: Snowflakes (Dec 1 - Jan 6)
+- [x] **Dark/Light Mode:** User preference with auto-detection
+- [x] **PWA:** Installable, offline-capable
+- [x] **Multi-language:** German and English
+
+## Infrastructure
+- [x] **Containerization:** Podman with compose
+- [x] **Dual Environment:** Staging + Production
+- [x] **TTS Container:** Separate Piper service
+- [x] **Nginx Reverse Proxy:** Auto-configured per environment
+- [x] **CI/CD:** Deployment scripts with version management
 
 ## Pending / Roadmap
-- [ ] **Testing:** Comprehensive unit/integration tests (Jest config exists, extent of coverage unknown).
-- [ ] **Performance Tuning:** Optimizing large context file handling.
-- [ ] **Mobile Optimization:** PWA features (manifest exists, `validate-pwa.sh` exists) - verify mobile UX.
-- [ ] **Accessibility:** Audit for WCAG compliance.
+- [ ] **Android Voice Fix:** Investigate duplication issue
+- [ ] **Testing:** Comprehensive unit/integration tests
+- [ ] **Performance:** Large context file optimization
+- [ ] **Accessibility:** WCAG compliance audit
+- [ ] **Capacitor Integration:** Native iOS audio control
 
 ## Known Issues
-- *None currently documented in this session.* (Refer to `INCIDENT-REPORTS/` for historical context).
-
+- **Android Voice Duplication:** Speech recognition shows repeated words on some Android devices. AI filters duplicates correctly, but UX is affected. Under investigation.
+- **Safari PDF:** Client-side PDF generation with `html2pdf.js` has Safari compatibility issues. Warning displayed to users.

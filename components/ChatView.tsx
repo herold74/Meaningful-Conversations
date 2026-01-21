@@ -254,6 +254,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // The onstart/onend events are unreliable in some browsers (especially Chrome)
   const speechPollingRef = useRef<number | null>(null);
   
+  // Lock to prevent concurrent speak() calls (prevents overlapping TTS)
+  const isSpeakingRef = useRef<boolean>(false);
+  
   // Web Audio API context for iOS audio session management
   // Once resumed during user interaction, allows audio playback without further interaction
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -679,10 +682,23 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, []);
 
-  const speak = useCallback(async (text: string, isMeditation: boolean = false) => {
+  const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false) => {
     if (!isTtsEnabled || !text.trim()) {
       return;
     }
+    
+    // Prevent concurrent speak() calls (unless it's a retry from the same call)
+    // This prevents overlapping TTS when user sends messages quickly
+    if (isSpeakingRef.current && !isRetry) {
+      console.log('[TTS] Skipping speak() - already speaking');
+      // Cancel current speech and start new one
+      window.speechSynthesis?.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    }
+    isSpeakingRef.current = true;
     
     // Set loading state IMMEDIATELY and force React to render before continuing
     // This prevents React from batching the true->false updates together
@@ -750,6 +766,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         });
         audio.addEventListener('ended', () => {
           setTtsStatus('idle');
+          isSpeakingRef.current = false; // Release lock when audio ends
           // Cleanup after playback to reset iOS audio session
           if (currentAudioUrlRef.current === audioUrl) {
             URL.revokeObjectURL(audioUrl);
@@ -761,19 +778,21 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           console.error('[TTS] Audio playback error');
           setTtsStatus('idle');
           setIsLoadingAudio(false);
+          isSpeakingRef.current = false; // Release lock on error
         });
         
         audio.src = audioUrl;
         await audio.play();
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
-        setIsLoadingAudio(false);
+        // DON'T set isLoadingAudio to false here - keep spinner visible during fallback
         setTtsStatus('idle');
         
         // Fallback to local mode but don't save preference
         // This allows retry on next session if server comes back
         setTtsMode('local');
-        setTimeout(() => speak(text, isMeditation), 100);
+        // Pass isRetry=true to bypass the speaking lock
+        setTimeout(() => speak(text, isMeditation, true), 100);
       }
       return;
     }
@@ -781,6 +800,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // Local TTS mode (Web Speech API)
     if (!window.speechSynthesis) {
       setIsLoadingAudio(false);
+      isSpeakingRef.current = false;
       return;
     }
     
@@ -817,6 +837,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       } else if (!synth.speaking && !synth.pending && hasStartedSpeaking) {
         // Speech has ended
         setTtsStatus('idle');
+        isSpeakingRef.current = false; // Release lock when speech ends
         if (speechPollingRef.current) {
           clearInterval(speechPollingRef.current);
           speechPollingRef.current = null;
@@ -838,6 +859,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     utterance.onend = () => {
       setTtsStatus('idle');
+      isSpeakingRef.current = false; // Release lock when speech ends
       if (speechPollingRef.current) {
         clearInterval(speechPollingRef.current);
         speechPollingRef.current = null;
@@ -846,6 +868,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     utterance.onerror = () => {
       setTtsStatus('idle');
       setIsLoadingAudio(false);
+      isSpeakingRef.current = false; // Release lock on error
       if (speechPollingRef.current) {
         clearInterval(speechPollingRef.current);
         speechPollingRef.current = null;
@@ -1223,14 +1246,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         const normalizedFinal = final_transcript.trim().toLowerCase();
         const normalizedInterim = interim_transcript.trim().toLowerCase();
         
-        // #region agent log
-        console.log('[SR-DEBUG] startsWith check', {
-          normalizedFinal,
-          normalizedInterim,
-          startsWithResult: normalizedInterim.startsWith(normalizedFinal)
-        });
-        // #endregion
-        
         if (normalizedInterim.startsWith(normalizedFinal)) {
           // Cumulative platform: interim contains everything, use it directly
           combined_transcript = interim_transcript;
@@ -1521,6 +1536,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           // to avoid crackling/popping sounds when TTS starts
           const audioSessionDelay = isIOS ? 300 : 100;
           if (currentInput.trim()) {
+              // Set loading state IMMEDIATELY so spinner appears without delay
+              setIsLoading(true);
               setTimeout(async () => {
                   await sendMessage(currentInput);
                   setInput('');
@@ -1898,7 +1915,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                             } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
                             aria-label={isListening ? 'Stop and send' : 'Start recording'}
                         >
-                            {isLoading ? <Spinner /> : isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
+                            {isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
                         <div className="mt-4 h-14 text-lg text-content-secondary flex items-center justify-center px-4 w-full max-w-md">
                             <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
@@ -1909,15 +1926,16 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
 
             {/* Bottom third: Control Buttons - Doppelter Abstand nach oben */}
             <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-4 min-h-[8rem]">
-                {isLoadingAudio ? (
+                {(isLoading || isLoadingAudio) ? (
                     <div className="flex flex-col items-center gap-3">
                         <div className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary shadow">
-                            <svg className="animate-spin w-8 h-8 text-content-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <Spinner />
                         </div>
-                        <p className="text-sm text-content-secondary">{t('chat_loading_audio') || 'Loading audio...'}</p>
+                        <p className="text-sm text-content-secondary">
+                            {isLoading 
+                                ? (t('chat_generating_response') || 'Antwort wird generiert...') 
+                                : (t('chat_loading_audio') || 'Audio wird geladen...')}
+                        </p>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center gap-6">

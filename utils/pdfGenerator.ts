@@ -2,10 +2,12 @@ import html2pdf from 'html2pdf.js';
 
 /**
  * Generates a PDF from HTML content and triggers download
+ * Uses html2pdf.js for consistent quality across all browsers
  * @param htmlContent - The HTML string to convert to PDF
  * @param filename - The desired filename (without extension)
  */
 export async function generatePDF(htmlContent: string, filename: string): Promise<void> {
+  // Use html2pdf.js for all browsers
   const options = {
     margin: [10, 10, 10, 10] as [number, number, number, number],
     filename: `${filename}.pdf`,
@@ -15,7 +17,7 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
       useCORS: true,
       logging: false,
       letterRendering: true,
-      foreignObjectRendering: false // Disable foreignObject which can cause Safari issues
+      foreignObjectRendering: false
     },
     jsPDF: { 
       unit: 'mm' as const, 
