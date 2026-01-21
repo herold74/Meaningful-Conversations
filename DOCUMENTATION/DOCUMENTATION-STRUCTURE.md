@@ -1,194 +1,130 @@
-# 📚 Documentation Structure
+# Documentation Structure
 
 ## Overview
 
-The project documentation is organized by deployment environment and purpose.
+The project documentation is organized by purpose and environment.
 
 ---
 
-## 📖 Core Documentation
+## Core Documentation
 
 ### Main README
+- **README.md** - Project overview, features, getting started
+- **README.de.md** - German version (in DOCUMENTATION/)
 
-1. **README.md**
-   - **Purpose:** Project overview and getting started
-   - **Content:** Features, tech stack, setup instructions
-   - **Audience:** Everyone new to the project
-
-### Google Cloud Run Deployment
-
-2. **DEPLOYMENT-QUICKSTART.md**
-   - **Purpose:** Google Cloud Run deployment guide
-   - **Content:** Staging and production deployment workflows
-   - **Audience:** Users deploying to Google Cloud
-
-### Alternative Server Deployment
-
-3. **README-ALTERNATIVE-SERVER.md**
-   - **Purpose:** Entry point for alternative server
-   - **Content:** Overview, architecture, quick commands
-   - **Audience:** Everyone starting with alternative server
-   - **Links to:** All alternative server guides
-
-4. **QUICK-START-ALTERNATIVE-SERVER.md**
-   - **Purpose:** Get alternative server running in 5 minutes
-   - **Content:** Step-by-step setup, common commands, troubleshooting
-   - **Audience:** Users who want to deploy quickly
-   - **Depth:** Practical, command-focused
-
-5. **ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md** ⭐
-   - **Purpose:** Comprehensive alternative server guide
-   - **Content:** 
-     - Dual environment (staging/production) architecture
-     - Complete deployment workflows
-     - Database management
-     - Data migration between environments
-     - Advanced troubleshooting
-     - Security best practices
-   - **Audience:** Users who need detailed information
-   - **Depth:** Complete reference guide
-
-### Infrastructure & Configuration
-
-6. **QUAY-REGISTRY-SETUP.md**
-   - **Purpose:** Container registry configuration
-   - **Content:** Using quay.myandi.de/gherold registry
-   - **Audience:** Alternative server users
-
-7. **QUAY-QUICKSTART.md**
-   - **Purpose:** Quick reference for Quay
-   - **Content:** Essential Quay commands
-   - **Audience:** Alternative server users
-
-8. **MARIADB-POD-CONFIGURATION.md**
-   - **Purpose:** Database and pod technical details
-   - **Content:** MariaDB operations, pod networking, dual environment setup
-   - **Audience:** Users managing databases
-
-9. **PODMAN-GUIDE.md**
-   - **Purpose:** Podman reference documentation
-   - **Content:** Podman commands, concepts, installation
-   - **Audience:** Users wanting to understand Podman
-
-### Comparison & Decision Making
-
-10. **DEPLOYMENT-COMPARISON.md**
-    - **Purpose:** Choose between Cloud Run and Alternative Server
-    - **Content:** Feature comparison, cost analysis, workflows
-    - **Audience:** Users deciding deployment strategy
-
-### Cross-Cutting Concerns
-
-11. **VERSION-MANAGEMENT.md**
-    - **Purpose:** How to update version numbers
-    - **Content:** Version update workflow, locations
-    - **Audience:** Everyone making releases
-
-12. **Data_Privacy.md**
-    - **Purpose:** Privacy policy and data handling
-    - **Content:** Privacy commitments, E2EE explanation
-    - **Audience:** Users and admins
-
-### Historical Reference & Migration
-
-13. **CHANGELOG-MARIADB-POD.md**
-    - **Purpose:** Documents PostgreSQL → MariaDB migration
-    - **Content:** What changed, migration guide
-    - **Audience:** Users upgrading from old setup (historical)
-
-14. **ENV-MIGRATION-GUIDE.md**
-    - **Purpose:** Migrate from `.env.alternative` to dual environments
-    - **Content:** Migration steps, command changes, verification
-    - **Audience:** Users upgrading from single to dual environment setup
-
-15. **DOCUMENTATION-CLEANUP-SUMMARY.md**
-    - **Purpose:** Recent documentation cleanup details
-    - **Content:** Files removed, updates made
-    - **Audience:** Reference for recent changes
+### Memory Bank (Active Development Context)
+Located in `/memory-bank/`:
+- **activeContext.md** - Current work focus, recent changes
+- **progress.md** - Feature status, roadmap
+- **techContext.md** - Technical details, deployment
+- **productContext.md** - Product vision, UX goals
+- **systemPatterns.md** - Architecture decisions
+- **projectbrief.md** - Project overview
 
 ---
 
-## 🎯 Reading Path by Use Case
+## DOCUMENTATION/ Folder
 
-### "I'm new to the project"
-1. README.md (project overview)
-2. DEPLOYMENT-COMPARISON.md (choose environment)
-3. Deploy to your chosen environment
+### Deployment & Infrastructure
+- **MANUALMODE-DUAL-ENVIRONMENT.md** - Dual staging/production setup
+- **QUICK-START-MANUALMODE-SERVER.md** - Quick deployment guide
+- **README-MANUALMODE-SERVER.md** - Server overview
+- **PODMAN-GUIDE.md** - Container engine reference
+- **MARIADB-POD-CONFIGURATION.md** - Database setup
+- **NGINX-REVERSE-PROXY-SETUP.md** - Nginx configuration
+- **NGINX-IP-ANONYMIZATION.md** - Privacy-compliant logging
 
-### "I want to deploy to Google Cloud Run"
-1. DEPLOYMENT-QUICKSTART.md
+### Registry & Images
+- **QUAY-REGISTRY-SETUP.md** - Container registry setup
+- **QUAY-QUICKSTART.md** - Quick registry commands
+
+### Version & Release
+- **VERSION-MANAGEMENT.md** - Version update workflow
+
+### Features
+- **TTS-FINAL-STATUS.md** - Text-to-Speech implementation
+- **TTS-HYBRID-README.md** - Hybrid TTS architecture
+- **TTS-LOCAL-DEVELOPMENT.md** - Local TTS setup
+- **WAKE-LOCK-VOICE-MODE.md** - Screen wake lock feature
+- **RAG-IMPLEMENTATION-GUIDE.md** - RAG feature (planned)
+
+### Compliance & Security
+- **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit
+- **DSGVO-COMPLIANCE-AUDIT.html/md** - German GDPR audit
+- **GOOGLE-CLOUD-DPA-COMPLIANCE.md** - Google DPA
+- **MAILJET-DPA-COMPLIANCE.md** - Mailjet DPA
+
+### Payment
+- **PAYPAL-SETUP-GUIDE.md** - PayPal integration
+
+### API & Costs
+- **GEMINI-API-COST-TRACKING-IMPLEMENTATION.md** - API usage tracking
+
+### Migration & History
+- **CHANGELOG-MARIADB-POD.md** - PostgreSQL to MariaDB migration
+- **SERVER-MIGRATION-GUIDE.md** - Server migration docs
+- **QUICK-MIGRATION.md** - Quick migration steps
+- **COMPLETE-CLEANUP-SUMMARY.md** - Documentation cleanup history
+- **DOCUMENTATION-CLEANUP-SUMMARY.md** - Previous cleanup details
+- **DEVELOPMENT-HISTORY.md** - Feature development timeline
+- **FEATURE-DEVELOPMENT-TIMELINE.md** - Detailed timeline
+
+### Goals & Planning
+- **GOAL-MANAGEMENT.md** - Goal tracking feature
+
+---
+
+## Root Level Documentation
+
+### Active/Current
+- **README.md** - Main project readme
+- **Data_Privacy.md** - Privacy policy
+- **USER-JOURNEY.md** - User flow documentation
+- **MONITORING-GUIDE.md** - System monitoring
+
+### Feature Implementation (Historical)
+- **PERSONALITY-PROFILE-IMPLEMENTATION.md** - Personality feature docs
+- **PDF-IMPLEMENTATION.md** - PDF export docs
+
+### Incident Reports
+- **INCIDENT-REPORT-2025-12-15.md** - Recent incident
+- **INCIDENT-REPORTS/** - Historical incidents
+
+### Configuration
+- **SYSTEM-CONFIG.md** - System configuration
+
+---
+
+## Reading Paths
+
+### New to the Project
+1. README.md (overview)
+2. memory-bank/productContext.md (vision)
+3. memory-bank/techContext.md (technical setup)
+
+### Deploying
+1. QUICK-START-MANUALMODE-SERVER.md
 2. VERSION-MANAGEMENT.md
+3. MANUALMODE-DUAL-ENVIRONMENT.md
 
-### "I want to deploy to my own server"
-1. README-ALTERNATIVE-SERVER.md (overview)
-2. QUICK-START-ALTERNATIVE-SERVER.md (quick setup)
-3. QUAY-REGISTRY-SETUP.md (registry setup)
-4. ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md (complete guide)
+### Understanding Features
+1. memory-bank/progress.md (feature list)
+2. TTS-FINAL-STATUS.md (voice features)
+3. PERSONALITY-PROFILE-IMPLEMENTATION.md (personality system)
 
-### "I want to understand everything about alternative server"
-1. README-ALTERNATIVE-SERVER.md
-2. ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md (complete guide)
-3. MARIADB-POD-CONFIGURATION.md (database details)
-4. PODMAN-GUIDE.md (container engine reference)
-
-### "I need to manage databases on alternative server"
-1. MARIADB-POD-CONFIGURATION.md
-2. ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md (migration sections)
-
-### "Should I use Alternative Server or Cloud Run?"
-1. DEPLOYMENT-COMPARISON.md
-
-### "I'm upgrading from old PostgreSQL setup"
-1. CHANGELOG-MARIADB-POD.md (historical)
-
-### "I'm upgrading from .env.alternative to dual environments"
-1. ENV-MIGRATION-GUIDE.md
-2. QUICK-START-ALTERNATIVE-SERVER.md
+### Debugging/Maintaining
+1. memory-bank/activeContext.md (current state)
+2. INCIDENT-REPORTS/ (past issues)
+3. MONITORING-GUIDE.md
 
 ---
 
-## 📊 Documentation Categories
+## Current Setup
 
-### By Environment
-- **Google Cloud Run**: DEPLOYMENT-QUICKSTART.md
-- **Alternative Server**: 6 focused guides (README, QUICK-START, DUAL-ENVIRONMENT, MARIADB-POD, QUAY-REGISTRY, QUAY-QUICKSTART)
-- **Universal**: VERSION-MANAGEMENT.md, DEPLOYMENT-COMPARISON.md
+- **Server:** Hetzner VPS (Manualmode Server)
+- **Environments:** Staging + Production
+- **Container Engine:** Podman
+- **Database:** MariaDB 11.2
+- **Registry:** quay.myandi.de/gherold
 
-### By Purpose
-- **Getting Started**: README.md, README-ALTERNATIVE-SERVER.md, QUICK-START-ALTERNATIVE-SERVER.md
-- **Complete Guides**: DEPLOYMENT-QUICKSTART.md, ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md
-- **Technical Deep Dives**: MARIADB-POD-CONFIGURATION.md, PODMAN-GUIDE.md
-- **Configuration**: QUAY-REGISTRY-SETUP.md, VERSION-MANAGEMENT.md
-- **Decision Support**: DEPLOYMENT-COMPARISON.md
-
----
-
-## ✅ Current Setup
-
-The documentation reflects the **current production setup**:
-- **Google Cloud Run**: Staging + Production environments
-- **Alternative Server**: Staging + Production pods with MariaDB
-- **Container Engine**: Podman (not Docker)
-- **Database**: MariaDB 11.2 (not PostgreSQL)
-- **Registry**: quay.myandi.de/gherold (for alternative server)
-
-All obsolete documentation has been removed.
-
----
-
-## 🎉 Recommendations
-
-### New to the Project?
-**Start here:** README.md → DEPLOYMENT-COMPARISON.md
-
-### Deploying to Google Cloud Run?
-**Go to:** DEPLOYMENT-QUICKSTART.md
-
-### Deploying to Your Own Server?
-**Start here:** README-ALTERNATIVE-SERVER.md → then choose:
-- **Fast path:** QUICK-START-ALTERNATIVE-SERVER.md
-- **Complete path:** ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md
-
-### Managing an Existing Deployment?
-- **Cloud Run:** VERSION-MANAGEMENT.md
-- **Alternative Server:** MARIADB-POD-CONFIGURATION.md + ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md
+**Last Updated:** January 2026

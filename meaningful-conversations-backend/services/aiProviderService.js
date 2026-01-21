@@ -66,6 +66,7 @@ async function getActiveProvider() {
 
 /**
  * Get model mapping configuration
+ * Format: { google: { chat: "...", analysis: "..." }, mistral: { chat: "...", analysis: "..." } }
  * @returns {Promise<object>} Model mapping object
  */
 async function getModelMapping() {
@@ -81,40 +82,80 @@ async function getModelMapping() {
     if (config?.value) {
       cachedModelMapping = JSON.parse(config.value);
     } else {
-      // Default mapping
+      // Default mapping for both providers
       cachedModelMapping = {
-        flash: 'mistral-small-latest',
-        pro: 'mistral-large-latest'
+        google: {
+          chat: 'gemini-2.5-flash',
+          analysis: 'gemini-2.5-pro'
+        },
+        mistral: {
+          chat: 'mistral-medium-latest',
+          analysis: 'mistral-large-latest'
+        }
       };
     }
     
     return cachedModelMapping;
   } catch (error) {
     console.error('Error fetching model mapping:', error);
+    // Return default on error
     return {
-      flash: 'mistral-small-latest',
-      pro: 'mistral-large-latest'
+      google: {
+        chat: 'gemini-2.5-flash',
+        analysis: 'gemini-2.5-pro'
+      },
+      mistral: {
+        chat: 'mistral-medium-latest',
+        analysis: 'mistral-large-latest'
+      }
     };
   }
 }
 
 /**
- * Map Google model name to Mistral equivalent
- * @param {string} googleModel - Google model name (e.g., 'gemini-2.5-flash')
- * @returns {Promise<string>} Mistral model name
+ * Get the configured model for a specific provider and context
+ * @param {string} provider - 'google' or 'mistral'
+ * @param {string} context - 'chat' or 'analysis'
+ * @returns {Promise<string>} Configured model name
  */
-async function mapToMistralModel(googleModel) {
+async function getModelForContext(provider, context = 'chat') {
   const mapping = await getModelMapping();
   
-  // Extract key from Google model name
-  if (googleModel.includes('flash')) {
-    return mapping.flash || 'mistral-small-latest';
-  } else if (googleModel.includes('pro')) {
-    return mapping.pro || 'mistral-large-latest';
+  // New provider-based format
+  if (mapping.google && mapping.mistral) {
+    if (provider === 'google') {
+      return mapping.google[context] || mapping.google.chat || 'gemini-2.5-flash';
+    } else if (provider === 'mistral') {
+      return mapping.mistral[context] || mapping.mistral.chat || 'mistral-medium-latest';
+    }
   }
   
-  // Default to small for unknown models
-  return mapping.flash || 'mistral-small-latest';
+  // Legacy compatibility: Simple chat/analysis format (assumed Mistral)
+  if (typeof mapping.chat === 'string' && typeof mapping.analysis === 'string') {
+    if (provider === 'mistral') {
+      return mapping[context] || mapping.chat || 'mistral-medium-latest';
+    } else {
+      // For Google, use defaults if not configured
+      return context === 'analysis' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+    }
+  }
+  
+  // Legacy compatibility: Old nested format
+  if (mapping.chat && mapping.analysis && typeof mapping.chat === 'object') {
+    if (provider === 'mistral') {
+      const contextMapping = mapping[context] || mapping.chat;
+      return contextMapping.standard || contextMapping.pro || 'mistral-medium-latest';
+    } else {
+      return context === 'analysis' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+    }
+  }
+  
+  // Ultimate fallback
+  if (provider === 'google') {
+    return context === 'analysis' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+  } else {
+    return context === 'analysis' ? 'mistral-large-latest' : 'mistral-medium-latest';
+  }
 }
 
 /**
@@ -124,18 +165,19 @@ async function mapToMistralModel(googleModel) {
  * @param {string|array} params.contents - Input contents
  * @param {object} params.config - Generation config (temperature, systemInstruction, etc.)
  * @param {boolean} params.skipFallback - If true, don't try fallback provider on error
+ * @param {string} params.context - Context for model selection: 'chat' or 'analysis' (default: 'chat')
  * @returns {Promise<object>} Response object with { text, usage, model, provider }
  */
-async function generateContent({ model, contents, config, skipFallback = false }) {
+async function generateContent({ model, contents, config, skipFallback = false, context = 'chat' }) {
   const provider = await getActiveProvider();
   
-  console.log(`🤖 Using AI provider: ${provider} for model: ${model}`);
+  console.log(`🤖 Using AI provider: ${provider} for model: ${model} (context: ${context})`);
   
   try {
     if (provider === 'mistral') {
-      return await generateWithMistral({ model, contents, config });
+      return await generateWithMistral({ model, contents, config, context });
     } else {
-      return await generateWithGoogle({ model, contents, config });
+      return await generateWithGoogle({ model, contents, config, context });
     }
   } catch (error) {
     console.error(`❌ Error with ${provider} provider:`, error.message);
@@ -147,9 +189,9 @@ async function generateContent({ model, contents, config, skipFallback = false }
       
       try {
         if (fallbackProvider === 'mistral') {
-          return await generateWithMistral({ model, contents, config });
+          return await generateWithMistral({ model, contents, config, context });
         } else {
-          return await generateWithGoogle({ model, contents, config });
+          return await generateWithGoogle({ model, contents, config, context });
         }
       } catch (fallbackError) {
         console.error(`❌ Fallback to ${fallbackProvider} also failed:`, fallbackError.message);
@@ -164,11 +206,16 @@ async function generateContent({ model, contents, config, skipFallback = false }
 /**
  * Generate content using Google Gemini
  */
-async function generateWithGoogle({ model, contents, config }) {
+async function generateWithGoogle({ model, contents, config, context = 'chat' }) {
   const client = await getGoogleClient();
   
+  // Get the configured model for this context
+  const configuredModel = await getModelForContext('google', context);
+  
+  console.log(`  → Using Google model: ${configuredModel} (requested: ${model}, context: ${context})`);
+  
   const response = await client.models.generateContent({
-    model,
+    model: configuredModel,
     contents,
     config
   });
@@ -180,7 +227,7 @@ async function generateWithGoogle({ model, contents, config }) {
       outputTokens: response.usageMetadata.candidatesTokenCount || 0,
       totalTokens: response.usageMetadata.totalTokenCount || 0,
     } : null,
-    model,
+    model: configuredModel,
     provider: 'google',
     rawResponse: response
   };
@@ -189,11 +236,13 @@ async function generateWithGoogle({ model, contents, config }) {
 /**
  * Generate content using Mistral AI
  */
-async function generateWithMistral({ model, contents, config }) {
+async function generateWithMistral({ model, contents, config, context = 'chat' }) {
   const client = getMistralClient();
   
-  // Map Google model to Mistral model
-  const mistralModel = await mapToMistralModel(model);
+  // Get the configured model for this context
+  const mistralModel = await getModelForContext('mistral', context);
+  
+  console.log(`  → Using Mistral model: ${mistralModel} (requested: ${model}, context: ${context})`);
   
   // Convert Google format to Mistral format
   const messages = convertToMistralFormat(contents, config);
@@ -386,6 +435,15 @@ async function checkProvidersHealth() {
   return results;
 }
 
+/**
+ * Clear the model mapping cache
+ * Called when model mapping is updated via admin interface
+ */
+function clearModelMappingCache() {
+  cachedModelMapping = null;
+  console.log('✓ Model mapping cache cleared');
+}
+
 module.exports = {
   getActiveProvider,
   generateContent,
@@ -393,5 +451,6 @@ module.exports = {
   getProviderStats,
   checkProvidersHealth,
   mapToMistralModel,
+  clearModelMappingCache,
 };
 

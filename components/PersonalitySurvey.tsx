@@ -77,6 +77,9 @@ export interface SurveyResult {
   
   // Generiertes Narrativ-Profil (optional, wird nach der Umfrage generiert)
   narrativeProfile?: NarrativeProfile;
+  
+  // Session count for DPFL refinements (passed from PersonalityProfileView)
+  sessionCount?: number;
 }
 
 // Struktur für das generierte Narrativ-Profil
@@ -1051,6 +1054,10 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const [step, setStep] = useState(0);
   const [selectedLens, setSelectedLens] = useState<LensType | null>(null);
   
+  // State for overwrite warning modal (shows when repeating an already-completed test with DPFL refinements)
+  const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
+  const [pendingLensSelection, setPendingLensSelection] = useState<LensType | null>(null);
+  
   // Initialize result with existing profile data or empty
   const [result, setResult] = useState<Partial<SurveyResult>>(() => {
     console.log('[PersonalitySurvey] Initializing with existingProfile:', existingProfile);
@@ -1109,6 +1116,22 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const currentStepId = flow[step] || 'DONE';
 
   const handleLensSelect = (lens: LensType) => {
+    // Check if this lens is already completed AND we have DPFL refinements
+    const isLensAlreadyCompleted = result.completedLenses?.includes(lens);
+    const hasDPFLRefinements = existingProfile?.sessionCount && existingProfile.sessionCount > 0 && existingProfile.adaptationMode === 'adaptive';
+    
+    if (isLensAlreadyCompleted && hasDPFLRefinements) {
+      // Show warning before overwriting
+      setPendingLensSelection(lens);
+      setShowOverwriteWarning(true);
+      return;
+    }
+    
+    // No warning needed - proceed with lens selection
+    proceedWithLensSelection(lens);
+  };
+  
+  const proceedWithLensSelection = (lens: LensType) => {
     // Capture narrative state at this moment - this determines if we show narrative questions
     // The flow should NOT change mid-survey when narratives are filled in
     const hasNarrativesNow = Boolean(result.narratives?.flowStory && result.narratives?.frictionStory);
@@ -1347,6 +1370,85 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
         </div>
       )}
       {content}
+      
+      {/* Overwrite Warning Modal - shows when repeating an already-completed test with DPFL refinements */}
+      {showOverwriteWarning && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
+          aria-modal="true"
+          role="dialog"
+          onClick={() => {
+            setShowOverwriteWarning(false);
+            setPendingLensSelection(null);
+          }}
+        >
+          <div 
+            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-red-400 dark:border-red-500/50 shadow-xl rounded-lg mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 uppercase flex items-center gap-2">
+                ⚠️ {t('profile_overwrite_warning_title') || 'Achtung: Neubeginn'}
+              </h2>
+              <button 
+                onClick={() => {
+                  setShowOverwriteWarning(false);
+                  setPendingLensSelection(null);
+                }} 
+                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                aria-label={t('modal_close') || 'Schließen'}
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+                <p className="text-red-800 dark:text-red-300 font-medium mb-2">
+                  {t('profile_overwrite_sessions', { count: existingProfile?.sessionCount || 0 }) || 
+                    `📊 Dein Profil wurde durch ${existingProfile?.sessionCount || 0} Coaching-Sessions verfeinert.`}
+                </p>
+                <p className="text-red-700 dark:text-red-400 text-sm">
+                  {t('profile_overwrite_loss_warning') || 
+                    'Diese individuellen Anpassungen basieren auf deinem echten Verhalten und werden bei der Erstellung einer neuen Persönlichkeits-Signatur berücksichtigt.'}
+                </p>
+              </div>
+              
+              <p className="text-gray-600 dark:text-gray-400">
+                {t('profile_overwrite_warning_question') || 'Ein neuer Test bedeutet einen NEUBEGINN. Das bisherige Profil kann nachträglich nicht wieder hergestellt werden. Bist du sicher, oder möchtest du vorher eine neue Signatur erstellen?'}
+              </p>
+            </div>
+            
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button 
+                onClick={() => {
+                  setShowOverwriteWarning(false);
+                  setPendingLensSelection(null);
+                  if (onCancel) onCancel(); // Go back to profile view
+                }} 
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {t('profile_overwrite_cancel') || 'Zurück zur Signatur'}
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowOverwriteWarning(false);
+                  if (pendingLensSelection) {
+                    proceedWithLensSelection(pendingLensSelection);
+                  }
+                  setPendingLensSelection(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium"
+              >
+                {t('profile_overwrite_confirm') || 'Ja, Neubeginn starten'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
