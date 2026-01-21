@@ -19,6 +19,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const prisma = require('./prismaClient.js');
 const { initCleanup: initGuestLimitCleanup } = require('./services/guestLimitTracker');
+const { ensureDefaultConfig } = require('./services/initService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -176,6 +177,9 @@ async function seedAdminUser() {
 async function startServer() {
     try {
         await runMigrationsAndSeed();
+        
+        // Ensure configuration data is up-to-date
+        await ensureDefaultConfig();
 
         // --- Express App Configuration ---
         const allowedOrigins = [
