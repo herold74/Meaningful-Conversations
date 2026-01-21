@@ -103,6 +103,17 @@ interface Projections {
 
 type TimeRange = '7d' | '30d' | '90d' | 'custom';
 
+interface ModelMapping {
+    google: {
+        chat: string;
+        analysis: string;
+    };
+    mistral: {
+        chat: string;
+        analysis: string;
+    };
+}
+
 export const ApiUsageView: React.FC = () => {
     const { t } = useLocalization();
     const [loading, setLoading] = useState(true);
@@ -122,11 +133,11 @@ export const ApiUsageView: React.FC = () => {
     const [switchingProvider, setSwitchingProvider] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [targetProvider, setTargetProvider] = useState<'google' | 'mistral'>('google');
-
-    useEffect(() => {
-        fetchUsageData();
-        fetchProviderConfig();
-    }, [timeRange, startDate, endDate]);
+    
+    // Model Mapping Configuration
+    const [modelMapping, setModelMapping] = useState<ModelMapping | null>(null);
+    const [loadingMapping, setLoadingMapping] = useState(false);
+    const [savingMapping, setSavingMapping] = useState(false);
     
     const fetchProviderConfig = async () => {
         setLoadingProvider(true);
@@ -157,6 +168,27 @@ export const ApiUsageView: React.FC = () => {
             alert(`Failed to switch provider: ${err.message || 'Unknown error'}`);
         } finally {
             setSwitchingProvider(false);
+        }
+    };
+    
+    const saveModelMapping = async () => {
+        if (!modelMapping) return;
+        
+        setSavingMapping(true);
+        try {
+            await apiFetch('/ai-model-mapping', {
+                method: 'PUT',
+                body: JSON.stringify({ mapping: modelMapping })
+            });
+            alert('Model mapping updated successfully!');
+            // Refresh to get updated metadata
+            const data = await apiFetch('/ai-model-mapping');
+            setModelMapping(data.mapping);
+        } catch (err: any) {
+            console.error('Failed to save model mapping:', err);
+            alert(`Failed to save model mapping: ${err.message || 'Unknown error'}`);
+        } finally {
+            setSavingMapping(false);
         }
     };
 
@@ -248,6 +280,26 @@ export const ApiUsageView: React.FC = () => {
             setDeletingFailed(false);
         }
     };
+
+    useEffect(() => {
+        const loadModelMapping = async () => {
+            setLoadingMapping(true);
+            try {
+                const data = await apiFetch('/ai-model-mapping');
+                setModelMapping(data.mapping);
+            } catch (err: any) {
+                console.error('Failed to fetch model mapping:', err);
+                // Silently fail - admin panel should still render
+                setModelMapping(null);
+            } finally {
+                setLoadingMapping(false);
+            }
+        };
+        
+        fetchUsageData();
+        fetchProviderConfig();
+        loadModelMapping();
+    }, [timeRange, startDate, endDate]);
 
     if (loading) {
         return (
@@ -388,6 +440,153 @@ export const ApiUsageView: React.FC = () => {
                                 </button>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Model Mapping Configuration Panel */}
+            {modelMapping && modelMapping.google && modelMapping.mistral && (
+                <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
+                    <div className="mb-6">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <ZapIcon className="w-6 h-6 text-purple-500" />
+                            AI Model Selection
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Configure which AI models to use for Chat conversations and Session Analysis for each provider
+                        </p>
+                    </div>
+                    
+                    {/* Google Gemini Models */}
+                    <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-blue-300 dark:border-blue-700">
+                        <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                            <span className="text-blue-500">🔵</span>
+                            Google Gemini Models
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Google Chat Model */}
+                            <div>
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <ActivityIcon className="w-4 h-4 text-blue-500" />
+                                        Chat Model
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        For conversations
+                                    </span>
+                                </label>
+                                <select
+                                    value={modelMapping.google.chat}
+                                    onChange={(e) => setModelMapping({
+                                        ...modelMapping,
+                                        google: { ...modelMapping.google, chat: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Free/Experimental)</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Cheap)</option>
+                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Balanced)</option>
+                                    <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview - Fast)</option>
+                                    <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview - Best)</option>
+                                </select>
+                            </div>
+                            
+                            {/* Google Analysis Model */}
+                            <div>
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <TrendingUpIcon className="w-4 h-4 text-blue-500" />
+                                        Analysis Model
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        For session analysis
+                                    </span>
+                                </label>
+                                <select
+                                    value={modelMapping.google.analysis}
+                                    onChange={(e) => setModelMapping({
+                                        ...modelMapping,
+                                        google: { ...modelMapping.google, analysis: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Free/Experimental)</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Cheap)</option>
+                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Balanced)</option>
+                                    <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview - Fast)</option>
+                                    <option value="gemini-3-pro-preview">Gemini 3 Pro (Preview - Best)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Mistral Models */}
+                    <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-purple-300 dark:border-purple-700">
+                        <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                            <span className="text-purple-500">🟣</span>
+                            Mistral AI Models
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Mistral Chat Model */}
+                            <div>
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <ActivityIcon className="w-4 h-4 text-purple-500" />
+                                        Chat Model
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        For conversations
+                                    </span>
+                                </label>
+                                <select
+                                    value={modelMapping.mistral.chat}
+                                    onChange={(e) => setModelMapping({
+                                        ...modelMapping,
+                                        mistral: { ...modelMapping.mistral, chat: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    <option value="mistral-small-latest">Mistral Small (Fast & Cheap)</option>
+                                    <option value="mistral-medium-latest">Mistral Medium (Balanced)</option>
+                                    <option value="mistral-large-latest">Mistral Large (Best Quality)</option>
+                                </select>
+                            </div>
+                            
+                            {/* Mistral Analysis Model */}
+                            <div>
+                                <label className="block mb-2">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <TrendingUpIcon className="w-4 h-4 text-purple-500" />
+                                        Analysis Model
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        For session analysis
+                                    </span>
+                                </label>
+                                <select
+                                    value={modelMapping.mistral.analysis}
+                                    onChange={(e) => setModelMapping({
+                                        ...modelMapping,
+                                        mistral: { ...modelMapping.mistral, analysis: e.target.value }
+                                    })}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    <option value="mistral-small-latest">Mistral Small (Fast & Cheap)</option>
+                                    <option value="mistral-medium-latest">Mistral Medium (Balanced)</option>
+                                    <option value="mistral-large-latest">Mistral Large (Best Quality)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                        <button
+                            onClick={saveModelMapping}
+                            disabled={savingMapping}
+                            className="px-6 py-2 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                        >
+                            {savingMapping ? <Spinner /> : 'Save Model Configuration'}
+                        </button>
                     </div>
                 </div>
             )}

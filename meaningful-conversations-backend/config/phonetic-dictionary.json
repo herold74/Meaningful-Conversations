@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -183,6 +183,36 @@
           "phonetic": "winn-winns",
           "caseSensitive": true,
           "notes": "Plural kleingeschrieben"
+        },
+        {
+          "term": "Checken",
+          "phonetic": "Tschecken",
+          "caseSensitive": true,
+          "notes": "Englisches Verb eingedeutscht"
+        },
+        {
+          "term": "checken",
+          "phonetic": "tschecken",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Check-in",
+          "phonetic": "Tschek-in",
+          "caseSensitive": true,
+          "notes": "Check-in Begriff"
+        },
+        {
+          "term": "check-in",
+          "phonetic": "tschek-in",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Check-In",
+          "phonetic": "Tschek-In",
+          "caseSensitive": true,
+          "notes": "Alternative Schreibweise"
         }
       ]
     },

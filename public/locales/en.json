@@ -194,6 +194,7 @@
   "chat_resume_tts": "Resume voice",
   "chat_repeat_tts": "Repeat last message",
   "chat_loading_audio": "Loading audio...",
+  "chat_generating_response": "Generating response...",
   "chat_speaking": "Speaking...",
   "chat_voice_settings": "Voice Settings",
   "chat_send_message": "Send Message",

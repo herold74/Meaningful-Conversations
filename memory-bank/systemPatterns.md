@@ -44,8 +44,27 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 
 ## Data Flow
 1.  **Load:** Frontend fetches encrypted data (Registered) or reads file input (Guest).
-2.  **Decrypt:** Client decrypts data locally.
-3.  **Chat:** Client sends current context + user message to Backend.
-4.  **Process:** Backend augments prompt with context -> Sends to Gemini -> Returns response.
-5.  **Update:** Gemini proposes context changes -> Frontend diffs changes -> User approves -> Client encrypts new state -> Sends to Backend (or downloads file).
+2.  **Decrypt:** Client decrypts Life Context and Personality Profile locally.
+3.  **Chat:** Client sends context + personality profile + user message to Backend.
+4.  **Process:** Backend builds dynamic prompt (DPC/DPFL) -> Sends to Gemini -> Returns response.
+5.  **TTS:** Response is spoken via Server TTS (Piper) or Local TTS (Web Speech API fallback).
+6.  **Update:** AI proposes context changes -> Frontend shows diff -> User approves -> Client encrypts -> Backend stores.
+7.  **DPFL (Optional):** Session behavior logged -> Profile refinement suggestions -> User approves adjustments.
+
+## Key Technical Decisions (Recent)
+
+### 5. Hybrid TTS Architecture
+- **Decision:** Separate TTS container with Piper, plus local Web Speech API fallback.
+- **Reasoning:** High-quality server voices for desktop, reliable local fallback for mobile/iOS.
+- **Implementation:** TTS container on port 8082, frontend auto-detects availability.
+
+### 6. iOS Audio Handling
+- **Decision:** Force local TTS on iOS, play silent audio after mic use.
+- **Reasoning:** iOS autoplay restrictions prevent server TTS; "playAndRecord" mode degrades quality.
+- **Implementation:** Silent WAV playback, MediaSession management in ChatView.tsx.
+
+### 7. Personality Profile E2EE
+- **Decision:** Encrypt personality data with same key as Life Context.
+- **Reasoning:** Same privacy guarantees for sensitive psychological data.
+- **Implementation:** Client-side encryption in personalityEncryption.ts.
 

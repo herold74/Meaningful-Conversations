@@ -192,6 +192,7 @@
   "chat_resume_tts": "Sprache fortsetzen",
   "chat_repeat_tts": "Letzte Nachricht wiederholen",
   "chat_loading_audio": "Audio wird geladen...",
+  "chat_generating_response": "Antwort wird generiert...",
   "chat_speaking": "Spricht...",
   "chat_voice_settings": "Spracheinstellungen",
   "chat_send_message": "Nachricht senden",

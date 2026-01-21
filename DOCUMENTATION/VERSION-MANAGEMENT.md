@@ -1,33 +1,35 @@
 # Version Management Guide
 
-## 🎯 Quick Command
+## 🎯 Quick Commands
 
 ```bash
-make update-version
-```
+# Update version (new minor/major release)
+make update-version    # Enter: 1.7.9
 
-Enter the new version (e.g., `1.4.9`) and it will update **everywhere** automatically.
+# Increment build number only (same version)
+# Edit BUILD_NUMBER file manually, then update sw.js
+```
 
 ---
 
 ## 📍 Where Version is Updated
 
-When you run `make update-version`, it updates these **6 locations**:
+When you run `make update-version`, it updates these **5 locations**:
 
 ### 1️⃣ `package.json`
 ```json
 {
-  "version": "1.4.9"  ← Updated here
+  "version": "1.7.9"  ← Updated here
 }
 ```
-**Why:** Used by Docker build to tag images
+**Why:** Source of truth for version
 
 ---
 
 ### 2️⃣ `meaningful-conversations-backend/package.json`
 ```json
 {
-  "version": "1.4.9"  ← Updated here
+  "version": "1.7.9"  ← Updated here
 }
 ```
 **Why:** Backend version, Docker image tag
@@ -36,70 +38,111 @@ When you run `make update-version`, it updates these **6 locations**:
 
 ### 3️⃣ `public/sw.js` (Service Worker)
 ```javascript
-const CACHE_NAME = 'meaningful-conversations-cache-v1.4.9-pwa-fix';  ← Updated here
+const CACHE_NAME = 'meaningful-conversations-cache-v1.7.9-b1';  ← Updated here
 ```
 **Why:** Forces browsers to reload all cached files (critical for PWA updates!)
 
 ---
 
-### 4️⃣ `components/BurgerMenu.tsx`
-```tsx
-<p className="text-xs text-center text-content-subtle">
-    Version 1.4.9  ← Updated here
-</p>
-```
-**Why:** Displayed at bottom of menu so users see current version
-
----
-
-### 5️⃣ `components/AboutView.tsx`
+### 4️⃣ `components/AboutView.tsx`
 ```tsx
 <p className="text-sm text-content-subtle">
-    {t('about_version')} 1.4.9  ← Updated here
+    {t('about_version')} 1.7.9  ← Updated here
 </p>
 ```
 **Why:** Displayed on About page
 
 ---
 
-### 6️⃣ `metadata.json`
+### 5️⃣ `metadata.json`
 ```json
 {
-  "name": "Meaningful Conversations 1.4.9_stream"  ← Updated here
+  "name": "Meaningful Conversations 1.7.9_stream"  ← Updated here
 }
 ```
 **Why:** App metadata
 
 ---
 
-## 🔄 Typical Workflow
+### 6️⃣ `BUILD_NUMBER` (Reset to 1)
+```
+1
+```
+**Why:** New version starts with Build 1
 
-### When Making a Release:
+---
+
+## 🔢 Build Number System
+
+Each version has a **build number** that increments with each deployment:
+
+- **Version:** `1.7.9` (from `package.json`)
+- **Build:** `13` (from `BUILD_NUMBER` file)
+- **Display:** `Version 1.7.9 (Build 13)`
+- **SW Cache:** `v1.7.9-b13`
+
+### ⚠️ Important Rules
+
+1. **New Version = Build 1**
+   ```
+   1.7.8 (Build 39) → 1.7.9 (Build 1)  ✅
+   1.7.8 (Build 39) → 1.7.9 (Build 40) ❌
+   ```
+
+2. **Same Version = Increment Build**
+   ```
+   Before deploy: Edit BUILD_NUMBER (12 → 13)
+   Update sw.js:  v1.7.9-b12 → v1.7.9-b13
+   ```
+
+---
+
+## 🔄 Typical Workflows
+
+### New Version Release
 
 ```bash
-# 1. Make your code changes
-# 2. Update version everywhere
+# 1. Update version everywhere
 make update-version
-# Enter: 1.4.9
+# Enter: 1.7.9
 
-# 3. Check what was updated
+# 2. Check changes
 git diff
 
-# 4. Commit version changes
+# 3. Commit
 git add .
-git commit -m "Bump version to 1.4.9"
+git commit -m "Bump version to 1.7.9"
 
-# 5. Deploy to staging
-make deploy-staging
+# 4. Deploy to staging
+./deploy-manualmode.sh -e staging -c frontend
 
-# 6. Test staging thoroughly
+# 5. Test thoroughly
 
-# 7. Deploy to production
-make deploy-production
+# 6. Deploy to production
+./deploy-manualmode.sh -e production -c frontend
 
-# 8. Tag the release
-git tag v1.4.9
-git push origin v1.4.9
+# 7. Tag release
+git tag v1.7.9
+git push origin v1.7.9
+```
+
+### Bug Fix (Same Version)
+
+```bash
+# 1. Make code changes
+
+# 2. Increment build number
+echo "14" > BUILD_NUMBER
+
+# 3. Update service worker cache
+# In public/sw.js: v1.7.9-b13 → v1.7.9-b14
+
+# 4. Commit
+git add .
+git commit -m "Fix: description (Build 14)"
+
+# 5. Deploy
+./deploy-manualmode.sh -e staging -c frontend
 ```
 
 ---
@@ -107,11 +150,14 @@ git push origin v1.4.9
 ## 🔍 Check Current Version
 
 ```bash
-# Quick check
-make version
+# Frontend version
+cat package.json | grep '"version"'
 
-# Or manually
-cat package.json | grep version
+# Build number
+cat BUILD_NUMBER
+
+# Service worker cache
+head -1 public/sw.js
 ```
 
 ---
@@ -119,99 +165,78 @@ cat package.json | grep version
 ## ⚠️ Important Notes
 
 ### Service Worker Cache
-**Most Important:** Changing the version in `sw.js` creates a new cache name. This forces all users' browsers to:
+Changing the cache name in `sw.js` forces all users' browsers to:
 - Download fresh copies of all files
 - Clear old cached data
 - Install the new Service Worker
 
-Without this, users might keep using old cached versions of your app!
+Without this, users might keep using old cached versions!
 
 ### Docker Image Tags
 The version from `package.json` becomes your Docker image tag:
 ```
-europe-west6-docker.pkg.dev/.../frontend:1.4.9
-```
-
-This allows easy rollback:
-```bash
-# Rollback to previous version
-./deploy-auto.sh -e production -v 1.4.8
+quay.myandi.de/gherold/meaningful-conversations-frontend:1.7.9
 ```
 
 ### Semantic Versioning
 Follow [SemVer](https://semver.org/):
-- **Major (1.x.x)**: Breaking changes
-- **Minor (x.4.x)**: New features, backwards compatible
-- **Patch (x.x.9)**: Bug fixes only
-
-Examples:
-- `1.4.9` → `1.4.10`: Bug fix
-- `1.4.10` → `1.5.0`: New feature
-- `1.5.0` → `2.0.0`: Breaking change
+- **Major (2.x.x)**: Breaking changes
+- **Minor (x.8.x)**: New features, backwards compatible
+- **Patch (x.x.10)**: Bug fixes only
 
 ---
 
-## 🚨 Manual Update (Not Recommended)
-
-If you need to manually update version for some reason:
+## 🚨 Manual Update (If Needed)
 
 ```bash
-# Frontend
-sed -i '' 's/"version": "[^"]*"/"version": "1.4.9"/' package.json
+# Frontend package.json
+sed -i '' 's/"version": "[^"]*"/"version": "1.7.9"/' package.json
 
-# Backend
-sed -i '' 's/"version": "[^"]*"/"version": "1.4.9"/' meaningful-conversations-backend/package.json
+# Backend package.json
+sed -i '' 's/"version": "[^"]*"/"version": "1.7.9"/' meaningful-conversations-backend/package.json
 
-# Service Worker
-sed -i '' 's/cache-v[^-]*-pwa-fix/cache-v1.4.9-pwa-fix/' public/sw.js
+# Service Worker (with build number)
+sed -i '' 's/cache-v[^'"'"']*/cache-v1.7.9-b1/' public/sw.js
 
-# UI Components
-sed -i '' 's/Version [0-9.]*/Version 1.4.9/' components/BurgerMenu.tsx
-sed -i '' "s/about_version')} [0-9.]*/about_version')} 1.4.9/" components/AboutView.tsx
+# About page
+sed -i '' "s/about_version')} [0-9.]*/about_version')} 1.7.9/" components/AboutView.tsx
 
 # Metadata
-sed -i '' 's/Meaningful Conversations [0-9.]*/Meaningful Conversations 1.4.9/' metadata.json
+sed -i '' 's/Meaningful Conversations [0-9.]*/Meaningful Conversations 1.7.9/' metadata.json
+
+# Build number
+echo "1" > BUILD_NUMBER
 ```
 
 **But really, just use `make update-version` - it's safer!** ✅
 
 ---
 
-## 📊 Version History
-
-Keep track of your versions in git:
-
-```bash
-# See all version tags
-git tag
-
-# See what changed in a version
-git log v1.4.8..v1.4.9 --oneline
-
-# Compare two versions
-git diff v1.4.8 v1.4.9
-```
-
----
-
 ## ✅ Best Practices
 
-1. **Always update version before deploying major changes**
+1. **Always update version before major deployments**
 2. **Use semantic versioning** (Major.Minor.Patch)
-3. **Commit version changes separately** from feature changes
+3. **Increment build number for every staging deploy**
 4. **Tag releases in git** for easy rollback
-5. **Document changes** in a CHANGELOG.md (optional but recommended)
-6. **Test staging** before updating production version
-7. **Don't skip versions** - go 1.4.8 → 1.4.9, not 1.4.8 → 1.5.0 for a bug fix
+5. **Test staging thoroughly** before production
+6. **Don't skip versions** - go 1.7.9 → 1.7.10, not 1.7.9 → 1.8.0 for a bug fix
 
 ---
 
 ## 🎉 Summary
 
-**One command updates everything:**
+**New version:**
 ```bash
 make update-version
 ```
 
-**It's automatic, safe, and consistent!** 🚀
+**Same version, new build:**
+```bash
+# Edit BUILD_NUMBER
+# Update sw.js cache name
+```
 
+**Deploy:**
+```bash
+./deploy-manualmode.sh -e staging -c frontend
+```
