@@ -316,7 +316,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
   const [profileMetadata, setProfileMetadata] = useState<ProfileMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
+  // Warning modal moved to PersonalitySurvey.tsx - shows only when repeating an already-completed test
   const [isGeneratingNarrative, setIsGeneratingNarrative] = useState(false);
   const [narrativeError, setNarrativeError] = useState<string | null>(null);
   const [isNarrativeExpanded, setIsNarrativeExpanded] = useState(false);
@@ -753,18 +753,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
               <Button
                 onClick={() => {
-                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
-                    setShowOverwriteWarning(true);
-                  } else {
-                    onStartNewTest({
-                      completedLenses: profileMetadata?.completedLenses || [],
-                      spiralDynamics: decryptedData?.spiralDynamics,
-                      riemann: decryptedData?.riemann,
-                      big5: decryptedData?.big5,
-                      narratives: decryptedData?.narratives,
-                      adaptationMode: profileMetadata?.adaptationMode,
-                    });
-                  }
+                  // Warning moved to PersonalitySurvey - shows only when repeating an already-completed test
+                  onStartNewTest({
+                    completedLenses: profileMetadata?.completedLenses || [],
+                    spiralDynamics: decryptedData?.spiralDynamics,
+                    riemann: decryptedData?.riemann,
+                    big5: decryptedData?.big5,
+                    narratives: decryptedData?.narratives,
+                    adaptationMode: profileMetadata?.adaptationMode,
+                    sessionCount: profileMetadata?.sessionCount || 0,
+                  });
                 }}
                 size="sm"
                 variant="secondary"
@@ -805,18 +803,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
               <Button
                 onClick={() => {
-                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
-                    setShowOverwriteWarning(true);
-                  } else {
-                    onStartNewTest({
-                      completedLenses: profileMetadata?.completedLenses || [],
-                      spiralDynamics: decryptedData?.spiralDynamics,
-                      riemann: decryptedData?.riemann,
-                      big5: decryptedData?.big5,
-                      narratives: decryptedData?.narratives,
-                      adaptationMode: profileMetadata?.adaptationMode,
-                    });
-                  }
+                  // Warning moved to PersonalitySurvey - shows only when repeating an already-completed test
+                  onStartNewTest({
+                    completedLenses: profileMetadata?.completedLenses || [],
+                    spiralDynamics: decryptedData?.spiralDynamics,
+                    riemann: decryptedData?.riemann,
+                    big5: decryptedData?.big5,
+                    narratives: decryptedData?.narratives,
+                    adaptationMode: profileMetadata?.adaptationMode,
+                    sessionCount: profileMetadata?.sessionCount || 0,
+                  });
                 }}
                 size="sm"
                 variant="secondary"
@@ -855,18 +851,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
               <Button
                 onClick={() => {
-                  if (profileMetadata && profileMetadata.sessionCount && profileMetadata.sessionCount > 0 && profileMetadata.adaptationMode === 'adaptive') {
-                    setShowOverwriteWarning(true);
-                  } else {
-                    onStartNewTest({
-                      completedLenses: profileMetadata?.completedLenses || [],
-                      spiralDynamics: decryptedData?.spiralDynamics,
-                      riemann: decryptedData?.riemann,
-                      big5: decryptedData?.big5,
-                      narratives: decryptedData?.narratives,
-                      adaptationMode: profileMetadata?.adaptationMode,
-                    });
-                  }
+                  // Warning moved to PersonalitySurvey - shows only when repeating an already-completed test
+                  onStartNewTest({
+                    completedLenses: profileMetadata?.completedLenses || [],
+                    spiralDynamics: decryptedData?.spiralDynamics,
+                    riemann: decryptedData?.riemann,
+                    big5: decryptedData?.big5,
+                    narratives: decryptedData?.narratives,
+                    adaptationMode: profileMetadata?.adaptationMode,
+                    sessionCount: profileMetadata?.sessionCount || 0,
+                  });
                 }}
                 size="sm"
                 variant="secondary"
@@ -1027,86 +1021,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           </button>
         </div>
       </div>
-      
-      {/* Overwrite Warning Modal */}
-      {showOverwriteWarning && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
-          aria-modal="true"
-          role="dialog"
-          onClick={() => setShowOverwriteWarning(false)}
-        >
-          <div 
-            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-red-400 dark:border-red-500/50 shadow-xl rounded-lg mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 uppercase flex items-center gap-2">
-                ⚠️ {t('profile_overwrite_warning_title') || 'Achtung: Datenverlust'}
-              </h2>
-              <button 
-                onClick={() => setShowOverwriteWarning(false)} 
-                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                aria-label={t('modal_close') || 'Schließen'}
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-                <p className="text-red-800 dark:text-red-300 font-medium mb-2">
-                  {t('profile_overwrite_sessions', { count: profileMetadata?.sessionCount || 0 }) || 
-                    `📊 Dein Profil wurde durch ${profileMetadata?.sessionCount || 0} Coaching-Sessions verfeinert.`}
-                </p>
-                <p className="text-red-700 dark:text-red-400 text-sm">
-                  {t('profile_overwrite_loss_warning') || 
-                    'Diese individuellen Anpassungen basieren auf deinem echten Verhalten und können nicht wiederhergestellt werden.'}
-                </p>
-              </div>
-              
-              <p className="text-gray-600 dark:text-gray-400">
-                {t('profile_overwrite_warning_question') || 'Ein neuer Test überschreibt ALLE bisherigen Verfeinerungen. Bist du sicher?'}
-              </p>
-            </div>
-            
-            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Button 
-                onClick={() => {
-                  setShowOverwriteWarning(false);
-                  setIsNarrativeExpanded(true); // Expand signature section
-                  // Scroll to signature section
-                  setTimeout(() => {
-                    document.querySelector('[data-signature-section]')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
-                }} 
-                variant="secondary"
-              >
-                {t('profile_overwrite_cancel') || 'Zurück zur Signatur'}
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  setShowOverwriteWarning(false);
-                  onStartNewTest({
-                    completedLenses: profileMetadata?.completedLenses || [],
-                    spiralDynamics: decryptedData?.spiralDynamics,
-                    riemann: decryptedData?.riemann,
-                    big5: decryptedData?.big5,
-                    narratives: decryptedData?.narratives,
-                    adaptationMode: profileMetadata?.adaptationMode,
-                  });
-                }}
-                variant="danger"
-              >
-                {t('profile_overwrite_confirm') || 'Ja, neuen Test starten'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Profile Warning Modal */}
       {showDeleteWarning && (

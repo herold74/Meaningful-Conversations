@@ -67,6 +67,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
                 config: {
                     systemInstruction: systemInstruction,
                 },
+                context: 'chat' // Translation uses chat context
                 })
             );
             translationResults.subject = subjectResult.text;
@@ -80,6 +81,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
                 config: {
                     systemInstruction: systemInstruction,
                 },
+                context: 'chat' // Translation uses chat context
                 })
             );
             translationResults.body = bodyResult.text;
@@ -223,6 +225,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             // For subsequent messages, we send the entire chat history.
             contents: isInitialMessage ? "" : modelHistory,
             config: config,
+            context: 'chat' // Chat messages use chat context
         });
         
         const durationMs = Date.now() - startTime;
@@ -488,6 +491,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
                 responseSchema: analysisPrompts.schema,
                 temperature: 0.2, // Lower temperature for more deterministic, structured output
             },
+            context: 'analysis' // Session analysis uses analysis context
         });
 
         const durationMs = Date.now() - startTime;
@@ -621,6 +625,7 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
         const response = await aiProviderService.generateContent({
             model: modelName,
             contents: fullPrompt,
+            context: 'analysis' // Formatting uses analysis context
         });
         
         const durationMs = Date.now() - startTime;

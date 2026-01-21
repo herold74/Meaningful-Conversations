@@ -10,11 +10,12 @@ Meaningful Conversations bridges this gap by creating a "living" document of the
 
 ## User Experience
 The user journey is circular and iterative:
-1.  **Context Creation:** Users start by creating a Life Context (via questionnaire) or uploading an existing one.
-2.  **Coach Selection:** Users choose a coach persona (e.g., "The Stoic") that fits their current mood or need.
-3.  **Conversation:** A real-time dialogue (voice or text) where the AI uses the loaded context to guide the discussion.
-4.  **Analysis & Review:** Post-session, the AI generates a summary and **proposes specific updates** to the Life Context file (e.g., adding a new goal, marking a challenge as resolved).
-5.  **Commit:** The user reviews and accepts these changes, updating their "memory" for the next session.
+1.  **Context Creation:** Create a Life Context via questionnaire or upload an existing one.
+2.  **Personality Profile (Optional):** Complete surveys (Riemann-Thomann, Big Five, Spiral Dynamics) for adaptive coaching.
+3.  **Coach Selection:** Choose from 7 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob, G-Interviewer).
+4.  **Conversation:** Voice or text dialogue. AI uses Life Context and personality profile for personalized guidance.
+5.  **Analysis & Review:** AI generates summary, proposes Life Context updates, and optionally refines personality profile (DPFL mode).
+6.  **Commit:** Review and accept changes, export calendar items for action steps.
 
 ## Privacy First
 - **Guest Mode:** Zero server data. Everything happens in the browser. The user manages the `.md` file manually.
