@@ -450,7 +450,8 @@ module.exports = {
   setActiveProvider,
   getProviderStats,
   checkProvidersHealth,
-  mapToMistralModel,
+  getModelMapping,
+  getModelForContext,
   clearModelMappingCache,
 };
 
