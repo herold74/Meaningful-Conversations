@@ -10,6 +10,7 @@ import { TrendingUpIcon } from './icons/TrendingUpIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import * as userService from '../services/userService';
 
 interface ApiUsageStats {
@@ -138,6 +139,7 @@ export const ApiUsageView: React.FC = () => {
     const [modelMapping, setModelMapping] = useState<ModelMapping | null>(null);
     const [loadingMapping, setLoadingMapping] = useState(false);
     const [savingMapping, setSavingMapping] = useState(false);
+    const [isModelSelectionExpanded, setIsModelSelectionExpanded] = useState(false);
     
     const fetchProviderConfig = async () => {
         setLoadingProvider(true);
@@ -447,15 +449,26 @@ export const ApiUsageView: React.FC = () => {
             {/* Model Mapping Configuration Panel */}
             {modelMapping && modelMapping.google && modelMapping.mistral && (
                 <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
-                    <div className="mb-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <ZapIcon className="w-6 h-6 text-purple-500" />
-                            AI Model Selection
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Configure which AI models to use for Chat conversations and Session Analysis for each provider
-                        </p>
+                    <div 
+                        className="flex items-center justify-between cursor-pointer mb-4"
+                        onClick={() => setIsModelSelectionExpanded(!isModelSelectionExpanded)}
+                    >
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <ZapIcon className="w-6 h-6 text-purple-500" />
+                                AI Model Selection
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                Configure which AI models to use for Chat conversations and Session Analysis for each provider
+                            </p>
+                        </div>
+                        <ChevronDownIcon 
+                            className={`w-6 h-6 text-purple-500 transition-transform duration-200 ${isModelSelectionExpanded ? 'rotate-180' : ''}`}
+                        />
                     </div>
+                    
+                    {isModelSelectionExpanded && (
+                        <>
                     
                     {/* Google Gemini Models */}
                     <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border-2 border-blue-300 dark:border-blue-700">
@@ -579,7 +592,7 @@ export const ApiUsageView: React.FC = () => {
                         </div>
                     </div>
                     
-                    <div className="flex justify-end">
+                    <div className="flex justify-end mt-4">
                         <button
                             onClick={saveModelMapping}
                             disabled={savingMapping}
@@ -588,6 +601,8 @@ export const ApiUsageView: React.FC = () => {
                             {savingMapping ? <Spinner /> : 'Save Model Configuration'}
                         </button>
                     </div>
+                    </>
+                    )}
                 </div>
             )}
             
