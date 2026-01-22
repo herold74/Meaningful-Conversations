@@ -28,6 +28,8 @@ import { synthesizeSpeech, getBotVoiceSettings, saveBotVoiceSettings, type TtsMo
 import { getApiBaseUrl } from '../services/api';
 import * as api from '../services/api';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
+import { isNativeApp, audioService } from '../services/capacitorAudioService';
+import { speechService, type SpeechResult } from '../services/capacitorSpeechService';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -206,7 +208,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
     
     // Stop speech recognition if active
-    if (recognitionRef.current) {
+    if (isNativeApp) {
+      // Native: Stop Capacitor speech and audio services
+      speechService.stop().catch(() => {});
+      audioService.stop();
+    } else if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch (e) {
@@ -739,18 +745,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // iOS Safari has strict autoplay policies that prevent audio.play() outside of
     // direct user interaction. Server TTS requires async API calls which break this.
-    // Solution: Force local TTS on iOS for reliable audio playback.
+    // Solution: Force local TTS on iOS Safari for reliable audio playback.
+    // EXCEPTION: Native iOS apps (Capacitor) use native audio APIs without these restrictions.
     // Also validate that selectedVoiceURI is a valid server voice ID if ttsMode is 'server'
     // to prevent corrupted settings from causing errors.
     const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
-    const effectiveTtsMode = isIOS ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
+    const iosBrowserRestriction = isIOS && !isNativeApp; // Only restrict iOS Safari, not native apps
+    const effectiveTtsMode = iosBrowserRestriction ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
 
     // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
     if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
       console.warn('[TTS] Corrupted settings detected: ttsMode=server but selectedVoiceURI is not a valid server voice:', selectedVoiceURI, '- using local TTS');
     }
 
-    // Server TTS mode (disabled on iOS due to autoplay restrictions)
+    // Server TTS mode (disabled on iOS Safari due to autoplay restrictions, but works on native iOS apps)
     if (effectiveTtsMode === 'server') {
       try {
         const loadingStartTime = Date.now();
@@ -777,75 +785,103 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
         }
         
-        const audioUrl = URL.createObjectURL(audioBlob);
-        currentAudioUrlRef.current = audioUrl;
-        
-        // Create a FRESH audio element for each playback
-        // This resets iOS audio session and ensures consistent quality
-        const audio = new Audio();
-        audioRef.current = audio;
-        
-        // Set up event handlers
-        audio.addEventListener('play', () => {
-          // #region agent log
-          console.log('[TTS-DEBUG] Server audio started playing');
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-audio-play',message:'Server audio started playing - setting isLoadingAudio=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-          // #endregion
-          setTtsStatus('speaking');
-          setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
-        });
-        audio.addEventListener('pause', () => {
-          // Only set paused if not ended (ended also triggers pause)
-          if (!audio.ended) setTtsStatus('paused');
-        });
-        audio.addEventListener('ended', () => {
-          setTtsStatus('idle');
-          isSpeakingRef.current = false; // Release lock when audio ends
-          // Cleanup after playback to reset iOS audio session
-          if (currentAudioUrlRef.current === audioUrl) {
-            URL.revokeObjectURL(audioUrl);
-            currentAudioUrlRef.current = null;
-          }
-          // Don't null audioRef here - it's still needed for pause/resume
-        });
-        audio.addEventListener('error', (e) => {
-          const audioError = audio.error;
-          const errorCode = audioError?.code;
-          const errorMessage = audioError?.message || 'Unknown error';
+        // === NATIVE APP: Use Capacitor Audio Service ===
+        if (isNativeApp) {
+          console.log('[TTS] Using native audio service (Capacitor)');
+          await audioService.playBlob(
+            audioBlob,
+            // onStart
+            () => {
+              console.log('[TTS-Native] Audio started playing');
+              setTtsStatus('speaking');
+              setIsLoadingAudio(false);
+            },
+            // onEnd
+            () => {
+              console.log('[TTS-Native] Audio ended');
+              setTtsStatus('idle');
+              isSpeakingRef.current = false;
+            },
+            // onError
+            (error) => {
+              console.error('[TTS-Native] Audio error:', error);
+              setTtsStatus('idle');
+              setIsLoadingAudio(false);
+              isSpeakingRef.current = false;
+            }
+          );
+        } else {
+          // === WEB/PWA: Use existing HTML5 Audio (unchanged) ===
+          const audioUrl = URL.createObjectURL(audioBlob);
+          currentAudioUrlRef.current = audioUrl;
           
-          // Ignore errors from intentionally stopping audio (e.g., when opening voice settings)
-          if (isStoppingAudioRef.current) {
-            console.log('[TTS] Audio stopped intentionally, ignoring error event');
-            return;
-          }
+          // Create a FRESH audio element for each playback
+          // This resets iOS audio session and ensures consistent quality
+          const audio = new Audio();
+          audioRef.current = audio;
           
-          // Ignore "Empty src" errors - these are benign race conditions that occur when:
-          // 1. Audio is stopped/cleared (src='') while playing
-          // 2. Browser queues error event
-          // 3. By the time handler runs, src may have changed
-          // These don't affect functionality - the next audio will play normally
-          if (errorCode === 4 && errorMessage.includes('Empty src')) {
-            console.log('[TTS] Ignoring "Empty src" error (benign race condition)');
-            return;
-          }
-          
-          const errorCodes: Record<number, string> = {1:'MEDIA_ERR_ABORTED',2:'MEDIA_ERR_NETWORK',3:'MEDIA_ERR_DECODE',4:'MEDIA_ERR_SRC_NOT_SUPPORTED'};
-          console.error('[TTS] Audio playback error:', {
-            code: errorCode,
-            codeName: errorCode ? errorCodes[errorCode] : 'NO_CODE',
-            message: errorMessage,
-            src: audio.src ? 'blob URL present' : 'no src',
-            readyState: audio.readyState,
-            networkState: audio.networkState,
-            event: e
+          // Set up event handlers
+          audio.addEventListener('play', () => {
+            // #region agent log
+            console.log('[TTS-DEBUG] Server audio started playing');
+            fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-audio-play',message:'Server audio started playing - setting isLoadingAudio=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+            // #endregion
+            setTtsStatus('speaking');
+            setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
           });
-          setTtsStatus('idle');
-          setIsLoadingAudio(false);
-          isSpeakingRef.current = false; // Release lock on error
-        });
-        
-        audio.src = audioUrl;
-        await audio.play();
+          audio.addEventListener('pause', () => {
+            // Only set paused if not ended (ended also triggers pause)
+            if (!audio.ended) setTtsStatus('paused');
+          });
+          audio.addEventListener('ended', () => {
+            setTtsStatus('idle');
+            isSpeakingRef.current = false; // Release lock when audio ends
+            // Cleanup after playback to reset iOS audio session
+            if (currentAudioUrlRef.current === audioUrl) {
+              URL.revokeObjectURL(audioUrl);
+              currentAudioUrlRef.current = null;
+            }
+            // Don't null audioRef here - it's still needed for pause/resume
+          });
+          audio.addEventListener('error', (e) => {
+            const audioError = audio.error;
+            const errorCode = audioError?.code;
+            const errorMessage = audioError?.message || 'Unknown error';
+            
+            // Ignore errors from intentionally stopping audio (e.g., when opening voice settings)
+            if (isStoppingAudioRef.current) {
+              console.log('[TTS] Audio stopped intentionally, ignoring error event');
+              return;
+            }
+            
+            // Ignore "Empty src" errors - these are benign race conditions that occur when:
+            // 1. Audio is stopped/cleared (src='') while playing
+            // 2. Browser queues error event
+            // 3. By the time handler runs, src may have changed
+            // These don't affect functionality - the next audio will play normally
+            if (errorCode === 4 && errorMessage.includes('Empty src')) {
+              console.log('[TTS] Ignoring "Empty src" error (benign race condition)');
+              return;
+            }
+            
+            const errorCodes: Record<number, string> = {1:'MEDIA_ERR_ABORTED',2:'MEDIA_ERR_NETWORK',3:'MEDIA_ERR_DECODE',4:'MEDIA_ERR_SRC_NOT_SUPPORTED'};
+            console.error('[TTS] Audio playback error:', {
+              code: errorCode,
+              codeName: errorCode ? errorCodes[errorCode] : 'NO_CODE',
+              message: errorMessage,
+              src: audio.src ? 'blob URL present' : 'no src',
+              readyState: audio.readyState,
+              networkState: audio.networkState,
+              event: e
+            });
+            setTtsStatus('idle');
+            setIsLoadingAudio(false);
+            isSpeakingRef.current = false; // Release lock on error
+          });
+          
+          audio.src = audioUrl;
+          await audio.play();
+        }
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
         // DON'T set isLoadingAudio to false here - keep spinner visible during fallback
@@ -1557,7 +1593,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     e.preventDefault();
     // If the user submits the form while recognition is active, stop it first.
     if (isListening) {
-      recognitionRef.current?.stop();
+      if (isNativeApp) {
+        await speechService.stop();
+      } else {
+        recognitionRef.current?.stop();
+      }
     }
     await sendMessage(input);
     setInput('');
@@ -1573,18 +1613,27 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
   
   const handleVoiceInteraction = async () => {
-      if (isLoading || !recognitionRef.current) return;
+      // Guard: Need either web speech recognition OR native app capability
+      if (isLoading || (!recognitionRef.current && !isNativeApp)) return;
 
       if (isListening) {
-          // Stop recording
-          recognitionRef.current.stop();
+          // === STOP RECORDING ===
+          
+          // Stop recognition (native or web)
+          if (isNativeApp) {
+            console.log('[SR-Native] Stopping native speech recognition');
+            await speechService.stop();
+          } else {
+            recognitionRef.current?.stop();
+          }
           
           // iOS Audio Session Fix: After microphone stops, iOS stays in "playAndRecord" mode
           // which causes degraded audio quality for TTS. We need to force iOS back to
           // stereo/A2DP mode by playing an HTML5 audio element (not AudioContext, which
           // uses a different audio path than Web Speech API).
           // This runs DURING user interaction, so autoplay is allowed.
-          if (isIOS) {
+          // Note: Native apps handle this automatically via Capacitor
+          if (isIOS && !isNativeApp) {
               try {
                   // Play a truly silent audio file to force iOS to switch audio modes
                   // This is a minimal valid WAV: 44.1kHz, 16-bit mono, 100 samples of silence (all zeros)
@@ -1614,10 +1663,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               }, audioSessionDelay);
           }
       } else {
+          // === START RECORDING ===
+          
           // Stop any ongoing TTS playback
-          window.speechSynthesis?.cancel();
-          if (audioRef.current) {
-            audioRef.current.pause();
+          if (isNativeApp) {
+            audioService.stop();
+          } else {
+            window.speechSynthesis?.cancel();
+            if (audioRef.current) {
+              audioRef.current.pause();
+            }
           }
           // Stop speech status polling
           if (speechPollingRef.current) {
@@ -1632,12 +1687,52 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-start',message:'SR recognition start',data:srDebugData0,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
           // #endregion
           
-          // Start recognition directly - let the browser handle mic permission (like v1.5.8)
-          try {
-            recognitionRef.current.start();
-          } catch (error) {
-            console.error('Failed to start speech recognition:', error);
-            alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+          // Start recognition
+          if (isNativeApp) {
+            // === NATIVE APP: Use Capacitor Speech Service ===
+            console.log('[SR-Native] Starting native speech recognition');
+            const botLanguage = bot.id === 'g-interviewer' ? 'en' : language;
+            const langCode = botLanguage === 'de' ? 'de-DE' : 'en-US';
+            
+            try {
+              await speechService.start(
+                { language: langCode, continuous: true, interimResults: true },
+                // onResult
+                (result: SpeechResult) => {
+                  console.log('[SR-Native] Result:', result);
+                  // Native speech returns cumulative transcript
+                  const combined = baseTranscriptRef.current + result.transcript;
+                  setInput(combined);
+                },
+                // onError
+                (error) => {
+                  console.error('[SR-Native] Error:', error);
+                  setIsListening(false);
+                  alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+                },
+                // onStart
+                () => {
+                  console.log('[SR-Native] Started');
+                  setIsListening(true);
+                },
+                // onEnd
+                () => {
+                  console.log('[SR-Native] Ended');
+                  setIsListening(false);
+                }
+              );
+            } catch (error) {
+              console.error('[SR-Native] Failed to start:', error);
+              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+            }
+          } else {
+            // === WEB/PWA: Use existing webkitSpeechRecognition (unchanged) ===
+            try {
+              recognitionRef.current?.start();
+            } catch (error) {
+              console.error('Failed to start speech recognition:', error);
+              alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
+            }
           }
       }
   };
