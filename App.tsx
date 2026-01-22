@@ -1152,26 +1152,6 @@ const App: React.FC = () => {
     const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
-    // #region agent log - Dark Mode Background Debug
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const htmlEl = document.documentElement;
-            const bodyEl = document.body;
-            const rootEl = document.getElementById('root');
-            const isDark = htmlEl.classList.contains('dark');
-            
-            const bodyBg = window.getComputedStyle(bodyEl).backgroundColor;
-            const htmlBg = window.getComputedStyle(htmlEl).backgroundColor;
-            const rootBg = rootEl ? window.getComputedStyle(rootEl).backgroundColor : 'N/A';
-            const bodyHeight = bodyEl.scrollHeight;
-            const windowHeight = window.innerHeight;
-            
-            fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:useEffect',message:'Dark mode background check',data:{view,isDark,bodyBg,htmlBg,rootBg,bodyHeight,windowHeight,contentShorterThanViewport:bodyHeight<windowHeight},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H5'})}).catch(()=>{});
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [view]);
-    // #endregion
-
     return (
         <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
