@@ -166,12 +166,23 @@ async function getModelForContext(provider, context = 'chat') {
  * @param {object} params.config - Generation config (temperature, systemInstruction, etc.)
  * @param {boolean} params.skipFallback - If true, don't try fallback provider on error
  * @param {string} params.context - Context for model selection: 'chat' or 'analysis' (default: 'chat')
+ * @param {string} params.userRegionPreference - User's region preference: 'eu', 'us', or 'optimal' (default: 'optimal')
  * @returns {Promise<object>} Response object with { text, usage, model, provider }
  */
-async function generateContent({ model, contents, config, skipFallback = false, context = 'chat' }) {
-  const provider = await getActiveProvider();
+async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal' }) {
+  // Determine provider based on user preference
+  let provider;
+  if (userRegionPreference === 'eu') {
+    provider = 'mistral';  // Mistral AI is EU-based (Paris)
+    console.log(`🇪🇺 User requested EU processing - using Mistral`);
+  } else if (userRegionPreference === 'us') {
+    provider = 'google';   // Google Gemini primarily US-based
+    console.log(`🇺🇸 User requested US processing - using Google`);
+  } else {
+    provider = await getActiveProvider();  // Use admin-configured default
+  }
   
-  console.log(`🤖 Using AI provider: ${provider} for model: ${model} (context: ${context})`);
+  console.log(`🤖 Using AI provider: ${provider} for model: ${model} (context: ${context}, region: ${userRegionPreference})`);
   
   try {
     if (provider === 'mistral') {
@@ -182,8 +193,8 @@ async function generateContent({ model, contents, config, skipFallback = false, 
   } catch (error) {
     console.error(`❌ Error with ${provider} provider:`, error.message);
     
-    // Automatic fallback to the other provider
-    if (!skipFallback) {
+    // Automatic fallback to the other provider (only if user didn't explicitly choose a region)
+    if (!skipFallback && userRegionPreference === 'optimal') {
       const fallbackProvider = provider === 'google' ? 'mistral' : 'google';
       console.log(`🔄 Falling back to ${fallbackProvider}...`);
       
@@ -197,6 +208,12 @@ async function generateContent({ model, contents, config, skipFallback = false, 
         console.error(`❌ Fallback to ${fallbackProvider} also failed:`, fallbackError.message);
         throw new Error(`Both providers failed. Primary: ${error.message}, Fallback: ${fallbackError.message}`);
       }
+    }
+    
+    // If user explicitly chose a region, don't fallback - throw with clear message
+    if (userRegionPreference !== 'optimal') {
+      const regionName = userRegionPreference === 'eu' ? 'EU (Mistral)' : 'US (Google)';
+      throw new Error(`${regionName} provider failed: ${error.message}. User preference prevents fallback.`);
     }
     
     throw error;
@@ -235,6 +252,7 @@ async function generateWithGoogle({ model, contents, config, context = 'chat' })
 
 /**
  * Generate content using Mistral AI
+ * Enhanced with detailed error logging for debugging
  */
 async function generateWithMistral({ model, contents, config, context = 'chat' }) {
   const client = getMistralClient();
@@ -291,24 +309,61 @@ async function generateWithMistral({ model, contents, config, context = 'chat' }
     console.log('  📋 Mistral JSON mode activated (Google Gemini compatibility add-on)');
   }
   
-  const response = await client.chat.complete(mistralConfig);
-  
-  const choice = response.choices[0];
-  
-  // Mistral SDK v1.10+ returns camelCase property names (promptTokens, completionTokens)
-  // Older versions used snake_case (prompt_tokens, completion_tokens)
-  // Support both for compatibility
-  return {
-    text: choice.message.content,
-    usage: response.usage ? {
-      inputTokens: response.usage.promptTokens || response.usage.prompt_tokens || 0,
-      outputTokens: response.usage.completionTokens || response.usage.completion_tokens || 0,
-      totalTokens: response.usage.totalTokens || response.usage.total_tokens || 0,
-    } : null,
-    model: mistralModel,
-    provider: 'mistral',
-    rawResponse: response
-  };
+  try {
+    const response = await client.chat.complete(mistralConfig);
+    
+    const choice = response.choices[0];
+    
+    // Mistral SDK v1.10+ returns camelCase property names (promptTokens, completionTokens)
+    // Older versions used snake_case (prompt_tokens, completion_tokens)
+    // Support both for compatibility
+    return {
+      text: choice.message.content,
+      usage: response.usage ? {
+        inputTokens: response.usage.promptTokens || response.usage.prompt_tokens || 0,
+        outputTokens: response.usage.completionTokens || response.usage.completion_tokens || 0,
+        totalTokens: response.usage.totalTokens || response.usage.total_tokens || 0,
+      } : null,
+      model: mistralModel,
+      provider: 'mistral',
+      rawResponse: response
+    };
+  } catch (error) {
+    // Enhanced error logging for Mistral API errors
+    const errorDetails = {
+      model: mistralModel,
+      context: context,
+      statusCode: error.status || error.statusCode || error.code || 'unknown',
+      errorType: error.name || error.constructor?.name || 'Error',
+      message: error.message,
+      // Mistral SDK error structure
+      body: error.body || null,
+      // HTTP response details if available
+      httpStatus: error.response?.status || error.status || null,
+      httpStatusText: error.response?.statusText || null,
+      // Rate limit info if available
+      retryAfter: error.headers?.['retry-after'] || error.retryAfter || null,
+    };
+    
+    console.error(`❌ Mistral API Error Details:`, JSON.stringify(errorDetails, null, 2));
+    
+    // Log specific error types for easier debugging
+    if (errorDetails.statusCode === 401 || errorDetails.httpStatus === 401) {
+      console.error('  ⚠️ HINT: API key may be invalid or missing');
+    } else if (errorDetails.statusCode === 429 || errorDetails.httpStatus === 429) {
+      console.error('  ⚠️ HINT: Rate limit exceeded. Retry after:', errorDetails.retryAfter || 'unknown');
+    } else if (errorDetails.statusCode === 404 || errorDetails.httpStatus === 404) {
+      console.error('  ⚠️ HINT: Model not found. Check if model name is correct:', mistralModel);
+    } else if (errorDetails.statusCode === 400 || errorDetails.httpStatus === 400) {
+      console.error('  ⚠️ HINT: Bad request - check message format or token limits');
+    }
+    
+    // Re-throw with enhanced message
+    const enhancedError = new Error(`Mistral API Error (${errorDetails.statusCode}): ${error.message}`);
+    enhancedError.originalError = error;
+    enhancedError.details = errorDetails;
+    throw enhancedError;
+  }
 }
 
 /**

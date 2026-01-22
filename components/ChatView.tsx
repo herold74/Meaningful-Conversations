@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { Bot, Message, Language, User, CoachingMode } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
@@ -256,6 +257,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   
   // Lock to prevent concurrent speak() calls (prevents overlapping TTS)
   const isSpeakingRef = useRef<boolean>(false);
+  
+  // Flag to track intentional audio stops (to avoid error events when clearing src)
+  const isStoppingAudioRef = useRef<boolean>(false);
   
   // Web Audio API context for iOS audio session management
   // Once resumed during user interaction, allows audio playback without further interaction
@@ -683,7 +687,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, []);
 
   const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false) => {
+    // #region agent log
+    console.log('[TTS-DEBUG] speak() called', { isTtsEnabled, textLength: text?.length, isMeditation, isRetry });
+    fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-start',message:'speak() called',data:{isTtsEnabled, textLength: text?.length, isMeditation, isRetry},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+    // #endregion
+    
     if (!isTtsEnabled || !text.trim()) {
+      // #region agent log
+      console.log('[TTS-DEBUG] speak() early return - TTS disabled or empty text');
+      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-early-return',message:'speak() early return',data:{isTtsEnabled, hasText: !!text?.trim()},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+      // #endregion
       return;
     }
     
@@ -702,8 +715,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     // Set loading state IMMEDIATELY and force React to render before continuing
     // This prevents React from batching the true->false updates together
-    setIsLoadingAudio(true);
-    await Promise.resolve();
+    // #region agent log
+    console.log('[TTS-DEBUG] Setting isLoadingAudio=true with flushSync');
+    fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-loading-true',message:'Setting isLoadingAudio=true with flushSync',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+    // #endregion
+    // Use flushSync to force immediate render - React 18 batches state updates across async boundaries
+    // which caused the TTS loading spinner to not show (isLoadingAudio=true was batched with isLoading=false)
+    flushSync(() => {
+      setIsLoadingAudio(true);
+    });
     
     const cleanText = text
         .replace(/#{1,6}\s/g, '')
@@ -711,14 +731,24 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
         .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
         .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-        .replace(/^>\s?/gm, '');
+        .replace(/^>\s?/gm, '')
+        // Remove emojis from TTS output (they're spoken as descriptions like "grinning face")
+        .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '');
 
     lastSpokenTextRef.current = cleanText;
 
     // iOS Safari has strict autoplay policies that prevent audio.play() outside of
     // direct user interaction. Server TTS requires async API calls which break this.
     // Solution: Force local TTS on iOS for reliable audio playback.
-    const effectiveTtsMode = isIOS ? 'local' : ttsMode;
+    // Also validate that selectedVoiceURI is a valid server voice ID if ttsMode is 'server'
+    // to prevent corrupted settings from causing errors.
+    const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
+    const effectiveTtsMode = isIOS ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
+
+    // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
+    if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
+      console.warn('[TTS] Corrupted settings detected: ttsMode=server but selectedVoiceURI is not a valid server voice:', selectedVoiceURI, '- using local TTS');
+    }
 
     // Server TTS mode (disabled on iOS due to autoplay restrictions)
     if (effectiveTtsMode === 'server') {
@@ -757,6 +787,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         // Set up event handlers
         audio.addEventListener('play', () => {
+          // #region agent log
+          console.log('[TTS-DEBUG] Server audio started playing');
+          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-audio-play',message:'Server audio started playing - setting isLoadingAudio=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+          // #endregion
           setTtsStatus('speaking');
           setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
         });
@@ -774,8 +808,37 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           // Don't null audioRef here - it's still needed for pause/resume
         });
-        audio.addEventListener('error', () => {
-          console.error('[TTS] Audio playback error');
+        audio.addEventListener('error', (e) => {
+          const audioError = audio.error;
+          const errorCode = audioError?.code;
+          const errorMessage = audioError?.message || 'Unknown error';
+          
+          // Ignore errors from intentionally stopping audio (e.g., when opening voice settings)
+          if (isStoppingAudioRef.current) {
+            console.log('[TTS] Audio stopped intentionally, ignoring error event');
+            return;
+          }
+          
+          // Ignore "Empty src" errors - these are benign race conditions that occur when:
+          // 1. Audio is stopped/cleared (src='') while playing
+          // 2. Browser queues error event
+          // 3. By the time handler runs, src may have changed
+          // These don't affect functionality - the next audio will play normally
+          if (errorCode === 4 && errorMessage.includes('Empty src')) {
+            console.log('[TTS] Ignoring "Empty src" error (benign race condition)');
+            return;
+          }
+          
+          const errorCodes: Record<number, string> = {1:'MEDIA_ERR_ABORTED',2:'MEDIA_ERR_NETWORK',3:'MEDIA_ERR_DECODE',4:'MEDIA_ERR_SRC_NOT_SUPPORTED'};
+          console.error('[TTS] Audio playback error:', {
+            code: errorCode,
+            codeName: errorCode ? errorCodes[errorCode] : 'NO_CODE',
+            message: errorMessage,
+            src: audio.src ? 'blob URL present' : 'no src',
+            readyState: audio.readyState,
+            networkState: audio.networkState,
+            event: e
+          });
           setTtsStatus('idle');
           setIsLoadingAudio(false);
           isSpeakingRef.current = false; // Release lock on error
@@ -1065,6 +1128,21 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const handleOpenVoiceModal = () => {
     if (!window.speechSynthesis) return;
 
+    // Stop any current audio playback when opening voice settings
+    isStoppingAudioRef.current = true;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+    window.speechSynthesis.cancel();
+    isSpeakingRef.current = false;
+    setTtsStatus('idle');
+    setIsLoadingAudio(false);
+    // Reset flag after a short delay to allow error events to be filtered
+    setTimeout(() => {
+      isStoppingAudioRef.current = false;
+    }, 100);
+
     // If voices are already loaded, just open the modal.
     const availableVoices = window.speechSynthesis.getVoices();
     if (availableVoices.length > 0) {
@@ -1204,65 +1282,49 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         transcript: r[0].transcript,
         confidence: r[0].confidence
       }));
-      console.log('[SR-DEBUG] onresult', {
+      const srDebugData1 = {
         resultIndex: event.resultIndex,
         resultsLength: event.results.length,
         baseTranscript: baseTranscriptRef.current,
         results: resultsDebug
-      });
+      };
+      console.log('[SR-DEBUG] onresult', srDebugData1);
+      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-onresult',message:'SR onresult',data:srDebugData1,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
       // #endregion
       
-      // On some platforms (notably Android), interim results are CUMULATIVE - they contain
-      // the full transcript including already-finalized text. On other platforms (desktop Chrome),
-      // interim results only contain the new, not-yet-finalized portion.
-      // 
-      // To handle both cases correctly:
-      // 1. If we have an interim result, check if it starts with the final transcript
-      // 2. If it does (cumulative platform), use only the interim result
-      // 3. If not (standard platform), combine final + interim
+      // ANDROID BUG FIX: On Android Chrome, the Web Speech API marks EVERY result as isFinal,
+      // but each result contains the CUMULATIVE transcript, not incremental text.
+      // Example: results = [{transcript: "hast"}, {transcript: "hast du"}, {transcript: "hast du einen"}]
+      // The old code would concatenate: "hast" + "hast du" + "hast du einen" = WRONG!
+      // The fix: Use ONLY the LAST result, which contains the complete cumulative transcript.
       
-      let interim_transcript = '';
-      let final_transcript = '';
-      
-      // Process all results
-      for (let i = 0; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          final_transcript += event.results[i][0].transcript;
-        } else {
-          // Take only the last interim result (there should only be one anyway)
-          interim_transcript = event.results[i][0].transcript;
-        }
-      }
+      // Find the last result (which contains the full cumulative text)
+      const lastResultIndex = event.results.length - 1;
+      const lastResult = event.results[lastResultIndex];
+      const transcript = lastResult[0].transcript;
+      const isFinal = lastResult.isFinal;
       
       // #region agent log
-      console.log('[SR-DEBUG] after loop', { final_transcript, interim_transcript });
+      const srDebugData2 = { 
+        lastResultIndex,
+        transcript,
+        isFinal,
+        strategy: 'use-last-result-only'
+      };
+      console.log('[SR-DEBUG] after processing', srDebugData2);
+      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-afterloop',message:'SR after processing',data:srDebugData2,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
       // #endregion
       
-      // Determine the combined transcript, avoiding duplication on cumulative platforms
-      let combined_transcript: string;
-      
-      if (interim_transcript && final_transcript) {
-        // Check if interim already contains the final text (cumulative platform like Android)
-        const normalizedFinal = final_transcript.trim().toLowerCase();
-        const normalizedInterim = interim_transcript.trim().toLowerCase();
-        
-        if (normalizedInterim.startsWith(normalizedFinal)) {
-          // Cumulative platform: interim contains everything, use it directly
-          combined_transcript = interim_transcript;
-        } else {
-          // Standard platform: interim only has new text, combine both
-          combined_transcript = final_transcript + interim_transcript;
-        }
-      } else {
-        // Only one of them exists, use whichever is available
-        combined_transcript = final_transcript || interim_transcript;
-      }
+      // Use the transcript directly - it's already cumulative on Android
+      const combined_transcript = transcript;
       
       // #region agent log
-      console.log('[SR-DEBUG] final output', {
+      const srDebugData3 = {
         combined_transcript,
         fullOutput: baseTranscriptRef.current + combined_transcript
-      });
+      };
+      console.log('[SR-DEBUG] final output', srDebugData3);
+      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-finaloutput',message:'SR final output',data:srDebugData3,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
       // #endregion
       
       // Combine with any text that existed before speech recognition started
@@ -1457,6 +1519,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }, 1000);
         } else {
           // Normal message, speak all of it
+          // #region agent log
+          console.log('[TTS-DEBUG] About to call speak() for normal message');
+          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:before-speak',message:'About to call speak()',data:{textLength: botMessage.text?.length, isTtsEnabled},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+          // #endregion
           speak(botMessage.text);
         }
         
@@ -1479,6 +1545,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       };
       setChatHistory(prev => [...prev, errorMessage]);
     } finally {
+      // #region agent log
+      console.log('[TTS-DEBUG] Setting isLoading=false in finally block');
+      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:finally-isLoading-false',message:'Setting isLoading=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
+      // #endregion
       setIsLoading(false);
     }
   };
@@ -1557,7 +1627,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
           // #region agent log
-          console.log('[SR-DEBUG] baseTranscriptRef set on recognition start', { value: baseTranscriptRef.current, inputWas: input });
+          const srDebugData0 = { value: baseTranscriptRef.current, inputWas: input };
+          console.log('[SR-DEBUG] baseTranscriptRef set on recognition start', srDebugData0);
+          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-start',message:'SR recognition start',data:srDebugData0,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
           // #endregion
           
           // Start recognition directly - let the browser handle mic permission (like v1.5.8)

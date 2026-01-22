@@ -217,7 +217,9 @@ function analyzeProfile(profile, lang = 'de') {
     }
   }
 
-  if (profile.path === 'RIEMANN' && profile.riemann) {
+  // Analyze Riemann if available (check both path and completedLenses for combined profiles)
+  const hasRiemann = profile.path === 'RIEMANN' || profile.completedLenses?.includes('riemann');
+  if (hasRiemann && profile.riemann) {
     const { beruf } = profile.riemann;
     
     // Find highest and lowest scores
@@ -228,14 +230,18 @@ function analyzeProfile(profile, lang = 'de') {
     analysis.dominant = [...analysis.dominant, ...scores.slice(0, 2).map(s => s.trait)];
     analysis.weak = [...analysis.weak, ...scores.slice(-2).map(s => s.trait)];
 
-    // Build strategies (language-specific)
-    analysis.strategies = {
-      primary: RIEMANN_STRATEGIES[scores[0].trait].high[lang] || RIEMANN_STRATEGIES[scores[0].trait].high['de'],
-      blindspot: RIEMANN_STRATEGIES[scores[3].trait].low[lang] || RIEMANN_STRATEGIES[scores[3].trait].low['de']
-    };
+    // Build strategies (language-specific) - only set if not already set by another analysis
+    if (!analysis.strategies.primary) {
+      analysis.strategies = {
+        primary: RIEMANN_STRATEGIES[scores[0].trait].high[lang] || RIEMANN_STRATEGIES[scores[0].trait].high['de'],
+        blindspot: RIEMANN_STRATEGIES[scores[3].trait].low[lang] || RIEMANN_STRATEGIES[scores[3].trait].low['de']
+      };
+    }
   }
 
-  if (profile.path === 'BIG5' && profile.big5) {
+  // Analyze Big5/OCEAN if available (check both path and completedLenses for combined profiles)
+  const hasOcean = profile.path === 'BIG5' || profile.completedLenses?.includes('ocean');
+  if (hasOcean && profile.big5) {
     const traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
     const scores = traits.map(t => ({ trait: t, score: profile.big5[t] || 0 }));
     scores.sort((a, b) => b.score - a.score);
@@ -243,14 +249,16 @@ function analyzeProfile(profile, lang = 'de') {
     analysis.dominant = [...analysis.dominant, ...scores.slice(0, 2).map(s => s.trait)];
     analysis.weak = [...analysis.weak, ...scores.slice(-2).map(s => s.trait)];
 
-    // Build strategies
-    const primary = scores[0];
-    const weakest = scores[scores.length - 1];
+    // Build strategies - only set if not already set by Riemann (avoid overwriting)
+    if (!analysis.strategies.primary) {
+      const primary = scores[0];
+      const weakest = scores[scores.length - 1];
 
-    analysis.strategies = {
-      primary: BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low']['de'],
-      blindspot: BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low']['de']
-    };
+      analysis.strategies = {
+        primary: BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low']['de'],
+        blindspot: BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low']['de']
+      };
+    }
   }
 
   // Include AI-generated narrative profile if available

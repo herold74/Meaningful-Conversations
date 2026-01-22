@@ -21,7 +21,7 @@ const de_centered_text = `Ganz im Sinne von: **Do it yourself, but not alone\\!*
 const de_markdown_part2 = `
 ## Wie es funktioniert
 
-"Sinnstiftende Gespräche" verbindet Ihre persönlichen Notizen und Ziele mit der fortschrittlichen KI von Google. Stellen Sie sich einen privaten Coach mit einem großartigen Gedächtnis und vertraulichen Notizen vor: Die App arbeitet mit dem Kontext Ihrer bisherigen Gespräche. Das ermöglicht es Ihnen, Ziele zu verfolgen, Herausforderungen aus verschiedenen Blickwinkeln zu betrachten und Ihren Fortschritt nachhaltig zu reflektieren.
+"Sinnstiftende Gespräche" verbindet Ihre persönlichen Notizen und Ziele mit der fortschrittlichen KI von Google (US) oder Mistral (EU). Stellen Sie sich einen privaten Coach mit einem großartigen Gedächtnis und vertraulichen Notizen vor: Die App arbeitet mit dem Kontext Ihrer bisherigen Gespräche. Das ermöglicht es Ihnen, Ziele zu verfolgen, Herausforderungen aus verschiedenen Blickwinkeln zu betrachten und Ihren Fortschritt nachhaltig zu reflektieren.
 `;
 
 const de_final_sentence = `Diese Anwendung ist ein Projekt, das aus Leidenschaft für persönliches Wachstum und Technologie entstanden ist. Wir hoffen, dass sie Ihnen auf Ihrem Weg eine wertvolle Unterstützung ist.`;
@@ -40,7 +40,7 @@ const en_centered_text = `In the spirit of: **Do it yourself, but not alone\\!**
 const en_markdown_part2 = `
 ## How it works
 
-"Meaningful Conversations" connects your personal notes and goals with Google's advanced AI. Imagine a private coach with a great memory and confidential notes: The app works with the context of your previous conversations. This allows you to pursue goals, view challenges from different angles, and sustainably reflect on your progress.
+"Meaningful Conversations" connects your personal notes and goals with advanced AI from Google (US) or Mistral (EU). Imagine a private coach with a great memory and confidential notes: The app works with the context of your previous conversations. This allows you to pursue goals, view challenges from different angles, and sustainably reflect on your progress.
 `;
 
 const en_final_sentence = `This application is a project born from a passion for personal growth and technology. We hope it serves as a valuable support on your journey.`;

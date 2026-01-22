@@ -19,6 +19,7 @@ module.exports = async (req, res, next) => {
         }
         
         req.userId = decodedToken.userId;
+        req.user = user;  // Make full user object available to routes
         
         next();
     } catch (error) {
