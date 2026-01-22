@@ -29,19 +29,28 @@ export const HowItWorks: React.FC = () => {
 
         {/* Core Cycle Diagram */}
         <div className="relative mb-20">
-          {/* Connecting Lines (Desktop only) */}
-          <div className="hidden md:block absolute top-[52%] left-0 w-full h-1 bg-border-secondary -z-1 transform -translate-y-1/2" />
-          <div className="hidden md:block absolute left-1/2 top-0 w-1 h-full bg-border-secondary -z-1 transform -translate-x-1/2" />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative">
-            
-            {/* Center Piece: Life Context - Hidden on small screens in grid flow, shown via absolute position on MD */}
-            <div className="order-first md:absolute md:top-[52%] md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 z-10 mb-8 md:mb-0 pointer-events-none flex justify-center">
-              <div className="bg-accent-primary text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-background-primary">
-                <FileTextIcon className="w-10 h-10 mb-1 text-white" />
-                <span className="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
-              </div>
+          {/* Center Piece: Life Context - positioned relative to outer container, NOT the grid */}
+          <div className="hidden md:flex absolute inset-0 m-auto w-32 h-32 z-10 pointer-events-none justify-center items-center">
+            <div className="bg-accent-primary text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-background-primary">
+              <FileTextIcon className="w-10 h-10 mb-1 text-white" />
+              <span className="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
             </div>
+          </div>
+          
+          {/* Mobile version of Life Context - shown at top on mobile */}
+          <div className="md:hidden flex justify-center mb-8">
+            <div className="bg-accent-primary text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-background-primary">
+              <FileTextIcon className="w-10 h-10 mb-1 text-white" />
+              <span className="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
+            </div>
+          </div>
+
+          {/* Grid with equal row heights to ensure consistent line positioning */}
+          <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-2 gap-8 md:gap-12 relative md:auto-rows-fr">
+            
+            {/* Connecting Lines (Desktop only) - positioned relative to grid */}
+            <div className="hidden md:block absolute inset-x-0 top-1/2 h-1 bg-border-secondary -z-1 -translate-y-1/2" />
+            <div className="hidden md:block absolute inset-y-0 left-1/2 w-1 bg-border-secondary -z-1 -translate-x-1/2" />
 
             {/* Step 1: Selection */}
             <div className="order-1 bg-background-secondary p-6 rounded-lg shadow-lg border border-border-secondary hover:border-accent-primary transition-colors relative group md:flex md:flex-col">

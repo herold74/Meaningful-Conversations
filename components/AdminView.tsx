@@ -24,9 +24,11 @@ import { UserPlusIcon } from './icons/UserPlusIcon';
 import { UnlockIcon } from './icons/UnlockIcon';
 import { ActivityIcon } from './icons/ActivityIcon';
 import { DollarIcon } from './icons/DollarIcon';
-import { TestScenario, getTestScenarios } from '../utils/testScenarios';
+import { getTestScenarios } from '../utils/testScenarios';
+import type { TestScenario } from '../utils/testScenarios';
 import { ApiUsageView } from './ApiUsageView';
 import NewsletterPanel from './NewsletterPanel';
+import TestRunner from './TestRunner';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -245,10 +247,12 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
     const [userToReset, setUserToReset] = useState<User | null>(null);
     const [selectedBotFilter, setSelectedBotFilter] = useState<string | null>(null);
-    const [selectedScenarioId, setSelectedScenarioId] = useState<string>(testScenarios[0].id);
+    const [selectedScenarioId, setSelectedScenarioId] = useState<string>(testScenarios[0]?.id || '');
     const [adminProfileType, setAdminProfileType] = useState<'RIEMANN' | 'BIG5' | null>(null);
     const [showMismatchWarning, setShowMismatchWarning] = useState(false);
     const [pendingScenario, setPendingScenario] = useState<TestScenario | null>(null);
+    const [showDynamicTestRunner, setShowDynamicTestRunner] = useState(false);
+    const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
 
 
     const loadData = useCallback(async () => {
@@ -279,21 +283,26 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         loadData();
     }, [loadData]);
 
-    // Load admin's profile type for test scenario matching
+    // Load admin's profile type and full profile for test scenario matching
     useEffect(() => {
-        const loadProfileType = async () => {
+        const loadProfileData = async () => {
             try {
                 const profile = await loadPersonalityProfile();
-                if (profile && profile.testType) {
-                    setAdminProfileType(profile.testType as 'RIEMANN' | 'BIG5');
+                if (profile) {
+                    if (profile.testType) {
+                        setAdminProfileType(profile.testType as 'RIEMANN' | 'BIG5');
+                    }
+                    // Store full profile for TestRunner's "My Profile" option
+                    setAdminPersonalityProfile(profile);
                 }
             } catch (err) {
                 // No profile - that's okay
                 setAdminProfileType(null);
+                setAdminPersonalityProfile(null);
             }
         };
         if (currentUser) {
-            loadProfileType();
+            loadProfileData();
         }
     }, [currentUser]);
 
@@ -1249,8 +1258,29 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         
         return (
             <div className="space-y-4">
+                {/* New Dynamic Test Runner Section */}
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                                🧪 Dynamischer Test-Runner
+                            </h3>
+                            <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
+                                Echte API-Calls mit Bot-Auswahl, Test-Profilen und automatischer Validierung
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowDynamicTestRunner(true)}
+                            className="px-5 py-2 text-base font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-md transition-colors"
+                        >
+                            🚀 Starten
+                        </button>
+                    </div>
+                </div>
+                
+                {/* Legacy Test Runner Section */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
-                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')}</h3>
+                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')} (Statisch)</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
                     
                     <div className="flex flex-col sm:flex-row items-stretch gap-3">
@@ -1363,6 +1393,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                             </div>
                         </div>
                     </div>
+                )}
+                
+                {/* Dynamic Test Runner Modal */}
+                {showDynamicTestRunner && (
+                    <TestRunner 
+                        onClose={() => setShowDynamicTestRunner(false)}
+                        userProfile={adminPersonalityProfile}
+                    />
                 )}
             </div>
         );

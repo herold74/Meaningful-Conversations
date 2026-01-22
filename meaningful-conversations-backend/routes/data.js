@@ -139,6 +139,59 @@ router.put('/user/coaching-mode', async (req, res) => {
     }
 });
 
+// PUT /api/data/user/ai-region - Update user AI region preference
+router.put('/user/ai-region', async (req, res) => {
+    const { aiRegionPreference } = req.body;
+    const userId = req.userId;
+    
+    // Validate region preference
+    const validRegions = ['optimal', 'eu', 'us'];
+    if (!validRegions.includes(aiRegionPreference)) {
+        return res.status(400).json({ error: 'Invalid AI region preference. Must be one of: optimal, eu, us' });
+    }
+    
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                aiRegionPreference,
+                updatedAt: new Date(),
+            },
+        });
+        
+        // Log region change for analytics
+        console.log(`🌍 User ${userId} changed AI region preference to: ${aiRegionPreference}`);
+        
+        // Return updated user without sensitive fields
+        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        
+        // Parse unlockedCoaches from JSON string
+        if (userResponse.unlockedCoaches) {
+            try {
+                userResponse.unlockedCoaches = JSON.parse(userResponse.unlockedCoaches);
+            } catch {
+                userResponse.unlockedCoaches = [];
+            }
+        } else {
+            userResponse.unlockedCoaches = [];
+        }
+        
+        res.json({ 
+            message: 'AI region preference updated successfully', 
+            user: userResponse,
+            regionInfo: {
+                eu: { provider: 'Mistral AI', location: 'Paris, France', gdprCompliant: true },
+                us: { provider: 'Google Gemini', location: 'USA', gdprCompliant: false },
+                optimal: { provider: 'Admin-configured default', location: 'Varies', gdprCompliant: 'depends' },
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating AI region preference:', error);
+        res.status(500).json({ error: 'Failed to update AI region preference.' });
+    }
+});
+
 // POST /api/data/redeem-code
 router.post('/redeem-code', async (req, res) => {
     const { code } = req.body;

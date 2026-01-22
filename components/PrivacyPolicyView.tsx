@@ -93,6 +93,28 @@ Wir nutzen verschiedene KI-Dienste für die Verarbeitung Ihrer Coaching-Gespräc
 - Der verschlüsselte Lebenskontext und das Persönlichkeitsprofil werden für die Verarbeitung temporär entschlüsselt und an die API übermittelt
 - Die sensiblen Daten werden **nicht** dauerhaft beim KI-Anbieter gespeichert
 
+#### Personalisierter Coaching-Modus (DPC/DPFL)
+
+Wenn Sie den **DPC (Dynamic Prompt Controller)** oder **DPFL (Dynamic Profile Feedback Loop)** Modus aktivieren, werden zusätzliche Profildaten an den KI-Anbieter übermittelt:
+
+**Was übermittelt wird:**
+- Abstrakte Persönlichkeitsmerkmale (z.B. "Nähe-Präferenz: hoch", "Wechsel-Präferenz: niedrig")
+- Ihre Persönlichkeits-Signatur (Stärken, Blindspots, Wachstumschancen) - falls generiert
+- Kommunikationsstil-Präferenzen aus Ihren Testergebnissen
+
+**Was NICHT übermittelt wird:**
+- Ihre Benutzer-ID oder E-Mail-Adresse
+- Ihre IP-Adresse
+- Direkt identifizierende Informationen
+
+**Pseudonymisierung (Art. 4 Nr. 5 DSGVO):**
+Die an den KI-Anbieter übermittelten Persönlichkeitsdaten sind **pseudonymisiert** - sie können nicht auf Sie als Person zurückgeführt werden. Die Merkmale sind abstrakte psychologische Konzepte, die auf Millionen von Menschen zutreffen. In Kombination mit unserer ausdrücklichen Empfehlung, keine personenbezogenen Daten (Namen, Adressen etc.) in Ihrem Lebenskontext zu verwenden, hat die KI keine Möglichkeit, Sie zu identifizieren.
+
+**Ihre Kontrolle:**
+- DPC/DPFL-Modus ist Opt-In - Sie wählen aktiv, ihn zu aktivieren
+- Sie können jederzeit zum Standard-Modus zurückkehren
+- Bei der ersten Aktivierung wird eine Warnung angezeigt
+
 #### Performance-Optimierung (Prompt Caching)
 Zur Verbesserung der Antwortgeschwindigkeit nutzen wir die Caching-Funktion der Gemini API. Dabei werden Teile Ihres Lebenskontexts (unverschlüsselt, wie bei jeder API-Anfrage) für maximal **5 Minuten** auf Servern von Google LLC (USA) zwischengespeichert. Die gecachten Daten:
 - Sind nur für Ihre eigenen Anfragen zugänglich
@@ -338,6 +360,28 @@ We use various AI services for processing your coaching conversations and genera
 - Your conversations are sent to the configured AI service for processing
 - The encrypted Life Context and personality profile are temporarily decrypted and transmitted to the API for processing
 - Sensitive data is **not** permanently stored by the AI provider
+
+#### Personalized Coaching Mode (DPC/DPFL)
+
+When you enable **DPC (Dynamic Prompt Controller)** or **DPFL (Dynamic Profile Feedback Loop)** mode, additional profile data is transmitted to the AI provider:
+
+**What is transmitted:**
+- Abstract personality traits (e.g., "proximity preference: high", "change preference: low")
+- Your personality signature (strengths, blindspots, growth opportunities) - if generated
+- Communication style preferences derived from your test results
+
+**What is NOT transmitted:**
+- Your user ID or email address
+- Your IP address
+- Directly identifying information
+
+**Pseudonymization (Art. 4 No. 5 GDPR):**
+The personality data transmitted to the AI provider is **pseudonymized** - it cannot be traced back to you as an individual. The traits are abstract psychological concepts that apply to millions of people. Combined with our explicit guidance to avoid including personal identifiers (names, addresses, etc.) in your Life Context, the AI has no way to identify who you are.
+
+**Your Control:**
+- DPC/DPFL mode is opt-in - you actively choose to enable it
+- You can return to standard mode at any time
+- A warning is displayed upon first activation
 
 #### Performance Optimization (Prompt Caching)
 To improve response times, we use the caching feature of the Gemini API. Parts of your Life Context (unencrypted, as with every API request) are temporarily stored on Google LLC (USA) servers for up to **5 minutes**. The cached data:

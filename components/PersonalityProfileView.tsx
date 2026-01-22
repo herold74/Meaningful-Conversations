@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
 import { updateCoachingMode } from '../services/userService';
@@ -6,6 +6,7 @@ import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile, SpiralDynamicsResult, LensType } from './PersonalitySurvey';
 import { formatSurveyResultAsHtml } from '../utils/surveyResultHtmlFormatter';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGenerator';
+import { detectPII, PIIDetectionResult } from '../utils/piiDetection';
 import Spinner from './shared/Spinner';
 import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
@@ -299,6 +300,8 @@ interface PersonalityProfileViewProps {
   onStartNewTest: (existingProfile?: Partial<SurveyResult>) => void;
   currentUser: User | null;
   onUserUpdate: (user: User) => void;
+  lifeContext?: string; // For PII detection when activating DPC/DPFL
+  onEditLifeContext?: () => void; // Navigate to Life Context editor for PII cleanup
 }
 
 interface ProfileMetadata {
@@ -310,7 +313,7 @@ interface ProfileMetadata {
   adaptationMode: 'adaptive' | 'stable';
 }
 
-const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate }) => {
+const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate, lifeContext, onEditLifeContext }) => {
   const { t, language } = useLocalization();
   const [isLoading, setIsLoading] = useState(true);
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
@@ -324,11 +327,35 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isUpdatingCoachingMode, setIsUpdatingCoachingMode] = useState(false);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDpcWarning, setShowDpcWarning] = useState(false);
+  const [pendingCoachingMode, setPendingCoachingMode] = useState<CoachingMode | null>(null);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
   
+  // Check if user has ever used DPC/DPFL before (stored in localStorage)
+  const hasSeenDpcWarning = localStorage.getItem('hasSeenDpcWarning') === 'true';
+  
+  // Detect PII in life context when DPC warning is shown
+  const piiDetectionResult = useMemo<PIIDetectionResult | null>(() => {
+    if (!showDpcWarning || !lifeContext) return null;
+    return detectPII(lifeContext, language as 'de' | 'en');
+  }, [showDpcWarning, lifeContext, language]);
+  
   const handleCoachingModeChange = async (newMode: CoachingMode) => {
+    if (!currentUser || isUpdatingCoachingMode) return;
+    
+    // Show warning when switching to DPC/DPFL for the first time from 'off'
+    if ((newMode === 'dpc' || newMode === 'dpfl') && currentCoachingMode === 'off' && !hasSeenDpcWarning) {
+      setPendingCoachingMode(newMode);
+      setShowDpcWarning(true);
+      return;
+    }
+    
+    await applyCoachingModeChange(newMode);
+  };
+  
+  const applyCoachingModeChange = async (newMode: CoachingMode) => {
     if (!currentUser || isUpdatingCoachingMode) return;
     
     setIsUpdatingCoachingMode(true);
@@ -340,6 +367,20 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
     } finally {
       setIsUpdatingCoachingMode(false);
     }
+  };
+  
+  const confirmDpcActivation = async () => {
+    if (pendingCoachingMode) {
+      localStorage.setItem('hasSeenDpcWarning', 'true');
+      setShowDpcWarning(false);
+      await applyCoachingModeChange(pendingCoachingMode);
+      setPendingCoachingMode(null);
+    }
+  };
+  
+  const cancelDpcActivation = () => {
+    setShowDpcWarning(false);
+    setPendingCoachingMode(null);
   };
 
   const handleDeleteProfile = async () => {
@@ -589,7 +630,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const chipTeal = `${chipBase} bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-300/70 dark:border-teal-700/60`;  // What Defines You - grounded depth
 
   const coachingSelectBase =
-    'px-3 py-1.5 text-sm font-semibold rounded-lg border bg-background-secondary dark:bg-background-secondary/60 cursor-pointer transition-colors appearance-none bg-no-repeat bg-right pr-8';
+    'px-3 py-1.5 text-sm font-semibold rounded-lg border bg-background-secondary dark:bg-background-secondary/60 cursor-pointer transition-colors appearance-none bg-no-repeat bg-right pr-8 flex-shrink-0 self-start sm:self-auto';
   const coachingSelectState =
     currentCoachingMode === 'off'
       ? 'border-border-secondary text-content-tertiary'
@@ -602,7 +643,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
         {/* Compact Header - Option A: Integrated with Dropdown */}
         <div className="mb-6 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <h2 className="text-2xl font-bold text-content-primary">
               {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
             </h2>
@@ -1023,6 +1064,127 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       </div>
 
       {/* Delete Profile Warning Modal */}
+      {/* DPC/DPFL Activation Warning Modal */}
+      {showDpcWarning && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto py-4"
+          aria-modal="true"
+          role="dialog"
+          onClick={cancelDpcActivation}
+        >
+          <div 
+            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-blue-400 dark:border-blue-500/50 shadow-xl rounded-lg mx-4 my-auto max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                🔐 {language === 'de' ? 'Personalisiertes Coaching aktivieren' : 'Activate Personalized Coaching'}
+              </h2>
+              <button 
+                onClick={cancelDpcActivation}
+                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                aria-label={t('modal_close') || 'Schließen'}
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <p className="text-blue-800 dark:text-blue-300 font-medium mb-2">
+                  {language === 'de' 
+                    ? 'Um dein Coaching-Erlebnis zu personalisieren, werden folgende Daten an den KI-Anbieter (Google oder Mistral) übermittelt:'
+                    : 'To personalize your coaching experience, the following data will be sent to the AI provider (Google or Mistral):'}
+                </p>
+                <ul className="text-blue-700 dark:text-blue-400 text-sm list-disc list-inside space-y-1 mt-3">
+                  <li>{language === 'de' ? 'Abstrakte Persönlichkeitsmerkmale (z.B. Nähe-Präferenz, Wechsel-Präferenz)' : 'Abstract personality traits (e.g., proximity preference, change preference)'}</li>
+                  <li>{language === 'de' ? 'Deine Persönlichkeits-Signatur (falls generiert)' : 'Your personality signature (if generated)'}</li>
+                  <li>{language === 'de' ? 'Kommunikationsstil-Präferenzen' : 'Communication style preferences'}</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                <p className="text-green-800 dark:text-green-300 font-medium mb-2">
+                  ✅ {language === 'de' ? 'Was NICHT übermittelt wird:' : 'What is NOT transmitted:'}
+                </p>
+                <ul className="text-green-700 dark:text-green-400 text-sm list-disc list-inside space-y-1">
+                  <li>{language === 'de' ? 'Deine E-Mail-Adresse oder Benutzer-ID' : 'Your email address or user ID'}</li>
+                  <li>{language === 'de' ? 'Deine IP-Adresse' : 'Your IP address'}</li>
+                  <li>{language === 'de' ? 'Direkt identifizierende Informationen' : 'Directly identifying information'}</li>
+                </ul>
+              </div>
+              
+              {/* PII Detection Warning */}
+              {piiDetectionResult?.hasPII && (
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                  <p className="text-amber-800 dark:text-amber-300 font-medium mb-2">
+                    ⚠️ {language === 'de' 
+                      ? 'Mögliche persönliche Daten in deinem Lebenskontext erkannt:'
+                      : 'Potential personal data detected in your Life Context:'}
+                  </p>
+                  <ul className="text-amber-700 dark:text-amber-400 text-sm list-disc list-inside space-y-1">
+                    {piiDetectionResult.detectedTypes.map((type, idx) => (
+                      <li key={idx}>
+                        {type}
+                        {piiDetectionResult.examples[idx] && (
+                          <span className="text-amber-600 dark:text-amber-500 ml-1">
+                            ({language === 'de' ? 'z.B.' : 'e.g.'} "{piiDetectionResult.examples[idx]}")
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-amber-700 dark:text-amber-400 text-sm mt-3">
+                    {language === 'de'
+                      ? '💡 Empfehlung: Ersetze echte Namen und Firmennamen durch Pseudonyme (z.B. "mein Chef" statt "Hans Müller").'
+                      : '💡 Recommendation: Replace real names and company names with pseudonyms (e.g., "my boss" instead of "John Smith").'}
+                  </p>
+                  {onEditLifeContext && (
+                    <button
+                      onClick={() => {
+                        setShowDpcWarning(false);
+                        setPendingCoachingMode(null);
+                        onEditLifeContext();
+                      }}
+                      className="mt-3 w-full py-2 px-4 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors text-sm"
+                    >
+                      📝 {language === 'de' ? 'Lebenskontext jetzt bereinigen' : 'Clean up Life Context now'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <p className="text-content-secondary text-sm">
+                {language === 'de' 
+                  ? 'Die übermittelten Daten sind pseudonymisiert und können nicht auf dich als Person zurückgeführt werden. Mehr Informationen findest du in unserer Datenschutzerklärung.'
+                  : 'The transmitted data is pseudonymized and cannot be traced back to you as an individual. More information can be found in our Privacy Policy.'}
+              </p>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={cancelDpcActivation}
+                variant="secondary"
+                size="md"
+                className="flex-1"
+              >
+                {language === 'de' ? 'Abbrechen' : 'Cancel'}
+              </Button>
+              <Button
+                onClick={confirmDpcActivation}
+                variant="primary"
+                size="md"
+                className="flex-1"
+              >
+                {language === 'de' ? 'Verstanden, aktivieren' : 'Understood, activate'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showDeleteWarning && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"

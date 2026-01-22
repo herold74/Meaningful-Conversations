@@ -68,7 +68,10 @@ export const synthesizeSpeech = async (
         if (modelName) {
             requestBody.voiceId = modelName;
         } else {
-            console.warn('[TTS Service] No model found for voiceId:', voiceId);
+            // voiceId is not a valid server voice - this means the caller passed a local voice name
+            // by mistake (likely due to inconsistent state). Log warning but continue without custom voice.
+            console.warn('[TTS Service] No model found for voiceId:', voiceId, '- using default voice. This may indicate corrupted voice settings.');
+            // Don't add voiceId to request - backend will use default voice for language/gender
         }
     }
 
