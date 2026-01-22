@@ -213,10 +213,14 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        
+        # Increment build number for each deployment
         BUILD_NUM=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
+        BUILD_NUM=$((BUILD_NUM + 1))
+        echo "$BUILD_NUM" > BUILD_NUMBER
         
         if [[ "$DRY_RUN" == true ]]; then
-            echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE"
+            echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE (Build $BUILD_NUM)"
         else
             podman build --platform linux/amd64 \
                 --build-arg BUILD_NUMBER="$BUILD_NUM" \

@@ -76,6 +76,15 @@ export const updateCoachingMode = async (coachingMode: 'off' | 'dpc' | 'dpfl'): 
     });
 };
 
+export type AIRegionPreference = 'optimal' | 'eu' | 'us';
+
+export const updateAIRegionPreference = async (aiRegionPreference: AIRegionPreference): Promise<{ message: string, user: User }> => {
+    return await apiFetch('/data/user/ai-region', {
+        method: 'PUT',
+        body: JSON.stringify({ aiRegionPreference }),
+    });
+};
+
 export const verifyEmail = async (token: string): Promise<{ user: User, token: string }> => {
     const session = await apiFetch('/auth/verify-email', {
         method: 'POST',

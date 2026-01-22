@@ -34,7 +34,8 @@ export type NavView =
     | 'changePassword'
     | 'exportData'
     | 'personalitySurvey'
-    | 'personalityProfile';
+    | 'personalityProfile'
+    | 'lifeContextEditor';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
