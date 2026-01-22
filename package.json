@@ -11,6 +11,10 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@capacitor-community/native-audio": "^8.0.0",
+    "@capacitor-community/speech-recognition": "^7.0.1",
+    "@capacitor/core": "^8.0.1",
+    "@capacitor/ios": "^8.0.1",
     "express": "^4.19.2",
     "html2pdf.js": "^0.12.1",
     "ics": "^3.8.1",
@@ -20,6 +24,7 @@
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.1",
     "@tailwindcss/typography": "^0.5.10",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.11.0",

@@ -3,6 +3,19 @@ node_modules/
 /node_modules
 meaningful-conversations-backend/node_modules/
 
+# Capacitor - iOS
+ios/App/Pods/
+ios/.build/
+ios/App/App/public/
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcuserdata
+
+# Capacitor - Android (for future use)
+android/.gradle/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+
 # Build output
 /dist
 meaningful-conversations-backend/dist/
