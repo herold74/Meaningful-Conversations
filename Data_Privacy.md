@@ -57,7 +57,29 @@ When you use the "Forgot Password" feature, the system allows you to create a ne
 
 ### What data does the AI see during a conversation?
 
-During a session, your current "Life Context" and the ongoing chat history are sent to the Google Gemini API to generate the coach's responses. This data is used for the duration of that specific API call and is not stored by us or Google in a way that is permanently linked to your user account for other purposes.
+During a session, your current "Life Context" and the ongoing chat history are sent to the AI API (Google Gemini or Mistral) to generate the coach's responses. This data is used for the duration of that specific API call and is not stored by us or the AI provider in a way that is permanently linked to your user account for other purposes.
+
+### What about DPC/DPFL Personalized Coaching Mode?
+
+When you enable the **DPC (Dynamic Prompt Controller)** or **DPFL (Dynamic Profile Feedback Loop)** mode, additional profile data is sent to the AI provider to personalize your coaching experience:
+
+**What is sent:**
+- Abstract personality traits (e.g., "proximity preference: high", "change preference: low")
+- Your personality signature (strengths, blindspots, growth opportunities) - if generated
+- Communication style preferences derived from your test results
+
+**What is NOT sent:**
+- Your user ID or email address
+- Your IP address
+- Any directly identifying information
+
+**Why this is privacy-safe:**
+The personality data sent to the AI is **pseudonymized** - it cannot be traced back to you as an individual. The traits are abstract psychological concepts that apply to millions of people. Combined with our explicit guidance to avoid including personal identifiers (names, addresses, etc.) in your Life Context, the AI has no way to identify who you are.
+
+**Your Control:**
+- DPC/DPFL mode is opt-in - you choose to enable it
+- You can switch back to standard mode at any time
+- A warning is displayed when you first enable the mode
 
 ### What data do you collect and store?
 

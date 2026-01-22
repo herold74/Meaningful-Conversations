@@ -116,16 +116,23 @@
 
 ### 12. **Experimental Mode (DPC/DPFL)** ✨ NEU
 - **Status:** ✅ DSGVO-KONFORM & TRANSPARENT
-- **Implementierung:** 10. Dezember 2025
+- **Implementierung:** 10. Dezember 2025, aktualisiert Januar 2026
 - **Funktion:**
   - **DPC (Dynamic Prompt Controller):** Personalisierte KI-Antworten basierend auf Persönlichkeitsprofil
   - **DPFL (Dynamic Profile Feedback Loop):** Verhaltensanalyse & Profil-Anpassung
 - **Datenschutz:**
   - Nur für Nutzer mit abgeschlossenem Persönlichkeitstest
   - Opt-In erforderlich (Nutzer wählt Modus aktiv)
+  - **Warnung bei Aktivierung:** Nutzer wird explizit darauf hingewiesen, dass Profildaten an KI-Anbieter übermittelt werden
   - Profil wird client-seitig entschlüsselt
   - Entschlüsseltes Profil über HTTPS an Backend (nur während Session)
   - Backend speichert entschlüsselte Daten NICHT dauerhaft
+- **Pseudonymisierung (Art. 4 Nr. 5 DSGVO):**
+  - **KEINE Identifikatoren werden an KI-Anbieter gesendet** (keine userId, keine E-Mail, keine IP)
+  - An KI gesendet werden nur: abstrakte Persönlichkeitsmerkmale (z.B. "naehe: hoch"), Coaching-Strategien, Signatur-Texte
+  - **Diese Daten sind nicht auf eine natürliche Person rückführbar**
+  - Nutzer werden explizit aufgefordert, keine personenbezogenen Daten (Namen, Adressen, etc.) im Lebenskontext zu verwenden
+  - Die Persönlichkeits-Signatur enthält nur abstrakte psychologische Konzepte
 - **Session Behavior Logs:**
   - **Datenbank-Tabelle:** `session_behavior_logs`
   - **Verschlüsselt:** Session-Transkripte (E2EE)
@@ -136,8 +143,10 @@
   - "Was bedeutet das?"-Link mit ausführlicher Erklärung
   - Grüne Badge "🧪 DPC" während Session zeigt Modus an
   - Nutzer kann jederzeit zu Standard-Modus zurückkehren
+  - **Aktivierungswarnung** informiert über Datenübertragung an KI-Anbieter
 - **Rechtsgrundlage:** Art. 6 Abs. 1 lit. a DSGVO (explizite Einwilligung)
 - **Art. 25 DSGVO:** Privacy by Design (Opt-In, E2EE, Opt-Out)
+- **Art. 4 Nr. 5 DSGVO:** Pseudonymisierung gewährleistet
 
 ### 13. **Blue-Green Deployment Entfernung** ✨ NEU
 - **Status:** ✅ DSGVO-VERBESSERUNG

@@ -1,212 +1,624 @@
 import { Bot, Message } from '../types';
 import { BOTS } from '../constants';
 
-export interface TestScenario {
-    id: string;
-    name: string;
-    description: string;
-    bot: Bot;
-    chatHistory: Message[];
+// ============================================
+// Legacy Test Scenario (for backward compatibility)
+// ============================================
+
+export interface LegacyTestScenario {
+  id: string;
+  name: string;
+  description: string;
+  bot: Bot;
+  chatHistory: Message[];
 }
+
+// Alias for backward compatibility
+export type TestScenario = LegacyTestScenario;
+
+// ============================================
+// New Dynamic Test System
+// ============================================
+
+export type TestCategory = 'core' | 'session' | 'personality' | 'safety' | 'bot';
+export type TestFeature = 'dpc' | 'dpfl' | 'context' | 'formatting' | 'comfort';
+
+export interface TestMessage {
+  text: string;
+  expectedBehavior?: string;  // Description of expected AI behavior
+}
+
+export interface AutoCheck {
+  id: string;
+  name: string;
+  check: (result: TestRunResult) => boolean;
+}
+
+export interface DynamicTestScenario {
+  id: string;
+  name: string;
+  description: string;
+  category: TestCategory;
+  testsFeatures: TestFeature[];
+  
+  // Test messages to be sent (real API calls!)
+  testMessages: TestMessage[];
+  
+  // Automatic validation
+  autoChecks: {
+    dpcRequired: boolean;
+    minDpcLength?: number;
+    expectedKeywords?: string[];  // DPFL should detect these
+    expectComfortCheck?: boolean;
+    // Session analysis auto-checks (for 'session' category)
+    expectSessionUpdates?: boolean;  // Expect proposedUpdates.length > 0
+    expectSessionNextSteps?: boolean;  // Expect nextSteps.length > 0
+  };
+  
+  // Manual checklist items
+  manualChecks: string[];
+}
+
+// ============================================
+// Profile Building Blocks for Multi-Select
+// ============================================
+
+export interface RiemannData {
+  naehe: number;
+  distanz: number;
+  dauer: number;
+  wechsel: number;
+}
+
+export interface SDLevels {
+  beige: number;
+  purple: number;
+  red: number;
+  blue: number;
+  orange: number;
+  green: number;
+  yellow: number;
+  turquoise: number;
+}
+
+export interface OCEANData {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+}
+
+export interface RiemannProfileBlock {
+  id: string;
+  name: string;
+  data: RiemannData;
+}
+
+export interface SDProfileBlock {
+  id: string;
+  name: string;
+  data: SDLevels;
+}
+
+export interface OCEANProfileBlock {
+  id: string;
+  name: string;
+  data: OCEANData;
+}
+
+// Combined profile structure for DPC
+export interface CombinedTestProfile {
+  completedLenses: string[];
+  riemann?: { beruf: RiemannData };
+  spiralDynamics?: { levels: SDLevels };
+  big5?: OCEANData;
+}
+
+// Legacy TestProfile interface (kept for backward compatibility)
+export interface TestProfile {
+  id: string;
+  name: string;
+  description: string;
+  profile: {
+    // Must match DPC controller expected structure
+    path?: 'RIEMANN' | 'BIG5' | 'SD';
+    completedLenses?: string[];
+    riemann?: {
+      beruf: {
+        naehe: number;
+        distanz: number;
+        dauer: number;
+        wechsel: number;
+      };
+    };
+    big5?: {
+      openness: number;
+      conscientiousness: number;
+      extraversion: number;
+      agreeableness: number;
+      neuroticism: number;
+    };
+    spiralDynamics?: {
+      levels: {
+        beige?: number;
+        purple?: number;
+        red?: number;
+        blue?: number;
+        orange?: number;
+        green?: number;
+        yellow?: number;
+        turquoise?: number;
+      };
+    };
+  };
+}
+
+export interface TestRunResult {
+  scenarioId: string;
+  botId: string;
+  profileId: string;
+  timestamp: string;
+  
+  // Response data
+  responses: {
+    userMessage: string;
+    botResponse: string;
+    responseTime: number;
+  }[];
+  
+  // DPC/DPFL telemetry (from backend)
+  telemetry?: {
+    dpcInjectionPresent: boolean;
+    dpcInjectionLength: number;
+    dpcStrategiesUsed: string[];
+    dpflKeywordsDetected: string[];
+    comfortCheckTriggered: boolean;
+  };
+  
+  // Auto-check results
+  autoCheckResults: {
+    checkId: string;
+    passed: boolean;
+    details?: string;
+  }[];
+  
+  // Manual check results (filled by tester)
+  manualCheckResults: {
+    checkId: string;
+    passed: boolean | null;  // null = not yet checked
+    notes?: string;
+  }[];
+}
+
+// ============================================
+// Pre-defined Test Profile Building Blocks
+// Each category has 2 options for multi-select
+// ============================================
+
+export const RIEMANN_PROFILES: RiemannProfileBlock[] = [
+  {
+    id: 'riemann_naehe',
+    name: '💚 Nähe (Harmonie)',
+    data: { naehe: 85, distanz: 25, dauer: 50, wechsel: 50 }
+  },
+  {
+    id: 'riemann_distanz',
+    name: '🔵 Distanz (Rationalität)',
+    data: { naehe: 30, distanz: 80, dauer: 70, wechsel: 30 }
+  }
+];
+
+export const SD_PROFILES: SDProfileBlock[] = [
+  {
+    id: 'sd_orange',
+    name: '🟠 Orange (Leistung)',
+    // Ranks 1-8 (1 = most dominant, 8 = least dominant)
+    data: { beige: 8, purple: 7, red: 4, blue: 3, orange: 1, green: 5, yellow: 6, turquoise: 2 }
+  },
+  {
+    id: 'sd_green',
+    name: '🟢 Grün (Gemeinschaft)',
+    // Ranks 1-8 (1 = most dominant, 8 = least dominant)
+    data: { beige: 8, purple: 5, red: 7, blue: 4, orange: 6, green: 1, yellow: 2, turquoise: 3 }
+  }
+];
+
+export const OCEAN_PROFILES: OCEANProfileBlock[] = [
+  {
+    id: 'ocean_balanced',
+    name: '⚖️ Ausgeglichen',
+    // OCEAN uses scale 1-5 (not 0-100!) - 3 is the midpoint
+    data: { openness: 3, conscientiousness: 3, extraversion: 3, agreeableness: 3, neuroticism: 3 }
+  },
+  {
+    id: 'ocean_high_openness',
+    name: '🎨 Hohe Offenheit',
+    // OCEAN uses scale 1-5 (not 0-100!)
+    data: { openness: 5, conscientiousness: 2, extraversion: 3, agreeableness: 3, neuroticism: 2 }
+  }
+];
+
+// ============================================
+// Profile Combination Function
+// Combines selected profile blocks into DPC-compatible format
+// ============================================
+
+export const combineProfiles = (
+  riemann: RiemannProfileBlock | null,
+  sd: SDProfileBlock | null,
+  ocean: OCEANProfileBlock | null
+): CombinedTestProfile => {
+  const completedLenses: string[] = [];
+  
+  if (riemann) completedLenses.push('riemann');
+  if (sd) completedLenses.push('sd');
+  if (ocean) completedLenses.push('ocean');
+  
+  return {
+    completedLenses,
+    riemann: riemann ? { beruf: riemann.data } : undefined,
+    spiralDynamics: sd ? { levels: sd.data } : undefined,
+    big5: ocean ? ocean.data : undefined
+  };
+};
+
+// ============================================
+// Legacy TEST_PROFILES (kept for backward compatibility)
+// ============================================
+
+export const TEST_PROFILES: TestProfile[] = [
+  {
+    id: 'naehe_dominant',
+    name: '💚 Nähe (Harmonie)',
+    description: 'Hohe Nähe, niedrige Distanz - erwartet warme, empathische Antworten',
+    profile: {
+      path: 'RIEMANN',
+      riemann: {
+        beruf: { naehe: 85, distanz: 25, dauer: 50, wechsel: 50 }
+      },
+      big5: { openness: 3, conscientiousness: 3, extraversion: 4, agreeableness: 4, neuroticism: 2 }
+    }
+  },
+  {
+    id: 'user_profile',
+    name: '👤 Mein Profil',
+    description: 'Verwendet dein echtes Persönlichkeitsprofil',
+    profile: {}
+  }
+];
+
+// ============================================
+// Test Scenarios - Category: Core
+// ============================================
+
+export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTestScenario[] => [
+  // ============================================
+  // CORE CHAT FUNCTIONALITY
+  // ============================================
+  {
+    id: 'core_response_quality',
+    name: '💬 ' + t('test_core_response_quality'),
+    description: t('test_core_response_quality_desc'),
+    category: 'core',
+    testsFeatures: ['formatting'],
+    testMessages: [
+      {
+        text: t('test_core_msg_1'),
+        expectedBehavior: t('test_core_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+    },
+    manualChecks: [
+      t('test_check_response_helpful'),
+      t('test_check_no_hallucination'),
+      t('test_check_bot_character'),
+    ]
+  },
+  {
+    id: 'core_context_usage',
+    name: '📝 ' + t('test_core_context_usage'),
+    description: t('test_core_context_usage_desc'),
+    category: 'core',
+    testsFeatures: ['context'],
+    testMessages: [
+      {
+        text: t('test_context_msg_1'),
+        expectedBehavior: t('test_context_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+    },
+    manualChecks: [
+      t('test_check_context_referenced'),
+      t('test_check_context_accurate'),
+    ]
+  },
+
+  // ============================================
+  // SESSION MANAGEMENT
+  // ============================================
+  {
+    id: 'session_update',
+    name: '✏️ ' + t('test_session_update'),
+    description: t('test_session_update_desc'),
+    category: 'session',
+    testsFeatures: ['context'],
+    testMessages: [
+      {
+        text: t('test_session_msg_1'),
+        expectedBehavior: t('test_session_msg_1_expected')
+      },
+      {
+        text: t('test_session_msg_2'),
+        expectedBehavior: t('test_session_msg_2_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionUpdates: true, // Auto-check: proposedUpdates.length > 0
+    },
+    manualChecks: [
+      t('test_check_update_format'),    // Manual: check headline & content quality
+      t('test_check_update_accurate'),  // Manual: check content reflects conversation
+    ]
+  },
+  {
+    id: 'session_next_steps',
+    name: '🎯 ' + t('test_session_next_steps'),
+    description: t('test_session_next_steps_desc'),
+    category: 'session',
+    testsFeatures: ['context', 'formatting'],
+    testMessages: [
+      {
+        text: t('test_nextsteps_msg_1'),
+        expectedBehavior: t('test_nextsteps_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionNextSteps: true, // Auto-check: nextSteps.length > 0
+    },
+    manualChecks: [
+      t('test_check_nextsteps_actionable'), // Manual: check steps are concrete
+      t('test_check_nextsteps_relevant'),   // Manual: check steps match topic
+    ]
+  },
+
+  // ============================================
+  // PERSONALITY SYSTEM (DPC + DPFL)
+  // ============================================
+  {
+    id: 'personality_loading',
+    name: '🧠 ' + t('test_personality_loading'),
+    description: t('test_personality_loading_desc'),
+    category: 'personality',
+    testsFeatures: ['dpc'],
+    testMessages: [
+      {
+        text: t('test_personality_msg_1'),
+        expectedBehavior: t('test_personality_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+    },
+    manualChecks: [
+      t('test_check_dpc_injection'),
+      t('test_check_profile_loaded'),
+    ]
+  },
+  {
+    id: 'personality_response_style',
+    name: '🎨 ' + t('test_personality_response_style'),
+    description: t('test_personality_response_style_desc'),
+    category: 'personality',
+    testsFeatures: ['dpc'],
+    testMessages: [
+      {
+        text: t('test_style_msg_1'),
+        expectedBehavior: t('test_style_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 200,
+    },
+    manualChecks: [
+      t('test_check_style_matches_profile'),
+      t('test_check_not_generic'),
+      t('test_check_bot_plus_personality'),
+    ]
+  },
+  {
+    id: 'personality_behavior_tracking',
+    name: '📊 ' + t('test_personality_behavior_tracking'),
+    description: t('test_personality_behavior_tracking_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl'],
+    testMessages: [
+      {
+        text: t('test_dpfl_msg_1'),  // Contains keywords like "Sicherheit", "Planung" / "security", "planning"
+        expectedBehavior: t('test_dpfl_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: true,
+      // Keywords must match language - German and English variants
+      expectedKeywords: ['sicherheit', 'planung', 'struktur', 'security', 'planning', 'structure'],
+    },
+    manualChecks: [
+      t('test_check_keywords_match_message'), // Manual: verify detected keywords match message content
+    ]
+  },
+  {
+    id: 'personality_blindspot',
+    name: '🎯 ' + t('test_personality_blindspot'),
+    description: t('test_personality_blindspot_desc'),
+    category: 'personality',
+    testsFeatures: ['dpc'],
+    testMessages: [
+      {
+        text: t('test_blindspot_msg_1'),
+        expectedBehavior: t('test_blindspot_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: true,
+    },
+    manualChecks: [
+      t('test_check_blindspot_addressed'),
+      t('test_check_challenge_gentle'),
+      t('test_check_not_pushy'),
+    ]
+  },
+
+  // ============================================
+  // SAFETY & WELLBEING
+  // ============================================
+  {
+    id: 'safety_comfort_check',
+    name: '💚 ' + t('test_safety_comfort_check'),
+    description: t('test_safety_comfort_check_desc'),
+    category: 'safety',
+    testsFeatures: ['comfort', 'dpfl'],
+    testMessages: [
+      {
+        text: t('test_comfort_msg_1'),  // Emotional distress message
+        expectedBehavior: t('test_comfort_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+      expectComfortCheck: true,
+    },
+    manualChecks: [
+      t('test_check_comfort_triggered'),
+      t('test_check_response_supportive'),
+      t('test_check_not_dismissive'),
+    ]
+  },
+
+  // ============================================
+  // BOT-SPECIFIC
+  // ============================================
+  {
+    id: 'bot_interview',
+    name: '🎤 ' + t('test_bot_interview'),
+    description: t('test_bot_interview_desc'),
+    category: 'bot',
+    testsFeatures: ['formatting'],
+    testMessages: [
+      {
+        text: t('test_interview_msg_1'),
+        expectedBehavior: t('test_interview_msg_1_expected')
+      }
+    ],
+    autoChecks: {
+      dpcRequired: false,
+    },
+    manualChecks: [
+      t('test_check_interview_format'),
+      t('test_check_interview_structure'),
+      t('test_check_interview_questions'),
+    ]
+  },
+];
+
+// ============================================
+// Helper Functions
+// ============================================
+
+export const getScenariosByCategory = (scenarios: DynamicTestScenario[], category: TestCategory): DynamicTestScenario[] => {
+  return scenarios.filter(s => s.category === category);
+};
+
+export const getCategoryIcon = (category: TestCategory): string => {
+  const icons: Record<TestCategory, string> = {
+    core: '💬',
+    session: '📋',
+    personality: '🧠',
+    safety: '💚',
+    bot: '🤖',
+  };
+  return icons[category];
+};
+
+export const getCategoryName = (category: TestCategory, t: (key: string) => string): string => {
+  const names: Record<TestCategory, string> = {
+    core: t('test_category_core'),
+    session: t('test_category_session'),
+    personality: t('test_category_personality'),
+    safety: t('test_category_safety'),
+    bot: t('test_category_bot'),
+  };
+  return names[category];
+};
+
+// Available bots for testing (filter out hidden ones)
+export const getTestableBots = (): Bot[] => {
+  return BOTS.filter(b => b.id !== 'g-interviewer'); // Interview bot has special handling
+};
+
+// ============================================
+// Legacy Test Scenarios (for backward compatibility)
+// Used by App.tsx and AdminView.tsx legacy runner
+// ============================================
 
 const simpleBot = BOTS.find(b => b.id === 'max-ambitious')!;
 const cbtBot = BOTS.find(b => b.id === 'chloe-cbt')!;
 const interviewBot = BOTS.find(b => b.id === 'g-interviewer')!;
-const chloeBot = BOTS.find(b => b.id === 'chloe-cbt')!;
 
-export const getTestScenarios = (t: (key: string) => string): TestScenario[] => [
-    {
-        id: 'interview_formatting',
-        name: t('scenario_interview_name'),
-        description: t('scenario_interview_desc'),
-        bot: interviewBot,
-        chatHistory: [ 
-             { id: '1', role: 'bot', text: t('scenario_interview_chathistory_bot'), timestamp: new Date().toISOString() },
-             { id: '2', role: 'user', text: t('scenario_interview_chathistory_user'), timestamp: new Date().toISOString() },
-             { id: '3', role: 'bot', text: t('scenario_interview_chathistory_bot2'), timestamp: new Date().toISOString() },
-             { id: '4', role: 'user', text: t('scenario_interview_chathistory_user2'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'simple_update',
-        name: t('scenario_simple_update_name'),
-        description: t('scenario_simple_update_desc'),
-        bot: simpleBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_simple_update_user'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_simple_update_bot'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_simple_update_user2'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'complex_update',
-        name: t('scenario_complex_update_name'),
-        description: t('scenario_complex_update_desc'),
-        bot: cbtBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_complex_update_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_complex_update_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_complex_update_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_complex_update_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_complex_update_user3'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'next_steps',
-        name: t('scenario_next_steps_name'),
-        description: t('scenario_next_steps_desc'),
-        bot: simpleBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_next_steps_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_next_steps_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_next_steps_user2'), timestamp: new Date().toISOString() },
-        ],
-    },
-    // ============================================
-    // DPC/DPFL Extended Test Scenarios (12-14 messages each)
-    // ============================================
-    {
-        id: 'dpc_riemann',
-        name: '🧪 ' + t('scenario_dpc_riemann_name'),
-        description: t('scenario_dpc_riemann_desc'),
-        bot: chloeBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_dpc_riemann_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_dpc_riemann_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_dpc_riemann_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_dpc_riemann_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_dpc_riemann_user3'), timestamp: new Date().toISOString() },
-            { id: '6', role: 'bot', text: t('scenario_dpc_riemann_bot3'), timestamp: new Date().toISOString() },
-            { id: '7', role: 'user', text: t('scenario_dpc_riemann_user4'), timestamp: new Date().toISOString() },
-            { id: '8', role: 'bot', text: t('scenario_dpc_riemann_bot4'), timestamp: new Date().toISOString() },
-            { id: '9', role: 'user', text: t('scenario_dpc_riemann_user5'), timestamp: new Date().toISOString() },
-            { id: '10', role: 'bot', text: t('scenario_dpc_riemann_bot5'), timestamp: new Date().toISOString() },
-            { id: '11', role: 'user', text: t('scenario_dpc_riemann_user6'), timestamp: new Date().toISOString() },
-            { id: '12', role: 'bot', text: t('scenario_dpc_riemann_bot6'), timestamp: new Date().toISOString() },
-            { id: '13', role: 'user', text: t('scenario_dpc_riemann_user7'), timestamp: new Date().toISOString() },
-            { id: '14', role: 'bot', text: t('scenario_dpc_riemann_bot7'), timestamp: new Date().toISOString() },
-            { id: '15', role: 'user', text: t('scenario_dpc_riemann_user8'), timestamp: new Date().toISOString() },
-            { id: '16', role: 'bot', text: t('scenario_dpc_riemann_bot8'), timestamp: new Date().toISOString() },
-            { id: '17', role: 'user', text: t('scenario_dpc_riemann_user9'), timestamp: new Date().toISOString() },
-            { id: '18', role: 'bot', text: t('scenario_dpc_riemann_bot9'), timestamp: new Date().toISOString() },
-            { id: '19', role: 'user', text: t('scenario_dpc_riemann_user10'), timestamp: new Date().toISOString() },
-            { id: '20', role: 'bot', text: t('scenario_dpc_riemann_bot10'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'dpc_ocean',
-        name: '🧪 ' + t('scenario_dpc_ocean_name'),
-        description: t('scenario_dpc_ocean_desc'),
-        bot: chloeBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_dpc_ocean_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_dpc_ocean_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_dpc_ocean_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_dpc_ocean_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_dpc_ocean_user3'), timestamp: new Date().toISOString() },
-            { id: '6', role: 'bot', text: t('scenario_dpc_ocean_bot3'), timestamp: new Date().toISOString() },
-            { id: '7', role: 'user', text: t('scenario_dpc_ocean_user4'), timestamp: new Date().toISOString() },
-            { id: '8', role: 'bot', text: t('scenario_dpc_ocean_bot4'), timestamp: new Date().toISOString() },
-            { id: '9', role: 'user', text: t('scenario_dpc_ocean_user5'), timestamp: new Date().toISOString() },
-            { id: '10', role: 'bot', text: t('scenario_dpc_ocean_bot5'), timestamp: new Date().toISOString() },
-            { id: '11', role: 'user', text: t('scenario_dpc_ocean_user6'), timestamp: new Date().toISOString() },
-            { id: '12', role: 'bot', text: t('scenario_dpc_ocean_bot6'), timestamp: new Date().toISOString() },
-            { id: '13', role: 'user', text: t('scenario_dpc_ocean_user7'), timestamp: new Date().toISOString() },
-            { id: '14', role: 'bot', text: t('scenario_dpc_ocean_bot7'), timestamp: new Date().toISOString() },
-            { id: '15', role: 'user', text: t('scenario_dpc_ocean_user8'), timestamp: new Date().toISOString() },
-            { id: '16', role: 'bot', text: t('scenario_dpc_ocean_bot8'), timestamp: new Date().toISOString() },
-            { id: '17', role: 'user', text: t('scenario_dpc_ocean_user9'), timestamp: new Date().toISOString() },
-            { id: '18', role: 'bot', text: t('scenario_dpc_ocean_bot9'), timestamp: new Date().toISOString() },
-            { id: '19', role: 'user', text: t('scenario_dpc_ocean_user10'), timestamp: new Date().toISOString() },
-            { id: '20', role: 'bot', text: t('scenario_dpc_ocean_bot10'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'dpfl_riemann',
-        name: '📊 ' + t('scenario_dpfl_riemann_name'),
-        description: t('scenario_dpfl_riemann_desc'),
-        bot: chloeBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_dpfl_riemann_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_dpfl_riemann_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_dpfl_riemann_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_dpfl_riemann_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_dpfl_riemann_user3'), timestamp: new Date().toISOString() },
-            { id: '6', role: 'bot', text: t('scenario_dpfl_riemann_bot3'), timestamp: new Date().toISOString() },
-            { id: '7', role: 'user', text: t('scenario_dpfl_riemann_user4'), timestamp: new Date().toISOString() },
-            { id: '8', role: 'bot', text: t('scenario_dpfl_riemann_bot4'), timestamp: new Date().toISOString() },
-            { id: '9', role: 'user', text: t('scenario_dpfl_riemann_user5'), timestamp: new Date().toISOString() },
-            { id: '10', role: 'bot', text: t('scenario_dpfl_riemann_bot5'), timestamp: new Date().toISOString() },
-            { id: '11', role: 'user', text: t('scenario_dpfl_riemann_user6'), timestamp: new Date().toISOString() },
-            { id: '12', role: 'bot', text: t('scenario_dpfl_riemann_bot6'), timestamp: new Date().toISOString() },
-            { id: '13', role: 'user', text: t('scenario_dpfl_riemann_user7'), timestamp: new Date().toISOString() },
-            { id: '14', role: 'bot', text: t('scenario_dpfl_riemann_bot7'), timestamp: new Date().toISOString() },
-            { id: '15', role: 'user', text: t('scenario_dpfl_riemann_user8'), timestamp: new Date().toISOString() },
-            { id: '16', role: 'bot', text: t('scenario_dpfl_riemann_bot8'), timestamp: new Date().toISOString() },
-            { id: '17', role: 'user', text: t('scenario_dpfl_riemann_user9'), timestamp: new Date().toISOString() },
-            { id: '18', role: 'bot', text: t('scenario_dpfl_riemann_bot9'), timestamp: new Date().toISOString() },
-            { id: '19', role: 'user', text: t('scenario_dpfl_riemann_user10'), timestamp: new Date().toISOString() },
-            { id: '20', role: 'bot', text: t('scenario_dpfl_riemann_bot10'), timestamp: new Date().toISOString() },
-            { id: '21', role: 'user', text: t('scenario_dpfl_riemann_user11'), timestamp: new Date().toISOString() },
-            { id: '22', role: 'bot', text: t('scenario_dpfl_riemann_bot11'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'dpfl_ocean',
-        name: '📊 ' + t('scenario_dpfl_ocean_name'),
-        description: t('scenario_dpfl_ocean_desc'),
-        bot: chloeBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_dpfl_ocean_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_dpfl_ocean_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_dpfl_ocean_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_dpfl_ocean_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_dpfl_ocean_user3'), timestamp: new Date().toISOString() },
-            { id: '6', role: 'bot', text: t('scenario_dpfl_ocean_bot3'), timestamp: new Date().toISOString() },
-            { id: '7', role: 'user', text: t('scenario_dpfl_ocean_user4'), timestamp: new Date().toISOString() },
-            { id: '8', role: 'bot', text: t('scenario_dpfl_ocean_bot4'), timestamp: new Date().toISOString() },
-            { id: '9', role: 'user', text: t('scenario_dpfl_ocean_user5'), timestamp: new Date().toISOString() },
-            { id: '10', role: 'bot', text: t('scenario_dpfl_ocean_bot5'), timestamp: new Date().toISOString() },
-            { id: '11', role: 'user', text: t('scenario_dpfl_ocean_user6'), timestamp: new Date().toISOString() },
-            { id: '12', role: 'bot', text: t('scenario_dpfl_ocean_bot6'), timestamp: new Date().toISOString() },
-            { id: '13', role: 'user', text: t('scenario_dpfl_ocean_user7'), timestamp: new Date().toISOString() },
-            { id: '14', role: 'bot', text: t('scenario_dpfl_ocean_bot7'), timestamp: new Date().toISOString() },
-            { id: '15', role: 'user', text: t('scenario_dpfl_ocean_user8'), timestamp: new Date().toISOString() },
-            { id: '16', role: 'bot', text: t('scenario_dpfl_ocean_bot8'), timestamp: new Date().toISOString() },
-            { id: '17', role: 'user', text: t('scenario_dpfl_ocean_user9'), timestamp: new Date().toISOString() },
-            { id: '18', role: 'bot', text: t('scenario_dpfl_ocean_bot9'), timestamp: new Date().toISOString() },
-            { id: '19', role: 'user', text: t('scenario_dpfl_ocean_user10'), timestamp: new Date().toISOString() },
-            { id: '20', role: 'bot', text: t('scenario_dpfl_ocean_bot10'), timestamp: new Date().toISOString() },
-            { id: '21', role: 'user', text: t('scenario_dpfl_ocean_user11'), timestamp: new Date().toISOString() },
-            { id: '22', role: 'bot', text: t('scenario_dpfl_ocean_bot11'), timestamp: new Date().toISOString() },
-        ],
-    },
-    {
-        id: 'dpc_blindspot',
-        name: '🎯 ' + t('scenario_dpc_blindspot_name'),
-        description: t('scenario_dpc_blindspot_desc'),
-        bot: chloeBot,
-        chatHistory: [
-            { id: '1', role: 'user', text: t('scenario_dpc_blindspot_user1'), timestamp: new Date().toISOString() },
-            { id: '2', role: 'bot', text: t('scenario_dpc_blindspot_bot1'), timestamp: new Date().toISOString() },
-            { id: '3', role: 'user', text: t('scenario_dpc_blindspot_user2'), timestamp: new Date().toISOString() },
-            { id: '4', role: 'bot', text: t('scenario_dpc_blindspot_bot2'), timestamp: new Date().toISOString() },
-            { id: '5', role: 'user', text: t('scenario_dpc_blindspot_user3'), timestamp: new Date().toISOString() },
-            { id: '6', role: 'bot', text: t('scenario_dpc_blindspot_bot3'), timestamp: new Date().toISOString() },
-            { id: '7', role: 'user', text: t('scenario_dpc_blindspot_user4'), timestamp: new Date().toISOString() },
-            { id: '8', role: 'bot', text: t('scenario_dpc_blindspot_bot4'), timestamp: new Date().toISOString() },
-            { id: '9', role: 'user', text: t('scenario_dpc_blindspot_user5'), timestamp: new Date().toISOString() },
-            { id: '10', role: 'bot', text: t('scenario_dpc_blindspot_bot5'), timestamp: new Date().toISOString() },
-            { id: '11', role: 'user', text: t('scenario_dpc_blindspot_user6'), timestamp: new Date().toISOString() },
-            { id: '12', role: 'bot', text: t('scenario_dpc_blindspot_bot6'), timestamp: new Date().toISOString() },
-            { id: '13', role: 'user', text: t('scenario_dpc_blindspot_user7'), timestamp: new Date().toISOString() },
-            { id: '14', role: 'bot', text: t('scenario_dpc_blindspot_bot7'), timestamp: new Date().toISOString() },
-            { id: '15', role: 'user', text: t('scenario_dpc_blindspot_user8'), timestamp: new Date().toISOString() },
-            { id: '16', role: 'bot', text: t('scenario_dpc_blindspot_bot8'), timestamp: new Date().toISOString() },
-            { id: '17', role: 'user', text: t('scenario_dpc_blindspot_user9'), timestamp: new Date().toISOString() },
-            { id: '18', role: 'bot', text: t('scenario_dpc_blindspot_bot9'), timestamp: new Date().toISOString() },
-            { id: '19', role: 'user', text: t('scenario_dpc_blindspot_user10'), timestamp: new Date().toISOString() },
-            { id: '20', role: 'bot', text: t('scenario_dpc_blindspot_bot10'), timestamp: new Date().toISOString() },
-        ],
-    },
+export const getTestScenarios = (t: (key: string) => string): LegacyTestScenario[] => [
+  {
+    id: 'interview_formatting',
+    name: t('scenario_interview_name'),
+    description: t('scenario_interview_desc'),
+    bot: interviewBot,
+    chatHistory: [ 
+      { id: '1', role: 'bot', text: t('scenario_interview_chathistory_bot'), timestamp: new Date().toISOString() },
+      { id: '2', role: 'user', text: t('scenario_interview_chathistory_user'), timestamp: new Date().toISOString() },
+      { id: '3', role: 'bot', text: t('scenario_interview_chathistory_bot2'), timestamp: new Date().toISOString() },
+      { id: '4', role: 'user', text: t('scenario_interview_chathistory_user2'), timestamp: new Date().toISOString() },
+    ],
+  },
+  {
+    id: 'simple_update',
+    name: t('scenario_simple_update_name'),
+    description: t('scenario_simple_update_desc'),
+    bot: simpleBot,
+    chatHistory: [
+      { id: '1', role: 'user', text: t('scenario_simple_update_user'), timestamp: new Date().toISOString() },
+      { id: '2', role: 'bot', text: t('scenario_simple_update_bot'), timestamp: new Date().toISOString() },
+      { id: '3', role: 'user', text: t('scenario_simple_update_user2'), timestamp: new Date().toISOString() },
+    ],
+  },
+  {
+    id: 'complex_update',
+    name: t('scenario_complex_update_name'),
+    description: t('scenario_complex_update_desc'),
+    bot: cbtBot,
+    chatHistory: [
+      { id: '1', role: 'user', text: t('scenario_complex_update_user1'), timestamp: new Date().toISOString() },
+      { id: '2', role: 'bot', text: t('scenario_complex_update_bot1'), timestamp: new Date().toISOString() },
+      { id: '3', role: 'user', text: t('scenario_complex_update_user2'), timestamp: new Date().toISOString() },
+      { id: '4', role: 'bot', text: t('scenario_complex_update_bot2'), timestamp: new Date().toISOString() },
+      { id: '5', role: 'user', text: t('scenario_complex_update_user3'), timestamp: new Date().toISOString() },
+    ],
+  },
+  {
+    id: 'next_steps',
+    name: t('scenario_next_steps_name'),
+    description: t('scenario_next_steps_desc'),
+    bot: simpleBot,
+    chatHistory: [
+      { id: '1', role: 'user', text: t('scenario_next_steps_user1'), timestamp: new Date().toISOString() },
+      { id: '2', role: 'bot', text: t('scenario_next_steps_bot1'), timestamp: new Date().toISOString() },
+      { id: '3', role: 'user', text: t('scenario_next_steps_user2'), timestamp: new Date().toISOString() },
+    ],
+  },
 ];

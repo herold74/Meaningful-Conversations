@@ -104,8 +104,22 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
-    const { botId, context, history, lang, isNewSession, coachingMode, decryptedPersonalityProfile } = req.body;
+    const { 
+        botId, context, history, lang, isNewSession, coachingMode, decryptedPersonalityProfile,
+        // Test mode support
+        testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
+    } = req.body;
     const userId = req.userId; // This will be undefined for guests
+    const isTestMode = req.headers['x-test-mode'] === 'true';
+    
+    // Telemetry collection for test mode
+    const testTelemetry = {
+        dpcInjectionPresent: false,
+        dpcInjectionLength: 0,
+        dpcStrategiesUsed: [],
+        dpflKeywordsDetected: [],
+        comfortCheckTriggered: false,
+    };
 
     const bot = BOTS.find(b => b.id === botId);
     if (!bot) {
@@ -114,11 +128,16 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
 
     // Server-side access control
     let hasAccess = false;
+    let userRegionPreference = 'optimal'; // Default for guests
+    
     if (bot.accessTier === 'guest') {
         hasAccess = true;
     } else if (userId) {
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (user) {
+            // Store user's AI region preference for later use
+            userRegionPreference = user.aiRegionPreference || 'optimal';
+            
             if (bot.accessTier === 'registered') {
                 hasAccess = true; // Any registered user can access 'registered' bots
             } else if (bot.accessTier === 'premium') {
@@ -161,22 +180,34 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     let finalSystemInstruction = systemInstruction;
     
     // DPC/DPFL: Dynamic Personality Coaching - inject profile context into prompt
-    if (coachingMode === 'dpc' || coachingMode === 'dpfl') {
-        if (decryptedPersonalityProfile) {
+    // In test mode, use testProfileOverride if provided
+    const profileToUse = (isTestMode && testProfileOverride) ? testProfileOverride : decryptedPersonalityProfile;
+    
+    if (coachingMode === 'dpc' || coachingMode === 'dpfl' || isTestMode) {
+        if (profileToUse) {
             try {
                 const adaptivePrompt = await dynamicPromptController.generatePromptForUser(
                     userId || 'guest',
-                    decryptedPersonalityProfile,
+                    profileToUse,
                     lang // Pass language to DPC
                 );
                 if (adaptivePrompt) {
                     finalSystemInstruction += adaptivePrompt;
+                    
+                    // Collect telemetry for test mode
+                    if (isTestMode) {
+                        testTelemetry.dpcInjectionPresent = true;
+                        testTelemetry.dpcInjectionLength = adaptivePrompt.length;
+                        // Extract strategy info from the prompt
+                        const strategyMatches = adaptivePrompt.match(/(?:Riemann|Big5|SD|Spiral)[\w\s]*/gi) || [];
+                        testTelemetry.dpcStrategiesUsed = [...new Set(strategyMatches)];
+                    }
                 }
             } catch (error) {
                 console.error('[DPC] Error generating adaptive prompt:', error);
                 // Fail gracefully - continue with standard prompt
             }
-        } else {
+        } else if (!isTestMode) {
             console.warn(`[DPC] Coaching mode ${coachingMode} active but no profile provided`);
         }
     }
@@ -225,7 +256,8 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             // For subsequent messages, we send the entire chat history.
             contents: isInitialMessage ? "" : modelHistory,
             config: config,
-            context: 'chat' // Chat messages use chat context
+            context: 'chat', // Chat messages use chat context
+            userRegionPreference: userRegionPreference // User's EU/US preference
         });
         
         const durationMs = Date.now() - startTime;
@@ -251,14 +283,43 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             },
         });
         
-        // DPFL: Async behavior logging (does not block response)
-        // Only active when DPFL mode is enabled and user is registered
-        if (coachingMode === 'dpfl' && userId) {
+        // DPFL: Behavior logging
+        // In test mode, we do this synchronously to collect telemetry
+        // Otherwise, async (does not block response)
+        const messageToAnalyze = testUserMessage || req.body.userMessage || '';
+        
+        if (isTestMode && messageToAnalyze) {
+            try {
+                const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, lang);
+                // Collect detected keywords for telemetry
+                const detectedKeywords = [];
+                for (const [dimension, data] of Object.entries(frequencies)) {
+                    // behaviorLogger returns { foundKeywords: { high: [], low: [] } }
+                    if (data.foundKeywords) {
+                        if (data.foundKeywords.high && data.foundKeywords.high.length > 0) {
+                            detectedKeywords.push(...data.foundKeywords.high.map(k => `${dimension}:high:${k}`));
+                        }
+                        if (data.foundKeywords.low && data.foundKeywords.low.length > 0) {
+                            detectedKeywords.push(...data.foundKeywords.low.map(k => `${dimension}:low:${k}`));
+                        }
+                    }
+                }
+                testTelemetry.dpflKeywordsDetected = detectedKeywords;
+                
+                // Check for comfort check triggers (stress/emotional distress keywords)
+                const comfortKeywords = ['stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos', 
+                                        'overwhelmed', 'anxious', 'sad', 'hopeless', 'depressed'];
+                const lowerMessage = messageToAnalyze.toLowerCase();
+                testTelemetry.comfortCheckTriggered = comfortKeywords.some(k => lowerMessage.includes(k));
+            } catch (error) {
+                console.error('[DPFL] Test mode behavior logging error:', error);
+            }
+        } else if (coachingMode === 'dpfl' && userId) {
             // Run in background - don't await
             setImmediate(async () => {
                 try {
                     // Analyze current user message
-                    const frequencies = behaviorLogger.analyzeMessage(req.body.userMessage || '', lang);
+                    const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, lang);
                     
                     // Note: Full conversation logging will be done at session end
                     // This is just real-time analysis for debugging/monitoring
@@ -269,7 +330,15 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             });
         }
         
-        res.json({ text });
+        // Build response
+        const responseData = { text };
+        
+        // Include telemetry in test mode
+        if (isTestMode && includeTestTelemetry) {
+            responseData.testTelemetry = testTelemetry;
+        }
+        
+        res.json(responseData);
     } catch (error) {
         console.error('AI API error in /chat/send-message:', error);
         
