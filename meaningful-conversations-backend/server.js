@@ -186,12 +186,19 @@ async function startServer() {
             process.env.FRONTEND_URL,
             'http://localhost:3000',
             'http://localhost:5173',
+            'capacitor://localhost',  // iOS Capacitor apps
+            'http://localhost',       // Android Capacitor apps
         ];
         
         const corsOptions = {
             origin: function (origin, callback) {
                 if (!origin) return callback(null, true);
+                // Allow localhost with any port in non-production
                 if (process.env.ENVIRONMENT_TYPE !== 'production' && /http:\/\/localhost:\d+/.test(origin)) {
+                    return callback(null, true);
+                }
+                // Allow Capacitor origins (iOS uses capacitor://, Android uses http://localhost)
+                if (origin === 'capacitor://localhost' || origin === 'http://localhost') {
                     return callback(null, true);
                 }
                 if (allowedOrigins.indexOf(origin) !== -1) {
