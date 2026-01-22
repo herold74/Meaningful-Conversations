@@ -27,8 +27,25 @@ export class ApiError extends Error {
 export const getApiBaseUrl = (): string => {
     const hostname = window.location.hostname;
     const port = window.location.port;
+    const protocol = window.location.protocol;
     const urlParams = new URLSearchParams(window.location.search);
     const backendParam = urlParams.get('backend');
+
+    // 0. Capacitor Detection: iOS/Android native apps run in capacitor:// protocol
+    // In this environment, 'localhost' refers to the device itself, not the dev machine.
+    // Use staging backend for Capacitor testing.
+    const isCapacitor = protocol === 'capacitor:' || 
+                        (typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor.isNativePlatform?.());
+    
+    if (isCapacitor) {
+        // Allow override via URL param even in Capacitor
+        if (backendParam === 'production') {
+            return 'https://mc-app.manualmode.at';
+        }
+        // Default to staging for Capacitor testing
+        console.log('[API] Capacitor detected, using staging backend');
+        return 'https://mc-beta.manualmode.at';
+    }
 
     // 1. Priority: URL parameter for explicit override (for local development/testing)
     if (backendParam === 'local') {
