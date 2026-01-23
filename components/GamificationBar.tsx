@@ -71,7 +71,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
         return (
             <div 
                 className="fixed top-0 left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
-                style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}
+                style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 2.75rem)' }}
             >
                 <button 
                     onClick={onBurgerClick}
@@ -91,7 +91,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     return (
         <div 
             className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md"
-            style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)' }}
+            style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 2.75rem)' }}
         >
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
