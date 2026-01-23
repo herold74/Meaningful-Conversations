@@ -232,12 +232,26 @@ html[data-theme="autumn"] {
 @tailwind utilities;
 
 @layer base {
+  /* iOS Safe Area CSS Variables - for use with Capacitor/native apps */
+  :root {
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  }
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Theme-aware scrollbar for Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--accent-primary)) rgb(var(--bg-tertiary));
+  }
+
+  /* Ensure html and body fill the screen on iOS */
+  html, body {
+    min-height: 100%;
+    min-height: -webkit-fill-available;
   }
 }
 
