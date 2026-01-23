@@ -27,6 +27,7 @@
   "login_title": "Anmelden",
   "login_email_label": "E-Mail",
   "login_password_label": "Passwort",
+  "login_remember_email": "E-Mail merken",
   "login_forgot_password": "Passwort vergessen?",
   "login_button": "Anmelden",
   "login_no_account": "Haben Sie noch kein Konto?",
@@ -610,10 +611,10 @@
   "scenario_complex_update_user3": "Ich fühle mich für alles verantwortlich und mache mir Sorgen, dass etwas schief geht, wenn ich nicht erreichbar bin. Ich weiß, dass ich meinem Team mehr vertrauen muss, aber es ist schwer. Ich sollte das Delegieren inzwischen wirklich besser beherrschen. Zusätzlich bringt mich dieser ganze Stress dazu, über meine Finanzen nachzudenken. Ich habe keinen echten Sparplan, was eine weitere Quelle der Angst ist.",
     
   "scenario_next_steps_name": "Nächste Schritte & Neue Überschrift",
-  "scenario_next_steps_desc": "Ein Gespräch, in dem sich der Benutzer zu einer spezifischen Aktion für ein neues Hobby verpflichtet.",
-  "scenario_next_steps_user1": "Ich habe beschlossen, ein neues Hobby anzufangen. Ich werde Zeichnen lernen.",
-  "scenario_next_steps_bot1": "Das klingt nach einer wunderbaren kreativen Beschäftigung. Was ist Ihr erster Schritt, um anzufangen?",
-  "scenario_next_steps_user2": "Ich werde bis Ende der Woche einen lokalen Kurs recherchieren und mich dafür anmelden.",
+  "scenario_next_steps_desc": "Ein Gespräch über Spiritualität, das eine NEUE Kategorie im Lebenskontext provozieren sollte.",
+  "scenario_next_steps_user1": "Ich interessiere mich sehr für Meditation und möchte mich intensiver mit dem Buddhismus beschäftigen.",
+  "scenario_next_steps_bot1": "Das ist ein faszinierender spiritueller Weg. Was zieht Sie besonders am Buddhismus an?",
+  "scenario_next_steps_user2": "Die Achtsamkeitspraxis und die Philosophie des Nicht-Anhaftens. Ich möchte bis nächsten Monat ein Meditations-Retreat besuchen.",
     
   "scenario_interview_name": "Interview-Formatierung",
   "scenario_interview_desc": "Ein kurzes Interview mit Gloria, um die Kontexterstellung und -formatierung zu testen.",
@@ -1339,10 +1340,12 @@
   "test_session_msg_2": "Das hat mir diese Woche schon viel gebracht.",
   "test_session_msg_2_expected": "Bot sollte Update-Vorschlag machen",
   
-  "test_session_next_steps": "Nächste Schritte",
-  "test_session_next_steps_desc": "Testet die Generierung von Action Items",
+  "test_session_next_steps": "Nächste Schritte & Neue Überschrift",
+  "test_session_next_steps_desc": "Testet Generierung von Action Items UND Session-Updates",
   "test_nextsteps_msg_1": "Ich möchte bis Ende der Woche einen Kurs für Zeichnen finden.",
   "test_nextsteps_msg_1_expected": "Bot sollte konkrete nächste Schritte formulieren",
+  "test_nextsteps_msg_2": "Das wird mir helfen, endlich wieder kreativ zu sein.",
+  "test_nextsteps_msg_2_expected": "Bot sollte Session-Update vorschlagen",
   
   "test_personality_loading": "Profil-Laden",
   "test_personality_loading_desc": "Testet, ob das Persönlichkeitsprofil geladen wird",

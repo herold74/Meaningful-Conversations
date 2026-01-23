@@ -308,6 +308,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         setIsAnalyzing(true);
         try {
           const analysis = await analyzeSession(chatHistory, '', language);
+          // #region agent log
+          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TestRunner.tsx:session-analysis',message:'Session analysis result',data:{hasConversationalEnd:analysis?.hasConversationalEnd,hasAccomplishedGoal:analysis?.hasAccomplishedGoal,updatesCount:analysis?.proposedUpdates?.length,nextStepsCount:analysis?.nextSteps?.length,newFindings:analysis?.newFindings?.substring(0,100)},timestamp:Date.now(),sessionId:'test-debug'})}).catch(()=>{});
+          // #endregion
           setSessionAnalysisResult(analysis);
           
           // Add session analysis auto-checks (use language for i18n since t is not in useCallback deps)

@@ -21,10 +21,27 @@ interface LoginViewProps {
   reason?: string | null;
 }
 
+const REMEMBER_EMAIL_KEY = 'rememberedEmail';
+
 const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, onSwitchToRegister, onBack, onForgotPassword, reason }) => {
   const { t } = useLocalization();
-  const [email, setEmail] = useState('');
+  
+  // Load remembered email from localStorage on mount
+  const [email, setEmail] = useState(() => {
+    try {
+      return localStorage.getItem(REMEMBER_EMAIL_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      return !!localStorage.getItem(REMEMBER_EMAIL_KEY);
+    } catch {
+      return false;
+    }
+  });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -51,6 +68,17 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
         const saltBytes = hexToUint8Array(user.encryptionSalt);
         
         const key = await deriveKey(trimmedPassword, saltBytes);
+        
+        // Save or remove email based on "Remember me" checkbox
+        try {
+            if (rememberMe) {
+                localStorage.setItem(REMEMBER_EMAIL_KEY, trimmedEmail);
+            } else {
+                localStorage.removeItem(REMEMBER_EMAIL_KEY);
+            }
+        } catch (e) {
+            console.warn('Could not save remember email preference:', e);
+        }
         
         onLoginSuccess(user, key);
 
@@ -124,7 +152,17 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
               autoCorrect="off"
               spellCheck="false"
             />
-            <div className="mt-2 text-right">
+            <div className="mt-2 flex justify-between items-center">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        disabled={isLoading}
+                        className="h-4 w-4 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary rounded disabled:opacity-50"
+                    />
+                    <span className="ml-2 text-xs text-content-secondary">{t('login_remember_email') || 'E-Mail merken'}</span>
+                </label>
                 <button type="button" onClick={onForgotPassword} disabled={isLoading} className="text-xs text-accent-primary hover:underline disabled:opacity-50">
                     {t('login_forgot_password')}
                 </button>
