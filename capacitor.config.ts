@@ -5,13 +5,18 @@ const config: CapacitorConfig = {
   appName: 'Meaningful Conversations',
   webDir: 'dist',
   ios: {
-    contentInset: 'automatic',
-    backgroundColor: '#1a1a2e'
+    contentInset: 'always',
+    backgroundColor: '#0f172a',
+    scrollEnabled: false
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#1a1a2e'
+      backgroundColor: '#0f172a'
+    },
+    StatusBar: {
+      style: 'dark',
+      backgroundColor: '#0f172a'
     }
   }
 };
