@@ -315,9 +315,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   // Helper function to save language-specific voice settings
   const saveLanguageVoiceSettings = useCallback((mode: TtsMode, voiceId: string | null, isAuto: boolean) => {
+    console.log('[TTS Save] Saving voice settings:', { bot: bot.id, language, mode, voiceId, isAuto });
     const allSettings = getBotVoiceSettings(bot.id);
     allSettings[language] = { mode, voiceId, isAuto };
     saveBotVoiceSettings(bot.id, allSettings);
+    console.log('[TTS Save] Settings after save:', allSettings);
   }, [bot.id, language]);
 
   // Reset voice settings when language changes
@@ -372,6 +374,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Check if saved voice is available, fallback to auto if not
   useEffect(() => {
     const checkVoiceAvailability = async () => {
+      // IMPORTANT: Read directly from localStorage to avoid stale closure issues
+      // The previous useEffect sets state from localStorage, but state updates are batched
+      // so we'd see old values here if we used state directly.
+      const settings = getBotVoiceSettings(bot.id);
+      const langSettings = settings[language];
+      const savedMode = langSettings.mode;
+      const savedVoiceId = langSettings.voiceId;
+      const savedIsAuto = langSettings.isAuto;
+      
+      console.log('[TTS Init] Checking voice availability:', { savedMode, savedVoiceId, savedIsAuto, isNativeiOS });
+      
       // Helper function to get best server voice for bot
       const getBestServerVoice = (botId: string, lang: string): string | null => {
         let gender: 'male' | 'female' = 'female';
@@ -402,7 +415,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
         
         // Check if current saved selection is available
-        if (ttsMode === 'server' && selectedVoiceURI) {
+        if (savedMode === 'server' && savedVoiceId) {
           // User has a server voice selected
           if (!serverAvailable) {
             // Server not available - temporarily use local fallback
@@ -414,24 +427,80 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             // The user's server voice preference stays saved and will be retried next time
           } else {
             // Server available, keep selection
+            console.log('[TTS Init] Server voice available, keeping:', savedVoiceId);
           }
-        } else if (ttsMode === 'local' && selectedVoiceURI) {
+        } else if (savedMode === 'local' && savedVoiceId) {
           // User has a local voice selected - check if it exists
-          const voiceExists = window.speechSynthesis.getVoices().some(v => v.voiceURI === selectedVoiceURI);
-          if (!voiceExists) {
-            // Local voice not available anymore (browser update, different device, etc.)
-            // Clear it permanently since local voices are device-specific
-            console.warn('[TTS Init] Saved local voice no longer exists, resetting to auto mode');
+          const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
+          
+          if (isNativeVoiceId && isNativeiOS) {
+            // Native iOS voice - it's valid, keep it
+            console.log('[TTS Init] Native iOS voice valid, keeping:', savedVoiceId);
+          } else if (isNativeVoiceId && !isNativeiOS) {
+            // Native voice but not on native iOS - reset to auto
+            console.warn('[TTS Init] Native voice saved but not on native iOS, resetting to auto mode');
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
             saveLanguageVoiceSettings('local', null, true);
+          } else {
+            // Web Speech API voice - check if it exists
+            const voiceExists = window.speechSynthesis.getVoices().some(v => v.voiceURI === savedVoiceId);
+            if (!voiceExists) {
+              // Local voice not available anymore (browser update, different device, etc.)
+              // Clear it permanently since local voices are device-specific
+              console.warn('[TTS Init] Saved local voice no longer exists, resetting to auto mode');
+              setIsAutoMode(true);
+              setSelectedVoiceURI(null);
+              saveLanguageVoiceSettings('local', null, true);
+            } else {
+              console.log('[TTS Init] Local voice valid, keeping:', savedVoiceId);
+            }
           }
-        } else if (isAutoMode || (!selectedVoiceURI && ttsMode === 'local')) {
+        } else if (savedIsAuto || (!savedVoiceId && savedMode === 'local')) {
           // Auto mode or no selection - choose best available
+          console.log('[TTS Init] Auto mode - selecting best voice for bot gender:', botGender);
+          
+          // On native iOS, prefer native TTS with premium/enhanced voices matching bot gender
+          if (isNativeiOS) {
+            try {
+              const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
+              if (nativeVoices.length > 0) {
+                // Filter voices by bot gender
+                const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie', 
+                                     'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
+                const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
+                
+                const genderFilteredVoices = nativeVoices.filter(v => {
+                  const nameLower = v.name.toLowerCase();
+                  if (botGender === 'male') {
+                    return maleNames.some(n => nameLower.includes(n)) || !femaleNames.some(n => nameLower.includes(n));
+                  } else {
+                    return femaleNames.some(n => nameLower.includes(n)) || !maleNames.some(n => nameLower.includes(n));
+                  }
+                });
+                
+                const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : nativeVoices;
+                
+                // Pick best quality voice (premium > enhanced > default)
+                const bestVoice = candidateVoices.find(v => v.quality === 'premium') 
+                               || candidateVoices.find(v => v.quality === 'enhanced')
+                               || candidateVoices[0];
+                console.log('[TTS Init] Auto mode on native iOS - selected:', bestVoice.name, bestVoice.quality);
+                setSelectedVoiceURI(bestVoice.identifier);
+                setTtsMode('local');
+                saveLanguageVoiceSettings('local', bestVoice.identifier, true);
+                return; // Skip server voice check
+              }
+            } catch (error) {
+              console.warn('[TTS Init] Could not get native voices:', error);
+            }
+          }
+          
           if (serverAvailable) {
             const bestVoice = getBestServerVoice(bot.id, language);
             if (bestVoice) {
               // Server voice available for this bot
+              console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
               saveLanguageVoiceSettings('server', bestVoice, true);
@@ -452,7 +521,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         console.warn('[TTS Init] Could not check voice availability:', error);
         // On error, if user had a server voice selected, temporarily fall back to local
         // BUT: Keep the saved preference in localStorage for next time!
-        if (ttsMode === 'server') {
+        if (savedMode === 'server') {
           console.warn('[TTS Init] Temporarily switching to local mode (keeping saved preference)');
           // Temporarily use local mode for this session
           setTtsMode('local');
@@ -762,18 +831,70 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // iOS Safari has strict autoplay policies that prevent audio.play() outside of
     // direct user interaction. Server TTS requires async API calls which break this.
-    // Solution: Force local TTS on iOS for reliable audio playback.
+    // Solution: Force local TTS on iOS Safari. EXCEPTION: Native iOS apps (Capacitor) 
+    // don't have this restriction, so allow server TTS there.
     // Also validate that selectedVoiceURI is a valid server voice ID if ttsMode is 'server'
     // to prevent corrupted settings from causing errors.
     const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
-    const effectiveTtsMode = isIOS ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
+    const isNativeVoice = selectedVoiceURI?.startsWith('com.apple.voice');
+    
+    // On native iOS: allow server TTS (no autoplay restrictions) and native TTS
+    // On iOS Safari: force local (Web Speech API) due to autoplay restrictions
+    const iosSafariForcesLocal = isIOS && !isNativeiOS;
+    const effectiveTtsMode = iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
 
     // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
     if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
       console.warn('[TTS] Corrupted settings detected: ttsMode=server but selectedVoiceURI is not a valid server voice:', selectedVoiceURI, '- using local TTS');
     }
 
-    // Server TTS mode (disabled on iOS due to autoplay restrictions)
+    // Native iOS with native voice selected - use AVSpeechSynthesizer for premium quality
+    if (isNativeiOS && isNativeVoice) {
+      console.log('[TTS] Using native iOS TTS with voice:', selectedVoiceURI);
+      const loadingStartTime = Date.now();
+      
+      try {
+        // Stop any existing speech
+        await nativeTtsService.stop();
+        
+        // Set up speech end listener
+        await nativeTtsService.addListener('speechEnd', () => {
+          setTtsStatus('idle');
+          setIsLoadingAudio(false);
+          isSpeakingRef.current = false;
+        });
+        
+        await nativeTtsService.addListener('speechStart', () => {
+          const elapsed = Date.now() - loadingStartTime;
+          const remainingTime = Math.max(0, 300 - elapsed);
+          setTimeout(() => {
+            setTtsStatus('speaking');
+            setIsLoadingAudio(false);
+          }, remainingTime);
+        });
+        
+        // Speak with native TTS
+        const result = await nativeTtsService.speak({
+          text: cleanText,
+          voiceIdentifier: selectedVoiceURI || undefined,
+          rate: 0.5,
+          pitch: 1.0,
+          volume: 1.0
+        });
+        
+        if (!result.completed && !result.cancelled) {
+          console.warn('[TTS] Native TTS did not complete successfully');
+        }
+      } catch (error) {
+        console.error('[TTS] Native iOS TTS error:', error);
+        setTtsStatus('idle');
+        setIsLoadingAudio(false);
+        isSpeakingRef.current = false;
+      }
+      return;
+    }
+
+    // Server TTS mode (disabled on iOS Safari due to autoplay restrictions, but works on native iOS)
     if (effectiveTtsMode === 'server') {
       try {
         const loadingStartTime = Date.now();
@@ -889,56 +1010,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       return;
     }
 
-    // Native iOS TTS mode - uses AVSpeechSynthesizer for premium voice quality
-    // Check if we're in native iOS app AND have a native voice identifier selected
-    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
-    
-    if (isNativeVoiceSelected) {
-      console.log('[TTS] Using native iOS TTS with voice:', selectedVoiceURI);
-      const loadingStartTime = Date.now();
-      
-      try {
-        // Stop any existing speech
-        await nativeTtsService.stop();
-        
-        // Set up speech end listener
-        await nativeTtsService.addListener('speechEnd', () => {
-          setTtsStatus('idle');
-          setIsLoadingAudio(false);
-          isSpeakingRef.current = false;
-        });
-        
-        await nativeTtsService.addListener('speechStart', () => {
-          const elapsed = Date.now() - loadingStartTime;
-          const remainingTime = Math.max(0, 300 - elapsed);
-          setTimeout(() => {
-            setTtsStatus('speaking');
-            setIsLoadingAudio(false);
-          }, remainingTime);
-        });
-        
-        // Speak with native TTS
-        const result = await nativeTtsService.speak({
-          text: cleanText,
-          voiceIdentifier: selectedVoiceURI || undefined,
-          rate: 0.5,
-          pitch: 1.0,
-          volume: 1.0
-        });
-        
-        if (!result.completed && !result.cancelled) {
-          console.warn('[TTS] Native TTS did not complete successfully');
-        }
-      } catch (error) {
-        console.error('[TTS] Native iOS TTS error:', error);
-        setTtsStatus('idle');
-        setIsLoadingAudio(false);
-        isSpeakingRef.current = false;
-      }
-      return;
-    }
-
-    // Local TTS mode (Web Speech API)
+    // Local TTS mode (Web Speech API) - fallback when not using server or native TTS
     // #region agent log
     fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:local-tts-start',message:'Starting LOCAL TTS (Web Speech API)',data:{hasSpeechSynthesis:!!window.speechSynthesis},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
     // #endregion
@@ -1161,24 +1233,51 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [t]);
 
   const handleSelectVoice = useCallback(async (selection: VoiceSelection) => {
+    console.log('[TTS Select] handleSelectVoice called with:', selection.type);
+    
     if (selection.type === 'auto') {
       // Save auto mode for this bot
       setIsAutoMode(true);
       
-      // In native iOS app, auto mode uses native TTS with best voice
+      // In native iOS app, auto mode uses native TTS with best voice matching bot gender
       if (isNativeiOS) {
+        console.log('[TTS Select] Auto mode - fetching native voices for language:', language, 'botGender:', botGender);
         const voices = await nativeTtsService.getVoicesForLanguage(language);
+        
         if (voices.length > 0) {
-          // Pick first premium/enhanced voice, or first available
-          const bestVoice = voices.find(v => v.quality === 'premium') 
-                         || voices.find(v => v.quality === 'enhanced')
-                         || voices[0];
+          // Filter voices by bot gender
+          // Female voice names (common German/English)
+          const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie', 
+                               'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
+          const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
+          
+          const genderFilteredVoices = voices.filter(v => {
+            const nameLower = v.name.toLowerCase();
+            if (botGender === 'male') {
+              // For male bot, prefer male voices, exclude known female names
+              return maleNames.some(n => nameLower.includes(n)) || !femaleNames.some(n => nameLower.includes(n));
+            } else {
+              // For female bot, prefer female voices, exclude known male names
+              return femaleNames.some(n => nameLower.includes(n)) || !maleNames.some(n => nameLower.includes(n));
+            }
+          });
+          
+          // If no gender-matched voices, fall back to all voices
+          const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : voices;
+          
+          // Pick best quality voice (premium > enhanced > default)
+          const bestVoice = candidateVoices.find(v => v.quality === 'premium') 
+                         || candidateVoices.find(v => v.quality === 'enhanced')
+                         || candidateVoices[0];
+          
+          console.log('[TTS Select] Auto mode - selected:', bestVoice.name, bestVoice.quality, 'from', candidateVoices.length, 'candidates');
           setSelectedVoiceURI(bestVoice.identifier);
           setTtsMode('local'); // Use 'local' mode but with native identifier
           saveLanguageVoiceSettings('local', bestVoice.identifier, true);
           setIsVoiceModalOpen(false);
           return;
         }
+        console.log('[TTS Select] Auto mode - no native voices, falling back to server');
       }
       
       // Auto mode: Try to use best available server voice, fallback to local
@@ -1247,13 +1346,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       saveLanguageVoiceSettings('server', selection.voiceId, false);
     } else if (selection.type === 'native') {
       // Native iOS voice selected
+      console.log('[TTS Select] Native voice selected:', selection.voiceIdentifier);
       setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceIdentifier);
       setTtsMode('local'); // Use 'local' mode internally, but the identifier triggers native TTS
       saveLanguageVoiceSettings('local', selection.voiceIdentifier, false);
     }
     setIsVoiceModalOpen(false);
-  }, [bot.id, language]);
+  }, [bot.id, language, saveLanguageVoiceSettings]);
   
   const handleOpenVoiceModal = () => {
     if (!window.speechSynthesis) return;
