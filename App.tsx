@@ -1153,7 +1153,7 @@ const App: React.FC = () => {
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
     return (
-        <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
+        <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'} pb-[var(--safe-area-inset-bottom)] ${!showGamificationBar ? 'pt-[var(--safe-area-inset-top)]' : ''}`}>
             {showGamificationBar && (
                 <GamificationBar 
                     gamificationState={gamificationState}
