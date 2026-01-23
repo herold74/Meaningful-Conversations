@@ -64,29 +64,21 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     
     // Load native voices when in native iOS app
     useEffect(() => {
+        console.log('[VoiceModal] Native iOS check:', { isNativeiOS, isOpen });
         if (isNativeiOS && isOpen) {
+            console.log('[VoiceModal] Loading native voices...');
             nativeTtsService.getVoices().then(voices => {
+                console.log('[VoiceModal] Native voices loaded:', voices.length);
                 setNativeVoices(voices);
+            }).catch(err => {
+                console.error('[VoiceModal] Failed to load native voices:', err);
             });
         }
     }, [isOpen]);
     
-    const [selection, setSelection] = useState<VoiceSelection>(() => {
-        // On iOS, always default to auto since server voices don't work
-        if (isIOSBrowser && currentTtsMode === 'server') {
-            return { type: 'auto' };
-        }
-        if (isAutoMode) {
-            return { type: 'auto' };
-        }
-        if (currentTtsMode === 'server' && currentVoiceURI) {
-            return { type: 'server', voiceId: currentVoiceURI };
-        }
-        if (currentVoiceURI) {
-            return { type: 'local', voiceURI: currentVoiceURI };
-        }
-        return { type: 'auto' };
-    });
+    // Local selection state for user interactions within the modal
+    const [selection, setSelection] = useState<VoiceSelection>({ type: 'auto' });
+    
     const [serverTtsAvailable, setServerTtsAvailable] = useState<boolean>(true);
 
     // Check TTS server availability
@@ -122,7 +114,12 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             } else if (currentTtsMode === 'server' && currentVoiceURI) {
                 setSelection({ type: 'server', voiceId: currentVoiceURI });
             } else if (currentVoiceURI) {
-                setSelection({ type: 'local', voiceURI: currentVoiceURI });
+                // Check if it's a native iOS voice (com.apple.voice identifier)
+                if (currentVoiceURI.startsWith('com.apple.voice')) {
+                    setSelection({ type: 'native', voiceIdentifier: currentVoiceURI });
+                } else {
+                    setSelection({ type: 'local', voiceURI: currentVoiceURI });
+                }
             } else {
                 setSelection({ type: 'auto' });
             }
@@ -400,7 +397,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         <input
                                             type="radio"
                                             name="voice-selection"
-                                            checked={selection.type === 'native' && selection.voiceIdentifier === voice.identifier}
+                                            checked={selection.type === 'native' && (selection as {type: 'native', voiceIdentifier: string}).voiceIdentifier === voice.identifier}
                                             onChange={() => setSelection({ type: 'native', voiceIdentifier: voice.identifier })}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                                         />
