@@ -225,13 +225,6 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     onStartPersonalitySurvey,
 }) => {
     const { t, language } = useLocalization();
-    // #region agent log
-    React.useEffect(() => {
-      if (hasConversationalEnd || hasAccomplishedGoal) {
-        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'SessionReview.tsx:mount',message:'Session Bonus conditions',data:{hasConversationalEnd,hasAccomplishedGoal,nextStepsCount:nextSteps?.length,proposedUpdatesCount:proposedUpdates?.length},timestamp:Date.now(),sessionId:'session-bonus-debug'})}).catch(()=>{});
-      }
-    }, [hasConversationalEnd, hasAccomplishedGoal, nextSteps, proposedUpdates]);
-    // #endregion
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
     
     const [rating, setRating] = useState(0);
