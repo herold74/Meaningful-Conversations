@@ -553,6 +553,8 @@
   "voiceModal_ios_unavailable": "Auf iOS nicht verfügbar",
   "voiceModal_ios_hint": "Server-Stimmen sind auf iOS aufgrund von Browser-Einschränkungen nicht verfügbar. Bitte wähle stattdessen eine Geräte-Stimme.",
   "voiceModal_local_voices": "Geräte-Stimmen",
+  "voiceModal_native_voices": "iOS-Stimmen",
+  "voiceModal_premium_quality": "Premium-Qualität",
   "voiceModal_preview_text": "Hallo, dies ist eine Vorschau meiner Stimme.",
   "voiceModal_preview_aria": "Vorschau der Stimme für {{name}}",
   "voiceModal_no_voices_title": "Keine passenden Stimmen gefunden",

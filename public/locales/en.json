@@ -554,6 +554,8 @@
   "voiceModal_ios_unavailable": "Not available on iOS",
   "voiceModal_ios_hint": "Server voices are not available on iOS due to browser audio restrictions. Please select a device voice instead.",
   "voiceModal_local_voices": "Device Voices",
+  "voiceModal_native_voices": "iOS Voices",
+  "voiceModal_premium_quality": "Premium Quality",
   "voiceModal_preview_text": "Hello, this is a preview of my voice.",
   "voiceModal_preview_aria": "Preview voice for {{name}}",
   "voiceModal_no_voices_title": "No Matching Voices Found",
