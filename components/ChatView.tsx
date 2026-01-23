@@ -19,7 +19,7 @@ import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { XIcon } from './icons/XIcon';
 import { LogOutIcon } from './icons/LogOutIcon';
 import { GearIcon } from './icons/GearIcon';
-import VoiceSelectionModal from './VoiceSelectionModal';
+import VoiceSelectionModal, { type VoiceSelection } from './VoiceSelectionModal';
 import { useLocalization } from '../context/LocalizationContext';
 import { selectVoice } from '../utils/voiceUtils';
 import { FlagIcon } from './icons/FlagIcon';
@@ -28,6 +28,7 @@ import { synthesizeSpeech, getBotVoiceSettings, saveBotVoiceSettings, type TtsMo
 import { getApiBaseUrl } from '../services/api';
 import * as api from '../services/api';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
+import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
@@ -888,6 +889,55 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       return;
     }
 
+    // Native iOS TTS mode - uses AVSpeechSynthesizer for premium voice quality
+    // Check if we're in native iOS app AND have a native voice identifier selected
+    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    
+    if (isNativeVoiceSelected) {
+      console.log('[TTS] Using native iOS TTS with voice:', selectedVoiceURI);
+      const loadingStartTime = Date.now();
+      
+      try {
+        // Stop any existing speech
+        await nativeTtsService.stop();
+        
+        // Set up speech end listener
+        await nativeTtsService.addListener('speechEnd', () => {
+          setTtsStatus('idle');
+          setIsLoadingAudio(false);
+          isSpeakingRef.current = false;
+        });
+        
+        await nativeTtsService.addListener('speechStart', () => {
+          const elapsed = Date.now() - loadingStartTime;
+          const remainingTime = Math.max(0, 300 - elapsed);
+          setTimeout(() => {
+            setTtsStatus('speaking');
+            setIsLoadingAudio(false);
+          }, remainingTime);
+        });
+        
+        // Speak with native TTS
+        const result = await nativeTtsService.speak({
+          text: cleanText,
+          voiceIdentifier: selectedVoiceURI || undefined,
+          rate: 0.5,
+          pitch: 1.0,
+          volume: 1.0
+        });
+        
+        if (!result.completed && !result.cancelled) {
+          console.warn('[TTS] Native TTS did not complete successfully');
+        }
+      } catch (error) {
+        console.error('[TTS] Native iOS TTS error:', error);
+        setTtsStatus('idle');
+        setIsLoadingAudio(false);
+        isSpeakingRef.current = false;
+      }
+      return;
+    }
+
     // Local TTS mode (Web Speech API)
     // #region agent log
     fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:local-tts-start',message:'Starting LOCAL TTS (Web Speech API)',data:{hasSpeechSynthesis:!!window.speechSynthesis},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
@@ -1089,10 +1139,47 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   }, [t, bot.id, language]);
 
-  const handleSelectVoice = useCallback(async (selection: { type: 'auto' } | { type: 'local'; voiceURI: string } | { type: 'server'; voiceId: string }) => {
+  const handlePreviewNativeVoice = useCallback(async (voiceIdentifier: string) => {
+    if (!isNativeiOS) return;
+    
+    const sampleText = t('voiceModal_preview_text');
+    try {
+      // Stop any current speech first
+      await nativeTtsService.stop();
+      
+      // Speak with the selected native voice
+      await nativeTtsService.speak({
+        text: sampleText,
+        voiceIdentifier: voiceIdentifier,
+        rate: 0.5,
+        pitch: 1.0,
+        volume: 1.0
+      });
+    } catch (error) {
+      console.error('Failed to preview native voice:', error);
+    }
+  }, [t]);
+
+  const handleSelectVoice = useCallback(async (selection: VoiceSelection) => {
     if (selection.type === 'auto') {
       // Save auto mode for this bot
       setIsAutoMode(true);
+      
+      // In native iOS app, auto mode uses native TTS with best voice
+      if (isNativeiOS) {
+        const voices = await nativeTtsService.getVoicesForLanguage(language);
+        if (voices.length > 0) {
+          // Pick first premium/enhanced voice, or first available
+          const bestVoice = voices.find(v => v.quality === 'premium') 
+                         || voices.find(v => v.quality === 'enhanced')
+                         || voices[0];
+          setSelectedVoiceURI(bestVoice.identifier);
+          setTtsMode('local'); // Use 'local' mode but with native identifier
+          saveLanguageVoiceSettings('local', bestVoice.identifier, true);
+          setIsVoiceModalOpen(false);
+          return;
+        }
+      }
       
       // Auto mode: Try to use best available server voice, fallback to local
       try {
@@ -1158,6 +1245,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       setSelectedVoiceURI(selection.voiceId);
       setTtsMode('server');
       saveLanguageVoiceSettings('server', selection.voiceId, false);
+    } else if (selection.type === 'native') {
+      // Native iOS voice selected
+      setIsAutoMode(false);
+      setSelectedVoiceURI(selection.voiceIdentifier);
+      setTtsMode('local'); // Use 'local' mode internally, but the identifier triggers native TTS
+      saveLanguageVoiceSettings('local', selection.voiceIdentifier, false);
     }
     setIsVoiceModalOpen(false);
   }, [bot.id, language]);
@@ -1209,7 +1302,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     const handleToggleTts = () => {
         if (isTtsEnabled) {
-            if (ttsMode === 'server' && audioRef.current) {
+            // Check if using native iOS TTS
+            const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+            
+            if (isNativeVoiceSelected) {
+                nativeTtsService.stop();
+            } else if (ttsMode === 'server' && audioRef.current) {
                 audioRef.current.pause();
             } else if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
@@ -1716,7 +1814,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
 
   const handlePauseTTS = () => {
-    if (ttsMode === 'server' && audioRef.current) {
+    // Check if using native iOS TTS
+    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    
+    if (isNativeVoiceSelected) {
+      nativeTtsService.pause();
+    } else if (ttsMode === 'server' && audioRef.current) {
       audioRef.current.pause();
     } else if (window.speechSynthesis) {
       window.speechSynthesis.pause();
@@ -1725,7 +1828,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
 
   const handleResumeTTS = () => {
-    if (ttsMode === 'server' && audioRef.current) {
+    // Check if using native iOS TTS
+    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    
+    if (isNativeVoiceSelected) {
+      nativeTtsService.resume();
+    } else if (ttsMode === 'server' && audioRef.current) {
       audioRef.current.play().catch(err => {
         console.error('Failed to resume audio:', err);
         setTtsStatus('idle');
@@ -2162,6 +2270,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         onSelectVoice={handleSelectVoice}
         onPreviewVoice={handlePreviewVoice}
         onPreviewServerVoice={handlePreviewServerVoice}
+        onPreviewNativeVoice={handlePreviewNativeVoice}
         botLanguage={language}
         botGender={botGender}
     />
