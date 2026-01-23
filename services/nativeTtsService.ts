@@ -51,8 +51,15 @@ interface NativeTTSPluginInterface {
 // Register the plugin (only available in native app)
 const NativeTTS = registerPlugin<NativeTTSPluginInterface>('NativeTTS');
 
+// Debug: Log Capacitor state at module load
+console.log('[NativeTTS] Module loaded, Capacitor state:', {
+    isNativePlatform: Capacitor.isNativePlatform(),
+    platform: Capacitor.getPlatform()
+});
+
 // Check if we're in a native iOS app
 export const isNativeiOS = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+console.log('[NativeTTS] isNativeiOS =', isNativeiOS);
 
 /**
  * Native TTS Service class
