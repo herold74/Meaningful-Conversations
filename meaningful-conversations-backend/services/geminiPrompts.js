@@ -89,7 +89,7 @@ const analysisSchema = {
         },
         hasConversationalEnd: { 
             type: 'BOOLEAN', 
-            description: 'Set to true if the user guided the conversation to a clear, formal end (e.g., saying "thank you for the session", "that\'s all for today", "goodbye"). Set to false if the conversation was just abandoned.' 
+            description: 'Set to true ONLY if the user EXPLICITLY said goodbye or thanked the coach to end the session (e.g., "thank you for the session", "that\'s all for today", "goodbye", "bye", "thanks, that helped"). Set to false if the conversation just stopped without an explicit farewell. Short conversations without a clear goodbye are NOT formal ends.' 
         },
         hasAccomplishedGoal: { 
             type: 'BOOLEAN', 
