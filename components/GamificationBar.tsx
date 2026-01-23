@@ -72,7 +72,8 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             <div 
                 className="fixed left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
                 style={{ top: 'max(env(safe-area-inset-top, 0px), 3.5rem)' }}
-                 <button 
+            >
+                <button 
                     onClick={onBurgerClick}
                     className="p-2 text-content-secondary hover:text-content-primary transition-colors"
                     aria-label={isMenuOpen ? t('menu_exit') : t('menu_title')}
@@ -90,7 +91,8 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     return (
         <div 
             className="fixed left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md"
-            style={{ top: 'max(env(safe-area-inset-top, 0px), 2.75rem)' }}
+            style={{ top: 'max(env(safe-area-inset-top, 0px), 3.5rem)' }}
+        >
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
                     <>
