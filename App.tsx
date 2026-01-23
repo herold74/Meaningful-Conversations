@@ -1170,6 +1170,10 @@ const App: React.FC = () => {
                     minimal={minimalBar}
                 />
             )}
+            {/* Spacer for fixed GamificationBar */}
+            {showGamificationBar && (
+                <div className={`shrink-0 ${minimalBar ? 'h-[calc(var(--safe-area-inset-top)+2.75rem)]' : 'h-[calc(var(--safe-area-inset-top)+3.5rem)]'}`} />
+            )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
                 {renderView()}
             </main>
