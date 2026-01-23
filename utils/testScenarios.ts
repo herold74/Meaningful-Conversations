@@ -376,15 +376,21 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       {
         text: t('test_nextsteps_msg_1'),
         expectedBehavior: t('test_nextsteps_msg_1_expected')
+      },
+      {
+        text: t('test_nextsteps_msg_2'),
+        expectedBehavior: t('test_nextsteps_msg_2_expected')
       }
     ],
     autoChecks: {
       dpcRequired: false,
       expectSessionNextSteps: true, // Auto-check: nextSteps.length > 0
+      expectSessionUpdates: true, // Auto-check: proposedUpdates.length > 0
     },
     manualChecks: [
       t('test_check_nextsteps_actionable'), // Manual: check steps are concrete
       t('test_check_nextsteps_relevant'),   // Manual: check steps match topic
+      t('test_check_update_accurate'),      // Manual: check update reflects conversation
     ]
   },
 

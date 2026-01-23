@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -213,6 +213,18 @@
           "phonetic": "Tschek-In",
           "caseSensitive": true,
           "notes": "Alternative Schreibweise"
+        },
+        {
+          "term": "Management",
+          "phonetic": "Mänätschment",
+          "caseSensitive": true,
+          "notes": "Business-Begriff"
+        },
+        {
+          "term": "management",
+          "phonetic": "mänätschment",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
         }
       ]
     },

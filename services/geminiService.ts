@@ -66,6 +66,10 @@ export const analyzeSession = async (
         const hasConversationalEnd: boolean = response && typeof response.hasConversationalEnd === 'boolean' ? response.hasConversationalEnd : false;
         const hasAccomplishedGoal: boolean = response && typeof response.hasAccomplishedGoal === 'boolean' ? response.hasAccomplishedGoal : false;
 
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'geminiService.ts:analyzeSession',message:'Backend session analysis result',data:{hasConversationalEnd,hasAccomplishedGoal,proposedUpdatesCount:proposedUpdates.length,nextStepsCount:nextSteps.length,rawResponse:JSON.stringify(response).substring(0,500)},timestamp:Date.now(),sessionId:'session-analysis-debug'})}).catch(()=>{});
+        // #endregion
+
         const blockageCount = solutionBlockages.length;
         let blockageScore = 0;
         if (blockageCount === 1) blockageScore = 2;

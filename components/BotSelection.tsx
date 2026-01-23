@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
+import { getApiBaseUrl } from '../services/api';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import Spinner from './shared/Spinner';
@@ -136,6 +137,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
       setIsLoading(true);
       try {
         const fetchedBots: Bot[] = await getBots();
+        // #region agent log
+        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:fetchedBots',message:'Bots from API',data:{count:fetchedBots.length,botIds:fetchedBots.map(b=>b.id)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
+        // #endregion
 
         let userAccessLevel: BotAccessTier = 'guest';
         const unlockedCoaches = currentUser?.unlockedCoaches || [];
@@ -149,6 +153,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
               userAccessLevel = 'registered';
           }
         }
+        // #region agent log
+        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:userAccess',message:'User access level',data:{userAccessLevel,hasUser:!!currentUser,unlockedCoaches},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
+        // #endregion
 
         const accessHierarchy: Record<BotAccessTier, number> = {
           guest: 0,
@@ -170,9 +177,15 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
               isAvailable: isTierAvailable || isIndividuallyUnlocked
             };
         });
+        // #region agent log
+        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:availableBots',message:'Filtered bots',data:{total:availableBots.length,available:availableBots.filter(b=>b.isAvailable).map(b=>b.id),locked:availableBots.filter(b=>!b.isAvailable).map(b=>b.id)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
+        // #endregion
         setBots(availableBots);
       } catch (error) {
           console.error("Failed to fetch bots:", error);
+          // #region agent log
+          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:error',message:'ERROR fetching bots',data:{error:String(error)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
+          // #endregion
       } finally {
         setIsLoading(false);
       }
