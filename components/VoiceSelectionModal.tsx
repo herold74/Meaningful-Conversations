@@ -8,11 +8,13 @@ import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import Button from './shared/Button';
+import { isNativeiOS, nativeTtsService, type NativeVoice } from '../services/nativeTtsService';
 
 type VoiceSelection = 
     | { type: 'auto' }
     | { type: 'local'; voiceURI: string }
-    | { type: 'server'; voiceId: string };
+    | { type: 'server'; voiceId: string }
+    | { type: 'native'; voiceIdentifier: string };
 
 interface VoiceSelectionModalProps {
     isOpen: boolean;
@@ -24,9 +26,13 @@ interface VoiceSelectionModalProps {
     onSelectVoice: (selection: VoiceSelection) => void;
     onPreviewVoice: (voice: SpeechSynthesisVoice) => void;
     onPreviewServerVoice: (voiceId: string) => void;
+    onPreviewNativeVoice?: (voiceIdentifier: string) => void;
     botLanguage: Language;
     botGender: 'male' | 'female';
 }
+
+// Export VoiceSelection type for use in ChatView
+export type { VoiceSelection };
 
 const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     isOpen,
@@ -38,21 +44,36 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     onSelectVoice,
     onPreviewVoice,
     onPreviewServerVoice,
+    onPreviewNativeVoice,
     botLanguage,
     botGender,
 }) => {
     const { t } = useLocalization();
     
-    // iOS detection - server TTS doesn't work reliably on iOS due to autoplay restrictions
-    const isIOS = useMemo(() => {
+    // iOS detection - server TTS doesn't work reliably on iOS (browser) due to autoplay restrictions
+    // Native iOS apps use AVSpeechSynthesizer which works perfectly
+    const isIOSBrowser = useMemo(() => {
+        if (isNativeiOS) return false; // Native app doesn't have browser restrictions
         if (typeof navigator === 'undefined') return false;
         return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }, []);
     
+    // State for native iOS voices
+    const [nativeVoices, setNativeVoices] = useState<NativeVoice[]>([]);
+    
+    // Load native voices when in native iOS app
+    useEffect(() => {
+        if (isNativeiOS && isOpen) {
+            nativeTtsService.getVoices().then(voices => {
+                setNativeVoices(voices);
+            });
+        }
+    }, [isOpen]);
+    
     const [selection, setSelection] = useState<VoiceSelection>(() => {
         // On iOS, always default to auto since server voices don't work
-        if (isIOS && currentTtsMode === 'server') {
+        if (isIOSBrowser && currentTtsMode === 'server') {
             return { type: 'auto' };
         }
         if (isAutoMode) {
@@ -87,7 +108,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             // On iOS, server voices are not available - switch to auto if server voice was selected
-            if (isIOS && currentTtsMode === 'server') {
+            if (isIOSBrowser && currentTtsMode === 'server') {
                 setSelection({ type: 'auto' });
                 return;
             }
@@ -106,7 +127,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 setSelection({ type: 'auto' });
             }
         }
-    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOS]);
+    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser]);
 
 
     const localVoices = useMemo(() => {
@@ -138,7 +159,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         const whitelistedVoices = voices.filter(v => {
             // On iOS, enhanced/premium voices may have localService: false
             // because they're downloaded from Apple servers, so skip this check on iOS
-            if (!isIOS && !v.localService) return false;
+            if (!isIOSBrowser && !v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const name = v.name.toLowerCase();
             return allowedNames.some(allowedName => name.includes(allowedName));
@@ -160,7 +181,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // First try: voices that match the gender
         let genderFilteredVoices = voices.filter(v => {
             // On iOS, skip localService check (see above)
-            if (!isIOS && !v.localService) return false;
+            if (!isIOSBrowser && !v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const voiceGender = getVoiceGender(v);
             return voiceGender === botGender;
@@ -173,7 +194,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             const oppositeGender = botGender === 'male' ? 'female' : 'male';
             genderFilteredVoices = voices.filter(v => {
                 // On iOS, skip localService check (see above)
-                if (!isIOS && !v.localService) return false;
+                if (!isIOSBrowser && !v.localService) return false;
                 if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
                 const voiceGender = getVoiceGender(v);
                 return voiceGender !== oppositeGender;
@@ -184,7 +205,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // Last resort: ANY voice for the language (iOS might have voices with unknown names)
         if (genderFilteredVoices.length === 0) {
             genderFilteredVoices = voices.filter(v => {
-                if (!isIOS && !v.localService) return false;
+                if (!isIOSBrowser && !v.localService) return false;
                 return v.lang.toLowerCase().startsWith(botLanguage);
             });
             console.log('[VoiceModal] All', botLanguage, 'voices (last resort):', genderFilteredVoices.length);
@@ -192,7 +213,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         
         // iOS special case: if STILL no voices, show ALL local voices regardless of language
         // Better to have some voice than none at all
-        if (genderFilteredVoices.length === 0 && isIOS) {
+        if (genderFilteredVoices.length === 0 && isIOSBrowser) {
             genderFilteredVoices = voices.filter(v => v.localService);
             console.log('[VoiceModal] iOS fallback - all local voices:', genderFilteredVoices.length);
         }
@@ -221,10 +242,56 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         );
     }, [botLanguage, botGender]);
 
+    // Filter native voices by language and gender
+    const filteredNativeVoices = useMemo(() => {
+        if (!isNativeiOS || nativeVoices.length === 0) return [];
+        
+        // Map gender keywords for voice name detection
+        const femaleKeywords = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie', 'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
+        const maleKeywords = ['markus', 'viktor', 'martin', 'hans', 'yannick', 'conrad', 'daniel', 'jamie', 'alex', 'tom', 'aaron', 'arthur', 'fred'];
+        
+        // Filter by language
+        let filtered = nativeVoices.filter(v => 
+            v.language.toLowerCase().startsWith(botLanguage.toLowerCase())
+        );
+        
+        // Filter by gender based on name
+        const targetKeywords = botGender === 'female' ? femaleKeywords : maleKeywords;
+        const oppositeKeywords = botGender === 'female' ? maleKeywords : femaleKeywords;
+        
+        // First try: exact gender match
+        let genderFiltered = filtered.filter(v => {
+            const nameLower = v.name.toLowerCase();
+            return targetKeywords.some(kw => nameLower.includes(kw));
+        });
+        
+        // Second try: not opposite gender
+        if (genderFiltered.length === 0) {
+            genderFiltered = filtered.filter(v => {
+                const nameLower = v.name.toLowerCase();
+                return !oppositeKeywords.some(kw => nameLower.includes(kw));
+            });
+        }
+        
+        // Fallback: all voices for the language
+        if (genderFiltered.length === 0) {
+            genderFiltered = filtered;
+        }
+        
+        // Sort by quality (premium > enhanced > default), then by name
+        return genderFiltered.sort((a, b) => {
+            const qualityOrder = { premium: 0, enhanced: 1, default: 2 };
+            const qualityDiff = (qualityOrder[a.quality] || 2) - (qualityOrder[b.quality] || 2);
+            if (qualityDiff !== 0) return qualityDiff;
+            return a.name.localeCompare(b.name);
+        });
+    }, [nativeVoices, botLanguage, botGender]);
+
     // Helper function to check if a server voice is enabled
-    // Server voices are disabled on iOS due to autoplay restrictions
+    // Server voices are disabled on iOS browser due to autoplay restrictions
+    // but work fine in native iOS apps (though we prefer native voices there)
     const isVoiceEnabled = (voice: ServerVoice) => {
-        return serverTtsAvailable && voice.model !== '' && !isIOS;
+        return serverTtsAvailable && voice.model !== '' && !isIOSBrowser;
     };
 
     const handleSave = () => {
@@ -274,12 +341,12 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         <>
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
-                                {!serverTtsAvailable && !isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
-                                {isIOS && <span className="block sm:inline sm:ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
+                                {!serverTtsAvailable && !isIOSBrowser && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
+                                {isIOSBrowser && <span className="block sm:inline sm:ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
                             </h3>
                             
                             {/* iOS Warning Banner */}
-                            {isIOS && (
+                            {isIOSBrowser && (
                                 <div className="p-3 mb-2 bg-status-info-background border border-status-info-border rounded-lg">
                                     <div className="flex items-start gap-2">
                                         <InfoIcon className="w-5 h-5 text-status-info-foreground flex-shrink-0 mt-0.5" />
@@ -320,8 +387,53 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         </>
                     )}
 
-                    {/* Local Voices Section */}
-                    {localVoices.length > 0 && (
+                    {/* Native iOS Voices Section (only in native app) */}
+                    {isNativeiOS && filteredNativeVoices.length > 0 && (
+                        <>
+                            <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
+                                {t('voiceModal_native_voices') || 'iOS Voices'}
+                                <span className="ml-2 text-xs normal-case text-accent-primary">({t('voiceModal_premium_quality') || 'Premium Quality'})</span>
+                            </h3>
+                            {filteredNativeVoices.map(voice => (
+                                <div key={voice.identifier} className="p-3 border border-border-primary bg-background-tertiary">
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="voice-selection"
+                                            checked={selection.type === 'native' && selection.voiceIdentifier === voice.identifier}
+                                            onChange={() => setSelection({ type: 'native', voiceIdentifier: voice.identifier })}
+                                            className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
+                                        />
+                                        <span className="ml-3 flex-1">
+                                            <span className="font-semibold text-content-primary">
+                                                {voice.name}
+                                                {voice.quality !== 'default' && (
+                                                    <span className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
+                                                        voice.quality === 'premium' 
+                                                            ? 'bg-accent-primary/20 text-accent-primary' 
+                                                            : 'bg-status-info-background text-status-info-foreground'
+                                                    }`}>
+                                                        {voice.quality}
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className="block text-sm text-content-secondary">{voice.language}</span>
+                                        </span>
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); onPreviewNativeVoice?.(voice.identifier); }}
+                                            className="p-2 text-content-secondary hover:text-accent-primary"
+                                            aria-label={`Preview voice ${voice.name}`}
+                                        >
+                                            <PlayIcon className="w-5 h-5" />
+                                        </button>
+                                    </label>
+                                </div>
+                            ))}
+                        </>
+                    )}
+
+                    {/* Local Voices Section (hidden in native iOS app if native voices available) */}
+                    {localVoices.length > 0 && !(isNativeiOS && filteredNativeVoices.length > 0) && (
                         <>
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_local_voices') || 'Device Voices'}
