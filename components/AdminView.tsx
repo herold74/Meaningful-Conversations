@@ -1305,23 +1305,6 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         </button>
                     </div>
                     
-                    {/* Profile type indicator */}
-                    {adminProfileType && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {t('admin_runner_your_profile')}: <span className="font-bold">{adminProfileType}</span>
-                            {hasMismatch && (
-                                <span className="ml-2 text-status-warning-foreground">
-                                    ⚠️ {t('admin_runner_profile_mismatch')}
-                                </span>
-                            )}
-                        </div>
-                    )}
-                    {!adminProfileType && isDpcOrDpflTest && (
-                        <div className="text-xs text-status-warning-foreground">
-                            ⚠️ {t('admin_runner_no_profile')}
-                        </div>
-                    )}
-                    
                     {/* Info box for DPC/DPFL tests */}
                     {isDpcOrDpflTest && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">

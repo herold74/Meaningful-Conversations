@@ -8,7 +8,6 @@ import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import Button from './shared/Button';
-import { isNativeApp } from '../services/capacitorAudioService';
 
 type VoiceSelection = 
     | { type: 'auto' }
@@ -44,20 +43,16 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
 }) => {
     const { t } = useLocalization();
     
-    // iOS detection - server TTS doesn't work reliably on iOS Safari due to autoplay restrictions
-    // EXCEPTION: Native iOS apps (Capacitor) use native audio APIs without these restrictions
+    // iOS detection - server TTS doesn't work reliably on iOS due to autoplay restrictions
     const isIOS = useMemo(() => {
         if (typeof navigator === 'undefined') return false;
         return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }, []);
     
-    // Only restrict iOS Safari, not native iOS apps
-    const iosBrowserRestriction = isIOS && !isNativeApp;
-    
     const [selection, setSelection] = useState<VoiceSelection>(() => {
-        // On iOS Safari (not native app), default to auto since server voices don't work
-        if (iosBrowserRestriction && currentTtsMode === 'server') {
+        // On iOS, always default to auto since server voices don't work
+        if (isIOS && currentTtsMode === 'server') {
             return { type: 'auto' };
         }
         if (isAutoMode) {
@@ -91,8 +86,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
-            // On iOS Safari (not native app), server voices are not available - switch to auto if server voice was selected
-            if (iosBrowserRestriction && currentTtsMode === 'server') {
+            // On iOS, server voices are not available - switch to auto if server voice was selected
+            if (isIOS && currentTtsMode === 'server') {
                 setSelection({ type: 'auto' });
                 return;
             }
@@ -111,21 +106,32 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 setSelection({ type: 'auto' });
             }
         }
-    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, iosBrowserRestriction]);
+    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOS]);
 
 
     const localVoices = useMemo(() => {
-        if (!voices || voices.length === 0) return [];
+        if (!voices || voices.length === 0) {
+            console.log('[VoiceModal] No voices available, voices.length =', voices?.length || 0);
+            return [];
+        }
+        
+        // Debug: Log what we received
+        console.log('[VoiceModal] Processing', voices.length, 'voices for', botLanguage, botGender);
         
         // --- Whitelist First Pass ---
+        // Extended whitelist to include more iOS voice names
         let allowedNames: string[] = [];
         if (botLanguage === 'de') {
-            allowedNames = botGender === 'female' ? ['petra', 'anna', 'helena', 'katja'] : ['markus', 'viktor', 'victor', 'martin', 'hans', 'yannick'];
+            // iOS German female voices: Anna, Helena, Petra, Katja, plus potential variations
+            // Also include "premium" and "enhanced" variants
+            allowedNames = botGender === 'female' 
+                ? ['petra', 'anna', 'helena', 'katja', 'marlene', 'vicki', 'marie'] 
+                : ['markus', 'viktor', 'victor', 'martin', 'hans', 'yannick', 'conrad'];
         } else if (botLanguage === 'en') {
             if (botGender === 'female') {
-                allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa'];
+                allowedNames = ['samantha', 'susan', 'serena', 'karen', 'moira', 'tessa', 'siri', 'nicky', 'allison', 'ava'];
             } else {
-                allowedNames = ['daniel', 'jamie', 'alex', 'tom'];
+                allowedNames = ['daniel', 'jamie', 'alex', 'tom', 'aaron', 'arthur', 'fred'];
             }
         }
         
@@ -138,9 +144,17 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             return allowedNames.some(allowedName => name.includes(allowedName));
         });
 
+        console.log('[VoiceModal] Whitelist filter found', whitelistedVoices.length, 'voices:', 
+            whitelistedVoices.map(v => v.name));
+
         if (whitelistedVoices.length > 0) {
             return whitelistedVoices.sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
         }
+        
+        // Debug: If no whitelisted voices, show all voices for the language
+        const allLangVoices = voices.filter(v => v.lang.toLowerCase().startsWith(botLanguage));
+        console.log('[VoiceModal] No whitelisted voices found. All', botLanguage, 'voices:', 
+            allLangVoices.map(v => ({ name: v.name, localService: v.localService })));
 
         // --- Fallback to Broader Search if Whitelist Fails ---
         // First try: voices that match the gender
@@ -151,6 +165,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             const voiceGender = getVoiceGender(v);
             return voiceGender === botGender;
         });
+        
+        console.log('[VoiceModal] Gender-matched voices:', genderFilteredVoices.length);
 
         // Second try: voices that are not the opposite gender (include 'unknown')
         if (genderFilteredVoices.length === 0) {
@@ -162,6 +178,23 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 const voiceGender = getVoiceGender(v);
                 return voiceGender !== oppositeGender;
             });
+            console.log('[VoiceModal] Non-opposite-gender voices:', genderFilteredVoices.length);
+        }
+        
+        // Last resort: ANY voice for the language (iOS might have voices with unknown names)
+        if (genderFilteredVoices.length === 0) {
+            genderFilteredVoices = voices.filter(v => {
+                if (!isIOS && !v.localService) return false;
+                return v.lang.toLowerCase().startsWith(botLanguage);
+            });
+            console.log('[VoiceModal] All', botLanguage, 'voices (last resort):', genderFilteredVoices.length);
+        }
+        
+        // iOS special case: if STILL no voices, show ALL local voices regardless of language
+        // Better to have some voice than none at all
+        if (genderFilteredVoices.length === 0 && isIOS) {
+            genderFilteredVoices = voices.filter(v => v.localService);
+            console.log('[VoiceModal] iOS fallback - all local voices:', genderFilteredVoices.length);
         }
 
         // De-duplicate and sort the broader list
@@ -174,8 +207,11 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             }
         });
 
-        return Array.from(uniqueVoicesMap.values())
+        const result = Array.from(uniqueVoicesMap.values())
             .sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
+        
+        console.log('[VoiceModal] FINAL localVoices result:', result.length, result.map(v => v.name));
+        return result;
 
     }, [voices, botLanguage, botGender]);
 
@@ -186,10 +222,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     }, [botLanguage, botGender]);
 
     // Helper function to check if a server voice is enabled
-    // Server voices are disabled on iOS Safari due to autoplay restrictions
-    // but work fine in native iOS apps (Capacitor)
+    // Server voices are disabled on iOS due to autoplay restrictions
     const isVoiceEnabled = (voice: ServerVoice) => {
-        return serverTtsAvailable && voice.model !== '' && !iosBrowserRestriction;
+        return serverTtsAvailable && voice.model !== '' && !isIOS;
     };
 
     const handleSave = () => {
@@ -239,17 +274,17 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         <>
                             <h3 className="text-sm font-bold text-content-secondary uppercase mt-4 mb-2">
                                 {t('voiceModal_server_voices') || 'Server Voices (High Quality)'}
-                                {!serverTtsAvailable && !iosBrowserRestriction && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
-                                {iosBrowserRestriction && <span className="block sm:inline sm:ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS Safari'})</span>}
+                                {!serverTtsAvailable && !isIOS && <span className="ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_unavailable') || 'Unavailable'})</span>}
+                                {isIOS && <span className="block sm:inline sm:ml-2 text-xs normal-case text-status-warning-foreground">({t('voiceModal_ios_unavailable') || 'Not available on iOS'})</span>}
                             </h3>
                             
-                            {/* iOS Safari Warning Banner (not shown in native iOS apps) */}
-                            {iosBrowserRestriction && (
+                            {/* iOS Warning Banner */}
+                            {isIOS && (
                                 <div className="p-3 mb-2 bg-status-info-background border border-status-info-border rounded-lg">
                                     <div className="flex items-start gap-2">
                                         <InfoIcon className="w-5 h-5 text-status-info-foreground flex-shrink-0 mt-0.5" />
                                         <p className="text-sm text-status-info-foreground">
-                                            {t('voiceModal_ios_hint') || 'Server voices are not available on iOS Safari due to browser audio restrictions. Please select a device voice instead, or use the native iOS app.'}
+                                            {t('voiceModal_ios_hint') || 'Server voices are not available on iOS due to browser audio restrictions. Please select a device voice instead.'}
                                         </p>
                                     </div>
                                 </div>

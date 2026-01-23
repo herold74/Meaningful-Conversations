@@ -27,6 +27,7 @@
   "login_title": "Login",
   "login_email_label": "Email",
   "login_password_label": "Password",
+  "login_remember_email": "Remember email",
   "login_forgot_password": "Forgot Password?",
   "login_button": "Login",
   "login_no_account": "Don't have an account?",
@@ -611,10 +612,10 @@
   "scenario_complex_update_user3": "I feel responsible for everything, and I worry that if I'm not available, something will go wrong. I know I need to trust my team more, but it's hard. I really should be better at delegating by now. On top of that, all this stress is making me think about my finances. I don't have any real savings plan, which is another source of anxiety.",
 
   "scenario_next_steps_name": "Next Steps & New Headline",
-  "scenario_next_steps_desc": "A conversation where the user commits to a specific action for a new hobby.",
-  "scenario_next_steps_user1": "I've decided to start a new hobby. I'm going to learn drawing.",
-  "scenario_next_steps_bot1": "That sounds like a wonderful creative outlet. What's your first step to get started?",
-  "scenario_next_steps_user2": "I will research and sign up for a local class by the end of the week.",
+  "scenario_next_steps_desc": "A conversation about spirituality that should provoke a NEW category in the life context.",
+  "scenario_next_steps_user1": "I'm very interested in meditation and want to explore Buddhism more deeply.",
+  "scenario_next_steps_bot1": "That's a fascinating spiritual path. What draws you most to Buddhism?",
+  "scenario_next_steps_user2": "The mindfulness practice and the philosophy of non-attachment. I want to attend a meditation retreat by next month.",
 
   "scenario_interview_name": "Interview Formatting",
   "scenario_interview_desc": "A short interview with Gloria to test the context generation and formatting.",
@@ -1340,10 +1341,12 @@
   "test_session_msg_2": "This has already helped me a lot this week.",
   "test_session_msg_2_expected": "Bot should suggest an update",
   
-  "test_session_next_steps": "Next Steps",
-  "test_session_next_steps_desc": "Tests the generation of action items",
+  "test_session_next_steps": "Next Steps & New Headline",
+  "test_session_next_steps_desc": "Tests generation of action items AND session updates",
   "test_nextsteps_msg_1": "I want to find a drawing course by the end of the week.",
   "test_nextsteps_msg_1_expected": "Bot should formulate concrete next steps",
+  "test_nextsteps_msg_2": "This will help me finally be creative again.",
+  "test_nextsteps_msg_2_expected": "Bot should suggest session update",
   
   "test_personality_loading": "Profile Loading",
   "test_personality_loading_desc": "Tests if the personality profile is loaded",
