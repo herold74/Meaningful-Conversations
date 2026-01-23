@@ -59,7 +59,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
             aria-modal="true"
         >
             <div 
-                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft"
+                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pt-[max(1.5rem,var(--safe-area-inset-top))] pb-[max(1.5rem,var(--safe-area-inset-bottom))]"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
