@@ -2,14 +2,10 @@ import Foundation
 import Capacitor
 import AVFoundation
 
-/**
- * NativeTTSPlugin - Provides access to iOS native AVSpeechSynthesizer
- * 
- * This plugin exposes ALL installed iOS voices (including premium/downloaded ones)
- * to the web layer, bypassing WKWebView's limited speechSynthesis.getVoices() API.
- */
 @objc(NativeTTSPlugin)
 public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDelegate {
+    
+    // MARK: - CAPBridgedPlugin Protocol
     public let identifier = "NativeTTSPlugin"
     public let jsName = "NativeTTS"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -21,22 +17,26 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
         CAPPluginMethod(name: "isSpeaking", returnType: CAPPluginReturnPromise)
     ]
     
-    private let synthesizer = AVSpeechSynthesizer()
+    // MARK: - Properties
+    private var synthesizer: AVSpeechSynthesizer!
     private var currentCall: CAPPluginCall?
     
-    override public func load() {
+    // MARK: - Lifecycle
+    public override func load() {
+        print("[NativeTTSPlugin] load() called - plugin is being initialized!")
+        synthesizer = AVSpeechSynthesizer()
         synthesizer.delegate = self
+        print("[NativeTTSPlugin] AVSpeechSynthesizer initialized, voices available: \(AVSpeechSynthesisVoice.speechVoices().count)")
     }
     
-    /**
-     * Get all available voices on the device
-     * Returns voices with identifier, name, language, and quality
-     */
+    // MARK: - Plugin Methods
     @objc func getVoices(_ call: CAPPluginCall) {
-        let voices = AVSpeechSynthesisVoice.speechVoices()
+        print("[NativeTTSPlugin] getVoices called!")
         
-        let voiceData = voices.map { voice -> [String: Any] in
-            // Determine quality level
+        let voices = AVSpeechSynthesisVoice.speechVoices()
+        var voiceData: [[String: Any]] = []
+        
+        for voice in voices {
             var quality = "default"
             if #available(iOS 13.0, *) {
                 switch voice.quality {
@@ -55,28 +55,19 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
                 cleanName = String(cleanName[..<range.lowerBound])
             }
             
-            return [
+            voiceData.append([
                 "identifier": voice.identifier,
                 "name": cleanName,
                 "fullName": voice.name,
                 "language": voice.language,
                 "quality": quality
-            ]
+            ])
         }
         
-        call.resolve([
-            "voices": voiceData
-        ])
+        print("[NativeTTSPlugin] Returning \(voiceData.count) voices")
+        call.resolve(["voices": voiceData])
     }
     
-    /**
-     * Speak text using the specified voice
-     * @param text - The text to speak
-     * @param voiceIdentifier - Optional voice identifier (uses default if not specified)
-     * @param rate - Speech rate (0.0 to 1.0, default 0.5)
-     * @param pitch - Speech pitch (0.5 to 2.0, default 1.0)
-     * @param volume - Volume (0.0 to 1.0, default 1.0)
-     */
     @objc func speak(_ call: CAPPluginCall) {
         guard let text = call.getString("text"), !text.isEmpty else {
             call.reject("Text is required")
@@ -96,15 +87,14 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
                 utterance.voice = voice
             } else {
                 // Try to find voice by language if identifier not found
-                let languageCode = String(voiceIdentifier.prefix(5)) // e.g., "de-DE"
+                let languageCode = String(voiceIdentifier.prefix(5))
                 utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
             }
         }
         
-        // Set speech parameters
+        // Set speech parameters with defaults
         let rate = call.getFloat("rate") ?? 0.5
-        utterance.rate = max(AVSpeechUtteranceMinimumSpeechRate, 
-                            min(AVSpeechUtteranceMaximumSpeechRate, rate))
+        utterance.rate = max(AVSpeechUtteranceMinimumSpeechRate, min(AVSpeechUtteranceMaximumSpeechRate, rate))
         
         let pitch = call.getFloat("pitch") ?? 1.0
         utterance.pitchMultiplier = max(0.5, min(2.0, pitch))
@@ -117,7 +107,7 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
         
         // Configure audio session for playback
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenContent, options: [.duckOthers])
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: .duckOthers)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("[NativeTTS] Audio session error: \(error)")
@@ -127,34 +117,22 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
         synthesizer.speak(utterance)
     }
     
-    /**
-     * Stop speaking immediately
-     */
     @objc func stop(_ call: CAPPluginCall) {
         synthesizer.stopSpeaking(at: .immediate)
         currentCall = nil
         call.resolve()
     }
     
-    /**
-     * Pause speaking
-     */
     @objc func pause(_ call: CAPPluginCall) {
         synthesizer.pauseSpeaking(at: .word)
         call.resolve()
     }
     
-    /**
-     * Resume speaking
-     */
     @objc func resume(_ call: CAPPluginCall) {
         synthesizer.continueSpeaking()
         call.resolve()
     }
     
-    /**
-     * Check if currently speaking
-     */
     @objc func isSpeaking(_ call: CAPPluginCall) {
         call.resolve([
             "speaking": synthesizer.isSpeaking,
@@ -163,7 +141,6 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
     }
     
     // MARK: - AVSpeechSynthesizerDelegate
-    
     public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
         notifyListeners("speechStart", data: [:])
     }
