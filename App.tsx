@@ -1174,7 +1174,7 @@ const App: React.FC = () => {
             {showGamificationBar && (
                 <div 
                     className="shrink-0"
-                    style={{ height: minimalBar ? 'calc(max(env(safe-area-inset-top, 0px), 3.5rem) + 2.75rem)' : 'calc(max(env(safe-area-inset-top, 0px), 3.5rem) + 3.5rem)' }}
+                    style={{ height: minimalBar ? 'calc(env(safe-area-inset-top, 0px) + 2.75rem)' : 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
                 />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
