@@ -695,6 +695,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Track current audio blob URL for cleanup
   const currentAudioUrlRef = useRef<string | null>(null);
   
+  // Audio cache for instant replay - stores the last generated audio
+  const cachedAudioRef = useRef<{ text: string; url: string; blob: Blob } | null>(null);
+  
   // iOS Audio Session Unlock: Resume AudioContext during user interaction
   // This allows audio.play() to work later without requiring another user interaction
   const unlockAudioSession = useCallback(() => {
@@ -778,17 +781,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, []);
 
-  const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false) => {
-    // #region agent log
-    console.log('[TTS-DEBUG] speak() called', { isTtsEnabled, textLength: text?.length, isMeditation, isRetry });
-    fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-start',message:'speak() called',data:{isTtsEnabled, textLength: text?.length, isMeditation, isRetry},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-    // #endregion
-    
+  const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false, forceLocalTts: boolean = false) => {
     if (!isTtsEnabled || !text.trim()) {
-      // #region agent log
-      console.log('[TTS-DEBUG] speak() early return - TTS disabled or empty text');
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-early-return',message:'speak() early return',data:{isTtsEnabled, hasText: !!text?.trim()},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-      // #endregion
       return;
     }
     
@@ -806,13 +800,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     isSpeakingRef.current = true;
     
     // Set loading state IMMEDIATELY and force React to render before continuing
-    // This prevents React from batching the true->false updates together
-    // #region agent log
-    console.log('[TTS-DEBUG] Setting isLoadingAudio=true with flushSync');
-    fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:speak-loading-true',message:'Setting isLoadingAudio=true with flushSync',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-    // #endregion
     // Use flushSync to force immediate render - React 18 batches state updates across async boundaries
-    // which caused the TTS loading spinner to not show (isLoadingAudio=true was batched with isLoading=false)
     flushSync(() => {
       setIsLoadingAudio(true);
     });
@@ -840,8 +828,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     // On native iOS: allow server TTS (no autoplay restrictions) and native TTS
     // On iOS Safari: force local (Web Speech API) due to autoplay restrictions
+    // forceLocalTts is used when server TTS fails and we need to fallback immediately
+    // (React state updates are async, so we can't rely on ttsMode being updated yet)
     const iosSafariForcesLocal = isIOS && !isNativeiOS;
-    const effectiveTtsMode = iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode);
+    const effectiveTtsMode = forceLocalTts ? 'local' : (iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode));
 
     // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
     if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
@@ -906,22 +896,43 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           audioRef.current = null;
         }
         
-        // Revoke previous blob URL to prevent memory leaks
-        if (currentAudioUrlRef.current) {
-          URL.revokeObjectURL(currentAudioUrlRef.current);
-          currentAudioUrlRef.current = null;
+        let audioUrl: string;
+        let audioBlob: Blob;
+        
+        // Check if we have cached audio for this exact text (instant replay)
+        if (cachedAudioRef.current && cachedAudioRef.current.text === cleanText) {
+          console.log('[TTS] Using cached audio for instant replay');
+          audioUrl = cachedAudioRef.current.url;
+          audioBlob = cachedAudioRef.current.blob;
+          // Skip loading spinner for cached audio - it's instant
+          setIsLoadingAudio(false);
+        } else {
+          // Revoke previous blob URL to prevent memory leaks (only if not reusing cache)
+          if (currentAudioUrlRef.current && currentAudioUrlRef.current !== cachedAudioRef.current?.url) {
+            URL.revokeObjectURL(currentAudioUrlRef.current);
+            currentAudioUrlRef.current = null;
+          }
+          
+          // Clear old cache before generating new audio
+          if (cachedAudioRef.current && cachedAudioRef.current.url !== currentAudioUrlRef.current) {
+            URL.revokeObjectURL(cachedAudioRef.current.url);
+          }
+          
+          const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
+          audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
+          
+          // Ensure loading spinner is visible for at least 300ms
+          const elapsed = Date.now() - loadingStartTime;
+          if (elapsed < 300) {
+            await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
+          }
+          
+          audioUrl = URL.createObjectURL(audioBlob);
+          
+          // Cache the audio for instant replay
+          cachedAudioRef.current = { text: cleanText, url: audioUrl, blob: audioBlob };
         }
         
-        const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
-        const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
-        
-        // Ensure loading spinner is visible for at least 300ms
-        const elapsed = Date.now() - loadingStartTime;
-        if (elapsed < 300) {
-          await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
-        }
-        
-        const audioUrl = URL.createObjectURL(audioBlob);
         currentAudioUrlRef.current = audioUrl;
         
         // Create a FRESH audio element for each playback
@@ -931,10 +942,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         // Set up event handlers
         audio.addEventListener('play', () => {
-          // #region agent log
-          console.log('[TTS-DEBUG] Server audio started playing');
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-audio-play',message:'Server audio started playing - setting isLoadingAudio=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-          // #endregion
           setTtsStatus('speaking');
           setIsLoadingAudio(false); // Hide spinner when audio actually starts playing
         });
@@ -945,11 +952,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         audio.addEventListener('ended', () => {
           setTtsStatus('idle');
           isSpeakingRef.current = false; // Release lock when audio ends
-          // Cleanup after playback to reset iOS audio session
-          if (currentAudioUrlRef.current === audioUrl) {
-            URL.revokeObjectURL(audioUrl);
-            currentAudioUrlRef.current = null;
-          }
+          // Don't revoke the URL here - keep it cached for instant replay
+          // The cache will be cleared when new audio is generated
           // Don't null audioRef here - it's still needed for pause/resume
         });
         audio.addEventListener('error', (e) => {
@@ -1004,8 +1008,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         // Fallback to local mode but don't save preference
         // This allows retry on next session if server comes back
         setTtsMode('local');
-        // Pass isRetry=true to bypass the speaking lock
-        setTimeout(() => speak(text, isMeditation, true), 100);
+        // Pass isRetry=true to bypass the speaking lock AND forceLocalTts=true to skip
+        // server TTS check (React state updates are async, so ttsMode might not be 'local' yet)
+        setTimeout(() => speak(text, isMeditation, true, true), 100);
       }
       return;
     }
@@ -1357,6 +1362,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   
   const handleOpenVoiceModal = () => {
     if (!window.speechSynthesis) return;
+    console.log('[VoiceModal OPEN] State before:', { ttsMode, selectedVoiceURI, isAutoMode, isTtsEnabled, isLoadingAudio });
 
     // Stop any current audio playback when opening voice settings
     isStoppingAudioRef.current = true;
@@ -2132,14 +2138,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
 
             {!isVoiceMode && (
                 <div className="flex items-center justify-end gap-2 border-l border-border-primary pl-2 sm:pl-2 md:pl-4">
+                    {/* DEBUG: Show states */}
+                    {/* <span className="text-[8px] text-red-500">{isLoadingAudio ? 'L' : '-'}{isTtsEnabled ? 'T' : '-'}</span> */}
                     {isTtsEnabled && (
                         <>
                             {isLoadingAudio && (
-                                <div className="p-1 text-content-secondary" aria-label={t('chat_loading_audio')}>
+                                <div className="flex items-center gap-2 p-1 text-accent-primary animate-pulse" aria-label={t('chat_loading_audio')}>
                                     <svg className="animate-spin w-5 h-5 sm:w-6 sm:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
+                                    <span className="text-xs hidden sm:inline">Audio...</span>
                                 </div>
                             )}
                             {!isLoadingAudio && ttsStatus === 'idle' && (
