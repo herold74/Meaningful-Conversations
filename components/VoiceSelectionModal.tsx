@@ -99,28 +99,36 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     // Sync state if the modal is reopened with a different external state
     useEffect(() => {
         if (isOpen) {
+            console.log('[VoiceModal SYNC] Props:', { currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser });
+            
             // On iOS, server voices are not available - switch to auto if server voice was selected
             if (isIOSBrowser && currentTtsMode === 'server') {
+                console.log('[VoiceModal SYNC] -> iOS browser, forcing auto');
                 setSelection({ type: 'auto' });
                 return;
             }
             
             // Sync modal state with parent props
-            if (isAutoMode && currentVoiceURI && currentTtsMode === 'server') {
-                // Auto mode selected a server voice - show it as selected (not on iOS)
-                setSelection({ type: 'server', voiceId: currentVoiceURI });
-            } else if (isAutoMode) {
+            if (isAutoMode) {
+                // Auto mode is enabled - always show the Auto radio button as selected
+                console.log('[VoiceModal SYNC] -> Auto mode (showing auto selected)');
                 setSelection({ type: 'auto' });
             } else if (currentTtsMode === 'server' && currentVoiceURI) {
+                console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
                 setSelection({ type: 'server', voiceId: currentVoiceURI });
             } else if (currentVoiceURI) {
                 // Check if it's a native iOS voice (com.apple.voice identifier)
-                if (currentVoiceURI.startsWith('com.apple.voice')) {
+                // IMPORTANT: Only treat as 'native' on actual iOS Native app!
+                // Safari Desktop also uses com.apple.voice.* URIs but should be 'local'
+                if (currentVoiceURI.startsWith('com.apple.voice') && isNativeiOS) {
+                    console.log('[VoiceModal SYNC] -> Native iOS voice:', currentVoiceURI);
                     setSelection({ type: 'native', voiceIdentifier: currentVoiceURI });
                 } else {
+                    console.log('[VoiceModal SYNC] -> Local voice:', currentVoiceURI);
                     setSelection({ type: 'local', voiceURI: currentVoiceURI });
                 }
             } else {
+                console.log('[VoiceModal SYNC] -> Default auto (no voiceURI)');
                 setSelection({ type: 'auto' });
             }
         }
@@ -317,7 +325,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 </div>
                 
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3">
-                    <div className="p-3 border border-border-primary bg-background-tertiary">
+                    <div className={`p-3 border ${selection.type === 'auto' ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary bg-background-tertiary'}`}>
                         <label className="flex items-center cursor-pointer">
                             <input
                                 type="radio"
@@ -327,7 +335,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-3">
-                                <span className="font-semibold text-content-primary">{t('voiceModal_auto')}</span>
+                                <span className="font-semibold text-content-primary">{t('voiceModal_auto')} {selection.type === 'auto' && <span className="text-accent-primary">✓</span>}</span>
                                 <span className="block text-sm text-content-secondary">{t('voiceModal_auto_desc')}</span>
                             </span>
                         </label>
@@ -358,19 +366,21 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                     </div>
                                 </div>
                             )}
-                            {serverVoices.map(voice => (
-                                <div key={voice.id} className={`p-3 border border-border-primary ${isVoiceEnabled(voice) ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
+                            {serverVoices.map(voice => {
+                                const isServerVoiceChecked = selection.type === 'server' && (selection as {type: 'server', voiceId: string}).voiceId === voice.id;
+                                return (
+                                <div key={voice.id} className={`p-3 border ${isServerVoiceChecked ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary'} ${isVoiceEnabled(voice) ? 'bg-background-tertiary' : 'bg-background-primary opacity-60'}`}>
                                     <label className={`flex items-center ${isVoiceEnabled(voice) ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                                         <input
                                             type="radio"
                                             name="voice-selection"
-                                            checked={selection.type === 'server' && selection.voiceId === voice.id}
+                                            checked={isServerVoiceChecked}
                                             onChange={() => isVoiceEnabled(voice) && setSelection({ type: 'server', voiceId: voice.id })}
                                             disabled={!isVoiceEnabled(voice)}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                         <span className="ml-3 flex-1">
-                                            <span className={`font-semibold ${isVoiceEnabled(voice) ? 'text-content-primary' : 'text-content-secondary'}`}>{voice.name}</span>
+                                            <span className={`font-semibold ${isVoiceEnabled(voice) ? 'text-content-primary' : 'text-content-secondary'}`}>{voice.name} {isServerVoiceChecked && <span className="text-accent-primary">✓</span>}</span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.language === 'de' ? 'Deutsch' : 'English'}
                                             </span>
@@ -385,7 +395,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         </button>
                                     </label>
                                 </div>
-                            ))}
+                            );
+                            })}
                         </>
                     )}
 
@@ -447,18 +458,21 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                     {t('voiceModal_local_voices_desc') || 'Installed on your device • Instantly available'}
                                 </p>
                             </div>
-                            {localVoices.map(voice => (
-                                <div key={voice.voiceURI} className="p-3 border border-border-primary bg-background-tertiary">
+                            {localVoices.map(voice => {
+                                const selectionVoiceURI = selection.type === 'local' ? (selection as { type: 'local'; voiceURI: string }).voiceURI : null;
+                                const isChecked = selection.type === 'local' && selectionVoiceURI === voice.voiceURI;
+                                return (
+                                <div key={voice.voiceURI} className={`p-3 border ${isChecked ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary bg-background-tertiary'}`}>
                                     <label className="flex items-center cursor-pointer">
                                         <input
                                             type="radio"
                                             name="voice-selection"
-                                            checked={selection.type === 'local' && selection.voiceURI === voice.voiceURI}
+                                            checked={isChecked}
                                             onChange={() => setSelection({ type: 'local', voiceURI: voice.voiceURI })}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                                         />
                                         <span className="ml-3 flex-1">
-                                            <span className="font-semibold text-content-primary">{cleanVoiceName(voice.name)}</span>
+                                            <span className="font-semibold text-content-primary">{cleanVoiceName(voice.name)} {isChecked && <span className="text-accent-primary">✓</span>}</span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.lang.startsWith('de') ? 'Deutsch' : voice.lang.startsWith('en') ? 'English' : voice.lang}
                                             </span>
@@ -472,7 +486,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         </button>
                                     </label>
                                 </div>
-                            ))}
+                            );
+                            })}
                         </>
                     )}
 
