@@ -69,7 +69,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
 
     if (minimal) {
         return (
-            <div className="sticky top-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm pt-[calc(var(--safe-area-inset-top)+0.5rem)]">
+            <div className="sticky top-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm pt-[max(calc(var(--safe-area-inset-top)+0.5rem),3rem)]">
                  <button 
                     onClick={onBurgerClick}
                     className="p-2 text-content-secondary hover:text-content-primary transition-colors"
@@ -86,7 +86,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     }
 
     return (
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md pt-[calc(var(--safe-area-inset-top)+0.75rem)]">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md pt-[max(calc(var(--safe-area-inset-top)+0.75rem),3rem)]">
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
                     <>
