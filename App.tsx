@@ -1170,6 +1170,13 @@ const App: React.FC = () => {
                     minimal={minimalBar}
                 />
             )}
+            {/* Spacer to prevent content from overlapping with sticky GamificationBar */}
+            {showGamificationBar && (
+                <div 
+                    className="shrink-0"
+                    style={{ height: minimalBar ? 'calc(var(--safe-area-inset-top) + 3.5rem)' : 'calc(var(--safe-area-inset-top) + 4.25rem)' }}
+                />
+            )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
                 {renderView()}
             </main>
