@@ -1171,7 +1171,7 @@ const App: React.FC = () => {
                         minimal={minimalBar}
                     />
                     {/* Spacer for fixed GamificationBar */}
-                    <div className={minimalBar ? 'h-12' : 'h-14'} />
+                    <div className={minimalBar ? 'h-16' : 'h-20'} />
                 </>
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
