@@ -511,26 +511,62 @@ const stressLabels = {
 // HELPER COMPONENTS
 // ============================================================================
 
-// Ship wheel logo as SVG
-const ShipWheelLogo = () => (
-  <Svg width={28} height={28} viewBox="0 0 24 24">
-    <G transform="rotate(0, 12, 12)">
-      <Path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" fill="white" />
-    </G>
-    <G transform="rotate(45, 12, 12)">
-      <Path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" fill="white" />
-    </G>
-    <G transform="rotate(90, 12, 12)">
-      <Path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" fill="white" />
-    </G>
-    <G transform="rotate(135, 12, 12)">
-      <Path d="M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z" fill="white" />
-    </G>
-    <Circle cx={12} cy={12} r={8} fill="none" stroke="white" strokeWidth={2} />
-    <Circle cx={12} cy={12} r={6} fill="none" stroke="white" strokeWidth={1} />
-    <Circle cx={12} cy={12} r={1.75} fill="white" />
-  </Svg>
-);
+// Ship wheel logo as SVG - simplified for @react-pdf/renderer compatibility
+const ShipWheelLogo = () => {
+  const size = 28;
+  const center = 12;
+  const outerR = 10;
+  const innerR = 6;
+  const handleR = 1.2;
+  
+  // Calculate spoke endpoints for 8 spokes
+  const spokes = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * 45) * (Math.PI / 180);
+    spokes.push({
+      x1: center,
+      y1: center,
+      x2: center + outerR * Math.cos(angle),
+      y2: center + outerR * Math.sin(angle),
+      // Handle position (at the end of spoke, on outer ring)
+      hx: center + outerR * Math.cos(angle),
+      hy: center + outerR * Math.sin(angle),
+    });
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Outer ring */}
+      <Circle cx={center} cy={center} r={outerR} fill="none" stroke="white" strokeWidth={2} />
+      {/* Inner ring */}
+      <Circle cx={center} cy={center} r={innerR} fill="none" stroke="white" strokeWidth={1.5} />
+      {/* Spokes */}
+      {spokes.map((spoke, i) => (
+        <Line
+          key={`spoke-${i}`}
+          x1={spoke.x1}
+          y1={spoke.y1}
+          x2={spoke.x2}
+          y2={spoke.y2}
+          stroke="white"
+          strokeWidth={1.5}
+        />
+      ))}
+      {/* Handles at end of spokes */}
+      {spokes.map((spoke, i) => (
+        <Circle
+          key={`handle-${i}`}
+          cx={spoke.hx}
+          cy={spoke.hy}
+          r={handleR}
+          fill="white"
+        />
+      ))}
+      {/* Center hub */}
+      <Circle cx={center} cy={center} r={2} fill="white" />
+    </Svg>
+  );
+};
 
 // Riemann Radar Chart as SVG
 const RiemannRadar = ({ data, language }: { 
@@ -685,60 +721,131 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const hasOcean = !!result.big5;
   const hasNarrative = !!result.narrativeProfile;
   
+  // When all 3 tests are completed, use 2 pages
+  const useTwoPages = hasSD && hasRiemann && hasOcean;
+  
   const getOceanColor = (score: number) => score >= 4 ? colors.teal500 : score >= 3 ? colors.amber500 : colors.red500;
   const getOceanLabel = (score: number) => score >= 4 ? t.high : score >= 3 ? t.medium : t.low;
   
+  // Reusable Header component
+  const Header = () => (
+    <View style={styles.header}>
+      <View style={styles.headerLeft}>
+        <ShipWheelLogo />
+        <View>
+          <Text style={styles.headerTitle}>{t.title}</Text>
+          <Text style={styles.headerSubtitle}>Meaningful Conversations</Text>
+        </View>
+      </View>
+      <View style={styles.headerRight}>
+        <Text style={styles.headerRightText}>{date}</Text>
+        <Text style={styles.headerRightText}>manualmode.at</Text>
+      </View>
+    </View>
+  );
+  
+  // Reusable Footer component
+  const Footer = () => (
+    <View style={styles.footer}>
+      <Text>
+        <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at • {t.confidential} • © {new Date().getFullYear()}
+      </Text>
+    </View>
+  );
+  
+  // OCEAN Section component
+  const OceanSection = () => (
+    <View style={[styles.box, { marginBottom: 10 }]}>
+      <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
+      {hasOcean && result.big5 ? (
+        <View style={styles.oceanRow}>
+          {[
+            { key: 'O', name: t.openness, score: result.big5.openness },
+            { key: 'C', name: t.conscientiousness, score: result.big5.conscientiousness },
+            { key: 'E', name: t.extraversion, score: result.big5.extraversion },
+            { key: 'A', name: t.agreeableness, score: result.big5.agreeableness },
+            { key: 'N', name: t.neuroticism, score: result.big5.neuroticism },
+          ].map((trait) => (
+            <View key={trait.key} style={styles.oceanItem}>
+              <Text style={styles.oceanName}>{trait.name}</Text>
+              <Text style={[styles.oceanScore, { color: getOceanColor(trait.score) }]}>
+                {trait.score}/5
+              </Text>
+              <Text style={[styles.oceanLabel, { color: getOceanColor(trait.score) }]}>
+                {getOceanLabel(trait.score)}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <Text style={styles.placeholderText}>{t.oceanNotCompleted}</Text>
+      )}
+    </View>
+  );
+  
+  // Usage Guide component
+  const UsageGuide = () => (
+    <View style={styles.usageGuide}>
+      <Text style={styles.usageTitle}>{t.howToUse}</Text>
+      <View style={styles.usageContent}>
+        <View style={styles.usageItem}>
+          <Text style={styles.usageItemTitle}>{t.reflect}</Text>
+          <Text> {t.reflectDesc}</Text>
+        </View>
+        <View style={styles.usageItem}>
+          <Text style={styles.usageItemTitle}>{t.noJudgment}</Text>
+          <Text> {t.noJudgmentDesc}</Text>
+        </View>
+        <View style={styles.usageItem}>
+          <Text style={styles.usageItemTitle}>{t.dialogue}</Text>
+          <Text> {t.dialogueDesc}</Text>
+        </View>
+        <View style={styles.usageItem}>
+          <Text style={styles.usageItemTitle}>{t.grow}</Text>
+          <Text> {t.growDesc}</Text>
+        </View>
+      </View>
+    </View>
+  );
+  
   return (
     <Document>
+      {/* PAGE 1 */}
       <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <ShipWheelLogo />
-            <View>
-              <Text style={styles.headerTitle}>{t.title}</Text>
-              <Text style={styles.headerSubtitle}>Meaningful Conversations</Text>
-            </View>
-          </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.headerRightText}>{date}</Text>
-            <Text style={styles.headerRightText}>manualmode.at</Text>
-          </View>
-        </View>
+        <Header />
         
-        {/* ROW 1: Signature + Superpowers */}
-        <View style={styles.grid2}>
-          {hasNarrative && result.narrativeProfile ? (
-            <>
-              <View style={[styles.box, styles.boxAccent, styles.gridHalf]}>
-                <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
-                <Text style={styles.signatureText}>{result.narrativeProfile.operatingSystem}</Text>
-              </View>
-              <View style={[styles.box, styles.boxWarm, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
-                {result.narrativeProfile.superpowers.slice(0, 3).map((p: { name: string; description: string }, i: number) => (
-                  <View key={i} style={styles.compactListItem}>
-                    <Text style={styles.compactListTitle}>{i + 1}. {p.name}</Text>
-                    <Text style={styles.compactListDesc}>{p.description}</Text>
-                  </View>
-                ))}
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>🧬 {t.narrativeOS}</Text>
-                <Text style={styles.placeholderText}>{t.signatureNotCreated}</Text>
-              </View>
-              <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeSuperpowers}</Text>
-                <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-              </View>
-            </>
-          )}
-        </View>
+        {/* Signature - Full Width */}
+        {hasNarrative && result.narrativeProfile ? (
+          <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
+            <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
+            <Text style={styles.signatureText}>{result.narrativeProfile.operatingSystem}</Text>
+          </View>
+        ) : (
+          <View style={[styles.box, styles.boxPlaceholder, { marginBottom: 10 }]}>
+            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeOS}</Text>
+            <Text style={styles.placeholderText}>{t.signatureNotCreated}</Text>
+          </View>
+        )}
         
-        {/* ROW 2: Spiral Dynamics */}
+        {/* Superpowers - Full Width */}
+        {hasNarrative && result.narrativeProfile ? (
+          <View style={[styles.box, styles.boxWarm, { marginBottom: 10 }]}>
+            <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
+            {result.narrativeProfile.superpowers.map((p: { name: string; description: string }, i: number) => (
+              <View key={i} style={styles.compactListItem}>
+                <Text style={styles.compactListTitle}>{i + 1}. {p.name}</Text>
+                <Text style={styles.compactListDesc}>{p.description}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={[styles.box, styles.boxPlaceholder, { marginBottom: 10 }]}>
+            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeSuperpowers}</Text>
+            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
+          </View>
+        )}
+        
+        {/* Spiral Dynamics */}
         <View style={[styles.box, { marginBottom: 10 }]}>
           <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
           {hasSD && result.spiralDynamics ? (
@@ -781,7 +888,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           )}
         </View>
         
-        {/* ROW 3: Riemann */}
+        {/* Riemann */}
         <View style={[styles.box, { marginBottom: 10 }]}>
           <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
           {hasRiemann && result.riemann ? (
@@ -833,35 +940,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           )}
         </View>
         
-        {/* ROW 4: OCEAN */}
-        <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
-          {hasOcean && result.big5 ? (
-            <View style={styles.oceanRow}>
-              {[
-                { key: 'O', name: t.openness, score: result.big5.openness },
-                { key: 'C', name: t.conscientiousness, score: result.big5.conscientiousness },
-                { key: 'E', name: t.extraversion, score: result.big5.extraversion },
-                { key: 'A', name: t.agreeableness, score: result.big5.agreeableness },
-                { key: 'N', name: t.neuroticism, score: result.big5.neuroticism },
-              ].map((trait) => (
-                <View key={trait.key} style={styles.oceanItem}>
-                  <Text style={styles.oceanName}>{trait.name}</Text>
-                  <Text style={[styles.oceanScore, { color: getOceanColor(trait.score) }]}>
-                    {trait.score}/5
-                  </Text>
-                  <Text style={[styles.oceanLabel, { color: getOceanColor(trait.score) }]}>
-                    {getOceanLabel(trait.score)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Text style={styles.placeholderText}>{t.oceanNotCompleted}</Text>
-          )}
-        </View>
-        
-        {/* ROW 5: Blindspots + Growth */}
+        {/* Blindspots + Growth - Side by side */}
         <View style={styles.grid2}>
           {hasNarrative && result.narrativeProfile ? (
             <>
@@ -904,36 +983,42 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           )}
         </View>
         
-        {/* Usage Guide */}
-        <View style={styles.usageGuide}>
-          <Text style={styles.usageTitle}>{t.howToUse}</Text>
-          <View style={styles.usageContent}>
-            <View style={styles.usageItem}>
-              <Text style={styles.usageItemTitle}>{t.reflect}</Text>
-              <Text> {t.reflectDesc}</Text>
-            </View>
-            <View style={styles.usageItem}>
-              <Text style={styles.usageItemTitle}>{t.noJudgment}</Text>
-              <Text> {t.noJudgmentDesc}</Text>
-            </View>
-            <View style={styles.usageItem}>
-              <Text style={styles.usageItemTitle}>{t.dialogue}</Text>
-              <Text> {t.dialogueDesc}</Text>
-            </View>
-            <View style={styles.usageItem}>
-              <Text style={styles.usageItemTitle}>{t.grow}</Text>
-              <Text> {t.growDesc}</Text>
-            </View>
-          </View>
-        </View>
+        {/* If NOT using two pages, show OCEAN, Usage Guide, and Footer on page 1 */}
+        {!useTwoPages && (
+          <>
+            <OceanSection />
+            <UsageGuide />
+            <Footer />
+          </>
+        )}
         
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>
-            <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at • {t.confidential} • © {new Date().getFullYear()}
-          </Text>
-        </View>
+        {/* If using two pages, just show footer hint on page 1 */}
+        {useTwoPages && (
+          <View style={{ marginTop: 'auto' }}>
+            <Text style={{ fontSize: 8, color: colors.gray400, textAlign: 'center', marginTop: 10 }}>
+              {language === 'de' ? '— Fortsetzung auf Seite 2 —' : '— Continued on page 2 —'}
+            </Text>
+          </View>
+        )}
       </Page>
+      
+      {/* PAGE 2 - Only when all 3 tests are completed */}
+      {useTwoPages && (
+        <Page size="A4" style={styles.page}>
+          <Header />
+          
+          {/* OCEAN Section */}
+          <OceanSection />
+          
+          {/* Usage Guide */}
+          <UsageGuide />
+          
+          {/* Push footer to bottom */}
+          <View style={{ marginTop: 'auto' }}>
+            <Footer />
+          </View>
+        </Page>
+      )}
     </Document>
   );
 };
