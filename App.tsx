@@ -1170,11 +1170,11 @@ const App: React.FC = () => {
                     minimal={minimalBar}
                 />
             )}
-            {/* Small spacer buffer below sticky GamificationBar */}
+            {/* Spacer for fixed GamificationBar - must account for full bar height */}
             {showGamificationBar && (
                 <div 
                     className="shrink-0"
-                    style={{ height: minimalBar ? '0.25rem' : '0.5rem' }}
+                    style={{ height: minimalBar ? 'calc(max(var(--safe-area-inset-top) + 0.5rem, 3rem) + 3rem)' : 'calc(max(var(--safe-area-inset-top) + 0.75rem, 3rem) + 3.5rem)' }}
                 />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
