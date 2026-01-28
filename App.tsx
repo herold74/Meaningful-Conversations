@@ -51,8 +51,7 @@ import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
 import PersonalityProfileView from './components/PersonalityProfileView';
 import LifeContextEditorView from './components/LifeContextEditorView';
-import { formatSurveyResultAsHtml } from './utils/surveyResultHtmlFormatter';
-import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGenerator';
+import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
@@ -586,10 +585,8 @@ const App: React.FC = () => {
         // Guest users: Generate and download PDF automatically (they can't save profile)
         else {
             try {
-                const htmlContent = formatSurveyResultAsHtml(result, language);
                 const filename = generateSurveyPdfFilename(result.path, language);
-                
-                await generatePDF(htmlContent, filename);
+                await generatePDF(result, filename, language);
                 alert(t('personality_survey_success_downloaded'));
                 
                 // Navigate back to chat
