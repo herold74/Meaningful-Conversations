@@ -711,11 +711,11 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           {hasNarrative && result.narrativeProfile ? (
             <>
               <View style={[styles.box, styles.boxAccent, styles.gridHalf]}>
-                <Text style={styles.boxTitle}>🧬 {t.narrativeOS}</Text>
+                <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
                 <Text style={styles.signatureText}>{result.narrativeProfile.operatingSystem}</Text>
               </View>
               <View style={[styles.box, styles.boxWarm, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleAmber]}>⚡ {t.narrativeSuperpowers}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
                 {result.narrativeProfile.superpowers.slice(0, 3).map((p: { name: string; description: string }, i: number) => (
                   <View key={i} style={styles.compactListItem}>
                     <Text style={styles.compactListTitle}>{i + 1}. {p.name}</Text>
@@ -731,7 +731,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 <Text style={styles.placeholderText}>{t.signatureNotCreated}</Text>
               </View>
               <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>⚡ {t.narrativeSuperpowers}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeSuperpowers}</Text>
                 <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
               </View>
             </>
@@ -740,7 +740,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         
         {/* ROW 2: Spiral Dynamics */}
         <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>🌀 {t.whatDrivesYou}</Text>
+          <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
           {hasSD && result.spiralDynamics ? (
             <View style={{ flexDirection: 'row', gap: 20 }}>
               <View style={{ flex: 1 }}>
@@ -783,7 +783,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         
         {/* ROW 3: Riemann */}
         <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>🎯 {t.howYouInteract}</Text>
+          <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
           {hasRiemann && result.riemann ? (
             <View style={styles.riemannContainer}>
               <RiemannRadar data={result.riemann} language={language} />
@@ -791,7 +791,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 {result.riemann.stressRanking && result.riemann.stressRanking.length > 0 && (
                   <View style={{ marginBottom: 8 }}>
                     <Text style={{ fontSize: 9, fontWeight: 'bold', color: colors.gray700, marginBottom: 4 }}>
-                      ⚡ {t.stressPattern}
+                      {t.stressPattern}
                     </Text>
                     <View style={styles.stressGrid}>
                       {result.riemann.stressRanking.map((id: string, i: number) => {
@@ -835,7 +835,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         
         {/* ROW 4: OCEAN */}
         <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>🧬 {t.whatDefinesYou}</Text>
+          <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
           {hasOcean && result.big5 ? (
             <View style={styles.oceanRow}>
               {[
@@ -866,7 +866,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           {hasNarrative && result.narrativeProfile ? (
             <>
               <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleRose]}>⚪ {t.narrativeBlindspots}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
                 <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
                   {t.blindspotsDesc}
                 </Text>
@@ -878,7 +878,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 ))}
               </View>
               <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleGreen]}>🌱 {t.narrativeGrowth}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
                 <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
                   {t.growthDesc}
                 </Text>
@@ -893,11 +893,11 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           ) : (
             <>
               <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>⚪ {t.narrativeBlindspots}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeBlindspots}</Text>
                 <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
               </View>
               <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>🌱 {t.narrativeGrowth}</Text>
+                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeGrowth}</Text>
                 <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
               </View>
             </>
@@ -906,7 +906,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         
         {/* Usage Guide */}
         <View style={styles.usageGuide}>
-          <Text style={styles.usageTitle}>📖 {t.howToUse}</Text>
+          <Text style={styles.usageTitle}>{t.howToUse}</Text>
           <View style={styles.usageContent}>
             <View style={styles.usageItem}>
               <Text style={styles.usageItemTitle}>{t.reflect}</Text>
