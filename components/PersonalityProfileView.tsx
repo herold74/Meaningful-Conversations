@@ -4,8 +4,7 @@ import * as api from '../services/api';
 import { updateCoachingMode } from '../services/userService';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile, SpiralDynamicsResult, LensType } from './PersonalitySurvey';
-import { formatSurveyResultAsHtml } from '../utils/surveyResultHtmlFormatter';
-import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGenerator';
+import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
 import { detectPII, PIIDetectionResult } from '../utils/piiDetection';
 import Spinner from './shared/Spinner';
 import Button from './shared/Button';
@@ -495,9 +494,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         narrativeProfile: decryptedData.narrativeProfile
       };
       
-      const htmlContent = formatSurveyResultAsHtml(surveyResult, language);
       const filename = generateSurveyPdfFilename(surveyResult.path, language);
-      await generatePDF(htmlContent, filename);
+      await generatePDF(surveyResult, filename, language);
     } catch (err) {
       console.error('PDF generation failed:', err);
       alert(t('personality_survey_error_pdf'));
