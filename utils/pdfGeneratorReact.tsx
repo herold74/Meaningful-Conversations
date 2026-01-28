@@ -516,7 +516,6 @@ const ShipWheelLogo = () => {
   const size = 28;
   const center = 12;
   const outerR = 10;
-  const innerR = 6;
   const handleR = 1.2;
   
   // Calculate spoke endpoints for 8 spokes
@@ -528,7 +527,6 @@ const ShipWheelLogo = () => {
       y1: center,
       x2: center + outerR * Math.cos(angle),
       y2: center + outerR * Math.sin(angle),
-      // Handle position (at the end of spoke, on outer ring)
       hx: center + outerR * Math.cos(angle),
       hy: center + outerR * Math.sin(angle),
     });
@@ -538,8 +536,6 @@ const ShipWheelLogo = () => {
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* Outer ring */}
       <Circle cx={center} cy={center} r={outerR} fill="none" stroke="white" strokeWidth={2} />
-      {/* Inner ring */}
-      <Circle cx={center} cy={center} r={innerR} fill="none" stroke="white" strokeWidth={1.5} />
       {/* Spokes */}
       {spokes.map((spoke, i) => (
         <Line
@@ -602,10 +598,14 @@ const RiemannRadar = ({ data, language }: {
     }).join(' ');
   };
   
+  // Colors must match exactly: fill = stroke color with 30% opacity
+  // orange500: #f97316 = rgb(249, 115, 22)
+  // green600: #16a34a = rgb(22, 163, 74)
+  // blue500: #3b82f6 = rgb(59, 130, 246)
   const contexts = [
-    { key: 'selbst', fill: 'rgba(249, 115, 22, 0.3)', stroke: colors.orange500 },
-    { key: 'privat', fill: 'rgba(34, 197, 94, 0.3)', stroke: colors.green600 },
     { key: 'beruf', fill: 'rgba(59, 130, 246, 0.3)', stroke: colors.blue500 },
+    { key: 'privat', fill: 'rgba(22, 163, 74, 0.3)', stroke: colors.green600 },
+    { key: 'selbst', fill: 'rgba(249, 115, 22, 0.3)', stroke: colors.orange500 },
   ];
   
   const dimLabels = language === 'de'
@@ -808,6 +808,51 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     </View>
   );
   
+  // Blindspots + Growth Section component (reusable)
+  const BlindspotsGrowthSection = () => (
+    <View style={styles.grid2}>
+      {hasNarrative && result.narrativeProfile ? (
+        <>
+          <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
+            <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
+            <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+              {t.blindspotsDesc}
+            </Text>
+            {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
+              <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
+                <Text style={[styles.compactListTitle, { color: colors.rose800 }]}>{i + 1}. {s.name}</Text>
+                <Text style={styles.compactListDesc}>{s.description}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
+            <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
+            <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+              {t.growthDesc}
+            </Text>
+            {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
+              <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
+                <Text style={[styles.compactListTitle, { color: colors.green800 }]}>{i + 1}. {g.title}</Text>
+                <Text style={styles.compactListDesc}>{g.recommendation}</Text>
+              </View>
+            ))}
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
+            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeBlindspots}</Text>
+            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
+          </View>
+          <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
+            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeGrowth}</Text>
+            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
+          </View>
+        </>
+      )}
+    </View>
+  );
+  
   return (
     <Document>
       {/* PAGE 1 */}
@@ -940,59 +985,17 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           )}
         </View>
         
-        {/* Blindspots + Growth - Side by side */}
-        <View style={styles.grid2}>
-          {hasNarrative && result.narrativeProfile ? (
-            <>
-              <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
-                <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
-                  {t.blindspotsDesc}
-                </Text>
-                {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
-                  <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
-                    <Text style={[styles.compactListTitle, { color: colors.rose800 }]}>{i + 1}. {s.name}</Text>
-                    <Text style={styles.compactListDesc}>{s.description}</Text>
-                  </View>
-                ))}
-              </View>
-              <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
-                <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
-                  {t.growthDesc}
-                </Text>
-                {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
-                  <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
-                    <Text style={[styles.compactListTitle, { color: colors.green800 }]}>{i + 1}. {g.title}</Text>
-                    <Text style={styles.compactListDesc}>{g.recommendation}</Text>
-                  </View>
-                ))}
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeBlindspots}</Text>
-                <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-              </View>
-              <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-                <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeGrowth}</Text>
-                <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-              </View>
-            </>
-          )}
-        </View>
-        
-        {/* If NOT using two pages, show OCEAN, Usage Guide, and Footer on page 1 */}
+        {/* If NOT using two pages, show everything on page 1 */}
         {!useTwoPages && (
           <>
+            <BlindspotsGrowthSection />
             <OceanSection />
             <UsageGuide />
             <Footer />
           </>
         )}
         
-        {/* If using two pages, just show footer hint on page 1 */}
+        {/* If using two pages, show continuation hint */}
         {useTwoPages && (
           <View style={{ marginTop: 'auto' }}>
             <Text style={{ fontSize: 8, color: colors.gray400, textAlign: 'center', marginTop: 10 }}>
@@ -1007,16 +1010,17 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         <Page size="A4" style={styles.page}>
           <Header />
           
+          {/* Blindspots + Growth on Page 2 */}
+          <BlindspotsGrowthSection />
+          
           {/* OCEAN Section */}
           <OceanSection />
           
           {/* Usage Guide */}
           <UsageGuide />
           
-          {/* Push footer to bottom */}
-          <View style={{ marginTop: 'auto' }}>
-            <Footer />
-          </View>
+          {/* Footer */}
+          <Footer />
         </Page>
       )}
     </Document>
