@@ -1153,7 +1153,7 @@ const App: React.FC = () => {
     const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
 
     return (
-        <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'} pb-[var(--safe-area-inset-bottom)] ${!showGamificationBar ? 'pt-[var(--safe-area-inset-top)]' : ''}`}>
+        <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
                 <GamificationBar 
                     gamificationState={gamificationState}
@@ -1168,13 +1168,6 @@ const App: React.FC = () => {
                     colorTheme={colorTheme}
                     toggleColorTheme={toggleColorTheme}
                     minimal={minimalBar}
-                />
-            )}
-            {/* Spacer for fixed GamificationBar - must account for full bar height */}
-            {showGamificationBar && (
-                <div 
-                    className="shrink-0"
-                    style={{ height: minimalBar ? 'calc(max(var(--safe-area-inset-top) + 0.5rem, 3rem) + 3rem)' : 'calc(max(var(--safe-area-inset-top) + 0.75rem, 3rem) + 3.5rem)' }}
                 />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
