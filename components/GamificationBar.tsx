@@ -1,5 +1,4 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import { FireIcon } from './icons/FireIcon';
 import { StarIcon } from './icons/StarIcon';
 import { TrophyIcon } from './icons/TrophyIcon';
@@ -69,8 +68,8 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     );
 
     if (minimal) {
-        const minimalBar = (
-            <div className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm pt-[max(calc(var(--safe-area-inset-top)+0.5rem),3rem)]" style={{ WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+        return (
+            <div className="sticky top-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm">
                  <button 
                     onClick={onBurgerClick}
                     className="p-2 text-content-secondary hover:text-content-primary transition-colors"
@@ -84,11 +83,10 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 </div>
             </div>
         );
-        return createPortal(minimalBar, document.body);
     }
 
-    const fullBar = (
-        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md pt-[max(calc(var(--safe-area-inset-top)+0.75rem),3rem)]" style={{ WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+    return (
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md">
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
                     <>
@@ -160,7 +158,6 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             </div>
         </div>
     );
-    return createPortal(fullBar, document.body);
 };
 
 export default GamificationBar;
