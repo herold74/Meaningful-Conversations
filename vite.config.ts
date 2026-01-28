@@ -16,6 +16,19 @@ export default defineConfig({
       ignored: ['*.js'],
     },
   },
+  // Optimize @react-pdf/renderer for browser
+  optimizeDeps: {
+    include: ['@react-pdf/renderer'],
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
+  resolve: {
+    alias: {
+      // Fix for @react-pdf/renderer in Vite
+      stream: 'stream-browserify',
+    },
+  },
   build: {
     // Increase chunk size warning limit to 1000 kB (optional, if you still get warnings after chunking)
     chunkSizeWarningLimit: 1000,
@@ -35,6 +48,13 @@ export default defineConfig({
               id.includes('node_modules/react-router') ||
               id.includes('node_modules/scheduler')) {
             return 'react-vendor';
+          }
+          
+          // @react-pdf/renderer and dependencies in separate chunk
+          if (id.includes('node_modules/@react-pdf') ||
+              id.includes('node_modules/pdfkit') ||
+              id.includes('node_modules/fontkit')) {
+            return 'pdf-vendor';
           }
           
           // UI/Design libraries (if you're using any specific ones)
