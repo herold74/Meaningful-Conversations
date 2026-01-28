@@ -797,9 +797,10 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                       {result.riemann.stressRanking.map((id: string, i: number) => {
                         const labels = stressLabels[language];
                         const item = labels[id as keyof typeof labels];
+                        const isFirst = i === 0;
                         return (
-                          <View key={id} style={[styles.stressItem, i === 0 && styles.stressItemFirst]}>
-                            <Text style={[styles.stressTitle, i === 0 && styles.stressTitleFirst]}>
+                          <View key={id} style={[styles.stressItem, isFirst ? styles.stressItemFirst : {}]}>
+                            <Text style={[styles.stressTitle, isFirst ? styles.stressTitleFirst : {}]}>
                               {i + 1}. {item?.label || id}
                             </Text>
                             <Text style={styles.stressDesc}>{item?.desc || ''}</Text>
