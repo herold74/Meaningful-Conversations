@@ -1155,20 +1155,24 @@ const App: React.FC = () => {
     return (
         <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
             {showGamificationBar && (
-                <GamificationBar 
-                    gamificationState={gamificationState}
-                    currentUser={currentUser}
-                    onViewAchievements={() => handleNavigateFromMenu('achievements')}
-                    onBurgerClick={handleBurgerIconClick}
-                    onCloseSubMenu={handleCloseSubMenu}
-                    isMenuOpen={isMenuOpen}
-                    isSubMenuOpen={!!menuView}
-                    isDarkMode={isDarkMode}
-                    toggleDarkMode={toggleDarkMode}
-                    colorTheme={colorTheme}
-                    toggleColorTheme={toggleColorTheme}
-                    minimal={minimalBar}
-                />
+                <>
+                    <GamificationBar 
+                        gamificationState={gamificationState}
+                        currentUser={currentUser}
+                        onViewAchievements={() => handleNavigateFromMenu('achievements')}
+                        onBurgerClick={handleBurgerIconClick}
+                        onCloseSubMenu={handleCloseSubMenu}
+                        isMenuOpen={isMenuOpen}
+                        isSubMenuOpen={!!menuView}
+                        isDarkMode={isDarkMode}
+                        toggleDarkMode={toggleDarkMode}
+                        colorTheme={colorTheme}
+                        toggleColorTheme={toggleColorTheme}
+                        minimal={minimalBar}
+                    />
+                    {/* Spacer for fixed GamificationBar */}
+                    <div className={minimalBar ? 'h-12' : 'h-14'} />
+                </>
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
                 {renderView()}
