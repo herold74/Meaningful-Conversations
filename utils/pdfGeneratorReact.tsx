@@ -280,10 +280,9 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   riemannText: {
-    flex: 1,
-    fontSize: 10, // Increased from 9
+    fontSize: 10,
     color: colors.gray600,
-    lineHeight: 1.4,
+    lineHeight: 1.5,
   },
   stressGrid: {
     flexDirection: 'row',
@@ -511,43 +510,41 @@ const stressLabels = {
 // HELPER COMPONENTS
 // ============================================================================
 
-// Ship wheel logo as SVG - simplified for @react-pdf/renderer compatibility
+// Ship wheel logo as SVG - matching brand LogoIcon exactly
 const ShipWheelLogo = () => {
   const size = 28;
-  const center = 12;
-  const ringR = 7;        // Ring radius
-  const spokeLength = 10; // Spokes extend beyond ring
   
-  // Calculate spoke endpoints for 8 spokes
-  const spokes = [];
-  for (let i = 0; i < 8; i++) {
-    const angle = (i * 45) * (Math.PI / 180);
-    spokes.push({
-      x1: center,
-      y1: center,
-      x2: center + spokeLength * Math.cos(angle),
-      y2: center + spokeLength * Math.sin(angle),
-    });
-  }
+  // Matching LogoIcon.tsx exactly:
+  // - 8 spokes with rounded handle ends (using Path with arcs)
+  // - Outer ring (donut: outer r=8, inner r=6)
+  // - Center hub (r=1.75)
+  
+  // The spoke path creates vertical spokes with rounded ends
+  // Original path: M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z
+  const spokePath = "M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z";
+  
+  // Donut ring path (outer r=8, inner r=6)
+  const ringPath = "M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z";
   
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {/* Spokes */}
-      {spokes.map((spoke, i) => (
-        <Line
-          key={`spoke-${i}`}
-          x1={spoke.x1}
-          y1={spoke.y1}
-          x2={spoke.x2}
-          y2={spoke.y2}
-          stroke="white"
-          strokeWidth={2}
-        />
-      ))}
-      {/* Outer ring */}
-      <Circle cx={center} cy={center} r={ringR} fill="none" stroke="white" strokeWidth={2.5} />
+      {/* 8 spokes created by 4 rotated paths */}
+      <G transform="rotate(0, 12, 12)">
+        <Path d={spokePath} fill="white" />
+      </G>
+      <G transform="rotate(45, 12, 12)">
+        <Path d={spokePath} fill="white" />
+      </G>
+      <G transform="rotate(90, 12, 12)">
+        <Path d={spokePath} fill="white" />
+      </G>
+      <G transform="rotate(135, 12, 12)">
+        <Path d={spokePath} fill="white" />
+      </G>
+      {/* Outer ring (donut shape) */}
+      <Path d={ringPath} fill="white" fillRule="evenodd" />
       {/* Center hub */}
-      <Circle cx={center} cy={center} r={2} fill="white" />
+      <Circle cx={12} cy={12} r={1.75} fill="white" />
     </Svg>
   );
 };
@@ -949,8 +946,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                     </View>
                   </View>
                 )}
-                <Text style={styles.riemannText}>{t.differencesExplanation}</Text>
-                <Text style={[styles.riemannText, { marginTop: 4 }]}>{t.axesExplanation}</Text>
+                <Text style={[styles.riemannText, { marginBottom: 8 }]}>{t.differencesExplanation}</Text>
+                <Text style={styles.riemannText}>{t.axesExplanation}</Text>
                 <View style={styles.legendContainer}>
                   <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
