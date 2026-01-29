@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 12,
     fontFamily: 'Helvetica',
-    fontSize: 10,
+    fontSize: 11, // Increased from 10
     color: colors.gray800,
     backgroundColor: colors.white,
   },
@@ -91,12 +91,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 18, // Increased from 16
     fontWeight: 'bold',
     color: colors.white,
   },
   headerSubtitle: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     color: colors.white,
     opacity: 0.8,
   },
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   headerRightText: {
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.white,
     opacity: 0.7,
   },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   boxTitle: {
-    fontSize: 10,
+    fontSize: 11, // Increased from 10
     fontWeight: 'bold',
     color: colors.primary,
     marginBottom: 6,
@@ -172,14 +172,14 @@ const styles = StyleSheet.create({
   },
   // Signature text
   signatureText: {
-    fontSize: 10,
+    fontSize: 11, // Increased from 10
     lineHeight: 1.5,
     color: colors.gray700,
     fontStyle: 'italic',
   },
   // Placeholder text
   placeholderText: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     color: colors.gray400,
     fontStyle: 'italic',
     textAlign: 'center',
@@ -187,24 +187,24 @@ const styles = StyleSheet.create({
   },
   // Compact list
   compactListItem: {
-    padding: '3 6',
-    marginBottom: 3,
+    padding: '4 6', // Increased padding
+    marginBottom: 4,
     borderRadius: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   compactListTitle: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     fontWeight: 'bold',
     color: colors.gray700,
   },
   compactListDesc: {
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.gray500,
     marginTop: 1,
   },
   // Section headers
   sectionHeader: {
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     fontWeight: 'bold',
     color: colors.gray500,
     marginBottom: 6,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   barLabel: {
-    width: 75,
+    width: 80, // Increased from 75
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -229,25 +229,25 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   barName: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     color: colors.gray700,
   },
   barTrack: {
     flex: 1,
-    height: 16,
+    height: 18, // Increased from 16
     backgroundColor: colors.gray200,
-    borderRadius: 8,
+    borderRadius: 9,
     overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingRight: 6,
   },
   barValue: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     fontWeight: 'bold',
     color: colors.white,
   },
@@ -262,16 +262,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   oceanName: {
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.gray500,
     marginBottom: 2,
   },
   oceanScore: {
-    fontSize: 14,
+    fontSize: 16, // Increased from 14
     fontWeight: 'bold',
   },
   oceanLabel: {
-    fontSize: 7,
+    fontSize: 8, // Increased from 7
     fontWeight: 'bold',
   },
   // Riemann section
@@ -281,20 +281,20 @@ const styles = StyleSheet.create({
   },
   riemannText: {
     flex: 1,
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     color: colors.gray600,
     lineHeight: 1.4,
   },
   stressGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 3,
+    gap: 4, // Increased from 3
     marginBottom: 8,
   },
   stressItem: {
     width: '48%',
-    fontSize: 8,
-    padding: '3 6',
+    fontSize: 9, // Increased from 8
+    padding: '4 6', // Increased padding
     borderRadius: 4,
     backgroundColor: colors.gray50,
     borderWidth: 1,
@@ -312,27 +312,27 @@ const styles = StyleSheet.create({
     color: colors.red600,
   },
   stressDesc: {
-    fontSize: 7,
+    fontSize: 8, // Increased from 7
     color: colors.gray500,
     marginTop: 1,
   },
   // Usage guide
   usageGuide: {
     marginTop: 10,
-    padding: '8 12',
+    padding: '10 12', // Increased padding
     backgroundColor: colors.sky50,
     borderWidth: 1,
     borderColor: colors.sky300,
     borderRadius: 8,
   },
   usageTitle: {
-    fontSize: 10,
+    fontSize: 11, // Increased from 10
     fontWeight: 'bold',
     color: colors.sky900,
-    marginBottom: 5,
+    marginBottom: 6,
     borderBottomWidth: 2,
     borderBottomColor: colors.sky500,
-    paddingBottom: 3,
+    paddingBottom: 4,
   },
   usageContent: {
     flexDirection: 'row',
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
   usageItem: {
     flex: 1,
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.blue900,
     lineHeight: 1.4,
   },
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   footer: {
     textAlign: 'center',
     paddingTop: 8,
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.gray400,
     borderTopWidth: 1,
     borderTopColor: colors.gray200,
@@ -365,21 +365,21 @@ const styles = StyleSheet.create({
   legendContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    gap: 10,
+    gap: 12, // Increased from 10
     marginTop: 8,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5, // Increased from 4
   },
   legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10, // Increased from 8
+    height: 10,
+    borderRadius: 5,
   },
   legendText: {
-    fontSize: 8,
+    fontSize: 9, // Increased from 8
     color: colors.gray700,
   },
 });
@@ -515,8 +515,9 @@ const stressLabels = {
 const ShipWheelLogo = () => {
   const size = 28;
   const center = 12;
-  const outerR = 10;
-  const handleR = 1.2;
+  const ringR = 7;        // Ring radius (smaller)
+  const spokeLength = 10; // Spokes extend beyond ring
+  const handleR = 1.5;    // Handle circles at end of spokes
   
   // Calculate spoke endpoints for 8 spokes
   const spokes = [];
@@ -525,18 +526,14 @@ const ShipWheelLogo = () => {
     spokes.push({
       x1: center,
       y1: center,
-      x2: center + outerR * Math.cos(angle),
-      y2: center + outerR * Math.sin(angle),
-      hx: center + outerR * Math.cos(angle),
-      hy: center + outerR * Math.sin(angle),
+      x2: center + spokeLength * Math.cos(angle),
+      y2: center + spokeLength * Math.sin(angle),
     });
   }
   
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {/* Outer ring */}
-      <Circle cx={center} cy={center} r={outerR} fill="none" stroke="white" strokeWidth={2} />
-      {/* Spokes */}
+      {/* Spokes (behind ring) */}
       {spokes.map((spoke, i) => (
         <Line
           key={`spoke-${i}`}
@@ -548,12 +545,14 @@ const ShipWheelLogo = () => {
           strokeWidth={1.5}
         />
       ))}
-      {/* Handles at end of spokes */}
+      {/* Outer ring */}
+      <Circle cx={center} cy={center} r={ringR} fill="none" stroke="white" strokeWidth={2} />
+      {/* Handles at end of spokes (outside ring) */}
       {spokes.map((spoke, i) => (
         <Circle
           key={`handle-${i}`}
-          cx={spoke.hx}
-          cy={spoke.hy}
+          cx={spoke.x2}
+          cy={spoke.y2}
           r={handleR}
           fill="white"
         />
@@ -569,7 +568,7 @@ const RiemannRadar = ({ data, language }: {
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
   language: 'de' | 'en';
 }) => {
-  const size = 150;
+  const size = 170; // Increased from 150
   const center = size / 2;
   const maxRadius = (size / 2) - 20;
   const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
@@ -598,14 +597,14 @@ const RiemannRadar = ({ data, language }: {
     }).join(' ');
   };
   
-  // Colors must match exactly: fill = stroke color with 30% opacity
+  // Colors must match exactly: fill = stroke color with 40% opacity (semi-transparent)
   // orange500: #f97316 = rgb(249, 115, 22)
   // green600: #16a34a = rgb(22, 163, 74)
   // blue500: #3b82f6 = rgb(59, 130, 246)
   const contexts = [
-    { key: 'beruf', fill: 'rgba(59, 130, 246, 0.3)', stroke: colors.blue500 },
-    { key: 'privat', fill: 'rgba(22, 163, 74, 0.3)', stroke: colors.green600 },
-    { key: 'selbst', fill: 'rgba(249, 115, 22, 0.3)', stroke: colors.orange500 },
+    { key: 'beruf', fill: 'rgba(59, 130, 246, 0.4)', stroke: colors.blue500 },
+    { key: 'privat', fill: 'rgba(22, 163, 74, 0.4)', stroke: colors.green600 },
+    { key: 'selbst', fill: 'rgba(249, 115, 22, 0.4)', stroke: colors.orange500 },
   ];
   
   const dimLabels = language === 'de'
