@@ -515,9 +515,8 @@ const stressLabels = {
 const ShipWheelLogo = () => {
   const size = 28;
   const center = 12;
-  const ringR = 7;        // Ring radius (smaller)
+  const ringR = 7;        // Ring radius
   const spokeLength = 10; // Spokes extend beyond ring
-  const handleR = 1.5;    // Handle circles at end of spokes
   
   // Calculate spoke endpoints for 8 spokes
   const spokes = [];
@@ -533,7 +532,7 @@ const ShipWheelLogo = () => {
   
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {/* Spokes (behind ring) */}
+      {/* Spokes */}
       {spokes.map((spoke, i) => (
         <Line
           key={`spoke-${i}`}
@@ -542,21 +541,11 @@ const ShipWheelLogo = () => {
           x2={spoke.x2}
           y2={spoke.y2}
           stroke="white"
-          strokeWidth={1.5}
+          strokeWidth={2}
         />
       ))}
       {/* Outer ring */}
-      <Circle cx={center} cy={center} r={ringR} fill="none" stroke="white" strokeWidth={2} />
-      {/* Handles at end of spokes (outside ring) */}
-      {spokes.map((spoke, i) => (
-        <Circle
-          key={`handle-${i}`}
-          cx={spoke.x2}
-          cy={spoke.y2}
-          r={handleR}
-          fill="white"
-        />
-      ))}
+      <Circle cx={center} cy={center} r={ringR} fill="none" stroke="white" strokeWidth={2.5} />
       {/* Center hub */}
       <Circle cx={center} cy={center} r={2} fill="white" />
     </Svg>
@@ -597,14 +586,12 @@ const RiemannRadar = ({ data, language }: {
     }).join(' ');
   };
   
-  // Colors must match exactly: fill = stroke color with 40% opacity (semi-transparent)
-  // orange500: #f97316 = rgb(249, 115, 22)
-  // green600: #16a34a = rgb(22, 163, 74)
-  // blue500: #3b82f6 = rgb(59, 130, 246)
+  // Colors for each context - using lighter fill colors for transparency effect
+  // Since rgba doesn't work well in @react-pdf/renderer, use lighter solid colors
   const contexts = [
-    { key: 'beruf', fill: 'rgba(59, 130, 246, 0.4)', stroke: colors.blue500 },
-    { key: 'privat', fill: 'rgba(22, 163, 74, 0.4)', stroke: colors.green600 },
-    { key: 'selbst', fill: 'rgba(249, 115, 22, 0.4)', stroke: colors.orange500 },
+    { key: 'beruf', fill: colors.blue300, stroke: colors.blue500, opacity: 0.5 },
+    { key: 'privat', fill: colors.green300, stroke: colors.green600, opacity: 0.5 },
+    { key: 'selbst', fill: '#fdba74', stroke: colors.orange500, opacity: 0.5 }, // orange-300
   ];
   
   const dimLabels = language === 'de'
@@ -650,7 +637,7 @@ const RiemannRadar = ({ data, language }: {
         );
       })}
       
-      {/* Data polygons */}
+      {/* Data polygons - with opacity for transparency */}
       {contexts.map((ctx) => {
         const contextData = data[ctx.key as keyof typeof data];
         return (
@@ -658,6 +645,7 @@ const RiemannRadar = ({ data, language }: {
             key={ctx.key}
             points={getPolygonPoints(contextData)}
             fill={ctx.fill}
+            fillOpacity={ctx.opacity}
             stroke={ctx.stroke}
             strokeWidth={2}
           />
