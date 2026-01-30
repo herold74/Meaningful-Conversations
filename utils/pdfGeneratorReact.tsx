@@ -347,18 +347,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.sky700,
   },
-  // Footer
+  // Footer - fixed at bottom of every page
   footer: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    right: 12,
     textAlign: 'center',
     paddingTop: 8,
-    fontSize: 9, // Increased from 8
+    fontSize: 9,
     color: colors.gray400,
     borderTopWidth: 1,
     borderTopColor: colors.gray200,
-    marginTop: 10,
   },
   footerBold: {
     fontWeight: 'bold',
+  },
+  // Pending tests compact section
+  pendingSection: {
+    marginTop: 10,
+    marginBottom: 30, // Space for footer
+    padding: '8 10',
+    backgroundColor: colors.gray100,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gray300,
+  },
+  pendingTitle: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: colors.gray500,
+    marginBottom: 6,
+  },
+  pendingItem: {
+    fontSize: 9,
+    color: colors.gray400,
+    fontStyle: 'italic',
+    marginBottom: 2,
   },
   // Legend
   legendContainer: {
@@ -431,6 +456,7 @@ const translations = {
     extraversion: 'Extraversion',
     agreeableness: 'Verträglichkeit',
     neuroticism: 'Emot. Stabilität',
+    pendingTests: 'Noch nicht abgeschlossen',
   },
   en: {
     title: 'Personality Signature',
@@ -475,6 +501,7 @@ const translations = {
     extraversion: 'Extraversion',
     agreeableness: 'Agreeableness',
     neuroticism: 'Emotional Stability',
+    pendingTests: 'Not yet completed',
   },
 };
 
@@ -751,11 +778,13 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     </View>
   );
   
-  // OCEAN Section component
-  const OceanSection = () => (
-    <View style={[styles.box, { marginBottom: 10 }]}>
-      <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
-      {hasOcean && result.big5 ? (
+  // OCEAN Section component - only renders if data exists
+  const OceanSection = () => {
+    if (!hasOcean || !result.big5) return null;
+    
+    return (
+      <View style={[styles.box, { marginBottom: 10 }]}>
+        <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
         <View style={styles.oceanRow}>
           {[
             { key: 'O', name: t.openness, score: result.big5.openness },
@@ -775,11 +804,9 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </View>
           ))}
         </View>
-      ) : (
-        <Text style={styles.placeholderText}>{t.oceanNotCompleted}</Text>
-      )}
-    </View>
-  );
+      </View>
+    );
+  };
   
   // Usage Guide component
   const UsageGuide = () => (
@@ -806,72 +833,76 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     </View>
   );
   
-  // Blindspots + Growth Section component (reusable)
-  const BlindspotsGrowthSection = () => (
-    <View style={styles.grid2}>
-      {hasNarrative && result.narrativeProfile ? (
-        <>
-          <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
-            <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
-            <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
-              {t.blindspotsDesc}
-            </Text>
-            {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
-              <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
-                <Text style={[styles.compactListTitle, { color: colors.rose800 }]}>{i + 1}. {s.name}</Text>
-                <Text style={styles.compactListDesc}>{s.description}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
-            <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
-            <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
-              {t.growthDesc}
-            </Text>
-            {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
-              <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
-                <Text style={[styles.compactListTitle, { color: colors.green800 }]}>{i + 1}. {g.title}</Text>
-                <Text style={styles.compactListDesc}>{g.recommendation}</Text>
-              </View>
-            ))}
-          </View>
-        </>
-      ) : (
-        <>
-          <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeBlindspots}</Text>
-            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-          </View>
-          <View style={[styles.box, styles.boxPlaceholder, styles.gridHalf]}>
-            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeGrowth}</Text>
-            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-          </View>
-        </>
-      )}
-    </View>
-  );
+  // Blindspots + Growth Section component (reusable) - wrap={false} prevents page break
+  const BlindspotsGrowthSection = () => {
+    if (!hasNarrative || !result.narrativeProfile) return null;
+    
+    return (
+      <View style={styles.grid2} wrap={false}>
+        <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
+          <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
+          <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+            {t.blindspotsDesc}
+          </Text>
+          {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
+            <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
+              <Text style={[styles.compactListTitle, { color: colors.rose800 }]}>{i + 1}. {s.name}</Text>
+              <Text style={styles.compactListDesc}>{s.description}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
+          <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
+          <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+            {t.growthDesc}
+          </Text>
+          {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
+            <View key={i} style={[styles.compactListItem, { backgroundColor: 'rgba(255,255,255,0.6)' }]}>
+              <Text style={[styles.compactListTitle, { color: colors.green800 }]}>{i + 1}. {g.title}</Text>
+              <Text style={styles.compactListDesc}>{g.recommendation}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+  
+  // Compact section for pending/incomplete tests - grouped at the end
+  const PendingTestsSection = () => {
+    const pendingTests: string[] = [];
+    if (!hasNarrative) pendingTests.push(t.signatureNotCreated);
+    if (!hasSD) pendingTests.push(t.spiralNotCompleted);
+    if (!hasRiemann) pendingTests.push(t.riemannNotCompleted);
+    if (!hasOcean) pendingTests.push(t.oceanNotCompleted);
+    
+    if (pendingTests.length === 0) return null;
+    
+    return (
+      <View style={styles.pendingSection}>
+        <Text style={styles.pendingTitle}>{t.pendingTests}</Text>
+        {pendingTests.map((test, i) => (
+          <Text key={i} style={styles.pendingItem}>• {test}</Text>
+        ))}
+      </View>
+    );
+  };
   
   return (
     <Document>
       {/* PAGE 1 */}
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={[styles.page, { paddingBottom: 50 }]}>
         <Header />
         
-        {/* Signature - Full Width */}
-        {hasNarrative && result.narrativeProfile ? (
+        {/* Signature - Full Width - only if available */}
+        {hasNarrative && result.narrativeProfile && (
           <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
             <Text style={styles.signatureText}>{result.narrativeProfile.operatingSystem}</Text>
           </View>
-        ) : (
-          <View style={[styles.box, styles.boxPlaceholder, { marginBottom: 10 }]}>
-            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeOS}</Text>
-            <Text style={styles.placeholderText}>{t.signatureNotCreated}</Text>
-          </View>
         )}
         
-        {/* Superpowers - Full Width */}
-        {hasNarrative && result.narrativeProfile ? (
+        {/* Superpowers - Full Width - only if available */}
+        {hasNarrative && result.narrativeProfile && (
           <View style={[styles.box, styles.boxWarm, { marginBottom: 10 }]}>
             <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
             {result.narrativeProfile.superpowers.map((p: { name: string; description: string }, i: number) => (
@@ -881,17 +912,12 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
               </View>
             ))}
           </View>
-        ) : (
-          <View style={[styles.box, styles.boxPlaceholder, { marginBottom: 10 }]}>
-            <Text style={[styles.boxTitle, styles.boxTitlePlaceholder]}>{t.narrativeSuperpowers}</Text>
-            <Text style={styles.placeholderText}>{t.availableAfterSignature}</Text>
-          </View>
         )}
         
-        {/* Spiral Dynamics */}
-        <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
-          {hasSD && result.spiralDynamics ? (
+        {/* Spiral Dynamics - only if available */}
+        {hasSD && result.spiralDynamics && (
+          <View style={[styles.box, { marginBottom: 10 }]}>
+            <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.sectionHeader}>{t.selfOriented}</Text>
@@ -926,15 +952,13 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 })}
               </View>
             </View>
-          ) : (
-            <Text style={styles.placeholderText}>{t.spiralNotCompleted}</Text>
-          )}
-        </View>
+          </View>
+        )}
         
-        {/* Riemann */}
-        <View style={[styles.box, { marginBottom: 10 }]}>
-          <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
-          {hasRiemann && result.riemann ? (
+        {/* Riemann - only if available */}
+        {hasRiemann && result.riemann && (
+          <View style={[styles.box, { marginBottom: 10 }]}>
+            <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
             <View style={styles.riemannContainer}>
               <RiemannRadar data={result.riemann} language={language} />
               <View style={{ flex: 1 }}>
@@ -978,10 +1002,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 </View>
               </View>
             </View>
-          ) : (
-            <Text style={styles.placeholderText}>{t.riemannNotCompleted}</Text>
-          )}
-        </View>
+          </View>
+        )}
         
         {/* If NOT using two pages, show everything on page 1 */}
         {!useTwoPages && (
@@ -989,7 +1011,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             <BlindspotsGrowthSection />
             <OceanSection />
             <UsageGuide />
-            <Footer />
+            <PendingTestsSection />
           </>
         )}
         
@@ -1001,11 +1023,14 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </Text>
           </View>
         )}
+        
+        {/* Fixed footer on every page */}
+        <Footer />
       </Page>
       
       {/* PAGE 2 - Only when all 3 tests are completed */}
       {useTwoPages && (
-        <Page size="A4" style={styles.page}>
+        <Page size="A4" style={[styles.page, { paddingBottom: 50 }]}>
           <Header />
           
           {/* Blindspots + Growth on Page 2 */}
@@ -1017,7 +1042,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           {/* Usage Guide */}
           <UsageGuide />
           
-          {/* Footer */}
+          {/* Fixed footer on every page */}
           <Footer />
         </Page>
       )}
