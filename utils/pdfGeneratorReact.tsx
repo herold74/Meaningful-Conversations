@@ -347,12 +347,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.sky700,
   },
-  // Footer - fixed at bottom of every page
-  footer: {
+  // Footer - fixed at bottom of every page (outer container for positioning)
+  footerContainer: {
     position: 'absolute',
     bottom: 12,
     left: 12,
     right: 12,
+  },
+  // Footer inner content (styled separately to avoid height collapse bug)
+  footer: {
     textAlign: 'center',
     paddingTop: 8,
     fontSize: 9,
