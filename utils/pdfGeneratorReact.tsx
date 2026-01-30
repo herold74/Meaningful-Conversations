@@ -510,41 +510,55 @@ const stressLabels = {
 // HELPER COMPONENTS
 // ============================================================================
 
-// Ship wheel logo as SVG - matching brand LogoIcon exactly
+// Ship wheel logo as SVG - simplified for @react-pdf/renderer compatibility
+// Matches visual appearance of brand LogoIcon.tsx using basic elements only
 const ShipWheelLogo = () => {
   const size = 28;
+  const center = 12;
+  const ringRadius = 7;      // Ring positioned between center and spoke ends
+  const spokeLength = 10;    // Spokes extend beyond ring
+  const hubRadius = 1.75;    // Matches LogoIcon
+  const ringStroke = 2;      // Thick ring stroke to match donut appearance
+  const spokeStroke = 1.8;   // Spoke thickness
   
-  // Matching LogoIcon.tsx exactly:
-  // - 8 spokes with rounded handle ends (using Path with arcs)
-  // - Outer ring (donut: outer r=8, inner r=6)
-  // - Center hub (r=1.75)
-  
-  // The spoke path creates vertical spokes with rounded ends
-  // Original path: M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z
-  const spokePath = "M11.325 4 L11.325 2 A 0.675 0.675 0 0 1 12.675 2 L12.675 4 L12.39375 4 L12.39375 20 L12.675 20 L12.675 22 A 0.675 0.675 0 0 1 11.325 22 L11.325 20 L11.60625 20 L11.60625 4 Z";
-  
-  // Donut ring path (outer r=8, inner r=6)
-  const ringPath = "M12 20a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z";
+  // Calculate 8 spoke endpoints
+  const spokes = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * 45) * (Math.PI / 180);
+    spokes.push({
+      x1: center - spokeLength * Math.cos(angle),
+      y1: center - spokeLength * Math.sin(angle),
+      x2: center + spokeLength * Math.cos(angle),
+      y2: center + spokeLength * Math.sin(angle),
+    });
+  }
   
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {/* 8 spokes created by 4 rotated paths */}
-      <G transform="rotate(0, 12, 12)">
-        <Path d={spokePath} fill="white" />
-      </G>
-      <G transform="rotate(45, 12, 12)">
-        <Path d={spokePath} fill="white" />
-      </G>
-      <G transform="rotate(90, 12, 12)">
-        <Path d={spokePath} fill="white" />
-      </G>
-      <G transform="rotate(135, 12, 12)">
-        <Path d={spokePath} fill="white" />
-      </G>
-      {/* Outer ring (donut shape) */}
-      <Path d={ringPath} fill="white" fillRule="evenodd" />
+      {/* 8 spokes as lines (4 lines, each creating 2 spokes through center) */}
+      {spokes.slice(0, 4).map((spoke, i) => (
+        <Line
+          key={`spoke-${i}`}
+          x1={spoke.x1}
+          y1={spoke.y1}
+          x2={spoke.x2}
+          y2={spoke.y2}
+          stroke="white"
+          strokeWidth={spokeStroke}
+          strokeLinecap="round"
+        />
+      ))}
+      {/* Ring as stroked circle (no fill) */}
+      <Circle 
+        cx={center} 
+        cy={center} 
+        r={ringRadius} 
+        fill="none" 
+        stroke="white" 
+        strokeWidth={ringStroke} 
+      />
       {/* Center hub */}
-      <Circle cx={12} cy={12} r={1.75} fill="white" />
+      <Circle cx={center} cy={center} r={hubRadius} fill="white" />
     </Svg>
   );
 };
