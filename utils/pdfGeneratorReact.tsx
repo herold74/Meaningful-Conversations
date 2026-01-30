@@ -769,12 +769,14 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     </View>
   );
   
-  // Reusable Footer component
+  // Reusable Footer component - fixed prop ensures it appears on every page
   const Footer = () => (
-    <View style={styles.footer}>
-      <Text>
-        <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at • {t.confidential} • © {new Date().getFullYear()}
-      </Text>
+    <View style={styles.footerContainer} fixed>
+      <View style={styles.footer}>
+        <Text>
+          <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at • {t.confidential} • © {new Date().getFullYear()}
+        </Text>
+      </View>
     </View>
   );
   
