@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FireIcon } from './icons/FireIcon';
 import { StarIcon } from './icons/StarIcon';
 import { TrophyIcon } from './icons/TrophyIcon';
@@ -57,6 +57,86 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     };
     
     const safeAreaTop = getSafeAreaTop();
+    const gbRef = useRef<HTMLDivElement>(null);
+
+    // #region agent log - Debug scroll behavior on iOS
+    useEffect(() => {
+        if (!isIOS) return;
+        
+        let lastGBTop = safeAreaTop;
+        let scrollCount = 0;
+        let sessionId = 'initial';
+        
+        // Get computed styles to check if fixed positioning is correct
+        const getComputedInfo = () => {
+            const gbEl = gbRef.current;
+            if (!gbEl) return null;
+            const computed = window.getComputedStyle(gbEl);
+            const rect = gbEl.getBoundingClientRect();
+            return {
+                position: computed.position,
+                top: computed.top,
+                transform: computed.transform,
+                rectTop: Math.round(rect.top),
+                innerHeight: window.innerHeight,
+                visualViewportOffsetTop: (window as any).visualViewport?.offsetTop ?? 'N/A',
+                bodyOverflow: window.getComputedStyle(document.body).overflow,
+                htmlOverflow: window.getComputedStyle(document.documentElement).overflow,
+            };
+        };
+        
+        // Log initial state
+        console.log('[GB-DEBUG] mount:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
+        
+        // Track visibility change (lock/unlock device)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                sessionId = 'after-unlock-' + Date.now();
+                console.log('[GB-DEBUG] visibility-visible:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
+                
+                // Check again after a short delay (layout might need to settle)
+                setTimeout(() => {
+                    console.log('[GB-DEBUG] visibility-visible-100ms:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
+                }, 100);
+            }
+        };
+        
+        // Track scroll
+        const handleScroll = () => {
+            scrollCount++;
+            const gbRect = gbRef.current?.getBoundingClientRect();
+            const gbTop = gbRect?.top ?? 0;
+            const delta = gbTop - safeAreaTop;
+            
+            // Log every 5th scroll or if GB moved
+            if (scrollCount % 5 === 0 || Math.abs(delta) > 2 || Math.abs(gbTop - lastGBTop) > 2) {
+                console.log('[GB-DEBUG] scroll:', JSON.stringify({sessionId, scrollCount, gbTop: Math.round(gbTop), expected: safeAreaTop, delta: Math.round(delta), windowScrollY: Math.round(window.scrollY)}));
+                lastGBTop = gbTop;
+            }
+        };
+        
+        // Track touchmove for rubber-band detection
+        const handleTouchMove = () => {
+            const gbRect = gbRef.current?.getBoundingClientRect();
+            const gbTop = gbRect?.top ?? 0;
+            const delta = gbTop - safeAreaTop;
+            
+            if (Math.abs(delta) > 2) {
+                console.log('[GB-DEBUG] touchmove:', JSON.stringify({sessionId, gbTop: Math.round(gbTop), expected: safeAreaTop, delta: Math.round(delta)}));
+            }
+        };
+        
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [isIOS, safeAreaTop]);
+    // #endregion
 
     const xpToReachCurrentLevel = 50 * (level - 1) * level;
     const xpForNextLevel = level * 100;
@@ -94,6 +174,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     />
                 )}
                 <div 
+                    ref={gbRef}
                     className="fixed left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
                     style={{ top: safeAreaTop }}
                 >
@@ -123,6 +204,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 />
             )}
             <div 
+                ref={gbRef}
                 className="fixed left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md"
                 style={{ top: safeAreaTop }}
             >
