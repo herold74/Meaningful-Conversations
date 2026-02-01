@@ -99,15 +99,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
   // Get combined profile name for display
   const getProfileDisplayName = useCallback((): string => {
-    if (useMyProfile) return '👤 Mein Profil';
+    if (useMyProfile) return '👤 ' + t('test_runner_my_profile');
     
     const parts: string[] = [];
     if (selectedRiemann) parts.push(selectedRiemann.name);
     if (selectedSD) parts.push(selectedSD.name);
     if (selectedOCEAN) parts.push(selectedOCEAN.name);
     
-    return parts.length > 0 ? parts.join(' + ') : 'Kein Profil';
-  }, [useMyProfile, selectedRiemann, selectedSD, selectedOCEAN]);
+    return parts.length > 0 ? parts.join(' + ') : t('test_runner_no_profile');
+  }, [useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t]);
 
   // Get the profile to use for testing
   const getTestProfile = useCallback((): CombinedTestProfile | null => {
@@ -313,7 +313,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           // #endregion
           setSessionAnalysisResult(analysis);
           
-          // Add session analysis auto-checks (use language for i18n since t is not in useCallback deps)
+          // Add session analysis auto-checks
           const sessionAutoChecks: TestRunResult['autoCheckResults'] = [];
           
           if (selectedScenario.autoChecks.expectSessionUpdates) {
@@ -323,8 +323,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
               checkId: 'session_updates',
               passed: hasUpdates,
               details: hasUpdates 
-                ? (language === 'de' ? `${count} Update(s) vorgeschlagen` : `${count} update(s) suggested`)
-                : (language === 'de' ? 'Keine Updates vorgeschlagen' : 'No updates suggested'),
+                ? t('test_runner_autocheck_updates_found', { count })
+                : t('test_runner_autocheck_no_updates'),
             });
           }
           
@@ -335,8 +335,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
               checkId: 'session_nextsteps',
               passed: hasNextSteps,
               details: hasNextSteps 
-                ? (language === 'de' ? `${count} nächste Schritt(e) identifiziert` : `${count} next step(s) identified`)
-                : (language === 'de' ? 'Keine nächsten Schritte identifiziert' : 'No next steps identified'),
+                ? t('test_runner_autocheck_nextsteps_found', { count })
+                : t('test_runner_autocheck_no_nextsteps'),
             });
           }
           
@@ -352,7 +352,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           console.error('Session analysis failed:', analysisErr);
           // Add failed checks for expected session analysis
           const failedChecks: TestRunResult['autoCheckResults'] = [];
-          const failedMsg = language === 'de' ? 'Session-Analyse fehlgeschlagen' : 'Session analysis failed';
+          const failedMsg = t('test_runner_autocheck_analysis_failed');
           
           if (selectedScenario.autoChecks.expectSessionUpdates) {
             failedChecks.push({
@@ -391,7 +391,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     } finally {
       setIsRunning(false);
     }
-  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, language]);
+  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t]);
 
   // Update manual check
   const handleManualCheck = (checkId: string, passed: boolean) => {
@@ -422,12 +422,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     <div className="space-y-6">
       {/* Bot Selection */}
       <div>
-        <h4 className="font-semibold mb-2 text-content-primary">1. Bot auswählen</h4>
+        <h4 className="font-semibold mb-2 text-content-primary">1. {t('test_runner_step_bot')}</h4>
         {selectedScenario?.id === 'bot_interview' ? (
           // Interview scenario: Show only interview bot (auto-selected)
           <div className="p-3 rounded-lg border border-accent-primary bg-accent-primary/10">
             <div className="font-medium text-content-primary">🎤 Gloria (Interview)</div>
-            <div className="text-xs text-content-secondary">Automatisch für Interview-Test ausgewählt</div>
+            <div className="text-xs text-content-secondary">{t('test_runner_interview_auto_selected')}</div>
           </div>
         ) : (
           // Normal scenarios: Show all testable bots
@@ -454,7 +454,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
       {/* Profile Selection - Multi-Select */}
       <div>
-        <h4 className="font-semibold mb-2 text-content-primary">2. Test-Profil zusammenstellen</h4>
+        <h4 className="font-semibold mb-2 text-content-primary">2. {t('test_runner_step_profile')}</h4>
         
         {/* My Profile Option */}
         <div className="mb-4 p-3 border rounded-lg border-border-secondary">
@@ -475,11 +475,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
               className="mt-1 w-4 h-4 accent-accent-primary"
             />
             <div className={`flex-1 ${!userProfile ? 'opacity-50' : ''}`}>
-              <div className="font-medium text-content-primary">👤 Mein Profil verwenden</div>
+              <div className="font-medium text-content-primary">👤 {t('test_runner_use_my_profile')}</div>
               <div className="text-xs text-content-secondary">
                 {userProfile ? (
                   <>
-                    Nutzt alle deine abgeschlossenen Linsen gleichwertig
+                    {t('test_runner_uses_all_lenses')}
                     {userProfileLenses.length > 0 && (
                       <span className="ml-1 text-accent-primary">
                         ({userProfileLenses.map(l => l === 'riemann' ? 'Riemann' : l === 'sd' ? 'SD' : 'OCEAN').join(', ')})
@@ -487,7 +487,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                     )}
                   </>
                 ) : (
-                  'Kein Profil vorhanden'
+                  t('test_runner_no_profile_available')
                 )}
               </div>
             </div>
@@ -498,7 +498,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         <div className={`space-y-3 ${useMyProfile ? 'opacity-40 pointer-events-none' : ''}`}>
           {/* Riemann Selection */}
           <div className="p-3 border rounded-lg border-border-secondary">
-            <div className="text-sm font-medium text-content-primary mb-2">Riemann (optional)</div>
+            <div className="text-sm font-medium text-content-primary mb-2">{t('test_runner_riemann_optional')}</div>
             <div className="flex gap-2 flex-wrap">
               {RIEMANN_PROFILES.map(profile => (
                 <button
@@ -518,7 +518,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
           {/* Spiral Dynamics Selection */}
           <div className="p-3 border rounded-lg border-border-secondary">
-            <div className="text-sm font-medium text-content-primary mb-2">Spiral Dynamics (optional)</div>
+            <div className="text-sm font-medium text-content-primary mb-2">{t('test_runner_sd_optional')}</div>
             <div className="flex gap-2 flex-wrap">
               {SD_PROFILES.map(profile => (
                 <button
@@ -538,7 +538,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
           {/* OCEAN Selection */}
           <div className="p-3 border rounded-lg border-border-secondary">
-            <div className="text-sm font-medium text-content-primary mb-2">OCEAN (optional)</div>
+            <div className="text-sm font-medium text-content-primary mb-2">{t('test_runner_ocean_optional')}</div>
             <div className="flex gap-2 flex-wrap">
               {OCEAN_PROFILES.map(profile => (
                 <button
@@ -560,20 +560,20 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {/* Selection Summary */}
         {hasProfileSelection && (
           <div className="mt-3 p-2 bg-accent-primary/10 rounded-lg text-sm text-content-primary">
-            <strong>Aktiv:</strong> {getProfileDisplayName()}
+            <strong>{t('test_runner_active')}:</strong> {getProfileDisplayName()}
           </div>
         )}
         
         {!hasProfileSelection && (
           <div className="mt-3 p-2 bg-yellow-500/10 rounded-lg text-sm text-yellow-600 dark:text-yellow-400">
-            ⚠️ Mindestens ein Profil oder "Mein Profil" muss ausgewählt werden
+            ⚠️ {t('test_runner_profile_required')}
           </div>
         )}
       </div>
 
       {/* Scenario Selection */}
       <div>
-        <h4 className="font-semibold mb-2 text-content-primary">3. Test-Szenario auswählen</h4>
+        <h4 className="font-semibold mb-2 text-content-primary">3. {t('test_runner_step_scenario')}</h4>
         
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-3">
@@ -585,7 +585,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                 : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
             }`}
           >
-            Alle
+            {t('test_runner_filter_all')}
           </button>
           {categories.map(cat => (
             <button
@@ -635,7 +635,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                    disabled:opacity-50 disabled:cursor-not-allowed
                    hover:bg-accent-primary/90 transition-colors"
       >
-        🚀 Test starten
+        🚀 {t('test_runner_start')}
       </button>
     </div>
   );
@@ -644,12 +644,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
   const renderRunning = () => (
     <div className="text-center py-12">
       <Spinner />
-      <h3 className="text-xl font-semibold mt-4 text-content-primary">Test läuft...</h3>
+      <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
       <p className="text-content-secondary mt-2">
-        Nachricht {currentMessageIndex + 1} von {selectedScenario?.testMessages.length}
+        {t('test_runner_message_progress', { current: currentMessageIndex + 1, total: selectedScenario?.testMessages.length ?? 0 })}
       </p>
       <div className="mt-4 p-4 bg-background-tertiary rounded-lg text-left max-w-md mx-auto">
-        <div className="text-sm text-content-secondary mb-1">Aktuelle Nachricht:</div>
+        <div className="text-sm text-content-secondary mb-1">{t('test_runner_current_message')}:</div>
         <div className="text-content-primary">
           "{selectedScenario?.testMessages[currentMessageIndex]?.text}"
         </div>
@@ -661,9 +661,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
   const renderAnalyzing = () => (
     <div className="text-center py-12">
       <Spinner />
-      <h3 className="text-xl font-semibold mt-4 text-content-primary">Session-Analyse...</h3>
+      <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_analyzing')}</h3>
       <p className="text-content-secondary mt-2">
-        Die Chat-Session wird analysiert, um Update-Vorschläge und nächste Schritte zu generieren.
+        {t('test_runner_analyzing_desc')}
       </p>
     </div>
   );
@@ -682,11 +682,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
       <div className="space-y-6">
         {/* Responses */}
         <div>
-          <h4 className="font-semibold mb-2 text-content-primary">📝 Antworten</h4>
+          <h4 className="font-semibold mb-2 text-content-primary">📝 {t('test_runner_responses')}</h4>
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {testResult.responses.map((r, idx) => (
               <div key={idx} className="p-3 bg-background-tertiary rounded-lg">
-                <div className="text-sm text-content-secondary mb-1">User:</div>
+                <div className="text-sm text-content-secondary mb-1">{t('test_runner_user')}:</div>
                 <div className="text-content-primary mb-2 text-sm">{r.userMessage}</div>
                 <div className="text-sm text-content-secondary mb-1">
                   Bot <span className="text-xs opacity-70">({r.responseTime}ms)</span>:
@@ -694,7 +694,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                 <div className="text-content-primary text-sm whitespace-pre-wrap">{r.botResponse}</div>
                 {selectedScenario.testMessages[idx]?.expectedBehavior && (
                   <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
-                    <span className="font-semibold">Erwartet:</span> {selectedScenario.testMessages[idx].expectedBehavior}
+                    <span className="font-semibold">{t('test_runner_expected')}:</span> {selectedScenario.testMessages[idx].expectedBehavior}
                   </div>
                 )}
               </div>
@@ -705,12 +705,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {/* Telemetry */}
         {testResult.telemetry && (
           <div>
-            <h4 className="font-semibold mb-2 text-content-primary">📊 Telemetrie</h4>
+            <h4 className="font-semibold mb-2 text-content-primary">📊 {t('test_runner_telemetry')}</h4>
             <div className="p-3 bg-background-tertiary rounded-lg text-sm space-y-1">
-              <div>DPC Injection: {testResult.telemetry.dpcInjectionPresent ? '✓' : '✗'} ({testResult.telemetry.dpcInjectionLength} chars)</div>
-              <div>DPC Strategien: {testResult.telemetry.dpcStrategiesUsed?.join(', ') || 'N/A'}</div>
-              <div>DPFL Keywords: {testResult.telemetry.dpflKeywordsDetected?.join(', ') || 'keine'}</div>
-              <div>Comfort Check: {testResult.telemetry.comfortCheckTriggered ? '✓ ausgelöst' : '✗ nicht ausgelöst'}</div>
+              <div>{t('test_runner_dpc_injection')}: {testResult.telemetry.dpcInjectionPresent ? '✓' : '✗'} ({testResult.telemetry.dpcInjectionLength} chars)</div>
+              <div>{t('test_runner_dpc_strategies')}: {testResult.telemetry.dpcStrategiesUsed?.join(', ') || 'N/A'}</div>
+              <div>{t('test_runner_dpfl_keywords')}: {testResult.telemetry.dpflKeywordsDetected?.join(', ') || t('test_runner_none')}</div>
+              <div>{t('test_runner_comfort_check')}: {testResult.telemetry.comfortCheckTriggered ? '✓ ' + t('test_runner_triggered') : '✗ ' + t('test_runner_not_triggered')}</div>
             </div>
           </div>
         )}
@@ -718,18 +718,18 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {/* Session Analysis (for session category tests) */}
         {sessionAnalysisResult && selectedScenario.category === 'session' && (
           <div>
-            <h4 className="font-semibold mb-2 text-content-primary">📋 Session-Analyse</h4>
+            <h4 className="font-semibold mb-2 text-content-primary">📋 {t('test_runner_session_analysis')}</h4>
             <div className="p-3 bg-background-tertiary rounded-lg text-sm space-y-3">
               {/* Proposed Updates */}
               {sessionAnalysisResult.proposedUpdates.length > 0 && (
                 <div>
-                  <div className="font-medium text-accent-primary mb-1">✏️ Vorgeschlagene Updates:</div>
+                  <div className="font-medium text-accent-primary mb-1">✏️ {t('test_runner_proposed_updates')}:</div>
                   <div className="space-y-2 pl-2">
                     {sessionAnalysisResult.proposedUpdates.map((update, idx) => (
                       <div key={idx} className="p-2 bg-background-secondary rounded border-l-2 border-accent-primary">
                         <div className="font-medium text-content-primary">{update.headline}</div>
                         <div className="text-content-secondary text-xs whitespace-pre-wrap mt-1">{update.content}</div>
-                        <div className="text-xs text-accent-secondary mt-1">Typ: {update.type}</div>
+                        <div className="text-xs text-accent-secondary mt-1">{t('test_runner_type')}: {update.type}</div>
                       </div>
                     ))}
                   </div>
@@ -739,7 +739,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
               {/* Next Steps */}
               {sessionAnalysisResult.nextSteps.length > 0 && (
                 <div>
-                  <div className="font-medium text-accent-primary mb-1">🎯 Nächste Schritte:</div>
+                  <div className="font-medium text-accent-primary mb-1">🎯 {t('test_runner_next_steps')}:</div>
                   <ul className="list-disc pl-6 space-y-1">
                     {sessionAnalysisResult.nextSteps.map((step, idx) => (
                       <li key={idx} className="text-content-secondary">
@@ -753,14 +753,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
               {/* New Findings */}
               {sessionAnalysisResult.newFindings && (
                 <div>
-                  <div className="font-medium text-accent-primary mb-1">💡 Neue Erkenntnisse:</div>
+                  <div className="font-medium text-accent-primary mb-1">💡 {t('test_runner_new_findings')}:</div>
                   <div className="text-content-secondary whitespace-pre-wrap">{sessionAnalysisResult.newFindings}</div>
                 </div>
               )}
               
               {/* No analysis available */}
               {!sessionAnalysisResult.proposedUpdates.length && !sessionAnalysisResult.nextSteps.length && !sessionAnalysisResult.newFindings && (
-                <div className="text-content-secondary italic">Keine Analyse-Ergebnisse vorhanden.</div>
+                <div className="text-content-secondary italic">{t('test_runner_no_analysis')}</div>
               )}
             </div>
           </div>
@@ -770,7 +770,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {testResult.autoCheckResults.length > 0 && (
           <div>
             <h4 className="font-semibold mb-2 text-content-primary">
-              🤖 Automatische Checks ({autoPassCount}/{autoTotalCount})
+              🤖 {t('test_runner_auto_checks')} ({autoPassCount}/{autoTotalCount})
             </h4>
             <div className="space-y-2">
               {testResult.autoCheckResults.map((check, idx) => (
@@ -795,7 +795,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {/* Manual Checks */}
         <div>
           <h4 className="font-semibold mb-2 text-content-primary">
-            👤 Manuelle Checks ({manualPassCount}/{manualTotalCount})
+            👤 {t('test_runner_manual_checks')} ({manualPassCount}/{manualTotalCount})
           </h4>
           <div className="space-y-2">
             {selectedScenario.manualChecks.map((check, idx) => {
@@ -831,7 +831,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                       <div className="text-content-primary text-sm">{check}</div>
                       <input
                         type="text"
-                        placeholder="Notizen (optional)"
+                        placeholder={t('test_runner_notes_optional')}
                         value={manualNotes[checkId] || ''}
                         onChange={(e) => setManualNotes(prev => ({ ...prev, [checkId]: e.target.value }))}
                         className="mt-1 w-full px-2 py-1 text-xs bg-background-primary border border-border-secondary rounded"
@@ -852,7 +852,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
                      disabled:opacity-50 disabled:cursor-not-allowed
                      hover:bg-accent-primary/90 transition-colors"
         >
-          ✓ Test abschließen
+          ✓ {t('test_runner_complete')}
         </button>
       </div>
     );
@@ -876,22 +876,22 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           {passRate >= 80 ? '✅' : passRate >= 50 ? '⚠️' : '❌'}
         </div>
         <h3 className="text-2xl font-bold text-content-primary">
-          Test abgeschlossen
+          {t('test_runner_completed')}
         </h3>
         <p className="text-4xl font-bold mt-2 text-accent-primary">
           {passRate}%
         </p>
         <p className="text-content-secondary mt-1">
-          {totalPassed} von {totalChecks} Checks bestanden
+          {t('test_runner_checks_passed', { passed: totalPassed, total: totalChecks })}
         </p>
         
         <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-md mx-auto">
           <div className="text-sm space-y-1">
-            <div>Bot: <span className="font-medium">{selectedBot?.name}</span></div>
-            <div>Profil: <span className="font-medium">{getProfileDisplayName()}</span></div>
-            <div>Szenario: <span className="font-medium">{selectedScenario.name}</span></div>
-            <div>Automatisch: <span className="font-medium">{autoPassCount}/{autoTotalCount}</span></div>
-            <div>Manuell: <span className="font-medium">{manualPassCount}/{manualTotalCount}</span></div>
+            <div>{t('test_runner_result_bot')}: <span className="font-medium">{selectedBot?.name}</span></div>
+            <div>{t('test_runner_result_profile')}: <span className="font-medium">{getProfileDisplayName()}</span></div>
+            <div>{t('test_runner_result_scenario')}: <span className="font-medium">{selectedScenario.name}</span></div>
+            <div>{t('test_runner_result_auto')}: <span className="font-medium">{autoPassCount}/{autoTotalCount}</span></div>
+            <div>{t('test_runner_result_manual')}: <span className="font-medium">{manualPassCount}/{manualTotalCount}</span></div>
           </div>
         </div>
 
@@ -914,14 +914,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
             className="py-2 px-6 bg-background-tertiary text-content-primary rounded-lg
                        hover:bg-background-secondary transition-colors"
           >
-            Neuer Test
+            {t('test_runner_new_test')}
           </button>
           <button
             onClick={onClose}
             className="py-2 px-6 bg-accent-primary text-white rounded-lg
                        hover:bg-accent-primary/90 transition-colors"
           >
-            Schließen
+            {t('test_runner_close')}
           </button>
         </div>
       </div>
@@ -934,7 +934,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-content-primary">
-            🧪 Dynamischer Test-Runner
+            🧪 {t('test_runner_title')}
           </h3>
           <button
             onClick={onClose}

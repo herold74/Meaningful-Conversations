@@ -46,7 +46,7 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
       return (
         <div className="text-center p-8">
           <Spinner />
-          <p className="mt-4 text-content-secondary">Newsletter wird abgemeldet...</p>
+          <p className="mt-4 text-content-secondary">{t('unsubscribe_loading')}</p>
         </div>
       );
     }
@@ -57,18 +57,18 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4 mx-auto">
             <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold text-content-primary mb-2">Erfolgreich abgemeldet</h2>
+          <h2 className="text-2xl font-bold text-content-primary mb-2">{t('unsubscribe_success_title')}</h2>
           <p className="text-content-secondary mb-4">
             {email && (
-              <>Die E-Mail-Adresse <span className="font-semibold">{email}</span> wurde erfolgreich vom Newsletter abgemeldet.</>
+              <>{t('unsubscribe_success_email', { email })}</>
             )}
-            {!email && <>Sie wurden erfolgreich vom Newsletter abgemeldet.</>}
+            {!email && <>{t('unsubscribe_success_generic')}</>}
           </p>
           <p className="text-sm text-content-tertiary">
-            Sie erhalten keine weiteren Newsletter-E-Mails von uns.
+            {t('unsubscribe_success_note')}
           </p>
           <Button onClick={onBack} size="lg" className="mt-6">
-            Zur Startseite
+            {t('unsubscribe_back_home')}
           </Button>
         </div>
       );
@@ -80,12 +80,12 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
           <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mb-4 mx-auto">
             <MailIcon className="w-10 h-10 text-blue-500 dark:text-blue-400" />
           </div>
-          <h2 className="text-2xl font-bold text-content-primary mb-2">Bereits abgemeldet</h2>
+          <h2 className="text-2xl font-bold text-content-primary mb-2">{t('unsubscribe_already_title')}</h2>
           <p className="text-content-secondary mb-4">
-            Sie sind bereits vom Newsletter abgemeldet.
+            {t('unsubscribe_already_desc')}
           </p>
           <Button onClick={onBack} size="lg" className="mt-6">
-            Zur Startseite
+            {t('unsubscribe_back_home')}
           </Button>
         </div>
       );
@@ -97,15 +97,15 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
         <div className="w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mb-4 mx-auto">
           <XIcon className="w-10 h-10 text-red-500 dark:text-red-400" />
         </div>
-        <h2 className="text-2xl font-bold text-content-primary mb-2">Fehler</h2>
+        <h2 className="text-2xl font-bold text-content-primary mb-2">{t('unsubscribe_error_title')}</h2>
         <p className="text-content-secondary mb-4">
-          {error || 'Der Abmelde-Link ist ungültig oder abgelaufen.'}
+          {error || t('unsubscribe_error_invalid_link')}
         </p>
         <p className="text-sm text-content-tertiary mb-6">
-          Bitte kontaktieren Sie uns, wenn Sie weiterhin Probleme haben.
+          {t('unsubscribe_error_contact')}
         </p>
         <Button onClick={onBack} size="lg">
-          Zur Startseite
+          {t('unsubscribe_back_home')}
         </Button>
       </div>
     );

@@ -1042,17 +1042,19 @@ interface PersonalitySurveyProps {
   onCancel?: () => void; // Optional: allows returning to profile view
   currentUser?: User | null;
   existingProfile?: Partial<SurveyResult> | null; // For adding additional lenses
+  preselectedLens?: LensType | null; // For directly starting a specific lens (skips selection screen)
 }
 
 export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({ 
   onFinish, 
   onCancel,
   currentUser,
-  existingProfile 
+  existingProfile,
+  preselectedLens
 }) => {
   const { t } = useLocalization();
   const [step, setStep] = useState(0);
-  const [selectedLens, setSelectedLens] = useState<LensType | null>(null);
+  const [selectedLens, setSelectedLens] = useState<LensType | null>(preselectedLens || null);
   
   // State for overwrite warning modal (shows when repeating an already-completed test with DPFL refinements)
   const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
@@ -1078,7 +1080,13 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
 
   // Track if narratives existed at the START of lens selection (not during!)
   // This prevents the flow from changing mid-survey when narratives are added
-  const [hadNarrativesAtStart, setHadNarrativesAtStart] = useState<boolean | null>(null);
+  const [hadNarrativesAtStart, setHadNarrativesAtStart] = useState<boolean | null>(() => {
+    // If preselectedLens is provided, initialize hadNarrativesAtStart immediately
+    if (preselectedLens) {
+      return Boolean(existingProfile?.narratives?.flowStory && existingProfile?.narratives?.frictionStory);
+    }
+    return null;
+  });
 
   // IMPORTANT: Refs to store pending lens results
   // React state updates are async, so when we call next() immediately after setResult(),
