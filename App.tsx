@@ -493,6 +493,10 @@ const App: React.FC = () => {
         // Registered users: Save profile without automatic PDF download
         if (currentUser && encryptionKey) {
             setIsSavingProfile(true); // Show loading spinner
+            
+            // Determine if we're adding a lens to an existing profile or creating a new one
+            const isAddingLens = existingProfileForExtension?.completedLenses && existingProfileForExtension.completedLenses.length > 0;
+            
             try {
                 // First, save the profile without signature
                 let encryptedData = await encryptPersonalityProfile(result, encryptionKey);
@@ -506,16 +510,20 @@ const App: React.FC = () => {
                     adaptationMode: result.adaptationMode || 'adaptive'
                 });
                 
-                // Automatically set coaching mode based on adaptation choice
-                // adaptive → DPFL (profile learns from sessions)
-                // stable → DPC (profile used but not modified)
-                const newCoachingMode = result.adaptationMode === 'adaptive' ? 'dpfl' : 'dpc';
-                try {
-                    const { user: updatedUser } = await userService.updateCoachingMode(newCoachingMode);
-                    setCurrentUser(updatedUser);
-                } catch (coachingModeError) {
-                    console.error('Failed to set coaching mode:', coachingModeError);
-                    // Non-critical error - profile is saved, coaching mode can be set later
+                // Only set coaching mode on FIRST profile creation, not when adding lenses
+                // This prevents accidentally changing the coaching mode when extending the profile
+                let newCoachingMode: 'dpfl' | 'dpc' | null = null;
+                if (!isAddingLens) {
+                    // adaptive → DPFL (profile learns from sessions)
+                    // stable → DPC (profile used but not modified)
+                    newCoachingMode = result.adaptationMode === 'adaptive' ? 'dpfl' : 'dpc';
+                    try {
+                        const { user: updatedUser } = await userService.updateCoachingMode(newCoachingMode);
+                        setCurrentUser(updatedUser);
+                    } catch (coachingModeError) {
+                        console.error('Failed to set coaching mode:', coachingModeError);
+                        // Non-critical error - profile is saved, coaching mode can be set later
+                    }
                 }
                 
                 setHasPersonalityProfile(true);
@@ -562,14 +570,26 @@ const App: React.FC = () => {
                 
                 setIsSavingProfile(false); // Hide loading spinner
                 
-                // Inform user about saved profile AND activated coaching mode
-                const modeLabel = newCoachingMode === 'dpfl' ? 'DPFL' : 'DPC';
-                if (signatureGenerated) {
-                    alert(t('personality_survey_success_with_signature', { mode: modeLabel }) || 
-                        `Profil und Signatur erstellt! ✨ Coaching-Modus „${modeLabel}" wurde aktiviert.`);
+                // Show different success messages based on context
+                if (isAddingLens) {
+                    // Adding a lens to existing profile - find the newly added lens
+                    const previousLenses = existingProfileForExtension?.completedLenses || [];
+                    const newLens = result.completedLenses?.find(lens => !previousLenses.includes(lens));
+                    const lensNameKey = newLens ? `lens_${newLens}_name` : '';
+                    const lensName = lensNameKey ? (t(lensNameKey) || newLens || '') : '';
+                    
+                    alert(t('personality_survey_success_lens_added', { lens: lensName }) || 
+                        `${lensName || 'Test'} wurde zu deinem Profil hinzugefügt! ✨`);
                 } else {
-                    alert(t('personality_survey_success_with_coaching_mode', { mode: modeLabel }) || 
-                        `Profil gespeichert! Coaching-Modus "${modeLabel}" wurde aktiviert. Du kannst jetzt deine Signatur generieren.`);
+                    // First profile creation - show coaching mode info
+                    const modeLabel = newCoachingMode === 'dpfl' ? 'DPFL' : 'DPC';
+                    if (signatureGenerated) {
+                        alert(t('personality_survey_success_with_signature', { mode: modeLabel }) || 
+                            `Profil und Signatur erstellt! ✨ Coaching-Modus „${modeLabel}" wurde aktiviert.`);
+                    } else {
+                        alert(t('personality_survey_success_with_coaching_mode', { mode: modeLabel }) || 
+                            `Profil gespeichert! Coaching-Modus "${modeLabel}" wurde aktiviert. Du kannst jetzt deine Signatur generieren.`);
+                    }
                 }
                 
                 // Navigate to profile view where user can view signature and download PDF
