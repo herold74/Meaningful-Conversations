@@ -5,9 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Meaningful Conversations',
   webDir: 'dist',
   ios: {
-    contentInset: 'always',
-    backgroundColor: '#0f172a',
-    scrollEnabled: false
+    contentInset: 'never',
+    backgroundColor: '#0f172a'
   },
   plugins: {
     SplashScreen: {

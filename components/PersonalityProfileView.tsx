@@ -296,7 +296,7 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
 
 interface PersonalityProfileViewProps {
   encryptionKey: CryptoKey | null;
-  onStartNewTest: (existingProfile?: Partial<SurveyResult>) => void;
+  onStartNewTest: (existingProfile?: Partial<SurveyResult>, targetLens?: LensType) => void;
   currentUser: User | null;
   onUserUpdate: (user: User) => void;
   lifeContext?: string; // For PII detection when activating DPC/DPFL
@@ -699,7 +699,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   big5: decryptedData?.big5,
                   narratives: decryptedData?.narratives,
                   adaptationMode: profileMetadata.adaptationMode,
-                })}
+                }, 'sd')}
                 className={`${chipMutedInteractive} hover:border-amber-300/70 hover:text-amber-700 dark:hover:text-amber-300`}
               >
                 + {t('lens_sd_name') || 'Was dich antreibt'}
@@ -718,7 +718,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   big5: decryptedData?.big5,
                   narratives: decryptedData?.narratives,
                   adaptationMode: profileMetadata.adaptationMode,
-                })}
+                }, 'riemann')}
                 className={`${chipMutedInteractive} hover:border-rose-300/70 hover:text-rose-700 dark:hover:text-rose-300`}
               >
                 + {t('lens_riemann_name') || 'Wie du interagierst'}
@@ -737,7 +737,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   big5: decryptedData?.big5,
                   narratives: decryptedData?.narratives,
                   adaptationMode: profileMetadata.adaptationMode,
-                })}
+                }, 'ocean')}
                 className={`${chipMutedInteractive} hover:border-teal-300/70 hover:text-teal-700 dark:hover:text-teal-300`}
               >
                 + {t('lens_ocean_name') || 'Was dich ausmacht'}
