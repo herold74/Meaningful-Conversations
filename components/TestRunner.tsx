@@ -426,7 +426,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {selectedScenario?.id === 'bot_interview' ? (
           // Interview scenario: Show only interview bot (auto-selected)
           <div className="p-3 rounded-lg border border-accent-primary bg-accent-primary/10">
-            <div className="font-medium text-content-primary">🎤 Gloria (Interview)</div>
+            <div className="font-medium text-content-primary">🎤 {t('test_runner_interview_bot_name')}</div>
             <div className="text-xs text-content-secondary">{t('test_runner_interview_auto_selected')}</div>
           </div>
         ) : (

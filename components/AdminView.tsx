@@ -187,7 +187,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
                             </span>
                         </button>
                     ) : (
-                        hasComment ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>
+                        hasComment ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">{t('admin_feedback_no_comment')}</span>
                     )}
                 </td>
                 <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
@@ -204,7 +204,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
             {isCommentExpanded && (
                 <tr className="bg-gray-50 dark:bg-gray-900/30 animate-fadeIn">
                     <td colSpan={5} className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">Full Comment</h5>
+                        <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">{t('admin_feedback_full_comment')}</h5>
                         <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{item.comments}</p>
                     </td>
                 </tr>
@@ -329,7 +329,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     onClick={() => setIsExpanded(p => !p)}
                 >
                     <td className="p-3 align-top whitespace-normal break-words text-gray-800 dark:text-gray-200">
-                        {item.comments ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">No comment provided.</span>}
+                        {item.comments ? <p>{item.comments}</p> : <span className="italic text-gray-400 dark:text-gray-500">{t('admin_feedback_no_comment')}</span>}
                     </td>
                     <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
                     <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">
@@ -777,7 +777,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                                         </td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 text-center font-bold">{userXp.toLocaleString()}</td>
-                                        <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
+                                        <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : t('admin_users_never')}</td>
                                         <td className="p-3">
                                             <div className="flex items-center justify-end gap-1">
                                                 {user.status === 'PENDING' && (
@@ -998,7 +998,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                 </div>
             ) : (
                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p>{codes.length > 0 ? 'No codes found for this filter.' : t('admin_no_codes_yet')}</p>
+                    <p>{codes.length > 0 ? t('admin_codes_no_filter_results') : t('admin_no_codes_yet')}</p>
                 </div>
             )}
         </div>
@@ -1016,11 +1016,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         <UsersIcon className="w-6 h-6 text-accent-primary" />
                         <div className="text-left">
                             <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
-                                Guest Logins (Last 30 Days)
+                                {t('admin_guest_logins_title')}
                             </h3>
                             {guestLoginStats && (
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Total: {guestLoginStats.totalCount} logins
+                                    {t('admin_guest_logins_total', { count: guestLoginStats.totalCount })}
                                 </p>
                             )}
                         </div>
@@ -1039,8 +1039,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                                 <table className="w-full text-sm">
                                     <thead className="bg-gray-50 dark:bg-gray-900/50 text-left text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0">
                                         <tr>
-                                            <th className="p-3">Date</th>
-                                            <th className="p-3 text-right">Guest Logins</th>
+                                            <th className="p-3">{t('admin_guest_date')}</th>
+                                            <th className="p-3 text-right">{t('admin_guest_logins')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -1059,7 +1059,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                             </div>
                         ) : (
                             <p className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                No guest logins in this period
+                                {t('admin_guest_logins_none')}
                             </p>
                         )}
                     </div>
@@ -1190,7 +1190,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     </div>
                     <div>
                          <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{selectedBotFilter ? `Details for ${ratingStats.botStats.find(b => b.id === selectedBotFilter)?.name}` : 'All Feedback'}</h3>
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{selectedBotFilter ? t('admin_ratings_details_for', { name: ratingStats.botStats.find(b => b.id === selectedBotFilter)?.name || '' }) : t('admin_ratings_all_feedback')}</h3>
                             {selectedBotFilter && (
                                 <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
                             )}
@@ -1263,24 +1263,24 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     <div className="flex items-center justify-between">
                         <div>
                             <h3 className="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">
-                                🧪 Dynamischer Test-Runner
+                                🧪 {t('admin_dynamic_runner_title')}
                             </h3>
                             <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
-                                Echte API-Calls mit Bot-Auswahl, Test-Profilen und automatischer Validierung
+                                {t('admin_dynamic_runner_desc')}
                             </p>
                         </div>
                         <button
                             onClick={() => setShowDynamicTestRunner(true)}
                             className="px-5 py-2 text-base font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-md transition-colors"
                         >
-                            🚀 Starten
+                            🚀 {t('admin_dynamic_runner_start')}
                         </button>
                     </div>
                 </div>
                 
                 {/* Legacy Test Runner Section */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
-                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')} (Statisch)</h3>
+                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')} {t('admin_runner_static')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
                     
                     <div className="flex flex-col sm:flex-row items-stretch gap-3">
