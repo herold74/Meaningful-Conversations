@@ -1107,11 +1107,15 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       steps.push('NARRATIVE_QUESTIONS');
     }
     
-    // Always end with adaptation choice
-    steps.push('ADAPTATION_CHOICE');
+    // Only show adaptation choice if no existing adaptation mode is set
+    // This prevents re-asking when adding additional tests to an existing profile
+    const hasExistingAdaptationMode = existingProfile?.adaptationMode;
+    if (!hasExistingAdaptationMode) {
+      steps.push('ADAPTATION_CHOICE');
+    }
     
     return steps;
-  }, [selectedLens, hadNarrativesAtStart]);
+  }, [selectedLens, hadNarrativesAtStart, existingProfile?.adaptationMode]);
 
   const currentStepId = flow[step] || 'DONE';
 
@@ -1197,6 +1201,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     // IMPORTANT: Use pending refs for values that may have been set in the same render cycle
     // React state updates are async, so result.spiralDynamics etc. may not be updated yet
     // when finishSurvey is called immediately after setResult()
+    // For adaptationMode: prefer pending choice, then existing profile's mode, then result, then default
     const finalResult: SurveyResult = {
       completedLenses: newCompletedLenses,
       path: pathMap[newCompletedLenses[0]] || 'SD',
@@ -1204,7 +1209,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       riemann: pendingRiemannResult.current || result.riemann,
       big5: pendingBig5Result.current || result.big5,
       narratives: pendingNarratives.current || result.narratives,
-      adaptationMode: pendingAdaptationMode.current || result.adaptationMode || 'adaptive',
+      adaptationMode: pendingAdaptationMode.current || existingProfile?.adaptationMode || result.adaptationMode || 'adaptive',
       narrativeProfile: result.narrativeProfile,
     };
     

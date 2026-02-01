@@ -647,6 +647,7 @@
   "personality_survey_success_saved_no_download": "Profil verschlüsselt gespeichert! ✨ Du kannst jetzt deine persönliche Signatur generieren und das PDF herunterladen.",
   "personality_survey_success_with_coaching_mode": "Profil gespeichert! ✨ Coaching-Modus «{{mode}}» wurde aktiviert. Du kannst jetzt deine Signatur generieren und den Modus jederzeit in deinem Profil ändern.",
   "personality_survey_success_with_signature": "Profil und Signatur erstellt! ✨ Coaching-Modus «{{mode}}» wurde aktiviert. Dein Coach kennt jetzt deine Stärken und Blindspots.",
+  "personality_survey_success_lens_added": "{{lens}} wurde zu deinem Profil hinzugefügt! ✨ Dein Profil ist jetzt vollständiger.",
   "personality_survey_success_downloaded": "PDF erfolgreich heruntergeladen!",
   "saving_profile_title": "Profil wird erstellt...",
   "saving_profile_subtitle": "Deine persönliche Signatur wird generiert. Das kann einen Moment dauern.",
