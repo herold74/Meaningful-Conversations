@@ -28,6 +28,19 @@ interface BurgerMenuProps {
 const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver }) => {
     const { t } = useLocalization();
     
+    // iOS Safe Area calculation (same as GamificationBar)
+    const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
+    const getIOSSafeAreaTop = (): number => {
+        if (!isIOS) return 0;
+        const screenHeight = Math.max(window.screen.height, window.screen.width);
+        if (screenHeight >= 932) return 52;  // iPhone 14/15 Pro Max (Dynamic Island)
+        if (screenHeight >= 852) return 52;  // iPhone 14/15 Pro (Dynamic Island)
+        if (screenHeight >= 844) return 44;  // iPhone 12/13/14/15 (notch)
+        if (screenHeight >= 812) return 44;  // iPhone X/XS/11 Pro (notch)
+        return 20;
+    };
+    const iosSafeAreaTop = getIOSSafeAreaTop();
+    
     const handleRefresh = async () => {
         // Dynamic import to avoid issues if module doesn't exist yet
         try {
@@ -59,7 +72,8 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
             aria-modal="true"
         >
             <div 
-                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pt-[max(1.5rem,var(--safe-area-inset-top))] pb-[max(1.5rem,var(--safe-area-inset-bottom))]"
+                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pb-[max(1.5rem,var(--safe-area-inset-bottom))]"
+                style={{ paddingTop: isIOS && iosSafeAreaTop > 0 ? `${iosSafeAreaTop + 8}px` : '1.5rem' }}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
@@ -114,7 +128,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     
                     <div className="px-4 pt-2 flex items-center justify-between">
                         <p className="text-xs text-content-subtle">
-                            Version {import.meta.env.VITE_APP_VERSION || '1.7.8'}
+                            Version {import.meta.env.VITE_APP_VERSION || 'unknown'}
                             {import.meta.env.VITE_BUILD_NUMBER && ` (Build ${import.meta.env.VITE_BUILD_NUMBER})`}
                         </p>
                         <button

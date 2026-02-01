@@ -214,20 +214,25 @@ if [[ "$SKIP_BUILD" == false ]]; then
         
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
         
-        # Increment build number for each deployment
+        # Read current build number (will be incremented only after successful build)
         BUILD_NUM=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
-        BUILD_NUM=$((BUILD_NUM + 1))
-        echo "$BUILD_NUM" > BUILD_NUMBER
+        NEXT_BUILD_NUM=$((BUILD_NUM + 1))
         
         if [[ "$DRY_RUN" == true ]]; then
-            echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE (Build $BUILD_NUM)"
+            echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE (Build $NEXT_BUILD_NUM)"
         else
-            podman build --platform linux/amd64 \
-                --build-arg BUILD_NUMBER="$BUILD_NUM" \
+            if podman build --platform linux/amd64 \
+                --build-arg BUILD_NUMBER="$NEXT_BUILD_NUM" \
                 --build-arg APP_VERSION="$VERSION" \
-                -t "$FRONTEND_IMAGE" .
-            podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
-            echo -e "${GREEN}✓ Frontend image built (v$VERSION, Build $BUILD_NUM)${NC}"
+                -t "$FRONTEND_IMAGE" .; then
+                # Only increment build number after successful build
+                echo "$NEXT_BUILD_NUM" > BUILD_NUMBER
+                podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
+                echo -e "${GREEN}✓ Frontend image built (v$VERSION, Build $NEXT_BUILD_NUM)${NC}"
+            else
+                echo -e "${RED}✗ Frontend build failed${NC}"
+                exit 1
+            fi
         fi
         echo ""
     fi

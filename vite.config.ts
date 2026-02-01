@@ -1,12 +1,26 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
+
+// Read version from package.json
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+
+// Read build number from BUILD_NUMBER file (or use 'dev' for local development)
+const buildNumber = fs.existsSync('./BUILD_NUMBER') 
+  ? fs.readFileSync('./BUILD_NUMBER', 'utf-8').trim() 
+  : 'dev';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
   ],
+  // Inject version info at build time (env vars override file-based values)
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VITE_APP_VERSION || pkg.version),
+    'import.meta.env.VITE_BUILD_NUMBER': JSON.stringify(process.env.VITE_BUILD_NUMBER || buildNumber),
+  },
   publicDir: 'public', // Ensures public assets are copied to dist during build
   server: {
     watch: {

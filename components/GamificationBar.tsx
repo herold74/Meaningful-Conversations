@@ -42,6 +42,22 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     const { t } = useLocalization();
     const { xp, level, streak } = gamificationState;
 
+    // iOS Safe Area handling (contentInset: 'never' - we manage safe areas manually)
+    const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
+    
+    // Calculate safe area - ensures content is below clock/Dynamic Island
+    const getSafeAreaTop = (): number => {
+        if (!isIOS) return 0;
+        const screenHeight = Math.max(window.screen.height, window.screen.width);
+        if (screenHeight >= 932) return 52;  // iPhone 14/15 Pro Max (Dynamic Island)
+        if (screenHeight >= 852) return 52;  // iPhone 14/15 Pro (Dynamic Island)
+        if (screenHeight >= 844) return 44;  // iPhone 12/13/14/15 (notch)
+        if (screenHeight >= 812) return 44;  // iPhone X/XS/11 Pro (notch)
+        return 20; // Older iPhones without notch
+    };
+    
+    const safeAreaTop = getSafeAreaTop();
+
     const xpToReachCurrentLevel = 50 * (level - 1) * level;
     const xpForNextLevel = level * 100;
     const currentLevelXp = xp - xpToReachCurrentLevel;
@@ -69,7 +85,18 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
 
     if (minimal) {
         return (
-            <div className="fixed top-0 left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm">
+            <>
+                {/* Safe area background extension - extends blur effect to top of screen */}
+                {isIOS && safeAreaTop > 0 && (
+                    <div 
+                        className="fixed top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                        style={{ height: safeAreaTop }}
+                    />
+                )}
+                <div 
+                    className="fixed left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                    style={{ top: safeAreaTop }}
+                >
                  <button 
                     onClick={onBurgerClick}
                     className="p-2 text-content-secondary hover:text-content-primary transition-colors"
@@ -82,11 +109,23 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     {colorThemeToggleButton}
                 </div>
             </div>
+            </>
         );
     }
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md">
+        <>
+            {/* Safe area background extension - extends blur effect to top of screen */}
+            {isIOS && safeAreaTop > 0 && (
+                <div 
+                    className="fixed top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                    style={{ height: safeAreaTop }}
+                />
+            )}
+            <div 
+                className="fixed left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md"
+                style={{ top: safeAreaTop }}
+            >
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
                     <>
@@ -157,6 +196,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 )}
             </div>
         </div>
+        </>
     );
 };
 

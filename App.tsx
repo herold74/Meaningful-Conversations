@@ -73,6 +73,20 @@ const App: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
 
+    // iOS Safe Area calculation (contentInset: 'never' - we manage safe areas manually)
+    // Values that clear the clock display
+    const getIOSSafeAreaTop = (): number => {
+        const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
+        if (!isIOS) return 0;
+        const screenHeight = Math.max(window.screen.height, window.screen.width);
+        if (screenHeight >= 932) return 52;  // iPhone 14/15 Pro Max (Dynamic Island)
+        if (screenHeight >= 852) return 52;  // iPhone 14/15 Pro (Dynamic Island)
+        if (screenHeight >= 844) return 44;  // iPhone 12/13/14/15 (notch)
+        if (screenHeight >= 812) return 44;  // iPhone X/XS/11 Pro (notch)
+        return 20;
+    };
+    const iosSafeAreaTop = getIOSSafeAreaTop();
+
     // Core App State
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
@@ -100,6 +114,7 @@ const App: React.FC = () => {
     // Personality Profile States
     const [hasPersonalityProfile, setHasPersonalityProfile] = useState(false);
     const [existingProfileForExtension, setExistingProfileForExtension] = useState<Partial<SurveyResult> | null>(null);
+    const [preselectedLensForSurvey, setPreselectedLensForSurvey] = useState<'sd' | 'riemann' | 'ocean' | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
     // Theme States
@@ -1074,21 +1089,23 @@ const App: React.FC = () => {
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'personalitySurvey': {
-                console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension);
+                console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension, 'preselectedLens:', preselectedLensForSurvey);
                 return <PersonalitySurvey 
                     onFinish={handlePersonalitySurveyComplete} 
-                    onCancel={existingProfileForExtension ? () => setView('personalityProfile') : undefined}
+                    onCancel={existingProfileForExtension ? () => { setPreselectedLensForSurvey(null); setView('personalityProfile'); } : undefined}
                     currentUser={currentUser} 
-                    existingProfile={existingProfileForExtension} 
+                    existingProfile={existingProfileForExtension}
+                    preselectedLens={preselectedLensForSurvey}
                 />;
             }
             case 'personalityProfile': return (
                 <PersonalityProfileView 
                     encryptionKey={encryptionKey}
-                    onStartNewTest={(existingProfile?: Partial<SurveyResult>) => {
-                        console.log('[App] onStartNewTest called with:', existingProfile);
+                    onStartNewTest={(existingProfile?: Partial<SurveyResult>, targetLens?: 'sd' | 'riemann' | 'ocean') => {
+                        console.log('[App] onStartNewTest called with:', existingProfile, 'targetLens:', targetLens);
                         setMenuView(null);
                         setExistingProfileForExtension(existingProfile || null);
+                        setPreselectedLensForSurvey(targetLens || null);
                         setView('personalitySurvey');
                     }}
                     currentUser={currentUser}
@@ -1187,8 +1204,8 @@ const App: React.FC = () => {
                         toggleColorTheme={toggleColorTheme}
                         minimal={minimalBar}
                     />
-                    {/* Spacer for fixed GamificationBar */}
-                    <div className={minimalBar ? 'h-16' : 'h-20'} />
+                    {/* Spacer for fixed GamificationBar - includes iOS safe area */}
+                    <div style={{ height: minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)` }} />
                 </>
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
