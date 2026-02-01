@@ -1480,5 +1480,22 @@
   "test_runner_autocheck_no_updates": "Keine Updates vorgeschlagen",
   "test_runner_autocheck_nextsteps_found": "{{count}} nächste Schritt(e) identifiziert",
   "test_runner_autocheck_no_nextsteps": "Keine nächsten Schritte identifiziert",
-  "test_runner_autocheck_analysis_failed": "Session-Analyse fehlgeschlagen"
+  "test_runner_autocheck_analysis_failed": "Session-Analyse fehlgeschlagen",
+
+  "admin_feedback_full_comment": "Vollständiger Kommentar",
+  "admin_feedback_no_comment": "Kein Kommentar vorhanden.",
+  "admin_users_never": "Nie",
+  "admin_codes_no_filter_results": "Keine Codes für diesen Filter gefunden.",
+  "admin_guest_logins_title": "Gast-Logins (Letzte 30 Tage)",
+  "admin_guest_logins_total": "Gesamt: {{count}} Logins",
+  "admin_guest_date": "Datum",
+  "admin_guest_logins": "Gast-Logins",
+  "admin_guest_logins_none": "Keine Gast-Logins in diesem Zeitraum",
+  "admin_ratings_details_for": "Details für {{name}}",
+  "admin_ratings_all_feedback": "Alle Bewertungen",
+  "admin_dynamic_runner_title": "Dynamischer Test-Runner",
+  "admin_dynamic_runner_desc": "Echte API-Calls mit Bot-Auswahl, Test-Profilen und automatischer Validierung",
+  "admin_dynamic_runner_start": "Starten",
+  "admin_runner_static": "(Statisch)",
+  "test_runner_interview_bot_name": "Gloria (Interview)"
 }
