@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
@@ -73,10 +73,12 @@ const App: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
 
+    const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
+    const useNativeGamificationBar = isIOS;
+
     // iOS Safe Area calculation (contentInset: 'never' - we manage safe areas manually)
     // Values that clear the clock display
     const getIOSSafeAreaTop = (): number => {
-        const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
         if (!isIOS) return 0;
         const screenHeight = Math.max(window.screen.height, window.screen.width);
         if (screenHeight >= 932) return 52;  // iPhone 14/15 Pro Max (Dynamic Island)
@@ -1184,11 +1186,105 @@ const App: React.FC = () => {
     };
     
     const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
-    const minimalBar = ['landing', 'questionnaire', 'piiWarning', 'contextChoice'].includes(view) && !menuView;
+    const minimalBar = ['landing', 'questionnaire', 'piiWarning'].includes(view) && !menuView;
+    const nativeBarHeight = minimalBar ? 64 : 80;
+    const previousViewRef = useRef<NavView>('welcome');
+    const nativeSpacerRef = useRef<HTMLDivElement | null>(null);
+    const [isLandscape, setIsLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight);
+    const effectiveSafeAreaTop = isLandscape ? 0 : iosSafeAreaTop;
+    const baseSpacerBarHeight = isLandscape ? (minimalBar ? 48 : 60) : nativeBarHeight;
+    const isChatLandscapeNoSpacer = false;
+    const spacerBarHeight = baseSpacerBarHeight;
+
+    useEffect(() => {
+        const handleResize = () => {
+            const nextIsLandscape = window.innerWidth > window.innerHeight;
+            setIsLandscape(nextIsLandscape);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (view !== 'achievements') {
+            previousViewRef.current = view;
+        }
+    }, [view]);
+
+    const handleNativeGamificationBarAction = useCallback((action: string) => {
+        if (action === 'menu') {
+            handleBurgerIconClick();
+            return;
+        }
+        if (action === 'achievements') {
+            const isAchievementsOpen = view === 'achievements' || menuView === 'achievements';
+            const targetView = isAchievementsOpen ? (previousViewRef.current || view || 'botSelection') : 'achievements';
+            if (isAchievementsOpen) {
+                setMenuView(null);
+                setView(targetView);
+            } else {
+                handleNavigateFromMenu('achievements');
+            }
+            return;
+        }
+        if (action === 'theme') {
+            toggleDarkMode();
+            return;
+        }
+        if (action === 'colorTheme') {
+            toggleColorTheme();
+            return;
+        }
+    }, [handleBurgerIconClick, handleNavigateFromMenu, toggleColorTheme, toggleDarkMode, view, menuView, isMenuOpen]);
+
+    useEffect(() => {
+        if (!useNativeGamificationBar) return;
+        (window as any).nativeGamificationBarAction = handleNativeGamificationBarAction;
+        return () => {
+            delete (window as any).nativeGamificationBarAction;
+        };
+    }, [handleNativeGamificationBarAction, useNativeGamificationBar]);
+
+    useEffect(() => {
+        if (!useNativeGamificationBar) return;
+        const nativeBar = (window as any).Capacitor?.Plugins?.NativeGamificationBar;
+
+        const level = gamificationState.level ?? 1;
+        const xp = gamificationState.xp ?? 0;
+        const streak = gamificationState.streak ?? 0;
+        const xpToReachCurrentLevel = 50 * (level - 1) * level;
+        const xpForNextLevel = level * 100;
+        const currentLevelXp = xp - xpToReachCurrentLevel;
+        const progress = xpForNextLevel > 0 ? currentLevelXp / xpForNextLevel : 0;
+
+        const payload = {
+            visible: showGamificationBar,
+            minimal: minimalBar,
+            view,
+            activeView: menuView || view,
+            menuView: menuView || null,
+            colorTheme,
+            levelText: `${t('gamificationBar_level')} ${level}`,
+            streakText: `${t('gamificationBar_streak')} ${streak}`,
+            xpText: `${currentLevelXp}/${xpForNextLevel} XP`,
+            progress,
+            isMenuOpen,
+            isDarkMode: isDarkMode === 'dark',
+        };
+
+        if (!nativeBar?.setState) {
+            return;
+        }
+
+        nativeBar.setState(payload).then(() => {
+        }).catch((error: unknown) => {
+            void error;
+        });
+    }, [gamificationState, isDarkMode, isMenuOpen, minimalBar, showGamificationBar, t, useNativeGamificationBar, view, menuView, colorTheme]);
 
     return (
         <div className={`font-sans ${view === 'chat' ? 'h-screen flex flex-col' : 'min-h-screen'}`}>
-            {showGamificationBar && (
+            {showGamificationBar && !useNativeGamificationBar && (
                 <>
                     <GamificationBar 
                         gamificationState={gamificationState}
@@ -1208,7 +1304,10 @@ const App: React.FC = () => {
                     <div style={{ height: minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)` }} />
                 </>
             )}
-            <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-4' : ''}`}>
+            {showGamificationBar && useNativeGamificationBar && (
+                <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px)` }} />
+            )}
+            <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 {renderView()}
             </main>
             <BurgerMenu 

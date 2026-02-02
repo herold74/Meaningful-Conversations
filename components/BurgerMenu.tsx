@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { User, NavView } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { LogInIcon } from './icons/LogInIcon';
@@ -40,6 +40,8 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
         return 20;
     };
     const iosSafeAreaTop = getIOSSafeAreaTop();
+    const isLandscape = typeof window !== 'undefined' && window.innerWidth > window.innerHeight;
+    const nativeBarOffset = isIOS && !isLandscape ? 60 : 0;
     
     const handleRefresh = async () => {
         // Dynamic import to avoid issues if module doesn't exist yet
@@ -51,6 +53,10 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
             window.location.reload();
         }
     };
+
+    const menuPaddingTop = isIOS && iosSafeAreaTop > 0
+        ? `${iosSafeAreaTop + nativeBarOffset + 8}px`
+        : '1.5rem';
 
     if (!isOpen) return null;
     
@@ -73,7 +79,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
         >
             <div 
                 className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pb-[max(1.5rem,var(--safe-area-inset-bottom))]"
-                style={{ paddingTop: isIOS && iosSafeAreaTop > 0 ? `${iosSafeAreaTop + 8}px` : '1.5rem' }}
+                style={{ paddingTop: menuPaddingTop }}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
@@ -109,7 +115,21 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         </>
                     )}
 
-                    <MenuItem icon={BookOpenIcon} text={t('menu_user_guide')} onClick={() => onNavigate('userGuide')} />
+                    <MenuItem
+                        icon={BookOpenIcon}
+                        text={t('menu_user_guide')}
+                        customText={
+                            !isLandscape && (t('menu_user_guide') || '').toLowerCase().includes('benutzerhandbuch')
+                                ? (
+                                    <>
+                                        <span className="block sm:inline">Benutzer-</span>
+                                        <span className="block sm:inline">Handbuch</span>
+                                    </>
+                                )
+                                : undefined
+                        }
+                        onClick={() => onNavigate('userGuide')}
+                    />
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => onNavigate('faq')} />
                     <MenuItem icon={CodeIcon} text={t('menu_formatting')} onClick={() => onNavigate('formattingHelp')} />
                 </nav>
@@ -145,7 +165,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
     );
 };
 
-const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void, specialColor?: string }> = ({ icon: Icon, text, onClick, specialColor }) => (
+const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void, specialColor?: string, customText?: React.ReactNode }> = ({ icon: Icon, text, onClick, specialColor, customText }) => (
     <button 
         onClick={onClick} 
         className={`w-full flex items-center gap-4 px-4 py-3 text-left rounded-md transition-colors ${
@@ -155,7 +175,7 @@ const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () =>
         }`}
     >
         <Icon className={`w-6 h-6 ${specialColor ? '' : 'text-content-subtle'}`} />
-        <span className="font-semibold">{text}</span>
+        <span className="font-semibold">{customText ?? text}</span>
     </button>
 );
 
