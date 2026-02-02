@@ -58,14 +58,23 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
     
     const safeAreaTop = getSafeAreaTop();
     const gbRef = useRef<HTMLDivElement>(null);
+    const bgRef = useRef<HTMLDivElement>(null);
 
-    // #region agent log - Debug scroll behavior on iOS
+    // #region iOS fixed positioning fix - Use position:sticky instead of position:fixed
+    // iOS WKWebView has a bug where position:fixed isn't honored until ~70+ scroll events.
+    // Hypothesis C: position:sticky works more reliably on iOS WebKit because it's designed
+    // to work within scroll containers rather than being positioned relative to viewport.
+    // 
+    // For non-iOS platforms, we continue to use position:fixed for better compatibility.
+    // #endregion
+
+    // #region agent log - Debug scroll behavior on iOS (hypothesis: backdrop-blur removed)
     useEffect(() => {
         if (!isIOS) return;
         
         let lastGBTop = safeAreaTop;
         let scrollCount = 0;
-        let sessionId = 'initial';
+        let sessionId = 'sticky-test';
         
         // Get computed styles to check if fixed positioning is correct
         const getComputedInfo = () => {
@@ -76,63 +85,44 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             return {
                 position: computed.position,
                 top: computed.top,
-                transform: computed.transform,
+                backdropFilter: computed.backdropFilter || 'none',
                 rectTop: Math.round(rect.top),
-                innerHeight: window.innerHeight,
-                visualViewportOffsetTop: (window as any).visualViewport?.offsetTop ?? 'N/A',
-                bodyOverflow: window.getComputedStyle(document.body).overflow,
-                htmlOverflow: window.getComputedStyle(document.documentElement).overflow,
             };
         };
         
-        // Log initial state
-        console.log('[GB-DEBUG] mount:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
+        // Log initial state - testing position:sticky on iOS
+        console.log('[GB-DEBUG] mount (STICKY TEST):', JSON.stringify({sessionId, safeAreaTop, positionStrategy: isIOS ? 'sticky' : 'fixed', ...getComputedInfo()}));
         
         // Track visibility change (lock/unlock device)
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                sessionId = 'after-unlock-' + Date.now();
+                sessionId = 'sticky-unlock-' + Date.now();
                 console.log('[GB-DEBUG] visibility-visible:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
-                
-                // Check again after a short delay (layout might need to settle)
-                setTimeout(() => {
-                    console.log('[GB-DEBUG] visibility-visible-100ms:', JSON.stringify({sessionId, safeAreaTop, ...getComputedInfo()}));
-                }, 100);
             }
         };
         
-        // Track scroll
+        // Track scroll - only log if position is WRONG (delta > 5)
         const handleScroll = () => {
             scrollCount++;
             const gbRect = gbRef.current?.getBoundingClientRect();
             const gbTop = gbRect?.top ?? 0;
             const delta = gbTop - safeAreaTop;
             
-            // Log every 5th scroll or if GB moved
-            if (scrollCount % 5 === 0 || Math.abs(delta) > 2 || Math.abs(gbTop - lastGBTop) > 2) {
-                console.log('[GB-DEBUG] scroll:', JSON.stringify({sessionId, scrollCount, gbTop: Math.round(gbTop), expected: safeAreaTop, delta: Math.round(delta), windowScrollY: Math.round(window.scrollY)}));
+            // If delta > 5, fixed positioning is BROKEN - log it
+            if (Math.abs(delta) > 5) {
+                console.log('[GB-DEBUG] FIXED BROKEN:', JSON.stringify({sessionId, scrollCount, gbTop: Math.round(gbTop), expected: safeAreaTop, delta: Math.round(delta), windowScrollY: Math.round(window.scrollY)}));
                 lastGBTop = gbTop;
-            }
-        };
-        
-        // Track touchmove for rubber-band detection
-        const handleTouchMove = () => {
-            const gbRect = gbRef.current?.getBoundingClientRect();
-            const gbTop = gbRect?.top ?? 0;
-            const delta = gbTop - safeAreaTop;
-            
-            if (Math.abs(delta) > 2) {
-                console.log('[GB-DEBUG] touchmove:', JSON.stringify({sessionId, gbTop: Math.round(gbTop), expected: safeAreaTop, delta: Math.round(delta)}));
+            } else if (scrollCount % 20 === 0) {
+                // Periodic "all good" log every 20 scrolls
+                console.log('[GB-DEBUG] fixed OK:', JSON.stringify({scrollCount, gbTop: Math.round(gbTop), expected: safeAreaTop, windowScrollY: Math.round(window.scrollY)}));
             }
         };
         
         window.addEventListener('scroll', handleScroll, { passive: true });
-        window.addEventListener('touchmove', handleTouchMove, { passive: true });
         document.addEventListener('visibilitychange', handleVisibilityChange);
         
         return () => {
             window.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('touchmove', handleTouchMove);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [isIOS, safeAreaTop]);
@@ -163,19 +153,23 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
         </button>
     );
 
+    // Use sticky on iOS (more reliable), fixed on other platforms
+    const positionClass = isIOS ? 'sticky' : 'fixed';
+    
     if (minimal) {
         return (
             <>
-                {/* Safe area background extension - extends blur effect to top of screen */}
+                {/* Safe area background extension - uses same positioning strategy as GB */}
                 {isIOS && safeAreaTop > 0 && (
                     <div 
-                        className="fixed top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                        ref={bgRef}
+                        className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/90 dark:bg-background-secondary/85`}
                         style={{ height: safeAreaTop }}
                     />
                 )}
                 <div 
                     ref={gbRef}
-                    className="fixed left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                    className={`${positionClass} left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/90 dark:bg-background-secondary/85`}
                     style={{ top: safeAreaTop }}
                 >
                  <button 
@@ -196,16 +190,17 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
 
     return (
         <>
-            {/* Safe area background extension - extends blur effect to top of screen */}
+            {/* Safe area background extension - uses same positioning strategy as GB */}
             {isIOS && safeAreaTop > 0 && (
                 <div 
-                    className="fixed top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/50 backdrop-blur-sm"
+                    ref={bgRef}
+                    className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/90 dark:bg-background-secondary/85`}
                     style={{ height: safeAreaTop }}
                 />
             )}
             <div 
                 ref={gbRef}
-                className="fixed left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/70 dark:bg-background-secondary/50 border-b border-border-primary dark:border-border-primary backdrop-blur-sm shadow-md"
+                className={`${positionClass} left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/90 dark:bg-background-secondary/85 border-b border-border-primary dark:border-border-primary shadow-md`}
                 style={{ top: safeAreaTop }}
             >
             <div className="flex items-center gap-2 sm:gap-4">
