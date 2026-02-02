@@ -180,6 +180,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
   const baseTranscriptRef = useRef<string>('');
   const initialFetchInitiated = useRef<boolean>(false);
 
@@ -1599,7 +1600,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     recognitionRef.current = recognition;
   }, [language, bot.id]);
-  
+
   useEffect(() => {
     // This effect is specifically to fetch the initial greeting from the bot.
     // The ref guard prevents this from running more than once (e.g., due to StrictMode).
@@ -2341,7 +2342,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           )}
         </main>
         
-        <footer className="p-4 border-t border-border-primary">
+        <footer ref={footerRef} className="p-4 border-t border-border-primary">
           {isTestMode ? (
             <div className="text-center py-2 text-content-secondary">
               <p className="text-sm">{t('test_mode_input_disabled')}</p>
