@@ -178,6 +178,64 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     };
   }, [language]);
 
+  // Generate a dynamic follow-up message based on conversation context
+  const generateFollowUpMessage = useCallback(async (
+    chatHistory: Message[],
+    scenarioDescription: string,
+    turnNumber: number
+  ): Promise<string> => {
+    const apiBaseUrl = getApiBaseUrl();
+    const session = getSession();
+    if (!session?.token) {
+      throw new Error('Not authenticated');
+    }
+
+    // Build a prompt for generating a contextual follow-up
+    const followUpPrompt = language === 'de' 
+      ? `Basierend auf diesem Gespräch, generiere eine natürliche Folgefrage oder Antwort als Benutzer. 
+         Szenario-Kontext: ${scenarioDescription}
+         Dies ist Nachricht ${turnNumber} in der Konversation.
+         Antworte NUR mit der Benutzernachricht selbst, ohne Erklärungen oder Anführungszeichen.
+         Die Nachricht sollte das Gespräch vertiefen und zum Thema passen.`
+      : `Based on this conversation, generate a natural follow-up question or response as the user.
+         Scenario context: ${scenarioDescription}
+         This is message ${turnNumber} in the conversation.
+         Reply ONLY with the user message itself, no explanations or quotes.
+         The message should deepen the conversation and stay on topic.`;
+
+    const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`,
+        'X-Test-Mode': 'true',
+      },
+      body: JSON.stringify({
+        botId: 'system', // Use a neutral bot for generation
+        userMessage: followUpPrompt,
+        history: chatHistory.map(m => ({
+          ...m,
+          role: m.role === 'bot' ? 'bot' : 'user'
+        })),
+        lang: language,
+        context: '',
+        systemOverride: language === 'de'
+          ? 'Du bist ein Assistent, der realistische Benutzerantworten für Testzwecke generiert. Antworte nur mit der Benutzernachricht.'
+          : 'You are an assistant generating realistic user responses for testing purposes. Reply only with the user message.',
+      }),
+    });
+
+    if (!response.ok) {
+      // Fallback to generic follow-up if generation fails
+      return language === 'de' 
+        ? 'Kannst du mir mehr dazu erzählen?'
+        : 'Can you tell me more about that?';
+    }
+
+    const data = await response.json();
+    return data.text?.trim() || (language === 'de' ? 'Interessant, erzähl weiter.' : 'Interesting, please continue.');
+  }, [language]);
+
   // Run the full test scenario
   const runTest = useCallback(async () => {
     if (!selectedBot || !hasProfileSelection || !selectedScenario) return;
@@ -226,6 +284,58 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
         if (result.telemetry) {
           lastTelemetry = result.telemetry;
+        }
+      }
+
+      // Dynamic continuation: generate follow-up messages until minConversationTurns is reached
+      const minTurns = selectedScenario.minConversationTurns ?? selectedScenario.testMessages.length;
+      const enableDynamic = selectedScenario.enableDynamicContinuation ?? false;
+      let currentTurn = selectedScenario.testMessages.length;
+
+      if (enableDynamic && currentTurn < minTurns) {
+        while (currentTurn < minTurns) {
+          setCurrentMessageIndex(currentTurn);
+          
+          // Generate a contextual follow-up message
+          const followUpText = await generateFollowUpMessage(
+            chatHistory,
+            selectedScenario.description,
+            currentTurn + 1
+          );
+
+          // Add generated user message to history
+          const userMessage: Message = {
+            id: `test-user-dynamic-${currentTurn}`,
+            role: 'user',
+            text: followUpText,
+            timestamp: new Date().toISOString(),
+          };
+          chatHistory.push(userMessage);
+
+          // Run the API call
+          const result = await runTestMessage(followUpText, selectedBot, profile, chatHistory);
+
+          // Add bot response to history
+          const botMessage: Message = {
+            id: `test-bot-dynamic-${currentTurn}`,
+            role: 'bot',
+            text: result.response,
+            timestamp: new Date().toISOString(),
+          };
+          chatHistory.push(botMessage);
+
+          responses.push({
+            userMessage: followUpText,
+            botResponse: result.response,
+            responseTime: result.responseTime,
+            isDynamic: true, // Mark as dynamically generated
+          });
+
+          if (result.telemetry) {
+            lastTelemetry = result.telemetry;
+          }
+
+          currentTurn++;
         }
       }
 
@@ -391,7 +501,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     } finally {
       setIsRunning(false);
     }
-  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t]);
+  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, generateFollowUpMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t, language]);
 
   // Update manual check
   const handleManualCheck = (checkId: string, passed: boolean) => {
@@ -641,21 +751,35 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
   );
 
   // Render running phase
-  const renderRunning = () => (
-    <div className="text-center py-12">
-      <Spinner />
-      <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
-      <p className="text-content-secondary mt-2">
-        {t('test_runner_message_progress', { current: currentMessageIndex + 1, total: selectedScenario?.testMessages.length ?? 0 })}
-      </p>
-      <div className="mt-4 p-4 bg-background-tertiary rounded-lg text-left max-w-md mx-auto">
-        <div className="text-sm text-content-secondary mb-1">{t('test_runner_current_message')}:</div>
-        <div className="text-content-primary">
-          "{selectedScenario?.testMessages[currentMessageIndex]?.text}"
+  const renderRunning = () => {
+    const minTurns = selectedScenario?.minConversationTurns ?? selectedScenario?.testMessages.length ?? 0;
+    const predefinedCount = selectedScenario?.testMessages.length ?? 0;
+    const isDynamicPhase = currentMessageIndex >= predefinedCount;
+    const currentMessage = isDynamicPhase 
+      ? (language === 'de' ? '🤖 Generiere Follow-up...' : '🤖 Generating follow-up...')
+      : `"${selectedScenario?.testMessages[currentMessageIndex]?.text}"`;
+
+    return (
+      <div className="text-center py-12">
+        <Spinner />
+        <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
+        <p className="text-content-secondary mt-2">
+          {t('test_runner_message_progress', { current: currentMessageIndex + 1, total: minTurns })}
+        </p>
+        {isDynamicPhase && (
+          <p className="text-accent-primary text-sm mt-1">
+            {language === 'de' ? '🔄 Dynamische Fortsetzung' : '🔄 Dynamic continuation'}
+          </p>
+        )}
+        <div className="mt-4 p-4 bg-background-tertiary rounded-lg text-left max-w-md mx-auto">
+          <div className="text-sm text-content-secondary mb-1">{t('test_runner_current_message')}:</div>
+          <div className="text-content-primary">
+            {currentMessage}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render analyzing phase (for session category tests)
   const renderAnalyzing = () => (
@@ -682,17 +806,26 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
       <div className="space-y-6">
         {/* Responses */}
         <div>
-          <h4 className="font-semibold mb-2 text-content-primary">📝 {t('test_runner_responses')}</h4>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <h4 className="font-semibold mb-2 text-content-primary">
+            📝 {t('test_runner_responses')} ({testResult.responses.length} {language === 'de' ? 'Austausche' : 'exchanges'})
+          </h4>
+          <div className="space-y-3 max-h-80 overflow-y-auto">
             {testResult.responses.map((r, idx) => (
-              <div key={idx} className="p-3 bg-background-tertiary rounded-lg">
-                <div className="text-sm text-content-secondary mb-1">{t('test_runner_user')}:</div>
+              <div key={idx} className={`p-3 rounded-lg ${r.isDynamic ? 'bg-accent-primary/10 border border-accent-primary/30' : 'bg-background-tertiary'}`}>
+                <div className="flex items-center gap-2 text-sm text-content-secondary mb-1">
+                  <span>{t('test_runner_user')}:</span>
+                  {r.isDynamic && (
+                    <span className="px-1.5 py-0.5 bg-accent-primary/20 text-accent-primary rounded text-xs">
+                      {language === 'de' ? '🤖 Dynamisch' : '🤖 Dynamic'}
+                    </span>
+                  )}
+                </div>
                 <div className="text-content-primary mb-2 text-sm">{r.userMessage}</div>
                 <div className="text-sm text-content-secondary mb-1">
                   Bot <span className="text-xs opacity-70">({r.responseTime}ms)</span>:
                 </div>
                 <div className="text-content-primary text-sm whitespace-pre-wrap">{r.botResponse}</div>
-                {selectedScenario.testMessages[idx]?.expectedBehavior && (
+                {!r.isDynamic && selectedScenario.testMessages[idx]?.expectedBehavior && (
                   <div className="mt-2 p-2 bg-yellow-500/10 rounded text-xs">
                     <span className="font-semibold">{t('test_runner_expected')}:</span> {selectedScenario.testMessages[idx].expectedBehavior}
                   </div>
