@@ -422,7 +422,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
   // ============================================
   {
     id: 'personality_loading',
-    name: '🧠 ' + t('test_personality_loading'),
+    name: '🧑🏼‍💼 ' + t('test_personality_loading'),
     description: t('test_personality_loading_desc'),
     category: 'personality',
     testsFeatures: ['dpc'],
@@ -582,7 +582,7 @@ export const getCategoryIcon = (category: TestCategory): string => {
   const icons: Record<TestCategory, string> = {
     core: '💬',
     session: '📋',
-    personality: '🧠',
+    personality: '🧑🏼‍💼',
     safety: '💚',
     bot: '🤖',
   };
