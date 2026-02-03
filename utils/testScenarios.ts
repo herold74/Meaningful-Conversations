@@ -209,8 +209,18 @@ export const RIEMANN_PROFILES: RiemannProfileBlock[] = [
   },
   {
     id: 'riemann_distanz',
-    name: '🔵 Distanz (Rationalität)',
-    data: { naehe: 30, distanz: 80, dauer: 70, wechsel: 30 }
+    name: '🔴 Distanz (Rationalität)',
+    data: { naehe: 30, distanz: 80, dauer: 40, wechsel: 40 }
+  },
+  {
+    id: 'riemann_dauer',
+    name: '🔵 Dauer (Sicherheit)',
+    data: { naehe: 40, distanz: 40, dauer: 85, wechsel: 20 }
+  },
+  {
+    id: 'riemann_wechsel',
+    name: '🟡 Wechsel (Flexibilität)',
+    data: { naehe: 50, distanz: 35, dauer: 25, wechsel: 85 }
   }
 ];
 
