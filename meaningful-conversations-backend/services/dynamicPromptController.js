@@ -2,7 +2,7 @@
 
 const prisma = require('../prismaClient');
 const crypto = require('crypto');
-const { RIEMANN_STRATEGIES, BIG5_STRATEGIES, SD_STRATEGIES } = require('./dpcStrategies');
+const { RIEMANN_STRATEGIES, BIG5_STRATEGIES, SD_STRATEGIES, CHALLENGE_EXAMPLES } = require('./dpcStrategies');
 
 /**
  * Dynamic Prompt Controller (DPC)
@@ -179,6 +179,7 @@ function analyzeProfile(profile, lang = 'de') {
     completedLenses: profile.completedLenses || [],
     dominant: [],
     weak: [],
+    blindspotTrait: null, // The single weakest trait for challenge examples
     strategies: {},
     sdAnalysis: null, // Spiral Dynamics specific analysis
     narrativeProfile: null // AI-generated personality signature
@@ -229,12 +230,16 @@ function analyzeProfile(profile, lang = 'de') {
 
     analysis.dominant = [...analysis.dominant, ...scores.slice(0, 2).map(s => s.trait)];
     analysis.weak = [...analysis.weak, ...scores.slice(-2).map(s => s.trait)];
+    
+    // Track the single weakest trait for challenge examples
+    const weakestTrait = scores[3].trait;
+    analysis.blindspotTrait = weakestTrait;
 
     // Build strategies (language-specific) - only set if not already set by another analysis
     if (!analysis.strategies.primary) {
       analysis.strategies = {
         primary: RIEMANN_STRATEGIES[scores[0].trait].high[lang] || RIEMANN_STRATEGIES[scores[0].trait].high['de'],
-        blindspot: RIEMANN_STRATEGIES[scores[3].trait].low[lang] || RIEMANN_STRATEGIES[scores[3].trait].low['de']
+        blindspot: RIEMANN_STRATEGIES[weakestTrait].low[lang] || RIEMANN_STRATEGIES[weakestTrait].low['de']
       };
     }
   }
@@ -253,10 +258,15 @@ function analyzeProfile(profile, lang = 'de') {
     if (!analysis.strategies.primary) {
       const primary = scores[0];
       const weakest = scores[scores.length - 1];
+      
+      // Track the single weakest trait for challenge examples (with score level for Big5)
+      const isWeakestLow = weakest.score < 3;
+      analysis.blindspotTrait = weakest.trait;
+      analysis.blindspotLevel = isWeakestLow ? 'low' : 'high';
 
       analysis.strategies = {
         primary: BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low']['de'],
-        blindspot: BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[weakest.trait][weakest.score >= 3 ? 'high' : 'low']['de']
+        blindspot: BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high'][lang] || BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high']['de']
       };
     }
   }
@@ -294,7 +304,19 @@ function generateAdaptivePrompt(analysis, lang = 'de') {
       blindspotHeader: '**Blinder Fleck (Herausforderungszone):**\n',
       weakness: 'Schwäche',
       challenge: 'Challenge-Strategie',
-      important: 'WICHTIG: Wenn die Person Themen anspricht, die diesen Blindspot betreffen, formuliere eine gezielte Herausforderung, um sie aus ihrer Komfortzone zu locken. Sei dabei respektvoll, aber bestimmt.\n\n',
+      exampleChallenges: 'Beispiel-Challenges',
+      // Proactive challenge guidance
+      challengeGuidance: `**Coaching-Balance (Challenge & Support):**
+- Beginne empathisch und baue Vertrauen auf (erste 2-3 Antworten)
+- Ab der 3. Antwort: Integriere sanfte Challenges zu den Blindspots
+- Dosierung: Ca. 1 von 4 Interventionen sollte den Blindspot addressieren
+- Eskalation: Starte mit Reflexionsfragen, steigere zu konkreten Handlungsaufforderungen
+- Sei proaktiv: Warte nicht nur auf Blindspot-Themen, sondern lenke das Gespräch gezielt dorthin
+
+`,
+      important: `WICHTIG: Gutes Coaching bedeutet nicht nur Verständnis, sondern auch gezieltes Herausfordern. Deine Aufgabe ist es, die Person respektvoll aber bestimmt aus ihrer Komfortzone zu locken. Nutze die Beispiel-Challenges als Inspiration.
+
+`,
       footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Dies ist ein experimenteller Modus, der die Coaching-Effektivität maximieren soll.',
       // Narrative profile translations
       signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
@@ -319,7 +341,19 @@ function generateAdaptivePrompt(analysis, lang = 'de') {
       blindspotHeader: '**Blindspot (Challenge Zone):**\n',
       weakness: 'Weakness',
       challenge: 'Challenge Strategy',
-      important: 'IMPORTANT: When the person addresses topics related to this blindspot, formulate a targeted challenge to move them out of their comfort zone. Be respectful but firm.\n\n',
+      exampleChallenges: 'Example Challenges',
+      // Proactive challenge guidance
+      challengeGuidance: `**Coaching Balance (Challenge & Support):**
+- Start empathetically and build trust (first 2-3 responses)
+- From the 3rd response: Integrate gentle challenges addressing blindspots
+- Dosage: Approximately 1 in 4 interventions should address the blindspot
+- Escalation: Start with reflection questions, progress to concrete action prompts
+- Be proactive: Don't just wait for blindspot topics, guide the conversation there
+
+`,
+      important: `IMPORTANT: Good coaching means not just understanding, but also targeted challenging. Your task is to respectfully but firmly move the person out of their comfort zone. Use the example challenges as inspiration.
+
+`,
       footer: 'Adapt ALL your responses to these preferences. This is an experimental mode designed to maximize coaching effectiveness.',
       // Narrative profile translations
       signatureHeader: '**Personality Signature (derived from personal stories):**\n',
@@ -363,11 +397,41 @@ function generateAdaptivePrompt(analysis, lang = 'de') {
     adaptivePrompt += `- ${t.approach}: ${strategies.primary.approach}\n\n`;
   }
 
-  // Add blindspot from quantitative analysis
+  // Add blindspot from quantitative analysis with proactive challenge guidance
   if (strategies.blindspot) {
     adaptivePrompt += t.blindspotHeader;
     adaptivePrompt += `- ${t.weakness}: ${strategies.blindspot.blindspot}\n`;
-    adaptivePrompt += `- ${t.challenge}: ${strategies.blindspot.challenge}\n\n`;
+    adaptivePrompt += `- ${t.challenge}: ${strategies.blindspot.challenge}\n`;
+    
+    // Add concrete example challenges for this blindspot type
+    // Use the tracked blindspotTrait (the single weakest trait)
+    const blindspotType = analysis.blindspotTrait;
+    if (blindspotType) {
+      // Check for Riemann trait examples first (simple key like 'dauer', 'naehe')
+      let examples = CHALLENGE_EXAMPLES[blindspotType]?.[lang] || CHALLENGE_EXAMPLES[blindspotType]?.['de'];
+      
+      // If not found, it might be a Big5 trait - try with level suffix
+      if (!examples) {
+        const big5Traits = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+        if (big5Traits.includes(blindspotType)) {
+          // Use the tracked level (low or high) from analysis
+          const level = analysis.blindspotLevel || 'low';
+          examples = CHALLENGE_EXAMPLES[`${blindspotType}_${level}`]?.[lang] || 
+                     CHALLENGE_EXAMPLES[`${blindspotType}_${level}`]?.['de'];
+        }
+      }
+      
+      if (examples && examples.length > 0) {
+        adaptivePrompt += `- ${t.exampleChallenges}:\n`;
+        examples.forEach(ex => {
+          adaptivePrompt += `  • "${ex}"\n`;
+        });
+      }
+    }
+    adaptivePrompt += '\n';
+    
+    // Add proactive challenge guidance
+    adaptivePrompt += t.challengeGuidance;
     adaptivePrompt += t.important;
   }
 
