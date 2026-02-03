@@ -848,7 +848,7 @@ Your response as coachee (answer the coach's question directly):`;
             contents: userPrompt,
             config: {
                 systemInstruction: systemPrompt,
-                maxOutputTokens: 200,
+                maxOutputTokens: 500, // Increased from 200 - Gemini needs more tokens for complete responses
                 temperature: 0.8, // Slightly creative for natural responses
             },
             context: 'chat'
