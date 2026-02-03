@@ -278,7 +278,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         const generatedText = data.text?.trim();
         
         // Validate the generated text (basic checks)
-        if (generatedText && generatedText.length > 5 && generatedText.length < 500) {
+        if (generatedText && generatedText.length > 5 && generatedText.length < 2000) {
           return generatedText;
         }
       }
