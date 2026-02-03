@@ -200,6 +200,42 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     ]
   }), []);
 
+  // Get personality description for the coachee based on selected profile
+  const getCoacheePersonalityDescription = useCallback((): string => {
+    const parts: string[] = [];
+    
+    if (selectedRiemann) {
+      const r = selectedRiemann;
+      if (r.data.naehe > 60) parts.push(language === 'de' 
+        ? 'Du suchst Nähe und Verbundenheit, brauchst emotionale Unterstützung'
+        : 'You seek closeness and connection, need emotional support');
+      if (r.data.distanz > 60) parts.push(language === 'de'
+        ? 'Du brauchst Abstand und Unabhängigkeit, bist eher analytisch'
+        : 'You need distance and independence, tend to be analytical');
+      if (r.data.dauer > 60) parts.push(language === 'de'
+        ? 'Du brauchst Sicherheit und Struktur, magst keine Überraschungen'
+        : 'You need security and structure, don\'t like surprises');
+      if (r.data.wechsel > 60) parts.push(language === 'de'
+        ? 'Du liebst Veränderung und Abwechslung, bist spontan'
+        : 'You love change and variety, are spontaneous');
+    }
+    
+    if (selectedOCEAN) {
+      const o = selectedOCEAN;
+      if (o.data.neuroticism > 60) parts.push(language === 'de'
+        ? 'Du bist emotional sensibel und reagierst stark auf Stress'
+        : 'You are emotionally sensitive and react strongly to stress');
+      if (o.data.extraversion > 60) parts.push(language === 'de'
+        ? 'Du bist extrovertiert und teilst gerne deine Gedanken'
+        : 'You are extroverted and like to share your thoughts');
+      if (o.data.extraversion < 40) parts.push(language === 'de'
+        ? 'Du bist eher introvertiert und zurückhaltend'
+        : 'You are rather introverted and reserved');
+    }
+    
+    return parts.length > 0 ? parts.join('. ') + '.' : '';
+  }, [selectedRiemann, selectedOCEAN, language]);
+
   // Generate a dynamic follow-up message based on conversation context
   const generateFollowUpMessage = useCallback(async (
     chatHistory: Message[],
@@ -217,9 +253,17 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     const lastBotMessage = [...chatHistory].reverse().find(m => m.role === 'bot')?.text || '';
     const lastUserMessage = [...chatHistory].reverse().find(m => m.role === 'user')?.text || '';
 
+    // Get personality context for the coachee
+    const personalityContext = getCoacheePersonalityDescription();
+    
     // Build a prompt for generating a contextual follow-up
     const followUpPrompt = language === 'de' 
       ? `Du spielst einen COACHEE (Klient) in einem Coaching-Gespräch. Du hast ein Problem und suchst Hilfe.
+
+DEINE PERSÖNLICHKEIT ALS COACHEE:
+${personalityContext || 'Du bist ein durchschnittlicher Mensch mit normalen Sorgen.'}
+
+SZENARIO: ${scenarioDescription}
 
 Der Coach hat gerade gefragt:
 "${lastBotMessage.substring(0, 400)}"
@@ -228,14 +272,19 @@ Du hattest vorher gesagt:
 "${lastUserMessage.substring(0, 200)}"
 
 AUFGABE: Antworte als Coachee auf die Frage des Coaches.
-- Teile deine Gefühle, Sorgen oder Gedanken
+- Antworte passend zu DEINER PERSÖNLICHKEIT (siehe oben)
+- Teile deine Gefühle, Sorgen oder Gedanken authentisch
 - Beantworte die Frage des Coaches aus deiner persönlichen Perspektive
-- Sei verletzlich und authentisch - du bist jemand, der Hilfe sucht
 - 1-2 Sätze, emotional und persönlich
 - NICHT wie ein Coach antworten! Du bist der Klient mit dem Problem.
 
 Deine Antwort als Coachee:`
       : `You are playing a COACHEE (client) in a coaching conversation. You have a problem and are seeking help.
+
+YOUR PERSONALITY AS COACHEE:
+${personalityContext || 'You are an average person with normal worries.'}
+
+SCENARIO: ${scenarioDescription}
 
 The coach just asked:
 "${lastBotMessage.substring(0, 400)}"
@@ -244,9 +293,9 @@ You had previously said:
 "${lastUserMessage.substring(0, 200)}"
 
 TASK: Respond as the coachee to the coach's question.
-- Share your feelings, worries, or thoughts
+- Respond according to YOUR PERSONALITY (see above)
+- Share your feelings, worries, or thoughts authentically
 - Answer the coach's question from your personal perspective
-- Be vulnerable and authentic - you are someone seeking help
 - 1-2 sentences, emotional and personal
 - Do NOT respond like a coach! You are the client with the problem.
 
@@ -299,7 +348,7 @@ Your response as coachee:`;
     const fallbacks = language === 'de' ? fallbackFollowUps.de : fallbackFollowUps.en;
     const fallbackIndex = (turnNumber - 1) % fallbacks.length;
     return fallbacks[fallbackIndex];
-  }, [language, fallbackFollowUps]);
+  }, [language, fallbackFollowUps, getCoacheePersonalityDescription]);
 
   // Run the full test scenario
   const runTest = useCallback(async () => {
