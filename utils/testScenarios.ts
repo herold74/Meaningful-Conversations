@@ -44,6 +44,10 @@ export interface DynamicTestScenario {
   // Test messages to be sent (real API calls!)
   testMessages: TestMessage[];
   
+  // Dynamic conversation continuation
+  minConversationTurns?: number;  // Minimum number of user-bot exchanges (default: testMessages.length)
+  enableDynamicContinuation?: boolean;  // If true, AI generates follow-up messages after predefined ones
+  
   // Automatic validation
   autoChecks: {
     dpcRequired: boolean;
@@ -165,6 +169,7 @@ export interface TestRunResult {
     userMessage: string;
     botResponse: string;
     responseTime: number;
+    isDynamic?: boolean;  // True if this message was dynamically generated
   }[];
   
   // DPC/DPFL telemetry (from backend)
@@ -308,6 +313,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_core_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
     },
@@ -329,6 +336,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_context_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
     },
@@ -357,6 +366,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_session_msg_2_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
       expectSessionUpdates: true, // Auto-check: proposedUpdates.length > 0
@@ -382,6 +393,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_nextsteps_msg_2_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
       expectSessionNextSteps: true, // Auto-check: nextSteps.length > 0
@@ -409,6 +422,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_personality_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
       minDpcLength: 100,
@@ -430,6 +445,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_style_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
       minDpcLength: 200,
@@ -452,6 +469,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_dpfl_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
       // Keywords must match language - German and English variants
@@ -473,6 +492,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_blindspot_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
     },
@@ -498,6 +519,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_comfort_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
       expectComfortCheck: true,
@@ -524,6 +547,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
         expectedBehavior: t('test_interview_msg_1_expected')
       }
     ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
     },
