@@ -178,25 +178,25 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     };
   }, [language]);
 
-  // Fallback follow-up messages for variety when generation fails
+  // Fallback follow-up messages - these should sound like a COACHEE sharing their struggles
   const fallbackFollowUps = useMemo(() => ({
     de: [
-      'Das klingt interessant. Kannst du das genauer erklären?',
-      'Wie meinst du das konkret?',
-      'Was wäre ein nächster Schritt für mich?',
-      'Gibt es da noch andere Aspekte zu beachten?',
-      'Wie kann ich das in meinem Alltag umsetzen?',
-      'Was würdest du mir in dieser Situation empfehlen?',
-      'Kannst du mir ein Beispiel dafür geben?',
+      'Ja, ich glaube es ist vor allem die Menge an verschiedenen Dingen gleichzeitig.',
+      'Das beschäftigt mich schon länger, ehrlich gesagt.',
+      'Ich weiß nicht genau, wo ich anfangen soll. Es fühlt sich alles so überwältigend an.',
+      'Manchmal habe ich das Gefühl, dass ich niemandem gerecht werde - weder mir selbst noch anderen.',
+      'Ich habe schon einiges versucht, aber nichts scheint wirklich zu helfen.',
+      'Das Schwierige ist, dass ich oft nicht nein sagen kann, wenn jemand etwas von mir braucht.',
+      'Ich merke, dass mich das emotional ziemlich mitnimmt.',
     ],
     en: [
-      'That sounds interesting. Can you explain that in more detail?',
-      'What do you mean by that specifically?',
-      'What would be a next step for me?',
-      'Are there other aspects to consider?',
-      'How can I apply this in my daily life?',
-      'What would you recommend in this situation?',
-      'Can you give me an example of that?',
+      'Yes, I think it\'s mainly the amount of different things happening at the same time.',
+      'This has been bothering me for a while, to be honest.',
+      'I don\'t really know where to start. It all feels so overwhelming.',
+      'Sometimes I feel like I\'m not doing justice to anyone - neither myself nor others.',
+      'I\'ve tried several things already, but nothing seems to really help.',
+      'The difficult part is that I often can\'t say no when someone needs something from me.',
+      'I notice that this is taking quite an emotional toll on me.',
     ]
   }), []);
 
@@ -219,40 +219,38 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
     // Build a prompt for generating a contextual follow-up
     const followUpPrompt = language === 'de' 
-      ? `WICHTIG: Du bist NICHT der Coach. Du spielst den BENUTZER in einem laufenden Gespräch.
+      ? `Du spielst einen COACHEE (Klient) in einem Coaching-Gespräch. Du hast ein Problem und suchst Hilfe.
 
-Das Gespräch läuft bereits. Der Coach hat gerade gesagt:
+Der Coach hat gerade gefragt:
 "${lastBotMessage.substring(0, 400)}"
 
-Der Benutzer hatte vorher gesagt:
+Du hattest vorher gesagt:
 "${lastUserMessage.substring(0, 200)}"
 
-Thema: ${scenarioDescription}
+AUFGABE: Antworte als Coachee auf die Frage des Coaches.
+- Teile deine Gefühle, Sorgen oder Gedanken
+- Beantworte die Frage des Coaches aus deiner persönlichen Perspektive
+- Sei verletzlich und authentisch - du bist jemand, der Hilfe sucht
+- 1-2 Sätze, emotional und persönlich
+- NICHT wie ein Coach antworten! Du bist der Klient mit dem Problem.
 
-AUFGABE: Schreibe die nächste Antwort des BENUTZERS (nicht des Coaches!).
-- Reagiere auf das, was der Coach gerade gesagt hat
-- Teile Gedanken, Gefühle oder stelle eine Nachfrage
-- 1-2 Sätze, persönlich und authentisch
-- KEINE Begrüßung, KEIN "Willkommen", das Gespräch läuft bereits!
+Deine Antwort als Coachee:`
+      : `You are playing a COACHEE (client) in a coaching conversation. You have a problem and are seeking help.
 
-Benutzer-Antwort:`
-      : `IMPORTANT: You are NOT the coach. You are playing the USER in an ongoing conversation.
-
-The conversation is already in progress. The coach just said:
+The coach just asked:
 "${lastBotMessage.substring(0, 400)}"
 
-The user had previously said:
+You had previously said:
 "${lastUserMessage.substring(0, 200)}"
 
-Topic: ${scenarioDescription}
+TASK: Respond as the coachee to the coach's question.
+- Share your feelings, worries, or thoughts
+- Answer the coach's question from your personal perspective
+- Be vulnerable and authentic - you are someone seeking help
+- 1-2 sentences, emotional and personal
+- Do NOT respond like a coach! You are the client with the problem.
 
-TASK: Write the USER's next response (not the coach's!).
-- React to what the coach just said
-- Share thoughts, feelings, or ask a follow-up question
-- 1-2 sentences, personal and authentic
-- NO greeting, NO "Welcome", the conversation is already ongoing!
-
-User response:`;
+Your response as coachee:`;
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
