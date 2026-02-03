@@ -325,16 +325,20 @@ VERBOTEN:
 - Nummerierte Listen mit Überschriften wie "1. **Erster Punkt:**"
 - Trennlinien (---) zwischen Abschnitten
 - Ankündigungen wie "Lass mich dir zwei Fragen stellen:" - stelle sie einfach!
+- Ganze Sätze fett markieren: KEINE "**Dein Ziel ist also, Klarheit zu gewinnen**" - nur einzelne Wörter!
+- Bestätigungen vorwegnehmen: NICHT "Verstanden. Dein Ziel ist also..." oder "Ich verstehe. Es geht dir um..."
+- Paraphrasieren ohne Rückfrage: NICHT annehmen, dass du richtig verstanden hast
 
 ERLAUBT:
 - Fettdruck für *einzelne wichtige Wörter* zur Betonung (z.B. "Was *genau* hält dich zurück?")
 - Kursiv für Zitate oder innere Gedanken des Klienten
 - Natürliche Aufzählungen ohne Überschriften
+- Nachfragen zur Bestätigung: "Habe ich das richtig verstanden?" oder "Ist das der Kern?"
 
 STIL:
 Schreibe wie ein echter Mensch in einem Gespräch spricht - fließend, ohne sichtbare Struktur.
-FALSCH: "**Zwei Fragen an dich:** 1. Was... 2. Wie..."
-RICHTIG: "Was genau hält dich davon ab? Und wenn du nur einen kleinen Schritt wagen würdest - wie sähe der aus?"
+FALSCH: "Verstanden. Dein Ziel für heute ist also, **Klarheit darüber zu gewinnen, wie du deine eigene Stimme erkennst**."
+RICHTIG: "Wenn ich dich richtig verstehe, geht es dir weniger um die Entscheidung selbst, sondern darum, *deine* Stimme wiederzufinden. Ist das der Kern?"
 
 `,
       footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT.',
@@ -382,16 +386,20 @@ FORBIDDEN:
 - Numbered lists with headers like "1. **First point:**"
 - Divider lines (---) between sections
 - Announcements like "Let me ask you two questions:" - just ask them!
+- Bold entire sentences: NO "**Your goal is to gain clarity**" - only single words!
+- Presuming confirmation: NOT "I understand. So your goal is..." or "Got it. What you're saying is..."
+- Paraphrasing without checking: Do NOT assume you understood correctly
 
 ALLOWED:
 - Bold for *single important words* for emphasis (e.g., "What *exactly* is holding you back?")
 - Italics for quotes or the client's inner thoughts
 - Natural lists without headers
+- Checking for understanding: "Did I get that right?" or "Is that the core of it?"
 
 STYLE:
 Write like a real person speaks in conversation - flowing, without visible structure.
-WRONG: "**Two questions for you:** 1. What... 2. How..."
-RIGHT: "What exactly is holding you back? And if you took just one small step - what would that look like?"
+WRONG: "I understand. So your goal for today is **to gain clarity about how to recognize your own voice**."
+RIGHT: "If I'm hearing you right, it's less about the decision itself and more about finding *your* voice again. Is that the heart of it?"
 
 `,
       footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL.',
