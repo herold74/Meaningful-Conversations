@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Paint palette icon with classic artist palette shape and thumb hole
+// Paint palette icon matching SF Symbol "paintpalette" style
 export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -12,15 +12,15 @@ export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeLinejoin="round" 
         {...props}
     >
-        {/* Classic palette shape with thumb hole */}
-        <path d="M2 12.5C2 7 6 3 12 3c5.5 0 10 4 10 8.5 0 2.5-1.5 4-3.5 4h-2c-1 0-1.5.7-1.5 1.5 0 .4.1.7.3 1 .2.3.2.6.2 1 0 1.2-1 2-2.5 2C6 21 2 17 2 12.5Z" />
+        {/* Palette body - organic kidney shape */}
+        <path d="M12 21a9 9 0 0 1 0-18c4.97 0 9 3.58 9 8 0 1.06-.47 2.08-1.32 2.83-.84.75-1.99 1.17-3.18 1.17h-2.5a2 2 0 0 0-1 3.75 1.3 1.3 0 0 1-1 2.25" />
         {/* Thumb hole */}
-        <circle cx="16.5" cy="16" r="1.8" />
-        {/* Paint blobs - arranged organically */}
-        <circle cx="7" cy="9" r="1.3" fill="currentColor" />
-        <circle cx="10.5" cy="6.5" r="1.1" fill="currentColor" />
-        <circle cx="14.5" cy="7" r="1.2" fill="currentColor" />
-        <circle cx="7.5" cy="13" r="1" fill="currentColor" />
-        <circle cx="11" cy="11" r="1.1" fill="currentColor" />
+        <circle cx="16.5" cy="17.5" r="1.5" />
+        {/* Paint dots - matching SF Symbol positions */}
+        <circle cx="8" cy="10" r="1" fill="currentColor" />
+        <circle cx="12" cy="7" r="1" fill="currentColor" />
+        <circle cx="16" cy="10" r="1" fill="currentColor" />
+        <circle cx="9" cy="14" r="1" fill="currentColor" />
+        <circle cx="13" cy="12" r="1" fill="currentColor" />
     </svg>
 );
