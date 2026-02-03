@@ -848,13 +848,16 @@ Your response as coachee (answer the coach's question directly):`;
             contents: userPrompt,
             config: {
                 systemInstruction: systemPrompt,
-                maxOutputTokens: 500, // Increased from 200 - Gemini needs more tokens for complete responses
+                maxOutputTokens: 1000, // Increased to ensure complete responses
                 temperature: 0.8, // Slightly creative for natural responses
             },
             context: 'chat'
         });
 
         const generatedText = result.text || '';
+        
+        // Log for debugging truncation issues
+        console.log(`[Coachee Simulation] Response length: ${generatedText.length} chars, finishReason: ${result.rawResponse?.candidates?.[0]?.finishReason || 'unknown'}`);
         const durationMs = Date.now() - startTime;
 
         // Track usage
