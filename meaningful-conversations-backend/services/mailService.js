@@ -246,7 +246,7 @@ const sendPurchaseEmail = async (email, name, code, botId) => {
       </div>
 
       <div style="background: #1b7272; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">Meaningful Conversations | www.manualmode.at</p>
+        <p style="margin: 0;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
         <p style="margin: 5px 0 0 0;">Gerald Herold</p>
       </div>
     </div>
