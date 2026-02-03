@@ -200,9 +200,10 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             )}
             <div 
                 ref={gbRef}
-                className={`${positionClass} left-0 right-0 z-10 flex items-center justify-between gap-2 sm:gap-6 p-3 bg-background-secondary/90 dark:bg-background-secondary/85 border-b border-border-primary dark:border-border-primary shadow-md`}
+                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/90 dark:bg-background-secondary/85 border-b border-border-primary dark:border-border-primary shadow-md`}
                 style={{ top: safeAreaTop }}
             >
+            {/* Left section: burger + level + streak */}
             <div className="flex items-center gap-2 sm:gap-4">
                 {isSubMenuOpen ? (
                     <>
@@ -243,34 +244,37 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     <span className="font-bold text-content-primary">{streak}</span>
                 </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-                {!isSubMenuOpen && !isMenuOpen ? (
-                    <>
-                        <div className="hidden md:flex items-center gap-3 w-64">
-                            <div className="w-full bg-border-primary h-2">
-                                <div className="bg-accent-primary h-2" style={{ width: `${progressPercentage}%` }}></div>
+
+            {/* Center section: XP progress (centered with flex-1 spacers) */}
+            {!isSubMenuOpen && !isMenuOpen && (
+                <>
+                    <div className="flex-1" /> {/* Left spacer */}
+                    <div className="flex flex-col items-center gap-1 mx-4">
+                        <div className="hidden sm:flex items-center gap-3 w-32 md:w-48">
+                            <div className="w-full bg-border-primary h-2 rounded">
+                                <div className="bg-accent-primary h-2 rounded" style={{ width: `${progressPercentage}%` }}></div>
                             </div>
-                            <span className="text-xs font-mono text-content-subtle whitespace-nowrap">{currentLevelXp}/{xpForNextLevel} XP</span>
                         </div>
-                        <div className="block md:hidden text-xs font-mono text-content-subtle">
-                            <span className="whitespace-nowrap">{currentLevelXp}/{xpForNextLevel} XP</span>
-                        </div>
-                        <button 
-                            onClick={onViewAchievements} 
-                            className="p-2 text-content-secondary hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
-                            aria-label="View Achievements"
-                        >
-                            <TrophyIcon className="w-6 h-6"/>
-                        </button>
-                        {themeToggleButton}
-                        {colorThemeToggleButton}
-                    </>
-                ) : (
-                    <div className="flex items-center">
-                        {themeToggleButton}
-                        {colorThemeToggleButton}
+                        <span className="text-xs font-mono text-content-subtle whitespace-nowrap">{currentLevelXp}/{xpForNextLevel} XP</span>
                     </div>
+                    <div className="flex-1" /> {/* Right spacer */}
+                </>
+            )}
+            {(isSubMenuOpen || isMenuOpen) && <div className="flex-1" />}
+
+            {/* Right section: icons */}
+            <div className="flex items-center gap-1 sm:gap-2">
+                {!isSubMenuOpen && !isMenuOpen && (
+                    <button 
+                        onClick={onViewAchievements} 
+                        className="p-2 text-content-secondary hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+                        aria-label="View Achievements"
+                    >
+                        <TrophyIcon className="w-6 h-6"/>
+                    </button>
                 )}
+                {themeToggleButton}
+                {colorThemeToggleButton}
             </div>
         </div>
         </>
