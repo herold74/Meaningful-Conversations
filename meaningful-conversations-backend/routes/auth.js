@@ -153,7 +153,7 @@ router.post('/login', async (req, res) => {
             },
         });
 
-        const { passwordHash, ...userPayload } = user;
+        const { passwordHash, encryptionSalt, ...userPayload } = user;
         const token = jwt.sign({ 
             userId: user.id
         }, JWT_SECRET, { expiresIn: '7d' });
@@ -193,7 +193,7 @@ router.post('/verify-email', async (req, res) => {
             },
         });
 
-        const { passwordHash, ...userPayload } = updatedUser;
+        const { passwordHash, encryptionSalt, ...userPayload } = updatedUser;
         // Automatically log the user in by creating a session token
         const sessionToken = jwt.sign({ 
             userId: updatedUser.id

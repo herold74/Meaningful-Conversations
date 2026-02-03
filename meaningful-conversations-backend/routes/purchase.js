@@ -97,11 +97,15 @@ router.post('/webhook', express.json(), async (req, res) => {
 
   } catch (error) {
     console.error('❌ Webhook processing error:', error);
-    res.status(500).send('Internal error');
+    res.status(500).json({ error: 'Internal server error processing webhook.' });
   }
 });
 
 // Verify PayPal webhook signature
+// ⚠️  SECURITY WARNING: Signature verification is currently DISABLED!
+// This function accepts ALL webhooks without cryptographic verification.
+// Before going live with payments, implement proper verification using:
+// https://developer.paypal.com/api/rest/webhooks/rest/#verify-webhook-signature
 function verifyPayPalSignature(req) {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   const transmissionId = req.headers['paypal-transmission-id'];
@@ -110,21 +114,20 @@ function verifyPayPalSignature(req) {
   const authAlgo = req.headers['paypal-auth-algo'];
   const transmissionSig = req.headers['paypal-transmission-sig'];
   
-  // TODO: Implement proper signature verification using PayPal SDK
-  // For now, accept all webhooks for testing purposes
-  // This is a simplified version - in production, implement full signature verification
-  // See: https://developer.paypal.com/api/rest/webhooks/rest/#verify-webhook-signature
+  // ⚠️  CRITICAL SECURITY TODO: Implement proper signature verification!
+  // Without this, attackers can send fake webhooks to grant premium access.
+  // Implementation required before accepting real payments.
   
   if (!webhookId) {
-    console.warn('⚠️  PAYPAL_WEBHOOK_ID not configured in environment');
+    console.warn('⚠️  PAYPAL_WEBHOOK_ID not configured - webhook verification impossible');
   }
   
   if (!transmissionId) {
     console.warn('⚠️  No PayPal transmission ID in headers (might be a test webhook)');
   }
   
-  console.log('✅ PayPal webhook accepted (validation bypassed for testing)');
-  return true; // TEMPORARILY accept all webhooks for testing
+  console.warn('⚠️  PayPal webhook accepted WITHOUT signature verification (INSECURE)');
+  return true; // TEMPORARILY accept all webhooks - MUST BE FIXED BEFORE PRODUCTION
 }
 
 module.exports = router;
