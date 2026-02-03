@@ -12,12 +12,12 @@ export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeLinejoin="round" 
         {...props}
     >
-        {/* Three overlapping circles in triangular arrangement */}
+        {/* Three overlapping circles in triangular arrangement - sized to fill viewBox */}
         {/* Top circle */}
-        <circle cx="12" cy="8" r="5" />
+        <circle cx="12" cy="7" r="6" />
         {/* Bottom left circle */}
-        <circle cx="8" cy="14" r="5" />
+        <circle cx="7" cy="16" r="6" />
         {/* Bottom right circle */}
-        <circle cx="16" cy="14" r="5" />
+        <circle cx="17" cy="16" r="6" />
     </svg>
 );
