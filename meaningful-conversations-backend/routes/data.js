@@ -88,7 +88,7 @@ router.put('/user/profile', async (req, res) => {
         });
         
         // Return updated user without sensitive fields
-        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        const { passwordHash, ...userResponse } = updatedUser;
         res.json({ message: 'Profile updated successfully', user: userResponse });
         
     } catch (error) {
@@ -118,7 +118,7 @@ router.put('/user/coaching-mode', async (req, res) => {
         });
         
         // Return updated user without sensitive fields
-        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        const { passwordHash, ...userResponse } = updatedUser;
         
         // Parse unlockedCoaches from JSON string
         if (userResponse.unlockedCoaches) {
@@ -163,7 +163,7 @@ router.put('/user/ai-region', async (req, res) => {
         console.log(`🌍 User ${userId} changed AI region preference to: ${aiRegionPreference}`);
         
         // Return updated user without sensitive fields
-        const { passwordHash, encryptionSalt, ...userResponse } = updatedUser;
+        const { passwordHash, ...userResponse } = updatedUser;
         
         // Parse unlockedCoaches from JSON string
         if (userResponse.unlockedCoaches) {
@@ -252,7 +252,7 @@ router.post('/redeem-code', async (req, res) => {
             }),
         ]);
 
-        const { passwordHash, encryptionSalt, ...userPayload } = updatedUser;
+        const { passwordHash, ...userPayload } = updatedUser;
         res.status(200).json({ user: userPayload });
 
     } catch (error) {
