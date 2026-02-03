@@ -236,12 +236,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     return parts.length > 0 ? parts.join('. ') + '.' : '';
   }, [selectedRiemann, selectedOCEAN, language]);
 
-  // Generate a dynamic follow-up message based on conversation context
+  // Generate a dynamic follow-up message using dedicated coachee simulation endpoint
   const generateFollowUpMessage = useCallback(async (
     chatHistory: Message[],
     scenarioDescription: string,
     turnNumber: number,
-    botId: string
+    _botId: string // Not used anymore, kept for API compatibility
   ): Promise<string> => {
     const apiBaseUrl = getApiBaseUrl();
     const session = getSession();
@@ -255,67 +255,21 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
     // Get personality context for the coachee
     const personalityContext = getCoacheePersonalityDescription();
-    
-    // Build a prompt for generating a contextual follow-up
-    const followUpPrompt = language === 'de' 
-      ? `Du spielst einen COACHEE (Klient) in einem Coaching-Gespräch. Du hast ein Problem und suchst Hilfe.
-
-DEINE PERSÖNLICHKEIT ALS COACHEE:
-${personalityContext || 'Du bist ein durchschnittlicher Mensch mit normalen Sorgen.'}
-
-SZENARIO: ${scenarioDescription}
-
-Der Coach hat gerade gefragt:
-"${lastBotMessage.substring(0, 400)}"
-
-Du hattest vorher gesagt:
-"${lastUserMessage.substring(0, 200)}"
-
-AUFGABE: Antworte als Coachee auf die Frage des Coaches.
-- Antworte passend zu DEINER PERSÖNLICHKEIT (siehe oben)
-- Teile deine Gefühle, Sorgen oder Gedanken authentisch
-- Beantworte die Frage des Coaches aus deiner persönlichen Perspektive
-- 1-2 Sätze, emotional und persönlich
-- NICHT wie ein Coach antworten! Du bist der Klient mit dem Problem.
-
-Deine Antwort als Coachee:`
-      : `You are playing a COACHEE (client) in a coaching conversation. You have a problem and are seeking help.
-
-YOUR PERSONALITY AS COACHEE:
-${personalityContext || 'You are an average person with normal worries.'}
-
-SCENARIO: ${scenarioDescription}
-
-The coach just asked:
-"${lastBotMessage.substring(0, 400)}"
-
-You had previously said:
-"${lastUserMessage.substring(0, 200)}"
-
-TASK: Respond as the coachee to the coach's question.
-- Respond according to YOUR PERSONALITY (see above)
-- Share your feelings, worries, or thoughts authentically
-- Answer the coach's question from your personal perspective
-- 1-2 sentences, emotional and personal
-- Do NOT respond like a coach! You are the client with the problem.
-
-Your response as coachee:`;
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
+      // Use dedicated coachee simulation endpoint (no bot personality interference)
+      const response = await fetch(`${apiBaseUrl}/api/gemini/test/simulate-coachee`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.token}`,
-          'X-Test-Mode': 'true',
         },
         body: JSON.stringify({
-          botId: botId, // Use the selected test bot
-          userMessage: followUpPrompt,
-          history: [], // Empty history - the prompt contains the context
+          lastBotMessage: lastBotMessage.substring(0, 500),
+          lastUserMessage: lastUserMessage.substring(0, 300),
+          scenarioDescription,
+          personalityContext: personalityContext || undefined,
           lang: language,
-          context: '',
-          testProfileOverride: null, // No profile override for generation
         }),
       });
 
@@ -323,25 +277,13 @@ Your response as coachee:`;
         const data = await response.json();
         const generatedText = data.text?.trim();
         
-        // Validate the generated text
+        // Validate the generated text (basic checks)
         if (generatedText && generatedText.length > 5 && generatedText.length < 500) {
-          // Reject if it looks like a coach greeting or bot response
-          const lowerText = generatedText.toLowerCase();
-          const isCoachResponse = lowerText.includes('willkommen') || 
-                                  lowerText.includes('welcome') ||
-                                  lowerText.includes('was beschäftigt dich') ||
-                                  lowerText.includes('was führt dich') ||
-                                  lowerText.includes('schön, dass du') ||
-                                  lowerText.includes('lass uns') ||
-                                  lowerText.startsWith('ich verstehe');
-          
-          if (!isCoachResponse) {
-            return generatedText;
-          }
+          return generatedText;
         }
       }
     } catch (err) {
-      console.warn('Follow-up generation failed:', err);
+      console.warn('Coachee simulation failed:', err);
     }
 
     // Fallback to varied follow-up messages
