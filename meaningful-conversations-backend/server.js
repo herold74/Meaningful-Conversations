@@ -211,6 +211,9 @@ async function startServer() {
         };
         app.use(cors(corsOptions));
         
+        // Trust the first proxy (nginx) for correct IP detection in rate limiting
+        app.set('trust proxy', 1);
+        
         app.use(express.json());
 
         // --- API Routes ---
