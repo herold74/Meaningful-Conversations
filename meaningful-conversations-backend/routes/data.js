@@ -252,7 +252,7 @@ router.post('/redeem-code', async (req, res) => {
             }),
         ]);
 
-        const { passwordHash, ...userPayload } = updatedUser;
+        const { passwordHash, encryptionSalt, ...userPayload } = updatedUser;
         res.status(200).json({ user: userPayload });
 
     } catch (error) {
