@@ -1060,6 +1060,51 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     );
   };
 
+  // Export test result as JSON
+  const exportTestResult = useCallback(() => {
+    if (!testResult || !selectedScenario || !selectedBot) return;
+
+    const exportData = {
+      exportVersion: '1.0',
+      exportedAt: new Date().toISOString(),
+      scenario: {
+        id: selectedScenario.id,
+        name: selectedScenario.name,
+        category: selectedScenario.category,
+      },
+      bot: {
+        id: selectedBot.id,
+        name: selectedBot.name,
+      },
+      profile: {
+        type: useMyProfile ? 'user_profile' : 'manual',
+        riemann: selectedRiemann?.id || null,
+        sd: selectedSD?.id || null,
+        ocean: selectedOCEAN?.id || null,
+      },
+      result: {
+        ...testResult,
+        manualCheckResults: Object.entries(manualCheckResults).map(([checkId, passed]) => ({
+          checkId,
+          checkText: selectedScenario.manualChecks[parseInt(checkId.replace('manual_', ''))],
+          passed,
+          notes: manualNotes[checkId] || null,
+        })),
+      },
+      sessionAnalysis: sessionAnalysisResult || null,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `test-${selectedScenario.id}-${selectedBot.id}-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult]);
+
   // Render complete phase
   const renderComplete = () => {
     if (!testResult || !selectedScenario) return null;
@@ -1097,7 +1142,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           </div>
         </div>
 
-        <div className="mt-6 flex gap-3 justify-center">
+        <div className="mt-6 flex gap-3 justify-center flex-wrap">
+          <button
+            onClick={exportTestResult}
+            className="py-2 px-6 bg-green-600 text-white rounded-lg
+                       hover:bg-green-700 transition-colors flex items-center gap-2"
+          >
+            📥 {language === 'de' ? 'Ergebnis exportieren' : 'Export Result'}
+          </button>
           <button
             onClick={() => {
               setPhase('setup');
