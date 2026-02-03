@@ -178,11 +178,34 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     };
   }, [language]);
 
+  // Fallback follow-up messages for variety when generation fails
+  const fallbackFollowUps = useMemo(() => ({
+    de: [
+      'Das klingt interessant. Kannst du das genauer erklären?',
+      'Wie meinst du das konkret?',
+      'Was wäre ein nächster Schritt für mich?',
+      'Gibt es da noch andere Aspekte zu beachten?',
+      'Wie kann ich das in meinem Alltag umsetzen?',
+      'Was würdest du mir in dieser Situation empfehlen?',
+      'Kannst du mir ein Beispiel dafür geben?',
+    ],
+    en: [
+      'That sounds interesting. Can you explain that in more detail?',
+      'What do you mean by that specifically?',
+      'What would be a next step for me?',
+      'Are there other aspects to consider?',
+      'How can I apply this in my daily life?',
+      'What would you recommend in this situation?',
+      'Can you give me an example of that?',
+    ]
+  }), []);
+
   // Generate a dynamic follow-up message based on conversation context
   const generateFollowUpMessage = useCallback(async (
     chatHistory: Message[],
     scenarioDescription: string,
-    turnNumber: number
+    turnNumber: number,
+    botId: string
   ): Promise<string> => {
     const apiBaseUrl = getApiBaseUrl();
     const session = getSession();
@@ -190,51 +213,73 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
       throw new Error('Not authenticated');
     }
 
+    // Get last bot response for context
+    const lastBotMessage = [...chatHistory].reverse().find(m => m.role === 'bot')?.text || '';
+    const lastUserMessage = [...chatHistory].reverse().find(m => m.role === 'user')?.text || '';
+
     // Build a prompt for generating a contextual follow-up
     const followUpPrompt = language === 'de' 
-      ? `Basierend auf diesem Gespräch, generiere eine natürliche Folgefrage oder Antwort als Benutzer. 
-         Szenario-Kontext: ${scenarioDescription}
-         Dies ist Nachricht ${turnNumber} in der Konversation.
-         Antworte NUR mit der Benutzernachricht selbst, ohne Erklärungen oder Anführungszeichen.
-         Die Nachricht sollte das Gespräch vertiefen und zum Thema passen.`
-      : `Based on this conversation, generate a natural follow-up question or response as the user.
-         Scenario context: ${scenarioDescription}
-         This is message ${turnNumber} in the conversation.
-         Reply ONLY with the user message itself, no explanations or quotes.
-         The message should deepen the conversation and stay on topic.`;
+      ? `Du simulierst einen Benutzer in einem Coaching-Gespräch.
+         
+Letzte Bot-Antwort: "${lastBotMessage.substring(0, 500)}"
+Letzte User-Nachricht: "${lastUserMessage.substring(0, 200)}"
+Szenario: ${scenarioDescription}
 
-    const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.token}`,
-        'X-Test-Mode': 'true',
-      },
-      body: JSON.stringify({
-        botId: 'system', // Use a neutral bot for generation
-        userMessage: followUpPrompt,
-        history: chatHistory.map(m => ({
-          ...m,
-          role: m.role === 'bot' ? 'bot' : 'user'
-        })),
-        lang: language,
-        context: '',
-        systemOverride: language === 'de'
-          ? 'Du bist ein Assistent, der realistische Benutzerantworten für Testzwecke generiert. Antworte nur mit der Benutzernachricht.'
-          : 'You are an assistant generating realistic user responses for testing purposes. Reply only with the user message.',
-      }),
-    });
+Generiere eine natürliche, authentische Antwort als Benutzer (1-2 Sätze).
+Die Antwort sollte:
+- Auf die Bot-Antwort eingehen
+- Das Gespräch vertiefen
+- Persönlich und emotional authentisch sein
 
-    if (!response.ok) {
-      // Fallback to generic follow-up if generation fails
-      return language === 'de' 
-        ? 'Kannst du mir mehr dazu erzählen?'
-        : 'Can you tell me more about that?';
+Antworte NUR mit der Benutzernachricht, ohne Anführungszeichen oder Erklärungen.`
+      : `You are simulating a user in a coaching conversation.
+         
+Last bot response: "${lastBotMessage.substring(0, 500)}"
+Last user message: "${lastUserMessage.substring(0, 200)}"
+Scenario: ${scenarioDescription}
+
+Generate a natural, authentic response as the user (1-2 sentences).
+The response should:
+- Respond to the bot's answer
+- Deepen the conversation
+- Be personally and emotionally authentic
+
+Reply ONLY with the user message, no quotes or explanations.`;
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`,
+          'X-Test-Mode': 'true',
+        },
+        body: JSON.stringify({
+          botId: botId, // Use the selected test bot
+          userMessage: followUpPrompt,
+          history: [], // Empty history - the prompt contains the context
+          lang: language,
+          context: '',
+          testProfileOverride: null, // No profile override for generation
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const generatedText = data.text?.trim();
+        if (generatedText && generatedText.length > 5 && generatedText.length < 500) {
+          return generatedText;
+        }
+      }
+    } catch (err) {
+      console.warn('Follow-up generation failed:', err);
     }
 
-    const data = await response.json();
-    return data.text?.trim() || (language === 'de' ? 'Interessant, erzähl weiter.' : 'Interesting, please continue.');
-  }, [language]);
+    // Fallback to varied follow-up messages
+    const fallbacks = language === 'de' ? fallbackFollowUps.de : fallbackFollowUps.en;
+    const fallbackIndex = (turnNumber - 1) % fallbacks.length;
+    return fallbacks[fallbackIndex];
+  }, [language, fallbackFollowUps]);
 
   // Run the full test scenario
   const runTest = useCallback(async () => {
@@ -251,6 +296,18 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     let lastTelemetry: any = null;
 
     try {
+      // Add initial bot greeting to simulate realistic conversation start
+      // In real conversations, the bot greets first, then the user responds
+      const initialGreeting: Message = {
+        id: 'test-bot-greeting',
+        role: 'bot',
+        text: language === 'de' 
+          ? 'Hallo! Schön, dass du da bist. Was beschäftigt dich heute?'
+          : 'Hello! Nice to see you. What\'s on your mind today?',
+        timestamp: new Date().toISOString(),
+      };
+      chatHistory.push(initialGreeting);
+
       for (let i = 0; i < selectedScenario.testMessages.length; i++) {
         setCurrentMessageIndex(i);
         const testMsg = selectedScenario.testMessages[i];
@@ -300,7 +357,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           const followUpText = await generateFollowUpMessage(
             chatHistory,
             selectedScenario.description,
-            currentTurn + 1
+            currentTurn + 1,
+            selectedBot.id
           );
 
           // Add generated user message to history
