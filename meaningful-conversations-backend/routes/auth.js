@@ -4,6 +4,12 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const prisma = require('../prismaClient.js');
 const { sendConfirmationEmail, sendPasswordResetEmail } = require('../services/mailService.js');
+const { 
+    loginLimiter, 
+    registerLimiter, 
+    forgotPasswordLimiter, 
+    verifyEmailLimiter 
+} = require('../middleware/rateLimiter.js');
 
 const router = express.Router();
 
@@ -28,7 +34,7 @@ function serializeGamificationState(state) {
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
     const { email, password, firstName, lastName, newsletterConsent, lang } = req.body;
     const lowerCaseEmail = email.toLowerCase();
 
@@ -103,7 +109,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     const { email, password } = req.body;
     const lowerCaseEmail = email.toLowerCase();
     
@@ -167,7 +173,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/verify-email
-router.post('/verify-email', async (req, res) => {
+router.post('/verify-email', verifyEmailLimiter, async (req, res) => {
     const { token } = req.body;
     try {
         // First, find the user by the token alone. This assumes the token is unique.
@@ -208,7 +214,7 @@ router.post('/verify-email', async (req, res) => {
 });
 
 // POST /api/auth/forgot-password
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
     const { email, lang } = req.body;
     const lowerCaseEmail = email.toLowerCase();
     
