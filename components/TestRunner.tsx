@@ -219,32 +219,40 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
     // Build a prompt for generating a contextual follow-up
     const followUpPrompt = language === 'de' 
-      ? `Du simulierst einen Benutzer in einem Coaching-Gespräch.
-         
-Letzte Bot-Antwort: "${lastBotMessage.substring(0, 500)}"
-Letzte User-Nachricht: "${lastUserMessage.substring(0, 200)}"
-Szenario: ${scenarioDescription}
+      ? `WICHTIG: Du bist NICHT der Coach. Du spielst den BENUTZER in einem laufenden Gespräch.
 
-Generiere eine natürliche, authentische Antwort als Benutzer (1-2 Sätze).
-Die Antwort sollte:
-- Auf die Bot-Antwort eingehen
-- Das Gespräch vertiefen
-- Persönlich und emotional authentisch sein
+Das Gespräch läuft bereits. Der Coach hat gerade gesagt:
+"${lastBotMessage.substring(0, 400)}"
 
-Antworte NUR mit der Benutzernachricht, ohne Anführungszeichen oder Erklärungen.`
-      : `You are simulating a user in a coaching conversation.
-         
-Last bot response: "${lastBotMessage.substring(0, 500)}"
-Last user message: "${lastUserMessage.substring(0, 200)}"
-Scenario: ${scenarioDescription}
+Der Benutzer hatte vorher gesagt:
+"${lastUserMessage.substring(0, 200)}"
 
-Generate a natural, authentic response as the user (1-2 sentences).
-The response should:
-- Respond to the bot's answer
-- Deepen the conversation
-- Be personally and emotionally authentic
+Thema: ${scenarioDescription}
 
-Reply ONLY with the user message, no quotes or explanations.`;
+AUFGABE: Schreibe die nächste Antwort des BENUTZERS (nicht des Coaches!).
+- Reagiere auf das, was der Coach gerade gesagt hat
+- Teile Gedanken, Gefühle oder stelle eine Nachfrage
+- 1-2 Sätze, persönlich und authentisch
+- KEINE Begrüßung, KEIN "Willkommen", das Gespräch läuft bereits!
+
+Benutzer-Antwort:`
+      : `IMPORTANT: You are NOT the coach. You are playing the USER in an ongoing conversation.
+
+The conversation is already in progress. The coach just said:
+"${lastBotMessage.substring(0, 400)}"
+
+The user had previously said:
+"${lastUserMessage.substring(0, 200)}"
+
+Topic: ${scenarioDescription}
+
+TASK: Write the USER's next response (not the coach's!).
+- React to what the coach just said
+- Share thoughts, feelings, or ask a follow-up question
+- 1-2 sentences, personal and authentic
+- NO greeting, NO "Welcome", the conversation is already ongoing!
+
+User response:`;
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
@@ -267,8 +275,22 @@ Reply ONLY with the user message, no quotes or explanations.`;
       if (response.ok) {
         const data = await response.json();
         const generatedText = data.text?.trim();
+        
+        // Validate the generated text
         if (generatedText && generatedText.length > 5 && generatedText.length < 500) {
-          return generatedText;
+          // Reject if it looks like a coach greeting or bot response
+          const lowerText = generatedText.toLowerCase();
+          const isCoachResponse = lowerText.includes('willkommen') || 
+                                  lowerText.includes('welcome') ||
+                                  lowerText.includes('was beschäftigt dich') ||
+                                  lowerText.includes('was führt dich') ||
+                                  lowerText.includes('schön, dass du') ||
+                                  lowerText.includes('lass uns') ||
+                                  lowerText.startsWith('ich verstehe');
+          
+          if (!isCoachResponse) {
+            return generatedText;
+          }
         }
       }
     } catch (err) {
