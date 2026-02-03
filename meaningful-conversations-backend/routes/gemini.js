@@ -843,18 +843,18 @@ ${lastUserMessage ? `You had previously said:\n"${lastUserMessage}"\n` : ''}
 Your response as coachee (answer the coach's question directly):`;
 
         // Use Gemini directly for coachee simulation (no bot personality)
-        const modelName = 'gemini-2.5-flash';
         const result = await aiProviderService.generateContent({
-            modelName,
-            systemInstruction: systemPrompt,
-            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            generationConfig: {
+            model: 'gemini-2.5-flash',
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemPrompt,
                 maxOutputTokens: 200,
                 temperature: 0.8, // Slightly creative for natural responses
-            }
+            },
+            context: 'chat'
         });
 
-        const generatedText = result?.response?.text?.() || result?.text || '';
+        const generatedText = result.text || '';
         const durationMs = Date.now() - startTime;
 
         // Track usage
@@ -862,8 +862,8 @@ Your response as coachee (answer the coach's question directly):`;
             userId,
             endpoint: '/api/gemini/test/simulate-coachee',
             botId: 'test-coachee-simulator',
-            inputTokens: result?.response?.usageMetadata?.promptTokenCount || 0,
-            outputTokens: result?.response?.usageMetadata?.candidatesTokenCount || 0,
+            inputTokens: result.usage?.inputTokens || 0,
+            outputTokens: result.usage?.outputTokens || 0,
             durationMs,
             success: true,
         });
