@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Palette icon matching SF Symbol "paintpalette" style
+// Paint palette icon with classic artist palette shape and thumb hole
 export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -12,11 +12,15 @@ export const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeLinejoin="round" 
         {...props}
     >
-        {/* Paint palette shape */}
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2Z" />
-        {/* Color dots */}
-        <circle cx="7.5" cy="10.5" r="1.5" fill="currentColor" />
-        <circle cx="12" cy="7.5" r="1.5" fill="currentColor" />
-        <circle cx="16.5" cy="10.5" r="1.5" fill="currentColor" />
+        {/* Classic palette shape with thumb hole */}
+        <path d="M2 12.5C2 7 6 3 12 3c5.5 0 10 4 10 8.5 0 2.5-1.5 4-3.5 4h-2c-1 0-1.5.7-1.5 1.5 0 .4.1.7.3 1 .2.3.2.6.2 1 0 1.2-1 2-2.5 2C6 21 2 17 2 12.5Z" />
+        {/* Thumb hole */}
+        <circle cx="16.5" cy="16" r="1.8" />
+        {/* Paint blobs - arranged organically */}
+        <circle cx="7" cy="9" r="1.3" fill="currentColor" />
+        <circle cx="10.5" cy="6.5" r="1.1" fill="currentColor" />
+        <circle cx="14.5" cy="7" r="1.2" fill="currentColor" />
+        <circle cx="7.5" cy="13" r="1" fill="currentColor" />
+        <circle cx="11" cy="11" r="1.1" fill="currentColor" />
     </svg>
 );
