@@ -329,7 +329,7 @@
   "profile_success": "Profil erfolgreich aktualisiert!",
   "profile_error": "Fehler beim Aktualisieren des Profils.",
 
-  "user_guide_title": "Benutzerhandbuch",
+  "user_guide_title": "Benutzer-Handbuch",
   "user_guide_attention_title": "Achtung: Datensicherheit",
   "user_guide_attention_guest": "<strong>Gastnutzer:</strong> Ihr Fortschritt wird nur gespeichert, wenn Sie Ihre <strong>Lebenskontext-Datei</strong> am Ende jeder Sitzungsüberprüfung manuell <strong>herunterladen</strong>. Wenn Sie den Browser ohne Herunterladen schließen, geht Ihr Fortschritt verloren.",
   "user_guide_attention_registered": "<strong>Registrierte Benutzer:</strong> Ihre Daten sind Ende-zu-Ende-verschlüsselt. Wenn Sie Ihr <strong>Passwort vergessen</strong>, können Ihre Daten nicht wiederhergestellt werden und sind dauerhaft verloren. Wir empfehlen, regelmäßig Backups durch Herunterladen Ihrer Datei zu erstellen.",
