@@ -121,8 +121,8 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
   const center = size / 2;
   const maxRadius = (size / 2) - 55; // Balanced padding for labels
   
-  // Dimensions in order: Beständigkeit (top), Nähe (right), Spontanität (bottom), Distanz (left)
-  const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
+  // Dimensions in order: Distanz (top), Spontanität (right), Nähe (bottom), Beständigkeit (left)
+  const dimensions = ['distanz', 'wechsel', 'naehe', 'dauer'];
   const dimensionLabels: Record<string, string> = {
     dauer: t('riemann_dimension_dauer') || 'Beständigkeit',
     naehe: t('riemann_dimension_naehe') || 'Nähe', 
