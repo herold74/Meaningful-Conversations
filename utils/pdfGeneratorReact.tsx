@@ -601,10 +601,11 @@ const RiemannRadar = ({ data, language }: {
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
   language: 'de' | 'en';
 }) => {
-  const size = 170; // Increased from 150
+  const size = 170;
   const center = size / 2;
-  const maxRadius = (size / 2) - 20;
-  const dimensions = ['dauer', 'naehe', 'wechsel', 'distanz'];
+  const maxRadius = (size / 2) - 30; // Reduced to make room for labels
+  // Order: Top=Distanz, Right=Wechsel(Spontanität), Bottom=Nähe, Left=Dauer(Beständigkeit)
+  const dimensions = ['distanz', 'wechsel', 'naehe', 'dauer'];
   
   const allValues = [
     ...Object.values(data.beruf),
@@ -639,8 +640,16 @@ const RiemannRadar = ({ data, language }: {
   ];
   
   const dimLabels = language === 'de'
-    ? { dauer: 'Beständigkeit', naehe: 'Nähe', wechsel: 'Spontanität', distanz: 'Distanz' }
-    : { dauer: 'Duration', naehe: 'Proximity', wechsel: 'Change', distanz: 'Distance' };
+    ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
+    : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
+  
+  // Label positions (outside the radar)
+  const labelPositions = [
+    { x: center, y: 8, anchor: 'middle' },      // Top (Distanz)
+    { x: size - 5, y: center, anchor: 'end' },  // Right (Wechsel)
+    { x: center, y: size - 3, anchor: 'middle' }, // Bottom (Nähe)
+    { x: 5, y: center, anchor: 'start' },       // Left (Dauer)
+  ];
   
   // Grid circles
   const gridLevels = [];
@@ -713,6 +722,23 @@ const RiemannRadar = ({ data, language }: {
             />
           );
         });
+      })}
+      
+      {/* Dimension labels */}
+      {dimensions.map((dim, i) => {
+        const pos = labelPositions[i];
+        return (
+          <G key={`label-${dim}`}>
+            <Text
+              x={pos.x}
+              y={pos.y}
+              textAnchor={pos.anchor as 'start' | 'middle' | 'end'}
+              style={{ fontSize: 8, fontWeight: 'bold', fill: colors.gray700 }}
+            >
+              {dimLabels[dim as keyof typeof dimLabels]}
+            </Text>
+          </G>
+        );
       })}
     </Svg>
   );
