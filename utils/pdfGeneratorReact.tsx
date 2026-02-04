@@ -204,50 +204,50 @@ const styles = StyleSheet.create({
   },
   // Section headers
   sectionHeader: {
-    fontSize: 9, // Increased from 8
+    fontSize: 8,
     fontWeight: 'bold',
     color: colors.gray500,
-    marginBottom: 6,
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  // Bars
+  // Bars (compact to fit on one page)
   barContainer: {
-    marginBottom: 6,
+    marginBottom: 4,
     flexDirection: 'row',
     alignItems: 'center',
   },
   barLabel: {
-    width: 80, // Increased from 75
+    width: 70,
     flexDirection: 'row',
     alignItems: 'center',
   },
   barDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 4,
   },
   barName: {
-    fontSize: 10, // Increased from 9
+    fontSize: 8,
     color: colors.gray700,
   },
   barTrack: {
     flex: 1,
-    height: 18, // Increased from 16
+    height: 14,
     backgroundColor: colors.gray200,
-    borderRadius: 9,
+    borderRadius: 7,
     overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    borderRadius: 9,
+    borderRadius: 7,
     justifyContent: 'center',
     alignItems: 'flex-end',
-    paddingRight: 6,
+    paddingRight: 4,
   },
   barValue: {
-    fontSize: 10, // Increased from 9
+    fontSize: 8,
     fontWeight: 'bold',
     color: colors.white,
   },
@@ -923,7 +923,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         {hasSD && result.spiralDynamics && (
           <View style={[styles.box, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
-            <View style={{ flexDirection: 'row', gap: 20 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.sectionHeader}>{t.selfOriented}</Text>
                 {['yellow', 'orange', 'red', 'beige'].map((level) => {
