@@ -113,7 +113,11 @@ struct NativeGamificationBarState {
 }
 
 final class NativeGamificationBarView: UIView {
-    private let backgroundView = UIView()
+    private let blurView: UIVisualEffectView = {
+        let blur = UIBlurEffect(style: .systemUltraThinMaterial)
+        return UIVisualEffectView(effect: blur)
+    }()
+    private let tintOverlay = UIView()  // Colored overlay on top of blur
     private let contentStack = UIStackView()
     private let leftStack = UIStackView()
     private let centerStack = UIStackView()
@@ -159,9 +163,13 @@ final class NativeGamificationBarView: UIView {
     private func setupView() {
         backgroundColor = .clear
         
-        backgroundView.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.9)
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(backgroundView)
+        // Blur effect background
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(blurView)
+        
+        // Tinted overlay on top of blur
+        tintOverlay.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(tintOverlay)
         
         contentStack.axis = .horizontal
         contentStack.alignment = .center
@@ -250,10 +258,15 @@ final class NativeGamificationBarView: UIView {
         addSubview(contentStack)
         
         NSLayoutConstraint.activate([
-            backgroundView.topAnchor.constraint(equalTo: topAnchor),
-            backgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            blurView.topAnchor.constraint(equalTo: topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            tintOverlay.topAnchor.constraint(equalTo: topAnchor),
+            tintOverlay.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tintOverlay.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tintOverlay.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
         
         contentLeadingConstraint = contentStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12)
@@ -312,7 +325,7 @@ final class NativeGamificationBarView: UIView {
         progressView.progress = state.progress
 
         let palette = themePalette(for: state.colorTheme, isDarkMode: state.isDarkMode)
-        backgroundView.backgroundColor = palette.accent.withAlphaComponent(palette.backgroundAlpha)
+        tintOverlay.backgroundColor = palette.accent.withAlphaComponent(palette.backgroundAlpha)
         progressView.progressTintColor = palette.accent
         progressView.trackTintColor = palette.secondaryText.withAlphaComponent(palette.trackAlpha)
         levelLabel.textColor = palette.primaryText
