@@ -120,7 +120,13 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         text={t('menu_user_guide')}
                         customText={
                             !isLandscape && (t('menu_user_guide') || '').toLowerCase().includes('benutzerhandbuch')
-                                ? 'Benutzer­handbuch'  // Soft hyphen (­) allows wrapping without visible hyphen
+                                ? (
+                                    <span className="inline-block">
+                                        <span className="inline sm:inline">Benutzer-</span>
+                                        <wbr />
+                                        <span className="inline sm:inline">handbuch</span>
+                                    </span>
+                                )
                                 : undefined
                         }
                         onClick={() => onNavigate('userGuide')}
