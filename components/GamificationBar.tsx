@@ -163,13 +163,13 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 {isIOS && safeAreaTop > 0 && (
                     <div 
                         ref={bgRef}
-                        className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/90 dark:bg-background-secondary/85`}
+                        className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm`}
                         style={{ height: safeAreaTop }}
                     />
                 )}
                 <div 
                     ref={gbRef}
-                    className={`${positionClass} left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/90 dark:bg-background-secondary/85`}
+                    className={`${positionClass} left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm`}
                     style={{ top: safeAreaTop }}
                 >
                  <button 
@@ -194,13 +194,13 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             {isIOS && safeAreaTop > 0 && (
                 <div 
                     ref={bgRef}
-                    className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/90 dark:bg-background-secondary/85`}
+                    className={`${positionClass} top-0 left-0 right-0 z-10 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm`}
                     style={{ height: safeAreaTop }}
                 />
             )}
             <div 
                 ref={gbRef}
-                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/90 dark:bg-background-secondary/85 border-b border-border-primary dark:border-border-primary shadow-md`}
+                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm border-b border-border-primary dark:border-border-primary shadow-md`}
                 style={{ top: safeAreaTop }}
             >
             {/* Left section: burger + level + streak */}

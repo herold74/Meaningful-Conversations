@@ -1033,7 +1033,7 @@
   "lens_ocean_name": "What Defines You",
   "lens_ocean_description": "Recognize your stable personality traits and typical behavioral patterns.",
 
-  "survey_sd_title": "Spiral Dynamics - What Drives You",
+  "survey_sd_title": "What Drives You",
   "survey_sd_intro": "When answering these questions, think about your current life challenges. How do you handle difficult situations? What drives you when it matters most?",
   "survey_sd_context_hint": "Rate each statement on a scale from 1 (strongly disagree) to 5 (strongly agree).",
   "survey_sd_progress": "Question {{current}} of {{total}}",
