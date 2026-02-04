@@ -361,9 +361,9 @@ final class NativeGamificationBarView: UIView {
         xpLabel.isHidden = hideInfo
         progressView.isHidden = hideInfo
         
-        // In minimal mode, hide spacers and adjust stack widths
+        // In minimal mode: hide leftSpacer and centerStack, but KEEP rightSpacer to push icons right
         leftSpacer.isHidden = hideInfo
-        rightSpacer.isHidden = hideInfo
+        // rightSpacer stays visible to act as flexible space between menu and icons
         
         // Adjust leftStack width - smaller in minimal mode (just menu button)
         leftStackWidthConstraint?.constant = hideInfo ? 44 : 160
