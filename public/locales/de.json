@@ -1032,7 +1032,7 @@
   "lens_ocean_name": "Was dich ausmacht",
   "lens_ocean_description": "Erkenne deine stabilen Persönlichkeitszüge und typischen Verhaltensweisen.",
 
-  "survey_sd_title": "Spiral Dynamics - Was dich antreibt",
+  "survey_sd_title": "Was dich antreibt",
   "survey_sd_intro": "Denke bei den folgenden Fragen an deine aktuellen Herausforderungen im Leben. Wie gehst du mit schwierigen Situationen um? Was treibt dich an, wenn es darauf ankommt?",
   "survey_sd_context_hint": "Bewerte jede Aussage auf einer Skala von 1 (trifft gar nicht zu) bis 5 (trifft voll zu).",
   "survey_sd_progress": "Frage {{current}} von {{total}}",
