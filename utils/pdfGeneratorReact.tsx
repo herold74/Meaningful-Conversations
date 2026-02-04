@@ -1,6 +1,9 @@
 import React from 'react';
 import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line, Polygon, Rect, G, Path } from '@react-pdf/renderer';
 import { SurveyResult } from '../components/PersonalitySurvey';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 // ============================================================================
 // STYLES
@@ -1068,19 +1071,40 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
 export async function generatePDF(result: SurveyResult, filename: string, language: 'de' | 'en' = 'de'): Promise<void> {
   try {
     const blob = await pdf(<PersonalityPdfDocument result={result} language={language} />).toBlob();
-    const url = URL.createObjectURL(blob);
     
-    // Detect iOS (including Capacitor WKWebView)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // Check if running in Capacitor native app
+    const isNative = Capacitor.isNativePlatform();
     
-    if (isIOS) {
-      // On iOS, open PDF in new tab - download doesn't work programmatically
-      window.open(url, '_blank');
-      // Don't revoke URL immediately since the new tab needs it
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    if (isNative) {
+      // Convert blob to base64 for native handling
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      const base64Data = await base64Promise;
+      const fullFilename = `${filename}.pdf`;
+      
+      // Write file to cache directory
+      const writeResult = await Filesystem.writeFile({
+        path: fullFilename,
+        data: base64Data,
+        directory: Directory.Cache,
+      });
+      
+      // Share the file using native share sheet
+      await Share.share({
+        title: fullFilename,
+        url: writeResult.uri,
+      });
     } else {
-      // Standard download for other platforms
+      // Standard download for web browsers
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `${filename}.pdf`;
