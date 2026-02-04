@@ -346,12 +346,19 @@ final class NativeGamificationBarView: UIView {
     }
     
     private func updateVisibilityForMode() {
-        centerStack.isHidden = isMinimal
-        achievementsButton.isHidden = false
-        levelLabel.isHidden = isMinimal
-        streakLabel.isHidden = isMinimal
-        xpLabel.isHidden = isMinimal
-        progressView.isHidden = isMinimal
+        // In minimal mode, hide level/streak/XP info, show only menu and action buttons
+        let hideInfo = isMinimal
+        centerStack.isHidden = hideInfo
+        levelLabel.isHidden = hideInfo
+        streakLabel.isHidden = hideInfo
+        xpLabel.isHidden = hideInfo
+        progressView.isHidden = hideInfo
+        
+        // Force layout update
+        leftStack.setNeedsLayout()
+        contentStack.setNeedsLayout()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
 
     private struct ThemePalette {
