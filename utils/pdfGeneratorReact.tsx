@@ -1068,16 +1068,27 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
 export async function generatePDF(result: SurveyResult, filename: string, language: 'de' | 'en' = 'de'): Promise<void> {
   try {
     const blob = await pdf(<PersonalityPdfDocument result={result} language={language} />).toBlob();
-    
-    // Create download link
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${filename}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    
+    // Detect iOS (including Capacitor WKWebView)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      // On iOS, open PDF in new tab - download doesn't work programmatically
+      window.open(url, '_blank');
+      // Don't revoke URL immediately since the new tab needs it
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } else {
+      // Standard download for other platforms
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   } catch (error) {
     console.error('PDF generation error:', error);
     throw new Error('Failed to generate PDF');
