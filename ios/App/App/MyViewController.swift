@@ -151,6 +151,7 @@ final class NativeGamificationBarView: UIView {
     private var rightStackWidthConstraint: NSLayoutConstraint?
     private var centerStackWidthConstraint: NSLayoutConstraint?
     private var leftStackWidthConstraint: NSLayoutConstraint?
+    private var spacerEqualWidthConstraint: NSLayoutConstraint?
     private var barLeadingConstraint: NSLayoutConstraint?
     private var barTrailingConstraint: NSLayoutConstraint?
     var contentTopAnchor: NSLayoutAnchor<NSLayoutYAxisAnchor> { contentStack.topAnchor }
@@ -290,6 +291,7 @@ final class NativeGamificationBarView: UIView {
         let spacerWidth = leftSpacer.widthAnchor.constraint(equalTo: rightSpacer.widthAnchor)
         spacerWidth.priority = UILayoutPriority(999)
         spacerWidth.isActive = true
+        spacerEqualWidthConstraint = spacerWidth
         let centerWidth = centerStack.widthAnchor.constraint(equalToConstant: 160)
         centerWidth.priority = UILayoutPriority(900)
         centerWidth.isActive = true
@@ -363,7 +365,8 @@ final class NativeGamificationBarView: UIView {
         
         // In minimal mode: hide leftSpacer and centerStack, but KEEP rightSpacer to push icons right
         leftSpacer.isHidden = hideInfo
-        // rightSpacer stays visible to act as flexible space between menu and icons
+        // Deactivate equal-width constraint in minimal mode so rightSpacer can expand
+        spacerEqualWidthConstraint?.isActive = !hideInfo
         
         // Adjust leftStack width - smaller in minimal mode (just menu button)
         leftStackWidthConstraint?.constant = hideInfo ? 44 : 160
