@@ -1358,15 +1358,17 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
 
   return (
     <div className="relative p-6 sm:p-10 bg-background-primary min-h-screen">
-      {/* Back button - consistent with app pattern */}
+      {/* Back button - positioned in flow, not absolute, to avoid overlap */}
       {onCancel && (
-        <button 
-          onClick={onCancel} 
-          className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors"
-          aria-label={t('survey_cancel') || 'Zurück'}
-        >
-          <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
-        </button>
+        <div className="mb-4">
+          <button 
+            onClick={onCancel} 
+            className="p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors"
+            aria-label={t('survey_cancel') || 'Zurück'}
+          >
+            <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
+          </button>
+        </div>
       )}
       {selectedLens && (
         <div className="max-w-xl mx-auto mb-4">
