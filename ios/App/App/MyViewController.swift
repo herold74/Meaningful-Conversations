@@ -7,6 +7,13 @@ class MyViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         NativeGamificationBarManager.shared.attach(to: self)
+        
+        // Disable zoom on the WKWebView to prevent magnification issues on rotation
+        if let webView = self.webView {
+            webView.scrollView.minimumZoomScale = 1.0
+            webView.scrollView.maximumZoomScale = 1.0
+            webView.scrollView.bouncesZoom = false
+        }
     }
     
     override func viewSafeAreaInsetsDidChange() {
