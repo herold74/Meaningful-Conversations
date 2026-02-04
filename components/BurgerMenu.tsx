@@ -118,17 +118,6 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem
                         icon={BookOpenIcon}
                         text={t('menu_user_guide')}
-                        customText={
-                            !isLandscape && (t('menu_user_guide') || '').toLowerCase().includes('benutzerhandbuch')
-                                ? (
-                                    <span className="inline-block">
-                                        <span className="inline sm:inline">Benutzer-</span>
-                                        <wbr />
-                                        <span className="inline sm:inline">handbuch</span>
-                                    </span>
-                                )
-                                : undefined
-                        }
                         onClick={() => onNavigate('userGuide')}
                     />
                     <MenuItem icon={QuestionMarkCircleIcon} text={t('menu_faq')} onClick={() => onNavigate('faq')} />
