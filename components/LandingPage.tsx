@@ -114,7 +114,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   };
 
   return (
-    <div className="flex flex-col items-center py-12 md:py-16 text-center animate-fadeIn">
+    <div className="flex flex-col items-center py-4 md:py-6 text-center animate-fadeIn">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
       {showSpring && <SpringBlossoms lightModeOnly={true} />}
       {showSummer && <SummerButterflies lightModeOnly={true} />}
