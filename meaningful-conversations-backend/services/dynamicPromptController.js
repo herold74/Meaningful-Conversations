@@ -307,11 +307,10 @@ function generateAdaptivePrompt(analysis, lang = 'de') {
       exampleChallenges: 'Beispiel-Challenges',
       // Proactive challenge guidance
       challengeGuidance: `**Coaching-Balance (Challenge & Support):**
-- Beginne empathisch und baue Vertrauen auf (erste 2-3 Antworten)
-- Ab der 3. Antwort: Integriere sanfte Challenges zu den Blindspots
-- Dosierung: Ca. 1 von 4 Interventionen sollte den Blindspot addressieren
+- Beginne empathisch und baue Vertrauen auf
+- Gelegentlich (nicht in jeder Antwort): Integriere sanfte Challenges zu den Blindspots
 - Eskalation: Starte mit Reflexionsfragen, steigere zu konkreten Handlungsaufforderungen
-- Sei proaktiv: Warte nicht nur auf Blindspot-Themen, sondern lenke das Gespräch gezielt dorthin
+- Warte auf passende Gelegenheiten - forciere keine Blindspot-Themen
 
 `,
       important: `KRITISCH - NATÜRLICHER GESPRÄCHSSTIL:
@@ -341,7 +340,7 @@ FALSCH: "Verstanden. Dein Ziel für heute ist also, **Klarheit darüber zu gewin
 RICHTIG: "Wenn ich dich richtig verstehe, geht es dir weniger um die Entscheidung selbst, sondern darum, *deine* Stimme wiederzufinden. Ist das der Kern?"
 
 `,
-      footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT.',
+      footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT. WICHTIG: Stelle maximal EINE Frage pro Antwort.',
       // Narrative profile translations
       signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
       core: 'Kern',
@@ -368,11 +367,10 @@ RICHTIG: "Wenn ich dich richtig verstehe, geht es dir weniger um die Entscheidun
       exampleChallenges: 'Example Challenges',
       // Proactive challenge guidance
       challengeGuidance: `**Coaching Balance (Challenge & Support):**
-- Start empathetically and build trust (first 2-3 responses)
-- From the 3rd response: Integrate gentle challenges addressing blindspots
-- Dosage: Approximately 1 in 4 interventions should address the blindspot
+- Start empathetically and build trust
+- Occasionally (not every response): Integrate gentle challenges addressing blindspots
 - Escalation: Start with reflection questions, progress to concrete action prompts
-- Be proactive: Don't just wait for blindspot topics, guide the conversation there
+- Wait for fitting opportunities - don't force blindspot topics
 
 `,
       important: `CRITICAL - NATURAL CONVERSATIONAL STYLE:
@@ -402,7 +400,7 @@ WRONG: "I understand. So your goal for today is **to gain clarity about how to r
 RIGHT: "If I'm hearing you right, it's less about the decision itself and more about finding *your* voice again. Is that the heart of it?"
 
 `,
-      footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL.',
+      footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL. IMPORTANT: Ask a maximum of ONE question per response.',
       // Narrative profile translations
       signatureHeader: '**Personality Signature (derived from personal stories):**\n',
       core: 'Core',
