@@ -340,7 +340,7 @@ FALSCH: "Verstanden. Dein Ziel für heute ist also, **Klarheit darüber zu gewin
 RICHTIG: "Wenn ich dich richtig verstehe, geht es dir weniger um die Entscheidung selbst, sondern darum, *deine* Stimme wiederzufinden. Ist das der Kern?"
 
 `,
-      footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT. WICHTIG: Stelle maximal EINE Frage pro Antwort.',
+      footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT. WICHTIG: Stelle EINE Frage pro Antwort, und maximal ZWEI wenn der Gesprächsfluss es erfordert.',
       // Narrative profile translations
       signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
       core: 'Kern',
@@ -400,7 +400,7 @@ WRONG: "I understand. So your goal for today is **to gain clarity about how to r
 RIGHT: "If I'm hearing you right, it's less about the decision itself and more about finding *your* voice again. Is that the heart of it?"
 
 `,
-      footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL. IMPORTANT: Ask a maximum of ONE question per response.',
+      footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL. IMPORTANT: Ask a ONE questions per response, and a maximum of TWO when conversational flow requires it.',
       // Narrative profile translations
       signatureHeader: '**Personality Signature (derived from personal stories):**\n',
       core: 'Core',
