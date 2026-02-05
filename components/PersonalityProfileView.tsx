@@ -247,12 +247,12 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
           })
         ))}
         
-        {/* Dimension labels - positioned to avoid overlap with data */}
-        {/* Top: Consistency - horizontal */}
+        {/* Dimension labels - positioned to match dimensions array order */}
+        {/* Top: Distanz - horizontal */}
         <text x={center} y={20} textAnchor="middle" className="text-xs font-bold fill-gray-700 dark:fill-gray-200">
-          {dimensionLabels.dauer}
+          {dimensionLabels.distanz}
         </text>
-        {/* Right: Closeness - VERTICAL (top to bottom) */}
+        {/* Right: Spontanität - VERTICAL (top to bottom) */}
         <text 
           x={size - 12} 
           y={center} 
@@ -260,13 +260,13 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
           className="text-xs font-bold fill-gray-700 dark:fill-gray-200"
           transform={`rotate(90, ${size - 12}, ${center})`}
         >
-          {dimensionLabels.naehe}
-        </text>
-        {/* Bottom: Spontaneity - horizontal */}
-        <text x={center} y={size - 8} textAnchor="middle" className="text-xs font-bold fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.wechsel}
         </text>
-        {/* Left: Distance - VERTICAL (bottom to top) */}
+        {/* Bottom: Nähe - horizontal */}
+        <text x={center} y={size - 8} textAnchor="middle" className="text-xs font-bold fill-gray-700 dark:fill-gray-200">
+          {dimensionLabels.naehe}
+        </text>
+        {/* Left: Beständigkeit - VERTICAL (bottom to top) */}
         <text 
           x={12} 
           y={center} 
@@ -274,7 +274,7 @@ const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
           className="text-xs font-bold fill-gray-700 dark:fill-gray-200"
           transform={`rotate(-90, 12, ${center})`}
         >
-          {dimensionLabels.distanz}
+          {dimensionLabels.dauer}
         </text>
       </svg>
       
