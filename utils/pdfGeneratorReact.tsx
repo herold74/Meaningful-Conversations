@@ -601,9 +601,9 @@ const RiemannRadar = ({ data, language }: {
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
   language: 'de' | 'en';
 }) => {
-  const size = 170;
+  const size = 140;
   const center = size / 2;
-  const maxRadius = (size / 2) - 30; // Reduced to make room for labels
+  const maxRadius = (size / 2) - 15;
   // Order: Top=Distanz, Right=Wechsel(Spontanität), Bottom=Nähe, Left=Dauer(Beständigkeit)
   const dimensions = ['distanz', 'wechsel', 'naehe', 'dauer'];
   
@@ -631,25 +631,15 @@ const RiemannRadar = ({ data, language }: {
     }).join(' ');
   };
   
-  // Colors for each context - using lighter fill colors for transparency effect
-  // Since rgba doesn't work well in @react-pdf/renderer, use lighter solid colors
   const contexts = [
     { key: 'beruf', fill: colors.blue300, stroke: colors.blue500, opacity: 0.5 },
     { key: 'privat', fill: colors.green300, stroke: colors.green600, opacity: 0.5 },
-    { key: 'selbst', fill: '#fdba74', stroke: colors.orange500, opacity: 0.5 }, // orange-300
+    { key: 'selbst', fill: '#fdba74', stroke: colors.orange500, opacity: 0.5 },
   ];
   
   const dimLabels = language === 'de'
-    ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
-    : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
-  
-  // Label positions (outside the radar) - left/right are rotated vertically
-  const labelPositions = [
-    { x: center, y: 10, anchor: 'middle', rotate: 0 },           // Top (Distanz)
-    { x: size - 8, y: center, anchor: 'middle', rotate: 90 },    // Right (Spontanität) - vertical
-    { x: center, y: size - 4, anchor: 'middle', rotate: 0 },     // Bottom (Nähe)
-    { x: 8, y: center, anchor: 'middle', rotate: -90 },          // Left (Beständigkeit) - vertical
-  ];
+    ? { distanz: 'Distanz', wechsel: 'Spont.', naehe: 'Nähe', dauer: 'Bestän.' }
+    : { distanz: 'Distance', wechsel: 'Spont.', naehe: 'Proximity', dauer: 'Stability' };
   
   // Grid circles
   const gridLevels = [];
@@ -659,24 +649,34 @@ const RiemannRadar = ({ data, language }: {
   }
   
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {/* Grid circles */}
-      {gridLevels.map((level, idx) => (
-        <Circle
-          key={`grid-${level}`}
-          cx={center}
-          cy={center}
-          r={(level / scale) * maxRadius}
-          fill="none"
-          stroke={colors.gray200}
-          strokeWidth={idx === gridLevels.length - 1 ? 1.5 : 1}
-          strokeDasharray={idx !== gridLevels.length - 1 ? '3,3' : undefined}
-        />
-      ))}
-      
-      {/* Axis lines */}
-      {dimensions.map((_, i) => {
-        const endPoint = getPoint(i, scale);
+    <View style={{ alignItems: 'center' }}>
+      {/* Top label */}
+      <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, marginBottom: 2 }}>
+        {dimLabels.distanz}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* Left label */}
+        <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, width: 30, textAlign: 'right', marginRight: 2 }}>
+          {dimLabels.dauer}
+        </Text>
+        <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {/* Grid circles */}
+          {gridLevels.map((level, idx) => (
+            <Circle
+              key={`grid-${level}`}
+              cx={center}
+              cy={center}
+              r={(level / scale) * maxRadius}
+              fill="none"
+              stroke={colors.gray200}
+              strokeWidth={idx === gridLevels.length - 1 ? 1.5 : 1}
+              strokeDasharray={idx !== gridLevels.length - 1 ? '3,3' : undefined}
+            />
+          ))}
+          
+          {/* Axis lines */}
+          {dimensions.map((_, i) => {
+            const endPoint = getPoint(i, scale);
         return (
           <Line
             key={`axis-${i}`}
@@ -724,24 +724,17 @@ const RiemannRadar = ({ data, language }: {
         });
       })}
       
-      {/* Dimension labels */}
-      {dimensions.map((dim, i) => {
-        const pos = labelPositions[i];
-        const transform = pos.rotate !== 0 ? `rotate(${pos.rotate}, ${pos.x}, ${pos.y})` : undefined;
-        return (
-          <G key={`label-${dim}`} transform={transform}>
-            <Text
-              x={pos.x}
-              y={pos.y}
-              textAnchor={pos.anchor as 'start' | 'middle' | 'end'}
-              style={{ fontSize: 7, fontWeight: 'bold', fill: colors.gray700 }}
-            >
-              {dimLabels[dim as keyof typeof dimLabels]}
-            </Text>
-          </G>
-        );
-      })}
-    </Svg>
+        </Svg>
+        {/* Right label */}
+        <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, width: 30, marginLeft: 2 }}>
+          {dimLabels.wechsel}
+        </Text>
+      </View>
+      {/* Bottom label */}
+      <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, marginTop: 2 }}>
+        {dimLabels.naehe}
+      </Text>
+    </View>
   );
 };
 
