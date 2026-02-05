@@ -196,12 +196,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   compactListTitle: {
-    fontSize: 10, // Increased from 9
+    fontSize: 9,
     fontWeight: 'bold',
     color: colors.gray700,
   },
   compactListDesc: {
-    fontSize: 9, // Increased from 8
+    fontSize: 8,
     color: colors.gray500,
     marginTop: 1,
   },
@@ -283,9 +283,9 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   riemannText: {
-    fontSize: 10,
+    fontSize: 9,
     color: colors.gray600,
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
   stressGrid: {
     flexDirection: 'row',
@@ -643,12 +643,12 @@ const RiemannRadar = ({ data, language }: {
     ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
     : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
   
-  // Label positions (outside the radar)
+  // Label positions (outside the radar) - left/right are rotated vertically
   const labelPositions = [
-    { x: center, y: 8, anchor: 'middle' },      // Top (Distanz)
-    { x: size - 5, y: center, anchor: 'end' },  // Right (Wechsel)
-    { x: center, y: size - 3, anchor: 'middle' }, // Bottom (Nähe)
-    { x: 5, y: center, anchor: 'start' },       // Left (Dauer)
+    { x: center, y: 10, anchor: 'middle', rotate: 0 },           // Top (Distanz)
+    { x: size - 8, y: center, anchor: 'middle', rotate: 90 },    // Right (Spontanität) - vertical
+    { x: center, y: size - 4, anchor: 'middle', rotate: 0 },     // Bottom (Nähe)
+    { x: 8, y: center, anchor: 'middle', rotate: -90 },          // Left (Beständigkeit) - vertical
   ];
   
   // Grid circles
@@ -727,13 +727,14 @@ const RiemannRadar = ({ data, language }: {
       {/* Dimension labels */}
       {dimensions.map((dim, i) => {
         const pos = labelPositions[i];
+        const transform = pos.rotate !== 0 ? `rotate(${pos.rotate}, ${pos.x}, ${pos.y})` : undefined;
         return (
-          <G key={`label-${dim}`}>
+          <G key={`label-${dim}`} transform={transform}>
             <Text
               x={pos.x}
               y={pos.y}
               textAnchor={pos.anchor as 'start' | 'middle' | 'end'}
-              style={{ fontSize: 8, fontWeight: 'bold', fill: colors.gray700 }}
+              style={{ fontSize: 7, fontWeight: 'bold', fill: colors.gray700 }}
             >
               {dimLabels[dim as keyof typeof dimLabels]}
             </Text>
