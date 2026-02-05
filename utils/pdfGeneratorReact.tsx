@@ -638,8 +638,8 @@ const RiemannRadar = ({ data, language }: {
   ];
   
   const dimLabels = language === 'de'
-    ? { distanz: 'Distanz', wechsel: 'Spont.', naehe: 'Nähe', dauer: 'Bestän.' }
-    : { distanz: 'Distance', wechsel: 'Spont.', naehe: 'Proximity', dauer: 'Stability' };
+    ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
+    : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
   
   // Grid circles
   const gridLevels = [];
@@ -648,6 +648,9 @@ const RiemannRadar = ({ data, language }: {
     gridLevels.push(i);
   }
   
+  // Helper to make vertical text by joining characters with newlines
+  const verticalText = (text: string) => text.split('').join('\n');
+  
   return (
     <View style={{ alignItems: 'center' }}>
       {/* Top label */}
@@ -655,9 +658,9 @@ const RiemannRadar = ({ data, language }: {
         {dimLabels.distanz}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* Left label */}
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, width: 30, textAlign: 'right', marginRight: 2 }}>
-          {dimLabels.dauer}
+        {/* Left label - vertical */}
+        <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, width: 12, textAlign: 'center', marginRight: 2, lineHeight: 1.1 }}>
+          {verticalText(dimLabels.dauer)}
         </Text>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {/* Grid circles */}
@@ -725,9 +728,9 @@ const RiemannRadar = ({ data, language }: {
       })}
       
         </Svg>
-        {/* Right label */}
-        <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, width: 30, marginLeft: 2 }}>
-          {dimLabels.wechsel}
+        {/* Right label - vertical */}
+        <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, width: 12, textAlign: 'center', marginLeft: 2, lineHeight: 1.1 }}>
+          {verticalText(dimLabels.wechsel)}
         </Text>
       </View>
       {/* Bottom label */}
