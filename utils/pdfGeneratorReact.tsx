@@ -648,20 +648,26 @@ const RiemannRadar = ({ data, language }: {
     gridLevels.push(i);
   }
   
-  // Helper to make vertical text by joining characters with newlines
-  const verticalText = (text: string) => text.split('').join('\n');
+  // Component for vertical text (stacked characters)
+  const VerticalLabel = ({ text }: { text: string }) => (
+    <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
+      {text.split('').map((char, i) => (
+        <Text key={i} style={{ fontSize: 5, fontWeight: 'bold', color: colors.gray700, lineHeight: 1.0 }}>
+          {char}
+        </Text>
+      ))}
+    </View>
+  );
   
   return (
     <View style={{ alignItems: 'center' }}>
       {/* Top label */}
-      <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, marginBottom: 2 }}>
+      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginBottom: 1 }}>
         {dimLabels.distanz}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {/* Left label - vertical */}
-        <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, width: 12, textAlign: 'center', marginRight: 2, lineHeight: 1.1 }}>
-          {verticalText(dimLabels.dauer)}
-        </Text>
+        <VerticalLabel text={dimLabels.dauer} />
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {/* Grid circles */}
           {gridLevels.map((level, idx) => (
@@ -729,12 +735,10 @@ const RiemannRadar = ({ data, language }: {
       
         </Svg>
         {/* Right label - vertical */}
-        <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, width: 12, textAlign: 'center', marginLeft: 2, lineHeight: 1.1 }}>
-          {verticalText(dimLabels.wechsel)}
-        </Text>
+        <VerticalLabel text={dimLabels.wechsel} />
       </View>
       {/* Bottom label */}
-      <Text style={{ fontSize: 8, fontWeight: 'bold', color: colors.gray700, marginTop: 2 }}>
+      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginTop: 1 }}>
         {dimLabels.naehe}
       </Text>
     </View>
