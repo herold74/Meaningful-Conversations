@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.primary,
     padding: '8 16',
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 6,
+    marginBottom: 8,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -149,13 +149,13 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   boxTitle: {
-    fontSize: 11, // Increased from 10
+    fontSize: 11,
     fontWeight: 'bold',
     color: colors.primary,
-    marginBottom: 6,
+    marginBottom: 4,
     borderBottomWidth: 2,
     borderBottomColor: colors.primary,
-    paddingBottom: 4,
+    paddingBottom: 3,
   },
   boxTitleAmber: {
     color: colors.amber700,
@@ -190,18 +190,18 @@ const styles = StyleSheet.create({
   },
   // Compact list
   compactListItem: {
-    padding: '4 6', // Increased padding
-    marginBottom: 4,
-    borderRadius: 4,
+    padding: '3 5',
+    marginBottom: 3,
+    borderRadius: 3,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   compactListTitle: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: 'bold',
     color: colors.gray700,
   },
   compactListDesc: {
-    fontSize: 8,
+    fontSize: 9,
     color: colors.gray500,
     marginTop: 1,
   },
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   riemannText: {
     fontSize: 9,
     color: colors.gray600,
-    lineHeight: 1.4,
+    lineHeight: 1.3,
   },
   stressGrid: {
     flexDirection: 'row',
