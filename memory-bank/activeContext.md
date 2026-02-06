@@ -1,9 +1,21 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.7.9 (Build 13)
+**Version:** 1.8.0
 **Staging:** ✅ Deployed
 **Production:** Pending
+
+## Recent Changes (v1.8.0)
+
+### Content & Terminology Updates
+- **Removal of Protected Terms:** Removed references to "Positive Intelligence" (now "Mental Fitness") and "CBT" (now "Structured Reflection").
+- **Coach Updates:** Rob and Chloe descriptions updated to reflect new terminology.
+- **Newsletter:** Created v1.8.0 newsletter highlighting UX improvements and new personality profiles.
+
+### Capacitor Integration (iOS)
+- **Native App Setup:** Initialized Capacitor project for iOS.
+- **Plugins:** Installed `@capacitor-community/speech-recognition` and `@capacitor-community/native-audio`.
+- **Services:** Implemented `capacitorAudioService.ts` and `capacitorSpeechService.ts` for native capability abstraction.
 
 ## Recent Changes (v1.7.9)
 

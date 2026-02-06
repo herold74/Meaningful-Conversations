@@ -433,6 +433,49 @@ git checkout v1.4.7
 
 ---
 
+### **v1.7.x - v1.8.0 - Personality, Voice & Mobile** 📱 🧠
+**Branch:** `main`
+
+**Status:** Production-ready (February 2026)
+
+**New Features (v1.7.x):**
+- ✅ **Advanced Personality Profiling**
+  - Implementation of Riemann-Thomann, Big Five (OCEAN), and Spiral Dynamics models
+  - **DPC (Dynamic Prompt Composition):** AI prompts adapted to user's personality profile
+  - **DPFL (Dynamic Prompt & Feedback Learning):** Adaptive learning system that refines coaching based on session analysis
+  - **Narrative Profile:** AI-generated "Signature" describing superpowers and blindspots
+
+- ✅ **Voice Mode Evolution**
+  - **Hybrid TTS Architecture:** Server-side Piper TTS (high quality) + Local Web Speech API fallback
+  - **iOS Optimization:** Forced local TTS on iOS due to autoplay restrictions
+  - **UX Improvements:** Consolidated loading spinner, wake lock support
+
+- ✅ **Seasonal Themes**
+  - Complete cycle: Spring (blossoms), Summer (butterflies), Autumn (leaves), Winter (snowflakes)
+  - Automatic switching based on date
+
+**New Features (v1.8.0):**
+- ✅ **Mobile App Foundation (Capacitor)**
+  - Integration of Capacitor for iOS native app generation
+  - Native plugins for Audio and Speech Recognition to bypass browser limitations
+  - `ios/` project structure and `capacitor.config.ts`
+
+- ✅ **Terminology & Content Refinement**
+  - Updated coaching terminology for broader appeal and compliance
+  - "Positive Intelligence" → "Mental Fitness"
+  - "CBT" → "Structured Reflection"
+
+- ✅ **Quality Assurance**
+  - **Personality Simulator:** Test runner to simulate client interactions with specific personality profiles
+  - Enhanced Admin Panel for testing DPC/DPFL logic
+
+**Technical Implementation:**
+- `services/capacitorAudioService.ts` - Native audio abstraction
+- `services/dynamicPromptController.js` - Complex prompt assembly logic
+- `components/PersonalitySurvey.tsx` - Multi-model survey interface
+
+---
+
 ## 🏗️ Architectural Evolution
 
 ### Phase 1: Client-Only (v1.0.0 - v1.1.0)
@@ -714,8 +757,8 @@ The preserved historical branches serve as a testament to the iterative developm
 
 ---
 
-**Last Updated**: December 2, 2025
-**Current Version**: 1.6.5 (main branch)
+**Last Updated**: February 2026
+**Current Version**: 1.8.0 (main branch)
 **Historical Branches**: v1.0.0, v1.1.0, v1.4.5, v1.4.7, v1.4.7-(Server-Edition), v1.4.9 (pre-reset)
 
 ---
