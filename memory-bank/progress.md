@@ -19,8 +19,8 @@
     - [x] Max (Ambitious, goal-oriented)
     - [x] Ava (Empathetic, supportive)
     - [x] Kenji (Mindful, Zen-inspired)
-    - [x] Chloe (CBT-focused)
-    - [x] Rob (Positive Intelligence)
+    - [x] Chloe (Structured Reflection)
+    - [x] Rob (Mental Fitness)
     - [x] G-Interviewer (Reflection interviews)
 - [x] **Data Privacy:**
     - [x] Guest Mode (Local only, no server storage)
