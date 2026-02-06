@@ -214,12 +214,6 @@ STRICTLY FORBIDDEN in this first message:
     // In test mode, use testProfileOverride if provided
     const profileToUse = (isTestMode && testProfileOverride) ? testProfileOverride : decryptedPersonalityProfile;
     
-    // #region agent log
-    const fs = require('fs');
-    const logPath = '/Users/gherold/Meaningful-Conversations-Project/.cursor/debug.log';
-    const debugLog = (msg, data) => { try { fs.appendFileSync(logPath, JSON.stringify({timestamp:Date.now(),location:'gemini.js',message:msg,data,sessionId:'debug-session',hypothesisId:'DPC-check'}) + '\n'); } catch(e){} };
-    debugLog('Session state', { coachingMode, isTestMode, hasProfile: !!profileToUse, isInitialMessage, isNewSession, firstMessageRulesInjected: isInitialMessage && !isNewSession });
-    // #endregion
     if (coachingMode === 'dpc' || coachingMode === 'dpfl' || isTestMode) {
         if (profileToUse) {
             try {
@@ -228,9 +222,6 @@ STRICTLY FORBIDDEN in this first message:
                     profileToUse,
                     lang // Pass language to DPC
                 );
-                // #region agent log
-                debugLog('DPC prompt generated', { adaptivePromptLength: adaptivePrompt?.length, hasFirstMessageRules: adaptivePrompt?.includes('ERSTE NACHRICHT') || adaptivePrompt?.includes('FIRST MESSAGE') });
-                // #endregion
                 if (adaptivePrompt) {
                     finalSystemInstruction += adaptivePrompt;
                     
@@ -266,18 +257,6 @@ STRICTLY FORBIDDEN in this first message:
     const startTime = Date.now();
     const modelName = 'gemini-2.5-flash';
     
-    // #region agent log
-    debugLog('Final system instruction built', { 
-        botId: bot.id,
-        totalLength: finalSystemInstruction.length,
-        hasFirstMessageRules: finalSystemInstruction.includes('ERSTE NACHRICHT') || finalSystemInstruction.includes('FIRST MESSAGE'),
-        hasStrictlyForbidden: finalSystemInstruction.includes('STRICTLY FORBIDDEN') || finalSystemInstruction.includes('STRIKTE REGELN'),
-        hasStopHere: finalSystemInstruction.includes('STOP HERE'),
-        hasNextStepsCheckIn: finalSystemInstruction.includes('Next Steps Check-in Rules'),
-        first1500chars: finalSystemInstruction.slice(0, 1500),
-        checkInSection: finalSystemInstruction.includes('CRITICAL - Follow Exactly') ? 'FOUND' : 'NOT FOUND'
-    });
-    // #endregion
     
     // Try to use prompt caching for registered users with Life Context
     // Note: Caching only works with Google AI currently
@@ -290,9 +269,6 @@ STRICTLY FORBIDDEN in this first message:
         cachedContentName = await getOrCreateCache(googleAI, userId, finalSystemInstruction, modelName);
         cacheUsed = cachedContentName !== null;
     }
-    // #region agent log
-    debugLog('Cache status', { cacheUsed, activeProvider, hasCachedContentName: !!cachedContentName });
-    // #endregion
     
     try {
         const config = {
