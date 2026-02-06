@@ -257,7 +257,6 @@ STRICTLY FORBIDDEN in this first message:
     const startTime = Date.now();
     const modelName = 'gemini-2.5-flash';
     
-    
     // Try to use prompt caching for registered users with Life Context
     // Note: Caching only works with Google AI currently
     let cachedContentName = null;
