@@ -17,14 +17,15 @@ According to the rules and regulations of AI Studio this project is licensed und
     - **Max** - Ambitious, goal-oriented coaching
     - **Ava** - Empathetic, supportive guidance
     - **Kenji** - Mindful, Zen-inspired reflection
-    - **Chloe** - CBT-focused cognitive coaching
-    - **Rob** - Positive Intelligence approach
+    - **Chloe** - Structured Reflection & Reframing
+    - **Rob** - Mental Fitness & Resilience focus
     - **G-Interviewer** - Structured reflection interviews
 *   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations.
 *   **Personality Profile & Adaptive Coaching**:
     - Complete personality surveys (Riemann-Thomann, Big Five/OCEAN, Spiral Dynamics)
     - DPC (Dynamic Prompt Composition) - Profile-informed coaching
     - DPFL (Dynamic Prompt & Feedback Learning) - Adaptive learning from sessions
+    - **Personality Simulator**: Test runner to simulate client interactions with different personality profiles for QA.
 *   **Voice & Text Chat**: 
     - Text input with Markdown rendering
     - Voice input via Web Speech API
@@ -36,6 +37,7 @@ According to the rules and regulations of AI Studio this project is licensed und
 *   **Gamification**: XP, levels, streaks, and achievements for regular self-reflection.
 *   **Seasonal Themes**: Automatic visual themes (Spring blossoms, Summer butterflies, Autumn leaves, Winter snowflakes).
 *   **Guest Mode**: Full functionality without account. Data stays in your browser.
+*   **Safety & Comfort**: "Comfort Check" feature to ensure emotional safety during intense sessions.
 *   **Multi-language Support**: English and German.
 
 ## 🛠️ Technology Stack

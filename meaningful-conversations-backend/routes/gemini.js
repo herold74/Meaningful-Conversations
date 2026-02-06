@@ -175,6 +175,37 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         } else {
             systemInstruction += "\n\n## Special Instruction for this First Message:\nThis is the user's very first interaction in this session. You MUST ignore any 'Initial Interaction Priority' rules about checking 'Next Steps'. Your first message MUST be your standard, warm welcome, asking what is on their mind. Do not mention anything about 'welcome back' or previous steps.";
         }
+    } else if (isInitialMessage && !isNewSession) {
+        // Returning user - enforce strict first-message rules for Next Steps check-in
+        if (lang === 'de') {
+            systemInstruction += `\n\n## ⚠️ STRIKTE REGELN FÜR DIESE ERSTE NACHRICHT (ÜBERSCHREIBT ALLES ANDERE):
+Wenn du nach "Next Steps" oder früheren Vorhaben fragst:
+1. Kurze Begrüßung
+2. Du darfst die Ziele/Vorhaben erwähnen
+3. Stelle NUR EINE einzige Frage (z.B. "Wie lief es damit?")
+4. STOPP. Warte auf die Antwort.
+
+STRIKT VERBOTEN in dieser ersten Nachricht:
+- KEIN LOB für Fortschritte die du noch nicht gehört hast
+- KEINE mehrfachen Fragen
+- KEINE detaillierten Nachfragen zu spezifischen Aspekten
+- KEINE Alternativen anbieten ("falls Sie lieber...", "oder gibt es etwas anderes...")
+- KEIN "Ich bin gespannt..." oder "Was können Sie mir berichten?"`;
+        } else {
+            systemInstruction += `\n\n## ⚠️ STRICT RULES FOR THIS FIRST MESSAGE (OVERRIDES EVERYTHING ELSE):
+If you're asking about "Next Steps" or previous intentions:
+1. Brief greeting
+2. You MAY mention the goals/intentions
+3. Ask ONLY ONE simple question (e.g., "How did it go?")
+4. STOP. Wait for the response.
+
+STRICTLY FORBIDDEN in this first message:
+- NO praising progress you haven't heard about yet
+- NO multiple questions
+- NO detailed follow-up questions about specific aspects
+- NO offering alternatives ("if you'd rather...", "or is there something else...")
+- NO "I'm curious to hear..." or "What can you tell me?"`;
+        }
     }
 
     let finalSystemInstruction = systemInstruction;
@@ -183,6 +214,12 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     // In test mode, use testProfileOverride if provided
     const profileToUse = (isTestMode && testProfileOverride) ? testProfileOverride : decryptedPersonalityProfile;
     
+    // #region agent log
+    const fs = require('fs');
+    const logPath = '/Users/gherold/Meaningful-Conversations-Project/.cursor/debug.log';
+    const debugLog = (msg, data) => { try { fs.appendFileSync(logPath, JSON.stringify({timestamp:Date.now(),location:'gemini.js',message:msg,data,sessionId:'debug-session',hypothesisId:'DPC-check'}) + '\n'); } catch(e){} };
+    debugLog('Session state', { coachingMode, isTestMode, hasProfile: !!profileToUse, isInitialMessage, isNewSession, firstMessageRulesInjected: isInitialMessage && !isNewSession });
+    // #endregion
     if (coachingMode === 'dpc' || coachingMode === 'dpfl' || isTestMode) {
         if (profileToUse) {
             try {
@@ -191,6 +228,9 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
                     profileToUse,
                     lang // Pass language to DPC
                 );
+                // #region agent log
+                debugLog('DPC prompt generated', { adaptivePromptLength: adaptivePrompt?.length, hasFirstMessageRules: adaptivePrompt?.includes('ERSTE NACHRICHT') || adaptivePrompt?.includes('FIRST MESSAGE') });
+                // #endregion
                 if (adaptivePrompt) {
                     finalSystemInstruction += adaptivePrompt;
                     
@@ -226,6 +266,19 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const startTime = Date.now();
     const modelName = 'gemini-2.5-flash';
     
+    // #region agent log
+    debugLog('Final system instruction built', { 
+        botId: bot.id,
+        totalLength: finalSystemInstruction.length,
+        hasFirstMessageRules: finalSystemInstruction.includes('ERSTE NACHRICHT') || finalSystemInstruction.includes('FIRST MESSAGE'),
+        hasStrictlyForbidden: finalSystemInstruction.includes('STRICTLY FORBIDDEN') || finalSystemInstruction.includes('STRIKTE REGELN'),
+        hasStopHere: finalSystemInstruction.includes('STOP HERE'),
+        hasNextStepsCheckIn: finalSystemInstruction.includes('Next Steps Check-in Rules'),
+        first1500chars: finalSystemInstruction.slice(0, 1500),
+        checkInSection: finalSystemInstruction.includes('CRITICAL - Follow Exactly') ? 'FOUND' : 'NOT FOUND'
+    });
+    // #endregion
+    
     // Try to use prompt caching for registered users with Life Context
     // Note: Caching only works with Google AI currently
     let cachedContentName = null;
@@ -237,6 +290,9 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         cachedContentName = await getOrCreateCache(googleAI, userId, finalSystemInstruction, modelName);
         cacheUsed = cachedContentName !== null;
     }
+    // #region agent log
+    debugLog('Cache status', { cacheUsed, activeProvider, hasCachedContentName: !!cachedContentName });
+    // #endregion
     
     try {
         const config = {

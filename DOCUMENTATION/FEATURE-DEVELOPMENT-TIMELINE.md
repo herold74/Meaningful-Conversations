@@ -10,7 +10,7 @@
 **Focus: Establishing the coaching foundation**
 
 - ✅ **Multiple Coach Personalities**
-  - Max (Ambitious), Kenji (Stoic), Chloe (CBT), Rob (Powerful Questions)
+  - Max (Ambitious), Kenji (Stoic), Chloe (Structured Reflection), Rob (Powerful Questions)
   - Unique coaching styles and approaches
   - DiceBear avatar system for consistent visual identity
 

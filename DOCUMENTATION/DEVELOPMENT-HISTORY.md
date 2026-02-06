@@ -245,7 +245,7 @@ git checkout v1.4.7
 **Coach Lineup (5 Total):**
 1. Max - Ambitious (Sage green background)
 2. Kenji - Stoic (Yellow background)
-3. Chloe - CBT (Beige background)
+3. Chloe - Structured Reflection (Beige background)
 4. Rob - Powerful Questions (Light grey background)
 5. Victor - Systemic (Red background)
 
