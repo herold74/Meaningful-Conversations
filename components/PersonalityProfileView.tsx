@@ -20,12 +20,19 @@ interface NarrativeProfileSectionProps {
 }
 
 const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narrativeProfile, t }) => {
+  // Safely extract operatingSystem - handle both string and object formats
+  const operatingSystemText = typeof narrativeProfile.operatingSystem === 'string' 
+    ? narrativeProfile.operatingSystem 
+    : (narrativeProfile.operatingSystem as any)?.core || 
+      (narrativeProfile.operatingSystem as any)?.dynamics ||
+      JSON.stringify(narrativeProfile.operatingSystem);
+  
   return (
     <div>
       {/* Operating System - The main paradox synthesis */}
       <div className="prose prose-sm dark:prose-invert max-w-none mb-8">
         <div className="text-content-primary leading-relaxed whitespace-pre-line">
-          {narrativeProfile.operatingSystem}
+          {operatingSystemText}
         </div>
       </div>
 
@@ -463,17 +470,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const handleDownloadPdf = async () => {
     if (!decryptedData || !profileMetadata) return;
     
-    // Detect Safari - known issues with html2canvas
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    if (isSafari) {
-      const proceed = window.confirm(
-        language === 'de' 
-          ? 'Safari hat bekannte Kompatibilitätsprobleme mit der PDF-Generierung. Das Layout könnte fehlerhaft sein.\n\nFür beste Ergebnisse verwende bitte Chrome, Firefox oder Edge.\n\nTrotzdem fortfahren?'
-          : 'Safari has known compatibility issues with PDF generation. The layout may be incorrect.\n\nFor best results, please use Chrome, Firefox, or Edge.\n\nContinue anyway?'
-      );
-      if (!proceed) return;
-    }
-    
     try {
       // Determine completedLenses from profile data
       const completedLenses: LensType[] = [];
@@ -552,6 +548,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             };
             const encryptedData = await encryptPersonalityProfile(surveyResult as any, encryptionKey);
             await api.savePersonalityProfile({
+              testType: profileMetadata.testType || 'RIEMANN', // Legacy field required by backend
               completedLenses: profileMetadata.completedLenses,
               encryptedData,
               adaptationMode: updatedData.adaptationMode

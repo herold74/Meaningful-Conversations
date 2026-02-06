@@ -340,7 +340,15 @@ FALSCH: "Verstanden. Dein Ziel für heute ist also, **Klarheit darüber zu gewin
 RICHTIG: "Wenn ich dich richtig verstehe, geht es dir weniger um die Entscheidung selbst, sondern darum, *deine* Stimme wiederzufinden. Ist das der Kern?"
 
 `,
-      footer: 'Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT. WICHTIG: Stelle EINE Frage pro Antwort, und maximal ZWEI wenn der Gesprächsfluss es erfordert.',
+      footer: `Passe ALLE deine Antworten an diese Präferenzen an. Halte deine Antworten NATÜRLICH und GESPRÄCHSORIENTIERT.
+
+⚠️ ERSTE NACHRICHT - STRIKTE REGELN (überschreibt alles andere):
+Wenn dies die ERSTE Nachricht einer Session ist und du nach "Next Steps" fragst:
+- KEIN LOB für Fortschritte die du noch nicht gehört hast ("herzlichen Glückwunsch", "beeindruckt mich", etc.)
+- NUR EINE einzige Frage stellen (z.B. "Wie lief es damit?")
+- KEINE Alternativen anbieten ("falls Sie lieber...", "wenn Sie etwas anderes...")
+- KEINE detaillierten Nachfragen zu spezifischen Aspekten
+- STOPP nach der einen Frage. Warte auf die Antwort.`,
       // Narrative profile translations
       signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
       core: 'Kern',
@@ -400,7 +408,15 @@ WRONG: "I understand. So your goal for today is **to gain clarity about how to r
 RIGHT: "If I'm hearing you right, it's less about the decision itself and more about finding *your* voice again. Is that the heart of it?"
 
 `,
-      footer: 'Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL. IMPORTANT: Ask a ONE questions per response, and a maximum of TWO when conversational flow requires it.',
+      footer: `Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL.
+
+⚠️ FIRST MESSAGE - STRICT RULES (overrides everything else):
+If this is the FIRST message of a session and you're asking about "Next Steps":
+- NO PRAISING progress you haven't heard about yet ("congratulations", "impressed", etc.)
+- Ask ONLY ONE simple question (e.g., "How did it go?")
+- NO offering alternatives ("if you'd rather...", "in case you want something else...")
+- NO detailed follow-up questions about specific aspects
+- STOP after the one question. Wait for the response.`,
       // Narrative profile translations
       signatureHeader: '**Personality Signature (derived from personal stories):**\n',
       core: 'Core',

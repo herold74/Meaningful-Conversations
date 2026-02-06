@@ -611,7 +611,7 @@ export const getTestableBots = (): Bot[] => {
 // ============================================
 
 const simpleBot = BOTS.find(b => b.id === 'max-ambitious')!;
-const cbtBot = BOTS.find(b => b.id === 'chloe-cbt')!;
+const reflectionBot = BOTS.find(b => b.id === 'chloe-cbt')!;
 const interviewBot = BOTS.find(b => b.id === 'g-interviewer')!;
 
 export const getTestScenarios = (t: (key: string) => string): LegacyTestScenario[] => [
@@ -642,7 +642,7 @@ export const getTestScenarios = (t: (key: string) => string): LegacyTestScenario
     id: 'complex_update',
     name: t('scenario_complex_update_name'),
     description: t('scenario_complex_update_desc'),
-    bot: cbtBot,
+    bot: reflectionBot,
     chatHistory: [
       { id: '1', role: 'user', text: t('scenario_complex_update_user1'), timestamp: new Date().toISOString() },
       { id: '2', role: 'bot', text: t('scenario_complex_update_bot1'), timestamp: new Date().toISOString() },

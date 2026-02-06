@@ -335,7 +335,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                             />
                             <span className="ml-3">
-                                <span className="font-semibold text-content-primary">{t('voiceModal_auto')} {selection.type === 'auto' && <span className="text-accent-primary">✓</span>}</span>
+                                <span className="font-semibold text-content-primary">{t('voiceModal_auto')}</span>
                                 <span className="block text-sm text-content-secondary">{t('voiceModal_auto_desc')}</span>
                             </span>
                         </label>

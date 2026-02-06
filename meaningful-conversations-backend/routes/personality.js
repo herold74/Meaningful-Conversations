@@ -563,6 +563,7 @@ REGELN:
 4. Tone: Empathisch, direkt, leicht poetisch, aber geerdet ("Du enthältst Multituden").
 5. Auf Deutsch schreiben. Verwende "Du" als Anrede.
 6. Zeitlosigkeit: Das Profil soll in 2 Jahren noch relevant klingen. Vermeide Referenzen auf aktuelle Ereignisse.
+7. Kein Markdown: Verwende KEINE Markdown-Formatierung wie *kursiv*, **fett** oder andere Sonderzeichen. Nur reinen Text.
 
 QUANTITATIVE DATEN (Testergebnisse):
 {{quantitativeData}}
@@ -601,6 +602,7 @@ RULES:
 4. Tone: Empathetic, direct, slightly poetic, but grounded ("You contain multitudes").
 5. Write in English. Use "You" as the form of address.
 6. Timelessness: The profile should still be relevant in 2 years. Avoid references to current events.
+7. No Markdown: Do NOT use any Markdown formatting like *italic*, **bold** or other special characters. Plain text only.
 
 QUANTITATIVE DATA (Test Results):
 {{quantitativeData}}
