@@ -598,7 +598,7 @@ const ShipWheelLogo = () => {
 
 // Vertical text label component (characters stacked vertically)
 const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
-  <View style={{ justifyContent: 'center', alignItems: 'center', width: 12 }}>
+  <View style={{ justifyContent: 'center', alignItems: 'center', width: 18 }}>
     {text.split('').map((char, i) => (
       <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 1.0, textAlign: 'center' }}>
         {char}
