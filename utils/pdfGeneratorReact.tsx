@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     color: colors.gray700,
   },
   compactListDesc: {
-    fontSize: 9,
+    fontSize: 10, // Increased from 9
     color: colors.gray500,
     marginTop: 1,
   },
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     color: colors.red600,
   },
   stressDesc: {
-    fontSize: 8, // Increased from 7
+    fontSize: 9, // Increased from 8
     color: colors.gray500,
     marginTop: 1,
   },
@@ -596,6 +596,17 @@ const ShipWheelLogo = () => {
   );
 };
 
+// Vertical text label component (characters stacked vertically)
+const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
+  <View style={{ justifyContent: 'center', alignItems: 'center', width: 12 }}>
+    {text.split('').map((char, i) => (
+      <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 1.0, textAlign: 'center' }}>
+        {char}
+      </Text>
+    ))}
+  </View>
+);
+
 // Riemann Radar Chart as SVG
 const RiemannRadar = ({ data, language }: { 
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
@@ -647,17 +658,6 @@ const RiemannRadar = ({ data, language }: {
   for (let i = step; i <= scale; i += step) {
     gridLevels.push(i);
   }
-  
-  // Component for vertical text (stacked characters)
-  const VerticalLabel = ({ text }: { text: string }) => (
-    <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
-      {text.split('').map((char, i) => (
-        <Text key={i} style={{ fontSize: 5, fontWeight: 'bold', color: colors.gray700, lineHeight: 1.0 }}>
-          {char}
-        </Text>
-      ))}
-    </View>
-  );
   
   return (
     <View style={{ alignItems: 'center' }}>
@@ -876,7 +876,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
       <View style={styles.grid2} wrap={false}>
         <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
           <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
-          <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+          <Text style={{ fontSize: 9, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
             {t.blindspotsDesc}
           </Text>
           {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
@@ -888,7 +888,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         </View>
         <View style={[styles.box, styles.boxGreen, styles.gridHalf]}>
           <Text style={[styles.boxTitle, styles.boxTitleGreen]}>{t.narrativeGrowth}</Text>
-          <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
+          <Text style={{ fontSize: 9, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
             {t.growthDesc}
           </Text>
           {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
@@ -932,7 +932,13 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         {hasNarrative && result.narrativeProfile && (
           <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
-            <Text style={styles.signatureText}>{result.narrativeProfile.operatingSystem}</Text>
+            <Text style={styles.signatureText}>
+              {typeof result.narrativeProfile.operatingSystem === 'string' 
+                ? result.narrativeProfile.operatingSystem 
+                : (result.narrativeProfile.operatingSystem as any)?.core || 
+                  (result.narrativeProfile.operatingSystem as any)?.dynamics || 
+                  ''}
+            </Text>
           </View>
         )}
         
