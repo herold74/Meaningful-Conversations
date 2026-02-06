@@ -2,7 +2,7 @@
 
 **Erstellt:** 2026-01-13  
 **Aktualisiert:** 2026-01-14  
-**Status:** Geplant (für spätere Implementierung)  
+**Status:** In Progress / Partially Implemented (Phase 1-3 complete)  
 **Ziel:** Native iOS Audio-APIs für zuverlässige TTS und Speech Recognition
 
 ---
