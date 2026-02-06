@@ -906,7 +906,10 @@ const App: React.FC = () => {
 
             } catch (error) {
                 console.error("Failed to save user data:", error);
-                // Optionally, add UI feedback for the user here.
+                // Show error notification to user
+                alert(language === 'de' 
+                    ? '⚠️ Speichern fehlgeschlagen. Bitte laden Sie Ihren Lebenskontext manuell herunter, um Datenverlust zu vermeiden.' 
+                    : '⚠️ Save failed. Please manually download your Life Context to prevent data loss.');
             }
         }
     };
