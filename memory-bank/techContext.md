@@ -12,6 +12,11 @@
 - **Routing:** Hash-based routing (SPA)
 - **Crypto:** Native Web Crypto API (SubtleCrypto)
 - **Voice:** Native Web Speech API (SpeechRecognition, SpeechSynthesis)
+- **Mobile/Native:** Capacitor 8.x (iOS)
+    - `@capacitor/core`: Native bridge
+    - `@capacitor/ios`: iOS platform
+    - `@capacitor-community/native-audio`: Audio handling
+    - `@capacitor-community/speech-recognition`: Native speech recognition
 - **PDF:** html2pdf.js (client-side)
 - **Utilities:**
     - `diff`: Text diffing
@@ -31,6 +36,16 @@
 - Position: Bottom of screen near Play/Repeat buttons
 - States: `isLoading` (AI response) and `isLoadingAudio` (TTS loading)
 - Polling mechanism for local TTS (browser events unreliable)
+
+## Mobile Environment (Capacitor)
+- **Platform:** iOS (Native App)
+- **IDE:** Xcode 15+
+- **Configuration:** `capacitor.config.ts`
+- **Native Plugins:**
+  - `SplashScreen`: Launch screen control
+  - `StatusBar`: Status bar styling
+  - `SpeechRecognition`: Native iOS speech recognition (avoids Safari limitations)
+  - `NativeAudio`: Audio session management
 
 ## Backend Stack
 - **Runtime:** Node.js v22.x

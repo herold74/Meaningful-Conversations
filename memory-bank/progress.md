@@ -90,12 +90,20 @@
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management
 
+## Mobile App (Capacitor)
+- [x] **iOS Integration:**
+    - [x] Project setup (Xcode, Capacitor CLI)
+    - [x] Native Audio Service abstraction
+    - [x] Native Speech Recognition Service abstraction
+    - [ ] App Store Deployment (TestFlight)
+- [ ] **Android Integration:**
+    - [ ] Project setup (Android Studio)
+
 ## Pending / Roadmap
-- [ ] **Android Voice Fix:** Investigate duplication issue
+- [ ] **Android Voice Fix:** Investigate duplication issue (PWA)
 - [ ] **Testing:** Comprehensive unit/integration tests
 - [ ] **Performance:** Large context file optimization
 - [ ] **Accessibility:** WCAG compliance audit
-- [ ] **Capacitor Integration:** Native iOS audio control
 
 ## Known Issues
 - **Android Voice Duplication:** Speech recognition shows repeated words on some Android devices. AI filters duplicates correctly, but UX is affected. Under investigation.
