@@ -32,8 +32,12 @@ import TestRunner from './TestRunner';
 
 interface AdminViewProps {
     currentUser: User | null;
+    encryptionKey: string;
     onRunTestSession: (scenario: TestScenario, adminLifeContext: string) => void;
+    onTestComfortCheck?: (withConversationalEnd: boolean) => void;
     lifeContext: string;
+    shouldOpenTestRunner?: boolean;
+    onTestRunnerOpened?: () => void;
 }
 
 type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage';
@@ -213,7 +217,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
     );
 };
 
-const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, lifeContext }) => {
+const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRunTestSession, onTestComfortCheck, lifeContext, shouldOpenTestRunner, onTestRunnerOpened }) => {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<AdminTab>('users');
     const [isLoading, setIsLoading] = useState(true);
@@ -282,6 +286,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // Auto-open Test Runner if requested (e.g., after Comfort Check test)
+    useEffect(() => {
+        if (shouldOpenTestRunner) {
+            setShowDynamicTestRunner(true);
+            onTestRunnerOpened?.(); // Reset the flag in parent
+        }
+    }, [shouldOpenTestRunner, onTestRunnerOpened]);
 
     // Load admin's profile type and full profile for test scenario matching
     useEffect(() => {
@@ -1258,7 +1270,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
         
         return (
             <div className="space-y-4">
-                {/* New Dynamic Test Runner Section */}
+                {/* New Dynamic Test Runner Section - MOVED TO TOP */}
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
                     <div className="flex items-center justify-between">
                         <div>
@@ -1271,12 +1283,39 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         </div>
                         <button
                             onClick={() => setShowDynamicTestRunner(true)}
-                            className="px-5 py-2 text-base font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-md transition-colors"
+                            className="px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-colors"
                         >
                             🚀 {t('admin_dynamic_runner_start')}
                         </button>
                     </div>
                 </div>
+                
+                {/* Comfort Check Quick Test Section */}
+                {onTestComfortCheck && (
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+                                        {t('admin_comfort_test_title')}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        {t('admin_comfort_test_desc')}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => onTestComfortCheck(true)}
+                                    className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
+                                >
+                                    Comfort Check
+                                </button>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                                {t('admin_comfort_test_note')}
+                            </p>
+                        </div>
+                    </div>
+                )}
                 
                 {/* Legacy Test Runner Section */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
@@ -1299,7 +1338,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                         </div>
                         <button
                             onClick={handleRunClick}
-                            className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-md"
+                            className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-sm"
                         >
                             {t('admin_runner_run')}
                         </button>
@@ -1383,6 +1422,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, onRunTestSession, li
                     <TestRunner 
                         onClose={() => setShowDynamicTestRunner(false)}
                         userProfile={adminPersonalityProfile}
+                        encryptionKey={encryptionKey}
                     />
                 )}
             </div>

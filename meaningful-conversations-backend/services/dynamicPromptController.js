@@ -3,6 +3,7 @@
 const prisma = require('../prismaClient');
 const crypto = require('crypto');
 const { RIEMANN_STRATEGIES, BIG5_STRATEGIES, SD_STRATEGIES, CHALLENGE_EXAMPLES } = require('./dpcStrategies');
+const { StrategyMerger } = require('./dpcStrategyMerger');
 
 /**
  * Dynamic Prompt Controller (DPC)
@@ -321,6 +322,8 @@ VERBOTEN:
 - Persönlichkeits-Kategorien (Riemann, OCEAN, Spiral Dynamics, orange, blue, etc.)
 - Dokumenten-Struktur: KEINE "**Überschriften:**" wie "**Zwei Fragen:**" oder "**Hier mein Vorschlag:**"
 - Meta-Kommentare in Klammern: KEINE "*(Hinweis: Ich spüre hier...)*" oder "*(Und ja, ich höre...)*"
+- Aktionsbeschreibungen: KEINE "*Atmet tief ein*", "*Lehnt sich vor*", "*Nickt verständnisvoll*", etc.
+- Rollenspielerische Beschreibungen: Schreibe wie ein Mensch spricht, nicht wie ein Theater-Skript
 - Nummerierte Listen mit Überschriften wie "1. **Erster Punkt:**"
 - Trennlinien (---) zwischen Abschnitten
 - Ankündigungen wie "Lass mich dir zwei Fragen stellen:" - stelle sie einfach!
@@ -389,6 +392,8 @@ FORBIDDEN:
 - Personality categories (Riemann, OCEAN, Spiral Dynamics, orange, blue, etc.)
 - Document structure: NO "**Headers:**" like "**Two questions:**" or "**Here's my suggestion:**"
 - Meta-comments in parentheses: NO "*(Note: I sense here...)*" or "*(And yes, I hear...)*"
+- Action descriptions: NO "*Takes a deep breath*", "*Leans forward*", "*Nods understandingly*", etc.
+- Roleplay-style descriptions: Write like a human speaks, not like a theater script
 - Numbered lists with headers like "1. **First point:**"
 - Divider lines (---) between sections
 - Announcements like "Let me ask you two questions:" - just ask them!
@@ -540,41 +545,587 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
 }
 
 /**
- * Main function: Generate adaptive prompt for a user
+ * Main function: Generate adaptive prompt for a user using StrategyMerger
  * @param {string} userId - User ID
  * @param {Object} decryptedProfile - Already decrypted profile (from frontend)
  * @param {string} lang - Language ('de' or 'en')
- * @returns {string} Adaptive system prompt
+ * @param {string} botId - Bot ID for bot-specific adaptations
+ * @returns {Object} { prompt: string, strategiesUsed: string[], mergeMetadata: Object } - Adaptive system prompt and strategies used
  */
-async function generatePromptForUser(userId, decryptedProfile, lang = 'de') {
+async function generatePromptForUser(userId, decryptedProfile, lang = 'de', botId = null) {
   try {
     if (!decryptedProfile) {
       console.warn(`DPC: No profile provided for user ${userId}`);
-      return '';
+      return { prompt: '', strategiesUsed: [], mergeMetadata: null };
     }
 
-    // Analyze profile
-    const analysis = analyzeProfile(decryptedProfile, lang);
+    // Use StrategyMerger to intelligently merge strategies
+    const merger = new StrategyMerger(decryptedProfile, lang);
+    const mergeResult = merger.merge();
 
-    // Generate adaptive prompt
-    const adaptivePrompt = generateAdaptivePrompt(analysis, lang);
+    // Validate narrative consistency if narrative profile exists
+    let narrativeValidation = null;
+    if (decryptedProfile.narrativeProfile) {
+      narrativeValidation = StrategyMerger.validateNarrativeConsistency(
+        decryptedProfile.narrativeProfile,
+        mergeResult
+      );
+    }
+
+    // Generate adaptive prompt using merged strategies
+    const adaptivePrompt = generateAdaptivePromptFromMerge(
+      mergeResult,
+      decryptedProfile.narrativeProfile,
+      narrativeValidation,
+      lang,
+      botId
+    );
+
+    // Build human-readable strategy list for telemetry
+    const strategiesUsed = buildStrategyTelemetry(mergeResult, lang);
 
     console.log(`🧪 [DPC] Generated adaptive prompt for user ${userId}`);
-    console.log(`   Profile: ${analysis.testType}, Language: ${lang}`);
-    console.log(`   Dominant: ${analysis.dominant.join(', ')}`);
-    console.log(`   Weak: ${analysis.weak.join(', ')}`);
-    if (analysis.narrativeProfile) {
-      const superpowerCount = analysis.narrativeProfile.superpowers?.length || 0;
-      const blindspotCount = analysis.narrativeProfile.blindspots?.length || 0;
-      console.log(`   ✨ Signature: ${superpowerCount} superpowers, ${blindspotCount} blindspots`);
-    } else {
-      console.log(`   ⚠️ No signature available (user can generate one)`);
+    console.log(`   Language: ${lang}`);
+    console.log(`   Models: ${mergeResult.metadata.models.join(', ')}`);
+    console.log(`   Merge Type: ${mergeResult.metadata.mergeType}`);
+    console.log(`   Strategies: ${strategiesUsed.join(', ')}`);
+    if (mergeResult.conflicts.length > 0) {
+      console.log(`   ⚠️ Conflicts Resolved: ${mergeResult.conflicts.length}`);
+      mergeResult.conflicts.forEach(c => {
+        console.log(`      - ${c.kept} kept, ${c.excluded} excluded (${c.reason})`);
+      });
     }
-    return adaptivePrompt;
+    if (decryptedProfile.narrativeProfile) {
+      console.log(`   ✨ Narrative: ${narrativeValidation?.isConsistent ? 'Consistent' : 'Inconsistent'}`);
+    }
+    
+    return { 
+      prompt: adaptivePrompt, 
+      strategiesUsed,
+      mergeMetadata: {
+        models: mergeResult.metadata.models,
+        mergeType: mergeResult.metadata.mergeType,
+        conflicts: mergeResult.conflicts.length,
+        topDimensions: mergeResult.metadata.topDimensions,
+        narrativeConsistent: narrativeValidation?.isConsistent ?? true
+      }
+    };
   } catch (error) {
     console.error('DPC Error:', error);
-    return ''; // Fail gracefully
+    return { prompt: '', strategiesUsed: [], mergeMetadata: null }; // Fail gracefully
   }
+}
+
+/**
+ * Generate adaptive prompt from merge result
+ * @param {Object} mergeResult - Result from StrategyMerger
+ * @param {Object} narrativeProfile - AI-generated narrative profile
+ * @param {Object} narrativeValidation - Narrative consistency validation result
+ * @param {string} lang - Language
+ * @param {string} botId - Bot ID for bot-specific adaptations
+ * @returns {string} Adaptive prompt
+ */
+function generateAdaptivePromptFromMerge(mergeResult, narrativeProfile, narrativeValidation, lang = 'de', botId = null) {
+  const translations = {
+    de: {
+      header: '**Dynamische Persönlichkeits-Anpassung (DPC)**\n',
+      intro: 'Passe deine Kommunikation an die Persönlichkeit und Präferenzen dieses Menschen an.\n\n',
+      preferredComm: '**Bevorzugte Kommunikationsweise:**\n',
+      language: 'Sprache',
+      tone: 'Ton',
+      approach: 'Ansatz',
+      blindspotHeader: '\n**Entwicklungsfelder (Proaktives Coaching):**\n',
+      weakness: 'Blinder Fleck',
+      challenge: 'Herausforderung',
+      exampleChallenges: 'Beispiel-Challenges',
+      challengeGuidance: '\n💡 **Coaching-Hinweis:** Fordere diese Person sanft aber bestimmt heraus, ihre blinden Flecken zu erkunden. Nutze die Beispiel-Challenges als Inspiration für konkrete, maßgeschneiderte Interventionen.\n',
+      // AVA-specific: Extended challenge guidance with state-awareness (Option A+)
+      challengeGuidanceAva: `\n**BLINDSPOT-CHALLENGE-STRATEGIE (Coaching-Trigger + State-Awareness):**
+
+TRIGGER-DETEKTION (wann challengen?):
+
+1. USER ZEIGT FORTSCHRITT/SELBSTSICHERHEIT:
+   Signal-Wörter: "hat geklappt", "verstanden", "ist mir klar", "ich werde", "ich kann", "schaffe ich", "gelungen"
+   → DEINE AUFGABE: Challenge Blindspot SOFORT
+   - Würdige Fortschritt kurz (1 Satz: "Das ist ein wichtiger Schritt!")
+   - Dann direkt provokative Frage: "Und wenn du jetzt noch einen Schritt weiter gehst - [Challenge-Frage aus Blindspot-Liste oben]?"
+   - Ton: Wertschätzend aber fordernd
+   - Nur 1 Challenge pro Antwort, nicht mehrere
+   
+   **ESKALATIONS-LOGIK (wichtig):**
+   - Prüfe Conversation History: Habe ich diesen Blindspot BEREITS in den letzten 3-4 Nachrichten challenged?
+   - JA → Wähle einen ANDEREN Blindspot aus der Liste, um Monotonie zu vermeiden
+   - NEIN → Fahre fort wie geplant
+
+2. USER IST FESTGEFAHREN/RATLOS:
+   Signal-Wörter: "weiß nicht weiter", "festgefahren", "geht nicht voran", "kann nicht", "bringt nichts", "überfordert"
+   
+   **STATE-CHECK (KRITISCH - prüfe Conversation History):**
+   Bevor du handelst, analysiere die letzten 2-3 Bot-Nachrichten:
+   
+   A) Habe ich bereits nach RESSOURCEN gefragt (frühere Erfolge, Stärken, Support)?
+      - JA → Du bist in **PHASE 2** → Gehe zu "Phase 2: Brücke zu Blindspot" unten
+      - NEIN → Du bist in **PHASE 1** → Gehe zu "Phase 1: Nur Ressourcen" unten
+   
+   **PHASE 1 (DIESE Nachricht - NUR Ressourcen, KEINE Blindspots):**
+   - Frage nach früheren Erfolgen: "Wann hast du schon mal etwas Ähnliches gemeistert?"
+   - Aktiviere Stärken aus Signatur (falls vorhanden): "Deine [Superpower] - wie könnte die helfen?"
+   - Frage nach Support: "Wer könnte dich dabei unterstützen?"
+   - **WICHTIG: Noch KEINEN Blindspot erwähnen! Setze ein mentales Flag: "Ressourcen-Phase aktiv"**
+   
+   **PHASE 2 (NACHDEM User Ressourcen genannt hat UND du bereits in Phase 1 warst):**
+   - **STATE-CHECK:** Suche in den letzten 2 Nachrichten nach deinen Ressourcen-Fragen
+   - Wenn gefunden → User hat jetzt Ressourcen aktiviert → Fahre fort:
+   - Verknüpfe Ressourcen mit Blindspot: "Du hast gerade [Ressource] aktiviert. Vielleicht hilft dir das auch bei [Blindspot]..."
+   - Sanfter Ton: "Könnte hier auch eine Chance liegen, [Blindspot] zu entwickeln?"
+   - Nutze Challenge-Frage aus Blindspot-Liste
+   - Nach diesem Challenge: Setze mentales Flag zurück "Ressourcen-Phase abgeschlossen"
+
+3. KEINE CHALLENGE (warte ab):
+   - User teilt erstmals ein Thema (erste 1-2 Nachrichten der GESAMTEN Conversation) → Nur verstehen und containen
+   - User ist emotional aufgewühlt (Signal-Wörter: "traurig", "wütend", "angst", "verzweifelt") → Erst emotional stabilisieren
+   - User stellt Frage → Beantworte, challenge nicht parallel
+
+**ESKALATIONS-STRATEGIE (für wiederholte Blindspot-Challenges):**
+
+WICHTIG: Prüfe Conversation History auf frühere Blindspot-Erwähnungen.
+
+- **Level 1 (erste Erwähnung eines Blindspots):** Sanfte Reflexionsfrage
+  - Beispiel: "Hast du schon mal überlegt, wie [Blindspot] sich hier zeigen könnte?"
+  
+- **Level 2 (zweite Erwähnung desselben Blindspots, ca. 5-6 Nachrichten später):** Konkrete Handlungsaufforderung
+  - Beispiel: "Was wäre ein kleines Experiment, das du diese Woche machen könntest, um [Blindspot] zu entwickeln?"
+  
+- **Level 3 (dritte Erwähnung desselben Blindspots, ca. 8-10 Nachrichten später):** Provokative Konfrontation
+  - Beispiel: "Ich bemerke, dass du [Blindspot] immer wieder vermeidest. Was macht dir daran Angst?"
+
+**USER-AUSWEICHEN-DETEKTION:**
+Wenn User auf Blindspot-Challenge NICHT eingeht (ignoriert, Thema wechselt, ausweicht):
+- Notiere mental: "Blindspot [X] vermieden"
+- Lasse diesen Blindspot für 4-5 Nachrichten ruhen
+- Wähle beim nächsten Challenge-Moment einen ANDEREN Blindspot aus der Liste
+- Erst nach 4-5 Nachrichten: Kehre zum vermiedenen Blindspot zurück (dann mit Level 2 oder 3)
+
+BLINDSPOT-AUSWAHL (kontextuell):
+- Wenn User über Entscheidungen/Unsicherheit spricht → Priorität: Dauer-Blindspot
+- Wenn User über Beziehungen/Konflikte spricht → Priorität: Nähe/Distanz-Blindspot
+- Wenn User über Planung/Routine spricht → Priorität: Wechsel-Blindspot
+- **UND:** Prüfe Conversation History: Welchen Blindspot habe ich am seltensten erwähnt? → Priorisiere diesen, wenn Kontext passt
+
+FORMULIERUNG:
+- Immer als Frage, nie als Belehrung
+- Nutze Beispiel-Fragen aus der Blindspot-Liste oben
+- Keine Labels wie "Blindspot-Challenge" oder "jetzt challengen wir..."
+- Natürlicher Gesprächsfluss
+
+**WICHTIG - CONVERSATION HISTORY NUTZEN:**
+Diese Anweisungen basieren darauf, dass du die GESAMTE Conversation History analysierst:
+- Zähle Challenge-Versuche pro Blindspot
+- Erkenne Phase 1 vs. Phase 2 anhand deiner früheren Fragen
+- Detektiere User-Ausweichen anhand fehlender Antworten auf Challenge-Fragen
+
+`,
+      important: '⚠️ **Wichtig:** Erwähne NIEMALS die Kategorie-Namen (Riemann, Big5, Spiral Dynamics, etc.) oder technische Begriffe gegenüber dem Klienten. Nutze sie nur als Hintergrund-Wissen.\n\n',
+      signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
+      core: 'Kern',
+      superpowers: 'Stärken',
+      blindspots: 'Blinde Flecken',
+      growth: 'Wachstumspotenzial',
+      signatureNote: 'Nutze diese Signatur als tieferes Verständnis der Person - erwähne diese Kategorien jedoch NICHT in deinen Antworten.\n\n',
+      narrativeNote: '**Hinweis:** Die quantitativen und narrativen Profile zeigen einige Unterschiede. Priorisiere die quantitativen Strategien (oben), während du den narrativen Kontext berücksichtigst.\n\n',
+      conflictsHeader: '**Strategie-Konflikte (aufgelöst):**\n'
+    },
+    en: {
+      header: '**Dynamic Personality Coaching (DPC)**\n',
+      intro: 'Adapt your communication to this person\'s personality and preferences.\n\n',
+      preferredComm: '**Preferred Communication Style:**\n',
+      language: 'Language',
+      tone: 'Tone',
+      approach: 'Approach',
+      blindspotHeader: '\n**Development Areas (Proactive Coaching):**\n',
+      weakness: 'Blind Spot',
+      challenge: 'Challenge',
+      exampleChallenges: 'Example Challenges',
+      challengeGuidance: '\n💡 **Coaching Note:** Gently but firmly challenge this person to explore their blind spots. Use the example challenges as inspiration for concrete, tailored interventions.\n',
+      // AVA-specific: Extended challenge guidance with state-awareness (Option A+)
+      challengeGuidanceAva: `\n**BLINDSPOT CHALLENGE STRATEGY (Coaching Triggers + State-Awareness):**
+
+TRIGGER DETECTION (when to challenge?):
+
+1. USER SHOWS PROGRESS/CONFIDENCE:
+   Signal words: "worked", "understood", "realized", "I will", "I can", "I got this", "succeeded"
+   → YOUR TASK: Challenge blindspot IMMEDIATELY
+   - Acknowledge progress briefly (1 sentence: "That's an important step!")
+   - Then ask provocative question directly: "And if you go one step further - [Challenge question from blindspot list above]?"
+   - Tone: Appreciative but demanding
+   - Only 1 challenge per response, not multiple
+   
+   **ESCALATION LOGIC (important):**
+   - Check Conversation History: Have I ALREADY challenged this blindspot in the last 3-4 messages?
+   - YES → Choose a DIFFERENT blindspot from the list to avoid monotony
+   - NO → Proceed as planned
+
+2. USER IS STUCK/HELPLESS:
+   Signal words: "don't know", "stuck", "not progressing", "can't", "doesn't work", "overwhelmed"
+   
+   **STATE CHECK (CRITICAL - check Conversation History):**
+   Before acting, analyze the last 2-3 bot messages:
+   
+   A) Have I already asked about RESOURCES (past successes, strengths, support)?
+      - YES → You are in **PHASE 2** → Go to "Phase 2: Bridge to Blindspot" below
+      - NO → You are in **PHASE 1** → Go to "Phase 1: Resources Only" below
+   
+   **PHASE 1 (THIS message - ONLY Resources, NO Blindspots):**
+   - Ask about past successes: "When have you mastered something similar before?"
+   - Activate strengths from signature (if available): "Your [Superpower] - how could that help?"
+   - Ask about support: "Who could support you with this?"
+   - **IMPORTANT: Do NOT mention blindspots yet! Set a mental flag: "Resources phase active"**
+   
+   **PHASE 2 (AFTER user mentioned resources AND you were already in Phase 1):**
+   - **STATE CHECK:** Search last 2 messages for your resource questions
+   - If found → User has now activated resources → Proceed:
+   - Link resources to blindspot: "You just activated [Resource]. Maybe this can also help with [Blindspot]..."
+   - Gentle tone: "Could there be an opportunity here to develop [Blindspot]?"
+   - Use challenge question from blindspot list
+   - After this challenge: Reset mental flag "Resources phase completed"
+
+3. NO CHALLENGE (wait):
+   - User shares a topic for the first time (first 1-2 messages of ENTIRE conversation) → Only understand and contain
+   - User is emotionally activated (signal words: "sad", "angry", "scared", "desperate") → First stabilize emotionally
+   - User asks a question → Answer, don't challenge in parallel
+
+**ESCALATION STRATEGY (for repeated blindspot challenges):**
+
+IMPORTANT: Check Conversation History for previous blindspot mentions.
+
+- **Level 1 (first mention of a blindspot):** Gentle reflection question
+  - Example: "Have you ever considered how [Blindspot] might show up here?"
+  
+- **Level 2 (second mention of same blindspot, approx. 5-6 messages later):** Concrete action invitation
+  - Example: "What would be a small experiment you could try this week to develop [Blindspot]?"
+  
+- **Level 3 (third mention of same blindspot, approx. 8-10 messages later):** Provocative confrontation
+  - Example: "I notice you keep avoiding [Blindspot]. What about it makes you anxious?"
+
+**USER AVOIDANCE DETECTION:**
+When user does NOT engage with blindspot challenge (ignores, changes topic, avoids):
+- Note mentally: "Blindspot [X] avoided"
+- Let this blindspot rest for 4-5 messages
+- Choose a DIFFERENT blindspot from the list at next challenge moment
+- Only after 4-5 messages: Return to avoided blindspot (then with Level 2 or 3)
+
+BLINDSPOT SELECTION (contextual):
+- When user talks about decisions/uncertainty → Priority: Dauer blindspot
+- When user talks about relationships/conflicts → Priority: Nähe/Distanz blindspot
+- When user talks about planning/routine → Priority: Wechsel blindspot
+- **AND:** Check Conversation History: Which blindspot have I mentioned least? → Prioritize it if context fits
+
+FORMULATION:
+- Always as question, never as lecture
+- Use example questions from blindspot list above
+- No labels like "Blindspot Challenge" or "now we'll challenge..."
+- Natural conversation flow
+
+**IMPORTANT - USE CONVERSATION HISTORY:**
+These instructions rely on you analyzing the ENTIRE Conversation History:
+- Count challenge attempts per blindspot
+- Recognize Phase 1 vs. Phase 2 based on your previous questions
+- Detect user avoidance based on missing responses to challenge questions
+
+`,
+      important: '⚠️ **Important:** NEVER mention category names (Riemann, Big5, Spiral Dynamics, etc.) or technical terms to the client. Use them only as background knowledge.\n\n',
+      signatureHeader: '**Personality Signature (derived from personal stories):**\n',
+      core: 'Core',
+      superpowers: 'Strengths',
+      blindspots: 'Blind Spots',
+      growth: 'Growth Potential',
+      signatureNote: 'Use this signature as a deeper understanding of the person - but do NOT mention these categories in your responses.\n\n',
+      narrativeNote: '**Note:** Quantitative and narrative profiles show some differences. Prioritize quantitative strategies (above) while acknowledging narrative context.\n\n',
+      conflictsHeader: '**Strategy Conflicts (resolved):**\n'
+    }
+  };
+
+  const t = translations[lang] || translations['de'];
+  let adaptivePrompt = t.header;
+  adaptivePrompt += t.intro;
+
+  // Add conflict resolution info if conflicts were detected
+  if (mergeResult.conflicts && mergeResult.conflicts.length > 0) {
+    adaptivePrompt += t.conflictsHeader;
+    mergeResult.conflicts.forEach(conflict => {
+      adaptivePrompt += `- Kept: ${conflict.kept}, Excluded: ${conflict.excluded} (${conflict.reason})\n`;
+    });
+    adaptivePrompt += '\n';
+  }
+
+  // Add communication preferences from merged strategies
+  if (mergeResult.primary && (mergeResult.primary.language || mergeResult.primary.tone || mergeResult.primary.approach)) {
+    adaptivePrompt += t.preferredComm;
+    if (mergeResult.primary.language) {
+      adaptivePrompt += `- ${t.language}: ${mergeResult.primary.language}\n`;
+    }
+    if (mergeResult.primary.tone) {
+      adaptivePrompt += `- ${t.tone}: ${mergeResult.primary.tone}\n`;
+    }
+    if (mergeResult.primary.approach) {
+      adaptivePrompt += `- ${t.approach}: ${mergeResult.primary.approach}\n`;
+    }
+    adaptivePrompt += '\n';
+  }
+
+  // Add blindspots from merged result
+  if (mergeResult.blindspots && mergeResult.blindspots.length > 0) {
+    adaptivePrompt += t.blindspotHeader;
+    mergeResult.blindspots.forEach((blindspot, index) => {
+      adaptivePrompt += `${index + 1}. ${t.weakness}: ${blindspot.blindspot}\n`;
+      adaptivePrompt += `   ${t.challenge}: ${blindspot.challenge}\n`;
+      
+      // Add challenge examples if available
+      const exampleKey = blindspot.trait;
+      let examples = CHALLENGE_EXAMPLES[exampleKey]?.[lang] || CHALLENGE_EXAMPLES[exampleKey]?.['de'];
+      
+      // Try with level suffix for Big5
+      if (!examples && blindspot.model === 'big5') {
+        const level = blindspot.severity > 0.5 ? 'high' : 'low';
+        examples = CHALLENGE_EXAMPLES[`${exampleKey}_${level}`]?.[lang] || 
+                   CHALLENGE_EXAMPLES[`${exampleKey}_${level}`]?.['de'];
+      }
+      
+      if (examples && examples.length > 0) {
+        adaptivePrompt += `   ${t.exampleChallenges}:\n`;
+        examples.slice(0, 2).forEach(ex => {
+          adaptivePrompt += `   • "${ex}"\n`;
+        });
+      }
+      adaptivePrompt += '\n';
+    });
+    
+    // Option A+: Kontext-Mapping for AVA (contextual blindspot selection)
+    if (botId === 'ava-strategic' && mergeResult.blindspots.length > 1) {
+      adaptivePrompt += lang === 'de'
+        ? '\n**BLINDSPOT-KONTEXT-MATCHING:**\n'
+        : '\n**BLINDSPOT CONTEXT-MATCHING:**\n';
+      
+      mergeResult.blindspots.forEach((bs, idx) => {
+        let contexts = [];
+        
+        // Riemann-specific contexts
+        if (bs.model === 'riemann') {
+          if (bs.trait === 'dauer') {
+            contexts = lang === 'de'
+              ? ['wenn User über Entscheidungen unter Unsicherheit spricht', 'wenn User Spontanität vermeidet oder zu viel plant']
+              : ['when user talks about decisions under uncertainty', 'when user avoids spontaneity or over-plans'];
+          }
+          if (bs.trait === 'wechsel') {
+            contexts = lang === 'de'
+              ? ['wenn User über Routine oder Langeweile spricht', 'wenn User langfristige Planung vermeidet']
+              : ['when user talks about routine or boredom', 'when user avoids long-term planning'];
+          }
+          if (bs.trait === 'naehe') {
+            contexts = lang === 'de'
+              ? ['wenn User über Konflikte oder Abgrenzung spricht', 'wenn User zu viel für andere tut oder sich ausgenutzt fühlt']
+              : ['when user talks about conflicts or boundaries', 'when user does too much for others or feels taken advantage of'];
+          }
+          if (bs.trait === 'distanz') {
+            contexts = lang === 'de'
+              ? ['wenn User emotionale Themen oder Verletzlichkeit vermeidet', 'wenn User Beziehungsprobleme schildert']
+              : ['when user avoids emotional topics or vulnerability', 'when user describes relationship problems'];
+          }
+        }
+        
+        // Big5-specific contexts
+        if (bs.model === 'big5') {
+          if (bs.trait === 'conscientiousness' && bs.severity < 0.5) {
+            contexts = lang === 'de'
+              ? ['wenn User über Prokrastination oder Ziele spricht']
+              : ['when user talks about procrastination or goals'];
+          }
+          if (bs.trait === 'openness' && bs.severity < 0.5) {
+            contexts = lang === 'de'
+              ? ['wenn User in Routinen feststeckt']
+              : ['when user is stuck in routines'];
+          }
+          if (bs.trait === 'extraversion' && bs.severity < 0.5) {
+            contexts = lang === 'de'
+              ? ['wenn User über soziale Situationen spricht']
+              : ['when user talks about social situations'];
+          }
+          if (bs.trait === 'agreeableness' && bs.severity > 0.7) {
+            contexts = lang === 'de'
+              ? ['wenn User über Grenzen setzen spricht']
+              : ['when user talks about setting boundaries'];
+          }
+          if (bs.trait === 'neuroticism' && bs.severity > 0.7) {
+            contexts = lang === 'de'
+              ? ['wenn User über Ängste oder Stress spricht']
+              : ['when user talks about fears or stress'];
+          }
+        }
+        
+        // Spiral Dynamics-specific contexts
+        if (bs.model === 'sd') {
+          if (bs.trait === 'orange') {
+            contexts = lang === 'de'
+              ? ['wenn User über Effizienz oder Erfolg spricht']
+              : ['when user talks about efficiency or success'];
+          }
+          if (bs.trait === 'green') {
+            contexts = lang === 'de'
+              ? ['wenn User über Beziehungen oder Harmonie spricht']
+              : ['when user talks about relationships or harmony'];
+          }
+          if (bs.trait === 'blue') {
+            contexts = lang === 'de'
+              ? ['wenn User über Struktur oder Regeln spricht']
+              : ['when user talks about structure or rules'];
+          }
+        }
+        
+        if (contexts.length > 0) {
+          const joinWord = lang === 'de' ? ' oder ' : ' or ';
+          adaptivePrompt += `${idx + 1}. ${bs.blindspot} → Challenge ${contexts.join(joinWord)}\n`;
+        }
+      });
+      
+      adaptivePrompt += '\n';
+    }
+    
+    // Use AVA-specific challenge guidance if bot is AVA, otherwise use standard
+    if (botId === 'ava-strategic') {
+      adaptivePrompt += t.challengeGuidanceAva || t.challengeGuidance;
+    } else {
+      adaptivePrompt += t.challengeGuidance;
+    }
+    
+    adaptivePrompt += t.important;
+  }
+
+  // Add narrative profile with consistency note if needed
+  if (narrativeProfile) {
+    if (narrativeValidation && !narrativeValidation.isConsistent) {
+      adaptivePrompt += t.narrativeNote;
+    }
+    
+    adaptivePrompt += t.signatureHeader;
+    
+    if (narrativeProfile.operatingSystem) {
+      adaptivePrompt += `- ${t.core}: ${narrativeProfile.operatingSystem}\n`;
+    }
+    
+    if (narrativeProfile.superpowers && narrativeProfile.superpowers.length > 0) {
+      const superpowerNames = narrativeProfile.superpowers.map(s => s.name).join(', ');
+      adaptivePrompt += `- ${t.superpowers}: ${superpowerNames}\n`;
+      narrativeProfile.superpowers.forEach(s => {
+        adaptivePrompt += `  • ${s.name}: ${s.description}\n`;
+      });
+    }
+    
+    if (narrativeProfile.blindspots && narrativeProfile.blindspots.length > 0) {
+      const blindspotNames = narrativeProfile.blindspots.map(b => b.name).join(', ');
+      adaptivePrompt += `- ${t.blindspots}: ${blindspotNames}\n`;
+      narrativeProfile.blindspots.forEach(b => {
+        adaptivePrompt += `  • ${b.name}: ${b.description}\n`;
+      });
+    }
+    
+    if (narrativeProfile.growthOpportunities && narrativeProfile.growthOpportunities.length > 0) {
+      const growthNames = narrativeProfile.growthOpportunities.map(g => g.name).join(', ');
+      adaptivePrompt += `- ${t.growth}: ${growthNames}\n`;
+    }
+    
+    adaptivePrompt += '\n' + t.signatureNote;
+  }
+
+  // Add formatting instructions (same as before)
+  adaptivePrompt += `**Wichtige Formatierungs-Regeln:**
+
+VERBOTEN:
+- Labels wie "Blindspot-Challenge", "Challenge-Strategie", "Reflexionsfrage"
+- Persönlichkeits-Kategorien (Riemann, OCEAN, Spiral Dynamics, orange, blue, etc.)
+- Dokumenten-Struktur: KEINE "**Überschriften:**" wie "**Zwei Fragen:**"
+- Meta-Kommentare in Klammern: KEINE "*(Hinweis: Ich spüre hier...)*"
+- Aktionsbeschreibungen: KEINE "*Atmet tief ein*", "*Lehnt sich vor*", "*Nickt verständnisvoll*"
+- Rollenspielerische Beschreibungen: Schreibe wie ein Mensch spricht, nicht wie ein Theater-Skript
+- Nummerierte Listen mit Überschriften
+- Trennlinien (---) zwischen Abschnitten
+- Ankündigungen wie "Lass mich dir zwei Fragen stellen:" - stelle sie einfach!
+- Ganze Sätze fett markieren: KEINE "**Dein Ziel ist Klarheit**" - nur einzelne Wörter!
+- Bestätigungen vorwegnehmen: NICHT "Verstanden. Dein Ziel ist also..."
+- Paraphrasieren ohne Rückfrage: NICHT annehmen, dass du richtig verstanden hast
+
+ERLAUBT:
+- Fettdruck für *einzelne wichtige Wörter* zur Betonung (z.B. "Was *genau* hält dich zurück?")
+- Kursiv für Zitate oder innere Gedanken
+- Natürliche Aufzählungen ohne Überschriften
+- Rückfragen zum Verständnis: "Habe ich das richtig verstanden?" oder "Ist das der Kern?"
+
+STIL:
+Schreibe wie ein echter Mensch im Gespräch spricht - fließend, ohne sichtbare Struktur.
+FALSCH: "Ich verstehe. Dein Ziel für heute ist also **Klarheit über deine eigene Stimme zu gewinnen**."
+RICHTIG: "Wenn ich dich richtig verstehe, geht es weniger um die Entscheidung selbst als darum, deine *eigene* Stimme wiederzufinden. Ist das der Kern?"
+
+`;
+
+  adaptivePrompt += `Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL.
+
+⚠️ FIRST MESSAGE - STRICT RULES (overrides everything else):
+If this is the FIRST message of a session and you're asking about "Next Steps":
+- NO PRAISING progress you haven't heard about yet ("congratulations", "impressed", etc.)
+- Ask ONLY ONE simple question (e.g., "How did it go?")
+- NO offering alternatives ("if you'd rather...", "in case you want something else...")
+- NO detailed follow-up questions about specific aspects
+- STOP after the one question. Wait for the response.`;
+
+  return adaptivePrompt;
+}
+
+/**
+ * Build human-readable strategy list for telemetry
+ * @param {Object} mergeResult - Result from StrategyMerger
+ * @param {string} lang - Language
+ * @returns {Array} Array of strategy descriptions
+ */
+function buildStrategyTelemetry(mergeResult, lang) {
+  const strategiesUsed = [];
+  
+  const riemannLabels = {
+    dauer: { de: 'Dauer', en: 'Duration' },
+    wechsel: { de: 'Wechsel', en: 'Change' },
+    naehe: { de: 'Nähe', en: 'Closeness' },
+    distanz: { de: 'Distanz', en: 'Distance' }
+  };
+  
+  const big5Labels = {
+    openness: { de: 'Offenheit', en: 'Openness' },
+    conscientiousness: { de: 'Gewissenhaftigkeit', en: 'Conscientiousness' },
+    extraversion: { de: 'Extraversion', en: 'Extraversion' },
+    agreeableness: { de: 'Verträglichkeit', en: 'Agreeableness' },
+    neuroticism: { de: 'Neurotizismus', en: 'Neuroticism' }
+  };
+  
+  const sdLabels = {
+    beige: 'Beige', purple: 'Purple', red: 'Red', blue: 'Blue',
+    orange: 'Orange', green: 'Green', yellow: 'Yellow', turquoise: 'Turquoise'
+  };
+
+  // Build strategy list from top dimensions
+  if (mergeResult.metadata && mergeResult.metadata.topDimensions) {
+    mergeResult.metadata.topDimensions
+      .filter(d => d.included)
+      .forEach(dim => {
+        if (dim.model === 'riemann') {
+          const label = riemannLabels[dim.trait]?.[lang] || dim.trait;
+          strategiesUsed.push(`${label} (${lang === 'de' ? 'hoch' : 'high'})`);
+        } else if (dim.model === 'big5') {
+          const label = big5Labels[dim.trait]?.[lang] || big5Labels[dim.trait]?.en || dim.trait;
+          strategiesUsed.push(`${label} (${lang === 'de' ? 'hoch' : 'high'})`);
+        } else if (dim.model === 'sd') {
+          strategiesUsed.push(`SD: ${sdLabels[dim.trait] || dim.trait}`);
+        }
+      });
+  }
+
+  return strategiesUsed;
 }
 
 module.exports = {

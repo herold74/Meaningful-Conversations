@@ -60,6 +60,7 @@ interface SessionReviewProps {
     onContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
     onSwitchCoach: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
     onReturnToStart: () => void;
+    onReturnToAdmin?: (options?: { openTestRunner?: boolean }) => void; // For test mode: return to admin console
     gamificationState: GamificationState;
     currentUser: User | null;
     isInterviewReview?: boolean;
@@ -71,6 +72,7 @@ interface SessionReviewProps {
     refinementPreviewError?: string | null;
     hasPersonalityProfile?: boolean;
     onStartPersonalitySurvey?: () => void;
+    encryptionKey?: CryptoKey | null;
 }
 
 // Questionnaire recommendation based on session content
@@ -212,6 +214,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     onContinueSession,
     onSwitchCoach,
     onReturnToStart,
+    onReturnToAdmin,
     gamificationState,
     currentUser,
     isInterviewReview,
@@ -223,6 +226,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     refinementPreviewError,
     hasPersonalityProfile,
     onStartPersonalitySurvey,
+    encryptionKey: encryptionKeyProp,
 }) => {
     const { t, language } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
@@ -236,27 +240,85 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const [datePickerModal, setDatePickerModal] = useState<{ isOpen: boolean; action: string; deadline: string } | null>(null);
     const [showComfortCheck, setShowComfortCheck] = useState(false);
     const [showRefinementModal, setShowRefinementModal] = useState(false);
-    const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
+    
+    // Use prop if provided, otherwise maintain local state
+    const [localEncryptionKey, setLocalEncryptionKey] = useState<CryptoKey | null>(null);
+    const encryptionKey = encryptionKeyProp || localEncryptionKey;
+    
+    // Generate stable session ID for this session review (used across multiple API calls)
+    const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
     
     // Track which next steps are selected (all selected by default)
     const [selectedNextSteps, setSelectedNextSteps] = useState<Set<number>>(
         new Set(nextSteps.map((_, index) => index))
     );
     
-    // Show comfort check for DPFL
-    // - In production: when user has coachingMode === 'dpfl'
-    // - In test mode: when refinementPreview is available (indicates DPFL test scenario)
-    // - NEVER for Nobody (nexus-gps) as it doesn't conduct full coaching sessions
+    // Show comfort check for DPFL after EVERY completed session
+    // 
+    // IMPORTANT: Comfort Check is only shown when the session has a conversational end
+    // (hasConversationalEnd === true), which means the coaching session was completed
+    // with proper closure and goals were addressed. This aligns with XP rewards:
+    // - XP is awarded when hasConversationalEnd === true (+50 XP bonus)
+    // - Comfort Check appears under the same conditions
+    //
+    // This ensures that only substantive, properly concluded sessions are considered
+    // for profile refinement, not incomplete or abandoned conversations.
+    //
+    // This allows user to:
+    // 1. Rate session authenticity (1-5 scale)
+    // 2. Opt-out of using this session for profile refinement ("Skip" button)
+    // 
+    // Sessions with score >= 3 and not opted-out are considered "authentic"
+    // and used for profile refinement calculations.
+    // 
+    // Refinement is proposed after 2nd authentic session (if in adaptive mode).
+    // User can then accept or reject the suggested changes.
+    //
+    // Never shown for:
+    // - Nobody bot (nexus-gps) - not a full coaching session
+    // - Users without coachingMode === 'dpfl'
+    // - Sessions without conversational end (hasConversationalEnd === false)
     useEffect(() => {
+        // #region agent log
+        console.log('[SESSION-REVIEW] Comfort Check useEffect triggered:', {
+            currentUser: currentUser?.email,
+            coachingMode: currentUser?.coachingMode,
+            isTestMode,
+            hasRefinementPreview: !!refinementPreview,
+            selectedBot: selectedBot.id,
+            hasConversationalEnd
+        });
+        // #endregion
+        
         const isNobodyBot = selectedBot.id === 'nexus-gps';
         const isDPFLTest = isTestMode && refinementPreview && !isNobodyBot;
         const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode && !isNobodyBot;
         
-        if (isDPFLTest || isDPFLProduction) {
+        // #region agent log
+        console.log('[SESSION-REVIEW] Comfort Check conditions:', {
+            isNobodyBot,
+            isDPFLTest,
+            isDPFLProduction,
+            hasConversationalEnd
+        });
+        // #endregion
+        
+        // CRITICAL: Only show comfort check if session has conversational end
+        // This aligns with XP reward logic (hasConversationalEnd = +50 XP bonus)
+        const hasProperClosure = hasConversationalEnd;
+        
+        if ((isDPFLTest || isDPFLProduction) && hasProperClosure) {
+            // #region agent log
+            console.log('[SESSION-REVIEW] ✓ All conditions met - showing Comfort Check after 1s delay');
+            // #endregion
             // Show comfort check after brief delay
             setTimeout(() => setShowComfortCheck(true), 1000);
+        } else {
+            // #region agent log
+            console.log('[SESSION-REVIEW] ✗ Conditions NOT met - Comfort Check will NOT show');
+            // #endregion
         }
-    }, [currentUser?.coachingMode, isTestMode, refinementPreview, selectedBot.id]);
+    }, [currentUser?.coachingMode, isTestMode, refinementPreview, selectedBot.id, hasConversationalEnd]);
 
     // Toggle individual next step selection
     const toggleNextStep = (index: number) => {
@@ -1096,13 +1158,19 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             {showComfortCheck && (
                 <ComfortCheckModal
                     chatHistory={chatHistory}
-                    sessionId={`test-${Date.now()}`}
+                    sessionId={sessionId}
                     coachingMode={currentUser?.coachingMode}
                     onComplete={() => {
                         setShowComfortCheck(false);
                         // After comfort check, show refinement modal if there are suggestions
                         if (refinementPreview?.refinementResult?.hasSuggestions) {
                             setShowRefinementModal(true);
+                        }
+                        // In test mode, automatically return to admin console and open test runner
+                        if (isTestMode && onReturnToAdmin) {
+                            setTimeout(() => {
+                                onReturnToAdmin({ openTestRunner: true });
+                            }, 500); // Small delay for smooth UX
                         }
                     }}
                     encryptionKey={encryptionKey}
