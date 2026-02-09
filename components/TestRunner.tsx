@@ -555,10 +555,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               responseTime: 0
             }],
             telemetry: {
-              profileType,
-              mockSessionsUsed: mockSessions.length,
-              refinementSuggestions: refinementResult.refinementResult?.hasSuggestions || false
-            },
+              dpcInjectionPresent: false,
+              dpcInjectionLength: 0,
+              dpcStrategiesUsed: [],
+              dpflKeywordsDetected: [],
+              stressKeywordsDetected: false,
+            } as any,
             autoCheckResults: [], // No auto-checks for this special test
             dpflKeywordsInfo: language === 'de'
               ? '🧪 Mock-Keywords wurden verwendet (siehe Modal für Details)'
