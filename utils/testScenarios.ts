@@ -48,6 +48,9 @@ export interface DynamicTestScenario {
   minConversationTurns?: number;  // Minimum number of user-bot exchanges (default: testMessages.length)
   enableDynamicContinuation?: boolean;  // If true, AI generates follow-up messages after predefined ones
   
+  // Special test modes
+  specialTestMode?: 'refinement_mock';  // Triggers custom test logic (e.g., mock multi-session refinement)
+  
   // Automatic validation
   autoChecks: {
     dpcRequired: boolean;
@@ -624,6 +627,37 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_comfort_rating_scale'),
       t('test_check_comfort_skip_button'),
       t('test_check_refinement_after_2nd'),
+    ]
+  },
+
+  // ============================================
+  // PROFILE REFINEMENT WITH MOCK DATA
+  // ============================================
+  {
+    id: 'dpfl_refinement_mock',
+    name: '🔄 ' + t('test_refinement_mock'),
+    description: t('test_refinement_mock_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'refinement'],
+    testMessages: [
+      {
+        text: t('test_refinement_mock_msg_1'),
+        expectedBehavior: t('test_refinement_mock_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 1,
+    enableDynamicContinuation: false,
+    specialTestMode: 'refinement_mock', // Triggers special logic in TestRunner
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionUpdates: false,
+      expectSessionNextSteps: false,
+    },
+    manualChecks: [
+      t('test_check_refinement_modal_shown'),
+      t('test_check_refinement_suggestions_present'),
+      t('test_check_refinement_bidirectional'),
+      t('test_check_refinement_context_specific'),
     ]
   },
 ];

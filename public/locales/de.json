@@ -702,6 +702,8 @@
   "comfort_check_high": "Sehr authentisch",
   "comfort_check_privacy": "Datenschutz",
   "comfort_check_privacy_desc": "Session-Daten sind Ende-zu-Ende verschlüsselt. Nur du kannst sie entschlüsseln.",
+  "comfort_check_privacy_desc_v2": "Es werden nur anonyme Keyword-Häufigkeiten gespeichert, keine Gesprächsinhalte. Du kannst das Transcript nach der Session herunterladen.",
+  "comfort_check_low_score_warning": "Score < 3: Session wird nicht für Profil-Verfeinerung verwendet",
   "comfort_check_accept": "Übernehmen",
   "comfort_check_use_session": "Für Profil-Verfeinerung nutzen",
   "comfort_check_skip": "Überspringen",
@@ -1517,5 +1519,13 @@
   "admin_dynamic_runner_desc": "Echte API-Calls mit Bot-Auswahl, Test-Profilen und automatischer Validierung",
   "admin_dynamic_runner_start": "Starten",
   "admin_runner_static": "(Statisch)",
-  "test_runner_interview_bot_name": "Gloria (Interview)"
+  "test_runner_interview_bot_name": "Gloria (Interview)",
+  "test_refinement_mock": "Profil-Verfeinerung (Mock-Sessions)",
+  "test_refinement_mock_desc": "Testet die Profil-Verfeinerung durch Simulation von 2 Sessions mit unterschiedlichen Keyword-Frequenzen",
+  "test_refinement_mock_msg_1": "Ich möchte verstehen, wie sich mein Profil durch Sessions anpasst.",
+  "test_refinement_mock_msg_1_expected": "Der Bot erklärt das adaptive Profil-System",
+  "test_check_refinement_modal_shown": "Refinement-Modal wird nach Mock-Sessions angezeigt",
+  "test_check_refinement_suggestions_present": "Profil-Anpassungs-Vorschläge sind vorhanden und nachvollziehbar",
+  "test_check_refinement_bidirectional": "Bidirektionale Analyse (High/Low Keywords) ist sichtbar",
+  "test_check_refinement_context_specific": "Vorschläge sind kontextspezifisch (Beruf/Privat/Selbst bei Riemann)"
 }
