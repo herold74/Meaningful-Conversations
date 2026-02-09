@@ -545,6 +545,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           
           // Build minimal test result for manual checks only
           setTestResult({
+            scenarioId: selectedScenario.id,
+            botId: selectedBot?.id || 'mock',
+            profileId: 'mock_profile',
+            timestamp: new Date().toISOString(),
             responses: [{
               userMessage: language === 'de' 
                 ? '🧪 Mock-Test: 2 simulierte Sessions mit hardcodierten Keywords'
@@ -560,11 +564,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               dpcStrategiesUsed: [],
               dpflKeywordsDetected: [],
               stressKeywordsDetected: false,
-            } as any,
+            },
             autoCheckResults: [], // No auto-checks for this special test
             dpflKeywordsInfo: language === 'de'
               ? '🧪 Mock-Keywords wurden verwendet (siehe Modal für Details)'
-              : '🧪 Mock keywords were used (see modal for details)'
+              : '🧪 Mock keywords were used (see modal for details)',
+            manualCheckResults: selectedScenario.manualChecks.map((check, idx) => ({
+              checkId: `manual_${idx}`,
+              passed: null,
+            })),
           });
           
           // Set phase to validation (manual checks only)
@@ -1443,7 +1451,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                     <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
                       <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
                       {t('test_runner_adaptive_weighting')}
-                      {testResult.telemetry.adaptiveWeighting.adjustedKeywordCount > 0 && (
+                      {(testResult.telemetry.adaptiveWeighting.adjustedKeywordCount ?? 0) > 0 && (
                         <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
                           {testResult.telemetry.adaptiveWeighting.adjustedKeywordCount} {t('test_runner_adjustments')}
                         </span>
