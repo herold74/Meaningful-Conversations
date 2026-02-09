@@ -32,7 +32,7 @@ import TestRunner from './TestRunner';
 
 interface AdminViewProps {
     currentUser: User | null;
-    encryptionKey: string;
+    encryptionKey: CryptoKey | null;
     onRunTestSession: (scenario: TestScenario, adminLifeContext: string) => void;
     onTestComfortCheck?: (withConversationalEnd: boolean) => void;
     lifeContext: string;

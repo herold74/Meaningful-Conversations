@@ -1068,29 +1068,34 @@ const App: React.FC = () => {
         // Mock ChatHistory (realistic DPFL session)
         const mockChatHistory: Message[] = [
             { 
+                id: `msg-${Date.now()}-1`,
                 role: 'user', 
                 text: 'Ich möchte über meine Karriereziele sprechen',
-                timestamp: Date.now() - 300000 
+                timestamp: new Date(Date.now() - 300000).toISOString()
             },
             { 
+                id: `msg-${Date.now()}-2`,
                 role: 'bot', 
                 text: 'Sehr gerne! Was ist dein aktuelles Karriereziel?',
-                timestamp: Date.now() - 240000 
+                timestamp: new Date(Date.now() - 240000).toISOString()
             },
             { 
+                id: `msg-${Date.now()}-3`,
                 role: 'user', 
                 text: 'Ich möchte in den nächsten 2 Jahren Teamleiter werden',
-                timestamp: Date.now() - 180000 
+                timestamp: new Date(Date.now() - 180000).toISOString()
             },
             { 
+                id: `msg-${Date.now()}-4`,
                 role: 'bot', 
                 text: 'Ein ambitioniertes Ziel! Was sind deine nächsten Schritte?',
-                timestamp: Date.now() - 120000 
+                timestamp: new Date(Date.now() - 120000).toISOString()
             },
             { 
+                id: `msg-${Date.now()}-5`,
                 role: 'user', 
                 text: 'Ich plane, ein Führungskräfte-Seminar zu besuchen',
-                timestamp: Date.now() - 60000 
+                timestamp: new Date(Date.now() - 60000).toISOString()
             },
         ];
 
@@ -1123,8 +1128,15 @@ const App: React.FC = () => {
         
         // Set a minimal refinement preview to enable Comfort Check in test mode
         setRefinementPreview({
-            suggestedChanges: [],
-            reasoning: "Quick test mode - no actual refinement suggestions"
+            success: true,
+            isPreviewOnly: true,
+            bidirectionalAnalysis: {
+                messageCount: mockChatHistory.length
+            },
+            refinementResult: {
+                hasSuggestions: false
+            },
+            message: "Quick test mode - no actual refinement suggestions"
         });
         
         setMenuView(null); // Close menu
@@ -1265,7 +1277,7 @@ const App: React.FC = () => {
                     isTestMode={isTestMode}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setView('admin'); setMenuView('upgrade'); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
