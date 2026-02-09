@@ -92,7 +92,7 @@ services:
       DB_USER: ${DB_USER:-mcuser}
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
       DB_NAME: ${DB_NAME:-meaningful_conversations_production}
-      DATABASE_URL: mysql://${DB_USER:-mcuser}:${DB_PASSWORD:-changeme}@mariadb:3306/${DB_NAME:-meaningful_conversations_production}
+      DATABASE_URL: mysql://${DB_USER:-mcuser}:${DB_PASSWORD:-changeme}@mariadb:3306/${DB_NAME:-meaningful_conversations_production}?connection_limit=25
       
       # Application configuration
       PORT: 8080

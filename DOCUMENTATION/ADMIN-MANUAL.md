@@ -31,12 +31,12 @@ This document is for administrators only and provides detailed instructions for 
 3. Select **"Admin Panel"** (only visible to admins)
 
 ### Admin Panel Overview
-The Admin Panel has several tabs:
+The Admin Panel has several tabs, now with a **fully responsive design** optimized for mobile devices:
 - **Users** - User management and statistics
 - **Codes** - Upgrade code generation and tracking
 - **Tickets** - Support ticket management
 - **Feedback** - Session ratings and message reports
-- **Runner** - Test scenarios for QA testing
+- **Runner** - Test scenarios for QA testing (Comprehensive Test Suite)
 - **API Usage** - AI API cost monitoring
 
 ---
@@ -382,5 +382,5 @@ This is expected behavior due to end-to-end encryption:
 
 For technical issues beyond this manual, contact the development team.
 
-**Version:** 1.8.0  
+**Version:** 1.8.2  
 **Last Updated:** February 2026

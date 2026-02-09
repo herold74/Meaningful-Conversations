@@ -1,9 +1,24 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.8.0
+**Version:** 1.8.2
 **Staging:** ✅ Deployed
 **Production:** Pending
+
+## Recent Changes (v1.8.2)
+
+### Platform Enhancements
+- **Responsive Admin UI:** Optimized the Admin Panel for mobile devices.
+- **Comprehensive Test Suite:** Added extensive tests for critical application paths.
+- **GDPR Compliance:** Removed encrypted transcript storage to minimize data retention and enhance privacy.
+- **Keyword Ambiguity Fixes:** Refined DPFL keyword detection to reduce false positives.
+
+## Recent Changes (v1.8.1)
+
+### Adaptive Intelligence
+- **Adaptive Keyword Weighting:** Enhanced DPFL logic to better recognize and weight user patterns.
+- **Cumulative Telemetry:** Implemented tracking across all frameworks for deeper coaching insights.
+- **Prompt Fixes:** Minor adjustments to system prompts for better consistency.
 
 ## Recent Changes (v1.8.0)
 

@@ -1,6 +1,6 @@
 {
   "name": "meaningful-conversations-backend",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Backend server for the Meaningful Conversations application.",
   "main": "server.js",
   "scripts": {
@@ -26,7 +26,8 @@
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.3",
     "marked": "^17.0.1",
-    "node-mailjet": "^6.0.5"
+    "node-mailjet": "^6.0.5",
+    "pm2": "^6.0.14"
   },
   "devDependencies": {
     "jest": "^30.2.0",
