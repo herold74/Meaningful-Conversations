@@ -86,9 +86,32 @@ const verifyEmailLimiter = rateLimit({
     },
 });
 
+/**
+ * Gemini (LLM) rate limiter - Prevents API quota abuse
+ * Authenticated users: 20 requests per minute (keyed by user ID)
+ * Guests: 10 requests per minute (keyed by IP)
+ */
+const geminiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: (req) => req.userId ? 20 : 10,
+    keyGenerator: (req) => req.userId ? `user_${req.userId}` : req.ip,
+    message: { 
+        error: 'Too many requests. Please slow down and try again in a moment.',
+        errorCode: 'RATE_LIMIT_GEMINI'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        const identifier = req.userId ? `user ${req.userId}` : `IP ${req.ip}`;
+        console.warn(`🚫 Gemini rate limit exceeded for ${identifier}`);
+        res.status(429).json(options.message);
+    },
+});
+
 module.exports = { 
     loginLimiter, 
     registerLimiter, 
     forgotPasswordLimiter,
-    verifyEmailLimiter
+    verifyEmailLimiter,
+    geminiLimiter
 };

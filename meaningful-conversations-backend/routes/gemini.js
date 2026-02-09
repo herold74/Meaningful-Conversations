@@ -19,6 +19,16 @@ import('@google/genai').then(({ GoogleGenAI }) => {
     googleAI = null;
 });
 
+// Timeout helper for async operations (prevents indefinite hangs)
+const withTimeout = (promise, timeoutMs, label = 'Operation') => {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`${label} timeout after ${timeoutMs}ms`)), timeoutMs)
+        )
+    ]);
+};
+
 // POST /api/gemini/translate
 router.post('/translate', optionalAuthMiddleware, async (req, res) => {
     const { subject, body, sourceLang = 'de', targetLang = 'en' } = req.body;
@@ -372,15 +382,19 @@ STRICTLY FORBIDDEN in this first message:
             config.systemInstruction = finalSystemInstruction;
         }
         
-        const response = await aiProviderService.generateContent({
-            model: modelName,
-            // For the initial message, we send an empty string to prompt the model's greeting.
-            // For subsequent messages, we send the entire chat history.
-            contents: isInitialMessage ? "" : modelHistory,
-            config: config,
-            context: 'chat', // Chat messages use chat context
-            userRegionPreference: userRegionPreference // User's EU/US preference
-        });
+        const response = await withTimeout(
+            aiProviderService.generateContent({
+                model: modelName,
+                // For the initial message, we send an empty string to prompt the model's greeting.
+                // For subsequent messages, we send the entire chat history.
+                contents: isInitialMessage ? "" : modelHistory,
+                config: config,
+                context: 'chat', // Chat messages use chat context
+                userRegionPreference: userRegionPreference // User's EU/US preference
+            }),
+            30000,
+            'Chat AI response'
+        );
         
         const durationMs = Date.now() - startTime;
         const text = response.text;
@@ -532,6 +546,7 @@ STRICTLY FORBIDDEN in this first message:
         console.error('AI API error in /chat/send-message:', error);
         
         const durationMs = Date.now() - startTime;
+        const isTimeout = error.message && error.message.includes('timeout');
         
         // Track failed API call
         await trackApiUsage({
@@ -547,7 +562,11 @@ STRICTLY FORBIDDEN in this first message:
             errorMessage: error.message,
         });
         
-        res.status(500).json({ error: 'Failed to get response from AI model.' });
+        if (isTimeout) {
+            res.status(504).json({ error: 'The AI model took too long to respond. Please try again.' });
+        } else {
+            res.status(500).json({ error: 'Failed to get response from AI model.' });
+        }
     }
 });
 
