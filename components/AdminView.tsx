@@ -1272,8 +1272,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             <div className="space-y-4">
                 {/* New Dynamic Test Runner Section - MOVED TO TOP */}
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
-                    <div className="flex items-center justify-between">
-                        <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">
                                 🧪 {t('admin_dynamic_runner_title')}
                             </h3>
@@ -1281,12 +1281,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 {t('admin_dynamic_runner_desc')}
                             </p>
                         </div>
-                        <button
-                            onClick={() => setShowDynamicTestRunner(true)}
-                            className="px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-colors"
-                        >
-                            🚀 {t('admin_dynamic_runner_start')}
-                        </button>
+                        <div className="flex justify-end shrink-0">
+                            <button
+                                onClick={() => setShowDynamicTestRunner(true)}
+                                className="w-40 px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-colors"
+                            >
+                                🚀 {t('admin_dynamic_runner_start')}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -1294,8 +1296,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                 {onTestComfortCheck && (
                     <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div className="flex-1 min-w-0">
                                     <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
                                         {t('admin_comfort_test_title')}
                                     </h3>
@@ -1303,12 +1305,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         {t('admin_comfort_test_desc')}
                                     </p>
                                 </div>
-                                <button
-                                    onClick={() => onTestComfortCheck(true)}
-                                    className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
-                                >
-                                    Comfort Check
-                                </button>
+                                <div className="flex justify-end shrink-0">
+                                    <button
+                                        onClick={() => onTestComfortCheck(true)}
+                                        className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
+                                    >
+                                        Comfort Check
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 italic">
                                 {t('admin_comfort_test_note')}
@@ -1322,26 +1326,28 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')} {t('admin_runner_static')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
                     
-                    <div className="flex flex-col sm:flex-row items-stretch gap-3">
-                        <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="flex-1 min-w-0">
                             <label htmlFor="scenario-select" className="sr-only">{t('admin_runner_select_scenario')}</label>
                             <select 
                                 id="scenario-select" 
                                 value={selectedScenarioId} 
                                 onChange={e => setSelectedScenarioId(e.target.value)} 
-                                className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                                className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-primary"
                             >
                                 {testScenarios.map(scenario => (
                                     <option key={scenario.id} value={scenario.id}>{scenario.name}</option>
                                 ))}
                             </select>
                         </div>
-                        <button
-                            onClick={handleRunClick}
-                            className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-sm"
-                        >
-                            {t('admin_runner_run')}
-                        </button>
+                        <div className="flex justify-end shrink-0">
+                            <button
+                                onClick={handleRunClick}
+                                className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-sm"
+                            >
+                                {t('admin_runner_run')}
+                            </button>
+                        </div>
                     </div>
                     
                     {/* Info box for DPC/DPFL tests */}
