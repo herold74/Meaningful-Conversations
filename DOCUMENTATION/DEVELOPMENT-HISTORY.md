@@ -469,6 +469,18 @@ git checkout v1.4.7
   - **Personality Simulator:** Test runner to simulate client interactions with specific personality profiles
   - Enhanced Admin Panel for testing DPC/DPFL logic
 
+**Updates (v1.8.1 - v1.8.2):**
+- ✅ **Adaptive Intelligence**
+  - **Adaptive Keyword Weighting:** Improved DPFL logic to better recognize user patterns.
+  - **Cumulative Telemetry:** Tracking across all frameworks for deeper insights.
+  - **Keyword Ambiguity Fixes:** Refined detection to reduce false positives.
+
+- ✅ **Platform Robustness**
+  - **Comprehensive Test Suite:** Expanded test coverage for critical paths.
+  - **Responsive Admin UI:** Optimized admin panel for mobile management.
+  - **GDPR Compliance:** Removed encrypted transcript storage to minimize data retention.
+  - **Comfort Check UX:** Improved flow for emotional safety checks.
+
 **Technical Implementation:**
 - `services/capacitorAudioService.ts` - Native audio abstraction
 - `services/dynamicPromptController.js` - Complex prompt assembly logic
@@ -758,7 +770,7 @@ The preserved historical branches serve as a testament to the iterative developm
 ---
 
 **Last Updated**: February 2026
-**Current Version**: 1.8.0 (main branch)
+**Current Version**: 1.8.2 (main branch)
 **Historical Branches**: v1.0.0, v1.1.0, v1.4.5, v1.4.7, v1.4.7-(Server-Edition), v1.4.9 (pre-reset)
 
 ---
