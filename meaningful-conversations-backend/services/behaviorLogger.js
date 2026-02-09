@@ -1,6 +1,9 @@
 // Behavior Logger for DPFL (Dynamic Profile Feedback Loop)
 // Analyzes user messages for personality dimension markers
 // Uses bidirectional keywords (high/low) for accurate profile refinement
+// Phase 2a: Enhanced with adaptive keyword weighting + sentiment analysis
+
+const adaptiveWeighting = require('./adaptiveKeywordWeighting');
 
 /**
  * Bidirectional keyword dictionaries for Riemann-Thomann dimensions
@@ -13,100 +16,174 @@ const RIEMANN_KEYWORDS = {
   de: {
     naehe: {
       high: [
+        // Fachbegriffe
         'verbundenheit', 'beziehung', 'harmonie', 'zusammenhalt', 'geborgenheit',
         'wärme', 'vertrauen', 'nähe', 'intimität', 'gemeinsam', 'team',
         'empathie', 'fürsorge', 'zugehörigkeit', 'miteinander', 'emotional',
-        'gefühl', 'persönlich', 'herzlich', 'liebevoll'
+        'gefühl', 'persönlich', 'herzlich', 'liebevoll',
+        // Alltagssprache
+        'zusammen sein', 'füreinander da', 'kuscheln', 'umarmen', 'vermisse',
+        'brauche jemanden', 'nicht allein', 'enger kontakt', 'herzensmenschen'
       ],
       low: [
+        // Bestehend
         'distanziert', 'abstand', 'zurückgezogen', 'isoliert', 'einsam',
-        'kühl', 'unpersönlich', 'gleichgültig', 'oberflächlich'
+        'kühl', 'unpersönlich', 'gleichgültig', 'oberflächlich',
+        // Erweitert (+6)
+        'halte distanz', 'brauche abstand', 'allein sein', 'für mich', 'unnahbar',
+        'einzelgänger', 'kontaktscheu', 'abweisend', 'reserviert', 'verschlossen',
+        'mauer', 'emotional verschlossen', 'brauche raum', 'lieber alleine'
       ]
     },
     distanz: {
       high: [
+        // Fachbegriffe
         'autonomie', 'freiheit', 'unabhängigkeit', 'eigenständig', 'abgrenzung',
         'privatsphäre', 'selbstständig', 'allein', 'rational', 'logik',
         'objektiv', 'sachlich', 'analyse', 'fakten', 'daten', 'professionell',
-        'neutral', 'kritisch', 'fokussiert', 'effizient'
+        'neutral', 'kritisch', 'fokussiert', 'effizient',
+        // Alltagssprache
+        'mein ding machen', 'lass mich in ruhe', 'mein eigener raum',
+        'kopfmensch', 'nüchtern betrachtet', 'auf distanz', 'brauche freiraum'
       ],
       low: [
+        // Bestehend
         'abhängig', 'angewiesen', 'gebunden', 'verpflichtet', 'eingeengt',
-        'klammern', 'unselbstständig', 'hilflos'
+        'klammern', 'unselbstständig', 'hilflos',
+        // Erweitert (+7)
+        'brauche andere', 'kann nicht allein', 'halte das nicht aus', 'überfordert allein',
+        'unsicher ohne', 'brauche bestätigung', 'verlustangst', 'trennungsangst',
+        'verlassen', 'alleinsein', 'orientierungslos', 'haltlos', 'halt brauchen'
       ]
     },
     dauer: {
       high: [
+        // Fachbegriffe
         'sicherheit', 'stabilität', 'planung', 'ordnung', 'verlässlichkeit',
         'routine', 'struktur', 'beständig', 'vorhersehbar', 'systematisch',
         'organisiert', 'disziplin', 'kontinuität', 'tradition', 'gewohnheit',
-        'langfristig', 'zuverlässig', 'konstant', 'methodisch'
+        'langfristig', 'zuverlässig', 'konstant', 'methodisch',
+        // Alltagssprache
+        'auf nummer sicher', 'wie immer', 'bewährt', 'verlässlich', 'fester plan',
+        'vorausplanen', 'kein risiko', 'lieber sicher', 'geordnet', 'alles unter kontrolle'
       ],
       low: [
+        // Bestehend
         'unsicherheit', 'chaos', 'planlos', 'unbeständig', 'wechselhaft',
-        'unzuverlässig', 'unstrukturiert', 'instabil', 'unberechenbar'
+        'unzuverlässig', 'unstrukturiert', 'instabil', 'unberechenbar',
+        // Erweitert (+6)
+        'kein plan', 'mal sehen', 'spontan entscheiden', 'egal wie', 'unverbindlich',
+        'aufgeschoben', 'vergesse oft', 'keine ahnung', 'mache mir keine gedanken',
+        'locker bleiben', 'nichts festlegen', 'unvorhersehbar', 'sprunghaft'
       ]
     },
     wechsel: {
       high: [
+        // Fachbegriffe
         'veränderung', 'abwechslung', 'neues', 'spontaneität', 'flexibilität',
         'dynamik', 'improvisation', 'experimentier', 'kreativ', 'innovation',
         'abenteuer', 'überraschung', 'anpassung', 'beweglich', 'variieren',
-        'anders', 'aufregend', 'neugierig', 'wandel'
+        'anders', 'aufregend', 'neugierig', 'wandel',
+        // Alltagssprache
+        'mal schauen', 'was neues', 'abwechslungsreich', 'langweilt mich schnell',
+        'immer was anderes', 'lass uns was neues probieren', 'spontan', 'locker'
       ],
       low: [
+        // Bestehend
         'festgefahren', 'starr', 'monoton', 'langweilig', 'eingerostet',
-        'unflexibel', 'stur', 'träge', 'statisch'
+        'unflexibel', 'stur', 'träge', 'statisch',
+        // Erweitert (+6)
+        'veränderung macht mir angst', 'lieber beim alten', 'bloß nicht ändern',
+        'hab angst vor neuem', 'das war schon immer so', 'verunsichert',
+        'risiko vermeiden', 'kein risiko', 'muss nicht sein', 'gewohnheitstier',
+        'will nichts neues', 'überfordert', 'ängstlich'
       ]
     }
   },
   en: {
     naehe: {
       high: [
+        // Formal
         'connection', 'relationship', 'harmony', 'togetherness', 'belonging',
         'warmth', 'trust', 'closeness', 'intimacy', 'together', 'team',
         'empathy', 'care', 'community', 'emotional', 'feeling', 'personal',
-        'heartfelt', 'loving', 'bonding'
+        'heartfelt', 'loving', 'bonding',
+        // Colloquial
+        'being together', 'there for each other', 'cuddle', 'hug', 'miss you',
+        'need someone', 'not alone', 'close contact', 'dear ones'
       ],
       low: [
+        // Existing
         'distant', 'detached', 'withdrawn', 'isolated', 'lonely',
-        'cold', 'impersonal', 'indifferent', 'superficial'
+        'cold', 'impersonal', 'indifferent', 'superficial',
+        // Expanded (+6)
+        'keep distance', 'need space', 'being alone', 'on my own', 'unapproachable',
+        'loner', 'avoid contact', 'stand-offish', 'reserved', 'closed off',
+        'wall up', 'emotionally closed', 'need room', 'rather alone'
       ]
     },
     distanz: {
       high: [
+        // Formal
         'autonomy', 'freedom', 'independence', 'self-reliant', 'boundaries',
         'privacy', 'autonomous', 'alone', 'rational', 'logic',
         'objective', 'factual', 'analysis', 'facts', 'data', 'professional',
-        'neutral', 'critical', 'focused', 'efficient'
+        'neutral', 'critical', 'focused', 'efficient',
+        // Colloquial
+        'do my own thing', 'leave me alone', 'my own space',
+        'head person', 'looking at it soberly', 'at a distance', 'need freedom'
       ],
       low: [
+        // Existing
         'dependent', 'reliant', 'bound', 'obligated', 'constrained',
-        'clingy', 'helpless', 'needy'
+        'clingy', 'helpless', 'needy',
+        // Expanded (+7)
+        'need others', 'cannot be alone', 'cannot handle this', 'overwhelmed alone',
+        'insecure without', 'need validation', 'fear of loss', 'separation anxiety',
+        'abandoned', 'being alone', 'disoriented', 'unanchored', 'need support'
       ]
     },
     dauer: {
       high: [
+        // Formal
         'security', 'stability', 'planning', 'order', 'reliability',
         'routine', 'structure', 'consistent', 'predictable', 'systematic',
         'organized', 'discipline', 'continuity', 'tradition', 'habit',
-        'long-term', 'dependable', 'constant', 'methodical'
+        'long-term', 'dependable', 'constant', 'methodical',
+        // Colloquial
+        'play it safe', 'as always', 'tried and true', 'reliable', 'fixed plan',
+        'plan ahead', 'no risk', 'rather safe', 'orderly', 'everything under control'
       ],
       low: [
+        // Existing
         'insecurity', 'chaos', 'unplanned', 'unstable', 'erratic',
-        'unreliable', 'unstructured', 'volatile', 'unpredictable'
+        'unreliable', 'unstructured', 'volatile', 'unpredictable',
+        // Expanded (+6)
+        'no plan', 'we will see', 'decide spontaneously', 'whatever', 'non-committal',
+        'postponed', 'often forget', 'no idea', 'not worried about it',
+        'stay loose', 'keep options open', 'unpredictable', 'erratic'
       ]
     },
     wechsel: {
       high: [
+        // Formal
         'change', 'variety', 'novelty', 'spontaneity', 'flexibility',
         'dynamic', 'improvisation', 'experiment', 'creative', 'innovation',
         'adventure', 'surprise', 'adaptation', 'agile', 'diverse',
-        'different', 'exciting', 'curious', 'transformation'
+        'different', 'exciting', 'curious', 'transformation',
+        // Colloquial
+        'let us see', 'something new', 'full of variety', 'get bored quickly',
+        'always something different', 'let us try something new', 'spontaneous', 'easy going'
       ],
       low: [
+        // Existing
         'stuck', 'rigid', 'monotonous', 'boring', 'stagnant',
-        'inflexible', 'stubborn', 'sluggish', 'static'
+        'inflexible', 'stubborn', 'sluggish', 'static',
+        // Expanded (+6)
+        'change scares me', 'rather stick with', 'better not change',
+        'afraid of new things', 'always been this way', 'unsettled',
+        'avoid risk', 'no risk', 'not necessary', 'creature of habit',
+        'do not want new', 'overwhelmed', 'anxious'
       ]
     }
   }
@@ -129,164 +206,294 @@ const SD_KEYWORDS = {
   de: {
     turquoise: {
       high: [
+        // Fachbegriffe
         'ganzheitlich', 'global', 'vernetzt', 'ökologisch', 'kollektiv', 'spirituell',
         'bewusstsein', 'transzendent', 'planetar', 'synthese', 'integral', 'holistisch',
-        'universell', 'kosmos', 'einheit', 'verbunden', 'ökosystem', 'symbiose'
+        'universell', 'kosmos', 'einheit', 'verbunden', 'ökosystem', 'symbiose',
+        // Alltagssprache
+        'alles hängt zusammen', 'big picture', 'vernetzt denken', 'globale verantwortung',
+        'wir sind alle eins', 'natur und mensch', 'nachhaltigkeit', 'größeres ganzes'
       ],
       low: [
-        'isoliert', 'fragmentiert', 'kurzfristig', 'materialistisch', 'egoistisch'
+        'isoliert', 'fragmentiert', 'kurzfristig', 'materialistisch', 'egoistisch',
+        // Erweitert
+        'egal was andere denken', 'nur für mich', 'nach mir die sintflut', 'nicht mein problem',
+        'kurzsichtig', 'eng gedacht', 'nur mein umfeld', 'gleichgültig gegenüber umwelt',
+        'konsumieren', 'wegwerfmentalität'
       ]
     },
     yellow: {
       high: [
+        // Fachbegriffe
         'systemisch', 'komplex', 'integriert', 'flexibel', 'multiperspektiv', 'autonom',
         'wissen', 'kompetenz', 'funktional', 'adaptiv', 'paradox', 'emergent',
-        'dynamisch', 'vernetzt', 'meta-ebene', 'kontextabhängig', 'selbstorganisiert'
+        'dynamisch', 'vernetzt', 'meta-ebene', 'kontextabhängig', 'selbstorganisiert',
+        // Alltagssprache
+        'kommt drauf an', 'sowohl als auch', 'situationsabhängig', 'flexibel denken',
+        'mehrere perspektiven', 'von allen seiten betrachten', 'hängt vom kontext ab',
+        'jeder hat recht auf seine art', 'verschiedene wahrheiten'
       ],
       low: [
-        'dogmatisch', 'starr', 'eindimensional', 'simplifiziert', 'ideologisch'
+        'dogmatisch', 'starr', 'eindimensional', 'simplifiziert', 'ideologisch',
+        // Erweitert
+        'schwarz-weiß', 'entweder oder', 'nur eine wahrheit', 'nicht diskutierbar',
+        'meine meinung steht fest', 'das ist halt so', 'keine alternative',
+        'tunnel', 'scheuklappen', 'engstirnig'
       ]
     },
     green: {
       high: [
         'gemeinschaft', 'gleichheit', 'harmonie', 'konsens', 'inklusion', 'empathie',
         'vielfalt', 'partizipation', 'dialog', 'wertschätzung', 'kooperation', 'fair',
-        'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität', 'gefühl'
+        'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität', 'gefühl',
+        // Alltagssprache
+        'alle mitnehmen', 'gemeinsam entscheiden', 'jeder ist gleich wichtig',
+        'zuhören', 'auf augenhöhe', 'miteinander', 'füreinander', 'fair play',
+        'zusammen schaffen', 'jede stimme zählt'
       ],
       low: [
-        'hierarchie', 'ausgrenzung', 'konkurrenz', 'dominanz', 'elitär', 'ausbeutung'
+        'hierarchie', 'ausgrenzung', 'konkurrenz', 'dominanz', 'elitär', 'ausbeutung',
+        // Erweitert
+        'der stärkere gewinnt', 'nicht mein problem', 'soll jeder selbst schauen',
+        'leistungsgesellschaft', 'aussondern', 'schwäche ausnutzen',
+        'oben und unten', 'gewinner und verlierer', 'ungleichheit'
       ]
     },
     orange: {
       high: [
         'erfolg', 'leistung', 'fortschritt', 'wettbewerb', 'gewinn', 'effizienz',
         'strategie', 'innovation', 'karriere', 'optimierung', 'ziele', 'achievement',
-        'professionell', 'wissenschaft', 'rationalität', 'wachstum', 'technologie'
+        'professionell', 'wissenschaft', 'rationalität', 'wachstum', 'technologie',
+        // Alltagssprache
+        'vorankommen', 'besser werden', 'das beste rausholen', 'weiterkommen',
+        'aufsteigen', 'smart arbeiten', 'ergebnisorientiert', 'machbar',
+        'problem lösen', 'daten zeigen', 'evidenzbasiert', 'rennen machen'
       ],
       low: [
-        'mittelmäßigkeit', 'stagnation', 'ineffizient', 'unprofessionell', 'amateurhaft'
+        'mittelmäßigkeit', 'stagnation', 'ineffizient', 'unprofessionell', 'amateurhaft',
+        // Erweitert
+        'reicht doch', 'wozu mehr', 'egal ob gut oder schlecht', 'keine ambitionen',
+        'bringt doch nichts', 'warum anstrengen', 'aufgeben', 'resigniert',
+        'aussichtslos', 'nicht der mühe wert'
       ]
     },
     blue: {
       high: [
+        // Bestehend
         'ordnung', 'regeln', 'pflicht', 'disziplin', 'autorität', 'tradition',
         'prinzipien', 'verantwortung', 'loyal', 'struktur', 'moral', 'gesetz',
-        'rechtmäßig', 'korrekt', 'wahrheit', 'glauben', 'sinn', 'zweck'
+        'rechtmäßig', 'korrekt', 'wahrheit', 'glauben', 'sinn', 'zweck',
+        // Kulturell vielfältige Blue-Ausdrucksformen
+        'hingabe', 'opferbereitschaft', 'gemeinschaftsdienst', 'tradition bewahren',
+        'prinzipien treu bleiben', 'pflichterfüllung', 'ehrgefühl', 'anstand',
+        'so gehört sich das', 'richtig und falsch', 'das macht man so'
       ],
       low: [
-        'chaos', 'regellos', 'unverantwortlich', 'undiszipliniert', 'anarchisch'
+        'chaos', 'regellos', 'unverantwortlich', 'undiszipliniert', 'anarchisch',
+        // Erweitert
+        'regeln sind dazu da gebrochen zu werden', 'ist mir egal', 'ohne plan',
+        'keine verpflichtung', 'keinem rechenschaft schuldig', 'mache was ich will',
+        'pflicht ist ein altes konzept', 'lebe im moment', 'keine moral'
       ]
     },
     red: {
       high: [
+        // Bestehend
         'macht', 'stärke', 'durchsetzung', 'kontrolle', 'dominanz', 'respekt',
         'sofort', 'impuls', 'aktion', 'eroberung', 'unabhängig', 'mutig',
-        'direkt', 'kämpfen', 'willen', 'energie', 'spontan', 'ungeduld'
+        'direkt', 'kämpfen', 'willen', 'energie', 'spontan', 'ungeduld',
+        // Konstruktive Red-Keywords
+        'für mich einstehen', 'grenzen setzen', 'entschlossen', 'selbstbewusst handeln',
+        'mut zeigen', 'nicht mit mir', 'sage nein', 'weiß was ich will',
+        'nehme mir was mir zusteht', 'lasse mich nicht einschüchtern', 'power'
       ],
       low: [
-        'schwach', 'unterwürfig', 'machtlos', 'ohnmächtig', 'passiv'
+        'schwach', 'unterwürfig', 'machtlos', 'ohnmächtig', 'passiv',
+        // Erweitert
+        'traue mich nicht', 'lasse alles mit mir machen', 'kann mich nicht wehren',
+        'sage immer ja', 'zu nett', 'lasse mich ausnutzen', 'kein rückgrat',
+        'wehrlos', 'hilflos', 'resigniert'
       ]
     },
     purple: {
       high: [
         'zugehörigkeit', 'ritual', 'tradition', 'ahnen', 'mystisch', 'stamm',
         'sippe', 'familie', 'schutz', 'magie', 'opfer', 'gemeinschaft',
-        'brauch', 'zeremonie', 'heilig', 'verbunden', 'geborgenheit'
+        'brauch', 'zeremonie', 'heilig', 'verbunden', 'geborgenheit',
+        // Alltagssprache
+        'meine leute', 'wo ich herkomme', 'familiäre wurzeln', 'heimat',
+        'zusammengehören', 'unsere art', 'das haben wir schon immer so gemacht'
       ],
       low: [
-        'entwurzelt', 'traditionslos', 'heimatlos', 'entfremdet'
+        'entwurzelt', 'traditionslos', 'heimatlos', 'entfremdet',
+        // Erweitert
+        'keine wurzeln', 'gehöre nirgends hin', 'fremd', 'verloren',
+        'kein zuhause', 'bindungslos', 'nirgends angekommen', 'auf der suche',
+        'abgeschnitten', 'keine familie'
       ]
     },
     beige: {
       high: [
         'überleben', 'instinkt', 'grundbedürfnis', 'sicherheit', 'schutz',
         'nahrung', 'schlaf', 'gesundheit', 'körper', 'existenz', 'physisch',
-        'wohlbefinden', 'lebensnotwendig', 'überlebenswichtig'
+        'wohlbefinden', 'lebensnotwendig', 'überlebenswichtig',
+        // Alltagssprache
+        'erstmal essen', 'bin müde', 'brauche schlaf', 'mein körper sagt',
+        'grundbedürfnisse', 'erstmal zur ruhe kommen', 'funktionieren'
       ],
       low: [
-        'überfluss', 'komfort', 'luxus'
+        'überfluss', 'komfort', 'luxus',
+        // Erweitert
+        'brauche nichts', 'alles egal', 'materielles unwichtig',
+        'über den dingen stehen', 'körper ignorieren', 'geist über materie',
+        'asketisch', 'genügsam', 'minimalistisch', 'kein bedürfnis'
       ]
     }
   },
   en: {
     turquoise: {
       high: [
+        // Formal
         'holistic', 'global', 'interconnected', 'ecological', 'collective', 'spiritual',
         'consciousness', 'transcendent', 'planetary', 'synthesis', 'integral',
-        'universal', 'cosmos', 'unity', 'ecosystem', 'symbiosis'
+        'universal', 'cosmos', 'unity', 'ecosystem', 'symbiosis',
+        // Colloquial
+        'everything is connected', 'big picture', 'think holistically', 'global responsibility',
+        'we are all one', 'nature and humanity', 'sustainability', 'greater whole'
       ],
       low: [
-        'isolated', 'fragmented', 'short-term', 'materialistic', 'selfish'
+        'isolated', 'fragmented', 'short-term', 'materialistic', 'selfish',
+        // Expanded
+        'do not care what others think', 'only for me', 'not my problem',
+        'short-sighted', 'narrow-minded', 'only my circle', 'indifferent to environment',
+        'consume', 'throwaway mentality'
       ]
     },
     yellow: {
       high: [
+        // Formal
         'systemic', 'complex', 'integrated', 'flexible', 'multiperspective', 'autonomous',
         'knowledge', 'competence', 'functional', 'adaptive', 'paradox', 'emergent',
-        'dynamic', 'networked', 'meta-level', 'contextual', 'self-organized'
+        'dynamic', 'networked', 'meta-level', 'contextual', 'self-organized',
+        // Colloquial
+        'it depends', 'both and', 'context-dependent', 'think flexibly',
+        'multiple perspectives', 'look at it from all sides', 'depends on context',
+        'everyone is right in their own way', 'different truths'
       ],
       low: [
-        'dogmatic', 'rigid', 'one-dimensional', 'simplified', 'ideological'
+        'dogmatic', 'rigid', 'one-dimensional', 'simplified', 'ideological',
+        // Expanded
+        'black and white', 'either or', 'only one truth', 'non-negotiable',
+        'my mind is made up', 'that is just how it is', 'no alternative',
+        'tunnel vision', 'blinders on', 'narrow-minded'
       ]
     },
     green: {
       high: [
         'community', 'equality', 'harmony', 'consensus', 'inclusion', 'empathy',
         'diversity', 'participation', 'dialogue', 'appreciation', 'cooperation', 'fair',
-        'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity', 'feeling'
+        'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity', 'feeling',
+        // Colloquial
+        'include everyone', 'decide together', 'everyone matters equally',
+        'listen', 'eye level', 'together', 'for each other', 'fair play',
+        'achieve together', 'every voice counts'
       ],
       low: [
-        'hierarchy', 'exclusion', 'competition', 'dominance', 'elitist', 'exploitation'
+        'hierarchy', 'exclusion', 'competition', 'dominance', 'elitist', 'exploitation',
+        // Expanded
+        'survival of the fittest', 'not my problem', 'everyone for themselves',
+        'meritocracy', 'weed out', 'exploit weakness',
+        'top and bottom', 'winners and losers', 'inequality'
       ]
     },
     orange: {
       high: [
         'success', 'achievement', 'progress', 'competition', 'profit', 'efficiency',
         'strategy', 'innovation', 'career', 'optimization', 'goals',
-        'professional', 'science', 'rationality', 'growth', 'technology'
+        'professional', 'science', 'rationality', 'growth', 'technology',
+        // Colloquial
+        'get ahead', 'get better', 'make the most of it', 'move forward',
+        'climb the ladder', 'work smart', 'results-driven', 'doable',
+        'problem solving', 'data shows', 'evidence-based', 'win the race'
       ],
       low: [
-        'mediocrity', 'stagnation', 'inefficient', 'unprofessional', 'amateur'
+        'mediocrity', 'stagnation', 'inefficient', 'unprofessional', 'amateur',
+        // Expanded
+        'good enough', 'why bother', 'does not matter', 'no ambition',
+        'pointless', 'why try', 'give up', 'resigned',
+        'hopeless', 'not worth the effort'
       ]
     },
     blue: {
       high: [
+        // Existing
         'order', 'rules', 'duty', 'discipline', 'authority', 'tradition',
         'principles', 'responsibility', 'loyal', 'structure', 'moral', 'law',
-        'rightful', 'correct', 'truth', 'belief', 'meaning', 'purpose'
+        'rightful', 'correct', 'truth', 'belief', 'meaning', 'purpose',
+        // Culturally diverse Blue expressions
+        'devotion', 'self-sacrifice', 'community service', 'preserve tradition',
+        'stay true to principles', 'fulfill duties', 'sense of honor', 'decency',
+        'that is how it should be', 'right and wrong', 'the proper way'
       ],
       low: [
-        'chaos', 'lawless', 'irresponsible', 'undisciplined', 'anarchic'
+        'chaos', 'lawless', 'irresponsible', 'undisciplined', 'anarchic',
+        // Expanded
+        'rules are meant to be broken', 'do not care', 'no plan',
+        'no obligation', 'accountable to no one', 'do what I want',
+        'duty is outdated', 'live in the moment', 'no morals'
       ]
     },
     red: {
       high: [
+        // Existing
         'power', 'strength', 'assertion', 'control', 'dominance', 'respect',
         'immediate', 'impulse', 'action', 'conquest', 'independent', 'brave',
-        'direct', 'fight', 'will', 'energy', 'spontaneous', 'impatient'
+        'direct', 'fight', 'will', 'energy', 'spontaneous', 'impatient',
+        // Constructive Red
+        'stand up for myself', 'set boundaries', 'decisive', 'act confidently',
+        'show courage', 'not with me', 'say no', 'know what I want',
+        'claim what is mine', 'will not be intimidated', 'power'
       ],
       low: [
-        'weak', 'submissive', 'powerless', 'helpless', 'passive'
+        'weak', 'submissive', 'powerless', 'helpless', 'passive',
+        // Expanded
+        'do not dare', 'let everyone walk over me', 'cannot defend myself',
+        'always say yes', 'too nice', 'let others take advantage', 'no backbone',
+        'defenseless', 'helpless', 'resigned'
       ]
     },
     purple: {
       high: [
         'belonging', 'ritual', 'tradition', 'ancestors', 'mystical', 'tribe',
         'clan', 'family', 'protection', 'magic', 'sacrifice', 'community',
-        'custom', 'ceremony', 'sacred', 'connected', 'security'
+        'custom', 'ceremony', 'sacred', 'connected', 'security',
+        // Colloquial
+        'my people', 'where I come from', 'family roots', 'homeland',
+        'belong together', 'our way', 'we have always done it this way'
       ],
       low: [
-        'uprooted', 'traditionless', 'homeless', 'alienated'
+        'uprooted', 'traditionless', 'homeless', 'alienated',
+        // Expanded
+        'no roots', 'do not belong anywhere', 'stranger', 'lost',
+        'no home', 'unattached', 'never settled', 'searching',
+        'cut off', 'no family'
       ]
     },
     beige: {
       high: [
         'survival', 'instinct', 'basic needs', 'safety', 'protection',
         'food', 'sleep', 'health', 'body', 'existence', 'physical',
-        'wellbeing', 'essential', 'vital'
+        'wellbeing', 'essential', 'vital',
+        // Colloquial
+        'need to eat first', 'am tired', 'need sleep', 'my body tells me',
+        'basic needs', 'need to rest first', 'just functioning'
       ],
       low: [
-        'abundance', 'comfort', 'luxury'
+        'abundance', 'comfort', 'luxury',
+        // Expanded
+        'do not need anything', 'does not matter', 'material things unimportant',
+        'above worldly things', 'ignore body', 'mind over matter',
+        'ascetic', 'frugal', 'minimalist', 'no needs'
       ]
     }
   }
@@ -296,15 +503,23 @@ const BIG5_KEYWORDS = {
   de: {
     openness: {
       high: [
+        // Fachbegriffe
         'kreativ', 'neugierig', 'experimentierfreudig', 'fantasievoll', 'künstlerisch',
         'offen', 'innovativ', 'visionär', 'originell', 'unkonventionell',
         'philosophisch', 'abstrakt', 'inspiriert', 'intellektuell', 'tiefgründig',
-        'aufgeschlossen', 'ideenreich', 'träumerisch', 'erfindungsreich'
+        'aufgeschlossen', 'ideenreich', 'träumerisch', 'erfindungsreich',
+        // Alltagssprache (sensorisch + emotional)
+        'ausprobieren', 'entdecken', 'experimentell', 'erleben', 'erkunden',
+        'mal was anderes', 'neues lernen', 'spannend finden', 'begeistert',
+        'vielseitig', 'abwechslung', 'horizont erweitern', 'reisen'
       ],
       low: [
         'traditionell', 'konventionell', 'konservativ', 'praktisch', 'routiniert',
         'bodenständig', 'realistisch', 'pragmatisch', 'gewohnt', 'bewährt',
-        'einfach', 'unkompliziert', 'nüchtern'
+        'einfach', 'unkompliziert', 'nüchtern',
+        // Alltagssprache
+        'bleibe lieber beim alten', 'muss nicht sein', 'kenne mich aus',
+        'funktioniert doch', 'wozu ändern', 'lieber sicher'
       ]
     },
     conscientiousness: {
@@ -312,25 +527,42 @@ const BIG5_KEYWORDS = {
         'organisiert', 'pünktlich', 'strukturiert', 'diszipliniert', 'gewissenhaft',
         'zuverlässig', 'ordentlich', 'geplant', 'sorgfältig', 'pflichtbewusst',
         'verantwortungsvoll', 'gründlich', 'systematisch', 'methodisch', 'genau',
-        'akribisch', 'termingerecht', 'effizient', 'zielorientiert'
+        'akribisch', 'termingerecht', 'effizient', 'zielorientiert',
+        // Alltagssprache
+        'to-do-liste', 'alles im griff', 'vorausplanen', 'nichts vergessen',
+        'rechtzeitig', 'fertig machen', 'aufgeräumt'
       ],
       low: [
+        // Bestehend (neutraler formuliert)
         'spontan', 'chaotisch', 'impulsiv', 'aufschieben', 'vergesslich',
-        'unorganisiert', 'nachlässig', 'planlos', 'unordentlich', 'schlampig',
-        'unpünktlich', 'unzuverlässig', 'zerstreut'
+        'unorganisiert', 'planlos', 'unordentlich', 'zerstreut',
+        // Neutralere Alternativen (statt "schlampig", "nachlässig", "unzuverlässig")
+        'kreativ-chaotisch', 'intuitiv', 'prozessorientiert', 'flexibel',
+        'pragmatisch', 'frei von regeln', 'locker', 'ungezwungen',
+        'mache mir keine gedanken', 'kommt wie es kommt', 'auf den letzten drücker',
+        'vergesse termine', 'nicht so genau', 'eher unstrukturiert'
       ]
     },
     extraversion: {
       high: [
+        // Bestehend
         'gesellig', 'gesprächig', 'energiegeladen', 'enthusiastisch', 'aktiv',
         'kontaktfreudig', 'aufgeschlossen', 'lebhaft', 'unternehmungslustig',
         'redselig', 'selbstbewusst', 'dominant', 'party', 'ausgehen',
-        'menschen', 'treffen', 'sozial', 'kommunikativ'
+        'menschen', 'treffen', 'sozial', 'kommunikativ',
+        // Berufliche / alltägliche Extraversion
+        'präsentieren', 'vernetzen', 'mitreißen', 'moderieren', 'rede gerne',
+        'offen auf leute zu', 'gerne unter leuten', 'team-player', 'wortführer',
+        'initiative ergreifen', 'smalltalk', 'netzwerken', 'brauche austausch'
       ],
       low: [
         'ruhig', 'zurückhaltend', 'introvertiert', 'nachdenklich', 'still',
         'beobachtend', 'schüchtern', 'reserviert', 'verschlossen', 'einzelgänger',
-        'allein', 'in sich gekehrt', 'wortkarg'
+        'allein', 'in sich gekehrt', 'wortkarg',
+        // Alltagssprache
+        'lieber zuhause', 'brauche meine ruhe', 'bin gerne für mich',
+        'telefonieren ungern', 'große gruppen anstrengend', 'beobachte lieber',
+        'rede nicht so viel', 'brauche zeit für mich'
       ]
     },
     agreeableness: {
@@ -338,40 +570,66 @@ const BIG5_KEYWORDS = {
         'hilfsbereit', 'kooperativ', 'vertrauensvoll', 'freundlich', 'mitfühlend',
         'harmoniebedürftig', 'einfühlsam', 'warmherzig', 'großzügig', 'nachgiebig',
         'rücksichtsvoll', 'tolerant', 'verständnisvoll', 'geduldig', 'fürsorglich',
-        'bescheiden', 'höflich', 'respektvoll', 'unterstützend'
+        'bescheiden', 'höflich', 'respektvoll', 'unterstützend',
+        // Alltagssprache
+        'gerne helfen', 'für andere da sein', 'nehme rücksicht', 'jedem eine chance',
+        'streit vermeiden', 'nachgeben', 'kompromiss finden'
       ],
       low: [
         'kritisch', 'wettbewerbsorientiert', 'skeptisch', 'direkt', 'konfrontativ',
         'durchsetzungsstark', 'streitlustig', 'misstrauisch', 'egozentrisch',
-        'kompromisslos', 'hartnäckig', 'unnachgiebig', 'fordernd'
+        'kompromisslos', 'hartnäckig', 'unnachgiebig', 'fordernd',
+        // Neutralere Alltagssprache
+        'sage meine meinung', 'klar und deutlich', 'nehme kein blatt vor den mund',
+        'erwarte viel', 'brauche keine harmonie', 'lasse mich nicht unterbuttern'
       ]
     },
     neuroticism: {
       high: [
-        'ängstlich', 'nervös', 'unsicher', 'besorgt', 'gestresst',
+        // Bestehende (leicht stigmatisierende beibehalten für Erkennung)
+        'nervös', 'unsicher', 'besorgt', 'gestresst',
         'emotional', 'verletzlich', 'überfordert', 'unruhig', 'angespannt',
-        'frustriert', 'gereizt', 'empfindlich', 'zweifelnd', 'pessimistisch',
-        'belastet', 'erschöpft', 'verzweifelt', 'panisch', 'sorge'
+        'frustriert', 'empfindlich', 'zweifelnd', 'pessimistisch',
+        'belastet', 'erschöpft', 'sorge',
+        // Neutralere / positive Neuroticism-High-Keywords (Kernverbesserung)
+        'sensibel', 'vorsichtig', 'achtsam', 'bedacht', 'reflektiert',
+        'grüble', 'mache mir gedanken', 'denke viel nach', 'nehme mir dinge zu herzen',
+        'kann schlecht abschalten', 'schlafe schlecht', 'kopfkino', 'gedankenkarussell',
+        'zerdenke', 'kann nicht loslassen', 'mache mir sorgen', 'hin und her gerissen',
+        'wälze probleme', 'alles zu viel', 'fühle mich unter druck',
+        'zweifle an mir', 'brauche sicherheit', 'grübeln', 'feinfühlig'
       ],
       low: [
         'gelassen', 'entspannt', 'stabil', 'selbstsicher', 'ausgeglichen',
         'ruhig', 'belastbar', 'zuversichtlich', 'unerschütterlich', 'gefasst',
-        'souverän', 'resilient', 'robust', 'optimistisch'
+        'souverän', 'resilient', 'robust', 'optimistisch',
+        // Alltagssprache
+        'stört mich nicht', 'komme damit klar', 'mache mir keine sorgen',
+        'schlafe gut', 'kann abschalten', 'lasse los', 'bin tiefenentspannt',
+        'nehme es locker', 'kein problem für mich'
       ]
     }
   },
   en: {
     openness: {
       high: [
+        // Formal
         'creative', 'curious', 'experimental', 'imaginative', 'artistic',
         'open', 'innovative', 'visionary', 'original', 'unconventional',
         'philosophical', 'abstract', 'inspired', 'intellectual', 'profound',
-        'receptive', 'inventive', 'dreamy', 'idealistic'
+        'receptive', 'inventive', 'dreamy', 'idealistic',
+        // Colloquial (sensory + emotional)
+        'try out', 'discover', 'experience', 'explore', 'something different',
+        'learn new things', 'find exciting', 'passionate about', 'versatile',
+        'variety', 'broaden horizons', 'travel'
       ],
       low: [
         'traditional', 'conventional', 'conservative', 'practical', 'routine',
         'down-to-earth', 'realistic', 'pragmatic', 'familiar', 'proven',
-        'simple', 'straightforward', 'sober'
+        'simple', 'straightforward', 'sober',
+        // Colloquial
+        'rather stick with', 'not necessary', 'know my way around',
+        'it works fine', 'why change', 'rather safe'
       ]
     },
     conscientiousness: {
@@ -379,25 +637,42 @@ const BIG5_KEYWORDS = {
         'organized', 'punctual', 'structured', 'disciplined', 'conscientious',
         'reliable', 'orderly', 'planned', 'careful', 'dutiful',
         'responsible', 'thorough', 'systematic', 'methodical', 'precise',
-        'meticulous', 'timely', 'efficient', 'goal-oriented'
+        'meticulous', 'timely', 'efficient', 'goal-oriented',
+        // Colloquial
+        'to-do list', 'got it covered', 'plan ahead', 'never forget',
+        'on time', 'get it done', 'neat and tidy'
       ],
       low: [
+        // Existing (neutralized)
         'spontaneous', 'chaotic', 'impulsive', 'procrastinate', 'forgetful',
-        'disorganized', 'careless', 'unplanned', 'messy', 'sloppy',
-        'late', 'unreliable', 'scattered'
+        'disorganized', 'unplanned', 'messy', 'scattered',
+        // Neutral alternatives (replacing "sloppy", "careless", "unreliable")
+        'creatively chaotic', 'intuitive', 'process-oriented', 'flexible',
+        'pragmatic', 'free from rules', 'easy going', 'casual',
+        'not worried about it', 'go with the flow', 'last minute',
+        'forget appointments', 'not precise', 'rather unstructured'
       ]
     },
     extraversion: {
       high: [
+        // Existing
         'sociable', 'talkative', 'energetic', 'enthusiastic', 'active',
         'outgoing', 'gregarious', 'lively', 'adventurous',
         'confident', 'assertive', 'party', 'going out',
-        'people', 'meeting', 'social', 'communicative'
+        'people', 'meeting', 'social', 'communicative',
+        // Professional / everyday extraversion
+        'presenting', 'networking', 'inspiring', 'moderating', 'love talking',
+        'approach people', 'enjoy company', 'team player', 'take the lead',
+        'take initiative', 'small talk', 'need exchange', 'socialize'
       ],
       low: [
         'quiet', 'reserved', 'introverted', 'reflective', 'silent',
         'observant', 'shy', 'withdrawn', 'private', 'solitary',
-        'alone', 'introspective', 'taciturn'
+        'alone', 'introspective', 'taciturn',
+        // Colloquial
+        'rather stay home', 'need my peace', 'enjoy being alone',
+        'hate phone calls', 'large groups exhausting', 'rather observe',
+        'do not talk much', 'need time for myself'
       ]
     },
     agreeableness: {
@@ -405,25 +680,43 @@ const BIG5_KEYWORDS = {
         'helpful', 'cooperative', 'trusting', 'friendly', 'compassionate',
         'harmony-seeking', 'empathetic', 'warmhearted', 'generous', 'yielding',
         'considerate', 'tolerant', 'understanding', 'patient', 'caring',
-        'modest', 'polite', 'respectful', 'supportive'
+        'modest', 'polite', 'respectful', 'supportive',
+        // Colloquial
+        'love to help', 'there for others', 'considerate of others', 'give everyone a chance',
+        'avoid conflict', 'give in', 'find compromise'
       ],
       low: [
         'critical', 'competitive', 'skeptical', 'direct', 'confrontational',
         'assertive', 'argumentative', 'distrustful', 'self-centered',
-        'uncompromising', 'stubborn', 'unyielding', 'demanding'
+        'uncompromising', 'stubborn', 'unyielding', 'demanding',
+        // Neutral colloquial
+        'speak my mind', 'straightforward', 'tell it like it is',
+        'expect a lot', 'do not need harmony', 'stand my ground'
       ]
     },
     neuroticism: {
       high: [
-        'anxious', 'nervous', 'insecure', 'worried', 'stressed',
+        // Existing (keeping some for detection)
+        'nervous', 'insecure', 'worried', 'stressed',
         'emotional', 'vulnerable', 'overwhelmed', 'restless', 'tense',
-        'frustrated', 'irritated', 'sensitive', 'doubtful', 'pessimistic',
-        'burdened', 'exhausted', 'desperate', 'panicky', 'worry'
+        'frustrated', 'sensitive', 'doubtful', 'pessimistic',
+        'burdened', 'exhausted', 'worry',
+        // Neutral / positive Neuroticism-High (core improvement)
+        'sensitive', 'cautious', 'mindful', 'thoughtful', 'reflective',
+        'ruminate', 'think a lot', 'overthink', 'take things to heart',
+        'hard to switch off', 'sleep badly', 'racing thoughts',
+        'cannot let go', 'worry too much', 'torn', 'dwell on problems',
+        'too much on my plate', 'feel under pressure',
+        'doubt myself', 'need reassurance', 'overthinking', 'highly sensitive'
       ],
       low: [
         'calm', 'relaxed', 'stable', 'confident', 'balanced',
         'serene', 'resilient', 'optimistic', 'unflappable', 'composed',
-        'poised', 'robust', 'steady', 'secure'
+        'poised', 'robust', 'steady', 'secure',
+        // Colloquial
+        'does not bother me', 'can handle it', 'not worried',
+        'sleep well', 'switch off easily', 'let it go', 'totally relaxed',
+        'take it easy', 'no problem for me'
       ]
     }
   }
@@ -818,6 +1111,230 @@ function normalizeBig5Frequencies(frequencies) {
   return result;
 }
 
+// ============================================
+// PHASE 2a: ENHANCED ANALYSIS WITH ADAPTIVE WEIGHTING
+// ============================================
+
+/**
+ * Enhanced analysis that applies adaptive weighting (context + sentiment) to keyword detections.
+ * This wraps the standard analyzeMessage/analyzeBig5Message/analyzeSDMessage functions
+ * and adjusts the weights based on conversation context, linguistic patterns, and sentiment.
+ * 
+ * @param {string} message - Current user message
+ * @param {string} lang - Language code ('de' or 'en')
+ * @param {string[]} recentMessages - Last 3-5 user messages for topic detection
+ * @returns {object} Enhanced analysis result with weighted scores + adaptive metadata
+ */
+function analyzeMessageEnhanced(message, lang, recentMessages) {
+  lang = lang || 'de';
+  recentMessages = recentMessages || [];
+
+  // Step 1: Run standard analysis (unchanged)
+  const riemannResult = analyzeMessage(message, lang);
+  const big5Result = analyzeBig5Message(message, lang);
+  const sdResult = analyzeSDMessage(message, lang);
+
+  // Step 2: Run adaptive analysis (context + sentiment)
+  var adaptiveResult;
+  try {
+    adaptiveResult = adaptiveWeighting.analyzeAdaptive(message, recentMessages, lang);
+  } catch (err) {
+    console.error('[DPFL] Adaptive analysis failed, using standard results:', err.message);
+    return {
+      riemann: riemannResult,
+      big5: big5Result,
+      spiralDynamics: sdResult,
+      adaptive: null
+    };
+  }
+
+  // Step 3: Apply adaptive weights to each found keyword
+  var weightingDetails = [];
+
+  // Process Riemann keywords
+  for (const [dimension, data] of Object.entries(riemannResult)) {
+    // Adjust high keywords
+    for (const keyword of data.foundKeywords.high) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'riemann', dimension, 'high', adaptiveResult, lang
+      );
+      
+      if (adj.direction !== 'high') {
+        // Negation detected: move from high to low
+        data.high = Math.max(0, data.high - 1);
+        data.low += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        // Weight adjustment
+        var diff = adj.weight - 1.0;
+        data.high = Math.max(0, data.high + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword,
+          framework: 'riemann',
+          dimension: dimension,
+          originalDirection: 'high',
+          adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary,
+          sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+
+    // Adjust low keywords
+    for (const keyword of data.foundKeywords.low) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'riemann', dimension, 'low', adaptiveResult, lang
+      );
+
+      if (adj.direction !== 'low') {
+        data.low = Math.max(0, data.low - 1);
+        data.high += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        var diff = adj.weight - 1.0;
+        data.low = Math.max(0, data.low + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword,
+          framework: 'riemann',
+          dimension: dimension,
+          originalDirection: 'low',
+          adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary,
+          sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+  }
+
+  // Process Big5 keywords
+  for (const [dimension, data] of Object.entries(big5Result)) {
+    for (const keyword of data.foundKeywords.high) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'big5', dimension, 'high', adaptiveResult, lang
+      );
+
+      if (adj.direction !== 'high') {
+        data.high = Math.max(0, data.high - 1);
+        data.low += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        var diff = adj.weight - 1.0;
+        data.high = Math.max(0, data.high + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword, framework: 'big5', dimension: dimension,
+          originalDirection: 'high', adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary, sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+
+    for (const keyword of data.foundKeywords.low) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'big5', dimension, 'low', adaptiveResult, lang
+      );
+
+      if (adj.direction !== 'low') {
+        data.low = Math.max(0, data.low - 1);
+        data.high += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        var diff = adj.weight - 1.0;
+        data.low = Math.max(0, data.low + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword, framework: 'big5', dimension: dimension,
+          originalDirection: 'low', adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary, sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+  }
+
+  // Process Spiral Dynamics keywords
+  for (const [level, data] of Object.entries(sdResult)) {
+    for (const keyword of data.foundKeywords.high) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'sd', level, 'high', adaptiveResult, lang
+      );
+
+      if (adj.direction !== 'high') {
+        data.high = Math.max(0, data.high - 1);
+        data.low += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        var diff = adj.weight - 1.0;
+        data.high = Math.max(0, data.high + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword, framework: 'sd', dimension: level,
+          originalDirection: 'high', adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary, sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+
+    for (const keyword of data.foundKeywords.low) {
+      var adj = adaptiveWeighting.getKeywordAdjustment(
+        keyword, message, 'sd', level, 'low', adaptiveResult, lang
+      );
+
+      if (adj.direction !== 'low') {
+        data.low = Math.max(0, data.low - 1);
+        data.high += adj.weight;
+        data.delta = data.high - data.low;
+      } else if (adj.weight !== 1.0) {
+        var diff = adj.weight - 1.0;
+        data.low = Math.max(0, data.low + diff);
+        data.delta = data.high - data.low;
+      }
+
+      if (adj.weight !== 1.0 || adj.sentimentAdjusted) {
+        weightingDetails.push({
+          keyword: keyword, framework: 'sd', dimension: level,
+          originalDirection: 'low', adjustedDirection: adj.direction,
+          weight: Math.round(adj.weight * 100) / 100,
+          isPrimary: adj.isPrimary, sentimentAdjusted: adj.sentimentAdjusted
+        });
+      }
+    }
+  }
+
+  return {
+    riemann: riemannResult,
+    big5: big5Result,
+    spiralDynamics: sdResult,
+    adaptive: {
+      context: adaptiveResult.context,
+      sentiment: adaptiveResult.sentiment,
+      weightingDetails: weightingDetails,
+      adjustedKeywordCount: weightingDetails.length
+    }
+  };
+}
+
 module.exports = {
   // Riemann analysis
   analyzeMessage,
@@ -832,5 +1349,7 @@ module.exports = {
   // Spiral Dynamics analysis
   analyzeSDMessage,
   analyzeSDConversation,
-  SD_KEYWORDS
+  SD_KEYWORDS,
+  // Phase 2a: Enhanced analysis with adaptive weighting
+  analyzeMessageEnhanced
 };

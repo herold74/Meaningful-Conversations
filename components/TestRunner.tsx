@@ -20,12 +20,63 @@ import {
   combineProfiles,
   CombinedTestProfile
 } from '../utils/testScenarios';
-import { getApiBaseUrl, getSession } from '../services/api';
+import { getApiBaseUrl, getSession, testRefinementWithMockSessions, RefinementPreviewResult } from '../services/api';
 import { analyzeSession } from '../services/geminiService';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import Spinner from './shared/Spinner';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
+import ProfileRefinementModal from './ProfileRefinementModal';
+
+// ============================================
+// MOCK SESSION DATA FOR REFINEMENT TESTING
+// ============================================
+
+// Mock sessions for Riemann-Thomann profile testing
+const MOCK_RIEMANN_SESSIONS = [
+  {
+    riemann: {
+      dauer: 5,    // Keywords: sicherheit, planung, struktur, verlässlich, kontinuität
+      wechsel: 2,  // Keywords: spontan, flexibel
+      naehe: 3,    // Keywords: team, vertrauen, gemeinsam
+      distanz: 1   // Keywords: eigenständig
+    },
+    comfortScore: 5
+  },
+  {
+    riemann: {
+      dauer: 4,    // Keywords: ordnung, routine, systematisch, disziplin
+      wechsel: 1,  // Keywords: abwechslung
+      naehe: 2,    // Keywords: beziehung, empathie
+      distanz: 0   // No keywords
+    },
+    comfortScore: 4
+  }
+];
+
+// Mock sessions for Big5/OCEAN profile testing
+const MOCK_BIG5_SESSIONS = [
+  {
+    big5: {
+      openness: 4,           // Keywords: kreativ, neugierig, experimentierfreudig, innovativ
+      conscientiousness: 6,  // Keywords: organisiert, pünktlich, strukturiert, diszipliniert, gewissenhaft, zuverlässig
+      extraversion: 2,       // Keywords: gesellig, gesprächig
+      agreeableness: 3,      // Keywords: hilfsbereit, kooperativ, freundlich
+      neuroticism: 3         // Keywords: nervös, besorgt, gestresst
+    },
+    comfortScore: 5
+  },
+  {
+    big5: {
+      openness: 3,           // Keywords: offen, ideenreich, aufgeschlossen
+      conscientiousness: 5,  // Keywords: ordentlich, geplant, sorgfältig, verantwortungsvoll, gründlich
+      extraversion: 1,       // Keywords: aktiv
+      agreeableness: 4,      // Keywords: vertrauensvoll, mitfühlend, einfühlsam, warmherzig
+      neuroticism: 2         // Keywords: unsicher, emotional
+    },
+    comfortScore: 4
+  }
+];
 
 interface TestRunnerProps {
   onClose: () => void;
@@ -66,6 +117,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   // Manual check state
   const [manualCheckResults, setManualCheckResults] = useState<Record<string, boolean | null>>({});
   const [manualNotes, setManualNotes] = useState<Record<string, string>>({});
+  
+  // Refinement mock test state
+  const [refinementPreview, setRefinementPreview] = useState<RefinementPreviewResult | null>(null);
+  const [showRefinementModal, setShowRefinementModal] = useState(false);
   
   // Decrypt user profile when available
   useEffect(() => {
@@ -326,6 +381,21 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const responses: TestRunResult['responses'] = [];
     const chatHistory: Message[] = [];
     let lastTelemetry: any = null;
+    
+    // Cumulative keyword tracking across ALL messages in the test
+    const cumulativeKeywords: {
+      riemann: string[];
+      big5: string[];
+      spiralDynamics: string[];
+    } = { riemann: [], big5: [], spiralDynamics: [] };
+    
+    const accumulateTelemetry = (telemetry: any) => {
+      if (!telemetry?.allFrameworkKeywords) return;
+      const afk = telemetry.allFrameworkKeywords;
+      if (afk.riemann) cumulativeKeywords.riemann.push(...afk.riemann);
+      if (afk.big5) cumulativeKeywords.big5.push(...afk.big5);
+      if (afk.spiralDynamics) cumulativeKeywords.spiralDynamics.push(...afk.spiralDynamics);
+    };
 
     try {
       // Add initial bot greeting to simulate realistic conversation start
@@ -374,6 +444,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
         if (result.telemetry) {
           lastTelemetry = result.telemetry;
+          accumulateTelemetry(result.telemetry);
         }
       }
 
@@ -425,9 +496,86 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
           if (result.telemetry) {
             lastTelemetry = result.telemetry;
+            accumulateTelemetry(result.telemetry);
           }
 
           currentTurn++;
+        }
+      }
+
+      // ============================================
+      // SPECIAL TEST MODE: REFINEMENT MOCK
+      // ============================================
+      // Check for special test mode: refinement_mock
+      // This mode skips normal conversation and directly tests the ProfileRefinementModal
+      // with hardcoded mock session data
+      if (selectedScenario.specialTestMode === 'refinement_mock') {
+        setPhase('analyzing');
+        
+        try {
+          // Detect profile type from user's profile or selected test profile
+          let profileType: 'RIEMANN' | 'BIG5' = 'RIEMANN';
+          let decryptedProfileData: any = null;
+          
+          if (useMyProfile && decryptedProfile) {
+            // Use actual user profile
+            profileType = decryptedProfile.riemann ? 'RIEMANN' : 'BIG5';
+            decryptedProfileData = decryptedProfile;
+          } else {
+            // Use selected test profile
+            profileType = selectedRiemann ? 'RIEMANN' : 'BIG5';
+            decryptedProfileData = profile;
+          }
+          
+          // Select appropriate mock sessions based on profile type
+          const mockSessions = profileType === 'RIEMANN' 
+            ? MOCK_RIEMANN_SESSIONS 
+            : MOCK_BIG5_SESSIONS;
+          
+          // Call backend API with mock session data
+          const refinementResult = await testRefinementWithMockSessions({
+            profileType,
+            decryptedProfile: decryptedProfileData,
+            mockSessions
+          });
+          
+          // Store preview in state for modal display
+          setRefinementPreview(refinementResult);
+          setShowRefinementModal(true);
+          
+          // Build minimal test result for manual checks only
+          setTestResult({
+            responses: [{
+              userMessage: language === 'de' 
+                ? '🧪 Mock-Test: 2 simulierte Sessions mit hardcodierten Keywords'
+                : '🧪 Mock Test: 2 simulated sessions with hardcoded keywords',
+              botResponse: language === 'de'
+                ? 'Refinement-Vorschau wird mit Mock-Daten berechnet...'
+                : 'Refinement preview is being calculated with mock data...',
+              responseTime: 0
+            }],
+            telemetry: {
+              profileType,
+              mockSessionsUsed: mockSessions.length,
+              refinementSuggestions: refinementResult.refinementResult?.hasSuggestions || false
+            },
+            autoCheckResults: [], // No auto-checks for this special test
+            dpflKeywordsInfo: language === 'de'
+              ? '🧪 Mock-Keywords wurden verwendet (siehe Modal für Details)'
+              : '🧪 Mock keywords were used (see modal for details)'
+          });
+          
+          // Set phase to validation (manual checks only)
+          setPhase('validation');
+          setIsRunning(false);
+          return; // Skip normal test flow
+          
+        } catch (error) {
+          console.error('[TestRunner] Refinement mock test failed:', error);
+          setError(`Refinement mock test failed: ${error instanceof Error ? error.message : String(error)}`);
+          setIsRunning(false);
+          setPhase('setup');
+          return;
         }
       }
 
@@ -454,46 +602,66 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       }
 
       // Store DPFL keywords for info display (not as pass/fail check)
+      // Use cumulative keywords from ALL messages, ALL frameworks
       const detectedKeywords = lastTelemetry?.dpflKeywordsDetected || [];
       
-      // Parse and group keywords by dimension for better readability
-      const groupedByDimension: Record<string, { high: string[], low: string[] }> = {};
-      
-      detectedKeywords.forEach((entry: string) => {
-        const parts = entry.split(':');
-        if (parts.length === 3) {
-          const [dimension, level, keyword] = parts;
-          if (!groupedByDimension[dimension]) {
-            groupedByDimension[dimension] = { high: [], low: [] };
+      // Parse cumulative keywords grouped by framework and dimension
+      const parseFrameworkKeywords = (entries: string[]) => {
+        const grouped: Record<string, { high: string[], low: string[] }> = {};
+        const seen = new Set<string>(); // deduplicate
+        entries.forEach((entry: string) => {
+          const parts = entry.split(':');
+          // Format: "framework:dimension:level:keyword"
+          if (parts.length === 4) {
+            const [, dimension, level, keyword] = parts;
+            const key = `${dimension}:${level}:${keyword}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            if (!grouped[dimension]) grouped[dimension] = { high: [], low: [] };
+            if (level === 'high') grouped[dimension].high.push(keyword);
+            else if (level === 'low') grouped[dimension].low.push(keyword);
           }
-          if (level === 'high') {
-            groupedByDimension[dimension].high.push(keyword);
-          } else if (level === 'low') {
-            groupedByDimension[dimension].low.push(keyword);
-          }
-        }
-      });
+        });
+        return grouped;
+      };
       
-      // Format DPFL keywords for info display
-      let dpflKeywordsInfo = '';
-      if (Object.keys(groupedByDimension).length > 0) {
+      const cumulativeRiemann = parseFrameworkKeywords(cumulativeKeywords.riemann);
+      const cumulativeBig5 = parseFrameworkKeywords(cumulativeKeywords.big5);
+      const cumulativeSD = parseFrameworkKeywords(cumulativeKeywords.spiralDynamics);
+      
+      // Format cumulative keywords for the simple text display
+      const formatGrouped = (grouped: Record<string, { high: string[], low: string[] }>) => {
         const lines: string[] = [];
-        for (const [dimension, levels] of Object.entries(groupedByDimension)) {
+        for (const [dimension, levels] of Object.entries(grouped)) {
           const dimName = dimension.charAt(0).toUpperCase() + dimension.slice(1);
-          if (levels.high.length > 0) {
-            lines.push(`${dimName} (hoch): ${levels.high.join(', ')}`);
-          }
-          if (levels.low.length > 0) {
-            lines.push(`${dimName} (niedrig): ${levels.low.join(', ')}`);
-          }
+          if (levels.high.length > 0) lines.push(`${dimName} (hoch): ${levels.high.join(', ')}`);
+          if (levels.low.length > 0) lines.push(`${dimName} (niedrig): ${levels.low.join(', ')}`);
         }
-        dpflKeywordsInfo = lines.join(' • ');
+        return lines.join(' · ');
+      };
+      
+      let dpflKeywordsInfo = '';
+      const riemannInfo = formatGrouped(cumulativeRiemann);
+      const big5Info = formatGrouped(cumulativeBig5);
+      const sdInfo = formatGrouped(cumulativeSD);
+      if (riemannInfo || big5Info || sdInfo) {
+        const parts: string[] = [];
+        if (riemannInfo) parts.push(`[Riemann] ${riemannInfo}`);
+        if (big5Info) parts.push(`[Big5] ${big5Info}`);
+        if (sdInfo) parts.push(`[SD] ${sdInfo}`);
+        dpflKeywordsInfo = parts.join('\n');
       }
 
       // Check expected keywords (only if explicitly testing for specific keywords)
+      // Search across ALL cumulative keywords from ALL frameworks
       if (selectedScenario.autoChecks.expectedKeywords?.length) {
+        const allCumulativeEntries = [
+          ...cumulativeKeywords.riemann,
+          ...cumulativeKeywords.big5,
+          ...cumulativeKeywords.spiralDynamics
+        ];
         const expectedFound = selectedScenario.autoChecks.expectedKeywords.filter(
-          k => detectedKeywords.some((d: string) => d.toLowerCase().includes(k.toLowerCase()))
+          k => allCumulativeEntries.some((d: string) => d.toLowerCase().includes(k.toLowerCase()))
         );
         
         autoCheckResults.push({
@@ -533,7 +701,16 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         profileId: profileId || 'no_profile',
         timestamp: new Date().toISOString(),
         responses,
-        telemetry: lastTelemetry,
+        telemetry: {
+          ...lastTelemetry,
+          // Cumulative all-framework keywords for detailed display
+          cumulativeKeywords: {
+            riemann: cumulativeRiemann,
+            big5: cumulativeBig5,
+            spiralDynamics: cumulativeSD,
+            totalCount: cumulativeKeywords.riemann.length + cumulativeKeywords.big5.length + cumulativeKeywords.spiralDynamics.length
+          }
+        },
         autoCheckResults,
         dpflKeywordsInfo, // Add DPFL keywords as info (not check)
         manualCheckResults: selectedScenario.manualChecks.map((check, idx) => ({
@@ -936,6 +1113,37 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
     return (
       <div className="space-y-6">
+        {/* Mock Data Notice for Refinement Mock Test */}
+        {selectedScenario.specialTestMode === 'refinement_mock' && (
+          <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <div className="flex items-start gap-2">
+              <span className="text-xl">ℹ️</span>
+              <div className="text-sm text-blue-600 dark:text-blue-400">
+                <strong>{t('test_mock_data_notice_title')}</strong>
+                <p className="mt-1">{t('test_mock_data_notice_desc')}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* ProfileRefinementModal for Refinement Mock Test */}
+        {showRefinementModal && refinementPreview && (
+          <ProfileRefinementModal
+            isOpen={showRefinementModal}
+            refinementPreview={refinementPreview}
+            isLoading={false}
+            error={null}
+            isTestMode={true}
+            onAccept={() => {
+              setShowRefinementModal(false);
+              // In test mode: just close, no API call
+            }}
+            onReject={() => {
+              setShowRefinementModal(false);
+            }}
+          />
+        )}
+        
         {/* Test Guide (Collapsible) */}
         <div className="p-3 bg-accent-primary/5 border border-accent-primary/20 rounded-lg">
           <details className="group">
@@ -1003,9 +1211,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                 <ul className="text-content-secondary space-y-1 pl-4 text-xs">
                   <li>• <span className="font-medium">DPC Injection:</span> Anzahl Zeichen der Persönlichkeitsanpassung im System-Prompt</li>
                   <li>• <span className="font-medium">DPC Strategien:</span> Welche Persönlichkeitsdimensionen für die Anpassung verwendet wurden</li>
-                  <li>• <span className="font-medium">DPFL Keywords:</span> Welche Persönlichkeits-Keywords im User-Text erkannt wurden (Format: Dimension (Level): Keywords)</li>
+                  <li>• <span className="font-medium">DPFL Keywords (kumulativ):</span> Alle erkannten Persönlichkeits-Keywords über den gesamten Test-Chat, aufgeschlüsselt nach Framework (Riemann-Thomann, Big5/OCEAN, Spiral Dynamics)</li>
                   <li>• <span className="font-medium">Stress-Schlüsselwörter:</span> Ob Stress-Indikatoren im User-Text gefunden wurden</li>
                   <li>• <span className="font-medium">Strategy Merge Details:</span> Technische Details zur Strategie-Zusammenführung (Konflikt-Auflösung, verwendete Modelle)</li>
+                  <li>• <span className="font-medium">Adaptive Keyword-Gewichtung:</span> Kontextabhängige Gewichtsanpassungen (Thema, Sprachmuster, Sentiment) für erkannte Keywords</li>
                 </ul>
               </div>
               
@@ -1137,14 +1346,82 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                 </div>
               )}
               
-              {/* DPFL Keywords */}
+              {/* DPFL Keywords - All Frameworks, Cumulative */}
               <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
-                <div className="text-sm">
-                  <span className="font-medium text-content-primary">{t('test_runner_dpfl_keywords')}:</span>
-                  <div className="mt-1 text-content-secondary">
-                    {testResult.dpflKeywordsInfo || t('test_runner_none')}
+                <details className="group" open>
+                  <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+                    <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
+                    {t('test_runner_dpfl_keywords')} ({t('test_runner_cumulative')})
+                    {testResult.telemetry.cumulativeKeywords && testResult.telemetry.cumulativeKeywords.totalCount > 0 && (
+                      <span className="text-xs bg-blue-500/20 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+                        {testResult.telemetry.cumulativeKeywords.totalCount} {t('test_runner_total')}
+                      </span>
+                    )}
+                  </summary>
+                  <div className="mt-2 pt-2 border-t border-border-secondary space-y-2 text-xs">
+                    {/* Riemann */}
+                    {testResult.telemetry.cumulativeKeywords?.riemann && Object.keys(testResult.telemetry.cumulativeKeywords.riemann).length > 0 && (
+                      <div>
+                        <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_riemann')}</div>
+                        <div className="space-y-0.5 pl-2">
+                          {Object.entries(testResult.telemetry.cumulativeKeywords.riemann).map(([dim, levels]: [string, any]) => (
+                            <div key={dim} className="flex flex-wrap gap-1 items-center">
+                              <span className="text-content-secondary min-w-[70px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                              {levels.high?.map((k: string) => (
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                              ))}
+                              {levels.low?.map((k: string) => (
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Big5 */}
+                    {testResult.telemetry.cumulativeKeywords?.big5 && Object.keys(testResult.telemetry.cumulativeKeywords.big5).length > 0 && (
+                      <div>
+                        <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_big5')}</div>
+                        <div className="space-y-0.5 pl-2">
+                          {Object.entries(testResult.telemetry.cumulativeKeywords.big5).map(([dim, levels]: [string, any]) => (
+                            <div key={dim} className="flex flex-wrap gap-1 items-center">
+                              <span className="text-content-secondary min-w-[110px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                              {levels.high?.map((k: string) => (
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                              ))}
+                              {levels.low?.map((k: string) => (
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Spiral Dynamics */}
+                    {testResult.telemetry.cumulativeKeywords?.spiralDynamics && Object.keys(testResult.telemetry.cumulativeKeywords.spiralDynamics).length > 0 && (
+                      <div>
+                        <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_sd')}</div>
+                        <div className="space-y-0.5 pl-2">
+                          {Object.entries(testResult.telemetry.cumulativeKeywords.spiralDynamics).map(([dim, levels]: [string, any]) => (
+                            <div key={dim} className="flex flex-wrap gap-1 items-center">
+                              <span className="text-content-secondary min-w-[80px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                              {levels.high?.map((k: string) => (
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                              ))}
+                              {levels.low?.map((k: string) => (
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Empty state */}
+                    {(!testResult.telemetry.cumulativeKeywords || testResult.telemetry.cumulativeKeywords.totalCount === 0) && (
+                      <div className="text-content-tertiary">{t('test_runner_none')}</div>
+                    )}
                   </div>
-                </div>
+                </details>
               </div>
               
               {/* Stress-Schlüsselwörter */}
@@ -1156,6 +1433,100 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   </span>
                 </div>
               </div>
+
+              {/* Phase 2a: Adaptive Weighting Details */}
+              {testResult.telemetry.adaptiveWeighting && (
+                <div className="p-2.5 bg-purple-500/5 border border-purple-500/20 rounded-lg">
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+                      <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
+                      {t('test_runner_adaptive_weighting')}
+                      {testResult.telemetry.adaptiveWeighting.adjustedKeywordCount > 0 && (
+                        <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
+                          {testResult.telemetry.adaptiveWeighting.adjustedKeywordCount} {t('test_runner_adjustments')}
+                        </span>
+                      )}
+                    </summary>
+                    <div className="mt-3 pt-2 border-t border-border-secondary space-y-2 text-xs">
+                      {/* Context Info */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-content-secondary">{t('test_runner_context_topic')}:</span>
+                          <span className="ml-1 font-medium text-content-primary">
+                            {testResult.telemetry.adaptiveWeighting.context?.topic
+                              ? `${t('context_topic_' + testResult.telemetry.adaptiveWeighting.context.topic)} (${Math.round((testResult.telemetry.adaptiveWeighting.context.topicConfidence || 0) * 100)}%)`
+                              : t('test_runner_none')}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-content-secondary">{t('test_runner_linguistic_pattern')}:</span>
+                          <span className="ml-1 font-medium text-content-primary">
+                            {testResult.telemetry.adaptiveWeighting.context?.linguisticPattern
+                              ? `${t('context_pattern_' + testResult.telemetry.adaptiveWeighting.context.linguisticPattern)} (${Math.round((testResult.telemetry.adaptiveWeighting.context.patternConfidence || 0) * 100)}%)`
+                              : t('test_runner_none')}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Sentiment */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-content-secondary">{t('test_runner_sentiment')}:</span>
+                        <span className={`font-medium ${
+                          (testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) > 0.2
+                            ? 'text-green-600 dark:text-green-400'
+                            : (testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) < -0.2
+                              ? 'text-red-600 dark:text-red-400'
+                              : 'text-content-secondary'
+                        }`}>
+                          {((testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) > 0 ? '+' : '')}
+                          {((testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) * 100).toFixed(0)}%
+                        </span>
+                        {testResult.telemetry.adaptiveWeighting.sentiment?.emotionalContext && testResult.telemetry.adaptiveWeighting.sentiment.emotionalContext !== 'neutral' && (
+                          <span className="text-content-tertiary">
+                            ({t('context_emotion_' + testResult.telemetry.adaptiveWeighting.sentiment.emotionalContext)})
+                          </span>
+                        )}
+                      </div>
+                      {/* Weighting Details */}
+                      {testResult.telemetry.adaptiveWeighting.weightingDetails && testResult.telemetry.adaptiveWeighting.weightingDetails.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-border-secondary">
+                          <div className="text-content-secondary mb-1">{t('test_runner_weight_adjustments')}:</div>
+                          <div className="space-y-1">
+                            {testResult.telemetry.adaptiveWeighting.weightingDetails.map((detail: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2 text-xs">
+                                <span className="font-mono text-content-primary">
+                                  {detail.keyword}
+                                </span>
+                                <span className="text-content-tertiary">→</span>
+                                <span className="text-content-secondary">
+                                  {detail.framework}:{detail.dimension}
+                                </span>
+                                <span className={`font-medium ${detail.weight > 1 ? 'text-green-600 dark:text-green-400' : detail.weight < 0.5 ? 'text-red-600 dark:text-red-400' : 'text-content-secondary'}`}>
+                                  ×{detail.weight.toFixed(2)}
+                                </span>
+                                {!detail.isPrimary && (
+                                  <span className="text-xs bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1 rounded">
+                                    {t('test_runner_secondary')}
+                                  </span>
+                                )}
+                                {detail.sentimentAdjusted && (
+                                  <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1 rounded">
+                                    {t('test_runner_sentiment_adj')}
+                                  </span>
+                                )}
+                                {detail.originalDirection !== detail.adjustedDirection && (
+                                  <span className="text-xs bg-red-500/20 text-red-600 dark:text-red-400 px-1 rounded">
+                                    {detail.originalDirection} → {detail.adjustedDirection}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                </div>
+              )}
 
             </div>
           </div>
