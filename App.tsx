@@ -109,6 +109,7 @@ const App: React.FC = () => {
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
     const [testScenarioId, setTestScenarioId] = useState<string | null>(null);
+    const [shouldOpenTestRunner, setShouldOpenTestRunner] = useState(false);
     const [refinementPreview, setRefinementPreview] = useState<api.RefinementPreviewResult | null>(null);
     const [isLoadingRefinementPreview, setIsLoadingRefinementPreview] = useState(false);
     const [refinementPreviewError, setRefinementPreviewError] = useState<string | null>(null);
@@ -1031,6 +1032,111 @@ const App: React.FC = () => {
         setView('chat');
     };
 
+    /**
+     * Quick test for Comfort Check Modal
+     * Bypasses full 20-30 min coaching session by directly navigating to SessionReview
+     * with mock data and configurable hasConversationalEnd parameter
+     */
+    const handleTestComfortCheck = (withConversationalEnd: boolean) => {
+        // #region agent log
+        console.log('[COMFORT-TEST] Starting quick test with conversationalEnd:', withConversationalEnd);
+        console.log('[COMFORT-TEST] Current user:', currentUser?.email, 'coachingMode:', currentUser?.coachingMode);
+        // #endregion
+        
+        // Ensure user has DPFL mode
+        if (currentUser?.coachingMode !== 'dpfl') {
+            // #region agent log
+            console.log('[COMFORT-TEST] BLOCKED: User does not have DPFL mode');
+            // #endregion
+            alert('Comfort Check test requires coachingMode = "dpfl". Please update your user settings.');
+            return;
+        }
+
+        // Mock SessionAnalysis
+        const mockAnalysis: SessionAnalysis = {
+            newFindings: "Mock session for Comfort Check testing - this is a simulated coaching session to test the Comfort Check modal functionality.",
+            proposedUpdates: [],
+            nextSteps: [],
+            completedSteps: [],
+            accomplishedGoals: [],
+            solutionBlockages: [],
+            blockageScore: 0,
+            hasConversationalEnd: withConversationalEnd,
+            hasAccomplishedGoal: false,
+        };
+
+        // Mock ChatHistory (realistic DPFL session)
+        const mockChatHistory: Message[] = [
+            { 
+                role: 'user', 
+                text: 'Ich möchte über meine Karriereziele sprechen',
+                timestamp: Date.now() - 300000 
+            },
+            { 
+                role: 'bot', 
+                text: 'Sehr gerne! Was ist dein aktuelles Karriereziel?',
+                timestamp: Date.now() - 240000 
+            },
+            { 
+                role: 'user', 
+                text: 'Ich möchte in den nächsten 2 Jahren Teamleiter werden',
+                timestamp: Date.now() - 180000 
+            },
+            { 
+                role: 'bot', 
+                text: 'Ein ambitioniertes Ziel! Was sind deine nächsten Schritte?',
+                timestamp: Date.now() - 120000 
+            },
+            { 
+                role: 'user', 
+                text: 'Ich plane, ein Führungskräfte-Seminar zu besuchen',
+                timestamp: Date.now() - 60000 
+            },
+        ];
+
+        // Use Alex (Career Coach) as default DPFL bot
+        const alexBot = BOTS.find(b => b.id === 'alex') || BOTS[0];
+
+        // Calculate XP for this mock session
+        const newState = calculateNewGamificationState(
+            gamificationState,
+            mockAnalysis.accomplishedGoals.length,
+            mockAnalysis.hasConversationalEnd,
+            mockAnalysis.hasAccomplishedGoal
+        );
+
+        // #region agent log
+        console.log('[COMFORT-TEST] Setting up test state:', {
+            bot: alexBot.id,
+            hasConversationalEnd: mockAnalysis.hasConversationalEnd,
+            isTestMode: true,
+            refinementPreview: { suggestedChanges: [], reasoning: 'Quick test mode' }
+        });
+        // #endregion
+
+        // Set state
+        setSessionAnalysis(mockAnalysis);
+        setChatHistory(mockChatHistory);
+        setSelectedBot(alexBot);
+        setNewGamificationState(newState);
+        setIsTestMode(true); // Mark as test mode
+        
+        // Set a minimal refinement preview to enable Comfort Check in test mode
+        setRefinementPreview({
+            suggestedChanges: [],
+            reasoning: "Quick test mode - no actual refinement suggestions"
+        });
+        
+        setMenuView(null); // Close menu
+        
+        // #region agent log
+        console.log('[COMFORT-TEST] Navigating to sessionReview...');
+        // #endregion
+        
+        // Navigate to SessionReview
+        setView('sessionReview');
+    };
+
 
     // --- Menu Handlers ---
     // Toggles the slide-out burger menu panel.
@@ -1159,7 +1265,7 @@ const App: React.FC = () => {
                     isTestMode={isTestMode}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setView('admin'); setMenuView('upgrade'); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
@@ -1182,7 +1288,7 @@ const App: React.FC = () => {
                         handleCloseSubMenu();
                     }
                 }} />;
-            case 'admin': return <AdminView currentUser={currentUser} onRunTestSession={handleRunTestSession} lifeContext={lifeContext} />;
+            case 'admin': return <AdminView currentUser={currentUser} encryptionKey={encryptionKey!} onRunTestSession={handleRunTestSession} onTestComfortCheck={handleTestComfortCheck} lifeContext={lifeContext} shouldOpenTestRunner={shouldOpenTestRunner} onTestRunnerOpened={() => setShouldOpenTestRunner(false)} />;
             case 'changePassword': return <ChangePasswordView currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
             default: return <WelcomeScreen />;
         }

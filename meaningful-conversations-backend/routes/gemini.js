@@ -118,7 +118,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         dpcInjectionLength: 0,
         dpcStrategiesUsed: [],
         dpflKeywordsDetected: [],
-        comfortCheckTriggered: false,
+        stressKeywordsDetected: false, // Track stress keywords (not used for triggering comfort check)
     };
 
     const bot = BOTS.find(b => b.id === botId);
@@ -217,21 +217,22 @@ STRICTLY FORBIDDEN in this first message:
     if (coachingMode === 'dpc' || coachingMode === 'dpfl' || isTestMode) {
         if (profileToUse) {
             try {
-                const adaptivePrompt = await dynamicPromptController.generatePromptForUser(
+                const dpcResult = await dynamicPromptController.generatePromptForUser(
                     userId || 'guest',
                     profileToUse,
-                    lang // Pass language to DPC
+                    lang, // Pass language to DPC
+                    botId // Pass botId for bot-specific adaptations (e.g., AVA's enhanced challenge logic)
                 );
-                if (adaptivePrompt) {
-                    finalSystemInstruction += adaptivePrompt;
+                
+                if (dpcResult?.prompt) {
+                    finalSystemInstruction += dpcResult.prompt;
                     
                     // Collect telemetry for test mode
                     if (isTestMode) {
                         testTelemetry.dpcInjectionPresent = true;
-                        testTelemetry.dpcInjectionLength = adaptivePrompt.length;
-                        // Extract strategy info from the prompt
-                        const strategyMatches = adaptivePrompt.match(/(?:Riemann|Big5|SD|Spiral)[\w\s]*/gi) || [];
-                        testTelemetry.dpcStrategiesUsed = [...new Set(strategyMatches)];
+                        testTelemetry.dpcInjectionLength = dpcResult.prompt.length;
+                        testTelemetry.dpcStrategiesUsed = dpcResult.strategiesUsed || [];
+                        testTelemetry.dpcMergeMetadata = dpcResult.mergeMetadata || null;
                     }
                 }
             } catch (error) {
@@ -241,6 +242,96 @@ STRICTLY FORBIDDEN in this first message:
         } else if (!isTestMode) {
             console.warn(`[DPC] Coaching mode ${coachingMode} active but no profile provided`);
         }
+    }
+    
+    // Option A+: Conversation History Summary for AVA (pseudo-state tracking)
+    if (botId === 'ava-strategic' && (coachingMode === 'dpc' || coachingMode === 'dpfl') && profileToUse) {
+        const recentHistory = history.slice(-6); // Last 6 messages (3 turns)
+        
+        // Extract bot's challenge questions from history
+        const botChallenges = recentHistory
+            .filter(msg => msg.role === 'bot')
+            .map(msg => {
+                // Simple heuristic: Contains challenge keywords + question mark
+                const text = msg.text.toLowerCase();
+                const hasChallengeKeyword = 
+                    text.includes('blindspot') || 
+                    text.includes('entwickeln') ||
+                    text.includes('develop') ||
+                    text.includes('schritt weiter') ||
+                    text.includes('one step further') ||
+                    text.includes('experiment') ||
+                    text.includes('herausforderung') ||
+                    text.includes('challenge');
+                const hasQuestion = text.includes('?');
+                return hasChallengeKeyword && hasQuestion ? msg.text : null;
+            })
+            .filter(Boolean);
+        
+        // Extract resource exploration questions
+        const resourceQuestions = recentHistory
+            .filter(msg => msg.role === 'bot')
+            .map(msg => {
+                const text = msg.text.toLowerCase();
+                const hasResourceKeyword =
+                    text.includes('gemeistert') ||
+                    text.includes('mastered') ||
+                    text.includes('erfolg') ||
+                    text.includes('success') ||
+                    text.includes('stärke') ||
+                    text.includes('strength') ||
+                    text.includes('unterstützen') ||
+                    text.includes('support') ||
+                    text.includes('ressource') ||
+                    text.includes('resource');
+                const hasQuestion = text.includes('?');
+                return hasResourceKeyword && hasQuestion ? msg.text : null;
+            })
+            .filter(Boolean);
+        
+        // Build history summary for LLM
+        let historySummary = '\n\n**CONVERSATION-STATE-KONTEXT (für deine State-Awareness):**\n\n';
+        
+        if (botChallenges.length > 0) {
+            historySummary += lang === 'de'
+                ? `Du hast bereits ${botChallenges.length} Blindspot-Challenge(s) gestellt:\n`
+                : `You have already posed ${botChallenges.length} blindspot challenge(s):\n`;
+            botChallenges.slice(-2).forEach((q, idx) => {
+                historySummary += `${idx + 1}. "${q.substring(0, 80)}..."\n`;
+            });
+            historySummary += '\n';
+        } else {
+            historySummary += lang === 'de'
+                ? 'Du hast noch KEINE Blindspot-Challenges gestellt.\n\n'
+                : 'You have NOT posed any blindspot challenges yet.\n\n';
+        }
+        
+        if (resourceQuestions.length > 0) {
+            historySummary += lang === 'de'
+                ? `Du hast bereits nach RESSOURCEN gefragt (${resourceQuestions.length}× in den letzten Nachrichten):\n`
+                : `You have already asked about RESOURCES (${resourceQuestions.length}× in recent messages):\n`;
+            resourceQuestions.slice(-1).forEach(q => {
+                historySummary += `"${q.substring(0, 80)}..."\n`;
+            });
+            historySummary += lang === 'de'
+                ? '→ Du bist vermutlich in **PHASE 2** (Ressourcen aktiviert, bereit für Blindspot-Brücke)\n\n'
+                : '→ You are likely in **PHASE 2** (Resources activated, ready for blindspot bridge)\n\n';
+        } else {
+            historySummary += lang === 'de'
+                ? 'Du hast noch NICHT nach Ressourcen gefragt.\n→ Wenn User "festgefahren" signalisiert: Starte mit **PHASE 1** (Ressourcen-Exploration)\n\n'
+                : 'You have NOT asked about resources yet.\n→ If user signals "stuck": Start with **PHASE 1** (Resource exploration)\n\n';
+        }
+        
+        const userLastMessage = recentHistory.filter(msg => msg.role === 'user').slice(-1)[0]?.text || '';
+        const userRespondedToChallenge = botChallenges.length > 0 && userLastMessage.length > 30;
+        
+        if (botChallenges.length > 0 && !userRespondedToChallenge) {
+            historySummary += lang === 'de'
+                ? '⚠️ User hat auf letzte Challenge NICHT geantwortet (Ausweichen?) → Wähle anderen Blindspot oder warte ab\n\n'
+                : '⚠️ User did NOT respond to last challenge (Avoidance?) → Choose different blindspot or wait\n\n';
+        }
+        
+        finalSystemInstruction += historySummary;
     }
     
     // For all bots EXCEPT the interviewer, add the context.
@@ -337,11 +428,20 @@ STRICTLY FORBIDDEN in this first message:
                 }
                 testTelemetry.dpflKeywordsDetected = detectedKeywords;
                 
-                // Check for comfort check triggers (stress/emotional distress keywords)
-                const comfortKeywords = ['stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos', 
-                                        'overwhelmed', 'anxious', 'sad', 'hopeless', 'depressed'];
+                // Test-only: Track if message contains stress keywords for telemetry
+                // Note: Comfort Check is shown after EVERY DPFL session, not just when keywords are found
+                const stressKeywords = [
+                    // German keywords (15)
+                    'stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos', 
+                    'verzweifelt', 'erschöpft', 'deprimiert', 'ausgebrannt', 'hilflos',
+                    'panik', 'einsam', 'mutlos', 'leer', 'verloren',
+                    // English keywords (15)
+                    'overwhelmed', 'anxious', 'sad', 'hopeless', 'depressed',
+                    'desperate', 'exhausted', 'burnt out', 'burnout', 'helpless',
+                    'panic', 'lonely', 'discouraged', 'empty', 'lost'
+                ];
                 const lowerMessage = messageToAnalyze.toLowerCase();
-                testTelemetry.comfortCheckTriggered = comfortKeywords.some(k => lowerMessage.includes(k));
+                testTelemetry.stressKeywordsDetected = stressKeywords.some(k => lowerMessage.includes(k));
             } catch (error) {
                 console.error('[DPFL] Test mode behavior logging error:', error);
             }
@@ -364,9 +464,25 @@ STRICTLY FORBIDDEN in this first message:
         // Build response
         const responseData = { text };
         
-        // Include telemetry in test mode
-        if (isTestMode && includeTestTelemetry) {
-            responseData.testTelemetry = testTelemetry;
+        // Add LLM metadata in test mode for comparison purposes
+        if (isTestMode) {
+            responseData.llmMetadata = {
+                model: actualModel,
+                provider: response.provider || 'unknown',
+                tokenUsage: {
+                    input: tokenUsage.inputTokens || 0,
+                    output: tokenUsage.outputTokens || 0,
+                    total: (tokenUsage.inputTokens || 0) + (tokenUsage.outputTokens || 0)
+                },
+                responseTimeMs: durationMs,
+                cacheUsed: cacheUsed || false,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Include telemetry in test mode
+            if (includeTestTelemetry) {
+                responseData.testTelemetry = testTelemetry;
+            }
         }
         
         res.json(responseData);
@@ -844,7 +960,8 @@ REGELN für deine Antwort:
 4. Antworte in 1-3 kurzen Sätzen
 5. KEINE Coaching-Phrasen wie "Lass uns...", "Ich verstehe...", "Was denkst du..."
 6. KEINE Fragen zurück an den Coach (außer Verständnisfragen)
-7. Antworte so, wie ein echter Mensch mit diesem Problem antworten würde`
+7. KEINE Verhaltenshinweise mit Sternchen (wie *seufzt*, *nickt*, *schaut weg*)
+8. Antworte so, wie ein echter Mensch mit diesem Problem antworten würde - in normalem Text ohne Rollenspiel-Formatierung`
             : `You are a coachee (client) in a coaching conversation. You have a problem and are seeking help.
 
 IMPORTANT: You are NOT the coach! You are the client seeking support.
@@ -859,7 +976,8 @@ RULES for your response:
 4. Respond in 1-3 short sentences
 5. NO coaching phrases like "Let's...", "I understand...", "What do you think..."
 6. NO questions back to the coach (except clarifying questions)
-7. Respond like a real person with this problem would respond`;
+7. NO action descriptions with asterisks (like *sighs*, *nods*, *looks away*)
+8. Respond like a real person with this problem would respond - in plain text without roleplay formatting`;
 
         const userPrompt = lang === 'de'
             ? `Der Coach hat gerade gesagt:
