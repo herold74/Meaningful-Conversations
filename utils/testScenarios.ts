@@ -21,7 +21,7 @@ export type TestScenario = LegacyTestScenario;
 // ============================================
 
 export type TestCategory = 'core' | 'session' | 'personality' | 'safety' | 'bot';
-export type TestFeature = 'dpc' | 'dpfl' | 'context' | 'formatting' | 'comfort';
+export type TestFeature = 'dpc' | 'dpfl' | 'context' | 'formatting' | 'comfort' | 'refinement';
 
 export interface TestMessage {
   text: string;

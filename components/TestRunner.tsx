@@ -30,7 +30,7 @@ import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 interface TestRunnerProps {
   onClose: () => void;
   userProfile?: any; // User's actual personality profile (encrypted from DB)
-  encryptionKey: string; // Encryption key to decrypt the profile
+  encryptionKey: CryptoKey | null; // Encryption key to decrypt the profile
 }
 
 type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
@@ -153,7 +153,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     bot: Bot, 
     profile: any,
     chatHistory: Message[]
-  ): Promise<{ response: string; responseTime: number; telemetry?: any }> => {
+  ): Promise<{ response: string; responseTime: number; telemetry?: any; llmMetadata?: any }> => {
     const apiBaseUrl = getApiBaseUrl();
     const startTime = Date.now();
     
@@ -1308,7 +1308,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const exportTestResult = useCallback(() => {
     if (!testResult || !selectedScenario || !selectedBot) return;
 
-    const exportData = {
+    const exportData: any = {
       exportVersion: '1.0',
       exportedAt: new Date().toISOString(),
       scenario: {
