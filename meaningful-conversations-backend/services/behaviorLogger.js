@@ -6,6 +6,25 @@
 const adaptiveWeighting = require('./adaptiveKeywordWeighting');
 
 /**
+ * Create a Unicode-aware keyword regex for German text.
+ * JavaScript's \b word boundary does NOT treat umlauts (ü,ö,ä,ß) as word characters,
+ * so keywords starting with umlauts (e.g. "überfordert", "ängstlich", "ökonomisch")
+ * would silently fail to match. This function uses Unicode property escapes instead.
+ * 
+ * Pattern: Match the keyword (optionally followed by more letters) only when
+ * it's not preceded or followed by a Unicode letter.
+ * 
+ * @param {string} word - The keyword to search for
+ * @returns {RegExp} A Unicode-aware regex with global+case-insensitive flags
+ */
+function createKeywordRegex(word) {
+  // Escape special regex characters in the keyword
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Use Unicode property \p{L} for letter boundaries instead of \b
+  return new RegExp(`(?<!\\p{L})${escaped}\\p{L}*(?!\\p{L})`, 'giu');
+}
+
+/**
  * Bidirectional keyword dictionaries for Riemann-Thomann dimensions
  * - high: Keywords that indicate high tendency towards this dimension
  * - low: Keywords that indicate low tendency (opposite pole behavior)
@@ -19,8 +38,12 @@ const RIEMANN_KEYWORDS = {
         // Fachbegriffe
         'verbundenheit', 'beziehung', 'harmonie', 'zusammenhalt', 'geborgenheit',
         'wärme', 'vertrauen', 'nähe', 'intimität', 'gemeinsam', 'team',
-        'empathie', 'fürsorge', 'zugehörigkeit', 'miteinander', 'emotional',
-        'gefühl', 'persönlich', 'herzlich', 'liebevoll',
+        'empathie', 'fürsorge', 'zugehörigkeit', 'miteinander',
+        // "emotional" entfernt (Doppel-Trigger mit Big5 Neuroticism; hier spezifischer:)
+        'emotional verbunden',
+        // "gefühl" entfernt (False Positive: "ein Gefühl in der Brust" = körperlich, nicht Naehe)
+        'tiefes gefühl', 'gefühle zeigen', 'gefühlvoll',
+        'persönlich', 'herzlich', 'liebevoll',
         // Alltagssprache
         'zusammen sein', 'füreinander da', 'kuscheln', 'umarmen', 'vermisse',
         'brauche jemanden', 'nicht allein', 'enger kontakt', 'herzensmenschen'
@@ -30,7 +53,9 @@ const RIEMANN_KEYWORDS = {
         'distanziert', 'abstand', 'zurückgezogen', 'isoliert', 'einsam',
         'kühl', 'unpersönlich', 'gleichgültig', 'oberflächlich',
         // Erweitert (+6)
-        'halte distanz', 'brauche abstand', 'allein sein', 'für mich', 'unnahbar',
+        'halte distanz', 'brauche abstand', 'allein sein', 'unnahbar',
+        // "für mich" entfernt (False Positive: "nur für mich" = Selbstfürsorge vs. Isolation)
+        'will für mich sein', 'bin lieber für mich', 'brauche zeit für mich allein',
         'einzelgänger', 'kontaktscheu', 'abweisend', 'reserviert', 'verschlossen',
         'mauer', 'emotional verschlossen', 'brauche raum', 'lieber alleine'
       ]
@@ -41,7 +66,9 @@ const RIEMANN_KEYWORDS = {
         'autonomie', 'freiheit', 'unabhängigkeit', 'eigenständig', 'abgrenzung',
         'privatsphäre', 'selbstständig', 'allein', 'rational', 'logik',
         'objektiv', 'sachlich', 'analyse', 'fakten', 'daten', 'professionell',
-        'neutral', 'kritisch', 'fokussiert', 'effizient',
+        // "neutral" entfernt (False Positive: "die Farbe ist neutral" etc.)
+        'neutral bleiben', 'sachlich neutral',
+        'kritisch', 'fokussiert', 'effizient',
         // Alltagssprache
         'mein ding machen', 'lass mich in ruhe', 'mein eigener raum',
         'kopfmensch', 'nüchtern betrachtet', 'auf distanz', 'brauche freiraum'
@@ -53,7 +80,9 @@ const RIEMANN_KEYWORDS = {
         // Erweitert (+7)
         'brauche andere', 'kann nicht allein', 'halte das nicht aus', 'überfordert allein',
         'unsicher ohne', 'brauche bestätigung', 'verlustangst', 'trennungsangst',
-        'verlassen', 'alleinsein', 'orientierungslos', 'haltlos', 'halt brauchen'
+        // "verlassen" entfernt (False Positive: "ich verlasse" = gehen/aufbrechen)
+        'verlassen worden', 'verlassen fühlen', 'im stich gelassen',
+        'alleinsein', 'orientierungslos', 'haltlos', 'halt brauchen'
       ]
     },
     dauer: {
@@ -105,11 +134,17 @@ const RIEMANN_KEYWORDS = {
       high: [
         // Formal
         'connection', 'relationship', 'harmony', 'togetherness', 'belonging',
-        'warmth', 'trust', 'closeness', 'intimacy', 'together', 'team',
-        'empathy', 'care', 'community', 'emotional', 'feeling', 'personal',
-        'heartfelt', 'loving', 'bonding',
+        'warmth', 'trust', 'closeness', 'intimacy', 'team',
+        // "together" entfernt (False Positive: "put it together")
+        'being together', 'close together',
+        'empathy', 'care', 'community',
+        // "emotional" entfernt (Cross-Framework: Big5 Neuroticism)
+        'emotionally connected',
+        // "feeling" entfernt (False Positive: "I have a feeling that...")
+        'deep feeling', 'warm feeling',
+        'personal', 'heartfelt', 'loving', 'bonding',
         // Colloquial
-        'being together', 'there for each other', 'cuddle', 'hug', 'miss you',
+        'there for each other', 'cuddle', 'hug', 'miss you',
         'need someone', 'not alone', 'close contact', 'dear ones'
       ],
       low: [
@@ -161,7 +196,7 @@ const RIEMANN_KEYWORDS = {
         // Expanded (+6)
         'no plan', 'we will see', 'decide spontaneously', 'whatever', 'non-committal',
         'postponed', 'often forget', 'no idea', 'not worried about it',
-        'stay loose', 'keep options open', 'unpredictable', 'erratic'
+        'stay loose', 'keep options open'
       ]
     },
     wechsel: {
@@ -209,7 +244,8 @@ const SD_KEYWORDS = {
         // Fachbegriffe
         'ganzheitlich', 'global', 'vernetzt', 'ökologisch', 'kollektiv', 'spirituell',
         'bewusstsein', 'transzendent', 'planetar', 'synthese', 'integral', 'holistisch',
-        'universell', 'kosmos', 'einheit', 'verbunden', 'ökosystem', 'symbiose',
+        // "verbunden" entfernt (Doppel-Trigger mit Purple; hier spezifischer:)
+        'universell', 'kosmos', 'einheit', 'universell verbunden', 'mit allem verbunden', 'ökosystem', 'symbiose',
         // Alltagssprache
         'alles hängt zusammen', 'big picture', 'vernetzt denken', 'globale verantwortung',
         'wir sind alle eins', 'natur und mensch', 'nachhaltigkeit', 'größeres ganzes'
@@ -217,7 +253,9 @@ const SD_KEYWORDS = {
       low: [
         'isoliert', 'fragmentiert', 'kurzfristig', 'materialistisch', 'egoistisch',
         // Erweitert
-        'egal was andere denken', 'nur für mich', 'nach mir die sintflut', 'nicht mein problem',
+        'egal was andere denken', 'nach mir die sintflut', 'nicht mein problem',
+        // "nur für mich" entfernt (False Positive: Selbstfürsorge vs. egoistische Weltsicht)
+        'interessiert mich nicht was mit anderen passiert', 'jeder ist sich selbst der nächste',
         'kurzsichtig', 'eng gedacht', 'nur mein umfeld', 'gleichgültig gegenüber umwelt',
         'konsumieren', 'wegwerfmentalität'
       ]
@@ -245,7 +283,9 @@ const SD_KEYWORDS = {
       high: [
         'gemeinschaft', 'gleichheit', 'harmonie', 'konsens', 'inklusion', 'empathie',
         'vielfalt', 'partizipation', 'dialog', 'wertschätzung', 'kooperation', 'fair',
-        'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität', 'gefühl',
+        'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität',
+        // "gefühl" entfernt (False Positive: "Gefühl in der Brust" vs. kollektives Wertgefühl)
+        'gemeinsames gefühl', 'mitgefühl', 'einfühlungsvermögen',
         // Alltagssprache
         'alle mitnehmen', 'gemeinsam entscheiden', 'jeder ist gleich wichtig',
         'zuhören', 'auf augenhöhe', 'miteinander', 'füreinander', 'fair play',
@@ -298,14 +338,27 @@ const SD_KEYWORDS = {
     },
     red: {
       high: [
-        // Bestehend
-        'macht', 'stärke', 'durchsetzung', 'kontrolle', 'dominanz', 'respekt',
-        'sofort', 'impuls', 'aktion', 'eroberung', 'unabhängig', 'mutig',
-        'direkt', 'kämpfen', 'willen', 'energie', 'spontan', 'ungeduld',
+        // "macht" entfernt (zu viele False Positives durch Verb "machen": "es macht mir...")
+        // Stattdessen eindeutige Macht-Komposita:
+        'machtkampf', 'machtposition', 'machtvoll', 'machtgefühl', 'machtanspruch',
+        'stärke', 'durchsetzung', 'kontrolle', 'dominanz', 'respekt',
+        // "sofort" entfernt (False Positive: "sofort zurückziehen" = Vermeidung, nicht Dominanz)
+        'sofort handeln', 'sofort zuschlagen', 'sofort reagiert',
+        'impuls', 'aktion', 'eroberung', 'unabhängig', 'mutig',
+        // "kämpfen" entfernt (False Positive: "andere kämpfen auch" = Schwierigkeiten, nicht Assertivität)
+        'kämpferisch', 'kampfbereit', 'kämpfe mich durch', 'für meine rechte kämpfen',
+        'direkt', 'spontan', 'ungeduld',
+        // "willen" entfernt (False Positive: "um Gottes willen", "deinetwillen")
+        'willenskraft', 'eiserner wille', 'starker wille',
+        // "energie" entfernt (False Positive: "keine Energie", "Energie sparen")
+        'voller energie', 'energiegeladen',
         // Konstruktive Red-Keywords
         'für mich einstehen', 'grenzen setzen', 'entschlossen', 'selbstbewusst handeln',
         'mut zeigen', 'nicht mit mir', 'sage nein', 'weiß was ich will',
-        'nehme mir was mir zusteht', 'lasse mich nicht einschüchtern', 'power'
+        'nehme mir was mir zusteht', 'lasse mich nicht einschüchtern', 'power',
+        'durchsetzen', 'die macht haben',
+        // "bestimmen" entfernt (False Positive: "das ist bestimmt so")
+        'selbst bestimmen', 'das sagen haben'
       ],
       low: [
         'schwach', 'unterwürfig', 'machtlos', 'ohnmächtig', 'passiv',
@@ -318,8 +371,14 @@ const SD_KEYWORDS = {
     purple: {
       high: [
         'zugehörigkeit', 'ritual', 'tradition', 'ahnen', 'mystisch', 'stamm',
-        'sippe', 'familie', 'schutz', 'magie', 'opfer', 'gemeinschaft',
-        'brauch', 'zeremonie', 'heilig', 'verbunden', 'geborgenheit',
+        'sippe', 'familie', 'magie', 'gemeinschaft',
+        // "schutz" entfernt (Doppel-Trigger mit Beige; in Purple spezifischer:)
+        'unter dem schutz der gemeinschaft',
+        // "opfer" entfernt (False Positive: Gewaltopfer, Mobbing-Opfer vs. rituelle Opfergabe)
+        'opfergabe', 'opferbereitschaft',
+        // "brauch" entfernt (False Positive durch Verb "brauchen": "ich brauche...")
+        'brauchtum', 'bräuche', 'alter brauch',
+        'zeremonie', 'heilig', 'verbunden', 'geborgenheit',
         // Alltagssprache
         'meine leute', 'wo ich herkomme', 'familiäre wurzeln', 'heimat',
         'zusammengehören', 'unsere art', 'das haben wir schon immer so gemacht'
@@ -339,7 +398,9 @@ const SD_KEYWORDS = {
         'wohlbefinden', 'lebensnotwendig', 'überlebenswichtig',
         // Alltagssprache
         'erstmal essen', 'bin müde', 'brauche schlaf', 'mein körper sagt',
-        'grundbedürfnisse', 'erstmal zur ruhe kommen', 'funktionieren'
+        'grundbedürfnisse', 'erstmal zur ruhe kommen',
+        // "funktionieren" entfernt (False Positive: "das funktioniert nicht" etc.)
+        'nur noch funktionieren', 'im überlebensmodus'
       ],
       low: [
         'überfluss', 'komfort', 'luxus',
@@ -392,10 +453,17 @@ const SD_KEYWORDS = {
       high: [
         'community', 'equality', 'harmony', 'consensus', 'inclusion', 'empathy',
         'diversity', 'participation', 'dialogue', 'appreciation', 'cooperation', 'fair',
-        'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity', 'feeling',
+        'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity',
+        // "feeling" entfernt (False Positive: "I have a feeling that...")
+        'deep feeling', 'shared feeling',
         // Colloquial
         'include everyone', 'decide together', 'everyone matters equally',
-        'listen', 'eye level', 'together', 'for each other', 'fair play',
+        // "listen" entfernt (False Positive: "listen to music")
+        'listen carefully', 'actively listen', 'hear everyone out',
+        'eye level',
+        // "together" entfernt (False Positive: "put it together")
+        'work together', 'come together', 'grow together',
+        'for each other', 'fair play',
         'achieve together', 'every voice counts'
       ],
       low: [
@@ -439,7 +507,7 @@ const SD_KEYWORDS = {
         'chaos', 'lawless', 'irresponsible', 'undisciplined', 'anarchic',
         // Expanded
         'rules are meant to be broken', 'do not care', 'no plan',
-        'no obligation', 'accountable to no one', 'do what I want',
+        'no obligation', 'accountable to no one', 'do what i want',
         'duty is outdated', 'live in the moment', 'no morals'
       ]
     },
@@ -447,19 +515,25 @@ const SD_KEYWORDS = {
       high: [
         // Existing
         'power', 'strength', 'assertion', 'control', 'dominance', 'respect',
-        'immediate', 'impulse', 'action', 'conquest', 'independent', 'brave',
-        'direct', 'fight', 'will', 'energy', 'spontaneous', 'impatient',
+        // "immediate" entfernt (False Positive: "immediately withdrew" = Vermeidung)
+        'take immediate action', 'act immediately',
+        'impulse', 'action', 'conquest', 'independent', 'brave',
+        // "will" entfernt (False Positive: Future Tense "I will...")
+        // Stattdessen spezifischere Willenskraft-Begriffe:
+        'direct', 'willpower', 'strong-willed', 'energy', 'spontaneous', 'impatient',
+        // "fight" entfernt (False Positive: "fighting with this" = Schwierigkeit, nicht Dominanz)
+        'fight for', 'fight back', 'fighter', 'put up a fight',
         // Constructive Red
         'stand up for myself', 'set boundaries', 'decisive', 'act confidently',
-        'show courage', 'not with me', 'say no', 'know what I want',
-        'claim what is mine', 'will not be intimidated', 'power'
+        'show courage', 'not with me', 'say no', 'know what i want',
+        'claim what is mine', 'will not be intimidated'
       ],
       low: [
         'weak', 'submissive', 'powerless', 'helpless', 'passive',
         // Expanded
         'do not dare', 'let everyone walk over me', 'cannot defend myself',
         'always say yes', 'too nice', 'let others take advantage', 'no backbone',
-        'defenseless', 'helpless', 'resigned'
+        'defenseless', 'resigned'
       ]
     },
     purple: {
@@ -468,7 +542,7 @@ const SD_KEYWORDS = {
         'clan', 'family', 'protection', 'magic', 'sacrifice', 'community',
         'custom', 'ceremony', 'sacred', 'connected', 'security',
         // Colloquial
-        'my people', 'where I come from', 'family roots', 'homeland',
+        'my people', 'where i come from', 'family roots', 'homeland',
         'belong together', 'our way', 'we have always done it this way'
       ],
       low: [
@@ -486,7 +560,7 @@ const SD_KEYWORDS = {
         'wellbeing', 'essential', 'vital',
         // Colloquial
         'need to eat first', 'am tired', 'need sleep', 'my body tells me',
-        'basic needs', 'need to rest first', 'just functioning'
+        'need to rest first', 'just functioning'
       ],
       low: [
         'abundance', 'comfort', 'luxury',
@@ -516,7 +590,9 @@ const BIG5_KEYWORDS = {
       low: [
         'traditionell', 'konventionell', 'konservativ', 'praktisch', 'routiniert',
         'bodenständig', 'realistisch', 'pragmatisch', 'gewohnt', 'bewährt',
-        'einfach', 'unkompliziert', 'nüchtern',
+        // "einfach" entfernt (False Positive: Adverb "einfach nur" vs. Adjektiv "simpel")
+        'einfach gestrickt', 'halte es einfach', 'lieber einfach',
+        'unkompliziert', 'nüchtern',
         // Alltagssprache
         'bleibe lieber beim alten', 'muss nicht sein', 'kenne mich aus',
         'funktioniert doch', 'wozu ändern', 'lieber sicher'
@@ -549,7 +625,9 @@ const BIG5_KEYWORDS = {
         'gesellig', 'gesprächig', 'energiegeladen', 'enthusiastisch', 'aktiv',
         'kontaktfreudig', 'aufgeschlossen', 'lebhaft', 'unternehmungslustig',
         'redselig', 'selbstbewusst', 'dominant', 'party', 'ausgehen',
-        'menschen', 'treffen', 'sozial', 'kommunikativ',
+        'menschen', 'sozial', 'kommunikativ',
+        // "treffen" entfernt (False Positive: "Entscheidung treffen" vs. "Leute treffen")
+        'leute treffen', 'sich treffen', 'verabreden',
         // Berufliche / alltägliche Extraversion
         'präsentieren', 'vernetzen', 'mitreißen', 'moderieren', 'rede gerne',
         'offen auf leute zu', 'gerne unter leuten', 'team-player', 'wortführer',
@@ -591,6 +669,8 @@ const BIG5_KEYWORDS = {
         'emotional', 'verletzlich', 'überfordert', 'unruhig', 'angespannt',
         'frustriert', 'empfindlich', 'zweifelnd', 'pessimistisch',
         'belastet', 'erschöpft', 'sorge',
+        // Einzelwort-Keywords (fehlten als Standalone)
+        'angst', 'druck', 'panik', 'verzweifelt',
         // Neutralere / positive Neuroticism-High-Keywords (Kernverbesserung)
         'sensibel', 'vorsichtig', 'achtsam', 'bedacht', 'reflektiert',
         'grüble', 'mache mir gedanken', 'denke viel nach', 'nehme mir dinge zu herzen',
@@ -615,7 +695,9 @@ const BIG5_KEYWORDS = {
       high: [
         // Formal
         'creative', 'curious', 'experimental', 'imaginative', 'artistic',
-        'open', 'innovative', 'visionary', 'original', 'unconventional',
+        // "open" entfernt (False Positive: "open the door", "open a file")
+        'open-minded', 'open to new',
+        'innovative', 'visionary', 'original', 'unconventional',
         'philosophical', 'abstract', 'inspired', 'intellectual', 'profound',
         'receptive', 'inventive', 'dreamy', 'idealistic',
         // Colloquial (sensory + emotional)
@@ -626,7 +708,8 @@ const BIG5_KEYWORDS = {
       low: [
         'traditional', 'conventional', 'conservative', 'practical', 'routine',
         'down-to-earth', 'realistic', 'pragmatic', 'familiar', 'proven',
-        'simple', 'straightforward', 'sober',
+        // "simple" entfernt (False Positive: "simply" vs. "keep it simple")
+        'keep it simple', 'prefer simple', 'straightforward', 'sober',
         // Colloquial
         'rather stick with', 'not necessary', 'know my way around',
         'it works fine', 'why change', 'rather safe'
@@ -659,7 +742,9 @@ const BIG5_KEYWORDS = {
         'sociable', 'talkative', 'energetic', 'enthusiastic', 'active',
         'outgoing', 'gregarious', 'lively', 'adventurous',
         'confident', 'assertive', 'party', 'going out',
-        'people', 'meeting', 'social', 'communicative',
+        'people', 'social', 'communicative',
+        // "meeting" entfernt (False Positive: Business-Meeting vs. soziales Treffen)
+        'meeting people', 'social gathering',
         // Professional / everyday extraversion
         'presenting', 'networking', 'inspiring', 'moderating', 'love talking',
         'approach people', 'enjoy company', 'team player', 'take the lead',
@@ -701,8 +786,10 @@ const BIG5_KEYWORDS = {
         'emotional', 'vulnerable', 'overwhelmed', 'restless', 'tense',
         'frustrated', 'sensitive', 'doubtful', 'pessimistic',
         'burdened', 'exhausted', 'worry',
+        // Standalone keywords (were missing)
+        'anxiety', 'fear', 'pressure', 'panic', 'desperate',
         // Neutral / positive Neuroticism-High (core improvement)
-        'sensitive', 'cautious', 'mindful', 'thoughtful', 'reflective',
+        'cautious', 'mindful', 'thoughtful', 'reflective',
         'ruminate', 'think a lot', 'overthink', 'take things to heart',
         'hard to switch off', 'sleep badly', 'racing thoughts',
         'cannot let go', 'worry too much', 'torn', 'dwell on problems',
@@ -751,7 +838,7 @@ function analyzeMessage(message, lang = 'de') {
     
     // Count high keywords
     for (const word of directions.high) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         highCount += matches.length;
@@ -761,7 +848,7 @@ function analyzeMessage(message, lang = 'de') {
     
     // Count low keywords
     for (const word of directions.low) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         lowCount += matches.length;
@@ -863,7 +950,7 @@ function analyzeBig5Message(message, lang = 'de') {
     
     // Count high keywords
     for (const word of directions.high) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         highCount += matches.length;
@@ -873,7 +960,7 @@ function analyzeBig5Message(message, lang = 'de') {
     
     // Count low keywords
     for (const word of directions.low) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         lowCount += matches.length;
@@ -978,7 +1065,7 @@ function analyzeSDMessage(message, lang = 'de') {
     
     // Count high keywords
     for (const word of directions.high) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         highCount += matches.length;
@@ -988,7 +1075,7 @@ function analyzeSDMessage(message, lang = 'de') {
     
     // Count low keywords
     for (const word of directions.low) {
-      const regex = new RegExp(`\\b${word}\\w*\\b`, 'gi');
+      const regex = createKeywordRegex(word);
       const matches = lowerMessage.match(regex);
       if (matches) {
         lowCount += matches.length;
@@ -1336,6 +1423,8 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
 }
 
 module.exports = {
+  // Regex helper (exported for testing)
+  createKeywordRegex,
   // Riemann analysis
   analyzeMessage,
   analyzeConversation,
