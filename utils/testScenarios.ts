@@ -195,6 +195,20 @@ export interface TestRunResult {
     dpflKeywordsDetected: string[];
     stressKeywordsDetected: boolean;
     dpcMergeMetadata?: any;
+    // Phase 2a: Adaptive weighting telemetry
+    adaptiveWeighting?: {
+      context?: { topic?: string; topicConfidence?: number; linguisticPattern?: string; patternConfidence?: number };
+      sentiment?: { polarity?: number; emotionalContext?: string };
+      adjustedKeywordCount?: number;
+      weightingDetails?: any[];
+    };
+    // Cumulative keywords across all messages, all frameworks
+    cumulativeKeywords?: {
+      riemann: Record<string, { high: string[]; low: string[] }>;
+      big5: Record<string, { high: string[]; low: string[] }>;
+      spiralDynamics: Record<string, { high: string[]; low: string[] }>;
+      totalCount: number;
+    };
   };
   
   // Auto-check results
