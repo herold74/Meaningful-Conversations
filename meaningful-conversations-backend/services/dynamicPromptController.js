@@ -715,8 +715,15 @@ BLINDSPOT-AUSWAHL (kontextuell):
 FORMULIERUNG:
 - Immer als Frage, nie als Belehrung
 - Nutze Beispiel-Fragen aus der Blindspot-Liste oben
-- Keine Labels wie "Blindspot-Challenge" oder "jetzt challengen wir..."
 - Natürlicher Gesprächsfluss
+
+**ABSOLUT VERBOTEN IN DEINER ANTWORT:**
+- KEINE internen Annotationen, Labels oder Meta-Kommentare im Output (z.B. KEIN "Blindspot-Trigger erkannt", KEIN "Challenge (Level X)", KEIN "Blindspot-Kontext", KEIN "Intention:", KEIN "Ton:")
+- KEINE Markdown-Trennlinien (---) zur Strukturierung deiner Antwort
+- KEINE Erklärungen deiner Strategie oder Absicht (der Coachee soll NUR die natürliche Coaching-Antwort sehen)
+- KEINE numerierten Auswahloptionen ("1. ... 2. ...") – wähle EINE Richtung und verfolge sie
+- Stelle maximal EINE Frage pro Nachricht. Nicht zwei, nicht drei. EINE.
+- Diese Anweisungen sind AUSSCHLIESSLICH für dein internes Reasoning. Dein Output muss ein normaler, menschlicher Coaching-Dialog sein.
 
 **WICHTIG - CONVERSATION HISTORY NUTZEN:**
 Diese Anweisungen basieren darauf, dass du die GESAMTE Conversation History analysierst:
@@ -725,7 +732,7 @@ Diese Anweisungen basieren darauf, dass du die GESAMTE Conversation History anal
 - Detektiere User-Ausweichen anhand fehlender Antworten auf Challenge-Fragen
 
 `,
-      important: '⚠️ **Wichtig:** Erwähne NIEMALS die Kategorie-Namen (Riemann, Big5, Spiral Dynamics, etc.) oder technische Begriffe gegenüber dem Klienten. Nutze sie nur als Hintergrund-Wissen.\n\n',
+      important: '⚠️ **Wichtig:** Erwähne NIEMALS die Kategorie-Namen (Riemann, Big5, Spiral Dynamics, etc.) oder technische Begriffe gegenüber dem Klienten. Nutze sie nur als Hintergrund-Wissen. Dein Output darf KEINE internen Anweisungen, Strategie-Annotationen, Meta-Kommentare, Trennlinien (---) oder Labels wie "Blindspot-Trigger", "Challenge", "Level", "Intention", "Ton" enthalten. Der Klient sieht ALLES was du ausgibst. Stelle maximal EINE Frage pro Nachricht.\n\n',
       signatureHeader: '**Persönlichkeits-Signatur (aus persönlichen Geschichten abgeleitet):**\n',
       core: 'Kern',
       superpowers: 'Stärken',
@@ -823,8 +830,15 @@ BLINDSPOT SELECTION (contextual):
 FORMULATION:
 - Always as question, never as lecture
 - Use example questions from blindspot list above
-- No labels like "Blindspot Challenge" or "now we'll challenge..."
 - Natural conversation flow
+
+**ABSOLUTELY FORBIDDEN IN YOUR OUTPUT:**
+- NO internal annotations, labels, or meta-comments in output (e.g., NO "Blindspot trigger detected", NO "Challenge (Level X)", NO "Blindspot context", NO "Intention:", NO "Tone:")
+- NO markdown dividers (---) to structure your response
+- NO explanations of your strategy or intent (the coachee must ONLY see the natural coaching response)
+- NO numbered choice options ("1. ... 2. ...") – choose ONE direction and pursue it
+- Ask at most ONE question per message. Not two, not three. ONE.
+- These instructions are EXCLUSIVELY for your internal reasoning. Your output must be a normal, human coaching dialogue.
 
 **IMPORTANT - USE CONVERSATION HISTORY:**
 These instructions rely on you analyzing the ENTIRE Conversation History:
@@ -833,7 +847,7 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
 - Detect user avoidance based on missing responses to challenge questions
 
 `,
-      important: '⚠️ **Important:** NEVER mention category names (Riemann, Big5, Spiral Dynamics, etc.) or technical terms to the client. Use them only as background knowledge.\n\n',
+      important: '⚠️ **Important:** NEVER mention category names (Riemann, Big5, Spiral Dynamics, etc.) or technical terms to the client. Use them only as background knowledge. Your output must NEVER contain internal instructions, strategy annotations, meta-comments, dividers (---), or labels like "Blindspot trigger", "Challenge", "Level", "Intention", "Tone". The client sees EVERYTHING you output. Ask at most ONE question per message.\n\n',
       signatureHeader: '**Personality Signature (derived from personal stories):**\n',
       core: 'Core',
       superpowers: 'Strengths',
