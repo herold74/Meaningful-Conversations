@@ -1105,9 +1105,9 @@ const App: React.FC = () => {
         // Calculate XP for this mock session
         const newState = calculateNewGamificationState(
             gamificationState,
-            mockAnalysis.accomplishedGoals.length,
-            mockAnalysis.hasConversationalEnd,
-            mockAnalysis.hasAccomplishedGoal
+            mockAnalysis,
+            alexBot.id,
+            mockChatHistory.length
         );
 
         // #region agent log
@@ -1136,6 +1136,7 @@ const App: React.FC = () => {
             refinementResult: {
                 hasSuggestions: false
             },
+            profileType: 'RIEMANN', // Dummy value for test mode
             message: "Quick test mode - no actual refinement suggestions"
         });
         
