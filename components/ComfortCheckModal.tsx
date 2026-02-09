@@ -124,9 +124,9 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         {/* Info Box */}
         <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-xs text-content-secondary">
-            <strong className="text-blue-700 dark:text-blue-400">ℹ️ {t('comfort_check_privacy') || 'Privacy'}:</strong>{' '}
-            {t('comfort_check_privacy_desc') || 
-              'Session data is end-to-end encrypted. Only you can decrypt it.'}
+            <strong className="text-blue-700 dark:text-blue-400">ℹ️ {t('comfort_check_privacy') || 'Datenschutz'}:</strong>{' '}
+            {t('comfort_check_privacy_desc_v2') || 
+              'Es werden nur anonyme Keyword-Häufigkeiten gespeichert, keine Gesprächsinhalte. Du kannst das Transcript nach der Session herunterladen.'}
           </p>
         </div>
 
@@ -134,7 +134,7 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             onClick={() => handleSubmit(false)}
-            disabled={comfortScore === null || isSubmitting}
+            disabled={comfortScore === null || comfortScore < 3 || isSubmitting}
             loading={isSubmitting}
             size="md"
             className="flex-1"
@@ -156,7 +156,13 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         </div>
 
         <p className="text-xs text-content-secondary mt-4 text-center">
-          {t('comfort_check_note') || 'Sessions with score ≥ 3 will be used for profile refinement'}
+          {comfortScore !== null && comfortScore < 3 ? (
+            <span className="text-yellow-600 dark:text-yellow-400">
+              ⚠️ {t('comfort_check_low_score_warning') || 'Score < 3: Session wird nicht für Profil-Verfeinerung verwendet'}
+            </span>
+          ) : (
+            t('comfort_check_note') || 'Sessions with score ≥ 3 will be used for profile refinement'
+          )}
         </p>
       </div>
     </div>

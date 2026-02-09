@@ -467,3 +467,37 @@ export const previewProfileRefinement = async (data: {
   }
   return response.json();
 };
+
+export const testRefinementWithMockSessions = async (data: {
+  profileType: 'RIEMANN' | 'BIG5';
+  decryptedProfile: Record<string, unknown>;
+  mockSessions: Array<{
+    // Riemann frequencies (for RIEMANN profile)
+    riemann?: {
+      dauer?: number;
+      wechsel?: number;
+      naehe?: number;
+      distanz?: number;
+    };
+    // Big5 frequencies (for BIG5 profile)
+    big5?: {
+      openness?: number;
+      conscientiousness?: number;
+      extraversion?: number;
+      agreeableness?: number;
+      neuroticism?: number;
+    };
+    comfortScore: number;
+  }>;
+}): Promise<RefinementPreviewResult> => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/test-refinement-mock`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to test mock refinement');
+  }
+  return response.json();
+};

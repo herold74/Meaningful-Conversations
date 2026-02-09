@@ -634,5 +634,43 @@ Create a JSON with exactly this structure:
 }`
 };
 
+/**
+ * POST /api/personality/test-refinement-mock
+ * Test endpoint for profile refinement with mock session data
+ * Allows testing refinement UI without running 2+ real sessions
+ * ADMIN/TEST ONLY - requires test profile override
+ */
+router.post('/test-refinement-mock', authMiddleware, async (req, res) => {
+  try {
+    const { profileType, decryptedProfile, mockSessions } = req.body;
+    
+    if (!profileType || !decryptedProfile || !mockSessions || mockSessions.length < 2) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: profileType, decryptedProfile, mockSessions (min 2)' 
+      });
+    }
+    
+    // Use profileRefinement service to calculate suggestions
+    const profileRefinementService = require('../services/profileRefinement');
+    
+    const result = await profileRefinementService.calculateRefinementSuggestions(
+      mockSessions,
+      decryptedProfile,
+      profileType
+    );
+    
+    res.json({
+      success: true,
+      isPreviewOnly: true,
+      isMockTest: true,
+      ...result
+    });
+    
+  } catch (error) {
+    console.error('Error in test-refinement-mock:', error);
+    res.status(500).json({ error: 'Failed to calculate mock refinement' });
+  }
+});
+
 module.exports = router;
 
