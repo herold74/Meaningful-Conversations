@@ -265,7 +265,6 @@ export const submitSessionLog = async (data: {
   encryptionKey: CryptoKey;
   language?: 'de' | 'en';
 }) => {
-  const { encryptTranscript } = await import('../utils/personalityEncryption');
   const { analyzeSession } = await import('../utils/sessionBehaviorAnalyzer');
   
   // Analyze chat history for all three profile types (Riemann, Big5, SD)
@@ -273,17 +272,16 @@ export const submitSessionLog = async (data: {
   const lang = data.language || 'de';
   const frequencies = analyzeSession(data.chatHistory, lang);
   
-  // Encrypt chat transcript
-  const transcript = JSON.stringify(data.chatHistory);
-  const encryptedTranscript = await encryptTranscript(transcript, data.encryptionKey);
+  // Note: Transcript is NOT stored (GDPR compliance)
+  // User can download transcript immediately after session
   
   const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
       sessionId: data.sessionId,
-      frequencies,
-      encryptedTranscript
+      frequencies
+      // encryptedTranscript removed - not stored anymore
     })
   });
   

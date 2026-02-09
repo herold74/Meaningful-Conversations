@@ -144,14 +144,15 @@ router.delete('/profile', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/personality/session-log
- * Loggt Session-Verhalten mit verschluesseltem Transkript
+ * Loggt Session-Verhalten (nur Keyword-Frequenzen, kein Transcript)
  * Speichert Frequenzen für alle drei Profile-Typen: Riemann, Big5, SD
+ * GDPR-konform: Transcript wird nicht gespeichert
  */
 router.post('/session-log', authMiddleware, async (req, res) => {
   try {
-    const { sessionId, encryptedTranscript, frequencies } = req.body;
+    const { sessionId, frequencies } = req.body;
     
-    if (!sessionId || !encryptedTranscript) {
+    if (!sessionId || !frequencies) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
@@ -164,7 +165,6 @@ router.post('/session-log', authMiddleware, async (req, res) => {
       data: {
         userId: req.userId,
         sessionId,
-        encryptedTranscript,
         // Riemann-Thomann (delta values: high - low)
         dauerFrequency: riemann.dauer || frequencies?.dauer || 0,
         wechselFrequency: riemann.wechsel || frequencies?.wechsel || 0,
@@ -185,6 +185,8 @@ router.post('/session-log', authMiddleware, async (req, res) => {
         greenFrequency: sd.green || 0,
         yellowFrequency: sd.yellow || 0,
         turquoiseFrequency: sd.turquoise || 0
+        // Note: encryptedTranscript field removed for GDPR compliance
+        // Users can download transcript immediately after session
       }
     });
     

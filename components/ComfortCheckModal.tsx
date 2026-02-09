@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
 import Button from './shared/Button';
@@ -23,9 +23,31 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Only show if DPFL mode and encryption key available
+  // Use useEffect to avoid setState during render
+  useEffect(() => {
+    // #region agent log
+    console.log('[COMFORT-MODAL] useEffect check:', {
+      coachingMode,
+      hasEncryptionKey: !!encryptionKey,
+      willClose: coachingMode !== 'dpfl' || !encryptionKey
+    });
+    // #endregion
+    
+    if (coachingMode !== 'dpfl' || !encryptionKey) {
+      // #region agent log
+      console.log('[COMFORT-MODAL] Closing immediately - conditions not met');
+      // #endregion
+      // Silently skip comfort check
+      onComplete();
+    } else {
+      // #region agent log
+      console.log('[COMFORT-MODAL] ✓ All conditions met - modal will render');
+      // #endregion
+    }
+  }, [coachingMode, encryptionKey, onComplete]);
+
+  // Don't render if conditions aren't met
   if (coachingMode !== 'dpfl' || !encryptionKey) {
-    // Silently skip comfort check
-    onComplete();
     return null;
   }
 
@@ -114,22 +136,22 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
             onClick={() => handleSubmit(false)}
             disabled={comfortScore === null || isSubmitting}
             loading={isSubmitting}
-            size="lg"
+            size="md"
             className="flex-1"
           >
             {isSubmitting 
               ? (t('comfort_check_submitting') || 'Saving...') 
-              : (t('comfort_check_use_session') || 'Use for Profile Refinement')}
+              : (t('comfort_check_accept') || 'Übernehmen')}
           </Button>
 
           <Button
             onClick={() => handleSubmit(true)}
             disabled={isSubmitting}
             variant="secondary"
-            size="lg"
+            size="md"
             className="flex-1"
           >
-            {t('comfort_check_skip') || 'Skip'}
+            {t('comfort_check_skip') || 'Überspringen'}
           </Button>
         </div>
 
