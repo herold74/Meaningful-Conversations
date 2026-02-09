@@ -29,4 +29,4 @@ COPY --from=builder /usr/src/app .
 
 EXPOSE 8080
 
-CMD ["node", "server.js"]
+CMD ["npx", "pm2-runtime", "ecosystem.config.js"]

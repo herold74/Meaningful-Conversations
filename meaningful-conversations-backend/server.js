@@ -176,10 +176,19 @@ async function seedAdminUser() {
 
 async function startServer() {
     try {
-        await runMigrationsAndSeed();
+        // In PM2 cluster mode, only the primary worker (id 0) runs migrations and seeding.
+        // Other workers wait briefly for the primary to finish.
+        const isPrimaryWorker = !process.env.pm_id || process.env.pm_id === '0';
         
-        // Ensure configuration data is up-to-date
-        await ensureDefaultConfig();
+        if (isPrimaryWorker) {
+            await runMigrationsAndSeed();
+            await ensureDefaultConfig();
+        } else {
+            console.log(`Worker ${process.env.pm_id}: Skipping migrations (handled by worker 0). Waiting 3s...`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            // Ensure configuration data is still accessible
+            await ensureDefaultConfig();
+        }
 
         // --- Express App Configuration ---
         const allowedOrigins = [
@@ -219,7 +228,9 @@ async function startServer() {
         // --- API Routes ---
         app.use('/api/auth', require('./routes/auth.js'));
         app.use('/api/data', require('./routes/data.js'));
-        app.use('/api/gemini', require('./routes/gemini.js'));
+        const { geminiLimiter } = require('./middleware/rateLimiter.js');
+        const optionalAuthForRateLimit = require('./middleware/optionalAuth.js');
+        app.use('/api/gemini', optionalAuthForRateLimit, geminiLimiter, require('./routes/gemini.js'));
         app.use('/api/bots', require('./routes/bots.js'));
         app.use('/api/feedback', require('./routes/feedback.js'));
         app.use('/api/admin', require('./routes/admin.js'));
