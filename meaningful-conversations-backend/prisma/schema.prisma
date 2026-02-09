@@ -230,8 +230,9 @@ model SessionBehaviorLog {
   comfortScore        Int?
   optedOut            Boolean @default(false)
   
-  // VERSCHLUESSELT: Vollstaendiges Transkript
-  encryptedTranscript String @db.Text
+  // Note: Transcript is NOT stored for GDPR compliance
+  // Users can download transcript immediately after session
+  // Only keyword frequencies are stored for profile refinement
   
   createdAt           DateTime @default(now())
   

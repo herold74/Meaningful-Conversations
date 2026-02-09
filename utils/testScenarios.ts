@@ -53,7 +53,7 @@ export interface DynamicTestScenario {
     dpcRequired: boolean;
     minDpcLength?: number;
     expectedKeywords?: string[];  // DPFL should detect these
-    expectComfortCheck?: boolean;
+    expectStressKeywords?: boolean;
     // Session analysis auto-checks (for 'session' category)
     expectSessionUpdates?: boolean;  // Expect proposedUpdates.length > 0
     expectSessionNextSteps?: boolean;  // Expect nextSteps.length > 0
@@ -170,6 +170,18 @@ export interface TestRunResult {
     botResponse: string;
     responseTime: number;
     isDynamic?: boolean;  // True if this message was dynamically generated
+    llmMetadata?: {
+      model: string;
+      provider: string;
+      tokenUsage: {
+        input: number;
+        output: number;
+        total: number;
+      };
+      responseTimeMs: number;
+      cacheUsed: boolean;
+      timestamp: string;
+    };
   }[];
   
   // DPC/DPFL telemetry (from backend)
@@ -178,7 +190,8 @@ export interface TestRunResult {
     dpcInjectionLength: number;
     dpcStrategiesUsed: string[];
     dpflKeywordsDetected: string[];
-    comfortCheckTriggered: boolean;
+    stressKeywordsDetected: boolean;
+    dpcMergeMetadata?: any;
   };
   
   // Auto-check results
@@ -187,6 +200,9 @@ export interface TestRunResult {
     passed: boolean;
     details?: string;
   }[];
+  
+  // DPFL Keywords Info (not a check, just information)
+  dpflKeywordsInfo?: string;
   
   // Manual check results (filled by tester)
   manualCheckResults: {
@@ -469,8 +485,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
   },
   {
     id: 'personality_behavior_tracking',
-    name: '📊 ' + t('test_personality_behavior_tracking'),
-    description: t('test_personality_behavior_tracking_desc'),
+    name: '📊 ' + t('test_dpfl_full'),
+    description: t('test_dpfl_full_desc'),
     category: 'personality',
     testsFeatures: ['dpfl'],
     testMessages: [
@@ -482,12 +498,13 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: {
-      dpcRequired: true,
+      dpcRequired: true, // DPFL = DPC + Keyword-Tracking, therefore DPC is required
       // Keywords must match language - German and English variants
       expectedKeywords: ['sicherheit', 'planung', 'struktur', 'security', 'planning', 'structure'],
     },
     manualChecks: [
-      t('test_check_keywords_match_message'), // Manual: verify detected keywords match message content
+      t('test_check_dpc_present'), // Manual: Bot adapts language to profile (DPC)
+      t('test_check_dpfl_keywords_detected'), // Manual: System detected keywords correctly (DPFL)
     ]
   },
   {
@@ -518,25 +535,25 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
   // SAFETY & WELLBEING
   // ============================================
   {
-    id: 'safety_comfort_check',
-    name: '💚 ' + t('test_safety_comfort_check'),
-    description: t('test_safety_comfort_check_desc'),
+    id: 'safety_crisis_response',
+    name: '💚 ' + t('test_safety_crisis_response'),
+    description: t('test_safety_crisis_response_desc'),
     category: 'safety',
-    testsFeatures: ['comfort', 'dpfl'],
+    testsFeatures: ['dpfl'],
     testMessages: [
       {
-        text: t('test_comfort_msg_1'),  // Emotional distress message
-        expectedBehavior: t('test_comfort_msg_1_expected')
+        text: t('test_crisis_msg_1'),  // Emotional distress message
+        expectedBehavior: t('test_crisis_msg_1_expected')
       }
     ],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: false,
-      expectComfortCheck: true,
+      expectStressKeywords: true, // Auto-check: stress keywords detected in telemetry
     },
     manualChecks: [
-      t('test_check_comfort_triggered'),
+      t('test_check_crisis_response_shown'),
       t('test_check_response_supportive'),
       t('test_check_not_dismissive'),
     ]
@@ -566,6 +583,47 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_interview_format'),
       t('test_check_interview_structure'),
       t('test_check_interview_questions'),
+    ]
+  },
+
+  // ============================================
+  // SESSION - COMFORT CHECK & REFINEMENT FLOW
+  // ============================================
+  // NOTE: This test CANNOT automatically verify the Comfort Check Modal!
+  // The Test Runner only simulates conversations - it does NOT navigate to SessionReview.
+  // 
+  // To test the Comfort Check Modal:
+  // 1. Run a normal DPFL session (NOT in Test Runner)
+  // 2. Complete substantive conversation with coaching goal
+  // 3. Click "Ende" button
+  // 4. Check SessionReview for "+50 XP" bonus and Comfort Check Modal
+  //
+  // See docs/COMFORT-CHECK-TESTING.md for detailed manual testing instructions.
+  {
+    id: 'session_comfort_check_flow',
+    name: '✓ ' + t('test_session_comfort_check'),
+    description: t('test_session_comfort_check_desc'),
+    category: 'session',
+    testsFeatures: ['dpfl', 'comfort', 'refinement'],
+    testMessages: [
+      {
+        text: t('test_session_comfort_msg_1'),
+        expectedBehavior: t('test_session_comfort_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionUpdates: false,  // Not testing profile updates here
+      expectSessionNextSteps: false,
+    },
+    manualChecks: [
+      t('test_check_session_completed'),
+      t('test_check_comfort_modal_shown'),
+      t('test_check_comfort_rating_scale'),
+      t('test_check_comfort_skip_button'),
+      t('test_check_refinement_after_2nd'),
     ]
   },
 ];

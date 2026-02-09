@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { Bot, Message, SessionAnalysis } from '../types';
 import { BOTS } from '../constants';
@@ -25,16 +25,21 @@ import { analyzeSession } from '../services/geminiService';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import Spinner from './shared/Spinner';
+import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 
 interface TestRunnerProps {
   onClose: () => void;
-  userProfile?: any; // User's actual personality profile
+  userProfile?: any; // User's actual personality profile (encrypted from DB)
+  encryptionKey: string; // Encryption key to decrypt the profile
 }
 
 type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
 
-const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
+const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey }) => {
   const { t, language } = useLocalization();
+  
+  // Decrypted personality profile state
+  const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
   
   // Setup state
   const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
@@ -62,15 +67,33 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
   const [manualCheckResults, setManualCheckResults] = useState<Record<string, boolean | null>>({});
   const [manualNotes, setManualNotes] = useState<Record<string, string>>({});
   
+  // Decrypt user profile when available
+  useEffect(() => {
+    const decryptProfile = async () => {
+      if (userProfile && userProfile.encryptedData && encryptionKey) {
+        try {
+          const decrypted = await decryptPersonalityProfile(userProfile.encryptedData, encryptionKey);
+          setDecryptedProfile(decrypted);
+        } catch (error) {
+          console.error('[TestRunner] Failed to decrypt personality profile:', error);
+          setDecryptedProfile(null);
+        }
+      } else {
+        setDecryptedProfile(null);
+      }
+    };
+    decryptProfile();
+  }, [userProfile, encryptionKey]);
+  
   // Determine which lenses the user profile has
   const userProfileLenses = useMemo(() => {
-    if (!userProfile) return [];
+    if (!decryptedProfile) return [];
     const lenses: string[] = [];
-    if (userProfile.riemann || userProfile.completedLenses?.includes('riemann')) lenses.push('riemann');
-    if (userProfile.spiralDynamics || userProfile.completedLenses?.includes('sd')) lenses.push('sd');
-    if (userProfile.big5 || userProfile.completedLenses?.includes('ocean')) lenses.push('ocean');
+    if (decryptedProfile.riemann) lenses.push('riemann');
+    if (decryptedProfile.spiralDynamics) lenses.push('sd');
+    if (decryptedProfile.big5) lenses.push('ocean');
     return lenses;
-  }, [userProfile]);
+  }, [decryptedProfile]);
 
   const scenarios = getDynamicTestScenarios(t);
   const bots = getTestableBots();
@@ -111,12 +134,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
   // Get the profile to use for testing
   const getTestProfile = useCallback((): CombinedTestProfile | null => {
-    if (useMyProfile && userProfile) {
-      // Use the user's actual profile - ensure completedLenses is set
-      return {
-        ...userProfile,
-        completedLenses: userProfile.completedLenses || userProfileLenses
-      };
+    if (useMyProfile && decryptedProfile) {
+      // Use the REAL decrypted profile data!
+      return decryptedProfile;
     }
     
     // Combine selected profile blocks
@@ -125,7 +145,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
     }
     
     return null;
-  }, [useMyProfile, userProfile, userProfileLenses, selectedRiemann, selectedSD, selectedOCEAN]);
+  }, [useMyProfile, decryptedProfile, selectedRiemann, selectedSD, selectedOCEAN]);
 
   // Run a single test message
   const runTestMessage = useCallback(async (
@@ -175,6 +195,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
       response: data.text,
       responseTime,
       telemetry: data.testTelemetry, // DPC/DPFL info from backend
+      llmMetadata: data.llmMetadata, // LLM metadata for comparison
     };
   }, [language]);
 
@@ -348,6 +369,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           userMessage: testMsg.text,
           botResponse: result.response,
           responseTime: result.responseTime,
+          llmMetadata: result.llmMetadata || null,
         });
 
         if (result.telemetry) {
@@ -398,6 +420,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
             botResponse: result.response,
             responseTime: result.responseTime,
             isDynamic: true, // Mark as dynamically generated
+            llmMetadata: result.llmMetadata || null,
           });
 
           if (result.telemetry) {
@@ -430,26 +453,65 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         }
       }
 
-      // Check expected keywords
+      // Store DPFL keywords for info display (not as pass/fail check)
+      const detectedKeywords = lastTelemetry?.dpflKeywordsDetected || [];
+      
+      // Parse and group keywords by dimension for better readability
+      const groupedByDimension: Record<string, { high: string[], low: string[] }> = {};
+      
+      detectedKeywords.forEach((entry: string) => {
+        const parts = entry.split(':');
+        if (parts.length === 3) {
+          const [dimension, level, keyword] = parts;
+          if (!groupedByDimension[dimension]) {
+            groupedByDimension[dimension] = { high: [], low: [] };
+          }
+          if (level === 'high') {
+            groupedByDimension[dimension].high.push(keyword);
+          } else if (level === 'low') {
+            groupedByDimension[dimension].low.push(keyword);
+          }
+        }
+      });
+      
+      // Format DPFL keywords for info display
+      let dpflKeywordsInfo = '';
+      if (Object.keys(groupedByDimension).length > 0) {
+        const lines: string[] = [];
+        for (const [dimension, levels] of Object.entries(groupedByDimension)) {
+          const dimName = dimension.charAt(0).toUpperCase() + dimension.slice(1);
+          if (levels.high.length > 0) {
+            lines.push(`${dimName} (hoch): ${levels.high.join(', ')}`);
+          }
+          if (levels.low.length > 0) {
+            lines.push(`${dimName} (niedrig): ${levels.low.join(', ')}`);
+          }
+        }
+        dpflKeywordsInfo = lines.join(' • ');
+      }
+
+      // Check expected keywords (only if explicitly testing for specific keywords)
       if (selectedScenario.autoChecks.expectedKeywords?.length) {
-        const detectedKeywords = lastTelemetry?.dpflKeywordsDetected || [];
         const expectedFound = selectedScenario.autoChecks.expectedKeywords.filter(
           k => detectedKeywords.some((d: string) => d.toLowerCase().includes(k.toLowerCase()))
         );
+        
         autoCheckResults.push({
-          checkId: 'dpfl_keywords',
+          checkId: 'expected_keywords',
           passed: expectedFound.length > 0,
-          details: `Found: ${expectedFound.join(', ') || 'none'} / Expected: ${selectedScenario.autoChecks.expectedKeywords.join(', ')}`,
+          details: expectedFound.length > 0 
+            ? `Erwartete Keywords gefunden: ${expectedFound.join(', ')}`
+            : `Erwartete Keywords nicht gefunden: ${selectedScenario.autoChecks.expectedKeywords.join(', ')}`,
         });
       }
 
-      // Check comfort check
-      if (selectedScenario.autoChecks.expectComfortCheck) {
-        const comfortTriggered = lastTelemetry?.comfortCheckTriggered ?? false;
+      // Check stress keywords detection
+      if (selectedScenario.autoChecks.expectStressKeywords) {
+        const stressDetected = lastTelemetry?.stressKeywordsDetected ?? false;
         autoCheckResults.push({
-          checkId: 'comfort_check',
-          passed: comfortTriggered,
-          details: comfortTriggered ? 'Comfort check was triggered' : 'Comfort check was NOT triggered',
+          checkId: 'stress_keywords',
+          passed: stressDetected,
+          details: stressDetected ? 'Stress keywords detected in telemetry' : 'No stress keywords detected',
         });
       }
 
@@ -473,6 +535,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         responses,
         telemetry: lastTelemetry,
         autoCheckResults,
+        dpflKeywordsInfo, // Add DPFL keywords as info (not check)
         manualCheckResults: selectedScenario.manualChecks.map((check, idx) => ({
           checkId: `manual_${idx}`,
           passed: null,
@@ -873,6 +936,94 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
 
     return (
       <div className="space-y-6">
+        {/* Test Guide (Collapsible) */}
+        <div className="p-3 bg-accent-primary/5 border border-accent-primary/20 rounded-lg">
+          <details className="group">
+            <summary className="cursor-pointer font-semibold text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+              <span className="group-open:rotate-90 transition-transform">▶</span>
+              📖 Test-Anleitung: {selectedScenario.name}
+            </summary>
+            <div className="mt-3 pt-3 border-t border-border-secondary space-y-3 text-sm">
+              {/* Test Description */}
+              <div>
+                <div className="font-medium text-content-primary mb-1">Beschreibung:</div>
+                <div className="text-content-secondary">{selectedScenario.description}</div>
+              </div>
+              
+              {/* Test Structure */}
+              <div>
+                <div className="font-medium text-content-primary mb-1">Test-Aufbau:</div>
+                <ul className="text-content-secondary space-y-1 pl-4">
+                  <li>• <span className="font-medium">{testResult.responses.filter(r => !r.isDynamic).length} vordefinierte Nachricht(en)</span> {selectedScenario.testMessages.length > 0 && '(mit erwarteten Verhaltensweisen)'}</li>
+                  {selectedScenario.enableDynamicContinuation && (
+                    <li>• <span className="font-medium">{testResult.responses.filter(r => r.isDynamic).length} dynamisch generierte Nachricht(en)</span> (KI-gesteuert)</li>
+                  )}
+                  <li>• <span className="font-medium">Mindestens {selectedScenario.minConversationTurns || selectedScenario.testMessages.length} Austausche</span> (User-Bot-Paare)</li>
+                  <li>• Profil: <span className="font-medium">{testResult.profileId}</span></li>
+                </ul>
+              </div>
+              
+              {/* What is tested automatically */}
+              <div>
+                <div className="font-medium text-content-primary mb-1">Automatische Prüfungen:</div>
+                <ul className="text-content-secondary space-y-1 pl-4">
+                  {selectedScenario.autoChecks.dpcRequired && (
+                    <li>• <span className="font-medium">DPC Injection:</span> Dynamic Personality Coaching muss aktiviert sein (min. {selectedScenario.autoChecks.minDpcLength || 200} chars)</li>
+                  )}
+                  {selectedScenario.autoChecks.expectedKeywords && selectedScenario.autoChecks.expectedKeywords.length > 0 && (
+                    <li>• <span className="font-medium">Erwartete Keywords:</span> System soll spezifische Keywords erkennen: {selectedScenario.autoChecks.expectedKeywords.join(', ')}</li>
+                  )}
+                  {selectedScenario.autoChecks.expectStressKeywords && (
+                    <li>• <span className="font-medium">Stress-Schlüsselwörter:</span> System soll Stress-Indikatoren im User-Text erkennen</li>
+                  )}
+                  {selectedScenario.autoChecks.expectSessionUpdates && (
+                    <li>• <span className="font-medium">Session Updates:</span> Bot soll Kontext-Updates vorschlagen</li>
+                  )}
+                  {selectedScenario.autoChecks.expectSessionNextSteps && (
+                    <li>• <span className="font-medium">Next Steps:</span> Bot soll konkrete nächste Schritte definieren</li>
+                  )}
+                </ul>
+              </div>
+              
+              {/* What needs manual checking */}
+              {selectedScenario.manualChecks.length > 0 && (
+                <div>
+                  <div className="font-medium text-content-primary mb-1">Manuelle Prüfungen (durch Sie als Tester):</div>
+                  <ul className="text-content-secondary space-y-1 pl-4">
+                    {selectedScenario.manualChecks.map((check, idx) => (
+                      <li key={idx}>• {check}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {/* Telemetry explanation */}
+              <div>
+                <div className="font-medium text-content-primary mb-1">Telemetrie-Daten:</div>
+                <ul className="text-content-secondary space-y-1 pl-4 text-xs">
+                  <li>• <span className="font-medium">DPC Injection:</span> Anzahl Zeichen der Persönlichkeitsanpassung im System-Prompt</li>
+                  <li>• <span className="font-medium">DPC Strategien:</span> Welche Persönlichkeitsdimensionen für die Anpassung verwendet wurden</li>
+                  <li>• <span className="font-medium">DPFL Keywords:</span> Welche Persönlichkeits-Keywords im User-Text erkannt wurden (Format: Dimension (Level): Keywords)</li>
+                  <li>• <span className="font-medium">Stress-Schlüsselwörter:</span> Ob Stress-Indikatoren im User-Text gefunden wurden</li>
+                  <li>• <span className="font-medium">Strategy Merge Details:</span> Technische Details zur Strategie-Zusammenführung (Konflikt-Auflösung, verwendete Modelle)</li>
+                </ul>
+              </div>
+              
+              {/* Tested Features */}
+              <div>
+                <div className="font-medium text-content-primary mb-1">Getestete Features:</div>
+                <div className="flex flex-wrap gap-1">
+                  {selectedScenario.testsFeatures.map((feature, idx) => (
+                    <span key={idx} className="px-2 py-0.5 bg-accent-primary/20 text-accent-primary rounded-full text-xs font-medium">
+                      {feature.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+        
         {/* Responses */}
         <div>
           <h4 className="font-semibold mb-2 text-content-primary">
@@ -880,7 +1031,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
           </h4>
           <div className="space-y-3 max-h-80 overflow-y-auto">
             {testResult.responses.map((r, idx) => (
-              <div key={idx} className={`p-3 rounded-lg ${r.isDynamic ? 'bg-accent-primary/10 border border-accent-primary/30' : 'bg-background-tertiary'}`}>
+              <div key={idx} className={`p-3 rounded-lg border ${r.isDynamic ? 'border-accent-primary/40' : 'border-border-secondary'} bg-background-tertiary`}>
                 <div className="flex items-center gap-2 text-sm text-content-secondary mb-1">
                   <span>{t('test_runner_user')}:</span>
                   {r.isDynamic && (
@@ -908,11 +1059,104 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
         {testResult.telemetry && (
           <div>
             <h4 className="font-semibold mb-2 text-content-primary">📊 {t('test_runner_telemetry')}</h4>
-            <div className="p-3 bg-background-tertiary rounded-lg text-sm space-y-1">
-              <div>{t('test_runner_dpc_injection')}: {testResult.telemetry.dpcInjectionPresent ? '✓' : '✗'} ({testResult.telemetry.dpcInjectionLength} chars)</div>
-              <div>{t('test_runner_dpc_strategies')}: {testResult.telemetry.dpcStrategiesUsed?.join(', ') || 'N/A'}</div>
-              <div>{t('test_runner_dpfl_keywords')}: {testResult.telemetry.dpflKeywordsDetected?.join(', ') || t('test_runner_none')}</div>
-              <div>{t('test_runner_comfort_check')}: {testResult.telemetry.comfortCheckTriggered ? '✓ ' + t('test_runner_triggered') : '✗ ' + t('test_runner_not_triggered')}</div>
+            <div className="space-y-2">
+              
+              {/* DPC Injection */}
+              <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-content-primary">DPC Injection:</span>
+                  <span className="text-content-secondary">
+                    {testResult.telemetry.dpcInjectionPresent 
+                      ? `✓ ${testResult.telemetry.dpcInjectionLength} chars` 
+                      : '✗ Nicht vorhanden'}
+                  </span>
+                </div>
+              </div>
+
+              {/* DPC Strategien */}
+              {testResult.telemetry.dpcStrategiesUsed && testResult.telemetry.dpcStrategiesUsed.length > 0 && (
+                <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                  <div className="text-sm">
+                    <span className="font-medium text-content-primary">DPC Strategien:</span>
+                    <div className="mt-1 text-content-secondary">{testResult.telemetry.dpcStrategiesUsed.join(', ')}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Strategy Merge Details (Accordion) */}
+              {testResult.telemetry.dpcMergeMetadata && (
+                <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                  <details className="group">
+                    <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+                      <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
+                      Strategy Merge Details
+                    </summary>
+                    <div className="mt-3 pt-2 border-t border-border-secondary space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-content-secondary">Merge Type:</span>
+                        <span className="font-semibold text-content-primary">
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'simple_weighted' && 'Weighted'}
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'conflict_aware' && 'Conflict-Resolved'}
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'empty' && 'Empty'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-content-secondary">Models Used:</span>
+                        <span className="text-content-primary">{testResult.telemetry.dpcMergeMetadata.models?.join(', ') || 'N/A'}</span>
+                      </div>
+                      {testResult.telemetry.dpcMergeMetadata.conflicts > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-content-secondary">Conflicts Resolved:</span>
+                          <span className="text-orange-500 font-semibold">{testResult.telemetry.dpcMergeMetadata.conflicts}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-content-secondary">Narrative Consistent:</span>
+                        <span className={testResult.telemetry.dpcMergeMetadata.narrativeConsistent ? 'text-green-500' : 'text-yellow-500'}>
+                          {testResult.telemetry.dpcMergeMetadata.narrativeConsistent ? '✓' : '⚠️'}
+                        </span>
+                      </div>
+                      {/* Top Dimensions Visualization */}
+                      {testResult.telemetry.dpcMergeMetadata.topDimensions && testResult.telemetry.dpcMergeMetadata.topDimensions.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-border-secondary">
+                          <div className="text-content-secondary mb-2">Top Dimensions:</div>
+                          <div className="space-y-1.5">
+                            {testResult.telemetry.dpcMergeMetadata.topDimensions.slice(0, 5).map((dim: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <div className={`h-1.5 rounded ${dim.included ? 'bg-accent-primary' : 'bg-gray-400'}`} style={{width: `${dim.weight * 60 + 20}px`}}></div>
+                                <span className={`text-xs ${dim.included ? 'text-content-primary' : 'text-content-tertiary line-through'}`}>
+                                  {dim.model}:{dim.trait} ({(dim.weight * 100).toFixed(0)}%)
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                </div>
+              )}
+              
+              {/* DPFL Keywords */}
+              <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                <div className="text-sm">
+                  <span className="font-medium text-content-primary">{t('test_runner_dpfl_keywords')}:</span>
+                  <div className="mt-1 text-content-secondary">
+                    {testResult.dpflKeywordsInfo || t('test_runner_none')}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Stress-Schlüsselwörter */}
+              <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-content-primary">{t('test_runner_stress_keywords')}:</span>
+                  <span className="text-content-secondary">
+                    {testResult.telemetry.stressKeywordsDetected ? '✓ ' + t('test_runner_detected') : '✗ ' + t('test_runner_not_detected')}
+                  </span>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
@@ -1093,6 +1337,25 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile }) => {
       },
       sessionAnalysis: sessionAnalysisResult || null,
     };
+
+    // Add aggregated LLM statistics for easy comparison
+    const responsesWithMetadata = testResult.responses.filter(r => r.llmMetadata);
+    if (responsesWithMetadata.length > 0) {
+      const llmStats = {
+        totalTokens: responsesWithMetadata.reduce((sum, r) => 
+          sum + (r.llmMetadata?.tokenUsage.total || 0), 0),
+        avgResponseTime: Math.round(
+          responsesWithMetadata.reduce((sum, r) => 
+            sum + (r.llmMetadata?.responseTimeMs || 0), 0) / responsesWithMetadata.length
+        ),
+        models: [...new Set(responsesWithMetadata.map(r => r.llmMetadata?.model).filter(Boolean))],
+        providers: [...new Set(responsesWithMetadata.map(r => r.llmMetadata?.provider).filter(Boolean))],
+        cacheHitRate: responsesWithMetadata.filter(r => r.llmMetadata?.cacheUsed).length / responsesWithMetadata.length,
+        responsesTracked: responsesWithMetadata.length,
+        totalResponses: testResult.responses.length,
+      };
+      exportData.llmStats = llmStats;
+    }
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
