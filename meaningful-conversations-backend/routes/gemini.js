@@ -412,11 +412,42 @@ STRICTLY FORBIDDEN in this first message:
         
         if (isTestMode && messageToAnalyze) {
             try {
-                const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, lang);
-                // Collect detected keywords for telemetry
+                // Phase 2a: Use enhanced analysis with adaptive weighting + sentiment
+                const recentUserMessages = (req.body.chatHistory || [])
+                    .filter(m => m.role === 'user')
+                    .slice(-5)
+                    .map(m => m.text || m.content || '');
+                
+                const enhancedResult = behaviorLogger.analyzeMessageEnhanced(
+                    messageToAnalyze, lang, recentUserMessages
+                );
+                
+                // Helper: extract keywords from framework analysis result
+                const extractKeywords = (frameworkResult, prefix) => {
+                    const keywords = [];
+                    for (const [dimension, data] of Object.entries(frameworkResult)) {
+                        if (data.foundKeywords) {
+                            if (data.foundKeywords.high && data.foundKeywords.high.length > 0) {
+                                keywords.push(...data.foundKeywords.high.map(k => `${prefix}:${dimension}:high:${k}`));
+                            }
+                            if (data.foundKeywords.low && data.foundKeywords.low.length > 0) {
+                                keywords.push(...data.foundKeywords.low.map(k => `${prefix}:${dimension}:low:${k}`));
+                            }
+                        }
+                    }
+                    return keywords;
+                };
+                
+                // Collect detected keywords for ALL frameworks
+                const allDetectedKeywords = {
+                    riemann: extractKeywords(enhancedResult.riemann, 'riemann'),
+                    big5: extractKeywords(enhancedResult.big5, 'big5'),
+                    spiralDynamics: extractKeywords(enhancedResult.spiralDynamics, 'sd')
+                };
+                
+                // Legacy format (Riemann-only, without prefix) for backward compatibility
                 const detectedKeywords = [];
-                for (const [dimension, data] of Object.entries(frequencies)) {
-                    // behaviorLogger returns { foundKeywords: { high: [], low: [] } }
+                for (const [dimension, data] of Object.entries(enhancedResult.riemann)) {
                     if (data.foundKeywords) {
                         if (data.foundKeywords.high && data.foundKeywords.high.length > 0) {
                             detectedKeywords.push(...data.foundKeywords.high.map(k => `${dimension}:high:${k}`));
@@ -427,6 +458,17 @@ STRICTLY FORBIDDEN in this first message:
                     }
                 }
                 testTelemetry.dpflKeywordsDetected = detectedKeywords;
+                testTelemetry.allFrameworkKeywords = allDetectedKeywords;
+                
+                // Phase 2a: Include adaptive weighting metadata in telemetry
+                if (enhancedResult.adaptive) {
+                    testTelemetry.adaptiveWeighting = {
+                        context: enhancedResult.adaptive.context,
+                        sentiment: enhancedResult.adaptive.sentiment,
+                        adjustedKeywordCount: enhancedResult.adaptive.adjustedKeywordCount,
+                        weightingDetails: enhancedResult.adaptive.weightingDetails
+                    };
+                }
                 
                 // Test-only: Track if message contains stress keywords for telemetry
                 // Note: Comfort Check is shown after EVERY DPFL session, not just when keywords are found
