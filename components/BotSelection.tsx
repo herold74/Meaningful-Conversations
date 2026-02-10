@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
-import { getApiBaseUrl } from '../services/api';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import Spinner from './shared/Spinner';
@@ -50,7 +49,8 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
         onClick={() => !isLocked && onSelect(bot)}
         className={`
             relative flex flex-col items-center text-center p-6
-            bg-background-secondary dark:bg-transparent border transition-all duration-200 rounded-lg shadow-md
+            bg-background-secondary dark:bg-transparent border transition-[box-shadow,transform] duration-200 rounded-lg shadow-md
+            [-webkit-tap-highlight-color:transparent]
             ${isLocked
               ? `cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 ${getBorderClass()}`
               : `cursor-pointer hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 ${getBorderClass()}`
@@ -137,9 +137,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
       setIsLoading(true);
       try {
         const fetchedBots: Bot[] = await getBots();
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:fetchedBots',message:'Bots from API',data:{count:fetchedBots.length,botIds:fetchedBots.map(b=>b.id)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
-        // #endregion
 
         let userAccessLevel: BotAccessTier = 'guest';
         const unlockedCoaches = currentUser?.unlockedCoaches || [];
@@ -153,9 +150,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
               userAccessLevel = 'registered';
           }
         }
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:userAccess',message:'User access level',data:{userAccessLevel,hasUser:!!currentUser,unlockedCoaches},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
-        // #endregion
 
         const accessHierarchy: Record<BotAccessTier, number> = {
           guest: 0,
@@ -177,15 +171,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
               isAvailable: isTierAvailable || isIndividuallyUnlocked
             };
         });
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:availableBots',message:'Filtered bots',data:{total:availableBots.length,available:availableBots.filter(b=>b.isAvailable).map(b=>b.id),locked:availableBots.filter(b=>!b.isAvailable).map(b=>b.id)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
-        // #endregion
         setBots(availableBots);
       } catch (error) {
           console.error("Failed to fetch bots:", error);
-          // #region agent log
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BotSelection.tsx:error',message:'ERROR fetching bots',data:{error:String(error)},timestamp:Date.now(),sessionId:'bot-debug'})}).catch(()=>{});
-          // #endregion
       } finally {
         setIsLoading(false);
       }
@@ -229,7 +217,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
   const lockedRegularBots = regularBots.filter(b => !b.isAvailable);
   
   return (
-    <div className="py-10 animate-fadeIn">
+    <div className="pt-4 pb-10 animate-fadeIn">
       <div className="w-full max-w-6xl mx-auto mb-8 text-center">
         <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('botSelection_title')}</h1>
         <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary leading-relaxed">

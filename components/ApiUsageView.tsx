@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useModalOpen } from '../utils/modalUtils';
 import { apiFetch } from '../services/api';
 import Spinner from './shared/Spinner';
 import { useLocalization } from '../context/LocalizationContext';
@@ -134,6 +136,7 @@ export const ApiUsageView: React.FC = () => {
     const [switchingProvider, setSwitchingProvider] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [targetProvider, setTargetProvider] = useState<'google' | 'mistral'>('google');
+    useModalOpen(showConfirmDialog);
     
     // Model Mapping Configuration
     const [modelMapping, setModelMapping] = useState<ModelMapping | null>(null);
@@ -607,8 +610,8 @@ export const ApiUsageView: React.FC = () => {
             )}
             
             {/* Confirmation Dialog */}
-            {showConfirmDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
+            {showConfirmDialog && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
                     <div className="bg-white dark:bg-gray-900 w-full max-w-md p-6 border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg">
                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-200 mb-4">
                             Confirm Provider Switch
@@ -632,7 +635,8 @@ export const ApiUsageView: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             
             {/* Time Range Selector */}

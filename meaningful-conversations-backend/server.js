@@ -19,6 +19,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const prisma = require('./prismaClient.js');
 const { initCleanup: initGuestLimitCleanup } = require('./services/guestLimitTracker');
+const { initDataRetentionCleanup } = require('./services/dataRetention');
 const { ensureDefaultConfig } = require('./services/initService');
 
 const app = express();
@@ -257,6 +258,9 @@ async function startServer() {
 
         // Initialize guest limit cleanup (runs every 24 hours)
         initGuestLimitCleanup();
+
+        // Initialize GDPR data retention cleanup (runs every 24 hours)
+        initDataRetentionCleanup();
 
         const server = app.listen(PORT, () => {
             console.log(`Backend server is running on port ${PORT}`);

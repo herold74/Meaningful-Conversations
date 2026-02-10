@@ -10,7 +10,7 @@ interface InfoViewProps {
 const FormattingHelpView: React.FC<InfoViewProps> = () => {
     const { t } = useLocalization();
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn">
             <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('formatting_title')}</h1>
             </div>

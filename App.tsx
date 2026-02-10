@@ -9,6 +9,7 @@ import { deserializeGamificationState, serializeGamificationState } from './util
 import { getAchievements } from './achievements';
 import { TestScenario } from './utils/testScenarios';
 import { getSeasonalColorTheme, getCurrentSeason } from './utils/dateUtils';
+import { useIsAnyModalOpen } from './utils/modalUtils';
 
 
 // Component Imports
@@ -1307,9 +1308,10 @@ const App: React.FC = () => {
         }
     };
     
-    const showGamificationBar = !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
+    const isAnyModalOpen = useIsAnyModalOpen();
+    const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning'].includes(view) && !menuView;
-    const nativeBarHeight = minimalBar ? 64 : 80;
+    const nativeBarHeight = minimalBar ? 48 : 60; // Must match Swift: barHeight in NativeGamificationBarView.updateLayout
     const previousViewRef = useRef<NavView>('welcome');
     const nativeSpacerRef = useRef<HTMLDivElement | null>(null);
     const [isLandscape, setIsLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight);
@@ -1422,8 +1424,11 @@ const App: React.FC = () => {
                         toggleColorTheme={toggleColorTheme}
                         minimal={minimalBar}
                     />
-                    {/* Spacer for fixed GamificationBar - includes iOS safe area */}
-                    <div style={{ height: minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)` }} />
+                    {/* Spacer for fixed web GamificationBar */}
+                    <div style={{ height: (view === 'chat' || view === 'welcome')
+                        ? (minimalBar ? `calc(5rem + ${iosSafeAreaTop}px)` : `calc(6rem + ${iosSafeAreaTop}px)`)
+                        : (minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)`)
+                    }} />
                 </>
             )}
             {showGamificationBar && useNativeGamificationBar && (

@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { User, GamificationState } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { UploadIcon } from './icons/UploadIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
 import ReactMarkdown from 'react-markdown';
@@ -26,6 +28,7 @@ const removeGamificationKey = (text: string) => {
 const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContext, gamificationState, onContinue, onStartNew }) => {
   const { t } = useLocalization();
   const [isConfirmingStartNew, setIsConfirmingStartNew] = useState(false);
+  useModalOpen(isConfirmingStartNew);
 
   const contextPreviewFull = useMemo(() => removeGamificationKey(savedContext.trim()), [savedContext]);
 
@@ -68,7 +71,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-[80dvh] text-center animate-fadeIn">
       <div className="w-full max-w-2xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold text-content-primary uppercase">
           {t('contextChoice_welcome_back')}
@@ -111,15 +114,16 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         </div>
       </div>
       
-      {isConfirmingStartNew && (
+      {isConfirmingStartNew && createPortal(
          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4"
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             onClick={() => setIsConfirmingStartNew(false)}
             role="dialog"
             aria-modal="true"
         >
             <div 
-                className="bg-background-secondary dark:bg-background-primary w-full max-w-lg m-4 p-6 border border-status-warning-border dark:border-status-warning-border/50 shadow-xl rounded-lg"
+                className="bg-background-secondary dark:bg-background-primary w-full max-w-lg p-6 border border-status-warning-border dark:border-status-warning-border/50 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4">
@@ -142,7 +146,8 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
                     </Button>
                  </div>
             </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

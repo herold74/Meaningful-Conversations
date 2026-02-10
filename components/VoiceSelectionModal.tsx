@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useModalOpen } from '../utils/modalUtils';
 import { XIcon } from './icons/XIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
@@ -49,6 +51,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     botGender,
 }) => {
     const { t } = useLocalization();
+    useModalOpen(isOpen);
     
     // iOS detection - server TTS doesn't work reliably on iOS (browser) due to autoplay restrictions
     // Native iOS apps use AVSpeechSynthesizer which works perfectly
@@ -306,15 +309,16 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             aria-modal="true" 
             role="dialog"
             onClick={onClose}
         >
             <div 
-                className="bg-background-secondary dark:bg-background-secondary w-full max-w-lg max-h-[80vh] flex flex-col p-6 border border-border-secondary dark:border-border-primary shadow-xl rounded-lg"
+                className="bg-background-secondary dark:bg-background-secondary w-full max-w-lg max-h-[80dvh] flex flex-col p-6 border border-border-secondary dark:border-border-primary shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-4">
@@ -535,7 +539,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                     </Button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

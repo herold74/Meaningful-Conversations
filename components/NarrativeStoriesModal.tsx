@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import Button from './shared/Button';
 
 interface NarrativeStoriesModalProps {
@@ -16,6 +18,7 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
   oldStories
 }) => {
   const { t } = useLocalization();
+  useModalOpen();
   const [flowStory, setFlowStory] = useState('');
   const [frictionStory, setFrictionStory] = useState('');
 
@@ -28,8 +31,8 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
     return isValid ? 'border-green-500' : 'border-red-500';
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 z-50 overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 z-[9999] overflow-y-auto" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="min-h-full flex items-start justify-center p-4 pt-20 pb-8">
         <div className="bg-background-primary dark:bg-background-secondary rounded-xl shadow-2xl max-w-3xl w-full p-8 animate-fadeIn">
         {/* Header */}
@@ -155,7 +158,8 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
         </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
