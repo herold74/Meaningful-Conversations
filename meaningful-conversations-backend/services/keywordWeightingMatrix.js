@@ -179,6 +179,12 @@ const KEYWORD_WEIGHT_MATRIX = {
       { framework: 'sd', dimension: 'red', weight: 0.4 }
     ]
   },
+  'independent': {
+    primary: { framework: 'riemann', dimension: 'distanz', weight: 1.0 },
+    secondary: [
+      { framework: 'sd', dimension: 'red', weight: 0.3 }
+    ]
+  },
   'eigenständig': {
     primary: { framework: 'riemann', dimension: 'distanz', weight: 1.0 },
     secondary: [
@@ -217,6 +223,46 @@ const KEYWORD_WEIGHT_MATRIX = {
     primary: { framework: 'sd', dimension: 'red', weight: 1.0 },
     secondary: [
       { framework: 'big5', dimension: 'extraversion', weight: 0.3 }
+    ]
+  },
+
+  // ============================================
+  // ANXIETY / DISTRESS KEYWORDS (cross: Neuroticism + Wechsel)
+  // ============================================
+  'anxious': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.3 }  // only when context = fear of change
+    ]
+  },
+  'ängstlich': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.3 }
+    ]
+  },
+  'overwhelmed': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.3 }
+    ]
+  },
+  'überfordert': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.3 }
+    ]
+  },
+  'trapped': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.5 }  // feeling trapped = strong change-resistance signal
+    ]
+  },
+  'gefangen': {
+    primary: { framework: 'big5', dimension: 'neuroticism', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'wechsel', weight: 0.5 }
     ]
   },
 
