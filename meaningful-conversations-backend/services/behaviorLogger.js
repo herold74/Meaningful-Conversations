@@ -43,10 +43,14 @@ const RIEMANN_KEYWORDS = {
         'emotional verbunden',
         // "gefühl" entfernt (False Positive: "ein Gefühl in der Brust" = körperlich, nicht Naehe)
         'tiefes gefühl', 'gefühle zeigen', 'gefühlvoll',
-        'persönlich', 'herzlich', 'liebevoll',
+        // "persönlich" entfernt (False Positive: "Persönlichkeitsprofil" matcht via Suffix-Regex)
+        'persönlich berührt', 'persönliche bindung', 'persönliche nähe', 'persönlich verbunden',
+        'herzlich', 'liebevoll',
         // Alltagssprache
         'zusammen sein', 'füreinander da', 'kuscheln', 'umarmen', 'vermisse',
-        'brauche jemanden', 'nicht allein', 'enger kontakt', 'herzensmenschen'
+        'brauche jemanden', 'nicht allein', 'enger kontakt', 'herzensmenschen',
+        // Verbindung / Anerkennung
+        'verbinden mit', 'verbindung mit', 'anschluss finden', 'wahrgenommen', 'anerkenn', 'gesehen werden'
       ],
       low: [
         // Bestehend
@@ -57,15 +61,20 @@ const RIEMANN_KEYWORDS = {
         // "für mich" entfernt (False Positive: "nur für mich" = Selbstfürsorge vs. Isolation)
         'will für mich sein', 'bin lieber für mich', 'brauche zeit für mich allein',
         'einzelgänger', 'kontaktscheu', 'abweisend', 'reserviert', 'verschlossen',
-        'mauer', 'emotional verschlossen', 'brauche raum', 'lieber alleine'
+        'mauer', 'emotional verschlossen', 'brauche raum', 'lieber alleine',
+        // Unsichtbarkeit / Nicht-Wahrgenommen-Werden
+        'unsichtbar', 'übersehen', 'nicht wahrgenommen', 'ignoriert', 'unbemerkt',
+        // Nichtzugehörigkeit
+        'fehl am platz', 'gehöre nicht dazu', 'passe nicht rein', 'außenseiter',
+        'ignorieren', 'übergangen'
       ]
     },
     distanz: {
       high: [
         // Fachbegriffe
-        'autonomie', 'freiheit', 'unabhängigkeit', 'eigenständig', 'abgrenzung',
+        'autonomie', 'freiheit', 'unabhängigkeit', 'eigenständig', 'selbstgenügsam', 'abgrenzung',
         'privatsphäre', 'selbstständig', 'allein', 'rational', 'logik',
-        'objektiv', 'sachlich', 'analyse', 'fakten', 'daten', 'professionell',
+        'objektiv', 'sachlich', 'analyse', 'analytisch', 'fakten', 'daten', 'professionell',
         // "neutral" entfernt (False Positive: "die Farbe ist neutral" etc.)
         'neutral bleiben', 'sachlich neutral',
         'kritisch', 'fokussiert', 'effizient',
@@ -75,7 +84,9 @@ const RIEMANN_KEYWORDS = {
       ],
       low: [
         // Bestehend
-        'abhängig', 'angewiesen', 'gebunden', 'verpflichtet', 'eingeengt',
+        'abhängig', 'angewiesen', 'verpflichtet', 'eingeengt',
+        // "gebunden" entfernt (False Positive: "ungebunden" / "Grenzen" Kontext)
+        'fest gebunden', 'gebunden an',
         'klammern', 'unselbstständig', 'hilflos',
         // Erweitert (+7)
         'brauche andere', 'kann nicht allein', 'halte das nicht aus', 'überfordert allein',
@@ -94,7 +105,9 @@ const RIEMANN_KEYWORDS = {
         'langfristig', 'zuverlässig', 'konstant', 'methodisch',
         // Alltagssprache
         'auf nummer sicher', 'wie immer', 'bewährt', 'verlässlich', 'fester plan',
-        'vorausplanen', 'kein risiko', 'lieber sicher', 'geordnet', 'alles unter kontrolle'
+        'vorausplanen', 'kein risiko', 'lieber sicher', 'geordnet', 'alles unter kontrolle',
+        // Sicherheitsgefühl
+        'sicher fühlen', 'sicherer'
       ],
       low: [
         // Bestehend
@@ -103,7 +116,8 @@ const RIEMANN_KEYWORDS = {
         // Erweitert (+6)
         'kein plan', 'mal sehen', 'spontan entscheiden', 'egal wie', 'unverbindlich',
         'aufgeschoben', 'vergesse oft', 'keine ahnung', 'mache mir keine gedanken',
-        'locker bleiben', 'nichts festlegen', 'unvorhersehbar', 'sprunghaft'
+        'locker bleiben', 'nichts festlegen', 'unvorhersehbar', 'sprunghaft',
+        'unklar', 'undefiniert', 'keine klare richtung'
       ]
     },
     wechsel: {
@@ -115,7 +129,9 @@ const RIEMANN_KEYWORDS = {
         'anders', 'aufregend', 'neugierig', 'wandel',
         // Alltagssprache
         'mal schauen', 'was neues', 'abwechslungsreich', 'langweilt mich schnell',
-        'immer was anderes', 'lass uns was neues probieren', 'spontan', 'locker'
+        'immer was anderes', 'lass uns was neues probieren', 'spontan', 'locker',
+        // Emotionale Intensität
+        'berauschend', 'elektrisierend', 'sehne mich nach'
       ],
       low: [
         // Bestehend
@@ -125,7 +141,7 @@ const RIEMANN_KEYWORDS = {
         'veränderung macht mir angst', 'lieber beim alten', 'bloß nicht ändern',
         'hab angst vor neuem', 'das war schon immer so', 'verunsichert',
         'risiko vermeiden', 'kein risiko', 'muss nicht sein', 'gewohnheitstier',
-        'will nichts neues', 'überfordert', 'ängstlich'
+        'will nichts neues', 'überfordert', 'ängstlich', 'angst vor veränderung', 'gefangen'
       ]
     }
   },
@@ -137,15 +153,23 @@ const RIEMANN_KEYWORDS = {
         'warmth', 'trust', 'closeness', 'intimacy', 'team',
         // "together" entfernt (False Positive: "put it together")
         'being together', 'close together',
-        'empathy', 'care', 'community',
+        'empathy', 'community',
+        // "care" entfernt (False Positive: "career" matcht via Suffix-Regex)
+        'care about', 'care for', 'taking care', 'caring',
         // "emotional" entfernt (Cross-Framework: Big5 Neuroticism)
         'emotionally connected',
         // "feeling" entfernt (False Positive: "I have a feeling that...")
         'deep feeling', 'warm feeling',
-        'personal', 'heartfelt', 'loving', 'bonding',
+        // "personal" entfernt (False Positive: "personality profile" matcht via Suffix-Regex)
+        'personal bond', 'personal connection', 'feel personal', 'personally connected',
+        'heartfelt', 'loving', 'bonding',
         // Colloquial
-        'there for each other', 'cuddle', 'hug', 'miss you',
-        'need someone', 'not alone', 'close contact', 'dear ones'
+        'there for each other', 'cuddle', 'miss you',
+        // "hug" entfernt (False Positive: "huge" matcht via Suffix-Regex; auch "a hug" matcht "a huge")
+        'hugging', 'hugged', 'hugs',
+        'need someone', 'not alone', 'close contact', 'dear ones',
+        // Verbindung / Anerkennung
+        'connect with', 'connecting with', 'feel connected', 'acknowledge', 'recogniz', 'seen'
       ],
       low: [
         // Existing
@@ -154,15 +178,20 @@ const RIEMANN_KEYWORDS = {
         // Expanded (+6)
         'keep distance', 'need space', 'being alone', 'on my own', 'unapproachable',
         'loner', 'avoid contact', 'stand-offish', 'reserved', 'closed off',
-        'wall up', 'emotionally closed', 'need room', 'rather alone'
+        'wall up', 'emotionally closed', 'need room', 'rather alone',
+        // Unsichtbarkeit / Nicht-Wahrgenommen-Werden
+        'invisible', 'invisibility', 'overlooked', 'unseen', 'ignored', 'unnoticed',
+        // Nichtzugehörigkeit
+        'out of place', 'do not belong', 'do not fit in', 'outsider',
+        'ignoring', 'passed over'
       ]
     },
     distanz: {
       high: [
         // Formal
-        'autonomy', 'freedom', 'independence', 'self-reliant', 'boundaries',
+        'autonomy', 'freedom', 'independence', 'independent', 'self-reliant', 'self-sufficient', 'boundaries',
         'privacy', 'autonomous', 'alone', 'rational', 'logic',
-        'objective', 'factual', 'analysis', 'facts', 'data', 'professional',
+        'objective', 'factual', 'analysis', 'analytical', 'facts', 'data', 'professional',
         'neutral', 'critical', 'focused', 'efficient',
         // Colloquial
         'do my own thing', 'leave me alone', 'my own space',
@@ -170,7 +199,11 @@ const RIEMANN_KEYWORDS = {
       ],
       low: [
         // Existing
-        'dependent', 'reliant', 'bound', 'obligated', 'constrained',
+        'dependent', 'obligated', 'constrained',
+        // "reliant" entfernt (False Positive: "self-reliant" matcht als Distanz↓)
+        'too reliant', 'overly reliant',
+        // "bound" entfernt (False Positive: "boundaries" matcht als Distanz↓)
+        'feel bound', 'bound to',
         'clingy', 'helpless', 'needy',
         // Expanded (+7)
         'need others', 'cannot be alone', 'cannot handle this', 'overwhelmed alone',
@@ -187,7 +220,9 @@ const RIEMANN_KEYWORDS = {
         'long-term', 'dependable', 'constant', 'methodical',
         // Colloquial
         'play it safe', 'as always', 'tried and true', 'reliable', 'fixed plan',
-        'plan ahead', 'no risk', 'rather safe', 'orderly', 'everything under control'
+        'plan ahead', 'no risk', 'rather safe', 'orderly', 'everything under control',
+        // Sicherheitsgefühl
+        'safe', 'safer', 'feel secure'
       ],
       low: [
         // Existing
@@ -196,7 +231,7 @@ const RIEMANN_KEYWORDS = {
         // Expanded (+6)
         'no plan', 'we will see', 'decide spontaneously', 'whatever', 'non-committal',
         'postponed', 'often forget', 'no idea', 'not worried about it',
-        'stay loose', 'keep options open'
+        'stay loose', 'keep options open', 'unclear', 'undefined', 'no clear direction'
       ]
     },
     wechsel: {
@@ -208,7 +243,9 @@ const RIEMANN_KEYWORDS = {
         'different', 'exciting', 'curious', 'transformation',
         // Colloquial
         'let us see', 'something new', 'full of variety', 'get bored quickly',
-        'always something different', 'let us try something new', 'spontaneous', 'easy going'
+        'always something different', 'let us try something new', 'spontaneous', 'easy going',
+        // Emotionale Intensität
+        'thrilling', 'exhilarating', 'crave'
       ],
       low: [
         // Existing
@@ -216,9 +253,9 @@ const RIEMANN_KEYWORDS = {
         'inflexible', 'stubborn', 'sluggish', 'static',
         // Expanded (+6)
         'change scares me', 'rather stick with', 'better not change',
-        'afraid of new things', 'always been this way', 'unsettled',
+        'afraid of new things', 'scared of change', 'always been this way', 'unsettled',
         'avoid risk', 'no risk', 'not necessary', 'creature of habit',
-        'do not want new', 'overwhelmed', 'anxious'
+        'do not want new', 'overwhelmed', 'overwhelming', 'anxious', 'dreading change', 'trapped'
       ]
     }
   }
@@ -264,7 +301,7 @@ const SD_KEYWORDS = {
       high: [
         // Fachbegriffe
         'systemisch', 'komplex', 'integriert', 'flexibel', 'multiperspektiv', 'autonom',
-        'wissen', 'kompetenz', 'funktional', 'adaptiv', 'paradox', 'emergent',
+        'wissen', 'weisheit', 'kompetenz', 'funktional', 'adaptiv', 'paradox', 'emergent',
         'dynamisch', 'vernetzt', 'meta-ebene', 'kontextabhängig', 'selbstorganisiert',
         // Alltagssprache
         'kommt drauf an', 'sowohl als auch', 'situationsabhängig', 'flexibel denken',
@@ -281,7 +318,7 @@ const SD_KEYWORDS = {
     },
     green: {
       high: [
-        'gemeinschaft', 'gleichheit', 'harmonie', 'konsens', 'inklusion', 'empathie',
+        'gemeinschaft', 'gleichheit', 'harmonie', 'harmonisch', 'konsens', 'inklusion', 'inklusiv', 'empathie',
         'vielfalt', 'partizipation', 'dialog', 'wertschätzung', 'kooperation', 'fair',
         'nachhaltig', 'sensibel', 'respekt', 'zusammenhalt', 'solidarität',
         // "gefühl" entfernt (False Positive: "Gefühl in der Brust" vs. kollektives Wertgefühl)
@@ -302,7 +339,7 @@ const SD_KEYWORDS = {
     orange: {
       high: [
         'erfolg', 'leistung', 'fortschritt', 'wettbewerb', 'gewinn', 'effizienz',
-        'strategie', 'innovation', 'karriere', 'optimierung', 'ziele', 'achievement',
+        'strategie', 'innovation', 'karriere', 'führung', 'führungsrolle', 'optimierung', 'ziele', 'achievement',
         'professionell', 'wissenschaft', 'rationalität', 'wachstum', 'technologie',
         // Alltagssprache
         'vorankommen', 'besser werden', 'das beste rausholen', 'weiterkommen',
@@ -347,9 +384,11 @@ const SD_KEYWORDS = {
         'impuls', 'aktion', 'eroberung', 'unabhängig', 'mutig',
         // "kämpfen" entfernt (False Positive: "andere kämpfen auch" = Schwierigkeiten, nicht Assertivität)
         'kämpferisch', 'kampfbereit', 'kämpfe mich durch', 'für meine rechte kämpfen',
-        'direkt', 'spontan', 'ungeduld',
+        // "direkt" entfernt (False Positive: "Direktionen" etc.)
+        'ganz direkt', 'direkt ansprechen', 'direkt sagen',
+        'spontan', 'ungeduld',
         // "willen" entfernt (False Positive: "um Gottes willen", "deinetwillen")
-        'willenskraft', 'eiserner wille', 'starker wille',
+        'willenskraft', 'eiserner wille', 'starker wille', 'dominieren', 'entschlossenheit',
         // "energie" entfernt (False Positive: "keine Energie", "Energie sparen")
         'voller energie', 'energiegeladen',
         // Konstruktive Red-Keywords
@@ -403,7 +442,9 @@ const SD_KEYWORDS = {
         'nur noch funktionieren', 'im überlebensmodus'
       ],
       low: [
-        'überfluss', 'komfort', 'luxus',
+        'überfluss', 'luxus',
+        // "komfort" entfernt (False Positive: "komfortabel in Gruppen" = sozial, nicht Überleben)
+        'körperlicher komfort', 'materieller komfort',
         // Erweitert
         'brauche nichts', 'alles egal', 'materielles unwichtig',
         'über den dingen stehen', 'körper ignorieren', 'geist über materie',
@@ -434,7 +475,7 @@ const SD_KEYWORDS = {
       high: [
         // Formal
         'systemic', 'complex', 'integrated', 'flexible', 'multiperspective', 'autonomous',
-        'knowledge', 'competence', 'functional', 'adaptive', 'paradox', 'emergent',
+        'knowledge', 'wisdom', 'competence', 'functional', 'adaptive', 'paradox', 'emergent',
         'dynamic', 'networked', 'meta-level', 'contextual', 'self-organized',
         // Colloquial
         'it depends', 'both and', 'context-dependent', 'think flexibly',
@@ -451,7 +492,7 @@ const SD_KEYWORDS = {
     },
     green: {
       high: [
-        'community', 'equality', 'harmony', 'consensus', 'inclusion', 'empathy',
+        'community', 'equality', 'harmony', 'harmonious', 'consensus', 'inclusion', 'inclusive', 'empathy',
         'diversity', 'participation', 'dialogue', 'appreciation', 'cooperation', 'fair',
         'sustainable', 'sensitive', 'respect', 'togetherness', 'solidarity',
         // "feeling" entfernt (False Positive: "I have a feeling that...")
@@ -477,7 +518,7 @@ const SD_KEYWORDS = {
     orange: {
       high: [
         'success', 'achievement', 'progress', 'competition', 'profit', 'efficiency',
-        'strategy', 'innovation', 'career', 'optimization', 'goals',
+        'strategy', 'innovation', 'career', 'leadership', 'optimization', 'goals',
         'professional', 'science', 'rationality', 'growth', 'technology',
         // Colloquial
         'get ahead', 'get better', 'make the most of it', 'move forward',
@@ -520,7 +561,9 @@ const SD_KEYWORDS = {
         'impulse', 'action', 'conquest', 'independent', 'brave',
         // "will" entfernt (False Positive: Future Tense "I will...")
         // Stattdessen spezifischere Willenskraft-Begriffe:
-        'direct', 'willpower', 'strong-willed', 'energy', 'spontaneous', 'impatient',
+        // "direct" entfernt (False Positive: "directions" matcht via Suffix-Regex)
+        'be direct', 'direct approach', 'very direct',
+        'willpower', 'strong-willed', 'dominate', 'determination', 'energy', 'spontaneous', 'impatient',
         // "fight" entfernt (False Positive: "fighting with this" = Schwierigkeit, nicht Dominanz)
         'fight for', 'fight back', 'fighter', 'put up a fight',
         // Constructive Red
@@ -563,7 +606,9 @@ const SD_KEYWORDS = {
         'need to rest first', 'just functioning'
       ],
       low: [
-        'abundance', 'comfort', 'luxury',
+        'abundance', 'luxury',
+        // "comfort" entfernt (False Positive: "comfortable in groups" = sozial, nicht Überleben)
+        'physical comfort', 'creature comforts', 'material comfort',
         // Expanded
         'do not need anything', 'does not matter', 'material things unimportant',
         'above worldly things', 'ignore body', 'mind over matter',
@@ -578,7 +623,7 @@ const BIG5_KEYWORDS = {
     openness: {
       high: [
         // Fachbegriffe
-        'kreativ', 'neugierig', 'experimentierfreudig', 'fantasievoll', 'künstlerisch',
+        'kreativ', 'erschaffen', 'gestalten', 'neugierig', 'experimentierfreudig', 'fantasievoll', 'künstlerisch',
         'offen', 'innovativ', 'visionär', 'originell', 'unkonventionell',
         'philosophisch', 'abstrakt', 'inspiriert', 'intellektuell', 'tiefgründig',
         'aufgeschlossen', 'ideenreich', 'träumerisch', 'erfindungsreich',
@@ -595,7 +640,9 @@ const BIG5_KEYWORDS = {
         'unkompliziert', 'nüchtern',
         // Alltagssprache
         'bleibe lieber beim alten', 'muss nicht sein', 'kenne mich aus',
-        'funktioniert doch', 'wozu ändern', 'lieber sicher'
+        'funktioniert doch', 'wozu ändern', 'lieber sicher',
+        // Komfortzone / Gewohnheit
+        'komfortzone', 'wie gewohnt', 'was ich kenne', 'beim bekannten bleiben'
       ]
     },
     conscientiousness: {
@@ -603,7 +650,8 @@ const BIG5_KEYWORDS = {
         'organisiert', 'pünktlich', 'strukturiert', 'diszipliniert', 'gewissenhaft',
         'zuverlässig', 'ordentlich', 'geplant', 'sorgfältig', 'pflichtbewusst',
         'verantwortungsvoll', 'gründlich', 'systematisch', 'methodisch', 'genau',
-        'akribisch', 'termingerecht', 'effizient', 'zielorientiert',
+        'akribisch', 'detailorientiert', 'termingerecht', 'effizient', 'zielorientiert',
+        'rechenschaftspflicht', 'verantwortlichkeit',
         // Alltagssprache
         'to-do-liste', 'alles im griff', 'vorausplanen', 'nichts vergessen',
         'rechtzeitig', 'fertig machen', 'aufgeräumt'
@@ -631,12 +679,15 @@ const BIG5_KEYWORDS = {
         // Berufliche / alltägliche Extraversion
         'präsentieren', 'vernetzen', 'mitreißen', 'moderieren', 'rede gerne',
         'offen auf leute zu', 'gerne unter leuten', 'team-player', 'wortführer',
-        'initiative ergreifen', 'smalltalk', 'netzwerken', 'brauche austausch'
+        'initiative ergreifen', 'smalltalk', 'netzwerken', 'brauche austausch',
+        'menschen zusammenbringen', 'bringe leute zusammen'
       ],
       low: [
         'ruhig', 'zurückhaltend', 'introvertiert', 'nachdenklich', 'still',
         'beobachtend', 'schüchtern', 'reserviert', 'verschlossen', 'einzelgänger',
         'allein', 'in sich gekehrt', 'wortkarg',
+        // Energieabfluss durch Soziales
+        'sozial erschöpft', 'menschen strengen an', 'anstrengend',
         // Alltagssprache
         'lieber zuhause', 'brauche meine ruhe', 'bin gerne für mich',
         'telefonieren ungern', 'große gruppen anstrengend', 'beobachte lieber',
@@ -645,16 +696,19 @@ const BIG5_KEYWORDS = {
     },
     agreeableness: {
       high: [
-        'hilfsbereit', 'kooperativ', 'vertrauensvoll', 'freundlich', 'mitfühlend',
-        'harmoniebedürftig', 'einfühlsam', 'warmherzig', 'großzügig', 'nachgiebig',
+        'hilfsbereit', 'kooperativ', 'kooperieren', 'vertrauensvoll', 'freundlich', 'mitfühlend',
+        'harmoniebedürftig', 'einfühlsam', 'empathie', 'warmherzig', 'großzügig', 'nachgiebig',
         'rücksichtsvoll', 'tolerant', 'verständnisvoll', 'geduldig', 'fürsorglich',
-        'bescheiden', 'höflich', 'respektvoll', 'unterstützend',
+        'bescheiden', 'höflich', 'respektvoll', 'unterstützend', 'entgegenkommend',
+        'freundlichkeit', 'selbstlos',
         // Alltagssprache
         'gerne helfen', 'für andere da sein', 'nehme rücksicht', 'jedem eine chance',
         'streit vermeiden', 'nachgeben', 'kompromiss finden'
       ],
       low: [
-        'kritisch', 'wettbewerbsorientiert', 'skeptisch', 'direkt', 'konfrontativ',
+        'kritisch', 'wettbewerbsorientiert', 'skeptisch', 'konfrontativ',
+        // "direkt" entfernt (False Positive: Suffix-Match)
+        'zu direkt', 'schonungslos',
         'durchsetzungsstark', 'streitlustig', 'misstrauisch', 'egozentrisch',
         'kompromisslos', 'hartnäckig', 'unnachgiebig', 'fordernd',
         // Neutralere Alltagssprache
@@ -670,7 +724,19 @@ const BIG5_KEYWORDS = {
         'frustriert', 'empfindlich', 'zweifelnd', 'pessimistisch',
         'belastet', 'erschöpft', 'sorge',
         // Einzelwort-Keywords (fehlten als Standalone)
-        'angst', 'druck', 'panik', 'verzweifelt',
+        'angst', 'ängstlich', 'druck', 'panik', 'verzweifelt',
+        // Häufige Angst-/Belastungsformen (Cross-Framework mit Riemann wechsel.low)
+        'verängstigt', 'fürchte', 'habe angst',
+        'gelähmt', 'lähmung', 'erstarrt', 'paralysiert', 'furchteinflößend',
+        // Soziale Angst / Rumination
+        'unbeholfen', 'peinlich', 'hinterfrage mich', 'zeranalysiere', 'zermürbend',
+        'gefangen', 'versag', 'lastet auf mir',
+        // Bewertungsangst / somatische Angst
+        'beurteilt', 'verurteilt', 'wach gelegen', 'erstarren',
+        // Stammform-Varianten
+        'unheimlich', 'überwältigend', 'unwohl',
+        // Erschöpfung / Selbstzweifel / somatische Angst
+        'ausgelaugt', 'zweifel', 'verbittert', 'schweißnass',
         // Neutralere / positive Neuroticism-High-Keywords (Kernverbesserung)
         'sensibel', 'vorsichtig', 'achtsam', 'bedacht', 'reflektiert',
         'grüble', 'mache mir gedanken', 'denke viel nach', 'nehme mir dinge zu herzen',
@@ -694,7 +760,7 @@ const BIG5_KEYWORDS = {
     openness: {
       high: [
         // Formal
-        'creative', 'curious', 'experimental', 'imaginative', 'artistic',
+        'creative', 'create', 'creating', 'curious', 'experimental', 'imaginative', 'artistic',
         // "open" entfernt (False Positive: "open the door", "open a file")
         'open-minded', 'open to new',
         'innovative', 'visionary', 'original', 'unconventional',
@@ -711,8 +777,10 @@ const BIG5_KEYWORDS = {
         // "simple" entfernt (False Positive: "simply" vs. "keep it simple")
         'keep it simple', 'prefer simple', 'straightforward', 'sober',
         // Colloquial
-        'rather stick with', 'not necessary', 'know my way around',
-        'it works fine', 'why change', 'rather safe'
+        'rather stick with', 'stick with', 'not necessary', 'know my way around',
+        'it works fine', 'why change', 'rather safe',
+        // Komfortzone / Gewohnheit
+        'comfort zone', 'usual', 'what I know'
       ]
     },
     conscientiousness: {
@@ -720,7 +788,8 @@ const BIG5_KEYWORDS = {
         'organized', 'punctual', 'structured', 'disciplined', 'conscientious',
         'reliable', 'orderly', 'planned', 'careful', 'dutiful',
         'responsible', 'thorough', 'systematic', 'methodical', 'precise',
-        'meticulous', 'timely', 'efficient', 'goal-oriented',
+        'meticulous', 'detail-oriented', 'timely', 'efficient', 'goal-oriented',
+        'accountability',
         // Colloquial
         'to-do list', 'got it covered', 'plan ahead', 'never forget',
         'on time', 'get it done', 'neat and tidy'
@@ -748,12 +817,15 @@ const BIG5_KEYWORDS = {
         // Professional / everyday extraversion
         'presenting', 'networking', 'inspiring', 'moderating', 'love talking',
         'approach people', 'enjoy company', 'team player', 'take the lead',
-        'take initiative', 'small talk', 'need exchange', 'socialize'
+        'take initiative', 'small talk', 'need exchange', 'socialize',
+        'bring people together', 'brings people together'
       ],
       low: [
         'quiet', 'reserved', 'introverted', 'reflective', 'silent',
         'observant', 'shy', 'withdrawn', 'private', 'solitary',
         'alone', 'introspective', 'taciturn',
+        // Energieabfluss durch Soziales
+        'socially drained', 'people drain', 'draining',
         // Colloquial
         'rather stay home', 'need my peace', 'enjoy being alone',
         'hate phone calls', 'large groups exhausting', 'rather observe',
@@ -762,16 +834,19 @@ const BIG5_KEYWORDS = {
     },
     agreeableness: {
       high: [
-        'helpful', 'cooperative', 'trusting', 'friendly', 'compassionate',
-        'harmony-seeking', 'empathetic', 'warmhearted', 'generous', 'yielding',
+        'helpful', 'cooperative', 'cooperate', 'trusting', 'friendly', 'compassionate',
+        'harmony-seeking', 'empathetic', 'empathy', 'warmhearted', 'generous', 'yielding',
         'considerate', 'tolerant', 'understanding', 'patient', 'caring',
-        'modest', 'polite', 'respectful', 'supportive',
+        'modest', 'polite', 'respectful', 'supportive', 'accommodating',
+        'kindness', 'selfless',
         // Colloquial
         'love to help', 'there for others', 'considerate of others', 'give everyone a chance',
         'avoid conflict', 'give in', 'find compromise'
       ],
       low: [
-        'critical', 'competitive', 'skeptical', 'direct', 'confrontational',
+        'critical', 'competitive', 'skeptical', 'confrontational',
+        // "direct" entfernt (False Positive: "directions" matcht via Suffix-Regex)
+        'too direct', 'blunt',
         'assertive', 'argumentative', 'distrustful', 'self-centered',
         'uncompromising', 'stubborn', 'unyielding', 'demanding',
         // Neutral colloquial
@@ -785,9 +860,21 @@ const BIG5_KEYWORDS = {
         'nervous', 'insecure', 'worried', 'stressed',
         'emotional', 'vulnerable', 'overwhelmed', 'restless', 'tense',
         'frustrated', 'sensitive', 'doubtful', 'pessimistic',
-        'burdened', 'exhausted', 'worry',
+        'burdened', 'exhausted', 'worry', 'concerned',
         // Standalone keywords (were missing)
-        'anxiety', 'fear', 'pressure', 'panic', 'desperate',
+        'anxiety', 'anxious', 'fear', 'pressure', 'panic', 'desperate',
+        // Common anxiety/distress forms (cross-framework with Riemann wechsel.low)
+        'afraid', 'scared', 'struggling', 'uneasy', 'dreading',
+        'terrifying', 'terrified', 'paralyze', 'paralyzed', 'paralysis', 'frozen',
+        // Soziale Angst / Rumination
+        'awkward', 'second-guess', 'overanalyze', 'overanalyzing', 'replaying', 'exhausting',
+        'trapped', 'fail', 'weighing on me',
+        // Bewertungsangst / somatische Angst
+        'judged', 'freeze', 'lying awake',
+        // Stammform-Varianten (Englisch: -e fällt vor -ing/-y weg)
+        'scary', 'overwhelming', 'uncomfortable',
+        // Erschöpfung / Selbstzweifel / somatische Angst
+        'drained', 'doubt', 'resentful', 'clammy',
         // Neutral / positive Neuroticism-High (core improvement)
         'cautious', 'mindful', 'thoughtful', 'reflective',
         'ruminate', 'think a lot', 'overthink', 'take things to heart',
