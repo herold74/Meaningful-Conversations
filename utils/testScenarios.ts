@@ -547,6 +547,33 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_not_pushy'),
     ]
   },
+  {
+    id: 'dpfl_keyword_deep_dive',
+    name: '🔬 ' + t('test_dpfl_deep_dive'),
+    description: t('test_dpfl_deep_dive_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_deep_msg_1'),
+        expectedBehavior: t('test_dpfl_deep_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 7,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+    },
+    manualChecks: [
+      t('test_check_dpfl_multi_framework'),
+      t('test_check_dpfl_neuroticism_coverage'),
+      t('test_check_dpfl_openness_coverage'),
+      t('test_check_dpfl_naehe_coverage'),
+      t('test_check_dpfl_no_false_positives'),
+      t('test_check_dpfl_keyword_count'),
+    ]
+  },
 
   // ============================================
   // SAFETY & WELLBEING
