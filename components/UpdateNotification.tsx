@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import Button from './shared/Button';
 
 interface UpdateNotificationProps {
@@ -9,6 +11,7 @@ interface UpdateNotificationProps {
 const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => {
   const { t } = useLocalization();
   const [show, setShow] = useState(false);
+  useModalOpen(show);
 
   useEffect(() => {
     // Check if service worker is supported
@@ -49,8 +52,8 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => 
 
   if (!show) return null;
 
-  return (
-    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-slideDown">
+  return createPortal(
+    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[9999] animate-slideDown">
       <div className="bg-accent-primary text-button-foreground-on-accent px-6 py-4 rounded-lg shadow-2xl border-2 border-accent-primary-hover max-w-md">
         <div className="flex items-center gap-4">
           <div className="flex-shrink-0">
@@ -71,7 +74,8 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => 
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

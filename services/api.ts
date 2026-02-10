@@ -469,7 +469,7 @@ export const previewProfileRefinement = async (data: {
 };
 
 export const testRefinementWithMockSessions = async (data: {
-  profileType: 'RIEMANN' | 'BIG5';
+  profileType: 'RIEMANN' | 'BIG5' | 'SD';
   decryptedProfile: Record<string, unknown>;
   mockSessions: Array<{
     // Riemann frequencies (for RIEMANN profile)

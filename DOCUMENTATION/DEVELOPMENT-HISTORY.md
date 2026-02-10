@@ -481,6 +481,11 @@ git checkout v1.4.7
   - **GDPR Compliance:** Removed encrypted transcript storage to minimize data retention.
   - **Comfort Check UX:** Improved flow for emotional safety checks.
 
+- ✅ **Backend Scaling & Stability**
+  - Integration of **PM2** process manager.
+  - **Cluster Mode** enabled (2 instances) for load distribution and crash resilience.
+  - Memory limit restarts configured (700M).
+
 **Technical Implementation:**
 - `services/capacitorAudioService.ts` - Native audio abstraction
 - `services/dynamicPromptController.js` - Complex prompt assembly logic

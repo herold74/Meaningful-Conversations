@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Message, User } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { XIcon } from './icons/XIcon';
 import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
@@ -16,6 +18,7 @@ interface FeedbackModalProps {
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit, lastUserMessage, botMessage, currentUser }) => {
     const { t } = useLocalization();
+    useModalOpen(isOpen);
     const [comments, setComments] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(true);
     const [email, setEmail] = useState('');
@@ -149,15 +152,16 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
         );
     };
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             aria-modal="true" 
             role="dialog"
             onClick={onClose}
         >
             <div 
-                className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
+                className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90dvh] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
@@ -170,7 +174,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                 </div>
                 {renderContent()}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 export default FeedbackModal;

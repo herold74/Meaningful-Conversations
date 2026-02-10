@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { Bot, Message, SessionAnalysis } from '../types';
 import { BOTS } from '../constants';
 import { 
@@ -33,23 +35,38 @@ import ProfileRefinementModal from './ProfileRefinementModal';
 // ============================================
 
 // Mock sessions for Riemann-Thomann profile testing
+// Format must match behaviorLogger output: *High, *Low, *Delta, *FoundHigh, *FoundLow
 const MOCK_RIEMANN_SESSIONS = [
   {
-    riemann: {
-      dauer: 5,    // Keywords: sicherheit, planung, struktur, verlässlich, kontinuität
-      wechsel: 2,  // Keywords: spontan, flexibel
-      naehe: 3,    // Keywords: team, vertrauen, gemeinsam
-      distanz: 1   // Keywords: eigenständig
-    },
+    // Session 1: Strong Dauer + moderate Naehe signal
+    dauerHigh: 5, dauerLow: 0, dauerDelta: 5,
+    dauerFoundHigh: ['sicherheit', 'planung', 'struktur', 'verlässlichkeit', 'routine'],
+    dauerFoundLow: [],
+    wechselHigh: 1, wechselLow: 2, wechselDelta: -1,
+    wechselFoundHigh: ['spontan'],
+    wechselFoundLow: ['vorhersehbar', 'gewohnt'],
+    naeheHigh: 3, naeheLow: 0, naeheDelta: 3,
+    naeheFoundHigh: ['teamarbeit', 'vertrauen', 'gemeinsam'],
+    naeheFoundLow: [],
+    distanzHigh: 0, distanzLow: 1, distanzDelta: -1,
+    distanzFoundHigh: [],
+    distanzFoundLow: ['eigenständig'],
     comfortScore: 5
   },
   {
-    riemann: {
-      dauer: 4,    // Keywords: ordnung, routine, systematisch, disziplin
-      wechsel: 1,  // Keywords: abwechslung
-      naehe: 2,    // Keywords: beziehung, empathie
-      distanz: 0   // No keywords
-    },
+    // Session 2: Confirming Dauer + Naehe pattern
+    dauerHigh: 4, dauerLow: 0, dauerDelta: 4,
+    dauerFoundHigh: ['ordnung', 'systematisch', 'disziplin', 'pünktlichkeit'],
+    dauerFoundLow: [],
+    wechselHigh: 0, wechselLow: 1, wechselDelta: -1,
+    wechselFoundHigh: [],
+    wechselFoundLow: ['abwechslung'],
+    naeheHigh: 2, naeheLow: 0, naeheDelta: 2,
+    naeheFoundHigh: ['beziehung', 'empathie'],
+    naeheFoundLow: [],
+    distanzHigh: 0, distanzLow: 0, distanzDelta: 0,
+    distanzFoundHigh: [],
+    distanzFoundLow: [],
     comfortScore: 4
   }
 ];
@@ -57,23 +74,96 @@ const MOCK_RIEMANN_SESSIONS = [
 // Mock sessions for Big5/OCEAN profile testing
 const MOCK_BIG5_SESSIONS = [
   {
-    big5: {
-      openness: 4,           // Keywords: kreativ, neugierig, experimentierfreudig, innovativ
-      conscientiousness: 6,  // Keywords: organisiert, pünktlich, strukturiert, diszipliniert, gewissenhaft, zuverlässig
-      extraversion: 2,       // Keywords: gesellig, gesprächig
-      agreeableness: 3,      // Keywords: hilfsbereit, kooperativ, freundlich
-      neuroticism: 3         // Keywords: nervös, besorgt, gestresst
-    },
+    // Session 1: High Conscientiousness + moderate Openness
+    opennessHigh: 4, opennessLow: 0, opennessDelta: 4,
+    opennessFoundHigh: ['kreativ', 'neugierig', 'experimentierfreudig', 'innovativ'],
+    opennessFoundLow: [],
+    conscientiousnessHigh: 6, conscientiousnessLow: 0, conscientiousnessDelta: 6,
+    conscientiousnessFoundHigh: ['organisiert', 'pünktlich', 'strukturiert', 'diszipliniert', 'gewissenhaft', 'zuverlässig'],
+    conscientiousnessFoundLow: [],
+    extraversionHigh: 2, extraversionLow: 1, extraversionDelta: 1,
+    extraversionFoundHigh: ['gesellig', 'gesprächig'],
+    extraversionFoundLow: ['zurückgezogen'],
+    agreeablenessHigh: 3, agreeablenessLow: 0, agreeablenessDelta: 3,
+    agreeablenessFoundHigh: ['hilfsbereit', 'kooperativ', 'freundlich'],
+    agreeablenessFoundLow: [],
+    neuroticismHigh: 3, neuroticismLow: 0, neuroticismDelta: 3,
+    neuroticismFoundHigh: ['nervös', 'besorgt', 'gestresst'],
+    neuroticismFoundLow: [],
     comfortScore: 5
   },
   {
-    big5: {
-      openness: 3,           // Keywords: offen, ideenreich, aufgeschlossen
-      conscientiousness: 5,  // Keywords: ordentlich, geplant, sorgfältig, verantwortungsvoll, gründlich
-      extraversion: 1,       // Keywords: aktiv
-      agreeableness: 4,      // Keywords: vertrauensvoll, mitfühlend, einfühlsam, warmherzig
-      neuroticism: 2         // Keywords: unsicher, emotional
-    },
+    // Session 2: Confirming Conscientiousness + Agreeableness
+    opennessHigh: 3, opennessLow: 0, opennessDelta: 3,
+    opennessFoundHigh: ['aufgeschlossen', 'ideenreich', 'offen für neues'],
+    opennessFoundLow: [],
+    conscientiousnessHigh: 5, conscientiousnessLow: 0, conscientiousnessDelta: 5,
+    conscientiousnessFoundHigh: ['ordentlich', 'sorgfältig', 'verantwortungsvoll', 'gründlich', 'geplant'],
+    conscientiousnessFoundLow: [],
+    extraversionHigh: 1, extraversionLow: 0, extraversionDelta: 1,
+    extraversionFoundHigh: ['aktiv'],
+    extraversionFoundLow: [],
+    agreeablenessHigh: 4, agreeablenessLow: 0, agreeablenessDelta: 4,
+    agreeablenessFoundHigh: ['vertrauensvoll', 'mitfühlend', 'einfühlsam', 'warmherzig'],
+    agreeablenessFoundLow: [],
+    neuroticismHigh: 2, neuroticismLow: 0, neuroticismDelta: 2,
+    neuroticismFoundHigh: ['unsicher', 'ängstlich'],
+    neuroticismFoundLow: [],
+    comfortScore: 4
+  }
+];
+
+// Mock sessions for Spiral Dynamics profile testing
+const MOCK_SD_SESSIONS = [
+  {
+    // Session 1: Strong Blue + Green signal
+    blueHigh: 4, blueLow: 0, blueDelta: 4,
+    blueFoundHigh: ['ordnung', 'regeln', 'pflicht', 'verantwortung'],
+    blueFoundLow: [],
+    greenHigh: 3, greenLow: 0, greenDelta: 3,
+    greenFoundHigh: ['mitgefühl', 'einfühlungsvermögen', 'gemeinsames gefühl'],
+    greenFoundLow: [],
+    orangeHigh: 2, orangeLow: 1, orangeDelta: 1,
+    orangeFoundHigh: ['leistung', 'effizienz'],
+    orangeFoundLow: ['wettbewerb'],
+    redHigh: 0, redLow: 2, redDelta: -2,
+    redFoundHigh: [],
+    redFoundLow: ['kampfbereit', 'sofort handeln'],
+    yellowHigh: 1, yellowLow: 0, yellowDelta: 1,
+    yellowFoundHigh: ['systemisch'],
+    yellowFoundLow: [],
+    purpleHigh: 0, purpleLow: 0, purpleDelta: 0,
+    purpleFoundHigh: [], purpleFoundLow: [],
+    turquoiseHigh: 1, turquoiseLow: 0, turquoiseDelta: 1,
+    turquoiseFoundHigh: ['universell verbunden'],
+    turquoiseFoundLow: [],
+    beigeHigh: 0, beigeLow: 0, beigeDelta: 0,
+    beigeFoundHigh: [], beigeFoundLow: [],
+    comfortScore: 5
+  },
+  {
+    // Session 2: Confirming Blue + Green
+    blueHigh: 3, blueLow: 0, blueDelta: 3,
+    blueFoundHigh: ['disziplin', 'loyalität', 'autorität'],
+    blueFoundLow: [],
+    greenHigh: 4, greenLow: 0, greenDelta: 4,
+    greenFoundHigh: ['harmonie', 'konsens', 'gleichberechtigung', 'inklusion'],
+    greenFoundLow: [],
+    orangeHigh: 1, orangeLow: 0, orangeDelta: 1,
+    orangeFoundHigh: ['zielorientiert'],
+    orangeFoundLow: [],
+    redHigh: 0, redLow: 1, redDelta: -1,
+    redFoundHigh: [],
+    redFoundLow: ['dominanz'],
+    yellowHigh: 0, yellowLow: 0, yellowDelta: 0,
+    yellowFoundHigh: [], yellowFoundLow: [],
+    purpleHigh: 1, purpleLow: 0, purpleDelta: 1,
+    purpleFoundHigh: ['zugehörigkeit'],
+    purpleFoundLow: [],
+    turquoiseHigh: 0, turquoiseLow: 0, turquoiseDelta: 0,
+    turquoiseFoundHigh: [], turquoiseFoundLow: [],
+    beigeHigh: 0, beigeLow: 0, beigeDelta: 0,
+    beigeFoundHigh: [], beigeFoundLow: [],
     comfortScore: 4
   }
 ];
@@ -88,6 +178,7 @@ type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
 
 const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey }) => {
   const { t, language } = useLocalization();
+  useModalOpen();
   
   // Decrypted personality profile state
   const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
@@ -514,23 +605,35 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         
         try {
           // Detect profile type from user's profile or selected test profile
-          let profileType: 'RIEMANN' | 'BIG5' = 'RIEMANN';
+          let profileType: 'RIEMANN' | 'BIG5' | 'SD' = 'RIEMANN';
           let decryptedProfileData: any = null;
           
           if (useMyProfile && decryptedProfile) {
-            // Use actual user profile
-            profileType = decryptedProfile.riemann ? 'RIEMANN' : 'BIG5';
+            // Use actual user profile - detect type from available data
+            if (decryptedProfile.spiralDynamics) {
+              profileType = 'SD';
+            } else if (decryptedProfile.big5) {
+              profileType = 'BIG5';
+            } else {
+              profileType = 'RIEMANN';
+            }
             decryptedProfileData = decryptedProfile;
           } else {
             // Use selected test profile
-            profileType = selectedRiemann ? 'RIEMANN' : 'BIG5';
+            if (selectedRiemann) {
+              profileType = 'RIEMANN';
+            } else {
+              profileType = 'BIG5';
+            }
             decryptedProfileData = profile;
           }
           
           // Select appropriate mock sessions based on profile type
           const mockSessions = profileType === 'RIEMANN' 
             ? MOCK_RIEMANN_SESSIONS 
-            : MOCK_BIG5_SESSIONS;
+            : profileType === 'SD'
+              ? MOCK_SD_SESSIONS
+              : MOCK_BIG5_SESSIONS;
           
           // Call backend API with mock session data
           const refinementResult = await testRefinementWithMockSessions({
@@ -1217,14 +1320,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               
               {/* Telemetry explanation */}
               <div>
-                <div className="font-medium text-content-primary mb-1">Telemetrie-Daten:</div>
+                <div className="font-medium text-content-primary mb-1">{t('test_runner_telemetry_data')}:</div>
                 <ul className="text-content-secondary space-y-1 pl-4 text-xs">
-                  <li>• <span className="font-medium">DPC Injection:</span> Anzahl Zeichen der Persönlichkeitsanpassung im System-Prompt</li>
-                  <li>• <span className="font-medium">DPC Strategien:</span> Welche Persönlichkeitsdimensionen für die Anpassung verwendet wurden</li>
-                  <li>• <span className="font-medium">DPFL Keywords (kumulativ):</span> Alle erkannten Persönlichkeits-Keywords über den gesamten Test-Chat, aufgeschlüsselt nach Framework (Riemann-Thomann, Big5/OCEAN, Spiral Dynamics)</li>
-                  <li>• <span className="font-medium">Stress-Schlüsselwörter:</span> Ob Stress-Indikatoren im User-Text gefunden wurden</li>
-                  <li>• <span className="font-medium">Strategy Merge Details:</span> Technische Details zur Strategie-Zusammenführung (Konflikt-Auflösung, verwendete Modelle)</li>
-                  <li>• <span className="font-medium">Adaptive Keyword-Gewichtung:</span> Kontextabhängige Gewichtsanpassungen (Thema, Sprachmuster, Sentiment) für erkannte Keywords</li>
+                  <li>• <span className="font-medium">{t('test_runner_dpc_injection')}:</span> {t('test_runner_telemetry_desc_dpc_injection')}</li>
+                  <li>• <span className="font-medium">{t('test_runner_dpc_strategies')}:</span> {t('test_runner_telemetry_desc_dpc_strategies')}</li>
+                  <li>• <span className="font-medium">{t('test_runner_dpfl_keywords')} ({t('test_runner_cumulative')}):</span> {t('test_runner_telemetry_desc_dpfl')}</li>
+                  <li>• <span className="font-medium">{t('test_runner_stress_keywords')}:</span> {t('test_runner_telemetry_desc_stress')}</li>
+                  <li>• <span className="font-medium">{t('test_runner_strategy_merge')}:</span> {t('test_runner_telemetry_desc_merge')}</li>
+                  <li>• <span className="font-medium">{t('test_runner_adaptive_weighting')}:</span> {t('test_runner_telemetry_desc_adaptive')}</li>
                 </ul>
               </div>
               
@@ -1278,16 +1381,16 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         {testResult.telemetry && (
           <div>
             <h4 className="font-semibold mb-2 text-content-primary">📊 {t('test_runner_telemetry')}</h4>
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-hidden">
               
               {/* DPC Injection */}
               <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-content-primary">DPC Injection:</span>
+                  <span className="font-medium text-content-primary">{t('test_runner_dpc_injection')}:</span>
                   <span className="text-content-secondary">
                     {testResult.telemetry.dpcInjectionPresent 
                       ? `✓ ${testResult.telemetry.dpcInjectionLength} chars` 
-                      : '✗ Nicht vorhanden'}
+                      : `✗ ${t('test_runner_dpc_not_present')}`}
                   </span>
                 </div>
               </div>
@@ -1296,8 +1399,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               {testResult.telemetry.dpcStrategiesUsed && testResult.telemetry.dpcStrategiesUsed.length > 0 && (
                 <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
                   <div className="text-sm">
-                    <span className="font-medium text-content-primary">DPC Strategien:</span>
-                    <div className="mt-1 text-content-secondary">{testResult.telemetry.dpcStrategiesUsed.join(', ')}</div>
+                    <span className="font-medium text-content-primary">{t('test_runner_dpc_strategies')}:</span>
+                    <div className="mt-1 text-content-secondary break-words">{testResult.telemetry.dpcStrategiesUsed.join(', ')}</div>
                   </div>
                 </div>
               )}
@@ -1308,29 +1411,29 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   <details className="group">
                     <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
                       <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
-                      Strategy Merge Details
+                      {t('test_runner_strategy_merge')}
                     </summary>
                     <div className="mt-3 pt-2 border-t border-border-secondary space-y-2 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-content-secondary">Merge Type:</span>
+                        <span className="text-content-secondary">{t('test_runner_merge_type')}:</span>
                         <span className="font-semibold text-content-primary">
-                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'simple_weighted' && 'Weighted'}
-                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'conflict_aware' && 'Conflict-Resolved'}
-                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'empty' && 'Empty'}
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'simple_weighted' && t('test_runner_merge_weighted')}
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'conflict_aware' && t('test_runner_merge_conflict')}
+                          {testResult.telemetry.dpcMergeMetadata.mergeType === 'empty' && t('test_runner_merge_empty')}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-content-secondary">Models Used:</span>
+                        <span className="text-content-secondary">{t('test_runner_models_used')}:</span>
                         <span className="text-content-primary">{testResult.telemetry.dpcMergeMetadata.models?.join(', ') || 'N/A'}</span>
                       </div>
                       {testResult.telemetry.dpcMergeMetadata.conflicts > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-content-secondary">Conflicts Resolved:</span>
+                          <span className="text-content-secondary">{t('test_runner_conflicts_resolved')}:</span>
                           <span className="text-orange-500 font-semibold">{testResult.telemetry.dpcMergeMetadata.conflicts}</span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-content-secondary">Narrative Consistent:</span>
+                        <span className="text-content-secondary">{t('test_runner_narrative_consistent')}:</span>
                         <span className={testResult.telemetry.dpcMergeMetadata.narrativeConsistent ? 'text-green-500' : 'text-yellow-500'}>
                           {testResult.telemetry.dpcMergeMetadata.narrativeConsistent ? '✓' : '⚠️'}
                         </span>
@@ -1338,12 +1441,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                       {/* Top Dimensions Visualization */}
                       {testResult.telemetry.dpcMergeMetadata.topDimensions && testResult.telemetry.dpcMergeMetadata.topDimensions.length > 0 && (
                         <div className="mt-2 pt-2 border-t border-border-secondary">
-                          <div className="text-content-secondary mb-2">Top Dimensions:</div>
+                          <div className="text-content-secondary mb-2">{t('test_runner_top_dimensions')}:</div>
                           <div className="space-y-1.5">
                             {testResult.telemetry.dpcMergeMetadata.topDimensions.slice(0, 5).map((dim: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <div className={`h-1.5 rounded ${dim.included ? 'bg-accent-primary' : 'bg-gray-400'}`} style={{width: `${dim.weight * 60 + 20}px`}}></div>
-                                <span className={`text-xs ${dim.included ? 'text-content-primary' : 'text-content-tertiary line-through'}`}>
+                              <div key={idx} className="flex items-center gap-2 min-w-0">
+                                <div className={`h-1.5 rounded shrink-0 ${dim.included ? 'bg-accent-primary' : 'bg-gray-400'}`} style={{width: `${Math.min(dim.weight * 60 + 20, 80)}px`}}></div>
+                                <span className={`text-xs truncate ${dim.included ? 'text-content-primary' : 'text-content-tertiary line-through'}`}>
                                   {dim.model}:{dim.trait} ({(dim.weight * 100).toFixed(0)}%)
                                 </span>
                               </div>
@@ -1357,31 +1460,31 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               )}
               
               {/* DPFL Keywords - All Frameworks, Cumulative */}
-              <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+              <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg overflow-hidden">
                 <details className="group" open>
-                  <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+                  <summary className="cursor-pointer text-sm font-medium text-content-primary flex flex-wrap items-center gap-1.5 hover:text-accent-primary transition-colors">
                     <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
-                    {t('test_runner_dpfl_keywords')} ({t('test_runner_cumulative')})
+                    <span>{t('test_runner_dpfl_keywords')} ({t('test_runner_cumulative')})</span>
                     {testResult.telemetry.cumulativeKeywords && testResult.telemetry.cumulativeKeywords.totalCount > 0 && (
-                      <span className="text-xs bg-blue-500/20 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+                      <span className="text-xs bg-blue-500/20 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full whitespace-nowrap">
                         {testResult.telemetry.cumulativeKeywords.totalCount} {t('test_runner_total')}
                       </span>
                     )}
                   </summary>
-                  <div className="mt-2 pt-2 border-t border-border-secondary space-y-2 text-xs">
+                  <div className="mt-2 pt-2 border-t border-border-secondary space-y-2 text-xs overflow-hidden">
                     {/* Riemann */}
                     {testResult.telemetry.cumulativeKeywords?.riemann && Object.keys(testResult.telemetry.cumulativeKeywords.riemann).length > 0 && (
                       <div>
                         <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_riemann')}</div>
                         <div className="space-y-0.5 pl-2">
                           {Object.entries(testResult.telemetry.cumulativeKeywords.riemann).map(([dim, levels]: [string, any]) => (
-                            <div key={dim} className="flex flex-wrap gap-1 items-center">
-                              <span className="text-content-secondary min-w-[70px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                            <div key={dim} className="flex flex-wrap gap-1 items-baseline">
+                              <span className="text-content-secondary shrink-0">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
                               {levels.high?.map((k: string) => (
-                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 break-all">{k} ↑</span>
                               ))}
                               {levels.low?.map((k: string) => (
-                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 break-all">{k} ↓</span>
                               ))}
                             </div>
                           ))}
@@ -1394,13 +1497,13 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                         <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_big5')}</div>
                         <div className="space-y-0.5 pl-2">
                           {Object.entries(testResult.telemetry.cumulativeKeywords.big5).map(([dim, levels]: [string, any]) => (
-                            <div key={dim} className="flex flex-wrap gap-1 items-center">
-                              <span className="text-content-secondary min-w-[110px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                            <div key={dim} className="flex flex-wrap gap-1 items-baseline">
+                              <span className="text-content-secondary shrink-0">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
                               {levels.high?.map((k: string) => (
-                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 break-all">{k} ↑</span>
                               ))}
                               {levels.low?.map((k: string) => (
-                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 break-all">{k} ↓</span>
                               ))}
                             </div>
                           ))}
@@ -1413,13 +1516,13 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                         <div className="font-medium text-content-primary mb-1">{t('test_runner_fw_sd')}</div>
                         <div className="space-y-0.5 pl-2">
                           {Object.entries(testResult.telemetry.cumulativeKeywords.spiralDynamics).map(([dim, levels]: [string, any]) => (
-                            <div key={dim} className="flex flex-wrap gap-1 items-center">
-                              <span className="text-content-secondary min-w-[80px]">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
+                            <div key={dim} className="flex flex-wrap gap-1 items-baseline">
+                              <span className="text-content-secondary shrink-0">{dim.charAt(0).toUpperCase() + dim.slice(1)}:</span>
                               {levels.high?.map((k: string) => (
-                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20">{k} ↑</span>
+                                <span key={`h-${k}`} className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 break-all">{k} ↑</span>
                               ))}
                               {levels.low?.map((k: string) => (
-                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20">{k} ↓</span>
+                                <span key={`l-${k}`} className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 break-all">{k} ↓</span>
                               ))}
                             </div>
                           ))}
@@ -1446,31 +1549,31 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
               {/* Phase 2a: Adaptive Weighting Details */}
               {testResult.telemetry.adaptiveWeighting && (
-                <div className="p-2.5 bg-purple-500/5 border border-purple-500/20 rounded-lg">
+                <div className="p-2.5 bg-purple-500/5 border border-purple-500/20 rounded-lg overflow-hidden">
                   <details className="group">
-                    <summary className="cursor-pointer text-sm font-medium text-content-primary flex items-center gap-2 hover:text-accent-primary transition-colors">
+                    <summary className="cursor-pointer text-sm font-medium text-content-primary flex flex-wrap items-center gap-1.5 hover:text-accent-primary transition-colors">
                       <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
-                      {t('test_runner_adaptive_weighting')}
+                      <span className="break-words">{t('test_runner_adaptive_weighting')}</span>
                       {(testResult.telemetry.adaptiveWeighting.adjustedKeywordCount ?? 0) > 0 && (
-                        <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
+                        <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full whitespace-nowrap">
                           {testResult.telemetry.adaptiveWeighting.adjustedKeywordCount} {t('test_runner_adjustments')}
                         </span>
                       )}
                     </summary>
-                    <div className="mt-3 pt-2 border-t border-border-secondary space-y-2 text-xs">
+                    <div className="mt-3 pt-2 border-t border-border-secondary space-y-2 text-xs overflow-hidden">
                       {/* Context Info */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-content-secondary">{t('test_runner_context_topic')}:</span>
-                          <span className="ml-1 font-medium text-content-primary">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <div className="flex flex-wrap gap-x-1">
+                          <span className="text-content-secondary whitespace-nowrap">{t('test_runner_context_topic')}:</span>
+                          <span className="font-medium text-content-primary break-words">
                             {testResult.telemetry.adaptiveWeighting.context?.topic
                               ? `${t('context_topic_' + testResult.telemetry.adaptiveWeighting.context.topic)} (${Math.round((testResult.telemetry.adaptiveWeighting.context.topicConfidence || 0) * 100)}%)`
                               : t('test_runner_none')}
                           </span>
                         </div>
-                        <div>
-                          <span className="text-content-secondary">{t('test_runner_linguistic_pattern')}:</span>
-                          <span className="ml-1 font-medium text-content-primary">
+                        <div className="flex flex-wrap gap-x-1">
+                          <span className="text-content-secondary whitespace-nowrap">{t('test_runner_linguistic_pattern')}:</span>
+                          <span className="font-medium text-content-primary break-words">
                             {testResult.telemetry.adaptiveWeighting.context?.linguisticPattern
                               ? `${t('context_pattern_' + testResult.telemetry.adaptiveWeighting.context.linguisticPattern)} (${Math.round((testResult.telemetry.adaptiveWeighting.context.patternConfidence || 0) * 100)}%)`
                               : t('test_runner_none')}
@@ -1478,7 +1581,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                         </div>
                       </div>
                       {/* Sentiment */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                         <span className="text-content-secondary">{t('test_runner_sentiment')}:</span>
                         <span className={`font-medium ${
                           (testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) > 0.2
@@ -1491,7 +1594,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                           {((testResult.telemetry.adaptiveWeighting.sentiment?.polarity || 0) * 100).toFixed(0)}%
                         </span>
                         {testResult.telemetry.adaptiveWeighting.sentiment?.emotionalContext && testResult.telemetry.adaptiveWeighting.sentiment.emotionalContext !== 'neutral' && (
-                          <span className="text-content-tertiary">
+                          <span className="text-content-tertiary break-words">
                             ({t('context_emotion_' + testResult.telemetry.adaptiveWeighting.sentiment.emotionalContext)})
                           </span>
                         )}
@@ -1500,31 +1603,31 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                       {testResult.telemetry.adaptiveWeighting.weightingDetails && testResult.telemetry.adaptiveWeighting.weightingDetails.length > 0 && (
                         <div className="mt-2 pt-2 border-t border-border-secondary">
                           <div className="text-content-secondary mb-1">{t('test_runner_weight_adjustments')}:</div>
-                          <div className="space-y-1">
+                          <div className="space-y-1.5">
                             {testResult.telemetry.adaptiveWeighting.weightingDetails.map((detail: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-2 text-xs">
-                                <span className="font-mono text-content-primary">
+                              <div key={idx} className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs">
+                                <span className="font-mono text-content-primary break-all">
                                   {detail.keyword}
                                 </span>
                                 <span className="text-content-tertiary">→</span>
-                                <span className="text-content-secondary">
+                                <span className="text-content-secondary break-all">
                                   {detail.framework}:{detail.dimension}
                                 </span>
-                                <span className={`font-medium ${detail.weight > 1 ? 'text-green-600 dark:text-green-400' : detail.weight < 0.5 ? 'text-red-600 dark:text-red-400' : 'text-content-secondary'}`}>
+                                <span className={`font-medium whitespace-nowrap ${detail.weight > 1 ? 'text-green-600 dark:text-green-400' : detail.weight < 0.5 ? 'text-red-600 dark:text-red-400' : 'text-content-secondary'}`}>
                                   ×{detail.weight.toFixed(2)}
                                 </span>
                                 {!detail.isPrimary && (
-                                  <span className="text-xs bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1 rounded">
+                                  <span className="text-xs bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1 rounded whitespace-nowrap">
                                     {t('test_runner_secondary')}
                                   </span>
                                 )}
                                 {detail.sentimentAdjusted && (
-                                  <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1 rounded">
+                                  <span className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-400 px-1 rounded whitespace-nowrap">
                                     {t('test_runner_sentiment_adj')}
                                   </span>
                                 )}
                                 {detail.originalDirection !== detail.adjustedDirection && (
-                                  <span className="text-xs bg-red-500/20 text-red-600 dark:text-red-400 px-1 rounded">
+                                  <span className="text-xs bg-red-500/20 text-red-600 dark:text-red-400 px-1 rounded whitespace-nowrap">
                                     {detail.originalDirection} → {detail.adjustedDirection}
                                   </span>
                                 )}
@@ -1826,11 +1929,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     );
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-3xl w-full p-6 my-8 animate-fadeIn max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-start justify-center overflow-y-auto p-4 pt-16 pb-8">
+      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-3xl w-full animate-fadeIn flex flex-col max-h-[85dvh]">
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-border-secondary shrink-0">
           <h3 className="text-xl font-bold text-content-primary">
             🧪 {t('test_runner_title')}
           </h3>
@@ -1843,21 +1946,25 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           </button>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500">
-            ❌ {error}
-          </div>
-        )}
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 min-h-0">
+          {/* Error Display */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500">
+              ❌ {error}
+            </div>
+          )}
 
-        {/* Phase Content */}
-        {phase === 'setup' && renderSetup()}
-        {phase === 'running' && renderRunning()}
-        {phase === 'analyzing' && renderAnalyzing()}
-        {phase === 'validation' && renderValidation()}
-        {phase === 'complete' && renderComplete()}
+          {/* Phase Content */}
+          {phase === 'setup' && renderSetup()}
+          {phase === 'running' && renderRunning()}
+          {phase === 'analyzing' && renderAnalyzing()}
+          {phase === 'validation' && renderValidation()}
+          {phase === 'complete' && renderComplete()}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

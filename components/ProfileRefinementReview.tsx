@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import * as api from '../services/api';
 import { encryptPersonalityProfile } from '../utils/personalityEncryption';
 import Button from './shared/Button';
@@ -34,6 +36,7 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
   onCancel
 }) => {
   const { t } = useLocalization();
+  useModalOpen();
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<RefinementSuggestion | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -102,21 +105,22 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
   };
 
   if (isLoading) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-2xl w-full p-6">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-primary mb-4"></div>
             <p className="text-content-secondary">{t('refinement_loading') || 'Lade Vorschläge...'}</p>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   if (error && !suggestions) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-md w-full p-6">
           <h3 className="text-xl font-bold mb-4 text-content-primary">
             🔄 {t('refinement_title') || 'Profil-Verfeinerung'}
@@ -126,7 +130,8 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
             {t('refinement_close') || 'Schließen'}
           </Button>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
@@ -134,12 +139,15 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
     return null; // Already handled by error state
   }
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-3xl w-full p-6 my-8">
-        <h3 className="text-xl font-bold mb-4 text-content-primary">
-          🔄 {t('refinement_title') || 'Profil-Verfeinerung'}
-        </h3>
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-3xl w-full flex flex-col max-h-[calc(100dvh-env(safe-area-inset-top)-2rem)]">
+        <div className="px-6 pt-5 pb-3 border-b border-border-secondary shrink-0">
+          <h3 className="text-xl font-bold text-content-primary">
+            🔄 {t('refinement_title') || 'Profil-Verfeinerung'}
+          </h3>
+        </div>
+        <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 min-h-0">
 
         <p className="text-content-secondary mb-6">
           {t('refinement_description', { count: suggestions.sessionCount || 0 }) || `Basierend auf ${suggestions.sessionCount || 0} authentischen Sessions haben wir folgende Verfeinerungen für dein Profil:`}
@@ -204,22 +212,27 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={onCancel} variant="secondary" size="lg" className="flex-1">
-            {t('refinement_cancel') || 'Ablehnen'}
-          </Button>
-          
-          <Button onClick={handleApply} disabled={isLoading} size="lg" className="flex-1">
-            {t('refinement_apply') || 'Änderungen übernehmen'}
-          </Button>
         </div>
-        
-        {error && (
-          <p className="mt-4 text-sm text-status-error-foreground text-center">{error}</p>
-        )}
+
+        {/* Actions (fixed footer) */}
+        <div className="px-6 py-4 border-t border-border-secondary shrink-0">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={onCancel} variant="secondary" size="lg" className="flex-1">
+              {t('refinement_cancel') || 'Ablehnen'}
+            </Button>
+            
+            <Button onClick={handleApply} disabled={isLoading} size="lg" className="flex-1">
+              {t('refinement_apply') || 'Änderungen übernehmen'}
+            </Button>
+          </div>
+          
+          {error && (
+            <p className="mt-4 text-sm text-status-error-foreground text-center">{error}</p>
+          )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

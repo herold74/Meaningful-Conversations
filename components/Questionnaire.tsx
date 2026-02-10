@@ -117,7 +117,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
     };
 
     return (
-        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
             <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
             </button>
