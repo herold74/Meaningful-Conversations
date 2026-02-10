@@ -934,6 +934,7 @@ const App: React.FC = () => {
         if (isTestMode) {
             setIsTestMode(false);
             setTestScenarioId(null);
+            setNewGamificationState(null); // Clear test XP to prevent state pollution
             setView('admin');
             return;
         }
@@ -968,6 +969,7 @@ const App: React.FC = () => {
         if (isTestMode) {
             setIsTestMode(false);
             setTestScenarioId(null);
+            setNewGamificationState(null); // Clear test XP to prevent state pollution
             setView('admin');
             return;
         }
@@ -1279,7 +1281,7 @@ const App: React.FC = () => {
                     isTestMode={isTestMode}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setIsTestMode(false); setTestScenarioId(null); setNewGamificationState(null); setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
