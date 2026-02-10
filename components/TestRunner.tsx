@@ -1536,6 +1536,136 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   </div>
                 </details>
               </div>
+
+              {/* DPFL Quality Summary */}
+              {testResult.telemetry.cumulativeKeywords && testResult.telemetry.cumulativeKeywords.totalCount > 0 && (() => {
+                const ck = testResult.telemetry.cumulativeKeywords;
+                const MIN_SIGNAL = 3;
+                const MIN_TOTAL = 15;
+                
+                // Build rankings per framework
+                const buildRanking = (framework: Record<string, { high: string[], low: string[] }> | undefined) => {
+                  if (!framework) return [];
+                  return Object.entries(framework)
+                    .map(([dim, levels]: [string, any]) => ({
+                      dim,
+                      count: (levels.high?.length || 0) + (levels.low?.length || 0),
+                      highCount: levels.high?.length || 0,
+                    }))
+                    .filter(d => d.count > 0)
+                    .sort((a, b) => b.count - a.count);
+                };
+                
+                const riemannRank = buildRanking(ck.riemann);
+                const big5Rank = buildRanking(ck.big5);
+                const sdRank = buildRanking(ck.spiralDynamics);
+                
+                // Find weak signals (dimensions with < MIN_SIGNAL keywords)
+                const allDims = [...riemannRank, ...big5Rank, ...sdRank];
+                const weakSignals = allDims.filter(d => d.count < MIN_SIGNAL && d.count > 0);
+                const totalOk = ck.totalCount >= MIN_TOTAL;
+                
+                const formatDim = (dim: string) => dim.charAt(0).toUpperCase() + dim.slice(1);
+                
+                return (
+                  <div className="p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg overflow-hidden">
+                    <details className="group">
+                      <summary className="cursor-pointer text-sm font-medium text-content-primary flex flex-wrap items-center gap-1.5 hover:text-accent-primary transition-colors">
+                        <span className="group-open:rotate-90 transition-transform text-xs">▶</span>
+                        <span>{t('test_runner_quality_summary')}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap ${
+                          totalOk && weakSignals.length === 0
+                            ? 'bg-green-500/20 text-green-600 dark:text-green-400'
+                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                        }`}>
+                          {totalOk && weakSignals.length === 0 ? '✓' : '⚠'} {ck.totalCount} {t('test_runner_keywords_detected')}
+                        </span>
+                      </summary>
+                      <div className="mt-2 pt-2 border-t border-border-secondary space-y-2.5 text-xs overflow-hidden">
+                        
+                        {/* Total Coverage */}
+                        <div className="flex items-center gap-2">
+                          <span className={totalOk ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>
+                            {totalOk ? '✓' : '⚠'}
+                          </span>
+                          <span className="text-content-secondary">
+                            {t('test_runner_quality_coverage')}: <span className="font-medium text-content-primary">{ck.totalCount}</span> {t('test_runner_quality_min', { min: MIN_TOTAL })}
+                          </span>
+                        </div>
+                        
+                        {/* Framework Rankings */}
+                        {riemannRank.length > 0 && (
+                          <div>
+                            <div className="text-content-secondary mb-0.5">{t('test_runner_fw_riemann')} — {t('test_runner_quality_ranking')}:</div>
+                            <div className="flex flex-wrap gap-1 pl-2">
+                              {riemannRank.map((d, i) => (
+                                <span key={d.dim} className={`px-1.5 py-0.5 rounded border ${
+                                  i === 0
+                                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 font-medium'
+                                    : d.count < MIN_SIGNAL
+                                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                                      : 'bg-surface-secondary text-content-secondary border-border-secondary'
+                                }`}>
+                                  {i === 0 && '① '}{formatDim(d.dim)} ({d.count})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {big5Rank.length > 0 && (
+                          <div>
+                            <div className="text-content-secondary mb-0.5">{t('test_runner_fw_big5')} — {t('test_runner_quality_ranking')}:</div>
+                            <div className="flex flex-wrap gap-1 pl-2">
+                              {big5Rank.map((d, i) => (
+                                <span key={d.dim} className={`px-1.5 py-0.5 rounded border ${
+                                  i === 0
+                                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 font-medium'
+                                    : d.count < MIN_SIGNAL
+                                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                                      : 'bg-surface-secondary text-content-secondary border-border-secondary'
+                                }`}>
+                                  {i === 0 && '① '}{formatDim(d.dim)} ({d.count})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {sdRank.length > 0 && (
+                          <div>
+                            <div className="text-content-secondary mb-0.5">{t('test_runner_fw_sd')} — {t('test_runner_quality_ranking')}:</div>
+                            <div className="flex flex-wrap gap-1 pl-2">
+                              {sdRank.map((d, i) => (
+                                <span key={d.dim} className={`px-1.5 py-0.5 rounded border ${
+                                  i === 0
+                                    ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30 font-medium'
+                                    : d.count < MIN_SIGNAL
+                                      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                                      : 'bg-surface-secondary text-content-secondary border-border-secondary'
+                                }`}>
+                                  {i === 0 && '① '}{formatDim(d.dim)} ({d.count})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Weak Signals Warning */}
+                        {weakSignals.length > 0 && (
+                          <div className="flex items-start gap-2 p-1.5 bg-amber-500/10 rounded border border-amber-500/20">
+                            <span className="text-amber-600 dark:text-amber-400 shrink-0">⚠</span>
+                            <span className="text-content-secondary">
+                              {t('test_runner_quality_weak')}: {weakSignals.map(d => `${formatDim(d.dim)} (${d.count})`).join(', ')}
+                            </span>
+                          </div>
+                        )}
+                        
+                      </div>
+                    </details>
+                  </div>
+                );
+              })()}
               
               {/* Stress-Schlüsselwörter */}
               <div className="p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
