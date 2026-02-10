@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import * as userService from '../services/userService';
 import { XIcon } from './icons/XIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
@@ -13,6 +15,7 @@ interface DeleteAccountModalProps {
 
 const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose, onDeleteSuccess }) => {
     const { t } = useLocalization();
+    useModalOpen(isOpen);
     const [confirmationText, setConfirmationText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -38,9 +41,10 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
         }
     };
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             aria-modal="true" 
             role="dialog"
             onClick={onClose}
@@ -90,7 +94,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                     </Button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

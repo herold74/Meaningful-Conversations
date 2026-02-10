@@ -283,6 +283,11 @@ The Newsletter panel allows sending bulk emails to users.
 
 ## 9. Server Administration
 
+### Process Management (PM2)
+The backend now uses **PM2** in Cluster Mode (2 instances) for improved performance and stability.
+- Logs may be prefixed with instance IDs (e.g., `[0]`, `[1]`).
+- Automatic restarts are handled if memory usage exceeds 700MB.
+
 ### Deployment Commands
 
 **SSH to Server:**

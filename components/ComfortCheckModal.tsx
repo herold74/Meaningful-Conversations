@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import * as api from '../services/api';
 import Button from './shared/Button';
 
@@ -19,6 +21,7 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   encryptionKey
 }) => {
   const { t, language } = useLocalization();
+  useModalOpen();
   const [comfortScore, setComfortScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,8 +82,8 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn">
         <h3 className="text-xl font-bold mb-4 text-content-primary">
           🧪 {t('comfort_check_title') || 'Session Reflection'}
@@ -165,7 +168,8 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
           )}
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

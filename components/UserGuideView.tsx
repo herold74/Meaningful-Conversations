@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { WarningIcon } from './icons/WarningIcon';
@@ -48,11 +49,154 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 ## Kapitel 2: Die Coaching-Sitzung
 
 ### 2.1 Einen Coach auswählen
-Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches.
-- Lesen Sie ihre Beschreibungen und Stile, um denjenigen zu finden, der am besten zu Ihren aktuellen Bedürfnissen passt.
-- Einige Coaches sind nur für registrierte oder Premium-Benutzer verfügbar.
-- **Besondere Features:** Coaches wie Rob und Kenji (gekennzeichnet mit einem Glocken-Symbol 🔔) bieten geführte Meditationsübungen während der Sitzung an.
-- **Wenn Sie auf eine Coach-Karte klicken**, beginnt Ihre Sitzung sofort.
+Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
+
+**Ihr Guide:**
+- **Nobody** -- Kein Coach, sondern ein effizienter Manager, der Ihnen hilft, eigene Lösungen strukturiert zu finden
+
+**Ihre Coaches:**
+- **Max** -- Motivierender Coach, der Ihnen hilft, größer zu denken und Ihr Potenzial freizusetzen
+- **Ava** -- Strategische Beraterin für Entscheidungsfindung und Prioritätenmanagement
+- **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
+- **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
+- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Client)
+- **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Client)
+
+Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Client-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
+
+**Klicken Sie auf einen Namen, um mehr zu erfahren:**
+
+<details>
+<summary>Nobody -- Effizient, Anpassungsfähig, Lösungsorientiert</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Nobody ist kein typischer Coach, sondern agiert wie ein effizienter Manager. Er nutzt den GPS-Ansatz (Goal-Problem-Solution), um Ihnen zu helfen, Ihre eigenen Lösungen strukturiert zu finden -- mit konkreten Tipps, wenn Sie sie brauchen.
+
+**Ideal für:**
+- Schnelle, zielgerichtete Problemlösung
+- Wenn Sie keine tiefgehende emotionale Exploration brauchen
+- Zeiteffiziente Sitzungen mit klarem Ergebnis
+- Konkrete Entscheidungen und nächste Schritte
+
+**Beispiel-Situationen:** "Ich habe ein konkretes Problem und brauche eine Lösung." / "Ich möchte in 10 Minuten einen klaren Plan haben." / "Ich brauche jemanden, der mich effizient durch eine Entscheidung führt."
+
+**Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Max -- Motivierend, Neugierig, Reflektierend</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Max hilft Ihnen, größer zu denken, indem er die richtigen Fragen stellt, um Ihr Potenzial freizusetzen.
+
+**Ideal für:**
+- Karriereziele und berufliche Weiterentwicklung
+- Persönliches Wachstum und Selbstvertrauen
+- Wenn Sie Motivation und einen frischen Blickwinkel brauchen
+- Herausforderungen annehmen und Grenzen erweitern
+
+**Beispiel-Situationen:** "Ich möchte mich beruflich verändern, weiß aber nicht wohin." / "Ich fühle mich festgefahren und brauche neue Impulse." / "Ich möchte ein Projekt starten, habe aber Zweifel."
+
+**Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Ava -- Strategisch, Langfristig, Analytisch</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Ava spezialisiert sich auf strategisches Denken und hilft Ihnen, das große Ganze zu sehen und Prioritäten klar zu ordnen.
+
+**Ideal für:**
+- Geschäftsentscheidungen und Unternehmensplanung
+- Priorisierung bei zu vielen Optionen
+- Langfristige Lebens- und Karriereplanung
+- Komplexe Entscheidungen mit mehreren Einflussfaktoren
+
+**Beispiel-Situationen:** "Ich muss eine schwierige Geschäftsentscheidung treffen." / "Ich habe zu viele Projekte und weiß nicht, was Priorität hat." / "Ich möchte meine nächsten 5 Jahre strategisch planen."
+
+**Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Kenji -- Besonnen, Philosophisch, Weise (Premium) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Kenji basiert auf der stoischen Philosophie und hilft Ihnen, Widerstandsfähigkeit aufzubauen, indem Sie sich auf das konzentrieren, was Sie kontrollieren können.
+
+**Ideal für:**
+- Umgang mit Stress, Unsicherheit und Veränderung
+- Perspektivwechsel bei schwierigen Situationen
+- Aufbau innerer Ruhe und Gelassenheit
+- Philosophische Reflexion über Lebensfragen
+
+**Besonderes Feature:** Kenji bietet **geführte Meditationsübungen** an (🔔). Fragen Sie ihn einfach nach einer Meditation -- er wird Sie durch eine stoisch inspirierte Übung leiten.
+
+**Beispiel-Situationen:** "Ich mache mir Sorgen über Dinge, die ich nicht kontrollieren kann." / "Ich brauche innere Ruhe in einer stressigen Phase." / "Ich möchte eine Meditation machen."
+
+**Zugang:** Premium-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Chloe -- Reflektierend, Strukturiert, Evidenzbasiert (Premium) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Chloe nutzt strukturierte Reflexionsmethoden, um Ihnen zu helfen, hinderliche Gedankenmuster zu erkennen und neue Verhaltensstrategien zu entwickeln.
+
+**Ideal für:**
+- Erkennen und Hinterfragen negativer Gedankenmuster
+- Entwicklung neuer Verhaltensstrategien
+- Strukturierte Selbstreflexion mit klarem Rahmen
+- Emotionale Herausforderungen systematisch angehen
+
+**Besonderes Feature:** Chloe bietet **geführte Meditationsübungen** an (🔔), die speziell auf achtsame Selbstreflexion ausgerichtet sind.
+
+**Beispiel-Situationen:** "Ich denke immer das Schlimmste und möchte das ändern." / "Ich möchte verstehen, warum ich in bestimmten Situationen immer gleich reagiere." / "Ich brauche einen strukturierten Ansatz für meine Herausforderung."
+
+**Zugang:** Premium-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Rob -- Mentale Fitness, Empathisch, Achtsam (Client) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Rob hilft Ihnen, mentale Fitness und Resilienz aufzubauen, indem Sie selbstsabotierende Muster erkennen und überwinden.
+
+**Ideal für:**
+- Selbstsabotage-Muster erkennen und durchbrechen
+- Mentale Stärke und emotionale Resilienz aufbauen
+- Achtsamkeit in den Alltag integrieren
+- Tiefgehende Reflexion über innere Blockaden
+
+**Besonderes Feature:** Rob bietet **geführte Meditationsübungen** an (🔔), die auf mentale Fitness und Achtsamkeit ausgerichtet sind.
+
+**Beispiel-Situationen:** "Ich sabotiere mich selbst und weiß nicht warum." / "Ich möchte mental stärker werden." / "Ich möchte eine Achtsamkeitsübung machen."
+
+**Zugang:** Client-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Victor -- Systemisch, Analytisch, Neutral (Client)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Victor ist inspiriert von Konzepten der Familientheorie und hilft Ihnen, Beziehungsmuster zu erkennen und differenziertere Reaktionen zu entwickeln.
+
+**Ideal für:**
+- Beziehungsdynamiken verstehen (Familie, Partner, Kollegen)
+- Emotionale Reaktivität in Beziehungen reduzieren
+- Eigene Muster in wiederkehrenden Konflikten erkennen
+- Differenzierung des Selbst -- ein klares "Ich" in Beziehungen entwickeln
+
+**Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Ich möchte verstehen, warum bestimmte Beziehungen mich so triggern." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
+
+**Zugang:** Client-Benutzer
+</div>
+</details>
 
 ### 2.2 Die Chat-Oberfläche
 - **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
@@ -97,11 +241,24 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Ziel ändern:** Sie können die Zielüberschrift für jeden Vorschlag ändern, auch um neue Abschnitte zu erstellen.
 - **Unterschiedsansicht:** Dieses Feld zeigt Ihnen die genauen Änderungen (rot für entfernt, grün für hinzugefügt), die auf Ihre Datei angewendet werden.
 - **Endgültige Kontextdatei:** **Klicken Sie auf "Anzeigen / Bearbeiten"**, um den vollständigen Text Ihrer neuen Lebenskontext-Datei zu sehen und manuelle Änderungen vorzunehmen.
+- **Transkript & Zusammenfassung herunterladen:**
+  - **Transkript herunterladen:** Speichert den vollständigen Chatverlauf mit Zeitstempeln als \`.txt\`-Datei.
+  - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
 - **Speichern & Fortfahren:**
   - **Kontext herunterladen (Backup):** **Dies ist für Gastbenutzer unerlässlich!** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern. Registrierte Benutzer können dies als Backup verwenden.
   - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
   - **Coach wechseln:** Speichert die Änderungen und bringt Sie zurück zum Coach-Auswahlbildschirm.
   - **(Nur für registrierte Benutzer) "Textänderungen nicht speichern...":** Wenn Sie dieses Kästchen ankreuzen, wird Ihr Gamification-Fortschritt gespeichert, aber die Textänderungen an Ihrem Lebenskontext werden verworfen.
+
+### 3.3 Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
+
+Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 7), erscheinen nach der Sitzung zwei zusätzliche Schritte:
+
+- **Authentizitäts-Check (Comfort Check):** Sie werden gefragt, wie authentisch Sie sich während der Sitzung verhalten haben (Skala 1-5). Nur Sitzungen mit einer Bewertung von 3 oder höher werden für die Profilverfeinerung verwendet. Dies stellt sicher, dass Ihr Profil nur auf Basis authentischer Interaktionen angepasst wird.
+- **Profilverfeinerung:** Ab der **zweiten authentischen Sitzung** erscheint ein Vorschlag zur Anpassung Ihres Persönlichkeitsprofils. Sie sehen:
+  - Eine Analyse der Schlüsselwörter, die zu den Vorschlägen geführt haben
+  - Aktuelle vs. vorgeschlagene Werte für Ihre Persönlichkeitsdimensionen
+  - Sie können die Vorschläge **annehmen** oder **ablehnen** -- Sie behalten stets die volle Kontrolle
 
 ---
 
@@ -132,16 +289,33 @@ Oben auf dem Bildschirm sehen Sie:
 | **Registriert** | Auf dem Server, an Ihr Konto gebunden. | **Ja**, über alle Sitzungen und Geräte hinweg. |
 | **Gast** | In der \`.md\`-Datei in einem versteckten Kommentar. | **Nein**, nur wenn Sie dieselbe Datei wiederverwenden. |
 
+### 4.4 Darstellung & Farbschema
+
+In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung:
+
+- **Hell-/Dunkelmodus (Mond-/Sonnen-Symbol):** Schaltet zwischen hellem und dunklem Erscheinungsbild um. Standardmäßig wechselt die App automatisch basierend auf der Uhrzeit: **Dunkelmodus** von 18:00 bis 6:00 Uhr, **Hellmodus** von 6:00 bis 18:00 Uhr. Ein manuelles Umschalten deaktiviert den automatischen Wechsel.
+- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Winter. Die App wählt automatisch das passende Schema zur aktuellen Jahreszeit, Sie können es aber jederzeit manuell ändern.
+
 ---
 
 ## Kapitel 5: Datenschutz & Sicherheit für registrierte Benutzer
 
-Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselung (E2EE)** für Ihre Lebenskontext-Datei.
+Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselung (E2EE)** für Ihre Lebenskontext-Datei und Ihr Persönlichkeitsprofil.
 
 - Ihr Passwort generiert einen einzigartigen Verschlüsselungsschlüssel **auf Ihrem Gerät**.
 - Dieser Schlüssel wird **niemals** an unsere Server gesendet.
 - Nur die verschlüsselte, unleserliche Version Ihrer Daten wird gespeichert.
 - **Niemand außer Ihnen kann Ihre Daten lesen.**
+
+### 5.1 Kontoverwaltung
+
+Über das Menü (☰) erreichen Sie die **Kontoverwaltung** mit folgenden Optionen:
+
+- **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
+- **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
+- **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Sitzungsbewertungen, eingelöste Codes und Nutzungsstatistiken.
+- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Client).
+- **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
 ---
 
@@ -195,9 +369,17 @@ Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönli
 
 ### 7.2 Die Persönlichkeitstests
 
-Basierend auf Ihren Antworten zu zwei Einstiegsfragen wird automatisch eines von zwei im Coaching bewährten Verfahren für Sie ausgewählt:
+Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet einen anderen Aspekt Ihrer Persönlichkeit:
 
-**OCEAN-Test:**
+**Spiral Dynamics -- "Was Sie antreibt" (Empfohlen)**
+Spiral Dynamics erfasst Ihre Wertesysteme und inneren Antriebskräfte auf acht Ebenen:
+- Zwei Perspektiven: **Ich-orientiert** (Autonomie & Selbstverwirklichung) und **Wir-orientiert** (Gemeinschaft & Zugehörigkeit)
+- 8 Ebenen: Sicherheit, Zugehörigkeit, Macht, Ordnung, Leistung, Gemeinschaft, Integration, Ganzheitlichkeit
+- Ergebnis: Balkendiagramm mit Ihren Ausprägungen (1-5) pro Ebene
+- Schnell auszufüllen (ca. 5 Minuten)
+- Ideal als erster Test für ein breites Verständnis Ihrer Motivation
+
+**OCEAN-Test (Big Five):**
 OCEAN ist ein Akronym für die fünf wissenschaftlich fundierten Persönlichkeitsdimensionen:
 - **O**ffenheit (Openness) - Neugier und Kreativität
 - **C**onscientiousness (Gewissenhaftigkeit) - Ordnung und Zielstrebigkeit
@@ -207,13 +389,15 @@ OCEAN ist ein Akronym für die fünf wissenschaftlich fundierten Persönlichkeit
 
 Das OCEAN-Modell ist das weltweit am besten erforschte Persönlichkeitsmodell.
 - Schneller auszufüllen (ca. 5 Minuten)
-- Ideal für einen ersten Überblick
+- Ideal für einen ersten Überblick über Ihre Persönlichkeitsstruktur
 
 **Riemann-Thomann-Test:**
 - Erfasst Ihre Grundstrebungen: Nähe, Distanz, Dauer und Wechsel
 - Unterscheidet zwischen beruflichem, privatem Kontext und Selbstbild
 - Zeigt Ihr Stress-Reaktionsmuster
 - Umfassender und detaillierter (ca. 10 Minuten)
+
+**Hinweis:** Sie können nach dem ersten Test jederzeit weitere Tests absolvieren, um Ihr Profil mit zusätzlichen Perspektiven zu ergänzen.
 
 ### 7.3 Die Persönlichkeits-Signatur
 
@@ -317,11 +501,154 @@ If you are a registered user returning with a saved context, you will see the **
 ## Chapter 2: The Coaching Session
 
 ### 2.1 Choosing Your Coach
-On the **Select a Coach** screen, you'll see a list of available coaches.
-- Read their descriptions and styles to find one that best fits your current needs.
-- Some coaches are only available to registered or premium users.
-- **Special Features:** Coaches like Rob and Kenji (marked with a bell icon 🔔) offer guided meditation exercises during the session.
-- **Clicking on a coach card** will start your session immediately.
+On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
+
+**Your Guide:**
+- **Nobody** -- Not a coach -- an efficient manager who helps you find your own solutions in a structured way
+
+**Your Coaches:**
+- **Max** -- Motivational coach who helps you think bigger and unlock your potential
+- **Ava** -- Strategic advisor for decision-making and priority management
+- **Kenji** -- Stoic philosopher for resilience and inner strength (Premium)
+- **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
+- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client)
+- **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
+
+Some coaches are marked with a lock icon and require a premium or client subscription. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
+
+**Click on a name to learn more:**
+
+<details>
+<summary>Nobody -- Efficient, Adaptive, Solution-Focused</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Nobody is not a typical coach but acts like an efficient manager. He uses the GPS approach (Goal-Problem-Solution) to help you find your own solutions in a structured way -- with concrete tips when you need them.
+
+**Ideal for:**
+- Quick, goal-oriented problem-solving
+- When you don't need deep emotional exploration
+- Time-efficient sessions with clear outcomes
+- Concrete decisions and next steps
+
+**Example Situations:** "I have a specific problem and need a solution." / "I want a clear plan in 10 minutes." / "I need someone to efficiently guide me through a decision."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Max -- Motivational, Inquisitive, Reflective</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Max helps you think bigger by asking the right questions to unlock your potential.
+
+**Ideal for:**
+- Career goals and professional development
+- Personal growth and building confidence
+- When you need motivation and a fresh perspective
+- Embracing challenges and expanding your boundaries
+
+**Example Situations:** "I want to change careers but don't know where to go." / "I feel stuck and need new impulses." / "I want to start a project but have doubts."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Ava -- Strategic, Long-term, Analytical</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Ava specializes in strategic thinking and helps you see the bigger picture and clearly organize your priorities.
+
+**Ideal for:**
+- Business decisions and organizational planning
+- Prioritizing when facing too many options
+- Long-term life and career planning
+- Complex decisions with multiple influencing factors
+
+**Example Situations:** "I need to make a difficult business decision." / "I have too many projects and don't know what to prioritize." / "I want to strategically plan my next 5 years."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Kenji -- Composed, Philosophical, Wise (Premium) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Kenji is grounded in Stoic philosophy and helps you build resilience by focusing on what you can control.
+
+**Ideal for:**
+- Dealing with stress, uncertainty, and change
+- Shifting perspective on difficult situations
+- Building inner calm and equanimity
+- Philosophical reflection on life questions
+
+**Special Feature:** Kenji offers **guided meditation exercises** (🔔). Simply ask him for a meditation -- he will guide you through a Stoic-inspired practice.
+
+**Example Situations:** "I worry about things I can't control." / "I need inner calm during a stressful period." / "I'd like to do a meditation."
+
+**Access:** Premium users
+</div>
+</details>
+
+<details>
+<summary>Chloe -- Reflective, Structured, Evidence-Based (Premium) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Chloe uses structured reflection techniques to help you recognize unhelpful thought patterns and develop new behavioral strategies.
+
+**Ideal for:**
+- Recognizing and challenging negative thought patterns
+- Developing new behavioral strategies
+- Structured self-reflection with a clear framework
+- Tackling emotional challenges systematically
+
+**Special Feature:** Chloe offers **guided meditation exercises** (🔔), specifically designed for mindful self-reflection.
+
+**Example Situations:** "I always assume the worst and want to change that." / "I want to understand why I always react the same way in certain situations." / "I need a structured approach for my challenge."
+
+**Access:** Premium users
+</div>
+</details>
+
+<details>
+<summary>Rob -- Mental Fitness, Empathetic, Mindful (Client) 🔔</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Rob helps you build mental fitness and resilience by recognizing and overcoming self-sabotaging patterns.
+
+**Ideal for:**
+- Recognizing and breaking self-sabotage patterns
+- Building mental strength and emotional resilience
+- Integrating mindfulness into daily life
+- Deep reflection on inner blockages
+
+**Special Feature:** Rob offers **guided meditation exercises** (🔔), focused on mental fitness and mindfulness.
+
+**Example Situations:** "I sabotage myself and don't know why." / "I want to become mentally stronger." / "I'd like to do a mindfulness exercise."
+
+**Access:** Client users
+</div>
+</details>
+
+<details>
+<summary>Victor -- Systemic, Analytical, Neutral (Client)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Victor is inspired by family systems theory concepts and helps you recognize relationship patterns and develop more differentiated responses.
+
+**Ideal for:**
+- Understanding relationship dynamics (family, partner, colleagues)
+- Reducing emotional reactivity in relationships
+- Recognizing your patterns in recurring conflicts
+- Differentiation of self -- developing a clear "I" within relationships
+
+**Example Situations:** "I always end up in the same conflicts at family gatherings." / "I want to understand why certain relationships trigger me so much." / "I want to learn to stay calmer in conflicts."
+
+**Access:** Client users
+</div>
+</details>
 
 ### 2.2 The Chat Interface
 - **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
@@ -366,11 +693,24 @@ This is the most important screen for capturing your insights.
   - **Change Target:** You can change the target headline for any suggestion, including creating new sections.
 - **Difference View:** This box shows you the exact changes (red for removed, green for added) that will be applied to your file.
 - **Final Context:** **Click "Show / Edit"** to see the full text of your new Life Context file and make any manual edits.
+- **Download Transcript & Summary:**
+  - **Download Transcript:** Saves the full chat history with timestamps as a \`.txt\` file.
+  - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
 - **Saving & Continuing:**
   - **Download Context (Backup):** **This is essential for guest users!** Click this to save your updated \`.md\` file. Registered users can use this as a backup.
   - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
   - **Switch Coach:** Saves the changes and takes you back to the coach selection screen.
   - **(Registered Users Only) "Don't save text changes...":** If you check this box, your gamification progress will be saved, but the text changes to your Life Context will be discarded.
+
+### 3.3 Authenticity Check & Profile Refinement (DPFL Mode)
+
+If you have the **DPFL coaching mode** activated (see Chapter 7), two additional steps appear after the session:
+
+- **Authenticity Check (Comfort Check):** You'll be asked how authentic you felt during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
+- **Profile Refinement:** Starting from the **second authentic session**, you'll see a suggestion to adjust your personality profile. You'll see:
+  - An analysis of the keywords that led to the suggestions
+  - Current vs. suggested values for your personality dimensions
+  - You can **accept** or **reject** the suggestions -- you always keep full control
 
 ---
 
@@ -401,16 +741,33 @@ At the top of the screen, you will see:
 | **Registered** | On the server, tied to your account. | **Yes**, across all sessions and devices. |
 | **Guest** | In the \`.md\` file in a hidden comment. | **No**, only if you reuse the same file. |
 
+### 4.4 Appearance & Color Scheme
+
+In the Gamification Bar, you'll find two icons to customize the appearance:
+
+- **Light/Dark Mode (Moon/Sun Icon):** Switches between light and dark appearance. By default, the app switches automatically based on the time of day: **Dark mode** from 6:00 PM to 6:00 AM, **Light mode** from 6:00 AM to 6:00 PM. Manually toggling disables the automatic switching.
+- **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Winter. The app automatically selects the matching scheme for the current season, but you can change it manually at any time.
+
 ---
 
 ## Chapter 5: Privacy & Security for Registered Users
 
-Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file.
+Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file and your Personality Profile.
 
 - Your password generates a unique encryption key **on your device**.
 - This key is **never** sent to our servers.
 - Only the encrypted, unreadable version of your data is stored.
 - **No one but you can read your data.**
+
+### 5.1 Account Management
+
+Via the menu (☰), you can access **Account Management** with the following options:
+
+- **Edit Profile:** Change your name and email address.
+- **Change Password:** Update your password. **Note:** Since your password generates the encryption key, your encrypted data (Life Context, Personality Profile) is automatically re-encrypted with the new key.
+- **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, session ratings, redeemed codes, and usage statistics.
+- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
+- **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
 
 ---
 
@@ -464,9 +821,17 @@ The Personality Profile is an encrypted document that captures your personality 
 
 ### 7.2 The Personality Tests
 
-Based on your answers to two initial questions, one of two methods proven in coaching is automatically selected for you:
+You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality:
 
-**OCEAN Test:**
+**Spiral Dynamics -- "What Drives You" (Recommended)**
+Spiral Dynamics captures your value systems and inner driving forces across eight levels:
+- Two perspectives: **Self-oriented** (Autonomy & Self-actualization) and **Community-oriented** (Belonging & Connection)
+- 8 levels: Survival, Belonging, Power, Order, Achievement, Community, Integration, Holism
+- Result: Bar chart showing your scores (1-5) per level
+- Quick to complete (approx. 5 minutes)
+- Ideal as a first test for a broad understanding of your motivations
+
+**OCEAN Test (Big Five):**
 OCEAN is an acronym for the five scientifically validated personality dimensions:
 - **O**penness - Curiosity and creativity
 - **C**onscientiousness - Organization and goal-orientation
@@ -476,13 +841,15 @@ OCEAN is an acronym for the five scientifically validated personality dimensions
 
 The OCEAN model is the most extensively researched personality model worldwide.
 - Quicker to complete (approx. 5 minutes)
-- Ideal for an initial overview
+- Ideal for an initial overview of your personality structure
 
 **Riemann-Thomann Test:**
 - Captures your basic drives: Proximity, Distance, Permanence, and Change
 - Distinguishes between professional, private context, and self-image
 - Shows your stress reaction pattern
 - More comprehensive and detailed (approx. 10 minutes)
+
+**Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 
 ### 7.3 The Personality Signature
 
@@ -552,19 +919,22 @@ const UserGuideView: React.FC<InfoViewProps> = () => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-content-primary uppercase">{t('user_guide_title')}</h1>
             </div>
             <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                         h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
                         h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose" {...props} />,
                         table: ({node, ...props}) => <table className="w-full my-4 text-sm" {...props} />,
                         th: ({node, ...props}) => <th className="border border-border-secondary p-2 bg-background-tertiary" {...props} />,
                         td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
+                        details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden" {...props} />,
+                        summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none" {...props} />,
                     }}
                 >
                     {markdownContent}

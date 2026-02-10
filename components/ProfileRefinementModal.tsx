@@ -1,5 +1,7 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { RefinementPreviewResult } from '../services/api';
 import { XIcon } from './icons/XIcon';
 import { CheckIcon } from './icons/CheckIcon';
@@ -36,6 +38,7 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
   isTestMode
 }) => {
   const { t } = useLocalization();
+  useModalOpen(isOpen);
   
   if (!isOpen) return null;
   
@@ -85,19 +88,20 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
     dim => dim?.foundKeywords && (dim.foundKeywords.high?.length > 0 || dim.foundKeywords.low?.length > 0)
   );
   
-  return (
+  return createPortal(
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+      style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       onClick={onReject}
       role="dialog"
       aria-modal="true"
     >
       <div 
-        className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
+        className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[calc(100dvh-2rem)] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-gray-900 flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        {/* Header (fixed) */}
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">
             {t('refinement_modal_title') || 'Profil-Anpassung'}
           </h2>
@@ -109,8 +113,8 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
           </button>
         </div>
         
-        {/* Content */}
-        <div className="p-6 space-y-6">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto overscroll-contain min-h-0 p-6 space-y-6">
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -321,8 +325,8 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
           )}
         </div>
         
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-white dark:bg-gray-900 flex justify-end gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+        {/* Footer (fixed) */}
+        <div className="flex justify-end gap-4 p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           <button 
             onClick={onReject}
             className="px-6 py-2 text-base font-bold text-gray-600 dark:text-gray-400 bg-transparent border border-gray-400 dark:border-gray-700 uppercase hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg shadow-md"
@@ -340,7 +344,8 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -241,6 +241,15 @@ html[data-theme="autumn"] {
   }
 }
 
+/* When a modal portal is open, completely hide the GamificationBar.
+   On iOS WebKit, sticky elements with backdrop-blur create compositing layers
+   that render above position:fixed portal elements regardless of z-index.
+   Hiding them entirely is the only reliable cross-platform solution. */
+html[data-modal-open] [data-gamification-bar],
+html[data-modal-open] [data-gamification-bg] {
+  display: none !important;
+}
+
 /* Custom scrollbar styles for WebKit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width: 10px;
@@ -259,7 +268,7 @@ html[data-theme="autumn"] {
 }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.animate-fadeIn { animation: fadeIn 0.5s ease-in-out forwards; }
+.animate-fadeIn { animation: fadeIn 0.5s ease-in-out both; }
 @keyframes slideInFromRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
 .animate-slideInFromRight { animation: slideInFromRight 0.3s ease-out forwards; }
 @keyframes slideInFromLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }

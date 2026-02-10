@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { User, NavView } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { LogInIcon } from './icons/LogInIcon';
 import { UserIcon } from './icons/UserIcon';
 import { LogOutIcon } from './icons/LogOutIcon';
@@ -27,6 +29,7 @@ interface BurgerMenuProps {
 
 const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver }) => {
     const { t } = useLocalization();
+    useModalOpen(isOpen);
     
     // iOS Safe Area calculation (same as GamificationBar)
     const isIOS = (window as any).Capacitor?.getPlatform?.() === 'ios';
@@ -70,9 +73,9 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
         onClose();
     }
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-40 flex justify-start"
+            className="fixed inset-0 z-[9998] flex justify-start"
             onClick={onClose}
             role="dialog"
             aria-modal="true"
@@ -151,7 +154,8 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

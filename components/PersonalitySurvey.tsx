@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import Button from './shared/Button';
 import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
@@ -1059,6 +1061,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   // State for overwrite warning modal (shows when repeating an already-completed test with DPFL refinements)
   const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
   const [pendingLensSelection, setPendingLensSelection] = useState<LensType | null>(null);
+  useModalOpen(showOverwriteWarning);
   
   // Initialize result with existing profile data or empty
   const [result, setResult] = useState<Partial<SurveyResult>>(() => {
@@ -1357,7 +1360,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const progressPercent = selectedLens ? Math.round(((step + 1) / totalSteps) * 100) : 0;
 
   return (
-    <div className="relative p-6 sm:p-10 bg-background-primary min-h-screen">
+    <div className="relative pt-4 px-6 pb-6 sm:pt-4 sm:px-10 sm:pb-10 bg-background-primary min-h-screen">
       {/* Back button - positioned in flow, not absolute, to avoid overlap */}
       {onCancel && (
         <div className="mb-4">
@@ -1387,9 +1390,10 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       {content}
       
       {/* Overwrite Warning Modal - shows when repeating an already-completed test with DPFL refinements */}
-      {showOverwriteWarning && (
+      {showOverwriteWarning && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
           aria-modal="true"
           role="dialog"
           onClick={() => {
@@ -1398,7 +1402,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
           }}
         >
           <div 
-            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-red-400 dark:border-red-500/50 shadow-xl rounded-lg mx-4"
+            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-red-400 dark:border-red-500/50 shadow-xl rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -1462,7 +1466,8 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
