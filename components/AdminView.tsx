@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { useModalOpen } from '../utils/modalUtils';
 import * as userService from '../services/userService';
 import { User, UpgradeCode, Ticket, Feedback } from '../types';
 import { apiFetch, loadPersonalityProfile } from '../services/api';
@@ -61,6 +63,7 @@ const ResetPasswordSuccessModal: React.FC<{
     onClose: () => void;
 }> = ({ data, onClose }) => {
     const { t } = useLocalization();
+    useModalOpen();
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = () => {
@@ -72,9 +75,10 @@ const ResetPasswordSuccessModal: React.FC<{
 
     const description = t('admin_reset_success_desc', { email: data.email });
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             onClick={onClose}
             role="dialog"
             aria-modal="true"
@@ -110,7 +114,8 @@ const ResetPasswordSuccessModal: React.FC<{
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -120,10 +125,12 @@ const ResetConfirmationModal: React.FC<{
     onCancel: () => void;
 }> = ({ user, onConfirm, onCancel }) => {
     const { t } = useLocalization();
+    useModalOpen();
 
-    return (
+    return createPortal(
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             onClick={onCancel}
             role="dialog"
             aria-modal="true"
@@ -156,7 +163,8 @@ const ResetConfirmationModal: React.FC<{
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -257,6 +265,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [pendingScenario, setPendingScenario] = useState<TestScenario | null>(null);
     const [showDynamicTestRunner, setShowDynamicTestRunner] = useState(false);
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
+    useModalOpen(showMismatchWarning);
 
 
     const loadData = useCallback(async () => {
@@ -1373,9 +1382,10 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                 </div>
                 
                 {/* Profile Mismatch Warning Modal */}
-                {showMismatchWarning && (
+                {showMismatchWarning && createPortal(
                     <div 
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+                        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
                         onClick={() => setShowMismatchWarning(false)}
                         role="dialog"
                         aria-modal="true"
@@ -1420,7 +1430,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
                 
                 {/* Dynamic Test Runner Modal */}
@@ -1452,7 +1463,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
              <div className="text-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('admin_title')}</h1>
             </div>

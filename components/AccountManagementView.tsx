@@ -59,7 +59,7 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
     ];
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-md">
+        <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-md">
             <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-content-primary">{t('account_management_title')}</h1>
                 <p className="text-sm text-content-subtle mt-2">{currentUser.email}</p>

@@ -644,6 +644,104 @@ function generateHtmlExport(exportData, language = 'de') {
                     </p>
                 ` : ''}
             </div>` : ''}
+
+            <!-- Personality Profile -->
+            ${exportData.personalityProfile ? `
+            <div class="section">
+                <h2>🧠 ${isGerman ? 'Persönlichkeitsprofil' : 'Personality Profile'}</h2>
+                <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <div class="info-label">${isGerman ? 'Testtyp' : 'Test Type'}</div>
+                        <div class="info-value">${exportData.personalityProfile.testType}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">${isGerman ? 'Abgeschlossene Perspektiven' : 'Completed Lenses'}</div>
+                        <div class="info-value">${exportData.personalityProfile.completedLenses}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">${isGerman ? 'Anpassungsmodus' : 'Adaptation Mode'}</div>
+                        <div class="info-value">${exportData.personalityProfile.adaptationMode}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">${isGerman ? 'Sitzungsanzahl' : 'Session Count'}</div>
+                        <div class="info-value">${exportData.personalityProfile.sessionCount}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">${isGerman ? 'Erstellt' : 'Created'}</div>
+                        <div class="info-value">${formatDate(exportData.personalityProfile.createdAt)}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">${isGerman ? 'Aktualisiert' : 'Updated'}</div>
+                        <div class="info-value">${formatDate(exportData.personalityProfile.updatedAt)}</div>
+                    </div>
+                </div>
+                <div class="encrypted" style="padding: 15px; border-radius: 8px; margin-top: 10px;">
+                    <strong>🔐 ${isGerman ? 'Verschlüsselte Profildaten' : 'Encrypted Profile Data'}:</strong><br>
+                    <small>${exportData.personalityProfile.note}</small><br><br>
+                    <code style="word-break: break-all; font-size: 0.8em;">${exportData.personalityProfile.encryptedData ? exportData.personalityProfile.encryptedData.substring(0, 500) + (exportData.personalityProfile.encryptedData.length > 500 ? '...' : '') : 'N/A'}</code>
+                </div>
+            </div>` : ''}
+
+            <!-- Session Behavior Logs -->
+            ${exportData.sessionBehaviorLogs && exportData.sessionBehaviorLogs.length > 0 ? `
+            <div class="section">
+                <h2>📈 ${isGerman ? 'Sitzungsverhaltens-Protokolle' : 'Session Behavior Logs'} (${exportData.sessionBehaviorLogs.length})</h2>
+                <p style="margin-bottom: 15px;">${isGerman ? 'Anonymisierte Häufigkeitszähler aus Coaching-Sitzungen (keine Transkripte gespeichert).' : 'Anonymized frequency counters from coaching sessions (no transcripts stored).'}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>${isGerman ? 'Datum' : 'Date'}</th>
+                            <th>Riemann (D/W/N/Di)</th>
+                            <th>Big5 (O/C/E/A/N)</th>
+                            <th>${isGerman ? 'Komfort' : 'Comfort'}</th>
+                            <th>Opt-Out</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${exportData.sessionBehaviorLogs.slice(0, 50).map(log => `
+                            <tr>
+                                <td>${formatDate(log.createdAt)}</td>
+                                <td>${log.dauerFrequency}/${log.wechselFrequency}/${log.naeheFrequency}/${log.distanzFrequency}</td>
+                                <td>${log.opennessFrequency}/${log.conscientiousnessFrequency}/${log.extraversionFrequency}/${log.agreeablenessFrequency}/${log.neuroticismFrequency}</td>
+                                <td>${log.comfortScore != null ? log.comfortScore : '-'}</td>
+                                <td>${log.optedOut ? '✓' : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                ${exportData.sessionBehaviorLogs.length > 50 ? `
+                    <p style="margin-top: 15px; color: #666; font-style: italic;">
+                        ${isGerman ? `... und ${exportData.sessionBehaviorLogs.length - 50} weitere Einträge` : `... and ${exportData.sessionBehaviorLogs.length - 50} more entries`}
+                    </p>
+                ` : ''}
+            </div>` : ''}
+
+            <!-- User Events -->
+            ${exportData.userEvents && exportData.userEvents.length > 0 ? `
+            <div class="section">
+                <h2>📋 ${isGerman ? 'Benutzer-Ereignisse' : 'User Events'} (${exportData.userEvents.length})</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>${isGerman ? 'Datum' : 'Date'}</th>
+                            <th>${isGerman ? 'Ereignistyp' : 'Event Type'}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${exportData.userEvents.slice(0, 100).map(evt => `
+                            <tr>
+                                <td>${formatDate(evt.createdAt)}</td>
+                                <td>${evt.eventType}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                ${exportData.userEvents.length > 100 ? `
+                    <p style="margin-top: 15px; color: #666; font-style: italic;">
+                        ${isGerman ? `... und ${exportData.userEvents.length - 100} weitere Einträge` : `... and ${exportData.userEvents.length - 100} more entries`}
+                    </p>
+                ` : ''}
+            </div>` : ''}
         </div>
 
         <div class="footer">
@@ -716,6 +814,62 @@ const handleExport = async (req, res) => {
             },
         });
 
+        // Fetch personality profile (GDPR Art. 20 - complete data export)
+        const personalityProfile = await prisma.personalityProfile.findUnique({
+            where: { userId },
+            select: {
+                testType: true,
+                completedLenses: true,
+                adaptationMode: true,
+                sessionCount: true,
+                encryptedData: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
+        // Fetch session behavior logs
+        const sessionBehaviorLogs = await prisma.sessionBehaviorLog.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                sessionId: true,
+                dauerFrequency: true,
+                wechselFrequency: true,
+                naeheFrequency: true,
+                distanzFrequency: true,
+                opennessFrequency: true,
+                conscientiousnessFrequency: true,
+                extraversionFrequency: true,
+                agreeablenessFrequency: true,
+                neuroticismFrequency: true,
+                beigeFrequency: true,
+                purpleFrequency: true,
+                redFrequency: true,
+                blueFrequency: true,
+                orangeFrequency: true,
+                greenFrequency: true,
+                yellowFrequency: true,
+                turquoiseFrequency: true,
+                comfortScore: true,
+                optedOut: true,
+                createdAt: true,
+            },
+        });
+
+        // Fetch user events
+        const userEvents = await prisma.userEvent.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                eventType: true,
+                metadata: true,
+                createdAt: true,
+            },
+        });
+
         // Prepare export data
         const exportData = {
             exportDate: new Date().toISOString(),
@@ -760,6 +914,20 @@ const handleExport = async (req, res) => {
                 isUsed: c.isUsed,
             })),
             apiUsage: apiUsage,
+            personalityProfile: personalityProfile ? {
+                testType: personalityProfile.testType,
+                completedLenses: personalityProfile.completedLenses,
+                adaptationMode: personalityProfile.adaptationMode,
+                sessionCount: personalityProfile.sessionCount,
+                encryptedData: personalityProfile.encryptedData,
+                note: language === 'de'
+                    ? "Ihr Persönlichkeitsprofil ist Ende-zu-Ende-verschlüsselt. Nur Sie können es mit Ihrem Passwort entschlüsseln."
+                    : "Your personality profile is end-to-end encrypted. Only you can decrypt it with your password.",
+                createdAt: personalityProfile.createdAt,
+                updatedAt: personalityProfile.updatedAt,
+            } : null,
+            sessionBehaviorLogs: sessionBehaviorLogs,
+            userEvents: userEvents,
         };
 
         // Return data in requested format
@@ -818,9 +986,18 @@ router.put('/user/password', async (req, res) => {
     }
 });
 
-// DELETE /api/data/user - Delete user account
+// DELETE /api/data/user - Delete user account (GDPR Art. 17 - Recht auf Löschung)
 router.delete('/user', async (req, res) => {
     try {
+        // Delete non-cascaded user data first (no FK constraints on these tables)
+        await prisma.apiUsage.deleteMany({ where: { userId: req.userId } });
+        await prisma.userEvent.deleteMany({ where: { userId: req.userId } });
+        // Nullify UpgradeCode references (codes remain but are unlinked from deleted user)
+        await prisma.upgradeCode.updateMany({
+            where: { usedById: req.userId },
+            data: { usedById: null },
+        });
+        // Cascade deletes: Feedback, PersonalityProfile, SessionBehaviorLog
         await prisma.user.delete({ where: { id: req.userId } });
         res.status(204).send();
     } catch (error) {

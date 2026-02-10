@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { useModalOpen } from '../utils/modalUtils';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
 import { updateCoachingMode } from '../services/userService';
@@ -335,6 +337,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDpcWarning, setShowDpcWarning] = useState(false);
   const [pendingCoachingMode, setPendingCoachingMode] = useState<CoachingMode | null>(null);
+  useModalOpen(showDpcWarning || showDeleteWarning);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
@@ -578,7 +581,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
   if (error) {
     return (
-      <div className="py-10 animate-fadeIn max-w-4xl mx-auto">
+      <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
         <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold mb-4 text-content-primary">{t('profile_view_error_title') || 'Fehler'}</h2>
           <p className="text-status-danger-foreground mb-4">{error}</p>
@@ -592,7 +595,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
   if (!decryptedData || !profileMetadata) {
     return (
-      <div className="py-10 animate-fadeIn max-w-4xl mx-auto">
+      <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
         <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6 text-center">
           <h2 className="text-2xl font-bold mb-4 text-content-primary">
             {t('profile_view_no_profile_title') || 'Kein Profil vorhanden'}
@@ -634,12 +637,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       : 'border-green-500 text-green-700 dark:text-green-300';
 
   return (
-    <div className="py-10 animate-fadeIn max-w-4xl mx-auto">
+    <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
       <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
         {/* Compact Header - Option A: Integrated with Dropdown */}
         <div className="mb-6 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <h2 className="text-2xl font-bold text-content-primary">
+            <h2 className="text-2xl font-bold text-content-primary text-center sm:text-left">
               {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
             </h2>
             {/* Coaching Mode Dropdown */}
@@ -1060,15 +1063,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
       {/* Delete Profile Warning Modal */}
       {/* DPC/DPFL Activation Warning Modal */}
-      {showDpcWarning && (
+      {showDpcWarning && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn overflow-y-auto py-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
           aria-modal="true"
           role="dialog"
           onClick={cancelDpcActivation}
         >
           <div 
-            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-blue-400 dark:border-blue-500/50 shadow-xl rounded-lg mx-4 my-auto max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-blue-400 dark:border-blue-500/50 shadow-xl rounded-lg mx-4 my-auto max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -1177,12 +1181,14 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {showDeleteWarning && (
+      {showDeleteWarning && createPortal(
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
           aria-modal="true"
           role="dialog"
           onClick={() => !isDeleting && setShowDeleteWarning(false)}
@@ -1255,7 +1261,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Narrative Stories Modal */}

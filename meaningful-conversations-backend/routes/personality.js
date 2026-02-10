@@ -485,7 +485,7 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
       }];
       
       refinementResult = profileRefinement.calculateRiemannRefinement(
-        decryptedProfile,
+        decryptedProfile.riemann || decryptedProfile,
         mockSessionLogs,
         0.3 // Standard weight
       );
@@ -653,17 +653,21 @@ router.post('/test-refinement-mock', authMiddleware, async (req, res) => {
     // Use profileRefinement service to calculate suggestions
     const profileRefinementService = require('../services/profileRefinement');
     
-    const result = await profileRefinementService.calculateRefinementSuggestions(
-      mockSessions,
+    const result = profileRefinementService.calculateProfileRefinement(
       decryptedProfile,
-      profileType
+      profileType,
+      mockSessions
     );
     
     res.json({
       success: true,
       isPreviewOnly: true,
       isMockTest: true,
-      ...result
+      refinementResult: result,
+      profileType,
+      message: result.hasSuggestions 
+        ? 'Mock refinement suggestions calculated' 
+        : (result.reason || 'No significant changes detected')
     });
     
   } catch (error) {

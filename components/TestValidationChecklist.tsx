@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 
@@ -17,6 +19,7 @@ interface TestValidationChecklistProps {
 
 const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testType, onClose }) => {
   const { t } = useLocalization();
+  useModalOpen();
   
   const getDpcChecklist = (): ValidationItem[] => [
     { id: 'dpc_profile_loaded', label: t('validation_dpc_profile_loaded'), status: 'pending' },
@@ -60,14 +63,17 @@ const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testT
   const passCount = checklist.filter(item => item.status === 'pass').length;
   const failCount = checklist.filter(item => item.status === 'fail').length;
   
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-2xl w-full p-6 my-8 animate-fadeIn">
-        <h3 className="text-xl font-bold mb-4 text-content-primary flex items-center gap-2">
-          ✅ {t('validation_title')}
-          {testType === 'dpc' && ' - DPC'}
-          {testType === 'dpfl' && ' - DPFL'}
-        </h3>
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+      <div className="bg-background-primary dark:bg-background-secondary rounded-lg shadow-xl max-w-2xl w-full animate-fadeIn flex flex-col max-h-[calc(100dvh-env(safe-area-inset-top)-2rem)]">
+        <div className="px-6 pt-5 pb-3 border-b border-border-secondary shrink-0">
+          <h3 className="text-xl font-bold text-content-primary flex items-center gap-2">
+            ✅ {t('validation_title')}
+            {testType === 'dpc' && ' - DPC'}
+            {testType === 'dpfl' && ' - DPFL'}
+          </h3>
+        </div>
+        <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 min-h-0">
         
         <p className="text-sm text-content-secondary mb-6">
           {t('validation_description')}
@@ -142,28 +148,8 @@ const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testT
           />
         </div>
         
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => {
-              // Test validation complete
-              onClose();
-            }}
-            className="flex-1 px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium"
-          >
-            {t('validation_save_close')}
-          </button>
-          
-          <button
-            onClick={onClose}
-            className="px-4 py-3 bg-background-tertiary hover:bg-background-primary text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
-          >
-            {t('validation_close_without_save')}
-          </button>
-        </div>
-        
         {/* Help */}
-        <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-xs text-content-secondary">
             <strong className="text-blue-700 dark:text-blue-400">💡 {t('validation_tip')}:</strong>{' '}
             {testType === 'dpc' && t('validation_tip_dpc')}
@@ -171,8 +157,32 @@ const TestValidationChecklist: React.FC<TestValidationChecklistProps> = ({ testT
             {testType === 'standard' && t('validation_tip_standard')}
           </p>
         </div>
+        </div>
+
+        {/* Actions (fixed footer) */}
+        <div className="px-6 py-4 border-t border-border-secondary shrink-0">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => {
+                // Test validation complete
+                onClose();
+              }}
+              className="flex-1 px-4 py-3 bg-accent-primary hover:bg-accent-secondary text-white rounded-lg transition-colors font-medium"
+            >
+              {t('validation_save_close')}
+            </button>
+            
+            <button
+              onClick={onClose}
+              className="px-4 py-3 bg-background-tertiary hover:bg-background-primary text-content-primary rounded-lg transition-colors font-medium border border-border-secondary"
+            >
+              {t('validation_close_without_save')}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

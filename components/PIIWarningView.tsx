@@ -11,7 +11,7 @@ interface PIIWarningViewProps {
 const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) => {
   const { t } = useLocalization();
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-[80dvh] text-center animate-fadeIn">
       <div className="w-full max-w-2xl p-8 space-y-6 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30">
         <div className="flex flex-col items-center">
           <WarningIcon className="w-16 h-16 text-status-warning-foreground" />

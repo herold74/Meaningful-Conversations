@@ -4,612 +4,413 @@ This document outlines the complete user experience through the Meaningful Conve
 
 ---
 
-## 🎯 Overview
+## Overview
 
-Meaningful Conversations provides AI-powered coaching through multiple specialized AI coaches, each with unique perspectives. Users maintain a "Life Context" file that serves as the AI's memory across sessions.
+Meaningful Conversations provides AI-powered coaching through multiple specialized AI coaches, each with unique perspectives and methodologies. Users maintain a "Life Context" file that serves as the AI's memory across sessions. The app supports personality profiling, adaptive coaching, gamification, and full GDPR-compliant data management.
 
 ---
 
-## 📱 User Journey Flow
+## User Journey Flow
 
-### 1. **Landing Page** 
+### 1. Landing Page
 *First impression and authentication choice*
 
 **Key Elements:**
 - Welcome message and app description
 - Three clear options:
-  - 🔐 **Login** - For returning users
-  - ✨ **Register** - Create a new account
-  - 👤 **Continue as Guest** - Try without registration
+  - **Login** - For returning users
+  - **Register** - Create a new account
+  - **Continue as Guest** - Try without registration
+- Seasonal decorations (snowflakes in winter, blossoms in spring, butterflies in summer, leaves in autumn)
 
 **User Decision Point:**
-- **Guest**: Data stays local, manual file management
-- **Registered**: Cloud sync, automatic encryption, cross-device access
-
-**Screenshot Checklist:**
-- [ ] Full landing page view
-- [ ] Mobile responsive view
+- **Guest**: Data stays local in browser, manual file management required
+- **Registered**: Cloud sync with E2E encryption, cross-device access, personality profiling
 
 ---
 
-### 2. **Registration Flow** (For New Users)
+### 2. Registration Flow (New Users)
 *Creating an account with E2E encryption*
 
 **Steps:**
-1. Enter email and password
-2. Accept terms and privacy policy
-3. Receive verification email
-4. Click activation link
-5. Account activated - ready to use
+1. Enter first name, last name, email, and password
+2. Optional: Opt-in to newsletter
+3. Accept terms and privacy policy
+4. Receive verification email
+5. Click activation link
+6. Account activated - ready to use
 
 **Key Security Feature:**
-- Password is used to generate encryption key
-- **Important**: Lost password = lost data (by design)
-
-**Screenshot Checklist:**
-- [ ] Registration form
-- [ ] Email verification pending screen
-- [ ] Email verification success
+- Password generates a unique encryption key on the device
+- **Important**: Lost password = lost encrypted data (by design, for maximum privacy)
 
 ---
 
-### 3. **Login Flow** (For Returning Users)
+### 3. Login Flow (Returning Users)
 *Secure authentication*
 
 **Steps:**
 1. Enter email and password
 2. System authenticates and decrypts stored Life Context
-3. Redirected to session preparation
+3. Redirected to Welcome Back screen
 
 **Additional Features:**
-- Forgot password option
-- Password reset flow
-
-**Screenshot Checklist:**
-- [ ] Login screen
-- [ ] Forgot password screen
-- [ ] Password reset confirmation
+- "Remember Email" checkbox for convenience
+- Forgot password / password reset flow
 
 ---
 
-### 4. **Life Context Setup**
+### 4. Life Context Setup
 *The AI's memory foundation*
 
-**Two Paths:**
+**Three Paths:**
 
-#### Path A: Upload Existing File
-- User has a `.md` file from previous session
-- Drag & drop or click to upload
+#### Path A: Create with a Questionnaire
+- Guided fields: name (required), background, goals, challenges
+- Optional: Country / State for local support resources
+- Generates a structured Life Context file
+
+#### Path B: Create with an Interview
+- Conversation with Gloria, a friendly guide (not a coach)
+- She asks the questionnaire questions in a natural, conversational way
+- Automatically formats answers into a Life Context file
+
+#### Path C: Upload an Existing File
+- Drag & drop or click to upload a `.md` file
+- Used by guest users to continue from a previous session
 - Preview before starting
 
-#### Path B: Create New File
-**Option 1: Guided Interview**
-- Interactive questionnaire covering:
-  - Core profile (age, location, life stage)
-  - Life domains (relationships, career, health, etc.)
-  - Current challenges and goals
-- AI generates structured Life Context file
+**PII Warning:**
+- After creation, a warning screen reminds users to avoid storing personally identifiable information
+- Suggestions to use pseudonyms (e.g., "John Smith" → "my boss")
+- Option to go back and edit or continue
 
-**Option 2: Start from Template**
-- Empty structured template provided
-- User fills in manually
-- Can edit anytime
-
-**Screenshot Checklist:**
-- [ ] Life Context choice screen
-- [ ] File upload interface with drag & drop
-- [ ] File preview
-- [ ] Questionnaire start screen
-- [ ] Sample questionnaire question
-- [ ] Generated Life Context preview
+**Context Choice (Returning Registered Users):**
+- Continue with saved context (loads last state)
+- Start a new session (blank context for new topics)
 
 ---
 
-### 5. **Bot Selection**
+### 5. Coach Selection
 *Choosing your AI coach*
 
-**Available Coaches:**
-- 🧘 **Stoic Guide** - Resilience and acceptance
-- 🧠 **Reflection Coach** - Structured reflection techniques
-- ♟️ **Strategic Thinker** - Problem-solving and planning
-- 💭 **Socratic Questioner** - Deep inquiry
-- 🎭 **Compassionate Listener** - Empathy and validation
-- 🔬 **Systems Analyst** - Patterns and interconnections
+**Your Guide:**
+
+| | Style | Core Intention | Access |
+|--|-------|---------------|--------|
+| **Nobody** | Efficient, Adaptive, Solution-Focused | Not a coach -- an efficient manager using the GPS approach (Goal-Problem-Solution) to help you find your own solutions | Guest |
+
+**Your Coaches:**
+
+| Coach | Style | Core Intention | Access |
+|-------|-------|---------------|--------|
+| **Max** | Motivational, Inquisitive, Reflective | Helps you think bigger and unlock your potential | Guest |
+| **Ava** | Strategic, Long-term, Analytical | Strategic thinking and decision management | Guest |
+| **Kenji** | Composed, Philosophical, Wise | Stoic philosophy for resilience and inner strength | Premium |
+| **Chloe** | Reflective, Structured, Evidence-Based | Structured reflection to recognize thought patterns | Premium |
+| **Rob** | Mental Fitness, Empathetic, Mindful | Mental fitness against self-sabotaging patterns | Client |
+| **Victor** | Systemic, Analytical, Neutral | Family systems theory for relationship patterns | Client |
 
 **Display:**
-- Coach name and tagline
-- Brief description of approach
-- Access level indicator (Guest/Registered/Premium)
-- Visual icon for each coach
-
-**Screenshot Checklist:**
-- [ ] Bot selection grid (desktop)
-- [ ] Bot selection scroll (mobile)
-- [ ] Individual bot card detail
-- [ ] Premium bot with lock icon (if guest)
+- Coach cards with avatar, name, style tags, and description
+- Lock icon on restricted coaches (Premium / Client tier)
+- Meditation badge (bell icon) on Rob, Kenji, and Chloe
+- DPC/DPFL coaching mode badges when personality profile is active
+- Clicking a coach card starts the session immediately
 
 ---
 
-### 6. **Chat Session**
+### 6. Chat Session
 *The core coaching experience*
 
 **Interface Elements:**
 
 **Header:**
-- Coach name and avatar
-- Session timer
-- Voice/Text mode toggle
-- Settings menu
-- End session button
+- Coach name and avatar (clickable for coach info modal with methodology details)
+- Active coaching mode indicator (DPC/DPFL) if enabled
+- Red "End Session" button
 
-**Chat Area:**
-- Message history
-- User messages (right, blue)
-- AI responses (left, white/gray)
-- Smooth scroll
-- Timestamp indicators
+**Text Mode (Default):**
+- Message input area at bottom
+- Send button (paper plane icon)
+- Microphone icon for speech-to-text dictation
+- Messages rendered with Markdown formatting
 
-**Input Area:**
-- Text input box
-- Send button
-- Voice mode button (with animation when active)
-- Character counter (if any limits)
+**Voice Output (TTS):**
+- Speaker icon to toggle text-to-speech
+- Pause/Play and Repeat controls
+- Voice Settings (gear icon) with three options:
+  - **Coach Signature Voice** - Best server voice matched to coach personality
+  - **Server Voices (High Quality)** - Professional Piper TTS voices
+  - **Device Voices (Local)** - Faster response, works offline
+- iOS note: Server voices unavailable due to browser restrictions; device voices used automatically
 
 **Voice Mode:**
-- 🎤 Push-to-talk or continuous listening
-- Visual feedback (waveform animation)
-- Speech-to-text preview
-- Text-to-speech for AI responses
-- Voice selection (multiple options)
+- Sound wave icon switches to pure voice conversation mode
+- Large microphone button for recording
+- Automatic playback of coach replies
+- Wake lock to prevent screen dimming
 
-**Screenshot Checklist:**
-- [ ] Initial greeting from AI coach
-- [ ] Active conversation (3-4 exchanges)
-- [ ] Voice mode active with visual indicator
-- [ ] Voice selection modal
-- [ ] Long conversation with scroll
-- [ ] Mobile view of chat
-- [ ] Landscape mode (mobile)
+**Guided Meditation (Rob, Kenji, Chloe):**
+- Meditation markers trigger a guided meditation timer
+- Intro text → countdown timer → meditation gong → closing reflection
+- Users can request meditation at any time during the session
 
 ---
 
-### 7. **Session Review**
+### 7. Session Review
 *AI-generated insights and updates*
 
-**Triggered When:** User clicks "End Session"
+**Triggered When:** User clicks "End Session" → AI analysis (~15-30 seconds)
 
-**Analysis Sections:**
+**Review Sections:**
 
-**1. Session Summary**
-- 2-4 sentence overview
-- Key insights discovered
+**1. New Findings**
+- AI-generated summary of key takeaways
 - Written in second person ("You realized...")
 
-**2. Life Context Updates**
-- AI-proposed changes to your Life Context file
-- Structured as:
-  - **Type**: Append, Replace Section, Create Headline
-  - **Location**: Which section to modify
-  - **Content**: The new/updated text
-- User can:
-  - ✅ Accept individual updates
-  - ✏️ Edit before accepting
-  - ❌ Reject updates
-  - 👁️ Preview final document
+**2. Session Rating**
+- 1-5 star rating with optional written feedback
+- Helps improve coach quality
 
-**3. Accomplished Goals** ⭐ *NEW in v1.6.1*
-- AI automatically detects when you've achieved a goal from your Life Context
-- Achieved goals are highlighted with ✅ checkmark
-- **Automatic removal**: Upon accepting session updates, accomplished goals are automatically removed from your Life Context
-- This keeps your goals list focused on current objectives
-- Examples:
-  - "Complete project X" → Project completed → Goal removed
-  - "Run first 5K" → Race completed → Goal removed
-  - "Find new job" → Job secured → Goal removed
+**3. Accomplished Goals**
+- AI automatically detects achieved goals from Life Context
+- Marked with checkmark, automatically removed when updates are accepted
 
-**4. Next Steps**
-- Concrete, actionable items
-- Each with specific deadline
-- User can add to calendar/reminders
-- **Automatic cleanup**: Completed next steps from previous sessions are removed from Life Context when acknowledged
+**4. Completed Steps**
+- Previously identified next steps that have been completed
+- Automatically removed from Life Context when acknowledged
 
-**5. Blockage Analysis** (Optional)
-- Visual gauge showing openness vs. blockage
-- Brief explanation
-- Suggestions for moving forward
+**5. Actionable Next Steps**
+- Concrete tasks with deadlines committed to during the conversation
+- **Calendar Integration:** Export individual steps or all at once as .ics files
+- Compatible with Google Calendar, Outlook, Apple Calendar, etc.
+- Events created at 9:00 AM with 24-hour advance reminder
 
-**Diff Viewer:**
-- Side-by-side comparison:
-  - **Left**: Current Life Context
-  - **Right**: Proposed changes (highlighted)
-- Color coding:
-  - 🟢 Green = Additions
-  - 🔴 Red = Deletions
-  - 🟡 Yellow = Modifications
+**6. Proposed Context Updates**
+- AI-suggested changes to Life Context
+- Per-suggestion controls: accept/reject, append/replace, change target section
+- Can create new sections
 
-**Screenshot Checklist:**
-- [ ] Session summary screen
-- [ ] Life Context updates list
-- [ ] Individual update card (expanded)
-- [ ] **Accomplished goals display with ✅ checkmark** ⭐
-- [ ] **Completed next steps being removed** ⭐
-- [ ] Diff viewer - side by side comparison
-- [ ] Next steps with deadlines
-- [ ] Blockage score gauge
-- [ ] Edit update modal
-- [ ] Final preview before saving
+**7. Difference View**
+- Color-coded changes: green = additions, red = deletions
+- Shows exact modifications before applying
+
+**8. Final Context**
+- Full editable text of the updated Life Context
+- Manual edits possible before saving
+
+**Downloads:**
+- **Download Transcript** - Full timestamped chat history as `.txt`
+- **Download Summary** - AI-generated analysis as text file
+- **Download Context (Backup)** - Essential for guest users
+
+**Saving Options:**
+- Continue with same coach (saves and starts new session)
+- Switch coach (saves and returns to coach selection)
+- "Don't save text changes" checkbox (registered users only)
+
+**DPFL-Specific Steps (when DPFL coaching mode is active):**
+
+**Authenticity Check (Comfort Check):**
+- Scale 1-5: How authentic was the session?
+- Only sessions rated 3+ are used for profile refinement
+
+**Profile Refinement:**
+- Appears after 2+ authentic sessions
+- Shows keyword analysis and current vs. suggested personality values
+- User can accept or reject adjustments
 
 ---
 
-### 8. **Life Context Management**
-*Your evolving personal document*
-
-**For Registered Users:**
-- Automatically saved (encrypted)
-- View current version anytime
-- Manual edit option
-- Version history (future feature)
-- Download as `.md` file
-
-**For Guests:**
-- Download after each session
-- Must upload for next session
-- No cloud storage
-
-**Screenshot Checklist:**
-- [ ] Life Context view/edit screen
-- [ ] Download modal
-- [ ] Save confirmation
-
----
-
-### 9. **Gamification & Progress**
+### 8. Gamification & Progress
 *Motivation through achievement*
 
-**Gamification Bar** (Always visible at top)
-- Current XP / Next Level XP
-- Visual progress bar
-- Level indicator
-- Streak counter (🔥 fire icon)
+**Gamification Bar** (always visible at top):
+- Current Level and XP progress bar
+- Streak counter (consecutive days with sessions)
+- Trophy icon → Achievements page
+- Dark/Light mode toggle (Moon/Sun icon)
+- Seasonal color scheme toggle (Palette icon)
 
 **XP Sources:**
-- Complete a session: +50 XP
-- Update Life Context: +25 XP
-- 7-day streak: +100 XP bonus
-- First session with each coach: +30 XP
 
-**Achievements View:**
-- Grid of achievement cards
-- 🔒 Locked (gray)
-- ✅ Unlocked (colored + animation)
-- Categories:
-  - Frequency (sessions completed)
-  - Consistency (streaks)
-  - Exploration (tried all coaches)
-  - Depth (long sessions)
-  - Growth (Life Context updates)
+| Action | XP |
+|--------|-----|
+| Per message sent in a session | 5 XP |
+| Per "Next Step" identified in analysis | 10 XP |
+| Accomplishing a pre-existing goal | 25 XP |
+| Formally concluding the session | 50 XP |
 
-**Achievement Examples:**
-- 🎯 "First Steps" - Complete your first session
-- 🔥 "Week Warrior" - 7-day streak
-- 🎓 "Wise Counsel" - Try all 6 coaches
-- 📈 "Growth Mindset" - 10 context updates
-- 💎 "Veteran" - 50 sessions completed
+**Achievements:**
+- Grid of achievement cards (locked/unlocked)
+- Categories: Frequency, Consistency, Exploration, Depth, Growth
 
-**Screenshot Checklist:**
-- [ ] Gamification bar at various XP levels
-- [ ] Level up animation/notification
-- [ ] Achievements grid overview
-- [ ] Individual achievement card (locked)
-- [ ] Individual achievement card (unlocked)
-- [ ] Streak counter with fire icon
-- [ ] XP gain notification
+**Where Progress is Saved:**
+- **Registered users**: Server, persists across sessions and devices
+- **Guest users**: Hidden comment in `.md` file, only persists if same file is reused
+
+**Appearance Settings:**
+- **Dark/Light Mode**: Auto-switches based on time (dark 18:00-06:00, light 06:00-18:00). Manual toggle disables auto-switching.
+- **Seasonal Color Schemes**: Summer, Autumn, Winter. Auto-selects by date; manual override available.
 
 ---
 
-### 10. **User Profile & Settings**
-*Personalization and preferences*
+### 9. Personality Profile (Registered Users)
+*Personalized coaching experience*
 
-**Profile Information:**
-- Email (registered users)
-- Account creation date
-- Last login
-- Total sessions
-- Current level & XP
-- Active streaks
+**Access:** Menu (hamburger) → "Personality Profile"
 
-**Settings:**
-- 🌐 Language (English/German)
-- 🎨 Theme (Light/Dark)
-- 🔊 Voice Preferences
-  - Voice selection (multiple options)
-  - Speech rate
-  - Auto-play toggle
-- 🔐 Security
-  - Change password
-  - Delete account (with warning)
-- 📥 Data Management
-  - Download all data
-  - Export Life Context
-  - View API usage (admin only)
+**Three Personality Lenses:**
 
-**Screenshot Checklist:**
-- [ ] Profile overview
-- [ ] Settings menu
-- [ ] Language selection
-- [ ] Theme toggle (light mode)
-- [ ] Theme toggle (dark mode)
-- [ ] Voice settings
-- [ ] Change password screen
-- [ ] Delete account warning
+| Test | Focus | Duration |
+|------|-------|----------|
+| **Spiral Dynamics** (Recommended) | Values and motivations across 8 levels | ~5 min |
+| **OCEAN (Big Five)** | 5 personality dimensions (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism) | ~5 min |
+| **Riemann-Thomann** | Basic drives (Proximity, Distance, Permanence, Change) across contexts | ~10 min |
+
+Users can take multiple tests to build a richer profile.
+
+**Personality Signature:**
+- Two "Golden Questions": Flow experience + Conflict experience
+- AI generates: Signature, Superpowers, Blindspots, Growth Opportunities
+
+**Profile Modes:**
+- **Adaptive**: Learns from sessions, refines over time
+- **Stable**: Fixed until manual re-evaluation
+
+**Coaching Modes:**
+- **Off (Default)**: Classic coaching, profile not used
+- **DPC (Dynamic Personality Coaching)**: Profile used during sessions, not modified
+- **DPFL (Dynamic Personality-Focused Learning)**: Profile used AND refined from 2nd session onward (requires adaptive profile)
+
+**Visualization:**
+- Spiral Dynamics: Two-column bar chart (Self-oriented vs. Community-oriented)
+- Riemann-Thomann: Radar chart with stress ranking
+- OCEAN: Horizontal trait bars
 
 ---
 
-### 11. **Admin Console** (Admin Users Only)
+### 10. Account Management (Registered Users)
+*Privacy, data control, and settings*
+
+**Access:** Menu (hamburger) → "Account Management"
+
+**Options:**
+- **Edit Profile** - Change name and email
+- **Change Password** - Re-encrypts all encrypted data with new key
+- **Export Data (GDPR)** - Download all data as HTML report or JSON (account, gamification, Life Context, Personality Profile, feedback, codes, usage stats)
+- **Redeem Code** - Enter access code for Premium/Client tier upgrade
+- **Delete Account** - Permanent removal of all data from servers
+
+**Privacy Features:**
+- End-to-End Encryption for Life Context and Personality Profile
+- Encryption key generated on device, never sent to server
+- Automatic data retention cleanup (API usage after 12 months, events after 6 months)
+- No conversation transcripts stored on server
+
+---
+
+### 11. PWA Installation
+*App-like experience on any device*
+
+**iOS (Safari):** Share → "Add to Home Screen"
+**Android (Chrome):** Menu → "Add to Home Screen" / "Install App"
+**Desktop:** Install icon in address bar
+
+**Benefits:** Quick access, full-screen mode, faster loading
+
+---
+
+### 12. Admin Console (Admin Users Only)
 *System management and analytics*
 
 **Tabs:**
 
 **1. User Management**
-- List all users
-- Search and filter
-- User details:
-  - Email, registration date
-  - Login count, last login
-  - XP and level
-  - Account status
-- Actions:
-  - Reset password
-  - Grant beta tester status
-  - Toggle admin rights
-  - Delete user
+- List, search, filter all users
+- User details (email, login count, XP, level, status)
+- Actions: Reset password, grant beta tester status, toggle admin, delete user
 
 **2. Upgrade Codes**
-- Generate codes for premium coaches
-- View code usage
-- Deactivate codes
-- Sort by date/usage
+- Generate and manage access codes (Premium/Client)
+- Track code usage and deactivate codes
 
-**3. Support Tickets**
-- View user-reported issues
-- Status: Open/In Progress/Resolved
-- Priority levels
-- Response interface
+**3. Ratings & Feedback**
+- Session ratings (1-5 stars) with written feedback
+- Filter by coach, average ratings per coach
 
-**4. Ratings & Feedback**
-- Session ratings (1-5 stars)
-- Written feedback
-- Filter by coach
-- Average ratings per coach
-- Sentiment analysis
+**4. Newsletter Management**
+- Subscriber list with consent tracking and status badges
+- Newsletter history
 
-**5. Session Simulator**
-- Test scenarios
-- Run analysis without affecting user data
-- Verify AI functionality
+**5. API Usage & Cost Tracking**
+- Summary: total cost, API calls, tokens (input/output), response time
+- Cost projections (monthly forecast based on 7-day average)
+- Breakdown by model, endpoint, bot, and top users
+- Dual provider support: Google Gemini + Mistral AI
+- Runtime provider switching without server restart
+- Time range selector (7/30/90 days or custom)
 
-**6. API Usage** ⭐ *NEW*
-- **Summary Cards:**
-  - 💰 Total cost (period)
-  - 📊 API calls (success/failure)
-  - ⚡ Total tokens (input/output split)
-  - 🕐 Avg response time
-  
-- **Cost Projections:**
-  - 📈 Monthly forecast (based on 7-day avg)
-  - Daily averages
-  
-- **Breakdown Tables:**
-  - By Model (Flash vs Pro)
-  - By Endpoint (chat, analyze, format)
-  - By Bot (which coaches cost most)
-  - Top 10 users by cost
-  
-- **Daily Usage Trend:**
-  - Day-by-day breakdown
-  - Scrollable history
-
-- **Time Range Selector:**
-  - Last 7/30/90 days
-  - Custom date range
-
-**Screenshot Checklist:**
-- [ ] Admin console - Users tab
-- [ ] User detail view
-- [ ] Reset password confirmation
-- [ ] Upgrade codes tab
-- [ ] Generate code interface
-- [ ] Support tickets tab
-- [ ] Ratings & feedback tab with stats
-- [ ] Session simulator
-- [ ] **API Usage - Summary cards**
-- [ ] **API Usage - Cost projections alert**
-- [ ] **API Usage - Model breakdown table**
-- [ ] **API Usage - Endpoint breakdown table**
-- [ ] **API Usage - Top users table**
-- [ ] **API Usage - Daily trend table**
-- [ ] **API Usage - Time range selector**
+**6. Provider Management**
+- Switch between Google Gemini and Mistral AI
+- Real-time usage statistics per provider
 
 ---
 
-### 12. **Mobile Responsive Views**
-*Optimized for all devices*
-
-**Key Responsive Features:**
-- Collapsible navigation menu (burger menu)
-- Stack layout on narrow screens
-- Touch-optimized buttons
-- Swipe gestures
-- Bottom navigation bar (mobile)
-- Responsive font sizes
-- Optimized chat interface
-
-**Screenshot Checklist:**
-- [ ] Mobile landing page
-- [ ] Mobile bot selection
-- [ ] Mobile chat interface
-- [ ] Mobile session review
-- [ ] Mobile achievements
-- [ ] Burger menu expanded
-- [ ] Tablet view (intermediate size)
-
----
-
-### 13. **Special Screens**
-
-**About Page:**
-- App description
-- Feature highlights
-- Technology stack
-- Credits
-
-**FAQ:**
-- Common questions
-- Expandable answers
-- Search functionality
-
-**User Guide:**
-- Step-by-step tutorials
-- Tips for effective use
-- Best practices
-
-**Terms & Privacy:**
-- Legal information
-- Data handling
-- User rights
-- GDPR compliance
-
-**Screenshot Checklist:**
-- [ ] About page
-- [ ] FAQ (collapsed)
-- [ ] FAQ (one expanded)
-- [ ] User guide
-- [ ] Terms of service
-- [ ] Privacy policy
-
----
-
-## 🎨 Design System Highlights
-
-**Color Palette:**
-- Primary: Blue accent
-- Secondary: Purple for highlights
-- Success: Green
-- Warning: Orange/Yellow
-- Error: Red
-- Neutrals: Gray scale
-
-**Typography:**
-- Clean, readable fonts
-- Proper hierarchy
-- Responsive sizes
-
-**Icons:**
-- Feather icons throughout
-- Consistent style
-- Semantic meaning
-
-**Animations:**
-- Smooth transitions
-- Loading spinners
-- Success confirmations
-- Level-up celebrations
-
----
-
-## 📊 Key User Flows Summary
+## Key User Flows Summary
 
 ### Guest User Journey:
-`Landing → Continue as Guest → Create/Upload Context → Select Coach → Chat → Review → Download File → Exit`
+```
+Landing → Continue as Guest → Create/Upload Context → Select Coach → Chat → Review → Download File → Exit
+```
 
 ### New Registered User Journey:
-`Landing → Register → Verify Email → Create/Upload Context → Select Coach → Chat → Review → Auto-Save → Dashboard`
+```
+Landing → Register → Verify Email → Create Context → PII Warning → Select Coach → Chat → Review → Auto-Save
+```
 
-### Returning User Journey:
-`Landing → Login → Dashboard → Select Coach (or Continue Session) → Chat → Review → Auto-Save → Dashboard`
+### Returning Registered User Journey:
+```
+Landing → Login → Welcome Back → Context Choice → Select Coach → Chat → Review → Auto-Save
+```
+
+### Personality-Enhanced Journey:
+```
+... → Personality Profile → Take Test(s) → Answer Golden Questions → Enable DPC/DPFL → Chat → Review → Comfort Check → Profile Refinement → Auto-Save
+```
 
 ### Admin User Journey:
-`Landing → Login → Admin Console → [Manage Users / View Analytics / Monitor API Usage] → Return to App`
+```
+Landing → Login → Admin Console → [Manage Users / Analytics / API Usage / Provider Management] → Return to App
+```
 
 ---
 
-## 🎯 Critical Moments to Capture
+## Critical Moments
 
 ### High-Impact Screens:
-1. ✨ First bot greeting (sets tone)
-2. 💡 Session summary with insights (value demonstration)
-3. 📝 Diff viewer showing changes (core feature)
-4. 🎉 Achievement unlock (motivation)
-5. 📊 Admin API usage dashboard (business intelligence)
+1. First bot greeting (sets the coaching tone)
+2. Session summary with insights (demonstrates value)
+3. Diff viewer showing changes (core feature)
+4. Achievement unlock (motivation)
+5. Personality Signature reveal (personal insight)
+6. Profile Refinement suggestion (adaptive coaching)
 
 ### Error States:
 - No internet connection
-- Login failed
+- Login failed / wrong password
 - Session timeout
 - File upload error
-- API error
+- API error / AI provider fallback
 
 ### Empty States:
 - No achievements yet
 - No session history
 - First time setup
+- No personality profile yet
 
 ---
 
-## 📸 How to Capture These Screenshots
-
-1. **Run the application locally:**
-   ```bash
-   npm run dev
-   ```
-
-2. **For backend features (admin, etc.):**
-   ```bash
-   cd meaningful-conversations-backend
-   npm start
-   ```
-
-3. **Access at:**
-   - Frontend: `http://localhost:5173`
-   - With staging backend: `http://localhost:5173/?backend=staging`
-
-4. **Capture screenshots:**
-   - **Mac**: `Cmd + Shift + 4` (select area) or `Cmd + Shift + 3` (full screen)
-   - **Windows**: `Win + Shift + S`
-   - **Chrome DevTools**: Device toolbar for mobile views (`Cmd/Ctrl + Shift + M`)
-
-5. **Recommended sizes:**
-   - Desktop: 1920x1080 or 1440x900
-   - Tablet: 768x1024 (iPad)
-   - Mobile: 375x667 (iPhone) or 360x740 (Android)
-
-6. **Save to:**
-   ```
-   /screenshots/
-   ├── 01-landing/
-   ├── 02-auth/
-   ├── 03-context-setup/
-   ├── 04-bot-selection/
-   ├── 05-chat/
-   ├── 06-session-review/
-   ├── 07-achievements/
-   ├── 08-admin/
-   └── 09-mobile/
-   ```
-
----
-
-## 🚀 Next Steps
-
-After capturing screenshots:
-1. Create `/screenshots` directory
-2. Organize images by section
-3. Update `README.md` with screenshot gallery
-4. Add to GitHub repository
-5. Use in documentation, presentations, and marketing
-
----
-
-**Last Updated**: November 22, 2024
-**Version**: 1.6.1 with Accomplished Goals Management
-
+**Last Updated**: February 2026
+**Version**: 1.8.2

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
+import { useModalOpen } from '../utils/modalUtils';
 import { formatDateToISO } from '../utils/dateParser';
 import Button from './shared/Button';
 
@@ -19,6 +21,7 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
     onCancel,
 }) => {
     const { t } = useLocalization();
+    useModalOpen(isOpen);
     const [selectedDate, setSelectedDate] = useState<string>('');
 
     useEffect(() => {
@@ -50,9 +53,10 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
         }
     };
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-4"
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             onClick={handleOverlayClick}
         >
             <div className="bg-background-primary dark:bg-background-primary border border-border-primary dark:border-border-primary rounded-lg shadow-lg max-w-md w-full p-6">
@@ -91,7 +95,8 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
                     </Button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

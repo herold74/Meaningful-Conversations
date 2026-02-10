@@ -49,7 +49,7 @@ const DisclaimerView: React.FC<DisclaimerViewProps> = () => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
 
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary my-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
             <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('disclaimer_title')}</h1>
             </div>

@@ -15,7 +15,7 @@ const LegalView: React.FC = () => {
     ];
 
     return (
-        <div className="w-full max-w-4xl mx-auto my-10 animate-fadeIn">
+        <div className="w-full max-w-4xl mx-auto mt-4 mb-10 animate-fadeIn">
             <div className="text-center mb-6">
                 <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('legal_title')}</h1>
             </div>

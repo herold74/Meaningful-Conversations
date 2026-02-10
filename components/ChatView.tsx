@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { flushSync } from 'react-dom';
+import { flushSync, createPortal } from 'react-dom';
+import { useModalOpen } from '../utils/modalUtils';
 import { Bot, Message, Language, User, CoachingMode } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
@@ -103,21 +104,23 @@ interface CoachInfoModalProps {
 
 const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, coachingMode }) => {
     const { language, t } = useLocalization();
+    useModalOpen(isOpen);
     if (!isOpen) return null;
 
     const botDescription = language === 'de' ? bot.description_de : bot.description;
     const botStyle = language === 'de' ? bot.style_de : bot.style;
 
-  return (
+  return createPortal(
     <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" 
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4" 
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-labelledby="coach-info-title"
     >
       <div 
-        className="bg-background-secondary dark:bg-background-tertiary w-full max-w-md m-4 p-6 border border-border-secondary dark:border-border-primary shadow-xl text-center animate-fadeIn rounded-lg" 
+        className="bg-background-secondary dark:bg-background-tertiary w-full max-w-md p-6 border border-border-secondary dark:border-border-primary shadow-xl text-center animate-fadeIn rounded-lg" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end -mt-2 -mr-2">
@@ -153,7 +156,8 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -2088,7 +2092,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
-    <div className="flex flex-col h-[85vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
+    <div className="flex flex-col h-[75vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-border-primary dark:border-border-primary gap-2">
         {/* Left: Coach Info (responsive) */}
         <div className="flex-1 min-w-0">

@@ -734,7 +734,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const blockageGridClass = "grid grid-cols-1 gap-4";
 
     return (
-        <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
+        <div className="flex flex-col items-center justify-center pt-4 pb-10 animate-fadeIn">
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
                 
                 {isTestMode && (
