@@ -31,10 +31,13 @@ class StrategyMerger {
    */
   extractDimensions() {
     // Riemann: Weight by extremity (distance from 50)
-    if (this.profile.riemann && this.profile.riemann.beruf) {
+    // Uses 'selbst' (self-image) as primary context for coaching — the client
+    // shows up as "themselves" in a coaching session, not in a work or private role.
+    // DPFL refinement still updates all 3 contexts (beruf, privat, selbst).
+    if (this.profile.riemann && this.profile.riemann.selbst) {
       const traits = ['dauer', 'wechsel', 'naehe', 'distanz'];
       traits.forEach(trait => {
-        const score = this.profile.riemann.beruf[trait];
+        const score = this.profile.riemann.selbst[trait];
         if (score !== undefined && score !== null) {
           const isHigh = score > 50;
           const level = isHigh ? 'high' : 'low';
@@ -331,11 +334,11 @@ class StrategyMerger {
     // Get all dimensions that represent weaknesses/blindspots
     const blindspotDimensions = [];
 
-    // Riemann: traits with low scores (< 30)
-    if (this.profile.riemann && this.profile.riemann.beruf) {
+    // Riemann: traits with low scores (< 30) — uses 'selbst' context (see extractDimensions)
+    if (this.profile.riemann && this.profile.riemann.selbst) {
       const traits = ['dauer', 'wechsel', 'naehe', 'distanz'];
       traits.forEach(trait => {
-        const score = this.profile.riemann.beruf[trait];
+        const score = this.profile.riemann.selbst[trait];
         if (score < 30) {
           const strategy = RIEMANN_STRATEGIES[trait]?.low?.[this.lang] || 
                           RIEMANN_STRATEGIES[trait]?.low?.['de'];

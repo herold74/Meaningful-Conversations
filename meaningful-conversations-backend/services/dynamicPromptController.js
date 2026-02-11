@@ -220,13 +220,15 @@ function analyzeProfile(profile, lang = 'de') {
   }
 
   // Analyze Riemann if available (check both path and completedLenses for combined profiles)
+  // Uses 'selbst' (self-image) as primary context — in a coaching session the client
+  // presents as "themselves", not in a work or private role. See dpcStrategyMerger.js.
   const hasRiemann = profile.path === 'RIEMANN' || profile.completedLenses?.includes('riemann');
   if (hasRiemann && profile.riemann) {
-    const { beruf } = profile.riemann;
+    const selbst = profile.riemann.selbst || profile.riemann.beruf; // fallback to beruf for legacy profiles
     
     // Find highest and lowest scores
     const traits = ['dauer', 'wechsel', 'naehe', 'distanz'];
-    const scores = traits.map(t => ({ trait: t, score: beruf[t] || 0 }));
+    const scores = traits.map(t => ({ trait: t, score: selbst[t] || 0 }));
     scores.sort((a, b) => b.score - a.score);
 
     analysis.dominant = [...analysis.dominant, ...scores.slice(0, 2).map(s => s.trait)];

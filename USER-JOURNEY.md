@@ -287,9 +287,12 @@ Users can take multiple tests to build a richer profile.
 - **DPC (Dynamic Personality Coaching)**: Profile used during sessions, not modified
 - **DPFL (Dynamic Personality-Focused Learning)**: Profile used AND refined from 2nd session onward (requires adaptive profile)
 
+**Riemann Context in DPC/DPFL:**
+The Riemann-Thomann test captures three contexts (Beruf/Work, Privat/Private, Selbst/Self). DPC/DPFL uses the **Selbst (self-image)** context as primary input for coaching strategy generation. Rationale: In a coaching session, the client presents as "themselves" — not in a professional role or intimate relationship. The self-image profile best represents the authentic person. DPFL refinement still updates all three contexts based on observed session behavior.
+
 **Visualization:**
 - Spiral Dynamics (PVQ-21): Two-column bar chart (Self-oriented vs. Community-oriented), derived from Schwartz values
-- Riemann-Thomann: Radar chart with stress ranking
+- Riemann-Thomann: Cross diagram (Riemann-Kreuz) with two bipolar axes (Distanz↔Nähe, Beständigkeit↔Spontanität), showing context dots for Beruf/Privat/Selbst
 - OCEAN (BFI-2): Horizontal domain bars; BFI-2-S additionally shows facet bars nested under each domain
 
 ---
