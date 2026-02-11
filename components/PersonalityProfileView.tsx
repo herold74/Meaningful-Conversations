@@ -114,8 +114,11 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
   );
 };
 
-// Radar Chart Component for Riemann-Thomann Results
-interface RiemannRadarChartProps {
+// Riemann-Thomann Cross (Quadrant Diagram)
+// Converts constant-sum data (4 dimensions) into 2 bipolar axes:
+//   X-axis: Nähe − Distanz  (right = Nähe-dominant)
+//   Y-axis: Wechsel − Dauer (up = Wechsel-dominant)
+interface RiemannCrossChartProps {
   data: {
     beruf: Record<string, number>;
     privat: Record<string, number>;
@@ -124,178 +127,130 @@ interface RiemannRadarChartProps {
   t: (key: string) => string;
 }
 
-const RiemannRadarChart: React.FC<RiemannRadarChartProps> = ({ data, t }) => {
-  // Responsive size - larger on bigger screens
+const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
   const size = 320;
   const center = size / 2;
-  const maxRadius = (size / 2) - 55; // Balanced padding for labels
-  
-  // Dimensions in order: Distanz (top), Spontanität (right), Nähe (bottom), Beständigkeit (left)
-  const dimensions = ['distanz', 'wechsel', 'naehe', 'dauer'];
+  const axisLen = (size / 2) - 45; // space for labels
+
   const dimensionLabels: Record<string, string> = {
     dauer: t('riemann_dimension_dauer') || 'Beständigkeit',
-    naehe: t('riemann_dimension_naehe') || 'Nähe', 
+    naehe: t('riemann_dimension_naehe') || 'Nähe',
     wechsel: t('riemann_dimension_wechsel') || 'Spontanität',
-    distanz: t('riemann_dimension_distanz') || 'Distanz'
+    distanz: t('riemann_dimension_distanz') || 'Distanz',
   };
-  
-  // DYNAMIC SCALING: Find the maximum value across all contexts and dimensions
-  const allValues = Object.values(data).flatMap(context => 
-    dimensions.map(dim => context[dim] || 0)
-  );
-  const dataMaxValue = Math.max(...allValues, 1); // At least 1 to avoid division by zero
-  // Round up to nearest whole number for cleaner scale
-  const scaleMax = Math.ceil(dataMaxValue);
-  
-  // Calculate point position on the radar with dynamic scaling
-  const getPoint = (dimIndex: number, value: number): { x: number; y: number } => {
-    const angle = (dimIndex * 90 - 90) * (Math.PI / 180); // Start from top, go clockwise
-    const radius = (value / scaleMax) * maxRadius; // Use dynamic scaleMax instead of fixed 10
-    return {
-      x: center + radius * Math.cos(angle),
-      y: center + radius * Math.sin(angle)
-    };
-  };
-  
-  // Generate polygon points for a context
-  const getPolygonPoints = (contextData: Record<string, number>): string => {
-    return dimensions.map((dim, i) => {
-      const point = getPoint(i, contextData[dim] || 0);
-      return `${point.x},${point.y}`;
-    }).join(' ');
-  };
-  
-  // Context colors
-  const contextColors = {
-    beruf: { fill: 'rgba(59, 130, 246, 0.25)', stroke: '#3b82f6', name: t('profile_view_beruf') || 'Beruf' },
-    privat: { fill: 'rgba(34, 197, 94, 0.25)', stroke: '#22c55e', name: t('profile_view_privat') || 'Privat' },
-    selbst: { fill: 'rgba(249, 115, 22, 0.25)', stroke: '#f97316', name: t('profile_view_selbst') || 'Selbst' }
-  };
+
+  // Convert constant-sum data to bipolar coordinates
+  const toCoord = (ctx: Record<string, number>) => ({
+    x: (ctx.naehe || 0) - (ctx.distanz || 0),   // positive = Nähe
+    y: (ctx.wechsel || 0) - (ctx.dauer || 0),    // positive = Wechsel
+  });
+
+  const contexts = [
+    { key: 'beruf' as const, color: '#3b82f6', name: t('profile_view_beruf') || 'Beruf' },
+    { key: 'privat' as const, color: '#22c55e', name: t('profile_view_privat') || 'Privat' },
+    { key: 'selbst' as const, color: '#f97316', name: t('profile_view_selbst') || 'Selbst' },
+  ];
+
+  // Compute coordinates and dynamic scale
+  const coords = contexts.map(c => toCoord(data[c.key]));
+  const maxAbs = Math.max(...coords.flatMap(c => [Math.abs(c.x), Math.abs(c.y)]), 1);
+  const scale = Math.ceil(maxAbs);
+
+  const toPixel = (val: number) => (val / scale) * axisLen;
 
   return (
     <div className="flex flex-col items-center w-full">
-      <svg 
-        viewBox={`0 0 ${size} ${size}`} 
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
         className="w-full max-w-[320px] h-auto"
         style={{ minHeight: '280px' }}
       >
-        {/* Background grid circles with labels - dynamically scaled */}
-        {(() => {
-          // Generate 5 evenly spaced levels from 0 to scaleMax
-          const levels = [0.2, 0.4, 0.6, 0.8, 1.0].map(fraction => fraction * scaleMax);
-          return levels.map((level, idx) => (
-            <g key={level}>
-              <circle
-                cx={center}
-                cy={center}
-                r={(level / scaleMax) * maxRadius}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeDasharray={idx === 4 ? "none" : "3,3"}
-                className="text-gray-300 dark:text-gray-600"
-              />
-              {/* Scale labels on right side - show at 40% and 80% of scale */}
-              {(idx === 1 || idx === 3) && (
-                <text
-                  x={center + (level / scaleMax) * maxRadius + 5}
-                  y={center + 4}
-                  className="text-[10px] fill-gray-400 dark:fill-gray-500"
-                >
-                  {Math.round(level * 10) / 10}
-                </text>
-              )}
-            </g>
-          ));
-        })()}
-        
-        {/* Axis lines */}
-        {dimensions.map((_, i) => {
-          const endPoint = getPoint(i, scaleMax); // Use dynamic scaleMax
-          return (
+        {/* Quadrant background shading */}
+        <rect x={center} y={0} width={center} height={center}
+          className="fill-blue-50/40 dark:fill-blue-900/10" />
+        <rect x={0} y={0} width={center} height={center}
+          className="fill-purple-50/40 dark:fill-purple-900/10" />
+        <rect x={0} y={center} width={center} height={center}
+          className="fill-gray-50/40 dark:fill-gray-800/10" />
+        <rect x={center} y={center} width={center} height={center}
+          className="fill-green-50/40 dark:fill-green-900/10" />
+
+        {/* Grid lines at 50% */}
+        {[-0.5, 0.5].map(frac => (
+          <g key={frac}>
             <line
-              key={i}
-              x1={center}
-              y1={center}
-              x2={endPoint.x}
-              y2={endPoint.y}
-              stroke="currentColor"
-              strokeWidth="1"
-              className="text-gray-300 dark:text-gray-600"
+              x1={center + toPixel(frac * scale)} y1={center - axisLen}
+              x2={center + toPixel(frac * scale)} y2={center + axisLen}
+              stroke="currentColor" strokeWidth="0.5" strokeDasharray="4,4"
+              className="text-gray-200 dark:text-gray-700"
             />
+            <line
+              x1={center - axisLen} y1={center - toPixel(frac * scale)}
+              x2={center + axisLen} y2={center - toPixel(frac * scale)}
+              stroke="currentColor" strokeWidth="0.5" strokeDasharray="4,4"
+              className="text-gray-200 dark:text-gray-700"
+            />
+          </g>
+        ))}
+
+        {/* Main cross axes */}
+        <line x1={center - axisLen} y1={center} x2={center + axisLen} y2={center}
+          stroke="currentColor" strokeWidth="1.5" className="text-gray-400 dark:text-gray-500" />
+        <line x1={center} y1={center - axisLen} x2={center} y2={center + axisLen}
+          stroke="currentColor" strokeWidth="1.5" className="text-gray-400 dark:text-gray-500" />
+
+        {/* Triangle connecting the 3 context dots */}
+        <polygon
+          points={coords.map(c =>
+            `${center + toPixel(c.x)},${center - toPixel(c.y)}`
+          ).join(' ')}
+          fill="rgba(148, 163, 184, 0.12)"
+          stroke="rgba(148, 163, 184, 0.35)"
+          strokeWidth="1"
+          strokeDasharray="4,3"
+        />
+
+        {/* Context dots with glow + label */}
+        {contexts.map((ctx, i) => {
+          const c = coords[i];
+          const px = center + toPixel(c.x);
+          const py = center - toPixel(c.y); // SVG y is inverted
+          return (
+            <g key={ctx.key}>
+              <circle cx={px} cy={py} r="12" fill={ctx.color} opacity="0.15" />
+              <circle cx={px} cy={py} r="7" fill={ctx.color} stroke="white" strokeWidth="2.5" />
+              <text x={px + 10} y={py + 4} className="text-[10px] font-semibold" fill={ctx.color}>
+                {ctx.name}
+              </text>
+            </g>
           );
         })}
-        
-        {/* Data polygons - draw in reverse order so beruf is on top */}
-        {(['selbst', 'privat', 'beruf'] as const).map(context => (
-          <polygon
-            key={context}
-            points={getPolygonPoints(data[context])}
-            fill={contextColors[context].fill}
-            stroke={contextColors[context].stroke}
-            strokeWidth="2.5"
-            className="transition-all duration-300"
-          />
-        ))}
-        
-        {/* Data points */}
-        {(['selbst', 'privat', 'beruf'] as const).map(context => (
-          dimensions.map((dim, i) => {
-            const point = getPoint(i, data[context][dim] || 0);
-            return (
-              <circle
-                key={`${context}-${dim}`}
-                cx={point.x}
-                cy={point.y}
-                r="5"
-                fill={contextColors[context].stroke}
-                stroke="white"
-                strokeWidth="2"
-              />
-            );
-          })
-        ))}
-        
-        {/* Dimension labels - positioned to match dimensions array order */}
-        {/* Top: Distanz - horizontal */}
-        <text x={center} y={20} textAnchor="middle" className="text-xs font-bold fill-gray-700 dark:fill-gray-200">
-          {dimensionLabels.distanz}
-        </text>
-        {/* Right: Spontanität - VERTICAL (top to bottom) */}
-        <text 
-          x={size - 12} 
-          y={center} 
-          textAnchor="middle" 
-          className="text-xs font-bold fill-gray-700 dark:fill-gray-200"
-          transform={`rotate(90, ${size - 12}, ${center})`}
-        >
-          {dimensionLabels.wechsel}
-        </text>
-        {/* Bottom: Nähe - horizontal */}
-        <text x={center} y={size - 8} textAnchor="middle" className="text-xs font-bold fill-gray-700 dark:fill-gray-200">
+
+        {/* Axis end-labels */}
+        <text x={center + axisLen + 4} y={center + 4} textAnchor="start"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.naehe}
         </text>
-        {/* Left: Beständigkeit - VERTICAL (bottom to top) */}
-        <text 
-          x={12} 
-          y={center} 
-          textAnchor="middle" 
-          className="text-xs font-bold fill-gray-700 dark:fill-gray-200"
-          transform={`rotate(-90, 12, ${center})`}
-        >
+        <text x={center - axisLen - 4} y={center + 4} textAnchor="end"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          {dimensionLabels.distanz}
+        </text>
+        <text x={center} y={center - axisLen - 8} textAnchor="middle"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          {dimensionLabels.wechsel}
+        </text>
+        <text x={center} y={center + axisLen + 16} textAnchor="middle"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.dauer}
         </text>
       </svg>
-      
+
       {/* Legend */}
-      <div className="flex gap-6 mt-4 flex-wrap justify-center">
-        {Object.entries(contextColors).map(([key, value]) => (
-          <div key={key} className="flex items-center gap-2">
-            <div 
-              className="w-4 h-4 rounded-full" 
-              style={{ backgroundColor: value.stroke }}
-            />
-            <span className="text-sm font-medium text-content-secondary">{value.name}</span>
+      <div className="flex gap-6 mt-3 flex-wrap justify-center">
+        {contexts.map(ctx => (
+          <div key={ctx.key} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: ctx.color }} />
+            <span className="text-sm font-medium text-content-secondary">{ctx.name}</span>
           </div>
         ))}
       </div>
@@ -961,7 +916,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
             
             <div className="p-4 bg-background-secondary dark:bg-background-secondary rounded-lg border border-border-secondary/70">
-              <RiemannRadarChart data={decryptedData.riemann} t={t} />
+              <RiemannCrossChart data={decryptedData.riemann} t={t} />
             </div>
             
             {/* Stress Reaction Ranking */}

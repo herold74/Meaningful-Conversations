@@ -455,8 +455,8 @@ const translations = {
     high: 'Hoch',
     medium: 'Mittel',
     low: 'Niedrig',
-    axesExplanation: 'Die 4 Achsen: Beständigkeit (Struktur & Sicherheit), Wechsel (Flexibilität & Spontanität), Nähe (Verbundenheit & Harmonie), Distanz (Autonomie & Unabhängigkeit).',
-    differencesExplanation: 'Unterschiede zwischen den Bereichen zeigen, wie du dich an verschiedene Situationen anpasst. Große Unterschiede können auf Flexibilität oder innere Spannung hindeuten.',
+    axesExplanation: 'Horizontale Achse: Distanz ↔ Nähe (Autonomie vs. Verbundenheit). Vertikale Achse: Beständigkeit ↔ Spontanität (Struktur vs. Flexibilität). Die Position zeigt deine Tendenz im jeweiligen Kontext.',
+    differencesExplanation: 'Die Punkte zeigen deine Position in drei Kontexten. Große Abstände zwischen den Punkten deuten auf Flexibilität oder innere Spannung hin.',
     openness: 'Offenheit',
     conscientiousness: 'Gewissenhaftigkeit',
     extraversion: 'Extraversion',
@@ -500,8 +500,8 @@ const translations = {
     high: 'High',
     medium: 'Med',
     low: 'Low',
-    axesExplanation: 'The 4 axes: Duration (structure & security), Change (flexibility & spontaneity), Proximity (connection & harmony), Distance (autonomy & independence).',
-    differencesExplanation: 'Differences between areas show how you adapt to different situations. Large differences may indicate flexibility or inner tension.',
+    axesExplanation: 'Horizontal axis: Distance ↔ Proximity (autonomy vs. connection). Vertical axis: Stability ↔ Spontaneity (structure vs. flexibility). Your position shows your tendency in each context.',
+    differencesExplanation: 'The dots show your position in three contexts. Large distances between dots may indicate flexibility or inner tension.',
     openness: 'Openness',
     conscientiousness: 'Conscientiousness',
     extraversion: 'Extraversion',
@@ -596,150 +596,101 @@ const ShipWheelLogo = () => {
   );
 };
 
-// Vertical text label component (characters stacked vertically)
-const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
-  <View style={{ justifyContent: 'center', alignItems: 'center', width: 18 }}>
-    {text.split('').map((char, i) => (
-      <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 1.0, textAlign: 'center' }}>
-        {char}
-      </Text>
-    ))}
-  </View>
-);
-
-// Riemann Radar Chart as SVG
-const RiemannRadar = ({ data, language }: { 
+// Riemann-Thomann Cross (Quadrant Diagram) for PDF
+// Converts constant-sum data into 2 bipolar axes:
+//   X-axis: Nähe − Distanz  (right = Nähe-dominant)
+//   Y-axis: Wechsel − Dauer (up = Wechsel-dominant)
+const RiemannCross = ({ data, language }: { 
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
   language: 'de' | 'en';
 }) => {
-  const size = 140;
+  const size = 150;
   const center = size / 2;
-  const maxRadius = (size / 2) - 15;
-  // Order: Top=Distanz, Right=Wechsel(Spontanität), Bottom=Nähe, Left=Dauer(Beständigkeit)
-  const dimensions = ['distanz', 'wechsel', 'naehe', 'dauer'];
-  
-  const allValues = [
-    ...Object.values(data.beruf),
-    ...Object.values(data.privat),
-    ...Object.values(data.selbst),
-  ];
-  const maxValue = Math.max(...allValues);
-  const scale = Math.max(1, Math.ceil(maxValue));
-  
-  const getPoint = (dimIndex: number, value: number) => {
-    const angle = (dimIndex * 90 - 90) * (Math.PI / 180);
-    const radius = (value / scale) * maxRadius;
-    return {
-      x: center + radius * Math.cos(angle),
-      y: center + radius * Math.sin(angle),
-    };
-  };
-  
-  const getPolygonPoints = (contextData: Record<string, number>) => {
-    return dimensions.map((dim, i) => {
-      const point = getPoint(i, contextData[dim] || 0);
-      return `${point.x},${point.y}`;
-    }).join(' ');
-  };
-  
-  const contexts = [
-    { key: 'beruf', fill: colors.blue300, stroke: colors.blue500, opacity: 0.5 },
-    { key: 'privat', fill: colors.green300, stroke: colors.green600, opacity: 0.5 },
-    { key: 'selbst', fill: '#fdba74', stroke: colors.orange500, opacity: 0.5 },
-  ];
-  
+  const axisLen = (size / 2) - 20; // space for labels
+
   const dimLabels = language === 'de'
     ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
     : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
-  
-  // Grid circles
-  const gridLevels = [];
-  const step = scale <= 6 ? 1 : scale <= 10 ? 2 : Math.ceil(scale / 5);
-  for (let i = step; i <= scale; i += step) {
-    gridLevels.push(i);
-  }
-  
+
+  // Convert constant-sum to bipolar coordinates
+  const toCoord = (ctx: Record<string, number>) => ({
+    x: (ctx.naehe || 0) - (ctx.distanz || 0),
+    y: (ctx.wechsel || 0) - (ctx.dauer || 0),
+  });
+
+  const contexts = [
+    { key: 'beruf' as const, color: colors.blue500 },
+    { key: 'privat' as const, color: colors.green600 },
+    { key: 'selbst' as const, color: colors.orange500 },
+  ];
+
+  const coords = contexts.map(c => toCoord(data[c.key]));
+  const maxAbs = Math.max(...coords.flatMap(c => [Math.abs(c.x), Math.abs(c.y)]), 1);
+  const scale = Math.ceil(maxAbs);
+
+  const toPixel = (val: number) => (val / scale) * axisLen;
+
   return (
     <View style={{ alignItems: 'center' }}>
-      {/* Top label */}
-      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginBottom: 1 }}>
-        {dimLabels.distanz}
+      {/* Top label: Wechsel/Spontanität */}
+      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginBottom: 1 }}>
+        {dimLabels.wechsel}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* Left label - vertical */}
-        <VerticalLabel text={dimLabels.dauer} />
+        {/* Left label: Distanz */}
+        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, width: 22, textAlign: 'right', marginRight: 2 }}>
+          {dimLabels.distanz}
+        </Text>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* Grid circles */}
-          {gridLevels.map((level, idx) => (
-            <Circle
-              key={`grid-${level}`}
-              cx={center}
-              cy={center}
-              r={(level / scale) * maxRadius}
-              fill="none"
-              stroke={colors.gray200}
-              strokeWidth={idx === gridLevels.length - 1 ? 1.5 : 1}
-              strokeDasharray={idx !== gridLevels.length - 1 ? '3,3' : undefined}
-            />
-          ))}
-          
-          {/* Axis lines */}
-          {dimensions.map((_, i) => {
-            const endPoint = getPoint(i, scale);
-        return (
-          <Line
-            key={`axis-${i}`}
-            x1={center}
-            y1={center}
-            x2={endPoint.x}
-            y2={endPoint.y}
-            stroke={colors.gray300}
-            strokeWidth={1}
-          />
-        );
-      })}
-      
-      {/* Data polygons - with opacity for transparency */}
-      {contexts.map((ctx) => {
-        const contextData = data[ctx.key as keyof typeof data];
-        return (
+          {/* Quadrant background shading */}
+          <Rect x={center} y={0} width={center} height={center} fill="#eff6ff" fillOpacity={0.5} />
+          <Rect x={0} y={0} width={center} height={center} fill="#faf5ff" fillOpacity={0.5} />
+          <Rect x={0} y={center} width={center} height={center} fill={colors.gray50} fillOpacity={0.5} />
+          <Rect x={center} y={center} width={center} height={center} fill="#f0fdf4" fillOpacity={0.5} />
+
+          {/* Dashed grid at 50% */}
+          <Line x1={center + toPixel(0.5 * scale)} y1={center - axisLen} x2={center + toPixel(0.5 * scale)} y2={center + axisLen} stroke={colors.gray200} strokeWidth={0.5} strokeDasharray="3,3" />
+          <Line x1={center + toPixel(-0.5 * scale)} y1={center - axisLen} x2={center + toPixel(-0.5 * scale)} y2={center + axisLen} stroke={colors.gray200} strokeWidth={0.5} strokeDasharray="3,3" />
+          <Line x1={center - axisLen} y1={center - toPixel(0.5 * scale)} x2={center + axisLen} y2={center - toPixel(0.5 * scale)} stroke={colors.gray200} strokeWidth={0.5} strokeDasharray="3,3" />
+          <Line x1={center - axisLen} y1={center - toPixel(-0.5 * scale)} x2={center + axisLen} y2={center - toPixel(-0.5 * scale)} stroke={colors.gray200} strokeWidth={0.5} strokeDasharray="3,3" />
+
+          {/* Main cross axes */}
+          <Line x1={center - axisLen} y1={center} x2={center + axisLen} y2={center} stroke={colors.gray400} strokeWidth={1.5} />
+          <Line x1={center} y1={center - axisLen} x2={center} y2={center + axisLen} stroke={colors.gray400} strokeWidth={1.5} />
+
+          {/* Triangle connecting the 3 context dots */}
           <Polygon
-            key={ctx.key}
-            points={getPolygonPoints(contextData)}
-            fill={ctx.fill}
-            fillOpacity={ctx.opacity}
-            stroke={ctx.stroke}
-            strokeWidth={2}
+            points={coords.map(c =>
+              `${center + toPixel(c.x)},${center - toPixel(c.y)}`
+            ).join(' ')}
+            fill={colors.gray200}
+            fillOpacity={0.3}
+            stroke={colors.gray300}
+            strokeWidth={0.8}
+            strokeDasharray="3,2"
           />
-        );
-      })}
-      
-      {/* Data points */}
-      {contexts.map((ctx) => {
-        const contextData = data[ctx.key as keyof typeof data];
-        return dimensions.map((dim, i) => {
-          const point = getPoint(i, contextData[dim] || 0);
-          return (
-            <Circle
-              key={`point-${ctx.key}-${dim}`}
-              cx={point.x}
-              cy={point.y}
-              r={4}
-              fill={ctx.stroke}
-              stroke="white"
-              strokeWidth={1.5}
-            />
-          );
-        });
-      })}
-      
+
+          {/* Context dots */}
+          {contexts.map((ctx, i) => {
+            const c = coords[i];
+            const px = center + toPixel(c.x);
+            const py = center - toPixel(c.y);
+            return (
+              <G key={ctx.key}>
+                <Circle cx={px} cy={py} r={8} fill={ctx.color} fillOpacity={0.15} />
+                <Circle cx={px} cy={py} r={5} fill={ctx.color} stroke="white" strokeWidth={1.5} />
+              </G>
+            );
+          })}
         </Svg>
-        {/* Right label - vertical */}
-        <VerticalLabel text={dimLabels.wechsel} />
+        {/* Right label: Nähe */}
+        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, width: 22, marginLeft: 2 }}>
+          {dimLabels.naehe}
+        </Text>
       </View>
-      {/* Bottom label */}
-      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginTop: 1 }}>
-        {dimLabels.naehe}
+      {/* Bottom label: Dauer/Beständigkeit */}
+      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginTop: 1 }}>
+        {dimLabels.dauer}
       </Text>
     </View>
   );
@@ -1001,7 +952,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           <View style={[styles.box, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
             <View style={styles.riemannContainer}>
-              <RiemannRadar data={result.riemann} language={language} />
+              <RiemannCross data={result.riemann} language={language} />
               <View style={{ flex: 1 }}>
                 {result.riemann.stressRanking && result.riemann.stressRanking.length > 0 && (
                   <View style={{ marginBottom: 8 }}>
