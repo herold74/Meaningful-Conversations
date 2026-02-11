@@ -408,9 +408,11 @@ Das Riemann-Thomann-Modell stammt aus der systemischen Beratung und erfasst vier
 
 Das Besondere: Der Test unterscheidet zwischen drei Kontexten -- **beruflich**, **privat** und **Selbstbild** -- und zeigt zusätzlich Ihr **Stress-Reaktionsmuster**. So erkennen Sie, wie sich Ihre Grundstrebungen je nach Lebenssituation verschieben.
 
-📊 Ergebnis: Radardiagramm mit Stressranking.
+📊 Ergebnis: Riemann-Kreuz (Quadrantendiagramm) mit den zwei bipolaren Achsen Distanz↔Nähe und Beständigkeit↔Spontanität. Drei farbige Punkte zeigen Ihre Position in den drei Kontexten. Dazu Ihr persönliches Stressranking.
 ⏱ Dauer: ca. 10 Minuten
 💡 Besonders wertvoll für alle, die Beziehungsdynamiken im beruflichen oder privaten Kontext besser verstehen möchten.
+
+**Coaching-Hinweis:** Wenn Sie DPC oder DPFL aktivieren, nutzt der Coach Ihr **Selbstbild-Profil** als Basis für die Gesprächsanpassung. Grund: Im Coaching treten Sie als "Sie selbst" auf -- nicht in einer beruflichen Rolle oder einer vertrauten Beziehung. Ihr Selbstbild bildet daher die authentischste Grundlage für personalisiertes Coaching. Die DPFL-Verfeinerung passt weiterhin alle drei Kontexte an.
 
 ---
 
@@ -883,6 +885,8 @@ The OCEAN model is the most extensively researched personality model worldwide.
 - Distinguishes between professional, private context, and self-image
 - Shows your stress reaction pattern
 - More comprehensive and detailed (approx. 10 minutes)
+
+**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement still adjusts all three contexts.
 
 **Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 

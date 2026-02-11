@@ -1171,6 +1171,7 @@
   "survey_btn_finish": "Complete",
   
   "survey_riemann_disclaimer": "Coaching-based self-assessment using the Riemann-Thomann model (Riemann, 1961; Thomann, 1988). Not a standardized psychometric instrument.",
+  "riemann_coaching_context_note": "In coaching mode (DPC/DPFL), your self-image profile is used as the basis — how you see yourself, not your professional or private role.",
   "survey_riemann_beruf_title": "Context: WORK",
   "survey_riemann_privat_title": "Context: PRIVATE",
   "survey_riemann_selbst_title": "Context: SELF-IMAGE",
