@@ -1427,8 +1427,9 @@ const App: React.FC = () => {
                         minimal={minimalBar}
                     />
                     {/* Spacer for fixed web GamificationBar */}
+                    {/* Chat gets extra spacer height (6rem) due to input bar; minimalBar is never true for chat view */}
                     <div style={{ height: view === 'chat'
-                        ? (minimalBar ? `calc(5rem + ${iosSafeAreaTop}px)` : `calc(6rem + ${iosSafeAreaTop}px)`)
+                        ? `calc(6rem + ${iosSafeAreaTop}px)`
                         : (minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)`)
                     }} />
                 </>
