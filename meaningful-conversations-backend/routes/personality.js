@@ -24,10 +24,30 @@ router.post('/save', authMiddleware, async (req, res) => {
     
     // Validate and serialize completedLenses
     const validLenses = ['sd', 'riemann', 'ocean'];
+    const premiumOnlyLenses = ['sd', 'riemann'];
     let lensesJson = '[]';
     if (Array.isArray(completedLenses)) {
       const filtered = completedLenses.filter(l => validLenses.includes(l));
       lensesJson = JSON.stringify(filtered);
+    }
+    
+    // Premium enforcement: Riemann & SD require premium (isPremium), client (isClient), or admin access
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user && !user.isPremium && !user.isClient && !user.isAdmin) {
+      const requestedPremiumLenses = (Array.isArray(completedLenses) ? completedLenses : [])
+        .filter(l => premiumOnlyLenses.includes(l));
+      
+      // Check if any premium-only lenses are NEW (not already in existing profile)
+      const existingProfileForCheck = await prisma.personalityProfile.findUnique({ where: { userId } });
+      const existingLensesForCheck = existingProfileForCheck?.completedLenses 
+        ? JSON.parse(existingProfileForCheck.completedLenses) : [];
+      
+      const newPremiumLenses = requestedPremiumLenses.filter(l => !existingLensesForCheck.includes(l));
+      if (newPremiumLenses.length > 0) {
+        return res.status(403).json({ 
+          error: `Riemann-Thomann and Spiral Dynamics profiles require Premium access.` 
+        });
+      }
     }
     
     // Check if profile exists to determine if we should merge lenses

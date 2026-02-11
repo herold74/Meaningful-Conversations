@@ -604,23 +604,30 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
 };
 
 // 5. LENS SELECTION (Choose which questionnaire to fill)
+// Lenses that require premium or higher access
+const PREMIUM_ONLY_LENSES: LensType[] = ['sd', 'riemann'];
+
 const LensSelectionBlock = ({ 
   onSelect, 
   completedLenses,
-  t 
+  t,
+  isPremiumOrHigher = false
 }: { 
   onSelect: (lens: LensType) => void;
   completedLenses: LensType[];
   t: TranslateFunc;
+  isPremiumOrHigher?: boolean;
 }) => {
   const lensInfo = getLensInfo(t);
   const availableLenses = Object.values(lensInfo).filter(
-    lens => !completedLenses.includes(lens.id)
+    lens => !completedLenses.includes(lens.id) && (isPremiumOrHigher || !PREMIUM_ONLY_LENSES.includes(lens.id))
   );
 
-  // All lenses completed - show option to redo any
+  // All lenses completed - show option to redo any (respecting premium restrictions)
   if (availableLenses.length === 0) {
-    const allLenses = Object.values(lensInfo);
+    const allLenses = Object.values(lensInfo).filter(
+      lens => isPremiumOrHigher || !PREMIUM_ONLY_LENSES.includes(lens.id)
+    );
     
     return (
       <div className="py-6">
@@ -1243,6 +1250,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
           onSelect={handleLensSelect}
           completedLenses={result.completedLenses || []}
           t={t}
+          isPremiumOrHigher={!!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin)}
         />
       </Card>
     );

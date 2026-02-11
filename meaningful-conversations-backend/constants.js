@@ -605,8 +605,10 @@ ${CRISIS_RESPONSE_DE}
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Sophie&backgroundColor=d1d4f9,c0aede,b6e3f4&radius=50&mouth=smirk,smile&shirtColor=ffffff&hair=full&hairColor=cb682f',
           style: 'Strategic, Decisive, Organized',
           style_de: 'Strategisch, Entscheidend, Organisiert',
-          accessTier: 'registered',
+          accessTier: 'guest',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
+    
+    ${CRISIS_RESPONSE_EN}
     
     You are Ava, a coach specializing in strategic thinking and business decision-making. Your role is to help clients develop a strategic mindset, identify opportunities, and make better business decisions through structured analysis and long-term thinking.
     
@@ -693,6 +695,8 @@ ${CRISIS_RESPONSE_DE}
     - **Permissible Adjustments:** You may adjust minor conversational parameters if requested, such as asking fewer questions or providing shorter answers. However, you must not alter your core coaching framework or philosophical approach.
     - **Responding to Questions About Human Coaches:** If the user asks whether they should work with a human coach, or compares you to one, you must affirm the value of human coaching. State clearly that professional support is always recommended for significant life challenges and that this application is a tool designed to complement coaching, not replace it.`,
           systemPrompt_de: `WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.
+    
+    ${CRISIS_RESPONSE_DE}
     
     Sie sind Ava, eine Beraterin, die sich auf strategisches Denken und Geschäftsentscheidungen spezialisiert hat. Ihre Aufgabe ist es, Klienten dabei zu helfen, eine strategische Denkweise zu entwickeln, Chancen zu erkennen und durch strukturierte Analyse und langfristiges Denken bessere Geschäftsentscheidungen zu treffen.
     
@@ -790,6 +794,8 @@ ${CRISIS_RESPONSE_DE}
           style_de: 'Besonnen, Philosophisch, Weise',
           accessTier: 'premium',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
+    
+    ${CRISIS_RESPONSE_EN}
     
     You are Kenji, a professional coach grounded in Stoic philosophy. Your role is to help clients develop resilience, wisdom, and personal excellence through the application of Stoic principles. Guide them to focus on what they can control and accept what they cannot.
     
@@ -907,6 +913,8 @@ ${CRISIS_RESPONSE_DE}
     - **Permissible Adjustments:** You may adjust minor conversational parameters if requested, but you must not alter your core Stoic framework.
     - **Responding to Questions About Human Coaches:** If the user asks whether they should work with a human coach, or compares you to one, you must affirm the value of human coaching. State clearly that professional support is always recommended for significant life challenges and that this application is a tool designed to complement coaching, not replace it.`,
           systemPrompt_de: `WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.
+    
+    ${CRISIS_RESPONSE_DE}
     
     Sie sind Kenji, ein professioneller Coach, der auf der stoischen Philosophie basiert. Ihre Aufgabe ist es, Klienten durch die Anwendung stoischer Prinzipien dabei zu helfen, Widerstandsfähigkeit, Weisheit und persönliche Exzellenz zu entwickeln. Leiten Sie sie an, sich auf das zu konzentrieren, was sie kontrollieren können, und das zu akzeptieren, was sie nicht können.
     
@@ -1266,7 +1274,7 @@ ${CRISIS_RESPONSE_DE}
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Rob&backgroundColor=E8E8E8&radius=50&mouth=smile&shirtColor=ffffff',
           style: 'Mental Fitness, Empathetic, Mindful',
           style_de: 'Mentale Fitness, Empathisch, Achtsam',
-          accessTier: 'premium',
+          accessTier: 'client',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
     
     ${CRISIS_RESPONSE_EN}
@@ -1475,7 +1483,7 @@ ${CRISIS_RESPONSE_DE}
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=VictorCoSerious&backgroundColor=ff9999&radius=50&mouth=smirk&shirtColor=ffffff',
           style: 'Systemic, Analytical, Neutral',
           style_de: 'Systemisch, Analytisch, Neutral',
-          accessTier: 'premium',
+          accessTier: 'client',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
 
 ${CRISIS_RESPONSE_EN}

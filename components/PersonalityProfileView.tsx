@@ -323,6 +323,8 @@ interface ProfileMetadata {
 
 const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate, lifeContext, onEditLifeContext }) => {
   const { t, language } = useLocalization();
+  // Premium or higher: isPremium (premium), isClient (client), or isAdmin (admin/developer)
+  const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin);
   const [isLoading, setIsLoading] = useState(true);
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
   const [profileMetadata, setProfileMetadata] = useState<ProfileMetadata | null>(null);
@@ -662,7 +664,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               >
                 <option value="off">{t('profile_coaching_mode_off_short') || 'Aus'}</option>
                 <option value="dpc">DPC</option>
-                <option value="dpfl" disabled={decryptedData?.adaptationMode === 'stable'}>DPFL</option>
+                <option value="dpfl" disabled={!isPremiumOrHigher || decryptedData?.adaptationMode === 'stable'}>
+                  {isPremiumOrHigher ? 'DPFL' : `DPFL (${t('feature_requires_premium') || 'Premium'})`}
+                </option>
               </select>
           </div>
           {/* Compact metadata line */}
@@ -690,7 +694,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               <span className={chipAmber}>
                 ✓ {t('lens_sd_name') || 'Was dich antreibt'}
               </span>
-            ) : (
+            ) : isPremiumOrHigher ? (
               <button
                 onClick={() => onStartNewTest({
                   completedLenses: profileMetadata.completedLenses,
@@ -704,12 +708,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               >
                 + {t('lens_sd_name') || 'Was dich antreibt'}
               </button>
+            ) : (
+              <span className={chipMuted} title={t('feature_requires_premium') || 'Premium erforderlich'}>
+                🔒 {t('lens_sd_name') || 'Was dich antreibt'}
+              </span>
             )}
             {profileMetadata.completedLenses.includes('riemann') ? (
               <span className={chipRose}>
                 ✓ {t('lens_riemann_name') || 'Wie du interagierst'}
               </span>
-            ) : (
+            ) : isPremiumOrHigher ? (
               <button
                 onClick={() => onStartNewTest({
                   completedLenses: profileMetadata.completedLenses,
@@ -723,6 +731,10 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               >
                 + {t('lens_riemann_name') || 'Wie du interagierst'}
               </button>
+            ) : (
+              <span className={chipMuted} title={t('feature_requires_premium') || 'Premium erforderlich'}>
+                🔒 {t('lens_riemann_name') || 'Wie du interagierst'}
+              </span>
             )}
             {profileMetadata.completedLenses.includes('ocean') ? (
               <span className={chipTeal}>

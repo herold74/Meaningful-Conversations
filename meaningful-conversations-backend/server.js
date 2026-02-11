@@ -146,7 +146,7 @@ async function seedAdminUser() {
                         passwordHash,
                         encryptionSalt,
                         isAdmin: true,
-                        isBetaTester: true,
+                        isPremium: true,
                         status: 'ACTIVE',
                         unlockedCoaches: '[]',
                     },

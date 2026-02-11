@@ -231,7 +231,7 @@
   "sessionReview_xpBonus_formalClose": "You've earned a 50 XP bonus for completing a full coaching session!",
   "sessionReview_xpBonus_goalAccomplished": "You've earned a 25 XP bonus for accomplishing one of your goals!",
   "sessionReview_blockages_title": "Potential Solution Blockages",
-  "sessionReview_blockages_subtitle": "Based on PEP by Dr. Michael Bohne, your coach noticed patterns that might be hindering your progress. This is an experimental feature for beta testers.",
+  "sessionReview_blockages_subtitle": "Based on PEP by Dr. Michael Bohne, your coach noticed patterns that might be hindering your progress.",
   "sessionReview_no_blockages": "No specific solution blockages were identified in this session.",
   "sessionReview_proposedUpdates": "Proposed Context Updates",
   "sessionReview_no_updates": "No updates were proposed in this session.",

@@ -229,7 +229,7 @@
   "sessionReview_xpBonus_formalClose": "Sie haben einen 50-XP-Bonus für den Abschluss einer vollständigen Coaching-Sitzung erhalten!",
   "sessionReview_xpBonus_goalAccomplished": "Sie haben einen 25-XP-Bonus für das Erreichen eines Ihrer Ziele erhalten!",
   "sessionReview_blockages_title": "Mögliche Lösungsblockaden",
-  "sessionReview_blockages_subtitle": "Basierend auf PEP von Dr. Michael Bohne hat Ihr Coach Muster bemerkt, die Ihren Fortschritt behindern könnten. Dies ist eine experimentelle Funktion für Betatester.",
+  "sessionReview_blockages_subtitle": "Basierend auf PEP von Dr. Michael Bohne hat Ihr Coach Muster bemerkt, die Ihren Fortschritt behindern könnten.",
   "sessionReview_no_blockages": "In dieser Sitzung wurden keine spezifischen Lösungsblockaden identifiziert.",
   "sessionReview_proposedUpdates": "Vorgeschlagene Kontext-Aktualisierungen",
   "sessionReview_no_updates": "In dieser Sitzung wurden keine Aktualisierungen vorgeschlagen.",
