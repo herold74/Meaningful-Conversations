@@ -121,10 +121,13 @@ Located in `/memory-bank/`:
 
 ## Current Setup
 
-- **Server:** Hetzner VPS (Manualmode Server)
-- **Environments:** Staging + Production
-- **Container Engine:** Podman
-- **Database:** MariaDB 11.2
+- **Version:** 1.8.4
+- **Server:** Hetzner VPS (91.99.193.87)
+- **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
+- **Container Engine:** Podman + podman-compose
+- **Containers:** Frontend, Backend (PM2 x2), TTS (Piper), MariaDB 11.2
 - **Registry:** quay.myandi.de/gherold
+- **Deploy:** Automatic health checks + auto-rollback on failure
+- **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** January 2026
+**Last Updated:** February 2026

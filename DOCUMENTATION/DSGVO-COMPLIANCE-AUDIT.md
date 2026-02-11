@@ -2,7 +2,7 @@
 ## Meaningful Conversations App
 
 **Pruefungsdatum:** 10. Februar 2026  
-**Gepruefte Version:** 1.8.2  
+**Gepruefte Version:** 1.8.4  
 **Vorherige Pruefung:** 16. Dezember 2025 (v1.7.0)  
 **Betreiber-Standort:** Oesterreich  
 **Server-Standort:** Hetzner, Deutschland (EU)  

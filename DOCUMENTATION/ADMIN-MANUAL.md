@@ -387,5 +387,5 @@ This is expected behavior due to end-to-end encryption:
 
 For technical issues beyond this manual, contact the development team.
 
-**Version:** 1.8.2  
+**Version:** 1.8.4  
 **Last Updated:** February 2026

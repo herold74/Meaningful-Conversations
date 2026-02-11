@@ -461,7 +461,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         createdAt: encryptedProfile.createdAt,
         updatedAt: encryptedProfile.updatedAt,
         sessionCount: encryptedProfile.sessionCount || 0,
-        adaptationMode: encryptedProfile.adaptationMode || 'adaptive'
+        adaptationMode: encryptedProfile.adaptationMode || 'stable'
       };
       setProfileMetadata(metadata);
     } catch (err) {
@@ -665,7 +665,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 <option value="off">{t('profile_coaching_mode_off_short') || 'Aus'}</option>
                 <option value="dpc">DPC</option>
                 <option value="dpfl" disabled={!isPremiumOrHigher || decryptedData?.adaptationMode === 'stable'}>
-                  {isPremiumOrHigher ? 'DPFL' : `DPFL (${t('feature_requires_premium') || 'Premium'})`}
+                  {isPremiumOrHigher ? 'DPFL' : `🔒 DPFL (${t('feature_requires_premium') || 'Premium'})`}
                 </option>
               </select>
           </div>
@@ -934,6 +934,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </p>
             </div>
             <SpiralDynamicsVisualization result={decryptedData.spiralDynamics} />
+            <div className="mt-3 text-xs text-content-tertiary italic text-center">
+              <p>{t('survey_pvq21_citation')}</p>
+              <a 
+                href={t('survey_pvq21_source_url')} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-accent-primary transition-colors"
+              >
+                {t('survey_pvq21_source_label')} ↗
+              </a>
+            </div>
           </section>
         )}
 
@@ -1005,61 +1016,111 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 </div>
               </div>
             )}
+            <p className="mt-3 text-xs text-content-tertiary italic text-center">
+              {t('survey_riemann_disclaimer')}
+            </p>
           </section>
         )}
 
-        {/* OCEAN Results */}
-        {decryptedData.big5 && (
-          <section className="mb-6 rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-5 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-content-primary">
-                {t('lens_ocean_name') || 'Was dich ausmacht'}
-              </h3>
-              <p className="text-sm text-content-tertiary">
-                {t('profile_view_results') || 'Ergebnisse'}
-              </p>
-            </div>
-            <div className="space-y-4">
-              {Object.entries(decryptedData.big5).map(([trait, scoreValue]) => {
-                const score = scoreValue as number;
-                const percentage = score * 20;
-                
-                // Translate trait name
-                const traitKey = `big5_${trait.toLowerCase()}`;
-                const translatedTrait = t(traitKey) || trait;
-                
-                // OCEAN trait icons (subtle, professional)
-                const traitIcon: Record<string, string> = {
-                  openness: '🎨',
-                  conscientiousness: '📋',
-                  extraversion: '💬',
-                  agreeableness: '🤝',
-                  neuroticism: '🌊'
-                };
-                
-                return (
-                  <div key={trait} className="group rounded-lg border border-border-secondary/70 bg-background-secondary dark:bg-background-secondary p-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base opacity-70">{traitIcon[trait.toLowerCase()] || '•'}</span>
-                        <span className="text-sm font-medium text-content-primary">{translatedTrait}</span>
+        {/* OCEAN / BFI-2 Results */}
+        {decryptedData.big5 && (() => {
+          const big5 = decryptedData.big5;
+          const domainKeys = ['extraversion', 'agreeableness', 'conscientiousness', 'neuroticism', 'openness'] as const;
+          const traitIcon: Record<string, string> = {
+            openness: '🎨', conscientiousness: '📋', extraversion: '💬', agreeableness: '🤝', neuroticism: '🌊'
+          };
+          // Facet keys grouped by domain
+          const domainFacets: Record<string, string[]> = {
+            extraversion: ['sociability', 'assertiveness', 'energyLevel'],
+            agreeableness: ['compassion', 'respectfulness', 'trust'],
+            conscientiousness: ['organization', 'productiveness', 'responsibility'],
+            neuroticism: ['anxiety', 'depression', 'emotionalVolatility'],
+            openness: ['aestheticSensitivity', 'intellectualCuriosity', 'creativeImagination'],
+          };
+          const variantLabel = big5.variant === 's' ? 'BFI-2-S' : big5.variant === 'xs' ? 'BFI-2-XS' : '';
+          
+          return (
+            <section className="mb-6 rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-5 shadow-sm">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-content-primary">
+                  {t('lens_ocean_name') || 'Was dich ausmacht'}
+                </h3>
+                <p className="text-sm text-content-tertiary">
+                  {t('profile_view_results') || 'Ergebnisse'}
+                  {variantLabel && <span className="ml-2 text-xs opacity-60">({variantLabel})</span>}
+                </p>
+              </div>
+              <div className="space-y-4">
+                {domainKeys.map(trait => {
+                  const score = big5[trait] as number;
+                  if (typeof score !== 'number') return null;
+                  const percentage = score * 20;
+                  const traitKey = `big5_${trait}`;
+                  const translatedTrait = t(traitKey) || trait;
+                  const facets = big5.facets ? domainFacets[trait] : null;
+                  
+                  return (
+                    <div key={trait}>
+                      <div className="group rounded-lg border border-border-secondary/70 bg-background-secondary dark:bg-background-secondary p-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base opacity-70">{traitIcon[trait] || '•'}</span>
+                            <span className="text-sm font-medium text-content-primary">{translatedTrait}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-accent-primary">
+                            {score.toFixed(1)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-background-tertiary rounded h-2.5 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-accent-primary/80 to-accent-primary h-full rounded transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        {/* Facets (BFI-2-S only) */}
+                        {facets && (
+                          <div className="mt-2 pt-2 border-t border-border-secondary/50 space-y-1.5">
+                            {facets.map(facetKey => {
+                              const facetScore = (big5.facets as any)?.[facetKey] as number;
+                              if (typeof facetScore !== 'number') return null;
+                              const facetPct = facetScore * 20;
+                              const facetLabel = t(`bfi2_facet_${facetKey.replace(/([A-Z])/g, '_$1').toLowerCase()}`) || facetKey;
+                              return (
+                                <div key={facetKey} className="flex items-center gap-2">
+                                  <span className="text-xs text-content-tertiary w-28 truncate" title={facetLabel}>{facetLabel}</span>
+                                  <div className="flex-1 bg-background-tertiary rounded h-1.5 overflow-hidden">
+                                    <div 
+                                      className="bg-accent-primary/50 h-full rounded transition-all duration-500"
+                                      style={{ width: `${facetPct}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-content-tertiary w-8 text-right">{facetScore.toFixed(1)}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                      <span className="text-sm font-semibold text-accent-primary">
-                        {score.toFixed(1)}
-                      </span>
                     </div>
-                    <div className="w-full bg-background-tertiary rounded h-2.5 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-accent-primary/80 to-accent-primary h-full rounded transition-all duration-500"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                  );
+                })}
+              </div>
+              {variantLabel && (
+                <div className="mt-3 text-xs text-content-tertiary italic text-center">
+                  <p>{t('survey_bfi2_citation')}</p>
+                  <a 
+                    href={t('survey_bfi2_source_url')} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="underline hover:text-accent-primary transition-colors"
+                  >
+                    {t('survey_bfi2_source_label')} ↗
+                  </a>
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
 
         {/* Delete Profile - Very subtle, at the bottom */}
