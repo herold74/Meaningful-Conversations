@@ -915,6 +915,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <div className="p-4 bg-background-secondary dark:bg-background-secondary rounded-lg border border-border-secondary/70">
               <RiemannCrossChart data={decryptedData.riemann} t={t} />
             </div>
+
+            {/* DPC/DPFL coaching context note */}
+            <p className="mt-3 text-xs text-content-tertiary text-center">
+              {t('riemann_coaching_context_note')}
+            </p>
             
             {/* Stress Reaction Ranking */}
             {decryptedData.riemann.stressRanking && decryptedData.riemann.stressRanking.length > 0 && (

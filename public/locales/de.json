@@ -1170,6 +1170,7 @@
   "survey_btn_finish": "Abschließen",
   
   "survey_riemann_disclaimer": "Coaching-basierte Selbsteinschätzung nach dem Riemann-Thomann-Modell (Riemann, 1961; Thomann, 1988). Kein standardisiertes psychometrisches Instrument.",
+  "riemann_coaching_context_note": "Im Coaching-Modus (DPC/DPFL) wird dein Selbstbild-Profil als Basis verwendet — so wie du dich selbst siehst, nicht deine berufliche oder private Rolle.",
   "survey_riemann_beruf_title": "Kontext: BERUF",
   "survey_riemann_privat_title": "Kontext: PRIVAT",
   "survey_riemann_selbst_title": "Kontext: SELBSTBILD",
