@@ -163,6 +163,13 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, _weight) {
     return { hasSuggestions: false, reason: 'Insufficient data' };
   }
 
+  // Only refine 'selbst' (self-image) — coaching sessions reflect the client's
+  // self-perception, not their work or private role. beruf and privat are set
+  // explicitly during the questionnaire and should not be altered by DPFL.
+  if (!currentProfile.selbst) {
+    return { hasSuggestions: false, reason: 'No selbst context in Riemann profile' };
+  }
+
   const confidence = getSessionConfidence(sessionLogs.length);
   const maxAdjustment = 5; // Max 5 points on 0-100 scale per cycle
 
@@ -181,8 +188,8 @@ function calculateRiemannRefinement(currentProfile, sessionLogs, _weight) {
   let hasSignificantChanges = false;
   const allFoundKeywords = {};
 
-  for (const context of ['beruf', 'privat', 'selbst']) {
-    if (!currentProfile[context]) continue;
+  {
+    const context = 'selbst';
 
     const currentScores = currentProfile[context];
     

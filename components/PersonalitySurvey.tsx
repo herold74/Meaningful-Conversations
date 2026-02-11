@@ -127,6 +127,7 @@ export interface NarrativeProfile {
     recommendation: string;
   }[];
   generatedAt: string;
+  generatedLanguage?: string;     // 'de' | 'en' — language the narrative was generated in
 }
 
 // --- SPIRAL DYNAMICS LEVEL DEFINITIONS ---

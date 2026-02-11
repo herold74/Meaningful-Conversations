@@ -412,7 +412,7 @@ Das Besondere: Der Test unterscheidet zwischen drei Kontexten -- **beruflich**, 
 ⏱ Dauer: ca. 10 Minuten
 💡 Besonders wertvoll für alle, die Beziehungsdynamiken im beruflichen oder privaten Kontext besser verstehen möchten.
 
-**Coaching-Hinweis:** Wenn Sie DPC oder DPFL aktivieren, nutzt der Coach Ihr **Selbstbild-Profil** als Basis für die Gesprächsanpassung. Grund: Im Coaching treten Sie als "Sie selbst" auf -- nicht in einer beruflichen Rolle oder einer vertrauten Beziehung. Ihr Selbstbild bildet daher die authentischste Grundlage für personalisiertes Coaching. Die DPFL-Verfeinerung passt weiterhin alle drei Kontexte an.
+**Coaching-Hinweis:** Wenn Sie DPC oder DPFL aktivieren, nutzt der Coach Ihr **Selbstbild-Profil** als Basis für die Gesprächsanpassung. Grund: Im Coaching treten Sie als "Sie selbst" auf -- nicht in einer beruflichen Rolle oder einer vertrauten Beziehung. Ihr Selbstbild bildet daher die authentischste Grundlage für personalisiertes Coaching. Die DPFL-Verfeinerung passt ausschließlich den **Selbstbild**-Kontext an; Beruf und Privat bleiben unverändert.
 
 ---
 
@@ -886,7 +886,7 @@ The OCEAN model is the most extensively researched personality model worldwide.
 - Shows your stress reaction pattern
 - More comprehensive and detailed (approx. 10 minutes)
 
-**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement still adjusts all three contexts.
+**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
 
 **Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 

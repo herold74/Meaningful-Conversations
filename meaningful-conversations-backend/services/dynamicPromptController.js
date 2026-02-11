@@ -222,9 +222,11 @@ function analyzeProfile(profile, lang = 'de') {
   // Analyze Riemann if available (check both path and completedLenses for combined profiles)
   // Uses 'selbst' (self-image) as primary context — in a coaching session the client
   // presents as "themselves", not in a work or private role. See dpcStrategyMerger.js.
+  // The Riemann test always collects all 3 contexts (beruf, privat, selbst) together,
+  // so there is no scenario where selbst would be missing while others exist.
   const hasRiemann = profile.path === 'RIEMANN' || profile.completedLenses?.includes('riemann');
-  if (hasRiemann && profile.riemann) {
-    const selbst = profile.riemann.selbst || profile.riemann.beruf; // fallback to beruf for legacy profiles
+  if (hasRiemann && profile.riemann && profile.riemann.selbst) {
+    const selbst = profile.riemann.selbst;
     
     // Find highest and lowest scores
     const traits = ['dauer', 'wechsel', 'naehe', 'distanz'];
