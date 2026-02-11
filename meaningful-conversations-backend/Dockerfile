@@ -7,7 +7,8 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm install
+# Use npm ci for reproducible builds (strictly follows package-lock.json)
+RUN npm ci --ignore-scripts && npx prisma generate
 
 COPY . .
 

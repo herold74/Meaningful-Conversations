@@ -59,6 +59,11 @@ show_help() {
     echo "  ${BLUE}./deploy-manualmode.sh --server root@1.2.3.4${NC}  # Deploy to different server"
     echo "  ${BLUE}./deploy-manualmode.sh -e production -c frontend${NC}  # Deploy frontend to production"
     echo ""
+    echo "Automatic Rollback:"
+    echo "  If health checks fail after deployment, the script automatically"
+    echo "  rolls back to the previous version. The previous version is saved"
+    echo "  on the server before each deployment."
+    echo ""
 }
 
 while [[ $# -gt 0 ]]; do
@@ -375,6 +380,18 @@ if [[ "$COMPONENT" == "all" || "$COMPONENT" == "frontend" ]]; then
     podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
 fi
 
+# Save current version for rollback (before stopping anything)
+PREV_VERSION=""
+if [ -f .env ]; then
+    PREV_VERSION=$(grep -m1 '^VERSION=' .env 2>/dev/null | cut -d'=' -f2 || echo "")
+fi
+if [ -n "$PREV_VERSION" ] && [ "$PREV_VERSION" != "$VERSION" ]; then
+    echo "$PREV_VERSION" > .previous-version
+    echo "Saved previous version $PREV_VERSION for rollback"
+else
+    echo "No previous version to save (first deploy or same version)"
+fi
+
 # Stop existing containers
 echo "Stopping existing containers..."
 podman-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
@@ -468,21 +485,143 @@ if [[ "$DRY_RUN" == false ]]; then
     echo -e "${BLUE}Frontend URL:${NC} $FRONTEND_TEST_URL"
     echo -e "${BLUE}Backend API:${NC}  $BACKEND_TEST_URL"
     echo ""
-    echo -e "${YELLOW}Testing connectivity...${NC}"
-    sleep 5
+    echo -e "${YELLOW}Testing connectivity (3 retries, 10s interval)...${NC}"
     
-    # Test frontend
-    if curl -f -s -o /dev/null "$FRONTEND_TEST_URL"; then
-        echo -e "${GREEN}✓ Frontend is responding${NC}"
-    else
-        echo -e "${YELLOW}⚠ Frontend not responding yet (may still be starting)${NC}"
+    DEPLOY_FAILED=false
+    
+    # Test frontend with retries
+    FRONTEND_OK=false
+    for i in 1 2 3; do
+        sleep 10
+        if curl -f -s -o /dev/null --max-time 10 "$FRONTEND_TEST_URL"; then
+            echo -e "${GREEN}✓ Frontend is responding${NC}"
+            FRONTEND_OK=true
+            break
+        else
+            echo -e "${YELLOW}  Attempt $i/3: Frontend not responding yet...${NC}"
+        fi
+    done
+    if [[ "$FRONTEND_OK" == false ]]; then
+        echo -e "${RED}✗ FRONTEND NOT RESPONDING after 3 attempts${NC}"
+        DEPLOY_FAILED=true
     fi
     
-    # Test backend
-    if curl -f -s -o /dev/null "$BACKEND_TEST_URL/health"; then
-        echo -e "${GREEN}✓ Backend is responding${NC}"
-    else
-        echo -e "${YELLOW}⚠ Backend not responding yet (may still be starting)${NC}"
+    # Test backend with retries
+    BACKEND_OK=false
+    for i in 1 2 3; do
+        if curl -f -s -o /dev/null --max-time 10 "$BACKEND_TEST_URL/health"; then
+            echo -e "${GREEN}✓ Backend is responding${NC}"
+            BACKEND_OK=true
+            break
+        else
+            echo -e "${YELLOW}  Attempt $i/3: Backend not responding yet...${NC}"
+            sleep 10
+        fi
+    done
+    if [[ "$BACKEND_OK" == false ]]; then
+        echo -e "${RED}✗ BACKEND NOT RESPONDING after 3 attempts${NC}"
+        DEPLOY_FAILED=true
+    fi
+    
+    # Automatic rollback if services are not healthy
+    if [[ "$DEPLOY_FAILED" == true ]]; then
+        echo ""
+        echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${RED}DEPLOYMENT VERIFICATION FAILED -- INITIATING ROLLBACK${NC}"
+        echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        
+        # Fetch backend logs for diagnostics before rollback
+        echo -e "${YELLOW}Fetching backend logs for diagnostics...${NC}"
+        ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE logs --tail 30 backend" 2>/dev/null || true
+        echo ""
+        
+        # Check if a previous version exists on the server
+        PREV_VERSION=$(ssh "$REMOTE_HOST" "cat $REMOTE_ENV_DIR/.previous-version 2>/dev/null" || echo "")
+        
+        if [[ -n "$PREV_VERSION" ]]; then
+            echo -e "${YELLOW}Rolling back to previous version: $PREV_VERSION${NC}"
+            
+            # Create rollback script
+            cat > /tmp/remote-rollback.sh << ROLLBACK_SCRIPT
+#!/bin/bash
+set -e
+cd "$REMOTE_ENV_DIR"
+COMPOSE_FILE="$COMPOSE_FILE"
+PREV_VERSION="$PREV_VERSION"
+REGISTRY_URL="$REGISTRY_URL"
+REGISTRY_USER="$REGISTRY_USER"
+
+echo "=== ROLLBACK: Stopping failed deployment ==="
+podman-compose -f "\$COMPOSE_FILE" down 2>/dev/null || true
+
+echo "=== ROLLBACK: Pulling previous images (v\$PREV_VERSION) ==="
+podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-backend:\$PREV_VERSION" || true
+podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-frontend:\$PREV_VERSION" || true
+podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-tts:\$PREV_VERSION" || true
+
+echo "=== ROLLBACK: Restoring VERSION in .env ==="
+sed -i '/^VERSION=/d' .env
+echo "VERSION=\$PREV_VERSION" >> .env
+
+echo "=== ROLLBACK: Starting services with v\$PREV_VERSION ==="
+podman-compose -f "\$COMPOSE_FILE" up -d
+
+echo "Waiting for rollback services to start..."
+sleep 15
+
+echo "=== ROLLBACK: Updating nginx ==="
+if [ -f "/usr/local/bin/update-nginx-ips.sh" ]; then
+    /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT || echo "WARNING: Nginx update failed during rollback"
+fi
+
+echo "=== ROLLBACK: Service status ==="
+podman-compose -f "\$COMPOSE_FILE" ps
+
+echo "=== ROLLBACK COMPLETE ==="
+ROLLBACK_SCRIPT
+            
+            scp /tmp/remote-rollback.sh "$REMOTE_HOST:/tmp/"
+            ssh "$REMOTE_HOST" "chmod +x /tmp/remote-rollback.sh && /tmp/remote-rollback.sh"
+            rm /tmp/remote-rollback.sh
+            
+            # Verify rollback health
+            echo ""
+            echo -e "${YELLOW}Verifying rollback health...${NC}"
+            sleep 5
+            
+            ROLLBACK_OK=true
+            if curl -f -s -o /dev/null --max-time 10 "$FRONTEND_TEST_URL"; then
+                echo -e "${GREEN}✓ Frontend responding after rollback${NC}"
+            else
+                echo -e "${RED}✗ Frontend still not responding after rollback${NC}"
+                ROLLBACK_OK=false
+            fi
+            if curl -f -s -o /dev/null --max-time 10 "$BACKEND_TEST_URL/health"; then
+                echo -e "${GREEN}✓ Backend responding after rollback${NC}"
+            else
+                echo -e "${RED}✗ Backend still not responding after rollback${NC}"
+                ROLLBACK_OK=false
+            fi
+            
+            echo ""
+            if [[ "$ROLLBACK_OK" == true ]]; then
+                echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+                echo -e "${GREEN}ROLLBACK SUCCESSFUL -- Restored to v$PREV_VERSION${NC}"
+                echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+            else
+                echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+                echo -e "${RED}ROLLBACK FAILED -- Manual intervention required!${NC}"
+                echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+                echo -e "${YELLOW}Check logs: ssh $REMOTE_HOST 'cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE logs --tail 50'${NC}"
+            fi
+        else
+            echo -e "${RED}No previous version found -- cannot rollback automatically${NC}"
+            echo -e "${YELLOW}This appears to be the first deployment to this environment.${NC}"
+            echo -e "${YELLOW}Check logs: ssh $REMOTE_HOST 'cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE logs --tail 50 backend'${NC}"
+        fi
+        
+        exit 1
     fi
     
     echo ""

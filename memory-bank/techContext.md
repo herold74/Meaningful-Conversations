@@ -84,6 +84,25 @@
   - `meaningful-conversations-backend:VERSION`
   - `meaningful-conversations-tts:VERSION`
 
+### Dependency Management
+- **Dockerfiles:** Use `npm ci` (not `npm install`) for reproducible builds
+- **Lockfile:** `package-lock.json` is the source of truth for production dependencies
+- **Local dev:** `npm install` is fine; always commit updated `package-lock.json` afterwards
+- **Lesson Learned (v1.8.4):** `npm install` in Dockerfile resolved `express-rate-limit ^8.2.1` to a newer 8.x with a breaking validation (`ERR_ERL_KEY_GEN_IPV6`), crashing the staging backend. Fixed by switching to `npm ci`.
+
+### Post-Deploy Health Checks & Automatic Rollback
+- Deploy script (`deploy-manualmode.sh`) performs connectivity checks after deployment
+- **Retry logic:** 3 attempts with 10s intervals for both frontend and backend
+- **Hard fail:** Script exits with error code 1 if services don't respond after all retries
+- **Automatic rollback:** On health check failure, the script automatically:
+  1. Fetches backend logs for diagnostics
+  2. Reads the previous version from `.previous-version` file on the server
+  3. Stops the failed deployment
+  4. Pulls and starts the previous version's images
+  5. Updates nginx reverse proxy
+  6. Verifies the rollback succeeded
+- **Rollback scope:** Applies to both staging (`-e staging`) and production (`-e production`) deployments
+
 ### Deployment Workflow
 
 **Prinzip: "Build once, deploy everywhere" mit konsistenter Versionierung**
@@ -99,9 +118,9 @@
 ```
 
 #### Versionierung
-- **VERSION:** Semantische Version aus `package.json` (z.B. `1.7.9`)
+- **VERSION:** Semantische Version aus `package.json` (z.B. `1.8.4`)
 - **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei
-- **Anzeige:** `Version 1.7.9 (Build 13)`
+- **Anzeige:** `Version 1.8.4 (Build 2)`
 - **Service Worker:** Cache-Name enthält Version + Build
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
