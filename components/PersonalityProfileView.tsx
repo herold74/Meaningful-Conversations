@@ -210,7 +210,7 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
           strokeDasharray="4,3"
         />
 
-        {/* Context dots with glow + label */}
+        {/* Context dots with glow (labels via legend below) */}
         {contexts.map((ctx, i) => {
           const c = coords[i];
           const px = center + toPixel(c.x);
@@ -219,9 +219,6 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
             <g key={ctx.key}>
               <circle cx={px} cy={py} r="12" fill={ctx.color} opacity="0.15" />
               <circle cx={px} cy={py} r="7" fill={ctx.color} stroke="white" strokeWidth="2.5" />
-              <text x={px + 10} y={py + 4} className="text-[10px] font-semibold" fill={ctx.color}>
-                {ctx.name}
-              </text>
             </g>
           );
         })}
