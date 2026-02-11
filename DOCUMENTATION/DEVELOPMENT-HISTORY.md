@@ -486,6 +486,19 @@ git checkout v1.4.7
   - **Cluster Mode** enabled (2 instances) for load distribution and crash resilience.
   - Memory limit restarts configured (700M).
 
+**Updates (v1.8.5):**
+- ✅ **Validated Psychometric Instruments**
+  - **BFI-2-XS/S:** Replaced custom OCEAN questionnaire with validated BFI-2 instruments (15 or 30 items, user choice). Full domain and facet scoring. Citation: Soto & John, 2017.
+  - **PVQ-21 → Spiral Dynamics:** Replaced custom SD questionnaire with validated Portrait Values Questionnaire (Schwartz, 2003). 21 items measuring 10 Schwartz values, mapped to 8 SD coaching levels via weighted algorithm.
+  - **Riemann-Thomann Disclaimer:** Added transparency note that Riemann-Thomann is a coaching heuristic, not a validated psychometric instrument.
+
+- ✅ **Riemann Visualization: Cross Diagram**
+  - Replaced radar chart with classical Riemann-Kreuz (quadrant diagram) using two bipolar axes (Distanz↔Nähe, Beständigkeit↔Spontanität). Applied consistently to web view and PDF export. Better coaching alignment for ipsative constant-sum data.
+
+- ✅ **DPC/DPFL: Selbst-Profil als Coaching-Basis**
+  - Changed DPC strategy generation from `beruf` (work) to `selbst` (self-image) context. In coaching, the client presents as "themselves" — the self-image profile is the most authentic representation. DPFL refinement continues to update all three contexts (beruf, privat, selbst).
+  - Affected services: `dpcStrategyMerger.js`, `dynamicPromptController.js` (with legacy fallback to `beruf` for older profiles).
+
 **Technical Implementation:**
 - `services/capacitorAudioService.ts` - Native audio abstraction
 - `services/dynamicPromptController.js` - Complex prompt assembly logic
@@ -775,7 +788,7 @@ The preserved historical branches serve as a testament to the iterative developm
 ---
 
 **Last Updated**: February 2026
-**Current Version**: 1.8.4 (main branch)
+**Current Version**: 1.8.5 (main branch)
 **Historical Branches**: v1.0.0, v1.1.0, v1.4.5, v1.4.7, v1.4.7-(Server-Edition), v1.4.9 (pre-reset)
 
 ---
