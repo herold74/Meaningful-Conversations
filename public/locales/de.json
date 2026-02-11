@@ -1147,6 +1147,8 @@
   "narrative_update_hint": "Klappe das Profil ein und wieder auf, um eine Aktualisierung zu ermöglichen",
   "narrative_update_hint_short": "Ein-/Ausklappen zum Aktivieren",
   "narrative_generating": "Generiere...",
+  "narrative_language_mismatch": "Diese Signatur wurde in einer anderen Sprache generiert. Aktualisiere sie, um sie in deiner aktuellen Sprache zu erhalten.",
+  "narrative_regenerate_language": "Neu generieren",
   "narrative_generation_error": "Signatur-Generierung fehlgeschlagen. Bitte versuche es später erneut.",
   "narrative_missing_stories": "Narrative-Daten fehlen. Bitte führe den Test erneut durch.",
   "profile_adaptation_adaptive_desc": "Dein Profil wird nach Coaching-Sessions automatisch verfeinert.",

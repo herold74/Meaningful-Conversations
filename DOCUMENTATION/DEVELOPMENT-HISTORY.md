@@ -496,8 +496,8 @@ git checkout v1.4.7
   - Replaced radar chart with classical Riemann-Kreuz (quadrant diagram) using two bipolar axes (Distanz↔Nähe, Beständigkeit↔Spontanität). Applied consistently to web view and PDF export. Better coaching alignment for ipsative constant-sum data.
 
 - ✅ **DPC/DPFL: Selbst-Profil als Coaching-Basis**
-  - Changed DPC strategy generation from `beruf` (work) to `selbst` (self-image) context. In coaching, the client presents as "themselves" — the self-image profile is the most authentic representation. DPFL refinement continues to update all three contexts (beruf, privat, selbst).
-  - Affected services: `dpcStrategyMerger.js`, `dynamicPromptController.js` (with legacy fallback to `beruf` for older profiles).
+  - Changed DPC strategy generation from `beruf` (work) to `selbst` (self-image) context. In coaching, the client presents as "themselves" — the self-image profile is the most authentic representation. DPFL refinement only updates `selbst`; `beruf` and `privat` are set in the questionnaire and remain unchanged.
+  - Affected services: `dpcStrategyMerger.js`, `dynamicPromptController.js`, `profileRefinement.js`. The Riemann test always collects all 3 contexts together, so there are no partial profiles.
 
 **Technical Implementation:**
 - `services/capacitorAudioService.ts` - Native audio abstraction

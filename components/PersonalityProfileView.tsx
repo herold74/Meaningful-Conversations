@@ -115,9 +115,9 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
 };
 
 // Riemann-Thomann Cross (Quadrant Diagram)
-// Converts constant-sum data (4 dimensions) into 2 bipolar axes:
-//   X-axis: Nähe − Distanz  (right = Nähe-dominant)
-//   Y-axis: Wechsel − Dauer (up = Wechsel-dominant)
+// Converts constant-sum data (4 dimensions) into 2 bipolar axes (classical Riemann-Kreuz):
+//   X-axis: Wechsel − Dauer  (right = Wechsel/Spontaneity)
+//   Y-axis: Distanz − Nähe   (up = Distanz/Distance)
 interface RiemannCrossChartProps {
   data: {
     beruf: Record<string, number>;
@@ -129,6 +129,8 @@ interface RiemannCrossChartProps {
 
 const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
   const size = 320;
+  const padX = 30; // extra horizontal space for rotated axis labels
+  const padY = 20; // extra vertical space for axis labels
   const center = size / 2;
   const axisLen = (size / 2) - 45; // space for labels
 
@@ -139,10 +141,10 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
     distanz: t('riemann_dimension_distanz') || 'Distanz',
   };
 
-  // Convert constant-sum data to bipolar coordinates
+  // Convert constant-sum data to bipolar coordinates (classical Riemann-Kreuz)
   const toCoord = (ctx: Record<string, number>) => ({
-    x: (ctx.naehe || 0) - (ctx.distanz || 0),   // positive = Nähe
-    y: (ctx.wechsel || 0) - (ctx.dauer || 0),    // positive = Wechsel
+    x: (ctx.wechsel || 0) - (ctx.dauer || 0),    // positive = Wechsel (right)
+    y: (ctx.distanz || 0) - (ctx.naehe || 0),     // positive = Distanz (up)
   });
 
   const contexts = [
@@ -161,8 +163,8 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
   return (
     <div className="flex flex-col items-center w-full">
       <svg
-        viewBox={`0 0 ${size} ${size}`}
-        className="w-full max-w-[320px] h-auto"
+        viewBox={`${-padX} ${-padY} ${size + padX * 2} ${size + padY * 2}`}
+        className="w-full max-w-[400px] h-auto"
         style={{ minHeight: '280px' }}
       >
         {/* Quadrant background shading */}
@@ -223,22 +225,30 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
           );
         })}
 
-        {/* Axis end-labels */}
-        <text x={center + axisLen + 4} y={center + 4} textAnchor="start"
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
-          {dimensionLabels.naehe}
-        </text>
-        <text x={center - axisLen - 4} y={center + 4} textAnchor="end"
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
-          {dimensionLabels.distanz}
-        </text>
-        <text x={center} y={center - axisLen - 8} textAnchor="middle"
+        {/* Axis end-labels (classical Riemann-Kreuz) */}
+        {/* Right: Wechsel/Spontaneity — rotated 90° */}
+        <text x={center + axisLen + 22} y={center}
+          textAnchor="middle"
+          transform={`rotate(90, ${center + axisLen + 22}, ${center})`}
           className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.wechsel}
         </text>
-        <text x={center} y={center + axisLen + 16} textAnchor="middle"
+        {/* Left: Dauer/Stability — rotated -90° */}
+        <text x={center - axisLen - 22} y={center}
+          textAnchor="middle"
+          transform={`rotate(-90, ${center - axisLen - 22}, ${center})`}
           className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.dauer}
+        </text>
+        {/* Top: Distanz/Distance */}
+        <text x={center} y={center - axisLen - 22} textAnchor="middle"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          {dimensionLabels.distanz}
+        </text>
+        {/* Bottom: Nähe/Closeness */}
+        <text x={center} y={center + axisLen + 30} textAnchor="middle"
+          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          {dimensionLabels.naehe}
         </text>
       </svg>
 
@@ -433,6 +443,20 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       if (decryptedData.spiralDynamics) completedLenses.push('sd');
       if (decryptedData.riemann) completedLenses.push('riemann');
       if (decryptedData.big5) completedLenses.push('ocean');
+      
+      // Check for language mismatch in narrative
+      const narrativeLangMismatch = decryptedData.narrativeProfile?.generatedLanguage 
+        && decryptedData.narrativeProfile.generatedLanguage !== language;
+      
+      if (narrativeLangMismatch) {
+        const confirmMsg = language === 'de'
+          ? 'Deine Signatur wurde auf Englisch generiert. Das PDF wird gemischte Sprachen enthalten.\n\nMöchtest du die Signatur erst aktualisieren (Abbrechen) oder das PDF trotzdem herunterladen (OK)?'
+          : 'Your signature was generated in German. The PDF will contain mixed languages.\n\nWould you like to update the signature first (Cancel) or download the PDF anyway (OK)?';
+        if (!window.confirm(confirmMsg)) {
+          setShowNarrativeStoriesModal(true);
+          return;
+        }
+      }
       
       // Reconstruct full SurveyResult for formatting
       const surveyResult: SurveyResult = {
@@ -726,6 +750,24 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </span>
             </button>
             
+            {/* Language mismatch warning */}
+            {decryptedData.narrativeProfile.generatedLanguage && decryptedData.narrativeProfile.generatedLanguage !== language && (
+              <div className="mx-4 sm:mx-5 mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg flex items-center justify-between gap-3">
+                <p className="text-amber-800 dark:text-amber-300 text-sm flex-1">
+                  ⚠️ {t('narrative_language_mismatch') || 'Diese Signatur wurde in einer anderen Sprache generiert. Aktualisiere sie, um sie in deiner aktuellen Sprache zu erhalten.'}
+                </p>
+                <Button
+                  onClick={() => setShowNarrativeStoriesModal(true)}
+                  disabled={isGeneratingNarrative}
+                  size="sm"
+                  variant="primary"
+                  loading={isGeneratingNarrative}
+                >
+                  🔄 {t('narrative_regenerate_language') || 'Neu generieren'}
+                </Button>
+              </div>
+            )}
+
             {/* Collapsible Content */}
             {isNarrativeExpanded && (
               <div className="px-4 sm:px-5 pb-4">

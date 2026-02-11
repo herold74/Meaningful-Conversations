@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   // Riemann section
   riemannContainer: {
     flexDirection: 'row',
-    gap: 15,
+    gap: 10,
   },
   riemannText: {
     fontSize: 9,
@@ -455,7 +455,7 @@ const translations = {
     high: 'Hoch',
     medium: 'Mittel',
     low: 'Niedrig',
-    axesExplanation: 'Horizontale Achse: Distanz ↔ Nähe (Autonomie vs. Verbundenheit). Vertikale Achse: Beständigkeit ↔ Spontanität (Struktur vs. Flexibilität). Die Position zeigt deine Tendenz im jeweiligen Kontext.',
+    axesExplanation: 'Horizontale Achse: Beständigkeit ↔ Spontanität (Struktur vs. Flexibilität). Vertikale Achse: Distanz ↔ Nähe (Autonomie vs. Verbundenheit). Die Position zeigt deine Tendenz im jeweiligen Kontext.',
     differencesExplanation: 'Die Punkte zeigen deine Position in drei Kontexten. Große Abstände zwischen den Punkten deuten auf Flexibilität oder innere Spannung hin.',
     openness: 'Offenheit',
     conscientiousness: 'Gewissenhaftigkeit',
@@ -500,7 +500,7 @@ const translations = {
     high: 'High',
     medium: 'Med',
     low: 'Low',
-    axesExplanation: 'Horizontal axis: Distance ↔ Proximity (autonomy vs. connection). Vertical axis: Stability ↔ Spontaneity (structure vs. flexibility). Your position shows your tendency in each context.',
+    axesExplanation: 'Horizontal axis: Stability ↔ Spontaneity (structure vs. flexibility). Vertical axis: Distance ↔ Proximity (autonomy vs. connection). Your position shows your tendency in each context.',
     differencesExplanation: 'The dots show your position in three contexts. Large distances between dots may indicate flexibility or inner tension.',
     openness: 'Openness',
     conscientiousness: 'Conscientiousness',
@@ -597,9 +597,20 @@ const ShipWheelLogo = () => {
 };
 
 // Riemann-Thomann Cross (Quadrant Diagram) for PDF
-// Converts constant-sum data into 2 bipolar axes:
-//   X-axis: Nähe − Distanz  (right = Nähe-dominant)
-//   Y-axis: Wechsel − Dauer (up = Wechsel-dominant)
+// Vertical text label component (characters stacked vertically) — for PDF axis labels
+const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
+  <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
+    {text.split('').map((char, i) => (
+      <Text key={i} style={{ fontSize: 7, fontWeight: 'bold', color, lineHeight: 1.0, textAlign: 'center' }}>
+        {char}
+      </Text>
+    ))}
+  </View>
+);
+
+// Converts constant-sum data into 2 bipolar axes (classical Riemann-Kreuz):
+//   X-axis: Wechsel − Dauer  (right = Wechsel/Spontaneity)
+//   Y-axis: Distanz − Nähe   (up = Distanz/Distance)
 const RiemannCross = ({ data, language }: { 
   data: { beruf: Record<string, number>; privat: Record<string, number>; selbst: Record<string, number> };
   language: 'de' | 'en';
@@ -608,14 +619,15 @@ const RiemannCross = ({ data, language }: {
   const center = size / 2;
   const axisLen = (size / 2) - 20; // space for labels
 
+  // Full labels for top/bottom (horizontal), short labels for left/right (vertical stacking)
   const dimLabels = language === 'de'
-    ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
-    : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
+    ? { distanz: 'Distanz', wechsel: 'Wechsel', naehe: 'Nähe', dauer: 'Dauer' }
+    : { distanz: 'Distance', wechsel: 'Change', naehe: 'Proximity', dauer: 'Stability' };
 
-  // Convert constant-sum to bipolar coordinates
+  // Convert constant-sum to bipolar coordinates (classical Riemann-Kreuz)
   const toCoord = (ctx: Record<string, number>) => ({
-    x: (ctx.naehe || 0) - (ctx.distanz || 0),
-    y: (ctx.wechsel || 0) - (ctx.dauer || 0),
+    x: (ctx.wechsel || 0) - (ctx.dauer || 0),    // positive = Wechsel (right)
+    y: (ctx.distanz || 0) - (ctx.naehe || 0),     // positive = Distanz (up)
   });
 
   const contexts = [
@@ -632,15 +644,13 @@ const RiemannCross = ({ data, language }: {
 
   return (
     <View style={{ alignItems: 'center' }}>
-      {/* Top label: Wechsel/Spontanität */}
-      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginBottom: 1 }}>
-        {dimLabels.wechsel}
+      {/* Top label: Distanz/Distance */}
+      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginBottom: -2 }}>
+        {dimLabels.distanz}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* Left label: Distanz */}
-        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, width: 22, textAlign: 'right', marginRight: 2 }}>
-          {dimLabels.distanz}
-        </Text>
+        {/* Left label: Dauer/Stability — vertical character stacking */}
+        <VerticalLabel text={dimLabels.dauer} />
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {/* Quadrant background shading */}
           <Rect x={center} y={0} width={center} height={center} fill="#eff6ff" fillOpacity={0.5} />
@@ -683,14 +693,12 @@ const RiemannCross = ({ data, language }: {
             );
           })}
         </Svg>
-        {/* Right label: Nähe */}
-        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, width: 22, marginLeft: 2 }}>
-          {dimLabels.naehe}
-        </Text>
+        {/* Right label: Wechsel/Change — vertical character stacking */}
+        <VerticalLabel text={dimLabels.wechsel} />
       </View>
-      {/* Bottom label: Dauer/Beständigkeit */}
-      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginTop: 1 }}>
-        {dimLabels.dauer}
+      {/* Bottom label: Nähe/Proximity */}
+      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginTop: -2 }}>
+        {dimLabels.naehe}
       </Text>
     </View>
   );
@@ -729,6 +737,9 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const hasRiemann = !!result.riemann;
   const hasOcean = !!result.big5;
   const hasNarrative = !!result.narrativeProfile;
+  const narrativeLangMismatch = hasNarrative 
+    && result.narrativeProfile?.generatedLanguage 
+    && result.narrativeProfile.generatedLanguage !== language;
   
   // When all 3 tests are completed, use 2 pages
   const useTwoPages = hasSD && hasRiemann && hasOcean;
@@ -883,6 +894,13 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         {hasNarrative && result.narrativeProfile && (
           <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
+            {narrativeLangMismatch && (
+              <Text style={{ fontSize: 8, color: colors.amber600, fontStyle: 'italic', marginBottom: 4 }}>
+                {language === 'de' 
+                  ? `⚠ Diese Signatur wurde auf ${result.narrativeProfile.generatedLanguage === 'en' ? 'Englisch' : 'Deutsch'} generiert.`
+                  : `⚠ This signature was generated in ${result.narrativeProfile.generatedLanguage === 'de' ? 'German' : 'English'}.`}
+              </Text>
+            )}
             <Text style={styles.signatureText}>
               {typeof result.narrativeProfile.operatingSystem === 'string' 
                 ? result.narrativeProfile.operatingSystem 
@@ -955,7 +973,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
               <View style={{ alignItems: 'center' }}>
                 <RiemannCross data={result.riemann} language={language} />
                 {/* Legend below diagram */}
-                <View style={[styles.legendContainer, { marginTop: 4 }]}>
+                <View style={[styles.legendContainer, { marginTop: 8 }]}>
                   <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
                     <Text style={styles.legendText}>{t.work}</Text>
@@ -993,7 +1011,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                     </View>
                   </View>
                 )}
-                <Text style={[styles.riemannText, { marginBottom: 8 }]}>{t.differencesExplanation}</Text>
+                <Text style={[styles.riemannText, { marginBottom: 4 }]}>{t.differencesExplanation}</Text>
                 <Text style={styles.riemannText}>{t.axesExplanation}</Text>
               </View>
             </View>
