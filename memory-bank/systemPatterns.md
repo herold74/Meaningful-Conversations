@@ -73,3 +73,13 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Same privacy guarantees for sensitive psychological data.
 - **Implementation:** Client-side encryption in personalityEncryption.ts.
 
+### 9. Reproducible Docker Builds
+- **Decision:** Use `npm ci` in all Dockerfiles, never `npm install`.
+- **Reasoning:** `npm install` can resolve semver ranges to newer versions than tested locally. A breaking validation change in express-rate-limit (`^8.2.1` resolved to a newer 8.x) crashed the staging backend with `ERR_ERL_KEY_GEN_IPV6`. `npm ci` strictly follows `package-lock.json`.
+- **Implementation:** All Dockerfiles use `npm ci`. Lockfiles are committed and are the source of truth for production builds. Local development continues to use `npm install` for flexibility.
+
+### 10. Tiered User Access Control
+- **Decision:** Six-tier role system: Guest, Registered, Premium, Client, Admin, Developer.
+- **Reasoning:** Fine-grained access control for different feature sets and pricing tiers. Developer role separates test infrastructure access from general admin capabilities.
+- **Implementation:** Boolean flags on User model (`isPremium`, `isClient`, `isAdmin`, `isDeveloper`). Server-side enforcement in route handlers. Frontend gating via `currentUser` flags. Access matrix documented in `DOCUMENTATION/USER-ACCESS-MATRIX.md`.
+

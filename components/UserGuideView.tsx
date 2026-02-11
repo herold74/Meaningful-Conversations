@@ -369,35 +369,65 @@ Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönli
 
 ### 7.2 Die Persönlichkeitstests
 
-Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet einen anderen Aspekt Ihrer Persönlichkeit:
+Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet einen anderen Aspekt Ihrer Persönlichkeit. Sie können nach dem ersten Test jederzeit weitere Tests absolvieren, um Ihr Profil mit zusätzlichen Perspektiven zu ergänzen.
 
-**Spiral Dynamics -- "Was Sie antreibt" (Empfohlen)**
-Spiral Dynamics erfasst Ihre Wertesysteme und inneren Antriebskräfte auf acht Ebenen:
-- Zwei Perspektiven: **Ich-orientiert** (Autonomie & Selbstverwirklichung) und **Wir-orientiert** (Gemeinschaft & Zugehörigkeit)
-- 8 Ebenen: Sicherheit, Zugehörigkeit, Macht, Ordnung, Leistung, Gemeinschaft, Integration, Ganzheitlichkeit
-- Ergebnis: Balkendiagramm mit Ihren Ausprägungen (1-5) pro Ebene
-- Schnell auszufüllen (ca. 5 Minuten)
-- Ideal als erster Test für ein breites Verständnis Ihrer Motivation
+---
 
-**OCEAN-Test (Big Five):**
-OCEAN ist ein Akronym für die fünf wissenschaftlich fundierten Persönlichkeitsdimensionen:
-- **O**ffenheit (Openness) - Neugier und Kreativität
-- **C**onscientiousness (Gewissenhaftigkeit) - Ordnung und Zielstrebigkeit
-- **E**xtraversion - Geselligkeit und Energie
-- **A**greeableness (Verträglichkeit) - Kooperation und Empathie
-- **N**eurotizismus / Emotionale Stabilität - Stressresistenz
+**OCEAN (Big Five) -- "Wer Sie sind"**
+✅ *Verfügbar für alle registrierten Nutzer*
 
-Das OCEAN-Modell ist das weltweit am besten erforschte Persönlichkeitsmodell.
-- Schneller auszufüllen (ca. 5 Minuten)
-- Ideal für einen ersten Überblick über Ihre Persönlichkeitsstruktur
+Der OCEAN-Test basiert auf dem **Big Five Inventory-2 (BFI-2)** -- dem weltweit am besten erforschten und validierten Persönlichkeitsmodell. Er misst fünf zentrale Dimensionen, die gemeinsam ein fundiertes Bild Ihrer Persönlichkeit ergeben:
 
-**Riemann-Thomann-Test:**
-- Erfasst Ihre Grundstrebungen: Nähe, Distanz, Dauer und Wechsel
-- Unterscheidet zwischen beruflichem, privatem Kontext und Selbstbild
-- Zeigt Ihr Stress-Reaktionsmuster
-- Umfassender und detaillierter (ca. 10 Minuten)
+- **Extraversion** -- Wie stark Sie aus sozialer Interaktion Energie ziehen
+- **Verträglichkeit** -- Wie kooperativ und einfühlsam Sie auf andere zugehen
+- **Gewissenhaftigkeit** -- Wie strukturiert und zielorientiert Sie vorgehen
+- **Negative Emotionalität** -- Wie Sie mit Stress und emotionalen Belastungen umgehen
+- **Offenheit** -- Wie neugierig und kreativ Sie sind
 
-**Hinweis:** Sie können nach dem ersten Test jederzeit weitere Tests absolvieren, um Ihr Profil mit zusätzlichen Perspektiven zu ergänzen.
+Sie können zwischen zwei Varianten wählen:
+- **Schnelltest (BFI-2-XS):** 15 Fragen, ca. 2 Minuten -- erfasst die fünf Hauptdimensionen
+- **Ausführlicher Test (BFI-2-S):** 30 Fragen, ca. 5 Minuten -- erfasst zusätzlich 15 Persönlichkeitsfacetten (z.B. Geselligkeit, Durchsetzungsfähigkeit, Vertrauen, Ordnung, Kreativität u.v.m.)
+
+📊 Ergebnis: Horizontale Balken zeigen Ihre Ausprägung pro Dimension, beim ausführlichen Test zusätzlich pro Facette.
+⏱ Dauer: 2-5 Minuten (je nach Variante)
+💡 Ideal als Einstieg -- bietet einen schnellen, wissenschaftlich fundierten Überblick über Ihre Persönlichkeitsstruktur.
+
+*Basierend auf: Soto, C. J., & John, O. P. (2017). Short and extra-short forms of the Big Five Inventory-2. Journal of Research in Personality, 68, 69-81.*
+
+---
+
+**Riemann-Thomann -- "Wie Sie mit anderen interagieren"**
+🔒 *Verfügbar ab Premium*
+
+Das Riemann-Thomann-Modell stammt aus der systemischen Beratung und erfasst vier Grundstrebungen, die Ihr Verhalten in Beziehungen und Teams maßgeblich beeinflussen:
+
+- **Nähe** -- Das Bedürfnis nach Verbundenheit, Harmonie und Zugehörigkeit
+- **Distanz** -- Das Bedürfnis nach Unabhängigkeit, Sachlichkeit und eigenem Raum
+- **Dauer** -- Das Bedürfnis nach Stabilität, Ordnung und Verlässlichkeit
+- **Wechsel** -- Das Bedürfnis nach Veränderung, Flexibilität und neuen Impulsen
+
+Das Besondere: Der Test unterscheidet zwischen drei Kontexten -- **beruflich**, **privat** und **Selbstbild** -- und zeigt zusätzlich Ihr **Stress-Reaktionsmuster**. So erkennen Sie, wie sich Ihre Grundstrebungen je nach Lebenssituation verschieben.
+
+📊 Ergebnis: Radardiagramm mit Stressranking.
+⏱ Dauer: ca. 10 Minuten
+💡 Besonders wertvoll für alle, die Beziehungsdynamiken im beruflichen oder privaten Kontext besser verstehen möchten.
+
+---
+
+**Spiral Dynamics -- "Was Sie antreibt"**
+🔒 *Verfügbar ab Premium*
+
+Spiral Dynamics ist ein Modell aus der Entwicklungspsychologie, das Ihre Wertesysteme und inneren Antriebskräfte auf acht Ebenen abbildet. Es zeigt nicht nur, *was* Ihnen wichtig ist, sondern auch *warum* -- und wie sich Ihre Werte im Laufe des Lebens entwickelt haben.
+
+Die acht Ebenen umfassen zwei Perspektiven:
+- **Ich-orientiert** (Autonomie, Selbstverwirklichung, Leistung)
+- **Wir-orientiert** (Gemeinschaft, Zugehörigkeit, Ganzheitlichkeit)
+
+Die Ebenen im Überblick: Sicherheit, Zugehörigkeit, Macht, Ordnung, Leistung, Gemeinschaft, Integration, Ganzheitlichkeit.
+
+📊 Ergebnis: Zweiteiliges Balkendiagramm mit Ihren Ausprägungen (1-5) pro Ebene.
+⏱ Dauer: ca. 5 Minuten
+💡 Ideal, um die tieferliegenden Motivationen und Wertekonflikte hinter Ihren Entscheidungen sichtbar zu machen.
 
 ### 7.3 Die Persönlichkeits-Signatur
 
@@ -415,18 +445,21 @@ Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI e
 
 ### 7.4 Adaptives vs. Stabiles Profil
 
-Am Ende des Tests wählen Sie, wie sich Ihr Profil entwickeln soll:
+Ihr Profil kann auf zwei Arten genutzt werden. Registrierte Nutzer erhalten automatisch ein stabiles Profil. Premium-Nutzer und höher können zwischen beiden Varianten wählen.
 
-**📊 Adaptives Profil:**
+**🔒 Stabiles Profil (Standard):**
+✅ *Verfügbar für alle registrierten Nutzer*
+- Bleibt unverändert bis zur nächsten manuellen Evaluierung
+- Sie behalten volle Kontrolle über Änderungen
+- Kann jederzeit durch erneutes Ausfüllen eines Tests aktualisiert werden
+- Ideal für: Klare Baseline & gezielte Vergleiche
+
+**📊 Adaptives Profil (DPFL):**
+🔒 *Verfügbar ab Premium*
 - Lernt aus Ihren Coaching-Sitzungen
 - Verfeinert sich automatisch über Zeit
 - Nach jeder Sitzung werden Sie gefragt, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
-
-**🔒 Stabiles Profil:**
-- Bleibt unverändert bis zur nächsten manuellen Evaluierung
-- Sie behalten volle Kontrolle über Änderungen
-- Ideal für: Klare Baseline & gezielte Vergleiche
 
 **Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
 
@@ -439,14 +472,16 @@ Mit einem Persönlichkeitsprofil können Sie zwischen drei Coaching-Modi wählen
 - Ihr Profil wird nicht verwendet
 
 **DPC (Dynamic Personality Coaching):**
+✅ *Verfügbar für alle registrierten Nutzer*
 - Ihr Profil wird während der Sessions genutzt
 - Der Coach passt seinen Stil an Ihre Persönlichkeit an
 - Das Profil wird **nicht** verändert
 
 **DPFL (Dynamic Personality-Focused Learning):**
+🔒 *Verfügbar ab Premium -- erfordert ein adaptives Profil*
 - Ihr Profil wird genutzt UND kann ab der **zweiten Session** vollständig verfeinert werden
 - Der Coach schlägt Profilanpassungen basierend auf dem Gespräch vor
-- Erfordert ein **adaptives Profil**
+- Nach jeder Sitzung findet ein **Comfort Check** statt, der die Authentizität der Sitzung bewertet
 
 **Modus wechseln:** Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil ändern. Gesammelte Verfeinerungen bleiben erhalten.
 

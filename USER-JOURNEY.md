@@ -263,11 +263,14 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 
 **Three Personality Lenses:**
 
-| Test | Focus | Duration |
-|------|-------|----------|
-| **Spiral Dynamics** (Recommended) | Values and motivations across 8 levels | ~5 min |
-| **OCEAN (Big Five)** | 5 personality dimensions (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism) | ~5 min |
-| **Riemann-Thomann** | Basic drives (Proximity, Distance, Permanence, Change) across contexts | ~10 min |
+| Test | Focus | Duration | Access |
+|------|-------|----------|--------|
+| **OCEAN (BFI-2)** | 5 personality dimensions + 15 facets (based on validated BFI-2-S/XS by Soto & John, 2017) | 2-5 min | All registered |
+| **Riemann-Thomann** | Basic drives (Proximity, Distance, Permanence, Change) across contexts | ~10 min | Premium+ |
+| **Spiral Dynamics (PVQ-21)** | Values and motivations mapped to 8 SD levels (based on validated PVQ-21 by Schwartz, 2003; ESS) | ~4 min | Premium+ |
+
+The OCEAN test offers two variants: Quick (BFI-2-XS, 15 items, domain scores only) and Detailed (BFI-2-S, 30 items, domain + facet scores).
+The Spiral Dynamics test uses the Portrait Values Questionnaire (PVQ-21, 21 items) measuring 10 Schwartz values, which are then mapped to 8 SD coaching levels via a weighted algorithm.
 
 Users can take multiple tests to build a richer profile.
 
@@ -285,9 +288,9 @@ Users can take multiple tests to build a richer profile.
 - **DPFL (Dynamic Personality-Focused Learning)**: Profile used AND refined from 2nd session onward (requires adaptive profile)
 
 **Visualization:**
-- Spiral Dynamics: Two-column bar chart (Self-oriented vs. Community-oriented)
+- Spiral Dynamics (PVQ-21): Two-column bar chart (Self-oriented vs. Community-oriented), derived from Schwartz values
 - Riemann-Thomann: Radar chart with stress ranking
-- OCEAN: Horizontal trait bars
+- OCEAN (BFI-2): Horizontal domain bars; BFI-2-S additionally shows facet bars nested under each domain
 
 ---
 

@@ -185,7 +185,7 @@ model PersonalityProfile {
   completedLenses String   @default("[]") // JSON array: ["sd", "riemann", "ocean"]
   filterWorry     Int?     // Optional: 1-5 (legacy, no longer collected)
   filterControl   Int?     // Optional: 1-5 (legacy, no longer collected)
-  adaptationMode  String   @default("adaptive") // "adaptive" oder "stable"
+  adaptationMode  String   @default("stable") // "adaptive" (DPFL, premium) oder "stable" (DPC, default)
   
   // VERSCHLUESSELT: Alle detaillierten Scores (SD, Riemann, Big5)
   encryptedData   String   @db.Text

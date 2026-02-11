@@ -1,9 +1,29 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.8.2
-**Staging:** ✅ Deployed
+**Version:** 1.8.4
+**Staging:** Deployed
 **Production:** Pending
+
+## Recent Changes (v1.8.4)
+
+### User Access & Roles
+- **User Access Matrix Enforcement:** Audited and enforced access restrictions for all user tiers (Guest, Registered, Premium, Client, Admin, Developer) across frontend and backend.
+- **isDeveloper Role:** New role separating Developer from Admin. Test Runner restricted to Developers. Existing admins promoted to Developer.
+- **isBetaTester → isPremium Rename:** Semantic clarification across entire codebase (DB schema, backend, frontend, types, i18n).
+- **Crisis Response Protocol:** Ensured all bots include helpline/crisis response in system prompts for all user types.
+- **Redeem Code Logic Fixes:** Fixed premium auto-revocation, client lockout, and ACCESS_PASS revocation bugs.
+
+### Deployment & Infrastructure
+- **Reproducible Docker Builds:** Switched Dockerfiles from `npm install` to `npm ci` for strict lockfile adherence.
+- **Deploy Health Checks:** Enhanced post-deploy verification with 3 retries and hard failure exit.
+- **express-rate-limit Fix:** Fixed IPv6 validation crash (`ERR_ERL_KEY_GEN_IPV6`) in `geminiLimiter` rate limiter.
+
+### UI & UX
+- **Spacer Height Fix:** Removed unreachable dead code in GamificationBar spacer calculation.
+- **i18n Developer Role:** Added missing locale keys for Developer badge and toggle.
+- **Test XP Pollution Fix:** Cleared gamification state on all test mode exit paths.
+- **GamificationBar Modal Hide:** Bar hidden when any modal is open.
 
 ## Recent Changes (v1.8.2)
 
@@ -111,11 +131,15 @@
 
 ## Active Tasks
 - [ ] Android Voice Duplication weiter beobachten
-- [ ] Production Deployment für v1.7.9 planen
+- [ ] Production Deployment fuer v1.8.4 planen
 
 ## Decision Log
+- **2026-02-11:** Dockerfiles auf `npm ci` umgestellt nach express-rate-limit Crash auf Staging
+- **2026-02-11:** Deploy-Script Health-Checks mit Retry-Logik und hartem Fehler-Exit
+- **2026-02-11:** isDeveloper Role eingefuehrt, isBetaTester → isPremium Rename
+- **2026-02-11:** User Access Matrix vollstaendig auditiert und durchgesetzt
 - **2026-01-20:** Debug-Logging entfernt, Build 13 auf Staging
 - **2026-01-19:** Spinner auf eine Position konsolidiert (unten)
-- **2026-01-18:** iOS Silent WAV für Audio-Session-Reset
-- **2026-01-17:** DPFL-Modus für Nobody deaktiviert
-- **2026-01-09:** Coaching-Modus zentral im Persönlichkeitsprofil
+- **2026-01-18:** iOS Silent WAV fuer Audio-Session-Reset
+- **2026-01-17:** DPFL-Modus fuer Nobody deaktiviert
+- **2026-01-09:** Coaching-Modus zentral im Persoenlichkeitsprofil
