@@ -1148,6 +1148,8 @@
   "narrative_update_hint": "Collapse and re-expand the profile to enable an update",
   "narrative_update_hint_short": "Collapse/expand to enable",
   "narrative_generating": "Generating...",
+  "narrative_language_mismatch": "This signature was generated in a different language. Update it to get it in your current language.",
+  "narrative_regenerate_language": "Regenerate",
   "narrative_generation_error": "Signature generation failed. Please try again later.",
   "narrative_missing_stories": "Narrative data missing. Please take the test again.",
   "profile_adaptation_adaptive_desc": "Your profile will be automatically refined after coaching sessions.",

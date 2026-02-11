@@ -33,7 +33,7 @@ class StrategyMerger {
     // Riemann: Weight by extremity (distance from 50)
     // Uses 'selbst' (self-image) as primary context for coaching — the client
     // shows up as "themselves" in a coaching session, not in a work or private role.
-    // DPFL refinement still updates all 3 contexts (beruf, privat, selbst).
+    // DPFL refinement only updates 'selbst'; beruf and privat are set in the questionnaire.
     if (this.profile.riemann && this.profile.riemann.selbst) {
       const traits = ['dauer', 'wechsel', 'naehe', 'distanz'];
       traits.forEach(trait => {

@@ -423,6 +423,7 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       
       narrativeProfile = JSON.parse(jsonText);
       narrativeProfile.generatedAt = new Date().toISOString();
+      narrativeProfile.generatedLanguage = lang;
     } catch (parseError) {
       console.error('[Narrative] Failed to parse AI response:', result.text);
       return res.status(500).json({ error: 'Failed to parse narrative profile' });
