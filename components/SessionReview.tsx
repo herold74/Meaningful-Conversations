@@ -474,9 +474,9 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     }, [existingHeadlines]);
     
     const canSeeBlockages = useMemo(() => {
-        if (currentUser?.isBetaTester) return true;
-        const unlocked = currentUser?.unlockedCoaches || [];
-        return unlocked.includes('big5');
+        // PEP Solution Blockages (Dr. Bohne) require Client, Admin, or Developer access
+        if (currentUser?.isClient || currentUser?.isAdmin) return true;
+        return false;
     }, [currentUser]);
 
     // Headlines that should default to 'append' (adding new items) rather than 'replace_section'

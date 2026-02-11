@@ -51,6 +51,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 6.  **Update:** AI proposes context changes -> Frontend shows diff -> User approves -> Client encrypts -> Backend stores.
 7.  **DPFL (Optional):** Session behavior logged -> Profile refinement suggestions -> User approves adjustments.
 
+### 8. Backend Scaling & Process Management
+- **Decision:** Use PM2 for Node.js process management.
+- **Reasoning:** Node.js is single-threaded. PM2 allows utilizing multi-core systems via "Cluster Mode" without changing code. It also provides automatic restarts on crash.
+- **Implementation:** `ecosystem.config.js` defines 2 instances. Docker container runs `pm2-runtime`.
+
 ## Key Technical Decisions (Recent)
 
 ### 5. Hybrid TTS Architecture

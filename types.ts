@@ -47,9 +47,10 @@ export interface User {
     preferredLanguage?: string;
     newsletterConsent?: boolean;
     newsletterConsentDate?: string | null;
-    isBetaTester: boolean;
+    isPremium: boolean;
     isClient?: boolean;
     isAdmin: boolean;
+    isDeveloper?: boolean;
     unlockedCoaches: string[];
     createdAt?: string;
     accessExpiresAt?: string;

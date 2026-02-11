@@ -1,7 +1,7 @@
 // TTS Routes - Text-to-Speech endpoints using Piper
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
+const authMiddleware = require('../middleware/auth.js');
 const { synthesizeSpeech, isPiperAvailable, getAvailableVoices, VOICE_MODELS } = require('../services/ttsService.js');
 const { trackApiUsage } = require('../services/apiUsageTracker.js');
 
@@ -35,9 +35,9 @@ router.use(checkTtsAvailable);
  * - isMeditation: boolean (optional) - Use slower meditation voice
  * - voiceId: string (optional) - Specific voice ID (e.g., 'de-mls', 'en-ryan')
  */
-router.post('/synthesize', optionalAuthMiddleware, async (req, res) => {
+router.post('/synthesize', authMiddleware, async (req, res) => {
     const { text, botId, lang, isMeditation = false, voiceId = null } = req.body;
-    const userId = req.userId; // May be undefined for guests
+    const userId = req.userId;
     const startTime = Date.now();
     
     // Validation

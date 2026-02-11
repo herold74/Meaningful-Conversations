@@ -296,13 +296,13 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         loadData();
     }, [loadData]);
 
-    // Auto-open Test Runner if requested (e.g., after Comfort Check test)
+    // Auto-open Test Runner if requested (e.g., after Comfort Check test) - Developer only
     useEffect(() => {
-        if (shouldOpenTestRunner) {
+        if (shouldOpenTestRunner && currentUser?.isDeveloper) {
             setShowDynamicTestRunner(true);
             onTestRunnerOpened?.(); // Reset the flag in parent
         }
-    }, [shouldOpenTestRunner, onTestRunnerOpened]);
+    }, [shouldOpenTestRunner, onTestRunnerOpened, currentUser?.isDeveloper]);
 
     // Load admin's profile type and full profile for test scenario matching
     useEffect(() => {
@@ -491,9 +491,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         break;
                     }
                     case 'roles': {
-                        // Sort by admin first, then client, then beta tester
-                        const aValue = (a.isAdmin ? 4 : 0) + (a.isClient ? 2 : 0) + (a.isBetaTester ? 1 : 0);
-                        const bValue = (b.isAdmin ? 4 : 0) + (b.isClient ? 2 : 0) + (b.isBetaTester ? 1 : 0);
+                        // Sort by developer first, then admin, then client, then premium
+                        const aValue = (a.isDeveloper ? 8 : 0) + (a.isAdmin ? 4 : 0) + (a.isClient ? 2 : 0) + (a.isPremium ? 1 : 0);
+                        const bValue = (b.isDeveloper ? 8 : 0) + (b.isAdmin ? 4 : 0) + (b.isClient ? 2 : 0) + (b.isPremium ? 1 : 0);
                         compare = aValue - bValue;
                         break;
                     }
@@ -663,7 +663,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
     const renderTabs = () => (
         <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
-            {(['users', 'feedback', 'tickets', 'codes', 'runner', 'api-usage'] as AdminTab[]).map(tab => {
+            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'api-usage'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
                 let textClass = 'whitespace-pre-line text-center leading-tight';
                 if (tab === 'runner' || tab === 'api-usage') {
@@ -779,7 +779,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
                                         <td className="p-3">
                                             <div className="flex items-center gap-3">
-                                                {user.isBetaTester && (
+                                                {user.isPremium && (
                                                     <span title={t('admin_users_premium')}>
                                                         <StarIcon className="w-5 h-5 text-status-info-foreground" />
                                                     </span>
@@ -792,6 +792,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                                 {user.isAdmin && (
                                                     <span title={t('admin_users_admin')}>
                                                         <ShieldIcon className="w-5 h-5 text-accent-tertiary" />
+                                                    </span>
+                                                )}
+                                                {user.isDeveloper && (
+                                                    <span title={t('admin_users_developer') || 'Developer'} className="text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                                        D
                                                     </span>
                                                 )}
                                             </div>
@@ -828,6 +833,16 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                                 >
                                                     <ShieldIcon className="w-5 h-5" />
                                                 </button>
+                                                {currentUser?.isDeveloper && (
+                                                    <button 
+                                                        onClick={() => handleAction(`toggle-developer-${user.id}`, () => userService.toggleUserDeveloper(user.id))} 
+                                                        disabled={actionLoading[`toggle-developer-${user.id}`] || isCurrentUser} 
+                                                        className="p-2 text-emerald-600 dark:text-emerald-400 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/30 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                                        title={isCurrentUser ? (t('admin_users_cannot_change_self') || 'Cannot change own role') : (t('admin_users_toggle_developer') || 'Toggle Developer')}
+                                                    >
+                                                        <span className="text-xs font-bold">D</span>
+                                                    </button>
+                                                )}
                                                 <button onClick={() => setUserToReset(user)} disabled={actionLoading[`reset-${user.id}`]} className="p-2 text-status-warning-foreground rounded-full hover:bg-status-warning-background disabled:opacity-50" title={t('admin_users_reset_password')}><KeyIcon className="w-5 h-5" /></button>
                                             </div>
                                         </td>
@@ -1455,7 +1470,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             codes: renderCodes(),
             tickets: renderTickets(),
             feedback: renderRatings(),
-            runner: renderTestRunner(),
+            runner: currentUser?.isDeveloper ? renderTestRunner() : <p className="text-content-secondary">{t('admin_developer_required') || 'Developer access required.'}</p>,
             'api-usage': <ApiUsageView />,
         };
 

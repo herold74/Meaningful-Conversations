@@ -241,8 +241,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const lastSpokenTextRef = useRef<string>('');
   
   // TTS Mode: 'local' uses Web Speech API, 'server' uses Piper TTS
-  // Load bot-specific settings
+  // Load bot-specific settings (guests are restricted to local voices only)
   const [ttsMode, setTtsMode] = useState<TtsMode>(() => {
+    if (!currentUser) return 'local'; // Guests: no server TTS
     const settings = getBotVoiceSettings(bot.id);
     return settings[language].mode;
   });
@@ -379,6 +380,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // Check if saved voice is available, fallback to auto if not
   useEffect(() => {
     const checkVoiceAvailability = async () => {
+      // Guests are restricted to local TTS only - skip all server voice checks
+      if (!currentUser) {
+        console.log('[TTS Init] Guest user - forcing local TTS only');
+        setTtsMode('local');
+        return;
+      }
+
       // IMPORTANT: Read directly from localStorage to avoid stale closure issues
       // The previous useEffect sets state from localStorage, but state updates are batched
       // so we'd see old values here if we used state directly.
@@ -537,7 +545,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
     
     checkVoiceAvailability();
-  }, [bot.id, language]); // Re-run when bot or language changes
+  }, [bot.id, language, currentUser]); // Re-run when bot, language or user changes
 
   // Auto-scroll to bottom when switching to text mode
   useEffect(() => {
@@ -836,7 +844,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     // forceLocalTts is used when server TTS fails and we need to fallback immediately
     // (React state updates are async, so we can't rely on ttsMode being updated yet)
     const iosSafariForcesLocal = isIOS && !isNativeiOS;
-    const effectiveTtsMode = forceLocalTts ? 'local' : (iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode));
+    const guestForcesLocal = !currentUser; // Guests cannot use server TTS
+    const effectiveTtsMode = forceLocalTts ? 'local' : (guestForcesLocal ? 'local' : (iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode)));
 
     // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
     if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
@@ -2387,6 +2396,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         onPreviewNativeVoice={handlePreviewNativeVoice}
         botLanguage={language}
         botGender={botGender}
+        isGuest={isGuest}
     />
      <CoachInfoModal
         bot={bot}

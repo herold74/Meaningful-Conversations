@@ -1427,7 +1427,7 @@ const App: React.FC = () => {
                         minimal={minimalBar}
                     />
                     {/* Spacer for fixed web GamificationBar */}
-                    <div style={{ height: (view === 'chat' || view === 'welcome')
+                    <div style={{ height: view === 'chat'
                         ? (minimalBar ? `calc(5rem + ${iosSafeAreaTop}px)` : `calc(6rem + ${iosSafeAreaTop}px)`)
                         : (minimalBar ? `calc(4rem + ${iosSafeAreaTop}px)` : `calc(5rem + ${iosSafeAreaTop}px)`)
                     }} />
