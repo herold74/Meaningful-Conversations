@@ -42,13 +42,40 @@ export interface RiemannResult {
   stressRanking: string[]; // IDs der Items in Reihenfolge 1-4
 }
 
-// Big5/OCEAN Result (unchanged structure)
+// Big5/OCEAN Result
+// Based on the BFI-2 by Soto & John (2017). Domain scores are mean item ratings (1-5).
+// Facets are only available when the BFI-2-S (30-item) variant is used.
+export interface Big5Facets {
+  // Extraversion facets
+  sociability: number;
+  assertiveness: number;
+  energyLevel: number;
+  // Agreeableness facets
+  compassion: number;
+  respectfulness: number;
+  trust: number;
+  // Conscientiousness facets
+  organization: number;
+  productiveness: number;
+  responsibility: number;
+  // Negative Emotionality facets
+  anxiety: number;
+  depression: number;
+  emotionalVolatility: number;
+  // Open-Mindedness facets
+  aestheticSensitivity: number;
+  intellectualCuriosity: number;
+  creativeImagination: number;
+}
+
 export interface Big5Result {
   openness: number;
   conscientiousness: number;
   extraversion: number;
   agreeableness: number;
-  neuroticism: number;
+  neuroticism: number; // Note: In BFI-2 this is "Negative Emotionality" (higher = more neurotic)
+  variant?: 'xs' | 's'; // BFI-2-XS (15 items) or BFI-2-S (30 items)
+  facets?: Big5Facets;   // Only populated for BFI-2-S variant
 }
 
 // Die Struktur eines Datensatzes für die Auswertung (Unified Profile)
@@ -115,53 +142,119 @@ export const SD_LEVELS = [
   { id: 'turquoise', color: '#14B8A6', nameKey: 'sd_level_turquoise_name', descKey: 'sd_level_turquoise_desc' },
 ] as const;
 
-// SD Levels with colors
-const SD_LEVEL_COLORS: Record<string, string> = {
-  beige: '#D4A574',
-  purple: '#8B5CF6',
-  red: '#EF4444',
-  blue: '#3B82F6',
-  orange: '#F97316',
-  green: '#22C55E',
-  yellow: '#EAB308',
-  turquoise: '#14B8A6',
+// --- PVQ-21 (Portrait Values Questionnaire) ---
+// Validated instrument by Schwartz (2003), European Social Survey.
+// 21 portrait items measuring 10 Schwartz values, mapped to 8 SD levels for coaching.
+
+type SchwartzValue = 'selfDirection' | 'power' | 'universalism' | 'achievement' | 'security' | 'stimulation' | 'conformity' | 'benevolence' | 'tradition' | 'hedonism';
+
+interface Pvq21Item {
+  id: string;
+  value: SchwartzValue;
+  text: string;
+}
+
+// PVQ-21 items (official ESS ordering and scoring key)
+const getPvq21Items = (t: TranslateFunc): Pvq21Item[] => [
+  { id: 'pvq_1',  value: 'selfDirection', text: t('survey_pvq21_item_1') },
+  { id: 'pvq_2',  value: 'power',         text: t('survey_pvq21_item_2') },
+  { id: 'pvq_3',  value: 'universalism',  text: t('survey_pvq21_item_3') },
+  { id: 'pvq_4',  value: 'achievement',   text: t('survey_pvq21_item_4') },
+  { id: 'pvq_5',  value: 'security',      text: t('survey_pvq21_item_5') },
+  { id: 'pvq_6',  value: 'stimulation',   text: t('survey_pvq21_item_6') },
+  { id: 'pvq_7',  value: 'conformity',    text: t('survey_pvq21_item_7') },
+  { id: 'pvq_8',  value: 'universalism',  text: t('survey_pvq21_item_8') },
+  { id: 'pvq_9',  value: 'tradition',     text: t('survey_pvq21_item_9') },
+  { id: 'pvq_10', value: 'hedonism',      text: t('survey_pvq21_item_10') },
+  { id: 'pvq_11', value: 'selfDirection', text: t('survey_pvq21_item_11') },
+  { id: 'pvq_12', value: 'benevolence',   text: t('survey_pvq21_item_12') },
+  { id: 'pvq_13', value: 'achievement',   text: t('survey_pvq21_item_13') },
+  { id: 'pvq_14', value: 'security',      text: t('survey_pvq21_item_14') },
+  { id: 'pvq_15', value: 'stimulation',   text: t('survey_pvq21_item_15') },
+  { id: 'pvq_16', value: 'conformity',    text: t('survey_pvq21_item_16') },
+  { id: 'pvq_17', value: 'power',         text: t('survey_pvq21_item_17') },
+  { id: 'pvq_18', value: 'benevolence',   text: t('survey_pvq21_item_18') },
+  { id: 'pvq_19', value: 'universalism',  text: t('survey_pvq21_item_19') },
+  { id: 'pvq_20', value: 'tradition',     text: t('survey_pvq21_item_20') },
+  { id: 'pvq_21', value: 'hedonism',      text: t('survey_pvq21_item_21') },
+];
+
+// Schwartz → SD weighted mapping
+// Each SD level is a weighted combination of Schwartz values
+const SCHWARTZ_TO_SD: Record<string, { value: SchwartzValue; weight: number }[]> = {
+  beige:     [{ value: 'security', weight: 1.0 }],
+  purple:    [{ value: 'tradition', weight: 0.7 }, { value: 'benevolence', weight: 0.3 }],
+  red:       [{ value: 'power', weight: 0.7 }, { value: 'stimulation', weight: 0.3 }],
+  blue:      [{ value: 'conformity', weight: 0.7 }, { value: 'security', weight: 0.3 }],
+  orange:    [{ value: 'achievement', weight: 0.6 }, { value: 'hedonism', weight: 0.4 }],
+  green:     [{ value: 'benevolence', weight: 0.5 }, { value: 'universalism', weight: 0.5 }],
+  yellow:    [{ value: 'selfDirection', weight: 0.7 }, { value: 'universalism', weight: 0.3 }],
+  turquoise: [{ value: 'universalism', weight: 0.7 }, { value: 'selfDirection', weight: 0.3 }],
 };
 
-// SD Questions (3 per level, 24 total) - contextualized to current challenges
-const getSDQuestions = (t: TranslateFunc) => [
-  // Beige - Survival
-  { id: 'beige_1', level: 'beige', text: t('survey_sd_q_beige_1') },
-  { id: 'beige_2', level: 'beige', text: t('survey_sd_q_beige_2') },
-  { id: 'beige_3', level: 'beige', text: t('survey_sd_q_beige_3') },
-  // Purple - Belonging  
-  { id: 'purple_1', level: 'purple', text: t('survey_sd_q_purple_1') },
-  { id: 'purple_2', level: 'purple', text: t('survey_sd_q_purple_2') },
-  { id: 'purple_3', level: 'purple', text: t('survey_sd_q_purple_3') },
-  // Red - Power
-  { id: 'red_1', level: 'red', text: t('survey_sd_q_red_1') },
-  { id: 'red_2', level: 'red', text: t('survey_sd_q_red_2') },
-  { id: 'red_3', level: 'red', text: t('survey_sd_q_red_3') },
-  // Blue - Order
-  { id: 'blue_1', level: 'blue', text: t('survey_sd_q_blue_1') },
-  { id: 'blue_2', level: 'blue', text: t('survey_sd_q_blue_2') },
-  { id: 'blue_3', level: 'blue', text: t('survey_sd_q_blue_3') },
-  // Orange - Achievement
-  { id: 'orange_1', level: 'orange', text: t('survey_sd_q_orange_1') },
-  { id: 'orange_2', level: 'orange', text: t('survey_sd_q_orange_2') },
-  { id: 'orange_3', level: 'orange', text: t('survey_sd_q_orange_3') },
-  // Green - Community
-  { id: 'green_1', level: 'green', text: t('survey_sd_q_green_1') },
-  { id: 'green_2', level: 'green', text: t('survey_sd_q_green_2') },
-  { id: 'green_3', level: 'green', text: t('survey_sd_q_green_3') },
-  // Yellow - Integration
-  { id: 'yellow_1', level: 'yellow', text: t('survey_sd_q_yellow_1') },
-  { id: 'yellow_2', level: 'yellow', text: t('survey_sd_q_yellow_2') },
-  { id: 'yellow_3', level: 'yellow', text: t('survey_sd_q_yellow_3') },
-  // Turquoise - Holism
-  { id: 'turquoise_1', level: 'turquoise', text: t('survey_sd_q_turquoise_1') },
-  { id: 'turquoise_2', level: 'turquoise', text: t('survey_sd_q_turquoise_2') },
-  { id: 'turquoise_3', level: 'turquoise', text: t('survey_sd_q_turquoise_3') },
-];
+// Calculate PVQ-21 answers → 10 Schwartz values → 8 SD levels
+const calculatePvq21ToSD = (
+  answers: Record<string, number>,
+  items: Pvq21Item[]
+): SpiralDynamicsResult => {
+  // Step 1: Reverse-code (PVQ uses 1="very much like me"..6="not at all like me")
+  // We want higher = more important, so: reversed = 7 - raw
+  const reversed: Record<string, number> = {};
+  Object.entries(answers).forEach(([id, raw]) => {
+    reversed[id] = 7 - raw;
+  });
+
+  // Step 2: Mean per Schwartz value
+  const valueSums: Record<SchwartzValue, number> = {
+    selfDirection: 0, power: 0, universalism: 0, achievement: 0, security: 0,
+    stimulation: 0, conformity: 0, benevolence: 0, tradition: 0, hedonism: 0,
+  };
+  const valueCounts: Record<SchwartzValue, number> = {
+    selfDirection: 0, power: 0, universalism: 0, achievement: 0, security: 0,
+    stimulation: 0, conformity: 0, benevolence: 0, tradition: 0, hedonism: 0,
+  };
+
+  items.forEach(item => {
+    const score = reversed[item.id] || 3.5; // default mid-point
+    valueSums[item.value] += score;
+    valueCounts[item.value]++;
+  });
+
+  const schwartzScores: Record<SchwartzValue, number> = {} as any;
+  (Object.keys(valueSums) as SchwartzValue[]).forEach(v => {
+    schwartzScores[v] = valueCounts[v] > 0
+      ? valueSums[v] / valueCounts[v]
+      : 3.5;
+  });
+
+  // Step 3: Weighted mapping to SD levels
+  const levels: SpiralDynamicsResult['levels'] = {
+    beige: 3, purple: 3, red: 3, blue: 3,
+    orange: 3, green: 3, yellow: 3, turquoise: 3,
+  };
+
+  (Object.keys(SCHWARTZ_TO_SD) as (keyof typeof levels)[]).forEach(sdLevel => {
+    const mapping = SCHWARTZ_TO_SD[sdLevel];
+    let weightedSum = 0;
+    mapping.forEach(m => {
+      weightedSum += schwartzScores[m.value] * m.weight;
+    });
+    // Normalize from 1-6 (reversed PVQ range) to 1-5 (SD range)
+    const normalized = ((weightedSum - 1) / 5) * 4 + 1;
+    levels[sdLevel] = Math.round(normalized * 10) / 10;
+  });
+
+  // Step 4: Determine dominant (top 3) and underdeveloped (bottom 3)
+  const sortedLevels = Object.entries(levels)
+    .sort(([, a], [, b]) => b - a)
+    .map(([level]) => level);
+
+  return {
+    levels,
+    dominantLevels: sortedLevels.slice(0, 3),
+    underdevelopedLevels: sortedLevels.slice(5, 8),
+  };
+};
 
 // Helper to shuffle an array (Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -252,17 +345,61 @@ export const STRESS_ITEMS = [
   { id: 'wechsel', label: 'Actionism', text: 'Become hectic, evade, start many things at once.' }
 ];
 
-const getBig5Questions = (t: TranslateFunc) => [
-  { id: 'openness_high', label: t('survey_big5_openness_high_label'), text: t('survey_big5_openness_high_text'), inverse: false },
-  { id: 'openness_low', label: t('survey_big5_openness_low_label'), text: t('survey_big5_openness_low_text'), inverse: true },
-  { id: 'conscientiousness_high', label: t('survey_big5_conscientiousness_high_label'), text: t('survey_big5_conscientiousness_high_text'), inverse: false },
-  { id: 'conscientiousness_low', label: t('survey_big5_conscientiousness_low_label'), text: t('survey_big5_conscientiousness_low_text'), inverse: true },
-  { id: 'extraversion_high', label: t('survey_big5_extraversion_high_label'), text: t('survey_big5_extraversion_high_text'), inverse: false },
-  { id: 'extraversion_low', label: t('survey_big5_extraversion_low_label'), text: t('survey_big5_extraversion_low_text'), inverse: true },
-  { id: 'agreeableness_high', label: t('survey_big5_agreeableness_high_label'), text: t('survey_big5_agreeableness_high_text'), inverse: false },
-  { id: 'agreeableness_low', label: t('survey_big5_agreeableness_low_label'), text: t('survey_big5_agreeableness_low_text'), inverse: true },
-  { id: 'neuroticism_low', label: t('survey_big5_neuroticism_low_label'), text: t('survey_big5_neuroticism_low_text'), inverse: false }
+// BFI-2 Item definitions (Soto & John, 2017)
+// Items 1-15 = BFI-2-XS, Items 1-30 = BFI-2-S
+// R = reverse-keyed (scored as 6 - raw)
+type Bfi2Variant = 'xs' | 's';
+
+interface Bfi2ItemDef {
+  id: string;       // e.g. "bfi2_1"
+  itemNum: number;   // 1-30
+  reverse: boolean;
+  domain: 'E' | 'A' | 'C' | 'N' | 'O';
+  facet?: string;    // Only meaningful for BFI-2-S scoring
+}
+
+const BFI2_ITEMS: Bfi2ItemDef[] = [
+  // BFI-2-XS items (1-15)
+  { id: 'bfi2_1',  itemNum: 1,  reverse: true,  domain: 'E', facet: 'sociability' },
+  { id: 'bfi2_2',  itemNum: 2,  reverse: false, domain: 'A', facet: 'compassion' },
+  { id: 'bfi2_3',  itemNum: 3,  reverse: true,  domain: 'C', facet: 'organization' },
+  { id: 'bfi2_4',  itemNum: 4,  reverse: false, domain: 'N', facet: 'anxiety' },
+  { id: 'bfi2_5',  itemNum: 5,  reverse: false, domain: 'O', facet: 'aestheticSensitivity' },
+  { id: 'bfi2_6',  itemNum: 6,  reverse: false, domain: 'E', facet: 'assertiveness' },
+  { id: 'bfi2_7',  itemNum: 7,  reverse: true,  domain: 'A', facet: 'respectfulness' },
+  { id: 'bfi2_8',  itemNum: 8,  reverse: true,  domain: 'C', facet: 'productiveness' },
+  { id: 'bfi2_9',  itemNum: 9,  reverse: false, domain: 'N', facet: 'depression' },
+  { id: 'bfi2_10', itemNum: 10, reverse: true,  domain: 'O', facet: 'intellectualCuriosity' },
+  { id: 'bfi2_11', itemNum: 11, reverse: false, domain: 'E', facet: 'energyLevel' },
+  { id: 'bfi2_12', itemNum: 12, reverse: false, domain: 'A', facet: 'trust' },
+  { id: 'bfi2_13', itemNum: 13, reverse: false, domain: 'C', facet: 'responsibility' },
+  { id: 'bfi2_14', itemNum: 14, reverse: true,  domain: 'N', facet: 'emotionalVolatility' },
+  { id: 'bfi2_15', itemNum: 15, reverse: false, domain: 'O', facet: 'creativeImagination' },
+  // BFI-2-S additional items (16-30)
+  { id: 'bfi2_16', itemNum: 16, reverse: false, domain: 'E', facet: 'sociability' },
+  { id: 'bfi2_17', itemNum: 17, reverse: true,  domain: 'A', facet: 'compassion' },
+  { id: 'bfi2_18', itemNum: 18, reverse: false, domain: 'C', facet: 'organization' },
+  { id: 'bfi2_19', itemNum: 19, reverse: true,  domain: 'N', facet: 'anxiety' },
+  { id: 'bfi2_20', itemNum: 20, reverse: true,  domain: 'O', facet: 'aestheticSensitivity' },
+  { id: 'bfi2_21', itemNum: 21, reverse: true,  domain: 'E', facet: 'assertiveness' },
+  { id: 'bfi2_22', itemNum: 22, reverse: false, domain: 'A', facet: 'respectfulness' },
+  { id: 'bfi2_23', itemNum: 23, reverse: false, domain: 'C', facet: 'productiveness' },
+  { id: 'bfi2_24', itemNum: 24, reverse: true,  domain: 'N', facet: 'depression' },
+  { id: 'bfi2_25', itemNum: 25, reverse: false, domain: 'O', facet: 'intellectualCuriosity' },
+  { id: 'bfi2_26', itemNum: 26, reverse: true,  domain: 'E', facet: 'energyLevel' },
+  { id: 'bfi2_27', itemNum: 27, reverse: true,  domain: 'A', facet: 'trust' },
+  { id: 'bfi2_28', itemNum: 28, reverse: true,  domain: 'C', facet: 'responsibility' },
+  { id: 'bfi2_29', itemNum: 29, reverse: false, domain: 'N', facet: 'emotionalVolatility' },
+  { id: 'bfi2_30', itemNum: 30, reverse: true,  domain: 'O', facet: 'creativeImagination' },
 ];
+
+const getBfi2Items = (variant: Bfi2Variant, t: TranslateFunc) => {
+  const count = variant === 'xs' ? 15 : 30;
+  return BFI2_ITEMS.slice(0, count).map(item => ({
+    id: item.id,
+    text: `${t('survey_bfi2_stem')} ${t(`survey_bfi2_item_${item.itemNum}`)}`,
+  }));
+};
 
 // --- HILFSKOMPONENTEN (UI) ---
 
@@ -285,7 +422,10 @@ const SurveyButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { c
 // --- LOGIK KOMPONENTEN ---
 
 // 1. LIKERT SCALE (1-5)
-const LikertBlock = ({ questions, onComplete, t }: { questions: any[], onComplete: (res: any) => void, t: TranslateFunc }) => {
+const LikertBlock = ({ questions, onComplete, t, lowLabel, highLabel }: { 
+  questions: any[], onComplete: (res: any) => void, t: TranslateFunc,
+  lowLabel?: string, highLabel?: string
+}) => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   const handleChange = (id: string, val: number) => setAnswers(prev => ({ ...prev, [id]: val }));
@@ -312,8 +452,8 @@ const LikertBlock = ({ questions, onComplete, t }: { questions: any[], onComplet
             ))}
           </div>
           <div className="flex justify-between text-xs text-content-secondary mt-1">
-            <span>{t('survey_likert_low')}</span>
-            <span>{t('survey_likert_high')}</span>
+            <span>{lowLabel || t('survey_likert_low')}</span>
+            <span>{highLabel || t('survey_likert_high')}</span>
           </div>
         </div>
       ))}
@@ -603,6 +743,73 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
   );
 };
 
+// 4b. BFI-2 VARIANT CHOICE (Quick XS vs Detailed S)
+const Bfi2VariantChoiceBlock = ({ onComplete, t }: {
+  onComplete: (variant: Bfi2Variant) => void;
+  t: (key: string) => string;
+}) => {
+  const [selected, setSelected] = useState<Bfi2Variant | null>(null);
+
+  const VariantCard = ({ value, titleKey, descKey, icon }: { value: Bfi2Variant, titleKey: string, descKey: string, icon: string }) => {
+    const isSelected = selected === value;
+    return (
+      <div
+        className={`p-5 border-2 rounded-xl cursor-pointer transition-all mb-4
+          ${isSelected
+            ? 'border-accent-primary bg-accent-primary/10'
+            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'}`}
+        onClick={() => setSelected(value)}
+      >
+        <div className="flex items-center mb-3">
+          <div className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center
+            ${isSelected
+              ? 'border-accent-primary bg-accent-primary'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'}`}
+          >
+            {isSelected && <span className="text-white text-sm">✓</span>}
+          </div>
+          <span className="text-base mr-2">{icon}</span>
+          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+            {t(titleKey)}
+          </span>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 ml-9 leading-relaxed">
+          {t(descKey)}
+        </p>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
+        {t('survey_bfi2_variant_intro')}
+      </p>
+
+      <VariantCard
+        value="xs"
+        titleKey="survey_bfi2_variant_xs_title"
+        descKey="survey_bfi2_variant_xs_desc"
+        icon="⚡"
+      />
+
+      <VariantCard
+        value="s"
+        titleKey="survey_bfi2_variant_s_title"
+        descKey="survey_bfi2_variant_s_desc"
+        icon="📊"
+      />
+
+      <SurveyButton
+        disabled={selected === null}
+        onClick={() => selected && onComplete(selected)}
+      >
+        {t('survey_bfi2_variant_submit')}
+      </SurveyButton>
+    </div>
+  );
+};
+
 // 5. LENS SELECTION (Choose which questionnaire to fill)
 // Lenses that require premium or higher access
 const PREMIUM_ONLY_LENSES: LensType[] = ['sd', 'riemann'];
@@ -804,7 +1011,8 @@ const LensSelectionBlock = ({
   );
 };
 
-// 6. SD QUESTIONNAIRE (24 Likert questions, 3 per level)
+// 6. PVQ-21 QUESTIONNAIRE (21 portrait items → 10 Schwartz values → 8 SD levels)
+// Based on the Portrait Values Questionnaire (Schwartz, 2003; European Social Survey)
 const SDQuestionnaireBlock = ({ 
   onComplete, 
   t 
@@ -812,8 +1020,9 @@ const SDQuestionnaireBlock = ({
   onComplete: (result: SpiralDynamicsResult) => void;
   t: TranslateFunc;
 }) => {
-  // Shuffle questions once on mount to avoid pattern recognition
-  const [questions] = useState(() => shuffleArray(getSDQuestions(t)));
+  // Get items and shuffle once on mount to reduce order effects
+  const allItems = useMemo(() => getPvq21Items(t), [t]);
+  const [questions] = useState(() => shuffleArray(allItems));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
@@ -822,64 +1031,17 @@ const SDQuestionnaireBlock = ({
   const progress = ((currentIndex + 1) / questions.length) * 100;
 
   const handleAnswer = (value: number) => {
-    setAnswers(prev => ({ ...prev, [currentQuestion.id]: value }));
+    const newAnswers = { ...answers, [currentQuestion.id]: value };
+    setAnswers(newAnswers);
     
     if (isLastQuestion) {
-      // Calculate results
-      const newAnswers = { ...answers, [currentQuestion.id]: value };
-      calculateAndComplete(newAnswers);
+      // Calculate PVQ-21 → Schwartz → SD mapping
+      const sdResult = calculatePvq21ToSD(newAnswers, allItems);
+      onComplete(sdResult);
     } else {
       // Auto-advance to next question after brief delay
       setTimeout(() => setCurrentIndex(prev => prev + 1), 200);
     }
-  };
-
-  const calculateAndComplete = (allAnswers: Record<string, number>) => {
-    // Calculate average score per level (3 questions each)
-    const levelScores: Record<string, number> = {
-      beige: 0, purple: 0, red: 0, blue: 0,
-      orange: 0, green: 0, yellow: 0, turquoise: 0
-    };
-
-    const levelCounts: Record<string, number> = {
-      beige: 0, purple: 0, red: 0, blue: 0,
-      orange: 0, green: 0, yellow: 0, turquoise: 0
-    };
-
-    // Sum up scores per level
-    questions.forEach(q => {
-      const answer = allAnswers[q.id] || 3; // Default to neutral if somehow missing
-      levelScores[q.level] += answer;
-      levelCounts[q.level]++;
-    });
-
-    // Calculate averages (1-5 scale)
-    const levels: SpiralDynamicsResult['levels'] = {
-      beige: 3, purple: 3, red: 3, blue: 3,
-      orange: 3, green: 3, yellow: 3, turquoise: 3
-    };
-
-    Object.keys(levelScores).forEach(level => {
-      if (levelCounts[level] > 0) {
-        levels[level as keyof typeof levels] = 
-          Math.round((levelScores[level] / levelCounts[level]) * 10) / 10;
-      }
-    });
-
-    // Sort levels by score to determine dominant and underdeveloped
-    const sortedLevels = Object.entries(levels)
-      .sort(([, a], [, b]) => b - a)
-      .map(([level]) => level);
-
-    // Top 3 are dominant, bottom 3 have growth potential
-    const dominantLevels = sortedLevels.slice(0, 3);
-    const underdevelopedLevels = sortedLevels.slice(5, 8);
-
-    onComplete({
-      levels,
-      dominantLevels,
-      underdevelopedLevels
-    });
   };
 
   const goBack = () => {
@@ -888,16 +1050,26 @@ const SDQuestionnaireBlock = ({
     }
   };
 
+  // PVQ-21 uses a 6-point similarity scale
+  const likertLabels = [
+    t('survey_pvq21_likert_1'), // Very much like me
+    t('survey_pvq21_likert_2'), // Like me
+    t('survey_pvq21_likert_3'), // Somewhat like me
+    t('survey_pvq21_likert_4'), // A little like me
+    t('survey_pvq21_likert_5'), // Not like me
+    t('survey_pvq21_likert_6'), // Not like me at all
+  ];
+
   return (
     <div>
       {/* Intro text on first question */}
       {currentIndex === 0 && (
         <div className="mb-6 p-4 bg-accent-primary/10 rounded-lg border border-accent-primary/20">
           <p className="text-sm text-content-primary mb-2">
-            {t('survey_sd_intro')}
+            {t('survey_pvq21_intro')}
           </p>
           <p className="text-xs text-content-secondary italic">
-            {t('survey_sd_context_hint')}
+            {t('survey_pvq21_instruction')}
           </p>
         </div>
       )}
@@ -920,30 +1092,26 @@ const SDQuestionnaireBlock = ({
         </div>
       </div>
 
-      {/* Current question */}
-      <div className="mb-6">
-        <div 
-          className="w-2 h-2 rounded-full inline-block mr-2 mb-0.5"
-          style={{ backgroundColor: SD_LEVEL_COLORS[currentQuestion.level] }}
-        />
-        <p className="inline font-medium text-content-primary text-lg">
+      {/* Current portrait description */}
+      <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <p className="font-medium text-content-primary text-lg leading-relaxed">
           {currentQuestion.text}
         </p>
       </div>
 
-      {/* Likert scale */}
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map(val => (
+      {/* 6-point similarity scale */}
+      <div className="space-y-2.5">
+        {[1, 2, 3, 4, 5, 6].map(val => (
           <button
             key={val}
             onClick={() => handleAnswer(val)}
-            className={`w-full p-4 rounded-lg border-2 transition-all text-left flex items-center gap-4
+            className={`w-full p-3.5 rounded-lg border-2 transition-all text-left flex items-center gap-3
               ${answers[currentQuestion.id] === val
                 ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 text-content-primary'
               }`}
           >
-            <span className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold
+            <span className={`w-9 h-9 flex items-center justify-center rounded-full text-base font-bold shrink-0
               ${answers[currentQuestion.id] === val
                 ? 'bg-accent-primary text-white'
                 : 'bg-gray-100 dark:bg-gray-700 text-content-secondary'
@@ -951,19 +1119,28 @@ const SDQuestionnaireBlock = ({
               {val}
             </span>
             <span className="text-sm">
-              {val === 1 && t('survey_likert_strongly_disagree')}
-              {val === 2 && t('survey_likert_disagree')}
-              {val === 3 && t('survey_likert_neutral')}
-              {val === 4 && t('survey_likert_agree')}
-              {val === 5 && t('survey_likert_strongly_agree')}
+              {likertLabels[val - 1]}
             </span>
           </button>
         ))}
       </div>
 
+      {/* Citation & License */}
+      <div className="mt-4 text-xs text-content-tertiary italic text-center">
+        <p>{t('survey_pvq21_citation')}</p>
+        <a 
+          href={t('survey_pvq21_source_url')} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="underline hover:text-accent-primary transition-colors"
+        >
+          {t('survey_pvq21_source_label')} ↗
+        </a>
+      </div>
+
       {/* Navigation - Back button only */}
       {currentIndex > 0 && (
-        <div className="mt-6">
+        <div className="mt-4">
           <button
             onClick={goBack}
             className="px-4 py-2 text-sm rounded-lg transition-colors text-content-secondary hover:text-content-primary hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -1065,6 +1242,9 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const [step, setStep] = useState(0);
   const [selectedLens, setSelectedLens] = useState<LensType | null>(preselectedLens || null);
   
+  // BFI-2 variant selection (XS = 15 items, S = 30 items)
+  const [bfi2Variant, setBfi2Variant] = useState<Bfi2Variant | null>(null);
+  
   // State for overwrite warning modal (shows when repeating an already-completed test with DPFL refinements)
   const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
   const [pendingLensSelection, setPendingLensSelection] = useState<LensType | null>(null);
@@ -1114,7 +1294,8 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     const lensSteps: Record<LensType, string[]> = {
       sd: ['SD_RANKING'],
       riemann: ['RIEMANN_BERUF', 'RIEMANN_PRIVAT', 'RIEMANN_SELBST', 'RIEMANN_STRESS'],
-      ocean: ['BIG5_QUESTIONS'],
+      // BFI-2: variant choice first (unless already selected), then questions
+      ocean: bfi2Variant ? ['BIG5_QUESTIONS'] : ['BFI2_VARIANT_CHOICE', 'BIG5_QUESTIONS'],
     };
     
     const steps = [...lensSteps[selectedLens]];
@@ -1125,15 +1306,17 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       steps.push('NARRATIVE_QUESTIONS');
     }
     
-    // Only show adaptation choice if no existing adaptation mode is set
-    // This prevents re-asking when adding additional tests to an existing profile
+    // Only show adaptation choice if:
+    // 1. No existing adaptation mode is set (prevents re-asking when adding additional lenses)
+    // 2. User is premium or higher (DPFL/adaptive is premium-only; registered users get 'stable' automatically)
     const hasExistingAdaptationMode = existingProfile?.adaptationMode;
-    if (!hasExistingAdaptationMode) {
+    const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin);
+    if (!hasExistingAdaptationMode && isPremiumOrHigher) {
       steps.push('ADAPTATION_CHOICE');
     }
     
     return steps;
-  }, [selectedLens, hadNarrativesAtStart, existingProfile?.adaptationMode]);
+  }, [selectedLens, hadNarrativesAtStart, existingProfile?.adaptationMode, currentUser?.isPremium, currentUser?.isClient, currentUser?.isAdmin, bfi2Variant]);
 
   const currentStepId = flow[step] || 'DONE';
 
@@ -1163,20 +1346,75 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     setStep(0); // This will now show the first step of the selected lens
   };
 
-  const calculateBig5 = (data: Record<string, number>): Big5Result => {
-    const calcTrait = (trait: string) => {
-      const high = data[`${trait}_high`] || 0;
-      const low = 6 - (data[`${trait}_low`] || 0);
-      return Math.round((high + low) / 2);
+  // BFI-2 Scoring: Soto & John (2017)
+  // Domain score = mean of items for that domain (reverse items scored as 6 - raw)
+  // Facet score = mean of 2 items per facet (BFI-2-S only)
+  const calculateBfi2 = (data: Record<string, number>, variant: Bfi2Variant): Big5Result => {
+    const count = variant === 'xs' ? 15 : 30;
+    const items = BFI2_ITEMS.slice(0, count);
+    
+    const scoreItem = (item: Bfi2ItemDef): number => {
+      const raw = data[item.id] || 3; // default to neutral
+      return item.reverse ? (6 - raw) : raw;
     };
     
-    return {
-      openness: calcTrait('openness'),
-      conscientiousness: calcTrait('conscientiousness'),
-      extraversion: calcTrait('extraversion'),
-      agreeableness: calcTrait('agreeableness'),
-      neuroticism: data['neuroticism_low'] || 0
+    // Domain scores: mean of all items belonging to that domain
+    const domainMap: Record<string, Bfi2ItemDef[]> = { E: [], A: [], C: [], N: [], O: [] };
+    items.forEach(item => domainMap[item.domain].push(item));
+    
+    const domainMean = (domain: string): number => {
+      const domainItems = domainMap[domain];
+      if (domainItems.length === 0) return 3;
+      const sum = domainItems.reduce((acc, item) => acc + scoreItem(item), 0);
+      return Math.round((sum / domainItems.length) * 10) / 10; // 1 decimal
     };
+    
+    const result: Big5Result = {
+      extraversion: domainMean('E'),
+      agreeableness: domainMean('A'),
+      conscientiousness: domainMean('C'),
+      neuroticism: domainMean('N'),
+      openness: domainMean('O'),
+      variant,
+    };
+    
+    // Facet scores (BFI-2-S only, 2 items per facet)
+    if (variant === 's') {
+      const facetMap: Record<string, Bfi2ItemDef[]> = {};
+      items.forEach(item => {
+        if (item.facet) {
+          if (!facetMap[item.facet]) facetMap[item.facet] = [];
+          facetMap[item.facet].push(item);
+        }
+      });
+      
+      const facetMean = (facetKey: string): number => {
+        const facetItems = facetMap[facetKey];
+        if (!facetItems || facetItems.length === 0) return 3;
+        const sum = facetItems.reduce((acc, item) => acc + scoreItem(item), 0);
+        return Math.round((sum / facetItems.length) * 10) / 10;
+      };
+      
+      result.facets = {
+        sociability: facetMean('sociability'),
+        assertiveness: facetMean('assertiveness'),
+        energyLevel: facetMean('energyLevel'),
+        compassion: facetMean('compassion'),
+        respectfulness: facetMean('respectfulness'),
+        trust: facetMean('trust'),
+        organization: facetMean('organization'),
+        productiveness: facetMean('productiveness'),
+        responsibility: facetMean('responsibility'),
+        anxiety: facetMean('anxiety'),
+        depression: facetMean('depression'),
+        emotionalVolatility: facetMean('emotionalVolatility'),
+        aestheticSensitivity: facetMean('aestheticSensitivity'),
+        intellectualCuriosity: facetMean('intellectualCuriosity'),
+        creativeImagination: facetMean('creativeImagination'),
+      };
+    }
+    
+    return result;
   };
 
   const updateRiemann = (key: string, data: any) => {
@@ -1227,7 +1465,9 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       riemann: pendingRiemannResult.current || result.riemann,
       big5: pendingBig5Result.current || result.big5,
       narratives: pendingNarratives.current || result.narratives,
-      adaptationMode: pendingAdaptationMode.current || existingProfile?.adaptationMode || result.adaptationMode || 'adaptive',
+      // For adaptationMode: prefer pending choice > existing profile > result > default
+      // Default is 'stable' (DPC) since 'adaptive' (DPFL) requires premium access
+      adaptationMode: pendingAdaptationMode.current || existingProfile?.adaptationMode || result.adaptationMode || 'stable',
       narrativeProfile: result.narrativeProfile,
     };
     
@@ -1238,7 +1478,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   // Get localized data
   const RIEMANN_BLOCKS = getRiemannBlocks(t);
   const STRESS_ITEMS_LOCALIZED = getStressItems(t);
-  const BIG5_QUESTIONS = getBig5Questions(t);
+  const BIG5_QUESTIONS = getBfi2Items(bfi2Variant || 'xs', t);
 
   // Renderer
   let content;
@@ -1257,7 +1497,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   }
   else if (currentStepId === 'SD_RANKING') {
     content = (
-      <Card title={t('survey_sd_title')}>
+      <Card title={t('survey_pvq21_title')}>
         <SDQuestionnaireBlock 
           t={t}
           onComplete={(sdResult) => {
@@ -1271,15 +1511,43 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       </Card>
     );
   }
-  else if (currentStepId === 'BIG5_QUESTIONS') {
+  else if (currentStepId === 'BFI2_VARIANT_CHOICE') {
     content = (
-      <Card title={t('survey_big5_title')}>
-        <p className="mb-4 text-gray-600 dark:text-gray-400">{t('survey_big5_intro')}</p>
-        <LikertBlock 
-          questions={BIG5_QUESTIONS} 
+      <Card title={t('survey_bfi2_variant_title')}>
+        <Bfi2VariantChoiceBlock
           t={t}
+          onComplete={(variant) => {
+            setBfi2Variant(variant);
+            next();
+          }}
+        />
+      </Card>
+    );
+  }
+  else if (currentStepId === 'BIG5_QUESTIONS') {
+    const effectiveVariant = bfi2Variant || 'xs';
+    const bfi2Questions = getBfi2Items(effectiveVariant, t);
+    content = (
+      <Card title={t('survey_bfi2_title')}>
+        <p className="mb-2 text-gray-600 dark:text-gray-400">{t('survey_bfi2_intro')}</p>
+        <div className="mb-4 text-xs text-gray-400 dark:text-gray-500 italic">
+          <p>{t('survey_bfi2_citation')}</p>
+          <a 
+            href={t('survey_bfi2_source_url')} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="underline hover:text-accent-primary transition-colors"
+          >
+            {t('survey_bfi2_source_label')} ↗
+          </a>
+        </div>
+        <LikertBlock 
+          questions={bfi2Questions} 
+          t={t}
+          lowLabel={t('survey_bfi2_likert_1')}
+          highLabel={t('survey_bfi2_likert_5')}
           onComplete={(data) => {
-            const calculatedScores = calculateBig5(data);
+            const calculatedScores = calculateBfi2(data, effectiveVariant);
             // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
             pendingBig5Result.current = calculatedScores;
             // Then update state (async)
@@ -1294,6 +1562,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     if (currentStepId === 'RIEMANN_BERUF') {
       content = (
         <Card title={RIEMANN_BLOCKS.beruf.title}>
+          <p className="mb-4 text-xs text-content-tertiary italic">{t('survey_riemann_disclaimer')}</p>
           <ConstantSumBlock contextTitle="Beruf" items={RIEMANN_BLOCKS.beruf.items} onComplete={(d) => updateRiemann('beruf', d)} t={t} />
         </Card>
       );

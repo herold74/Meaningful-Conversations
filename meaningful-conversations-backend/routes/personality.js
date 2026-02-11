@@ -19,8 +19,8 @@ router.post('/save', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // Validate adaptationMode
-    const validMode = adaptationMode === 'stable' ? 'stable' : 'adaptive';
+    // Validate adaptationMode - default to 'stable' (DPC); 'adaptive' (DPFL) requires premium
+    const validMode = adaptationMode === 'adaptive' ? 'adaptive' : 'stable';
     
     // Validate and serialize completedLenses
     const validLenses = ['sd', 'riemann', 'ocean'];

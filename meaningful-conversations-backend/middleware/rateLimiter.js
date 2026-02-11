@@ -94,13 +94,23 @@ const verifyEmailLimiter = rateLimit({
 const geminiLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: (req) => req.userId ? 20 : 10,
-    keyGenerator: (req) => req.userId ? `user_${req.userId}` : req.ip,
+    keyGenerator: (req) => {
+        if (req.userId) return `user_${req.userId}`;
+        // Normalize IPv6 addresses to /64 subnet for consistent rate limiting
+        const ip = req.ip || 'unknown';
+        if (ip.includes(':')) {
+            return ip.split(':').slice(0, 4).join(':');
+        }
+        return ip;
+    },
     message: { 
         error: 'Too many requests. Please slow down and try again in a moment.',
         errorCode: 'RATE_LIMIT_GEMINI'
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Disable validation - we handle IPv6 normalization in keyGenerator ourselves
+    validate: false,
     handler: (req, res, next, options) => {
         const identifier = req.userId ? `user ${req.userId}` : `IP ${req.ip}`;
         console.warn(`🚫 Gemini rate limit exceeded for ${identifier}`);
