@@ -142,9 +142,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
         const unlockedCoaches = currentUser?.unlockedCoaches || [];
         
         if (currentUser) {
-          if (currentUser.isClient) {
+          if (currentUser.isAdmin) {
+              userAccessLevel = 'client'; // Admins & Developers have full bot access
+          } else if (currentUser.isClient) {
               userAccessLevel = 'client';
-          } else if (currentUser.isBetaTester) {
+          } else if (currentUser.isPremium) {
               userAccessLevel = 'premium';
           } else {
               userAccessLevel = 'registered';
@@ -195,8 +197,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
       if (currentUser?.isClient) {
           return null;
       }
-      // isBetaTester (Premium) can see some locked bots (Rob, Victor) - show client message
-      if (currentUser?.isBetaTester) {
+      // isPremium (Premium) can see some locked bots (Rob, Victor) - show client message
+      if (currentUser?.isPremium) {
           return t('botSelection_premiumMessage');
       }
       if (!currentUser) {
@@ -238,7 +240,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
           />
         ))}
         
-        {lockedRegularBots.length > 0 && unlockMessage && !currentUser?.isBetaTester && !currentUser?.isClient && (
+        {lockedRegularBots.length > 0 && unlockMessage && !currentUser?.isPremium && !currentUser?.isClient && (
             <div className="md:col-span-2 lg:col-span-3">
                 <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground p-2 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 text-center">
                     {unlockMessage}

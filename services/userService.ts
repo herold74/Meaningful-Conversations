@@ -174,6 +174,10 @@ export const toggleUserClient = async (userId: string): Promise<void> => {
      await apiFetch(`/admin/users/${userId}/toggle-client`, { method: 'PUT' });
 };
 
+export const toggleUserDeveloper = async (userId: string): Promise<void> => {
+     await apiFetch(`/admin/users/${userId}/toggle-developer`, { method: 'PUT' });
+};
+
 export const resetUserPassword = async (userId: string): Promise<{ newPassword: string }> => {
     return await apiFetch(`/admin/users/${userId}/reset-password`, { method: 'POST' });
 };

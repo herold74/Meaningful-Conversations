@@ -63,7 +63,7 @@ async function updateUserEmail() {
                 firstName: true,
                 lastName: true,
                 status: true,
-                isBetaTester: true,
+                isPremium: true,
                 isAdmin: true,
                 createdAt: true,
             }

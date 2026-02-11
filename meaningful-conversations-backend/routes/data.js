@@ -108,6 +108,14 @@ router.put('/user/coaching-mode', async (req, res) => {
         return res.status(400).json({ error: 'Invalid coaching mode. Must be one of: off, dpc, dpfl' });
     }
     
+    // DPFL requires premium (isPremium), client (isClient), or admin access
+    if (coachingMode === 'dpfl') {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user && !user.isPremium && !user.isClient && !user.isAdmin) {
+            return res.status(403).json({ error: 'DPFL requires Premium access.' });
+        }
+    }
+    
     try {
         const updatedUser = await prisma.user.update({
             where: { id: userId },
@@ -227,9 +235,11 @@ router.post('/redeem-code', async (req, res) => {
             currentExpiry.setMonth(currentExpiry.getMonth() + 1);
             updateData.accessExpiresAt = currentExpiry;
         } else if (upgradeCode.botId === 'premium') {
-             updateData.isBetaTester = true;
+             updateData.isPremium = true;
+             updateData.accessExpiresAt = null; // Permanent premium - no expiry-based revocation
         } else if (upgradeCode.botId === 'client') {
              updateData.isClient = true;
+             updateData.accessExpiresAt = null; // Permanent client - no expiry-based revocation
         } else {
             const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
             if (!unlocked.includes(upgradeCode.botId)) {
@@ -885,8 +895,9 @@ const handleExport = async (req, res) => {
                 lastLogin: user.lastLogin,
                 loginCount: user.loginCount,
                 status: user.status,
-                isBetaTester: user.isBetaTester,
+                isPremium: user.isPremium,
                 isAdmin: user.isAdmin,
+                isDeveloper: user.isDeveloper,
                 accessExpiresAt: user.accessExpiresAt,
                 unlockedCoaches: user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [],
             },
