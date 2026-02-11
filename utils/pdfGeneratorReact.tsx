@@ -601,7 +601,7 @@ const ShipWheelLogo = () => {
 const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
   <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
     {text.split('').map((char, i) => (
-      <Text key={i} style={{ fontSize: 7, fontWeight: 'bold', color, lineHeight: 1.0, textAlign: 'center' }}>
+      <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 0.95, textAlign: 'center' }}>
         {char}
       </Text>
     ))}
@@ -619,10 +619,9 @@ const RiemannCross = ({ data, language }: {
   const center = size / 2;
   const axisLen = (size / 2) - 20; // space for labels
 
-  // Full labels for top/bottom (horizontal), short labels for left/right (vertical stacking)
   const dimLabels = language === 'de'
-    ? { distanz: 'Distanz', wechsel: 'Wechsel', naehe: 'Nähe', dauer: 'Dauer' }
-    : { distanz: 'Distance', wechsel: 'Change', naehe: 'Proximity', dauer: 'Stability' };
+    ? { distanz: 'Distanz', wechsel: 'Spontanität', naehe: 'Nähe', dauer: 'Beständigkeit' }
+    : { distanz: 'Distance', wechsel: 'Spontaneity', naehe: 'Proximity', dauer: 'Stability' };
 
   // Convert constant-sum to bipolar coordinates (classical Riemann-Kreuz)
   const toCoord = (ctx: Record<string, number>) => ({
@@ -644,9 +643,9 @@ const RiemannCross = ({ data, language }: {
 
   return (
     <View style={{ alignItems: 'center' }}>
-      {/* Top label: Distanz/Distance */}
-      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginBottom: -2 }}>
-        {dimLabels.distanz}
+      {/* Top label: Distanz/Distance — spaced letters to match vertical label style */}
+      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginBottom: -2, letterSpacing: 3 }}>
+        {dimLabels.distanz.toUpperCase()}
       </Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {/* Left label: Dauer/Stability — vertical character stacking */}
@@ -696,9 +695,9 @@ const RiemannCross = ({ data, language }: {
         {/* Right label: Wechsel/Change — vertical character stacking */}
         <VerticalLabel text={dimLabels.wechsel} />
       </View>
-      {/* Bottom label: Nähe/Proximity */}
-      <Text style={{ fontSize: 7, fontWeight: 'bold', color: colors.gray700, marginTop: -2 }}>
-        {dimLabels.naehe}
+      {/* Bottom label: Nähe/Proximity — spaced letters to match vertical label style */}
+      <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginTop: -2, letterSpacing: 3 }}>
+        {dimLabels.naehe.toUpperCase()}
       </Text>
     </View>
   );

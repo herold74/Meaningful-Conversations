@@ -225,29 +225,34 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
           );
         })}
 
-        {/* Axis end-labels (classical Riemann-Kreuz) */}
+        {/* Axis end-labels (classical Riemann-Kreuz) — use SVG-native fontSize
+            so labels scale proportionally with the chart on small screens */}
         {/* Right: Wechsel/Spontaneity — rotated 90° */}
         <text x={center + axisLen + 22} y={center}
           textAnchor="middle"
           transform={`rotate(90, ${center + axisLen + 22}, ${center})`}
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          fontSize="14" fontWeight="bold"
+          className="fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.wechsel}
         </text>
         {/* Left: Dauer/Stability — rotated -90° */}
         <text x={center - axisLen - 22} y={center}
           textAnchor="middle"
           transform={`rotate(-90, ${center - axisLen - 22}, ${center})`}
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          fontSize="14" fontWeight="bold"
+          className="fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.dauer}
         </text>
         {/* Top: Distanz/Distance */}
-        <text x={center} y={center - axisLen - 22} textAnchor="middle"
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+        <text x={center} y={center - axisLen - 20} textAnchor="middle"
+          fontSize="14" fontWeight="bold"
+          className="fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.distanz}
         </text>
         {/* Bottom: Nähe/Closeness */}
         <text x={center} y={center + axisLen + 30} textAnchor="middle"
-          className="text-[11px] font-bold fill-gray-700 dark:fill-gray-200">
+          fontSize="14" fontWeight="bold"
+          className="fill-gray-700 dark:fill-gray-200">
           {dimensionLabels.naehe}
         </text>
       </svg>
