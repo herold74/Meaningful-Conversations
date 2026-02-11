@@ -21,9 +21,10 @@ model User {
   lifeContext               String?       @db.Text
   gamificationState         String?       @db.Text
   unlockedCoaches           String?       @db.Text
-  isBetaTester              Boolean       @default(false)
+  isPremium                 Boolean       @default(false)
   isClient                  Boolean       @default(false)
   isAdmin                   Boolean       @default(false)
+  isDeveloper               Boolean       @default(false)
   coachingMode              String        @default("off") // off, dpc, dpfl
   aiRegionPreference        String        @default("optimal") // optimal, eu, us
   createdAt                 DateTime      @default(now())

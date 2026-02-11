@@ -49,6 +49,7 @@
 
 ## Backend Stack
 - **Runtime:** Node.js v22.x
+- **Process Manager:** PM2 (Cluster Mode, 2 instances)
 - **Framework:** Express
 - **ORM:** Prisma
 - **Database:** MariaDB 11.2

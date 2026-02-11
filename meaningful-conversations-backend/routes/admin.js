@@ -30,7 +30,8 @@ router.get('/users', async (req, res) => {
                 email: true,
                 createdAt: true,
                 isAdmin: true,
-                isBetaTester: true,
+                isDeveloper: true,
+                isPremium: true,
                 isClient: true,
                 loginCount: true,
                 lastLogin: true,
@@ -82,7 +83,7 @@ router.put('/users/:id/toggle-premium', async (req, res) => {
 
         await prisma.user.update({
             where: { id },
-            data: { isBetaTester: !user.isBetaTester },
+            data: { isPremium: !user.isPremium },
         });
         res.status(204).send();
     } catch (error) {
@@ -129,6 +130,32 @@ router.put('/users/:id/toggle-client', async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling client:", error);
+        res.status(500).json({ error: 'Operation failed.' });
+    }
+});
+
+// PUT /api/admin/users/:id/toggle-developer
+router.put('/users/:id/toggle-developer', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { id } });
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        const newIsDeveloper = !user.isDeveloper;
+        // Developers always need Admin access too (Admin Panel is prerequisite for Test Runner)
+        const updateData = { isDeveloper: newIsDeveloper };
+        if (newIsDeveloper && !user.isAdmin) {
+            updateData.isAdmin = true;
+        }
+
+        await prisma.user.update({
+            where: { id },
+            data: updateData,
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin: Error toggling developer:", error);
         res.status(500).json({ error: 'Operation failed.' });
     }
 });
@@ -257,8 +284,13 @@ router.post('/codes/:id/revoke', async (req, res) => {
         const user = await prisma.user.findUnique({ where: { id: code.usedById } });
         if (user) {
             let updateData = {};
-            if (code.botId === 'premium') {
-                updateData.isBetaTester = false;
+            const accessPassTypes = ['ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M'];
+            
+            if (accessPassTypes.includes(code.botId)) {
+                // Revoke access pass: reset accessExpiresAt to now (effectively expired)
+                updateData.accessExpiresAt = new Date();
+            } else if (code.botId === 'premium') {
+                updateData.isPremium = false;
             } else if (code.botId === 'client') {
                 updateData.isClient = false;
             } else {

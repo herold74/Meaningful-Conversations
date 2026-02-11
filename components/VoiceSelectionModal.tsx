@@ -31,6 +31,7 @@ interface VoiceSelectionModalProps {
     onPreviewNativeVoice?: (voiceIdentifier: string) => void;
     botLanguage: Language;
     botGender: 'male' | 'female';
+    isGuest?: boolean;
 }
 
 // Export VoiceSelection type for use in ChatView
@@ -49,6 +50,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     onPreviewNativeVoice,
     botLanguage,
     botGender,
+    isGuest = false,
 }) => {
     const { t } = useLocalization();
     useModalOpen(isOpen);
@@ -345,8 +347,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         </label>
                     </div>
 
-                    {/* Server Voices Section */}
-                    {serverVoices.length > 0 && (
+                    {/* Server Voices Section (hidden for guests) */}
+                    {serverVoices.length > 0 && !isGuest && (
                         <>
                             <div className="mt-4 mb-2">
                                 <h3 className="text-sm font-bold text-content-secondary uppercase">

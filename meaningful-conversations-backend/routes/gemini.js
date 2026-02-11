@@ -148,13 +148,23 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             // Store user's AI region preference for later use
             userRegionPreference = user.aiRegionPreference || 'optimal';
             
-            if (bot.accessTier === 'registered') {
+            // Admins and Developers have full access to all bots
+            if (user.isAdmin) {
+                hasAccess = true;
+            } else if (bot.accessTier === 'registered') {
                 hasAccess = true; // Any registered user can access 'registered' bots
             } else if (bot.accessTier === 'premium') {
-                // Beta testers get access to all premium bots.
+                // Premium users and clients get access to all premium bots.
                 // Others need to have it explicitly unlocked.
                 const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
-                if (user.isBetaTester || unlockedCoaches.includes(bot.id)) {
+                if (user.isPremium || user.isClient || unlockedCoaches.includes(bot.id)) {
+                    hasAccess = true;
+                }
+            } else if (bot.accessTier === 'client') {
+                // Client-only bots (e.g. Rob, Victor) require isClient flag.
+                // Also allow if individually unlocked via unlockedCoaches.
+                const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+                if (user.isClient || unlockedCoaches.includes(bot.id)) {
                     hasAccess = true;
                 }
             }
@@ -861,6 +871,18 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
         // Deduplicate response against existing context before sending
         const deduplicatedResponse = deduplicateAnalysisResponse(jsonResponse, context);
         
+        // Strip solutionBlockages for users without Client or Admin access (PEP is client/admin/developer feature)
+        if (deduplicatedResponse.solutionBlockages) {
+            let hasPepAccess = false;
+            if (userId) {
+                const analysisUser = await prisma.user.findUnique({ where: { id: userId } });
+                hasPepAccess = analysisUser?.isClient === true || analysisUser?.isAdmin === true;
+            }
+            if (!hasPepAccess) {
+                deduplicatedResponse.solutionBlockages = [];
+            }
+        }
+        
         res.json(deduplicatedResponse);
     } catch (error) {
         console.error('AI API error in /session/analyze:', error);
@@ -980,14 +1002,14 @@ router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
 router.post('/test/simulate-coachee', optionalAuthMiddleware, async (req, res) => {
     const userId = req.userId;
     
-    // Only allow admins to use this endpoint
+    // Only allow developers to use this endpoint (Test Runner is developer-only)
     if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
     }
     
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.isAdmin) {
-        return res.status(403).json({ error: 'Admin access required' });
+    if (!user || !user.isDeveloper) {
+        return res.status(403).json({ error: 'Developer access required' });
     }
 
     const { 
