@@ -952,7 +952,24 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           <View style={[styles.box, { marginBottom: 10 }]}>
             <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
             <View style={styles.riemannContainer}>
-              <RiemannCross data={result.riemann} language={language} />
+              <View style={{ alignItems: 'center' }}>
+                <RiemannCross data={result.riemann} language={language} />
+                {/* Legend below diagram */}
+                <View style={[styles.legendContainer, { marginTop: 4 }]}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
+                    <Text style={styles.legendText}>{t.work}</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.green600 }]} />
+                    <Text style={styles.legendText}>{t.private}</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.orange500 }]} />
+                    <Text style={styles.legendText}>{t.self}</Text>
+                  </View>
+                </View>
+              </View>
               <View style={{ flex: 1 }}>
                 {result.riemann.stressRanking && result.riemann.stressRanking.length > 0 && (
                   <View style={{ marginBottom: 8 }}>
@@ -978,20 +995,6 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 )}
                 <Text style={[styles.riemannText, { marginBottom: 8 }]}>{t.differencesExplanation}</Text>
                 <Text style={styles.riemannText}>{t.axesExplanation}</Text>
-                <View style={styles.legendContainer}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
-                    <Text style={styles.legendText}>{t.work}</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.green600 }]} />
-                    <Text style={styles.legendText}>{t.private}</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.orange500 }]} />
-                    <Text style={styles.legendText}>{t.self}</Text>
-                  </View>
-                </View>
               </View>
             </View>
           </View>
