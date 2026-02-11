@@ -600,7 +600,7 @@ const ShipWheelLogo = () => {
 // Vertical text label component (characters stacked vertically) — for PDF axis labels
 const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
   <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
-    {text.split('').map((char, i) => (
+    {text.toUpperCase().split('').map((char, i) => (
       <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 0.95, textAlign: 'center' }}>
         {char}
       </Text>
