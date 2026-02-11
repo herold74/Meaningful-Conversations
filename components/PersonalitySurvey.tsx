@@ -1517,8 +1517,11 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
         <Bfi2VariantChoiceBlock
           t={t}
           onComplete={(variant) => {
+            // Only set variant — do NOT call next().
+            // Setting bfi2Variant recomputes the flow from
+            // ['BFI2_VARIANT_CHOICE','BIG5_QUESTIONS'] to ['BIG5_QUESTIONS'],
+            // so step 0 automatically becomes BIG5_QUESTIONS.
             setBfi2Variant(variant);
-            next();
           }}
         />
       </Card>
