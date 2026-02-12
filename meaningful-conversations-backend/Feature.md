@@ -102,3 +102,49 @@ A dedicated, hands-free conversational interface that combines speech-to-text an
 
 ### Voice Selection
 A customization feature that allows users to choose and preview different system voices for the AI coach's text-to-speech output.
+
+---
+
+## Feature Backlog & Research Findings
+
+This section captures research insights, enhancement ideas, and architectural improvements identified during development. Items here are not yet planned for implementation but represent validated directions for future work.
+
+### Spiral Dynamics: 2nd-Tier Coaching Modality
+
+**Source:** Review of [spiraldynamics-integral.de](https://spiraldynamics-integral.de/) (CHE D·A·CH) and analysis of current DPC strategy implementation.
+
+**Background:**
+Spiral Dynamics theory distinguishes two fundamentally different tiers of value systems:
+- **1st Tier** (Beige through Green): Each level believes its worldview is the only correct one and tends to reject others.
+- **2nd Tier** (Yellow, Turquoise): These levels can see the value and necessity of ALL previous levels. They hold a systemic, integrative meta-perspective.
+
+**Current Implementation:**
+The DPC strategy merger (`dpcStrategies.js`, `dpcStrategyMerger.js`) treats all 8 SD levels with the same structural pattern — a `high` and `low` strategy for each, merged by rank weight (1.0 primary, 0.7 secondary). The coaching bot always speaks *within* the user's dominant value system.
+
+For a Yellow-dominant profile, the bot currently receives:
+- Language: "systemic, integrative, perspective-rich"
+- Tone: "curious, flexible, complexity-affirming"
+- Approach: "Offer multiple perspectives. Encourage systems thinking and embracing complexity."
+
+**Enhancement Opportunity:**
+A 2nd-tier dominant person can handle — and actually *prefers* — **cross-level meta-reflection**. For example: *"I notice your systems-thinking side wants to map out all possibilities, but maybe your Orange drive for results is what's actually needed right now."* This kind of coaching would be powerful for genuine 2nd-tier profiles but confusing for 1st-tier users.
+
+**Proposed Changes:**
+1. **Tier detection** in the strategy merger: Add a `tier` property based on whether Yellow or Turquoise rank in the top 2 dominant levels.
+2. **Meta-reflective coaching mode** for 2nd-tier profiles: Allow the coaching prompt to explicitly reference multiple value systems and invite the user to hold paradoxes, rather than speaking from a single value system's perspective.
+3. **Transition zone awareness** (high Green with emerging Yellow): This is where coaching matters most — Green's relativism becomes paralyzing, but 2nd-tier integration hasn't yet emerged. A specific strategy for this transition could be highly impactful.
+
+**Caveats:**
+- SD scores are derived from PVQ-21 (Schwartz values mapping), not a native SD assessment. Detecting genuine 2nd-tier development from mapped scores has limited accuracy.
+- True 2nd-tier assessment typically requires more nuanced instruments or clinical observation.
+- Implementation should be conservative — only activate meta-reflective mode when 2nd-tier scores are clearly dominant, not marginal.
+
+**References:**
+- Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values*
+- Beck, D.E. & Cowan, C.C. (1996). *Spiral Dynamics: Mastering Values, Leadership, and Change*
+- [spiraldynamics-integral.de](https://spiraldynamics-integral.de/) — German-language SDi platform (CHE D·A·CH)
+- Laloux, F. (2014). *Reinventing Organizations* (builds on SDi framework)
+
+**Priority:** Low (research/exploration phase)
+**Complexity:** Medium — requires changes to `dpcStrategies.js`, `dpcStrategyMerger.js`, and `dynamicPromptController.js`
+**Dependencies:** None (additive enhancement to existing DPC system)
