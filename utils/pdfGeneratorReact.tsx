@@ -465,6 +465,10 @@ const translations = {
     pendingTests: 'Noch nicht abgeschlossen',
     bfi2Citation: 'BFI-2 — Soto & John (2017). J. of Personality and Social Psychology, 113(1), 117–143.',
     scaleLegend: 'Skala: 1 (niedrig) — 3 (mittel) — 5 (hoch)',
+    pvq21Citation: 'PVQ-21 — Schwartz, S. H. (2003/2021). European Social Survey. Lizenz: CC BY-NC-ND 3.0.',
+    sdCitation: 'Spiral Dynamics — Beck, D. E. & Cowan, C. C. (1996). Spiral Dynamics: Mastering Values, Leadership and Change. Blackwell. Basierend auf Graves, C. W. (1970).',
+    sdMappingNote: 'Die Darstellung nutzt das Spiral-Dynamics-Farbmodell als Visualisierung. Grundlage ist der PVQ-21 (Schwartz-Werte), dessen 10 Wertedimensionen auf SD-Ebenen abgebildet werden.',
+    riemannDisclaimer: 'Coaching-basierte Selbsteinschätzung nach dem Riemann-Thomann-Modell (Riemann, 1961; Thomann, 1988). Kein standardisiertes psychometrisches Instrument.',
   },
   en: {
     title: 'Personality Signature',
@@ -512,6 +516,10 @@ const translations = {
     pendingTests: 'Not yet completed',
     bfi2Citation: 'BFI-2 — Soto & John (2017). J. of Personality and Social Psychology, 113(1), 117–143.',
     scaleLegend: 'Scale: 1 (low) — 3 (average) — 5 (high)',
+    pvq21Citation: 'PVQ-21 — Schwartz, S. H. (2003/2021). European Social Survey. License: CC BY-NC-ND 3.0.',
+    sdCitation: 'Spiral Dynamics — Beck, D. E. & Cowan, C. C. (1996). Spiral Dynamics: Mastering Values, Leadership and Change. Blackwell. Based on Graves, C. W. (1970).',
+    sdMappingNote: 'This visualization uses the Spiral Dynamics color model. It is based on the PVQ-21 (Schwartz Values), whose 10 value dimensions are mapped to SD levels.',
+    riemannDisclaimer: 'Coaching-based self-assessment using the Riemann-Thomann model (Riemann, 1961; Thomann, 1988). Not a standardized psychometric instrument.',
   },
 };
 
@@ -971,6 +979,15 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 })}
               </View>
             </View>
+            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
+              {t.sdMappingNote}
+            </Text>
+            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 1, fontStyle: 'italic' }}>
+              {t.sdCitation}
+            </Text>
+            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 1, fontStyle: 'italic' }}>
+              {t.pvq21Citation}
+            </Text>
           </View>
         )}
         
@@ -1024,6 +1041,9 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 <Text style={styles.riemannText}>{t.axesExplanation}</Text>
               </View>
             </View>
+            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
+              {t.riemannDisclaimer}
+            </Text>
           </View>
         )}
         

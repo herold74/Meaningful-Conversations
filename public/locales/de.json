@@ -1080,6 +1080,8 @@
   "survey_pvq21_citation": "Portrait Values Questionnaire (PVQ-21) — Schwartz, S. H. (2003/2021). European Social Survey. Lizenz: CC BY-NC-ND 3.0.",
   "survey_pvq21_source_url": "https://scholarworks.gvsu.edu/orpc/vol2/iss2/9/",
   "survey_pvq21_source_label": "Quelle & Lizenz",
+  "sd_mapping_note": "Die Darstellung nutzt das Spiral-Dynamics-Farbmodell als Visualisierung. Grundlage ist der PVQ-21 (Schwartz-Werte), dessen 10 Wertedimensionen auf SD-Ebenen abgebildet werden.",
+  "sd_citation": "Spiral Dynamics — Beck, D. E. & Cowan, C. C. (1996). Spiral Dynamics: Mastering Values, Leadership and Change. Blackwell. Basierend auf Graves, C. W. (1970).",
 
   "sd_statement_beige": "Sicherheit und Überleben sind das Wichtigste",
   "sd_statement_purple": "Traditionen und Zugehörigkeit geben mir Halt",
