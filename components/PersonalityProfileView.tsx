@@ -1109,19 +1109,22 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   );
                 })}
               </div>
-              {variantLabel && (
-                <div className="mt-3 text-xs text-content-tertiary italic text-center">
-                  <p>{t('survey_bfi2_citation')}</p>
-                  <a 
-                    href={t('survey_bfi2_source_url')} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="underline hover:text-accent-primary transition-colors"
-                  >
-                    {t('survey_bfi2_source_label')} ↗
-                  </a>
-                </div>
-              )}
+              {/* Scale legend */}
+              <p className="mt-3 text-[10px] text-content-tertiary text-center tracking-wide">
+                {t('big5_scale_legend')}
+              </p>
+              {/* Citation & source */}
+              <div className="mt-2 text-xs text-content-tertiary italic text-center">
+                <p>{t('survey_bfi2_citation')}</p>
+                <a 
+                  href={t('survey_bfi2_source_url')} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-accent-primary transition-colors"
+                >
+                  {t('survey_bfi2_source_label')} ↗
+                </a>
+              </div>
             </section>
           );
         })()}

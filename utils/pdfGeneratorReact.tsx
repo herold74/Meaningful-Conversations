@@ -463,6 +463,8 @@ const translations = {
     agreeableness: 'Verträglichkeit',
     neuroticism: 'Emot. Stabilität',
     pendingTests: 'Noch nicht abgeschlossen',
+    bfi2Citation: 'BFI-2 — Soto & John (2017). J. of Personality and Social Psychology, 113(1), 117–143.',
+    scaleLegend: 'Skala: 1 (niedrig) — 3 (mittel) — 5 (hoch)',
   },
   en: {
     title: 'Personality Signature',
@@ -508,6 +510,8 @@ const translations = {
     agreeableness: 'Agreeableness',
     neuroticism: 'Emotional Stability',
     pendingTests: 'Not yet completed',
+    bfi2Citation: 'BFI-2 — Soto & John (2017). J. of Personality and Social Psychology, 113(1), 117–143.',
+    scaleLegend: 'Scale: 1 (low) — 3 (average) — 5 (high)',
   },
 };
 
@@ -800,6 +804,12 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </View>
           ))}
         </View>
+        <Text style={{ fontSize: 6, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+          {t.scaleLegend}
+        </Text>
+        <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 2, fontStyle: 'italic' }}>
+          {t.bfi2Citation}
+        </Text>
       </View>
     );
   };
