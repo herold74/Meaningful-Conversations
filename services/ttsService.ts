@@ -1,4 +1,4 @@
-import { apiFetch, getApiBaseUrl } from './api';
+import { apiFetch, getApiBaseUrl, getAuthHeaders } from './api';
 
 export type TtsMode = 'local' | 'server';
 
@@ -80,10 +80,7 @@ export const synthesizeSpeech = async (
     
     const rawResponse = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {}),
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(requestBody),
     });
 

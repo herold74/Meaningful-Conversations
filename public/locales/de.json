@@ -554,6 +554,7 @@
   "voiceModal_server_voices": "Server-Stimmen",
   "voiceModal_server_voices_desc": "Von unserem Server generiert • Kann längere Ladezeiten haben",
   "voiceModal_unavailable": "Nicht verfügbar",
+  "tts_server_unavailable": "Server-TTS ist derzeit nicht verfügbar. Du kannst weiterhin lokale Geräte-Stimmen verwenden.",
   "voiceModal_ios_unavailable": "Auf iOS nicht verfügbar",
   "voiceModal_ios_hint": "Server-Stimmen sind auf iOS aufgrund von Browser-Einschränkungen nicht verfügbar. Bitte wähle stattdessen eine Geräte-Stimme.",
   "voiceModal_local_voices": "Geräte-Stimmen",

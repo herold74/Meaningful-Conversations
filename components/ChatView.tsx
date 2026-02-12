@@ -839,13 +839,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
     const isNativeVoice = selectedVoiceURI?.startsWith('com.apple.voice');
     
-    // On native iOS: allow server TTS (no autoplay restrictions) and native TTS
+    // On native iOS: always use native TTS (device voices), never server TTS
     // On iOS Safari: force local (Web Speech API) due to autoplay restrictions
     // forceLocalTts is used when server TTS fails and we need to fallback immediately
     // (React state updates are async, so we can't rely on ttsMode being updated yet)
     const iosSafariForcesLocal = isIOS && !isNativeiOS;
+    const nativeiOSForcesLocal = isNativeiOS && ttsMode === 'server'; // Legacy settings guard: native iOS never uses server TTS
     const guestForcesLocal = !currentUser; // Guests cannot use server TTS
-    const effectiveTtsMode = forceLocalTts ? 'local' : (guestForcesLocal ? 'local' : (iosSafariForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode)));
+    const effectiveTtsMode = forceLocalTts ? 'local' : (guestForcesLocal ? 'local' : (iosSafariForcesLocal ? 'local' : (nativeiOSForcesLocal ? 'local' : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI ? 'local' : ttsMode))));
 
     // Log and fix corrupted state: ttsMode='server' but selectedVoiceURI is a local voice name
     if (ttsMode === 'server' && selectedVoiceURI && !isValidServerVoice) {
@@ -1296,10 +1297,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           setIsVoiceModalOpen(false);
           return;
         }
-        console.log('[TTS Select] Auto mode - no native voices, falling back to server');
+        // Native iOS but no native voices found (unlikely) — fall back to local Web Speech API
+        console.log('[TTS Select] Auto mode - native iOS but no native voices found, using local');
+        setSelectedVoiceURI(null);
+        setTtsMode('local');
+        saveLanguageVoiceSettings('local', null, true);
+        setIsVoiceModalOpen(false);
+        return;
       }
       
-      // Auto mode: Try to use best available server voice, fallback to local
+      // Non-iOS platforms: Try to use best available server voice, fallback to local
       try {
         const apiBaseUrl = getApiBaseUrl();
         const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, { 

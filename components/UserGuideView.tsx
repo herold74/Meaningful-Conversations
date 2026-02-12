@@ -207,11 +207,11 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - **Sprachausgabe (TTS):**
   - **Klicken Sie auf das Lautsprecher-Symbol**, um die Sprachausgabe ein- oder auszuschalten.
   - Wenn sie aktiviert ist, können Sie die Wiedergabe mit den Symbolen **Pause/Wiedergabe** und **Wiederholen** steuern.
-  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie drei Optionen:
-    - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches. Nutzt hochwertige Server-Stimmen für konsistente Qualität.
-    - **Server-Stimmen (Hohe Qualität):** Professionelle Stimmen, die auf unserem Server generiert werden. Bieten die beste Klangqualität und Natürlichkeit.
-    - **Gerätestimmen (Lokal):** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Deutlich schnellere Reaktionszeiten und funktionieren auch offline. Es lohnt sich, diese alternativ auszuprobieren, besonders für flüssige Gespräche im Sprachmodus.
-  - **Hinweis für iOS:** Auf iPhone und iPad sind Server-Stimmen aufgrund von Browser-Einschränkungen nicht verfügbar. Gerätestimmen werden automatisch verwendet.
+  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie folgende Optionen:
+    - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches -- wird automatisch ausgewählt.
+    - **Gerätestimmen:** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Sofortige Reaktionszeiten und funktionieren auch offline.
+    - **Server-Stimmen:** *(Nur im Web-Browser verfügbar)* Professionelle Stimmen, die auf unserem Server generiert werden.
+  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit -- Server-Stimmen sind hier nicht verfügbar und auch nicht nötig.
 - **Sprachmodus:**
   - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
@@ -394,6 +394,27 @@ Sie können zwischen zwei Varianten wählen:
 
 *Basierend auf: Soto, C. J., & John, O. P. (2017). Short and extra-short forms of the Big Five Inventory-2. Journal of Research in Personality, 68, 69-81.*
 
+<details>
+<summary>ℹ️ Hintergrund zum OCEAN-Modell</summary>
+<div style="padding: 12px 16px;">
+
+Das **Big Five-Modell** (auch OCEAN-Modell) ist das wissenschaftlich am besten abgesicherte Persönlichkeitsmodell der modernen Psychologie. Es entstand nicht aus einer einzelnen Theorie, sondern aus einem über Jahrzehnte geführten empirischen Forschungsprozess -- dem sogenannten **lexikalischen Ansatz**.
+
+**Grundidee:** Wenn ein Persönlichkeitsmerkmal für Menschen wirklich bedeutsam ist, dann existiert dafür ein Wort in der Alltagssprache. Forscher analysierten systematisch Tausende von Eigenschaftswörtern in verschiedenen Sprachen und fanden immer wieder dieselben fünf übergeordneten Faktoren -- unabhängig von Kultur, Sprache oder Epoche.
+
+**Meilensteine der Forschung:**
+- **1930er-1960er:** Gordon Allport, Raymond Cattell und andere sammelten und kategorisierten persönlichkeitsbeschreibende Adjektive
+- **1961:** Ernest Tupes und Raymond Christal identifizierten erstmals fünf wiederkehrende Faktoren
+- **1980er-1990er:** Lewis Goldberg prägte den Begriff "Big Five"; Paul Costa und Robert McCrae entwickelten den NEO-PI-R, den ersten standardisierten Big Five-Fragebogen
+- **2017:** Christopher Soto und Oliver John veröffentlichten den **BFI-2** -- die modernste Version, die wir in dieser App verwenden
+
+**Warum genau fünf Faktoren?** Bei der statistischen Analyse großer Datensätze ergibt sich konsistent eine Fünf-Faktor-Lösung. Weniger Faktoren verlieren wichtige Nuancen; mehr Faktoren werden instabil und kulturabhängig. Die Fünf sind der robuste "Sweet Spot" der Persönlichkeitsbeschreibung.
+
+**Was das Modell kann -- und was nicht:** Die Big Five beschreiben *Tendenzen*, keine festen Typen. Jeder Mensch hat Ausprägungen auf allen fünf Dimensionen. Das Modell sagt nicht, *warum* Sie so sind (Gene, Erziehung, Erfahrungen wirken zusammen), sondern bildet ab, *wie* Sie typischerweise denken, fühlen und handeln. Die Dimensionen sind über die Zeit relativ stabil, können sich aber durch prägende Lebenserfahrungen verschieben.
+
+</div>
+</details>
+
 ---
 
 **Riemann-Thomann -- "Wie Sie mit anderen interagieren"**
@@ -414,6 +435,33 @@ Das Besondere: Der Test unterscheidet zwischen drei Kontexten -- **beruflich**, 
 
 **Coaching-Hinweis:** Wenn Sie DPC oder DPFL aktivieren, nutzt der Coach Ihr **Selbstbild-Profil** als Basis für die Gesprächsanpassung. Grund: Im Coaching treten Sie als "Sie selbst" auf -- nicht in einer beruflichen Rolle oder einer vertrauten Beziehung. Ihr Selbstbild bildet daher die authentischste Grundlage für personalisiertes Coaching. Die DPFL-Verfeinerung passt ausschließlich den **Selbstbild**-Kontext an; Beruf und Privat bleiben unverändert.
 
+<details>
+<summary>ℹ️ Hintergrund zum Riemann-Thomann-Modell</summary>
+<div style="padding: 12px 16px;">
+
+Das **Riemann-Thomann-Modell** verbindet tiefenpsychologische Erkenntnisse mit systemischer Beratungspraxis. Es wurde von dem Schweizer Psychologen und Kommunikationsberater **Christoph Thomann** entwickelt, aufbauend auf den Arbeiten des Psychoanalytikers **Fritz Riemann**.
+
+**Ursprung:** Fritz Riemann beschrieb in seinem einflussreichen Werk *Grundformen der Angst* (1961) vier existenzielle Grundängste, die das menschliche Erleben prägen: die Angst vor Hingabe (Selbstverlust), vor Selbstwerdung (Isolation), vor Veränderung (Unsicherheit) und vor Beständigkeit (Erstarrung). Christoph Thomann überführte diese tiefenpsychologischen Polaritäten in ein praktisches Beratungsmodell mit zwei bipolaren Achsen.
+
+**Das Riemann-Kreuz:** Die vier Grundstrebungen sind als zwei Achsen angeordnet:
+- **Nähe ↔ Distanz:** Das Spannungsfeld zwischen dem Wunsch nach Verbundenheit und dem Bedürfnis nach Eigenständigkeit
+- **Dauer ↔ Wechsel:** Das Spannungsfeld zwischen dem Wunsch nach Stabilität und dem Bedürfnis nach Veränderung
+
+Jeder Mensch hat Anteile aller vier Strebungen -- die individuelle Mischung macht das persönliche Profil aus. Es gibt kein "besser" oder "schlechter"; jede Position hat Stärken und Herausforderungen.
+
+**Besonderheit des Modells:** Anders als viele Persönlichkeitsmodelle berücksichtigt Riemann-Thomann explizit, dass sich Menschen **kontextabhängig** unterschiedlich verhalten. Im Beruf zeigen wir oft andere Strebungen als im privaten Umfeld oder in unserer Selbstwahrnehmung. Diese Differenzierung macht das Modell besonders wertvoll für die Arbeit an Beziehungsdynamiken.
+
+**Stressverhalten:** Unter Druck verstärken sich die dominanten Grundstrebungen -- ein stark nähebezogener Mensch wird unter Stress möglicherweise noch klammernder, ein distanzorientierter noch verschlossener. Das Erkennen dieser Muster ist ein wichtiger Schritt zur Selbstregulation.
+
+**Verbreitung:** Das Modell ist vor allem im deutschsprachigen Raum in der systemischen Beratung, Mediation und Teamentwicklung weit verbreitet und wird u.a. am Kommunikationsinstitut der Universität Zürich gelehrt.
+
+**Quellen:**
+- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
+- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1: Handbuch für Therapeuten, Gesprächshelfer und Moderatoren in schwierigen Gesprächen.* Rowohlt.
+
+</div>
+</details>
+
 ---
 
 **Spiral Dynamics -- "Was Sie antreibt"**
@@ -430,6 +478,43 @@ Die Ebenen im Überblick: Sicherheit, Zugehörigkeit, Macht, Ordnung, Leistung, 
 📊 Ergebnis: Zweiteiliges Balkendiagramm mit Ihren Ausprägungen (1-5) pro Ebene.
 ⏱ Dauer: ca. 5 Minuten
 💡 Ideal, um die tieferliegenden Motivationen und Wertekonflikte hinter Ihren Entscheidungen sichtbar zu machen.
+
+<details>
+<summary>ℹ️ Hintergrund zu Spiral Dynamics</summary>
+<div style="padding: 12px 16px;">
+
+**Spiral Dynamics** ist ein Modell der menschlichen Entwicklung, das beschreibt, wie sich Wertesysteme und Weltanschauungen im Laufe eines Lebens -- und im Laufe der Menschheitsgeschichte -- entfalten. Es geht auf den amerikanischen Entwicklungspsychologen **Clare W. Graves** zurück und wurde von **Don Edward Beck** und **Christopher Cowan** unter dem Namen "Spiral Dynamics" populär gemacht.
+
+**Die Grundidee:** Menschen entwickeln ihre Wertesysteme nicht zufällig, sondern als Antwort auf die Lebensbedingungen, mit denen sie konfrontiert sind. Wenn sich die Bedingungen ändern, können sich auch die Wertesysteme weiterentwickeln -- in einer vorhersagbaren Reihenfolge, die einer Spirale gleicht: Jede neue Ebene integriert die vorherigen und fügt neue Fähigkeiten hinzu.
+
+**Zwei Ebenen (Tiers):**
+- **1st Tier** (Beige bis Grün): Jede Ebene hält ihre eigene Weltsicht für die einzig richtige. Ein leistungsorientierter Mensch (Orange) versteht nicht unbedingt, warum jemand Tradition und Ordnung (Blau) so wichtig findet -- und umgekehrt.
+- **2nd Tier** (Gelb, Türkis): Diese Ebenen erkennen den Wert *aller* vorherigen Ebenen. Sie verstehen, dass unterschiedliche Situationen unterschiedliche Wertesysteme erfordern, und können flexibel zwischen Perspektiven wechseln.
+
+**Die acht Ebenen im Detail:**
+| Farbe | Kernthema | Ich/Wir |
+|---|---|---|
+| **Beige** | Überleben, physiologische Grundbedürfnisse | Ich |
+| **Purpur** | Zugehörigkeit, Rituale, Stammesgemeinschaft | Wir |
+| **Rot** | Macht, Durchsetzung, Selbstbehauptung | Ich |
+| **Blau** | Ordnung, Pflicht, Moral, Tradition | Wir |
+| **Orange** | Leistung, Erfolg, Rationalität, Innovation | Ich |
+| **Grün** | Gemeinschaft, Gleichheit, Empathie, Konsens | Wir |
+| **Gelb** | Integration, Systemdenken, Flexibilität | Ich |
+| **Türkis** | Ganzheitlichkeit, globales Bewusstsein | Wir |
+
+**Wichtiger Hinweis zur Messung:** In dieser App verwenden wir den **PVQ-21 (Portrait Values Questionnaire)** von Shalom Schwartz, dessen Ergebnisse auf die Spiral Dynamics-Farbebenen abgebildet werden. Der PVQ-21 misst Werteprioritäten -- nicht Entwicklungsstufen im engeren Sinne. Die Zuordnung zu SD-Farben ist eine bewährte, aber vereinfachende Annäherung. Eine vollständige Spiral Dynamics-Bewertung würde vertiefte Interviews oder spezialisierte Instrumente erfordern.
+
+**Verbreitung:** Spiral Dynamics wird weltweit in Coaching, Organisationsentwicklung, Leadership-Training und politischer Beratung eingesetzt. Im deutschsprachigen Raum ist das Modell insbesondere durch das *Center for Human Emergence (CHE)* und die SDi-Community verbreitet.
+
+**Quellen:**
+- Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values.* Journal of Humanistic Psychology.
+- Beck, D.E. & Cowan, C.C. (1996). *Spiral Dynamics: Mastering Values, Leadership, and Change.* Blackwell Publishing.
+- Schwartz, S.H. (2003). *A Proposal for Measuring Value Orientations across Nations.* ESS Questionnaire Development Report.
+- [spiraldynamics-integral.de](https://spiraldynamics-integral.de/) -- Deutschsprachige SDi-Plattform (CHE D·A·CH)
+
+</div>
+</details>
 
 ### 7.3 Die Persönlichkeits-Signatur
 
@@ -696,11 +781,11 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - **Voice Output (TTS) Controls:**
   - **Click the Speaker icon** to toggle text-to-speech on or off.
   - When enabled, you can control playback with the **Pause/Play** and **Repeat** icons.
-  - **Click the Gear icon** to open the **Voice Settings** modal. You have three options:
-    - **Coach Signature Voice:** The best available voice for the coach's language and personality. Uses high-quality server voices for consistent quality.
-    - **Server Voices (High Quality):** Professional voices generated on our server. Offer the best sound quality and naturalness.
-    - **Device Voices (Local):** Voices generated directly on your device. **Advantage:** Significantly faster response times and work offline. Worth trying as an alternative, especially for fluid conversations in voice mode.
-  - **Note for iOS:** Server voices are not available on iPhone and iPad due to browser restrictions. Device voices are automatically used instead.
+  - **Click the Gear icon** to open the **Voice Settings** modal. You have the following options:
+    - **Coach Signature Voice:** The best available voice for the coach's language and personality -- automatically selected.
+    - **Device Voices:** Voices generated directly on your device. **Advantage:** Instant response times and work offline.
+    - **Server Voices:** *(Web browser only)* Professional voices generated on our server.
+  - **Note for iOS App:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times -- server voices are not available or needed here.
 - **Voice Mode:**
   - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
   - **Tap the large microphone icon** to start recording. Speak your message.
@@ -868,6 +953,40 @@ Spiral Dynamics captures your value systems and inner driving forces across eigh
 - Quick to complete (approx. 5 minutes)
 - Ideal as a first test for a broad understanding of your motivations
 
+<details>
+<summary>ℹ️ About the Spiral Dynamics Model</summary>
+<div style="padding: 12px 16px;">
+
+**Spiral Dynamics** is a model of human development that describes how value systems and worldviews unfold over the course of a lifetime -- and over the course of human history. It originated with American developmental psychologist **Clare W. Graves** and was popularized by **Don Edward Beck** and **Christopher Cowan** under the name "Spiral Dynamics."
+
+**Core idea:** People don't develop their value systems randomly. They emerge as responses to the life conditions they face. When conditions change, value systems can evolve -- in a predictable sequence that resembles a spiral: each new level integrates the previous ones and adds new capabilities.
+
+**Two Tiers:**
+- **1st Tier** (Beige through Green): Each level considers its own worldview to be the only correct one. An achievement-oriented person (Orange) may not understand why someone values tradition and order (Blue) so highly -- and vice versa.
+- **2nd Tier** (Yellow, Turquoise): These levels recognize the value of *all* previous levels. They understand that different situations require different value systems and can flexibly switch between perspectives.
+
+**The eight levels:**
+| Color | Core Theme | Self/Community |
+|---|---|---|
+| **Beige** | Survival, basic physiological needs | Self |
+| **Purple** | Belonging, rituals, tribal community | Community |
+| **Red** | Power, assertion, self-expression | Self |
+| **Blue** | Order, duty, morality, tradition | Community |
+| **Orange** | Achievement, success, rationality, innovation | Self |
+| **Green** | Community, equality, empathy, consensus | Community |
+| **Yellow** | Integration, systems thinking, flexibility | Self |
+| **Turquoise** | Holism, global consciousness | Community |
+
+**Important note on measurement:** In this app, we use the **PVQ-21 (Portrait Values Questionnaire)** by Shalom Schwartz, whose results are mapped to Spiral Dynamics color levels. The PVQ-21 measures value priorities -- not developmental stages in the strict sense. The mapping to SD colors is a well-established but simplified approximation. A full Spiral Dynamics assessment would require in-depth interviews or specialized instruments.
+
+**Sources:**
+- Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values.* Journal of Humanistic Psychology.
+- Beck, D.E. & Cowan, C.C. (1996). *Spiral Dynamics: Mastering Values, Leadership, and Change.* Blackwell Publishing.
+- Schwartz, S.H. (2003). *A Proposal for Measuring Value Orientations across Nations.* ESS Questionnaire Development Report.
+
+</div>
+</details>
+
 **OCEAN Test (Big Five):**
 OCEAN is an acronym for the five scientifically validated personality dimensions:
 - **O**penness - Curiosity and creativity
@@ -880,6 +999,31 @@ The OCEAN model is the most extensively researched personality model worldwide.
 - Quicker to complete (approx. 5 minutes)
 - Ideal for an initial overview of your personality structure
 
+<details>
+<summary>ℹ️ About the OCEAN Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Big Five model** (also known as OCEAN) is the most scientifically validated personality model in modern psychology. It didn't emerge from a single theory but from decades of empirical research known as the **lexical approach**.
+
+**Core idea:** If a personality trait truly matters to people, a word for it exists in everyday language. Researchers systematically analyzed thousands of trait-describing adjectives across languages and consistently found the same five overarching factors -- regardless of culture, language, or era.
+
+**Key milestones:**
+- **1930s-1960s:** Gordon Allport, Raymond Cattell, and others collected and categorized personality-describing adjectives
+- **1961:** Ernest Tupes and Raymond Christal first identified five recurring factors through factor analysis
+- **1980s-1990s:** Lewis Goldberg coined "Big Five"; Paul Costa and Robert McCrae developed the NEO-PI-R, the first standardized Big Five questionnaire
+- **2017:** Christopher Soto and Oliver John published the **BFI-2** -- the most modern version, which we use in this app
+
+**Why exactly five factors?** Statistical analysis of large datasets consistently yields a five-factor solution. Fewer factors lose important nuances; more factors become unstable and culture-dependent. Five is the robust "sweet spot" of personality description.
+
+**What the model can do -- and what it can't:** The Big Five describe *tendencies*, not fixed types. Everyone has scores on all five dimensions. The model doesn't say *why* you are the way you are (genes, upbringing, and experience all play a role), but rather maps *how* you typically think, feel, and act. The dimensions are relatively stable over time but can shift through formative life experiences.
+
+**Sources:**
+- Soto, C.J. & John, O.P. (2017). *Short and extra-short forms of the Big Five Inventory–2.* Journal of Research in Personality, 68, 69-81.
+- Goldberg, L.R. (1993). *The structure of phenotypic personality traits.* American Psychologist, 48(1), 26-34.
+
+</div>
+</details>
+
 **Riemann-Thomann Test:**
 - Captures your basic drives: Proximity, Distance, Permanence, and Change
 - Distinguishes between professional, private context, and self-image
@@ -887,6 +1031,31 @@ The OCEAN model is the most extensively researched personality model worldwide.
 - More comprehensive and detailed (approx. 10 minutes)
 
 **Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
+
+<details>
+<summary>ℹ️ About the Riemann-Thomann Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Riemann-Thomann model** combines depth-psychological insights with systemic counseling practice. It was developed by Swiss psychologist and communication consultant **Christoph Thomann**, building on the work of psychoanalyst **Fritz Riemann**.
+
+**Origin:** In his influential work *Grundformen der Angst* (Basic Forms of Anxiety, 1961), Fritz Riemann described four existential core anxieties that shape human experience: the fear of intimacy (loss of self), of individuation (isolation), of change (uncertainty), and of permanence (rigidity). Christoph Thomann transformed these depth-psychological polarities into a practical counseling model with two bipolar axes.
+
+**The Riemann Cross:** The four basic drives are arranged as two axes:
+- **Proximity ↔ Distance:** The tension between the desire for closeness and the need for independence
+- **Permanence ↔ Change:** The tension between the desire for stability and the need for novelty
+
+Everyone carries elements of all four drives -- the individual mix creates the personal profile. There is no "better" or "worse"; each position has its strengths and challenges.
+
+**What makes this model special:** Unlike many personality models, Riemann-Thomann explicitly accounts for the fact that people behave **differently depending on context**. At work, we often show different drives than in private life or in our self-perception. This differentiation makes the model particularly valuable for understanding relationship dynamics.
+
+**Stress behavior:** Under pressure, dominant drives tend to intensify -- a strongly proximity-oriented person may become even more clingy under stress, while a distance-oriented person may withdraw further. Recognizing these patterns is an important step toward self-regulation.
+
+**Sources:**
+- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
+- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1.* Rowohlt.
+
+</div>
+</details>
 
 **Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 
