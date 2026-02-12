@@ -469,6 +469,9 @@ const translations = {
     sdCitation: 'Spiral Dynamics — Beck, D. E. & Cowan, C. C. (1996). Spiral Dynamics: Mastering Values, Leadership and Change. Blackwell. Basierend auf Graves, C. W. (1970).',
     sdMappingNote: 'Die Darstellung nutzt das Spiral-Dynamics-Farbmodell als Visualisierung. Grundlage ist der PVQ-21 (Schwartz-Werte), dessen 10 Wertedimensionen auf SD-Ebenen abgebildet werden.',
     riemannDisclaimer: 'Coaching-basierte Selbsteinschätzung nach dem Riemann-Thomann-Modell (Riemann, 1961; Thomann, 1988). Kein standardisiertes psychometrisches Instrument.',
+    riemannInlineHint: 'Selbsteinschätzung basierend auf dem Riemann-Thomann-Modell.',
+    oceanInlineHint: 'Erhoben mit dem Big Five Inventory-2 (BFI-2) Fragebogen.',
+    footnotesTitle: 'Quellen',
   },
   en: {
     title: 'Personality Signature',
@@ -520,6 +523,9 @@ const translations = {
     sdCitation: 'Spiral Dynamics — Beck, D. E. & Cowan, C. C. (1996). Spiral Dynamics: Mastering Values, Leadership and Change. Blackwell. Based on Graves, C. W. (1970).',
     sdMappingNote: 'This visualization uses the Spiral Dynamics color model. It is based on the PVQ-21 (Schwartz Values), whose 10 value dimensions are mapped to SD levels.',
     riemannDisclaimer: 'Coaching-based self-assessment using the Riemann-Thomann model (Riemann, 1961; Thomann, 1988). Not a standardized psychometric instrument.',
+    riemannInlineHint: 'Self-assessment based on the Riemann-Thomann model.',
+    oceanInlineHint: 'Measured using the Big Five Inventory-2 (BFI-2) questionnaire.',
+    footnotesTitle: 'Sources',
   },
 };
 
@@ -812,11 +818,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </View>
           ))}
         </View>
-        <Text style={{ fontSize: 6, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
-          {t.scaleLegend}
-        </Text>
-        <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 2, fontStyle: 'italic' }}>
-          {t.bfi2Citation}
+        <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+          {t.oceanInlineHint} {t.scaleLegend} [{oceanFootnote}]
         </Text>
       </View>
     );
@@ -900,6 +903,41 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
       </View>
     );
   };
+
+  // Compute footnote numbers so inline hints can reference them
+  const footnotes: { text: string; section: string }[] = [];
+  if (hasSD) {
+    footnotes.push({ text: t.sdCitation, section: 'sd' });
+    footnotes.push({ text: t.pvq21Citation, section: 'sd' });
+  }
+  if (hasRiemann) {
+    footnotes.push({ text: t.riemannDisclaimer, section: 'riemann' });
+  }
+  if (hasOcean) {
+    footnotes.push({ text: t.bfi2Citation, section: 'ocean' });
+  }
+  // Footnote number helpers (1-based)
+  const sdFootnotes = footnotes.filter(f => f.section === 'sd').map((_, i) => footnotes.findIndex(f => f.section === 'sd') + i + 1);
+  const riemannFootnote = footnotes.findIndex(f => f.section === 'riemann') + 1;
+  const oceanFootnote = footnotes.findIndex(f => f.section === 'ocean') + 1;
+
+  // Footnotes section - consolidated academic citations at the bottom of the last page
+  const FootnotesSection = () => {
+    if (footnotes.length === 0) return null;
+
+    return (
+      <View style={{ marginTop: 10, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.gray300 }}>
+        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray400, marginBottom: 3 }}>
+          {t.footnotesTitle}
+        </Text>
+        {footnotes.map((f, i) => (
+          <Text key={i} style={{ fontSize: 5.5, color: colors.gray400, fontStyle: 'italic', lineHeight: 1.4 }}>
+            [{i + 1}] {f.text}
+          </Text>
+        ))}
+      </View>
+    );
+  };
   
   return (
     <Document>
@@ -979,14 +1017,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 })}
               </View>
             </View>
-            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
-              {t.sdMappingNote}
-            </Text>
-            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 1, fontStyle: 'italic' }}>
-              {t.sdCitation}
-            </Text>
-            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 1, fontStyle: 'italic' }}>
-              {t.pvq21Citation}
+            <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+              {t.sdMappingNote} [{sdFootnotes.join(', ')}]
             </Text>
           </View>
         )}
@@ -1041,8 +1073,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 <Text style={styles.riemannText}>{t.axesExplanation}</Text>
               </View>
             </View>
-            <Text style={{ fontSize: 5.5, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
-              {t.riemannDisclaimer}
+            <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+              {t.riemannInlineHint} [{riemannFootnote}]
             </Text>
           </View>
         )}
@@ -1054,16 +1086,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             <OceanSection />
             <UsageGuide />
             <PendingTestsSection />
+            <FootnotesSection />
           </>
-        )}
-        
-        {/* If using two pages, show continuation hint */}
-        {useTwoPages && (
-          <View style={{ marginTop: 'auto' }}>
-            <Text style={{ fontSize: 8, color: colors.gray400, textAlign: 'center', marginTop: 10 }}>
-              {language === 'de' ? '— Fortsetzung auf Seite 2 —' : '— Continued on page 2 —'}
-            </Text>
-          </View>
         )}
         
         {/* Fixed footer on every page */}
@@ -1083,6 +1107,9 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           
           {/* Usage Guide */}
           <UsageGuide />
+          
+          {/* Footnotes - consolidated citations */}
+          <FootnotesSection />
           
           {/* Fixed footer on every page */}
           <Footer />
