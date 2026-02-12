@@ -933,8 +933,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </p>
             </div>
             <SpiralDynamicsVisualization result={decryptedData.spiralDynamics} />
-            <div className="mt-3 text-xs text-content-tertiary italic text-center">
-              <p>{t('survey_pvq21_citation')}</p>
+            <p className="mt-3 text-[10px] text-content-tertiary text-center">
+              {t('sd_mapping_note')}
+            </p>
+            <div className="mt-2 text-xs text-content-tertiary italic text-center">
+              <p>{t('sd_citation')}</p>
+              <p className="mt-1">{t('survey_pvq21_citation')}</p>
               <a 
                 href={t('survey_pvq21_source_url')} 
                 target="_blank" 
