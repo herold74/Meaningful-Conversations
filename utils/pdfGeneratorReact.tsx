@@ -472,6 +472,7 @@ const translations = {
     riemannInlineHint: 'Selbsteinschätzung basierend auf dem Riemann-Thomann-Modell.',
     oceanInlineHint: 'Erhoben mit dem Big Five Inventory-2 (BFI-2) Fragebogen.',
     footnotesTitle: 'Quellen',
+    footnotesOnNextPage: 'Quellenverzeichnis siehe Seite 2.',
   },
   en: {
     title: 'Personality Signature',
@@ -526,6 +527,7 @@ const translations = {
     riemannInlineHint: 'Self-assessment based on the Riemann-Thomann model.',
     oceanInlineHint: 'Measured using the Big Five Inventory-2 (BFI-2) questionnaire.',
     footnotesTitle: 'Sources',
+    footnotesOnNextPage: 'Sources listed on page 2.',
   },
 };
 
@@ -819,7 +821,10 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           ))}
         </View>
         <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
-          {t.oceanInlineHint} {t.scaleLegend} [{oceanFootnote}]
+          {t.scaleLegend}
+        </Text>
+        <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 1 }}>
+          {t.oceanInlineHint} [{oceanFootnote}]
         </Text>
       </View>
     );
@@ -926,7 +931,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     if (footnotes.length === 0) return null;
 
     return (
-      <View style={{ marginTop: 10, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.gray300 }}>
+      <View style={{ marginTop: 'auto', paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.gray300 }}>
         <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray400, marginBottom: 3 }}>
           {t.footnotesTitle}
         </Text>
@@ -1088,6 +1093,13 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             <PendingTestsSection />
             <FootnotesSection />
           </>
+        )}
+        
+        {/* Two-page layout: compact footnote reference on page 1 */}
+        {useTwoPages && footnotes.length > 0 && (
+          <Text style={{ fontSize: 6, color: colors.gray400, fontStyle: 'italic', textAlign: 'center', marginTop: 6 }}>
+            {t.footnotesOnNextPage}
+          </Text>
         )}
         
         {/* Fixed footer on every page */}
