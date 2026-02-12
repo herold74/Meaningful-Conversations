@@ -933,7 +933,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </p>
             </div>
             <SpiralDynamicsVisualization result={decryptedData.spiralDynamics} />
-            <p className="mt-3 text-[10px] text-content-tertiary text-center">
+            <p className="mt-3 text-xs text-content-tertiary text-center font-semibold">
               {t('sd_mapping_note')}
             </p>
             <div className="mt-2 text-xs text-content-tertiary italic text-center">
@@ -968,7 +968,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
 
             {/* DPC/DPFL coaching context note */}
-            <p className="mt-3 text-xs text-content-tertiary text-center">
+            <p className="mt-3 text-xs text-content-tertiary text-center font-semibold">
               {t('riemann_coaching_context_note')}
             </p>
             
@@ -1114,7 +1114,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 })}
               </div>
               {/* Scale legend */}
-              <p className="mt-3 text-[10px] text-content-tertiary text-center tracking-wide">
+              <p className="mt-3 text-xs text-content-tertiary text-center tracking-wide font-semibold">
                 {t('big5_scale_legend')}
               </p>
               {/* Citation & source */}
