@@ -86,9 +86,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     
     const [serverTtsAvailable, setServerTtsAvailable] = useState<boolean>(true);
 
-    // Check TTS server availability
+    // Check TTS server availability (skip on native iOS - server voices not offered there)
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !isNativeiOS) {
             const apiBaseUrl = getApiBaseUrl();
             fetch(`${apiBaseUrl}/api/tts/health`)
                 .then(res => res.json())
@@ -347,8 +347,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         </label>
                     </div>
 
-                    {/* Server Voices Section (hidden for guests) */}
-                    {serverVoices.length > 0 && !isGuest && (
+                    {/* Server Voices Section (hidden for guests and native iOS - native voices are superior) */}
+                    {serverVoices.length > 0 && !isGuest && !isNativeiOS && (
                         <>
                             <div className="mt-4 mb-2">
                                 <h3 className="text-sm font-bold text-content-secondary uppercase">
