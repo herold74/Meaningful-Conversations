@@ -1262,6 +1262,7 @@
   "survey_bfi2_citation": "Big Five Inventory-2 (BFI-2) — Soto, C. J. & John, O. P. (2017). Journal of Personality and Social Psychology, 113(1), 117–143.",
   "survey_bfi2_source_url": "https://doi.org/10.1037/pspp0000096",
   "survey_bfi2_source_label": "Quelle (DOI)",
+  "big5_scale_legend": "Skala: 1 (niedrig) — 3 (mittel) — 5 (hoch)",
   "bfi2_facet_sociability": "Geselligkeit",
   "bfi2_facet_assertiveness": "Durchsetzungsfähigkeit",
   "bfi2_facet_energy_level": "Energieniveau",
