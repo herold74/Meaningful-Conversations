@@ -1,5 +1,7 @@
 # Quick Migration Guide
 
+> **⚠️ HISTORICAL DOCUMENT**: This migration was completed in November 2024. This guide is preserved for reference in case of future server migrations. For current server operations, see [QUICK-START-MANUALMODE-SERVER.md](./QUICK-START-MANUALMODE-SERVER.md).
+
 Schnellanleitung für den Server-Umzug in 10 Schritten.
 Für Details siehe: [SERVER-MIGRATION-GUIDE.md](./SERVER-MIGRATION-GUIDE.md)
 
