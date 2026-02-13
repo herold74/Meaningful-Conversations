@@ -1338,7 +1338,7 @@ const App: React.FC = () => {
                     return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} currentUser={currentUser || undefined} onDone={() => setView('botSelection')} />;
                 }
                 if (teStep === 'history') {
-                    return <EvaluationHistory onBack={() => setTeStep('pre')} />;
+                    return <EvaluationHistory onBack={() => setTeStep('pre')} currentUser={currentUser || undefined} />;
                 }
                 return null;
             }
