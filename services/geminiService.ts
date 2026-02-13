@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary } from '../types';
 import { apiFetch } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
@@ -90,6 +90,24 @@ export const analyzeSession = async (
             hasAccomplishedGoal: false,
         };
     }
+};
+
+export const evaluateTranscript = async (
+    preAnswers: TranscriptPreAnswers,
+    transcript: string,
+    lang: Language,
+    decryptedPersonalityProfile?: any
+): Promise<TranscriptEvaluationResponse> => {
+    return await apiFetch('/gemini/transcript/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({ preAnswers, transcript, lang, decryptedPersonalityProfile }),
+    });
+};
+
+export const getTranscriptEvaluations = async (): Promise<TranscriptEvaluationSummary[]> => {
+    return await apiFetch('/gemini/transcript/evaluations', {
+        method: 'GET',
+    });
 };
 
 export const generateContextFromInterview = async (

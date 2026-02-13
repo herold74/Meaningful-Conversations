@@ -35,7 +35,8 @@ export type NavView =
     | 'exportData'
     | 'personalitySurvey'
     | 'personalityProfile'
-    | 'lifeContextEditor';
+    | 'lifeContextEditor'
+    | 'transcriptEval';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
@@ -162,4 +163,44 @@ export interface CalendarEvent {
     action: string;
     deadline: string;
     description?: string;
+}
+
+// Transcript Evaluation types
+export interface TranscriptPreAnswers {
+    goal: string;
+    personalTarget: string;
+    assumptions: string;
+    satisfaction: number; // 1-5
+    difficult?: string;
+}
+
+export interface TranscriptEvaluationResult {
+    summary: string;
+    goalAlignment: { score: number; evidence: string; gaps: string };
+    behavioralAlignment: { score: number; evidence: string; blindspotEvidence: string[] };
+    assumptionCheck: { confirmed: string[]; challenged: string[]; newInsights: string[] };
+    calibration: { selfRating: number; evidenceRating: number; delta: string; interpretation: string };
+    personalityInsights: { dimension: string; observation: string; recommendation: string }[];
+    strengths: string[];
+    developmentAreas: string[];
+    nextSteps: { action: string; rationale: string }[];
+    contextUpdates: ProposedUpdate[];
+    overallScore: number; // 1-10
+}
+
+export interface TranscriptEvaluationResponse {
+    id: string;
+    evaluation: TranscriptEvaluationResult;
+    durationMs: number;
+}
+
+export interface TranscriptEvaluationSummary {
+    id: string;
+    createdAt: string;
+    lang: string;
+    goal: string;
+    summary: string;
+    overallScore: number;
+    preAnswers: TranscriptPreAnswers;
+    evaluationData: TranscriptEvaluationResult;
 }
