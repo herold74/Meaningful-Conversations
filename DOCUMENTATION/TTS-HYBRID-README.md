@@ -1,5 +1,7 @@
 # Hybrid TTS Implementation (v1.6.0)
 
+> **⚠️ NOTE**: For the most current TTS implementation details, see [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md). This document provides architectural background but may not reflect the latest changes.
+
 The Meaningful Conversations app features a **Hybrid Text-to-Speech (TTS)** system with intelligent voice selection and fallback mechanisms.
 
 ## 🎙️ TTS Modes

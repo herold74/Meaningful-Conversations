@@ -1,5 +1,7 @@
 # Server Migration Guide
 
+> **⚠️ HISTORICAL DOCUMENT**: This migration was completed in November 2024. The server is now running on `<YOUR_SERVER_IP>` (manualmode). This document is kept for reference in case of future migrations. See [QUICK-START-MANUALMODE-SERVER.md](./QUICK-START-MANUALMODE-SERVER.md) for current server operations.
+
 Complete guide for migrating the Meaningful Conversations application to a new server.
 
 ## 📋 Prerequisites
