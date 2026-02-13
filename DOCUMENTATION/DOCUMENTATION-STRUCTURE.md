@@ -66,6 +66,8 @@ Located in `/memory-bank/`:
 - **PERSONALITY-PROFILE-IMPLEMENTATION.md** - Personality feature implementation
 - **PDF-IMPLEMENTATION.md** - PDF export implementation
 - **GOAL-MANAGEMENT.md** - Goal tracking feature
+- **TRANSCRIPT-EVALUATION-USER-GUIDE.md** - **⭐ User guide for Transcript Evaluation feature (Client-only, DE)**
+- **TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md** - **⭐ User guide for Transcript Evaluation feature (Client-only, EN)**
 
 *Note: TTS-SETUP-STATUS and TTS-HYBRID-README are marked as historical/superseded. Use TTS-FINAL-STATUS for current info.*
 
@@ -136,6 +138,7 @@ Located in `/memory-bank/`:
 1. memory-bank/progress.md (feature list)
 2. TTS-FINAL-STATUS.md (voice features)
 3. PERSONALITY-PROFILE-IMPLEMENTATION.md (personality system)
+4. TRANSCRIPT-EVALUATION-USER-GUIDE.md (transcript analysis for clients)
 
 ### Debugging/Maintaining
 1. **TROUBLESHOOTING-INDEX.md** (quick reference for common issues)

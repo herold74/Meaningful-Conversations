@@ -201,8 +201,8 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
 
             {/* Action buttons */}
             <div className="mt-8 mb-4 space-y-3">
-                {/* PDF Export - nur für Clients */}
-                {currentUser?.isClient && (
+                {/* PDF Export - für Clients, Admins und Developers */}
+                {(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper) && (
                     <button
                         onClick={handleExportPDF}
                         disabled={isExporting}

@@ -20,6 +20,8 @@ According to the rules and regulations of AI Studio this project is licensed und
     - **Chloe** - Structured Reflection & Reframing
     - **Rob** - Mental Fitness & Resilience focus
     - **G-Interviewer** - Structured reflection interviews
+*   **Transcript Evaluation** (Client-only): AI-powered analysis of conversation transcripts with personality-aware insights and PDF export.
+    - **➡️ [User Guide (DE)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE.md)** | **[User Guide (EN)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md)**
 *   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations.
 *   **Personality Profile & Adaptive Coaching**:
     - Complete personality surveys (Riemann-Thomann, Big Five/OCEAN, Spiral Dynamics)
@@ -75,11 +77,22 @@ This is a monorepo-style project containing both the frontend and the backend se
 
 This project consists of a frontend application (this directory) and a backend server (`/meaningful-conversations-backend`).
 
+### Quick Start Guide
+
+**➡️ New to the project?** Follow the complete setup guide:
+- **[LOCAL-DEV-SETUP.md](./DOCUMENTATION/LOCAL-DEV-SETUP.md)** - Complete setup from scratch (recommended!)
+
 ### Backend Setup
 
 The backend server is required for the frontend to function. Please follow the detailed setup instructions in the backend's README file to get it running.
 
 **➡️ [`meaningful-conversations-backend/README.md`](./meaningful-conversations-backend/README.md)**
+
+### Database Migrations
+
+If you're working with database changes, see the migration guide:
+
+**➡️ [LOCAL-DEV-MIGRATIONS.md](./DOCUMENTATION/LOCAL-DEV-MIGRATIONS.md)** - Prisma migration workflow & troubleshooting
 
 ### Frontend Setup
 
