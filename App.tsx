@@ -1335,7 +1335,7 @@ const App: React.FC = () => {
                     return <TranscriptInput onSubmit={handleTeTranscriptSubmit} onBack={() => setTeStep('pre')} isLoading={teIsLoading} />;
                 }
                 if (teStep === 'review' && teEvaluation && tePreAnswers) {
-                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} onDone={() => setView('botSelection')} />;
+                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} currentUser={currentUser || undefined} onDone={() => setView('botSelection')} />;
                 }
                 if (teStep === 'history') {
                     return <EvaluationHistory onBack={() => setTeStep('pre')} />;
