@@ -487,7 +487,7 @@ const transcriptEvaluationSchema = {
         },
         overallScore: {
             type: 'INTEGER',
-            description: 'Overall effectiveness score from 1 (poor) to 10 (excellent), considering all evaluation dimensions.'
+            description: 'Overall effectiveness score from 1 (poor) to 10 (excellent), based on goal alignment, behavioral alignment, strengths, and development areas. Do NOT include the user\'s self-rating (satisfaction) in this score.'
         }
     },
     required: ['summary', 'goalAlignment', 'behavioralAlignment', 'assumptionCheck', 'calibration', 'personalityInsights', 'strengths', 'developmentAreas', 'nextSteps', 'contextUpdates', 'overallScore']
@@ -550,7 +550,7 @@ ${transcript}
 
 9. **Context Updates:** If the user has a Life Context, propose updates that capture significant new insights from this evaluation. Follow the hierarchical headline format (e.g., "Career & Work > Challenges"). ${docLang === 'de' ? 'Write context updates in German.' : 'Write context updates in English.'}
 
-10. **Overall Score (1-10):** A holistic assessment considering all dimensions.
+10. **Overall Score (1-10):** A holistic assessment considering goal alignment, behavioral alignment, strengths, and development areas. **Do NOT consider the user's self-rating (satisfaction) in this score** — that's purely for calibration purposes. Base the overall score on objective evidence from the transcript.
 
 **Output Language:** Write ALL evaluation content in English.
 **Tone:** Supportive but honest. Like a trusted coach who respects the user enough to give direct feedback.
@@ -560,7 +560,7 @@ Provide your evaluation as a JSON object.`
     },
     de: {
         prompt: ({ preAnswers, transcript, personalityProfile, context, docLang, currentDate }) => `
-Sie sind ein erfahrener Kommunikationscoach, der ein reales Interaktionstranskript auswertet. Ihre Aufgabe ist es, eine strukturierte, evidenzbasierte Bewertung zu erstellen, indem Sie die vom Benutzer formulierten Ziele und Absichten mit dem vergleichen, was tatsächlich in der Interaktion passiert ist.
+Du bist ein erfahrener Kommunikationscoach, der ein reales Interaktionstranskript auswertet. Deine Aufgabe ist es, eine strukturierte, evidenzbasierte Bewertung zu erstellen, indem du die formulierten Ziele und Absichten mit dem vergleichst, was tatsächlich in der Interaktion passiert ist.
 
 **Heutiges Datum:** ${currentDate}
 
@@ -578,10 +578,10 @@ Vor der Bereitstellung des Transkripts hat der Benutzer folgende Fragen beantwor
 ${preAnswers.difficult ? `\n**Was am schwierigsten war:** ${preAnswers.difficult}` : ''}
 
 ${personalityProfile ? `## Persönlichkeitsprofil-Zusammenfassung
-Der Benutzer hat folgendes Persönlichkeitsprofil. Nutzen Sie dies, um Blindspot-Evidenz zu identifizieren und persönlichkeitsbezogene Erkenntnisse zu liefern.
+Der Benutzer hat folgendes Persönlichkeitsprofil. Nutze dies, um Blindspot-Evidenz zu identifizieren und persönlichkeitsbezogene Erkenntnisse zu liefern.
 
 ${personalityProfile}
-` : '## Kein Persönlichkeitsprofil vorhanden\nLiefern Sie allgemeine Kommunikationserkenntnisse ohne persönlichkeitsspezifische Analyse. Lassen Sie personalityInsights als leeres Array.'}
+` : '## Kein Persönlichkeitsprofil vorhanden\nLiefere allgemeine Kommunikationserkenntnisse ohne persönlichkeitsspezifische Analyse. Lasse personalityInsights als leeres Array.'}
 
 ${context ? `## Lebenskontext
 \`\`\`markdown
@@ -595,31 +595,31 @@ ${transcript}
 
 ## Bewertungsanweisungen
 
-1. **Zielübereinstimmung (Score 1-5):** Wie gut hat die tatsächliche Interaktion das formulierte Ziel des Benutzers erreicht? Zitieren Sie spezifische Transkriptmomente als Beleg. Identifizieren Sie Lücken zwischen Absicht und Realität.
+1. **Zielübereinstimmung (Score 1-5):** Wie gut hat die tatsächliche Interaktion das formulierte Ziel erreicht? Zitiere spezifische Transkriptmomente als Beleg. Identifiziere Lücken zwischen Absicht und Realität.
 
-2. **Verhaltensübereinstimmung (Score 1-5):** Hat der Benutzer so gehandelt, wie er es beabsichtigte? Vergleichen Sie das "persönliche Ziel" mit dem tatsächlichen Verhalten im Transkript. Wenn ein Persönlichkeitsprofil vorhanden ist, identifizieren Sie Momente, in denen bekannte Blindspots auftraten.
+2. **Verhaltensübereinstimmung (Score 1-5):** Hat die Person so gehandelt, wie beabsichtigt? Vergleiche das "persönliche Ziel" mit dem tatsächlichen Verhalten im Transkript. Wenn ein Persönlichkeitsprofil vorhanden ist, identifiziere Momente, in denen bekannte Blindspots auftraten.
 
-3. **Annahmencheck:** Sortieren Sie die Annahmen des Benutzers in bestätigt, herausgefordert, oder notieren Sie unerwartete Erkenntnisse.
+3. **Annahmencheck:** Sortiere die Annahmen in bestätigt, widerlegt, oder notiere unerwartete Erkenntnisse.
 
-4. **Kalibrierung:** Vergleichen Sie die Selbstbewertung des Benutzers (${preAnswers.satisfaction}/5) mit Ihrer evidenzbasierten Einschätzung. Die Differenz zwischen Selbstwahrnehmung und Realität ist die wertvollste Coaching-Erkenntnis. Unterschätzt der Benutzer sich selbst, zeigt das eine Vertrauenslücke. Überschätzt er sich, zeigt das einen Blindspot.
+4. **Kalibrierung:** Vergleiche die Selbstbewertung (${preAnswers.satisfaction}/5) mit deiner evidenzbasierten Einschätzung. Die Differenz zwischen Selbstwahrnehmung und Realität ist die wertvollste Coaching-Erkenntnis. Wird die eigene Leistung unterschätzt, zeigt das eine Vertrauenslücke. Wird sie überschätzt, zeigt das einen Blindspot.
 
-5. **Persönlichkeitserkenntnisse:** Nur wenn ein Profil vorhanden ist. Verknüpfen Sie spezifische Transkriptmomente mit Persönlichkeitsdimensionen.
+5. **Persönlichkeitserkenntnisse:** Nur wenn ein Profil vorhanden ist. Verknüpfe spezifische Transkriptmomente mit Persönlichkeitsdimensionen.
 
-6. **Stärken:** Was hat der Benutzer gut gemacht? Seien Sie konkret mit Transkriptbelegen.
+6. **Stärken:** Was wurde gut gemacht? Sei konkret mit Transkriptbelegen.
 
 7. **Entwicklungsbereiche:** Was kann verbessert werden? Konstruktiv und spezifisch.
 
 8. **Nächste Schritte:** 2-4 konkrete, umsetzbare Empfehlungen mit klarer Begründung.
 
-9. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlagen Sie Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwenden Sie das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreiben Sie Kontext-Updates auf Deutsch.' : 'Schreiben Sie Kontext-Updates auf Englisch.'}
+9. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlage Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwende das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreibe Kontext-Updates auf Deutsch.' : 'Schreibe Kontext-Updates auf Englisch.'}
 
-10. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung aller Dimensionen.
+10. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung von Zielerreichung, Verhaltensausrichtung, Stärken und Entwicklungsbereichen. **Berücksichtige NICHT die Selbstbewertung (Zufriedenheit) in dieser Bewertung** — diese dient ausschließlich zur Kalibrierung. Basiere die Gesamtbewertung auf objektiven Belegen aus dem Transkript.
 
-**Ausgabesprache:** Schreiben Sie ALLE Bewertungsinhalte auf Deutsch.
-**Ton:** Unterstützend, aber ehrlich. Wie ein vertrauenswürdiger Coach, der den Benutzer genug respektiert, um direktes Feedback zu geben.
+**Ausgabesprache:** Schreibe ALLE Bewertungsinhalte auf Deutsch.
+**Ton:** Unterstützend, aber ehrlich. Wie ein vertrauenswürdiger Coach, der die Person genug respektiert, um direktes Feedback zu geben. **Verwende konsequent "du" und nicht "Sie".**
 **Evidenz:** Jede Behauptung muss durch spezifische Transkriptreferenzen belegt sein. Keine vagen Verallgemeinerungen.
 
-Stellen Sie Ihre Bewertung als JSON-Objekt bereit.`
+Stelle deine Bewertung als JSON-Objekt bereit.`
     }
 };
 

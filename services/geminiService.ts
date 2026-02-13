@@ -110,6 +110,12 @@ export const getTranscriptEvaluations = async (): Promise<TranscriptEvaluationSu
     });
 };
 
+export const deleteTranscriptEvaluation = async (id: string): Promise<{ success: boolean; message: string }> => {
+    return await apiFetch(`/gemini/transcript/evaluations/${id}`, {
+        method: 'DELETE',
+    });
+};
+
 export const generateContextFromInterview = async (
     history: Message[],
     lang: Language

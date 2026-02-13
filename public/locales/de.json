@@ -1713,5 +1713,8 @@
   "te_history_empty": "Noch keine Auswertungen vorhanden.",
   "te_history_score": "Score",
   "te_history_view": "Details anzeigen",
-  "te_history_back": "Zurück zur Übersicht"
+  "te_history_view_details": "Details anzeigen",
+  "te_history_back": "Zurück zur Übersicht",
+  
+  "delete": "Löschen"
 }
