@@ -7,7 +7,7 @@ interface EvaluationReviewProps {
     evaluation: TranscriptEvaluationResult;
     preAnswers: TranscriptPreAnswers;
     onDone: () => void;
-    currentUser?: { email?: string; isClient?: boolean };
+    currentUser?: { email?: string; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean };
 }
 
 const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) => {
