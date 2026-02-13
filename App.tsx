@@ -52,6 +52,11 @@ import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
 import PersonalityProfileView from './components/PersonalityProfileView';
 import LifeContextEditorView from './components/LifeContextEditorView';
+import TranscriptPreQuestions from './components/TranscriptPreQuestions';
+import TranscriptInput from './components/TranscriptInput';
+import EvaluationReview from './components/EvaluationReview';
+import EvaluationHistory from './components/EvaluationHistory';
+import { TranscriptPreAnswers, TranscriptEvaluationResult } from './types';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
@@ -120,6 +125,12 @@ const App: React.FC = () => {
     const [existingProfileForExtension, setExistingProfileForExtension] = useState<Partial<SurveyResult> | null>(null);
     const [preselectedLensForSurvey, setPreselectedLensForSurvey] = useState<'sd' | 'riemann' | 'ocean' | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    // Transcript Evaluation States
+    const [teStep, setTeStep] = useState<'pre' | 'input' | 'review' | 'history'>('pre');
+    const [tePreAnswers, setTePreAnswers] = useState<TranscriptPreAnswers | null>(null);
+    const [teEvaluation, setTeEvaluation] = useState<TranscriptEvaluationResult | null>(null);
+    const [teIsLoading, setTeIsLoading] = useState(false);
 
     // Theme States
     const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
@@ -1262,6 +1273,12 @@ const App: React.FC = () => {
             case 'botSelection': return (
                 <BotSelection 
                     onSelect={handleSelectBot} 
+                    onTranscriptEval={() => {
+                        setTeStep('pre');
+                        setTePreAnswers(null);
+                        setTeEvaluation(null);
+                        setView('transcriptEval');
+                    }}
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={currentUser?.coachingMode || 'off'}
@@ -1282,6 +1299,49 @@ const App: React.FC = () => {
                 />
             );
             case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setIsTestMode(false); setTestScenarioId(null); setNewGamificationState(null); setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
+            case 'transcriptEval': {
+                const handleTePreSubmit = (answers: TranscriptPreAnswers) => {
+                    setTePreAnswers(answers);
+                    setTeStep('input');
+                };
+                const handleTeTranscriptSubmit = async (transcript: string) => {
+                    if (!tePreAnswers) return;
+                    setTeIsLoading(true);
+                    try {
+                        let profile = undefined;
+                        if (hasPersonalityProfile && encryptionKey) {
+                            try {
+                                const profileData = await api.loadPersonalityProfile();
+                                if (profileData?.encryptedData) {
+                                    profile = decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
+                                }
+                            } catch { /* profile is optional */ }
+                        }
+                        const result = await geminiService.evaluateTranscript(tePreAnswers, transcript, language, profile);
+                        setTeEvaluation(result.evaluation);
+                        setTeStep('review');
+                    } catch (error) {
+                        console.error('Transcript evaluation failed:', error);
+                        alert('Evaluation failed. Please try again.');
+                    } finally {
+                        setTeIsLoading(false);
+                    }
+                };
+
+                if (teStep === 'pre') {
+                    return <TranscriptPreQuestions onNext={handleTePreSubmit} onBack={() => setView('botSelection')} onHistory={() => setTeStep('history')} />;
+                }
+                if (teStep === 'input') {
+                    return <TranscriptInput onSubmit={handleTeTranscriptSubmit} onBack={() => setTeStep('pre')} isLoading={teIsLoading} />;
+                }
+                if (teStep === 'review' && teEvaluation && tePreAnswers) {
+                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} onDone={() => setView('botSelection')} />;
+                }
+                if (teStep === 'history') {
+                    return <EvaluationHistory onBack={() => setTeStep('pre')} />;
+                }
+                return null;
+            }
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
