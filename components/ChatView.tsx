@@ -817,8 +817,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     flushSync(() => {
       setIsLoadingAudio(true);
     });
-    
-    const cleanText = text
+     
+     const cleanText = text
         .replace(/#{1,6}\s/g, '')
         .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
         .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
@@ -975,10 +975,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           const audioError = audio.error;
           const errorCode = audioError?.code;
           const errorMessage = audioError?.message || 'Unknown error';
-          
           // Ignore errors from intentionally stopping audio (e.g., when opening voice settings)
           if (isStoppingAudioRef.current) {
             console.log('[TTS] Audio stopped intentionally, ignoring error event');
+            return;
+          }
+          
+          // Ignore errors from stale (replaced) audio objects — when a new speak() call
+          // cancels the previous audio, the old Audio element fires an error event
+          // asynchronously. This must not clear the loading state of the NEW request.
+          if (audioRef.current !== audio) {
+            console.log('[TTS] Ignoring error from stale audio object (replaced by new speak call)');
             return;
           }
           
