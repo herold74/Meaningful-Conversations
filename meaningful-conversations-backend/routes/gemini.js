@@ -1336,4 +1336,36 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
     }
 });
 
+// DELETE /api/gemini/transcript/evaluations/:id - Delete a transcript evaluation
+router.delete('/transcript/evaluations/:id', authMiddleware, async (req, res) => {
+    const userId = req.userId;
+    const { id } = req.params;
+
+    try {
+        // Verify ownership before deleting
+        const evaluation = await prisma.transcriptEvaluation.findUnique({
+            where: { id },
+            select: { userId: true }
+        });
+
+        if (!evaluation) {
+            return res.status(404).json({ error: 'Evaluation not found.' });
+        }
+
+        if (evaluation.userId !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to delete this evaluation.' });
+        }
+
+        // Delete the evaluation
+        await prisma.transcriptEvaluation.delete({
+            where: { id }
+        });
+
+        res.json({ success: true, message: 'Evaluation deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting transcript evaluation:', error);
+        res.status(500).json({ error: 'Failed to delete evaluation.' });
+    }
+});
+
 module.exports = router;
