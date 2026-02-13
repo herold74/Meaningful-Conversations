@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: colors.gray100,
     borderRadius: 4,
+    breakInside: 'avoid', // Verhindert Seitenumbrüche innerhalb von Abschnitten
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -81,10 +82,12 @@ const styles = StyleSheet.create({
   },
   bulletList: {
     marginTop: 4,
+    marginBottom: 8,
   },
   bulletItem: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 6,
+    breakInside: 'avoid', // Verhindert, dass Bullet-Items getrennt werden
   },
   bullet: {
     width: 4,
@@ -201,7 +204,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
         </View>
 
         {/* Pre-Questions Section */}
-        <View style={styles.section}>
+        <View style={styles.section} wrap={false}>
           <Text style={styles.sectionTitle}>{t('pre_questions')}</Text>
           <View style={styles.divider} />
           <Text style={styles.text}>
@@ -218,7 +221,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
           </Text>
           <Text style={styles.text}>
             <Text style={{ fontWeight: 'bold' }}>{t('satisfaction')}: </Text>
-            {preAnswers.satisfaction}/10
+            {preAnswers.satisfaction}/5
           </Text>
           {preAnswers.difficult && (
             <Text style={styles.text}>
@@ -229,7 +232,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
         </View>
 
         {/* Overall Score */}
-        <View style={styles.section}>
+        <View style={styles.section} wrap={false}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('overall_score')}</Text>
             <Text style={styles.scoreBadge}>
@@ -240,41 +243,39 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
         </View>
 
         {/* Goal Alignment */}
-        <View style={styles.section}>
+        <View style={styles.section} wrap={false}>
           <Text style={styles.sectionTitle}>{t('goal_alignment')}</Text>
           <View style={styles.divider} />
           <Text style={styles.text}>
             <Text style={{ fontWeight: 'bold' }}>{t('achieved')}: </Text>
-            {evaluation.goalAlignment.score}/10
+            {evaluation.goalAlignment.score}/5
           </Text>
           <Text style={styles.text}>
             <Text style={{ fontWeight: 'bold' }}>{t('evidence')}: </Text>
+            {evaluation.goalAlignment.evidence}
           </Text>
-          <Text style={styles.bulletText}>{evaluation.goalAlignment.evidence}</Text>
           {evaluation.goalAlignment.gaps && (
-            <>
-              <Text style={styles.text}>
-                <Text style={{ fontWeight: 'bold' }}>Gaps: </Text>
-              </Text>
-              <Text style={styles.bulletText}>{evaluation.goalAlignment.gaps}</Text>
-            </>
+            <Text style={styles.text}>
+              <Text style={{ fontWeight: 'bold' }}>Gaps: </Text>
+              {evaluation.goalAlignment.gaps}
+            </Text>
           )}
         </View>
 
         {/* Behavioral Analysis */}
         {evaluation.behavioralAlignment && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('behavioral_analysis')}</Text>
             <View style={styles.divider} />
             <Text style={styles.text}>
               <Text style={{ fontWeight: 'bold' }}>Score: </Text>
-              {evaluation.behavioralAlignment.score}/10
+              {evaluation.behavioralAlignment.score}/5
             </Text>
             <Text style={styles.text}>{evaluation.behavioralAlignment.evidence}</Text>
             {evaluation.behavioralAlignment.blindspotEvidence.length > 0 && (
               <>
-                <Text style={styles.text}>
-                  <Text style={{ fontWeight: 'bold' }}>Blindspots: </Text>
+                <Text style={[styles.text, { marginTop: 8, marginBottom: 4, fontWeight: 'bold' }]}>
+                  Blindspots:
                 </Text>
                 <BulletList items={evaluation.behavioralAlignment.blindspotEvidence} />
               </>
@@ -284,64 +285,66 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
 
         {/* Assumption Check */}
         {evaluation.assumptionCheck && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('assumption_check')}</Text>
             <View style={styles.divider} />
             {evaluation.assumptionCheck.confirmed.length > 0 && (
-              <>
-                <Text style={styles.text}>
-                  <Text style={{ fontWeight: 'bold' }}>{t('confirmed')}:</Text>
+              <View style={{ marginBottom: 8 }}>
+                <Text style={[styles.text, { fontWeight: 'bold', marginBottom: 4 }]}>
+                  {t('confirmed')}:
                 </Text>
                 <BulletList items={evaluation.assumptionCheck.confirmed} />
-              </>
+              </View>
             )}
             {evaluation.assumptionCheck.challenged.length > 0 && (
-              <>
-                <Text style={styles.text}>
-                  <Text style={{ fontWeight: 'bold' }}>Challenged:</Text>
+              <View style={{ marginBottom: 8 }}>
+                <Text style={[styles.text, { fontWeight: 'bold', marginBottom: 4 }]}>
+                  Challenged:
                 </Text>
                 <BulletList items={evaluation.assumptionCheck.challenged} />
-              </>
+              </View>
             )}
             {evaluation.assumptionCheck.newInsights.length > 0 && (
-              <>
-                <Text style={styles.text}>
-                  <Text style={{ fontWeight: 'bold' }}>New Insights:</Text>
+              <View style={{ marginBottom: 8 }}>
+                <Text style={[styles.text, { fontWeight: 'bold', marginBottom: 4 }]}>
+                  New Insights:
                 </Text>
                 <BulletList items={evaluation.assumptionCheck.newInsights} />
-              </>
+              </View>
             )}
           </View>
         )}
 
         {/* Calibration */}
         {evaluation.calibration && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('calibration')}</Text>
             <View style={styles.divider} />
             <Text style={styles.text}>
-              {t('self_rating')}: {evaluation.calibration.selfRating}/10
+              <Text style={{ fontWeight: 'bold' }}>{t('self_rating')}: </Text>
+              {evaluation.calibration.selfRating}/5
             </Text>
             <Text style={styles.text}>
-              Evidence: {evaluation.calibration.evidenceRating}/10
+              <Text style={{ fontWeight: 'bold' }}>Evidence: </Text>
+              {evaluation.calibration.evidenceRating}/5
             </Text>
-            <Text style={styles.text}>{evaluation.calibration.delta}</Text>
+            <Text style={[styles.text, { marginTop: 8 }]}>{evaluation.calibration.delta}</Text>
             <Text style={styles.text}>{evaluation.calibration.interpretation}</Text>
           </View>
         )}
 
         {/* Personality Insights */}
         {evaluation.personalityInsights && evaluation.personalityInsights.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('personality_insights')}</Text>
             <View style={styles.divider} />
             {evaluation.personalityInsights.map((insight, i) => (
-              <View key={i} style={{ marginBottom: 8 }}>
+              <View key={i} style={{ marginBottom: 10 }}>
                 <Text style={[styles.text, { fontWeight: 'bold', color: colors.primary }]}>
                   {insight.dimension}
                 </Text>
-                <Text style={styles.bulletText}>{insight.observation}</Text>
-                <Text style={[styles.bulletText, { fontStyle: 'italic' }]}>
+                <Text style={styles.text}>{insight.observation}</Text>
+                <Text style={[styles.text, { fontStyle: 'italic' }]}>
                   → {insight.recommendation}
                 </Text>
               </View>
@@ -351,7 +354,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
 
         {/* Strengths */}
         {evaluation.strengths && evaluation.strengths.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('strengths')}</Text>
             <View style={styles.divider} />
             <BulletList items={evaluation.strengths} />
@@ -360,7 +363,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
 
         {/* Development Areas */}
         {evaluation.developmentAreas && evaluation.developmentAreas.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('development')}</Text>
             <View style={styles.divider} />
             <BulletList items={evaluation.developmentAreas} />
@@ -369,15 +372,17 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
 
         {/* Next Steps */}
         {evaluation.nextSteps && evaluation.nextSteps.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>{t('next_steps')}</Text>
             <View style={styles.divider} />
             {evaluation.nextSteps.map((step, i) => (
-              <View key={i} style={{ marginBottom: 6 }}>
+              <View key={i} style={{ marginBottom: 10 }}>
                 <Text style={[styles.text, { fontWeight: 'bold' }]}>
                   {i + 1}. {step.action}
                 </Text>
-                <Text style={styles.bulletText}>{step.rationale}</Text>
+                <Text style={[styles.text, { marginLeft: 12, fontSize: 9, color: colors.gray600 }]}>
+                  {step.rationale}
+                </Text>
               </View>
             ))}
           </View>
