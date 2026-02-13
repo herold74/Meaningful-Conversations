@@ -3,7 +3,8 @@ const router = express.Router();
 const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
 const prisma = require('../prismaClient.js');
 const { BOTS } = require('../constants.js');
-const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = require('../services/geminiPrompts.js');
+const authMiddleware = require('../middleware/auth.js');
+const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate, transcriptEvaluationPrompts } = require('../services/geminiPrompts.js');
 const { trackApiUsage } = require('../services/apiUsageTracker.js');
 const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
@@ -1124,6 +1125,214 @@ Your response as coachee (answer the coach's question directly):`;
         });
         
         res.status(500).json({ error: 'Failed to generate coachee response' });
+    }
+});
+
+// POST /api/gemini/transcript/evaluate
+// Requires authentication and Premium+ access
+router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.userId;
+    const { preAnswers, transcript, lang = 'de', decryptedPersonalityProfile } = req.body;
+
+    try {
+        // Validate required fields
+        if (!preAnswers || !transcript) {
+            return res.status(400).json({ error: 'preAnswers and transcript are required.' });
+        }
+
+        if (!preAnswers.goal || !preAnswers.personalTarget || !preAnswers.assumptions || !preAnswers.satisfaction) {
+            return res.status(400).json({ error: 'Pre-answers must include goal, personalTarget, assumptions, and satisfaction.' });
+        }
+
+        // Transcript length limit (50,000 chars)
+        if (transcript.length > 50000) {
+            return res.status(400).json({ error: 'Transcript exceeds maximum length of 50,000 characters.' });
+        }
+
+        // Access check: Premium+ only
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isPremium: true, isClient: true, isAdmin: true, isDeveloper: true, lifeContext: true }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        if (!user.isPremium && !user.isClient && !user.isAdmin && !user.isDeveloper) {
+            return res.status(403).json({ error: 'Transcript evaluation requires Premium access or higher.' });
+        }
+
+        // Build personality profile summary for prompt (if provided)
+        let personalityProfileSummary = null;
+        if (decryptedPersonalityProfile) {
+            const parts = [];
+            if (decryptedPersonalityProfile.riemann?.selbst) {
+                const s = decryptedPersonalityProfile.riemann.selbst;
+                parts.push(`Riemann-Thomann (Selbst): Nähe=${s.naehe}, Distanz=${s.distanz}, Dauer=${s.dauer}, Wechsel=${s.wechsel}`);
+            }
+            if (decryptedPersonalityProfile.big5) {
+                const b = decryptedPersonalityProfile.big5;
+                parts.push(`Big5/OCEAN: O=${b.openness}, C=${b.conscientiousness}, E=${b.extraversion}, A=${b.agreeableness}, N=${b.neuroticism}`);
+            }
+            if (decryptedPersonalityProfile.spiralDynamics?.levels) {
+                const levels = decryptedPersonalityProfile.spiralDynamics.levels;
+                const top = Object.entries(levels).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                parts.push(`Spiral Dynamics (top 3): ${top.map(([k, v]) => `${k}=${v}`).join(', ')}`);
+            }
+            if (decryptedPersonalityProfile.narrativeProfile) {
+                const np = decryptedPersonalityProfile.narrativeProfile;
+                if (np.blindspots?.length > 0) {
+                    parts.push(`Known Blindspots: ${np.blindspots.map(b => b.name).join(', ')}`);
+                }
+                if (np.superpowers?.length > 0) {
+                    parts.push(`Superpowers: ${np.superpowers.map(s => s.name).join(', ')}`);
+                }
+            }
+            personalityProfileSummary = parts.join('\n');
+        }
+
+        // Determine document language from context
+        const context = user.lifeContext || null;
+        const docLang = context && context.startsWith('# Mein Lebenskontext') ? 'de' : 'en';
+        const currentDate = new Date().toISOString().split('T')[0];
+
+        // Build evaluation prompt
+        const promptFn = transcriptEvaluationPrompts[lang]?.prompt || transcriptEvaluationPrompts.en.prompt;
+        const evaluationPrompt = promptFn({
+            preAnswers,
+            transcript,
+            personalityProfile: personalityProfileSummary,
+            context,
+            docLang,
+            currentDate
+        });
+
+        // AI call
+        const modelName = 'gemini-2.5-pro';
+        const result = await withTimeout(
+            aiProviderService.generateContent({
+                model: modelName,
+                contents: evaluationPrompt,
+                config: {
+                    responseMimeType: 'application/json',
+                    responseSchema: transcriptEvaluationPrompts.schema,
+                    temperature: 0.2,
+                },
+                context: 'transcript-evaluation',
+            }),
+            120000,
+            'Transcript evaluation'
+        );
+
+        const durationMs = Date.now() - startTime;
+        const generatedText = result.text || '';
+        const tokenUsage = result.usage || {};
+
+        // Parse response
+        let evaluationResult;
+        try {
+            const cleanedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            evaluationResult = JSON.parse(cleanedText);
+        } catch (parseErr) {
+            console.error('Failed to parse transcript evaluation response:', parseErr);
+            return res.status(500).json({ error: 'Failed to parse evaluation response.' });
+        }
+
+        // Persist evaluation (transcript is NOT stored)
+        const savedEvaluation = await prisma.transcriptEvaluation.create({
+            data: {
+                userId,
+                preAnswers: JSON.stringify(preAnswers),
+                evaluationData: JSON.stringify(evaluationResult),
+                lang,
+            }
+        });
+
+        // Track usage
+        await trackApiUsage({
+            userId,
+            endpoint: 'transcript-evaluate',
+            model: modelName,
+            botId: null,
+            inputTokens: tokenUsage.inputTokens || 0,
+            outputTokens: tokenUsage.outputTokens || 0,
+            durationMs,
+            success: true,
+        });
+
+        res.json({
+            id: savedEvaluation.id,
+            evaluation: evaluationResult,
+            durationMs,
+        });
+
+    } catch (error) {
+        console.error('Transcript evaluation error:', error);
+        const durationMs = Date.now() - startTime;
+
+        await trackApiUsage({
+            userId,
+            endpoint: 'transcript-evaluate',
+            model: 'gemini-2.5-pro',
+            botId: null,
+            inputTokens: 0,
+            outputTokens: 0,
+            durationMs,
+            success: false,
+            errorMessage: error.message,
+        });
+
+        res.status(500).json({ error: 'Transcript evaluation failed. Please try again.' });
+    }
+});
+
+// GET /api/gemini/transcript/evaluations
+// Returns list of past evaluations for the authenticated user
+router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const evaluations = await prisma.transcriptEvaluation.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                preAnswers: true,
+                evaluationData: true,
+                lang: true,
+                createdAt: true,
+            }
+        });
+
+        // Parse JSON fields and return summary for list view
+        const result = evaluations.map(e => {
+            let preAnswers, evaluationData;
+            try {
+                preAnswers = JSON.parse(e.preAnswers);
+                evaluationData = JSON.parse(e.evaluationData);
+            } catch {
+                preAnswers = {};
+                evaluationData = {};
+            }
+            return {
+                id: e.id,
+                createdAt: e.createdAt,
+                lang: e.lang,
+                goal: preAnswers.goal || '',
+                summary: evaluationData.summary || '',
+                overallScore: evaluationData.overallScore || 0,
+                // Full data for detail view
+                preAnswers,
+                evaluationData,
+            };
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error fetching transcript evaluations:', error);
+        res.status(500).json({ error: 'Failed to fetch evaluations.' });
     }
 });
 

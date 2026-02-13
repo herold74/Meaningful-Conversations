@@ -6,9 +6,11 @@ import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import { isDesktopWeb, isNativeApp } from '../utils/platformDetection';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
+  onTranscriptEval?: () => void;
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
@@ -127,7 +129,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasPersonalityProfile, coachingMode }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, currentUser, hasPersonalityProfile, coachingMode }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -296,6 +298,66 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, currentUser, hasP
             {t('botSelection_clientAccessMessage')}
           </p>
         </div>
+      )}
+
+      {/* Tools Section — only on web (hidden on native apps entirely) */}
+      {!isNativeApp() && (
+        <>
+          <div className="w-full max-w-6xl mx-auto my-12">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 border border-accent-primary/20">
+                <span className="text-lg">🛠</span>
+                <span className="text-sm font-semibold text-accent-primary">
+                  {t('te_tools_section')}
+                </span>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary to-transparent"></div>
+            </div>
+          </div>
+
+          <div className="w-full max-w-4xl mx-auto">
+            {(() => {
+              const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+              const desktop = isDesktopWeb();
+              const locked = !isPremiumPlus || !desktop;
+              const lockReason = !isPremiumPlus ? t('te_premium_required') : !desktop ? t('te_desktop_only') : '';
+
+              return (
+                <div
+                  onClick={() => !locked && onTranscriptEval?.()}
+                  className={`
+                    relative flex items-center gap-5 p-6 rounded-lg border transition-all
+                    ${locked
+                      ? 'cursor-not-allowed opacity-60 bg-background-primary dark:bg-background-primary/50 border-border-primary'
+                      : 'cursor-pointer bg-background-secondary dark:bg-transparent border-border-primary hover:border-accent-primary hover:shadow-xl hover:-translate-y-1 shadow-md'
+                    }
+                  `}
+                >
+                  {/* Icon */}
+                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-3xl ${locked ? 'bg-gray-200 dark:bg-gray-700' : 'bg-accent-primary/10'}`}>
+                    {locked ? (
+                      <LockIcon className="w-8 h-8 text-content-secondary" />
+                    ) : (
+                      <span>📋</span>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-content-primary">{t('te_title')}</h3>
+                    <p className="text-sm text-content-secondary mt-1">{t('te_description')}</p>
+                    {locked && lockReason && (
+                      <p className="text-xs text-status-warning-foreground mt-2 font-semibold">
+                        🔒 {lockReason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </>
       )}
     </div>
   );

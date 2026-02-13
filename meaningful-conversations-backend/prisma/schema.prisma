@@ -41,6 +41,7 @@ model User {
   upgradeCodesUsedByUser    UpgradeCode[] @relation("UserToUpgradeCodes")
   personalityProfile        PersonalityProfile?
   sessionBehaviorLogs       SessionBehaviorLog[]
+  transcriptEvaluations     TranscriptEvaluation[]
 }
 
 model UpgradeCode {
@@ -240,4 +241,18 @@ model SessionBehaviorLog {
   @@index([userId])
   @@index([sessionId])
   @@map("session_behavior_logs")
+}
+
+model TranscriptEvaluation {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preAnswers      String   @db.Text    // JSON: { goal, personalTarget, assumptions, satisfaction, difficult? }
+  evaluationData  String   @db.Text    // JSON: structured AI evaluation result
+  lang            String   @default("de")
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("transcript_evaluations")
 }

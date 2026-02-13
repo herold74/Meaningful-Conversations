@@ -376,8 +376,256 @@ Erstellen Sie nun die endgültige "Lebenskontext"-Markdown-Datei, indem Sie die 
     }
 };
 
+// Schema for transcript evaluation feature
+const transcriptEvaluationSchema = {
+    type: 'OBJECT',
+    properties: {
+        summary: {
+            type: 'STRING',
+            description: 'A concise 2-3 sentence overview of the evaluation findings. Written in second person ("You...").'
+        },
+        goalAlignment: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 (not aligned) to 5 (fully aligned).' },
+                evidence: { type: 'STRING', description: 'Specific quotes or behaviors from the transcript that demonstrate alignment with the stated goal.' },
+                gaps: { type: 'STRING', description: 'What was missing or could have been done differently to better achieve the goal.' }
+            },
+            required: ['score', 'evidence', 'gaps']
+        },
+        behavioralAlignment: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 (not aligned) to 5 (fully aligned) — how well the user acted according to their personal target.' },
+                evidence: { type: 'STRING', description: 'Specific moments in the transcript where the user demonstrated (or failed to demonstrate) their intended personal behavior.' },
+                blindspotEvidence: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING' },
+                    description: 'Specific moments where known personality blindspots (from personality profile) surfaced in the transcript. Each entry should cite the relevant behavior and which blindspot it relates to.'
+                }
+            },
+            required: ['score', 'evidence', 'blindspotEvidence']
+        },
+        assumptionCheck: {
+            type: 'OBJECT',
+            properties: {
+                confirmed: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING' },
+                    description: 'User assumptions that were confirmed by what happened in the interaction.'
+                },
+                challenged: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING' },
+                    description: 'User assumptions that were contradicted or challenged by the actual interaction.'
+                },
+                newInsights: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING' },
+                    description: 'Unexpected insights or patterns that emerged, which the user did not anticipate.'
+                }
+            },
+            required: ['confirmed', 'challenged', 'newInsights']
+        },
+        calibration: {
+            type: 'OBJECT',
+            properties: {
+                selfRating: { type: 'INTEGER', description: 'The user\'s self-reported satisfaction rating (1-5), copied from pre-answers.' },
+                evidenceRating: { type: 'INTEGER', description: 'AI-assessed effectiveness rating (1-5) based on transcript evidence.' },
+                delta: { type: 'STRING', description: 'Description of the gap between self-assessment and evidence (e.g., "You rated yourself 2 points lower than the evidence suggests").' },
+                interpretation: { type: 'STRING', description: 'What the gap (or alignment) between self-rating and evidence-rating reveals about the user\'s self-perception. This is where blindspot or confidence insights emerge.' }
+            },
+            required: ['selfRating', 'evidenceRating', 'delta', 'interpretation']
+        },
+        personalityInsights: {
+            type: 'ARRAY',
+            description: 'Personality-specific observations. Only include if a personality profile was provided.',
+            items: {
+                type: 'OBJECT',
+                properties: {
+                    dimension: { type: 'STRING', description: 'The personality dimension (e.g., "Riemann: Nähe", "Big5: Extraversion", "SD: Orange").' },
+                    observation: { type: 'STRING', description: 'What was observed in the transcript related to this dimension.' },
+                    recommendation: { type: 'STRING', description: 'A specific, actionable recommendation for development.' }
+                },
+                required: ['dimension', 'observation', 'recommendation']
+            }
+        },
+        strengths: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: 'What went well in the interaction — specific behaviors, communication patterns, or decisions that were effective.'
+        },
+        developmentAreas: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: 'What could be improved — specific behaviors, missed opportunities, or patterns to work on.'
+        },
+        nextSteps: {
+            type: 'ARRAY',
+            description: 'Concrete, actionable recommendations for the user\'s next interaction or coaching session.',
+            items: {
+                type: 'OBJECT',
+                properties: {
+                    action: { type: 'STRING', description: 'A specific action to take.' },
+                    rationale: { type: 'STRING', description: 'Why this action matters, linked to the evaluation findings.' }
+                },
+                required: ['action', 'rationale']
+            }
+        },
+        contextUpdates: {
+            type: 'ARRAY',
+            description: 'Proposed updates to the user\'s Life Context based on evaluation insights.',
+            items: {
+                type: 'OBJECT',
+                properties: {
+                    type: { type: 'STRING', description: 'Update type: "append", "replace_section", or "create_headline".' },
+                    headline: { type: 'STRING', description: 'Target headline using hierarchical path (e.g., "Career & Work > Challenges").' },
+                    content: { type: 'STRING', description: 'The content to add or replace.' }
+                },
+                required: ['type', 'headline', 'content']
+            }
+        },
+        overallScore: {
+            type: 'INTEGER',
+            description: 'Overall effectiveness score from 1 (poor) to 10 (excellent), considering all evaluation dimensions.'
+        }
+    },
+    required: ['summary', 'goalAlignment', 'behavioralAlignment', 'assumptionCheck', 'calibration', 'personalityInsights', 'strengths', 'developmentAreas', 'nextSteps', 'contextUpdates', 'overallScore']
+};
+
+const transcriptEvaluationPrompts = {
+    schema: transcriptEvaluationSchema,
+    en: {
+        prompt: ({ preAnswers, transcript, personalityProfile, context, docLang, currentDate }) => `
+You are an expert communication coach evaluating a real interaction transcript. Your task is to provide a structured, evidence-based evaluation by comparing the user's stated goals and intentions against what actually happened in the interaction.
+
+**Today's Date:** ${currentDate}
+
+## User's Pre-Reflection
+
+Before providing the transcript, the user answered these questions:
+
+**Goal of the interaction:** ${preAnswers.goal}
+
+**Personal target (how they wanted to behave):** ${preAnswers.personalTarget}
+
+**Assumptions and beliefs going in:** ${preAnswers.assumptions}
+
+**Self-rated satisfaction (1-5):** ${preAnswers.satisfaction}
+${preAnswers.difficult ? `\n**What was most difficult:** ${preAnswers.difficult}` : ''}
+
+${personalityProfile ? `## Personality Profile Summary
+The user has the following personality profile. Use this to identify blindspot evidence and provide personality-aware insights.
+
+${personalityProfile}
+` : '## No Personality Profile Available\nProvide general communication insights without personality-specific analysis. Leave personalityInsights as an empty array.'}
+
+${context ? `## Life Context
+\`\`\`markdown
+${context}
+\`\`\`` : '## No Life Context Available'}
+
+## Interaction Transcript
+\`\`\`
+${transcript}
+\`\`\`
+
+## Evaluation Instructions
+
+1. **Goal Alignment (score 1-5):** How well did the actual interaction achieve the user's stated goal? Cite specific transcript moments as evidence. Identify gaps between intention and reality.
+
+2. **Behavioral Alignment (score 1-5):** Did the user act the way they intended to? Reference their "personal target" and compare with actual behavior in the transcript. If a personality profile is available, identify moments where known blindspots surfaced.
+
+3. **Assumption Check:** Sort the user's stated assumptions into confirmed, challenged, or note any unexpected insights that emerged.
+
+4. **Calibration:** Compare the user's self-rating (${preAnswers.satisfaction}/5) with your evidence-based assessment. The delta between self-perception and reality is where the most valuable coaching insight lives. If the user underrates themselves, that reveals a confidence gap. If they overrate themselves, that reveals a blindspot.
+
+5. **Personality Insights:** Only if a profile was provided. Link specific transcript moments to personality dimensions. Be specific — don't just name the dimension, show how it manifested.
+
+6. **Strengths:** What did the user do well? Be specific and cite transcript evidence.
+
+7. **Development Areas:** What could improve? Be constructive and specific.
+
+8. **Next Steps:** Provide 2-4 concrete, actionable recommendations with clear rationale tied to your findings.
+
+9. **Context Updates:** If the user has a Life Context, propose updates that capture significant new insights from this evaluation. Follow the hierarchical headline format (e.g., "Career & Work > Challenges"). ${docLang === 'de' ? 'Write context updates in German.' : 'Write context updates in English.'}
+
+10. **Overall Score (1-10):** A holistic assessment considering all dimensions.
+
+**Output Language:** Write ALL evaluation content in English.
+**Tone:** Supportive but honest. Like a trusted coach who respects the user enough to give direct feedback.
+**Evidence:** Every claim must be backed by specific transcript references. No vague generalizations.
+
+Provide your evaluation as a JSON object.`
+    },
+    de: {
+        prompt: ({ preAnswers, transcript, personalityProfile, context, docLang, currentDate }) => `
+Sie sind ein erfahrener Kommunikationscoach, der ein reales Interaktionstranskript auswertet. Ihre Aufgabe ist es, eine strukturierte, evidenzbasierte Bewertung zu erstellen, indem Sie die vom Benutzer formulierten Ziele und Absichten mit dem vergleichen, was tatsächlich in der Interaktion passiert ist.
+
+**Heutiges Datum:** ${currentDate}
+
+## Vorreflexion des Benutzers
+
+Vor der Bereitstellung des Transkripts hat der Benutzer folgende Fragen beantwortet:
+
+**Ziel der Interaktion:** ${preAnswers.goal}
+
+**Persönliches Ziel (gewünschtes Verhalten):** ${preAnswers.personalTarget}
+
+**Annahmen und Überzeugungen:** ${preAnswers.assumptions}
+
+**Selbstbewertung der Zufriedenheit (1-5):** ${preAnswers.satisfaction}
+${preAnswers.difficult ? `\n**Was am schwierigsten war:** ${preAnswers.difficult}` : ''}
+
+${personalityProfile ? `## Persönlichkeitsprofil-Zusammenfassung
+Der Benutzer hat folgendes Persönlichkeitsprofil. Nutzen Sie dies, um Blindspot-Evidenz zu identifizieren und persönlichkeitsbezogene Erkenntnisse zu liefern.
+
+${personalityProfile}
+` : '## Kein Persönlichkeitsprofil vorhanden\nLiefern Sie allgemeine Kommunikationserkenntnisse ohne persönlichkeitsspezifische Analyse. Lassen Sie personalityInsights als leeres Array.'}
+
+${context ? `## Lebenskontext
+\`\`\`markdown
+${context}
+\`\`\`` : '## Kein Lebenskontext vorhanden'}
+
+## Interaktionstranskript
+\`\`\`
+${transcript}
+\`\`\`
+
+## Bewertungsanweisungen
+
+1. **Zielübereinstimmung (Score 1-5):** Wie gut hat die tatsächliche Interaktion das formulierte Ziel des Benutzers erreicht? Zitieren Sie spezifische Transkriptmomente als Beleg. Identifizieren Sie Lücken zwischen Absicht und Realität.
+
+2. **Verhaltensübereinstimmung (Score 1-5):** Hat der Benutzer so gehandelt, wie er es beabsichtigte? Vergleichen Sie das "persönliche Ziel" mit dem tatsächlichen Verhalten im Transkript. Wenn ein Persönlichkeitsprofil vorhanden ist, identifizieren Sie Momente, in denen bekannte Blindspots auftraten.
+
+3. **Annahmencheck:** Sortieren Sie die Annahmen des Benutzers in bestätigt, herausgefordert, oder notieren Sie unerwartete Erkenntnisse.
+
+4. **Kalibrierung:** Vergleichen Sie die Selbstbewertung des Benutzers (${preAnswers.satisfaction}/5) mit Ihrer evidenzbasierten Einschätzung. Die Differenz zwischen Selbstwahrnehmung und Realität ist die wertvollste Coaching-Erkenntnis. Unterschätzt der Benutzer sich selbst, zeigt das eine Vertrauenslücke. Überschätzt er sich, zeigt das einen Blindspot.
+
+5. **Persönlichkeitserkenntnisse:** Nur wenn ein Profil vorhanden ist. Verknüpfen Sie spezifische Transkriptmomente mit Persönlichkeitsdimensionen.
+
+6. **Stärken:** Was hat der Benutzer gut gemacht? Seien Sie konkret mit Transkriptbelegen.
+
+7. **Entwicklungsbereiche:** Was kann verbessert werden? Konstruktiv und spezifisch.
+
+8. **Nächste Schritte:** 2-4 konkrete, umsetzbare Empfehlungen mit klarer Begründung.
+
+9. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlagen Sie Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwenden Sie das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreiben Sie Kontext-Updates auf Deutsch.' : 'Schreiben Sie Kontext-Updates auf Englisch.'}
+
+10. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung aller Dimensionen.
+
+**Ausgabesprache:** Schreiben Sie ALLE Bewertungsinhalte auf Deutsch.
+**Ton:** Unterstützend, aber ehrlich. Wie ein vertrauenswürdiger Coach, der den Benutzer genug respektiert, um direktes Feedback zu geben.
+**Evidenz:** Jede Behauptung muss durch spezifische Transkriptreferenzen belegt sein. Keine vagen Verallgemeinerungen.
+
+Stellen Sie Ihre Bewertung als JSON-Objekt bereit.`
+    }
+};
+
 module.exports = {
     analysisPrompts,
     interviewFormattingPrompts,
     getInterviewTemplate,
+    transcriptEvaluationPrompts,
 };
