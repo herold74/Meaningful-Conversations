@@ -487,7 +487,7 @@ const transcriptEvaluationSchema = {
         },
         overallScore: {
             type: 'INTEGER',
-            description: 'Overall effectiveness score from 1 (poor) to 10 (excellent), based on goal alignment, behavioral alignment, strengths, and development areas. Do NOT include the user\'s self-rating (satisfaction) in this score.'
+            description: 'Overall effectiveness score from 1-10, calculated as: Goal Alignment Score + Behavioral Alignment Score. Example: Goal=4, Behavioral=5 → Overall=9. Do NOT include the user\'s self-rating (satisfaction) in this score.'
         }
     },
     required: ['summary', 'goalAlignment', 'behavioralAlignment', 'assumptionCheck', 'calibration', 'personalityInsights', 'strengths', 'developmentAreas', 'nextSteps', 'contextUpdates', 'overallScore']
@@ -552,6 +552,11 @@ ${transcript}
 
 10. **Overall Score (1-10):** A holistic assessment considering goal alignment, behavioral alignment, strengths, and development areas. **Do NOT consider the user's self-rating (satisfaction) in this score** — that's purely for calibration purposes. Base the overall score on objective evidence from the transcript.
 
+**IMPORTANT: Calculate the overall score as follows:**
+- Overall Score = Goal Alignment Score + Behavioral Alignment Score
+- Example: Goal=4/5, Behavioral=5/5 → Overall=9/10
+- This ensures transparency and traceability for users.
+
 **Output Language:** Write ALL evaluation content in English.
 **Tone:** Supportive but honest. Like a trusted coach who respects the user enough to give direct feedback.
 **Evidence:** Every claim must be backed by specific transcript references. No vague generalizations.
@@ -614,6 +619,11 @@ ${transcript}
 9. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlage Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwende das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreibe Kontext-Updates auf Deutsch.' : 'Schreibe Kontext-Updates auf Englisch.'}
 
 10. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung von Zielerreichung, Verhaltensausrichtung, Stärken und Entwicklungsbereichen. **Berücksichtige NICHT die Selbstbewertung (Zufriedenheit) in dieser Bewertung** — diese dient ausschließlich zur Kalibrierung. Basiere die Gesamtbewertung auf objektiven Belegen aus dem Transkript.
+
+**WICHTIG: Berechne die Gesamtbewertung wie folgt:**
+- Gesamtbewertung = Zielübereinstimmung Score + Verhaltensübereinstimmung Score
+- Beispiel: Ziel=4/5, Verhalten=5/5 → Gesamt=9/10
+- Dies gewährleistet Transparenz und Nachvollziehbarkeit für Benutzer.
 
 **Ausgabesprache:** Schreibe ALLE Bewertungsinhalte auf Deutsch.
 **Ton:** Unterstützend, aber ehrlich. Wie ein vertrauenswürdiger Coach, der die Person genug respektiert, um direktes Feedback zu geben. **Verwende konsequent "du" und nicht "Sie".**
