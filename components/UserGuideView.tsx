@@ -9,13 +9,20 @@ import { WarningIcon } from './icons/WarningIcon';
 interface InfoViewProps {
 }
 
-const de_markdown = `## Einführung
+const de_markdown = `<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
+<div style="padding: 16px;">
 
 Willkommen bei "Sinnstiftende Gespräche"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
 
+</div>
+</details>
+
 ---
 
-## Kapitel 1: Erste Schritte
+<details open>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
+<div style="padding: 16px;">
 
 Wenn Sie die App zum ersten Mal öffnen, haben Sie die Wahl, wie Sie beginnen möchten.
 
@@ -44,9 +51,14 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 - **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
 - **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
 
+</div>
+</details>
+
 ---
 
-## Kapitel 2: Die Coaching-Sitzung
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 2: Die Coaching-Sitzung</summary>
+<div style="padding: 16px;">
 
 ### 2.1 Einen Coach auswählen
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
@@ -217,9 +229,47 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
   - **Tippen Sie erneut auf das Symbol (jetzt ein Papierflieger)**, um die Aufnahme zu beenden und Ihre Nachricht zu senden. Die Antwort des Coaches wird automatisch abgespielt.
 
+</div>
+</details>
+
 ---
 
-## Kapitel 3: Nach der Sitzung - Der Analyseprozess
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 2.5: Transkript-Auswertung (Client-Feature)</summary>
+<div style="padding: 16px;">
+
+Dieses Feature ermöglicht Client-Benutzern, echte Gesprächstranskripte hochzuladen und KI-gestützte Rückmeldung zu erhalten. Es befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm und ist **nur auf dem Desktop** verfügbar.
+
+**Ablauf:**
+1. **Reflexionsfragen vor dem Upload** – Kurze Fragen zur Vorbereitung
+2. **Transkript hochladen** – Als Text oder SRT-Datei
+3. **Detaillierte Auswertung** – Die KI analysiert Ihr Gespräch und liefert:
+   - **Zielausrichtung** (X/5) – Wie gut wurde das Gesprächsziel erreicht?
+   - **Verhaltensanalyse** (X/5) – Analyse Ihres Gesprächsverhaltens
+   - **Annahmenprüfung** – Überprüfung von Annahmen im Gespräch
+   - **Kalibrierung** – Abstimmung zwischen Erwartung und Realität
+   - **Persönlichkeitsinsights** – Falls ein Profil existiert, Einblicke in Ihre Persönlichkeit
+   - **Stärken & Entwicklungsbereiche** – Was gut lief und wo Sie sich weiterentwickeln können
+   - **Nächste Schritte** – Konkrete Empfehlungen
+
+**Gesamtbewertung:** Ziel + Verhalten (z.B. 4+5=9/10)
+
+**Weitere Funktionen:**
+- **PDF-Export** für Clients, Admins und Developers
+- **History-Ansicht** zum Überprüfen und Löschen vergangener Auswertungen
+
+**Datenschutz:** Transkripte werden nicht dauerhaft gespeichert – nur die Auswertungsergebnisse werden gesichert.
+
+**Am besten geeignet für:** Echte Gespräche von 5–10 Minuten mit klarer Struktur.
+
+</div>
+</details>
+
+---
+
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 3: Nach der Sitzung - Der Analyseprozess</summary>
+<div style="padding: 16px;">
 
 ### 3.1 Die Analyse
 **Wenn Sie auf "Sitzung beenden" klicken**, analysiert eine KI Ihr Gespräch. Sie sehen einen Ladebildschirm mit dem Titel **Sitzung wird analysiert...**. Dieser Vorgang dauert in der Regel etwa 15-30 Sekunden.
@@ -260,9 +310,14 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 7), erschein
   - Aktuelle vs. vorgeschlagene Werte für Ihre Persönlichkeitsdimensionen
   - Sie können die Vorschläge **annehmen** oder **ablehnen** -- Sie behalten stets die volle Kontrolle
 
+</div>
+</details>
+
 ---
 
-## Kapitel 4: Ihren Fortschritt verstehen (Gamification)
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 4: Ihren Fortschritt verstehen (Gamification)</summary>
+<div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
 
@@ -296,9 +351,14 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 - **Hell-/Dunkelmodus (Mond-/Sonnen-Symbol):** Schaltet zwischen hellem und dunklem Erscheinungsbild um. Standardmäßig wechselt die App automatisch basierend auf der Uhrzeit: **Dunkelmodus** von 18:00 bis 6:00 Uhr, **Hellmodus** von 6:00 bis 18:00 Uhr. Ein manuelles Umschalten deaktiviert den automatischen Wechsel.
 - **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Winter. Die App wählt automatisch das passende Schema zur aktuellen Jahreszeit, Sie können es aber jederzeit manuell ändern.
 
+</div>
+</details>
+
 ---
 
-## Kapitel 5: Datenschutz & Sicherheit für registrierte Benutzer
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 5: Datenschutz & Sicherheit für registrierte Benutzer</summary>
+<div style="padding: 16px;">
 
 Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselung (E2EE)** für Ihre Lebenskontext-Datei und Ihr Persönlichkeitsprofil.
 
@@ -317,9 +377,14 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Client).
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
+</div>
+</details>
+
 ---
 
-## Kapitel 6: App zum Homescreen hinzufügen
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 6: App zum Homescreen hinzufügen</summary>
+<div style="padding: 16px;">
 
 Die Meaningful Conversations App ist eine Progressive Web App (PWA) und kann wie eine native App auf Ihrem Gerät installiert werden. So haben Sie schnellen Zugriff und ein App-ähnliches Erlebnis.
 
@@ -352,9 +417,14 @@ Die Meaningful Conversations App ist eine Progressive Web App (PWA) und kann wie
 - Push-Benachrichtigungen (falls aktiviert)
 - Funktioniert teilweise auch offline
 
+</div>
+</details>
+
 ---
 
-## Kapitel 7: Persönlichkeitsprofil für registrierte Benutzer
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧠 Kapitel 7: Persönlichkeitsprofil für registrierte Benutzer</summary>
+<div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
 
@@ -581,9 +651,27 @@ Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches**
 - Die Gesprächsführung berücksichtigt Ihre bevorzugte Art der Kommunikation
 - Bei einem adaptiven Profil schlagen die Coaches kontinuierlich Anpassungen Ihres Persönlichkeitsprofils vor, die auf Basis des Gesprächsverlaufs gewonnen werden. Auf diese Weise bieten die Coaches "Fremdbild"-Feedback, welches Ihr "Selbstbild" optimal ergänzt.
 - Im DPC/DPFL-Modus nutzen die Coaches Ihre **Persönlichkeits-Signatur** aktiv: Sie erkennen, wenn Herausforderungen mit Ihren **Stärken** bewältigt werden können, und weisen behutsam auf **potenzielle Blind Spots** hin - besonders bei Motivations- und Beziehungsthemen.
+
+</div>
+</details>
 `;
 
-const en_markdown = `## Introduction
+const en_markdown = `<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
+<div style="padding: 16px;">
+
+Welcome to Meaningful Conversations! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
+
+</div>
+</details>
+
+---
+
+<details open>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
+<div style="padding: 16px;">
+
+When you first open the app, you'll have a choice of how to begin.
 
 Welcome to Meaningful Conversations! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
 
@@ -618,9 +706,14 @@ If you are a registered user returning with a saved context, you will see the **
 - **Continue with Saved Context:** Loads your last state and takes you to coach selection.
 - **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
 
+</div>
+</details>
+
 ---
 
-## Chapter 2: The Coaching Session
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 2: The Coaching Session</summary>
+<div style="padding: 16px;">
 
 ### 2.1 Choosing Your Coach
 On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
@@ -791,9 +884,14 @@ Some coaches are marked with a lock icon and require a premium or client subscri
   - **Tap the large microphone icon** to start recording. Speak your message.
   - **Tap the icon again (now a paper plane)** to stop recording and send your message. The coach's reply will play automatically.
 
+</div>
+</details>
+
 ---
 
-## Chapter 3: After the Session - The Review Process
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 3: After the Session - The Review Process</summary>
+<div style="padding: 16px;">
 
 ### 3.1 The Analysis
 **When you click "End Session,"** an AI analyzes your conversation. You will see a loading screen titled **Analyzing Session...**. This process usually takes about 15-30 seconds.
@@ -834,9 +932,14 @@ If you have the **DPFL coaching mode** activated (see Chapter 7), two additional
   - Current vs. suggested values for your personality dimensions
   - You can **accept** or **reject** the suggestions -- you always keep full control
 
+</div>
+</details>
+
 ---
 
-## Chapter 4: Understanding Your Progress (Gamification)
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 4: Understanding Your Progress (Gamification)</summary>
+<div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
 
@@ -870,9 +973,14 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 - **Light/Dark Mode (Moon/Sun Icon):** Switches between light and dark appearance. By default, the app switches automatically based on the time of day: **Dark mode** from 6:00 PM to 6:00 AM, **Light mode** from 6:00 AM to 6:00 PM. Manually toggling disables the automatic switching.
 - **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Winter. The app automatically selects the matching scheme for the current season, but you can change it manually at any time.
 
+</div>
+</details>
+
 ---
 
-## Chapter 5: Privacy & Security for Registered Users
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 5: Privacy & Security for Registered Users</summary>
+<div style="padding: 16px;">
 
 Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file and your Personality Profile.
 
@@ -891,9 +999,14 @@ Via the menu (☰), you can access **Account Management** with the following opt
 - **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
 - **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
 
+</div>
+</details>
+
 ---
 
-## Chapter 6: Adding the App to Your Home Screen
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 6: Adding the App to Your Home Screen</summary>
+<div style="padding: 16px;">
 
 The Meaningful Conversations app is a Progressive Web App (PWA) and can be installed like a native app on your device. This gives you quick access and an app-like experience.
 
@@ -926,9 +1039,14 @@ The Meaningful Conversations app is a Progressive Web App (PWA) and can be insta
 - Push notifications (if enabled)
 - Works partially offline
 
+</div>
+</details>
+
 ---
 
-## Chapter 7: Personality Profile for Registered Users
+<details>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧠 Chapter 7: Personality Profile for Registered Users</summary>
+<div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
 
@@ -1119,6 +1237,9 @@ With an active personality profile, coaching is tailored to you with **all coach
 - Conversation guidance considers your preferred way of communicating
 - With an adaptive profile, coaches continuously suggest adjustments to your personality profile based on conversation insights. This way, coaches provide "external perspective" feedback that optimally complements your "self-image".
 - In DPC/DPFL mode, coaches actively use your **Personality Signature**: They recognize when challenges can be addressed with your **strengths**, and gently point out **potential blind spots** - especially for motivation and relationship topics.
+
+</div>
+</details>
 `;
 
 // Fix: Add the component definition and default export.
