@@ -251,6 +251,11 @@ model TranscriptEvaluation {
   evaluationData  String   @db.Text    // JSON: structured AI evaluation result
   lang            String   @default("de")
   createdAt       DateTime @default(now())
+  
+  // User rating fields (NPS-style)
+  userRating      Int?                 // 0-10 NPS scale
+  userFeedback    String?  @db.Text    // Optional feedback text
+  ratedAt         DateTime?            // When the rating was submitted
 
   @@index([userId])
   @@index([createdAt])

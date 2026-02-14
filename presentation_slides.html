@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPC & DPFL Präsentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .slide {
+            width: 1000px; /* Fixed width for 16:9 aspect ratio feeling */
+            height: 562.5px; /* 1000 * 9 / 16 */
+            margin: 40px auto;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+        }
+
+        /* Print styles to ensure one slide per page */
+        @media print {
+            body {
+                background: none;
+                margin: 0;
+            }
+            .slide {
+                margin: 0;
+                box-shadow: none;
+                width: 100vw;
+                height: 100vh;
+                page-break-after: always;
+                border: none;
+            }
+            /* Hide the instruction bar when printing */
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+        
+        .accent-text {
+            color: #0ea5e9; /* Sky 500 */
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Instructions Bar -->
+    <div class="no-print fixed top-0 left-0 w-full bg-slate-800 text-white p-4 z-50 flex justify-between items-center shadow-lg">
+        <div>
+            <span class="font-bold mr-2">Präsentations-Vorschau</span>
+            <span class="text-sm text-slate-300">Drei Folien für Coaches</span>
+        </div>
+        <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2">
+            <i class="fas fa-file-pdf"></i> Als PDF speichern / Drucken
+        </button>
+    </div>
+
+    <div class="h-16 no-print"></div> <!-- Spacer -->
+
+    <!-- SLIDE 1: DPC -->
+    <div class="slide p-12 relative">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Technologie-Konzept 1</div>
+            <h1 class="text-4xl font-bold text-slate-800 mb-2">Maßgeschneidertes Coaching</h1>
+            <h2 class="text-2xl text-slate-500 font-light">DPC: Wie die KI Ihren Klienten wirklich "versteht"</h2>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="flex-1 grid grid-cols-2 gap-12 items-center">
+            
+            <!-- Left: The Problem -->
+            <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 h-full flex flex-col justify-center opacity-70">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 text-xl">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700">Standard KI</h3>
+                </div>
+                <ul class="space-y-4 text-slate-600">
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-times text-red-400 mt-1"></i>
+                        <span>Generische Ratschläge ("One-size-fits-all")</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-times text-red-400 mt-1"></i>
+                        <span>Ignoriert Persönlichkeitsstruktur</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-times text-red-400 mt-1"></i>
+                        <span>Risiko: Klient fühlt sich nicht "gemeint"</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right: The Solution (DPC) -->
+            <div class="bg-white p-8 rounded-2xl border-2 border-blue-100 shadow-xl h-full flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">DPC Technologie</div>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Individuelles Briefing</h3>
+                </div>
+                
+                <p class="text-slate-600 mb-6 text-sm">
+                    Vor jeder Antwort analysiert die App das <strong>Persönlichkeitsprofil</strong> (Riemann-Thomann, Big Five, Spiral Dynamics).
+                </p>
+
+                <div class="space-y-3">
+                    <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                        <div class="text-xs font-bold text-blue-800 uppercase mb-1">Klient A (Harmonie)</div>
+                        <div class="text-sm text-blue-900">"Sei behutsam, bestätige Gefühle."</div>
+                    </div>
+                    <div class="bg-indigo-50 p-3 rounded-lg border-l-4 border-indigo-400">
+                        <div class="text-xs font-bold text-indigo-800 uppercase mb-1">Klient B (Rational)</div>
+                        <div class="text-sm text-indigo-900">"Bleib sachlich, liefere Fakten."</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center text-slate-400 text-sm">
+            <span>Dynamic Prompt Composition</span>
+            <span>Meaningful Conversations App</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: DPFL -->
+    <div class="slide p-12 relative">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Technologie-Konzept 2</div>
+            <h1 class="text-4xl font-bold text-slate-800 mb-2">Der lernende Coach</h1>
+            <h2 class="text-2xl text-slate-500 font-light">DPFL: Adaptives Lernen ohne menschliches Eingreifen</h2>
+        </div>
+
+        <!-- Content: Cycle Diagram -->
+        <div class="flex-1 flex items-center justify-center relative">
+            
+            <!-- Center Hub -->
+            <div class="absolute z-10 w-40 h-40 bg-white rounded-full shadow-2xl flex flex-col items-center justify-center border-4 border-slate-50">
+                <i class="fas fa-sync-alt text-4xl text-emerald-500 mb-2"></i>
+                <span class="font-bold text-slate-700">DPFL Loop</span>
+            </div>
+
+            <!-- Cycle Items -->
+            <div class="grid grid-cols-3 gap-8 w-full">
+                
+                <!-- Step 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-emerald-400 flex flex-col items-center text-center transform translate-y-8">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 font-bold">1</div>
+                    <h3 class="font-bold text-lg mb-2">Beobachten</h3>
+                    <p class="text-sm text-slate-600">Die KI analysiert die Sitzung: Wo zögert der Klient? Wo gibt es Durchbrüche?</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-emerald-500 flex flex-col items-center text-center transform -translate-y-8">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 font-bold">2</div>
+                    <h3 class="font-bold text-lg mb-2">Lernen</h3>
+                    <p class="text-sm text-slate-600">Das "Handbuch" des Klienten wird aktualisiert. <br><em>z.B. "Druck reduzieren."</em></p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-emerald-600 flex flex-col items-center text-center transform translate-y-8">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 font-bold">3</div>
+                    <h3 class="font-bold text-lg mb-2">Anpassen</h3>
+                    <p class="text-sm text-slate-600">In der <strong>nächsten</strong> Sitzung ist die neue Strategie sofort aktiv.</p>
+                </div>
+            </div>
+
+            <!-- Connecting Arrows (Visual only) -->
+            <svg class="absolute top-0 left-0 w-full h-full pointer-events-none -z-10 opacity-20" viewBox="0 0 800 400">
+                <path d="M 200 250 Q 400 100 600 250" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="10 10"/>
+            </svg>
+        </div>
+
+        <!-- Bottom Benefit Box -->
+        <div class="mt-12 bg-emerald-50 p-4 rounded-lg flex items-center gap-4 border border-emerald-100">
+            <i class="fas fa-check-circle text-emerald-500 text-2xl"></i>
+            <div>
+                <span class="font-bold text-emerald-900">Der Nutzen:</span>
+                <span class="text-emerald-800">Vermeidung von wiederholten Fehlern. Der Coach wächst mit dem Klienten mit.</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center text-slate-400 text-sm">
+            <span>Dynamic Prompt & Feedback Learning</span>
+            <span>Meaningful Conversations App</span>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: Synergy -->
+    <div class="slide p-12 relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute -right-20 -top-20 w-96 h-96 bg-indigo-50 rounded-full opacity-50 blur-3xl"></div>
+        <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-purple-50 rounded-full opacity-50 blur-3xl"></div>
+
+        <!-- Header -->
+        <div class="mb-10 relative z-10">
+            <div class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Fazit & Sicherheit</div>
+            <h1 class="text-4xl font-bold text-slate-800 mb-2">Synergie: Mensch & KI</h1>
+            <h2 class="text-2xl text-slate-500 font-light">Technologie als Verlängerung Ihrer Kompetenz</h2>
+        </div>
+
+        <!-- Content Columns -->
+        <div class="flex-1 grid grid-cols-3 gap-8 relative z-10">
+            
+            <!-- Column 1: Narrative Profile -->
+            <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-xl mb-4">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 mb-3">Das Narrative Profil</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Statt nackter Daten schreibt die KI eine lesbare Charakterstudie. Sie zeigt <strong>Superkräfte</strong> und <strong>Blinde Flecken</strong> auf und dient als Spiegel zur Selbstreflexion.
+                </p>
+            </div>
+
+            <!-- Column 2: Safety -->
+            <div class="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-xl mb-4">
+                    <i class="fas fa-shield-heart"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 mb-3">Comfort Check</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Sicherheit geht vor. Erkennt die KI starke emotionale Belastung, wechselt der Modus automatisch von "Herausforderung" zu <strong>"Stabilisierung"</strong>.
+                </p>
+            </div>
+
+            <!-- Column 3: Conclusion -->
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-white text-xl mb-4">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="font-bold text-white mb-3">Ihr Vorteil</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        Die App wird zum intelligenten <strong>Übungspartner</strong> zwischen den Sitzungen. Sie agiert nicht zufällig, sondern folgt psychologischen Modellen.
+                    </p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400">
+                    Qualitätssicherung durch fundierte Modelle.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-auto pt-6 border-t border-slate-100 flex justify-between items-center text-slate-400 text-sm relative z-10">
+            <span>Qualität & Sicherheit</span>
+            <span>Meaningful Conversations App</span>
+        </div>
+    </div>
+
+</body>
+</html>

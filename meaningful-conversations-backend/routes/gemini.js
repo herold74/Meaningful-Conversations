@@ -1165,6 +1165,15 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
         }
 
         // Build personality profile summary for prompt (if provided)
+        // #region agent log
+        console.log('[TE DEBUG] Profile check:', { 
+            hasDecryptedProfile: !!decryptedPersonalityProfile,
+            profileKeys: decryptedPersonalityProfile ? Object.keys(decryptedPersonalityProfile) : null,
+            hasRiemann: !!decryptedPersonalityProfile?.riemann,
+            hasBig5: !!decryptedPersonalityProfile?.big5,
+            userId
+        });
+        // #endregion
         let personalityProfileSummary = null;
         if (decryptedPersonalityProfile) {
             const parts = [];
@@ -1191,6 +1200,17 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
                 }
             }
             personalityProfileSummary = parts.join('\n');
+            // #region agent log
+            console.log('[TE DEBUG] Profile summary built:', { 
+                summaryLength: personalityProfileSummary.length,
+                partsCount: parts.length,
+                preview: personalityProfileSummary.substring(0, 100)
+            });
+            // #endregion
+        } else {
+            // #region agent log
+            console.log('[TE DEBUG] No profile provided - evaluation will proceed without personality insights');
+            // #endregion
         }
 
         // Determine document language from context
@@ -1303,6 +1323,8 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
                 evaluationData: true,
                 lang: true,
                 createdAt: true,
+                userRating: true,
+                userFeedback: true,
             }
         });
 
@@ -1326,6 +1348,9 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
                 // Full data for detail view
                 preAnswers,
                 evaluationData,
+                // Rating data
+                userRating: e.userRating,
+                userFeedback: e.userFeedback,
             };
         });
 
@@ -1365,6 +1390,49 @@ router.delete('/transcript/evaluations/:id', authMiddleware, async (req, res) =>
     } catch (error) {
         console.error('Error deleting transcript evaluation:', error);
         res.status(500).json({ error: 'Failed to delete evaluation.' });
+    }
+});
+
+// POST /api/gemini/transcript/:id/rate - Rate a transcript evaluation
+router.post('/transcript/:id/rate', authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { rating, feedback } = req.body;
+    const userId = req.userId;
+
+    try {
+        // Validate rating (0-10 NPS scale)
+        if (typeof rating !== 'number' || rating < 0 || rating > 10) {
+            return res.status(400).json({ error: 'Rating must be a number between 0 and 10.' });
+        }
+
+        // Verify ownership
+        const evaluation = await prisma.transcriptEvaluation.findUnique({
+            where: { id },
+            select: { userId: true }
+        });
+
+        if (!evaluation) {
+            return res.status(404).json({ error: 'Evaluation not found.' });
+        }
+
+        if (evaluation.userId !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to rate this evaluation.' });
+        }
+
+        // Update rating
+        await prisma.transcriptEvaluation.update({
+            where: { id },
+            data: {
+                userRating: rating,
+                userFeedback: feedback || null,
+                ratedAt: new Date()
+            }
+        });
+
+        res.json({ success: true, message: 'Rating submitted successfully.' });
+    } catch (error) {
+        console.error('Error rating transcript evaluation:', error);
+        res.status(500).json({ error: 'Failed to submit rating.' });
     }
 });
 

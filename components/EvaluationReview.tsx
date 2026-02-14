@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { TranscriptEvaluationResult, TranscriptPreAnswers } from '../types';
 import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF';
+import EvaluationRating from './EvaluationRating';
 
 interface EvaluationReviewProps {
     evaluation: TranscriptEvaluationResult;
@@ -235,6 +236,18 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                     {t('te_review_done')}
                 </button>
             </div>
+
+            {/* Rating Section */}
+            {evaluation.id && (
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <EvaluationRating
+                        evaluationId={evaluation.id}
+                        existingRating={evaluation.userRating}
+                        existingFeedback={evaluation.userFeedback}
+                        onRated={() => {}}
+                    />
+                </div>
+            )}
         </div>
     );
 };

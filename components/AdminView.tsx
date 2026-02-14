@@ -31,6 +31,7 @@ import type { TestScenario } from '../utils/testScenarios';
 import { ApiUsageView } from './ApiUsageView';
 import NewsletterPanel from './NewsletterPanel';
 import TestRunner from './TestRunner';
+import TranscriptRatingsView from './TranscriptRatingsView';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -1188,10 +1189,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     
     const renderRatings = () => (
         <div className="space-y-6">
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
-                <p className="text-4xl font-bold text-status-success-foreground">{ratingStats.overallAverage}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
+            {/* Session Feedback Section */}
+            <div>
+                <h2 className="text-xl font-bold text-content-primary mb-4">{t('admin_ratings_session_feedback')}</h2>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
+                    <p className="text-4xl font-bold text-status-success-foreground">{ratingStats.overallAverage}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
+                </div>
             </div>
             {ratingStats.totalRatings > 0 ? (
                 <>
@@ -1255,6 +1260,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     <p className="text-lg">{t('admin_ratings_no_ratings')}</p>
                 </div>
             )}
+            
+            {/* Transcript Evaluation Ratings Section */}
+            <div className="pt-8 border-t-2 border-gray-300 dark:border-gray-700">
+                <TranscriptRatingsView />
+            </div>
         </div>
     );
     
