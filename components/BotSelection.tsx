@@ -133,6 +133,17 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  // Track window width for responsive Transcript Evaluation card
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchAndSetBots = async () => {
@@ -212,13 +223,20 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
 
   const unlockMessage = getUnlockMessage();
   
-  // Separate client-only bots (Rob, Victor) from regular bots
+  // Kategorisierung nach Themen
+  const kommunikationBotIds = ['nexus-gps']; // Nobody
+  const coachingBotIds = ['max-ambitious', 'ava-strategic', 'kenji-stoic', 'chloe-cbt'];
   const clientOnlyBotIds = ['rob', 'victor-bowen'];
-  const regularBots = bots.filter(b => !clientOnlyBotIds.includes(b.id));
+  
+  const kommunikationBots = bots.filter(b => kommunikationBotIds.includes(b.id));
+  const coachingBots = bots.filter(b => coachingBotIds.includes(b.id));
   const clientOnlyBots = bots.filter(b => clientOnlyBotIds.includes(b.id));
   
-  const availableRegularBots = regularBots.filter(b => b.isAvailable);
-  const lockedRegularBots = regularBots.filter(b => !b.isAvailable);
+  const availableKommunikationBots = kommunikationBots.filter(b => b.isAvailable);
+  const lockedKommunikationBots = kommunikationBots.filter(b => !b.isAvailable);
+  
+  const availableCoachingBots = coachingBots.filter(b => b.isAvailable);
+  const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
   
   return (
     <div className="pt-4 pb-10 animate-fadeIn">
@@ -229,95 +247,43 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         </p>
       </div>
 
-      {/* Regular Bots Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl mx-auto">
-        {availableRegularBots.map((bot) => (
-          <BotCard 
-            key={bot.id} 
-            bot={bot} 
-            onSelect={onSelect} 
-            language={language}
-            hasPersonalityProfile={hasPersonalityProfile}
-            coachingMode={coachingMode}
-          />
-        ))}
-        
-        {lockedRegularBots.length > 0 && unlockMessage && !currentUser?.isPremium && !currentUser?.isClient && (
-            <div className="md:col-span-2 lg:col-span-3">
-                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground p-2 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 text-center">
-                    {unlockMessage}
-                </p>
-            </div>
-        )}
-
-        {lockedRegularBots.map((bot) => (
-          <BotCard 
-            key={bot.id} 
-            bot={bot} 
-            onSelect={onSelect} 
-            language={language}
-            hasPersonalityProfile={hasPersonalityProfile}
-            coachingMode={coachingMode}
-          />
-        ))}
-      </div>
-
-      {/* Client-Only Section Divider */}
-      <div className="w-full max-w-6xl mx-auto my-12">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
-            <span className="text-lg">🎓</span>
-            <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-              {t('botSelection_clientOnlySection')}
-            </span>
-          </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
-        </div>
-      </div>
-
-      {/* Client-Only Bots Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl mx-auto">
-        {clientOnlyBots.map((bot) => (
-          <BotCard 
-            key={bot.id} 
-            bot={bot} 
-            onSelect={onSelect} 
-            language={language}
-            hasPersonalityProfile={hasPersonalityProfile}
-            coachingMode={coachingMode}
-            isClientOnly={true}
-          />
-        ))}
-      </div>
-      
-      {/* Client access message for non-clients */}
-      {!currentUser?.isClient && (
-        <div className="w-full max-w-4xl mx-auto mt-6">
-          <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
-            {t('botSelection_clientAccessMessage')}
-          </p>
-        </div>
-      )}
-
-      {/* Tools Section — only on web (hidden on native apps entirely) */}
-      {!isNativeApp() && (
-        <>
-          <div className="w-full max-w-6xl mx-auto my-12">
+      <div className="space-y-12">
+        {/* 1. Kommunikation Section */}
+        <section className="w-full max-w-6xl mx-auto">
+          {/* Section Divider */}
+          <div className="mb-6">
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 border border-accent-primary/20">
-                <span className="text-lg">🛠</span>
-                <span className="text-sm font-semibold text-accent-primary">
-                  {t('te_tools_section')}
-                </span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                <span className="text-lg">💬</span>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {t('botSelection_section_kommunikation')}
+                  </div>
+                  <div className="text-xs text-gray-700 dark:text-gray-300">
+                    {t('botSelection_section_kommunikation_desc')}
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
             </div>
           </div>
-
-          <div className="w-full max-w-4xl mx-auto">
-            {(() => {
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Nobody Bot Card */}
+            {availableKommunikationBots.map((bot) => (
+              <BotCard 
+                key={bot.id} 
+                bot={bot} 
+                onSelect={onSelect} 
+                language={language}
+                hasPersonalityProfile={hasPersonalityProfile}
+                coachingMode={coachingMode}
+              />
+            ))}
+            
+            {/* Transcript Evaluation Card - nur auf Web */}
+            {!isNativeApp() && (() => {
               const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
               const desktop = isDesktopWeb();
               const locked = !isPremiumPlus || !desktop;
@@ -356,9 +322,122 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 </div>
               );
             })()}
+            
+            {/* Locked Kommunikation Bots */}
+            {lockedKommunikationBots.map((bot) => (
+              <BotCard 
+                key={bot.id} 
+                bot={bot} 
+                onSelect={onSelect} 
+                language={language}
+                hasPersonalityProfile={hasPersonalityProfile}
+                coachingMode={coachingMode}
+              />
+            ))}
           </div>
-        </>
-      )}
+        </section>
+
+        {/* 2. Coaching Section */}
+        <section className="w-full max-w-6xl mx-auto">
+          {/* Section Divider */}
+          <div className="mb-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                <span className="text-lg">🎯</span>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                    {t('botSelection_section_coaching')}
+                  </div>
+                  <div className="text-xs text-gray-700 dark:text-gray-300">
+                    {t('botSelection_section_coaching_desc')}
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {availableCoachingBots.map((bot) => (
+              <BotCard 
+                key={bot.id} 
+                bot={bot} 
+                onSelect={onSelect} 
+                language={language}
+                hasPersonalityProfile={hasPersonalityProfile}
+                coachingMode={coachingMode}
+              />
+            ))}
+            
+            {/* Unlock Message für Premium Coaches */}
+            {lockedCoachingBots.length > 0 && unlockMessage && !currentUser?.isPremium && !currentUser?.isClient && (
+              <div className="md:col-span-2">
+                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground p-2 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 text-center">
+                  {unlockMessage}
+                </p>
+              </div>
+            )}
+            
+            {lockedCoachingBots.map((bot) => (
+              <BotCard 
+                key={bot.id} 
+                bot={bot} 
+                onSelect={onSelect} 
+                language={language}
+                hasPersonalityProfile={hasPersonalityProfile}
+                coachingMode={coachingMode}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* 3. Exklusiv für Klienten Section */}
+        <section className="w-full max-w-6xl mx-auto">
+          {/* Client-Only Section Divider */}
+          <div className="mb-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+                <span className="text-lg">🎓</span>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                    {t('botSelection_section_client')}
+                  </div>
+                  <div className="text-xs text-amber-700 dark:text-amber-400">
+                    {t('botSelection_section_client_desc')}
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+            </div>
+          </div>
+
+          {/* Client-Only Bots */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {clientOnlyBots.map((bot) => (
+              <BotCard 
+                key={bot.id} 
+                bot={bot} 
+                onSelect={onSelect} 
+                language={language}
+                hasPersonalityProfile={hasPersonalityProfile}
+                coachingMode={coachingMode}
+                isClientOnly={true}
+              />
+            ))}
+          </div>
+          
+          {/* Client access message for non-clients */}
+          {!currentUser?.isClient && (
+            <div className="max-w-4xl mx-auto mt-6">
+              <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
+                {t('botSelection_clientAccessMessage')}
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

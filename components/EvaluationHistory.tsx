@@ -3,6 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { TranscriptEvaluationSummary, TranscriptEvaluationResult, TranscriptPreAnswers } from '../types';
 import { getTranscriptEvaluations, deleteTranscriptEvaluation } from '../services/geminiService';
 import EvaluationReview from './EvaluationReview';
+import EvaluationRating from './EvaluationRating';
 import Spinner from './shared/Spinner';
 import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF';
 
@@ -263,6 +264,24 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                                     </svg>
                                                 )}
                                             </button>
+                                        </div>
+
+                                        {/* Rating Section */}
+                                        <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
+                                            <EvaluationRating
+                                                evaluationId={evalItem.id}
+                                                existingRating={evalItem.userRating}
+                                                existingFeedback={evalItem.userFeedback}
+                                                onRated={async () => {
+                                                    // Refresh list to show updated rating
+                                                    try {
+                                                        const data = await getTranscriptEvaluations();
+                                                        setEvaluations(data);
+                                                    } catch (error) {
+                                                        console.error('Failed to refresh evaluations:', error);
+                                                    }
+                                                }}
+                                            />
                                         </div>
                                     </div>
                                 )}

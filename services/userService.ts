@@ -314,3 +314,32 @@ export const setAIProvider = async (provider: 'google' | 'mistral'): Promise<{ s
 export const getAIProviderHealth = async (): Promise<AIProviderConfig['providerHealth']> => {
     return await apiFetch('/admin/ai-provider/health');
 };
+
+// --- Transcript Evaluation Ratings ---
+
+export interface TranscriptRating {
+    id: string;
+    userEmail: string;
+    isClient: boolean;
+    isPremium: boolean;
+    rating: number;
+    feedback: string | null;
+    ratedAt: string;
+    createdAt: string;
+    lang: string;
+    goal: string;
+    overallScore: number;
+}
+
+export interface TranscriptRatingStats {
+    total: number;
+    promoters: number;
+    passives: number;
+    detractors: number;
+    avgRating: number;
+    nps: number;
+}
+
+export const getTranscriptRatings = async (): Promise<{ ratings: TranscriptRating[]; stats: TranscriptRatingStats }> => {
+    return await apiFetch('/admin/transcript-ratings');
+};

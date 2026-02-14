@@ -665,4 +665,81 @@ router.get('/ai-provider/health', async (req, res) => {
     }
 });
 
+// GET /api/admin/transcript-ratings - Get all transcript evaluation ratings with stats
+router.get('/transcript-ratings', async (req, res) => {
+    try {
+        const ratings = await prisma.transcriptEvaluation.findMany({
+            where: {
+                userRating: { not: null }
+            },
+            select: {
+                id: true,
+                userId: true,
+                userRating: true,
+                userFeedback: true,
+                ratedAt: true,
+                createdAt: true,
+                lang: true,
+                preAnswers: true,
+                evaluationData: true,
+                user: {
+                    select: {
+                        email: true,
+                        isClient: true,
+                        isPremium: true
+                    }
+                }
+            },
+            orderBy: { ratedAt: 'desc' }
+        });
+
+        // Parse JSON fields and calculate stats
+        const processed = ratings.map(r => {
+            let preAnswers, evalData;
+            try {
+                preAnswers = JSON.parse(r.preAnswers);
+                evalData = JSON.parse(r.evaluationData);
+            } catch {
+                preAnswers = {};
+                evalData = {};
+            }
+            return {
+                id: r.id,
+                userEmail: r.user.email,
+                isClient: r.user.isClient,
+                isPremium: r.user.isPremium,
+                rating: r.userRating,
+                feedback: r.userFeedback,
+                ratedAt: r.ratedAt,
+                createdAt: r.createdAt,
+                lang: r.lang,
+                goal: preAnswers.goal || '',
+                overallScore: evalData.overallScore || 0
+            };
+        });
+
+        // Calculate NPS statistics
+        const total = processed.length;
+        const promoters = processed.filter(r => r.rating >= 9).length;
+        const passives = processed.filter(r => r.rating >= 7 && r.rating <= 8).length;
+        const detractors = processed.filter(r => r.rating <= 6).length;
+        const avgRating = total > 0 ? processed.reduce((sum, r) => sum + r.rating, 0) / total : 0;
+        const nps = total > 0 ? ((promoters - detractors) / total * 100) : 0;
+
+        const stats = {
+            total,
+            promoters,
+            passives,
+            detractors,
+            avgRating: Math.round(avgRating * 10) / 10,
+            nps: Math.round(nps * 10) / 10
+        };
+
+        res.json({ ratings: processed, stats });
+    } catch (error) {
+        console.error("Admin: Error fetching transcript ratings:", error);
+        res.status(500).json({ error: 'Failed to fetch transcript ratings.' });
+    }
+});
+
 module.exports = router;
