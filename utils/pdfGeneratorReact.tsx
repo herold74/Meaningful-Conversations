@@ -661,6 +661,41 @@ const RiemannCross = ({ data, language }: {
 
   const toPixel = (val: number) => (val / scale) * axisLen;
 
+  // Detect overlapping points and apply jitter
+  const OVERLAP_THRESHOLD = 6; // pixels - adjusted for PDF smaller size
+  const JITTER_RADIUS = 7; // pixels - radius of jitter circle for PDF
+  
+  const adjustedCoords = coords.map((c, i) => {
+    const px = center + toPixel(c.x);
+    const py = center - toPixel(c.y);
+    
+    // Check if this point overlaps with any previous point
+    let hasOverlap = false;
+    for (let j = 0; j < i; j++) {
+      const prevPx = center + toPixel(coords[j].x);
+      const prevPy = center - toPixel(coords[j].y);
+      const dist = Math.sqrt((px - prevPx) ** 2 + (py - prevPy) ** 2);
+      if (dist < OVERLAP_THRESHOLD) {
+        hasOverlap = true;
+        break;
+      }
+    }
+    
+    // Apply jitter if overlapping - arrange in a circle
+    if (hasOverlap) {
+      const angle = (i * 120) * (Math.PI / 180); // 120° apart for 3 points
+      return {
+        x: c.x,
+        y: c.y,
+        px: px + Math.cos(angle) * JITTER_RADIUS,
+        py: py + Math.sin(angle) * JITTER_RADIUS,
+        isJittered: true
+      };
+    }
+    
+    return { x: c.x, y: c.y, px, py, isJittered: false };
+  });
+
   return (
     <View style={{ alignItems: 'center' }}>
       {/* Top label: Distanz/Distance — spaced letters to match vertical label style */}
@@ -687,9 +722,9 @@ const RiemannCross = ({ data, language }: {
           <Line x1={center - axisLen} y1={center} x2={center + axisLen} y2={center} stroke={colors.gray400} strokeWidth={1.5} />
           <Line x1={center} y1={center - axisLen} x2={center} y2={center + axisLen} stroke={colors.gray400} strokeWidth={1.5} />
 
-          {/* Triangle connecting the 3 context dots */}
+          {/* Triangle connecting the 3 context dots - uses original positions */}
           <Polygon
-            points={coords.map(c =>
+            points={adjustedCoords.map(c =>
               `${center + toPixel(c.x)},${center - toPixel(c.y)}`
             ).join(' ')}
             fill={colors.gray200}
@@ -699,11 +734,11 @@ const RiemannCross = ({ data, language }: {
             strokeDasharray="3,2"
           />
 
-          {/* Context dots */}
+          {/* Context dots with jitter adjustment */}
           {contexts.map((ctx, i) => {
-            const c = coords[i];
-            const px = center + toPixel(c.x);
-            const py = center - toPixel(c.y);
+            const adj = adjustedCoords[i];
+            const px = adj.px;
+            const py = adj.py;
             return (
               <G key={ctx.key}>
                 <Circle cx={px} cy={py} r={8} fill={ctx.color} fillOpacity={0.15} />
