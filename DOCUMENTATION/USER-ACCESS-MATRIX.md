@@ -40,6 +40,7 @@ This document outlines the different user types within the Meaningful Conversati
 | DPFL (Adaptive Learning) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Comfort Check (DPFL) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Transcript Evaluation | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Calendar Export (.ics) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | PDF Export (Profile) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Gamification (XP, Levels) | ✅ (Local) | ✅ | ✅ | ✅ | ✅ | ✅ |
