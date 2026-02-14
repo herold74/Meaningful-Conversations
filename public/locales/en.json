@@ -1683,6 +1683,9 @@
   "te_input_evaluating": "Evaluating...",
   "te_input_evaluating_hint": "Analysis may take up to 2 minutes.",
   "te_input_back": "Back",
+  "te_consent_title": "Important: Participant Consent Required",
+  "te_consent_warning": "You are solely responsible for ensuring you have the right to upload and analyze this transcript. The application does NOT verify that you have obtained consent from all conversation participants.",
+  "te_consent_checkbox": "I confirm that I have obtained consent from all conversation participants for recording and analyzing this conversation, and that I am authorized to upload this transcript.",
 
   "te_review_title": "Evaluation Results",
   "te_review_overall": "Overall Score",
