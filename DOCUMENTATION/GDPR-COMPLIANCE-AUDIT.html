@@ -304,8 +304,8 @@
 
         <div class="content">
             <div class="meta-info">
-                <p><strong>Audit Date:</strong> November 11, 2025</p>
-                <p><strong>Audited Version:</strong> 1.5.4</p>
+                <p><strong>Audit Date:</strong> February 14, 2026</p>
+                <p><strong>Audited Version:</strong> 1.8.7</p>
                 <p><strong>Operator Location:</strong> Austria</p>
                 <p><strong>Server Location:</strong> Hetzner, Germany (EU)</p>
                 <p><strong>Supervisory Authority:</strong> <a href="https://www.dsb.gv.at/" target="_blank">Austrian Data Protection Authority</a></p>
@@ -559,6 +559,77 @@
                     <li><strong>Documentation:</strong> <code>DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md</code> ✅</li>
                 </ul>
                 <p><strong>Note:</strong> Sinch DPA (Mailjet belongs to Sinch) is automatically active for all Mailjet customers</p>
+            </div>
+
+            <div class="section positive">
+                <h3>7. NEW: Transcript Evaluation Feature <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge info">(USER RESPONSIBILITY)</span></h3>
+                <p><strong>Date:</strong> February 14, 2026</p>
+                <p><strong>Feature:</strong> Client users can upload conversation transcripts for AI-powered communication analysis</p>
+                
+                <h4>Data Processing:</h4>
+                <ul>
+                    <li><strong>Input:</strong> User uploads transcript (text or SRT file) + pre-reflection answers</li>
+                    <li><strong>Processing:</strong> Transcript analyzed by Google Gemini API (covered by existing Google Cloud DPA)</li>
+                    <li><strong>Storage:</strong> 
+                        <ul>
+                            <li><strong>Stored:</strong> Pre-reflection answers + AI evaluation results (structured JSON)</li>
+                            <li><strong>NOT stored:</strong> Original transcript text (deleted after analysis)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Retention:</strong> Evaluation results stored indefinitely until user deletes them</li>
+                    <li><strong>User Rights:</strong> Users can delete evaluations at any time via UI (delete button in history)</li>
+                </ul>
+
+                <h4>Data Schema (TranscriptEvaluation):</h4>
+                <ul>
+                    <li><code>userId</code> - Foreign key to User table (ON DELETE CASCADE)</li>
+                    <li><code>preAnswers</code> - JSON: goal, personalTarget, assumptions, satisfaction, difficult (TEXT)</li>
+                    <li><code>evaluationData</code> - JSON: structured AI evaluation result (TEXT)</li>
+                    <li><code>lang</code> - Language code (de/en)</li>
+                    <li><code>createdAt</code> - Timestamp</li>
+                </ul>
+
+                <h4>Third-Party Processing:</h4>
+                <ul>
+                    <li><strong>Google Gemini API:</strong> Receives transcript + context for analysis</li>
+                    <li><strong>DPA Coverage:</strong> ✅ Covered by existing Google Cloud DPA</li>
+                    <li><strong>Data Transmission:</strong> Same as regular coaching sessions (already documented)</li>
+                </ul>
+
+                <h4>⚠️ CRITICAL: User Responsibility for Transcript Content</h4>
+                <div class="section warning" style="margin-top: 15px;">
+                    <p><strong>IMPORTANT DISCLAIMER:</strong></p>
+                    <ul>
+                        <li>The application <strong>does NOT verify</strong> the origin or legality of uploaded transcripts</li>
+                        <li><strong>USER is solely responsible</strong> for ensuring:
+                            <ul>
+                                <li>They have legal right to upload the transcript</li>
+                                <li>All conversation participants have consented to recording/analysis</li>
+                                <li>Transcript does not contain third-party personal data without consent</li>
+                                <li>Compliance with local recording laws (e.g., Germany: §201 StGB requires consent)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Application Operator:</strong> Not liable for user-uploaded content</li>
+                        <li><strong>Terms of Service:</strong> Must include clause stating user responsibility for transcript legality</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> Add explicit warning in UI before transcript upload reminding users of their legal obligations</p>
+                </div>
+
+                <h4>GDPR Compliance Assessment:</h4>
+                <ul>
+                    <li><strong>Art. 6(1)(b) GDPR:</strong> ✅ Processing necessary for service provision (evaluation service)</li>
+                    <li><strong>Art. 28 GDPR:</strong> ✅ DPA with Google (data processor) in place</li>
+                    <li><strong>Art. 32 GDPR:</strong> ✅ Technical security (HTTPS, server-side validation, database encryption)</li>
+                    <li><strong>Art. 17 GDPR:</strong> ✅ Right to erasure (delete button + CASCADE on account deletion)</li>
+                    <li><strong>Data Minimization:</strong> ✅ Transcript deleted after analysis (only results stored)</li>
+                    <li><strong>Transparency:</strong> ⚠️ <strong>ACTION REQUIRED</strong> - Add to privacy policy + user guide</li>
+                </ul>
+
+                <h4>Recommended UI Warning:</h4>
+                <pre><code>⚠️ Wichtig: Sie sind dafür verantwortlich, dass Sie berechtigt sind, 
+dieses Transkript hochzuladen und analysieren zu lassen. Stellen Sie 
+sicher, dass alle Gesprächsteilnehmer der Aufzeichnung und Analyse 
+zugestimmt haben.</code></pre>
             </div>
 
             <hr>
@@ -872,7 +943,7 @@ make deploy-manualmode-production # Production</code></pre>
             <hr style="margin: 20px 0; opacity: 0.3;">
             <p style="font-size: 0.9em;">
                 Meaningful Conversations App - GDPR Compliance Audit<br>
-                Status: November 11, 2025 - Version 1.5.4
+                Status: February 14, 2026 - Version 1.8.7
             </p>
         </div>
     </div>
