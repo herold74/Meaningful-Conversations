@@ -1682,6 +1682,9 @@
   "te_input_evaluating": "Auswertung läuft...",
   "te_input_evaluating_hint": "Die Analyse kann bis zu 2 Minuten dauern.",
   "te_input_back": "Zurück",
+  "te_consent_title": "Wichtig: Einwilligung der Gesprächsteilnehmer erforderlich",
+  "te_consent_warning": "Du bist dafür verantwortlich, dass du berechtigt bist, dieses Transkript hochzuladen und analysieren zu lassen. Die Anwendung überprüft NICHT, ob du die Zustimmung aller Gesprächsteilnehmer eingeholt hast.",
+  "te_consent_checkbox": "Ich bestätige, dass ich die Einwilligung aller Gesprächsteilnehmer für die Aufzeichnung und Analyse dieses Gesprächs eingeholt habe und dass ich berechtigt bin, dieses Transkript hochzuladen.",
 
   "te_review_title": "Auswertungsergebnis",
   "te_review_overall": "Gesamtbewertung",

@@ -2115,7 +2115,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
   const relevantVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
 
   return (
-    <div className="flex flex-col h-[75vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
+    <div className="flex flex-col h-[87.5vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-border-primary dark:border-border-primary gap-2">
         {/* Left: Coach Info (responsive) */}
         <div className="flex-1 min-w-0">
