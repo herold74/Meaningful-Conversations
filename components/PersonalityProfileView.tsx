@@ -160,6 +160,41 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
 
   const toPixel = (val: number) => (val / scale) * axisLen;
 
+  // Detect overlapping points and apply jitter
+  const OVERLAP_THRESHOLD = 8; // pixels - points closer than this are considered overlapping
+  const JITTER_RADIUS = 10; // pixels - radius of jitter circle
+  
+  const adjustedCoords = coords.map((c, i) => {
+    const px = center + toPixel(c.x);
+    const py = center - toPixel(c.y);
+    
+    // Check if this point overlaps with any previous point
+    let hasOverlap = false;
+    for (let j = 0; j < i; j++) {
+      const prevPx = center + toPixel(coords[j].x);
+      const prevPy = center - toPixel(coords[j].y);
+      const dist = Math.sqrt((px - prevPx) ** 2 + (py - prevPy) ** 2);
+      if (dist < OVERLAP_THRESHOLD) {
+        hasOverlap = true;
+        break;
+      }
+    }
+    
+    // Apply jitter if overlapping - arrange in a circle
+    if (hasOverlap) {
+      const angle = (i * 120) * (Math.PI / 180); // 120° apart for 3 points
+      return {
+        x: c.x,
+        y: c.y,
+        px: px + Math.cos(angle) * JITTER_RADIUS,
+        py: py + Math.sin(angle) * JITTER_RADIUS,
+        isJittered: true
+      };
+    }
+    
+    return { x: c.x, y: c.y, px, py, isJittered: false };
+  });
+
   return (
     <div className="flex flex-col items-center w-full">
       <svg
@@ -201,9 +236,9 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
         <line x1={center} y1={center - axisLen} x2={center} y2={center + axisLen}
           stroke="currentColor" strokeWidth="1.5" className="text-gray-400 dark:text-gray-500" />
 
-        {/* Triangle connecting the 3 context dots */}
+        {/* Triangle connecting the 3 context dots - uses original positions */}
         <polygon
-          points={coords.map(c =>
+          points={adjustedCoords.map(c =>
             `${center + toPixel(c.x)},${center - toPixel(c.y)}`
           ).join(' ')}
           fill="rgba(148, 163, 184, 0.12)"
@@ -212,15 +247,47 @@ const RiemannCrossChart: React.FC<RiemannCrossChartProps> = ({ data, t }) => {
           strokeDasharray="4,3"
         />
 
-        {/* Context dots with glow (labels via legend below) */}
+        {/* Context dots with glow and tooltips */}
         {contexts.map((ctx, i) => {
-          const c = coords[i];
-          const px = center + toPixel(c.x);
-          const py = center - toPixel(c.y); // SVG y is inverted
+          const adj = adjustedCoords[i];
+          const px = adj.px;
+          const py = adj.py;
           return (
-            <g key={ctx.key}>
+            <g key={ctx.key} className="group cursor-help">
+              {/* Glow effect */}
               <circle cx={px} cy={py} r="12" fill={ctx.color} opacity="0.15" />
-              <circle cx={px} cy={py} r="7" fill={ctx.color} stroke="white" strokeWidth="2.5" />
+              {/* Main dot */}
+              <circle 
+                cx={px} 
+                cy={py} 
+                r="7" 
+                fill={ctx.color} 
+                stroke="white" 
+                strokeWidth="2.5"
+                className="transition-all group-hover:r-[9]"
+              />
+              {/* Tooltip on hover */}
+              <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <rect
+                  x={px - 35}
+                  y={py - 35}
+                  width="70"
+                  height="24"
+                  rx="4"
+                  className="fill-gray-900 dark:fill-gray-100"
+                  opacity="0.95"
+                />
+                <text
+                  x={px}
+                  y={py - 20}
+                  textAnchor="middle"
+                  fontSize="11"
+                  fontWeight="600"
+                  className="fill-white dark:fill-gray-900"
+                >
+                  {ctx.name}
+                </text>
+              </g>
             </g>
           );
         })}

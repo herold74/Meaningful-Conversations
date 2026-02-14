@@ -186,6 +186,10 @@ export interface TranscriptEvaluationResult {
     nextSteps: { action: string; rationale: string }[];
     contextUpdates: ProposedUpdate[];
     overallScore: number; // 1-10
+    // User rating fields
+    id?: string;
+    userRating?: number | null;
+    userFeedback?: string | null;
 }
 
 export interface TranscriptEvaluationResponse {
@@ -203,4 +207,7 @@ export interface TranscriptEvaluationSummary {
     overallScore: number;
     preAnswers: TranscriptPreAnswers;
     evaluationData: TranscriptEvaluationResult;
+    // User rating fields
+    userRating?: number | null;
+    userFeedback?: string | null;
 }
