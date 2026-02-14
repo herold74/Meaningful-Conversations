@@ -31,6 +31,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
     const [activeTab, setActiveTab] = useState<'paste' | 'file'>('paste');
     const [text, setText] = useState('');
     const [fileName, setFileName] = useState<string | null>(null);
+    const [hasConsent, setHasConsent] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const charCount = text.length;
@@ -147,13 +148,40 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                 </div>
             )}
 
+            {/* Consent Warning */}
+            <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <div className="text-2xl mt-0.5">⚠️</div>
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-content-primary mb-2">
+                            {t('te_consent_title')}
+                        </h3>
+                        <p className="text-sm text-content-secondary mb-3">
+                            {t('te_consent_warning')}
+                        </p>
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                checked={hasConsent}
+                                onChange={(e) => setHasConsent(e.target.checked)}
+                                disabled={isLoading}
+                                className="mt-1 w-5 h-5 text-accent-primary border-gray-300 rounded focus:ring-2 focus:ring-accent-primary disabled:opacity-50"
+                            />
+                            <span className="text-sm text-content-primary group-hover:text-accent-primary transition-colors">
+                                {t('te_consent_checkbox')}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             {/* Submit */}
             <div className="mt-6">
                 <button
                     onClick={() => onSubmit(text)}
-                    disabled={!isValid || isLoading}
+                    disabled={!isValid || !hasConsent || isLoading}
                     className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
-                        isValid && !isLoading
+                        isValid && hasConsent && !isLoading
                             ? 'bg-accent-primary hover:bg-accent-primary/90 shadow-md hover:shadow-lg'
                             : 'bg-gray-400 cursor-not-allowed'
                     }`}
