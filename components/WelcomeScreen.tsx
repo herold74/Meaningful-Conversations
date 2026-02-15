@@ -41,7 +41,7 @@ const WelcomeScreen: React.FC = () => {
         </div>
         
         {/* Bot Avatars positioned around the logo container */}
-        {BOTS.slice(0, 6).map((bot, index) => {
+        {BOTS.slice(1, 7).map((bot, index) => {
           const animationDelay = `${200 + index * 100}ms`;
           const position = avatarPositions[index];
 
