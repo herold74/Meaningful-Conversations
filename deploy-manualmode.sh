@@ -53,11 +53,13 @@ show_help() {
     echo "  -h, --help            Show this help"
     echo ""
     echo "Examples:"
-    echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Deploy all to staging"
-    echo "  ${BLUE}./deploy-manualmode.sh -e production${NC}      # Deploy all to production"
-    echo "  ${BLUE}./deploy-manualmode.sh -c frontend${NC}        # Deploy frontend to staging"
+    echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Build & deploy all to staging"
+    echo "  ${BLUE}./deploy-manualmode.sh -e production${NC}      # Deploy staging images to production (no rebuild)"
+    echo "  ${BLUE}./deploy-manualmode.sh -c frontend${NC}        # Build & deploy frontend to staging"
     echo "  ${BLUE}./deploy-manualmode.sh --server root@1.2.3.4${NC}  # Deploy to different server"
-    echo "  ${BLUE}./deploy-manualmode.sh -e production -c frontend${NC}  # Deploy frontend to production"
+    echo ""
+    echo "Production deploys skip building and pushing — they pull the pre-built"
+    echo "staging images from the registry. Principle: \"Build once, deploy everywhere\"."
     echo ""
     echo "Automatic Rollback:"
     echo "  If health checks fail after deployment, the script automatically"
@@ -114,20 +116,11 @@ if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" ]]; then
     exit 1
 fi
 
-# Block production builds — production MUST use pre-built staging images
+# Production: never rebuild — always use pre-built staging images from registry
 if [[ "$ENVIRONMENT" == "production" ]]; then
-    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${RED}ERROR: Production deployments must NOT rebuild images!${NC}"
-    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo ""
-    echo -e "${YELLOW}Principle: \"Build once, deploy everywhere\"${NC}"
-    echo -e "${YELLOW}Production must use the same images already tested on staging.${NC}"
-    echo ""
-    echo -e "${GREEN}Use instead:${NC}"
-    echo -e "  ${BLUE}./scripts/deploy-production-scheduled.sh${NC}           # Version from package.json"
-    echo -e "  ${BLUE}./scripts/deploy-production-scheduled.sh 1.8.9${NC}    # Specific version"
-    echo ""
-    exit 1
+    SKIP_BUILD=true
+    SKIP_PUSH=true
+    echo -e "${YELLOW}Production: skipping build & push (using pre-built staging images from registry)${NC}"
 fi
 
 # Validate component
