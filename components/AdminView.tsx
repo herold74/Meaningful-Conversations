@@ -252,8 +252,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, []);
 
     const [newCodeBotId, setNewCodeBotId] = useState('ACCESS_PASS_1M');
+    const [codeReferrer, setCodeReferrer] = useState('');
     const [bulkQuantity, setBulkQuantity] = useState<number>(10);
-    const [generatedBulkCodes, setGeneratedBulkCodes] = useState<Array<{ code: string; botId: string; createdAt: string }> | null>(null);
+    const [generatedBulkCodes, setGeneratedBulkCodes] = useState<Array<{ code: string; botId: string; referrer?: string; createdAt: string }> | null>(null);
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [codeEmailFilter, setCodeEmailFilter] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
@@ -421,7 +422,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
     const handleCreateCode = async (e: React.FormEvent) => {
         e.preventDefault();
-        await handleAction('createCode', () => userService.createUpgradeCode(newCodeBotId));
+        await handleAction('createCode', () => userService.createUpgradeCode(newCodeBotId, codeReferrer || undefined));
     };
 
     const handleBulkGenerate = async () => {
@@ -432,7 +433,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
         setActionLoading(prev => ({ ...prev, 'bulkGenerate': true }));
         try {
-            const result = await userService.createBulkUpgradeCodes(newCodeBotId, bulkQuantity);
+            const result = await userService.createBulkUpgradeCodes(newCodeBotId, bulkQuantity, codeReferrer || undefined);
             setGeneratedBulkCodes(result.codes);
             await loadData(); // Refresh codes list
             alert(t('admin_codes_bulk_success', { count: result.count }));
@@ -447,11 +448,13 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         if (!generatedBulkCodes || generatedBulkCodes.length === 0) return;
 
         const productName = getUnlockName(generatedBulkCodes[0].botId);
+        const referrer = generatedBulkCodes[0].referrer || '';
         const csvContent = [
-            ['Code', 'Product', 'Created', 'Status'].join(','),
+            ['Code', 'Product', 'Referrer', 'Created', 'Status'].join(','),
             ...generatedBulkCodes.map(c => [
                 c.code,
                 productName,
+                referrer,
                 new Date(c.createdAt).toLocaleString(),
                 'Available'
             ].join(','))
@@ -459,8 +462,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
+        const filePrefix = referrer ? `codes_${referrer}_` : `codes_`;
         link.href = URL.createObjectURL(blob);
-        link.download = `codes_${newCodeBotId}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `${filePrefix}${newCodeBotId}_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
     };
     
@@ -548,6 +552,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, [codes, codeEmailFilter]);
 
     const getUnlockName = useCallback((botId: string): string => {
+        if (botId === 'REGISTERED_LIFETIME') return t('admin_codes_registered_lifetime');
         if (botId === 'ACCESS_PASS_1Y') return t('admin_codes_unlock_access_pass');
         if (botId === 'ACCESS_PASS_3M') return t('admin_codes_unlock_access_pass_3m');
         if (botId === 'ACCESS_PASS_1M') return t('admin_codes_unlock_access_pass_1m');
@@ -889,7 +894,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
-                            <option disabled>── {t('admin_codes_section_passes')} ──</option>
+                            <option disabled>── {t('admin_codes_section_registered')} ──</option>
+                            <option value="REGISTERED_LIFETIME">{t('admin_codes_registered_lifetime')}</option>
+                            <option disabled>── {t('admin_codes_section_premium')} ──</option>
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="ACCESS_PASS_3M">{t('admin_codes_unlock_access_pass_3m')}</option>
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
@@ -909,6 +916,16 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
                             <option value="client">{t('admin_codes_unlock_client')}</option>
                         </select>
+                    </div>
+                    <div className="sm:w-40">
+                        <input
+                            type="text"
+                            value={codeReferrer}
+                            onChange={e => setCodeReferrer(e.target.value)}
+                            placeholder={t('admin_codes_referrer_placeholder')}
+                            maxLength={12}
+                            className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                        />
                     </div>
                     <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">
                         {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
@@ -977,6 +994,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         {sortConfig?.key === 'unlocks' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
+                                <th className="p-3 uppercase">{t('admin_codes_referrer')}</th>
                                 <th className="p-3 uppercase">
                                     <button onClick={() => requestSort('createdAt')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                                         {t('admin_codes_created')}
@@ -1004,6 +1022,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         </div>
                                     </td>
                                     <td className="p-3 text-gray-600 dark:text-gray-400">{getUnlockName(code.botId)}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{code.referrer || '—'}</td>
                                     <td className="p-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{new Date(code.createdAt).toLocaleDateString()}</td>
                                     <td className="p-3 break-all text-gray-600 dark:text-gray-400 text-center">
                                         {code.usedBy?.email ? (
