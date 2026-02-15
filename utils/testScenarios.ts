@@ -735,7 +735,7 @@ export const getCategoryName = (category: TestCategory, t: (key: string) => stri
 
 // Available bots for testing (filter out hidden ones)
 export const getTestableBots = (): Bot[] => {
-  return BOTS.filter(b => b.id !== 'g-interviewer'); // Interview bot has special handling
+  return BOTS.filter(b => b.id !== 'gloria-life-context'); // Interview bot has special handling
 };
 
 // ============================================
@@ -745,7 +745,7 @@ export const getTestableBots = (): Bot[] => {
 
 const simpleBot = BOTS.find(b => b.id === 'max-ambitious')!;
 const reflectionBot = BOTS.find(b => b.id === 'chloe-cbt')!;
-const interviewBot = BOTS.find(b => b.id === 'g-interviewer')!;
+const interviewBot = BOTS.find(b => b.id === 'gloria-life-context')!;
 
 export const getTestScenarios = (t: (key: string) => string): LegacyTestScenario[] => [
   {

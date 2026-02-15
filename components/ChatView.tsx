@@ -260,7 +260,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const botGender = useMemo((): 'male' | 'female' => {
       switch (bot.id) {
-          case 'g-interviewer':
+          case 'gloria-life-context':
+          case 'gloria-interview':
           case 'ava-strategic':
           case 'chloe-cbt':
               return 'female';
@@ -360,7 +361,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps'];
           gender = maleBotsEN.includes(botId) ? 'male' : 'female';
         } else if (lang === 'de') {
-          const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
+          const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-cbt'];
           gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
         }
         
@@ -1076,7 +1077,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             gender = botGender;
         } else {
             switch (bot.id) {
-                case 'g-interviewer':
+                case 'gloria-life-context':
+                case 'gloria-interview':
                 case 'ava-strategic':
                 case 'chloe-cbt':
                     gender = 'female';
@@ -1268,7 +1270,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps', 'victor-bowen'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
             } else if (lang === 'de') {
-              const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
+              const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-cbt'];
               gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
             }
             

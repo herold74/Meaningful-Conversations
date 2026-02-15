@@ -21,7 +21,8 @@
     - [x] Kenji (Mindful, Zen-inspired)
     - [x] Chloe (Structured Reflection)
     - [x] Rob (Mental Fitness)
-    - [x] G-Interviewer (Reflection interviews)
+    - [x] Gloria Life Context (Onboarding interview, formerly G-Interviewer)
+    - [x] Gloria Interview (Structured topic interviews with summary + corrected transcript export)
 - [x] **Data Privacy:**
     - [x] Guest Mode (Local only, no server storage)
     - [x] E2EE for Registered Users

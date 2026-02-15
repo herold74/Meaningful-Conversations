@@ -146,7 +146,7 @@ Each bot automatically gets assigned an appropriate voice:
 
 | Bot ID | Language | Voice (DE) | Voice (EN) |
 |--------|----------|----------|----------|
-| g-interviewer | Both | mls (F) | amy (F) |
+| gloria-life-context | Both | mls (F) | amy (F) |
 | ava-strategic | Both | mls (F) | amy (F) |
 | chloe-cbt | Both | mls (F) | amy (F) |
 | max-ambitious | Both | thorsten (M) | ryan (M) |

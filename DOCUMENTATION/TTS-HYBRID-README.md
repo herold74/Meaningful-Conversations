@@ -128,7 +128,7 @@ Auto mode selects voices based on bot personality and language:
 
 | Bot | Gender | DE Voice | EN Voice |
 |-----|--------|----------|----------|
-| **Gloria** (g-interviewer) | Female | Sophia | Amy |
+| **Gloria** (gloria-life-context) | Female | Sophia | Amy |
 | **Max** (max-ambitious) | Male | Thorsten | Ryan |
 | **Ava** (ava-strategic) | Female | Sophia | Amy |
 | **Kenji** (kenji-stoic) | Male | Thorsten | Ryan |

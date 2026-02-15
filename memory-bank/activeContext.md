@@ -1,9 +1,22 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.8.4
-**Staging:** Deployed
+**Version:** 1.8.4+
+**Staging:** Pending
 **Production:** Pending
+
+## Recent Changes (Post v1.8.4)
+
+### Gloria Interview Bot (New Feature)
+- **New Bot:** `gloria-interview` — a professional interviewer for structured topic interviews (ideas, projects, workflows, concepts, strategies, decisions). Access tier: `registered`.
+- **Rename:** `g-interviewer` renamed to `gloria-life-context` across entire codebase to prevent confusion between the two Gloria variants.
+- **System Prompt:** EN/DE dual prompt. Asks for topic, duration, and special requests/perspectives (one per message). Confirms assignment in first person before starting. No coaching, no prompt disclosure, adjustable parameters (pace, answer length, question count).
+- **Interview Transcript View:** New `InterviewTranscriptView` component with 3 sections: Summary (collapsible), Interview Setup (collapsible), Smoothed Interview. All rendered as Markdown. Export as `.md` (individual sections or complete).
+- **Backend Endpoint:** `POST /api/gemini/interview/transcript` — AI generates summary + setup extraction + grammatically corrected transcript. Labels: "Interviewer:" and user's first name (fallback: "Befragter"/"Interviewee").
+- **Bot Selection Layout:** Gloria Interview placed in "Management & Communication" section next to Nobody. No coaching badge (DPFL/DPC) shown for this bot.
+- **Transcript Evaluation:** Redesigned as slim inline option (not a bot tile). Larger font for better visibility. "Ausgangslage"/"Starting Point" replaces "Vorreflexion"/"Pre-Reflection".
+- **Gender Mapping:** `gloria-interview` added to all female bot lists in ChatView.tsx (4 locations).
+- **Documentation:** USER-ACCESS-MATRIX.md updated with Gloria Interview under registered tier.
 
 ## Recent Changes (v1.8.4)
 
