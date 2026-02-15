@@ -219,19 +219,6 @@ function generateCode(referrer) {
     return random;
 }
 
-// Check if the referrer column exists in the database (migration may not be applied yet)
-let referrerColumnAvailable = null; // null = unknown, true/false = checked
-async function hasReferrerColumn() {
-    if (referrerColumnAvailable !== null) return referrerColumnAvailable;
-    try {
-        await prisma.$queryRawUnsafe(`SELECT referrer FROM UpgradeCode LIMIT 0`);
-        referrerColumnAvailable = true;
-    } catch {
-        referrerColumnAvailable = false;
-        console.warn('⚠️  UpgradeCode.referrer column not found — run migration 20260215140000_add_referrer_to_upgrade_code');
-    }
-    return referrerColumnAvailable;
-}
 
 // POST /api/admin/codes
 router.post('/codes', async (req, res) => {
@@ -241,9 +228,7 @@ router.post('/codes', async (req, res) => {
     try {
         const code = generateCode(referrer);
         const data = { code, botId };
-        if (referrer && referrer.trim() && await hasReferrerColumn()) {
-            data.referrer = referrer.trim();
-        }
+        if (referrer && referrer.trim()) data.referrer = referrer.trim();
         const newCode = await prisma.upgradeCode.create({ data });
         res.status(201).json(newCode);
     } catch (error) {
@@ -267,18 +252,16 @@ router.post('/codes/bulk', async (req, res) => {
     try {
         const codes = [];
         const trimmedReferrer = referrer && referrer.trim() ? referrer.trim() : null;
-        const canStoreReferrer = trimmedReferrer ? await hasReferrerColumn() : false;
-        
         // Generate codes in batch
         for (let i = 0; i < quantity; i++) {
             const code = generateCode(trimmedReferrer);
             const data = { code, botId };
-            if (trimmedReferrer && canStoreReferrer) data.referrer = trimmedReferrer;
+            if (trimmedReferrer) data.referrer = trimmedReferrer;
             const newCode = await prisma.upgradeCode.create({ data });
             codes.push({
                 code: newCode.code,
                 botId: newCode.botId,
-                referrer: newCode.referrer || trimmedReferrer,
+                referrer: newCode.referrer,
                 createdAt: newCode.createdAt,
             });
         }
@@ -321,8 +304,8 @@ router.post('/codes/:id/revoke', async (req, res) => {
                 updateData.isPremium = false;
                 updateData.accessExpiresAt = new Date();
             } else if (code.botId === 'REGISTERED_LIFETIME') {
-                // Revoke registered lifetime: set expiry to now
-                updateData.accessExpiresAt = new Date();
+                // No user field changes needed for revoke.
+                // User remains a normal registered user (account intact).
             } else if (code.botId === 'premium') {
                 updateData.isPremium = false;
             } else if (code.botId === 'client') {
