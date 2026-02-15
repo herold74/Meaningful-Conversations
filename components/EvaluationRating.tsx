@@ -6,6 +6,7 @@ interface EvaluationRatingProps {
     evaluationId: string;
     existingRating?: number | null;
     existingFeedback?: string | null;
+    existingContactOptIn?: boolean;
     onRated: () => void;
 }
 
@@ -13,11 +14,13 @@ const EvaluationRating: React.FC<EvaluationRatingProps> = ({
     evaluationId,
     existingRating,
     existingFeedback,
+    existingContactOptIn,
     onRated
 }) => {
     const { t } = useLocalization();
     const [selectedRating, setSelectedRating] = useState<number | null>(existingRating ?? null);
     const [feedback, setFeedback] = useState(existingFeedback || '');
+    const [contactOptIn, setContactOptIn] = useState(existingContactOptIn || false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(!!existingRating);
 
@@ -26,7 +29,7 @@ const EvaluationRating: React.FC<EvaluationRatingProps> = ({
 
         setIsSubmitting(true);
         try {
-            await rateTranscriptEvaluation(evaluationId, selectedRating, feedback.trim() || undefined);
+            await rateTranscriptEvaluation(evaluationId, selectedRating, feedback.trim() || undefined, contactOptIn);
             setIsSubmitted(true);
             onRated();
         } catch (error) {
@@ -115,6 +118,21 @@ const EvaluationRating: React.FC<EvaluationRatingProps> = ({
                         {feedback.length}/500
                     </p>
                 </div>
+            )}
+
+            {/* Contact Opt-In Checkbox */}
+            {selectedRating !== null && (
+                <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                        type="checkbox"
+                        checked={contactOptIn}
+                        onChange={(e) => setContactOptIn(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-accent-primary focus:ring-accent-primary cursor-pointer"
+                    />
+                    <span className="text-xs text-content-secondary group-hover:text-content-primary transition-colors leading-relaxed">
+                        {t('te_rating_contact_optin') || 'Ich bin damit einverstanden, dass mich ein Administrator bezüglich dieser Bewertung kontaktieren darf.'}
+                    </span>
+                </label>
             )}
 
             {/* Submit Button */}

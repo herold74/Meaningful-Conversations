@@ -544,7 +544,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       };
       
       const filename = generateSurveyPdfFilename(surveyResult.path, language);
-      await generatePDF(surveyResult, filename, language);
+      await generatePDF(surveyResult, filename, language, currentUser?.email);
     } catch (err) {
       console.error('PDF generation failed:', err);
       alert(t('personality_survey_error_pdf'));

@@ -9,7 +9,7 @@ import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF'
 
 interface EvaluationHistoryProps {
     onBack: () => void;
-    currentUser?: { email?: string; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean };
+    currentUser?: { email?: string; isPremium?: boolean; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean; unlockedCoaches?: string[] };
 }
 
 const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUser }) => {
@@ -163,8 +163,11 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                                 {t('te_history_score')}: {evalItem.overallScore}/10
                                             </span>
                                         </div>
-                                        <p className="text-sm font-medium text-content-primary">
-                                            <span className="font-semibold">{t('te_pre_q1_label')}:</span> {evalItem.goal}
+                                        {evalItem.preAnswers.situationName && (
+                                            <p className="text-sm font-bold text-content-primary mb-1">{evalItem.preAnswers.situationName}</p>
+                                        )}
+                                        <p className="text-sm text-content-secondary truncate">
+                                            <span className="font-medium text-content-primary">{t('te_pre_q1_label')}:</span> {evalItem.goal}
                                         </p>
                                     </div>
 
@@ -272,6 +275,7 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                                 evaluationId={evalItem.id}
                                                 existingRating={evalItem.userRating}
                                                 existingFeedback={evalItem.userFeedback}
+                                                existingContactOptIn={evalItem.contactOptIn}
                                                 onRated={async () => {
                                                     // Refresh list to show updated rating
                                                     try {

@@ -10,13 +10,15 @@ interface TranscriptPreQuestionsProps {
 
 const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext, onBack, onHistory }) => {
     const { t } = useLocalization();
+    const [situationName, setSituationName] = useState('');
     const [goal, setGoal] = useState('');
     const [personalTarget, setPersonalTarget] = useState('');
     const [assumptions, setAssumptions] = useState('');
     const [satisfaction, setSatisfaction] = useState<number>(0);
     const [difficult, setDifficult] = useState('');
 
-    const isValid = goal.trim().length > 0 
+    const isValid = situationName.trim().length > 0
+        && goal.trim().length > 0 
         && personalTarget.trim().length > 0 
         && assumptions.trim().length > 0 
         && satisfaction > 0;
@@ -24,6 +26,7 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
     const handleSubmit = () => {
         if (!isValid) return;
         onNext({
+            situationName: situationName.trim(),
             goal: goal.trim(),
             personalTarget: personalTarget.trim(),
             assumptions: assumptions.trim(),
@@ -63,6 +66,20 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
             <p className="text-content-secondary mb-8">{t('te_pre_subtitle')}</p>
 
             <div className="space-y-6">
+                {/* Situation Name */}
+                <div>
+                    <label className="block text-sm font-semibold text-content-primary mb-2">
+                        {t('te_pre_situation_label')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={situationName}
+                        onChange={(e) => setSituationName(e.target.value)}
+                        placeholder={t('te_pre_situation_placeholder')}
+                        className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-primary text-content-primary placeholder-content-secondary/50 focus:ring-2 focus:ring-accent-primary focus:border-transparent transition-all"
+                    />
+                </div>
+
                 {/* Question 1: Goal */}
                 <div>
                     <label className="block text-sm font-semibold text-content-primary mb-2">

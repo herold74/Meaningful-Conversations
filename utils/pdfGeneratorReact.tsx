@@ -777,9 +777,10 @@ const ProgressBar = ({ value, color, maxValue = 5 }: { value: number; color: str
 interface PersonalityPdfDocumentProps {
   result: SurveyResult;
   language: 'de' | 'en';
+  userEmail?: string;
 }
 
-const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result, language }) => {
+const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result, language, userEmail }) => {
   const t = translations[language];
   const date = new Date().toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
     year: 'numeric',
@@ -819,11 +820,15 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   );
   
   // Reusable Footer component - fixed prop ensures it appears on every page
+  const footerLine1 = language === 'de'
+    ? `Erstellt für ${userEmail || 'Unbekannt'} • Persönlich und Vertraulich • ${date}`
+    : `Generated for ${userEmail || 'Unknown'} • Personal and Confidential • ${date}`;
   const Footer = () => (
     <View style={styles.footerContainer} fixed>
       <View style={styles.footer}>
-        <Text>
-          <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at • {t.confidential} • © {new Date().getFullYear()}
+        <Text>{footerLine1}</Text>
+        <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>
+          <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at
         </Text>
       </View>
     </View>
@@ -1175,10 +1180,11 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
  * @param result - The survey result data
  * @param filename - The desired filename (without extension)
  * @param language - 'de' or 'en'
+ * @param userEmail - optional user email for footer
  */
-export async function generatePDF(result: SurveyResult, filename: string, language: 'de' | 'en' = 'de'): Promise<void> {
+export async function generatePDF(result: SurveyResult, filename: string, language: 'de' | 'en' = 'de', userEmail?: string): Promise<void> {
   try {
-    const blob = await pdf(<PersonalityPdfDocument result={result} language={language} />).toBlob();
+    const blob = await pdf(<PersonalityPdfDocument result={result} language={language} userEmail={userEmail} />).toBlob();
     
     // Check if running in Capacitor native app
     const isNative = Capacitor.isNativePlatform();
