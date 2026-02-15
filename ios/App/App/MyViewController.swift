@@ -27,8 +27,9 @@ class MyViewController: CAPBridgeViewController {
     }
     
     override func capacitorDidLoad() {
-        // Register NativeTTS plugin with the bridge
+        // Register native plugins with the bridge
         bridge?.registerPluginInstance(NativeTTSPlugin())
+        bridge?.registerPluginInstance(NativeSTTPlugin())
         bridge?.registerPluginInstance(NativeGamificationBarPlugin())
         NativeGamificationBarManager.shared.bridge = bridge
     }
