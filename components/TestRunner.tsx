@@ -243,7 +243,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   const scenarios = getDynamicTestScenarios(t);
   const bots = getTestableBots();
-  const interviewBot = BOTS.find(b => b.id === 'g-interviewer') || null;
+  const interviewBot = BOTS.find(b => b.id === 'gloria-life-context') || null;
   const categories: TestCategory[] = ['core', 'session', 'personality', 'safety', 'bot'];
   
   const filteredScenarios = categoryFilter === 'all' 
@@ -255,7 +255,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     setSelectedScenario(scenario);
     if (scenario.id === 'bot_interview' && interviewBot) {
       setSelectedBot(interviewBot);
-    } else if (selectedBot?.id === 'g-interviewer') {
+    } else if (selectedBot?.id === 'gloria-life-context') {
       // Clear interview bot if switching away from interview scenario
       setSelectedBot(null);
     }

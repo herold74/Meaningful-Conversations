@@ -624,7 +624,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
     const ratingStats = useMemo(() => {
         const statsByBot = BOTS
-            .filter(bot => bot.id !== 'g-interviewer')
+            .filter(bot => bot.id !== 'gloria-life-context')
             .reduce((acc, bot) => {
             acc[bot.id] = {
                 id: bot.id,

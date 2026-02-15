@@ -36,7 +36,8 @@ export type NavView =
     | 'personalitySurvey'
     | 'personalityProfile'
     | 'lifeContextEditor'
-    | 'transcriptEval';
+    | 'transcriptEval'
+    | 'interviewTranscript';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
