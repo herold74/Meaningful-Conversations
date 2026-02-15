@@ -365,7 +365,7 @@ Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches**
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
 **Ihr Guide:**
-- **Nobody** -- Kein Coach, sondern ein effizienter Manager, der Ihnen hilft, eigene Lösungen strukturiert zu finden
+- **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
 
 **Ihre Coaches:**
 - **Max** -- Motivierender Coach, der Ihnen hilft, größer zu denken und Ihr Potenzial freizusetzen
@@ -383,13 +383,13 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 <summary>Nobody -- Effizient, Anpassungsfähig, Lösungsorientiert</summary>
 <div style="padding: 12px 16px;">
 
-**Kernidee:** Nobody ist kein typischer Coach, sondern agiert wie ein effizienter Manager. Er nutzt den GPS-Ansatz (Goal-Problem-Solution), um Ihnen zu helfen, Ihre eigenen Lösungen strukturiert zu finden -- mit konkreten Tipps, wenn Sie sie brauchen.
+**Kernidee:** Nobody ist kein Coach im klassischen Sinne, sondern Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen. Er nutzt den GPS-Ansatz (Goal-Problem-Solution) und passt seinen Stil situativ an: Von gezielten Fragen bis hin zu konkreten Tipps, wenn Sie nicht weiterkommen.
 
 **Ideal für:**
 - Wenn es um spontane Alltags- und Kommunikationsthemen geht
-- Zeiteffiziente Sitzungen mit klarem Ergebnis
 - Konkrete Strategien und nächste Schritte
 - Schnelle, zielgerichtete Reflexion
+- Zeiteffiziente Sitzungen mit klarem Ergebnis
 
 **Beispiel-Situationen:** "Ich habe ein konkretes Problem und muss meine nächsten Schritte definieren." / "Ich möchte mich auf ein Gespräch vorbereiten." / "Ich brauche jemanden, der mir hilft, eine erlebte Situation effizient zu reflektieren."
 
@@ -657,8 +657,27 @@ Die Auswertung enthält folgende Komponenten – in verständlicher Sprache:
 - **Kalibrierung:** Wie gut stimmten Erwartung und Realität überein?
 - **Stärken & Entwicklungsbereiche:** Was lief gut und wo können Sie sich weiterentwickeln?
 - **Nächste Schritte:** Konkrete Empfehlungen für Ihr nächstes Gespräch.
+- **Empfohlene Coaching-Profile:** Zu jedem identifizierten Entwicklungsbereich schlägt die KI passende Coaching-Profile vor (siehe unten).
 
 **Gesamtbewertung:** Ziel + Verhalten (z.B. 4+5=9/10)
+
+### Empfohlene Coaching-Profile
+
+Am Ende jeder Auswertung erhalten Sie **KI-generierte Coaching-Empfehlungen** für Ihre Entwicklungsbereiche. Für jeden Bereich werden zwei Profile vorgeschlagen:
+
+- **Primäres Profil:** Der Coach, der am besten zu diesem Entwicklungsbereich passt – mit einer Begründung, warum gerade dieser Coach geeignet ist.
+- **Alternatives Profil:** Ein zweiter Coach mit einer ergänzenden Perspektive auf dasselbe Thema.
+
+Jede Empfehlung enthält:
+- **Begründung:** Warum dieser Coach für Ihren Entwicklungsbereich besonders geeignet ist
+- **Gesprächseinstieg:** Ein konkreter Beispielsatz, mit dem Sie die erste Sitzung zu diesem Thema starten können (per Klick in die Zwischenablage kopierbar)
+
+**Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich an, ob Sie Zugang zum jeweiligen Coach haben:
+- 🟢 **Verfügbar** – Sie können diesen Coach sofort nutzen
+- 🔒 **Premium erforderlich** – Dieser Coach erfordert eine Premium-Zugangsstufe
+- 🔒 **Klient erforderlich** – Dieser Coach erfordert eine Klienten-Zugangsstufe
+
+Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungsplanung dokumentieren können.
 
 ### Persönlichkeitsprofile & Personalisierung
 
@@ -672,6 +691,27 @@ Die Auswertung enthält folgende Komponenten – in verständlicher Sprache:
 ### Datenschutz
 
 Transkripte werden nicht dauerhaft gespeichert – nur die Auswertungsergebnisse werden gesichert.
+
+### Wie kommen Sie zu einem Transkript?
+
+Es gibt mehrere einfache Wege, ein Gesprächstranskript zu erstellen:
+
+**1. Videokonferenz-Tools (einfachste Methode)**
+Die meisten modernen Videokonferenz-Plattformen bieten integrierte Transkription:
+- **Microsoft Teams:** Aktivieren Sie unter *Einstellungen → Besprechungen* die automatische Transkription. Nach dem Meeting finden Sie das Transkript im Chat-Verlauf.
+- **Zoom:** Unter *Einstellungen → Aufzeichnung* die Option "Audiotranskript" aktivieren. Nach der Aufzeichnung wird eine \`.vtt\`-Datei erstellt.
+- **Google Meet:** Über die drei Punkte im Meeting "Transkription starten" wählen. Das Transkript erscheint anschließend in Google Docs.
+
+**2. Transkriptions-Apps für persönliche Gespräche**
+Für Gespräche vor Ort oder Telefonate:
+- **Otter.ai** (iOS/Android/Web): Zeichnet auf und transkribiert in Echtzeit. Export als Text möglich.
+- **Apple-Geräte (ab iOS 18 / macOS Sequoia):** Die integrierte *Notizen*-App bietet eine Aufnahmefunktion mit automatischer Transkription.
+- **Whisper / MacWhisper** (Desktop): Lokale, kostenlose Transkription für Audiodateien direkt auf Ihrem Gerät (kein Cloud-Upload nötig, besonders datenschutzfreundlich).
+
+**3. Manuelle Erstellung**
+Für kurze Gespräche können Sie auch einfach aus der Erinnerung ein Protokoll schreiben. Verwenden Sie das Format "Sprecher: Text" – die KI kommt auch mit ungenauen Transkripten gut zurecht.
+
+**⚠️ Wichtig:** Sie sind dafür verantwortlich, dass alle Gesprächsteilnehmer der Aufzeichnung und Analyse zugestimmt haben. Beachten Sie die geltenden Gesetze zur Gesprächsaufzeichnung in Ihrem Land.
 
 ### Tipps für beste Ergebnisse
 
@@ -1004,7 +1044,7 @@ With an active personality profile, coaching is tailored to you with **all coach
 On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
 **Your Guide:**
-- **Nobody** -- Not a coach -- an efficient manager who helps you find your own solutions in a structured way
+- **Nobody** -- Your pragmatic sparring partner for management and communication topics
 
 **Your Coaches:**
 - **Max** -- Motivational coach who helps you think bigger and unlock your potential
@@ -1022,13 +1062,13 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 <summary>Nobody -- Efficient, Adaptive, Solution-Focused</summary>
 <div style="padding: 12px 16px;">
 
-**Core Idea:** Nobody is not a typical coach -- he acts like an efficient manager. He uses the GPS approach (Goal-Problem-Solution) to help you find your own solutions in a structured way -- with concrete tips when you need them.
+**Core Idea:** Nobody is not a coach in the classical sense -- he is your pragmatic sparring partner for management and communication topics. He uses the GPS approach (Goal-Problem-Solution) and adapts his style situationally: from targeted questions to concrete tips when you are stuck.
 
 **Ideal for:**
 - When dealing with spontaneous everyday and communication topics
-- Time-efficient sessions with clear outcomes
 - Concrete strategies and next steps
 - Quick, goal-oriented reflection
+- Time-efficient sessions with clear outcomes
 
 **Example Situations:** "I have a specific problem and need to define my next steps." / "I want to prepare for a conversation." / "I need someone to help me efficiently reflect on a situation I experienced."
 
@@ -1296,8 +1336,27 @@ The evaluation contains the following components—explained in plain language:
 - **Calibration:** How well did expectations match reality?
 - **Strengths & Development Areas:** What went well and where you can develop further?
 - **Next Steps:** Concrete recommendations for your next conversation.
+- **Recommended Coaching Profiles:** For each identified development area, the AI suggests matching coaching profiles (see below).
 
 **Overall Score:** Goal + Behavior (e.g., 4+5=9/10)
+
+### Recommended Coaching Profiles
+
+At the end of each evaluation, you receive **AI-generated coaching recommendations** for your development areas. For each area, two profiles are suggested:
+
+- **Primary Profile:** The coach best suited for this development area – with a rationale explaining why this coach is a good fit.
+- **Alternative Profile:** A second coach offering a complementary perspective on the same topic.
+
+Each recommendation includes:
+- **Rationale:** Why this coach is particularly suitable for your development area
+- **Conversation Starter:** A concrete example prompt to kick off your first session on this topic (click to copy to clipboard)
+
+**Availability at a Glance:** The recommendation cards use color coding to show whether you have access to each coach:
+- 🟢 **Available** – You can use this coach right away
+- 🔒 **Premium Required** – This coach requires a Premium access tier
+- 🔒 **Client Required** – This coach requires a Client access tier
+
+The recommendations also appear in the **PDF export**, so you can document your development planning.
 
 ### Personality Profiles & Personalization
 
@@ -1311,6 +1370,27 @@ The evaluation contains the following components—explained in plain language:
 ### Privacy
 
 Transcripts are not stored permanently—only the evaluation results are saved.
+
+### How to Get a Transcript
+
+There are several easy ways to create a conversation transcript:
+
+**1. Video Conferencing Tools (easiest method)**
+Most modern video conferencing platforms offer built-in transcription:
+- **Microsoft Teams:** Enable automatic transcription under *Settings → Meetings*. After the meeting, you'll find the transcript in the chat history.
+- **Zoom:** Under *Settings → Recording*, enable "Audio transcript." After recording, a \`.vtt\` file is created.
+- **Google Meet:** Select "Start transcription" from the three-dot menu during the meeting. The transcript then appears in Google Docs.
+
+**2. Transcription Apps for In-Person Conversations**
+For face-to-face meetings or phone calls:
+- **Otter.ai** (iOS/Android/Web): Records and transcribes in real-time. Export as text is available.
+- **Apple Devices (iOS 18+ / macOS Sequoia):** The built-in *Notes* app offers a recording feature with automatic transcription.
+- **Whisper / MacWhisper** (Desktop): Free, local transcription for audio files directly on your device (no cloud upload needed, particularly privacy-friendly).
+
+**3. Manual Creation**
+For short conversations, you can simply write a protocol from memory. Use the format "Speaker: Text" – the AI handles imperfect transcripts quite well.
+
+**⚠️ Important:** You are responsible for ensuring that all conversation participants have consented to recording and analysis. Please observe the applicable laws regarding conversation recording in your country.
 
 ### Tips for Best Results
 

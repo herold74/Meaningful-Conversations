@@ -464,9 +464,11 @@ const LikertBlock = ({ questions, onComplete, t, lowLabel, highLabel }: {
 };
 
 // 2. CONSTANT SUM (Verteile 10 Punkte) - Touch-friendly Stepper Version
-const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle: string, items: any[], onComplete: (res: any) => void, t: TranslateFunc }) => {
+const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValues, t }: { contextTitle: string, items: any[], onComplete: (res: any) => void, onBack?: () => void, initialValues?: Record<string, number>, t: TranslateFunc }) => {
   const [values, setValues] = useState<Record<string, number>>(
-    items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
+    initialValues
+      ? items.reduce((acc, item) => ({ ...acc, [item.id]: initialValues[item.id] ?? 0 }), {})
+      : items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
   );
 
   const total = Object.values(values).reduce((a, b) => a + b, 0);
@@ -575,7 +577,18 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, t }: { contextTitle
         </div>
       ))}
       
-      <SurveyButton disabled={remaining !== 0} onClick={() => onComplete(values)}>{t('survey_btn_next')}</SurveyButton>
+      <div className={`mt-5 flex items-center ${onBack ? 'gap-3' : ''}`}>
+        {onBack && (
+          <Button variant="ghost" onClick={onBack}>
+            ← {t('survey_btn_back')}
+          </Button>
+        )}
+        <div className="flex-1">
+          <Button variant="primary" fullWidth disabled={remaining !== 0} onClick={() => onComplete(values)}>
+            {t('survey_btn_next')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1294,7 +1307,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     
     const lensSteps: Record<LensType, string[]> = {
       sd: ['SD_RANKING'],
-      riemann: ['RIEMANN_BERUF', 'RIEMANN_PRIVAT', 'RIEMANN_SELBST', 'RIEMANN_STRESS'],
+      riemann: ['RIEMANN_SELBST', 'RIEMANN_BERUF', 'RIEMANN_PRIVAT', 'RIEMANN_STRESS'],
       // BFI-2: variant choice first (unless already selected), then questions
       ocean: bfi2Variant ? ['BIG5_QUESTIONS'] : ['BFI2_VARIANT_CHOICE', 'BIG5_QUESTIONS'],
     };
@@ -1431,6 +1444,12 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     next();
   };
 
+  const prev = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
+
   const next = () => {
     if (step < flow.length - 1) {
       setStep(step + 1);
@@ -1563,23 +1582,46 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     );
   }
   else if (currentStepId.startsWith('RIEMANN')) {
-    if (currentStepId === 'RIEMANN_BERUF') {
+    if (currentStepId === 'RIEMANN_SELBST') {
+      content = (
+        <Card title={RIEMANN_BLOCKS.selbst.title}>
+          <p className="mb-4 text-xs text-content-tertiary italic">{t('survey_riemann_disclaimer')}</p>
+          <ConstantSumBlock
+            key="selbst"
+            contextTitle="Selbst"
+            items={RIEMANN_BLOCKS.selbst.items}
+            initialValues={result.riemann?.selbst}
+            onComplete={(d) => updateRiemann('selbst', d)}
+            t={t}
+          />
+        </Card>
+      );
+    } else if (currentStepId === 'RIEMANN_BERUF') {
       content = (
         <Card title={RIEMANN_BLOCKS.beruf.title}>
-          <p className="mb-4 text-xs text-content-tertiary italic">{t('survey_riemann_disclaimer')}</p>
-          <ConstantSumBlock contextTitle="Beruf" items={RIEMANN_BLOCKS.beruf.items} onComplete={(d) => updateRiemann('beruf', d)} t={t} />
+          <ConstantSumBlock
+            key="beruf"
+            contextTitle="Beruf"
+            items={RIEMANN_BLOCKS.beruf.items}
+            initialValues={result.riemann?.beruf || result.riemann?.selbst}
+            onComplete={(d) => updateRiemann('beruf', d)}
+            onBack={prev}
+            t={t}
+          />
         </Card>
       );
     } else if (currentStepId === 'RIEMANN_PRIVAT') {
       content = (
         <Card title={RIEMANN_BLOCKS.privat.title}>
-          <ConstantSumBlock contextTitle="Privat" items={RIEMANN_BLOCKS.privat.items} onComplete={(d) => updateRiemann('privat', d)} t={t} />
-        </Card>
-      );
-    } else if (currentStepId === 'RIEMANN_SELBST') {
-      content = (
-        <Card title={RIEMANN_BLOCKS.selbst.title}>
-          <ConstantSumBlock contextTitle="Selbst" items={RIEMANN_BLOCKS.selbst.items} onComplete={(d) => updateRiemann('selbst', d)} t={t} />
+          <ConstantSumBlock
+            key="privat"
+            contextTitle="Privat"
+            items={RIEMANN_BLOCKS.privat.items}
+            initialValues={result.riemann?.privat || result.riemann?.selbst}
+            onComplete={(d) => updateRiemann('privat', d)}
+            onBack={prev}
+            t={t}
+          />
         </Card>
       );
     } else if (currentStepId === 'RIEMANN_STRESS') {

@@ -119,11 +119,12 @@ export const deleteTranscriptEvaluation = async (id: string): Promise<{ success:
 export const rateTranscriptEvaluation = async (
     evaluationId: string,
     rating: number,
-    feedback?: string
+    feedback?: string,
+    contactOptIn?: boolean
 ): Promise<{ success: boolean; message: string }> => {
     return await apiFetch(`/gemini/transcript/${evaluationId}/rate`, {
         method: 'POST',
-        body: JSON.stringify({ rating, feedback }),
+        body: JSON.stringify({ rating, feedback, contactOptIn: !!contactOptIn }),
     });
 };
 

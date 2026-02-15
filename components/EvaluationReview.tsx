@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
-import { TranscriptEvaluationResult, TranscriptPreAnswers } from '../types';
+import { TranscriptEvaluationResult, TranscriptPreAnswers, BotRecommendation, BotRecommendationEntry } from '../types';
 import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF';
 import EvaluationRating from './EvaluationRating';
 
@@ -8,7 +8,7 @@ interface EvaluationReviewProps {
     evaluation: TranscriptEvaluationResult;
     preAnswers: TranscriptPreAnswers;
     onDone: () => void;
-    currentUser?: { email?: string; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean };
+    currentUser?: { email?: string; isPremium?: boolean; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean; unlockedCoaches?: string[] };
 }
 
 const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) => {
@@ -45,9 +45,93 @@ const BulletList: React.FC<{ items: string[]; color?: string }> = ({ items, colo
     );
 };
 
+const accessHierarchy: Record<string, number> = {
+    guest: 0,
+    registered: 1,
+    premium: 2,
+    client: 3
+};
+
+const getUserAccessLevel = (user?: EvaluationReviewProps['currentUser']): string => {
+    if (!user) return 'guest';
+    if (user.isAdmin || user.isDeveloper) return 'client';
+    if (user.isClient) return 'client';
+    if (user.isPremium) return 'premium';
+    return 'registered';
+};
+
+const isBotAvailable = (requiredTier: string, userLevel: string, botId: string, unlockedCoaches: string[]): boolean => {
+    return (accessHierarchy[userLevel] ?? 0) >= (accessHierarchy[requiredTier] ?? 0) || unlockedCoaches.includes(botId);
+};
+
+const BotRecCard: React.FC<{
+    rec: BotRecommendationEntry;
+    label: string;
+    available: boolean;
+    tierLabel: string;
+    t: (key: string) => string;
+}> = ({ rec, label, available, tierLabel, t }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(rec.examplePrompt).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    return (
+        <div className={`rounded-lg border p-4 flex flex-col h-full ${available ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'}`}>
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold uppercase tracking-wide ${label === t('te_review_bot_primary') ? 'text-accent-primary' : 'text-content-tertiary'}`}>
+                        {label}
+                    </span>
+                    <span className="text-sm font-bold text-content-primary">{rec.botName}</span>
+                </div>
+                {available ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        {t('te_review_bot_available')}
+                    </span>
+                ) : (
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${rec.requiredTier === 'client' ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30' : 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        {tierLabel}
+                    </span>
+                )}
+            </div>
+            <p className="text-sm text-content-secondary mb-3 line-clamp-6 min-h-[7.5rem]" title={rec.rationale}>{rec.rationale}</p>
+            <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex-1">
+                <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide mb-1">{t('te_review_bot_example_prompt')}</p>
+                <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
+                <button
+                    onClick={handleCopy}
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors"
+                >
+                    {copied ? (
+                        <>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            {t('te_review_bot_copied')}
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            {t('te_review_bot_copy_prompt')}
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnswers, onDone, currentUser }) => {
     const { t, language } = useLocalization();
     const [isExporting, setIsExporting] = useState(false);
+    const userAccessLevel = getUserAccessLevel(currentUser);
+    const unlockedCoaches = currentUser?.unlockedCoaches || [];
 
     const handleExportPDF = async () => {
         setIsExporting(true);
@@ -68,7 +152,10 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-6">
-            <h2 className="text-2xl font-bold text-content-primary mb-2">{t('te_review_title')}</h2>
+            <h2 className="text-2xl font-bold text-content-primary mb-1">{t('te_review_title')}</h2>
+            {preAnswers.situationName && (
+                <p className="text-base text-content-secondary mb-4">{preAnswers.situationName}</p>
+            )}
 
             {/* Overall Score */}
             <div className="bg-gradient-to-r from-accent-primary/10 to-accent-primary/5 rounded-xl border border-accent-primary/20 p-6 mb-6 text-center">
@@ -200,6 +287,50 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                 </div>
             </Section>
 
+            {/* Bot Recommendations */}
+            {evaluation.botRecommendations && evaluation.botRecommendations.length > 0 && (
+                <Section title={t('te_review_bot_recommendations')}>
+                    <div className="space-y-6">
+                        {evaluation.botRecommendations.map((rec, i) => {
+                            const getTierLabel = (tier: string) => {
+                                if (tier === 'client') return t('te_review_bot_client_required');
+                                if (tier === 'premium') return t('te_review_bot_premium_required');
+                                return t('te_review_bot_available');
+                            };
+                            const primaryAvailable = isBotAvailable(rec.primary.requiredTier, userAccessLevel, rec.primary.botId, unlockedCoaches);
+                            const secondaryAvailable = isBotAvailable(rec.secondary.requiredTier, userAccessLevel, rec.secondary.botId, unlockedCoaches);
+
+                            return (
+                                <div key={i}>
+                                    <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-3 leading-relaxed">
+                                        {rec.developmentArea}
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <BotRecCard
+                                            rec={rec.primary}
+                                            label={t('te_review_bot_primary')}
+                                            available={primaryAvailable}
+                                            tierLabel={getTierLabel(rec.primary.requiredTier)}
+                                            t={t}
+                                        />
+                                        <BotRecCard
+                                            rec={rec.secondary}
+                                            label={t('te_review_bot_secondary')}
+                                            available={secondaryAvailable}
+                                            tierLabel={getTierLabel(rec.secondary.requiredTier)}
+                                            t={t}
+                                        />
+                                    </div>
+                                    {i < evaluation.botRecommendations!.length - 1 && (
+                                        <hr className="mt-6 border-gray-200 dark:border-gray-700" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </Section>
+            )}
+
             {/* Action buttons */}
             <div className="mt-8 mb-4 space-y-3">
                 {/* PDF Export - für Clients, Admins und Developers */}
@@ -244,6 +375,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                         evaluationId={evaluation.id}
                         existingRating={evaluation.userRating}
                         existingFeedback={evaluation.userFeedback}
+                        existingContactOptIn={evaluation.contactOptIn}
                         onRated={() => {}}
                     />
                 </div>
