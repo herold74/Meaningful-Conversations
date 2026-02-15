@@ -78,19 +78,26 @@ npx cap sync ios
 ### 3. Production
 
 ```bash
-./scripts/deploy-production-scheduled.sh [VERSION]
+./deploy-manualmode.sh -e production
 ```
 
-- **🔴 CRITICAL: Production MUST use this script — NEVER `deploy-manualmode.sh -e production`!**
-- Does NOT build images — pulls the already-pushed staging images from registry
+- Automatically skips build & push — pulls pre-built staging images from registry
 - Principle: **"Build once, deploy everywhere"** — production runs the exact same images tested on staging
-- `deploy-manualmode.sh` will refuse to run with `-e production` and redirect here
-- Includes pre-flight checks: SSH, Podman, database integrity (user count)
-- Includes post-deploy verification: health check, database integrity re-check
-- Can be used via cron for scheduled deployments
+- Same deployment flow as staging (pull, stop, start, nginx update, health checks, auto-rollback)
 - **NEVER deploy to production without explicit user approval**
 - **ALWAYS deploy to staging first** and verify
 - URL: https://mc-app.manualmode.at
+
+### 4. Production (Scheduled / No-Build)
+
+```bash
+./scripts/deploy-production-scheduled.sh [VERSION]
+```
+
+- Standalone script for automated/scheduled production deployments (e.g. via cron)
+- Same principle as above: pulls pre-built images, no rebuild
+- Includes additional safety checks: database integrity (user count before/after)
+- Can be used independently without the main deploy script
 
 ## Complete Deployment Checklist
 
@@ -171,9 +178,9 @@ Order of operations:
 
 ### Step 6: Deploy to Production (only if requested)
 - [ ] Confirm user explicitly approved
-- [ ] **🔴 Use `./scripts/deploy-production-scheduled.sh` — NEVER `deploy-manualmode.sh -e production`!**
-- [ ] Wait for "PRODUCTION DEPLOYMENT COMPLETED SUCCESSFULLY"
-- [ ] Verify health check passed and database integrity confirmed
+- [ ] `./deploy-manualmode.sh -e production` (auto-skips build, pulls staging images)
+- [ ] Wait for "Deployment Complete" and health check success
+- [ ] If health check fails: auto-rollback kicks in — check logs
 
 ## Deploy Script Options
 
