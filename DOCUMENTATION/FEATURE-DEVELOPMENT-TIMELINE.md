@@ -92,6 +92,86 @@
 
 ---
 
+### Phase 5: Personality & Adaptive Coaching (January 2026)
+**Focus: Deep personalization and coaching intelligence**
+
+- ✅ **Personality Profile System**
+  - OCEAN (Big Five) — BFI-2 with short (15 items) and extended (30 items) variants
+  - Riemann-Thomann Model — 3 contexts (work, private, self-image) + stress pattern
+  - Spiral Dynamics — 24 Likert questions mapped to 8 value levels
+  - E2EE encrypted profile storage
+
+- ✅ **Coaching Modes (DPC & DPFL)**
+  - DPC: Dynamic Personality Coaching — profile-based prompt adaptation
+  - DPFL: Dynamic Personality-Focused Learning — adaptive profile refinement over time
+  - Comfort Check after each session for authenticity assessment
+  - Profile refinement suggestions after 2+ authentic sessions
+
+- ✅ **Narrative Personality Signature**
+  - AI-generated personality summary with superpowers, blindspots, growth areas
+  - Based on test results + two "Golden Questions" (flow & conflict experiences)
+  - Auto-generated after completing surveys
+
+- ✅ **Gamification System**
+  - XP for messages, next steps, completed goals, session completion
+  - Levels, streaks, achievements
+  - Persistent for registered users (server) / embedded in .md for guests
+
+---
+
+### Phase 6: Platform Maturity & Monetization (January–February 2026)
+**Focus: Access tiers, payments, enterprise readiness**
+
+- ✅ **Multi-Tier Access System** (v1.8.4)
+  - Guest (free), Registered (3.90€/mo), Premium (9.90€/mo), Client (via coach)
+  - Bot-level access control with individual unlock codes
+  - Upgrade codes with referrer tracking
+  - PayPal webhook integration for automated tier upgrades
+
+- ✅ **Transcript Evaluation** (v1.8.7–v1.8.9)
+  - Upload real conversation transcripts for AI-powered analysis
+  - Pre-reflection questions (Ausgangslage) for contextualized evaluation
+  - Structured feedback: Goal alignment, behavior analysis, strengths, development areas
+  - AI-generated coaching profile recommendations with conversation starters
+  - PDF export, history view, star ratings with feedback
+  - Personality profile integration for personalized insights
+
+- ✅ **Deployment & Infrastructure Hardening** (v1.8.4)
+  - `npm ci` in Dockerfiles for reproducible builds
+  - Health checks with 3 retries and automatic rollback on failure
+  - "Build once, deploy everywhere" — production pulls staging images only
+  - BUILD_NUMBER tracking for Xcode and cache-busting
+
+---
+
+### Phase 7: Interview Bot & Tools (February 2026)
+**Focus: Structured interviews and knowledge capture**
+
+- ✅ **Gloria Interview Bot** (v1.8.9+)
+  - Professional interviewer for ideas, projects, workflows, concepts, strategies
+  - Setup phase: topic, duration, special perspectives (one question per message)
+  - First-person confirmation before interview starts
+  - Systematic exploration with follow-ups and periodic summaries
+  - Time awareness with end-of-session signaling
+  - Access tier: Registered
+
+- ✅ **Interview Transcript View**
+  - 3-section AI-generated analysis: Summary, Interview Setup, Smoothed Interview
+  - Markdown rendering for all sections
+  - Copy/download per section + complete .md export
+  - User's first name used as transcript label (fallback: Befragter/Interviewee)
+
+- ✅ **Gloria Life Context Rename**
+  - `g-interviewer` → `gloria-life-context` for clear bot distinction
+  - `gloria-interview` uses separate prompt, avatar, and post-session flow
+
+- ✅ **BotSelection Redesign**
+  - Gloria Interview placed in "Management & Communication" section next to Nobody
+  - Transcript Evaluation as slim inline option (not a bot tile)
+  - Coaching badge (DPC/DPFL) suppressed for non-coaching bots
+
+---
+
 ## 🔧 ADMINISTRATOR PERSPECTIVE: Platform Management
 
 ### Phase 1: Infrastructure & Stability (Early Development)
@@ -204,34 +284,67 @@
 
 ---
 
+### Phase 6: Access Control & Revenue (January–February 2026)
+**Focus: Monetization infrastructure**
+
+- ✅ **Upgrade Code System**
+  - Code types: premium, client, bot-unlock, ACCESS_PASS_1Y, REGISTERED_LIFETIME
+  - Admin UI for code generation, revocation, and tracking
+  - Referrer prefix tracking for attribution
+  - PayPal custom_id mapping for automated activation
+
+- ✅ **API Usage Tracking Enhancements**
+  - Per-endpoint tracking (chat, analysis, format-interview, interview-transcript, transcript-eval)
+  - Bot-level attribution for cost analysis
+  - Provider metadata (Gemini model, actual model used)
+
+---
+
+### Phase 7: Testing & Quality (February 2026)
+**Focus: Automated testing and quality assurance**
+
+- ✅ **Test Runner** (Admin/Developer only)
+  - Automated test scenarios for all bot types
+  - Scenario-based testing with predefined contexts and messages
+  - XP pollution prevention (gamification state cleared on test exit)
+
+- ✅ **Transcript Evaluation Ratings**
+  - Admin view for evaluation ratings and user feedback
+  - Contact request tracking
+  - Filter and sort capabilities
+
+---
+
 ## 📊 TIMELINE VISUALIZATION SUGGESTIONS
 
 ### For Slide Deck:
 
 #### **Option 1: Dual-Track Timeline**
 ```
-User Track:     ●────●────●────●────●
-                ↓    ↓    ↓    ↓    ↓
-               P1   P2   P3   P4   Now
-                ↑    ↑    ↑    ↑    ↑
-Admin Track:    ●────●────●────●────●
+User Track:     ●────●────●────●────●────●────●
+                ↓    ↓    ↓    ↓    ↓    ↓    ↓
+               P1   P2   P3   P4   P5   P6   P7
+                ↑    ↑    ↑    ↑    ↑    ↑    ↑
+Admin Track:    ●────●────●────●────●────●────●
 ```
 
 #### **Option 2: Quarterly Roadmap**
 ```
-Q3 2025          Q4 2025          Q1 2026
-├─────────────────┼─────────────────┼────►
-User:    Coach System    Victor + UX     Seasonal Features
-Admin:   Infrastructure  AI Management   Automation
+Q3 2025          Q4 2025           Q1 2026
+├─────────────────┼──────────────────┼────────────────────►
+User:  Coach System  Victor+Seasonal  Personality+Transcript+Interview
+Admin: Infrastructure  AI+Newsletter  Access Tiers+Testing+PayPal
 ```
 
 #### **Option 3: Feature Categories (Matrix)**
 ```
-              | User Experience | Admin Tools | Infrastructure
-──────────────┼─────────────────┼─────────────┼────────────────
-Early 2025    | Coaches + Chat  | Deployment  | Containers
-Mid 2025      | Victor + UX     | AI Tracking | DB Stability
-Late 2025     | Christmas Theme | Newsletter  | Automation
+              | User Experience      | Admin Tools      | Infrastructure
+──────────────┼──────────────────────┼──────────────────┼──────────────────
+Early 2025    | Coaches + Chat       | Deployment       | Containers
+Mid 2025      | Victor + UX          | AI Tracking      | DB Stability
+Late 2025     | Christmas Theme      | Newsletter       | Automation
+Jan 2026      | Personality + DPC    | Access Tiers     | Build Pipeline
+Feb 2026      | Transcript + Gloria  | Test Runner      | Health Checks
 ```
 
 ---
@@ -239,34 +352,44 @@ Late 2025     | Christmas Theme | Newsletter  | Automation
 ## 🎯 KEY MILESTONES FOR SLIDES
 
 ### User-Facing Highlights:
-1. **5 Unique Coaching Personalities** - Diverse approaches to personal development
-2. **Victor Launch** - Systemic coaching for relationship patterns (Nov 2025)
-3. **Seasonal Delight** - Christmas animations (Dec 2025)
-4. **Smart Automation** - Time-based theme switching (Dec 2025)
-5. **Privacy-First** - Encrypted data, GDPR compliance, user control
+1. **5 Unique Coaching Personalities** — Diverse approaches to personal development
+2. **Victor Launch** — Systemic coaching for relationship patterns (Nov 2025)
+3. **Personality Profiling** — OCEAN, Riemann-Thomann, Spiral Dynamics with E2EE (Jan 2026)
+4. **Adaptive Coaching (DPC/DPFL)** — AI adapts coaching style to user personality (Jan 2026)
+5. **Transcript Evaluation** — AI-powered analysis of real conversations (Jan–Feb 2026)
+6. **Gloria Interview** — Professional interviewing with structured transcript export (Feb 2026)
+7. **Multi-Tier Monetization** — Guest, Registered, Premium, Client access levels (Jan 2026)
+8. **Privacy-First** — Encrypted data, GDPR compliance, user control
 
 ### Admin-Facing Highlights:
-1. **Dual AI Provider System** - Cost optimization + flexibility (Nov 2025)
-2. **API Usage Dashboard** - Real-time token tracking and cost projection
-3. **Database Stability** - 95% confidence in deployment reliability (Nov 2025)
-4. **Newsletter Management** - Complete subscriber lifecycle tracking
-5. **Automated Deployments** - Daily production updates at 05:00 (Dec 2025)
+1. **Dual AI Provider System** — Cost optimization + flexibility (Nov 2025)
+2. **API Usage Dashboard** — Per-endpoint token tracking with bot attribution
+3. **Build-Once-Deploy-Everywhere** — Staging builds promoted to production (Jan 2026)
+4. **Upgrade Code System** — Flexible monetization with PayPal automation (Jan 2026)
+5. **Test Runner** — Automated scenario-based testing for all bot types (Feb 2026)
+6. **Automated Deployments** — Scheduled production updates from staging builds (Dec 2025)
 
 ---
 
 ## 📈 IMPACT METRICS (Suggested for Slides)
 
 ### User Metrics:
-- 5 coaching personalities with distinct approaches
-- 2 onboarding modes (questionnaire + interview)
-- 10+ seasonal snowflakes for engagement
-- 100% encrypted life context data
-- Multi-voice TTS support
+- 5 coaching personalities + 1 interview bot + Gloria Life Context
+- 3 personality profile systems (OCEAN, Riemann-Thomann, Spiral Dynamics)
+- 2 adaptive coaching modes (DPC + DPFL)
+- Transcript Evaluation with PDF export and coaching recommendations
+- Interview transcript generation with 3-section analysis
+- 4 access tiers (Guest, Registered, Premium, Client)
+- 100% E2EE for personality profiles and life context data
+- Multi-voice TTS support with gender-aware assignment
+- Gamification with XP, levels, streaks, and achievements
 
 ### Admin Metrics:
 - 2 AI providers (Google Gemini + Mistral AI)
-- 95% deployment stability confidence
-- 30-second graceful shutdown window
+- 6 tracked API endpoints for cost attribution
+- Build-once-deploy-everywhere with health checks and rollback
+- Upgrade code system with PayPal webhook automation
+- Automated test runner for all bot scenarios
 - 4 environments (local dev, staging, production, cloud)
 - 10+ Makefile commands for operations
 
@@ -275,20 +398,19 @@ Late 2025     | Christmas Theme | Newsletter  | Automation
 ## 🔮 FUTURE ROADMAP (Optional Slide)
 
 ### User Perspective:
-- Additional coach personalities
-- Voice input for conversations
-- Mobile app (iOS/Android)
-- Progress tracking and goal setting
+- Voice input for conversations (STT)
+- Additional coach personalities and interview modes
+- Progress tracking dashboard with goal visualization
+- Group coaching sessions
 - Community features (anonymized insights)
 
 ### Admin Perspective:
-- Advanced analytics dashboard
-- A/B testing framework
+- Advanced analytics dashboard with revenue metrics
+- A/B testing framework for coaching approaches
 - Multi-region deployment
-- Automated scaling
-- Cost optimization alerts
+- Automated scaling based on usage patterns
+- Cost optimization alerts and budget controls
 
 ---
 
-*This timeline was generated on December 2, 2025, and reflects the evolution of the Meaningful Conversations platform from inception through the latest Christmas seasonal features and automated deployment enhancements.*
-
+*Last updated: February 15, 2026. Reflects the evolution of the Meaningful Conversations platform from inception through Gloria Interview Bot, Transcript Evaluation, Personality Profiling, Adaptive Coaching (DPC/DPFL), and Multi-Tier Monetization.*

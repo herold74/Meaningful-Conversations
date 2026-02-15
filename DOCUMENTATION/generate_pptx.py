@@ -249,6 +249,7 @@ slide3 = prs.slides.add_slide(prs.slide_layouts[6])
 bots_data = [
     ('Management & Kommunikation',           '', '', '', '', True, BRONZE),
     ('Nobody (GPS, Problemlösung)',          '✅', '✅', '✅', '✅', False, None),
+    ('Gloria Interview (Strukturierte Interviews)', '—', '✅', '✅', '✅', False, None),
     ('Gloria (Onboarding)',                  '✅', '✅', '✅', '✅', False, None),
     ('Coaching Bots',                        '', '', '', '', True, SILVER),
     ('Max (Ambitioniert)',                   '✅', '✅', '✅', '✅', False, None),
@@ -308,10 +309,10 @@ tiers = [
         'bg': TEAL_LIGHT,
         'features': [
             'Alles aus Guest, plus:',
+            'Gloria Interview (Transkript)',
             'Cloud-Sync & E2EE',
             'Server-TTS (High Quality)',
-            'OCEAN-Profil & Signature',
-            'DPC & PDF-Export',
+            'OCEAN-Profil, Signature, DPC',
         ],
         'limit': 'Kein Riemann/SD, DPFL, Kenji/Chloe',
     },
@@ -431,11 +432,12 @@ add_text_box(slide5, 0.5, 0.15, 12, 0.6,
 sections = [
     {
         'title': 'Management & Kommunikation',
-        'subtitle': 'Stets verfügbar — Guest-Tier',
+        'subtitle': 'Nobody & Gloria: Guest  |  Gloria Interview: Registered',
         'color': BRONZE,
         'bg': BRONZE_BG,
         'bots': [
             ('Nobody', 'GPS-Ansatz, Problemlösung, Kommunikationsanalyse'),
+            ('Gloria Interview', 'Strukturierte Interviews mit Transkript-Export'),
             ('Gloria', 'Onboarding & Erstgespräch'),
         ],
     },
