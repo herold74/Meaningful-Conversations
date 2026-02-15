@@ -74,7 +74,7 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
 - **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
 - **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Sitzungsbewertungen, eingelöste Codes und Nutzungsstatistiken.
-- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Client).
+- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
 </div>
@@ -372,10 +372,10 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. 
 - **Ava** -- Strategische Beraterin für Entscheidungsfindung und Prioritätenmanagement
 - **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
 - **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
-- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Client)
-- **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Client)
+- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten)
+- **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
 
-Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Client-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
+Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Klienten-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
 
 **Klicken Sie auf einen Namen, um mehr zu erfahren:**
 
@@ -386,12 +386,12 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 **Kernidee:** Nobody ist kein typischer Coach, sondern agiert wie ein effizienter Manager. Er nutzt den GPS-Ansatz (Goal-Problem-Solution), um Ihnen zu helfen, Ihre eigenen Lösungen strukturiert zu finden -- mit konkreten Tipps, wenn Sie sie brauchen.
 
 **Ideal für:**
-- Schnelle, zielgerichtete Problemlösung
-- Wenn Sie keine tiefgehende emotionale Exploration brauchen
+- Wenn es um spontane Alltags- und Kommunikationsthemen geht
 - Zeiteffiziente Sitzungen mit klarem Ergebnis
-- Konkrete Entscheidungen und nächste Schritte
+- Konkrete Strategien und nächste Schritte
+- Schnelle, zielgerichtete Reflexion
 
-**Beispiel-Situationen:** "Ich habe ein konkretes Problem und brauche eine Lösung." / "Ich möchte in 10 Minuten einen klaren Plan haben." / "Ich brauche jemanden, der mich effizient durch eine Entscheidung führt."
+**Beispiel-Situationen:** "Ich habe ein konkretes Problem und muss meine nächsten Schritte definieren." / "Ich möchte mich auf ein Gespräch vorbereiten." / "Ich brauche jemanden, der mir hilft, eine erlebte Situation effizient zu reflektieren."
 
 **Zugang:** Kostenlos für alle Benutzer
 </div>
@@ -474,7 +474,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </details>
 
 <details>
-<summary>Rob -- Mentale Fitness, Empathisch, Achtsam (Client) 🔔</summary>
+<summary>Rob -- Mentale Fitness, Empathisch, Achtsam (Klienten) 🔔</summary>
 <div style="padding: 12px 16px;">
 
 **Kernidee:** Rob hilft Ihnen, mentale Fitness und Resilienz aufzubauen, indem Sie selbstsabotierende Muster erkennen und überwinden.
@@ -489,12 +489,12 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 
 **Beispiel-Situationen:** "Ich sabotiere mich selbst und weiß nicht warum." / "Ich möchte mental stärker werden." / "Ich möchte eine Achtsamkeitsübung machen."
 
-**Zugang:** Client-Benutzer
+**Zugang:** Klienten-Benutzer
 </div>
 </details>
 
 <details>
-<summary>Victor -- Systemisch, Analytisch, Neutral (Client)</summary>
+<summary>Victor -- Systemisch, Analytisch, Neutral (Klienten)</summary>
 <div style="padding: 12px 16px;">
 
 **Kernidee:** Victor ist inspiriert von Konzepten der Familientheorie und hilft Ihnen, Beziehungsmuster zu erkennen und differenziertere Reaktionen zu entwickeln.
@@ -507,7 +507,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 
 **Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Ich möchte verstehen, warum bestimmte Beziehungen mich so triggern." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
 
-**Zugang:** Client-Benutzer
+**Zugang:** Klienten-Benutzer
 </div>
 </details>
 
@@ -625,7 +625,7 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Client-Feature)</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -634,7 +634,7 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist **Client-Benutzern** vorbehalten und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm. Es ist **auf Desktop und Tablets** verfügbar.
+Dieses Feature ist **Klienten-Benutzern** vorbehalten und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm. Es ist **auf Desktop und Tablets** verfügbar.
 
 ### Wie funktioniert es?
 
@@ -662,11 +662,11 @@ Die Auswertung enthält folgende Komponenten – in verständlicher Sprache:
 
 ### Persönlichkeitsprofile & Personalisierung
 
-**Wenn Sie ein Persönlichkeitsprofil angelegt haben**, nutzt die KI dieses zusätzlich. Sie erhalten dann **persönlichkeitsbasierte Insights**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. So können Sie verstehen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
+**Wenn Sie ein Persönlichkeitsprofil angelegt haben**, nutzt die KI dieses zusätzlich. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. So können Sie verstehen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
 
 ### Zusätzliche Funktionen
 
-- **PDF-Export** für Clients, Admins und Developers
+- **PDF-Export** für Klienten, Admins und Developers
 - **History-Ansicht** zum Überprüfen und Löschen vergangener Auswertungen
 
 ### Datenschutz
@@ -1020,6 +1020,24 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 
 <details>
 <summary>Nobody -- Efficient, Adaptive, Solution-Focused</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Nobody is not a typical coach -- he acts like an efficient manager. He uses the GPS approach (Goal-Problem-Solution) to help you find your own solutions in a structured way -- with concrete tips when you need them.
+
+**Ideal for:**
+- When dealing with spontaneous everyday and communication topics
+- Time-efficient sessions with clear outcomes
+- Concrete strategies and next steps
+- Quick, goal-oriented reflection
+
+**Example Situations:** "I have a specific problem and need to define my next steps." / "I want to prepare for a conversation." / "I need someone to help me efficiently reflect on a situation I experienced."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Max -- Motivating, Curious, Reflective</summary>
 <div style="padding: 12px 16px;">
 
 **Core Idea:** Max helps you think bigger by asking the right questions to unlock your potential.

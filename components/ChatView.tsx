@@ -1092,7 +1092,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     break;
                 case 'nexus-gps':
                     gender = 'male';
-                    utterance.rate = 1.1;
                     break;
                 default:
                     gender = 'male';
