@@ -203,7 +203,7 @@ Options:
 |---|---|
 | Remote server | `root@91.99.193.87` |
 | Staging dir | `/opt/manualmode-staging` |
-| Production dir | `/opt/manualmode` |
+| Production dir | `/opt/manualmode-production` |
 | Registry | `quay.myandi.de/gherold` |
 | Container runtime | Podman + podman-compose |
 | Reverse proxy | Nginx (on same server) |
@@ -223,8 +223,8 @@ ssh root@91.99.193.87 'cd /opt/manualmode-staging && podman-compose -f podman-co
 # Single container logs (e.g. backend)
 ssh root@91.99.193.87 'podman logs --tail 100 meaningful-conversations-backend-staging'
 
-# Production (replace -staging with production paths/names)
-ssh root@91.99.193.87 'cd /opt/manualmode && podman-compose -f podman-compose-production.yml logs -f'
+# Production
+ssh root@91.99.193.87 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
 ```
 
 ### Run Prisma Migration Remotely
@@ -234,7 +234,7 @@ ssh root@91.99.193.87 'cd /opt/manualmode && podman-compose -f podman-compose-pr
 ssh root@91.99.193.87 'podman exec meaningful-conversations-backend-staging npx prisma migrate deploy'
 
 # Production
-ssh root@91.99.193.87 'podman exec meaningful-conversations-backend npx prisma migrate deploy'
+ssh root@91.99.193.87 'podman exec meaningful-conversations-backend-production npx prisma migrate deploy'
 ```
 
 ## Automatic Rollback
