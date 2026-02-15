@@ -2,7 +2,7 @@ import { Bot } from './types';
 
 export const BOTS: Bot[] = [
     {
-        id: 'g-interviewer',
+        id: 'gloria-life-context',
         name: 'Gloria',
         description: 'A friendly guide who helps you create your first Life Context file through a simple conversation.',
         description_de: 'Ein freundlicher Guide, der Ihnen hilft, Ihre erste Lebenskontext-Datei durch ein einfaches Gespräch zu erstellen.',
@@ -10,6 +10,16 @@ export const BOTS: Bot[] = [
         style: 'Conversational, Structured, Helpful',
         style_de: 'Gesprächsorientiert, Strukturiert, Hilfsbereit',
         accessTier: 'guest',
+    },
+    {
+        id: 'gloria-interview',
+        name: 'Gloria',
+        description: 'A professional interviewer who helps you structure and articulate your ideas, projects, and workflows through a focused conversation.',
+        description_de: 'Eine professionelle Interviewerin, die Ihnen hilft, Ihre Ideen, Projekte und Abläufe durch ein fokussiertes Gespräch zu strukturieren und zu artikulieren.',
+        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Erik&backgroundColor=c0aede&hairColor=86efac',
+        style: 'Structured, Inquisitive, Focused',
+        style_de: 'Strukturiert, Fragend, Fokussiert',
+        accessTier: 'registered',
     },
     {
         id: 'max-ambitious',

@@ -12,7 +12,7 @@ Meaningful Conversations bridges this gap by creating a "living" document of the
 The user journey is circular and iterative:
 1.  **Context Creation:** Create a Life Context via questionnaire or upload an existing one.
 2.  **Personality Profile (Optional):** Complete surveys (Riemann-Thomann, Big Five, Spiral Dynamics) for adaptive coaching.
-3.  **Coach Selection:** Choose from 7 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob, G-Interviewer).
+3.  **Coach Selection:** Choose from 8 bots: 6 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob), Gloria Life Context (onboarding interview), and Gloria Interview (structured topic interviews with transcript export).
 4.  **Conversation:** Voice or text dialogue. AI uses Life Context and personality profile for personalized guidance.
 5.  **Analysis & Review:** AI generates summary, proposes Life Context updates, and optionally refines personality profile (DPFL mode).
 6.  **Commit:** Review and accept changes, export calendar items for action steps.

@@ -78,7 +78,17 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** `npm install` can resolve semver ranges to newer versions than tested locally. A breaking validation change in express-rate-limit (`^8.2.1` resolved to a newer 8.x) crashed the staging backend with `ERR_ERL_KEY_GEN_IPV6`. `npm ci` strictly follows `package-lock.json`.
 - **Implementation:** All Dockerfiles use `npm ci`. Lockfiles are committed and are the source of truth for production builds. Local development continues to use `npm install` for flexibility.
 
-### 10. Tiered User Access Control
+### 10. Bot Type Distinction: Coaches vs. Interviewers
+- **Decision:** Separate bot types with different end-session flows and UI treatment.
+- **Reasoning:** Coaching bots (Nobody, Max, Ava, Kenji, Chloe, Rob) produce session analyses with Life Context updates. Interview bots (Gloria Life Context, Gloria Interview) produce specialized outputs (Life Context file or interview transcript). Each type needs a distinct post-session view.
+- **Implementation:**
+  - `handleEndSession` in `App.tsx` checks `selectedBot.id` and routes to the appropriate view.
+  - `gloria-life-context`: Hidden from bot selection, routes to `sessionReview` with generated Life Context.
+  - `gloria-interview`: Visible in bot selection (registered tier), routes to `interviewTranscript` view with AI-generated summary + corrected transcript.
+  - Interview bots have no DPC/DPFL integration — coaching badge suppressed in `BotSelection.tsx`.
+  - Bot IDs use clear prefixes (`gloria-life-context`, `gloria-interview`) to prevent confusion during future changes.
+
+### 11. Tiered User Access Control
 - **Decision:** Six-tier role system: Guest, Registered, Premium, Client, Admin, Developer.
 - **Reasoning:** Fine-grained access control for different feature sets and pricing tiers. Developer role separates test infrastructure access from general admin capabilities.
 - **Implementation:** Boolean flags on User model (`isPremium`, `isClient`, `isAdmin`, `isDeveloper`). Server-side enforcement in route handlers. Frontend gating via `currentUser` flags. Access matrix documented in `DOCUMENTATION/USER-ACCESS-MATRIX.md`.
