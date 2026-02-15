@@ -48,6 +48,7 @@ model UpgradeCode {
   id         String     @id @default(cuid())
   code       String     @unique
   botId      String
+  referrer   String?
   isUsed     Boolean    @default(false)
   createdAt  DateTime   @default(now())
   usedById   String?
@@ -55,6 +56,7 @@ model UpgradeCode {
   purchases  Purchase[]
 
   @@index([usedById])
+  @@index([referrer])
 }
 
 model Ticket {

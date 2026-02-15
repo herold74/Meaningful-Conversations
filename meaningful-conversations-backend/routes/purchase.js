@@ -5,12 +5,29 @@ const prisma = require('../prismaClient');
 const { sendPurchaseEmail, sendAdminNotification } = require('../services/mailService');
 
 // Product ID Mapping (PayPal Button IDs zu internen botIds)
+// Full-price products
 const PRODUCT_MAPPING = {
-  'ACCESS_PASS_1M': 'ACCESS_PASS_1M',
-  'ACCESS_PASS_3M': 'ACCESS_PASS_3M',
-  'ACCESS_PASS_1Y': 'ACCESS_PASS_1Y',
-  'KENJI_UNLOCK': 'kenji-adhd',
-  'CHLOE_UNLOCK': 'chloe-cbt'
+  // Registered tier
+  'REGISTERED_LIFETIME':  'REGISTERED_LIFETIME',
+  // Premium passes (full price)
+  'ACCESS_PASS_1M':       'ACCESS_PASS_1M',
+  'ACCESS_PASS_3M':       'ACCESS_PASS_3M',
+  'ACCESS_PASS_1Y':       'ACCESS_PASS_1Y',
+  // Premium passes — Upgrade from Registered Lifetime (loyalty discount)
+  'UPGRADE_LT_PREMIUM_1M': 'ACCESS_PASS_1M',
+  'UPGRADE_LT_PREMIUM_3M': 'ACCESS_PASS_3M',
+  'UPGRADE_LT_PREMIUM_1Y': 'ACCESS_PASS_1Y',
+  // Premium passes — Upgrade with Bot-Unlock credit
+  'UPGRADE_BOT_PREMIUM_1M': 'ACCESS_PASS_1M',
+  'UPGRADE_BOT_PREMIUM_3M': 'ACCESS_PASS_3M',
+  'UPGRADE_BOT_PREMIUM_1Y': 'ACCESS_PASS_1Y',
+  // Premium passes — Upgrade Lifetime + Bot combined
+  'UPGRADE_LT_BOT_PREMIUM_1M': 'ACCESS_PASS_1M',
+  'UPGRADE_LT_BOT_PREMIUM_3M': 'ACCESS_PASS_3M',
+  'UPGRADE_LT_BOT_PREMIUM_1Y': 'ACCESS_PASS_1Y',
+  // Individual bot unlocks
+  'KENJI_UNLOCK':         'kenji-stoic',
+  'CHLOE_UNLOCK':         'chloe-cbt'
 };
 
 // POST /api/purchase/webhook

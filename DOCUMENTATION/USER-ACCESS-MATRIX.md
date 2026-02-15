@@ -46,9 +46,9 @@ This document outlines the different user types within the Meaningful Conversati
 | DPFL (Adaptive Learning) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Comfort Check (DPFL) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | PEP Solution Blockages (Dr. Bohne) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Transcript Evaluation | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Transcript Evaluation PDF Export | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Bot Recommendations (in Evaluation) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Transcript Evaluation | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Transcript Evaluation PDF Export | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Bot Recommendations (in Evaluation) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Administration** | | | | | | |
 | Admin Panel Access | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
@@ -74,13 +74,41 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 
 ## Access Pass Products (PayPal)
 
-| Product | Custom ID | Duration | Tier Granted |
+### Standardprodukte
+
+| Product | Custom ID (PayPal) | Internal botId | Duration | Tier Granted |
+| :--- | :--- | :--- | :--- | :--- |
+| Registered Lifetime | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered |
+| Premium 1-Monats-Pass | `ACCESS_PASS_1M` | `ACCESS_PASS_1M` | 30 Tage | Premium |
+| Premium 3-Monats-Pass | `ACCESS_PASS_3M` | `ACCESS_PASS_3M` | 90 Tage | Premium |
+| Premium 1-Jahres-Pass | `ACCESS_PASS_1Y` | `ACCESS_PASS_1Y` | 365 Tage | Premium |
+| Kenji Coach Unlock | `KENJI_UNLOCK` | `kenji-stoic` | Permanent | Kenji (einzeln) |
+| Chloe Coach Unlock | `CHLOE_UNLOCK` | `chloe-cbt` | Permanent | Chloe (einzeln) |
+
+### Upgrade-Produkte (rabattiert, gleiche Wirkung wie Standardprodukte)
+
+Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. Der Rabatt wird auf der Website/PayPal-Seite abgebildet.
+
+| Product | Custom ID (PayPal) | Internal botId | Rabatt-Basis | Beispiel (1M) |
+| :--- | :--- | :--- | :--- | ---: |
+| Upgrade Lifetime → Premium 1M | `UPGRADE_LT_PREMIUM_1M` | `ACCESS_PASS_1M` | Loyalty ~20% | 7,90 € |
+| Upgrade Lifetime → Premium 3M | `UPGRADE_LT_PREMIUM_3M` | `ACCESS_PASS_3M` | Loyalty ~24% | 18,90 € |
+| Upgrade Lifetime → Premium 1Y | `UPGRADE_LT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | Loyalty ~25% | 59,90 € |
+| Upgrade Bot → Premium 1M | `UPGRADE_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | 4,90 € Anrechnung | 5,00 € |
+| Upgrade Bot → Premium 3M | `UPGRADE_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | 4,90 € Anrechnung | 20,00 € |
+| Upgrade Bot → Premium 1Y | `UPGRADE_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | 4,90 € Anrechnung | 75,00 € |
+| Upgrade Lifetime+Bot → Premium 1M | `UPGRADE_LT_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | Loyalty + Bot | 3,00 € |
+| Upgrade Lifetime+Bot → Premium 3M | `UPGRADE_LT_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | Loyalty + Bot | 14,00 € |
+| Upgrade Lifetime+Bot → Premium 1Y | `UPGRADE_LT_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | Loyalty + Bot | 55,00 € |
+
+### Admin-Only Codes (nicht käuflich)
+
+| Product | Internal botId | Duration | Effekt |
 | :--- | :--- | :--- | :--- |
-| 1-Monats-Pass | `ACCESS_PASS_1M` | 30 Tage | Premium |
-| 3-Monats-Pass | `ACCESS_PASS_3M` | 90 Tage | Premium |
-| 1-Jahres-Pass | `ACCESS_PASS_1Y` | 365 Tage | Premium |
-| Kenji Coach Unlock | `KENJI_UNLOCK` | Permanent | Kenji (einzeln) |
-| Chloe Coach Unlock | `CHLOE_UNLOCK` | Permanent | Chloe (einzeln) |
+| Premium Status | `premium` | Permanent | `isPremium = true`, kein Ablaufdatum |
+| Client Status | `client` | Permanent | `isClient = true`, kein Ablaufdatum |
+| OCEAN Profil | `big5` | Permanent | OCEAN-Fragebogen freigeschaltet |
+| Einzelner Coach | `{bot-id}` | Permanent | Bot zu `unlockedCoaches` hinzugefügt |
 
 ---
 
@@ -92,14 +120,14 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 | :--- | :--- | :--- |
 | **Guest** (kostenlos) | 4 Bots (Nobody, Gloria, Max, Ava), Chat, Voice, Life Context (lokal), Kalenderexport | Daten gehen bei Browser-Reset verloren; kein TTS, kein Profil, kein DPC |
 | **Registered** (3,90 €/Monat) | + Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature, DPC, PDF-Export, Gamification | Kein Riemann/SD-Profil, kein DPFL, kein Kenji/Chloe |
-| **Premium** (9,90 €/Monat) | + Riemann-Thomann, Spiral Dynamics, DPFL, Comfort Check, Kenji, Chloe | Kein Rob/Victor, keine Transcript Evaluation, kein PEP |
-| **Client** (durch Coach) | + Rob, Victor, Transcript Evaluation mit PDF & Bot-Empfehlungen, PEP | — Vollzugang — |
+| **Premium** (9,90 €/Monat) | + Riemann-Thomann, Spiral Dynamics, DPFL, Comfort Check, Kenji, Chloe, Transcript Evaluation mit PDF & Bot-Empfehlungen | Kein Rob/Victor, kein PEP |
+| **Client** (durch Coach) | + Rob, Victor, PEP Lösungsblockaden | — Vollzugang — |
 
 ### Grundprinzipien
 
 1. **Guest ist kostenlos** — Zum Ausprobieren mit 4 Bots, Chat und Voice. Daten nur lokal → natürlicher Anreiz zur Registrierung.
 2. **Registered (3,90 €/Monat) hat echten Wert** — Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature und DPC. Das ist eine produktiv nutzbare App, kein Teaser. Der Preis deckt Infrastrukturkosten (TTS, Cloud-Storage, Sync) und liegt unter der "Kaffee-pro-Woche"-Schwelle.
-3. **Premium (9,90 €/Monat) lohnt sich für Vertiefer** — Wer über Wochen mit der App arbeitet und tiefer gehen will, bekommt mit Riemann, Spiral Dynamics und DPFL ein sich anpassendes System plus zwei spezialisierte Coaches (Kenji, Chloe).
+3. **Premium (9,90 €/Monat) lohnt sich für Vertiefer** — Wer über Wochen mit der App arbeitet und tiefer gehen will, bekommt mit Riemann, Spiral Dynamics, DPFL und Transcript Evaluation ein umfassendes System plus zwei spezialisierte Coaches (Kenji, Chloe).
 4. **Client ist kein Produkt** — Der Client-Zugang ergänzt eine reale Coaching-Beziehung. Er wird nicht verkauft, sondern vom Coach freigeschaltet.
 
 ### Empfohlene Preisstruktur
@@ -110,7 +138,7 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 | **Registered Monatsabo** | 3,90 €/Monat | Alle Nutzer | Cloud-Sync, TTS, OCEAN, Signature, DPC, PDF |
 | **Registered Einmalzahlung** | 14,90 € (einmalig) | Abo-Skeptiker | Wie Monatsabo, permanent (≈ 4 Monate) |
 | | | **Premium** | |
-| **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Riemann, SD, DPFL, Comfort Check |
+| **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation (PDF & Bot-Empfehlungen) |
 | **Premium 3-Monats-Pass** | 24,90 € | Regelmäßige Nutzer | Wie 1M; ~17% Ersparnis; genug Zeit für DPFL-Lerneffekt |
 | **Premium 1-Jahres-Pass** | 79,90 € | Power-User | Wie 1M; ~33% Ersparnis; stärkste Bindung |
 | **Einzelner Bot-Unlock** | 4,90 € | Gezieltes Interesse | Kenji ODER Chloe permanent (ohne restlichen Premium-Umfang) |
@@ -155,12 +183,64 @@ Registered (3,90 €/Monat oder 14,90 € einmalig)
   → Trigger: Riemann/SD gesperrt, DPFL gesperrt, Kenji/Chloe gesperrt
   ↓
 Premium (9,90 €/Monat oder Pass)
-  → Erlebt: Kenji, Chloe, Riemann, SD, DPFL, Comfort Check
-  → Trigger: Transcript Evaluation gesperrt, Rob/Victor gesperrt
+  → Erlebt: Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation mit PDF & Bot-Empfehlungen
+  → Trigger: Rob/Victor gesperrt, PEP gesperrt
   ↓
 Client (durch Coach vergeben, nicht käuflich)
-  → Erlebt: Alles — Rob, Victor, Transcript Evaluation, PEP
+  → Erlebt: Alles — Rob, Victor, PEP
 ```
+
+### Upgrade-Pfade & Rabatte
+
+Grundprinzip: Frühere Investitionen werden immer anerkannt. Kein Buyer's Remorse.
+
+#### 1. Registered Monatsabo → Premium
+
+Premium *ersetzt* Registered (alle Registered-Features sind in Premium enthalten). Der User kauft einen Premium-Pass und das Monatsabo wird beendet. Die Restlaufzeit des aktuellen Monats wird als Guthaben angerechnet (pro-rata).
+
+- Kein zusätzlicher Rabatt nötig — der User spart die 3,90 €/Monat automatisch
+
+#### 2. Registered Lifetime (14,90 €) → Premium
+
+Loyalty-Rabatt als Anerkennung der Einmalzahlung. Die Registered-Features bleiben permanent aktiv — auch wenn der Premium-Pass abläuft, fällt der User auf Registered Lifetime zurück (nicht auf Guest).
+
+| Premium-Produkt | Normalpreis | Upgrade-Preis | Ersparnis |
+| :--- | ---: | ---: | :--- |
+| **Premium 1-Monats-Pass** | 9,90 € | 7,90 € | ~20% |
+| **Premium 3-Monats-Pass** | 24,90 € | 18,90 € | ~24% |
+| **Premium 1-Jahres-Pass** | 79,90 € | 59,90 € | ~25% |
+
+#### 3. Bot-Unlock (4,90 €) → Premium
+
+Der Einzelbot-Kaufpreis wird als Guthaben auf den ersten Premium-Pass angerechnet.
+
+| Premium-Produkt | Normalpreis | Mit 1 Bot-Unlock | Mit 2 Bot-Unlocks |
+| :--- | ---: | ---: | ---: |
+| **Premium 1-Monats-Pass** | 9,90 € | 5,00 € | 0,10 € |
+| **Premium 3-Monats-Pass** | 24,90 € | 20,00 € | 15,10 € |
+| **Premium 1-Jahres-Pass** | 79,90 € | 75,00 € | 70,10 € |
+
+#### 4. Registered Lifetime + Bot-Unlock → Premium
+
+Für die loyalsten User: Loyalty-Rabatt und Bot-Guthaben werden kumuliert.
+
+| Premium-Produkt | Normalpreis | Lifetime + 1 Bot | Lifetime + 2 Bots |
+| :--- | ---: | ---: | ---: |
+| **Premium 1-Monats-Pass** | 9,90 € | 3,00 € | 0,10 € |
+| **Premium 3-Monats-Pass** | 24,90 € | 14,00 € | 9,10 € |
+| **Premium 1-Jahres-Pass** | 79,90 € | 55,00 € | 50,10 € |
+
+#### 5. Guest → Premium (direkt)
+
+Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart sich die Registered-Kosten und steigt direkt ein.
+
+#### Prinzipien
+
+1. **Kein Buyer's Remorse** — Frühere Investitionen werden als Guthaben oder Rabatt anerkannt
+2. **Fallback-Sicherheit** — Registered Lifetime bleibt aktiv wenn Premium abläuft
+3. **Kumulierbar** — Loyalty-Rabatt und Bot-Guthaben stapeln sich
+4. **Einfach kommunizierbar** — "Deine bisherigen Käufe werden angerechnet"
+5. **Technisch umsetzbar** — PayPal Custom IDs erlauben Tracking früherer Käufe
 
 ### Noch nicht implementiert / Empfehlungen für die Zukunft
 

@@ -208,16 +208,43 @@ router.get('/codes', async (req, res) => {
     }
 });
 
+// Generate a code string, optionally prefixed with the referrer name
+function generateCode(referrer) {
+    const random = crypto.randomBytes(4).toString('hex').toUpperCase();
+    if (referrer && referrer.trim()) {
+        // Sanitize: uppercase, alphanumeric only, max 12 chars
+        const prefix = referrer.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+        return prefix ? `${prefix}-${random}` : random;
+    }
+    return random;
+}
+
+// Check if the referrer column exists in the database (migration may not be applied yet)
+let referrerColumnAvailable = null; // null = unknown, true/false = checked
+async function hasReferrerColumn() {
+    if (referrerColumnAvailable !== null) return referrerColumnAvailable;
+    try {
+        await prisma.$queryRawUnsafe(`SELECT referrer FROM UpgradeCode LIMIT 0`);
+        referrerColumnAvailable = true;
+    } catch {
+        referrerColumnAvailable = false;
+        console.warn('⚠️  UpgradeCode.referrer column not found — run migration 20260215140000_add_referrer_to_upgrade_code');
+    }
+    return referrerColumnAvailable;
+}
+
 // POST /api/admin/codes
 router.post('/codes', async (req, res) => {
-    const { botId } = req.body;
+    const { botId, referrer } = req.body;
     if (!botId) return res.status(400).json({ error: 'botId is required.' });
 
     try {
-        const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-        const newCode = await prisma.upgradeCode.create({
-            data: { code, botId },
-        });
+        const code = generateCode(referrer);
+        const data = { code, botId };
+        if (referrer && referrer.trim() && await hasReferrerColumn()) {
+            data.referrer = referrer.trim();
+        }
+        const newCode = await prisma.upgradeCode.create({ data });
         res.status(201).json(newCode);
     } catch (error) {
         console.error("Admin: Error creating code:", error);
@@ -227,7 +254,7 @@ router.post('/codes', async (req, res) => {
 
 // POST /api/admin/codes/bulk
 router.post('/codes/bulk', async (req, res) => {
-    const { botId, quantity } = req.body;
+    const { botId, quantity, referrer } = req.body;
     
     if (!botId) {
         return res.status(400).json({ error: 'botId is required.' });
@@ -239,16 +266,19 @@ router.post('/codes/bulk', async (req, res) => {
 
     try {
         const codes = [];
+        const trimmedReferrer = referrer && referrer.trim() ? referrer.trim() : null;
+        const canStoreReferrer = trimmedReferrer ? await hasReferrerColumn() : false;
         
         // Generate codes in batch
         for (let i = 0; i < quantity; i++) {
-            const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-            const newCode = await prisma.upgradeCode.create({
-                data: { code, botId },
-            });
+            const code = generateCode(trimmedReferrer);
+            const data = { code, botId };
+            if (trimmedReferrer && canStoreReferrer) data.referrer = trimmedReferrer;
+            const newCode = await prisma.upgradeCode.create({ data });
             codes.push({
                 code: newCode.code,
                 botId: newCode.botId,
+                referrer: newCode.referrer || trimmedReferrer,
                 createdAt: newCode.createdAt,
             });
         }
@@ -287,7 +317,11 @@ router.post('/codes/:id/revoke', async (req, res) => {
             const accessPassTypes = ['ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M'];
             
             if (accessPassTypes.includes(code.botId)) {
-                // Revoke access pass: reset accessExpiresAt to now (effectively expired)
+                // Revoke premium pass: reset isPremium and expire access
+                updateData.isPremium = false;
+                updateData.accessExpiresAt = new Date();
+            } else if (code.botId === 'REGISTERED_LIFETIME') {
+                // Revoke registered lifetime: set expiry to now
                 updateData.accessExpiresAt = new Date();
             } else if (code.botId === 'premium') {
                 updateData.isPremium = false;

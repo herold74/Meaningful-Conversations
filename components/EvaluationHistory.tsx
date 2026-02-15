@@ -228,8 +228,8 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                                 {t('te_history_view_details') || 'Details anzeigen'}
                                             </button>
 
-                                            {/* PDF Export - für Clients, Admins und Developers */}
-                                            {(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper) && (
+                                            {/* PDF Export - für Premium, Clients, Admins und Developers */}
+                                            {(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper) && (
                                                 <button
                                                     onClick={(e) => handleExportPDF(evalItem, e)}
                                                     disabled={exportingId === evalItem.id}

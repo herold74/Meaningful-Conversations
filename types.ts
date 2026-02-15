@@ -133,6 +133,7 @@ export interface UpgradeCode {
     id: string;
     code: string;
     botId: string;
+    referrer?: string;
     isUsed: boolean;
     createdAt: string;
     usedBy?: { email: string };

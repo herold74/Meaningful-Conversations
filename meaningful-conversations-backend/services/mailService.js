@@ -188,10 +188,11 @@ const sendPasswordResetEmail = async (email, token, lang = 'en') => {
 // Product names for emails
 const getProductName = (botId) => {
   const names = {
-    'ACCESS_PASS_1M': { de: '1-Monats-Zugangspass', en: '1-Month Access Pass' },
-    'ACCESS_PASS_3M': { de: '3-Monats-Zugangspass', en: '3-Month Access Pass' },
-    'ACCESS_PASS_1Y': { de: '1-Jahres-Zugangspass', en: '1-Year Access Pass' },
-    'kenji-adhd': { de: 'Kenji - Stoischer Coach', en: 'Kenji - Stoic Coach' },
+    'REGISTERED_LIFETIME': { de: 'Registered Lifetime-Zugang', en: 'Registered Lifetime Access' },
+    'ACCESS_PASS_1M': { de: 'Premium 1-Monats-Pass', en: 'Premium 1-Month Pass' },
+    'ACCESS_PASS_3M': { de: 'Premium 3-Monats-Pass', en: 'Premium 3-Month Pass' },
+    'ACCESS_PASS_1Y': { de: 'Premium 1-Jahres-Pass', en: 'Premium 1-Year Pass' },
+    'kenji-stoic': { de: 'Kenji - Stoischer Coach', en: 'Kenji - Stoic Coach' },
     'chloe-cbt': { de: 'Chloe - Reflektions-Coach', en: 'Chloe - Reflection Coach' }
   };
   return names[botId] || { de: botId, en: botId };

@@ -190,17 +190,17 @@ export const getUpgradeCodes = async (): Promise<UpgradeCode[]> => {
     return await apiFetch('/admin/codes');
 };
 
-export const createUpgradeCode = async (botId: string): Promise<UpgradeCode> => {
+export const createUpgradeCode = async (botId: string, referrer?: string): Promise<UpgradeCode> => {
     return await apiFetch('/admin/codes', {
         method: 'POST',
-        body: JSON.stringify({ botId }),
+        body: JSON.stringify({ botId, referrer: referrer || undefined }),
     });
 };
 
-export const createBulkUpgradeCodes = async (botId: string, quantity: number): Promise<{ codes: Array<{ code: string; botId: string; createdAt: string }>; count: number }> => {
+export const createBulkUpgradeCodes = async (botId: string, quantity: number, referrer?: string): Promise<{ codes: Array<{ code: string; botId: string; referrer?: string; createdAt: string }>; count: number }> => {
     return await apiFetch('/admin/codes/bulk', {
         method: 'POST',
-        body: JSON.stringify({ botId, quantity }),
+        body: JSON.stringify({ botId, quantity, referrer: referrer || undefined }),
     });
 };
 
