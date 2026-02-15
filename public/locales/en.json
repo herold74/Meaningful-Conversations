@@ -1664,7 +1664,7 @@
   "te_premium_required": "Premium access required",
   "te_tools_section": "Tools",
 
-  "te_pre_title": "Pre-Reflection",
+  "te_pre_title": "Starting Point",
   "te_pre_subtitle": "Answer these questions before submitting the transcript.",
   "te_pre_situation_label": "Name of the situation",
   "te_pre_situation_placeholder": "e.g., Q1 Team Meeting, Feedback session with colleague, Client presentation...",
@@ -1776,5 +1776,17 @@
   "admin_te_ratings_filter_contact": "Contact Requested",
   "admin_ratings_session_feedback": "Session Feedback (Coaches)",
   
-  "delete": "Delete"
+  "delete": "Delete",
+
+  "interview_transcript_title": "Interview Results",
+  "interview_transcript_loading": "Generating summary and transcript...",
+  "interview_transcript_error": "An error occurred while generating the transcript. Please try again.",
+  "interview_transcript_summary": "Summary",
+  "interview_transcript_setup": "Interview Setup",
+  "interview_transcript_full": "Smoothed Interview",
+  "interview_transcript_download_all": "Download Complete",
+  "interview_transcript_copy": "Copy",
+  "interview_transcript_copied": "Copied!",
+  "interview_transcript_download": "Download",
+  "interview_transcript_back": "Back to Coach Selection"
 }

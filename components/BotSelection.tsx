@@ -31,7 +31,9 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
     // Nobody (nexus-gps) doesn't support DPFL - show DPC instead
     // DPFL requires full coaching sessions which Nobody doesn't conduct
-    const effectiveCoachingMode = (bot.id === 'nexus-gps' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+    // Gloria Interview has no coaching integration at all - never show badge
+    const isNonCoachingBot = bot.id === 'gloria-interview';
+    const effectiveCoachingMode = isNonCoachingBot ? undefined : (bot.id === 'nexus-gps' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
     // Show coaching mode badge for all bots if profile exists and mode is active
     const showCoachingBadge = hasPersonalityProfile && effectiveCoachingMode && effectiveCoachingMode !== 'off' && !isLocked;
     
@@ -174,7 +176,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         };
 
         const availableBots: BotWithAvailability[] = fetchedBots
-          .filter(bot => bot.id !== 'g-interviewer') // Filter out the hidden interview bot
+          .filter(bot => bot.id !== 'gloria-life-context') // Filter out the hidden interview bot
           .map(bot => {
             const requiredLevel = accessHierarchy[bot.accessTier];
             const userLevel = accessHierarchy[userAccessLevel];
@@ -224,7 +226,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const unlockMessage = getUnlockMessage();
   
   // Kategorisierung nach Themen
-  const kommunikationBotIds = ['nexus-gps']; // Nobody
+  const kommunikationBotIds = ['nexus-gps', 'gloria-interview']; // Nobody + Gloria Interview
   const coachingBotIds = ['max-ambitious', 'ava-strategic', 'kenji-stoic', 'chloe-cbt'];
   const clientOnlyBotIds = ['rob', 'victor-bowen'];
   
@@ -282,47 +284,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               />
             ))}
             
-            {/* Transcript Evaluation Card - nur auf Web */}
-            {!isNativeApp() && (() => {
-              const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-              const desktop = isDesktopWeb();
-              const locked = !isPremiumPlus || !desktop;
-              const lockReason = !isPremiumPlus ? t('te_premium_required') : !desktop ? t('te_desktop_only') : '';
-
-              return (
-                <div
-                  onClick={() => !locked && onTranscriptEval?.()}
-                  className={`
-                    relative flex items-center gap-5 p-6 rounded-lg border transition-all
-                    ${locked
-                      ? 'cursor-not-allowed opacity-60 bg-background-primary dark:bg-background-primary/50 border-border-primary'
-                      : 'cursor-pointer bg-background-secondary dark:bg-transparent border-border-primary hover:border-accent-primary hover:shadow-xl hover:-translate-y-1 shadow-md'
-                    }
-                  `}
-                >
-                  {/* Icon */}
-                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center text-3xl ${locked ? 'bg-gray-200 dark:bg-gray-700' : 'bg-accent-primary/10'}`}>
-                    {locked ? (
-                      <LockIcon className="w-8 h-8 text-content-secondary" />
-                    ) : (
-                      <span>📋</span>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-content-primary">{t('te_title')}</h3>
-                    <p className="text-sm text-content-secondary mt-1">{t('te_description')}</p>
-                    {locked && lockReason && (
-                      <p className="text-xs text-status-warning-foreground mt-2 font-semibold">
-                        🔒 {lockReason}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-            
             {/* Locked Kommunikation Bots */}
             {lockedKommunikationBots.map((bot) => (
               <BotCard 
@@ -335,6 +296,43 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               />
             ))}
           </div>
+
+          {/* Transcript Evaluation — slim inline option, web only */}
+          {!isNativeApp() && (() => {
+            const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+            const desktop = isDesktopWeb();
+            const locked = !isPremiumPlus || !desktop;
+            const lockReason = !isPremiumPlus ? t('te_premium_required') : !desktop ? t('te_desktop_only') : '';
+
+            return (
+              <div className="max-w-4xl mx-auto mt-4">
+                <div
+                  onClick={() => !locked && onTranscriptEval?.()}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-lg border transition-all
+                    ${locked
+                      ? 'cursor-not-allowed opacity-50 border-border-primary bg-background-primary/30 dark:bg-background-primary/20'
+                      : 'cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-sm hover:shadow-md'
+                    }
+                  `}
+                >
+                  <span className="text-xl flex-shrink-0">{locked ? '🔒' : '📋'}</span>
+                  <span className={`text-base font-semibold ${locked ? 'text-content-secondary' : 'text-content-primary'}`}>
+                    {t('te_title')}
+                  </span>
+                  <span className="text-sm text-content-secondary hidden sm:inline">{t('te_description')}</span>
+                  {locked && lockReason && (
+                    <span className="text-xs text-status-warning-foreground ml-auto font-semibold whitespace-nowrap">
+                      {lockReason}
+                    </span>
+                  )}
+                  {!locked && (
+                    <span className="ml-auto text-content-secondary text-sm">→</span>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
         {/* 2. Coaching Section — Silver */}

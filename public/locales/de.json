@@ -1663,7 +1663,7 @@
   "te_premium_required": "Premium-Zugang erforderlich",
   "te_tools_section": "Werkzeuge",
 
-  "te_pre_title": "Vorreflexion",
+  "te_pre_title": "Ausgangslage",
   "te_pre_subtitle": "Beantworte diese Fragen, bevor du das Transkript einreichst.",
   "te_pre_situation_label": "Bezeichnung der Situation",
   "te_pre_situation_placeholder": "z.B. Teammeeting Q1, Feedbackgespräch mit Kollege, Kundenpräsentation...",
@@ -1775,5 +1775,17 @@
   "admin_te_ratings_filter_contact": "Kontaktwunsch",
   "admin_ratings_session_feedback": "Sitzungs-Feedback (Coaches)",
   
-  "delete": "Löschen"
+  "delete": "Löschen",
+
+  "interview_transcript_title": "Interview-Ergebnisse",
+  "interview_transcript_loading": "Zusammenfassung und Transkript werden erstellt...",
+  "interview_transcript_error": "Beim Erstellen des Transkripts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+  "interview_transcript_summary": "Zusammenfassung",
+  "interview_transcript_setup": "Interview Setup",
+  "interview_transcript_full": "Geglättetes Interview",
+  "interview_transcript_download_all": "Alles herunterladen",
+  "interview_transcript_copy": "Kopieren",
+  "interview_transcript_copied": "Kopiert!",
+  "interview_transcript_download": "Herunterladen",
+  "interview_transcript_back": "Zurück zur Coach-Auswahl"
 }

@@ -128,6 +128,18 @@ export const rateTranscriptEvaluation = async (
     });
 };
 
+export const generateInterviewTranscript = async (
+    history: Message[],
+    lang: Language,
+    userName?: string
+): Promise<{ summary: string; setup: string; transcript: string }> => {
+    const response = await apiFetch('/gemini/interview/transcript', {
+        method: 'POST',
+        body: JSON.stringify({ history, lang, userName }),
+    });
+    return { summary: response.summary, setup: response.setup, transcript: response.transcript };
+};
+
 export const generateContextFromInterview = async (
     history: Message[],
     lang: Language

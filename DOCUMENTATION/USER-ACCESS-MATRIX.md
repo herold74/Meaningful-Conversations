@@ -32,6 +32,7 @@ This document outlines the different user types within the Meaningful Conversati
 | Gamification (XP, Levels) | ✅ (Local) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Management & Kommunikation** | | | | | | |
 | **Nobody** (GPS, Problemlösung) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Gloria Interview** (Strukturierte Interviews) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria** (Onboarding) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Coaching Bots** | | | | | | |
 | **Max** (Ambitioniert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -64,7 +65,7 @@ Die App gruppiert Bots in drei Sektionen mit visuellem Farbschema:
 
 | Sektion | Farbschema | Bots | Besonderheit |
 | :--- | :--- | :--- | :--- |
-| **Management & Kommunikation** | Bronze | Nobody | Kein Coaching — GPS-Ansatz, Problemlösung, Kommunikationsanalyse |
+| **Management & Kommunikation** | Bronze | Nobody, Gloria Interview | Kein Coaching — GPS-Ansatz, Problemlösung, Kommunikationsanalyse, strukturierte Interviews |
 | **Coaching** | Silver | Max, Ava (Guest), Kenji, Chloe (Premium) | Persönlichkeitsentwicklung und Zielerreichung |
 | **Exklusiv für Klienten** | Gold | Rob, Victor | Nur mit manualmode.at Coaching-Beziehung |
 
@@ -118,8 +119,8 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 
 | Stufe | Wert für den Nutzer | Anreiz zum Upgrade |
 | :--- | :--- | :--- |
-| **Guest** (kostenlos) | 4 Bots (Nobody, Gloria, Max, Ava), Chat, Voice, Life Context (lokal), Kalenderexport | Daten gehen bei Browser-Reset verloren; kein TTS, kein Profil, kein DPC |
-| **Registered** (3,90 €/Monat) | + Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature, DPC, PDF-Export, Gamification | Kein Riemann/SD-Profil, kein DPFL, kein Kenji/Chloe |
+| **Guest** (kostenlos) | 4 Bots (Nobody, Gloria, Max, Ava), Chat, Voice, Life Context (lokal), Kalenderexport | Daten gehen bei Browser-Reset verloren; kein TTS, kein Profil, kein DPC, kein Gloria Interview |
+| **Registered** (3,90 €/Monat) | + Gloria Interview, Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature, DPC, PDF-Export, Gamification | Kein Riemann/SD-Profil, kein DPFL, kein Kenji/Chloe |
 | **Premium** (9,90 €/Monat) | + Riemann-Thomann, Spiral Dynamics, DPFL, Comfort Check, Kenji, Chloe, Transcript Evaluation mit PDF & Bot-Empfehlungen | Kein Rob/Victor, kein PEP |
 | **Client** (durch Coach) | + Rob, Victor, PEP Lösungsblockaden | — Vollzugang — |
 
@@ -175,7 +176,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 
 ```
 Guest (kostenlos, sofort nutzbar)
-  → Erlebt: Nobody, Max, Ava, Gloria, Chat, Voice, Life Context (lokal)
+  → Erlebt: Nobody, Max, Ava, Gloria, Chat, Voice, Life Context (lokal) — kein Gloria Interview
   → Trigger: "Daten nur im Browser" + kein TTS + kein Profil
   ↓
 Registered (3,90 €/Monat oder 14,90 € einmalig)

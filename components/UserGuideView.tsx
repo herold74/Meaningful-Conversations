@@ -367,6 +367,9 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. 
 **Ihr Guide:**
 - **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
 
+**Ihre Interviewerin:**
+- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
+
 **Ihre Coaches:**
 - **Max** -- Motivierender Coach, der Ihnen hilft, größer zu denken und Ihr Potenzial freizusetzen
 - **Ava** -- Strategische Beraterin für Entscheidungsfindung und Prioritätenmanagement
@@ -394,6 +397,37 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 **Beispiel-Situationen:** "Ich habe ein konkretes Problem und muss meine nächsten Schritte definieren." / "Ich möchte mich auf ein Gespräch vorbereiten." / "Ich brauche jemanden, der mir hilft, eine erlebte Situation effizient zu reflektieren."
 
 **Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Gloria -- Strukturiert, Fragend, Fokussiert (Registriert)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Gloria ist eine professionelle Interviewerin -- kein Coach. Sie führt strukturierte Interviews, die Ihnen helfen, Ihre Ideen, Projekte, Abläufe oder Konzepte durch gezielte Fragen zu artikulieren und zu durchdenken.
+
+**Ablauf:**
+1. **Auftragsklärung:** Gloria fragt nacheinander nach dem Thema, der geplanten Dauer und eventuellen besonderen Perspektiven (z.B. "Interviewe mich als potenzieller Investor").
+2. **Bestätigung:** Sie fasst den Auftrag in der Ich-Perspektive zusammen, bevor das Interview beginnt.
+3. **Interview:** Systematische Erkundung des Themas mit jeweils einer Frage pro Nachricht, Nachfragen bei interessanten Punkten und periodischen Zusammenfassungen.
+4. **Abschluss:** Am Ende der Sitzung erhalten Sie eine **Interview-Auswertung** mit drei Abschnitten:
+   - **Zusammenfassung** -- Die wichtigsten Erkenntnisse auf einen Blick
+   - **Interview Setup** -- Übersicht der vereinbarten Parameter (Thema, Dauer, Perspektive)
+   - **Geglättetes Interview** -- Das vollständige Transkript, sprachlich bereinigt und klar formatiert
+
+**Export:** Alle Abschnitte können einzeln kopiert oder als vollständige Markdown-Datei (.md) heruntergeladen werden.
+
+**Anpassbar:** Sie können Gloria bitten, Tempo, Antwortlänge oder Frageanzahl pro Nachricht zu ändern.
+
+**Ideal für:**
+- Ideen strukturiert durchdenken und artikulieren
+- Projekte oder Konzepte aus verschiedenen Perspektiven beleuchten
+- Ein dokumentiertes Interview als Grundlage für Texte, Präsentationen oder Entscheidungen erstellen
+- Abläufe und Workflows beschreiben und hinterfragen
+
+**Beispiel-Situationen:** "Ich möchte meine App-Idee aus Investorensicht durchleuchten." / "Interviewe mich zu meinem Projektkonzept für eine Präsentation." / "Ich möchte einen Workflow beschreiben und dabei Schwachstellen aufdecken."
+
+**Zugang:** Registrierte Benutzer
 </div>
 </details>
 
@@ -1046,6 +1080,9 @@ On the **Select a Coach** screen, you'll see a list of available coaches. Each c
 **Your Guide:**
 - **Nobody** -- Your pragmatic sparring partner for management and communication topics
 
+**Your Interviewer:**
+- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
+
 **Your Coaches:**
 - **Max** -- Motivational coach who helps you think bigger and unlock your potential
 - **Ava** -- Strategic advisor for decision-making and priority management
@@ -1073,6 +1110,37 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 **Example Situations:** "I have a specific problem and need to define my next steps." / "I want to prepare for a conversation." / "I need someone to help me efficiently reflect on a situation I experienced."
 
 **Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Gloria -- Structured, Inquisitive, Focused (Registered)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Gloria is a professional interviewer -- not a coach. She conducts structured interviews that help you articulate and think through your ideas, projects, workflows, or concepts through targeted questions.
+
+**How It Works:**
+1. **Setup:** Gloria asks one question at a time about the topic, planned duration, and any special perspectives (e.g., "Interview me as a potential investor").
+2. **Confirmation:** She summarizes the assignment in first person before starting the interview.
+3. **Interview:** Systematic exploration of the topic with one question per message, follow-ups on interesting points, and periodic summaries.
+4. **Conclusion:** At the end of the session, you receive an **Interview Review** with three sections:
+   - **Summary** -- Key insights at a glance
+   - **Interview Setup** -- Overview of the agreed parameters (topic, duration, perspective)
+   - **Smoothed Interview** -- The complete transcript, linguistically cleaned up and clearly formatted
+
+**Export:** All sections can be copied individually or downloaded as a complete Markdown file (.md).
+
+**Adjustable:** You can ask Gloria to change the pace, answer length, or number of questions per message.
+
+**Ideal for:**
+- Structuring and articulating ideas
+- Examining projects or concepts from different perspectives
+- Creating a documented interview as a basis for texts, presentations, or decisions
+- Describing and questioning workflows and processes
+
+**Example Situations:** "I want to examine my app idea from an investor's perspective." / "Interview me about my project concept for a presentation." / "I want to describe a workflow and uncover weak points."
+
+**Access:** Registered users
 </div>
 </details>
 

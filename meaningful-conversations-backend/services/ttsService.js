@@ -38,7 +38,7 @@ function getVoiceForBot(botId, lang) {
     // Bot-specific gender assignment (matches ChatView.tsx logic)
     if (lang === 'en') {
         switch (botId) {
-            case 'g-interviewer':
+            case 'gloria-life-context':
             case 'ava-strategic':
             case 'chloe-cbt':
                 gender = 'female';
@@ -56,7 +56,7 @@ function getVoiceForBot(botId, lang) {
     }
     // For German, check if voice model exists for gender
     else if (lang === 'de') {
-        const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-cbt'];
+        const femaleBotsDE = ['gloria-life-context', 'ava-strategic', 'chloe-cbt'];
         gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
     }
     
