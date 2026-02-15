@@ -114,6 +114,22 @@ if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" ]]; then
     exit 1
 fi
 
+# Block production builds — production MUST use pre-built staging images
+if [[ "$ENVIRONMENT" == "production" ]]; then
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED}ERROR: Production deployments must NOT rebuild images!${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${YELLOW}Principle: \"Build once, deploy everywhere\"${NC}"
+    echo -e "${YELLOW}Production must use the same images already tested on staging.${NC}"
+    echo ""
+    echo -e "${GREEN}Use instead:${NC}"
+    echo -e "  ${BLUE}./scripts/deploy-production-scheduled.sh${NC}           # Version from package.json"
+    echo -e "  ${BLUE}./scripts/deploy-production-scheduled.sh 1.8.9${NC}    # Specific version"
+    echo ""
+    exit 1
+fi
+
 # Validate component
 if [[ "$COMPONENT" != "all" && "$COMPONENT" != "frontend" && "$COMPONENT" != "backend" && "$COMPONENT" != "tts" ]]; then
     echo -e "${RED}Error: Component must be 'all', 'frontend', 'backend', or 'tts'${NC}"
