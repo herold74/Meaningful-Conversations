@@ -324,11 +324,10 @@ export interface TranscriptRating {
     isPremium: boolean;
     rating: number;
     feedback: string | null;
+    contactOptIn: boolean;
     ratedAt: string;
     createdAt: string;
     lang: string;
-    goal: string;
-    overallScore: number;
 }
 
 export interface TranscriptRatingStats {

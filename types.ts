@@ -167,11 +167,26 @@ export interface CalendarEvent {
 
 // Transcript Evaluation types
 export interface TranscriptPreAnswers {
+    situationName: string;
     goal: string;
     personalTarget: string;
     assumptions: string;
     satisfaction: number; // 1-5
     difficult?: string;
+}
+
+export interface BotRecommendationEntry {
+    botId: string;
+    botName: string;
+    rationale: string;
+    examplePrompt: string;
+    requiredTier: 'guest' | 'premium' | 'client';
+}
+
+export interface BotRecommendation {
+    developmentArea: string;
+    primary: BotRecommendationEntry;
+    secondary: BotRecommendationEntry;
 }
 
 export interface TranscriptEvaluationResult {
@@ -184,12 +199,14 @@ export interface TranscriptEvaluationResult {
     strengths: string[];
     developmentAreas: string[];
     nextSteps: { action: string; rationale: string }[];
+    botRecommendations?: BotRecommendation[];
     contextUpdates: ProposedUpdate[];
     overallScore: number; // 1-10
     // User rating fields
     id?: string;
     userRating?: number | null;
     userFeedback?: string | null;
+    contactOptIn?: boolean;
 }
 
 export interface TranscriptEvaluationResponse {
@@ -210,4 +227,5 @@ export interface TranscriptEvaluationSummary {
     // User rating fields
     userRating?: number | null;
     userFeedback?: string | null;
+    contactOptIn?: boolean;
 }

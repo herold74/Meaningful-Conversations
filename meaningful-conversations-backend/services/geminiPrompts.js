@@ -485,12 +485,47 @@ const transcriptEvaluationSchema = {
                 required: ['type', 'headline', 'content']
             }
         },
+        botRecommendations: {
+            type: 'ARRAY',
+            description: 'For each development area, recommend a primary and secondary coaching profile from the available bot catalog. Match the bot\'s specialization to the development need.',
+            items: {
+                type: 'OBJECT',
+                properties: {
+                    developmentArea: { type: 'STRING', description: 'The exact development area text this recommendation addresses (must match an entry from developmentAreas).' },
+                    primary: {
+                        type: 'OBJECT',
+                        description: 'The best-fit coaching profile for this development area.',
+                        properties: {
+                            botId: { type: 'STRING', description: 'The exact bot ID (e.g., "ava-strategic", "chloe-cbt").' },
+                            botName: { type: 'STRING', description: 'The display name of the bot (e.g., "Ava", "Chloe").' },
+                            rationale: { type: 'STRING', description: 'A 1-2 sentence explanation why this bot is the best fit for the development area.' },
+                            examplePrompt: { type: 'STRING', description: 'A concrete, copy-paste-ready conversation starter the user could use to begin a session addressing this development area.' },
+                            requiredTier: { type: 'STRING', description: 'The access tier required: "guest", "premium", or "client".' }
+                        },
+                        required: ['botId', 'botName', 'rationale', 'examplePrompt', 'requiredTier']
+                    },
+                    secondary: {
+                        type: 'OBJECT',
+                        description: 'An alternative coaching profile that could also help with this development area, offering a different approach.',
+                        properties: {
+                            botId: { type: 'STRING', description: 'The exact bot ID (e.g., "nexus-gps", "victor-bowen").' },
+                            botName: { type: 'STRING', description: 'The display name of the bot (e.g., "Nobody", "Victor").' },
+                            rationale: { type: 'STRING', description: 'A 1-2 sentence explanation why this bot offers a valuable alternative approach.' },
+                            examplePrompt: { type: 'STRING', description: 'A concrete, copy-paste-ready conversation starter for this alternative bot.' },
+                            requiredTier: { type: 'STRING', description: 'The access tier required: "guest", "premium", or "client".' }
+                        },
+                        required: ['botId', 'botName', 'rationale', 'examplePrompt', 'requiredTier']
+                    }
+                },
+                required: ['developmentArea', 'primary', 'secondary']
+            }
+        },
         overallScore: {
             type: 'INTEGER',
             description: 'Overall effectiveness score from 1-10, calculated as: Goal Alignment Score + Behavioral Alignment Score. Example: Goal=4, Behavioral=5 → Overall=9. Do NOT include the user\'s self-rating (satisfaction) in this score.'
         }
     },
-    required: ['summary', 'goalAlignment', 'behavioralAlignment', 'assumptionCheck', 'calibration', 'personalityInsights', 'strengths', 'developmentAreas', 'nextSteps', 'contextUpdates', 'overallScore']
+    required: ['summary', 'goalAlignment', 'behavioralAlignment', 'assumptionCheck', 'calibration', 'personalityInsights', 'strengths', 'developmentAreas', 'nextSteps', 'botRecommendations', 'contextUpdates', 'overallScore']
 };
 
 const transcriptEvaluationPrompts = {
@@ -548,9 +583,20 @@ ${transcript}
 
 8. **Next Steps:** Provide 2-4 concrete, actionable recommendations with clear rationale tied to your findings.
 
-9. **Context Updates:** If the user has a Life Context, propose updates that capture significant new insights from this evaluation. Follow the hierarchical headline format (e.g., "Career & Work > Challenges"). ${docLang === 'de' ? 'Write context updates in German.' : 'Write context updates in English.'}
+9. **Bot Recommendations:** For each development area, recommend a primary and secondary coaching profile from the catalog below. Include the exact botId, a 1-2 sentence rationale why this bot fits, and a concrete example conversation starter the user could copy-paste to begin a session addressing this development area. Ensure the primary and secondary bots are different. Always use the SAME language as the evaluation output for rationale and examplePrompt.
 
-10. **Overall Score (1-10):** A holistic assessment considering goal alignment, behavioral alignment, strengths, and development areas. **Do NOT consider the user's self-rating (satisfaction) in this score** — that's purely for calibration purposes. Base the overall score on objective evidence from the transcript.
+**Available Coaching Profiles:**
+- Nobody (nexus-gps, guest): Pragmatic management advisor and communication strategist, GPS method. For: management and communication topics, concrete problem-solving, next steps, conversation preparation.
+- Max (max-ambitious, guest): Inspiring, questioning, reflective. For: potential, motivation, new perspectives, confidence.
+- Ava (ava-strategic, guest): Strategic, decisive, organized. For: prioritization, planning, complex decisions, organizational topics.
+- Kenji (kenji-stoic, premium): Stoic, composed, wise. For: stress, perspective shifts, inner calm, philosophical reflection.
+- Chloe (chloe-cbt, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
+- Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
+- Victor (victor-bowen, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.
+
+10. **Context Updates:** If the user has a Life Context, propose updates that capture significant new insights from this evaluation. Follow the hierarchical headline format (e.g., "Career & Work > Challenges"). ${docLang === 'de' ? 'Write context updates in German.' : 'Write context updates in English.'}
+
+11. **Overall Score (1-10):** A holistic assessment considering goal alignment, behavioral alignment, strengths, and development areas. **Do NOT consider the user's self-rating (satisfaction) in this score** — that's purely for calibration purposes. Base the overall score on objective evidence from the transcript.
 
 **IMPORTANT: Calculate the overall score as follows:**
 - Overall Score = Goal Alignment Score + Behavioral Alignment Score
@@ -616,9 +662,20 @@ ${transcript}
 
 8. **Nächste Schritte:** 2-4 konkrete, umsetzbare Empfehlungen mit klarer Begründung.
 
-9. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlage Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwende das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreibe Kontext-Updates auf Deutsch.' : 'Schreibe Kontext-Updates auf Englisch.'}
+9. **Bot-Empfehlungen:** Empfehle für jeden Entwicklungsbereich ein primäres und ein sekundäres Coaching-Profil aus dem unten stehenden Katalog. Gib die exakte botId an, eine 1-2 Satz Begründung warum dieser Bot passt, und einen konkreten Gesprächseinstieg, den der Benutzer kopieren und einfügen kann. Primärer und sekundärer Bot müssen unterschiedlich sein. Schreibe Begründung und Gesprächseinstieg in derselben Sprache wie die restliche Bewertung.
 
-10. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung von Zielerreichung, Verhaltensausrichtung, Stärken und Entwicklungsbereichen. **Berücksichtige NICHT die Selbstbewertung (Zufriedenheit) in dieser Bewertung** — diese dient ausschließlich zur Kalibrierung. Basiere die Gesamtbewertung auf objektiven Belegen aus dem Transkript.
+**Verfügbare Coaching-Profile:**
+- Nobody (nexus-gps, guest): Pragmatischer Management-Berater und Kommunikationsstratege, GPS-Methode. Für: Management- und Kommunikationsthemen, konkretes Problem-Solving, nächste Schritte, Gesprächsvorbereitung.
+- Max (max-ambitious, guest): Inspirierend, fragend, reflektiv. Für: Potenzial, Motivation, neue Perspektiven, Selbstvertrauen.
+- Ava (ava-strategic, guest): Strategisch, entscheidungsstark, organisiert. Für: Priorisierung, Planung, komplexe Entscheidungen, organisatorische Themen.
+- Kenji (kenji-stoic, premium): Stoisch, gelassen, weise. Für: Stress, Perspektivwechsel, innere Ruhe, philosophische Reflexion.
+- Chloe (chloe-cbt, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
+- Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotage-Muster, emotionale Resilienz, innere Blockaden.
+- Victor (victor-bowen, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.
+
+10. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlage Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwende das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreibe Kontext-Updates auf Deutsch.' : 'Schreibe Kontext-Updates auf Englisch.'}
+
+11. **Gesamtbewertung (1-10):** Eine ganzheitliche Einschätzung unter Berücksichtigung von Zielerreichung, Verhaltensausrichtung, Stärken und Entwicklungsbereichen. **Berücksichtige NICHT die Selbstbewertung (Zufriedenheit) in dieser Bewertung** — diese dient ausschließlich zur Kalibrierung. Basiere die Gesamtbewertung auf objektiven Belegen aus dem Transkript.
 
 **WICHTIG: Berechne die Gesamtbewertung wie folgt:**
 - Gesamtbewertung = Zielübereinstimmung Score + Verhaltensübereinstimmung Score

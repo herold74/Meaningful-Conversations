@@ -248,24 +248,24 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
       </div>
 
       <div className="space-y-12">
-        {/* 1. Kommunikation Section */}
+        {/* 1. Kommunikation Section — Bronze */}
         <section className="w-full max-w-6xl mx-auto">
           {/* Section Divider */}
           <div className="mb-6">
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#CD7F32]/50 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#CD7F32]/10 dark:bg-[#CD7F32]/15 border border-[#CD7F32]/30 dark:border-[#CD7F32]/40">
                 <span className="text-lg">💬</span>
                 <div className="text-center">
-                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  <div className="text-sm font-semibold text-[#8B5A2B] dark:text-[#D4944C]">
                     {t('botSelection_section_kommunikation')}
                   </div>
-                  <div className="text-xs text-gray-700 dark:text-gray-300">
+                  <div className="text-xs text-[#8B5A2B]/80 dark:text-[#D4944C]/80">
                     {t('botSelection_section_kommunikation_desc')}
                   </div>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#CD7F32]/50 to-transparent"></div>
             </div>
           </div>
           
@@ -337,24 +337,24 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           </div>
         </section>
 
-        {/* 2. Coaching Section */}
+        {/* 2. Coaching Section — Silver */}
         <section className="w-full max-w-6xl mx-auto">
           {/* Section Divider */}
           <div className="mb-6">
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-400 dark:via-slate-500 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600">
                 <span className="text-lg">🎯</span>
                 <div className="text-center">
-                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     {t('botSelection_section_coaching')}
                   </div>
-                  <div className="text-xs text-gray-700 dark:text-gray-300">
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
                     {t('botSelection_section_coaching_desc')}
                   </div>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-400 dark:via-gray-500 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-400 dark:via-slate-500 to-transparent"></div>
             </div>
           </div>
           

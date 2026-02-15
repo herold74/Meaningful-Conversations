@@ -636,7 +636,7 @@ const App: React.FC = () => {
         else {
             try {
                 const filename = generateSurveyPdfFilename(result.path, language);
-                await generatePDF(result, filename, language);
+                await generatePDF(result, filename, language, currentUser?.email);
                 alert(t('personality_survey_success_downloaded'));
                 
                 // Navigate back to chat

@@ -1,9 +1,9 @@
 # DSGVO-KONFORMITAETSPRUEFUNG
 ## Meaningful Conversations App
 
-**Pruefungsdatum:** 10. Februar 2026  
-**Gepruefte Version:** 1.8.4  
-**Vorherige Pruefung:** 16. Dezember 2025 (v1.7.0)  
+**Pruefungsdatum:** 15. Februar 2026  
+**Gepruefte Version:** 1.8.8  
+**Vorherige Pruefung:** 10. Februar 2026 (v1.8.4)  
 **Betreiber-Standort:** Oesterreich  
 **Server-Standort:** Hetzner, Deutschland (EU)  
 **Zustaendige Behoerde:** Datenschutzbehoerde Oesterreich (https://www.dsb.gv.at/)
@@ -190,7 +190,46 @@
   - Nutzer koennen Transkripte direkt nach der Sitzung herunterladen
 - **Vorteil:** Weitere Datenminimierung (Art. 5 Abs. 1 lit. c DSGVO)
 
-### 17. Daten-Retention Service (NEU v1.8.2)
+### 17. Transcript Evaluation Feature (NEU v1.8.7)
+- **Status:** DSGVO-KONFORM
+- **Funktion:** Premium-Nutzer koennen Gespraechstranskripte fuer KI-gestuetzte Kommunikationsanalyse hochladen
+- **Datenverarbeitung:**
+  - **Eingabe:** Nutzer laedt Transkript hoch (Text/SRT) + Vorreflexions-Antworten (inkl. Situationsname)
+  - **KI-Analyse:** Transkript wird an Google Gemini API gesendet (durch bestehende Google Cloud DPA abgedeckt)
+  - **Speicherung:**
+    - **Gespeichert:** Vorreflexions-Antworten (inkl. `situationName`) + KI-Auswertungsergebnisse (strukturiertes JSON, inkl. `botRecommendations`)
+    - **NICHT gespeichert:** Original-Transkripttext (nach Analyse geloescht)
+  - **Aufbewahrung:** Auswertungen bleiben bis der Nutzer sie loescht
+  - **Nutzerrechte:** Nutzer koennen Auswertungen jederzeit ueber die UI loeschen (Delete-Button in History)
+- **Datenbank-Schema (TranscriptEvaluation):**
+  - `userId` -- Fremdschluessel zur User-Tabelle (ON DELETE CASCADE)
+  - `preAnswers` -- JSON: situationName, goal, personalTarget, assumptions, satisfaction, difficult (TEXT)
+  - `evaluationData` -- JSON: strukturiertes KI-Auswertungsergebnis inkl. botRecommendations (TEXT)
+  - `lang` -- Sprachcode (de/en)
+  - `userRating` -- Optionale NPS-Bewertung (0-10)
+  - `userFeedback` -- Optionales Freitext-Feedback
+  - `contactOptIn` -- Opt-In fuer Kontaktaufnahme durch Admin (Boolean, Standard: false)
+  - `ratedAt`, `createdAt` -- Zeitstempel
+- **GDPR-spezifische Massnahmen:**
+  - **Admin-Sichtbarkeit (Art. 5 Abs. 1 lit. c DSGVO -- Datenminimierung):**
+    - Admins sehen NUR: Rating-Zahl, freiwilliges Feedback, contactOptIn, E-Mail, Zeitstempel
+    - `preAnswers` und `evaluationData` werden NICHT an Admin-Endpoints gesendet
+    - `situationName`, `goal`, Entwicklungsbereiche, Bot-Empfehlungen sind fuer Admins UNSICHTBAR
+  - **contactOptIn (Art. 6 Abs. 1 lit. a DSGVO -- Einwilligung):**
+    - Opt-In Checkbox: Nutzer entscheidet aktiv, ob Admin ihn kontaktieren darf
+    - Standard: false (kein Kontakt ohne Einwilligung)
+    - Nur bei aktivem Opt-In wird die E-Mail-Adresse dem Admin als kontaktierbar angezeigt
+  - **PDF-Export:** Clientseitig generiert, markiert als "Persoenlich und Vertraulich"
+  - **Bot-Empfehlungen:** KI-generierte Coaching-Empfehlungen pro Entwicklungsbereich; nur fuer den Nutzer selbst sichtbar
+- **Nutzer-Verantwortung (WICHTIG):**
+  - Die App prueft NICHT Herkunft oder Rechtmaessigkeit hochgeladener Transkripte
+  - NUTZER ist allein verantwortlich fuer: Recht zum Hochladen, Einwilligung aller Gespraechsteilnehmer, lokale Aufnahmegesetze
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. b DSGVO (Vertragserfullung)
+- **Art. 28 DSGVO:** AVV mit Google (Auftragsverarbeiter) vorhanden
+- **Art. 32 DSGVO:** Technische Sicherheit (HTTPS, serverseitige Validierung)
+- **Art. 17 DSGVO:** Recht auf Loeschung (Delete-Button + CASCADE bei Account-Loeschung)
+
+### 18. Daten-Retention Service (NEU v1.8.2)
 - **Status:** IMPLEMENTIERT
 - **Datei:** `services/dataRetention.js`
 - **Automatische Loeschung:**
@@ -279,7 +318,7 @@
 | Technische Massnahmen | Best-in-Class | A++ | -- |
 | Datenminimierung | Best-in-Class | A++ | Aufwaerts (vorher: A+) |
 
-**Grund fuer Score-Erhoehung (v1.7.0 -> v1.8.2):**
+**Grund fuer Score-Erhoehung (v1.7.0 -> v1.8.8):**
 - Vollstaendiger Datenexport (PersonalityProfile, SessionBehaviorLog, UserEvents hinzugefuegt)
 - Vollstaendige Account-Loeschung (ApiUsage, UserEvent, UpgradeCode jetzt beruecksichtigt)
 - Automatische Daten-Retention (ApiUsage: 12 Monate, UserEvent: 6 Monate)
@@ -287,6 +326,9 @@
 - Mistral AI als EU-Alternative mit DPA-Dokumentation
 - TTS-Service lokal ohne externe Drittanbieter
 - Alle Platzhalter in Datenschutzerklaerung/Impressum personalisiert
+- **NEU (v1.8.8):** Transcript Evaluation mit DSGVO-konformem Admin-Zugang
+- **NEU (v1.8.8):** contactOptIn fuer datenschutzkonforme Kontaktaufnahme
+- **NEU (v1.8.8):** Admin-Datenminimierung (preAnswers/evaluationData nicht exponiert)
 
 ### Rechtliche Risiken
 
@@ -341,6 +383,15 @@
 - [x] **Daten-Retention Service** fuer ApiUsage (12 Monate) und UserEvent (6 Monate) (Feb 2026)
 - [x] **Mistral AI DPA Compliance** Dokumentation erstellt (Feb 2026)
 - [x] **Datenschutzerklaerung & Impressum** personalisiert (Platzhalter ersetzt)
+
+### v1.8.8 DSGVO-Ergaenzungen - ABGESCHLOSSEN (Feb 2026)
+- [x] **Transcript Evaluation Feature** mit DSGVO-konformem Admin-Zugang
+- [x] **User Rating System (NPS)** mit optionalem Feedback
+- [x] **contactOptIn:** Opt-In Checkbox fuer Kontaktaufnahme durch Admin (Art. 6 Abs. 1 lit. a DSGVO)
+- [x] **Admin-Datenminimierung:** preAnswers/evaluationData NICHT an Admin-Endpoints gesendet
+- [x] **situationName:** Neues Pflichtfeld fuer Transkript-Zuordnung (nicht fuer Admin sichtbar)
+- [x] **Bot-Empfehlungen:** KI-generierte Coaching-Empfehlungen pro Entwicklungsbereich (nur Nutzer sichtbar)
+- [x] **PDF-Footer:** "Persoenlich und Vertraulich" auf jeder Seite mit Nutzername und Datum
 
 ---
 
@@ -414,6 +465,12 @@
 15. **Transcript-Entfernung** aus Session Logs (Feb 2026) -- weitere Datenminimierung
 16. **Vollstaendige Account-Loeschung** (Feb 2026) -- alle Tabellen beruecksichtigt
 17. **Automatische Daten-Retention** (Feb 2026) -- ApiUsage 12 Monate, UserEvent 6 Monate
+18. **Transcript Evaluation mit GDPR-konformem Admin-Zugang** (Feb 2026)
+    - Admin sieht nur Rating + freiwilliges Feedback (keine preAnswers/evaluationData)
+    - contactOptIn: Opt-In Checkbox fuer Kontaktaufnahme
+    - situationName als Pflichtfeld fuer Zuordnung
+    - Bot-Empfehlungen nur fuer den Nutzer sichtbar
+    - PDF markiert als "Persoenlich und Vertraulich"
 
 **Rechtskonformitaet:**
 - Die App erfuellt die **wesentlichen Anforderungen der DSGVO**

@@ -677,11 +677,11 @@ router.get('/transcript-ratings', async (req, res) => {
                 userId: true,
                 userRating: true,
                 userFeedback: true,
+                contactOptIn: true,
                 ratedAt: true,
                 createdAt: true,
                 lang: true,
-                preAnswers: true,
-                evaluationData: true,
+                // GDPR: preAnswers and evaluationData are NOT exposed to admin
                 user: {
                     select: {
                         email: true,
@@ -693,30 +693,19 @@ router.get('/transcript-ratings', async (req, res) => {
             orderBy: { ratedAt: 'desc' }
         });
 
-        // Parse JSON fields and calculate stats
-        const processed = ratings.map(r => {
-            let preAnswers, evalData;
-            try {
-                preAnswers = JSON.parse(r.preAnswers);
-                evalData = JSON.parse(r.evaluationData);
-            } catch {
-                preAnswers = {};
-                evalData = {};
-            }
-            return {
-                id: r.id,
-                userEmail: r.user.email,
-                isClient: r.user.isClient,
-                isPremium: r.user.isPremium,
-                rating: r.userRating,
-                feedback: r.userFeedback,
-                ratedAt: r.ratedAt,
-                createdAt: r.createdAt,
-                lang: r.lang,
-                goal: preAnswers.goal || '',
-                overallScore: evalData.overallScore || 0
-            };
-        });
+        // GDPR: Only expose rating metadata and voluntary feedback — no preAnswers or evaluationData
+        const processed = ratings.map(r => ({
+            id: r.id,
+            userEmail: r.user.email,
+            isClient: r.user.isClient,
+            isPremium: r.user.isPremium,
+            rating: r.userRating,
+            feedback: r.userFeedback,
+            contactOptIn: r.contactOptIn,
+            ratedAt: r.ratedAt,
+            createdAt: r.createdAt,
+            lang: r.lang
+        }));
 
         // Calculate NPS statistics
         const total = processed.length;
