@@ -304,8 +304,8 @@
 
         <div class="content">
             <div class="meta-info">
-                <p><strong>Audit Date:</strong> February 14, 2026</p>
-                <p><strong>Audited Version:</strong> 1.8.7</p>
+                <p><strong>Audit Date:</strong> February 15, 2026</p>
+                <p><strong>Audited Version:</strong> 1.8.8</p>
                 <p><strong>Operator Location:</strong> Austria</p>
                 <p><strong>Server Location:</strong> Hetzner, Germany (EU)</p>
                 <p><strong>Supervisory Authority:</strong> <a href="https://www.dsb.gv.at/" target="_blank">Austrian Data Protection Authority</a></p>
@@ -583,11 +583,32 @@
                 <h4>Data Schema (TranscriptEvaluation):</h4>
                 <ul>
                     <li><code>userId</code> - Foreign key to User table (ON DELETE CASCADE)</li>
-                    <li><code>preAnswers</code> - JSON: goal, personalTarget, assumptions, satisfaction, difficult (TEXT)</li>
-                    <li><code>evaluationData</code> - JSON: structured AI evaluation result (TEXT)</li>
+                    <li><code>preAnswers</code> - JSON: situationName, goal, personalTarget, assumptions, satisfaction, difficult (TEXT)</li>
+                    <li><code>evaluationData</code> - JSON: structured AI evaluation result incl. botRecommendations (TEXT)</li>
                     <li><code>lang</code> - Language code (de/en)</li>
-                    <li><code>createdAt</code> - Timestamp</li>
+                    <li><code>userRating</code> - Optional NPS rating (0-10)</li>
+                    <li><code>userFeedback</code> - Optional free-text feedback</li>
+                    <li><code>contactOptIn</code> - Opt-in for admin contact (Boolean, default: false)</li>
+                    <li><code>ratedAt</code>, <code>createdAt</code> - Timestamps</li>
                 </ul>
+
+                <h4>GDPR-Specific Measures (February 15, 2026):</h4>
+                <div class="section positive" style="margin-top: 15px;">
+                    <p><strong>Admin Data Access (Art. 5(1)(c) GDPR — Data Minimization):</strong></p>
+                    <ul>
+                        <li>Admins see ONLY: rating number, voluntary feedback, contactOptIn, email, timestamp</li>
+                        <li><code>preAnswers</code> and <code>evaluationData</code> are NOT sent to admin endpoints</li>
+                        <li><code>situationName</code>, <code>goal</code>, development areas, bot recommendations are INVISIBLE to admins</li>
+                    </ul>
+                    <p><strong>contactOptIn (Art. 6(1)(a) GDPR — Consent):</strong></p>
+                    <ul>
+                        <li>Opt-in checkbox: user actively decides whether admin may contact them</li>
+                        <li>Default: false (no contact without consent)</li>
+                        <li>Only with active opt-in is the user's email shown as contactable to admin</li>
+                    </ul>
+                    <p><strong>PDF Export:</strong> Generated client-side, marked as "Personal and Confidential"</p>
+                    <p><strong>Bot Recommendations:</strong> AI-generated coaching recommendations per development area; visible only to the user themselves</p>
+                </div>
 
                 <h4>Third-Party Processing:</h4>
                 <ul>
@@ -732,6 +753,19 @@ zugestimmt haben.</code></pre>
                     <li><span class="checkbox">☑</span> Create & integrate imprint</li>
                     <li><span class="checkbox">☑</span> Implement data export function</li>
                     <li><span class="checkbox">☑</span> Review cookie usage (result: no banner needed)</li>
+                </ul>
+            </div>
+
+            <div class="section positive">
+                <h3>v1.8.8 GDPR Additions - ✅ COMPLETED (February 15, 2026)</h3>
+                <ul>
+                    <li><span class="checkbox">☑</span> Transcript Evaluation Feature with GDPR-compliant admin access</li>
+                    <li><span class="checkbox">☑</span> User Rating System (NPS) with optional feedback</li>
+                    <li><span class="checkbox">☑</span> contactOptIn: Opt-in checkbox for admin contact (Art. 6(1)(a) GDPR)</li>
+                    <li><span class="checkbox">☑</span> Admin data minimization: preAnswers/evaluationData NOT sent to admin endpoints</li>
+                    <li><span class="checkbox">☑</span> situationName: New mandatory field for transcript identification (not visible to admin)</li>
+                    <li><span class="checkbox">☑</span> Bot recommendations: AI-generated coaching recommendations per development area (user-only)</li>
+                    <li><span class="checkbox">☑</span> PDF footer: "Personal and Confidential" on every page with username and date</li>
                 </ul>
             </div>
 
@@ -943,7 +977,7 @@ make deploy-manualmode-production # Production</code></pre>
             <hr style="margin: 20px 0; opacity: 0.3;">
             <p style="font-size: 0.9em;">
                 Meaningful Conversations App - GDPR Compliance Audit<br>
-                Status: February 14, 2026 - Version 1.8.7
+                Status: February 15, 2026 - Version 1.8.8
             </p>
         </div>
     </div>

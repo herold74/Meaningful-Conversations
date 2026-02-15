@@ -1141,8 +1141,8 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: 'preAnswers and transcript are required.' });
         }
 
-        if (!preAnswers.goal || !preAnswers.personalTarget || !preAnswers.assumptions || !preAnswers.satisfaction) {
-            return res.status(400).json({ error: 'Pre-answers must include goal, personalTarget, assumptions, and satisfaction.' });
+        if (!preAnswers.situationName || !preAnswers.goal || !preAnswers.personalTarget || !preAnswers.assumptions || !preAnswers.satisfaction) {
+            return res.status(400).json({ error: 'Pre-answers must include situationName, goal, personalTarget, assumptions, and satisfaction.' });
         }
 
         // Transcript length limit (50,000 chars)
@@ -1325,6 +1325,7 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
                 createdAt: true,
                 userRating: true,
                 userFeedback: true,
+                contactOptIn: true,
             }
         });
 
@@ -1351,6 +1352,7 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
                 // Rating data
                 userRating: e.userRating,
                 userFeedback: e.userFeedback,
+                contactOptIn: e.contactOptIn,
             };
         });
 
@@ -1396,7 +1398,7 @@ router.delete('/transcript/evaluations/:id', authMiddleware, async (req, res) =>
 // POST /api/gemini/transcript/:id/rate - Rate a transcript evaluation
 router.post('/transcript/:id/rate', authMiddleware, async (req, res) => {
     const { id } = req.params;
-    const { rating, feedback } = req.body;
+    const { rating, feedback, contactOptIn } = req.body;
     const userId = req.userId;
 
     try {
@@ -1425,6 +1427,7 @@ router.post('/transcript/:id/rate', authMiddleware, async (req, res) => {
             data: {
                 userRating: rating,
                 userFeedback: feedback || null,
+                contactOptIn: !!contactOptIn,
                 ratedAt: new Date()
             }
         });

@@ -255,6 +255,7 @@ model TranscriptEvaluation {
   // User rating fields (NPS-style)
   userRating      Int?                 // 0-10 NPS scale
   userFeedback    String?  @db.Text    // Optional feedback text
+  contactOptIn    Boolean  @default(false) // User opts in to be contacted about this evaluation
   ratedAt         DateTime?            // When the rating was submitted
 
   @@index([userId])

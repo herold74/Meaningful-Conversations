@@ -8,7 +8,7 @@ const TranscriptRatingsView: React.FC = () => {
     const [ratings, setRatings] = useState<TranscriptRating[]>([]);
     const [stats, setStats] = useState<TranscriptRatingStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'with' | 'without'>('all');
+    const [feedbackFilter, setFeedbackFilter] = useState<'all' | 'with' | 'without' | 'contact'>('all');
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -55,6 +55,7 @@ const TranscriptRatingsView: React.FC = () => {
     const filteredRatings = ratings.filter(r => {
         if (feedbackFilter === 'with') return r.feedback && r.feedback.trim().length > 0;
         if (feedbackFilter === 'without') return !r.feedback || r.feedback.trim().length === 0;
+        if (feedbackFilter === 'contact') return r.contactOptIn;
         return true;
     });
 
@@ -134,6 +135,16 @@ const TranscriptRatingsView: React.FC = () => {
                 >
                     {t('admin_te_ratings_filter_no_feedback')}
                 </button>
+                <button
+                    onClick={() => setFeedbackFilter('contact')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        feedbackFilter === 'contact'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                >
+                    📬 {t('admin_te_ratings_filter_contact')}
+                </button>
             </div>
 
             {/* Ratings List */}
@@ -161,8 +172,8 @@ const TranscriptRatingsView: React.FC = () => {
                                 className="rounded-lg border border-gray-200 dark:border-gray-700 bg-background-secondary dark:bg-transparent"
                             >
                                 <div
-                                    onClick={() => toggleExpand(rating.id)}
-                                    className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                    onClick={() => rating.feedback && rating.feedback.trim().length > 0 && toggleExpand(rating.id)}
+                                    className={`p-4 transition-colors ${rating.feedback && rating.feedback.trim().length > 0 ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''}`}
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1 min-w-0">
@@ -175,39 +186,43 @@ const TranscriptRatingsView: React.FC = () => {
                                                 </span>
                                                 <span className="text-xs text-content-tertiary">•</span>
                                                 <span className="text-xs text-content-secondary">{dateStr}</span>
+                                                {rating.contactOptIn && (
+                                                    <>
+                                                        <span className="text-xs text-content-tertiary">•</span>
+                                                        <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                                                            📬 {t('admin_te_ratings_contact_requested')}
+                                                        </span>
+                                                    </>
+                                                )}
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                                            <div className="text-sm">
                                                 <p className="text-content-secondary">
                                                     <span className="font-medium text-content-primary">{t('admin_te_ratings_user')}:</span> {rating.userEmail}
                                                     {rating.isClient && <span className="ml-2 text-xs bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded">Client</span>}
                                                     {rating.isPremium && !rating.isClient && <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded">Premium</span>}
                                                 </p>
-                                                <p className="text-content-secondary">
-                                                    <span className="font-medium text-content-primary">{t('admin_te_ratings_score')}:</span> {rating.overallScore}/10
-                                                </p>
                                             </div>
-                                            <p className="text-sm text-content-secondary mt-2 truncate">
-                                                <span className="font-medium text-content-primary">{t('admin_te_ratings_goal')}:</span> {rating.goal}
-                                            </p>
                                         </div>
 
-                                        {/* Expand Icon */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleExpand(rating.id);
-                                            }}
-                                            className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-                                        >
-                                            <svg
-                                                className={`w-5 h-5 text-content-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        {/* Expand Icon - only show if there's feedback to display */}
+                                        {rating.feedback && rating.feedback.trim().length > 0 && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleExpand(rating.id);
+                                                }}
+                                                className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
                                             >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
+                                                <svg
+                                                    className={`w-5 h-5 text-content-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
