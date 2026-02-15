@@ -564,6 +564,7 @@
   "tts_server_unavailable": "Server TTS is currently unavailable. You can still use local device voices.",
   "voiceModal_ios_unavailable": "Not available on iOS",
   "voiceModal_ios_hint": "Server voices are not available on iOS due to browser audio restrictions. Please select a device voice instead.",
+  "voiceModal_server_voices_web_hint": "Additional voices are available in the desktop browser version.",
   "voiceModal_local_voices": "Device Voices",
   "voiceModal_local_voices_desc": "Installed on your device • Instantly available",
   "voiceModal_native_voices": "Device Voices",

@@ -81,7 +81,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
             aria-modal="true"
         >
             <div 
-                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pb-[max(1.5rem,var(--safe-area-inset-bottom))]"
+                className="w-full max-w-sm h-full bg-background-secondary shadow-2xl p-6 flex flex-col animate-slideInFromLeft pb-[max(2.5rem,calc(var(--safe-area-inset-bottom)+1rem))]"
                 style={{ paddingTop: menuPaddingTop }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -139,7 +139,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
                     
-                    <div className="px-4 pt-2 flex items-center justify-between">
+                    <div className="px-4 pt-2 pb-2 flex items-center justify-between">
                         <p className="text-xs text-content-subtle">
                             Version {import.meta.env.VITE_APP_VERSION || 'unknown'}
                             {import.meta.env.VITE_BUILD_NUMBER && ` (Build ${import.meta.env.VITE_BUILD_NUMBER})`}

@@ -30,53 +30,10 @@ import { getApiBaseUrl } from '../services/api';
 import * as api from '../services/api';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
+import { speechService, isNativeApp } from '../services/capacitorSpeechService';
 
-interface SpeechRecognitionAlternative {
-  readonly transcript: string;
-  readonly confidence: number;
-}
-
-interface SpeechRecognitionResult {
-  readonly isFinal: boolean;
-  readonly length: number;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-interface SpeechRecognitionResultList {
-  readonly length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionEvent extends Event {
-  readonly resultIndex: number;
-  readonly results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onstart: (() => void) | null;
-  onend: (() => void) | null;
-  onerror: ((event: any) => void) | null;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  start(): void;
-  stop(): void;
-}
-
-interface SpeechRecognitionConstructor {
-  new(): SpeechRecognition;
-}
-
-declare var SpeechRecognition: SpeechRecognitionConstructor;
-declare var webkitSpeechRecognition: SpeechRecognitionConstructor;
-
-// For SpeechRecognition API and AudioContext
+// Extend Window for AudioContext vendor prefix (used by meditation gong fallback)
 interface CustomWindow extends Window {
-  SpeechRecognition: typeof SpeechRecognition;
-  webkitSpeechRecognition: typeof webkitSpeechRecognition;
   AudioContext: typeof AudioContext;
   webkitAudioContext: typeof AudioContext;
 }
@@ -211,14 +168,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       speechPollingRef.current = null;
     }
     
-    // Stop speech recognition if active
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore errors - recognition might already be stopped
-      }
-    }
+    // Stop speech recognition if active (unified for all platforms)
+    speechService.stop().catch(() => {});
     
     // Reset voice-related states
     setIsListening(false);
@@ -234,8 +185,11 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isListening, setIsListening] = useState(false);
   const [isTtsEnabled, setIsTtsEnabled] = useState(false); // Default to off
   const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  
+  // For native speech recognition (iOS), we use the capacitorSpeechService
+  // which manages audio session properly. For web, we use Web Speech API.
+  const usingNativeSpeech = isNativeApp;
 
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'speaking' | 'paused'>('idle');
   const lastSpokenTextRef = useRef<string>('');
@@ -1015,15 +969,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         });
         
         audio.src = audioUrl;
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-audio-before-play',message:'About to call audio.play()',data:{audioSrc: audioUrl?.substring(0,50)},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-        // #endregion
         await audio.play();
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:server-tts-ERROR',message:'Server TTS failed - falling back to local',data:{error:String(error),errorName:(error as Error)?.name || 'unknown'},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-        // #endregion
         // DON'T set isLoadingAudio to false here - keep spinner visible during fallback
         setTtsStatus('idle');
         
@@ -1038,13 +986,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
 
     // Local TTS mode (Web Speech API) - fallback when not using server or native TTS
-    // #region agent log
-    fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:local-tts-start',message:'Starting LOCAL TTS (Web Speech API)',data:{hasSpeechSynthesis:!!window.speechSynthesis},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-    // #endregion
     if (!window.speechSynthesis) {
-      // #region agent log
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:local-tts-no-api',message:'speechSynthesis API not available',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-      // #endregion
       setIsLoadingAudio(false);
       isSpeakingRef.current = false;
       return;
@@ -1074,9 +1016,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       if (synth.speaking && !synth.paused && !hasStartedSpeaking) {
         // Speech has started - ensure minimum loading time then show speaking status
         hasStartedSpeaking = true;
-        // #region agent log
-        fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:local-tts-speaking',message:'Local TTS started speaking',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-        // #endregion
         const elapsed = Date.now() - loadingStartTime;
         const remainingTime = Math.max(0, 300 - elapsed);
         setTimeout(() => {
@@ -1482,151 +1421,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   }, [input]); // This effect runs every time the input value changes.
 
-  useEffect(() => {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognitionAPI) {
-      console.warn("Speech Recognition not supported in this browser.");
-      return;
-    }
-
-    const recognition = new SpeechRecognitionAPI();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    // Speech recognition language matches UI language
-    // Gloria now supports both German and English based on user's language preference
-    recognition.lang = language === 'de' ? 'de-DE' : 'en-US';
-
-    recognition.onstart = () => {
-      console.log('🎙️ Recognition started (onstart event fired)');
-      setIsListening(true);
-    };
-    
-    recognition.onend = () => {
-      console.log('🎙️ Recognition ended (onend event fired)');
-      setIsListening(false);
-      
-    };
-    
-    recognition.onerror = (event) => {
-      // Enhanced error handling for better debugging and user feedback
-      console.error("Speech recognition error:", {
-        error: event.error,
-        message: event.message,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Provide specific error messages for common issues
-      switch (event.error) {
-        case 'not-allowed':
-          console.error('❌ Microphone access denied. Please grant microphone permissions.');
-          alert(t('microphone_permission_denied') || 'Microphone access denied. Please grant permissions in your browser settings.');
-          break;
-        case 'no-speech':
-          console.warn('⚠️ No speech detected. Please try again.');
-          break;
-        case 'audio-capture':
-          console.error('❌ Audio capture failed. Check if microphone is available and not used by another app.');
-          alert(t('microphone_error') || 'Microphone error. Please check if your microphone is available and not used by another application.');
-          break;
-        case 'network':
-          console.error('❌ Network error during speech recognition.');
-          break;
-        case 'aborted':
-          // Common and usually not critical (e.g., user stopped recognition quickly)
-          console.warn('⚠️ Speech recognition was aborted.');
-          break;
-        default:
-          console.error('❌ Speech recognition error:', event.error);
-      }
-      
-      setIsListening(false);
-    };
-    
-    recognition.onresult = (event) => {
-      // #region agent log - CRITICAL: Full debugging for Android duplication issue
-      const resultsDebug = Array.from(event.results).map((r, idx) => ({
-        idx,
-        isFinal: r.isFinal,
-        transcript: r[0].transcript,
-        confidence: r[0].confidence
-      }));
-      const srDebugData1 = {
-        resultIndex: event.resultIndex,
-        resultsLength: event.results.length,
-        baseTranscript: baseTranscriptRef.current,
-        results: resultsDebug
-      };
-      console.log('[SR-DEBUG] onresult RAW', srDebugData1);
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-onresult',message:'SR onresult RAW',data:srDebugData1,timestamp:Date.now(),sessionId:'sr-android-debug'})}).catch(()=>{});
-      // #endregion
-      
-      // ANDROID BUG FIX v2: Different Android devices/versions behave differently:
-      // Type A: Each result in event.results is cumulative (newer devices)
-      //         results = [{t:"hello"}, {t:"hello world"}] → use last = "hello world"
-      // Type B: Each result is incremental (older devices/versions)  
-      //         results = [{t:"hello"}, {t:"world"}] → need to concatenate
-      // 
-      // DETECTION: If the last result's transcript is shorter than or doesn't 
-      // start with the previous result's transcript, it's Type B (incremental).
-      
-      let finalTranscript = '';
-      const resultsArray = Array.from(event.results);
-      
-      if (resultsArray.length === 1) {
-        // Only one result - use it directly
-        finalTranscript = resultsArray[0][0].transcript;
-      } else {
-        // Multiple results - check if cumulative or incremental
-        const lastTranscript = resultsArray[resultsArray.length - 1][0].transcript;
-        const secondLastTranscript = resultsArray[resultsArray.length - 2][0].transcript;
-        
-        // If last contains second-last at the start, it's cumulative (Type A)
-        if (lastTranscript.startsWith(secondLastTranscript) || 
-            lastTranscript.toLowerCase().startsWith(secondLastTranscript.toLowerCase())) {
-          finalTranscript = lastTranscript;
-        } else if (lastTranscript.length > secondLastTranscript.length * 0.8) {
-          // Last is significantly long - probably cumulative but with corrections
-          finalTranscript = lastTranscript;
-        } else {
-          // Seems incremental - concatenate all isFinal results
-          finalTranscript = resultsArray
-            .filter(r => r.isFinal)
-            .map(r => r[0].transcript)
-            .join(' ');
-          // If nothing is final yet, just use the last result
-          if (!finalTranscript.trim()) {
-            finalTranscript = lastTranscript;
-          }
-        }
-      }
-      
-      // #region agent log
-      const srDebugData2 = { 
-        detectedType: resultsArray.length > 1 && resultsArray[resultsArray.length - 1][0].transcript.startsWith(resultsArray[resultsArray.length - 2][0].transcript) ? 'cumulative' : 'incremental',
-        finalTranscript,
-        strategy: 'adaptive-v2'
-      };
-      console.log('[SR-DEBUG] after adaptive processing', srDebugData2);
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-adaptive',message:'SR adaptive result',data:srDebugData2,timestamp:Date.now(),sessionId:'sr-android-debug'})}).catch(()=>{});
-      // #endregion
-      
-      const combined_transcript = finalTranscript;
-      
-      // #region agent log
-      const srDebugData3 = {
-        combined_transcript,
-        fullOutput: baseTranscriptRef.current + combined_transcript
-      };
-      console.log('[SR-DEBUG] final output', srDebugData3);
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-finaloutput',message:'SR final output',data:srDebugData3,timestamp:Date.now(),sessionId:'sr-android-debug'})}).catch(()=>{});
-      // #endregion
-      
-      // Combine with any text that existed before speech recognition started
-      setInput(baseTranscriptRef.current + combined_transcript);
-    };
-
-    recognitionRef.current = recognition;
-  }, [language, bot.id]);
+  // Speech recognition is now fully managed by the unified speechService
+  // (WebSpeechService for browsers, NativeSpeechService for iOS)
+  // No per-language setup needed - language is passed at start() time
 
   useEffect(() => {
     // This effect is specifically to fetch the initial greeting from the bot.
@@ -1813,10 +1610,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }, 1000);
         } else {
           // Normal message, speak all of it
-          // #region agent log
-          console.log('[TTS-DEBUG] About to call speak() for normal message');
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:before-speak',message:'About to call speak()',data:{textLength: botMessage.text?.length, isTtsEnabled},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-          // #endregion
           speak(botMessage.text);
         }
         
@@ -1839,10 +1632,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       };
       setChatHistory(prev => [...prev, errorMessage]);
     } finally {
-      // #region agent log
-      console.log('[TTS-DEBUG] Setting isLoading=false in finally block');
-      fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:finally-isLoading-false',message:'Setting isLoading=false',data:{},timestamp:Date.now(),sessionId:'tts-debug'})}).catch(()=>{});
-      // #endregion
       setIsLoading(false);
     }
   };
@@ -1851,7 +1640,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     e.preventDefault();
     // If the user submits the form while recognition is active, stop it first.
     if (isListening) {
-      recognitionRef.current?.stop();
+      await speechService.stop();
+      setIsListening(false);
     }
     await sendMessage(input);
     setInput('');
@@ -1867,61 +1657,44 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
   
   const handleVoiceInteraction = async () => {
-      if (isLoading || !recognitionRef.current) return;
+      if (isLoading) return;
 
       if (isListening) {
-          // Stop recording
-          recognitionRef.current.stop();
+          // === STOP LISTENING & SEND ===
+          console.log('[Speech] Stopping speech recognition');
           
-          // iOS Audio Session Fix: After microphone stops, iOS stays in "playAndRecord" mode
-          // which causes degraded audio quality for TTS. We need to force iOS back to
-          // stereo/A2DP mode by playing an HTML5 audio element (not AudioContext, which
-          // uses a different audio path than Web Speech API).
-          // This runs DURING user interaction, so autoplay is allowed.
-          if (isIOS) {
-              try {
-                  // Play a truly silent audio file to force iOS to switch audio modes
-                  // This is a minimal valid WAV: 44.1kHz, 16-bit mono, 100 samples of silence (all zeros)
-                  // The playback triggers the mode switch, the volume is 0 as extra safety
-                  // Previous version had non-silent samples (0x78 instead of 0x00) causing clicks
-                  const resetAudio = new Audio('data:audio/wav;base64,UklGRtQAAABXQVZFZm10IBAAAAABAAEARKwAAESsAAACABAAZGF0YbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=');
-                  resetAudio.volume = 0; // Silent - playback itself triggers iOS mode switch
-                  await resetAudio.play();
-              } catch (e) {
-                  // Ignore errors - this is just an optimization
-              }
+          try {
+              await speechService.stop();
+              setIsListening(false);
+          } catch (e) {
+              console.error('[Speech] Error stopping recognition:', e);
           }
           
-          // Capture the current input value before any async operations
+          // Capture input before async operations
           const currentInput = input;
-          // #region agent log
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:voice-stop-send',message:'Voice recording stopped, preparing to send',data:{inputLength:currentInput?.length,inputTrimmed:currentInput?.trim()?.substring(0,50)},timestamp:Date.now(),sessionId:'voice-debug'})}).catch(()=>{});
-          // #endregion
           
-          // Send message after a delay for recognition to fully stop
-          // iOS needs extra time (300ms) to switch audio sessions from recording to playback
-          // to avoid crackling/popping sounds when TTS starts
-          const audioSessionDelay = isIOS ? 300 : 100;
+          // iOS Safari/PWA with Web Speech API needs time for audio session cleanup
+          // (Native iOS uses NativeSTTPlugin which handles this properly)
+          if (isIOS && !usingNativeSpeech) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          // Send message
           if (currentInput.trim()) {
-              // Set loading state IMMEDIATELY so spinner appears without delay
               setIsLoading(true);
-              // #region agent log
-              fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:voice-sending',message:'Voice message sending with delay',data:{delay:audioSessionDelay},timestamp:Date.now(),sessionId:'voice-debug'})}).catch(()=>{});
-              // #endregion
-              setTimeout(async () => {
-                  await sendMessage(currentInput);
-                  setInput('');
-              }, audioSessionDelay);
-          } else {
-              // #region agent log
-              fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:voice-empty',message:'Voice input was empty - not sending',data:{},timestamp:Date.now(),sessionId:'voice-debug'})}).catch(()=>{});
-              // #endregion
+              console.log('[Speech] Sending message after STT stop');
+              await sendMessage(currentInput);
+              setInput('');
           }
       } else {
+          // === START LISTENING ===
           // Stop any ongoing TTS playback
           window.speechSynthesis?.cancel();
           if (audioRef.current) {
             audioRef.current.pause();
+          }
+          if (isNativeiOS) {
+            nativeTtsService.stop();
           }
           // Stop speech status polling
           if (speechPollingRef.current) {
@@ -1930,17 +1703,41 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           setTtsStatus('idle');
           baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
-          // #region agent log
-          const srDebugData0 = { value: baseTranscriptRef.current, inputWas: input };
-          console.log('[SR-DEBUG] baseTranscriptRef set on recognition start', srDebugData0);
-          fetch(`${getApiBaseUrl()}/api/debug/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChatView.tsx:SR-start',message:'SR recognition start',data:srDebugData0,timestamp:Date.now(),sessionId:`sr-${Date.now()}`})}).catch(()=>{});
-          // #endregion
           
-          // Start recognition directly - let the browser handle mic permission (like v1.5.8)
           try {
-            recognitionRef.current.start();
+            console.log('[Speech] Starting speech recognition');
+            await speechService.start(
+              { 
+                language: language === 'de' ? 'de-DE' : 'en-US',
+                interimResults: true,
+                debugLogBaseUrl: getApiBaseUrl()
+              },
+              // onResult - transcript is already adaptive-processed for Android
+              (result) => {
+                setInput(baseTranscriptRef.current + result.transcript);
+              },
+              // onError - show user-facing alert for permission/hardware errors
+              (error) => {
+                setIsListening(false);
+                if (error.message === 'microphone_permission_denied') {
+                  alert(t('microphone_permission_denied') || 'Microphone access denied. Please grant permissions in your browser settings.');
+                } else if (error.message === 'microphone_error') {
+                  alert(t('microphone_error') || 'Microphone error. Please check if your microphone is available.');
+                }
+              },
+              // onStart
+              () => {
+                console.log('[Speech] 🎙️ Recognition started');
+                setIsListening(true);
+              },
+              // onEnd
+              () => {
+                console.log('[Speech] 🎙️ Recognition ended');
+                setIsListening(false);
+              }
+            );
           } catch (error) {
-            console.error('Failed to start speech recognition:', error);
+            console.error('[Speech] Failed to start recognition:', error);
             alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
           }
       }
