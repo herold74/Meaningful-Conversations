@@ -260,7 +260,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const botGender = useMemo((): 'male' | 'female' => {
       switch (bot.id) {
-          case 'g-interviewer':
+          case 'gloria-life-context':
+          case 'gloria-interview':
           case 'ava-strategic':
           case 'chloe-structured-reflection':
               return 'female';
@@ -360,7 +361,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution'];
           gender = maleBotsEN.includes(botId) ? 'male' : 'female';
         } else if (lang === 'de') {
-          const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-structured-reflection'];
+          const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection'];
           gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
         }
         
@@ -1076,7 +1077,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             gender = botGender;
         } else {
             switch (bot.id) {
-                case 'g-interviewer':
+                case 'gloria-life-context':
+                case 'gloria-interview':
                 case 'ava-strategic':
                 case 'chloe-structured-reflection':
                     gender = 'female';
@@ -1268,7 +1270,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
               const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'victor-systemic-coaching'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
             } else if (lang === 'de') {
-              const femaleBotsDE = ['g-interviewer', 'ava-strategic', 'chloe-structured-reflection'];
+              const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection'];
               gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
             }
             

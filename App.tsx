@@ -25,6 +25,7 @@ import AnalyzingView from './components/AnalyzingView';
 import PIIWarningView from './components/PIIWarningView';
 import Questionnaire from './components/Questionnaire';
 import AchievementsView from './components/AchievementsView';
+import InterviewTranscriptView from './components/InterviewTranscriptView';
 import UserGuideView from './components/UserGuideView';
 import FormattingHelpView from './components/FormattingHelpView';
 import FAQView from './components/FAQView';
@@ -675,21 +676,34 @@ const App: React.FC = () => {
     };
     
     const handleStartInterview = () => {
-        const interviewBot = BOTS.find(b => b.id === 'g-interviewer');
+        const interviewBot = BOTS.find(b => b.id === 'gloria-life-context');
         if (interviewBot) {
             setLifeContext(''); // Ensure interview starts with a blank slate
             setGamificationState(DEFAULT_GAMIFICATION_STATE);
             handleSelectBot(interviewBot);
         } else {
-            console.error("Interview bot 'g-interviewer' not found in BOTS constant.");
+            console.error("Interview bot 'gloria-life-context' not found in BOTS constant.");
         }
     };
 
     const handleEndSession = async () => {
         if (!selectedBot) return;
         
-        // --- Special Handling for Interview Bot "G." ---
-        if (selectedBot.id === 'g-interviewer') {
+        // --- Special Handling for Gloria Interview Bot ---
+        if (selectedBot.id === 'gloria-interview') {
+            if (userMessageCount === 0 && !isTestMode) {
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('botSelection');
+                return;
+            }
+            // Route directly to the transcript view with the chat history
+            setView('interviewTranscript');
+            return;
+        }
+
+        // --- Special Handling for Interview Bot "G." (Life Context) ---
+        if (selectedBot.id === 'gloria-life-context') {
             if (userMessageCount === 0 && !isTestMode) {
                 // If the user exits immediately, go back to the landing page.
                 setSelectedBot(null);
@@ -1298,7 +1312,7 @@ const App: React.FC = () => {
                     isTestMode={isTestMode}
                 />
             );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setIsTestMode(false); setTestScenarioId(null); setNewGamificationState(null); setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'g-interviewer'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
+            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setIsTestMode(false); setTestScenarioId(null); setNewGamificationState(null); setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'gloria-life-context'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
             case 'transcriptEval': {
                 const handleTePreSubmit = (answers: TranscriptPreAnswers) => {
                     setTePreAnswers(answers);
@@ -1362,6 +1376,18 @@ const App: React.FC = () => {
                 }
                 return null;
             }
+            case 'interviewTranscript': return (
+                <InterviewTranscriptView
+                    chatHistory={chatHistory}
+                    language={language}
+                    userName={currentUser?.firstName || undefined}
+                    onBack={() => {
+                        setSelectedBot(null);
+                        setChatHistory([]);
+                        setView('botSelection');
+                    }}
+                />
+            );
             case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
             case 'userGuide': return <UserGuideView />;
             case 'formattingHelp': return <FormattingHelpView />;
