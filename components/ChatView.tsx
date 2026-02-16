@@ -1383,48 +1383,96 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // No per-language setup needed - language is passed at start() time
 
   useEffect(() => {
-    // This effect is specifically to fetch the initial greeting from the bot.
+    // This effect handles two cases on mount:
+    // 1. Normal start (empty history) → fetch the bot's initial greeting.
+    // 2. Pre-seeded user message (e.g., from transcript evaluation "Start session")
+    //    → skip greeting, auto-send the user message to get the bot's response.
     // The ref guard prevents this from running more than once (e.g., due to StrictMode).
-    if (chatHistory.length !== 0 || initialFetchInitiated.current) {
+    if (initialFetchInitiated.current) {
         return;
     }
-    initialFetchInitiated.current = true; // Set flag immediately to prevent re-entry.
 
-    const fetchInitialMessage = async () => {
-        setIsLoading(true);
-        try {
-            // Call with an empty history to trigger the bot's initial message.
-            const response = await geminiService.sendMessage(
-                bot.id, 
-                lifeContext, 
-                [], 
-                language, 
-                isNewSession,
-                effectiveCoachingMode,
-                decryptedProfile
-            );
-            const initialBotMessage: Message = {
-                id: `bot-${Date.now()}`,
-                text: response.text,
-                role: 'bot',
-                timestamp: new Date().toISOString(),
-            };
-            setChatHistory([initialBotMessage]);
-        } catch (err) {
-            console.error('Error fetching initial message:', err);
-            const errorMessage: Message = {
-                id: `error-${Date.now()}`,
-                text: t('chat_error'),
-                role: 'bot',
-                timestamp: new Date().toISOString(),
-            };
-            setChatHistory([errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Case 1: Empty history → fetch greeting
+    if (chatHistory.length === 0) {
+        initialFetchInitiated.current = true;
 
-    fetchInitialMessage();
+        const fetchInitialMessage = async () => {
+            setIsLoading(true);
+            try {
+                const response = await geminiService.sendMessage(
+                    bot.id, 
+                    lifeContext, 
+                    [], 
+                    language, 
+                    isNewSession,
+                    effectiveCoachingMode,
+                    decryptedProfile
+                );
+                const initialBotMessage: Message = {
+                    id: `bot-${Date.now()}`,
+                    text: response.text,
+                    role: 'bot',
+                    timestamp: new Date().toISOString(),
+                };
+                setChatHistory([initialBotMessage]);
+            } catch (err) {
+                console.error('Error fetching initial message:', err);
+                const errorMessage: Message = {
+                    id: `error-${Date.now()}`,
+                    text: t('chat_error'),
+                    role: 'bot',
+                    timestamp: new Date().toISOString(),
+                };
+                setChatHistory([errorMessage]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchInitialMessage();
+        return;
+    }
+
+    // Case 2: Pre-seeded with a user message → auto-send to get bot response
+    if (chatHistory.length === 1 && chatHistory[0].role === 'user') {
+        initialFetchInitiated.current = true;
+
+        const autoSendPreSeeded = async () => {
+            setIsLoading(true);
+            try {
+                const response = await geminiService.sendMessage(
+                    bot.id,
+                    lifeContext,
+                    chatHistory,
+                    language,
+                    true, // isNewSession — skip "Next Steps" check-in
+                    effectiveCoachingMode,
+                    decryptedProfile
+                );
+                const botMessage: Message = {
+                    id: `bot-${Date.now()}`,
+                    text: response.text,
+                    role: 'bot',
+                    timestamp: new Date().toISOString(),
+                };
+                setChatHistory(prev => [...prev, botMessage]);
+            } catch (err) {
+                console.error('Error auto-sending pre-seeded message:', err);
+                const errorMessage: Message = {
+                    id: `error-${Date.now()}`,
+                    text: t('chat_error'),
+                    role: 'bot',
+                    timestamp: new Date().toISOString(),
+                };
+                setChatHistory(prev => [...prev, errorMessage]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        autoSendPreSeeded();
+        return;
+    }
   }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length]);
 
   // Track if we've already spoken the first message
