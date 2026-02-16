@@ -32,6 +32,7 @@ import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { speechService, isNativeApp } from '../services/capacitorSpeechService';
 import { isDesktopWeb } from '../utils/platformDetection';
+import { useWakeLock } from '../hooks/useWakeLock';
 
 // Extend Window for AudioContext vendor prefix (used by meditation gong fallback)
 interface CustomWindow extends Window {
@@ -575,62 +576,16 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     };
   }, []);
 
-  // Wake Lock: Keep screen active in voice mode to prevent interruption
+  // Wake Lock: Keep screen active in voice mode to prevent the OS from
+  // locking the screen and killing the microphone mid-sentence.
+  const wakeLock = useWakeLock();
   useEffect(() => {
-    let wakeLock: WakeLockSentinel | null = null;
-
-    const requestWakeLock = async () => {
-      try {
-        // Check if Wake Lock API is supported
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-
-          // Re-acquire wake lock when visibility changes (e.g., switching tabs)
-          const handleVisibilityChange = async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible' && isVoiceMode) {
-              try {
-                wakeLock = await navigator.wakeLock.request('screen');
-              } catch (err) {
-                console.error('Failed to re-acquire wake lock:', err);
-              }
-            }
-          };
-
-          document.addEventListener('visibilitychange', handleVisibilityChange);
-
-          // Store cleanup function
-          wakeLock.addEventListener('release', () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-          });
-        } else {
-          console.warn('Screen Wake Lock API not supported on this device');
-        }
-      } catch (err) {
-        console.error('Failed to acquire screen wake lock:', err);
-      }
-    };
-
-    const releaseWakeLock = async () => {
-      if (wakeLock !== null) {
-        try {
-          await wakeLock.release();
-          wakeLock = null;
-        } catch (err) {
-          console.error('Failed to release wake lock:', err);
-        }
-      }
-    };
-
-    // Activate wake lock when entering voice mode
     if (isVoiceMode) {
-      requestWakeLock();
+      wakeLock.request();
+    } else {
+      wakeLock.release();
     }
-
-    // Cleanup: Release wake lock when leaving voice mode or component unmounts
-    return () => {
-      releaseWakeLock();
-    };
-  }, [isVoiceMode]);
+  }, [isVoiceMode, wakeLock.request, wakeLock.release]);
 
   // iOS Bluetooth Audio Fix: Use MediaSession API to signal this is an audio app
   // This helps iOS maintain a stable Bluetooth audio route
@@ -2106,8 +2061,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         >
                             {isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
-                        <div className="mt-4 h-14 text-lg text-content-secondary flex items-center justify-center px-4 w-full max-w-md">
-                            <p>{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
+                        <div className="mt-4 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
+                            <p className="h-14 flex items-center">{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
+                            {isListening && !wakeLock.isSupported && (
+                                <p className="text-xs text-status-warning-foreground mt-1">{t('chat_keep_screen_on')}</p>
+                            )}
                         </div>
                     </>
                 )}
