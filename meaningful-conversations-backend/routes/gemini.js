@@ -6,12 +6,13 @@ const { BOTS } = require('../constants.js');
 const authMiddleware = require('../middleware/auth.js');
 const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate, transcriptEvaluationPrompts } = require('../services/geminiPrompts.js');
 const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const { getOrCreateCache, getCacheStats } = require('../services/promptCache.js');
+const { getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const dynamicPromptController = require('../services/dynamicPromptController.js');
 const behaviorLogger = require('../services/behaviorLogger.js');
 
-// For backward compatibility with prompt cache (which needs direct Google AI access)
+// Google AI client kept for potential future use (explicit caching, etc.)
+// Currently, implicit caching handles cost optimization automatically.
 let googleAI;
 import('@google/genai').then(({ GoogleGenAI }) => {
     googleAI = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
@@ -369,29 +370,21 @@ STRICTLY FORBIDDEN in this first message:
     const startTime = Date.now();
     const modelName = 'gemini-2.5-flash';
     
-    // Try to use prompt caching for registered users with Life Context
-    // Note: Caching only works with Google AI currently
-    let cachedContentName = null;
+    // Explicit prompt caching disabled — Google Gemini 2.5 Flash has automatic
+    // implicit caching (since May 2025) which handles repeated system instructions
+    // without needing explicit cache creation. The previous explicit caching via
+    // ai.caches.create() failed because the API requires a `contents` array with
+    // ≥1024 tokens, but we only passed `systemInstruction` (which doesn't count
+    // toward total_token_count). Adding dummy contents would pollute chat history.
+    // Implicit caching provides the same cost savings automatically.
     let cacheUsed = false;
     const activeProvider = await aiProviderService.getActiveProvider();
-    
-    if (userId && bot.id !== 'gloria-life-context' && context && activeProvider === 'google' && googleAI) {
-        // Only cache for registered users with actual Life Context when using Google
-        cachedContentName = await getOrCreateCache(googleAI, userId, finalSystemInstruction, modelName);
-        cacheUsed = cachedContentName !== null;
-    }
     
     try {
         const config = {
             temperature: 0.7,
+            systemInstruction: finalSystemInstruction,
         };
-        
-        // If cache is available, use it; otherwise use regular systemInstruction
-        if (cachedContentName) {
-            config.cachedContent = cachedContentName;
-        } else {
-            config.systemInstruction = finalSystemInstruction;
-        }
         
         const response = await withTimeout(
             aiProviderService.generateContent({
