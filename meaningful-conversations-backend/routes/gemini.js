@@ -1589,6 +1589,17 @@ router.post('/transcript/transcribe-audio', authMiddleware, audioTranscribeLimit
 
         const { lang = 'de', speakerHint } = req.body;
 
+        // Reject extremely small files — they contain no meaningful audio and
+        // cause Gemini to hallucinate entire transcripts from nothing.
+        const MIN_AUDIO_BYTES = 10000; // ~10 KB
+        if (req.file.size < MIN_AUDIO_BYTES) {
+            return res.status(400).json({
+                error: lang === 'de'
+                    ? 'Die Audiodatei ist zu kurz oder leer. Bitte nimm mindestens einige Sekunden Audio auf.'
+                    : 'The audio file is too short or empty. Please record at least a few seconds of audio.'
+            });
+        }
+
         // Access check: Client+ only (Client, Admin, Developer)
         const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -1674,6 +1685,27 @@ IMPORTANT: Output ONLY the speaker identification and transcript, no additional 
         );
 
         const transcript = response.text || '';
+        const tokenUsage = response.usageMetadata || {};
+
+        // Hallucination guard: if the audio contributed very few tokens but Gemini
+        // produced a long transcript, the output is almost certainly fabricated.
+        // Typical audio encodes at ~25 tokens/second, so < 50 prompt tokens means
+        // less than ~2 seconds of real audio — yet the prompt text itself accounts
+        // for ~200-300 tokens. We flag when the output is suspiciously long relative
+        // to the audio input.
+        const promptTokens = tokenUsage.promptTokenCount || 0;
+        const outputTokens = tokenUsage.candidatesTokenCount || 0;
+        const PROMPT_TEXT_OVERHEAD = 350; // approximate tokens used by the diarization prompt itself
+        const audioTokens = Math.max(0, promptTokens - PROMPT_TEXT_OVERHEAD);
+
+        if (audioTokens < 50 && outputTokens > 100) {
+            console.warn(`[Audio Transcription] Hallucination suspected: audioTokens=${audioTokens}, outputTokens=${outputTokens}`);
+            return res.status(400).json({
+                error: lang === 'de'
+                    ? 'Die Audiodatei enthält keine erkennbare Sprache. Bitte stelle sicher, dass die Aufnahme Gesprächsinhalte enthält.'
+                    : 'The audio file does not contain recognizable speech. Please make sure the recording contains conversation content.'
+            });
+        }
 
         // Count speakers from the transcript
         const speakerPattern = lang === 'de' ? /\[Sprecher (\d+)\]/g : /\[Speaker (\d+)\]/g;
@@ -1685,14 +1717,13 @@ IMPORTANT: Output ONLY the speaker identification and transcript, no additional 
         const speakerCount = speakerNumbers.size;
 
         const durationMs = Date.now() - startTime;
-        const tokenUsage = response.usageMetadata || {};
 
         await trackApiUsage({
             userId,
             endpoint: '/api/gemini/transcript/transcribe-audio',
             botId: 'audio-transcription',
-            inputTokens: tokenUsage.promptTokenCount || 0,
-            outputTokens: tokenUsage.candidatesTokenCount || 0,
+            inputTokens: promptTokens,
+            outputTokens: outputTokens,
             durationMs,
             success: true,
         });

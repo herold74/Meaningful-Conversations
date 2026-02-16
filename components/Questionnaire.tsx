@@ -225,7 +225,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                     );
                 })}
                 
-                <Button type="submit" size="lg" fullWidth className="mt-8">
+                <Button type="submit" size="lg" fullWidth className="mt-8" disabled={!answers['profile_name']?.trim()}>
                     {t('questionnaire_generateFile')}
                 </Button>
             </form>

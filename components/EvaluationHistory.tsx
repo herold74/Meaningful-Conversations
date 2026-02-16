@@ -10,9 +10,10 @@ import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF'
 interface EvaluationHistoryProps {
     onBack: () => void;
     currentUser?: { email?: string; isPremium?: boolean; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean; unlockedCoaches?: string[] };
+    onStartSession?: (botId: string, examplePrompt: string) => void;
 }
 
-const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUser }) => {
+const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUser, onStartSession }) => {
     const { t, language } = useLocalization();
     const [evaluations, setEvaluations] = useState<TranscriptEvaluationSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -107,6 +108,7 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                     preAnswers={selectedEval.preAnswers}
                     currentUser={currentUser}
                     onDone={() => setSelectedEval(null)}
+                    onStartSession={onStartSession}
                 />
             </div>
         );
