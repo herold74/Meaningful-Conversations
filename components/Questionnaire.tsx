@@ -143,7 +143,14 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                             
                             {isExpanded && (
                                 <div className="p-4 space-y-4 animate-fadeIn">
-                                    {section.description && <p className="text-content-secondary italic">{section.description}</p>}
+                                    {section.description && (
+                                        <div className="flex justify-between items-baseline">
+                                            <p className="text-content-secondary italic">{section.description}</p>
+                                            {section.fields?.some(f => f.id === 'profile_name') && (
+                                                <span className="text-sm text-red-500 font-semibold shrink-0">({t('required_field_indicator')})</span>
+                                            )}
+                                        </div>
+                                    )}
                                     
                                     {section.fields?.map(field => {
                                         if (field.id === 'profile_name') {
@@ -151,7 +158,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                                                 <div key={field.id}>
                                                     <div className="flex items-center gap-4">
                                                         <label htmlFor={field.id} className="text-lg font-medium text-content-secondary shrink-0">
-                                                            {field.label} <span className="text-sm text-status-danger-foreground font-semibold ml-1">({t('required_field_indicator')})</span>
+                                                            {field.label}<span className="text-red-500">*</span>
                                                         </label>
                                                         <input
                                                             type="text"
