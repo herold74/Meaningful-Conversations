@@ -105,7 +105,7 @@
   "questionnaire_error_name_required": "Bitte geben Sie einen Namen oder Rufnamen an.",
   "questionnaire_generateFile": "Datei erstellen & Weiter",
   "questionnaire_main_title": "Lebenskontext",
-  "required_field_indicator": "*erforderlich",
+  "required_field_indicator": "*Pflichtfeld",
 
   "q_section_profile_title": "👤 Kernprofil",
   "q_section_profile_desc": "Allgemeine, stabile Informationen über mich.",

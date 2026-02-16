@@ -63,7 +63,10 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
                     </button>
                 )}
             </div>
-            <p className="text-content-secondary mb-8">{t('te_pre_subtitle')}</p>
+            <div className="flex justify-between items-baseline mb-8">
+                <p className="text-content-secondary">{t('te_pre_subtitle')}</p>
+                <span className="text-sm text-red-500 font-semibold shrink-0">({t('required_field_indicator')})</span>
+            </div>
 
             <div className="space-y-6">
                 {/* Situation Name */}
