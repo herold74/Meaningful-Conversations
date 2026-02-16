@@ -1443,6 +1443,14 @@ const App: React.FC = () => {
         }
     }, [view]);
 
+    // Scroll to top on every view change so the heading is always visible.
+    // Chat view is excluded because it manages its own scroll (bottom-anchored).
+    useEffect(() => {
+        if (view !== 'chat') {
+            window.scrollTo(0, 0);
+        }
+    }, [view]);
+
     const handleNativeGamificationBarAction = useCallback((action: string) => {
         if (action === 'menu') {
             handleBurgerIconClick();
