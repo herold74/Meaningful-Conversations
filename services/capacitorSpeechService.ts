@@ -125,6 +125,14 @@ class WebSpeechService implements ISpeechService {
         onStart?: () => void;
         onEnd?: () => void;
     } | null = null;
+    /** Accumulated transcript from previous auto-restart sessions (Android only).
+     *  When Chrome kills the session after a silence pause and we auto-restart,
+     *  the Web Speech API resets event.results. This field preserves everything
+     *  spoken before the restart so no text is lost. */
+    private accumulatedTranscript: string = '';
+    /** Transcript from the current recognition session, updated on every onresult.
+     *  Captured into accumulatedTranscript before each auto-restart. */
+    private currentSessionTranscript: string = '';
 
     async isAvailable(): Promise<boolean> {
         return typeof window !== 'undefined' && 
@@ -158,6 +166,10 @@ class WebSpeechService implements ISpeechService {
 
         this.debugLogBaseUrl = options.debugLogBaseUrl || null;
 
+        // Reset accumulation for the new recording session
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
+
         // Save args for Android auto-restart
         if (isAndroidBrowser) {
             this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
@@ -189,7 +201,15 @@ class WebSpeechService implements ISpeechService {
             // can pause naturally without having to tap the button again.
             // This ONLY runs on Android — PC and iOS are unaffected.
             if (isAndroidBrowser && !this.stoppedManually && this.lastStartArgs) {
-                console.log('[WebSpeechService] 🔄 Android auto-restart after silence timeout');
+                // Preserve text from the session that just ended so it
+                // survives the fresh event.results after restart.
+                if (this.currentSessionTranscript.trim()) {
+                    this.accumulatedTranscript = this.accumulatedTranscript
+                        ? this.accumulatedTranscript + ' ' + this.currentSessionTranscript
+                        : this.currentSessionTranscript;
+                    this.currentSessionTranscript = '';
+                }
+                console.log('[WebSpeechService] 🔄 Android auto-restart after silence timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
                 try {
                     recognition.start();
                     return;
@@ -201,6 +221,8 @@ class WebSpeechService implements ISpeechService {
             console.log('[WebSpeechService] 🎙️ Recognition ended');
             this.listening = false;
             this.lastStartArgs = null;
+            this.accumulatedTranscript = '';
+            this.currentSessionTranscript = '';
             onEnd?.();
         };
 
@@ -258,6 +280,8 @@ class WebSpeechService implements ISpeechService {
     async stop(): Promise<void> {
         this.stoppedManually = true;
         this.lastStartArgs = null;
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
         if (this.recognition) {
             try {
                 this.recognition.stop();
@@ -369,6 +393,14 @@ class WebSpeechService implements ISpeechService {
             }).catch(() => {});
         }
         // #endregion
+
+        // Track what we got from the current session (for accumulation on auto-restart)
+        this.currentSessionTranscript = finalTranscript;
+
+        // Prepend text from previous auto-restart sessions so nothing is lost
+        if (this.accumulatedTranscript) {
+            finalTranscript = this.accumulatedTranscript + ' ' + finalTranscript;
+        }
 
         // Get confidence from last result
         const lastResult = resultsArray[resultsArray.length - 1];
