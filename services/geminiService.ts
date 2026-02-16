@@ -140,6 +140,27 @@ export const generateInterviewTranscript = async (
     return { summary: response.summary, setup: response.setup, transcript: response.transcript };
 };
 
+export const transcribeAudio = async (
+    audioFile: File,
+    lang: Language,
+    speakerHint?: number
+): Promise<{ transcript: string; speakerCount: number }> => {
+    const formData = new FormData();
+    formData.append('audio', audioFile);
+    formData.append('lang', lang);
+    if (speakerHint) {
+        formData.append('speakerHint', String(speakerHint));
+    }
+
+    const response = await apiFetch('/gemini/transcript/transcribe-audio', {
+        method: 'POST',
+        body: formData,
+        signal: AbortSignal.timeout(120000),
+    });
+
+    return { transcript: response.transcript, speakerCount: response.speakerCount };
+};
+
 export const generateContextFromInterview = async (
     history: Message[],
     lang: Language
