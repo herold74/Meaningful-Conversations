@@ -105,7 +105,7 @@
   "questionnaire_error_name_required": "Please provide a name or a calling name.",
   "questionnaire_generateFile": "Generate File & Continue",
   "questionnaire_main_title": "My Life Context",
-  "required_field_indicator": "*required",
+  "required_field_indicator": "*required field",
 
   "q_section_profile_title": "👤 Core Profile",
   "q_section_profile_desc": "High-level, stable information about me.",
