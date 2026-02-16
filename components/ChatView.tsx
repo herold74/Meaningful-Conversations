@@ -31,6 +31,7 @@ import * as api from '../services/api';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { speechService, isNativeApp } from '../services/capacitorSpeechService';
+import { isDesktopWeb } from '../utils/platformDetection';
 
 // Extend Window for AudioContext vendor prefix (used by meditation gong fallback)
 interface CustomWindow extends Window {
@@ -1649,9 +1650,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault(); // Prevent adding a new line
-        // Manually create a mock event and call the existing form submit handler
+    // On mobile/tablet (< 768px or native app) Enter adds a newline;
+    // only the paper-plane button sends. On desktop, Enter sends.
+    if (e.key === 'Enter' && !e.shiftKey && isDesktopWeb()) {
+        e.preventDefault();
         const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
         await handleFormSubmit(syntheticEvent);
     }
