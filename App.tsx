@@ -674,6 +674,33 @@ const App: React.FC = () => {
         setChatHistory([]);
         setView('chat');
     };
+
+    const handleStartSessionFromEval = (botId: string, examplePrompt: string) => {
+        const bot = BOTS.find(b => b.id === botId);
+        if (!bot) return;
+
+        // Stop any ongoing voice output
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => { audio.pause(); audio.currentTime = 0; });
+
+        // Pre-seed chat history with the suggested prompt as a user message.
+        // ChatView will detect this and auto-send it to the backend, skipping
+        // the bot's standard greeting/open-task check-in.
+        const userMessage: Message = {
+            id: `user-${Date.now()}`,
+            text: examplePrompt,
+            role: 'user',
+            timestamp: new Date().toISOString(),
+        };
+        setSelectedBot(bot);
+        setChatHistory([userMessage]);
+        setUserMessageCount(0);
+        setCameFromContextChoice(false);
+        setView('chat');
+    };
     
     const handleStartInterview = () => {
         const interviewBot = BOTS.find(b => b.id === 'gloria-life-context');
@@ -1370,10 +1397,10 @@ const App: React.FC = () => {
                     return <TranscriptInput onSubmit={handleTeTranscriptSubmit} onBack={() => setTeStep('pre')} isLoading={teIsLoading} showAudioTab={showAudioTab} language={language} />;
                 }
                 if (teStep === 'review' && teEvaluation && tePreAnswers) {
-                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} currentUser={currentUser || undefined} onDone={() => setView('botSelection')} />;
+                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} currentUser={currentUser || undefined} onDone={() => setView('botSelection')} onStartSession={handleStartSessionFromEval} />;
                 }
                 if (teStep === 'history') {
-                    return <EvaluationHistory onBack={() => setTeStep('pre')} currentUser={currentUser || undefined} />;
+                    return <EvaluationHistory onBack={() => setTeStep('pre')} currentUser={currentUser || undefined} onStartSession={handleStartSessionFromEval} />;
                 }
                 return null;
             }

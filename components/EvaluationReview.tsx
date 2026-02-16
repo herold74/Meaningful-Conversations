@@ -9,6 +9,7 @@ interface EvaluationReviewProps {
     preAnswers: TranscriptPreAnswers;
     onDone: () => void;
     currentUser?: { email?: string; isPremium?: boolean; isClient?: boolean; isAdmin?: boolean; isDeveloper?: boolean; unlockedCoaches?: string[] };
+    onStartSession?: (botId: string, examplePrompt: string) => void;
 }
 
 const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) => {
@@ -70,7 +71,8 @@ const BotRecCard: React.FC<{
     available: boolean;
     tierLabel: string;
     t: (key: string) => string;
-}> = ({ rec, label, available, tierLabel, t }) => {
+    onStartSession?: (botId: string, examplePrompt: string) => void;
+}> = ({ rec, label, available, tierLabel, t, onStartSession }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = (e: React.MouseEvent) => {
@@ -103,31 +105,42 @@ const BotRecCard: React.FC<{
                 )}
             </div>
             <p className="text-sm text-content-secondary mb-3 line-clamp-6 min-h-[7.5rem]" title={rec.rationale}>{rec.rationale}</p>
-            <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex-1">
+            <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex-1 flex flex-col">
                 <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide mb-1">{t('te_review_bot_example_prompt')}</p>
                 <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
-                <button
-                    onClick={handleCopy}
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors"
-                >
-                    {copied ? (
-                        <>
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            {t('te_review_bot_copied')}
-                        </>
-                    ) : (
-                        <>
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            {t('te_review_bot_copy_prompt')}
-                        </>
+                <div className="mt-auto pt-2 flex items-center justify-between">
+                    <button
+                        onClick={handleCopy}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors"
+                    >
+                        {copied ? (
+                            <>
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                {t('te_review_bot_copied')}
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                {t('te_review_bot_copy_prompt')}
+                            </>
+                        )}
+                    </button>
+                    {available && onStartSession && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onStartSession(rec.botId, rec.examplePrompt); }}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-white bg-accent-primary hover:bg-accent-primary/90 px-3 py-1.5 rounded-md shadow-sm transition-colors"
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                            {t('te_review_bot_start_session')}
+                        </button>
                     )}
-                </button>
+                </div>
             </div>
         </div>
     );
 };
 
-const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnswers, onDone, currentUser }) => {
+const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnswers, onDone, currentUser, onStartSession }) => {
     const { t, language } = useLocalization();
     const [isExporting, setIsExporting] = useState(false);
     const userAccessLevel = getUserAccessLevel(currentUser);
@@ -312,6 +325,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                                             available={primaryAvailable}
                                             tierLabel={getTierLabel(rec.primary.requiredTier)}
                                             t={t}
+                                            onStartSession={onStartSession}
                                         />
                                         <BotRecCard
                                             rec={rec.secondary}
@@ -319,6 +333,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                                             available={secondaryAvailable}
                                             tierLabel={getTierLabel(rec.secondary.requiredTier)}
                                             t={t}
+                                            onStartSession={onStartSession}
                                         />
                                     </div>
                                     {i < evaluation.botRecommendations!.length - 1 && (
