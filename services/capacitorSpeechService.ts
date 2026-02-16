@@ -17,6 +17,7 @@
  */
 
 import { Capacitor, registerPlugin } from '@capacitor/core';
+import { isAndroidBrowser } from '../utils/platformDetection';
 
 // Detect if running in native Capacitor environment
 export const isNativeApp = Capacitor.isNativePlatform();
@@ -114,6 +115,16 @@ class WebSpeechService implements ISpeechService {
     private recognition: any = null; // webkitSpeechRecognition instance
     private listening: boolean = false;
     private debugLogBaseUrl: string | null = null;
+    /** Set to true only when stop() is called explicitly by the user. */
+    private stoppedManually: boolean = false;
+    /** Saved options/callbacks for Android auto-restart after silence timeout. */
+    private lastStartArgs: {
+        options: SpeechOptions;
+        onResult: (result: SpeechResult) => void;
+        onError?: (error: Error) => void;
+        onStart?: () => void;
+        onEnd?: () => void;
+    } | null = null;
 
     async isAvailable(): Promise<boolean> {
         return typeof window !== 'undefined' && 
@@ -140,10 +151,17 @@ class WebSpeechService implements ISpeechService {
         onStart?: () => void,
         onEnd?: () => void
     ): Promise<void> {
-        // Stop any existing recognition
+        // Stop any existing recognition (without triggering auto-restart)
+        this.stoppedManually = true;
         await this.stop();
+        this.stoppedManually = false;
 
         this.debugLogBaseUrl = options.debugLogBaseUrl || null;
+
+        // Save args for Android auto-restart
+        if (isAndroidBrowser) {
+            this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
+        }
 
         const SpeechRecognitionAPI = (window as any).SpeechRecognition || 
                                      (window as any).webkitSpeechRecognition;
@@ -166,14 +184,37 @@ class WebSpeechService implements ISpeechService {
         };
 
         recognition.onend = () => {
+            // Android Chrome fires onend after 2-3s of silence even with
+            // continuous=true. Auto-restart keeps the mic open so the user
+            // can pause naturally without having to tap the button again.
+            // This ONLY runs on Android — PC and iOS are unaffected.
+            if (isAndroidBrowser && !this.stoppedManually && this.lastStartArgs) {
+                console.log('[WebSpeechService] 🔄 Android auto-restart after silence timeout');
+                try {
+                    recognition.start();
+                    return;
+                } catch (e) {
+                    console.warn('[WebSpeechService] Auto-restart failed, ending normally:', e);
+                }
+            }
+
             console.log('[WebSpeechService] 🎙️ Recognition ended');
             this.listening = false;
+            this.lastStartArgs = null;
             onEnd?.();
         };
 
         recognition.onerror = (event: any) => {
-            this.listening = false;
             const errorCode = event.error || 'unknown';
+
+            // On Android, 'no-speech' fires before the automatic onend.
+            // We allow auto-restart to handle it — don't kill the session.
+            if (isAndroidBrowser && errorCode === 'no-speech' && !this.stoppedManually) {
+                console.log('[WebSpeechService] 🤖 Android no-speech — will auto-restart on end');
+                return;
+            }
+
+            this.listening = false;
             
             // Categorized error handling
             switch (errorCode) {
@@ -182,7 +223,6 @@ class WebSpeechService implements ISpeechService {
                     onError?.(new Error('microphone_permission_denied'));
                     break;
                 case 'no-speech':
-                    // Common and usually not critical - don't report as error
                     console.warn('[WebSpeechService] No speech detected');
                     break;
                 case 'audio-capture':
@@ -194,7 +234,6 @@ class WebSpeechService implements ISpeechService {
                     onError?.(new Error('network_error'));
                     break;
                 case 'aborted':
-                    // Expected when stopping - not an error
                     console.warn('[WebSpeechService] Recognition aborted (expected on stop)');
                     break;
                 default:
@@ -217,6 +256,8 @@ class WebSpeechService implements ISpeechService {
     }
 
     async stop(): Promise<void> {
+        this.stoppedManually = true;
+        this.lastStartArgs = null;
         if (this.recognition) {
             try {
                 this.recognition.stop();
