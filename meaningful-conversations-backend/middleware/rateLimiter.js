@@ -118,10 +118,33 @@ const geminiLimiter = rateLimit({
     },
 });
 
+/**
+ * Audio transcription rate limiter - Expensive Gemini operation
+ * 5 requests per hour per user (keyed by user ID)
+ */
+const audioTranscribeLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    keyGenerator: (req) => `audio_${req.userId || req.ip}`,
+    message: { 
+        error: 'Too many audio transcription requests. Please try again later.',
+        errorCode: 'RATE_LIMIT_AUDIO_TRANSCRIBE'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: false,
+    handler: (req, res, next, options) => {
+        const identifier = req.userId ? `user ${req.userId}` : `IP ${req.ip}`;
+        console.warn(`🚫 Audio transcription rate limit exceeded for ${identifier}`);
+        res.status(429).json(options.message);
+    },
+});
+
 module.exports = { 
     loginLimiter, 
     registerLimiter, 
     forgotPasswordLimiter,
     verifyEmailLimiter,
-    geminiLimiter
+    geminiLimiter,
+    audioTranscribeLimiter
 };
