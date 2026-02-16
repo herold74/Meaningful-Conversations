@@ -501,6 +501,7 @@ function clearModelMappingCache() {
 
 module.exports = {
   getActiveProvider,
+  getGoogleClient,
   generateContent,
   setActiveProvider,
   getProviderStats,

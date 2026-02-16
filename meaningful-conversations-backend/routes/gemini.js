@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
 const prisma = require('../prismaClient.js');
 const { BOTS } = require('../constants.js');
@@ -10,6 +11,20 @@ const { getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const dynamicPromptController = require('../services/dynamicPromptController.js');
 const behaviorLogger = require('../services/behaviorLogger.js');
+const { audioTranscribeLimiter } = require('../middleware/rateLimiter.js');
+
+const audioUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowedMimes = ['audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/flac', 'audio/webm', 'audio/x-m4a', 'audio/mp3'];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`Unsupported audio format: ${file.mimetype}`));
+        }
+    }
+});
 
 // Google AI client kept for potential future use (explicit caching, etc.)
 // Currently, implicit caching handles cost optimization automatically.
@@ -1556,6 +1571,154 @@ router.post('/transcript/:id/rate', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error('Error rating transcript evaluation:', error);
         res.status(500).json({ error: 'Failed to submit rating.' });
+    }
+});
+
+// POST /api/gemini/transcript/transcribe-audio
+// Transcribes audio with speaker diarization via Gemini (Google-only, no Mistral fallback)
+// Requires authentication and Client+ access
+router.post('/transcript/transcribe-audio', authMiddleware, audioTranscribeLimiter, audioUpload.single('audio'), async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.userId;
+
+    try {
+        // Validate file presence
+        if (!req.file) {
+            return res.status(400).json({ error: 'No audio file provided.' });
+        }
+
+        const { lang = 'de', speakerHint } = req.body;
+
+        // Access check: Client+ only (Client, Admin, Developer)
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isClient: true, isAdmin: true, isDeveloper: true }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        if (!user.isClient && !user.isAdmin && !user.isDeveloper) {
+            return res.status(403).json({ error: 'Audio transcription requires Client access or higher.' });
+        }
+
+        // Build diarization prompt
+        const speakerHintNum = speakerHint ? parseInt(speakerHint, 10) : null;
+        const speakerInstruction = speakerHintNum && speakerHintNum >= 2 && speakerHintNum <= 4
+            ? (lang === 'de'
+                ? `Es sind genau ${speakerHintNum} Sprecher im Gespräch.`
+                : `There are exactly ${speakerHintNum} speakers in this conversation.`)
+            : '';
+
+        const diarizationPrompt = lang === 'de'
+            ? `Transkribiere die folgende Audiodatei vollständig und wortgetreu.
+
+SPRECHERIDENTIFIKATION:
+- Identifiziere die verschiedenen Sprecher anhand ihrer Stimmen.
+- Verwende die Labels [Sprecher 1], [Sprecher 2], [Sprecher 3] usw.
+${speakerInstruction}
+
+FORMAT:
+- Beginne mit einer kurzen Sprecherzuordnung im Format:
+  ---SPRECHER---
+  Sprecher 1: [kurze Stimmbeschreibung, z.B. "männliche Stimme, tiefer Tonfall"]
+  Sprecher 2: [kurze Stimmbeschreibung]
+  ---SPRECHER---
+- Danach folgt das vollständige Transkript.
+- Jeder Sprecherwechsel beginnt in einer neuen Zeile mit dem Sprecher-Label.
+- Format: [Sprecher N]: Text des Sprechers
+- Füge Absätze bei thematischen Wechseln ein.
+- Behalte Füllwörter und natürliche Sprachmuster bei, aber korrigiere offensichtliche Grammatikfehler leicht.
+
+WICHTIG: Gib NUR die Sprecherzuordnung und das Transkript aus, keine zusätzlichen Kommentare oder Zusammenfassungen.`
+            : `Transcribe the following audio file completely and verbatim.
+
+SPEAKER IDENTIFICATION:
+- Identify the different speakers based on their voices.
+- Use labels [Speaker 1], [Speaker 2], [Speaker 3] etc.
+${speakerInstruction}
+
+FORMAT:
+- Start with a brief speaker identification section in this format:
+  ---SPEAKERS---
+  Speaker 1: [brief voice description, e.g. "male voice, deep tone"]
+  Speaker 2: [brief voice description]
+  ---SPEAKERS---
+- Then provide the complete transcript.
+- Each speaker change starts on a new line with the speaker label.
+- Format: [Speaker N]: Speaker's text
+- Add paragraph breaks at topical shifts.
+- Keep filler words and natural speech patterns, but lightly correct obvious grammar errors.
+
+IMPORTANT: Output ONLY the speaker identification and transcript, no additional comments or summaries.`;
+
+        // Send to Gemini with audio inline data (Google-only, no Mistral fallback)
+        const client = await aiProviderService.getGoogleClient();
+        const audioBase64 = req.file.buffer.toString('base64');
+
+        const response = await withTimeout(
+            client.models.generateContent({
+                model: 'gemini-2.5-pro',
+                contents: [{
+                    role: 'user',
+                    parts: [
+                        { inlineData: { mimeType: req.file.mimetype, data: audioBase64 } },
+                        { text: diarizationPrompt }
+                    ]
+                }],
+                config: { temperature: 0.1, maxOutputTokens: 65536 }
+            }),
+            120000,
+            'Audio transcription'
+        );
+
+        const transcript = response.text || '';
+
+        // Count speakers from the transcript
+        const speakerPattern = lang === 'de' ? /\[Sprecher (\d+)\]/g : /\[Speaker (\d+)\]/g;
+        const speakerNumbers = new Set();
+        let match;
+        while ((match = speakerPattern.exec(transcript)) !== null) {
+            speakerNumbers.add(parseInt(match[1], 10));
+        }
+        const speakerCount = speakerNumbers.size;
+
+        const durationMs = Date.now() - startTime;
+        const tokenUsage = response.usageMetadata || {};
+
+        await trackApiUsage({
+            userId,
+            endpoint: '/api/gemini/transcript/transcribe-audio',
+            botId: 'audio-transcription',
+            inputTokens: tokenUsage.promptTokenCount || 0,
+            outputTokens: tokenUsage.candidatesTokenCount || 0,
+            durationMs,
+            success: true,
+        });
+
+        res.json({ transcript, speakerCount });
+
+    } catch (error) {
+        console.error('Audio transcription error:', error);
+        const durationMs = Date.now() - startTime;
+
+        await trackApiUsage({
+            userId,
+            endpoint: '/api/gemini/transcript/transcribe-audio',
+            botId: 'audio-transcription',
+            inputTokens: 0,
+            outputTokens: 0,
+            durationMs,
+            success: false,
+            errorMessage: error.message,
+        });
+
+        if (error.message?.includes('Unsupported audio format')) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        res.status(500).json({ error: 'Failed to transcribe audio.' });
     }
 });
 
