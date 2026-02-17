@@ -37,9 +37,20 @@ router.get('/users', async (req, res) => {
                 lastLogin: true,
                 gamificationState: true,
                 status: true,
+                personalityProfile: {
+                    select: { completedLenses: true }
+                },
             }
         });
-        res.json(users);
+        const mapped = users.map(u => ({
+            ...u,
+            completedLenses: u.personalityProfile
+                ? JSON.parse(u.personalityProfile.completedLenses || '[]')
+                : [],
+            hasProfile: !!u.personalityProfile,
+            personalityProfile: undefined,
+        }));
+        res.json(mapped);
     } catch (error) {
         console.error("Admin: Error fetching users:", error);
         res.status(500).json({ error: 'Failed to fetch users.' });

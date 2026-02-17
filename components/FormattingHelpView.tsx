@@ -1,8 +1,6 @@
 import React from 'react';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { InfoIcon } from './icons/InfoIcon';
-import { WarningIcon } from './icons/WarningIcon';
 
 interface InfoViewProps {
 }
@@ -47,9 +45,11 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                     <pre className="bg-gray-100 dark:bg-gray-900 p-3 mt-2 border border-gray-200 dark:border-gray-700 text-sm font-mono text-gray-800 dark:text-gray-200"><code>
                         {t('formatting_lists_code')}
                     </code></pre>
-                    <div className="p-4 mt-4 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4 not-prose">
-                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <p dangerouslySetInnerHTML={{ __html: t('formatting_lists_warning') }} />
+                    <div className="p-4 mt-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg not-prose">
+                        <div className="flex items-start gap-3">
+                            <div className="text-2xl mt-0.5">⚠️</div>
+                            <p className="text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('formatting_lists_warning') }} />
+                        </div>
                     </div>
                 </div>
 
@@ -64,9 +64,11 @@ const FormattingHelpView: React.FC<InfoViewProps> = () => {
                 <div>
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{t('formatting_manual_title')}</h2>
                     <p dangerouslySetInnerHTML={{ __html: t('formatting_manual_p1') }} />
-                     <div className="p-4 mt-4 bg-status-success-background dark:bg-status-success-background border-l-4 border-status-success-border dark:border-status-success-border/30 text-status-success-foreground dark:text-status-success-foreground flex items-start gap-4 not-prose">
-                        <InfoIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <p dangerouslySetInnerHTML={{__html: t('formatting_manual_p2')}}/>
+                    <div className="p-4 mt-4 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 dark:border-emerald-600 rounded-lg not-prose">
+                        <div className="flex items-start gap-3">
+                            <div className="text-2xl mt-0.5">ℹ️</div>
+                            <p className="text-sm text-content-secondary" dangerouslySetInnerHTML={{__html: t('formatting_manual_p2')}}/>
+                        </div>
                     </div>
                 </div>
 

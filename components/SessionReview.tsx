@@ -731,24 +731,28 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
                 
                 {isTestMode && (
-                    <div className="p-4 mb-6 bg-status-info-background dark:bg-status-info-background border-l-4 border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-4">
-                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <div>
-                            <h3 className="font-bold text-lg">{t('sessionReview_testMode_warning_title')}</h3>
-                            <p className="mt-2 text-sm md:hidden">{t('sessionReview_testMode_warning_desc_short')}</p>
-                            <p className="mt-2 text-sm hidden md:block">{t('sessionReview_testMode_warning_desc')}</p>
+                    <div className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <div className="text-2xl mt-0.5">💡</div>
+                            <div>
+                                <h3 className="font-bold text-lg text-content-primary">{t('sessionReview_testMode_warning_title')}</h3>
+                                <p className="mt-2 text-sm text-content-secondary md:hidden">{t('sessionReview_testMode_warning_desc_short')}</p>
+                                <p className="mt-2 text-sm text-content-secondary hidden md:block">{t('sessionReview_testMode_warning_desc')}</p>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {isGuest && (
-                    <div className="p-4 mb-6 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4">
-                        <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                        <div>
-                            <h3 className="font-bold text-lg">{t('sessionReview_guestWarning_title')}</h3>
-                            <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p1') }} />
-                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p2') }} />
-                            <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p3') }} />
+                    <div className="p-4 mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <div className="text-2xl mt-0.5">⚠️</div>
+                            <div>
+                                <h3 className="font-bold text-lg text-content-primary">{t('sessionReview_guestWarning_title')}</h3>
+                                <p className="mt-2 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p1') }} />
+                                <p className="mt-1 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p2') }} />
+                                <p className="mt-1 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p3') }} />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -1102,16 +1106,21 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     const label = questionnaireLabels[recommendation.type][language === 'de' ? 'de' : 'en'];
                     
                     return (
-                        <div className="py-3 px-4 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-500 text-sm">
-                            <span className="text-purple-700 dark:text-purple-300">
-                                💡 {t('sessionReview_questionnaire_hint') || 'Tipp'}: {t('sessionReview_questionnaire_recommendation') || 'Der Fragebogen'} „{label}" {t('sessionReview_questionnaire_could_help') || 'könnte bei deinem Thema helfen'}.{' '}
-                            </span>
-                            <button 
-                                onClick={onStartPersonalitySurvey}
-                                className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline font-medium"
-                            >
-                                {t('sessionReview_questionnaire_learn_more') || 'Mehr erfahren'}
-                            </button>
+                        <div className="py-3 px-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-400 dark:border-purple-600 rounded-lg text-sm">
+                            <div className="flex items-start gap-3">
+                                <div className="text-xl mt-0.5">💡</div>
+                                <div>
+                                    <span className="text-purple-700 dark:text-purple-300">
+                                        {t('sessionReview_questionnaire_hint') || 'Tipp'}: {t('sessionReview_questionnaire_recommendation') || 'Der Fragebogen'} „{label}" {t('sessionReview_questionnaire_could_help') || 'könnte bei deinem Thema helfen'}.{' '}
+                                    </span>
+                                    <button 
+                                        onClick={onStartPersonalitySurvey}
+                                        className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 underline font-medium"
+                                    >
+                                        {t('sessionReview_questionnaire_learn_more') || 'Mehr erfahren'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     );
                 })()}

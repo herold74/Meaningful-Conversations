@@ -4,7 +4,6 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { WarningIcon } from './icons/WarningIcon';
 
 interface InfoViewProps {
 }
@@ -1499,12 +1498,14 @@ const UserGuideView: React.FC<InfoViewProps> = () => {
                 </ReactMarkdown>
             </div>
             
-            <div className="p-4 mt-6 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border dark:border-status-warning-border/30 text-status-warning-foreground dark:text-status-warning-foreground flex items-start gap-4 not-prose">
-                <WarningIcon className="w-8 h-8 flex-shrink-0 mt-1" />
-                <div>
-                    <h3 className="font-bold text-lg">{t('user_guide_attention_title')}</h3>
-                    <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_guest') }} />
-                    <p className="mt-2 text-sm" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_registered') }} />
+            <div className="p-4 mt-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg not-prose">
+                <div className="flex items-start gap-3">
+                    <div className="text-2xl mt-0.5">⚠️</div>
+                    <div>
+                        <h3 className="font-bold text-lg text-content-primary">{t('user_guide_attention_title')}</h3>
+                        <p className="mt-2 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_guest') }} />
+                        <p className="mt-2 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('user_guide_attention_registered') }} />
+                    </div>
                 </div>
             </div>
 

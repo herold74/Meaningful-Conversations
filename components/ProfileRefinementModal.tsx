@@ -127,10 +127,11 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
           
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded border border-red-200 dark:border-red-700">
-              <p className="text-red-700 dark:text-red-400">
-                ⚠️ {error}
-              </p>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl mt-0.5">🚨</div>
+                <p className="text-sm text-content-secondary">{error}</p>
+              </div>
             </div>
           )}
           

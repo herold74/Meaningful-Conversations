@@ -1559,7 +1559,7 @@ const App: React.FC = () => {
                 </>
             )}
             {showGamificationBar && useNativeGamificationBar && (
-                <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 8px)` }} />
+                <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 20px)` }} />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 {renderView()}
