@@ -138,7 +138,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                 {activeTab === 'about' && (
                     <div className="p-4 mt-6 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 dark:border-emerald-600 rounded-lg not-prose">
                         <div className="flex items-start gap-3">
-                            <div className="text-2xl mt-0.5">ℹ️</div>
+                            <div className="text-2xl mt-0.5">✅</div>
                             <div>
                                 <ReactMarkdown 
                                     remarkPlugins={[remarkGfm]}
