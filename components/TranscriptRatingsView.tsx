@@ -107,43 +107,51 @@ const TranscriptRatingsView: React.FC = () => {
             <div className="flex gap-2">
                 <button
                     onClick={() => setFeedbackFilter('all')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    title={t('admin_te_ratings_filter_all')}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'all'
                             ? 'bg-accent-primary text-white'
                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                 >
-                    {t('admin_te_ratings_filter_all')}
+                    <span className="sm:hidden">📋</span>
+                    <span className="hidden sm:inline">{t('admin_te_ratings_filter_all')}</span>
                 </button>
                 <button
                     onClick={() => setFeedbackFilter('with')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    title={t('admin_te_ratings_filter_with_feedback')}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'with'
                             ? 'bg-accent-primary text-white'
                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                 >
-                    {t('admin_te_ratings_filter_with_feedback')}
+                    <span className="sm:hidden">💬</span>
+                    <span className="hidden sm:inline">{t('admin_te_ratings_filter_with_feedback')}</span>
                 </button>
                 <button
                     onClick={() => setFeedbackFilter('without')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    title={t('admin_te_ratings_filter_no_feedback')}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'without'
                             ? 'bg-accent-primary text-white'
                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                 >
-                    {t('admin_te_ratings_filter_no_feedback')}
+                    <span className="sm:hidden">🔢</span>
+                    <span className="hidden sm:inline">{t('admin_te_ratings_filter_no_feedback')}</span>
                 </button>
                 <button
                     onClick={() => setFeedbackFilter('contact')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    title={t('admin_te_ratings_filter_contact')}
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'contact'
                             ? 'bg-blue-600 text-white'
                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                 >
-                    📬 {t('admin_te_ratings_filter_contact')}
+                    <span className="sm:hidden">📬</span>
+                    <span className="hidden sm:inline">📬 {t('admin_te_ratings_filter_contact')}</span>
                 </button>
             </div>
 
@@ -190,7 +198,7 @@ const TranscriptRatingsView: React.FC = () => {
                                                     <>
                                                         <span className="text-xs text-content-tertiary">•</span>
                                                         <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
-                                                            📬 {t('admin_te_ratings_contact_requested')}
+                                                            {t('admin_te_ratings_contact_requested')}
                                                         </span>
                                                     </>
                                                 )}

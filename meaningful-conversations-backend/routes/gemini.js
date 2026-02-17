@@ -371,9 +371,10 @@ STRICTLY FORBIDDEN in this first message:
         finalSystemInstruction += historySummary;
     }
     
-    // For all bots EXCEPT the interviewer, add the context.
-    // The interviewer's purpose is to CREATE the context, so it doesn't need to read one.
-    if (bot.id !== 'gloria-life-context') {
+    // Exclude context injection for bots that don't need it:
+    // - gloria-life-context: creates the context, doesn't read one
+    // - gloria-interview: conducts topic-based interviews independent of life context
+    if (bot.id !== 'gloria-life-context' && bot.id !== 'gloria-interview') {
         finalSystemInstruction += `\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
     }
 

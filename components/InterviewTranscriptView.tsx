@@ -5,6 +5,7 @@ import { generateInterviewTranscript } from '../services/geminiService';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Spinner from './shared/Spinner';
+import { downloadTextFile } from '../utils/fileDownload';
 
 interface InterviewTranscriptViewProps {
     chatHistory: Message[];
@@ -57,26 +58,22 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
         }
     };
 
-    const handleDownload = (text: string, filename: string) => {
-        const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    const handleDownload = async (text: string, filename: string) => {
+        try {
+            await downloadTextFile(text, filename, 'text/markdown;charset=utf-8');
+        } catch (err: any) {
+            console.error('Download failed:', err);
+        }
     };
 
-    const handleDownloadAll = () => {
+    const handleDownloadAll = async () => {
         const dateStr = new Date().toISOString().slice(0, 10);
         const sections = [
             `# ${t('interview_transcript_summary')}\n\n${summary}`,
             `# ${t('interview_transcript_setup')}\n\n${setup}`,
             `# ${t('interview_transcript_full')}\n\n${transcript}`
         ];
-        handleDownload(sections.join('\n\n---\n\n'), `interview-complete-${dateStr}.md`);
+        await handleDownload(sections.join('\n\n---\n\n'), `interview-complete-${dateStr}.md`);
     };
 
     if (isLoading) {
