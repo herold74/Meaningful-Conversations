@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { transcribeAudio } from '../services/geminiService';
+import { downloadTextFile } from '../utils/fileDownload';
 import { Language } from '../types';
 
 interface TranscriptInputProps {
@@ -229,31 +230,33 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
         setActiveTab('paste');
     }, [rawTranscript]);
 
-    const handleDownloadTranscript = useCallback(() => {
+    const handleDownloadTranscript = useCallback(async () => {
         if (!text.trim()) return;
         const dateStr = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
-        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `transcript_${dateStr}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            await downloadTextFile(text, `transcript_${dateStr}.txt`);
+        } catch (err) {
+            console.error('Transcript download failed:', err);
+        }
     }, [text]);
 
     // Tab button helper
-    const tabButton = (id: 'paste' | 'file' | 'audio', label: string) => (
+    const tabButton = (id: 'paste' | 'file' | 'audio', label: string, mobileIcon?: string) => (
         <button
             onClick={() => setActiveTab(id)}
+            title={label}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === id
                     ? 'bg-accent-primary text-white'
                     : 'bg-background-primary text-content-secondary border border-gray-300 dark:border-gray-600 hover:border-accent-primary/50'
             }`}
         >
-            {label}
+            {mobileIcon ? (
+                <>
+                    <span className="sm:hidden">{mobileIcon}</span>
+                    <span className="hidden sm:inline">{label}</span>
+                </>
+            ) : label}
         </button>
     );
 
@@ -319,7 +322,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
             <div className="flex gap-2 mb-4 flex-wrap">
                 {tabButton('paste', t('te_input_paste_tab'))}
                 {tabButton('file', t('te_input_file_tab'))}
-                {showAudioTab && tabButton('audio', t('te_input_audio_tab'))}
+                {showAudioTab && tabButton('audio', t('te_input_audio_tab'), '🎙️')}
             </div>
 
             {/* Content */}
