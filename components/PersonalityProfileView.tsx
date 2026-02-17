@@ -901,8 +901,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </p>
             
             {narrativeError && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
-                {narrativeError}
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="text-xl mt-0.5">🚨</div>
+                  <p className="text-sm text-content-secondary">{narrativeError}</p>
+                </div>
               </div>
             )}
             
@@ -949,8 +952,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </p>
             
             {narrativeError && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
-                {narrativeError}
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="text-xl mt-0.5">🚨</div>
+                  <p className="text-sm text-content-secondary">{narrativeError}</p>
+                </div>
               </div>
             )}
             
@@ -1365,14 +1371,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
             
             <div className="space-y-4">
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-                <p className="text-red-800 dark:text-red-300 font-medium mb-2">
-                  ⚠️ {t('profile_delete_warning') || 'Diese Aktion kann nicht rückgängig gemacht werden!'}
-                </p>
-                <p className="text-red-700 dark:text-red-400 text-sm">
-                  {t('profile_delete_data_loss') || 
-                    'Dein Persönlichkeitsprofil, deine Signatur und alle Coaching-Verfeinerungen werden dauerhaft gelöscht.'}
-                </p>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-0.5">🚨</div>
+                  <div>
+                    <p className="font-semibold text-content-primary mb-1">
+                      {t('profile_delete_warning') || 'Diese Aktion kann nicht rückgängig gemacht werden!'}
+                    </p>
+                    <p className="text-sm text-content-secondary">
+                      {t('profile_delete_data_loss') || 
+                        'Dein Persönlichkeitsprofil, deine Signatur und alle Coaching-Verfeinerungen werden dauerhaft gelöscht.'}
+                    </p>
+                  </div>
+                </div>
               </div>
               
               {profileMetadata && profileMetadata.sessionCount > 0 && (
