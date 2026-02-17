@@ -47,13 +47,16 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
         </div>
 
         {/* Info Box: Why we need this */}
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg">
-          <p className="text-sm text-content-secondary">
-            <strong className="text-blue-700 dark:text-blue-400">💡 {t('narrative_stories_modal_why') || 'Warum?'}</strong>
-            <br />
-            {t('narrative_stories_modal_reason') || 
-              'Deine Persönlichkeit entwickelt sich weiter. Neue Erfahrungen führen zu relevanteren Einsichten als alte Stories.'}
-          </p>
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="text-xl mt-0.5">💡</div>
+            <p className="text-sm text-content-secondary">
+              <strong className="text-blue-700 dark:text-blue-400">{t('narrative_stories_modal_why') || 'Warum?'}</strong>
+              <br />
+              {t('narrative_stories_modal_reason') || 
+                'Deine Persönlichkeit entwickelt sich weiter. Neue Erfahrungen führen zu relevanteren Einsichten als alte Stories.'}
+            </p>
+          </div>
         </div>
 
         {/* Old Stories Hint (collapsed, not editable) */}

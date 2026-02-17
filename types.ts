@@ -62,6 +62,8 @@ export interface User {
     gamificationState?: string;
     status?: 'PENDING' | 'ACTIVE';
     coachingMode?: CoachingMode; // off = standard coaching, dpc = profile used but not refined, dpfl = profile used and refined
+    hasProfile?: boolean;
+    completedLenses?: string[];
 }
 
 export type BotAccessTier = 'guest' | 'registered' | 'premium' | 'client';

@@ -2080,8 +2080,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 min-h-0">
           {/* Error Display */}
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500">
-              ❌ {error}
+            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl mt-0.5">🚨</div>
+                <p className="text-sm text-content-secondary">{error}</p>
+              </div>
             </div>
           )}
 
