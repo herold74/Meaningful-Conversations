@@ -45,7 +45,7 @@ interface AdminViewProps {
 
 type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
-type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'loginCount' | 'xp' | 'lastLogin';
+type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'profile' | 'loginCount' | 'xp' | 'lastLogin';
 
 interface GuestLoginStats {
     dateRange: {
@@ -149,9 +149,14 @@ const ResetConfirmationModal: React.FC<{
                         <p className="mt-2 text-gray-600 dark:text-gray-400">
                           {t('admin_reset_confirm_part1')}<strong>{user.email}</strong>{t('admin_reset_confirm_part2')}
                         </p>
-                        <div className="mt-4 p-3 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border text-status-warning-foreground dark:text-status-warning-foreground">
-                           <p className="font-bold">{t('admin_reset_confirm_warning_title')}</p>
-                           <p className="text-sm">{t('admin_reset_confirm_warning_desc')}</p>
+                        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+                            <div className="flex items-start gap-3">
+                                <div className="text-2xl mt-0.5">⚠️</div>
+                                <div>
+                                    <p className="font-bold text-content-primary">{t('admin_reset_confirm_warning_title')}</p>
+                                    <p className="text-sm text-content-secondary">{t('admin_reset_confirm_warning_desc')}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -256,6 +261,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [bulkQuantity, setBulkQuantity] = useState<number>(10);
     const [generatedBulkCodes, setGeneratedBulkCodes] = useState<Array<{ code: string; botId: string; referrer?: string; createdAt: string }> | null>(null);
     const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [profileFilter, setProfileFilter] = useState<'all' | 'with' | 'without'>('all');
     const [codeEmailFilter, setCodeEmailFilter] = useState('');
     const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
@@ -475,9 +481,17 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     };
 
     const filteredUsers = useMemo(() => {
-        if (!userSearchQuery) return users;
-        return users.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
-    }, [users, userSearchQuery]);
+        let result = users;
+        if (userSearchQuery) {
+            result = result.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
+        }
+        if (profileFilter === 'with') {
+            result = result.filter(user => user.hasProfile);
+        } else if (profileFilter === 'without') {
+            result = result.filter(user => !user.hasProfile);
+        }
+        return result;
+    }, [users, userSearchQuery, profileFilter]);
 
     const sortedAndFilteredUsers = useMemo(() => {
         let sortableUsers = [...filteredUsers];
@@ -499,6 +513,12 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         // Sort by developer first, then admin, then client, then premium
                         const aValue = (a.isDeveloper ? 8 : 0) + (a.isAdmin ? 4 : 0) + (a.isClient ? 2 : 0) + (a.isPremium ? 1 : 0);
                         const bValue = (b.isDeveloper ? 8 : 0) + (b.isAdmin ? 4 : 0) + (b.isClient ? 2 : 0) + (b.isPremium ? 1 : 0);
+                        compare = aValue - bValue;
+                        break;
+                    }
+                    case 'profile': {
+                        const aValue = (a.completedLenses?.length || 0);
+                        const bValue = (b.completedLenses?.length || 0);
                         compare = aValue - bValue;
                         break;
                     }
@@ -716,13 +736,29 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
 
             {isUsersExpanded && (
                 <div className="space-y-4 animate-fadeIn">
-                    <input 
-                        type="search"
-                        value={userSearchQuery}
-                        onChange={e => setUserSearchQuery(e.target.value)}
-                        placeholder={t('admin_search_users_placeholder')}
-                        className="w-full p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <input 
+                            type="search"
+                            value={userSearchQuery}
+                            onChange={e => setUserSearchQuery(e.target.value)}
+                            placeholder={t('admin_search_users_placeholder')}
+                            className="flex-1 p-3 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary rounded-lg"
+                        />
+                        <div className="flex gap-1">
+                            {(['all', 'with', 'without'] as const).map(f => (
+                                <button key={f} onClick={() => setProfileFilter(f)}
+                                    title={t(`admin_users_profile_filter_${f}`)}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                                        profileFilter === f
+                                            ? 'bg-accent-primary text-white'
+                                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}>
+                                    <span className="sm:hidden">{f === 'all' ? '👥' : f === 'with' ? '🧠' : '∅'}</span>
+                                    <span className="hidden sm:inline">{t(`admin_users_profile_filter_${f}`)}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     {filteredUsers.length > 0 ? (
                 <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredUsers.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                     <table className="w-full text-left text-sm">
@@ -744,6 +780,12 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                     <button onClick={() => requestUserSort('roles')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                                         {t('admin_users_roles')}
                                         {userSortConfig?.key === 'roles' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
+                                    </button>
+                                </th>
+                                <th className="p-3 text-center">
+                                    <button onClick={() => requestUserSort('profile')} className="flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200 transition-colors mx-auto">
+                                        {t('admin_users_profile')}
+                                        {userSortConfig?.key === 'profile' && (userSortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />)}
                                     </button>
                                 </th>
                                 <th className="p-3 text-center">
@@ -806,6 +848,31 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                                     </span>
                                                 )}
                                             </div>
+                                        </td>
+                                        <td className="p-3 text-center">
+                                            {user.hasProfile ? (
+                                                <div className="flex items-center justify-center gap-1">
+                                                    {(user.completedLenses || []).map((lens: string) => {
+                                                        const label = lens === 'riemann' ? 'R' : lens === 'ocean' ? 'O' : lens === 'sd' ? 'SD' : lens.toUpperCase();
+                                                        const colors = lens === 'riemann'
+                                                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                                                            : lens === 'ocean'
+                                                            ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
+                                                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400';
+                                                        return (
+                                                            <span key={lens} title={lens === 'riemann' ? 'Riemann' : lens === 'ocean' ? 'OCEAN / Big Five' : lens === 'sd' ? 'Spiral Dynamics' : lens}
+                                                                className={`text-xs font-bold px-1.5 py-0.5 rounded ${colors}`}>
+                                                                {label}
+                                                            </span>
+                                                        );
+                                                    })}
+                                                    {(user.completedLenses || []).length === 0 && (
+                                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500">✓</span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 dark:text-gray-600">—</span>
+                                            )}
                                         </td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 text-center">{user.loginCount || 0}</td>
                                         <td className="p-3 text-gray-600 dark:text-gray-400 text-center font-bold">{userXp.toLocaleString()}</td>
@@ -1452,10 +1519,13 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                             scenarioType: scenarioProfileType || 'Unknown'
                                         })}
                                     </p>
-                                    <div className="mt-4 p-3 bg-status-warning-background dark:bg-status-warning-background border-l-4 border-status-warning-border text-status-warning-foreground dark:text-status-warning-foreground">
-                                        <p className="text-sm">
-                                            {t('admin_runner_mismatch_hint')}
-                                        </p>
+                                    <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+                                        <div className="flex items-start gap-3">
+                                            <div className="text-2xl mt-0.5">⚠️</div>
+                                            <p className="text-sm text-content-secondary">
+                                                {t('admin_runner_mismatch_hint')}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -1747,15 +1747,20 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
             </div>
             
             <div className="space-y-4">
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-                <p className="text-red-800 dark:text-red-300 font-medium mb-2">
-                  {t('profile_overwrite_sessions', { count: existingProfile?.sessionCount || 0 }) || 
-                    `📊 Dein Profil wurde durch ${existingProfile?.sessionCount || 0} Coaching-Sessions verfeinert.`}
-                </p>
-                <p className="text-red-700 dark:text-red-400 text-sm">
-                  {t('profile_overwrite_loss_warning') || 
-                    'Diese individuellen Anpassungen basieren auf deinem echten Verhalten und werden bei der Erstellung einer neuen Persönlichkeits-Signatur berücksichtigt.'}
-                </p>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl mt-0.5">🚨</div>
+                  <div>
+                    <p className="font-semibold text-content-primary mb-1">
+                      {t('profile_overwrite_sessions', { count: existingProfile?.sessionCount || 0 }) || 
+                        `📊 Dein Profil wurde durch ${existingProfile?.sessionCount || 0} Coaching-Sessions verfeinert.`}
+                    </p>
+                    <p className="text-sm text-content-secondary">
+                      {t('profile_overwrite_loss_warning') || 
+                        'Diese individuellen Anpassungen basieren auf deinem echten Verhalten und werden bei der Erstellung einer neuen Persönlichkeits-Signatur berücksichtigt.'}
+                    </p>
+                  </div>
+                </div>
               </div>
               
               <p className="text-gray-600 dark:text-gray-400">
