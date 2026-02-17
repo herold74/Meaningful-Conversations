@@ -6,7 +6,6 @@ import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import { isDesktopWeb, isNativeApp } from '../utils/platformDetection';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -297,12 +296,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             ))}
           </div>
 
-          {/* Transcript Evaluation — slim inline option, web only */}
-          {!isNativeApp() && (() => {
+          {/* Transcript Evaluation — slim inline option */}
+          {(() => {
             const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-            const desktop = isDesktopWeb();
-            const locked = !isPremiumPlus || !desktop;
-            const lockReason = !isPremiumPlus ? t('te_premium_required') : !desktop ? t('te_desktop_only') : '';
+            const locked = !isPremiumPlus;
+            const lockReason = !isPremiumPlus ? t('te_premium_required') : '';
 
             return (
               <div className="max-w-4xl mx-auto mt-4">
