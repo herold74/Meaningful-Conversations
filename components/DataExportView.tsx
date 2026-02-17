@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { getSession, getApiBaseUrl } from '../services/api';
+import { downloadBlobFile } from '../utils/fileDownload';
 import Button from './shared/Button';
 
 interface DataExportViewProps {
@@ -62,14 +63,7 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
 
             // Download the file
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            await downloadBlobFile(blob, filename);
 
             setSuccess(true);
         } catch (err: any) {
