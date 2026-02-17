@@ -11,7 +11,6 @@ import { StarIcon } from './icons/StarIcon';
 import Button from './shared/Button';
 import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline, fuzzyMatchHeadline, getEmojiForHeadline } from '../utils/contextUpdater';
-import { WarningIcon } from './icons/WarningIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
 import { downloadTextFile } from '../utils/fileDownload';
 import { CalendarIcon } from './icons/CalendarIcon';

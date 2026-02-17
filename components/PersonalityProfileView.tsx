@@ -1351,7 +1351,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           onClick={() => !isDeleting && setShowDeleteWarning(false)}
         >
           <div 
-            className="bg-white dark:bg-gray-900 w-full max-w-lg p-6 border border-red-400 dark:border-red-500/50 shadow-xl rounded-lg mx-4"
+            className="bg-red-50 dark:bg-gray-900 w-full max-w-lg p-6 border-2 border-red-400 dark:border-red-600 shadow-xl rounded-lg mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
