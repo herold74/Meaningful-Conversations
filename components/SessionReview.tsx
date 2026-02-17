@@ -13,6 +13,7 @@ import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline, fuzzyMatchHeadline, getEmojiForHeadline } from '../utils/contextUpdater';
 import { WarningIcon } from './icons/WarningIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
+import { downloadTextFile } from '../utils/fileDownload';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '../utils/calendarExport';
 import DatePickerModal from './DatePickerModal';
@@ -653,7 +654,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return t(key);
     };
 
-    const handleDownloadSummary = () => {
+    const handleDownloadSummary = async () => {
         let summaryContent = `${t('sessionReview_summary')}\n---------------------------------\n${newFindings}\n\n`;
         if (solutionBlockages && solutionBlockages.length > 0) {
             summaryContent += `${t('sessionReview_blockages_title')}\n---------------------------------\n`;
@@ -661,20 +662,16 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 summaryContent += `Blockage: ${getBlockageNameTranslation(blockage.blockage)}\nExplanation: ${blockage.explanation}\nQuote: "${blockage.quote}"\n\n`;
             });
         }
-        const blob = new Blob([summaryContent.trim()], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Session_Summary.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            await downloadTextFile(summaryContent.trim(), 'Session_Summary.txt');
+        } catch (err) {
+            console.error('Summary download failed:', err);
+        }
     };
 
-    const handleDownloadTranscript = () => {
+    const handleDownloadTranscript = async () => {
         const today = new Date();
-        const formattedDate = today.toLocaleDateString('en-CA'); // YYYY-MM-DD for filename
+        const formattedDate = today.toLocaleDateString('en-CA');
         const formattedDateTime = today.toLocaleString(language, { dateStyle: 'long', timeStyle: 'short' });
 
         let transcriptContent = `Session Transcript\n`;
@@ -688,15 +685,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             transcriptContent += `[${timestamp}] ${role}: ${message.text}\n\n`;
         });
 
-        const blob = new Blob([transcriptContent.trim()], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Session_Transcript_${formattedDate}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            await downloadTextFile(transcriptContent.trim(), `Session_Transcript_${formattedDate}.txt`);
+        } catch (err) {
+            console.error('Transcript download failed:', err);
+        }
     };
     
     const getActionTypeTranslation = (type: string) => {

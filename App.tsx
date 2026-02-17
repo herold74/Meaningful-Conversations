@@ -1349,34 +1349,16 @@ const App: React.FC = () => {
                     if (!tePreAnswers) return;
                     setTeIsLoading(true);
                     try {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1307',message:'TE Submit: Initial state',data:{hasPersonalityProfile,hasEncryptionKey:!!encryptionKey,userEmail:currentUser?.email},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'A,B'})}).catch(()=>{});
-                        // #endregion
                         let profile = undefined;
                         if (hasPersonalityProfile && encryptionKey) {
                             try {
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1314',message:'TE: Loading profile',data:{hasPersonalityProfile,hasEncryptionKey:!!encryptionKey},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'C'})}).catch(()=>{});
-                                // #endregion
                                 const profileData = await api.loadPersonalityProfile();
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1315',message:'TE: Profile loaded',data:{hasEncryptedData:!!profileData?.encryptedData,profileDataKeys:profileData?Object.keys(profileData):null},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'C'})}).catch(()=>{});
-                                // #endregion
                                 if (profileData?.encryptedData) {
                                     profile = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
-                                    // #region agent log
-                                    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1317',message:'TE: Profile decrypted',data:{hasProfile:!!profile,profileKeys:profile?Object.keys(profile):null,hasRiemann:!!profile?.riemann,hasBig5:!!profile?.big5},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'D'})}).catch(()=>{});
-                                    // #endregion
                                 }
                             } catch (err) { 
-                                // #region agent log
-                                fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1318',message:'TE: Profile load ERROR',data:{error:(err as Error)?.message||String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'C,D'})}).catch(()=>{});
-                                // #endregion
                             }
                         }
-                        // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:1320',message:'TE: Calling evaluateTranscript',data:{hasProfile:!!profile,profileSummary:profile?`riemann:${!!profile.riemann},big5:${!!profile.big5},spiral:${!!profile.spiralDynamics}`:null},timestamp:Date.now(),sessionId:'debug-session',runId:'te-profile',hypothesisId:'E'})}).catch(()=>{});
-                        // #endregion
                         const result = await geminiService.evaluateTranscript(tePreAnswers, transcript, language, profile);
                         // Add id to evaluation result
                         setTeEvaluation({ ...result.evaluation, id: result.id });
@@ -1577,7 +1559,7 @@ const App: React.FC = () => {
                 </>
             )}
             {showGamificationBar && useNativeGamificationBar && (
-                <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px)` }} />
+                <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 8px)` }} />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 {renderView()}
