@@ -46,7 +46,7 @@ export const saveUserData = async (context: string, gamificationState: string, k
     });
 };
 
-export const login = async (email: string, password: string): Promise<{ user: User, token: string }> => {
+export const login = async (email: string, password: string): Promise<{ user: User, token: string, accessExpired?: boolean }> => {
     const session = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
