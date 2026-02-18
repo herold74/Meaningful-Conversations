@@ -116,6 +116,13 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY}
       
+      # PayPal Payment Integration
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+      PAYPAL_API_BASE: ${PAYPAL_API_BASE:-https://api-m.paypal.com}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@manualmode.at}
+      
       # Admin configuration
       INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@manualmode.at}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
