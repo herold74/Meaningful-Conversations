@@ -26,7 +26,9 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
       setTimeout(() => onRedeemSuccess(updatedUser), 2000);
     } catch (err: any) {
       setStatus('error');
-      if (err.status === 404 || err.status === 409) {
+      if (err.data?.errorCode === 'ACCESS_EXPIRED_BOT_CODE' || err.status === 403) {
+          setError(t('redeem_error_bot_code_expired'));
+      } else if (err.status === 404 || err.status === 409) {
           setError(t('redeem_error_invalid'));
       } else {
           setError(t('redeem_error_generic'));
