@@ -215,6 +215,23 @@ router.post('/redeem-code', async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
+        const ACCESS_CODE_TYPES = [
+            'ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M',
+            'REGISTERED_LIFETIME', 'premium', 'client',
+        ];
+        const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
+
+        const hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
+        const accessExpired = !hasPermanentAccess &&
+            user.accessExpiresAt && new Date(user.accessExpiresAt) < new Date();
+
+        if (accessExpired && !isAccessCode) {
+            return res.status(403).json({
+                error: 'Your access has expired. Please redeem an access code or purchase access first.',
+                errorCode: 'ACCESS_EXPIRED_BOT_CODE',
+            });
+        }
+
         let updateData = { updatedAt: new Date() };
 
         if (upgradeCode.botId === 'ACCESS_PASS_1Y') {

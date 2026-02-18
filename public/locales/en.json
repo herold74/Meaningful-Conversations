@@ -427,6 +427,7 @@
   "redeem_button": "Redeem",
   "redeem_success": "Code redeemed successfully!",
   "redeem_error_invalid": "The code is invalid, expired, or has already been used.",
+  "redeem_error_bot_code_expired": "This code unlocks a coach but cannot be redeemed while your access has expired. Please purchase an access pass or redeem an access code first.",
   "redeem_error_generic": "An error occurred. Please try again.",
   "redeem_info_text": "For information about upgrade codes, visit ",
 

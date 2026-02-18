@@ -426,6 +426,7 @@
   "redeem_button": "Einlösen",
   "redeem_success": "Code erfolgreich eingelöst!",
   "redeem_error_invalid": "Der Code ist ungültig, abgelaufen oder wurde bereits verwendet.",
+  "redeem_error_bot_code_expired": "Dieser Code schaltet einen Coach frei, kann aber nicht eingelöst werden, solange Ihr Zugang abgelaufen ist. Bitte erwerben Sie zuerst einen Zugangspass oder lösen Sie einen Zugangscode ein.",
   "redeem_error_generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   "redeem_info_text": "Informationen zu Upgrade-Codes finden Sie unter ",
     
