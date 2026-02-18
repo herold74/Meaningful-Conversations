@@ -20,13 +20,14 @@ interface Product {
 
 interface PaywallViewProps {
   userEmail: string | null;
+  userXp?: number;
   onRedeem: () => void;
   onPurchaseSuccess: (user: User) => void;
   onLogout: () => void;
   onDownloadData?: () => void;
 }
 
-const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurchaseSuccess, onLogout, onDownloadData }) => {
+const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRedeem, onPurchaseSuccess, onLogout, onDownloadData }) => {
   const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
@@ -127,7 +128,9 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
   };
 
   const description = userEmail
-    ? t('paywall_description_expired', { email: userEmail })
+    ? (userXp >= 100
+      ? t('paywall_description_engaged', { email: userEmail })
+      : t('paywall_description_expired', { email: userEmail }))
     : t('paywall_description_new');
 
   const accessProducts = products.filter(p => p.category === 'access');
