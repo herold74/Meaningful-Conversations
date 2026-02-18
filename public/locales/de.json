@@ -613,7 +613,7 @@
     
   "paywall_title": "Zugang erforderlich",
   "paywall_description_new": "Um 'Sinnstiftende Gespräche' nutzen zu können, erwerben Sie bitte einen Zugangspass oder lösen Sie einen Zugangscode ein.",
-  "paywall_description_expired": "Ihr Zugangspass für das Konto <strong>{{email}}</strong> ist abgelaufen. Um 'Sinnstiftende Gespräche' weiterhin nutzen zu können, erwerben Sie bitte einen neuen Pass oder lösen Sie einen Zugangscode ein.",
+  "paywall_description_expired": "Ihr Zugangspass für das Konto <strong>{{email}}</strong> ist abgelaufen. Um 'Sinnstiftende Gespräche' weiterhin nutzen zu können, erwerben Sie bitte einen Premium Zugangspass oder lösen Sie einen Zugangscode ein.",
   "paywall_product_title": "Registered Lifetime",
   "paywall_product_price": "Einmalig €14,90",
   "paywall_product_description": "Unbegrenzter Zugang zu allen Basisfunktionen",
