@@ -9,6 +9,11 @@ const { sendPurchaseEmail, sendAdminNotification } = require('../services/mailSe
 // --- Product Catalog ---
 
 const PRODUCTS = {
+  REGISTERED_1M: {
+    id: 'REGISTERED_1M', name: 'Registriert 1-Monats-Pass', price: 3.90,
+    category: 'access', duration: '1M', days: 30,
+    description: 'Meaningful Conversations — Registered 1 Month',
+  },
   REGISTERED_LIFETIME: {
     id: 'REGISTERED_LIFETIME', name: 'Registered Lifetime', price: 14.90,
     category: 'access', duration: null,
@@ -47,6 +52,7 @@ const MIN_PRICE = 0.10;
 
 // Product ID Mapping (PayPal Button IDs → internal botIds, used by legacy webhook)
 const PRODUCT_MAPPING = {
+  'REGISTERED_1M':        'REGISTERED_1M',
   'REGISTERED_LIFETIME':  'REGISTERED_LIFETIME',
   'ACCESS_PASS_1M':       'ACCESS_PASS_1M',
   'ACCESS_PASS_3M':       'ACCESS_PASS_3M',
@@ -160,6 +166,15 @@ function checkProductEligibility(user, productId) {
     }
   }
 
+  if (productId === 'REGISTERED_1M') {
+    if (!user.accessExpiresAt && tier !== 'admin' && tier !== 'client') {
+      return { eligible: false, reason: 'You already have Registered Lifetime access.' };
+    }
+    if (tier === 'client' || tier === 'admin') {
+      return { eligible: false, reason: 'Your current access level already includes this.' };
+    }
+  }
+
   if (product.category === 'premium') {
     if (tier === 'client' || tier === 'admin') {
       return { eligible: false, reason: 'Your current access level already includes Premium.' };
@@ -197,6 +212,13 @@ async function applyProductEffect(userId, productId) {
 
   if (productId === 'REGISTERED_LIFETIME') {
     updateData.accessExpiresAt = null;
+  } else if (productId === 'REGISTERED_1M') {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const now = new Date();
+    const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
+      ? new Date(user.accessExpiresAt) : new Date();
+    baseDate.setDate(baseDate.getDate() + product.days);
+    updateData.accessExpiresAt = baseDate;
   } else if (product.category === 'premium') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const now = new Date();
@@ -253,8 +275,7 @@ router.get('/products', auth, async (req, res) => {
     const products = [];
 
     for (const product of Object.values(PRODUCTS)) {
-      // Skip Registered Lifetime if user already has it
-      if (product.id === 'REGISTERED_LIFETIME') {
+      if (product.id === 'REGISTERED_LIFETIME' || product.id === 'REGISTERED_1M') {
         if (!user.accessExpiresAt && tier !== 'admin') continue;
         if (tier === 'client' || tier === 'admin') continue;
       }
