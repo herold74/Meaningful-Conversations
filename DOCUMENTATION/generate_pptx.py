@@ -501,7 +501,7 @@ for i, sec in enumerate(sections):
 
 add_text_box(slide5, 0.5, 6.8, 12.3, 0.4,
              '🔒 = Erfordert höheren Zugang  |  '
-             'Einzelne Premium-Bots können für 4,90 € permanent '
+             'Einzelne Premium-Bots können für 3,90 € permanent '
              'freigeschaltet werden',
              font_size=11, color=GRAY, alignment=PP_ALIGN.CENTER)
 
@@ -531,10 +531,10 @@ upgrade_rows = [
     ('Normalpreis',           '9,90 €',        '24,90 €',       '79,90 €',       '—'),
     ('Registered Monatsabo',  '9,90 €',        '24,90 €',       '79,90 €',       'Pro-rata Restmonat als Guthaben'),
     ('Registered Lifetime',   '7,90 €',        '18,90 €',       '59,90 €',       '~20–25% Loyalty-Rabatt'),
-    ('1 Bot-Unlock (4,90 €)', '5,00 €',        '20,00 €',       '75,00 €',       '4,90 € Anrechnung'),
-    ('2 Bot-Unlocks (9,80 €)','0,10 €',        '15,10 €',       '70,10 €',       '9,80 € Anrechnung'),
-    ('Lifetime + 1 Bot',      '3,00 €',        '14,00 €',       '55,00 €',       'Loyalty + Bot kumuliert'),
-    ('Lifetime + 2 Bots',     '0,10 €',        '9,10 €',        '50,10 €',       'Loyalty + Bots kumuliert'),
+    ('1 Bot-Unlock (3,90 €)', '6,00 €',        '21,00 €',       '76,00 €',       '3,90 € Anrechnung'),
+    ('2 Bot-Unlocks (7,80 €)','2,10 €',        '17,10 €',       '72,10 €',       '7,80 € Anrechnung'),
+    ('Lifetime + 1 Bot',      '4,00 €',        '15,00 €',       '56,00 €',       'Loyalty + Bot kumuliert'),
+    ('Lifetime + 2 Bots',     '0,10 €',        '11,10 €',       '52,10 €',       'Loyalty + Bots kumuliert'),
     ('Guest → Premium',       '9,90 €',        '24,90 €',       '79,90 €',       'Kein Rabatt (enthält Registered)'),
 ]
 

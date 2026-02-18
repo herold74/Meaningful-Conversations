@@ -41,6 +41,7 @@ import RegisterView from './components/RegisterView';
 import ContextChoiceView from './components/ContextChoiceView';
 import ForgotPasswordView from './components/ForgotPasswordView';
 import RedeemCodeView from './components/RedeemCodeView';
+import UpgradeView from './components/UpgradeView';
 import AdminView from './components/AdminView';
 import ChangePasswordView from './components/ChangePasswordView';
 import DeleteAccountModal from './components/DeleteAccountModal';
@@ -62,6 +63,7 @@ import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReac
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
+import { downloadTextFile } from './utils/fileDownload';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -464,10 +466,15 @@ const App: React.FC = () => {
         }
     };
 
-    const handleAccessExpired = (email: string, user: User, key: CryptoKey) => {
+    const handleAccessExpired = async (email: string, user: User, key: CryptoKey) => {
         setAndProcessUser(user);
         setEncryptionKey(key);
         setPaywallUserEmail(email);
+        try {
+            const data = await userService.loadUserData(key);
+            setLifeContext(data.context || '');
+            setGamificationState(deserializeGamificationState(data.gamificationState));
+        } catch { /* data load failed — download button will be empty, but paywall still works */ }
         setView('paywall');
     };
     
@@ -1265,7 +1272,30 @@ const App: React.FC = () => {
             case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
             case 'unsubscribe': return <UnsubscribeView token={new URLSearchParams(window.location.search).get('token') || ''} onBack={() => setView('auth')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
-            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView('redeemCode'); }} onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }} onLogout={handleLogout} />;
+            case 'paywall': return <PaywallView
+                userEmail={paywallUserEmail}
+                onRedeem={() => { setMenuView('redeemCode'); }}
+                onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }}
+                onLogout={handleLogout}
+                onDownloadData={async () => {
+                    const parts: string[] = [];
+                    if (lifeContext) {
+                        parts.push('# Life Context\n\n' + lifeContext);
+                    }
+                    if (encryptionKey) {
+                        try {
+                            const profileData = await api.loadPersonalityProfile();
+                            if (profileData?.encryptedData) {
+                                const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
+                                parts.push('# Personality Profile\n\n' + JSON.stringify(decrypted, null, 2));
+                            }
+                        } catch { /* profile may not exist */ }
+                    }
+                    if (parts.length > 0) {
+                        await downloadTextFile(parts.join('\n\n---\n\n'), 'my-data-export.md', 'text/markdown;charset=utf-8');
+                    }
+                }}
+            />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
@@ -1322,6 +1352,7 @@ const App: React.FC = () => {
                         setTeEvaluation(null);
                         setView('transcriptEval');
                     }}
+                    onUpgrade={() => setMenuView('upgrade')}
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={currentUser?.coachingMode || 'off'}
@@ -1410,6 +1441,11 @@ const App: React.FC = () => {
             case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'editProfile': return <EditProfileView currentUser={currentUser!} onBack={() => setMenuView('accountManagement')} onProfileUpdated={(user) => setAndProcessUser(user)} />;
             case 'exportData': return <DataExportView lifeContext={lifeContext} colorTheme={colorTheme} />;
+            case 'upgrade': return <UpgradeView
+                    currentUser={currentUser!}
+                    onPurchaseSuccess={(user) => { setAndProcessUser(user); setMenuView(null); }}
+                    onRedeem={() => setMenuView('redeemCode')}
+                />;
             case 'redeemCode': return <RedeemCodeView
                     onBack={view === 'paywall' ? () => setMenuView(null) : undefined}
                     onRedeemSuccess={(user) => { 
