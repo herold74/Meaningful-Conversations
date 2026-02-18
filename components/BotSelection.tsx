@@ -10,6 +10,7 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
+  onUpgrade?: () => void;
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
@@ -18,13 +19,14 @@ interface BotSelectionProps {
 interface BotCardProps {
   bot: BotWithAvailability;
   onSelect: (bot: Bot) => void;
+  onUpgrade?: () => void;
   language: Language;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
   isClientOnly?: boolean;
 }
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
@@ -49,13 +51,13 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     
     return (
       <div
-        onClick={() => !isLocked && onSelect(bot)}
+        onClick={() => isLocked ? onUpgrade?.() : onSelect(bot)}
         className={`
             relative flex flex-col items-center text-center p-6
             bg-background-secondary dark:bg-transparent border transition-[box-shadow,transform] duration-200 rounded-lg shadow-md
             [-webkit-tap-highlight-color:transparent]
             ${isLocked
-              ? `cursor-not-allowed bg-background-primary dark:bg-background-primary/50 opacity-60 ${getBorderClass()}`
+              ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} bg-background-primary dark:bg-background-primary/50 opacity-60 ${getBorderClass()}`
               : `cursor-pointer hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 ${getBorderClass()}`
             }
         `}
@@ -130,7 +132,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, language, hasPersonali
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, currentUser, hasPersonalityProfile, coachingMode }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, currentUser, hasPersonalityProfile, coachingMode }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -289,6 +291,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 key={bot.id} 
                 bot={bot} 
                 onSelect={onSelect} 
+                onUpgrade={onUpgrade}
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
@@ -305,11 +308,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             return (
               <div className="max-w-4xl mx-auto mt-4">
                 <div
-                  onClick={() => !locked && onTranscriptEval?.()}
+                  onClick={() => locked ? onUpgrade?.() : onTranscriptEval?.()}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg border transition-all
                     ${locked
-                      ? 'cursor-not-allowed opacity-50 border-border-primary bg-background-primary/30 dark:bg-background-primary/20'
+                      ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} opacity-50 border-border-primary bg-background-primary/30 dark:bg-background-primary/20`
                       : 'cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-sm hover:shadow-md'
                     }
                   `}
@@ -380,6 +383,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 key={bot.id} 
                 bot={bot} 
                 onSelect={onSelect} 
+                onUpgrade={onUpgrade}
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}

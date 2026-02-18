@@ -53,8 +53,8 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
     return (
       <>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('redeem_title')}</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400 mb-8">{t('redeem_subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('redeem_title')}</h1>
+          <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-8">{t('redeem_subtitle')}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +104,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
+    <div className="w-full max-w-xl mx-auto p-5 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
         <div className="w-full mt-4 sm:mt-0">
             {renderContent()}
         </div>

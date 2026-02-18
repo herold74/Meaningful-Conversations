@@ -62,14 +62,20 @@ router.post('/register', registerLimiter, async (req, res) => {
         const registrationDate = new Date();
         const cutoffDate = new Date('2026-01-01T00:00:00.000Z');
         let accessExpiresAt;
+        let premiumExpiresAt = null;
+        let isPremiumTrial = false;
         if (registrationDate < cutoffDate) {
-            // Users registering in 2025 get access until June 30, 2026
+            // Early adopters (2025): Premium access until June 30, 2026
             accessExpiresAt = new Date('2026-06-30T23:59:59.000Z');
+            premiumExpiresAt = new Date('2026-06-30T23:59:59.000Z');
+            isPremiumTrial = true;
         } else {
-            // Users registering from 2026 onwards get 4 weeks (28 days) free access
-            const fourWeeksFromNow = new Date(registrationDate);
-            fourWeeksFromNow.setDate(fourWeeksFromNow.getDate() + 28);
-            accessExpiresAt = fourWeeksFromNow;
+            // 14-day Premium trial for new users
+            const trialEnd = new Date(registrationDate);
+            trialEnd.setDate(trialEnd.getDate() + 14);
+            accessExpiresAt = trialEnd;
+            premiumExpiresAt = new Date(trialEnd);
+            isPremiumTrial = true;
         }
 
         const unsubscribeToken = newsletterConsent ? crypto.randomBytes(32).toString('hex') : null;
@@ -88,6 +94,8 @@ router.post('/register', registerLimiter, async (req, res) => {
                 activationToken,
                 activationTokenExpires,
                 accessExpiresAt: accessExpiresAt,
+                isPremium: isPremiumTrial,
+                premiumExpiresAt: premiumExpiresAt,
                 // Set default non-null values for the new fields
                 lifeContext: '',
                 gamificationState: serializeGamificationState({
@@ -131,20 +139,19 @@ router.post('/login', loginLimiter, async (req, res) => {
              return res.status(403).json({ error: 'Your account is currently inactive.' });
         }
 
-        // Check if Premium status should be revoked due to expired access pass
-        // Only applies when accessExpiresAt is set (permanent premium/client have null accessExpiresAt)
+        // Check if Premium status should be revoked due to expired premium pass
         const now = new Date();
-        if (user.isPremium && user.accessExpiresAt && new Date(user.accessExpiresAt) < now) {
+        if (user.isPremium && user.premiumExpiresAt && new Date(user.premiumExpiresAt) < now) {
             user.isPremium = false;
             await prisma.user.update({
                 where: { id: user.id },
                 data: { isPremium: false },
             });
-            console.log(`🔒 Revoked premium status for user ${user.email} due to expired access pass`);
+            console.log(`🔒 Revoked premium status for user ${user.email} due to expired premium pass`);
         }
 
-        // Access Pass Check - users with permanent roles (admin, premium, client, developer) bypass this
-        // accessExpiresAt = null means unlimited access (permanent), only a set date in the past triggers expiry
+        // Access Pass Check
+        // Permanent access: admin, active premium, client, developer, or Lifetime (accessExpiresAt = null)
         const hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
         let accessExpired = false;
         if (!hasPermanentAccess) {
