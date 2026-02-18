@@ -140,11 +140,34 @@ const audioTranscribeLimiter = rateLimit({
     },
 });
 
+/**
+ * Purchase rate limiter - Prevents order-creation abuse
+ * 10 requests per hour per user
+ */
+const purchaseLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    keyGenerator: (req) => `purchase_${req.userId || req.ip}`,
+    message: { 
+        error: 'Too many purchase requests. Please try again later.',
+        errorCode: 'RATE_LIMIT_PURCHASE'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: false,
+    handler: (req, res, next, options) => {
+        const identifier = req.userId ? `user ${req.userId}` : `IP ${req.ip}`;
+        console.warn(`🚫 Purchase rate limit exceeded for ${identifier}`);
+        res.status(429).json(options.message);
+    },
+});
+
 module.exports = { 
     loginLimiter, 
     registerLimiter, 
     forgotPasswordLimiter,
     verifyEmailLimiter,
     geminiLimiter,
-    audioTranscribeLimiter
+    audioTranscribeLimiter,
+    purchaseLimiter
 };
