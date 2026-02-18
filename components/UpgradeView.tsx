@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { usePayPal } from '../hooks/usePayPal';
 import { isNativeApp } from '../utils/platformDetection';
@@ -47,6 +47,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   const [error, setError] = useState<string | null>(null);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedPremiumId, setSelectedPremiumId] = useState<string | null>(null);
   const paypalButtonRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const renderedButtonsRef = useRef<Set<string>>(new Set());
 
@@ -58,6 +59,8 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       try {
         const result = await fetchProducts();
         setData(result);
+        const premiums = (result.products || []).filter((p: Product) => p.category === 'premium');
+        if (premiums.length > 0) setSelectedPremiumId(premiums[0].id);
       } catch {
         setError(t('upgrade_load_error'));
       } finally {
@@ -66,47 +69,79 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     })();
   }, []);
 
-  useEffect(() => {
-    if (!showPayPal || !paypalReady || !data || !window.paypal?.Buttons) return;
+  const renderPayPalButton = useCallback((productId: string, container: HTMLDivElement) => {
+    if (!window.paypal?.Buttons) return;
+    window.paypal.Buttons({
+      style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 40, tagline: false },
+      createOrder: async () => {
+        setPurchasingId(productId);
+        setSuccessMessage(null);
+        try {
+          return await createOrder(productId);
+        } catch (err) {
+          setPurchasingId(null);
+          throw err;
+        }
+      },
+      onApprove: async (approveData: { orderID: string }) => {
+        try {
+          const result = await captureOrder(approveData.orderID);
+          if (result.success && result.user) {
+            setSuccessMessage(t('upgrade_purchase_success'));
+            setTimeout(() => onPurchaseSuccess(result.user), 1500);
+          } else {
+            setPurchasingId(null);
+            setError(result.error || t('upgrade_purchase_error'));
+          }
+        } catch {
+          setPurchasingId(null);
+          setError(t('upgrade_purchase_error'));
+        }
+      },
+      onCancel: () => { setPurchasingId(null); },
+      onError: () => { setPurchasingId(null); },
+    }).render(container);
+  }, [createOrder, captureOrder, onPurchaseSuccess, t]);
 
-    for (const product of data.products) {
+  useEffect(() => {
+    if (!showPayPal || !paypalReady || !data) return;
+
+    const nonPremium = data.products.filter(p => p.category !== 'premium');
+    for (const product of nonPremium) {
       const container = paypalButtonRefs.current[product.id];
       if (!container || renderedButtonsRef.current.has(product.id)) continue;
-
       renderedButtonsRef.current.add(product.id);
-
-      window.paypal.Buttons({
-        style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 40, tagline: false },
-        createOrder: async () => {
-          setPurchasingId(product.id);
-          setSuccessMessage(null);
-          try {
-            return await createOrder(product.id);
-          } catch (err) {
-            setPurchasingId(null);
-            throw err;
-          }
-        },
-        onApprove: async (approveData: { orderID: string }) => {
-          try {
-            const result = await captureOrder(approveData.orderID);
-            if (result.success && result.user) {
-              setSuccessMessage(t('upgrade_purchase_success'));
-              setTimeout(() => onPurchaseSuccess(result.user), 1500);
-            } else {
-              setPurchasingId(null);
-              setError(result.error || t('upgrade_purchase_error'));
-            }
-          } catch {
-            setPurchasingId(null);
-            setError(t('upgrade_purchase_error'));
-          }
-        },
-        onCancel: () => { setPurchasingId(null); },
-        onError: () => { setPurchasingId(null); },
-      }).render(container);
+      renderPayPalButton(product.id, container);
     }
-  }, [paypalReady, data, showPayPal]);
+  }, [paypalReady, data, showPayPal, renderPayPalButton]);
+
+  useEffect(() => {
+    if (!showPayPal || !paypalReady || !selectedPremiumId) return;
+
+    const key = `premium_${selectedPremiumId}`;
+    const container = paypalButtonRefs.current[key];
+    if (!container || renderedButtonsRef.current.has(key)) return;
+
+    container.innerHTML = '';
+    renderedButtonsRef.current.add(key);
+    renderPayPalButton(selectedPremiumId, container);
+  }, [paypalReady, selectedPremiumId, showPayPal, renderPayPalButton]);
+
+  const handlePremiumChange = (newId: string) => {
+    if (newId === selectedPremiumId) return;
+    const oldKey = `premium_${selectedPremiumId}`;
+    renderedButtonsRef.current.delete(oldKey);
+    const oldContainer = paypalButtonRefs.current[oldKey];
+    if (oldContainer) oldContainer.innerHTML = '';
+    setSelectedPremiumId(newId);
+  };
+
+  const durationLabel = (d: string | null) => {
+    if (d === '1M') return t('upgrade_duration_1m');
+    if (d === '3M') return t('upgrade_duration_3m');
+    if (d === '1Y') return t('upgrade_duration_1y');
+    return '';
+  };
 
   if (loading) {
     return (
@@ -131,6 +166,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   const botProducts = data.products.filter(p => p.category === 'bot');
   const accessProducts = data.products.filter(p => p.category === 'access');
   const hasProducts = data.products.length > 0;
+  const selectedPremium = premiumProducts.find(p => p.id === selectedPremiumId) || null;
 
   const renderProductCard = (product: Product) => {
     const hasDiscount = product.finalPrice < product.price;
@@ -142,9 +178,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
           <div className="min-w-0">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">{product.name}</h3>
             {product.duration && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {product.duration === '1M' ? t('upgrade_duration_1m') : product.duration === '3M' ? t('upgrade_duration_3m') : t('upgrade_duration_1y')}
-              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(product.duration)}</span>
             )}
           </div>
           <div className="text-right flex-shrink-0">
@@ -223,7 +257,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </div>
       )}
 
-      {/* Registered Lifetime (for expired users who somehow reach this page) */}
+      {/* Access passes */}
       {accessProducts.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_access_section')}</h2>
@@ -231,12 +265,70 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </section>
       )}
 
-      {/* Premium Passes */}
+      {/* Premium Passes — dropdown selector */}
       {premiumProducts.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_premium_section')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('upgrade_premium_description')}</p>
-          <div className="space-y-4">{premiumProducts.map(renderProductCard)}</div>
+          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-5 space-y-3">
+            <select
+              value={selectedPremiumId || ''}
+              onChange={e => handlePremiumChange(e.target.value)}
+              className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+            >
+              {premiumProducts.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — €{p.finalPrice.toFixed(2).replace('.', ',')}
+                  {p.finalPrice < p.price ? ` (${t('upgrade_loyalty_badge')})` : ''}
+                </option>
+              ))}
+            </select>
+
+            {selectedPremium && (
+              <>
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(selectedPremium.duration)}</span>
+                  <div className="text-right flex-shrink-0">
+                    {selectedPremium.finalPrice < selectedPremium.price && (
+                      <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
+                    )}
+                    <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+                      €{selectedPremium.finalPrice.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+
+                {selectedPremium.discountReasons.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedPremium.discountReasons.includes('loyalty') && (
+                      <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+                        {t('upgrade_loyalty_badge')}
+                      </span>
+                    )}
+                    {selectedPremium.discountReasons.includes('bot_credit') && (
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                        {t('upgrade_bot_credit_badge')}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {purchasingId === selectedPremium.id && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+                    {t('upgrade_payment_processing')}
+                  </div>
+                )}
+
+                {showPayPal && (
+                  <div
+                    ref={el => { paypalButtonRefs.current[`premium_${selectedPremium.id}`] = el; }}
+                    className="min-h-[40px]"
+                    style={{ display: purchasingId === selectedPremium.id ? 'none' : 'block' }}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </section>
       )}
 
@@ -252,7 +344,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {/* iOS hint */}
       {isNativeApp() && (
         <div className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 text-sm">
-          💡 {t('paywall_ios_hint')}
+          {t('paywall_ios_hint')}
         </div>
       )}
 
