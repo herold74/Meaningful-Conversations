@@ -37,6 +37,7 @@ model User {
   passwordResetToken        String?       @unique
   passwordResetTokenExpires DateTime?
   accessExpiresAt           DateTime?
+  premiumExpiresAt          DateTime?
   feedbacksByUser           Feedback[]    @relation("UserToFeedbacks")
   upgradeCodesUsedByUser    UpgradeCode[] @relation("UserToUpgradeCodes")
   personalityProfile        PersonalityProfile?

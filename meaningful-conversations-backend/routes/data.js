@@ -221,7 +221,8 @@ router.post('/redeem-code', async (req, res) => {
         ];
         const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
 
-        const hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
+        const premiumActive = user.isPremium && (!user.premiumExpiresAt || new Date(user.premiumExpiresAt) > new Date());
+        const hasPermanentAccess = user.isAdmin || premiumActive || user.isClient;
         const accessExpired = !hasPermanentAccess &&
             user.accessExpiresAt && new Date(user.accessExpiresAt) < new Date();
 
@@ -235,37 +236,36 @@ router.post('/redeem-code', async (req, res) => {
         let updateData = { updatedAt: new Date() };
 
         if (upgradeCode.botId === 'ACCESS_PASS_1Y') {
-            // Premium 1-Year Pass: grant premium + set expiry (auto-revoked on login when expired)
+            // Premium 1-Year Pass: grant premium via premiumExpiresAt (preserves accessExpiresAt)
             const now = new Date();
-            const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
-                ? new Date(user.accessExpiresAt) : new Date();
+            const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
+                ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setFullYear(baseDate.getFullYear() + 1);
             updateData.isPremium = true;
-            updateData.accessExpiresAt = baseDate;
+            updateData.premiumExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'ACCESS_PASS_3M') {
             // Premium 3-Month Pass
             const now = new Date();
-            const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
-                ? new Date(user.accessExpiresAt) : new Date();
+            const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
+                ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setMonth(baseDate.getMonth() + 3);
             updateData.isPremium = true;
-            updateData.accessExpiresAt = baseDate;
+            updateData.premiumExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'ACCESS_PASS_1M') {
             // Premium 1-Month Pass
             const now = new Date();
-            const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
-                ? new Date(user.accessExpiresAt) : new Date();
+            const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
+                ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setMonth(baseDate.getMonth() + 1);
             updateData.isPremium = true;
-            updateData.accessExpiresAt = baseDate;
+            updateData.premiumExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'REGISTERED_LIFETIME') {
             // Registered Lifetime: permanent registered access (no premium features)
-            // Clears any existing expiry → user always has at least Registered tier
             updateData.accessExpiresAt = null;
         } else if (upgradeCode.botId === 'premium') {
              // Permanent Premium (admin-granted, no expiry)
              updateData.isPremium = true;
-             updateData.accessExpiresAt = null;
+             updateData.premiumExpiresAt = null;
         } else if (upgradeCode.botId === 'client') {
              // Permanent Client (coach-granted, no expiry)
              updateData.isClient = true;

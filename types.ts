@@ -30,6 +30,7 @@ export type NavView =
     | 'accountManagement'
     | 'editProfile'
     | 'redeemCode'
+    | 'upgrade'
     | 'admin'
     | 'changePassword'
     | 'exportData'
@@ -56,6 +57,7 @@ export interface User {
     unlockedCoaches: string[];
     createdAt?: string;
     accessExpiresAt?: string;
+    premiumExpiresAt?: string;
     loginCount?: number;
     lastLogin?: string;
     encryptionSalt?: string; // Hex-encoded string

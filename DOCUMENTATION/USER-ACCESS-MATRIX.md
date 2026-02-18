@@ -2,12 +2,12 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: February 15, 2026 — v1.8.9
+**Last Updated**: February 18, 2026 — v1.9.2
 
 ## User Types
 
 1.  **Guest (Gast)**: Unregistered users who can try out the application with limited features. Data is stored locally in the browser.
-2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN).
+2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **14-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Lifetime, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered Lifetime users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026.
 3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
 4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor), Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
 5.  **Admin**: Administrators with access to the backend management panel.
@@ -50,7 +50,12 @@ This document outlines the different user types within the Meaningful Conversati
 | Transcript Evaluation | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Transcript Evaluation PDF Export | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Bot Recommendations (in Evaluation) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Audio Transcription (Record & Upload) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Payment & Access** | | | | | | |
+| PayPal Direct Checkout (Web) | — | — | — | — | — | — |
+| Code Redemption | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Bot Code blocked when expired | — | ✅ | — | — | — | — |
 | **Administration** | | | | | | |
 | Admin Panel Access | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 | User Management | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
@@ -95,12 +100,12 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 | Upgrade Lifetime → Premium 1M | `UPGRADE_LT_PREMIUM_1M` | `ACCESS_PASS_1M` | Loyalty ~20% | 7,90 € |
 | Upgrade Lifetime → Premium 3M | `UPGRADE_LT_PREMIUM_3M` | `ACCESS_PASS_3M` | Loyalty ~24% | 18,90 € |
 | Upgrade Lifetime → Premium 1Y | `UPGRADE_LT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | Loyalty ~25% | 59,90 € |
-| Upgrade Bot → Premium 1M | `UPGRADE_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | 4,90 € Anrechnung | 5,00 € |
-| Upgrade Bot → Premium 3M | `UPGRADE_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | 4,90 € Anrechnung | 20,00 € |
-| Upgrade Bot → Premium 1Y | `UPGRADE_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | 4,90 € Anrechnung | 75,00 € |
-| Upgrade Lifetime+Bot → Premium 1M | `UPGRADE_LT_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | Loyalty + Bot | 3,00 € |
-| Upgrade Lifetime+Bot → Premium 3M | `UPGRADE_LT_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | Loyalty + Bot | 14,00 € |
-| Upgrade Lifetime+Bot → Premium 1Y | `UPGRADE_LT_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | Loyalty + Bot | 55,00 € |
+| Upgrade Bot → Premium 1M | `UPGRADE_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | 3,90 € Anrechnung | 6,00 € |
+| Upgrade Bot → Premium 3M | `UPGRADE_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | 3,90 € Anrechnung | 21,00 € |
+| Upgrade Bot → Premium 1Y | `UPGRADE_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | 3,90 € Anrechnung | 76,00 € |
+| Upgrade Lifetime+Bot → Premium 1M | `UPGRADE_LT_BOT_PREMIUM_1M` | `ACCESS_PASS_1M` | Loyalty + Bot | 4,00 € |
+| Upgrade Lifetime+Bot → Premium 3M | `UPGRADE_LT_BOT_PREMIUM_3M` | `ACCESS_PASS_3M` | Loyalty + Bot | 15,00 € |
+| Upgrade Lifetime+Bot → Premium 1Y | `UPGRADE_LT_BOT_PREMIUM_1Y` | `ACCESS_PASS_1Y` | Loyalty + Bot | 56,00 € |
 
 ### Admin-Only Codes (nicht käuflich)
 
@@ -142,7 +147,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 | **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation (PDF & Bot-Empfehlungen) |
 | **Premium 3-Monats-Pass** | 24,90 € | Regelmäßige Nutzer | Wie 1M; ~17% Ersparnis; genug Zeit für DPFL-Lerneffekt |
 | **Premium 1-Jahres-Pass** | 79,90 € | Power-User | Wie 1M; ~33% Ersparnis; stärkste Bindung |
-| **Einzelner Bot-Unlock** | 4,90 € | Gezieltes Interesse | Kenji ODER Chloe permanent (ohne restlichen Premium-Umfang) |
+| **Einzelner Bot-Unlock** | 3,90 € | Gezieltes Interesse | Kenji ODER Chloe permanent (ohne restlichen Premium-Umfang) |
 | | | **Client** | |
 | **Client-Zugang** | Nicht käuflich | Coaching-Klienten | Wird vom Coach per Code vergeben |
 
@@ -161,7 +166,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 - API-Kosten (Gemini 2.5 Flash: ~0,075 $/1M Tokens) erlauben komfortable Marge
 - Niedrig genug als Impulskauf, hoch genug für wahrgenommenen Wert
 
-**Warum Einzelbot-Unlock (4,90 €)?**
+**Warum Einzelbot-Unlock (3,90 €)?**
 - Für Nutzer, die genau Kenji oder Chloe wollen, aber kein Abo möchten
 - Permanent → kein Abo-Druck, senkt Kaufhemmung
 - Upselling-Effekt: Wer einen Coach mag, will oft den vollen Premium-Umfang
@@ -178,6 +183,11 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 Guest (kostenlos, sofort nutzbar)
   → Erlebt: Nobody, Max, Ava, Gloria, Chat, Voice, Life Context (lokal) — kein Gloria Interview
   → Trigger: "Daten nur im Browser" + kein TTS + kein Profil
+  ↓
+14-Tage Premium-Trial (kostenlos nach Registrierung)
+  → Erlebt: ALLES was Premium bietet — Kenji, Chloe, Riemann, SD, DPFL, etc.
+  → Nach 14 Tagen: Paywall mit vollem Produktkatalog
+  → Daten-Download (Life Context, Profil) auch nach Ablauf möglich
   ↓
 Registered (3,90 €/Monat oder 14,90 € einmalig)
   → Erlebt: Cloud-Sync, Server-TTS, OCEAN-Profil, Signature, DPC, PDF
@@ -211,15 +221,15 @@ Loyalty-Rabatt als Anerkennung der Einmalzahlung. Die Registered-Features bleibe
 | **Premium 3-Monats-Pass** | 24,90 € | 18,90 € | ~24% |
 | **Premium 1-Jahres-Pass** | 79,90 € | 59,90 € | ~25% |
 
-#### 3. Bot-Unlock (4,90 €) → Premium
+#### 3. Bot-Unlock (3,90 €) → Premium
 
 Der Einzelbot-Kaufpreis wird als Guthaben auf den ersten Premium-Pass angerechnet.
 
 | Premium-Produkt | Normalpreis | Mit 1 Bot-Unlock | Mit 2 Bot-Unlocks |
 | :--- | ---: | ---: | ---: |
-| **Premium 1-Monats-Pass** | 9,90 € | 5,00 € | 0,10 € |
-| **Premium 3-Monats-Pass** | 24,90 € | 20,00 € | 15,10 € |
-| **Premium 1-Jahres-Pass** | 79,90 € | 75,00 € | 70,10 € |
+| **Premium 1-Monats-Pass** | 9,90 € | 6,00 € | 2,10 € |
+| **Premium 3-Monats-Pass** | 24,90 € | 21,00 € | 17,10 € |
+| **Premium 1-Jahres-Pass** | 79,90 € | 76,00 € | 72,10 € |
 
 #### 4. Registered Lifetime + Bot-Unlock → Premium
 
@@ -227,9 +237,9 @@ Für die loyalsten User: Loyalty-Rabatt und Bot-Guthaben werden kumuliert.
 
 | Premium-Produkt | Normalpreis | Lifetime + 1 Bot | Lifetime + 2 Bots |
 | :--- | ---: | ---: | ---: |
-| **Premium 1-Monats-Pass** | 9,90 € | 3,00 € | 0,10 € |
-| **Premium 3-Monats-Pass** | 24,90 € | 14,00 € | 9,10 € |
-| **Premium 1-Jahres-Pass** | 79,90 € | 55,00 € | 50,10 € |
+| **Premium 1-Monats-Pass** | 9,90 € | 4,00 € | 0,10 € |
+| **Premium 3-Monats-Pass** | 24,90 € | 15,00 € | 11,10 € |
+| **Premium 1-Jahres-Pass** | 79,90 € | 56,00 € | 52,10 € |
 
 #### 5. Guest → Premium (direkt)
 
@@ -243,12 +253,23 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 4. **Einfach kommunizierbar** — "Deine bisherigen Käufe werden angerechnet"
 5. **Technisch umsetzbar** — PayPal Custom IDs erlauben Tracking früherer Käufe
 
-### Noch nicht implementiert / Empfehlungen für die Zukunft
+### Implementierungsstand (v1.9.1)
 
-- **Trial-Periode**: 7 Tage Premium kostenlos nach Registrierung (kein Zahlungsmittel nötig)
-- **Referral-Programm**: 1 Monat gratis für Einladung eines zahlenden Users
-- **Team/Unternehmenslizenz**: Firmentarif für 10+ User mit Admin-Dashboard
-- **Jährliche Abrechnung**: Automatisches Abo statt manuellem Pass-Kauf (PayPal Subscriptions API)
+| Feature | Status | Details |
+| :--- | :---: | :--- |
+| **28-Tage Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
+| **Paywall (abgelaufene User)** | ✅ | Responsive 2-Spalten-Layout, PayPal + Code |
+| **PayPal Direct Checkout** | ✅ | €14.90 Registered Lifetime (Web only, hidden on iOS) |
+| **Bot-Code-Sperre bei Ablauf** | ✅ | Server blockiert Bot-Codes, zeigt Warnung |
+| **Paywall-Bypass-Schutz** | ✅ | Burger-Menü bei Paywall-View versteckt |
+| **Registered Monatsabo** | ❌ | Noch nicht implementiert (3,90 €/Monat) |
+| **Premium-Pässe (PayPal)** | ❌ | Upgrade-UI und Backend-Endpoints fehlen |
+| **Bot-Unlock (PayPal)** | ❌ | Einzelkauf Kenji/Chloe fehlt |
+| **Upgrade-Rabatte** | ❌ | Loyalty-Rabatt-Logik fehlt |
+| **iOS In-App Purchase** | ❌ | Apple StoreKit-Integration geplant |
+| **Referral-Programm** | ❌ | 1 Monat gratis für Einladung eines zahlenden Users |
+| **Team/Unternehmenslizenz** | ❌ | Firmentarif für 10+ User mit Admin-Dashboard |
+| **Jährliche Abrechnung** | ❌ | Automatisches Abo (PayPal Subscriptions API) |
 
 ---
 
