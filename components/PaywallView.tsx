@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { LockIcon } from './icons/LockIcon';
 import { KeyIcon } from './icons/KeyIcon';
@@ -27,13 +27,14 @@ interface PaywallViewProps {
 }
 
 const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurchaseSuccess, onLogout, onDownloadData }) => {
-  const { t, language } = useLocalization();
+  const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedPremiumId, setSelectedPremiumId] = useState<string | null>(null);
   const paypalButtonRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const renderedButtonsRef = useRef<Set<string>>(new Set());
 
@@ -44,9 +45,11 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
     (async () => {
       try {
         const result = await fetchProducts();
-        setProducts(result.products || []);
+        const prods = result.products || [];
+        setProducts(prods);
+        const premiums = prods.filter((p: Product) => p.category === 'premium');
+        if (premiums.length > 0) setSelectedPremiumId(premiums[0].id);
       } catch {
-        // Products endpoint may fail for unauthenticated or expired users — show code redemption only
         setProducts([]);
       } finally {
         setLoading(false);
@@ -54,49 +57,74 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
     })();
   }, []);
 
-  useEffect(() => {
-    if (!showPayPal || !paypalReady || !products.length || !window.paypal?.Buttons) return;
+  const renderPayPalButton = useCallback((productId: string, container: HTMLDivElement) => {
+    if (!window.paypal?.Buttons) return;
+    window.paypal.Buttons({
+      style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 40, tagline: false },
+      createOrder: async () => {
+        setPurchasingId(productId);
+        setSuccessMessage(null);
+        setErrorMessage(null);
+        try {
+          return await createOrder(productId);
+        } catch (err) {
+          setPurchasingId(null);
+          setErrorMessage(t('paywall_payment_error'));
+          throw err;
+        }
+      },
+      onApprove: async (data: { orderID: string }) => {
+        try {
+          const result = await captureOrder(data.orderID);
+          if (result.success && result.user) {
+            setSuccessMessage(t('paywall_payment_success'));
+            setTimeout(() => onPurchaseSuccess(result.user), 1200);
+          } else {
+            setPurchasingId(null);
+            setErrorMessage(result.error || t('paywall_payment_error'));
+          }
+        } catch {
+          setPurchasingId(null);
+          setErrorMessage(t('paywall_payment_error'));
+        }
+      },
+      onCancel: () => { setPurchasingId(null); },
+      onError: () => { setPurchasingId(null); setErrorMessage(t('paywall_payment_error')); },
+    }).render(container);
+  }, [createOrder, captureOrder, onPurchaseSuccess, t]);
 
-    for (const product of products) {
+  useEffect(() => {
+    if (!showPayPal || !paypalReady || !products.length) return;
+
+    const nonPremium = products.filter(p => p.category !== 'premium');
+    for (const product of nonPremium) {
       const container = paypalButtonRefs.current[product.id];
       if (!container || renderedButtonsRef.current.has(product.id)) continue;
-
       renderedButtonsRef.current.add(product.id);
-
-      window.paypal.Buttons({
-        style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 40, tagline: false },
-        createOrder: async () => {
-          setPurchasingId(product.id);
-          setSuccessMessage(null);
-          setErrorMessage(null);
-          try {
-            return await createOrder(product.id);
-          } catch (err) {
-            setPurchasingId(null);
-            setErrorMessage(t('paywall_payment_error'));
-            throw err;
-          }
-        },
-        onApprove: async (data: { orderID: string }) => {
-          try {
-            const result = await captureOrder(data.orderID);
-            if (result.success && result.user) {
-              setSuccessMessage(t('paywall_payment_success'));
-              setTimeout(() => onPurchaseSuccess(result.user), 1200);
-            } else {
-              setPurchasingId(null);
-              setErrorMessage(result.error || t('paywall_payment_error'));
-            }
-          } catch {
-            setPurchasingId(null);
-            setErrorMessage(t('paywall_payment_error'));
-          }
-        },
-        onCancel: () => { setPurchasingId(null); },
-        onError: () => { setPurchasingId(null); setErrorMessage(t('paywall_payment_error')); },
-      }).render(container);
+      renderPayPalButton(product.id, container);
     }
-  }, [paypalReady, products, showPayPal]);
+  }, [paypalReady, products, showPayPal, renderPayPalButton]);
+
+  useEffect(() => {
+    if (!showPayPal || !paypalReady || !selectedPremiumId) return;
+
+    const key = `premium_${selectedPremiumId}`;
+    const container = paypalButtonRefs.current[key];
+    if (!container || renderedButtonsRef.current.has(key)) return;
+
+    container.innerHTML = '';
+    renderedButtonsRef.current.add(key);
+    renderPayPalButton(selectedPremiumId, container);
+  }, [paypalReady, selectedPremiumId, showPayPal, renderPayPalButton]);
+
+  const handlePremiumChange = (newId: string) => {
+    if (newId === selectedPremiumId) return;
+    const oldKey = `premium_${selectedPremiumId}`;
+    renderedButtonsRef.current.delete(oldKey);
+    const oldContainer = paypalButtonRefs.current[oldKey];
+    if (oldContainer) oldContainer.innerHTML = '';
+    setSelectedPremiumId(newId);
+  };
 
   const description = userEmail
     ? t('paywall_description_expired', { email: userEmail })
@@ -104,6 +132,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
 
   const accessProducts = products.filter(p => p.category === 'access');
   const premiumProducts = products.filter(p => p.category === 'premium');
+  const selectedPremium = premiumProducts.find(p => p.id === selectedPremiumId) || null;
 
   const durationLabel = (d: string | null) => {
     if (d === '1M') return t('upgrade_duration_1m');
@@ -197,7 +226,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
         {!loading && products.length > 0 && (
           <div className="md:flex md:gap-6 md:items-start space-y-4 md:space-y-0 text-left mb-6">
 
-            {/* Access products (Registered Lifetime) */}
+            {/* Access products (Registered Monthly + Lifetime) */}
             {accessProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
                 <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
@@ -207,13 +236,71 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
               </div>
             )}
 
-            {/* Premium products */}
+            {/* Premium products — dropdown selector */}
             {premiumProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
                 <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {t('paywall_section_premium')}
                 </h2>
-                {premiumProducts.map(renderProductCard)}
+                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+                  <select
+                    value={selectedPremiumId || ''}
+                    onChange={e => handlePremiumChange(e.target.value)}
+                    className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  >
+                    {premiumProducts.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} — €{p.finalPrice.toFixed(2).replace('.', ',')}
+                        {p.finalPrice < p.price ? ` (${t('upgrade_loyalty_badge')})` : ''}
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedPremium && (
+                    <>
+                      <div className="flex flex-wrap items-center justify-between gap-1">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(selectedPremium.duration)}</span>
+                        <div className="text-right flex-shrink-0">
+                          {selectedPremium.finalPrice < selectedPremium.price && (
+                            <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
+                          )}
+                          <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+                            €{selectedPremium.finalPrice.toFixed(2).replace('.', ',')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {selectedPremium.discountReasons.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {selectedPremium.discountReasons.includes('loyalty') && (
+                            <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+                              {t('upgrade_loyalty_badge')}
+                            </span>
+                          )}
+                          {selectedPremium.discountReasons.includes('bot_credit') && (
+                            <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                              {t('upgrade_bot_credit_badge')}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {purchasingId === selectedPremium.id && (
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+                          {t('paywall_payment_processing')}
+                        </div>
+                      )}
+
+                      {showPayPal && (
+                        <div
+                          ref={el => { paypalButtonRefs.current[`premium_${selectedPremium.id}`] = el; }}
+                          className="min-h-[40px]"
+                          style={{ display: purchasingId === selectedPremium.id ? 'none' : 'block' }}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
