@@ -464,7 +464,9 @@ const App: React.FC = () => {
         }
     };
 
-    const handleAccessExpired = (email: string) => {
+    const handleAccessExpired = (email: string, user: User, key: CryptoKey) => {
+        setAndProcessUser(user);
+        setEncryptionKey(key);
         setPaywallUserEmail(email);
         setView('paywall');
     };
@@ -1263,7 +1265,7 @@ const App: React.FC = () => {
             case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
             case 'unsubscribe': return <UnsubscribeView token={new URLSearchParams(window.location.search).get('token') || ''} onBack={() => setView('auth')} />;
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
-            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView(null); setView('redeemCode'); }} onLogout={handleLogout} />;
+            case 'paywall': return <PaywallView userEmail={paywallUserEmail} onRedeem={() => { setMenuView(null); setView('redeemCode'); }} onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }} onLogout={handleLogout} />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
