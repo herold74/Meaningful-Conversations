@@ -35,7 +35,13 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
       createOrder: async () => {
         setPaymentStatus('processing');
         setErrorMessage(null);
-        return createOrder();
+        try {
+          return await createOrder();
+        } catch (err) {
+          setPaymentStatus('error');
+          setErrorMessage(t('paywall_payment_error'));
+          throw err;
+        }
       },
       onApprove: async (data: { orderID: string }) => {
         try {
@@ -98,24 +104,22 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
                   </p>
                 </div>
 
-                {paymentStatus === 'success' ? (
+                {paymentStatus === 'success' && (
                   <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 font-medium">
                     ✅ {t('paywall_payment_success')}
                   </div>
-                ) : paymentStatus === 'processing' ? (
+                )}
+                {paymentStatus === 'processing' && (
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 font-medium animate-pulse">
                     {t('paywall_payment_processing')}
                   </div>
-                ) : (
-                  <>
-                    {(errorMessage || paypalError) && (
-                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm">
-                        🚨 {errorMessage || paypalError}
-                      </div>
-                    )}
-                    <div ref={paypalContainerRef} className="min-h-[50px]" />
-                  </>
                 )}
+                {(paymentStatus === 'idle' || paymentStatus === 'error') && (errorMessage || paypalError) && (
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                    🚨 {errorMessage || paypalError}
+                  </div>
+                )}
+                <div ref={paypalContainerRef} className="min-h-[50px]" style={{ display: paymentStatus === 'idle' || paymentStatus === 'error' ? 'block' : 'none' }} />
               </>
             )}
 
