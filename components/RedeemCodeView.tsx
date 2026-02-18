@@ -7,9 +7,10 @@ import { CheckIcon } from './icons/CheckIcon';
 
 interface RedeemCodeViewProps {
   onRedeemSuccess: (user: User) => void;
+  onBack?: () => void;
 }
 
-const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
+const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack }) => {
   const { t } = useLocalization();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -87,6 +88,17 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess }) => {
                 www.manualmode.at
             </a>
         </p>
+
+        {onBack && (
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-6 text-center">
+            <button
+              onClick={onBack}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+            >
+              ← {t('redeem_back_button')}
+            </button>
+          </div>
+        )}
       </>
     );
   };
