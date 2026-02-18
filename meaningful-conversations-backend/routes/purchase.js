@@ -158,7 +158,7 @@ function checkProductEligibility(user, productId) {
   const tier = getUserTier(user);
 
   if (productId === 'REGISTERED_LIFETIME') {
-    if (!user.accessExpiresAt && tier !== 'admin' && tier !== 'client') {
+    if (isLifetimeRegistered(user)) {
       return { eligible: false, reason: 'You already have Registered Lifetime access.' };
     }
     if (tier === 'client' || tier === 'admin') {
@@ -167,7 +167,7 @@ function checkProductEligibility(user, productId) {
   }
 
   if (productId === 'REGISTERED_1M') {
-    if (!user.accessExpiresAt && tier !== 'admin' && tier !== 'client') {
+    if (isLifetimeRegistered(user)) {
       return { eligible: false, reason: 'You already have Registered Lifetime access.' };
     }
     if (tier === 'client' || tier === 'admin') {
@@ -275,8 +275,13 @@ router.get('/products', auth, async (req, res) => {
     const products = [];
 
     for (const product of Object.values(PRODUCTS)) {
-      if (product.id === 'REGISTERED_LIFETIME' || product.id === 'REGISTERED_1M') {
-        if (!user.accessExpiresAt && tier !== 'admin') continue;
+      if (product.id === 'REGISTERED_LIFETIME') {
+        if (lifetime) continue;
+        if (tier === 'client' || tier === 'admin') continue;
+      }
+
+      if (product.id === 'REGISTERED_1M') {
+        if (lifetime) continue;
         if (tier === 'client' || tier === 'admin') continue;
       }
 

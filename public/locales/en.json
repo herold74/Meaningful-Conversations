@@ -618,6 +618,7 @@
   "paywall_title": "Trial Ended",
   "paywall_description_new": "Choose an access pass that suits you — or redeem an access code.",
   "paywall_description_expired": "Your trial for the account <strong>{{email}}</strong> has ended. Choose an access pass to continue using Meaningful Conversations.",
+  "paywall_description_engaged": "Your trial for the account <strong>{{email}}</strong> has ended — but your conversations and insights are waiting for you! Continue your personal development and build on the progress you've already made. If you have any questions, feel free to reach out to us directly: <a href='mailto:gherold@manualmode.at' style='color: #1b7272; font-weight: bold;'>gherold@manualmode.at</a>",
   "paywall_section_basic": "Basic Access",
   "paywall_section_premium": "Premium",
   "paywall_download_data": "Download my data (Life Context & Profile)",
