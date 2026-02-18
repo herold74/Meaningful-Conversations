@@ -1274,6 +1274,7 @@ const App: React.FC = () => {
             case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
             case 'paywall': return <PaywallView
                 userEmail={paywallUserEmail}
+                userXp={gamificationState.xp}
                 onRedeem={() => { setMenuView('redeemCode'); }}
                 onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }}
                 onLogout={handleLogout}
