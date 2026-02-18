@@ -146,9 +146,10 @@ router.post('/login', loginLimiter, async (req, res) => {
         // Access Pass Check - users with permanent roles (admin, premium, client, developer) bypass this
         // accessExpiresAt = null means unlimited access (permanent), only a set date in the past triggers expiry
         const hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
+        let accessExpired = false;
         if (!hasPermanentAccess) {
             if (user.accessExpiresAt && new Date(user.accessExpiresAt) < now) {
-                return res.status(403).json({ error: 'Your access pass has expired.', errorCode: 'ACCESS_EXPIRED' });
+                accessExpired = true;
             }
         }
 
@@ -165,6 +166,10 @@ router.post('/login', loginLimiter, async (req, res) => {
         const token = jwt.sign({ 
             userId: user.id
         }, JWT_SECRET, { expiresIn: '7d' });
+
+        if (accessExpired) {
+            return res.json({ token, user: userPayload, accessExpired: true });
+        }
 
         res.json({ token, user: userPayload });
 

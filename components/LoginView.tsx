@@ -14,7 +14,7 @@ import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } fro
 
 interface LoginViewProps {
   onLoginSuccess: (user: User, key: CryptoKey) => void;
-  onAccessExpired: (email: string) => void;
+  onAccessExpired: (email: string, user: User, key: CryptoKey) => void;
   onSwitchToRegister: () => void;
   onBack: () => void;
   onForgotPassword: () => void;
@@ -58,18 +58,15 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
     const trimmedPassword = password.trim();
 
     try {
-        const { user, token } = await userService.login(trimmedEmail, trimmedPassword);
+        const { user, token, accessExpired } = await userService.login(trimmedEmail, trimmedPassword);
         
         if (!user.encryptionSalt) {
             throw new Error("Encryption salt is missing for this user.");
         }
         
-        // The salt is hex-encoded on the backend, decode it to a byte array for the Web Crypto API
         const saltBytes = hexToUint8Array(user.encryptionSalt);
-        
         const key = await deriveKey(trimmedPassword, saltBytes);
         
-        // Save or remove email based on "Remember me" checkbox
         try {
             if (rememberMe) {
                 localStorage.setItem(REMEMBER_EMAIL_KEY, trimmedEmail);
@@ -80,13 +77,15 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
             console.warn('Could not save remember email preference:', e);
         }
         
-        onLoginSuccess(user, key);
+        if (accessExpired) {
+            onAccessExpired(trimmedEmail, user, key);
+        } else {
+            onLoginSuccess(user, key);
+        }
 
     } catch (err: any) {
         console.error("Login failed:", err);
-        if (err.status === 403 && err.data?.errorCode === 'ACCESS_EXPIRED') {
-            onAccessExpired(trimmedEmail);
-        } else if (err.isNetworkError) {
+        if (err.isNetworkError) {
             setError(t('error_network_detailed', { url: err.backendUrl }));
         } else if (err.status === 401) {
             setError(t('login_error_credentials'));
