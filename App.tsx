@@ -1410,7 +1410,9 @@ const App: React.FC = () => {
             case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
             case 'editProfile': return <EditProfileView currentUser={currentUser!} onBack={() => setMenuView('accountManagement')} onProfileUpdated={(user) => setAndProcessUser(user)} />;
             case 'exportData': return <DataExportView lifeContext={lifeContext} colorTheme={colorTheme} />;
-            case 'redeemCode': return <RedeemCodeView onRedeemSuccess={(user) => { 
+            case 'redeemCode': return <RedeemCodeView
+                    onBack={view === 'paywall' ? () => setMenuView(null) : undefined}
+                    onRedeemSuccess={(user) => { 
                     setAndProcessUser(user);
                     setMenuView(null);
                     if (paywallUserEmail) {
@@ -1418,7 +1420,6 @@ const App: React.FC = () => {
                         setPaywallUserEmail(null);
                         setView('login');
                     } else {
-                        // If redeeming without being on the paywall, just close the menu view
                         handleCloseSubMenu();
                     }
                 }} />;
