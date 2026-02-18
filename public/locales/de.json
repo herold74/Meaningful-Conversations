@@ -617,6 +617,7 @@
   "paywall_title": "Testphase beendet",
   "paywall_description_new": "Wählen Sie einen Zugangspass, der zu Ihnen passt — oder lösen Sie einen Zugangscode ein.",
   "paywall_description_expired": "Ihre Testphase für das Konto <strong>{{email}}</strong> ist abgelaufen. Wählen Sie einen Zugangspass, um 'Sinnstiftende Gespräche' weiterhin zu nutzen.",
+  "paywall_description_engaged": "Ihre Testphase für das Konto <strong>{{email}}</strong> ist abgelaufen — aber Ihre bisherigen Gespräche und Erkenntnisse warten auf Sie! Setzen Sie Ihre persönliche Entwicklung fort und bauen Sie auf den Fortschritten auf, die Sie bereits erzielt haben. Bei Fragen stehen wir Ihnen gerne persönlich zur Verfügung: <a href='mailto:gherold@manualmode.at' style='color: #1b7272; font-weight: bold;'>gherold@manualmode.at</a>",
   "paywall_section_basic": "Basiszugang",
   "paywall_section_premium": "Premium",
   "paywall_download_data": "Meine Daten herunterladen (Life Context & Profil)",
