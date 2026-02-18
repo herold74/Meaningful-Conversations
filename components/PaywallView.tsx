@@ -66,89 +66,103 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, onRedeem, onPurcha
     : t('paywall_description_new');
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn px-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border-2 border-yellow-400 dark:border-yellow-500 rounded-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn px-4 py-8">
+      <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-white dark:bg-transparent border-2 border-yellow-400 dark:border-yellow-500 rounded-lg">
 
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center mb-4">
-            <LockIcon className="w-10 h-10 text-yellow-500 dark:text-yellow-400" />
+        {/* Header — always centered */}
+        <div className="flex flex-col items-center mb-4 md:mb-6">
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center mb-3">
+            <LockIcon className="w-8 h-8 md:w-10 md:h-10 text-yellow-500 dark:text-yellow-400" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('paywall_title')}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('paywall_title')}</h1>
         </div>
 
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{ __html: description }} />
+        <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-5 md:mb-6" dangerouslySetInnerHTML={{ __html: description }} />
 
-        {/* PayPal checkout (web only) */}
-        {showPayPal && (
-          <div className="space-y-3 pt-2">
-            <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-              <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                {t('paywall_product_title')}
-              </p>
-              <p className="text-2xl font-bold text-accent-primary mt-1">
-                {t('paywall_product_price')}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {t('paywall_product_description')}
-              </p>
-            </div>
+        {/* Two-column on md+, single column on mobile */}
+        <div className="md:flex md:gap-6 md:items-start space-y-5 md:space-y-0">
 
-            {paymentStatus === 'success' ? (
-              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 font-medium">
-                ✅ {t('paywall_payment_success')}
-              </div>
-            ) : paymentStatus === 'processing' ? (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 font-medium animate-pulse">
-                {t('paywall_payment_processing')}
-              </div>
-            ) : (
+          {/* Left column: PayPal / iOS hint */}
+          <div className="md:flex-1 space-y-3">
+            {showPayPal && (
               <>
-                {(errorMessage || paypalError) && (
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm">
-                    🚨 {errorMessage || paypalError}
+                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-left">
+                  <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {t('paywall_product_title')}
+                  </p>
+                  <p className="text-2xl font-bold text-accent-primary mt-1">
+                    {t('paywall_product_price')}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {t('paywall_product_description')}
+                  </p>
+                </div>
+
+                {paymentStatus === 'success' ? (
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 font-medium">
+                    ✅ {t('paywall_payment_success')}
                   </div>
+                ) : paymentStatus === 'processing' ? (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 font-medium animate-pulse">
+                    {t('paywall_payment_processing')}
+                  </div>
+                ) : (
+                  <>
+                    {(errorMessage || paypalError) && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                        🚨 {errorMessage || paypalError}
+                      </div>
+                    )}
+                    <div ref={paypalContainerRef} className="min-h-[50px]" />
+                  </>
                 )}
-                <div ref={paypalContainerRef} className="min-h-[50px]" />
               </>
             )}
+
+            {isNativeApp() && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 text-sm">
+                💡 {t('paywall_ios_hint')}
+              </div>
+            )}
           </div>
-        )}
 
-        {/* iOS native hint */}
-        {isNativeApp() && (
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 text-sm">
-            💡 {t('paywall_ios_hint')}
+          {/* Divider — horizontal on mobile, vertical on md+ */}
+          {showPayPal && (
+            <>
+              <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600 md:hidden">
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                <span className="text-sm">{t('paywall_or_divider')}</span>
+                <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+              </div>
+              <div className="hidden md:flex md:flex-col md:items-center md:self-stretch md:justify-center">
+                <div className="w-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <span className="text-sm text-gray-400 dark:text-gray-600 py-2">{t('paywall_or_divider')}</span>
+                <div className="w-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              </div>
+            </>
+          )}
+
+          {/* Right column: Redeem + Logout */}
+          <div className="md:flex-1 space-y-4 flex flex-col justify-center">
+            <Button
+              onClick={onRedeem}
+              size="lg"
+              fullWidth
+              leftIcon={<KeyIcon className="w-5 h-5" />}
+              className="bg-[#FECC78] text-black hover:brightness-95"
+            >
+              {t('paywall_redeem_button')}
+            </Button>
+
+            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={onLogout}
+                className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+              >
+                {t('paywall_logout_button')}
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Divider */}
-        {showPayPal && (
-          <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-sm">{t('paywall_or_divider')}</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <Button
-            onClick={onRedeem}
-            size="lg"
-            fullWidth
-            leftIcon={<KeyIcon className="w-5 h-5" />}
-            className="bg-[#FECC78] text-black hover:brightness-95"
-          >
-            {t('paywall_redeem_button')}
-          </Button>
-        </div>
-
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={onLogout}
-            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
-          >
-            {t('paywall_logout_button')}
-          </button>
         </div>
       </div>
     </div>
