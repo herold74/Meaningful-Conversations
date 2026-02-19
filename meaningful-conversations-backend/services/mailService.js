@@ -30,15 +30,81 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
     };
 
     const textBodies = {
-        en: `Welcome to Meaningful Conversations!\n\nYour account includes 14 days of free Premium access with all features.\n\nPlease click the link below to activate your account. This link is valid for 24 hours.\n\n${confirmationUrl}\n\nYour 14-day Premium trial gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.\n\nIf you did not sign up for an account, you can safely ignore this email.`,
-        de: `Willkommen bei Sinnstiftende Gespräche!\n\nIhr Konto enthält 14 Tage kostenlosen Premium-Zugang mit allen Funktionen.\n\nBitte klicken Sie auf den untenstehenden Link, um Ihr Konto zu aktivieren. Dieser Link ist 24 Stunden gültig.\n\n${confirmationUrl}\n\nIhre 14-tägige Premium-Testphase bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.\n\nWenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail einfach ignorieren.`
+        en: `========================================
+Welcome to Meaningful Conversations!
+Your account includes 14 days of free Premium access.
+========================================
+
+Please click the link below to activate your account.
+This link is valid for 24 hours.
+
+${confirmationUrl}
+
+----------------------------------------
+WHAT'S INCLUDED IN EACH PLAN?
+----------------------------------------
+Feature                  | Guest    | Registered | Premium
+-------------------------|----------|------------|--------
+Coaching Profiles        | 3        | 3 (2 opt.) | 5
+Interview Assistant      | -        | Yes        | Yes
+Saved Life Context       | -        | Yes        | Yes
+Personality Profile      | -        | -          | Yes
+Transcript Evaluation    | -        | -          | Yes
+Audio Recording          | -        | -          | Yes
+Voice Mode               | Yes      | Yes        | Yes
+Unlimited Messages       | 50/week  | Yes        | Yes
+----------------------------------------
+
+Your 14-day Premium trial gives you full access to all features.
+After the trial, you can continue for free as a guest and still manage
+your Life Context yourself. As a registered user (from EUR 3.90/month)
+you also benefit from automatic management, an individually created
+personality profile, and personalized guidance through our coaching
+profiles. Premium access is available for 1, 3, or 12 months from EUR 9.90.
+
+If you did not sign up for an account, you can safely ignore this email.`,
+        de: `========================================
+Willkommen bei Sinnstiftende Gespräche!
+Ihr Konto enthält 14 Tage kostenlosen Premium-Zugang.
+========================================
+
+Bitte klicken Sie auf den untenstehenden Link, um Ihr Konto zu aktivieren.
+Dieser Link ist 24 Stunden gültig.
+
+${confirmationUrl}
+
+----------------------------------------
+WAS IST IN WELCHEM PLAN ENTHALTEN?
+----------------------------------------
+Funktion                    | Gast     | Registriert | Premium
+----------------------------|----------|-------------|--------
+Coaching Profile            | 3        | 3 (2 opt.)  | 5
+Interview Assistent         | -        | Ja          | Ja
+Gespeicherter Life Context  | -        | Ja          | Ja
+Persönlichkeitsprofil       | -        | -           | Ja
+Transkript-Auswertung       | -        | -           | Ja
+Audioaufzeichnung           | -        | -           | Ja
+Sprachmodus                 | Ja       | Ja          | Ja
+Unbegrenzte Nachrichten     | 50/Woche | Ja          | Ja
+----------------------------------------
+
+Ihre 14-tägige Premium-Testphase bietet Ihnen den vollen Funktionsumfang.
+Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context
+weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat)
+profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell
+erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch
+unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate
+ab 9,90 € erhältlich.
+
+Wenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail
+einfach ignorieren.`
     };
 
     const htmlBodies = {
         en: `
         <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%); color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Welcome to Meaningful Conversations!</h2>
+            <div style="background-color: #1b7272; color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Welcome to<br>Meaningful Conversations!</h2>
                 <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9);">Your account includes <strong>14 days of free Premium access</strong></p>
             </div>
 
@@ -49,7 +115,7 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
                 </p>
 
                 <h3 style="color: #1b7272; margin-top: 30px;">What's included in each plan?</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
                     <thead>
                         <tr style="background: #1b7272; color: white;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Feature</th>
@@ -70,7 +136,7 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
                     </tbody>
                 </table>
 
-                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin: 20px 0; font-size: 13px; color: #111827;">
+                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
                     <strong>Your 14-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
                 </div>
 
@@ -85,8 +151,8 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
     `,
         de: `
         <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%); color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Willkommen bei Sinnstiftende Gespräche!</h2>
+            <div style="background-color: #1b7272; color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
                 <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9);">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
             </div>
 
@@ -97,7 +163,7 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
                 </p>
 
                 <h3 style="color: #1b7272; margin-top: 30px;">Was ist in welchem Plan enthalten?</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
                     <thead>
                         <tr style="background: #1b7272; color: white;">
                             <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Funktion</th>
@@ -118,7 +184,7 @@ const sendConfirmationEmail = async (email, token, lang = 'en') => {
                     </tbody>
                 </table>
 
-                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin: 20px 0; font-size: 13px; color: #111827;">
+                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
                     <strong>Ihre 14-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
                 </div>
 
