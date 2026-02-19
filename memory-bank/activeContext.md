@@ -145,6 +145,15 @@
 ## Active Tasks
 - [ ] Android Voice Duplication weiter beobachten
 - [ ] Production Deployment fuer v1.8.4 planen
+- [ ] **iOS In-App Purchase:** StoreKit 2 Integration geplant (Skill: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`)
+
+## Planned: Native In-App Purchase (iOS)
+- **Strategy:** iOS uses StoreKit 2 (via RevenueCat or direct), Web keeps PayPal
+- **Products:** 3 subscriptions (Registered Monthly, Premium Monthly, Premium Yearly) + 3 non-consumables (Registered Lifetime, Kenji Unlock, Chloe Unlock)
+- **App Store Product IDs:** `mc.registered.monthly`, `mc.premium.monthly`, `mc.premium.yearly`, `mc.registered.lifetime`, `mc.coach.kenji`, `mc.coach.chloe`
+- **Backend:** New endpoints `/api/purchase/verify-receipt` and `/api/purchase/apple-notification`
+- **Apple Compliance:** PayPal links must be hidden on iOS; Restore Purchases button mandatory
+- **Implementation Phases:** A (App Store Setup) → B (Backend) → C (Frontend) → D (Testing)
 
 ## Decision Log
 - **2026-02-11:** Dockerfiles auf `npm ci` umgestellt nach express-rate-limit Crash auf Staging
