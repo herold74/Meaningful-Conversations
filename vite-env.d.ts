@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_BACKEND_URL_LOCAL: string;
   readonly VITE_APP_VERSION?: string;
   readonly VITE_BUILD_NUMBER?: string;
+  readonly VITE_REVENUECAT_IOS_KEY?: string;
 }
 
 interface ImportMeta {
