@@ -14,11 +14,22 @@ interface AccountManagementViewProps {
 }
 
 const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUser, onNavigate, onDeleteAccount }) => {
-    const { t } = useLocalization();
+    const { t, language } = useLocalization();
     const menuItemBase =
         'w-full p-4 text-left rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors';
     const menuIconWrap =
         'flex h-10 w-10 items-center justify-center rounded-full border border-border-secondary/70 dark:border-border-primary/70 bg-background-secondary dark:bg-background-secondary';
+
+    const getTierLabel = () => {
+        if (currentUser.isDeveloper) return t('account_tier_developer');
+        if (currentUser.isAdmin) return t('account_tier_admin');
+        if (currentUser.isClient) return t('account_tier_client');
+        if (currentUser.isPremium) return t('account_tier_premium');
+        return t('account_tier_registered');
+    };
+
+    const premiumExpiresAt = currentUser.premiumExpiresAt || currentUser.accessExpiresAt;
+    const shouldShowPremiumExpiry = currentUser.isPremium && !currentUser.isClient && !!premiumExpiresAt;
 
     const menuItems = [
         {
@@ -63,6 +74,16 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
             <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-content-primary">{t('account_management_title')}</h1>
                 <p className="text-sm text-content-subtle mt-2">{currentUser.email}</p>
+                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-primary bg-background-tertiary text-sm text-content-primary">
+                    <span className="text-content-subtle">{t('account_current_status')}:</span>
+                    <span className="font-semibold">{getTierLabel()}</span>
+                </div>
+                {shouldShowPremiumExpiry && (
+                    <p className="text-xs text-content-subtle mt-2">
+                        {t('account_status_expires')}{' '}
+                        {new Date(premiumExpiresAt).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-3">
