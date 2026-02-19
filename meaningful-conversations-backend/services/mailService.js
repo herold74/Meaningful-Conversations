@@ -103,10 +103,14 @@ einfach ignorieren.`
     const htmlBodies = {
         en: `
         <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <div style="background-color: #1b7272; color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Welcome to<br>Meaningful Conversations!</h2>
-                <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9);">Your account includes <strong>14 days of free Premium access</strong></p>
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 8px 8px 0 0;">
+                <tr>
+                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>Meaningful Conversations!</h2>
+                        <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>14 days of free Premium access</strong></p>
+                    </td>
+                </tr>
+            </table>
 
             <div style="padding: 25px; background: #f9fafb; color: #111827;">
                 <p style="color: #111827;">Please click the button below to activate your account. This link is valid for 24 hours.</p>
@@ -144,17 +148,25 @@ einfach ignorieren.`
                 <p style="font-size: 12px; color: #555555;">If you did not sign up for an account, you can safely ignore this email.</p>
             </div>
 
-            <div style="background: #1b7272; color: white; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 0 0 8px 8px;">
+                <tr>
+                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                        <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
+                    </td>
+                </tr>
+            </table>
         </div>
     `,
         de: `
         <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <div style="background-color: #1b7272; color: #ffffff; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h2 style="margin: 0; font-size: 24px; color: #ffffff;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
-                <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9);">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 8px 8px 0 0;">
+                <tr>
+                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                        <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
+                        <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
+                    </td>
+                </tr>
+            </table>
 
             <div style="padding: 25px; background: #f9fafb; color: #111827;">
                 <p style="color: #111827;">Bitte klicken Sie auf den untenstehenden Button, um Ihr Konto zu aktivieren. Dieser Link ist 24 Stunden gültig.</p>
@@ -192,9 +204,13 @@ einfach ignorieren.`
                 <p style="font-size: 12px; color: #555555;">Wenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail einfach ignorieren.</p>
             </div>
 
-            <div style="background: #1b7272; color: white; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
-            </div>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 0 0 8px 8px;">
+                <tr>
+                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                        <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
+                    </td>
+                </tr>
+            </table>
         </div>
     `};
     
