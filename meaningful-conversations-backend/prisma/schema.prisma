@@ -38,6 +38,7 @@ model User {
   passwordResetTokenExpires DateTime?
   accessExpiresAt           DateTime?
   premiumExpiresAt          DateTime?
+  purchasePlatform          String?       // paypal | ios | android — primary purchase platform
   feedbacksByUser           Feedback[]    @relation("UserToFeedbacks")
   upgradeCodesUsedByUser    UpgradeCode[] @relation("UserToUpgradeCodes")
   personalityProfile        PersonalityProfile?
@@ -119,21 +120,28 @@ model GuestUsage {
 }
 
 model Purchase {
-  id            String       @id @default(cuid())
-  paypalOrderId String       @unique
-  customerEmail String
-  customerName  String?
-  productId     String
-  amount        Decimal      @db.Decimal(10, 2)
-  currency      String       @default("EUR")
-  upgradeCodeId String?
-  upgradeCode   UpgradeCode? @relation(fields: [upgradeCodeId], references: [id])
-  status        String       @default("COMPLETED")
-  paypalPayload Json
-  createdAt     DateTime     @default(now())
+  id                          String       @id @default(cuid())
+  paypalOrderId               String?      @unique
+  customerEmail               String
+  customerName                String?
+  productId                   String
+  amount                      Decimal      @db.Decimal(10, 2)
+  currency                    String       @default("EUR")
+  upgradeCodeId               String?
+  upgradeCode                 UpgradeCode? @relation(fields: [upgradeCodeId], references: [id])
+  status                      String       @default("COMPLETED")
+  paypalPayload               Json?
+  platform                    String       @default("paypal") // paypal | ios | android
+  appleTransactionId          String?      @unique
+  appleOriginalTransactionId  String?
+  subscriptionStatus          String?      // active | expired | grace_period | cancelled | refunded
+  renewsAt                    DateTime?
+  createdAt                   DateTime     @default(now())
 
   @@index([customerEmail])
   @@index([paypalOrderId])
+  @@index([platform])
+  @@index([appleOriginalTransactionId])
 }
 
 model NewsletterLog {

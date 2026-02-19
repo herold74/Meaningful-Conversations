@@ -172,6 +172,33 @@
 
 ---
 
+### Phase 8: Native In-App Purchases (Planned)
+**Focus: iOS App Store monetization with StoreKit 2**
+
+- ⬜ **iOS Native Paywall**
+  - StoreKit 2 integration via RevenueCat or direct plugin
+  - Platform detection: native IAP on iOS, PayPal on web
+  - New `NativePaywall.tsx` component for iOS purchase flow
+  - Restore Purchases button (Apple mandatory)
+
+- ⬜ **Auto-Renewable Subscriptions**
+  - Registered Monthly (3,99 EUR/mo) — `mc.registered.monthly`
+  - Premium Monthly (9,99 EUR/mo) — `mc.premium.monthly`
+  - Premium Yearly (79,99 EUR/yr) — `mc.premium.yearly`
+  - Subscription group with upgrade/downgrade support
+
+- ⬜ **Non-Consumable Purchases**
+  - Registered Lifetime (14,99 EUR) — `mc.registered.lifetime`
+  - Kenji Coach Unlock (3,99 EUR) — `mc.coach.kenji`
+  - Chloe Coach Unlock (3,99 EUR) — `mc.coach.chloe`
+
+- ⬜ **Apple Compliance**
+  - PayPal links removed from iOS version (Guideline 3.1.1)
+  - No external purchase links in native app (Guideline 3.1.3b)
+  - Subscription management view linking to Apple settings
+
+---
+
 ## 🔧 ADMINISTRATOR PERSPECTIVE: Platform Management
 
 ### Phase 1: Infrastructure & Stability (Early Development)
@@ -315,17 +342,43 @@
 
 ---
 
+### Phase 8: In-App Purchase Infrastructure (Planned)
+**Focus: Apple App Store payment processing and subscription management**
+
+- ⬜ **Server-Side Receipt Validation**
+  - New endpoint `POST /api/purchase/verify-receipt` for Apple receipts
+  - Apple App Store Server API v2 client (JWT-based auth)
+  - Purchase records with `platform` field (`'paypal'` | `'ios'`)
+
+- ⬜ **Apple Server Notifications v2**
+  - New endpoint `POST /api/purchase/apple-notification`
+  - Handles: DID_RENEW, DID_FAIL_TO_RENEW, EXPIRED, REFUND, DID_CHANGE_RENEWAL_STATUS
+  - Grace period and automatic tier fallback logic
+
+- ⬜ **Database Extensions**
+  - Purchase table: `platform`, `appleTransactionId`, `appleOriginalTransactionId`, `subscriptionStatus`, `renewsAt`
+  - User table: `purchasePlatform` for support attribution
+  - Daily subscription status sync cron (safety net)
+
+- ⬜ **App Store Connect Setup**
+  - Product configuration (3 subscriptions + 3 non-consumables)
+  - Subscription group with upgrade/downgrade levels
+  - Sandbox testers and Server Notifications v2 URL
+  - Apple Small Business Program enrollment (15% commission)
+
+---
+
 ## 📊 TIMELINE VISUALIZATION SUGGESTIONS
 
 ### For Slide Deck:
 
 #### **Option 1: Dual-Track Timeline**
 ```
-User Track:     ●────●────●────●────●────●────●
-                ↓    ↓    ↓    ↓    ↓    ↓    ↓
-               P1   P2   P3   P4   P5   P6   P7
-                ↑    ↑    ↑    ↑    ↑    ↑    ↑
-Admin Track:    ●────●────●────●────●────●────●
+User Track:     ●────●────●────●────●────●────●────◯
+                ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓
+               P1   P2   P3   P4   P5   P6   P7   P8
+                ↑    ↑    ↑    ↑    ↑    ↑    ↑    ↑
+Admin Track:    ●────●────●────●────●────●────●────◯
 ```
 
 #### **Option 2: Quarterly Roadmap**
@@ -360,6 +413,7 @@ Feb 2026      | Transcript + Gloria  | Test Runner      | Health Checks
 6. **Gloria Interview** — Professional interviewing with structured transcript export (Feb 2026)
 7. **Multi-Tier Monetization** — Guest, Registered, Premium, Client access levels (Jan 2026)
 8. **Privacy-First** — Encrypted data, GDPR compliance, user control
+9. **Native In-App Purchases** — Seamless iOS purchasing with subscriptions and one-time unlocks (Planned)
 
 ### Admin-Facing Highlights:
 1. **Dual AI Provider System** — Cost optimization + flexibility (Nov 2025)
@@ -368,6 +422,7 @@ Feb 2026      | Transcript + Gloria  | Test Runner      | Health Checks
 4. **Upgrade Code System** — Flexible monetization with PayPal automation (Jan 2026)
 5. **Test Runner** — Automated scenario-based testing for all bot types (Feb 2026)
 6. **Automated Deployments** — Scheduled production updates from staging builds (Dec 2025)
+7. **Apple Receipt Validation** — Server-side verification with App Store Server API v2 (Planned)
 
 ---
 
@@ -413,4 +468,4 @@ Feb 2026      | Transcript + Gloria  | Test Runner      | Health Checks
 
 ---
 
-*Last updated: February 15, 2026. Reflects the evolution of the Meaningful Conversations platform from inception through Gloria Interview Bot, Transcript Evaluation, Personality Profiling, Adaptive Coaching (DPC/DPFL), and Multi-Tier Monetization.*
+*Last updated: February 19, 2026. Reflects the evolution of the Meaningful Conversations platform from inception through Gloria Interview Bot, Transcript Evaluation, Personality Profiling, Adaptive Coaching (DPC/DPFL), Multi-Tier Monetization, and planned Native In-App Purchases.*

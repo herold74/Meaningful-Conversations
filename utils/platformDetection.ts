@@ -17,6 +17,14 @@ export const isNativeApp = (): boolean => {
     return Capacitor.isNativePlatform();
 };
 
+/**
+ * Returns true if running inside a native iOS Capacitor app.
+ * Used to show native In-App Purchase flow instead of PayPal.
+ */
+export const isNativeIOS = (): boolean => {
+    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+};
+
 // ─── Android Detection ───────────────────────────────────────────────
 // Standalone Android detection so that Android-specific fixes
 // (speech recognition, TTS, etc.) never affect PC or iOS code paths.
