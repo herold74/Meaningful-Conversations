@@ -42,6 +42,18 @@
     {
       "layers" : [
         {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "soft-light"
+            }
+          ],
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "automatic"
+            }
+          ],
           "image-name" : "icon-main-1024.png",
           "name" : "icon-main-1024",
           "position" : {
