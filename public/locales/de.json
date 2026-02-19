@@ -324,6 +324,13 @@
   "account_export_data_desc": "Laden Sie alle Ihre Daten herunter (DSGVO Art. 20)",
   "account_redeem_code_desc": "Schalten Sie Premium-Funktionen oder Coaches frei",
   "account_delete_account_desc": "Löschen Sie Ihren Account dauerhaft (DSGVO Art. 17)",
+  "account_current_status": "Aktueller Status",
+  "account_tier_registered": "Registriert",
+  "account_tier_premium": "Premium",
+  "account_tier_client": "Klient",
+  "account_tier_admin": "Administrator",
+  "account_tier_developer": "Developer",
+  "account_status_expires": "Läuft ab am",
   "account_management_footer": "Alle Änderungen werden sofort wirksam. Die Account-Löschung ist endgültig.",
   
   "profile_edit_title": "Profil bearbeiten",
