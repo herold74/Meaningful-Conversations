@@ -2,7 +2,7 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: February 18, 2026 — v1.9.2
+**Last Updated**: February 19, 2026 — v1.9.2
 
 ## User Types
 
@@ -266,10 +266,63 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 | **Premium-Pässe (PayPal)** | ❌ | Upgrade-UI und Backend-Endpoints fehlen |
 | **Bot-Unlock (PayPal)** | ❌ | Einzelkauf Kenji/Chloe fehlt |
 | **Upgrade-Rabatte** | ❌ | Loyalty-Rabatt-Logik fehlt |
-| **iOS In-App Purchase** | ❌ | Apple StoreKit-Integration geplant |
+| **iOS In-App Purchase** | ❌ | Apple StoreKit-Integration geplant (siehe Sektion unten) |
 | **Referral-Programm** | ❌ | 1 Monat gratis für Einladung eines zahlenden Users |
 | **Team/Unternehmenslizenz** | ❌ | Firmentarif für 10+ User mit Admin-Dashboard |
 | **Jährliche Abrechnung** | ❌ | Automatisches Abo (PayPal Subscriptions API) |
+
+---
+
+## iOS In-App Purchase (Geplant)
+
+### Plattform-Strategie
+
+- **iOS (Capacitor App):** Native In-App Purchases via StoreKit 2
+- **Web-Browser:** PayPal bleibt bestehen (externer Link + Upgrade-Codes)
+- PayPal-Links werden in der iOS-Version ausgeblendet (Apple Guideline 3.1.1)
+
+### App Store Produkt-Mapping
+
+#### Subscription Group: "Meaningful Conversations Access"
+
+| Level | App Store Product ID | Typ | iOS-Preis | Web-Preis | Netto (15%) | Tier |
+| :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| 1 | `mc.registered.monthly` | Auto-Renewable | 3,99 €/Mo | 3,90 €/Mo | ~3,39 € | Registered |
+| 2 | `mc.premium.monthly` | Auto-Renewable | 9,99 €/Mo | 9,90 €/Mo | ~8,49 € | Premium |
+| 3 | `mc.premium.yearly` | Auto-Renewable | 79,99 €/Jr | 79,90 €/Jr | ~67,99 € | Premium |
+
+#### Non-Consumable Purchases
+
+| App Store Product ID | Typ | iOS-Preis | Web-Preis | Netto (15%) | Effekt |
+| :--- | :--- | ---: | ---: | ---: | :--- |
+| `mc.registered.lifetime` | Non-Consumable | 14,99 € | 14,90 € | ~12,74 € | Permanent Registered |
+| `mc.coach.kenji` | Non-Consumable | 3,99 € | 3,90 € | ~3,39 € | Kenji Unlock (permanent) |
+| `mc.coach.chloe` | Non-Consumable | 3,99 € | 3,90 € | ~3,39 € | Chloe Unlock (permanent) |
+
+#### Nicht als IAP verfügbar
+
+- **Premium 3-Monats-Pass** — ersetzt durch Auto-Renewable Subscriptions
+- **Upgrade-Produkte** — Apple Subscription Offers / Promotional Offers statt separater Produkte
+- **Client-Zugang** — weiterhin per Admin-Code
+
+### Preisdifferenz Web vs. iOS
+
+Apple Small Business Program (Umsatz < 1M USD/Jahr): **15% Provision**. iOS-Preise sind leicht höher, um die Provision zu kompensieren. Web-Nutzer profitieren vom günstigeren PayPal-Preis.
+
+### Product ID → Internal ID Mapping
+
+| App Store Product ID | Internal botId / Effekt |
+| :--- | :--- |
+| `mc.registered.monthly` | Registered-Tier setzen, `accessExpiresAt` +30d |
+| `mc.premium.monthly` | Entspricht `ACCESS_PASS_1M`, `isPremium`, `accessExpiresAt` +30d |
+| `mc.premium.yearly` | Entspricht `ACCESS_PASS_1Y`, `isPremium`, `accessExpiresAt` +365d |
+| `mc.registered.lifetime` | Entspricht `REGISTERED_LIFETIME`, permanent |
+| `mc.coach.kenji` | `kenji-stoic` zu `unlockedCoaches` hinzugefügt |
+| `mc.coach.chloe` | `chloe-cbt` zu `unlockedCoaches` hinzugefügt |
+
+### Implementierungsdetails
+
+Vollständige technische Dokumentation: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`
 
 ---
 

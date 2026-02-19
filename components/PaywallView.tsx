@@ -4,8 +4,9 @@ import { LockIcon } from './icons/LockIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import Button from './shared/Button';
 import { usePayPal } from '../hooks/usePayPal';
-import { isNativeApp } from '../utils/platformDetection';
+import { isNativeApp, isNativeIOS } from '../utils/platformDetection';
 import { User } from '../types';
+import NativePaywall from './NativePaywall';
 
 interface Product {
   id: string;
@@ -313,9 +314,9 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
           <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
         )}
 
-        {isNativeApp() && (
-          <div className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 text-sm">
-            {t('paywall_ios_hint')}
+        {isNativeIOS() && (
+          <div className="mb-6">
+            <NativePaywall onPurchaseSuccess={onPurchaseSuccess} />
           </div>
         )}
 
