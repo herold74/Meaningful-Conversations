@@ -97,9 +97,25 @@
     - [x] Project setup (Xcode, Capacitor CLI)
     - [x] Native Audio Service abstraction
     - [x] Native Speech Recognition Service abstraction
+    - [ ] Native In-App Purchase (StoreKit 2)
     - [ ] App Store Deployment (TestFlight)
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
+
+## Monetization & Payments
+- [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
+- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption
+- [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
+- [x] **Premium Trial:** 14-day trial for new registrations
+- [ ] **iOS In-App Purchase (StoreKit 2):**
+    - [ ] App Store Connect product setup (subscriptions + non-consumables)
+    - [ ] Backend receipt validation (`/api/purchase/verify-receipt`)
+    - [ ] Apple Server Notifications v2 (`/api/purchase/apple-notification`)
+    - [ ] Frontend native paywall (`NativePaywall.tsx`)
+    - [ ] Restore Purchases functionality
+    - [ ] Sandbox & TestFlight testing
+- [ ] **Registered Monthly Subscription:** 3,90 EUR/month (PayPal Subscriptions API)
+- [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing
 
 ## Pending / Roadmap
 - [ ] **Android Voice Fix:** Investigate duplication issue (PWA)
