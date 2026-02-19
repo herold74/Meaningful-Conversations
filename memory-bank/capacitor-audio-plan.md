@@ -176,7 +176,7 @@ npm install @capacitor/core @capacitor/ios
 npm install -D @capacitor/cli
 
 # Capacitor initialisieren
-npx cap init "Meaningful Conversations" "de.manualmode.mc" --web-dir=dist
+npx cap init "Meaningful Conversations" "at.manualmode.mc" --web-dir=dist
 \`\`\`
 
 ### 1.2 iOS-Projekt erstellen
@@ -194,7 +194,7 @@ npx cap add ios
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'de.manualmode.mc',
+  appId: 'at.manualmode.mc',
   appName: 'Meaningful Conversations',
   webDir: 'dist',
   server: {

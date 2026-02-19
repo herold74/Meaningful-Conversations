@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'de.manualmode.mc',
+  appId: 'at.manualmode.mc',
   appName: 'Meaningful Conversations',
   webDir: 'dist',
   ios: {
