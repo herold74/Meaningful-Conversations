@@ -21,7 +21,7 @@ function getAppleConfig() {
   return {
     keyId: process.env.APPLE_KEY_ID,
     issuerId: process.env.APPLE_ISSUER_ID,
-    bundleId: process.env.APPLE_BUNDLE_ID || 'de.manualmode.mc',
+    bundleId: process.env.APPLE_BUNDLE_ID || 'at.manualmode.mc',
     privateKey: process.env.APPLE_PRIVATE_KEY,
     environment: process.env.APPLE_IAP_ENVIRONMENT || 'sandbox',
   };
