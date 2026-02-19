@@ -325,6 +325,13 @@
   "account_export_data_desc": "Download all your data (GDPR Art. 20)",
   "account_redeem_code_desc": "Unlock premium features or coaches",
   "account_delete_account_desc": "Permanently delete your account (GDPR Art. 17)",
+  "account_current_status": "Current status",
+  "account_tier_registered": "Registered",
+  "account_tier_premium": "Premium",
+  "account_tier_client": "Client",
+  "account_tier_admin": "Administrator",
+  "account_tier_developer": "Developer",
+  "account_status_expires": "Expires on",
   "account_management_footer": "All changes take effect immediately. Account deletion is permanent.",
   
   "profile_edit_title": "Edit Profile",
