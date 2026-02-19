@@ -102,116 +102,134 @@ einfach ignorieren.`
 
     const htmlBodies = {
         en: `
-        <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 8px 8px 0 0;">
-                <tr>
-                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                        <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>Meaningful Conversations!</h2>
-                        <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>14 days of free Premium access</strong></p>
-                    </td>
-                </tr>
-            </table>
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-family: sans-serif; line-height: 1.6;">
+            <tr>
+                <td align="center" style="padding: 0;">
+                    <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
 
-            <div style="padding: 25px; background: #f9fafb; color: #111827;">
-                <p style="color: #111827;">Please click the button below to activate your account. This link is valid for 24 hours.</p>
-                <p style="margin: 20px 0; text-align: center;">
-                    <a href="${confirmationUrl}" style="background-color: #22c55e; color: white; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px;">Activate Account</a>
-                </p>
-
-                <h3 style="color: #1b7272; margin-top: 30px;">What's included in each plan?</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
-                    <thead>
-                        <tr style="background: #1b7272; color: white;">
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Feature</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Guest</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Registered</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd; background: #d4af37; color: #000;">Premium ⭐</th>
+                        <!-- Header -->
+                        <tr>
+                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>Meaningful Conversations!</h2>
+                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>14 days of free Premium access</strong></p>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Coaching Profiles</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3 (2 optional)</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">5</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Interview Assistant</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Saved Life Context</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Personality Profile</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Transcript Evaluation</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Audio Recording</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Voice Mode</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Unlimited Messages</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">50/week</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                    </tbody>
-                </table>
 
-                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
-                    <strong>Your 14-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
-                </div>
+                        <!-- Body -->
+                        <tr>
+                            <td bgcolor="#f9fafb" style="background-color: #f9fafb; padding: 25px; color: #111827;">
+                                <p style="color: #111827; margin-top: 0;">Please click the button below to activate your account. This link is valid for 24 hours.</p>
+                                <p style="margin: 20px 0; text-align: center;">
+                                    <a href="${confirmationUrl}" style="background-color: #22c55e; color: #ffffff; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px; font-family: sans-serif;">Activate Account</a>
+                                </p>
 
-                <p style="font-size: 12px; color: #555555;">If you cannot click the button, copy this URL: <a href="${confirmationUrl}" style="color: #1b7272;">${confirmationUrl}</a></p>
-                <p style="font-size: 12px; color: #555555;">If you did not sign up for an account, you can safely ignore this email.</p>
-            </div>
+                                <h3 style="color: #1b7272; margin-top: 30px;">What's included in each plan?</h3>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
+                                    <thead>
+                                        <tr>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Feature</th>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Guest</th>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registered</th>
+                                            <th bgcolor="#d4af37" style="background-color: #d4af37; color: #000000; padding: 8px; text-align: center; border: 1px solid #ddd;">Premium ⭐</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Coaching Profiles</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3 (2 optional)</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">5</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Interview Assistant</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Saved Life Context</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Personality Profile</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Transcript Evaluation</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Audio Recording</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Voice Mode</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Unlimited Messages</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">50/week</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                    </tbody>
+                                </table>
 
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 0 0 8px 8px;">
-                <tr>
-                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                        <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
+                                    <strong>Your 14-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
+                                </div>
+
+                                <p style="font-size: 10px; color: #888888;">If you cannot click the button, copy this URL: <a href="${confirmationUrl}" style="color: #1b7272; word-break: break-all;">${confirmationUrl}</a></p>
+                                <p style="font-size: 12px; color: #555555;">If you did not sign up for an account, you can safely ignore this email.</p>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;<a href="https://www.manualmode.at" style="color: #ffffff; text-decoration: none;">www.manualmode.at</a></p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>
     `,
         de: `
-        <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 8px 8px 0 0;">
-                <tr>
-                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                        <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
-                        <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
-                    </td>
-                </tr>
-            </table>
+        <table width="100%" cellpadding="0" cellspacing="0" style="font-family: sans-serif; line-height: 1.6;">
+            <tr>
+                <td align="center" style="padding: 0;">
+                    <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
 
-            <div style="padding: 25px; background: #f9fafb; color: #111827;">
-                <p style="color: #111827;">Bitte klicken Sie auf den untenstehenden Button, um Ihr Konto zu aktivieren. Dieser Link ist 24 Stunden gültig.</p>
-                <p style="margin: 20px 0; text-align: center;">
-                    <a href="${confirmationUrl}" style="background-color: #22c55e; color: white; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px;">Konto aktivieren</a>
-                </p>
-
-                <h3 style="color: #1b7272; margin-top: 30px;">Was ist in welchem Plan enthalten?</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
-                    <thead>
-                        <tr style="background: #1b7272; color: white;">
-                            <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Funktion</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Gast</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Registriert</th>
-                            <th style="padding: 8px; text-align: center; border: 1px solid #ddd; background: #d4af37; color: #000;">Premium ⭐</th>
+                        <!-- Header -->
+                        <tr>
+                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
+                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Coaching Profile</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3 (2 optional)</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">5</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Interview Assistent</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Gespeicherter Life Context</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Persönlichkeitsprofil</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Transkript-Auswertung</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Audioaufzeichnung</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Sprachmodus</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fefce8;">✅</td></tr>
-                        <tr style="background: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Unbegrenzte Nachrichten</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">50/Woche</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee; background: #fef9c3;">✅</td></tr>
-                    </tbody>
-                </table>
 
-                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
-                    <strong>Ihre 14-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
-                </div>
+                        <!-- Body -->
+                        <tr>
+                            <td bgcolor="#f9fafb" style="background-color: #f9fafb; padding: 25px; color: #111827;">
+                                <p style="color: #111827; margin-top: 0;">Bitte klicken Sie auf den untenstehenden Button, um Ihr Konto zu aktivieren. Dieser Link ist 24 Stunden gültig.</p>
+                                <p style="margin: 20px 0; text-align: center;">
+                                    <a href="${confirmationUrl}" style="background-color: #22c55e; color: #ffffff; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px; font-family: sans-serif;">Konto aktivieren</a>
+                                </p>
 
-                <p style="font-size: 12px; color: #555555;">Wenn Sie den Button nicht anklicken können, kopieren Sie diese URL: <a href="${confirmationUrl}" style="color: #1b7272;">${confirmationUrl}</a></p>
-                <p style="font-size: 12px; color: #555555;">Wenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail einfach ignorieren.</p>
-            </div>
+                                <h3 style="color: #1b7272; margin-top: 30px;">Was ist in welchem Plan enthalten?</h3>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
+                                    <thead>
+                                        <tr>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Funktion</th>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Gast</th>
+                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registriert</th>
+                                            <th bgcolor="#d4af37" style="background-color: #d4af37; color: #000000; padding: 8px; text-align: center; border: 1px solid #ddd;">Premium ⭐</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Coaching Profile</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">3 (2 optional)</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">5</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Interview Assistent</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Gespeicherter Life Context</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Persönlichkeitsprofil</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Transkript-Auswertung</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Audioaufzeichnung</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">—</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                        <tr><td style="padding: 6px 8px; border: 1px solid #eee;">Sprachmodus</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fefce8" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fefce8;">✅</td></tr>
+                                        <tr bgcolor="#f3f4f6" style="background-color: #f3f4f6;"><td style="padding: 6px 8px; border: 1px solid #eee;">Unbegrenzte Nachrichten</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">50/Woche</td><td style="padding: 6px; text-align: center; border: 1px solid #eee;">✅</td><td bgcolor="#fef9c3" style="padding: 6px; text-align: center; border: 1px solid #eee; background-color: #fef9c3;">✅</td></tr>
+                                    </tbody>
+                                </table>
 
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius: 0 0 8px 8px;">
-                <tr>
-                    <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                        <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
+                                    <strong>Ihre 14-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
+                                </div>
+
+                                <p style="font-size: 10px; color: #888888;">Wenn Sie den Button nicht anklicken können, kopieren Sie diese URL: <a href="${confirmationUrl}" style="color: #1b7272; word-break: break-all;">${confirmationUrl}</a></p>
+                                <p style="font-size: 12px; color: #555555;">Wenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail einfach ignorieren.</p>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;<a href="https://www.manualmode.at" style="color: #ffffff; text-decoration: none;">www.manualmode.at</a></p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>
     `};
     
     const subject = subjects[lang] || subjects['en'];
