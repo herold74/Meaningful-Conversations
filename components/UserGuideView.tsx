@@ -29,6 +29,8 @@ Wenn Sie die App zum ersten Mal öffnen, haben Sie die Wahl, wie Sie beginnen m�
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur in Ihrem Browser verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
 - **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
+**Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
+
 ### 1.2 Ihre erste Lebenskontext-Datei erstellen
 Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Sie drei Möglichkeiten haben:
 
@@ -75,6 +77,19 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Sitzungsbewertungen, eingelöste Codes und Nutzungsstatistiken.
 - **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
+
+### 2.2 Zugangsstufen & Upgrade
+
+Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
+
+| Stufe | Zugang | Coaches | Funktionen |
+| :--- | :--- | :--- | :--- |
+| **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
+| **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
+| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil |
+| **Klient** | Zugangscode von manualmode.at | + Rob, Victor | Transkript-Auswertung, alle Features |
+
+**So upgraden Sie:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe in verschiedenen Laufzeiten (1, 3 oder 12 Monate) sowie Einzelcoach-Freischaltungen. Alternativ können Sie unter **Kontoverwaltung → "Code einlösen"** einen Zugangscode eingeben.
 
 </div>
 </details>
@@ -298,6 +313,8 @@ Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI e
 - 🌱 **Wachstumsmöglichkeiten:** Konkrete Entwicklungsempfehlungen
 
 **Hinweis:** Die Signatur kann eingeklappt werden. Um sie zu aktualisieren, klappen Sie sie ein und wieder auf – so wird versehentliches Neugenerieren verhindert.
+
+**PDF-Export:** Über die Schaltfläche **"Als PDF herunterladen"** können Sie Ihr vollständiges Persönlichkeitsprofil -- inklusive Testergebnisse, Signatur und Facetten -- als PDF-Datei exportieren und speichern.
 
 ### 4.4 Adaptives vs. Stabiles Profil
 
@@ -544,7 +561,20 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-### 5.2 Die Chat-Oberfläche
+### 5.2 Coach-Empfehlung (KI-gestützte Suche)
+
+Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
+
+- **Situation beschreiben:** Geben Sie in das Textfeld ein, worum es Ihnen geht -- z.B. "Ich stehe vor einer schwierigen Entscheidung im Beruf" oder "Ich möchte an meiner Kommunikation arbeiten".
+- **Spracheingabe:** Sie können Ihre Beschreibung auch per **Mikrofon-Symbol** diktieren (Sprache-zu-Text).
+- **Empfehlung erhalten:** Klicken Sie auf das **Senden-Symbol** (oder drücken Sie Cmd/Ctrl + Enter). Die KI analysiert Ihre Beschreibung und empfiehlt Ihnen zwei Coaches:
+  - **Primäre Empfehlung:** Der Coach, der am besten zu Ihrer Situation passt -- mit Begründung und einem vorgeschlagenen Gesprächseinstieg.
+  - **Alternative Empfehlung:** Ein zweiter Coach mit einer ergänzenden Perspektive.
+- **Sitzung starten:** Klicken Sie auf eine Empfehlungskarte, um die Sitzung direkt mit dem vorgeschlagenen Gesprächseinstieg zu beginnen. Der Coach überspringt dabei seine üblichen Einleitungsfragen und geht sofort auf Ihr Thema ein.
+
+**Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
+
+### 5.3 Die Chat-Oberfläche
 - **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
@@ -562,6 +592,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
   - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
   - **Tippen Sie erneut auf das Symbol (jetzt ein Papierflieger)**, um die Aufnahme zu beenden und Ihre Nachricht zu senden. Die Antwort des Coaches wird automatisch abgespielt.
+- **Textformatierung:** Ihre Lebenskontext-Datei unterstützt **Markdown-Formatierung** (z.B. \*\*fett\*\*, \*kursiv\*, Aufzählungen, Überschriften). Details finden Sie unter Menü (☰) → **"Formatierung"**.
 
 </div>
 </details>
@@ -778,6 +809,8 @@ When you first open the app, you'll have a choice of how to begin.
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only in your browser. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
 - **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
+**Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
+
 ### 1.2 Creating Your First Life Context
 After making your choice, you'll arrive at the landing page with three options:
 
@@ -824,6 +857,19 @@ Via the menu (☰), you can access **Account Management** with the following opt
 - **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, session ratings, redeemed codes, and usage statistics.
 - **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
 - **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
+
+### 2.2 Access Tiers & Upgrade
+
+The app offers four access tiers with increasing functionality:
+
+| Tier | Access | Coaches | Features |
+| :--- | :--- | :--- | :--- |
+| **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
+| **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
+| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile |
+| **Client** | Access code from manualmode.at | + Rob, Victor | Transcript evaluation, all features |
+
+**How to upgrade:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes in various durations (1, 3, or 12 months) as well as individual coach unlocks. Alternatively, go to **Account Management → "Redeem Code"** to enter an access code.
 
 </div>
 </details>
@@ -1016,6 +1062,8 @@ Based on your test results and these stories, our AI generates a unique **Person
 - 🌱 **Growth Opportunities:** Concrete development recommendations
 
 **Note:** The signature can be collapsed. To update it, collapse and expand it again – this prevents accidental regeneration.
+
+**PDF Export:** Use the **"Download as PDF"** button to export your complete personality profile -- including test results, signature, and facets -- as a PDF file.
 
 ### 4.4 Adaptive vs. Stable Profile
 
@@ -1257,7 +1305,20 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-### 5.2 The Chat Interface
+### 5.2 Coach Recommendation (AI-Powered Search)
+
+Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
+
+- **Describe your situation:** Type into the text field what you're looking for -- e.g. "I'm facing a difficult career decision" or "I want to work on my communication skills".
+- **Voice input:** You can also dictate your description using the **microphone icon** (speech-to-text).
+- **Get a recommendation:** Click the **send icon** (or press Cmd/Ctrl + Enter). The AI will analyze your description and recommend two coaches:
+  - **Primary recommendation:** The coach that best fits your situation -- with reasoning and a suggested conversation opener.
+  - **Alternative recommendation:** A second coach offering a complementary perspective.
+- **Start a session:** Click on a recommendation card to begin the session directly with the suggested conversation opener. The coach will skip the usual introductory questions and address your topic right away.
+
+**Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
+
+### 5.3 The Chat Interface
 - **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
 - **Text Mode (Default):**
   - Type your message in the text area at the bottom.
@@ -1275,6 +1336,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
   - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
   - **Tap the large microphone icon** to start recording. Speak your message.
   - **Tap the icon again (now a paper plane)** to stop recording and send your message. The coach's reply will play automatically.
+- **Text formatting:** Your Life Context file supports **Markdown formatting** (e.g. \*\*bold\*\*, \*italic\*, bullet lists, headings). See Menu (☰) → **"Formatting"** for details.
 
 </div>
 </details>
