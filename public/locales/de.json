@@ -172,7 +172,7 @@
   "botSelection_clientAccessMessage": "Diese Coaches sind exklusiv für Klienten von manualmode.at verfügbar. Kontaktieren Sie uns für mehr Informationen.",
   "botSelection_goBack": "Zurück",
   "botSelection_meditationBadge": "Bietet geführte Meditation 🔔",
-  "botSearch_placeholder": "Beschreiben Sie Ihre Situation oder Ihr Thema ...",
+  "botSearch_placeholder": "Beschreiben Sie Ihre Situation oder Thema ...",
   "botSearch_button": "Coach empfehlen",
   "botSearch_loading": "Passenden Coach suchen ...",
   "botSearch_result_primary": "Empfohlener Coach",
@@ -182,7 +182,7 @@
   "botSearch_copied": "Kopiert!",
   "botSearch_locked": "Upgrade erforderlich",
   "botSearch_login_hint": "Melden Sie sich an, um einen passenden Coach für Ihr Thema zu finden.",
-  "botSearch_section_title": "Coach-Empfehlung",
+  "botSearch_section_title": "... wenn wir bei der Auswahl helfen sollen.",
   "botSearch_section_desc": "Beschreiben Sie Ihre Situation – wir empfehlen den passenden Coach.",
   
   "guest_limit_warning": "Sie haben Ihr wöchentliches Limit von 50 Nachrichten erreicht. Registrieren Sie sich für unbegrenzten Zugang.",

@@ -195,62 +195,64 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto mb-10">
-            {/* Section Header */}
-            <div className="mb-4">
-                <div className="flex items-center gap-4">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
-                        <span className="text-lg">🔍</span>
-                        <div className="text-center">
-                            <div className="text-sm font-semibold text-accent-tertiary dark:text-accent-primary">
-                                {t('botSearch_section_title')}
-                            </div>
-                            <div className="text-xs text-accent-tertiary/80 dark:text-accent-primary/70">
-                                {t('botSearch_section_desc')}
-                            </div>
-                        </div>
+        <div className="w-full max-w-4xl mx-auto">
+            {/* Unified capsule container — same width/roundness as section pills below */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
+              <div className="rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5 min-w-[18rem] max-w-lg w-full">
+                {/* Top row: 🔍 left | gray input box [textarea | mic | send] */}
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[1.3rem] leading-none flex-shrink-0 opacity-60">🔍</span>
+                    <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
+                        {!isLoggedIn ? (
+                            <p className="flex-1 text-sm text-content-secondary py-1">
+                                {t('botSearch_login_hint')}
+                            </p>
+                        ) : (
+                            <textarea
+                                ref={topicTextareaRef}
+                                value={topic}
+                                onChange={e => setTopic(e.target.value)}
+                                placeholder={t('botSearch_placeholder')}
+                                rows={2}
+                                className="flex-1 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-hidden focus:outline-none"
+                                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
+                            />
+                        )}
+                        {isLoggedIn && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={handleMic}
+                                    className="p-0.5 text-content-secondary hover:text-content-primary transition-colors flex-shrink-0"
+                                    aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}
+                                >
+                                    <MicrophoneIcon className={`w-5 h-5 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit as any}
+                                    disabled={!topic.trim() || isLoading}
+                                    className="p-1.5 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:opacity-40 rounded-lg transition-colors flex-shrink-0"
+                                    aria-label={t('botSearch_button')}
+                                >
+                                    {isLoading
+                                        ? <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        : <PaperPlaneIcon className="w-5 h-5" />
+                                    }
+                                </button>
+                            </>
+                        )}
                     </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
                 </div>
-            </div>
 
-            {!isLoggedIn ? (
-                <p className="text-sm text-content-secondary text-center py-3 px-4 bg-background-secondary/50 dark:bg-background-secondary/20 rounded-lg border border-border-primary">
-                    {t('botSearch_login_hint')}
-                </p>
-            ) : (
-                <form onSubmit={handleSubmit} className="flex items-end gap-3">
-                    <textarea
-                        ref={topicTextareaRef}
-                        value={topic}
-                        onChange={e => setTopic(e.target.value)}
-                        placeholder={t('botSearch_placeholder')}
-                        rows={1}
-                        className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
-                        onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
-                    />
-                    <button
-                        type="button"
-                        onClick={handleMic}
-                        className="p-2 text-content-secondary hover:text-content-primary"
-                        aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}
-                    >
-                        <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={!topic.trim() || isLoading}
-                        className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg"
-                        aria-label={t('botSearch_button')}
-                    >
-                        {isLoading
-                            ? <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                            : <PaperPlaneIcon className="w-6 h-6" />
-                        }
-                    </button>
-                </form>
-            )}
+                {/* Bottom row: hint text centered */}
+                <div className="text-xs text-accent-tertiary/70 dark:text-accent-primary/60 text-center pt-0.5">
+                    {t('botSearch_section_title')}
+                </div>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
+            </div>
 
             {error && (
                 <p className="mt-3 text-sm text-status-error-foreground text-center">{error}</p>

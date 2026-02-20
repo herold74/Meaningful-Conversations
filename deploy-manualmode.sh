@@ -44,7 +44,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -e, --env ENV         Environment: staging (default) or production"
-    echo "  -c, --component COMP  Component: all (default), frontend, or backend"
+    echo "  -c, --component COMP  Component: all (default), app, frontend, backend, or tts"
     echo "  --server HOST         Remote server (default: root@91.99.193.87)"
     echo "  -s, --skip-build      Skip building images (use existing)"
     echo "  -p, --skip-push       Skip pushing to registry (deploy existing)"
@@ -55,7 +55,8 @@ show_help() {
     echo "Examples:"
     echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Build & deploy all to staging"
     echo "  ${BLUE}./deploy-manualmode.sh -e production${NC}      # Deploy staging images to production (no rebuild)"
-    echo "  ${BLUE}./deploy-manualmode.sh -c frontend${NC}        # Build & deploy frontend to staging"
+    echo "  ${BLUE}./deploy-manualmode.sh -c app${NC}             # Build & deploy frontend+backend (no TTS)"
+  echo "  ${BLUE}./deploy-manualmode.sh -c frontend${NC}        # Build & deploy frontend to staging"
     echo "  ${BLUE}./deploy-manualmode.sh --server root@1.2.3.4${NC}  # Deploy to different server"
     echo ""
     echo "Production deploys skip building and pushing — they pull the pre-built"
@@ -124,8 +125,8 @@ if [[ "$ENVIRONMENT" == "production" ]]; then
 fi
 
 # Validate component
-if [[ "$COMPONENT" != "all" && "$COMPONENT" != "frontend" && "$COMPONENT" != "backend" && "$COMPONENT" != "tts" ]]; then
-    echo -e "${RED}Error: Component must be 'all', 'frontend', 'backend', or 'tts'${NC}"
+if [[ "$COMPONENT" != "all" && "$COMPONENT" != "app" && "$COMPONENT" != "frontend" && "$COMPONENT" != "backend" && "$COMPONENT" != "tts" ]]; then
+    echo -e "${RED}Error: Component must be 'all', 'app', 'frontend', 'backend', or 'tts'${NC}"
     exit 1
 fi
 
@@ -182,7 +183,7 @@ echo ""
 # ============================================================================
 
 if [[ "$SKIP_BUILD" == false ]]; then
-    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "backend" ]]; then
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo -e "${BLUE}Building Backend Image${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -221,7 +222,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo ""
     fi
 
-    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "frontend" ]]; then
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo -e "${BLUE}Building Frontend Image${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -283,7 +284,7 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
         echo ""
     fi
     
-    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "backend" ]]; then
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
         BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
@@ -311,7 +312,7 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
         echo ""
     fi
     
-    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "frontend" ]]; then
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
@@ -379,12 +380,12 @@ fi
 
 # Pull latest images from registry
 echo "Pulling images from registry..."
-if [[ "$COMPONENT" == "all" || "$COMPONENT" == "backend" ]]; then
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
     echo "Pulling backend image..."
     podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION" || echo "Warning: Could not pull backend image"
 fi
 
-if [[ "$COMPONENT" == "all" || "$COMPONENT" == "frontend" ]]; then
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
     echo "Pulling frontend image..."
     podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
 fi
