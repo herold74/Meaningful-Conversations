@@ -124,6 +124,23 @@ Nach der Analyse (ca. 10-30 Sekunden) erhalten Sie einen detaillierten Bericht:
 - **Aktion**: Konkrete Handlungsempfehlung
 - **Rationale**: Warum ist dieser Schritt wichtig?
 
+#### 🤖 Coach-Empfehlungen
+
+Für jedes identifizierte **Entwicklungsfeld** schlägt die Auswertung einen primären und einen alternativen Coach vor, der Ihnen bei genau diesem Thema weiterhelfen kann.
+
+**Für jede Empfehlung sehen Sie:**
+- **Coach-Name** und einen farbigen Badge, der zeigt, ob der Coach für Sie verfügbar ist
+- **Begründung**: Warum dieser Coach für Ihr spezifisches Entwicklungsfeld passt
+- **Gesprächseinstieg**: Ein fertig formulierter Satz, mit dem Sie die Session direkt am Thema beginnen können
+
+**Gesprächseinstieg kopieren:**
+Klicken Sie auf **"Prompt kopieren"**, um den Einstiegssatz in die Zwischenablage zu kopieren und ihn z.B. in einer manuell gestarteten Session zu verwenden.
+
+**Session direkt starten:**
+Klicken Sie auf **"Session starten"** – die App öffnet den empfohlenen Coach und schickt den vorgeschlagenen Einstiegssatz automatisch als Ihre erste Nachricht. Die Unterhaltung beginnt sofort am konkreten Entwicklungsthema, ohne Suche oder manuelle Eingabe.
+
+> 💡 **Tipp**: Der "Session starten"-Button ist nur bei Coaches sichtbar, die Ihrem aktuellen Zugangslevel entsprechen. Coaches höherer Stufen zeigen stattdessen einen "Upgrade"-Button. Locked Coaches sind im PDF-Export sichtbar, aber der Start-Button erscheint erst nach einem Upgrade.
+
 ---
 
 ## 📄 PDF Export (für Klienten, Admins & Developers)
@@ -322,6 +339,40 @@ Das exportierte PDF enthält:
 
 ---
 
+## 🔍 Coach-Empfehlung: Passenden Coach für Ihr Thema finden
+
+Direkt auf der **Coach-Auswahl-Seite** (der Startseite nach dem Login) finden Sie ein Suchfeld, mit dem Sie per KI den am besten passenden Coach für Ihre aktuelle Situation ermitteln können – ganz ohne die Coaches manuell zu vergleichen.
+
+### So nutzen Sie die Suche
+
+1. Melden Sie sich an und gehen Sie zur **Coach-Auswahl**
+2. Oben auf der Seite befindet sich der Bereich **"Coach-Empfehlung"** mit einem Eingabefeld
+3. Beschreiben Sie Ihre Situation oder Ihr Thema in eigenen Worten — so ausführlich oder knapp wie Sie möchten
+   > Beispiel: *"Wenn ich unter Menschen bin, die mir vertraut sind, bin ich manchmal so eingeschüchtert, dass ich mich nicht mehr aktiv einbringen kann. Ich will verstehen, was da passiert."*
+4. Klicken Sie auf **"Coach empfehlen"** (oder drücken Sie `Cmd/Ctrl + Enter`)
+5. Die KI analysiert Ihr Thema und zeigt Ihnen:
+   - Einen **primären Coach** (beste Übereinstimmung mit Ihrem Thema)
+   - Einen **alternativen Coach** (anderer Ansatz zum gleichen Thema)
+   - Für jeden Coach: Begründung und fertigen Gesprächseinstieg
+
+### Von der Empfehlung direkt in die Session
+
+| Button | Was passiert |
+|--------|-------------|
+| **"Session starten"** | Öffnet den Coach und sendet den vorgeschlagenen Einstiegssatz als erste Nachricht — Sie starten sofort am Thema |
+| **"Einstieg kopieren"** | Kopiert den Einstiegssatz in die Zwischenablage zur eigenen Verwendung |
+| **"Upgrade"** | Erscheint bei Coaches, die ein höheres Zugangslevel erfordern |
+
+### Wer kann die Suche nutzen?
+
+- **Angemeldete Nutzer** (alle Stufen): Die Empfehlung selbst steht allen registrierten Nutzern zur Verfügung
+- **Gäste**: Sehen einen Anmelde-Hinweis anstelle des Suchfeldes
+- **Session starten**: Abhängig vom empfohlenen Coach und Ihrem Zugangslevel (Guest / Premium / Klient)
+
+> 💡 **Unterschied zur Transkript-Auswertung**: Die Suche hier arbeitet ohne Transkript – Sie beschreiben Ihr Thema frei, und die KI empfiehlt den Coach. Die Transkript-Auswertung hingegen analysiert ein konkretes Gespräch und empfiehlt Coaches basierend auf den darin identifizierten Entwicklungsfeldern.
+
+---
+
 ## 📞 Support
 
 Bei Fragen oder Problemen:
@@ -332,6 +383,6 @@ Bei Fragen oder Problemen:
 
 ---
 
-**Version:** 1.8.7  
-**Zuletzt aktualisiert:** 13. Februar 2026  
-**Feature verfügbar für:** Klienten (Desktop-Browser)
+**Version:** 1.9.3  
+**Zuletzt aktualisiert:** 20. Februar 2026  
+**Feature verfügbar für:** Klienten (Desktop-Browser) · Coach-Empfehlung: alle registrierten Nutzer
