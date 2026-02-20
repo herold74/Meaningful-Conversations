@@ -690,9 +690,103 @@ Stelle deine Bewertung als JSON-Objekt bereit.`
     }
 };
 
+const BOT_CATALOG_EN = `- Nobody (nexus-gps, guest): Pragmatic management advisor and communication strategist, GPS method. For: management and communication topics, concrete problem-solving, next steps, conversation preparation.
+- Max (max-ambitious, guest): Inspiring, questioning, reflective. For: potential, motivation, new perspectives, confidence.
+- Ava (ava-strategic, guest): Strategic, decisive, organized. For: prioritization, planning, complex decisions, organizational topics.
+- Kenji (kenji-stoic, premium): Stoic, composed, wise. For: stress, perspective shifts, inner calm, philosophical reflection.
+- Chloe (chloe-cbt, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
+- Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
+- Victor (victor-bowen, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.`;
+
+const BOT_CATALOG_DE = `- Nobody (nexus-gps, guest): Pragmatischer Management-Berater und Kommunikationsstratege, GPS-Methode. Für: Management- und Kommunikationsthemen, konkrete Problemlösung, nächste Schritte, Gesprächsvorbereitung.
+- Max (max-ambitious, guest): Inspirierend, hinterfragend, reflektierend. Für: Potenzial, Motivation, neue Perspektiven, Selbstvertrauen.
+- Ava (ava-strategic, guest): Strategisch, entschlossen, organisiert. Für: Priorisierung, Planung, komplexe Entscheidungen, organisatorische Themen.
+- Kenji (kenji-stoic, premium): Stoisch, gelassen, weise. Für: Stress, Perspektivwechsel, innere Ruhe, philosophische Reflexion.
+- Chloe (chloe-cbt, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
+- Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotagemuster, emotionale Resilienz, innere Blockaden.
+- Victor (victor-bowen, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.`;
+
+const botRecommendationPrompts = {
+    schema: {
+        type: 'OBJECT',
+        properties: {
+            primary: {
+                type: 'OBJECT',
+                description: 'The best-fit coaching profile for the given topic.',
+                properties: {
+                    botId: { type: 'STRING', description: 'The exact bot ID (e.g., "ava-strategic", "chloe-cbt").' },
+                    botName: { type: 'STRING', description: 'The display name of the bot (e.g., "Ava", "Chloe").' },
+                    rationale: { type: 'STRING', description: 'A 1-2 sentence explanation why this bot is the best fit.' },
+                    examplePrompt: { type: 'STRING', description: 'A concrete, copy-paste-ready conversation starter for this topic.' },
+                    requiredTier: { type: 'STRING', description: 'The access tier required: "guest", "premium", or "client".' }
+                },
+                required: ['botId', 'botName', 'rationale', 'examplePrompt', 'requiredTier']
+            },
+            secondary: {
+                type: 'OBJECT',
+                description: 'An alternative coaching profile offering a different approach.',
+                properties: {
+                    botId: { type: 'STRING', description: 'The exact bot ID (e.g., "ava-strategic", "chloe-cbt").' },
+                    botName: { type: 'STRING', description: 'The display name of the bot (e.g., "Ava", "Chloe").' },
+                    rationale: { type: 'STRING', description: 'A 1-2 sentence explanation why this bot is an alternative.' },
+                    examplePrompt: { type: 'STRING', description: 'A concrete, copy-paste-ready conversation starter for this topic.' },
+                    requiredTier: { type: 'STRING', description: 'The access tier required: "guest", "premium", or "client".' }
+                },
+                required: ['botId', 'botName', 'rationale', 'examplePrompt', 'requiredTier']
+            }
+        },
+        required: ['primary', 'secondary']
+    },
+    en: {
+        prompt: ({ topic }) => `You are a coaching advisor matching a user's topic to the most suitable coaching profile.
+
+The user described their situation or topic as:
+"${topic}"
+
+Based on this, recommend:
+1. The PRIMARY coaching profile that best matches the topic
+2. A SECONDARY coaching profile offering an alternative approach
+
+**Available Coaching Profiles:**
+${BOT_CATALOG_EN}
+
+For each, provide:
+- The exact botId
+- The bot display name
+- A 1-2 sentence rationale why this bot fits
+- A concrete, copy-paste-ready conversation starter the user could use to begin a session on this topic
+- The required access tier ("guest", "premium", or "client")
+
+Primary and secondary must be different bots. Write rationale and examplePrompt in English.`
+    },
+    de: {
+        prompt: ({ topic }) => `Du bist ein Coaching-Berater, der die Situation eines Nutzers dem passendsten Coaching-Profil zuordnet.
+
+Der Nutzer hat seine Situation oder sein Thema so beschrieben:
+"${topic}"
+
+Empfehle basierend darauf:
+1. Das PRIMÄRE Coaching-Profil, das am besten passt
+2. Ein SEKUNDÄRES Coaching-Profil als alternativen Ansatz
+
+**Verfügbare Coaching-Profile:**
+${BOT_CATALOG_DE}
+
+Für jedes Profil gib an:
+- Die exakte botId
+- Den Anzeigenamen des Bots
+- Eine 1-2-Satz-Begründung, warum dieser Bot passt
+- Einen konkreten, kopierfertigen Gesprächseinstieg für das Thema
+- Die benötigte Zugangsstufe ("guest", "premium", oder "client")
+
+Primary und Secondary müssen unterschiedliche Bots sein. Schreibe rationale und examplePrompt auf Deutsch.`
+    }
+};
+
 module.exports = {
     analysisPrompts,
     interviewFormattingPrompts,
     getInterviewTemplate,
     transcriptEvaluationPrompts,
+    botRecommendationPrompts,
 };
