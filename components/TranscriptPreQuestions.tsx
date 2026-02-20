@@ -45,15 +45,13 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
 
     return (
         <div className="max-w-2xl mx-auto px-4 py-6">
-            <button
-                onClick={onBack}
-                className="mb-4 text-sm text-content-secondary hover:text-content-primary transition-colors"
-            >
-                ← {t('te_input_back')}
-            </button>
-
-            <div className="flex items-center justify-between mb-2">
-                <h2 className="text-2xl font-bold text-content-primary">{t('te_pre_title')}</h2>
+            <div className="flex items-center justify-between mb-4">
+                <button
+                    onClick={onBack}
+                    className="text-sm text-content-secondary hover:text-content-primary transition-colors"
+                >
+                    ← {t('te_input_back')}
+                </button>
                 {onHistory && (
                     <button
                         onClick={onHistory}
@@ -62,6 +60,10 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
                         {t('te_history_title')} →
                     </button>
                 )}
+            </div>
+
+            <div className="mb-2">
+                <h2 className="text-2xl font-bold text-content-primary">{t('te_pre_title')}</h2>
             </div>
             <p className="text-content-secondary mb-8">{t('te_pre_subtitle')}</p>
 
@@ -142,10 +144,15 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
                                 }`}
                             >
                                 <div className="text-lg mb-1">{value}</div>
-                                <div className="text-xs leading-tight">{satisfactionLabels[value - 1]}</div>
+                                <div className="text-xs leading-tight hidden sm:block">{satisfactionLabels[value - 1]}</div>
                             </button>
                         ))}
                     </div>
+                    {satisfaction > 0 && (
+                        <p className="text-xs text-center text-content-secondary mt-2 sm:hidden">
+                            {satisfaction} – {satisfactionLabels[satisfaction - 1]}
+                        </p>
+                    )}
                 </div>
 
                 {/* Question 5: Difficult (optional) */}
