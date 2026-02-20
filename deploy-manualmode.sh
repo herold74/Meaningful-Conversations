@@ -252,6 +252,27 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo ""
     fi
 
+    # Re-tag TTS image when using -c app (TTS not rebuilt but compose needs matching version tag)
+    if [[ "$COMPONENT" == "app" ]]; then
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        TTS_LATEST="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "${YELLOW}[DRY RUN]${NC} Would re-tag TTS image: $TTS_LATEST → $TTS_IMAGE"
+        else
+            if podman image exists "$TTS_IMAGE" 2>/dev/null; then
+                echo -e "${GREEN}✓ TTS image already tagged for $VERSION${NC}"
+            elif podman image exists "$TTS_LATEST" 2>/dev/null; then
+                echo -e "${YELLOW}Re-tagging TTS image: latest → $VERSION${NC}"
+                podman tag "$TTS_LATEST" "$TTS_IMAGE"
+                echo -e "${GREEN}✓ TTS image re-tagged to $VERSION${NC}"
+            else
+                echo -e "${YELLOW}⚠ No local TTS image found — will rely on registry${NC}"
+            fi
+        fi
+        echo ""
+    fi
+
 else
     echo -e "${YELLOW}⏭️  Skipping build phase${NC}"
     echo ""
@@ -322,6 +343,20 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
             podman push "$FRONTEND_IMAGE"
             podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
             echo -e "${GREEN}✓ Frontend image pushed${NC}"
+        fi
+        echo ""
+    fi
+
+    # Push re-tagged TTS image when using -c app
+    if [[ "$COMPONENT" == "app" ]]; then
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "${YELLOW}[DRY RUN]${NC} Would push re-tagged TTS: $TTS_IMAGE"
+        elif podman image exists "$TTS_IMAGE" 2>/dev/null; then
+            echo -e "${YELLOW}Pushing re-tagged TTS image...${NC}"
+            podman push "$TTS_IMAGE"
+            echo -e "${GREEN}✓ TTS image pushed (re-tagged)${NC}"
         fi
         echo ""
     fi
