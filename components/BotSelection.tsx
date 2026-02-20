@@ -203,7 +203,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 {/* Top row: 🔍 left | gray input box [textarea | mic | send] */}
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-[1.3rem] leading-none flex-shrink-0 opacity-60">🔍</span>
-                    <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
+                    <div className="flex-1 flex items-center gap-1 px-2 py-1.5 bg-background-tertiary border border-border-secondary rounded-lg">
                         {!isLoggedIn ? (
                             <p className="flex-1 text-sm text-content-secondary py-1">
                                 {t('botSearch_login_hint')}
