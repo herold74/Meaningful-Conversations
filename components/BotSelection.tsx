@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
+import { recommendBotForTopic } from '../services/geminiService';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import Spinner from './shared/Spinner';
@@ -11,6 +12,7 @@ interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
   onUpgrade?: () => void;
+  onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
@@ -25,6 +27,203 @@ interface BotCardProps {
   coachingMode?: CoachingMode;
   isClientOnly?: boolean;
 }
+
+interface TopicSearchProps {
+    bots: BotWithAvailability[];
+    onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
+    onUpgrade?: () => void;
+    currentUser: User | null;
+    language: Language;
+}
+
+const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, currentUser, language }) => {
+    const { t } = useLocalization();
+    const [topic, setTopic] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [recommendation, setRecommendation] = useState<{ primary: BotRecommendationEntry; secondary: BotRecommendationEntry } | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const resultRef = useRef<HTMLDivElement>(null);
+
+    const isLoggedIn = !!currentUser;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!topic.trim() || isLoading) return;
+        setIsLoading(true);
+        setError(null);
+        setRecommendation(null);
+        try {
+            const result = await recommendBotForTopic(topic.trim(), language);
+            setRecommendation(result);
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+        } catch {
+            setError(language === 'de' ? 'Empfehlung konnte nicht geladen werden. Bitte versuche es erneut.' : 'Could not load recommendation. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCopy = (text: string, id: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
+        });
+    };
+
+    const isBotAvailable = (botId: string) => {
+        const found = bots.find(b => b.id === botId);
+        return found?.isAvailable ?? false;
+    };
+
+    const getTierLabel = (tier: string) => {
+        if (tier === 'premium') return 'Premium';
+        if (tier === 'client') return language === 'de' ? 'Klient' : 'Client';
+        return tier;
+    };
+
+    const renderRecCard = (rec: BotRecommendationEntry, label: string, cardId: string) => {
+        const available = isBotAvailable(rec.botId);
+        const tierLabel = getTierLabel(rec.requiredTier);
+        const isCopied = copiedId === cardId;
+        const isPrimary = cardId === 'primary';
+
+        return (
+            <div className={`rounded-lg border p-4 flex flex-col ${available ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' : 'border-border-primary dark:border-border-primary bg-background-secondary/50 dark:bg-background-secondary/20'}`}>
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold uppercase tracking-wide ${isPrimary ? 'text-accent-primary' : 'text-content-tertiary'}`}>
+                            {label}
+                        </span>
+                        <span className="text-sm font-bold text-content-primary">{rec.botName}</span>
+                    </div>
+                    {available ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            {language === 'de' ? 'Verfügbar' : 'Available'}
+                        </span>
+                    ) : (
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${rec.requiredTier === 'client' ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30' : 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            {tierLabel}
+                        </span>
+                    )}
+                </div>
+                <p className="text-sm text-content-secondary mb-3 leading-relaxed">{rec.rationale}</p>
+                <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-border-primary dark:border-border-primary p-3 flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">{language === 'de' ? 'Gesprächseinstieg' : 'Conversation starter'}</p>
+                    <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
+                    <div className="flex items-center justify-between pt-1">
+                        <button
+                            type="button"
+                            onClick={() => handleCopy(rec.examplePrompt, cardId)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors"
+                        >
+                            {isCopied ? (
+                                <>
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                    {t('botSearch_copied')}
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                    {t('botSearch_copy_prompt')}
+                                </>
+                            )}
+                        </button>
+                        {available && onStartSessionWithPrompt ? (
+                            <button
+                                type="button"
+                                onClick={() => onStartSessionWithPrompt(rec.botId, rec.examplePrompt)}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-white bg-accent-primary hover:bg-accent-primary/90 px-3 py-1.5 rounded-md shadow-sm transition-colors"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                {t('botSearch_start_session')}
+                            </button>
+                        ) : !available && onUpgrade ? (
+                            <button
+                                type="button"
+                                onClick={onUpgrade}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-content-secondary hover:text-content-primary px-3 py-1.5 rounded-md border border-border-primary transition-colors"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                {t('botSearch_locked')}
+                            </button>
+                        ) : null}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="w-full max-w-4xl mx-auto mb-10">
+            {/* Section Header */}
+            <div className="mb-4">
+                <div className="flex items-center gap-4">
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/30 to-transparent"></div>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
+                        <span className="text-lg">🔍</span>
+                        <div className="text-center">
+                            <div className="text-sm font-semibold text-accent-primary dark:text-accent-primary">
+                                {t('botSearch_section_title')}
+                            </div>
+                            <div className="text-xs text-accent-primary/70 dark:text-accent-primary/70">
+                                {t('botSearch_section_desc')}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/30 to-transparent"></div>
+                </div>
+            </div>
+
+            {!isLoggedIn ? (
+                <p className="text-sm text-content-secondary text-center py-3 px-4 bg-background-secondary/50 dark:bg-background-secondary/20 rounded-lg border border-border-primary">
+                    {t('botSearch_login_hint')}
+                </p>
+            ) : (
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                    <textarea
+                        value={topic}
+                        onChange={e => setTopic(e.target.value)}
+                        placeholder={t('botSearch_placeholder')}
+                        rows={2}
+                        className="flex-1 resize-none px-4 py-3 rounded-lg border border-border-primary bg-background-secondary dark:bg-background-secondary/30 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-colors text-sm leading-relaxed"
+                        onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
+                    />
+                    <button
+                        type="submit"
+                        disabled={!topic.trim() || isLoading}
+                        className="sm:self-end px-5 py-3 rounded-lg bg-accent-primary text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-primary/90 transition-colors shadow-sm whitespace-nowrap flex items-center gap-2"
+                    >
+                        {isLoading ? (
+                            <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                {t('botSearch_loading')}
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.5 3.5 0 01-4.95 0l-.347-.347z" /></svg>
+                                {t('botSearch_button')}
+                            </>
+                        )}
+                    </button>
+                </form>
+            )}
+
+            {error && (
+                <p className="mt-3 text-sm text-status-error-foreground text-center">{error}</p>
+            )}
+
+            {recommendation && (
+                <div ref={resultRef} className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+                    {renderRecCard(recommendation.primary, t('botSearch_result_primary'), 'primary')}
+                    {renderRecCard(recommendation.secondary, t('botSearch_result_secondary'), 'secondary')}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
     const { t } = useLocalization();
@@ -132,7 +331,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, currentUser, hasPersonalityProfile, coachingMode }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -249,6 +448,14 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         {t('botSelection_subtitle')}
         </p>
       </div>
+
+      <TopicSearchSection
+        bots={bots}
+        onStartSessionWithPrompt={onStartSessionWithPrompt}
+        onUpgrade={onUpgrade}
+        currentUser={currentUser}
+        language={language}
+      />
 
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}

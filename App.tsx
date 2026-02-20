@@ -1354,6 +1354,7 @@ const App: React.FC = () => {
                         setView('transcriptEval');
                     }}
                     onUpgrade={() => setMenuView('upgrade')}
+                    onStartSessionWithPrompt={handleStartSessionFromEval}
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={currentUser?.coachingMode || 'off'}
