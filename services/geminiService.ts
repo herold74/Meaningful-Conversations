@@ -65,6 +65,7 @@ export const analyzeSession = async (
         
         const hasConversationalEnd: boolean = response && typeof response.hasConversationalEnd === 'boolean' ? response.hasConversationalEnd : false;
         const hasAccomplishedGoal: boolean = response && typeof response.hasAccomplishedGoal === 'boolean' ? response.hasAccomplishedGoal : false;
+        const hasSessionGoalAchieved: boolean = response && typeof response.hasSessionGoalAchieved === 'boolean' ? response.hasSessionGoalAchieved : false;
 
         const blockageCount = solutionBlockages.length;
         let blockageScore = 0;
@@ -74,7 +75,7 @@ export const analyzeSession = async (
         else if (blockageCount === 4) blockageScore = 8;
         else if (blockageCount >= 5) blockageScore = 10;
 
-        return { newFindings, proposedUpdates, nextSteps, completedSteps, accomplishedGoals, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal };
+        return { newFindings, proposedUpdates, nextSteps, completedSteps, accomplishedGoals, solutionBlockages, blockageScore, hasConversationalEnd, hasAccomplishedGoal, hasSessionGoalAchieved };
 
     } catch (error) {
         console.error("Error analyzing session via backend:", error);
@@ -88,6 +89,7 @@ export const analyzeSession = async (
             blockageScore: 0,
             hasConversationalEnd: false,
             hasAccomplishedGoal: false,
+            hasSessionGoalAchieved: false,
         };
     }
 };

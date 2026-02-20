@@ -764,6 +764,7 @@ const App: React.FC = () => {
                     blockageScore: 0,
                     hasConversationalEnd: true,
                     hasAccomplishedGoal: false,
+                    hasSessionGoalAchieved: false,
                 });
                 // Do not change gamification state for an interview session
                 setNewGamificationState(gamificationState);
@@ -782,6 +783,7 @@ const App: React.FC = () => {
                     blockageScore: 0,
                     hasConversationalEnd: false,
                     hasAccomplishedGoal: false,
+                    hasSessionGoalAchieved: false,
                 });
                 setTempContext('');
                 setNewGamificationState(gamificationState);
@@ -935,6 +937,7 @@ const App: React.FC = () => {
                 blockageScore: 0,
                 hasConversationalEnd: false,
                 hasAccomplishedGoal: false,
+                hasSessionGoalAchieved: false,
             };
             setSessionAnalysis(fallbackAnalysis);
             const messageCount = isTestMode ? chatHistory.length : userMessageCount;
@@ -1127,6 +1130,7 @@ const App: React.FC = () => {
             blockageScore: 0,
             hasConversationalEnd: withConversationalEnd,
             hasAccomplishedGoal: false,
+            hasSessionGoalAchieved: false,
         };
 
         // Mock ChatHistory (realistic DPFL session)

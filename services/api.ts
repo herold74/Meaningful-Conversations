@@ -281,7 +281,6 @@ export const submitSessionLog = async (data: {
     body: JSON.stringify({
       sessionId: data.sessionId,
       frequencies
-      // encryptedTranscript removed - not stored anymore
     })
   });
   
@@ -296,8 +295,8 @@ export const submitSessionLog = async (data: {
       headers: getAuthHeaders(),
       body: JSON.stringify({
         sessionId: data.sessionId,
-        comfortScore: data.comfortScore,
-        optedOut: false
+        score: data.comfortScore,
+        optOut: false
       })
     });
     

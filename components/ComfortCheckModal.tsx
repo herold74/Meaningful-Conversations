@@ -25,27 +25,9 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
   const [comfortScore, setComfortScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Only show if DPFL mode and encryption key available
-  // Use useEffect to avoid setState during render
   useEffect(() => {
-    // #region agent log
-    console.log('[COMFORT-MODAL] useEffect check:', {
-      coachingMode,
-      hasEncryptionKey: !!encryptionKey,
-      willClose: coachingMode !== 'dpfl' || !encryptionKey
-    });
-    // #endregion
-    
     if (coachingMode !== 'dpfl' || !encryptionKey) {
-      // #region agent log
-      console.log('[COMFORT-MODAL] Closing immediately - conditions not met');
-      // #endregion
-      // Silently skip comfort check
       onComplete();
-    } else {
-      // #region agent log
-      console.log('[COMFORT-MODAL] ✓ All conditions met - modal will render');
-      // #endregion
     }
   }, [coachingMode, encryptionKey, onComplete]);
 
@@ -71,11 +53,8 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         encryptionKey,
         language: language as 'de' | 'en'
       });
-
       onComplete();
     } catch (error) {
-      console.error('[DPFL] Failed to submit comfort check:', error);
-      // Don't block user - complete anyway
       onComplete();
     } finally {
       setIsSubmitting(false);
@@ -136,6 +115,16 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
+            onClick={() => handleSubmit(true)}
+            disabled={isSubmitting}
+            variant="secondary"
+            size="md"
+            className="flex-1"
+          >
+            {t('comfort_check_skip') || 'Überspringen'}
+          </Button>
+
+          <Button
             onClick={() => handleSubmit(false)}
             disabled={comfortScore === null || comfortScore < 3 || isSubmitting}
             loading={isSubmitting}
@@ -145,16 +134,6 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
             {isSubmitting 
               ? (t('comfort_check_submitting') || 'Saving...') 
               : (t('comfort_check_accept') || 'Übernehmen')}
-          </Button>
-
-          <Button
-            onClick={() => handleSubmit(true)}
-            disabled={isSubmitting}
-            variant="secondary"
-            size="md"
-            className="flex-1"
-          >
-            {t('comfort_check_skip') || 'Überspringen'}
           </Button>
         </div>
 

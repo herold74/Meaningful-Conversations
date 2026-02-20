@@ -124,6 +124,7 @@ export interface SessionAnalysis {
     blockageScore: number;
     hasConversationalEnd: boolean;
     hasAccomplishedGoal: boolean;
+    hasSessionGoalAchieved: boolean;
 }
 
 export interface Achievement {

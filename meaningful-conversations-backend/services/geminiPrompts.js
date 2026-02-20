@@ -94,9 +94,13 @@ const analysisSchema = {
         hasAccomplishedGoal: { 
             type: 'BOOLEAN', 
             description: 'Set to true ONLY if the user explicitly mentioned accomplishing a specific goal that was previously stated in their life context file.' 
+        },
+        hasSessionGoalAchieved: {
+            type: 'BOOLEAN',
+            description: 'Set to true if the session goal agreed upon between the coach and user during this conversation was substantially addressed or achieved. This means the coach explicitly summarized or confirmed that the topic/problem the user wanted to work on today was worked through (e.g., "We have explored...", "You now have concrete steps for...", "We have successfully worked on..."). Set to false if the session ended without the agreed topic being addressed, or if no clear session goal was established.'
         }
     },
-    required: ['summary', 'updates', 'nextSteps', 'completedSteps', 'accomplishedGoals', 'solutionBlockages', 'hasConversationalEnd', 'hasAccomplishedGoal']
+    required: ['summary', 'updates', 'nextSteps', 'completedSteps', 'accomplishedGoals', 'solutionBlockages', 'hasConversationalEnd', 'hasAccomplishedGoal', 'hasSessionGoalAchieved']
 };
 
 const analysisPrompts = {

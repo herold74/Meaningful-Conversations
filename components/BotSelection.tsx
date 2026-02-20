@@ -5,8 +5,11 @@ import { getBots } from '../services/userService';
 import { recommendBotForTopic } from '../services/geminiService';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
+import { MicrophoneIcon } from './icons/MicrophoneIcon';
+import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import { speechService } from '../services/capacitorSpeechService';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -42,13 +45,27 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     const [isLoading, setIsLoading] = useState(false);
     const [recommendation, setRecommendation] = useState<{ primary: BotRecommendationEntry; secondary: BotRecommendationEntry } | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isListening, setIsListening] = useState(false);
+    const baseTranscriptRef = useRef('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const resultRef = useRef<HTMLDivElement>(null);
+    const topicTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (topicTextareaRef.current) {
+            topicTextareaRef.current.style.height = 'auto';
+            topicTextareaRef.current.style.height = `${topicTextareaRef.current.scrollHeight}px`;
+        }
+    }, [topic]);
 
     const isLoggedIn = !!currentUser;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isListening) {
+            await speechService.stop();
+            setIsListening(false);
+        }
         if (!topic.trim() || isLoading) return;
         setIsLoading(true);
         setError(null);
@@ -61,6 +78,27 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             setError(language === 'de' ? 'Empfehlung konnte nicht geladen werden. Bitte versuche es erneut.' : 'Could not load recommendation. Please try again.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleMic = async () => {
+        if (isListening) {
+            await speechService.stop();
+            setIsListening(false);
+        } else {
+            baseTranscriptRef.current = topic.trim() ? topic.trim() + ' ' : '';
+            await speechService.start(
+                { language: language === 'de' ? 'de-DE' : 'en-US', interimResults: true },
+                (result) => setTopic(baseTranscriptRef.current + result.transcript),
+                (error) => {
+                    setIsListening(false);
+                    if (error.message === 'microphone_permission_denied') {
+                        alert(t('microphone_permission_denied') || 'Microphone access denied.');
+                    }
+                },
+                () => setIsListening(true),
+                () => setIsListening(false)
+            );
         }
     };
 
@@ -161,19 +199,19 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             {/* Section Header */}
             <div className="mb-4">
                 <div className="flex items-center gap-4">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/30 to-transparent"></div>
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
                         <span className="text-lg">🔍</span>
                         <div className="text-center">
-                            <div className="text-sm font-semibold text-accent-primary dark:text-accent-primary">
+                            <div className="text-sm font-semibold text-accent-tertiary dark:text-accent-primary">
                                 {t('botSearch_section_title')}
                             </div>
-                            <div className="text-xs text-accent-primary/70 dark:text-accent-primary/70">
+                            <div className="text-xs text-accent-tertiary/80 dark:text-accent-primary/70">
                                 {t('botSearch_section_desc')}
                             </div>
                         </div>
                     </div>
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/30 to-transparent"></div>
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
                 </div>
             </div>
 
@@ -182,31 +220,34 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                     {t('botSearch_login_hint')}
                 </p>
             ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                <form onSubmit={handleSubmit} className="flex items-end gap-3">
                     <textarea
+                        ref={topicTextareaRef}
                         value={topic}
                         onChange={e => setTopic(e.target.value)}
                         placeholder={t('botSearch_placeholder')}
-                        rows={2}
-                        className="flex-1 resize-none px-4 py-3 rounded-lg border border-border-primary bg-background-secondary dark:bg-background-secondary/30 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-colors text-sm leading-relaxed"
+                        rows={1}
+                        className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
                         onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                     />
                     <button
+                        type="button"
+                        onClick={handleMic}
+                        className="p-2 text-content-secondary hover:text-content-primary"
+                        aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}
+                    >
+                        <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+                    </button>
+                    <button
                         type="submit"
                         disabled={!topic.trim() || isLoading}
-                        className="sm:self-end px-5 py-3 rounded-lg bg-accent-primary text-white font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-primary/90 transition-colors shadow-sm whitespace-nowrap flex items-center gap-2"
+                        className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg"
+                        aria-label={t('botSearch_button')}
                     >
-                        {isLoading ? (
-                            <>
-                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                                {t('botSearch_loading')}
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.5 3.5 0 01-4.95 0l-.347-.347z" /></svg>
-                                {t('botSearch_button')}
-                            </>
-                        )}
+                        {isLoading
+                            ? <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            : <PaperPlaneIcon className="w-6 h-6" />
+                        }
                     </button>
                 </form>
             )}
@@ -275,7 +316,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         {/* Coaching Mode Badge (non-interactive) - Text badge in top right */}
         {showCoachingBadge && (
           <div 
-            className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold"
+            className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40 text-accent-tertiary dark:text-accent-primary text-xs font-bold"
             title={`${t('profile_coaching_mode_title')}: ${effectiveCoachingMode?.toUpperCase()}`}
           >
             {effectiveCoachingMode?.toUpperCase()}
@@ -449,13 +490,15 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         </p>
       </div>
 
-      <TopicSearchSection
-        bots={bots}
-        onStartSessionWithPrompt={onStartSessionWithPrompt}
-        onUpgrade={onUpgrade}
-        currentUser={currentUser}
-        language={language}
-      />
+      {currentUser && (
+        <TopicSearchSection
+          bots={bots}
+          onStartSessionWithPrompt={onStartSessionWithPrompt}
+          onUpgrade={onUpgrade}
+          currentUser={currentUser}
+          language={language}
+        />
+      )}
 
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}
