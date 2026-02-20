@@ -1484,13 +1484,22 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [bot.id, isNewSession]);
   
   useEffect(() => {
-      if (chatHistory.length === 1 && 
-          chatHistory[0].role === 'bot' && 
-          voices.length > 0 && 
-          isTtsEnabled && 
+      const lastMsg = chatHistory[chatHistory.length - 1];
+      const isInitialBotResponse =
+          lastMsg?.role === 'bot' &&
+          (chatHistory.length === 1 ||
+          (chatHistory.length === 2 && chatHistory[0].role === 'user'));
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f8fa79'},body:JSON.stringify({sessionId:'f8fa79',location:'ChatView.tsx:ttsFirstMsg',message:'TTS first-msg check',data:{historyLen:chatHistory.length,lastRole:lastMsg?.role,firstRole:chatHistory[0]?.role,isInitialBotResponse,isTtsEnabled,voicesLoaded:voices.length>0,alreadySpoken:hasSpokenFirstMessageRef.current,willSpeak:isInitialBotResponse&&voices.length>0&&isTtsEnabled&&!hasSpokenFirstMessageRef.current},timestamp:Date.now(),hypothesisId:'TTS-INIT'})}).catch(()=>{});
+      // #endregion
+
+      if (isInitialBotResponse &&
+          voices.length > 0 &&
+          isTtsEnabled &&
           !hasSpokenFirstMessageRef.current) {
         hasSpokenFirstMessageRef.current = true;
-        speak(chatHistory[0].text);
+        speak(lastMsg.text);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatHistory, voices, isTtsEnabled]);

@@ -141,6 +141,28 @@ const audioTranscribeLimiter = rateLimit({
 });
 
 /**
+ * Bot recommendation rate limiter - Prevents Gemini cost abuse
+ * 10 requests per 10 minutes per user (keyed by user ID)
+ */
+const botRecommendationLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 10,
+    keyGenerator: (req) => `bot_rec_${req.userId || req.ip}`,
+    message: { 
+        error: 'Too many recommendation requests. Please wait a moment.',
+        errorCode: 'RATE_LIMIT_BOT_RECOMMENDATION'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: false,
+    handler: (req, res, next, options) => {
+        const identifier = req.userId ? `user ${req.userId}` : `IP ${req.ip}`;
+        console.warn(`🚫 Bot recommendation rate limit exceeded for ${identifier}`);
+        res.status(429).json(options.message);
+    },
+});
+
+/**
  * Purchase rate limiter - Prevents order-creation abuse
  * 10 requests per hour per user
  */
@@ -169,5 +191,6 @@ module.exports = {
     verifyEmailLimiter,
     geminiLimiter,
     audioTranscribeLimiter,
+    botRecommendationLimiter,
     purchaseLimiter
 };
