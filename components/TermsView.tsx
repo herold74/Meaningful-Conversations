@@ -24,7 +24,9 @@ Der Dienst bietet Zugang zu KI-gesteuerten Coaching-Gesprächen, die zur Selbstr
 Sie stimmen zu, den Dienst nicht für rechtswidrige Zwecke zu nutzen. Sie sind während und außerhalb der Coaching-Einheiten in jeder Phase der Arbeit mit der Anwendung **eigenverantwortlich**. Sie sind für Ihre körperliche und geistige Gesundheit sowie Ihr Wohlbefinden in vollem Umfang selbst verantwortlich. Sämtliche Maßnahmen, die Sie aufgrund des Coachings durchführen, liegen in Ihrem alleinigen Verantwortungsbereich.
 
 ## 4. Dienstverfügbarkeit und Änderungen
-Wir behalten uns das Recht vor, den Dienst oder einzelne Funktionen jederzeit ohne Vorankündigung zu ändern oder einzustellen. Die gesetzliche Gewährleistung für die **Funktionalität der Anwendung** (wie im Handbuch beschrieben) bleibt hiervon unberührt.
+Wir behalten uns das Recht vor, den Dienst oder einzelne Funktionen jederzeit zu ändern oder einzustellen. Die gesetzliche Gewährleistung für die **Funktionalität der Anwendung** (wie im Handbuch beschrieben) bleibt hiervon unberührt.
+
+**Hinweis zu Lifetime-Käufen:** Der Begriff „lebenslang" bzw. „Lifetime" bezieht sich auf die Betriebsdauer des Dienstes, nicht auf die biologische Lebensdauer des Nutzers. Sollte der Dienst dauerhaft eingestellt werden, werden Inhaber eines Lifetime-Zugangs mindestens **6 Monate im Voraus** informiert. In diesem Fall wird eine anteilige Rückerstattung des Kaufpreises geprüft, sofern der Dienst weniger als 3 Jahre nach dem jeweiligen Kauf eingestellt wird.
 
 ## 5. Änderungen der Bedingungen
 Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Wir werden Sie über alle Änderungen informieren, indem wir die neuen Bedingungen innerhalb des Dienstes veröffentlichen.
@@ -47,7 +49,9 @@ The Service provides access to AI-powered coaching conversations intended for se
 You agree not to use the Service for any unlawful purpose. You act **on your own responsibility** during and outside of coaching sessions at every stage of working with the application. You are fully responsible for your physical and mental health and well-being. All measures taken as a result of the coaching are solely your responsibility.
 
 ## 4. Service Availability and Modifications
-We reserve the right to modify or discontinue the Service, or any feature thereof, at any time without notice. The statutory warranty for the **functionality of the application** (as described in the user manual) remains unaffected.
+We reserve the right to modify or discontinue the Service, or any feature thereof, at any time. The statutory warranty for the **functionality of the application** (as described in the user manual) remains unaffected.
+
+**Note on Lifetime Purchases:** The term "lifetime" refers to the operational lifetime of the Service, not the biological lifetime of the user. Should the Service be permanently discontinued, holders of a Lifetime access will be notified at least **6 months in advance**. In such a case, a pro-rated refund of the purchase price will be considered if the Service is discontinued less than 3 years after the respective purchase.
 
 ## 5. Changes to Terms
 We reserve the right to modify these Terms at any time. We will notify you of any changes by posting the new Terms within the Service.
