@@ -124,6 +124,23 @@ After analysis (approx. 10-30 seconds), you'll receive a detailed report:
 - **Action**: Concrete action recommendation
 - **Rationale**: Why is this step important?
 
+#### 🤖 Coach Recommendations
+
+For each identified **development area**, the evaluation recommends a primary and an alternative coach best suited to help you with that specific topic.
+
+**For each recommendation you see:**
+- **Coach name** and a colored badge indicating whether the coach is available to you
+- **Rationale**: Why this coach fits your specific development area
+- **Conversation starter**: A ready-made sentence to begin the session directly on the topic
+
+**Copy the conversation starter:**
+Click **"Copy starter"** to copy the starter sentence to your clipboard — useful for manually starting a session or saving it for later.
+
+**Start session directly:**
+Click **"Start session"** — the app opens the recommended coach and automatically sends the suggested starter sentence as your first message. The conversation begins immediately on your specific development topic, with no searching or manual input required.
+
+> 💡 **Tip**: The "Start session" button is only shown for coaches matching your current access level. Coaches of a higher tier display an "Upgrade" button instead. Locked coaches are still visible in the PDF export, but the start button only appears after upgrading.
+
 ---
 
 ## 📄 PDF Export (Clients, Admins & Developers)
@@ -282,6 +299,40 @@ The exported PDF contains:
 
 ---
 
+## 🔍 Coach Recommendation: Find the Right Coach for Your Topic
+
+Directly on the **coach selection page** (the home page after logging in), you'll find a search field that uses AI to identify the best-fitting coach for your current situation — without manually comparing coaches.
+
+### How to Use the Search
+
+1. Log in and go to **Coach Selection**
+2. At the top of the page, you'll find the **"Coach Recommendation"** section with an input field
+3. Describe your situation or topic in your own words — as detailed or brief as you like
+   > Example: *"When I'm around people I'm close to, I sometimes feel so intimidated that I can't actively contribute. I want to understand what's happening."*
+4. Click **"Find coach"** (or press `Cmd/Ctrl + Enter`)
+5. The AI analyzes your topic and shows you:
+   - A **primary coach** (best match for your topic)
+   - An **alternative coach** (different approach to the same topic)
+   - For each: a rationale and a ready-made conversation starter
+
+### From Recommendation to Session
+
+| Button | What happens |
+|--------|-------------|
+| **"Start session"** | Opens the coach and sends the suggested starter as your first message — you begin immediately on your topic |
+| **"Copy starter"** | Copies the starter sentence to your clipboard for personal use |
+| **"Upgrade"** | Appears for coaches that require a higher access level |
+
+### Who Can Use the Search?
+
+- **Logged-in users** (all tiers): The recommendation feature is available to all registered users
+- **Guests**: See a sign-in prompt instead of the search field
+- **Start session**: Depends on the recommended coach and your access level (Guest / Premium / Client)
+
+> 💡 **Difference from Transcript Evaluation**: This search works without a transcript — you describe your topic freely, and the AI recommends the right coach. Transcript evaluation, on the other hand, analyzes a real conversation and recommends coaches based on development areas identified in that conversation.
+
+---
+
 ## 📞 Support
 
 For questions or issues:
@@ -292,6 +343,6 @@ For questions or issues:
 
 ---
 
-**Version:** 1.8.7  
-**Last Updated:** February 13, 2026  
-**Feature Available For:** Clients (Desktop Browser)
+**Version:** 1.9.3  
+**Last Updated:** February 20, 2026  
+**Feature Available For:** Clients (Desktop Browser) · Coach Recommendation: all registered users
