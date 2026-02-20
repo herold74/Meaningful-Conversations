@@ -435,24 +435,23 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             try {
               const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
               if (nativeVoices.length > 0) {
-                // Filter voices by bot gender
-                const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie', 
+                // Only consider enhanced/premium voices (skip low-quality default voices)
+                const qualityVoices = nativeVoices.filter(v => v.quality === 'premium' || v.quality === 'enhanced');
+                const pool = qualityVoices.length > 0 ? qualityVoices : nativeVoices;
+
+                // Gender soft-filter via known name patterns (Apple provides no gender metadata)
+                const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
                                      'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
                 const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
-                
-                const genderFilteredVoices = nativeVoices.filter(v => {
-                  const nameLower = v.name.toLowerCase();
-                  if (botGender === 'male') {
-                    return maleNames.some(n => nameLower.includes(n)) || !femaleNames.some(n => nameLower.includes(n));
-                  } else {
-                    return femaleNames.some(n => nameLower.includes(n)) || !maleNames.some(n => nameLower.includes(n));
-                  }
-                });
-                
-                const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : nativeVoices;
-                
-                // Pick best quality voice (premium > enhanced > default)
-                const bestVoice = candidateVoices.find(v => v.quality === 'premium') 
+                const targetNames = botGender === 'female' ? femaleNames : maleNames;
+                const oppositeNames = botGender === 'female' ? maleNames : femaleNames;
+
+                const genderMatched = pool.filter(v => targetNames.some(n => v.name.toLowerCase().includes(n)));
+                const notOpposite = genderMatched.length > 0 ? genderMatched
+                    : pool.filter(v => !oppositeNames.some(n => v.name.toLowerCase().includes(n)));
+                const candidateVoices = notOpposite.length > 0 ? notOpposite : pool;
+
+                const bestVoice = candidateVoices.find(v => v.quality === 'premium')
                                || candidateVoices.find(v => v.quality === 'enhanced')
                                || candidateVoices[0];
                 console.log('[TTS Init] Auto mode on native iOS - selected:', bestVoice.name, bestVoice.quality);

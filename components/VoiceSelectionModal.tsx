@@ -252,42 +252,37 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         );
     }, [botLanguage, botGender]);
 
-    // Filter native voices by language and gender
+    // Filter native voices: only enhanced/premium, by language, with gender soft-filter
     const filteredNativeVoices = useMemo(() => {
         if (!isNativeiOS || nativeVoices.length === 0) return [];
-        
-        // Map gender keywords for voice name detection
+
+        // Only show enhanced/premium voices (skip low-quality default voices)
+        let filtered = nativeVoices.filter(v =>
+            v.language.toLowerCase().startsWith(botLanguage.toLowerCase())
+            && (v.quality === 'premium' || v.quality === 'enhanced')
+        );
+
+        // Fallback: if no enhanced/premium voices exist, show all for the language
+        if (filtered.length === 0) {
+            filtered = nativeVoices.filter(v =>
+                v.language.toLowerCase().startsWith(botLanguage.toLowerCase())
+            );
+        }
+
+        // Gender soft-filter via known name patterns (Apple provides no gender metadata)
         const femaleKeywords = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie', 'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
         const maleKeywords = ['markus', 'viktor', 'martin', 'hans', 'yannick', 'conrad', 'daniel', 'jamie', 'alex', 'tom', 'aaron', 'arthur', 'fred'];
-        
-        // Filter by language
-        let filtered = nativeVoices.filter(v => 
-            v.language.toLowerCase().startsWith(botLanguage.toLowerCase())
-        );
-        
-        // Filter by gender based on name
         const targetKeywords = botGender === 'female' ? femaleKeywords : maleKeywords;
         const oppositeKeywords = botGender === 'female' ? maleKeywords : femaleKeywords;
-        
-        // First try: exact gender match
-        let genderFiltered = filtered.filter(v => {
-            const nameLower = v.name.toLowerCase();
-            return targetKeywords.some(kw => nameLower.includes(kw));
-        });
-        
-        // Second try: not opposite gender
+
+        let genderFiltered = filtered.filter(v => targetKeywords.some(kw => v.name.toLowerCase().includes(kw)));
         if (genderFiltered.length === 0) {
-            genderFiltered = filtered.filter(v => {
-                const nameLower = v.name.toLowerCase();
-                return !oppositeKeywords.some(kw => nameLower.includes(kw));
-            });
+            genderFiltered = filtered.filter(v => !oppositeKeywords.some(kw => v.name.toLowerCase().includes(kw)));
         }
-        
-        // Fallback: all voices for the language
         if (genderFiltered.length === 0) {
             genderFiltered = filtered;
         }
-        
+
         // Sort by quality (premium > enhanced > default), then by name
         return genderFiltered.sort((a, b) => {
             const qualityOrder = { premium: 0, enhanced: 1, default: 2 };
