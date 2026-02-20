@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry } from '../types';
 import { apiFetch } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
@@ -159,6 +159,16 @@ export const transcribeAudio = async (
     });
 
     return { transcript: response.transcript, speakerCount: response.speakerCount };
+};
+
+export const recommendBotForTopic = async (
+    topic: string,
+    lang: Language
+): Promise<{ primary: BotRecommendationEntry; secondary: BotRecommendationEntry }> => {
+    return await apiFetch('/gemini/bot-recommendation', {
+        method: 'POST',
+        body: JSON.stringify({ topic, lang }),
+    });
 };
 
 export const generateContextFromInterview = async (
