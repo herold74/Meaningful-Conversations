@@ -55,6 +55,7 @@ interface SessionReviewProps {
     blockageScore: number;
     hasConversationalEnd: boolean;
     hasAccomplishedGoal: boolean;
+    hasSessionGoalAchieved: boolean;
     originalContext: string;
     selectedBot: Bot;
     onContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
@@ -209,6 +210,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     blockageScore,
     hasConversationalEnd,
     hasAccomplishedGoal,
+    hasSessionGoalAchieved,
     originalContext,
     selectedBot,
     onContinueSession,
@@ -253,72 +255,33 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         new Set(nextSteps.map((_, index) => index))
     );
     
-    // Show comfort check for DPFL after EVERY completed session
-    // 
-    // IMPORTANT: Comfort Check is only shown when the session has a conversational end
-    // (hasConversationalEnd === true), which means the coaching session was completed
-    // with proper closure and goals were addressed. This aligns with XP rewards:
-    // - XP is awarded when hasConversationalEnd === true (+50 XP bonus)
-    // - Comfort Check appears under the same conditions
+    // Show comfort check for DPFL after substantive sessions.
     //
-    // This ensures that only substantive, properly concluded sessions are considered
-    // for profile refinement, not incomplete or abandoned conversations.
+    // A session qualifies if ANY of the following is true:
+    // - hasConversationalEnd: user explicitly said goodbye/thank you
+    // - hasSessionGoalAchieved: bot confirmed the session goal was addressed
+    // - userMessageCount > threshold: session was substantive (DEV: >3, PROD: >10)
     //
-    // This allows user to:
-    // 1. Rate session authenticity (1-5 scale)
-    // 2. Opt-out of using this session for profile refinement ("Skip" button)
-    // 
     // Sessions with score >= 3 and not opted-out are considered "authentic"
     // and used for profile refinement calculations.
-    // 
-    // Refinement is proposed after 2nd authentic session (if in adaptive mode).
-    // User can then accept or reject the suggested changes.
     //
     // Never shown for:
     // - Nobody bot (nexus-gps) - not a full coaching session
     // - Users without coachingMode === 'dpfl'
-    // - Sessions without conversational end (hasConversationalEnd === false)
     useEffect(() => {
-        // #region agent log
-        console.log('[SESSION-REVIEW] Comfort Check useEffect triggered:', {
-            currentUser: currentUser?.email,
-            coachingMode: currentUser?.coachingMode,
-            isTestMode,
-            hasRefinementPreview: !!refinementPreview,
-            selectedBot: selectedBot.id,
-            hasConversationalEnd
-        });
-        // #endregion
-        
         const isNobodyBot = selectedBot.id === 'nexus-gps';
         const isDPFLTest = isTestMode && refinementPreview && !isNobodyBot;
         const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode && !isNobodyBot;
-        
-        // #region agent log
-        console.log('[SESSION-REVIEW] Comfort Check conditions:', {
-            isNobodyBot,
-            isDPFLTest,
-            isDPFLProduction,
-            hasConversationalEnd
-        });
-        // #endregion
-        
-        // CRITICAL: Only show comfort check if session has conversational end
-        // This aligns with XP reward logic (hasConversationalEnd = +50 XP bonus)
-        const hasProperClosure = hasConversationalEnd;
-        
-        if ((isDPFLTest || isDPFLProduction) && hasProperClosure) {
-            // #region agent log
-            console.log('[SESSION-REVIEW] ✓ All conditions met - showing Comfort Check after 1s delay');
-            // #endregion
-            // Show comfort check after brief delay
+        const userMessageCount = chatHistory.filter(m => m.role === 'user').length;
+        const msgThreshold = import.meta.env.DEV ? 3 : 10;
+        const hasProperClosure = hasConversationalEnd || hasSessionGoalAchieved;
+        const isSubstantiveSession = userMessageCount > msgThreshold;
+        const qualifiesForComfortCheck = hasProperClosure || isSubstantiveSession;
+
+        if ((isDPFLTest || isDPFLProduction) && qualifiesForComfortCheck) {
             setTimeout(() => setShowComfortCheck(true), 1000);
-        } else {
-            // #region agent log
-            console.log('[SESSION-REVIEW] ✗ Conditions NOT met - Comfort Check will NOT show');
-            // #endregion
         }
-    }, [currentUser?.coachingMode, isTestMode, refinementPreview, selectedBot.id, hasConversationalEnd]);
+    }, [currentUser?.coachingMode, isTestMode, refinementPreview, selectedBot.id, hasConversationalEnd, hasSessionGoalAchieved, chatHistory]);
 
     // Toggle individual next step selection
     const toggleNextStep = (index: number) => {

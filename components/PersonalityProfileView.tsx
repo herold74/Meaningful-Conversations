@@ -669,7 +669,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
     });
   };
 
-  const chipBase = 'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium';
+  const chipBase = 'inline-flex items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium w-full text-center';
   const chipMuted = `${chipBase} bg-background-secondary text-content-tertiary border-border-secondary dark:border-border-primary`;
   const chipMutedInteractive = `${chipMuted} opacity-70 hover:opacity-100 hover:bg-background-tertiary hover:text-content-primary transition-colors`;
   // Fall-inspired color palette
@@ -678,32 +678,37 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const chipTeal = `${chipBase} bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-300/70 dark:border-teal-700/60`;  // What Defines You - grounded depth
 
   const coachingSelectBase =
-    'px-3 py-1.5 text-sm font-semibold rounded-lg border bg-background-secondary dark:bg-background-secondary/60 cursor-pointer transition-colors appearance-none bg-no-repeat bg-right pr-8 flex-shrink-0 self-start sm:self-auto';
+    'px-3 py-1.5 text-sm font-semibold rounded-lg border cursor-pointer transition-colors appearance-none bg-no-repeat bg-right pr-8 flex-shrink-0';
   const coachingSelectState =
     currentCoachingMode === 'off'
-      ? 'border-border-secondary text-content-tertiary'
-      : currentCoachingMode === 'dpc'
-      ? 'border-blue-400 text-blue-700 dark:text-blue-300'
-      : 'border-green-500 text-green-700 dark:text-green-300';
+      ? 'bg-background-secondary dark:bg-background-secondary/60 border-border-secondary text-content-tertiary'
+      : 'bg-background-secondary dark:bg-background-secondary/60 border-accent-primary/50 text-accent-tertiary dark:text-accent-primary';
 
   return (
     <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
       <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
         {/* Compact Header - Option A: Integrated with Dropdown */}
         <div className="mb-6 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <h2 className="text-2xl font-bold text-content-primary text-center sm:text-left">
-              {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
-            </h2>
-            {/* Coaching Mode Dropdown */}
-            <select
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            {/* Left: title + created date */}
+            <div className="flex flex-col gap-1 min-w-0">
+              <h2 className="text-2xl font-bold text-content-primary">
+                {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
+              </h2>
+              <span className="text-xs text-content-secondary">
+                {t('profile_view_created') || 'Erstellt'}: {formatDate(profileMetadata.createdAt)}
+              </span>
+            </div>
+            {/* Right: coaching mode dropdown + session metadata – always grouped */}
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <select
                 value={currentCoachingMode}
                 onChange={(e) => handleCoachingModeChange(e.target.value as 'off' | 'dpc' | 'dpfl')}
                 disabled={isUpdatingCoachingMode}
                 className={`${coachingSelectBase} ${coachingSelectState} ${isUpdatingCoachingMode ? 'opacity-50 cursor-wait' : ''}`}
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1.25rem', backgroundPosition: 'right 0.5rem center' }}
                 title={
-                  currentCoachingMode === 'off' 
+                  currentCoachingMode === 'off'
                     ? (t('profile_coaching_mode_off_desc') || 'Klassisches Coaching')
                     : currentCoachingMode === 'dpc'
                     ? (t('profile_coaching_mode_dpc_desc') || 'Profil wird genutzt')
@@ -716,28 +721,27 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   {isPremiumOrHigher ? 'DPFL' : `🔒 DPFL (${t('feature_requires_premium') || 'Premium'})`}
                 </option>
               </select>
-          </div>
-          {/* Compact metadata line */}
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-content-secondary mt-3">
-            <span>{t('profile_view_created') || 'Erstellt'}: {formatDate(profileMetadata.createdAt)}</span>
-            <div className="flex items-center gap-x-4">
-              {profileMetadata.sessionCount > 0 && (
-                <span className="text-green-600 dark:text-green-400">
-                  ✓ {profileMetadata.sessionCount} {profileMetadata.sessionCount === 1 
-                    ? (t('profile_session_singular') || 'Session') 
-                    : (t('profile_session_plural') || 'Sessions')}
-                </span>
-              )}
-              {profileMetadata.updatedAt && profileMetadata.updatedAt !== profileMetadata.createdAt && (
-                <span className="text-green-600 dark:text-green-400">
-                  {t('profile_view_updated') || 'Aktualisiert'}: {formatDate(profileMetadata.updatedAt)}
-                </span>
+              {(profileMetadata.sessionCount > 0 || (profileMetadata.updatedAt && profileMetadata.updatedAt !== profileMetadata.createdAt)) && (
+                <div className="flex flex-col items-end gap-0.5 text-xs text-accent-tertiary dark:text-accent-primary">
+                  {profileMetadata.sessionCount > 0 && (
+                    <span>
+                      ✓ {profileMetadata.sessionCount} {profileMetadata.sessionCount === 1
+                        ? (t('profile_session_singular') || 'Session')
+                        : (t('profile_session_plural') || 'Sessions')}
+                    </span>
+                  )}
+                  {profileMetadata.updatedAt && profileMetadata.updatedAt !== profileMetadata.createdAt && (
+                    <span>
+                      {t('profile_view_updated') || 'Aktualisiert'}: {formatDate(profileMetadata.updatedAt)}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
           
           {/* All facets indicators - completed ones colorful, pending ones clickable to add */}
-          <div className="mt-5 flex flex-wrap items-center justify-evenly gap-2">
+          <div className="mt-5 grid grid-cols-3 gap-2">
             {profileMetadata.completedLenses.includes('sd') ? (
               <span className={chipAmber}>
                 ✓ {t('lens_sd_name') || 'Was dich antreibt'}

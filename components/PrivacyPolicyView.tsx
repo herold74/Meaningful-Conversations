@@ -7,7 +7,7 @@ interface PrivacyPolicyViewProps {
     onBack?: () => void;
 }
 
-const de_markdown = `Diese Datenschutzerklärung klärt Sie über die Art, den Umfang und Zweck der Verarbeitung von personenbezogenen Daten (nachfolgend kurz „Daten") im Rahmen der Erbringung unserer Leistungen sowie innerhalb unseres Onlineangebotes und der mit ihm verbundenen Webseiten, Funktionen und Inhalte auf (nachfolgend gemeinsam bezeichnet als „Onlineangebot").
+const de_markdown = `Diese Datenschutzerklärung klärt Sie über die Art, den Umfang und Zweck der Verarbeitung von personenbezogenen Daten (nachfolgend kurz „Daten") im Rahmen der Erbringung unserer Leistungen sowie innerhalb unseres Angebotes und der mit ihm verbundenen Anwendungen, Funktionen und Inhalte auf (nachfolgend gemeinsam bezeichnet als „Angebot").
 
 ## 1. Verantwortlicher
 
@@ -275,7 +275,7 @@ Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets de
 
 **Stand:** Dezember 2025`;
 
-const en_markdown = `This Privacy Policy explains the nature, scope, and purpose of the processing of personal data (hereinafter referred to as "data") within the provision of our services and within our online offering and the websites, functions, and content associated with it (hereinafter collectively referred to as "online offering").
+const en_markdown = `This Privacy Policy explains the nature, scope, and purpose of the processing of personal data (hereinafter referred to as "data") within the provision of our services and within our offering and the applications, functions, and content associated with it (hereinafter collectively referred to as "offering").
 
 ## 1. Controller
 

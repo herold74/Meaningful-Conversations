@@ -11,7 +11,7 @@ const { getCacheStats } = require('../services/promptCache.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const dynamicPromptController = require('../services/dynamicPromptController.js');
 const behaviorLogger = require('../services/behaviorLogger.js');
-const { audioTranscribeLimiter } = require('../middleware/rateLimiter.js');
+const { audioTranscribeLimiter, botRecommendationLimiter } = require('../middleware/rateLimiter.js');
 
 const audioUpload = multer({
     storage: multer.memoryStorage(),
@@ -1447,7 +1447,7 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
 // POST /api/gemini/bot-recommendation
 // Returns a primary and secondary bot recommendation for a given topic
 // Requires authentication (registered users and above)
-router.post('/bot-recommendation', authMiddleware, async (req, res) => {
+router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, async (req, res) => {
     const startTime = Date.now();
     const userId = req.userId;
     const { topic, lang = 'de' } = req.body;
