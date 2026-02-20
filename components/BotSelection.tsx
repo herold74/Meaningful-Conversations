@@ -195,15 +195,16 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
-            {/* Unified capsule container — same width/roundness as section pills below */}
-            <div className="flex items-center gap-4 mb-10">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-              <div className="rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5 min-w-[18rem] max-w-lg w-full">
+        <div className="w-full max-w-6xl mx-auto">
+            {/* Unified capsule container — matches Management & Kommunikation pill structure */}
+            <div className="mb-10">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
+                <div className="w-full max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
                 {/* Top row: 🔍 left | gray input box [textarea | mic | send] */}
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-[1.3rem] leading-none flex-shrink-0 opacity-60">🔍</span>
-                    <div className="flex-1 flex items-center gap-1 px-2 py-1.5 bg-background-tertiary border border-border-secondary rounded-lg">
+                    <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
                         {!isLoggedIn ? (
                             <p className="flex-1 text-sm text-content-secondary py-1">
                                 {t('botSearch_login_hint')}
@@ -214,8 +215,8 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 value={topic}
                                 onChange={e => setTopic(e.target.value)}
                                 placeholder={t('botSearch_placeholder')}
-                                rows={2}
-                                className="flex-1 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-hidden focus:outline-none"
+                            rows={1}
+                            className="flex-1 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-auto max-h-40 focus:outline-none"
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
@@ -247,11 +248,12 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 </div>
 
                 {/* Bottom row: hint text centered */}
-                <div className="text-xs text-accent-tertiary/70 dark:text-accent-primary/60 text-center pt-0.5">
+                <div className="text-xs font-semibold text-accent-tertiary/70 dark:text-accent-primary/60 text-center pt-0.5">
                     {t('botSearch_section_title')}
                 </div>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
             </div>
 
             {error && (
@@ -512,7 +514,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#CD7F32]/10 dark:bg-[#CD7F32]/15 border border-[#CD7F32]/30 dark:border-[#CD7F32]/40">
                 <span className="text-lg">💬</span>
                 <div className="text-center">
-                  <div className="text-sm font-semibold text-[#8B5A2B] dark:text-[#D4944C]">
+                  <div className="text-[0.9375rem] font-semibold uppercase text-[#8B5A2B] dark:text-[#D4944C]">
                     {t('botSelection_section_kommunikation')}
                   </div>
                   <div className="text-xs text-[#8B5A2B]/80 dark:text-[#D4944C]/80">
@@ -565,7 +567,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                     flex items-center gap-3 px-4 py-3 rounded-lg border transition-all
                     ${locked
                       ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} opacity-50 border-border-primary bg-background-primary/30 dark:bg-background-primary/20`
-                      : 'cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-sm hover:shadow-md'
+                      : 'cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl'
                     }
                   `}
                 >
@@ -597,7 +599,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600">
                 <span className="text-lg">🎯</span>
                 <div className="text-center">
-                  <div className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="text-[0.9375rem] font-semibold uppercase text-slate-700 dark:text-slate-300">
                     {t('botSelection_section_coaching')}
                   </div>
                   <div className="text-xs text-slate-600 dark:text-slate-400">
@@ -653,7 +655,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
                 <span className="text-lg">🎓</span>
                 <div className="text-center">
-                  <div className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                  <div className="text-[0.9375rem] font-semibold uppercase text-amber-700 dark:text-amber-400">
                     {t('botSelection_section_client')}
                   </div>
                   <div className="text-xs text-amber-700 dark:text-amber-400">
@@ -680,11 +682,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             ))}
           </div>
           
-          {/* Client access message for non-clients */}
+          {/* Client contact info for non-clients */}
           {!currentUser?.isClient && (
             <div className="max-w-4xl mx-auto mt-6">
               <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
-                {t('botSelection_clientAccessMessage')}
+                {t('botSelection_clientContactMessage')}
               </p>
             </div>
           )}

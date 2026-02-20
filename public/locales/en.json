@@ -170,6 +170,7 @@
   "botSelection_clientOnlySection": "Exclusive for manualmode.at Clients",
   "botSelection_clientOnlyBadge": "Client Only",
   "botSelection_clientAccessMessage": "These coaches are exclusively available for manualmode.at clients. Contact us for more information.",
+  "botSelection_clientContactMessage": "Contact us for more information.",
   "botSelection_goBack": "Go Back",
   "botSelection_meditationBadge": "Offers guided meditation 🔔",
   "botSearch_placeholder": "Describe your situation or topic ...",
