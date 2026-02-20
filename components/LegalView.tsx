@@ -26,13 +26,20 @@ const LegalView: React.FC = () => {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex-1 px-4 py-3 text-sm sm:text-base font-semibold uppercase transition-colors ${
+                        className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-base font-semibold uppercase transition-colors text-center ${
                             activeTab === tab.id
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-subtle hover:text-content-secondary'
                         }`}
                     >
-                        {tab.label}
+                        {tab.id === 'terms' ? (
+                            <>
+                                <span className="sm:hidden leading-tight">
+                                    NUTZUNGS-<br />BEDINGUNGEN
+                                </span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </>
+                        ) : tab.label}
                     </button>
                 ))}
             </div>
