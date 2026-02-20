@@ -450,7 +450,7 @@ sections = [
             ('Max', 'Ambitioniert, motivierend, neugierig'),
             ('Ava', 'Strategisch, entscheidend, organisiert'),
             ('Kenji 🔒', 'Stoisch, philosophisch, weise'),
-            ('Chloe 🔒', 'Strukturierte Reflexion, CBT-basiert'),
+            ('Chloe 🔒', 'Strukturierte Reflexion, evidenzbasiert'),
         ],
     },
     {
