@@ -5,6 +5,7 @@ interface SerializableGamificationState {
     xp: number;
     level: number;
     streak: number;
+    longestStreak: number;
     totalSessions: number;
     lastSessionDate: string | null;
     unlockedAchievements: string[];
@@ -38,6 +39,7 @@ export const deserializeGamificationState = (data: unknown): GamificationState =
         xp: 0,
         level: 1,
         streak: 0,
+        longestStreak: 0,
         totalSessions: 0,
         lastSessionDate: null,
         unlockedAchievements: new Set<string>(),

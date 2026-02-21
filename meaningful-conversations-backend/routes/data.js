@@ -14,7 +14,7 @@ router.get('/user', async (req, res) => {
             where: { id: req.userId },
         });
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'User not found.' });
         }
         res.json({
             context: user.lifeContext,
@@ -297,7 +297,7 @@ router.post('/redeem-code', async (req, res) => {
 
     } catch (error) {
         console.error("Error redeeming code:", error);
-        res.status(500).json({ error: 'An internal server error occurred.' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
@@ -551,7 +551,7 @@ function generateHtmlExport(exportData, language = 'de') {
                         <div class="stat-label">${isGerman ? 'Erfahrungspunkte' : 'Experience Points'}</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-number">${exportData.gamificationData.currentStreak || 0}</div>
+                        <div class="stat-number">${exportData.gamificationData.streak || 0}</div>
                         <div class="stat-label">${isGerman ? 'Aktuelle Serie' : 'Current Streak'}</div>
                     </div>
                     <div class="stat-box">
@@ -563,9 +563,17 @@ function generateHtmlExport(exportData, language = 'de') {
                 <div style="margin-top: 20px;">
                     <h3 style="color: #16A34A; margin-bottom: 10px;">${isGerman ? '🏆 Erfolge' : '🏆 Achievements'}</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        ${exportData.gamificationData.unlockedAchievements.map(a => `
-                            <span class="badge badge-info">${a}</span>
-                        `).join('')}
+                        ${exportData.gamificationData.unlockedAchievements.map(a => {
+                            const names = {
+                                beta_pioneer: isGerman ? 'Beta-Pionier' : 'Beta Pioneer',
+                                first_session: isGerman ? 'Erster Schritt' : 'First Step',
+                                journeyman: isGerman ? 'Geselle' : 'Journeyman',
+                                veteran: isGerman ? 'Veteran' : 'Veteran',
+                                streak_starter: isGerman ? 'Am laufenden Band' : 'On a Roll',
+                                polymath: isGerman ? 'Universalgelehrter' : 'Polymath',
+                            };
+                            return `<span class="badge badge-info">${names[a] || a}</span>`;
+                        }).join('')}
                     </div>
                 </div>` : ''}
             </div>` : ''}
@@ -806,7 +814,7 @@ const handleExport = async (req, res) => {
     try {
         const userId = req.userId;
         const format = req.query.format || 'json'; // Default to JSON
-        const language = req.query.lang || 'de'; // Default to German
+        const language = req.query.language || 'de'; // Default to German
         const decryptedLifeContext = req.body?.decryptedLifeContext || null; // From POST request
 
         // Fetch all user-related data
@@ -836,7 +844,7 @@ const handleExport = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'User not found.' });
         }
 
         // Fetch API usage data
@@ -1002,7 +1010,7 @@ router.put('/user/password', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { id: req.userId } });
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'User not found.' });
         }
         const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
         if (!isMatch) {

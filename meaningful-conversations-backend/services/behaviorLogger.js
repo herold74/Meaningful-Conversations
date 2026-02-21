@@ -780,7 +780,7 @@ const BIG5_KEYWORDS = {
         'rather stick with', 'stick with', 'not necessary', 'know my way around',
         'it works fine', 'why change', 'rather safe',
         // Komfortzone / Gewohnheit
-        'comfort zone', 'usual', 'what I know'
+        'comfort zone', 'usual', 'what i know'
       ]
     },
     conscientiousness: {
@@ -899,10 +899,10 @@ const BIG5_KEYWORDS = {
 /**
  * Analyze a user message for Riemann personality markers (bidirectional)
  * @param {string} message - User's message text
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @returns {object} - High/Low counts and found keywords for each dimension
  */
-function analyzeMessage(message, lang = 'de') {
+function analyzeMessage(message, language = 'de') {
   if (!message || typeof message !== 'string') {
     return {
       naehe: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
@@ -912,7 +912,7 @@ function analyzeMessage(message, lang = 'de') {
     };
   }
   
-  const keywords = RIEMANN_KEYWORDS[lang] || RIEMANN_KEYWORDS.de;
+  const keywords = RIEMANN_KEYWORDS[language] || RIEMANN_KEYWORDS.de;
   const lowerMessage = message.toLowerCase();
   
   const results = {};
@@ -958,10 +958,10 @@ function analyzeMessage(message, lang = 'de') {
  * Analyze an entire conversation history for Riemann markers (bidirectional)
  * Returns aggregated high/low counts for user messages only
  * @param {Array} chatHistory - Array of message objects with role and text
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {object} - Aggregated analysis with deltas and found keywords
  */
-function analyzeConversation(chatHistory, lang = 'de') {
+function analyzeConversation(chatHistory, language = 'de') {
   const aggregated = {
     naehe: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
     distanz: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
@@ -978,7 +978,7 @@ function analyzeConversation(chatHistory, lang = 'de') {
   const userMessages = chatHistory.filter(msg => msg.role === 'user');
   
   for (const message of userMessages) {
-    const analysis = analyzeMessage(message.text, lang);
+    const analysis = analyzeMessage(message.text, language);
     
     for (const dimension of ['naehe', 'distanz', 'dauer', 'wechsel']) {
       aggregated[dimension].high += analysis[dimension].high;
@@ -1010,10 +1010,10 @@ function analyzeConversation(chatHistory, lang = 'de') {
 /**
  * Analyze a user message for Big5/OCEAN personality markers (bidirectional)
  * @param {string} message - User's message text
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @returns {object} - High/Low counts and found keywords for each dimension
  */
-function analyzeBig5Message(message, lang = 'de') {
+function analyzeBig5Message(message, language = 'de') {
   if (!message || typeof message !== 'string') {
     return {
       openness: { high: 0, low: 0, delta: 0, foundKeywords: { high: [], low: [] } },
@@ -1024,7 +1024,7 @@ function analyzeBig5Message(message, lang = 'de') {
     };
   }
   
-  const keywords = BIG5_KEYWORDS[lang] || BIG5_KEYWORDS.de;
+  const keywords = BIG5_KEYWORDS[language] || BIG5_KEYWORDS.de;
   const lowerMessage = message.toLowerCase();
   
   const results = {};
@@ -1070,10 +1070,10 @@ function analyzeBig5Message(message, lang = 'de') {
  * Analyze an entire conversation history for Big5/OCEAN markers (bidirectional)
  * Returns aggregated high/low counts for user messages only
  * @param {Array} chatHistory - Array of message objects with role and text
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {object} - Aggregated analysis with deltas and found keywords
  */
-function analyzeBig5Conversation(chatHistory, lang = 'de') {
+function analyzeBig5Conversation(chatHistory, language = 'de') {
   const dimensions = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
   
   const aggregated = {
@@ -1093,7 +1093,7 @@ function analyzeBig5Conversation(chatHistory, lang = 'de') {
   const userMessages = chatHistory.filter(msg => msg.role === 'user');
   
   for (const message of userMessages) {
-    const analysis = analyzeBig5Message(message.text, lang);
+    const analysis = analyzeBig5Message(message.text, language);
     
     for (const dimension of dimensions) {
       aggregated[dimension].high += analysis[dimension].high;
@@ -1125,10 +1125,10 @@ function analyzeBig5Conversation(chatHistory, lang = 'de') {
 /**
  * Analyze a user message for Spiral Dynamics level markers (bidirectional)
  * @param {string} message - User's message text
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @returns {object} - High/Low counts and found keywords for each SD level
  */
-function analyzeSDMessage(message, lang = 'de') {
+function analyzeSDMessage(message, language = 'de') {
   const levels = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
   
   if (!message || typeof message !== 'string') {
@@ -1139,7 +1139,7 @@ function analyzeSDMessage(message, lang = 'de') {
     return empty;
   }
   
-  const keywords = SD_KEYWORDS[lang] || SD_KEYWORDS.de;
+  const keywords = SD_KEYWORDS[language] || SD_KEYWORDS.de;
   const lowerMessage = message.toLowerCase();
   
   const results = {};
@@ -1185,10 +1185,10 @@ function analyzeSDMessage(message, lang = 'de') {
  * Analyze an entire conversation history for Spiral Dynamics markers (bidirectional)
  * Returns aggregated high/low counts for user messages only
  * @param {Array} chatHistory - Array of message objects with role and text
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {object} - Aggregated analysis with deltas and found keywords
  */
-function analyzeSDConversation(chatHistory, lang = 'de') {
+function analyzeSDConversation(chatHistory, language = 'de') {
   const levels = ['turquoise', 'yellow', 'green', 'orange', 'blue', 'red', 'purple', 'beige'];
   
   const aggregated = {
@@ -1208,7 +1208,7 @@ function analyzeSDConversation(chatHistory, lang = 'de') {
   const userMessages = chatHistory.filter(msg => msg.role === 'user');
   
   for (const message of userMessages) {
-    const analysis = analyzeSDMessage(message.text, lang);
+    const analysis = analyzeSDMessage(message.text, language);
     
     for (const level of levels) {
       aggregated[level].high += analysis[level].high;
@@ -1295,23 +1295,23 @@ function normalizeBig5Frequencies(frequencies) {
  * and adjusts the weights based on conversation context, linguistic patterns, and sentiment.
  * 
  * @param {string} message - Current user message
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @param {string[]} recentMessages - Last 3-5 user messages for topic detection
  * @returns {object} Enhanced analysis result with weighted scores + adaptive metadata
  */
-function analyzeMessageEnhanced(message, lang, recentMessages) {
-  lang = lang || 'de';
+function analyzeMessageEnhanced(message, language, recentMessages) {
+  language = language || 'de';
   recentMessages = recentMessages || [];
 
   // Step 1: Run standard analysis (unchanged)
-  const riemannResult = analyzeMessage(message, lang);
-  const big5Result = analyzeBig5Message(message, lang);
-  const sdResult = analyzeSDMessage(message, lang);
+  const riemannResult = analyzeMessage(message, language);
+  const big5Result = analyzeBig5Message(message, language);
+  const sdResult = analyzeSDMessage(message, language);
 
   // Step 2: Run adaptive analysis (context + sentiment)
   var adaptiveResult;
   try {
-    adaptiveResult = adaptiveWeighting.analyzeAdaptive(message, recentMessages, lang);
+    adaptiveResult = adaptiveWeighting.analyzeAdaptive(message, recentMessages, language);
   } catch (err) {
     console.error('[DPFL] Adaptive analysis failed, using standard results:', err.message);
     return {
@@ -1330,7 +1330,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
     // Adjust high keywords
     for (const keyword of data.foundKeywords.high) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'riemann', dimension, 'high', adaptiveResult, lang
+        keyword, message, 'riemann', dimension, 'high', adaptiveResult, language
       );
       
       if (adj.direction !== 'high') {
@@ -1362,7 +1362,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
     // Adjust low keywords
     for (const keyword of data.foundKeywords.low) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'riemann', dimension, 'low', adaptiveResult, lang
+        keyword, message, 'riemann', dimension, 'low', adaptiveResult, language
       );
 
       if (adj.direction !== 'low') {
@@ -1394,7 +1394,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
   for (const [dimension, data] of Object.entries(big5Result)) {
     for (const keyword of data.foundKeywords.high) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'big5', dimension, 'high', adaptiveResult, lang
+        keyword, message, 'big5', dimension, 'high', adaptiveResult, language
       );
 
       if (adj.direction !== 'high') {
@@ -1419,7 +1419,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
 
     for (const keyword of data.foundKeywords.low) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'big5', dimension, 'low', adaptiveResult, lang
+        keyword, message, 'big5', dimension, 'low', adaptiveResult, language
       );
 
       if (adj.direction !== 'low') {
@@ -1447,7 +1447,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
   for (const [level, data] of Object.entries(sdResult)) {
     for (const keyword of data.foundKeywords.high) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'sd', level, 'high', adaptiveResult, lang
+        keyword, message, 'sd', level, 'high', adaptiveResult, language
       );
 
       if (adj.direction !== 'high') {
@@ -1472,7 +1472,7 @@ function analyzeMessageEnhanced(message, lang, recentMessages) {
 
     for (const keyword of data.foundKeywords.low) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
-        keyword, message, 'sd', level, 'low', adaptiveResult, lang
+        keyword, message, 'sd', level, 'low', adaptiveResult, language
       );
 
       if (adj.direction !== 'low') {

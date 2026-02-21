@@ -37,7 +37,7 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
             // Prepare request body with decrypted life context for GDPR compliance
             const requestBody = lifeContext ? JSON.stringify({ decryptedLifeContext: lifeContext }) : undefined;
 
-            const response = await fetch(`${apiBaseUrl}/api/data/export?format=${exportFormat}&lang=${currentLanguage}`, {
+            const response = await fetch(`${apiBaseUrl}/api/data/export?format=${exportFormat}&language=${currentLanguage}`, {
                 method: 'POST', // Changed to POST to send decrypted context
                 headers: {
                     'Content-Type': 'application/json',

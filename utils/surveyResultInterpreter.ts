@@ -281,18 +281,18 @@ const findDominantAndLow = (scores: Record<string, number>): { dominant: string;
 /**
  * Compares scores from Work and Private contexts.
  */
-const checkConsistency = (r: SurveyResult['riemann'], lang: Language): { type: string; typeLabel: string; stress: string; score: number }[] => {
+const checkConsistency = (r: SurveyResult['riemann'], language: Language): { type: string; typeLabel: string; stress: string; score: number }[] => {
   if (!r) return [];
   const results = [];
   const keys = ['distanz', 'naehe', 'dauer', 'wechsel'];
-  const t = INTERPRETATION_TEXT[lang];
+  const t = INTERPRETATION_TEXT[language];
   
   for (const key of keys) {
       const diff = Math.abs((r.beruf[key] || 0) - (r.privat[key] || 0));
     if (diff >= 6) { // Significant deviation at 10 points (>= 60% difference)
           results.push({
               type: key,
-        typeLabel: RIEMANN_LABELS[lang][key],
+        typeLabel: RIEMANN_LABELS[language][key],
         stress: (r.beruf[key] || 0) > (r.privat[key] || 0) ? t.inconsistencyStressJob : t.inconsistencyStressPrivate,
               score: diff
           });

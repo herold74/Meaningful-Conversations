@@ -63,7 +63,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
             <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-content-primary uppercase">{t('about_title')}</h1>
-                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.9.4</p>
+                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.9.5</p>
                 </div>
                 <div className="flex items-center justify-evenly border-b border-border-secondary dark:border-border-primary">
                     <button

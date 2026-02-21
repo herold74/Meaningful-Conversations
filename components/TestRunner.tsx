@@ -321,7 +321,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         botId: bot.id,
         userMessage: message,
         history: chatHistory,
-        lang: language,
+        language,
         context: '', // Could be extended to test with context
         testProfileOverride: profile, // Backend will use this instead of user's actual profile
         includeTestTelemetry: true, // Request DPC/DPFL telemetry in response
@@ -436,7 +436,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           lastUserMessage: lastUserMessage.substring(0, 300),
           scenarioDescription,
           personalityContext: personalityContext || undefined,
-          lang: language,
+          language,
         }),
       });
 

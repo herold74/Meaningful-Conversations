@@ -383,10 +383,10 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    const lang = language === 'en' ? 'en' : 'de';
+    const normalizedLang = language === 'en' ? 'en' : 'de';
     
     // Build the synthesis prompt
-    const synthesisPrompt = NARRATIVE_SYNTHESIS_PROMPTS[lang]
+    const synthesisPrompt = NARRATIVE_SYNTHESIS_PROMPTS[normalizedLang]
       .replace('{{quantitativeData}}', JSON.stringify(quantitativeData, null, 2))
       .replace('{{flowStory}}', narratives.flowStory)
       .replace('{{frictionStory}}', narratives.frictionStory);
@@ -400,7 +400,7 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
         temperature: 0.8,
         maxOutputTokens: 4096,
         responseMimeType: 'application/json',
-        systemInstruction: lang === 'de' 
+        systemInstruction: normalizedLang === 'de' 
           ? 'Antworte ausschließlich mit validem JSON gemäß dem angeforderten Schema. Keine Erklärungen außerhalb des JSON.'
           : 'Respond only with valid JSON matching the requested schema. No explanations outside the JSON.'
       }
@@ -423,7 +423,7 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       
       narrativeProfile = JSON.parse(jsonText);
       narrativeProfile.generatedAt = new Date().toISOString();
-      narrativeProfile.generatedLanguage = lang;
+      narrativeProfile.generatedLanguage = normalizedLang;
     } catch (parseError) {
       console.error('[Narrative] Failed to parse AI response:', result.text);
       return res.status(500).json({ error: 'Failed to parse narrative profile' });
@@ -451,7 +451,7 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
  */
 router.post('/preview-refinement', authMiddleware, async (req, res) => {
   try {
-    const { chatHistory, decryptedProfile, profileType, lang } = req.body;
+    const { chatHistory, decryptedProfile, profileType, language } = req.body;
     
     // Validation
     if (!chatHistory || !Array.isArray(chatHistory)) {
@@ -464,7 +464,7 @@ router.post('/preview-refinement', authMiddleware, async (req, res) => {
     
     // Import behavior logger
     const behaviorLogger = require('../services/behaviorLogger.js');
-    const language = lang === 'en' ? 'en' : 'de';
+    const normalizedLang = language === 'en' ? 'en' : 'de';
     
     // Analyze conversation using appropriate keyword set based on profile type
     // New bidirectional format: each dimension has high/low counts and delta
