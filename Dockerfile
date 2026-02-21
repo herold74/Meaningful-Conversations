@@ -5,6 +5,7 @@ FROM node:22-bullseye AS builder
 # Build arguments for version tracking
 ARG BUILD_NUMBER=0
 ARG APP_VERSION=0.0.0
+ARG REVENUECAT_IOS_KEY=""
 
 # Set the working directory inside the container.
 WORKDIR /app
@@ -21,6 +22,7 @@ COPY . .
 # Set build-time environment variables for Vite
 ENV VITE_BUILD_NUMBER=$BUILD_NUMBER
 ENV VITE_APP_VERSION=$APP_VERSION
+ENV VITE_REVENUECAT_IOS_KEY=$REVENUECAT_IOS_KEY
 
 # Run the production build script defined in package.json.
 # This creates the optimized static files in the /app/dist directory.
