@@ -32,6 +32,8 @@ export interface SpiralDynamicsResult {
   dominantLevels: string[];
   // Derived from ranking (positions 6-8)
   underdevelopedLevels: string[];
+  // PVQ-21 raw item answers for re-population on facet update
+  rawAnswers?: Record<string, number>;
 }
 
 // Riemann Result (unchanged structure)
@@ -76,6 +78,8 @@ export interface Big5Result {
   neuroticism: number; // Note: In BFI-2 this is "Negative Emotionality" (higher = more neurotic)
   variant?: 'xs' | 's'; // BFI-2-XS (15 items) or BFI-2-S (30 items)
   facets?: Big5Facets;   // Only populated for BFI-2-S variant
+  // BFI-2 raw item answers for re-population on facet update
+  rawAnswers?: Record<string, number>;
 }
 
 // Die Struktur eines Datensatzes für die Auswertung (Unified Profile)
@@ -423,11 +427,11 @@ const SurveyButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { c
 // --- LOGIK KOMPONENTEN ---
 
 // 1. LIKERT SCALE (1-5)
-const LikertBlock = ({ questions, onComplete, t, lowLabel, highLabel }: { 
+const LikertBlock = ({ questions, onComplete, t, lowLabel, highLabel, initialAnswers }: { 
   questions: any[], onComplete: (res: any) => void, t: TranslateFunc,
-  lowLabel?: string, highLabel?: string
+  lowLabel?: string, highLabel?: string, initialAnswers?: Record<string, number>
 }) => {
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number>>(initialAnswers || {});
 
   const handleChange = (id: string, val: number) => setAnswers(prev => ({ ...prev, [id]: val }));
   const isComplete = questions.every(q => answers[q.id] !== undefined);
@@ -1029,16 +1033,18 @@ const LensSelectionBlock = ({
 // Based on the Portrait Values Questionnaire (Schwartz, 2003; European Social Survey)
 const SDQuestionnaireBlock = ({ 
   onComplete, 
+  initialAnswers,
   t 
 }: { 
   onComplete: (result: SpiralDynamicsResult) => void;
+  initialAnswers?: Record<string, number>;
   t: TranslateFunc;
 }) => {
-  // Get items and shuffle once on mount to reduce order effects
   const allItems = useMemo(() => getPvq21Items(t), [t]);
-  const [questions] = useState(() => shuffleArray(allItems));
+  // Stable order when pre-filled so the user sees a familiar sequence
+  const [questions] = useState(() => initialAnswers ? allItems : shuffleArray(allItems));
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number>>(initialAnswers || {});
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
@@ -1049,8 +1055,8 @@ const SDQuestionnaireBlock = ({
     setAnswers(newAnswers);
     
     if (isLastQuestion) {
-      // Calculate PVQ-21 → Schwartz → SD mapping
       const sdResult = calculatePvq21ToSD(newAnswers, allItems);
+      sdResult.rawAnswers = newAnswers;
       onComplete(sdResult);
     } else {
       // Auto-advance to next question after brief delay
@@ -1168,9 +1174,19 @@ const SDQuestionnaireBlock = ({
 };
 
 // 7. RANKING (Drag & Drop Simulation via Click) - for Riemann stress ranking
-const RankingBlock = ({ items, onComplete, t }: { items: any[], onComplete: (ids: string[]) => void, t: TranslateFunc }) => {
-  const [pool, setPool] = useState(items);
-  const [ranked, setRanked] = useState<any[]>([]);
+const RankingBlock = ({ items, onComplete, t, initialOrder }: { items: any[], onComplete: (ids: string[]) => void, t: TranslateFunc, initialOrder?: string[] }) => {
+  const [pool, setPool] = useState(() => {
+    if (initialOrder?.length) {
+      return items.filter(i => !initialOrder.includes(i.id));
+    }
+    return items;
+  });
+  const [ranked, setRanked] = useState<any[]>(() => {
+    if (initialOrder?.length) {
+      return initialOrder.map(id => items.find(i => i.id === id)).filter(Boolean);
+    }
+    return [];
+  });
 
   const moveToRanked = (item: any) => {
     setRanked([...ranked, item]);
@@ -1257,7 +1273,10 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
   const [selectedLens, setSelectedLens] = useState<LensType | null>(preselectedLens || null);
   
   // BFI-2 variant selection (XS = 15 items, S = 30 items)
-  const [bfi2Variant, setBfi2Variant] = useState<Bfi2Variant | null>(null);
+  // Auto-select variant from existing profile when rawAnswers are available
+  const [bfi2Variant, setBfi2Variant] = useState<Bfi2Variant | null>(
+    existingProfile?.big5?.rawAnswers ? (existingProfile.big5.variant || 'xs') : null
+  );
   
   // State for overwrite warning modal (shows when repeating an already-completed test with DPFL refinements)
   const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
@@ -1520,10 +1539,9 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       <Card title={t('survey_pvq21_title')}>
         <SDQuestionnaireBlock 
           t={t}
+          initialAnswers={result.spiralDynamics?.rawAnswers}
           onComplete={(sdResult) => {
-            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
             pendingSDResult.current = sdResult;
-            // Then update state (async)
             setResult(prev => ({ ...prev, spiralDynamics: sdResult }));
             next();
           }} 
@@ -1569,11 +1587,11 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
           t={t}
           lowLabel={t('survey_bfi2_likert_1')}
           highLabel={t('survey_bfi2_likert_5')}
+          initialAnswers={result.big5?.rawAnswers}
           onComplete={(data) => {
             const calculatedScores = calculateBfi2(data, effectiveVariant);
-            // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
+            calculatedScores.rawAnswers = data;
             pendingBig5Result.current = calculatedScores;
-            // Then update state (async)
             setResult(prev => ({ ...prev, big5: calculatedScores }));
             next();
           }} 
@@ -1627,12 +1645,9 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     } else if (currentStepId === 'RIEMANN_STRESS') {
       content = (
         <Card title={t('survey_riemann_stress_title')}>
-          <RankingBlock items={STRESS_ITEMS_LOCALIZED} t={t} onComplete={(d) => {
-             // Build updated Riemann result with stressRanking
+          <RankingBlock items={STRESS_ITEMS_LOCALIZED} t={t} initialOrder={result.riemann?.stressRanking} onComplete={(d) => {
              const updatedRiemann = { ...result.riemann, stressRanking: d } as RiemannResult;
-             // Store in ref FIRST (synchronous) - this ensures finishSurvey has access
              pendingRiemannResult.current = updatedRiemann;
-             // Then update state (async)
              setResult(prev => ({ 
                ...prev, 
                riemann: { ...prev.riemann, stressRanking: d } as RiemannResult 
