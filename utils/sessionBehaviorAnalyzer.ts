@@ -204,8 +204,8 @@ function countKeywords(text: string, highKeywords: string[], lowKeywords: string
 /**
  * Analyze chat history for Riemann-Thomann markers
  */
-export function analyzeRiemann(chatHistory: Message[], lang: 'de' | 'en' = 'de'): Record<string, number> {
-  const keywords = RIEMANN_KEYWORDS[lang] || RIEMANN_KEYWORDS.de;
+export function analyzeRiemann(chatHistory: Message[], language: 'de' | 'en' = 'de'): Record<string, number> {
+  const keywords = RIEMANN_KEYWORDS[language] || RIEMANN_KEYWORDS.de;
   const userText = chatHistory
     .filter(m => m.role === 'user')
     .map(m => m.text)
@@ -223,8 +223,8 @@ export function analyzeRiemann(chatHistory: Message[], lang: 'de' | 'en' = 'de')
 /**
  * Analyze chat history for Big5/OCEAN markers
  */
-export function analyzeBig5(chatHistory: Message[], lang: 'de' | 'en' = 'de'): Record<string, number> {
-  const keywords = BIG5_KEYWORDS[lang] || BIG5_KEYWORDS.de;
+export function analyzeBig5(chatHistory: Message[], language: 'de' | 'en' = 'de'): Record<string, number> {
+  const keywords = BIG5_KEYWORDS[language] || BIG5_KEYWORDS.de;
   const userText = chatHistory
     .filter(m => m.role === 'user')
     .map(m => m.text)
@@ -242,8 +242,8 @@ export function analyzeBig5(chatHistory: Message[], lang: 'de' | 'en' = 'de'): R
 /**
  * Analyze chat history for Spiral Dynamics markers
  */
-export function analyzeSD(chatHistory: Message[], lang: 'de' | 'en' = 'de'): Record<string, number> {
-  const keywords = SD_KEYWORDS[lang] || SD_KEYWORDS.de;
+export function analyzeSD(chatHistory: Message[], language: 'de' | 'en' = 'de'): Record<string, number> {
+  const keywords = SD_KEYWORDS[language] || SD_KEYWORDS.de;
   const userText = chatHistory
     .filter(m => m.role === 'user')
     .map(m => m.text)
@@ -261,10 +261,10 @@ export function analyzeSD(chatHistory: Message[], lang: 'de' | 'en' = 'de'): Rec
 /**
  * Analyze chat history for all profile types
  */
-export function analyzeSession(chatHistory: Message[], lang: 'de' | 'en' = 'de') {
+export function analyzeSession(chatHistory: Message[], language: 'de' | 'en' = 'de') {
   return {
-    riemann: analyzeRiemann(chatHistory, lang),
-    big5: analyzeBig5(chatHistory, lang),
-    sd: analyzeSD(chatHistory, lang)
+    riemann: analyzeRiemann(chatHistory, language),
+    big5: analyzeBig5(chatHistory, language),
+    sd: analyzeSD(chatHistory, language)
   };
 }

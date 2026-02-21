@@ -29,14 +29,14 @@ const VOICE_MODELS = {
 /**
  * Get the appropriate voice model for a bot and language
  * @param {string} botId - The bot ID
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @returns {object} - { model: string, gender: 'male'|'female' }
  */
-function getVoiceForBot(botId, lang) {
+function getVoiceForBot(botId, language) {
     let gender = 'female';
     
     // Bot-specific gender assignment (matches ChatView.tsx logic)
-    if (lang === 'en') {
+    if (language === 'en') {
         switch (botId) {
             case 'gloria-life-context':
             case 'ava-strategic':
@@ -55,12 +55,12 @@ function getVoiceForBot(botId, lang) {
         }
     }
     // For German, check if voice model exists for gender
-    else if (lang === 'de') {
+    else if (language === 'de') {
         const femaleBotsDE = ['gloria-life-context', 'ava-strategic', 'chloe-cbt'];
         gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
     }
     
-    const voiceModel = VOICE_MODELS[lang]?.[gender];
+    const voiceModel = VOICE_MODELS[language]?.[gender];
     
     // If no voice model available (e.g., German female), return null
     if (!voiceModel) {
@@ -129,19 +129,19 @@ function getVoiceModelFromId(voiceId) {
  * Synthesize speech using Piper TTS
  * @param {string} text - The text to synthesize
  * @param {string} botId - The bot ID for voice selection
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @param {boolean} isMeditation - Whether to use meditation mode (slower)
  * @param {string} voiceId - Optional: Specific voice ID to use (overrides bot default)
  * @param {boolean} stream - Not used (kept for backwards compatibility)
  * @returns {Promise<Buffer>} - Audio data as WAV buffer
  */
-async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId = null, stream = true) {
+async function synthesizeSpeech(text, botId, language, isMeditation = false, voiceId = null, stream = true) {
     if (!text || text.trim().length === 0) {
         throw new Error('Text is required for speech synthesis');
     }
     
     // Clean the text (remove markdown, apply phonetic replacements)
-    let cleanText = cleanTextForSpeech(text, lang);
+    let cleanText = cleanTextForSpeech(text, language);
     
     // Get voice model - use voiceId if provided, otherwise auto-select
     let model;
@@ -149,16 +149,16 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
         model = getVoiceModelFromId(voiceId);
         if (!model) {
             console.warn(`Unknown voiceId: ${voiceId}, falling back to bot default`);
-            const voiceInfo = getVoiceForBot(botId, lang);
+            const voiceInfo = getVoiceForBot(botId, language);
             model = voiceInfo.model;
         }
     } else {
-        const voiceInfo = getVoiceForBot(botId, lang);
+        const voiceInfo = getVoiceForBot(botId, language);
         model = voiceInfo.model;
         
         // If no server voice available (e.g., German female), return null to use local voice
         if (!model) {
-            console.log(`No server voice available for botId=${botId}, lang=${lang}, gender=${voiceInfo.gender} - client will use local voice`);
+            console.log(`No server voice available for botId=${botId}, language=${language}, gender=${voiceInfo.gender} - client will use local voice`);
             return null;
         }
     }
@@ -239,13 +239,13 @@ async function synthesizeSpeech(text, botId, lang, isMeditation = false, voiceId
  * Removes markdown formatting and other non-spoken elements
  * Applies phonetic replacements from dictionary for better pronunciation
  * @param {string} text - Raw text with possible markdown
- * @param {string} lang - Language code for phonetic replacements (default: 'de')
+ * @param {string} language - Language code for phonetic replacements (default: 'de')
  * @returns {string} - Cleaned text ready for TTS
  */
-function cleanTextForSpeech(text, lang = 'de') {
+function cleanTextForSpeech(text, language = 'de') {
     // Load phonetic replacements from dictionary
     // Dictionary is cached, so this has no I/O overhead
-    const phoneticReplacements = getPhoneticReplacements(lang);
+    const phoneticReplacements = getPhoneticReplacements(language);
     
     // First, clean markdown and formatting
     let cleanedText = text
@@ -332,9 +332,9 @@ async function getAvailableVoices() {
     if (USE_TTS_CONTAINER) {
         // Return the configured voice models without checking filesystem
         const models = [];
-        for (const lang of Object.keys(VOICE_MODELS)) {
-            for (const gender of Object.keys(VOICE_MODELS[lang])) {
-                models.push(VOICE_MODELS[lang][gender]);
+        for (const languageCode of Object.keys(VOICE_MODELS)) {
+            for (const gender of Object.keys(VOICE_MODELS[languageCode])) {
+                models.push(VOICE_MODELS[languageCode][gender]);
             }
         }
         return models;

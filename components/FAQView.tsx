@@ -33,7 +33,7 @@ Aufgrund unseres E2EE-Sicherheitsmodells ist **Ihre verschlüsselte Lebenskontex
 Nein. Der Chatverlauf Ihrer Coaching-Sitzungen wird **nicht** auf unseren Servern gespeichert. Die Konversation existiert nur während der aktiven Sitzung in Ihrem Browser. Nach der Sitzungsanalyse werden lediglich die Analyseergebnisse (Zusammenfassung, nächste Schritte, Bewertung) gesichert -- nicht der vollständige Gesprächsverlauf. Sie können das Transkript am Ende jeder Sitzung als Textdatei herunterladen, wenn Sie es aufbewahren möchten.
 
 ### Welche Zugangsstufen gibt es und wie kann ich upgraden?
-Die App bietet vier Stufen: **Gast** (ohne Registrierung, Basisfunktionen), **Registriert** (kostenloses Konto, Cloud-Speicher, OCEAN-Test), **Premium** (zusätzliche Coaches, Tests und das adaptive Profil) und **Klient** (alle Features inkl. Transkript-Auswertung). Zum Upgrade öffnen Sie das Menü (☰) → **"Upgrade"** oder lösen unter **Kontoverwaltung** einen Zugangscode ein. Detaillierte Informationen zu den Stufen finden Sie im Benutzerhandbuch unter Kapitel 2.2.
+Die App bietet vier Stufen: **Gast** (ohne Registrierung, Basisfunktionen), **Registriert** (kostenloses Konto, Cloud-Speicher, OCEAN-Test), **Premium** (zusätzliche Coaches, Tests, adaptives Profil und Transkript-Auswertung) und **Klient** (alle Features inkl. Audio-Transkription). Zum Upgrade öffnen Sie das Menü (☰) → **"Upgrade"** oder lösen unter **Kontoverwaltung** einen Zugangscode ein. Detaillierte Informationen zu den Stufen finden Sie im Benutzerhandbuch unter Kapitel 2.2.
 
 ---
 
@@ -72,7 +72,7 @@ Due to our E2EE security model, **if you forget your password, your encrypted Li
 No. Your coaching session chat history is **not** stored on our servers. The conversation only exists during the active session in your browser. After the session analysis, only the analysis results (summary, next steps, rating) are saved -- not the full conversation. You can download the transcript as a text file at the end of each session if you wish to keep it.
 
 ### What access tiers are available and how do I upgrade?
-The app offers four tiers: **Guest** (no registration, basic features), **Registered** (free account, cloud storage, OCEAN test), **Premium** (additional coaches, tests, and the adaptive profile), and **Client** (all features incl. transcript evaluation). To upgrade, open the menu (☰) → **"Upgrade"** or redeem an access code under **Account Management**. For detailed information about the tiers, see the User Guide, Chapter 2.2.
+The app offers four tiers: **Guest** (no registration, basic features), **Registered** (free account, cloud storage, OCEAN test), **Premium** (additional coaches, tests, adaptive profile, and transcript evaluation), and **Client** (all features incl. audio transcription). To upgrade, open the menu (☰) → **"Upgrade"** or redeem an access code under **Account Management**. For detailed information about the tiers, see the User Guide, Chapter 2.2.
 
 ---
 

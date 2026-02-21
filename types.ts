@@ -64,7 +64,7 @@ export interface User {
     gamificationState?: string;
     status?: 'PENDING' | 'ACTIVE';
     coachingMode?: CoachingMode; // off = standard coaching, dpc = profile used but not refined, dpfl = profile used and refined
-    hasProfile?: boolean;
+    hasPersonalityProfile?: boolean;
     completedLenses?: string[];
 }
 
@@ -96,6 +96,7 @@ export interface GamificationState {
     xp: number;
     level: number;
     streak: number;
+    longestStreak: number;
     totalSessions: number;
     lastSessionDate: string | null;
     unlockedAchievements: Set<string>;
@@ -225,7 +226,7 @@ export interface TranscriptEvaluationResponse {
 export interface TranscriptEvaluationSummary {
     id: string;
     createdAt: string;
-    lang: string;
+    language: string;
     goal: string;
     summary: string;
     overallScore: number;

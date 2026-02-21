@@ -152,11 +152,11 @@ function clearCache() {
  * Detect intensity modifier in context around a word position.
  * @param {string[]} words - Array of words in sentence
  * @param {number} position - Index of the target word
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {'high'|'neutral'|'low'}
  */
-function detectIntensity(words, position, lang = 'de') {
-  const intensifiers = INTENSIFIERS[lang] || INTENSIFIERS.de;
+function detectIntensity(words, position, language = 'de') {
+  const intensifiers = INTENSIFIERS[language] || INTENSIFIERS.de;
 
   // Check 2 words before position
   for (let i = Math.max(0, position - 2); i < position; i++) {
@@ -177,11 +177,11 @@ function detectIntensity(words, position, lang = 'de') {
  * Check if a keyword at a given position is negated.
  * @param {string[]} words - Array of words in sentence
  * @param {number} position - Index of the keyword
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {boolean} true if negated
  */
-function isNegated(words, position, lang = 'de') {
-  const negations = NEGATION_WORDS[lang] || NEGATION_WORDS.de;
+function isNegated(words, position, language = 'de') {
+  const negations = NEGATION_WORDS[language] || NEGATION_WORDS.de;
 
   // Check NEGATION_WINDOW words before the keyword
   const startIdx = Math.max(0, position - NEGATION_WINDOW);
@@ -199,17 +199,17 @@ function isNegated(words, position, lang = 'de') {
  * Calculate sentiment polarity for a sentence.
  * 
  * @param {string} sentence - The sentence to analyze
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {number} Polarity from -1.0 (very negative) to +1.0 (very positive)
  */
-function calculateSentiment(sentence, lang = 'de') {
+function calculateSentiment(sentence, language = 'de') {
   if (!sentence || sentence.trim().length === 0) {
     return 0;
   }
 
   const words = sentence.toLowerCase().split(/\s+/);
-  const positives = POSITIVE_INDICATORS[lang] || POSITIVE_INDICATORS.de;
-  const negatives = NEGATIVE_INDICATORS[lang] || NEGATIVE_INDICATORS.de;
+  const positives = POSITIVE_INDICATORS[language] || POSITIVE_INDICATORS.de;
+  const negatives = NEGATIVE_INDICATORS[language] || NEGATIVE_INDICATORS.de;
 
   let score = 0;
   let matchCount = 0;
@@ -231,12 +231,12 @@ function calculateSentiment(sentence, lang = 'de') {
     }
 
     // Check for negation
-    if (isNegated(words, i, lang)) {
+    if (isNegated(words, i, language)) {
       wordScore *= -0.8; // Invert, slightly reduced (negated positive isn't as strong as direct negative)
     }
 
     // Check for intensity
-    const intensity = detectIntensity(words, i, lang);
+    const intensity = detectIntensity(words, i, language);
     wordScore *= INTENSITY_WEIGHTS[intensity];
 
     score += wordScore;
@@ -253,14 +253,14 @@ function calculateSentiment(sentence, lang = 'de') {
  * 
  * @param {string} sentence - The sentence
  * @param {number} sentimentScore - Pre-calculated sentiment polarity
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {string} One of: 'desired_positive', 'desired_negative', 'suffering', 'positive', 'negative', 'neutral'
  */
-function detectEmotionalContext(sentence, sentimentScore, lang = 'de') {
+function detectEmotionalContext(sentence, sentimentScore, language = 'de') {
   if (!sentence) return 'neutral';
 
-  const desired = DESIRED_PATTERNS[lang] || DESIRED_PATTERNS.de;
-  const suffering = SUFFERING_PATTERNS[lang] || SUFFERING_PATTERNS.de;
+  const desired = DESIRED_PATTERNS[language] || DESIRED_PATTERNS.de;
+  const suffering = SUFFERING_PATTERNS[language] || SUFFERING_PATTERNS.de;
 
   const hasDesiredPattern = desired.some(pattern => pattern.test(sentence));
   const hasSufferingPattern = suffering.some(pattern => pattern.test(sentence));
@@ -295,10 +295,10 @@ function detectEmotionalContext(sentence, sentimentScore, lang = 'de') {
  * @param {string} keyword - The keyword that was found
  * @param {string} sentence - The sentence containing the keyword
  * @param {string} direction - 'high' or 'low' (the keyword's direction)
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {{ adjustedDirection: string, weightMultiplier: number, negated: boolean, intensity: string, emotionalContext: string }}
  */
-function analyzeKeywordSentiment(keyword, sentence, direction, lang = 'de') {
+function analyzeKeywordSentiment(keyword, sentence, direction, language = 'de') {
   if (!sentence || !keyword) {
     return {
       adjustedDirection: direction,
@@ -332,14 +332,14 @@ function analyzeKeywordSentiment(keyword, sentence, direction, lang = 'de') {
   }
 
   // Check negation
-  const negated = isNegated(words, keywordPosition, lang);
+  const negated = isNegated(words, keywordPosition, language);
 
   // Check intensity
-  const intensity = detectIntensity(words, keywordPosition, lang);
+  const intensity = detectIntensity(words, keywordPosition, language);
 
   // Get sentence-level sentiment
-  const sentimentScore = calculateSentiment(sentence, lang);
-  const emotionalContext = detectEmotionalContext(sentence, sentimentScore, lang);
+  const sentimentScore = calculateSentiment(sentence, language);
+  const emotionalContext = detectEmotionalContext(sentence, sentimentScore, language);
 
   // Determine adjusted direction and weight
   let adjustedDirection = direction;
@@ -388,24 +388,24 @@ function analyzeKeywordSentiment(keyword, sentence, direction, lang = 'de') {
  * Analyze sentiment of a full message (cached).
  * 
  * @param {string} message - The full user message
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {{ polarity: number, emotionalContext: string, confidence: number, isAmbiguous: boolean }}
  */
-function analyzeSentiment(message, lang = 'de') {
+function analyzeSentiment(message, language = 'de') {
   if (!message || message.trim().length === 0) {
     return { polarity: 0, emotionalContext: 'neutral', confidence: 0, isAmbiguous: true };
   }
 
   // Check cache
-  const cacheKey = `${lang}:${message.toLowerCase().trim()}`;
+  const cacheKey = `${language}:${message.toLowerCase().trim()}`;
   const cached = getCached(cacheKey);
   if (cached) {
     return { ...cached, fromCache: true };
   }
 
   // Compute
-  const polarity = calculateSentiment(message, lang);
-  const emotionalContext = detectEmotionalContext(message, polarity, lang);
+  const polarity = calculateSentiment(message, language);
+  const emotionalContext = detectEmotionalContext(message, polarity, language);
   const confidence = Math.abs(polarity);
   const isAmbiguous = Math.abs(polarity) < 0.2;
 

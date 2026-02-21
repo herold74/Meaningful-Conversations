@@ -709,13 +709,13 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1.25rem', backgroundPosition: 'right 0.5rem center' }}
                 title={
                   currentCoachingMode === 'off'
-                    ? (t('profile_coaching_mode_off_desc') || 'Klassisches Coaching')
+                    ? (t('coaching_mode_off_desc') || 'Klassisches Coaching')
                     : currentCoachingMode === 'dpc'
-                    ? (t('profile_coaching_mode_dpc_desc') || 'Profil wird genutzt')
-                    : (t('profile_coaching_mode_dpfl_desc') || 'Profil wird verfeinert')
+                    ? (t('coaching_mode_dpc_desc') || 'Profil wird genutzt')
+                    : (t('coaching_mode_dpfl_desc') || 'Profil wird verfeinert')
                 }
               >
-                <option value="off">{t('profile_coaching_mode_off_short') || 'Aus'}</option>
+                <option value="off">{t('coaching_mode_off_short') || 'Aus'}</option>
                 <option value="dpc">DPC</option>
                 <option value="dpfl" disabled={!isPremiumOrHigher || decryptedData?.adaptationMode === 'stable'}>
                   {isPremiumOrHigher ? 'DPFL' : `🔒 DPFL (${t('feature_requires_premium') || 'Premium'})`}

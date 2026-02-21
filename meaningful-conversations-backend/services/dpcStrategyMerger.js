@@ -9,9 +9,9 @@ const { RIEMANN_STRATEGIES, BIG5_STRATEGIES, SD_STRATEGIES } = require('./dpcStr
  * Extracts dimensions from all personality models, detects conflicts, and merges strategies intelligently
  */
 class StrategyMerger {
-  constructor(profile, lang = 'de') {
+  constructor(profile, language = 'de') {
     this.profile = profile;
-    this.lang = lang;
+    this.language = language;
     this.dimensions = []; // All weighted dimensions from all models
     this.conflicts = [];  // Detected contradictions
   }
@@ -41,7 +41,7 @@ class StrategyMerger {
         if (score !== undefined && score !== null) {
           const isHigh = score > 50;
           const level = isHigh ? 'high' : 'low';
-          const strategy = RIEMANN_STRATEGIES[trait]?.[level]?.[this.lang] || 
+          const strategy = RIEMANN_STRATEGIES[trait]?.[level]?.[this.language] || 
                           RIEMANN_STRATEGIES[trait]?.[level]?.['de'];
           
           if (strategy) {
@@ -66,7 +66,7 @@ class StrategyMerger {
         if (score !== undefined && score !== null) {
           const isHigh = score >= 4;
           const level = isHigh ? 'high' : 'low';
-          const strategy = BIG5_STRATEGIES[trait]?.[level]?.[this.lang] || 
+          const strategy = BIG5_STRATEGIES[trait]?.[level]?.[this.language] || 
                           BIG5_STRATEGIES[trait]?.[level]?.['de'];
           
           if (strategy) {
@@ -98,7 +98,7 @@ class StrategyMerger {
       
       // Take top 2 dominant levels
       rankedLevels.slice(0, 2).forEach((levelData, index) => {
-        const strategy = SD_STRATEGIES[levelData.level]?.high?.[this.lang] || 
+        const strategy = SD_STRATEGIES[levelData.level]?.high?.[this.language] || 
                         SD_STRATEGIES[levelData.level]?.high?.['de'];
         
         if (strategy) {
@@ -340,7 +340,7 @@ class StrategyMerger {
       traits.forEach(trait => {
         const score = this.profile.riemann.selbst[trait];
         if (score < 30) {
-          const strategy = RIEMANN_STRATEGIES[trait]?.low?.[this.lang] || 
+          const strategy = RIEMANN_STRATEGIES[trait]?.low?.[this.language] || 
                           RIEMANN_STRATEGIES[trait]?.low?.['de'];
           if (strategy) {
             blindspotDimensions.push({
@@ -363,7 +363,7 @@ class StrategyMerger {
         if (score < 2.5 || score > 4.5) {
           const isLow = score < 2.5;
           const level = isLow ? 'low' : 'high';
-          const strategy = BIG5_STRATEGIES[trait]?.[level]?.[this.lang] || 
+          const strategy = BIG5_STRATEGIES[trait]?.[level]?.[this.language] || 
                           BIG5_STRATEGIES[trait]?.[level]?.['de'];
           if (strategy && strategy.blindspot) {
             blindspotDimensions.push({
@@ -392,7 +392,7 @@ class StrategyMerger {
       
       // Get underdeveloped levels (rank 6-8)
       rankedLevels.slice(5, 8).forEach(levelData => {
-        const strategy = SD_STRATEGIES[levelData.level]?.low?.[this.lang] || 
+        const strategy = SD_STRATEGIES[levelData.level]?.low?.[this.language] || 
                         SD_STRATEGIES[levelData.level]?.low?.['de'];
         if (strategy) {
           blindspotDimensions.push({

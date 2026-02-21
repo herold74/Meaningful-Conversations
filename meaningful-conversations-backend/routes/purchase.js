@@ -491,7 +491,7 @@ router.post('/webhook', express.json(), async (req, res) => {
   try {
     if (!verifyPayPalSignature(req)) {
       console.error('Invalid PayPal webhook signature');
-      return res.status(401).send('Unauthorized');
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const event = req.body;
@@ -499,7 +499,7 @@ router.post('/webhook', express.json(), async (req, res) => {
     
     if (event.event_type !== 'PAYMENT.CAPTURE.COMPLETED') {
       console.log(`Ignoring event type: ${event.event_type}`);
-      return res.status(200).send('Event ignored');
+      return res.status(200).json({ status: 'ignored' });
     }
 
     const paypalOrderId = event.resource?.supplementary_data?.related_ids?.order_id || event.resource?.id;
@@ -511,24 +511,24 @@ router.post('/webhook', express.json(), async (req, res) => {
     
     if (!customerEmail) {
       console.error('❌ No customer email found in webhook');
-      return res.status(400).send('Missing customer email');
+      return res.status(400).json({ error: 'Missing customer email' });
     }
     
     if (!productId) {
       console.error('❌ No product ID (custom_id) found in webhook');
-      return res.status(400).send('Missing product ID');
+      return res.status(400).json({ error: 'Missing product ID' });
     }
     
     const existingPurchase = await prisma.purchase.findUnique({ where: { paypalOrderId } });
     if (existingPurchase) {
       console.log(`Purchase ${paypalOrderId} already processed`);
-      return res.status(200).send('Already processed');
+      return res.status(200).json({ status: 'already_processed' });
     }
 
     const botId = PRODUCT_MAPPING[productId];
     if (!botId) {
       console.error(`Unknown product ID: ${productId}`);
-      return res.status(400).send('Unknown product');
+      return res.status(400).json({ error: 'Unknown product' });
     }
 
     const code = crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -553,7 +553,7 @@ router.post('/webhook', express.json(), async (req, res) => {
     await sendAdminNotification(customerEmail, customerName, code, botId, amount);
 
     console.log(`✅ Purchase processed: ${paypalOrderId} -> Code: ${code} -> Customer: ${customerEmail}`);
-    res.status(200).send('OK');
+    res.status(200).json({ status: 'ok' });
 
   } catch (error) {
     console.error('❌ Webhook processing error:', error);

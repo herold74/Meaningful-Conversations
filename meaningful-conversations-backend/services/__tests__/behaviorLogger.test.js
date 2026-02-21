@@ -1211,7 +1211,7 @@ describe('analyzeMessageEnhanced (Integration)', () => {
     expect(result2).toHaveProperty('riemann');
   });
 
-  test('handles null lang by defaulting to de', () => {
+  test('handles null language by defaulting to de', () => {
     const result = analyzeMessageEnhanced('Ich habe Angst.', null, []);
     expectKeywordDetected(result.big5, 'neuroticism', 'high', 'angst');
   });
