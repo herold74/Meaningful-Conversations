@@ -239,6 +239,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
             if podman build --platform linux/amd64 \
                 --build-arg BUILD_NUMBER="$NEXT_BUILD_NUM" \
                 --build-arg APP_VERSION="$VERSION" \
+                --build-arg REVENUECAT_IOS_KEY="${REVENUECAT_IOS_KEY:-}" \
                 -t "$FRONTEND_IMAGE" .; then
                 # Only increment build number after successful build
                 echo "$NEXT_BUILD_NUM" > BUILD_NUMBER
