@@ -103,7 +103,7 @@ router.post('/notification', async (req, res) => {
   try {
     const { signedPayload } = req.body;
     if (!signedPayload) {
-      return res.status(400).send('Missing signedPayload');
+      return res.status(400).json({ error: 'Missing signedPayload' });
     }
 
     const notification = decodeNotificationPayload(signedPayload);
@@ -113,7 +113,7 @@ router.post('/notification', async (req, res) => {
 
     if (!data?.signedTransactionInfo) {
       console.warn('⚠️ No transaction info in notification');
-      return res.status(200).send('OK');
+      return res.status(200).json({ status: 'ok' });
     }
 
     const transactionInfo = decodeJWSPayload(data.signedTransactionInfo);
@@ -132,7 +132,7 @@ router.post('/notification', async (req, res) => {
 
     if (!purchase) {
       console.warn(`⚠️ No purchase found for originalTransactionId: ${originalTransactionId}`);
-      return res.status(200).send('OK');
+      return res.status(200).json({ status: 'ok' });
     }
 
     // Find the user who made this purchase
@@ -142,7 +142,7 @@ router.post('/notification', async (req, res) => {
 
     if (!user) {
       console.warn(`⚠️ No user found for email: ${purchase.customerEmail}`);
-      return res.status(200).send('OK');
+      return res.status(200).json({ status: 'ok' });
     }
 
     const productMapping = mapAppleProduct(transactionInfo.productId);
@@ -230,10 +230,10 @@ router.post('/notification', async (req, res) => {
         console.log(`ℹ️ Unhandled Apple notification: ${notificationType}/${subtype}`);
     }
 
-    res.status(200).send('OK');
+    res.status(200).json({ status: 'ok' });
   } catch (error) {
     console.error('❌ Apple notification error:', error);
-    res.status(200).send('OK'); // Always 200 so Apple doesn't retry indefinitely
+    res.status(200).json({ status: 'ok' }); // Always 200 so Apple doesn't retry indefinitely
   }
 });
 

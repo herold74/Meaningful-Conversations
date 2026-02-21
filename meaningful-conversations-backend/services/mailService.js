@@ -21,7 +21,7 @@ const SENDER_EMAIL = process.env.MAILJET_SENDER_EMAIL || 'noreply@example.com';
 const SENDER_NAME = 'Meaningful Conversations | www.manualmode.at';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-const sendConfirmationEmail = async (email, token, lang = 'en') => {
+const sendConfirmationEmail = async (email, token, language = 'en') => {
     const confirmationUrl = `${FRONTEND_URL}?route=verify-email&token=${token}`;
 
     const subjects = {
@@ -232,9 +232,9 @@ einfach ignorieren.`
         </table>
     `};
     
-    const subject = subjects[lang] || subjects['en'];
-    const textBody = textBodies[lang] || textBodies['en'];
-    const htmlBody = htmlBodies[lang] || htmlBodies['en'];
+    const subject = subjects[language] || subjects['en'];
+    const textBody = textBodies[language] || textBodies['en'];
+    const htmlBody = htmlBodies[language] || htmlBodies['en'];
 
     if (!isProductionOrStaging) {
         console.log('\n--- SIMULATED EMAIL ---');
@@ -274,7 +274,7 @@ einfach ignorieren.`
     return request;
 };
 
-const sendPasswordResetEmail = async (email, token, lang = 'en') => {
+const sendPasswordResetEmail = async (email, token, language = 'en') => {
     const resetUrl = `${FRONTEND_URL}?route=reset-password&token=${token}`;
 
     const subjects = {
@@ -314,9 +314,9 @@ const sendPasswordResetEmail = async (email, token, lang = 'en') => {
     `
     };
     
-    const subject = subjects[lang] || subjects['en'];
-    const textBody = textBodies[lang] || textBodies['en'];
-    const htmlBody = htmlBodies[lang] || htmlBodies['en'];
+    const subject = subjects[language] || subjects['en'];
+    const textBody = textBodies[language] || textBodies['en'];
+    const htmlBody = htmlBodies[language] || htmlBodies['en'];
 
     if (!isProductionOrStaging) {
         console.log('\n--- SIMULATED EMAIL ---');
@@ -499,7 +499,7 @@ const sendAdminNotification = async (customerEmail, customerName, code, botId, a
   return request;
 };
 
-const sendNewsletterEmail = async (email, subject, content, lang = 'de') => {
+const sendNewsletterEmail = async (email, subject, content, language = 'de') => {
     // content should contain: { textBody, htmlBody, unsubscribeToken }
     
     // Generate unsubscribe link
@@ -515,14 +515,14 @@ const sendNewsletterEmail = async (email, subject, content, lang = 'de') => {
     // Append unsubscribe link to text body
     let finalTextBody = content.textBody;
     if (unsubscribeUrl) {
-        finalTextBody += unsubscribeTexts[lang] || unsubscribeTexts['de'];
+        finalTextBody += unsubscribeTexts[language] || unsubscribeTexts['de'];
         finalTextBody += unsubscribeUrl;
     }
     
     // Append unsubscribe link to HTML body
     let finalHtmlBody = content.htmlBody;
     if (unsubscribeUrl) {
-        const unsubscribeHtml = lang === 'de' 
+        const unsubscribeHtml = language === 'de' 
             ? `<hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                <p style="text-align: center; font-size: 12px; color: #6b7280;">
                  Sie möchten keine weiteren Newsletter erhalten?<br>

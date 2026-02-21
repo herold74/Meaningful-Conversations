@@ -86,8 +86,8 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | :--- | :--- | :--- | :--- |
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
 | **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
-| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil |
-| **Klient** | Zugangscode von manualmode.at | + Rob, Victor | Transkript-Auswertung, alle Features |
+| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
+| **Klient** | Zugangscode von manualmode.at | + Rob, Victor | Audio-Transkription, alle Features |
 
 **So upgraden Sie:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe in verschiedenen Laufzeiten (1, 3 oder 12 Monate) sowie Einzelcoach-Freischaltungen. Alternativ können Sie unter **Kontoverwaltung → "Code einlösen"** einen Zugangscode eingeben.
 
@@ -316,57 +316,32 @@ Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI e
 
 **PDF-Export:** Über die Schaltfläche **"Als PDF herunterladen"** können Sie Ihr vollständiges Persönlichkeitsprofil -- inklusive Testergebnisse, Signatur und Facetten -- als PDF-Datei exportieren und speichern.
 
-### 4.4 Adaptives vs. Stabiles Profil
+### 4.4 Coaching-Modi
 
-Ihr Profil kann auf zwei Arten genutzt werden. Registrierte Nutzer erhalten automatisch ein stabiles Profil. Premium-Nutzer und höher können zwischen beiden Varianten wählen.
-
-**🔒 Stabiles Profil (Standard):**
-✅ *Verfügbar für alle registrierten Nutzer*
-- Bleibt unverändert bis zur nächsten manuellen Evaluierung
-- Sie behalten volle Kontrolle über Änderungen
-- Kann jederzeit durch erneutes Ausfüllen eines Tests aktualisiert werden
-- Ideal für: Klare Baseline & gezielte Vergleiche
-
-**📊 Adaptives Profil (DPFL):**
-🔒 *Verfügbar ab Premium*
-- Lernt aus Ihren Coaching-Sitzungen
-- Verfeinert sich automatisch über Zeit
-- Nach jeder Sitzung werden Sie gefragt, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
-- Ideal für: Selbstentdeckung & kontinuierliches Wachstum
-
-**Warnung:** Bei einem adaptiven Profil mit bereits erfolgten Verfeinerungen erhalten Sie beim Starten eines neuen Tests eine Warnung, dass alle bisherigen Anpassungen überschrieben werden.
-
-### 4.5 Coaching-Modi
-
-Mit einem Persönlichkeitsprofil können Sie zwischen drei Coaching-Modi wählen:
+Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie einen **Coaching-Modus** aktivieren, fließt Ihr Profil in die Sitzungen ein. Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil wechseln.
 
 **Aus (Standard):**
 - Klassisches Coaching ohne Personalisierung
-- Ihr Profil wird nicht verwendet
+- Ihr Profil wird nicht verwendet -- auch wenn eines vorhanden ist
 
 **DPC (Dynamic Personality Coaching):**
 ✅ *Verfügbar für alle registrierten Nutzer*
-- Ihr Profil wird während der Sessions genutzt
-- Der Coach passt seinen Stil an Ihre Persönlichkeit an
-- Das Profil wird **nicht** verändert
+- Der Coach nutzt Ihr Profil, um seinen Kommunikationsstil an Ihre Persönlichkeit anzupassen
+- Er erkennt, wenn Herausforderungen mit Ihren **Stärken** bewältigt werden können, und weist behutsam auf **potenzielle Blind Spots** hin
+- Ihr Profil bleibt dabei **unverändert** (stabil)
+- Ideal für: Personalisiertes Coaching mit voller Kontrolle über das Profil
 
 **DPFL (Dynamic Personality-Focused Learning):**
-🔒 *Verfügbar ab Premium -- erfordert ein adaptives Profil*
-- Ihr Profil wird genutzt UND kann ab der **zweiten Session** vollständig verfeinert werden
-- Der Coach schlägt Profilanpassungen basierend auf dem Gespräch vor
-- Nach jeder Sitzung findet ein **Comfort Check** statt, der die Authentizität der Sitzung bewertet
+🔒 *Verfügbar ab Premium*
+- Alles was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
+- Der Coach schlägt nach dem Gespräch Profilanpassungen vor -- eine Art "Fremdbild"-Feedback, das Ihr "Selbstbild" ergänzt
+- Nach jeder Sitzung findet ein **Comfort Check** statt: Sie bewerten, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
+- Wenn Sie zurück zu DPC oder Aus wechseln, bleiben gesammelte Verfeinerungen erhalten
+- Ideal für: Selbstentdeckung & kontinuierliches Wachstum
 
-**Modus wechseln:** Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil ändern. Gesammelte Verfeinerungen bleiben erhalten.
+**⚠️ Hinweis:** Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der **Persönlichkeits-Signatur** (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren, um die Auswirkungen der Profilanpassungen in Ihrer Signatur sichtbar und erfahrbar zu machen.
 
 **Anzeige:** Der aktive Coaching-Modus wird im **Coach-Info-Modal** angezeigt (klicken Sie auf den Coach-Namen im Chat).
-
-### 4.6 Personalisiertes Coaching
-
-Mit einem aktiven Persönlichkeitsprofil wird das Coaching bei **allen Coaches** auf Sie zugeschnitten:
-- Jeder Coach passt seinen Kommunikationsstil an Ihre Persönlichkeitsmerkmale an
-- Die Gesprächsführung berücksichtigt Ihre bevorzugte Art der Kommunikation
-- Bei einem adaptiven Profil schlagen die Coaches kontinuierlich Anpassungen Ihres Persönlichkeitsprofils vor, die auf Basis des Gesprächsverlaufs gewonnen werden. Auf diese Weise bieten die Coaches "Fremdbild"-Feedback, welches Ihr "Selbstbild" optimal ergänzt.
-- Im DPC/DPFL-Modus nutzen die Coaches Ihre **Persönlichkeits-Signatur** aktiv: Sie erkennen, wenn Herausforderungen mit Ihren **Stärken** bewältigt werden können, und weisen behutsam auf **potenzielle Blind Spots** hin - besonders bei Motivations- und Beziehungsthemen.
 
 </div>
 </details>
@@ -689,7 +664,7 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Klienten-Feature)</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -698,22 +673,22 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist **Klienten-Benutzern** vorbehalten und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm. Es ist **auf Desktop und Tablets** verfügbar.
+Dieses Feature ist ab der **Premium-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm.
 
 ### Wie funktioniert es?
 
 **Schritt 1: Reflexionsfragen vor dem Upload**
-Beantworten Sie kurze Fragen, die Sie auf das Gespräch vorbereiten – z.B. zum Kontext, Ihrem Ziel oder Ihren Erwartungen. Diese Reflexion hilft der KI, die Auswertung besser auf Ihre Situation abzustimmen.
+Beantworten Sie kurze Fragen, die die Ausgangssituation des Gesprächs beschreiben – z.B. zum Kontext, Ihrem Ziel oder Ihren Erwartungen. Diese Reflexion hilft der KI, die Auswertung besser auf Ihre Situation abzustimmen.
 
 **Schritt 2: Transkript hochladen**
-Laden Sie Ihr Gespräch als Text ein oder als SRT-Datei (z.B. aus einer Transkriptions-App). Das Format sollte klar erkennbar sein (z.B. Sprecher: Text).
+Laden Sie Ihr Gespräch als Text oder als SRT-Datei hoch (z.B. aus einer Transkriptions-App). Das Format sollte klar erkennbar sein (z.B. Sprecher: Text).
 
 **Schritt 3: Detaillierte Auswertung**
 Die KI analysiert Ihr Gespräch und liefert eine strukturierte Auswertung. Sie erhalten u.a. Bewertungen, Einblicke und konkrete Empfehlungen (siehe unten).
 
 ### Was erhalten Sie?
 
-Die Auswertung enthält folgende Komponenten – in verständlicher Sprache:
+Die Auswertung enthält folgende Komponenten:
 
 - **Zielausrichtung (X/5):** Wie gut wurde das Gesprächsziel erreicht? Eine Einschätzung der Zielerreichung.
 - **Verhaltensanalyse (X/5):** Wie haben Sie sich im Gespräch verhalten? Eine Analyse Ihres Kommunikationsstils und Ihrer Verhaltensmuster.
@@ -734,7 +709,8 @@ Am Ende jeder Auswertung erhalten Sie **KI-generierte Coaching-Empfehlungen** f�
 
 Jede Empfehlung enthält:
 - **Begründung:** Warum dieser Coach für Ihren Entwicklungsbereich besonders geeignet ist
-- **Gesprächseinstieg:** Ein konkreter Beispielsatz, mit dem Sie die erste Sitzung zu diesem Thema starten können (per Klick in die Zwischenablage kopierbar)
+- **Gesprächseinstieg:** Ein konkreter Beispielsatz, mit dem Sie die erste Sitzung zu diesem Thema starten können (per Klick in die Zwischenablage kopierbar). **Vorteil:** Wenn Sie den kopierten Einstieg manuell in den Chat einfügen, kann der Coach zunächst Ihre offenen Ziele aus früheren Sitzungen ansprechen, bevor er auf das neue Thema eingeht.
+- **Direkt-Start:** Alternativ können Sie über den **Sitzungs-Button** direkt eine Coaching-Sitzung mit dem vorgeschlagenen Gesprächseinstieg starten. Der Coach überspringt dabei seine üblichen Einleitungsfragen und geht sofort auf Ihr Thema ein – offene Ziele werden in diesem Fall nicht vorab besprochen.
 
 **Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich an, ob Sie Zugang zum jeweiligen Coach haben:
 - 🟢 **Verfügbar** – Sie können diesen Coach sofort nutzen
@@ -745,7 +721,7 @@ Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungs
 
 ### Persönlichkeitsprofile & Personalisierung
 
-**Wenn Sie ein Persönlichkeitsprofil angelegt haben**, nutzt die KI dieses zusätzlich. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. So können Sie verstehen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
+**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe Kapitel 4), nutzt die KI dieses automatisch bei der Auswertung. Aktivieren Sie dazu vor dem Upload die Option **"Persönlichkeitsprofil einbeziehen"** im Reflexionsfragebogen. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. Die Auswertung zeigt Ihnen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
 
 ### Zusätzliche Funktionen
 
@@ -866,8 +842,8 @@ The app offers four access tiers with increasing functionality:
 | :--- | :--- | :--- | :--- |
 | **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
 | **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
-| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile |
-| **Client** | Access code from manualmode.at | + Rob, Victor | Transcript evaluation, all features |
+| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
+| **Client** | Access code from manualmode.at | + Rob, Victor | Audio transcription, all features |
 
 **How to upgrade:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes in various durations (1, 3, or 12 months) as well as individual coach unlocks. Alternatively, go to **Account Management → "Redeem Code"** to enter an access code.
 
@@ -1065,52 +1041,32 @@ Based on your test results and these stories, our AI generates a unique **Person
 
 **PDF Export:** Use the **"Download as PDF"** button to export your complete personality profile -- including test results, signature, and facets -- as a PDF file.
 
-### 4.4 Adaptive vs. Stable Profile
+### 4.4 Coaching Modes
 
-At the end of the test, you choose how your profile should evolve:
-
-**📊 Adaptive Profile:**
-- Learns from your coaching sessions
-- Refines itself automatically over time
-- After each session, you'll be asked how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
-- Ideal for: Self-discovery & continuous growth
-
-**🔒 Stable Profile:**
-- Remains unchanged until the next manual evaluation
-- You keep full control over changes
-- Ideal for: Clear baseline & targeted comparisons
-
-**Warning:** For an adaptive profile with existing refinements, you'll receive a warning when starting a new test that all previous adaptations will be overwritten.
-
-### 4.5 Coaching Modes
-
-With a personality profile, you can choose between three coaching modes:
+Having a personality profile alone does not change coaching. Only when you activate a **coaching mode** does your profile feed into sessions. You can switch modes at any time in your personality profile.
 
 **Off (Default):**
 - Classic coaching without personalization
-- Your profile is not used
+- Your profile is not used -- even if one exists
 
 **DPC (Dynamic Personality Coaching):**
-- Your profile is used during sessions
-- The coach adapts their style to your personality
-- The profile is **not** modified
+✅ *Available for all registered users*
+- The coach uses your profile to adapt their communication style to your personality
+- They recognize when challenges can be addressed with your **strengths**, and gently point out **potential blind spots**
+- Your profile remains **unchanged** (stable)
+- Ideal for: Personalized coaching with full control over your profile
 
 **DPFL (Dynamic Personality-Focused Learning):**
-- Your profile is used AND can be fully refined from the **second session** onwards
-- The coach suggests profile adjustments based on the conversation
-- Requires an **adaptive profile**
+🔒 *Available from Premium*
+- Everything DPC offers, plus: your profile becomes **adaptive** and can be refined from the **second session** onwards
+- The coach suggests profile adjustments after the conversation -- a form of "external perspective" feedback that complements your "self-image"
+- After each session, a **Comfort Check** takes place: you rate how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
+- If you switch back to DPC or Off, collected refinements are preserved
+- Ideal for: Self-discovery & continuous growth
 
-**Switching Modes:** You can change the mode at any time in your personality profile. Collected refinements are preserved.
+**⚠️ Note:** Starting a new personality test will overwrite all previous DPFL refinements. However, creating or updating your **Personality Signature** (see 4.3) has no effect on your refinements — on the contrary: it is particularly useful to regenerate the signature after a few DPFL sessions, so you can see and experience the impact of your profile adjustments reflected in your signature.
 
 **Display:** The active coaching mode is shown in the **Coach Info Modal** (click on the coach's name in the chat).
-
-### 4.6 Personalized Coaching
-
-With an active personality profile, coaching is tailored to you with **all coaches**:
-- Every coach adapts their communication style to your personality traits
-- Conversation guidance considers your preferred way of communicating
-- With an adaptive profile, coaches continuously suggest adjustments to your personality profile based on conversation insights. This way, coaches provide "external perspective" feedback that optimally complements your "self-image".
-- In DPC/DPFL mode, coaches actively use your **Personality Signature**: They recognize when challenges can be addressed with your **strengths**, and gently point out **potential blind spots** - especially for motivation and relationship topics.
 
 </div>
 </details>
@@ -1433,7 +1389,7 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Client Feature)</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1442,12 +1398,12 @@ Transcript Evaluation helps you reflect on real conversations—e.g., with clien
 
 ### Who Can Use It?
 
-This feature is reserved for **Client users** and is located in the **"Tools"** area on the coach selection screen. It is **available on desktop and tablets**.
+This feature is available from the **Premium access tier** and above, and is located in the **"Tools"** area on the coach selection screen.
 
 ### How Does It Work?
 
 **Step 1: Reflection Questions Before Upload**
-Answer short questions that prepare you for the conversation—e.g., about context, your goal, or your expectations. This reflection helps the AI tailor the evaluation better to your situation.
+Answer short questions that describe the initial situation of the conversation—e.g., about context, your goal, or your expectations. This reflection helps the AI tailor the evaluation better to your situation.
 
 **Step 2: Upload Transcript**
 Upload your conversation as text or as an SRT file (e.g., from a transcription app). The format should be clearly recognizable (e.g., Speaker: Text).
@@ -1457,7 +1413,7 @@ The AI analyzes your conversation and delivers a structured evaluation. You rece
 
 ### What to Expect
 
-The evaluation contains the following components—explained in plain language:
+The evaluation contains the following components:
 
 - **Goal Alignment (X/5):** How well was the conversation goal achieved? An assessment of goal attainment.
 - **Behavior Analysis (X/5):** How did you behave in the conversation? An analysis of your communication style and behavioral patterns.
@@ -1478,7 +1434,8 @@ At the end of each evaluation, you receive **AI-generated coaching recommendatio
 
 Each recommendation includes:
 - **Rationale:** Why this coach is particularly suitable for your development area
-- **Conversation Starter:** A concrete example prompt to kick off your first session on this topic (click to copy to clipboard)
+- **Conversation Starter:** A concrete example prompt to kick off your first session on this topic (click to copy to clipboard). **Advantage:** If you paste the copied starter manually into the chat, the coach can first address your open goals from previous sessions before diving into the new topic.
+- **Direct Start:** Alternatively, you can use the **Session button** to directly launch a coaching session with the suggested conversation starter. The coach skips its usual introductory questions and immediately addresses your topic—open goals are not discussed beforehand in this case.
 
 **Availability at a Glance:** The recommendation cards use color coding to show whether you have access to each coach:
 - 🟢 **Available** – You can use this coach right away
@@ -1489,7 +1446,7 @@ The recommendations also appear in the **PDF export**, so you can document your 
 
 ### Personality Profiles & Personalization
 
-**If you have a Personality Profile**, the AI uses it as well. You will then receive **personality-based insights** tailored to your communication style and personality traits. This helps you understand how your typical patterns showed up in this conversation—and where you can target improvements.
+**If you have a Personality Profile** (see Chapter 4), the AI will automatically use it during the evaluation. To enable this, activate the **"Include Personality Profile"** option in the reflection questionnaire before uploading. You will then receive **personality-based insights** tailored to your communication style and personality traits. The evaluation shows how your typical patterns appeared in this conversation—and where you can target improvements.
 
 ### Additional Features
 

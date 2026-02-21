@@ -171,10 +171,10 @@ async function decryptProfile(encryptedData, derivationInfo) {
 /**
  * Analyzes personality profile and determines dominant traits
  * @param {Object} profile - Decrypted personality profile
- * @param {string} lang - Language ('de' or 'en')
+ * @param {string} language - Language ('de' or 'en')
  * @returns {Object} Analysis with dominant and weak traits
  */
-function analyzeProfile(profile, lang = 'de') {
+function analyzeProfile(profile, language = 'de') {
   const analysis = {
     testType: profile.path,
     completedLenses: profile.completedLenses || [],
@@ -208,8 +208,8 @@ function analyzeProfile(profile, lang = 'de') {
     analysis.sdAnalysis = {
       dominantLevels: dominantSD,
       underdevelopedLevels: underdevelopedSD,
-      primaryStrategy: SD_STRATEGIES[primaryLevel]?.high?.[lang] || SD_STRATEGIES[primaryLevel]?.high?.['de'],
-      blindspotStrategy: SD_STRATEGIES[weakestLevel]?.low?.[lang] || SD_STRATEGIES[weakestLevel]?.low?.['de']
+      primaryStrategy: SD_STRATEGIES[primaryLevel]?.high?.[language] || SD_STRATEGIES[primaryLevel]?.high?.['de'],
+      blindspotStrategy: SD_STRATEGIES[weakestLevel]?.low?.[language] || SD_STRATEGIES[weakestLevel]?.low?.['de']
     };
     
     // Add to overall dominant/weak if this is the primary profile type
@@ -243,8 +243,8 @@ function analyzeProfile(profile, lang = 'de') {
     // Build strategies (language-specific) - only set if not already set by another analysis
     if (!analysis.strategies.primary) {
       analysis.strategies = {
-        primary: RIEMANN_STRATEGIES[scores[0].trait].high[lang] || RIEMANN_STRATEGIES[scores[0].trait].high['de'],
-        blindspot: RIEMANN_STRATEGIES[weakestTrait].low[lang] || RIEMANN_STRATEGIES[weakestTrait].low['de']
+        primary: RIEMANN_STRATEGIES[scores[0].trait].high[language] || RIEMANN_STRATEGIES[scores[0].trait].high['de'],
+        blindspot: RIEMANN_STRATEGIES[weakestTrait].low[language] || RIEMANN_STRATEGIES[weakestTrait].low['de']
       };
     }
   }
@@ -270,8 +270,8 @@ function analyzeProfile(profile, lang = 'de') {
       analysis.blindspotLevel = isWeakestLow ? 'low' : 'high';
 
       analysis.strategies = {
-        primary: BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low'][lang] || BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low']['de'],
-        blindspot: BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high'][lang] || BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high']['de']
+        primary: BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low'][language] || BIG5_STRATEGIES[primary.trait][primary.score >= 4 ? 'high' : 'low']['de'],
+        blindspot: BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high'][language] || BIG5_STRATEGIES[weakest.trait][isWeakestLow ? 'low' : 'high']['de']
       };
     }
   }
@@ -288,10 +288,10 @@ function analyzeProfile(profile, lang = 'de') {
 /**
  * Generates adaptive system prompt based on profile analysis
  * @param {Object} analysis - Profile analysis
- * @param {string} lang - Language ('de' or 'en')
+ * @param {string} language - Language ('de' or 'en')
  * @returns {string} Adaptive system prompt addition
  */
-function generateAdaptivePrompt(analysis, lang = 'de') {
+function generateAdaptivePrompt(analysis, language = 'de') {
   const { strategies, sdAnalysis, narrativeProfile } = analysis;
 
   if (!strategies.primary && !sdAnalysis && !narrativeProfile) {
@@ -441,7 +441,7 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
     }
   };
 
-  const t = translations[lang] || translations['de'];
+  const t = translations[language] || translations['de'];
 
   let adaptivePrompt = t.header;
   adaptivePrompt += t.intro;
@@ -479,7 +479,7 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
     const blindspotType = analysis.blindspotTrait;
     if (blindspotType) {
       // Check for Riemann trait examples first (simple key like 'dauer', 'naehe')
-      let examples = CHALLENGE_EXAMPLES[blindspotType]?.[lang] || CHALLENGE_EXAMPLES[blindspotType]?.['de'];
+      let examples = CHALLENGE_EXAMPLES[blindspotType]?.[language] || CHALLENGE_EXAMPLES[blindspotType]?.['de'];
       
       // If not found, it might be a Big5 trait - try with level suffix
       if (!examples) {
@@ -487,7 +487,7 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
         if (big5Traits.includes(blindspotType)) {
           // Use the tracked level (low or high) from analysis
           const level = analysis.blindspotLevel || 'low';
-          examples = CHALLENGE_EXAMPLES[`${blindspotType}_${level}`]?.[lang] || 
+          examples = CHALLENGE_EXAMPLES[`${blindspotType}_${level}`]?.[language] || 
                      CHALLENGE_EXAMPLES[`${blindspotType}_${level}`]?.['de'];
         }
       }
@@ -552,11 +552,11 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
  * Main function: Generate adaptive prompt for a user using StrategyMerger
  * @param {string} userId - User ID
  * @param {Object} decryptedProfile - Already decrypted profile (from frontend)
- * @param {string} lang - Language ('de' or 'en')
+ * @param {string} language - Language ('de' or 'en')
  * @param {string} botId - Bot ID for bot-specific adaptations
  * @returns {Object} { prompt: string, strategiesUsed: string[], mergeMetadata: Object } - Adaptive system prompt and strategies used
  */
-async function generatePromptForUser(userId, decryptedProfile, lang = 'de', botId = null) {
+async function generatePromptForUser(userId, decryptedProfile, language = 'de', botId = null) {
   try {
     if (!decryptedProfile) {
       console.warn(`DPC: No profile provided for user ${userId}`);
@@ -564,7 +564,7 @@ async function generatePromptForUser(userId, decryptedProfile, lang = 'de', botI
     }
 
     // Use StrategyMerger to intelligently merge strategies
-    const merger = new StrategyMerger(decryptedProfile, lang);
+    const merger = new StrategyMerger(decryptedProfile, language);
     const mergeResult = merger.merge();
 
     // Validate narrative consistency if narrative profile exists
@@ -581,15 +581,15 @@ async function generatePromptForUser(userId, decryptedProfile, lang = 'de', botI
       mergeResult,
       decryptedProfile.narrativeProfile,
       narrativeValidation,
-      lang,
+      language,
       botId
     );
 
     // Build human-readable strategy list for telemetry
-    const strategiesUsed = buildStrategyTelemetry(mergeResult, lang);
+    const strategiesUsed = buildStrategyTelemetry(mergeResult, language);
 
     console.log(`🧪 [DPC] Generated adaptive prompt for user ${userId}`);
-    console.log(`   Language: ${lang}`);
+    console.log(`   Language: ${language}`);
     console.log(`   Models: ${mergeResult.metadata.models.join(', ')}`);
     console.log(`   Merge Type: ${mergeResult.metadata.mergeType}`);
     console.log(`   Strategies: ${strategiesUsed.join(', ')}`);
@@ -625,11 +625,11 @@ async function generatePromptForUser(userId, decryptedProfile, lang = 'de', botI
  * @param {Object} mergeResult - Result from StrategyMerger
  * @param {Object} narrativeProfile - AI-generated narrative profile
  * @param {Object} narrativeValidation - Narrative consistency validation result
- * @param {string} lang - Language
+ * @param {string} language - Language
  * @param {string} botId - Bot ID for bot-specific adaptations
  * @returns {string} Adaptive prompt
  */
-function generateAdaptivePromptFromMerge(mergeResult, narrativeProfile, narrativeValidation, lang = 'de', botId = null) {
+function generateAdaptivePromptFromMerge(mergeResult, narrativeProfile, narrativeValidation, language = 'de', botId = null) {
   const translations = {
     de: {
       header: '**Dynamische Persönlichkeits-Anpassung (DPC)**\n',
@@ -863,7 +863,7 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
     }
   };
 
-  const t = translations[lang] || translations['de'];
+  const t = translations[language] || translations['de'];
   let adaptivePrompt = t.header;
   adaptivePrompt += t.intro;
 
@@ -900,12 +900,12 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
       
       // Add challenge examples if available
       const exampleKey = blindspot.trait;
-      let examples = CHALLENGE_EXAMPLES[exampleKey]?.[lang] || CHALLENGE_EXAMPLES[exampleKey]?.['de'];
+      let examples = CHALLENGE_EXAMPLES[exampleKey]?.[language] || CHALLENGE_EXAMPLES[exampleKey]?.['de'];
       
       // Try with level suffix for Big5
       if (!examples && blindspot.model === 'big5') {
         const level = blindspot.severity > 0.5 ? 'high' : 'low';
-        examples = CHALLENGE_EXAMPLES[`${exampleKey}_${level}`]?.[lang] || 
+        examples = CHALLENGE_EXAMPLES[`${exampleKey}_${level}`]?.[language] || 
                    CHALLENGE_EXAMPLES[`${exampleKey}_${level}`]?.['de'];
       }
       
@@ -920,7 +920,7 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
     
     // Option A+: Kontext-Mapping for AVA (contextual blindspot selection)
     if (botId === 'ava-strategic' && mergeResult.blindspots.length > 1) {
-      adaptivePrompt += lang === 'de'
+      adaptivePrompt += language === 'de'
         ? '\n**BLINDSPOT-KONTEXT-MATCHING:**\n'
         : '\n**BLINDSPOT CONTEXT-MATCHING:**\n';
       
@@ -930,22 +930,22 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
         // Riemann-specific contexts
         if (bs.model === 'riemann') {
           if (bs.trait === 'dauer') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Entscheidungen unter Unsicherheit spricht', 'wenn User Spontanität vermeidet oder zu viel plant']
               : ['when user talks about decisions under uncertainty', 'when user avoids spontaneity or over-plans'];
           }
           if (bs.trait === 'wechsel') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Routine oder Langeweile spricht', 'wenn User langfristige Planung vermeidet']
               : ['when user talks about routine or boredom', 'when user avoids long-term planning'];
           }
           if (bs.trait === 'naehe') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Konflikte oder Abgrenzung spricht', 'wenn User zu viel für andere tut oder sich ausgenutzt fühlt']
               : ['when user talks about conflicts or boundaries', 'when user does too much for others or feels taken advantage of'];
           }
           if (bs.trait === 'distanz') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User emotionale Themen oder Verletzlichkeit vermeidet', 'wenn User Beziehungsprobleme schildert']
               : ['when user avoids emotional topics or vulnerability', 'when user describes relationship problems'];
           }
@@ -954,27 +954,27 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
         // Big5-specific contexts
         if (bs.model === 'big5') {
           if (bs.trait === 'conscientiousness' && bs.severity < 0.5) {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Prokrastination oder Ziele spricht']
               : ['when user talks about procrastination or goals'];
           }
           if (bs.trait === 'openness' && bs.severity < 0.5) {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User in Routinen feststeckt']
               : ['when user is stuck in routines'];
           }
           if (bs.trait === 'extraversion' && bs.severity < 0.5) {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über soziale Situationen spricht']
               : ['when user talks about social situations'];
           }
           if (bs.trait === 'agreeableness' && bs.severity > 0.7) {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Grenzen setzen spricht']
               : ['when user talks about setting boundaries'];
           }
           if (bs.trait === 'neuroticism' && bs.severity > 0.7) {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Ängste oder Stress spricht']
               : ['when user talks about fears or stress'];
           }
@@ -983,24 +983,24 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
         // Spiral Dynamics-specific contexts
         if (bs.model === 'sd') {
           if (bs.trait === 'orange') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Effizienz oder Erfolg spricht']
               : ['when user talks about efficiency or success'];
           }
           if (bs.trait === 'green') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Beziehungen oder Harmonie spricht']
               : ['when user talks about relationships or harmony'];
           }
           if (bs.trait === 'blue') {
-            contexts = lang === 'de'
+            contexts = language === 'de'
               ? ['wenn User über Struktur oder Regeln spricht']
               : ['when user talks about structure or rules'];
           }
         }
         
         if (contexts.length > 0) {
-          const joinWord = lang === 'de' ? ' oder ' : ' or ';
+          const joinWord = language === 'de' ? ' oder ' : ' or ';
           adaptivePrompt += `${idx + 1}. ${bs.blindspot} → Challenge ${contexts.join(joinWord)}\n`;
         }
       });
@@ -1100,10 +1100,10 @@ If this is the FIRST message of a session and you're asking about "Next Steps":
 /**
  * Build human-readable strategy list for telemetry
  * @param {Object} mergeResult - Result from StrategyMerger
- * @param {string} lang - Language
+ * @param {string} language - Language
  * @returns {Array} Array of strategy descriptions
  */
-function buildStrategyTelemetry(mergeResult, lang) {
+function buildStrategyTelemetry(mergeResult, language) {
   const strategiesUsed = [];
   
   const riemannLabels = {
@@ -1132,11 +1132,11 @@ function buildStrategyTelemetry(mergeResult, lang) {
       .filter(d => d.included)
       .forEach(dim => {
         if (dim.model === 'riemann') {
-          const label = riemannLabels[dim.trait]?.[lang] || dim.trait;
-          strategiesUsed.push(`${label} (${lang === 'de' ? 'hoch' : 'high'})`);
+          const label = riemannLabels[dim.trait]?.[language] || dim.trait;
+          strategiesUsed.push(`${label} (${language === 'de' ? 'hoch' : 'high'})`);
         } else if (dim.model === 'big5') {
-          const label = big5Labels[dim.trait]?.[lang] || big5Labels[dim.trait]?.en || dim.trait;
-          strategiesUsed.push(`${label} (${lang === 'de' ? 'hoch' : 'high'})`);
+          const label = big5Labels[dim.trait]?.[language] || big5Labels[dim.trait]?.en || dim.trait;
+          strategiesUsed.push(`${label} (${language === 'de' ? 'hoch' : 'high'})`);
         } else if (dim.model === 'sd') {
           strategiesUsed.push(`SD: ${sdLabels[dim.trait] || dim.trait}`);
         }

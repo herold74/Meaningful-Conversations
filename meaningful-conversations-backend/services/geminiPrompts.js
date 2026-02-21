@@ -324,8 +324,8 @@ const templates = {
 `
 };
 
-const getInterviewTemplate = (lang) => {
-    return lang === 'de' ? templates.de : templates.en;
+const getInterviewTemplate = (language) => {
+    return language === 'de' ? templates.de : templates.en;
 };
 
 
