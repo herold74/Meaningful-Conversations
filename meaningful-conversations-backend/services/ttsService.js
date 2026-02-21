@@ -166,8 +166,8 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
     
     // Get speech rate
     const rate = getSpeechRate(botId, isMeditation);
-    // Server TTS voices are 5% slower (lengthScale 1.05x higher)
-    const serverVoiceSlowdown = 1.05;
+    // Server TTS voices are 10% slower (lengthScale 1.10x higher)
+    const serverVoiceSlowdown = 1.10;
     const lengthScale = (1.0 / rate) * serverVoiceSlowdown; // Piper uses length_scale (inverse of rate)
     
     // Try TTS container first (if configured)
