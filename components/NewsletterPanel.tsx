@@ -11,7 +11,7 @@ const NewsletterPanel: React.FC = () => {
   const { language, t } = useLocalization();
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [history, setHistory] = useState<NewsletterHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [showSubscribers, setShowSubscribers] = useState(false);
@@ -46,7 +46,7 @@ const NewsletterPanel: React.FC = () => {
     } catch (error) {
       console.error('Failed to load newsletter data:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -143,7 +143,7 @@ const NewsletterPanel: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-6 bg-background-secondary dark:bg-background-primary rounded-lg">
         <div className="flex items-center justify-center">

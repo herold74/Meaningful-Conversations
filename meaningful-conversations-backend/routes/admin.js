@@ -47,7 +47,7 @@ router.get('/users', async (req, res) => {
             completedLenses: u.personalityProfile
                 ? JSON.parse(u.personalityProfile.completedLenses || '[]')
                 : [],
-            hasProfile: !!u.personalityProfile,
+            hasPersonalityProfile: !!u.personalityProfile,
             personalityProfile: undefined,
         }));
         res.json(mapped);
@@ -554,16 +554,16 @@ router.post('/send-newsletter', async (req, res) => {
         for (const subscriber of subscribers) {
             try {
                 // Use user's preferred language
-                const lang = subscriber.preferredLanguage || 'de';
+                const language = subscriber.preferredLanguage || 'de';
                 
-                const subject = lang === 'de' ? subjectDE : subjectEN;
+                const subject = language === 'de' ? subjectDE : subjectEN;
                 const content = {
-                    textBody: lang === 'de' ? textBodyDE : textBodyEN,
-                    htmlBody: lang === 'de' ? generatedHtmlDE : generatedHtmlEN,
+                    textBody: language === 'de' ? textBodyDE : textBodyEN,
+                    htmlBody: language === 'de' ? generatedHtmlDE : generatedHtmlEN,
                     unsubscribeToken: subscriber.unsubscribeToken
                 };
                 
-                await sendNewsletterEmail(subscriber.email, subject, content, lang);
+                await sendNewsletterEmail(subscriber.email, subject, content, language);
                 results.success++;
                 
                 // Small delay between emails to avoid rate limiting
@@ -725,7 +725,7 @@ router.get('/transcript-ratings', async (req, res) => {
                 contactOptIn: true,
                 ratedAt: true,
                 createdAt: true,
-                lang: true,
+                language: true,
                 // GDPR: preAnswers and evaluationData are NOT exposed to admin
                 user: {
                     select: {
@@ -749,7 +749,7 @@ router.get('/transcript-ratings', async (req, res) => {
             contactOptIn: r.contactOptIn,
             ratedAt: r.ratedAt,
             createdAt: r.createdAt,
-            lang: r.lang
+            language: r.language
         }));
 
         // Calculate NPS statistics

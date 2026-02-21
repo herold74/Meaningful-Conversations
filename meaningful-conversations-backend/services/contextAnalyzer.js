@@ -123,10 +123,10 @@ const LINGUISTIC_PATTERNS = {
  * Uses keyword counting across recent history.
  * 
  * @param {string[]} recentMessages - Last 3-5 user messages
- * @param {string} lang - Language code ('de' or 'en')
+ * @param {string} language - Language code ('de' or 'en')
  * @returns {{ topic: string|null, confidence: number, scores: object }}
  */
-function detectTopic(recentMessages, lang = 'de') {
+function detectTopic(recentMessages, language = 'de') {
   if (!recentMessages || recentMessages.length === 0) {
     return { topic: null, confidence: 0, scores: {} };
   }
@@ -135,7 +135,7 @@ function detectTopic(recentMessages, lang = 'de') {
   const scores = {};
 
   for (const [topic, patterns] of Object.entries(TOPIC_PATTERNS)) {
-    const langPatterns = patterns[lang] || patterns.de;
+    const langPatterns = patterns[language] || patterns.de;
     let score = 0;
 
     for (const keyword of langPatterns) {
@@ -175,16 +175,16 @@ function detectTopic(recentMessages, lang = 'de') {
  * Detect linguistic pattern in a sentence.
  * 
  * @param {string} sentence - Single sentence to analyze
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {{ pattern: string|null, confidence: number }}
  */
-function detectLinguisticPattern(sentence, lang = 'de') {
+function detectLinguisticPattern(sentence, language = 'de') {
   if (!sentence) {
     return { pattern: null, confidence: 0 };
   }
 
   for (const [patternName, patterns] of Object.entries(LINGUISTIC_PATTERNS)) {
-    const langPatterns = patterns[lang] || patterns.de;
+    const langPatterns = patterns[language] || patterns.de;
 
     for (const regex of langPatterns) {
       if (regex.test(sentence)) {
@@ -251,10 +251,10 @@ function findCoKeywords(sentence, allKeywords) {
  * @param {string} message - Current user message
  * @param {string[]} recentMessages - Last 3-5 user messages (for topic detection)
  * @param {string[]} overlappingKeywords - Keywords that appear in multiple frameworks
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {object} Context analysis result
  */
-function analyzeContext(message, recentMessages = [], overlappingKeywords = [], lang = 'de') {
+function analyzeContext(message, recentMessages = [], overlappingKeywords = [], language = 'de') {
   if (!message) {
     return {
       topic: { topic: null, confidence: 0, scores: {} },
@@ -268,14 +268,14 @@ function analyzeContext(message, recentMessages = [], overlappingKeywords = [], 
   const allMessages = [...recentMessages, message];
 
   // 1. Detect topic from conversation history
-  const topic = detectTopic(allMessages, lang);
+  const topic = detectTopic(allMessages, language);
 
   // 2. Split message into sentences for fine-grained analysis
   const sentences = splitIntoSentences(message);
 
   // 3. Analyze each sentence
   const sentenceContexts = sentences.map(sentence => {
-    const linguisticPattern = detectLinguisticPattern(sentence, lang);
+    const linguisticPattern = detectLinguisticPattern(sentence, language);
     const coKeywords = findCoKeywords(sentence, overlappingKeywords);
 
     return {
@@ -287,7 +287,7 @@ function analyzeContext(message, recentMessages = [], overlappingKeywords = [], 
   });
 
   // 4. Overall linguistic pattern (from full message)
-  const overallPattern = detectLinguisticPattern(message, lang);
+  const overallPattern = detectLinguisticPattern(message, language);
 
   return {
     topic,

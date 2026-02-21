@@ -195,7 +195,7 @@ interface TranscriptEvaluationPDFProps {
   evaluation: TranscriptEvaluationResult;
   preAnswers: TranscriptPreAnswers;
   userEmail?: string;
-  lang: 'de' | 'en';
+  language: 'de' | 'en';
 }
 
 const BulletList: React.FC<{ items: string[] }> = ({ items }) => {
@@ -216,7 +216,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
   evaluation,
   preAnswers,
   userEmail,
-  lang,
+  language,
 }) => {
   const t = (key: string) => {
     const translations: Record<string, { de: string; en: string }> = {
@@ -261,12 +261,12 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
         en: 'Generated for {user} • Personal and Confidential • {date}',
       },
     };
-    return translations[key]?.[lang] || key;
+    return translations[key]?.[language] || key;
   };
 
   const formatDate = () => {
     const date = new Date();
-    return date.toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
+    return date.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -534,7 +534,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
         <View style={styles.footerContainer} fixed>
           <View style={styles.footer}>
             <Text>
-              {t('footer_template').replace('{user}', userEmail || (lang === 'de' ? 'Unbekannt' : 'Unknown')).replace('{date}', formatDate())}
+              {t('footer_template').replace('{user}', userEmail || (language === 'de' ? 'Unbekannt' : 'Unknown')).replace('{date}', formatDate())}
             </Text>
             <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>
               <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at
@@ -554,7 +554,7 @@ export const exportTranscriptEvaluationPDF = async (
   evaluation: TranscriptEvaluationResult,
   preAnswers: TranscriptPreAnswers,
   userEmail?: string,
-  lang: 'de' | 'en' = 'de'
+  language: 'de' | 'en' = 'de'
 ): Promise<void> => {
   const isNative = Capacitor.isNativePlatform();
   const fileName = `transcript_evaluation_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -565,7 +565,7 @@ export const exportTranscriptEvaluationPDF = async (
         evaluation={evaluation}
         preAnswers={preAnswers}
         userEmail={userEmail}
-        lang={lang}
+        language={language}
       />
     ).toBlob();
 
@@ -581,10 +581,10 @@ export const exportTranscriptEvaluationPDF = async (
         });
 
         await Share.share({
-          title: lang === 'de' ? 'Transkript-Auswertung' : 'Transcript Evaluation',
-          text: lang === 'de' ? 'Meine Transkript-Auswertung' : 'My Transcript Evaluation',
+          title: language === 'de' ? 'Transkript-Auswertung' : 'Transcript Evaluation',
+          text: language === 'de' ? 'Meine Transkript-Auswertung' : 'My Transcript Evaluation',
           url: savedFile.uri,
-          dialogTitle: lang === 'de' ? 'Auswertung teilen' : 'Share Evaluation',
+          dialogTitle: language === 'de' ? 'Auswertung teilen' : 'Share Evaluation',
         });
       };
       reader.readAsDataURL(blob);

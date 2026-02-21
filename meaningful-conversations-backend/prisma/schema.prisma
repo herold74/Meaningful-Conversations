@@ -260,7 +260,7 @@ model TranscriptEvaluation {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   preAnswers      String   @db.Text    // JSON: { goal, personalTarget, assumptions, satisfaction, difficult? }
   evaluationData  String   @db.Text    // JSON: structured AI evaluation result
-  lang            String   @default("de")
+  language        String   @default("de") @map("lang")
   createdAt       DateTime @default(now())
   
   // User rating fields (NPS-style)

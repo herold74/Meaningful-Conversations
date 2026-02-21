@@ -58,11 +58,11 @@ const getModelFromVoiceId = (voiceId: string): string | null => {
 export const synthesizeSpeech = async (
     text: string,
     botId: string,
-    lang: 'de' | 'en',
+    language: 'de' | 'en',
     isMeditation: boolean = false,
     voiceId?: string | null
 ): Promise<Blob> => {
-    const requestBody: any = { text, botId, lang, isMeditation };
+    const requestBody: any = { text, botId, language, isMeditation };
     if (voiceId) {
         const modelName = getModelFromVoiceId(voiceId);
         if (modelName) {

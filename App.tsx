@@ -69,6 +69,7 @@ const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
     level: 1,
     streak: 0,
+    longestStreak: 0,
     totalSessions: 0,
     lastSessionDate: null,
     unlockedAchievements: new Set<string>(),
@@ -280,46 +281,50 @@ const App: React.FC = () => {
         botId: string,
         messageCount: number
     ): GamificationState => {
-        let xpGained = (messageCount * 5) + ((analysis?.nextSteps?.length || 0) * 10);
-        
-        if (analysis?.hasConversationalEnd) {
-            xpGained += 50;
-        }
-        if (analysis?.hasAccomplishedGoal) {
-            xpGained += 25;
+        const isQualifiedSession = messageCount >= 5;
+
+        // Bug 5 fix: no XP for sessions with fewer than 5 messages
+        let xpGained = 0;
+        if (isQualifiedSession) {
+            xpGained = (messageCount * 5) + ((analysis?.nextSteps?.length || 0) * 10);
+            if (analysis?.hasConversationalEnd) xpGained += 50;
+            if (analysis?.hasAccomplishedGoal) xpGained += 25;
         }
 
+        // Bug 3 fix: use local dates instead of UTC to prevent timezone-related streak breaks
+        const toLocalDateString = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        const lastSession = currentState.lastSessionDate ? new Date(currentState.lastSessionDate) : null;
-        let newStreak = currentState.streak;
+        const today = toLocalDateString(now);
 
-        if (messageCount >= 5) {
-            if (lastSession) {
+        let newStreak = currentState.streak;
+        if (isQualifiedSession) {
+            if (currentState.lastSessionDate) {
                 const yesterday = new Date(now);
                 yesterday.setDate(now.getDate() - 1);
-                const lastSessionDay = lastSession.toISOString().split('T')[0];
-                const yesterdayDay = yesterday.toISOString().split('T')[0];
-    
-                if (lastSessionDay === yesterdayDay) {
-                    newStreak += 1; // It was yesterday, streak continues
-                } else if (lastSessionDay !== today) {
-                    newStreak = 1; // It wasn't yesterday or today, reset
+                const yesterdayStr = toLocalDateString(yesterday);
+
+                if (currentState.lastSessionDate === yesterdayStr) {
+                    newStreak += 1;
+                } else if (currentState.lastSessionDate !== today) {
+                    newStreak = 1;
                 }
             } else {
-                newStreak = 1; // First session
+                newStreak = 1;
             }
         }
-        
+
+        // Bug 2 fix: track longest streak
+        const newLongestStreak = Math.max(currentState.longestStreak || 0, newStreak);
+
+        // Bug 4 fix: exclude gloria-life-context from coachesUsed (not a standalone coaching bot)
         const newCoachesUsed = new Set(currentState.coachesUsed);
-        if(messageCount >= 5) {
+        if (isQualifiedSession && botId !== 'gloria-life-context') {
             newCoachesUsed.add(botId);
         }
-        
+
         const newXp = currentState.xp + xpGained;
         const newUnlockedAchievements = new Set(currentState.unlockedAchievements);
 
-        // Progressive XP calculation
         const calculateLevelFromXp = (xp: number) => {
             let level = 1;
             let requiredForNext = 100;
@@ -332,14 +337,15 @@ const App: React.FC = () => {
             return level;
         };
         const newLevel = calculateLevelFromXp(newXp);
-        
+
         const newState: GamificationState = {
             ...currentState,
             xp: newXp,
             level: newLevel,
             streak: newStreak,
-            totalSessions: currentState.totalSessions + (messageCount >= 5 ? 1 : 0),
-            lastSessionDate: messageCount >= 5 ? today : currentState.lastSessionDate,
+            longestStreak: newLongestStreak,
+            totalSessions: currentState.totalSessions + (isQualifiedSession ? 1 : 0),
+            lastSessionDate: isQualifiedSession ? today : currentState.lastSessionDate,
             coachesUsed: newCoachesUsed,
             unlockedAchievements: newUnlockedAchievements
         };
@@ -904,7 +910,7 @@ const App: React.FC = () => {
                                     chatHistory: chatHistory.map(m => ({ role: m.role, text: m.text })),
                                     decryptedProfile: profileForRefinement as Record<string, unknown>,
                                     profileType: profileType as 'RIEMANN' | 'BIG5',
-                                    lang: language
+                                    language
                                 });
                                 setRefinementPreview(preview);
                             } else {

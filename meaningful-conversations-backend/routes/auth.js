@@ -35,7 +35,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
 router.post('/register', registerLimiter, async (req, res) => {
-    const { email, password, firstName, lastName, newsletterConsent, lang } = req.body;
+    const { email, password, firstName, lastName, newsletterConsent, language } = req.body;
     const lowerCaseEmail = email.toLowerCase();
 
     try {
@@ -85,7 +85,7 @@ router.post('/register', registerLimiter, async (req, res) => {
                 email: lowerCaseEmail,
                 firstName: firstName || null,
                 lastName: lastName || null,
-                preferredLanguage: lang || 'de',
+                preferredLanguage: language || 'de',
                 newsletterConsent: newsletterConsent || false,
                 newsletterConsentDate: newsletterConsent ? new Date() : null,
                 unsubscribeToken,
@@ -99,20 +99,20 @@ router.post('/register', registerLimiter, async (req, res) => {
                 // Set default non-null values for the new fields
                 lifeContext: '',
                 gamificationState: serializeGamificationState({
-                    xp: 0, level: 1, streak: 0, totalSessions: 0, lastSessionDate: null,
+                    xp: 0, level: 1, streak: 0, longestStreak: 0, totalSessions: 0, lastSessionDate: null,
                     unlockedAchievements: new Set(), coachesUsed: new Set()
                 }),
                 unlockedCoaches: JSON.stringify([])
             },
         });
 
-        await sendConfirmationEmail(lowerCaseEmail, activationToken, lang);
+        await sendConfirmationEmail(lowerCaseEmail, activationToken, language);
 
         res.status(201).json({ message: 'Registration successful. Please check your email to activate your account.' });
 
     } catch (error) {
         console.error("Registration error:", error);
-        res.status(500).json({ error: 'An internal server error occurred during registration.' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
@@ -182,7 +182,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({ error: 'An internal server error occurred during login.' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
@@ -223,13 +223,13 @@ router.post('/verify-email', verifyEmailLimiter, async (req, res) => {
         
     } catch (error) {
         console.error("Email verification error:", error);
-        res.status(500).json({ error: 'An internal server error occurred.' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
 // POST /api/auth/forgot-password
 router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
-    const { email, lang } = req.body;
+    const { email, language } = req.body;
     const lowerCaseEmail = email.toLowerCase();
     
     try {
@@ -245,7 +245,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
                     passwordResetTokenExpires: expires,
                 },
             });
-            await sendPasswordResetEmail(lowerCaseEmail, token, lang);
+            await sendPasswordResetEmail(lowerCaseEmail, token, language);
         }
         res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
     } catch (error) {
@@ -285,7 +285,7 @@ router.post('/reset-password', async (req, res) => {
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {
         console.error('Reset password error:', error);
-        res.status(500).json({ error: 'An internal server error occurred.' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 

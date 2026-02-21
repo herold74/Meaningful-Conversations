@@ -253,7 +253,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const testScenarios = useMemo(() => getTestScenarios(t), [t]);
 
     const botsForCodes = useMemo(() => {
-        return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'nexus-gps');
+        return BOTS.filter(b => b.accessTier !== 'guest' && b.id !== 'nexus-gps' && b.id !== 'gloria-life-context');
     }, []);
 
     const [newCodeBotId, setNewCodeBotId] = useState('ACCESS_PASS_1M');
@@ -486,9 +486,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             result = result.filter(user => user.email.toLowerCase().includes(userSearchQuery.toLowerCase()));
         }
         if (profileFilter === 'with') {
-            result = result.filter(user => user.hasProfile);
+            result = result.filter(user => user.hasPersonalityProfile);
         } else if (profileFilter === 'without') {
-            result = result.filter(user => !user.hasProfile);
+            result = result.filter(user => !user.hasPersonalityProfile);
         }
         return result;
     }, [users, userSearchQuery, profileFilter]);
@@ -700,6 +700,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     textClass += ' hidden sm:inline';
                 }
 
+                const hasOpenTickets = tab === 'tickets' && tickets.some(tk => tk.status === 'OPEN');
+
                 return (
                     <button
                         key={tab}
@@ -711,7 +713,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         }`}
                         aria-label={t(key)}
                     >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <Icon className={`w-5 h-5 flex-shrink-0 ${hasOpenTickets ? 'text-red-500' : ''}`} />
                         <span className={textClass}>{t(key)}</span>
                     </button>
                 )
@@ -850,7 +852,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                             </div>
                                         </td>
                                         <td className="p-3 text-center">
-                                            {user.hasProfile ? (
+                                            {user.hasPersonalityProfile ? (
                                                 <div className="flex items-center justify-center gap-1">
                                                     {(user.completedLenses || []).map((lens: string) => {
                                                         const label = lens === 'riemann' ? 'R' : lens === 'ocean' ? 'O' : lens === 'sd' ? 'SD' : lens.toUpperCase();
@@ -961,15 +963,15 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     <div className="flex-1">
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
-                            <option disabled>── {t('admin_codes_section_registered')} ──</option>
+                            <option disabled>— {t('admin_codes_section_registered')} —</option>
                             <option value="REGISTERED_LIFETIME">{t('admin_codes_registered_lifetime')}</option>
-                            <option disabled>── {t('admin_codes_section_premium')} ──</option>
+                            <option disabled>— {t('admin_codes_section_premium')} —</option>
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="ACCESS_PASS_3M">{t('admin_codes_unlock_access_pass_3m')}</option>
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
-                            <option disabled>── Features ──</option>
+                            <option disabled>— Features —</option>
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
-                            <option disabled>── Coaches ──</option>
+                            <option disabled>— Coaches —</option>
                             {botsForCodes.map(bot => {
                                 const key = bot.id === 'rob'
                                     ? 'admin_codes_unlock_rob'
@@ -979,7 +981,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 const displayName = key ? t(key) : bot.name;
                                 return <option key={bot.id} value={bot.id}>{displayName}</option>;
                             })}
-                            <option disabled>── Status ──</option>
+                            <option disabled>— Status —</option>
                             <option value="premium">{t('admin_codes_unlock_premium')}</option>
                             <option value="client">{t('admin_codes_unlock_client')}</option>
                         </select>
@@ -1275,46 +1277,50 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     
     const renderRatings = () => (
         <div className="space-y-6">
-            {/* Session Feedback Section */}
-            <div>
-                <h2 className="text-xl font-bold text-content-primary mb-4">{t('admin_ratings_session_feedback')}</h2>
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-center rounded-lg shadow-md">
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">{t('admin_ratings_overall_avg')}</h3>
-                    <p className="text-4xl font-bold text-status-success-foreground">{ratingStats.overallAverage}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_total_ratings', { count: ratingStats.totalRatings })}</p>
-                </div>
-            </div>
-            {ratingStats.totalRatings > 0 ? (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {ratingStats.botStats.map(stat => (
-                            <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-accent-primary ${selectedBotFilter === stat.id ? 'border-accent-primary' : 'border-gray-200 dark:border-gray-700/50'}`}>
-                                <div className="flex items-center gap-4 mb-3">
-                                    <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
-                                    <div>
-                                        <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">{stat.name}</h4>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_avg_rating')}: <span className="font-bold text-gray-700 dark:text-gray-300">{stat.average}</span> ({stat.count})</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-1">
-                                    {([5, 4, 3, 2, 1]).map(star => {
-                                        const count = stat.distribution[String(star)];
-                                        const percentage = stat.count > 0 ? (count / stat.count) * 100 : 0;
-                                        return (
-                                            <div key={star} className="flex items-center gap-2 text-xs">
-                                                <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">{star} <StarIcon className="w-3 h-3 text-yellow-400"/></span>
-                                                <div className="w-full bg-gray-200 dark:bg-gray-700 h-4 flex-1">
-                                                    <div className="bg-status-success-foreground h-4 text-center text-black font-bold" style={{ width: `${percentage}%` }}>
-                                                        {count > 0 ? count : ''}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+            {/* Session Feedback Section — collapsible stats */}
+            <details className="group">
+                <summary className="cursor-pointer list-none">
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-bold text-content-primary">{t('admin_ratings_session_feedback')}</h2>
+                            <span className="text-3xl font-bold text-status-success-foreground">{ratingStats.overallAverage}</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">({ratingStats.totalRatings})</span>
+                        </div>
+                        <svg className="w-5 h-5 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                </summary>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {ratingStats.botStats.map(stat => (
+                        <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-accent-primary ${selectedBotFilter === stat.id ? 'border-accent-primary' : 'border-gray-200 dark:border-gray-700/50'}`}>
+                            <div className="flex items-center gap-4 mb-3">
+                                <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
+                                <div>
+                                    <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">{stat.name}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_avg_rating')}: <span className="font-bold text-gray-700 dark:text-gray-300">{stat.average}</span> ({stat.count})</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="space-y-1">
+                                {([5, 4, 3, 2, 1]).map(star => {
+                                    const count = stat.distribution[String(star)];
+                                    const percentage = stat.count > 0 ? (count / stat.count) * 100 : 0;
+                                    return (
+                                        <div key={star} className="flex items-center gap-2 text-xs">
+                                            <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">{star} <StarIcon className="w-3 h-3 text-yellow-400"/></span>
+                                            <div className="w-full bg-gray-200 dark:bg-gray-700 h-4 flex-1">
+                                                <div className="bg-status-success-foreground h-4 text-center text-black font-bold" style={{ width: `${percentage}%` }}>
+                                                    {count > 0 ? count : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </details>
+            {ratingStats.totalRatings > 0 ? (
+                <>
                     <div>
                          <div className="flex justify-between items-center mb-2">
                             <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{selectedBotFilter ? t('admin_ratings_details_for', { name: ratingStats.botStats.find(b => b.id === selectedBotFilter)?.name || '' }) : t('admin_ratings_all_feedback')}</h3>
@@ -1391,7 +1397,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         return (
             <div className="space-y-4">
                 {/* New Dynamic Test Runner Section - MOVED TO TOP */}
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-md">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">

@@ -16,7 +16,7 @@ interface NativePaywallProps {
 const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
   const { t } = useLocalization();
   const [products, setProducts] = useState<StoreProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
       } catch {
         setError(t('iap_load_error'));
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -80,7 +80,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
   const botUnlocks = nonConsumables.filter(p => p.iapProduct.tier === 'bot');
   const accessPasses = nonConsumables.filter(p => p.iapProduct.tier !== 'bot');
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400 text-center">
         {t('upgrade_loading')}

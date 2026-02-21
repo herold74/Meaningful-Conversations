@@ -32,7 +32,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
   const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,7 +54,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
       } catch {
         setProducts([]);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -227,7 +227,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
         )}
 
         {/* Product catalog */}
-        {!loading && products.length > 0 && (
+        {!isLoading && products.length > 0 && (
           <div className="md:flex md:gap-6 md:items-start space-y-4 md:space-y-0 text-left mb-6">
 
             {/* Access products (Registered Monthly + Lifetime) */}
@@ -310,7 +310,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
           </div>
         )}
 
-        {loading && (
+        {isLoading && (
           <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
         )}
 

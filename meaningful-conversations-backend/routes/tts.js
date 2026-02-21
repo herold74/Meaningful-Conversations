@@ -31,12 +31,12 @@ router.use(checkTtsAvailable);
  * Body:
  * - text: string (required) - Text to synthesize
  * - botId: string (required) - Bot ID for voice selection
- * - lang: string (required) - Language code ('de' or 'en')
+ * - language: string (required) - Language code ('de' or 'en')
  * - isMeditation: boolean (optional) - Use slower meditation voice
  * - voiceId: string (optional) - Specific voice ID (e.g., 'de-mls', 'en-ryan')
  */
 router.post('/synthesize', authMiddleware, async (req, res) => {
-    const { text, botId, lang, isMeditation = false, voiceId = null } = req.body;
+    const { text, botId, language, isMeditation = false, voiceId = null } = req.body;
     const userId = req.userId;
     const startTime = Date.now();
     
@@ -49,7 +49,7 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
         return res.status(400).json({ error: 'Bot ID is required' });
     }
     
-    if (!lang || !['de', 'en'].includes(lang)) {
+    if (!language || !['de', 'en'].includes(language)) {
         return res.status(400).json({ error: 'Valid language code is required (de or en)' });
     }
     
@@ -73,7 +73,7 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
         }
         
         // Synthesize speech
-        const audioBuffer = await synthesizeSpeech(text, botId, lang, isMeditation, voiceId);
+        const audioBuffer = await synthesizeSpeech(text, botId, language, isMeditation, voiceId);
         
         // If no server voice available (returns null), fallback to local
         if (!audioBuffer) {
@@ -98,7 +98,7 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
             durationMs,
             success: true,
             metadata: {
-                language: lang,
+                language: language,
                 textLength: characterCount,
                 isMeditation,
                 audioSize: audioBuffer.length,

@@ -108,8 +108,8 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
             </div>
             <p className="text-xs text-content-secondary leading-relaxed">
               {coachingMode === 'dpc' 
-                ? t('profile_coaching_mode_dpc_desc')
-                : t('profile_coaching_mode_dpfl_desc')
+                ? t('coaching_mode_dpc_desc')
+                : t('coaching_mode_dpfl_desc')
               }
             </p>
           </div>
@@ -356,20 +356,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       console.log('[TTS Init] Checking voice availability:', { savedMode, savedVoiceId, savedIsAuto, isNativeiOS });
       
       // Helper function to get best server voice for bot
-      const getBestServerVoice = (botId: string, lang: string): string | null => {
+      const getBestServerVoice = (botId: string, language: string): string | null => {
         let gender: 'male' | 'female' = 'female';
         
-        if (lang === 'en') {
+        if (language === 'en') {
           const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps'];
           gender = maleBotsEN.includes(botId) ? 'male' : 'female';
-        } else if (lang === 'de') {
+        } else if (language === 'de') {
           const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-cbt'];
           gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
         }
         
         // Map to voice IDs
-        // Note: No German female server voice available - will use local voice
-        if (lang === 'de') {
+        if (language === 'de') {
           return gender === 'female' ? null : 'de-thorsten';
         } else {
           return gender === 'female' ? 'en-amy' : 'en-ryan';
@@ -1218,20 +1217,19 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         
         if (healthData.status === 'ok' && healthData.piperAvailable) {
           // Server TTS available - select best voice for bot
-          const getBestServerVoice = (botId: string, lang: string): string | null => {
+          const getBestServerVoice = (botId: string, language: string): string | null => {
             let gender: 'male' | 'female' = 'female';
             
-            if (lang === 'en') {
+            if (language === 'en') {
               const maleBotsEN = ['max-ambitious', 'rob', 'kenji-stoic', 'nexus-gps', 'victor-bowen'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
-            } else if (lang === 'de') {
+            } else if (language === 'de') {
               const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-cbt'];
               gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
             }
             
             // Map to voice IDs
-            if (lang === 'de') {
-              // No female German server voice available - use local
+            if (language === 'de') {
               return gender === 'male' ? 'de-thorsten' : null;
             } else {
               return gender === 'female' ? 'en-amy' : 'en-ryan';
@@ -1483,14 +1481,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   }, [bot.id, isNewSession]);
   
   useEffect(() => {
-      const lastMsg = chatHistory[chatHistory.length - 1];
+      const lastMessage = chatHistory[chatHistory.length - 1];
       const isInitialBotResponse =
-          lastMsg?.role === 'bot' &&
+          lastMessage?.role === 'bot' &&
           (chatHistory.length === 1 ||
           (chatHistory.length === 2 && chatHistory[0].role === 'user'));
 
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f8fa79'},body:JSON.stringify({sessionId:'f8fa79',location:'ChatView.tsx:ttsFirstMsg',message:'TTS first-msg check',data:{historyLen:chatHistory.length,lastRole:lastMsg?.role,firstRole:chatHistory[0]?.role,isInitialBotResponse,isTtsEnabled,voicesLoaded:voices.length>0,alreadySpoken:hasSpokenFirstMessageRef.current,willSpeak:isInitialBotResponse&&voices.length>0&&isTtsEnabled&&!hasSpokenFirstMessageRef.current},timestamp:Date.now(),hypothesisId:'TTS-INIT'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f8fa79'},body:JSON.stringify({sessionId:'f8fa79',location:'ChatView.tsx:ttsFirstMsg',message:'TTS first-msg check',data:{historyLen:chatHistory.length,lastRole:lastMessage?.role,firstRole:chatHistory[0]?.role,isInitialBotResponse,isTtsEnabled,voicesLoaded:voices.length>0,alreadySpoken:hasSpokenFirstMessageRef.current,willSpeak:isInitialBotResponse&&voices.length>0&&isTtsEnabled&&!hasSpokenFirstMessageRef.current},timestamp:Date.now(),hypothesisId:'TTS-INIT'})}).catch(()=>{});
       // #endregion
 
       if (isInitialBotResponse &&
@@ -1498,7 +1496,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           isTtsEnabled &&
           !hasSpokenFirstMessageRef.current) {
         hasSpokenFirstMessageRef.current = true;
-        speak(lastMsg.text);
+        speak(lastMessage.text);
       }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatHistory, voices, isTtsEnabled]);
@@ -1895,7 +1893,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   };
 
   const handleOpenFeedbackModal = (botMessage: Message) => {
-    const botMessageIndex = chatHistory.findIndex(msg => msg.id === botMessage.id);
+    const botMessageIndex = chatHistory.findIndex(m => m.id === botMessage.id);
     let lastUserMessage: Message | null = null;
     if (botMessageIndex > 0) {
         for (let i = botMessageIndex - 1; i >= 0; i--) {

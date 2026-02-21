@@ -269,8 +269,8 @@ export const submitSessionLog = async (data: {
   
   // Analyze chat history for all three profile types (Riemann, Big5, SD)
   // This extracts delta values (high - low keyword counts) for DPFL refinement
-  const lang = data.language || 'de';
-  const frequencies = analyzeSession(data.chatHistory, lang);
+  const language = data.language || 'de';
+  const frequencies = analyzeSession(data.chatHistory, language);
   
   // Note: Transcript is NOT stored (GDPR compliance)
   // User can download transcript immediately after session
@@ -453,7 +453,7 @@ export const previewProfileRefinement = async (data: {
   chatHistory: Array<{ role: string; text: string }>;
   decryptedProfile: Record<string, unknown>;
   profileType: 'RIEMANN' | 'BIG5';
-  lang: string;
+  language: string;
 }): Promise<RefinementPreviewResult> => {
   const response = await fetch(`${API_BASE_URL}/api/personality/preview-refinement`, {
     method: 'POST',

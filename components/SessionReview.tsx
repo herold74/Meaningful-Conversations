@@ -720,7 +720,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('sessionReview_title')}</h1>
+                    <h1 className="text-3xl font-bold text-content-primary dark:text-content-primary uppercase">{t('sessionReview_title')}</h1>
                     <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
                 </div>
 
