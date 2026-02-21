@@ -7,6 +7,7 @@ export interface EncryptedPersonalityData {
     levels: Record<string, number>;
     dominantLevels: string[];
     underdevelopedLevels: string[];
+    rawAnswers?: Record<string, number>;
   };
   // Riemann-Thomann results
   riemann?: {
@@ -22,6 +23,7 @@ export interface EncryptedPersonalityData {
     extraversion: number;
     agreeableness: number;
     neuroticism: number;
+    rawAnswers?: Record<string, number>;
   };
   // Narrative data
   narratives?: {
