@@ -200,7 +200,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             <div className="mb-10">
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-                <div className="w-full max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
+                <div className="w-full min-w-0 max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
                 {/* Top row: 🔍 left | gray input box [textarea | mic | send] */}
                 <div className="flex items-center gap-2 mb-2">
                     <span className="text-[1.3rem] leading-none flex-shrink-0 opacity-60">🔍</span>
@@ -216,7 +216,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 onChange={e => setTopic(e.target.value)}
                                 placeholder={t('botSearch_placeholder')}
                             rows={1}
-                            className="flex-1 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-auto max-h-40 focus:outline-none"
+                            className="flex-1 w-0 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-auto max-h-40 focus:outline-none"
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
@@ -321,7 +321,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         {showCoachingBadge && (
           <div 
             className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40 text-accent-tertiary dark:text-accent-primary text-xs font-bold"
-            title={`${t('profile_coaching_mode_title')}: ${effectiveCoachingMode?.toUpperCase()}`}
+            title={`${t('coaching_mode_title')}: ${effectiveCoachingMode?.toUpperCase()}`}
           >
             {effectiveCoachingMode?.toUpperCase()}
           </div>

@@ -7,7 +7,7 @@ export const sendMessage = async (
     botId: string,
     context: string,
     history: Message[],
-    lang: Language,
+    language: Language,
     isNewSession: boolean,
     coachingMode?: string,
     decryptedPersonalityProfile?: any
@@ -19,7 +19,7 @@ export const sendMessage = async (
             botId, 
             context, 
             history: history, 
-            lang, 
+            language, 
             isNewSession,
             coachingMode,
             decryptedPersonalityProfile
@@ -31,14 +31,15 @@ export const sendMessage = async (
 export const analyzeSession = async (
     history: Message[],
     context: string,
-    lang: Language
+    language: Language
 ): Promise<SessionAnalysis> => {
     try {
         const response = await apiFetch('/gemini/session/analyze', {
             method: 'POST',
-            body: JSON.stringify({ history, context, lang }),
+            body: JSON.stringify({ history, context, language }),
         });
 
+        // Map Gemini schema field names to domain-specific frontend types
         const newFindings: string = (response && typeof response.summary === 'string')
             ? response.summary
             : "No specific new findings were summarized.";
@@ -97,12 +98,12 @@ export const analyzeSession = async (
 export const evaluateTranscript = async (
     preAnswers: TranscriptPreAnswers,
     transcript: string,
-    lang: Language,
+    language: Language,
     decryptedPersonalityProfile?: any
 ): Promise<TranscriptEvaluationResponse> => {
     return await apiFetch('/gemini/transcript/evaluate', {
         method: 'POST',
-        body: JSON.stringify({ preAnswers, transcript, lang, decryptedPersonalityProfile }),
+        body: JSON.stringify({ preAnswers, transcript, language, decryptedPersonalityProfile }),
     });
 };
 
@@ -124,7 +125,7 @@ export const rateTranscriptEvaluation = async (
     feedback?: string,
     contactOptIn?: boolean
 ): Promise<{ success: boolean; message: string }> => {
-    return await apiFetch(`/gemini/transcript/${evaluationId}/rate`, {
+    return await apiFetch(`/gemini/transcript/evaluations/${evaluationId}/rate`, {
         method: 'POST',
         body: JSON.stringify({ rating, feedback, contactOptIn: !!contactOptIn }),
     });
@@ -132,24 +133,24 @@ export const rateTranscriptEvaluation = async (
 
 export const generateInterviewTranscript = async (
     history: Message[],
-    lang: Language,
+    language: Language,
     userName?: string
 ): Promise<{ summary: string; setup: string; transcript: string }> => {
     const response = await apiFetch('/gemini/interview/transcript', {
         method: 'POST',
-        body: JSON.stringify({ history, lang, userName }),
+        body: JSON.stringify({ history, language, userName }),
     });
     return { summary: response.summary, setup: response.setup, transcript: response.transcript };
 };
 
 export const transcribeAudio = async (
     audioFile: File,
-    lang: Language,
+    language: Language,
     speakerHint?: number
 ): Promise<{ transcript: string; speakerCount: number }> => {
     const formData = new FormData();
     formData.append('audio', audioFile);
-    formData.append('lang', lang);
+    formData.append('language', language);
     if (speakerHint) {
         formData.append('speakerHint', String(speakerHint));
     }
@@ -165,22 +166,22 @@ export const transcribeAudio = async (
 
 export const recommendBotForTopic = async (
     topic: string,
-    lang: Language
+    language: Language
 ): Promise<{ primary: BotRecommendationEntry; secondary: BotRecommendationEntry }> => {
     return await apiFetch('/gemini/bot-recommendation', {
         method: 'POST',
-        body: JSON.stringify({ topic, lang }),
+        body: JSON.stringify({ topic, language }),
     });
 };
 
 export const generateContextFromInterview = async (
     history: Message[],
-    lang: Language
+    language: Language
 ): Promise<string> => {
     try {
         const response = await apiFetch('/gemini/session/format-interview', {
             method: 'POST',
-            body: JSON.stringify({ history, lang }),
+            body: JSON.stringify({ history, language }),
         });
         return response.markdown;
     } catch (error) {

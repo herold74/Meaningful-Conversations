@@ -119,7 +119,7 @@ interface ModelMapping {
 
 export const ApiUsageView: React.FC = () => {
     const { t } = useLocalization();
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState<ApiUsageStats | null>(null);
     const [dailyUsage, setDailyUsage] = useState<DailyUsage[]>([]);
     const [topUsers, setTopUsers] = useState<TopUser[]>([]);
@@ -223,7 +223,7 @@ export const ApiUsageView: React.FC = () => {
     };
 
     const fetchUsageData = async () => {
-        setLoading(true);
+        setIsLoading(true);
         setError(null);
         try {
             const { start, end } = getDateRange();
@@ -243,7 +243,7 @@ export const ApiUsageView: React.FC = () => {
             console.error('Failed to fetch API usage data:', err);
             setError(err.message || 'Failed to load usage data');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -306,7 +306,7 @@ export const ApiUsageView: React.FC = () => {
         loadModelMapping();
     }, [timeRange, startDate, endDate]);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
                 <Spinner />

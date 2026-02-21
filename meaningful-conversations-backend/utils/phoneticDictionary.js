@@ -36,16 +36,16 @@ function loadDictionary() {
 /**
  * Get phonetic replacements for a specific language
  * Uses cached dictionary for performance (no I/O on each request)
- * @param {string} lang - Language code ('de', 'en', etc.)
+ * @param {string} language - Language code ('de', 'en', etc.)
  * @returns {Array} Array of pattern objects with term, phonetic, and caseSensitive
  */
-function getPhoneticReplacements(lang) {
+function getPhoneticReplacements(language) {
     // Load dictionary on first access (lazy loading)
     if (!dictionaryCache) {
         dictionaryCache = loadDictionary();
     }
     
-    const languagePatterns = dictionaryCache.languages[lang];
+    const languagePatterns = dictionaryCache.languages[language];
     if (!languagePatterns || !languagePatterns.patterns) {
         return [];
     }
@@ -61,15 +61,15 @@ function getPhoneticReplacements(lang) {
 
 /**
  * Get all phonetic patterns for a language (with metadata)
- * @param {string} lang - Language code
+ * @param {string} language - Language code
  * @returns {Array} Array of pattern objects with metadata
  */
-function getPhoneticPatterns(lang) {
+function getPhoneticPatterns(language) {
     if (!dictionaryCache) {
         dictionaryCache = loadDictionary();
     }
     
-    const languagePatterns = dictionaryCache.languages[lang];
+    const languagePatterns = dictionaryCache.languages[language];
     return languagePatterns?.patterns || [];
 }
 
@@ -99,8 +99,8 @@ function getDictionaryStats() {
         languages: {}
     };
     
-    for (const [lang, data] of Object.entries(dictionaryCache.languages)) {
-        stats.languages[lang] = {
+    for (const [languageCode, data] of Object.entries(dictionaryCache.languages)) {
+        stats.languages[languageCode] = {
             description: data.description,
             patternCount: data.patterns?.length || 0
         };

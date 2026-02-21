@@ -55,10 +55,10 @@ export const login = async (email: string, password: string): Promise<{ user: Us
     return session;
 };
 
-export const register = async (email: string, password: string, lang: Language, firstName?: string, lastName?: string, newsletterConsent?: boolean): Promise<{ message: string }> => {
+export const register = async (email: string, password: string, language: Language, firstName?: string, lastName?: string, newsletterConsent?: boolean): Promise<{ message: string }> => {
     return await apiFetch('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password, lang, firstName, lastName, newsletterConsent }),
+        body: JSON.stringify({ email, password, language, firstName, lastName, newsletterConsent }),
     });
 };
 
@@ -95,10 +95,10 @@ export const verifyEmail = async (token: string): Promise<{ user: User, token: s
 };
 
 
-export const requestPasswordReset = async (email: string, lang: Language): Promise<void> => {
+export const requestPasswordReset = async (email: string, language: Language): Promise<void> => {
     await apiFetch('/auth/forgot-password', {
         method: 'POST',
-        body: JSON.stringify({ email, lang }),
+        body: JSON.stringify({ email, language }),
     });
 };
 
@@ -327,7 +327,7 @@ export interface TranscriptRating {
     contactOptIn: boolean;
     ratedAt: string;
     createdAt: string;
-    lang: string;
+    language: string;
 }
 
 export interface TranscriptRatingStats {

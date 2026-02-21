@@ -43,7 +43,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   const { t, language } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [data, setData] = useState<ProductsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -64,7 +64,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       } catch {
         setError(t('upgrade_load_error'));
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -143,7 +143,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     return '';
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>

@@ -90,10 +90,10 @@ function calculateAdjustedWeight(baseWeight, framework, context, sentimentResult
 // KEYWORD DETECTION PROCESSING
 // ============================================
 
-function processKeywordDetection(keyword, sentence, originalFramework, originalDimension, direction, context, lang) {
-  lang = lang || 'de';
+function processKeywordDetection(keyword, sentence, originalFramework, originalDimension, direction, context, language) {
+  language = language || 'de';
   var results = [];
-  var sentimentResult = analyzeKeywordSentiment(keyword, sentence, direction, lang);
+  var sentimentResult = analyzeKeywordSentiment(keyword, sentence, direction, language);
   var adjustedDirection = sentimentResult.adjustedDirection;
 
   var weightEntry = getKeywordWeights(keyword);
@@ -181,13 +181,13 @@ function processKeywordDetection(keyword, sentence, originalFramework, originalD
  * Full adaptive analysis for a message.
  * Call this once per message, then use getKeywordAdjustment for each keyword found.
  */
-function analyzeAdaptive(message, recentMessages, lang) {
-  lang = lang || 'de';
+function analyzeAdaptive(message, recentMessages, language) {
+  language = language || 'de';
   recentMessages = recentMessages || [];
   var overlappingKeywords = getOverlappingKeywords();
 
-  var context = analyzeContext(message, recentMessages, overlappingKeywords, lang);
-  var messageSentiment = analyzeSentiment(message, lang);
+  var context = analyzeContext(message, recentMessages, overlappingKeywords, language);
+  var messageSentiment = analyzeSentiment(message, language);
 
   return {
     context: {
@@ -211,15 +211,15 @@ function analyzeAdaptive(message, recentMessages, lang) {
  * Get the weight adjustment for a specific keyword found during standard analysis.
  * Called by behaviorLogger after it finds a keyword.
  */
-function getKeywordAdjustment(keyword, sentence, framework, dimension, direction, adaptiveResult, lang) {
-  lang = lang || 'de';
+function getKeywordAdjustment(keyword, sentence, framework, dimension, direction, adaptiveResult, language) {
+  language = language || 'de';
   if (!adaptiveResult || !adaptiveResult._fullContext) {
     return { direction: direction, weight: 1.0, isPrimary: true, sentimentAdjusted: false };
   }
 
   var detections = processKeywordDetection(
     keyword, sentence, framework, dimension, direction,
-    adaptiveResult._fullContext, lang
+    adaptiveResult._fullContext, language
   );
 
   // Find the detection for this specific framework+dimension

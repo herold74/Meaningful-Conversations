@@ -132,7 +132,7 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const { 
-        botId, context, history, lang, isNewSession, coachingMode, decryptedPersonalityProfile,
+        botId, context, history, language, isNewSession, coachingMode, decryptedPersonalityProfile,
         // Test mode support
         testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
     } = req.body;
@@ -193,12 +193,12 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'You do not have permission to access this coach.' });
     }
 
-    let systemInstruction = lang === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
+    let systemInstruction = language === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
     
     // Get and format the current date based on the request language.
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const locale = lang === 'de' ? 'de-DE' : 'en-US';
+    const locale = language === 'de' ? 'de-DE' : 'en-US';
     const formattedDate = new Intl.DateTimeFormat(locale, options).format(today);
 
     // Replace the date placeholder in the system instruction.
@@ -207,14 +207,14 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const isInitialMessage = history.length === 0;
 
     if (isInitialMessage && isNewSession) {
-        if (lang === 'de') {
+        if (language === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
         } else {
             systemInstruction += "\n\n## Special Instruction for this First Message:\nThis is the user's very first interaction in this session. You MUST ignore any 'Initial Interaction Priority' rules about checking 'Next Steps'. Your first message MUST be your standard, warm welcome, asking what is on their mind. Do not mention anything about 'welcome back' or previous steps.";
         }
     } else if (isInitialMessage && !isNewSession) {
         // Returning user - enforce strict first-message rules for Next Steps check-in
-        if (lang === 'de') {
+        if (language === 'de') {
             systemInstruction += `\n\n## ⚠️ STRIKTE REGELN FÜR DIESE ERSTE NACHRICHT (ÜBERSCHREIBT ALLES ANDERE):
 Wenn du nach "Next Steps" oder früheren Vorhaben fragst:
 1. Kurze Begrüßung
@@ -257,7 +257,7 @@ STRICTLY FORBIDDEN in this first message:
                 const dpcResult = await dynamicPromptController.generatePromptForUser(
                     userId || 'guest',
                     profileToUse,
-                    lang, // Pass language to DPC
+                    language, // Pass language to DPC
                     botId // Pass botId for bot-specific adaptations (e.g., AVA's enhanced challenge logic)
                 );
                 
@@ -330,7 +330,7 @@ STRICTLY FORBIDDEN in this first message:
         let historySummary = '\n\n**CONVERSATION-STATE-KONTEXT (für deine State-Awareness):**\n\n';
         
         if (botChallenges.length > 0) {
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? `Du hast bereits ${botChallenges.length} Blindspot-Challenge(s) gestellt:\n`
                 : `You have already posed ${botChallenges.length} blindspot challenge(s):\n`;
             botChallenges.slice(-2).forEach((q, idx) => {
@@ -338,23 +338,23 @@ STRICTLY FORBIDDEN in this first message:
             });
             historySummary += '\n';
         } else {
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? 'Du hast noch KEINE Blindspot-Challenges gestellt.\n\n'
                 : 'You have NOT posed any blindspot challenges yet.\n\n';
         }
         
         if (resourceQuestions.length > 0) {
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? `Du hast bereits nach RESSOURCEN gefragt (${resourceQuestions.length}× in den letzten Nachrichten):\n`
                 : `You have already asked about RESOURCES (${resourceQuestions.length}× in recent messages):\n`;
             resourceQuestions.slice(-1).forEach(q => {
                 historySummary += `"${q.substring(0, 80)}..."\n`;
             });
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? '→ Du bist vermutlich in **PHASE 2** (Ressourcen aktiviert, bereit für Blindspot-Brücke)\n\n'
                 : '→ You are likely in **PHASE 2** (Resources activated, ready for blindspot bridge)\n\n';
         } else {
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? 'Du hast noch NICHT nach Ressourcen gefragt.\n→ Wenn User "festgefahren" signalisiert: Starte mit **PHASE 1** (Ressourcen-Exploration)\n\n'
                 : 'You have NOT asked about resources yet.\n→ If user signals "stuck": Start with **PHASE 1** (Resource exploration)\n\n';
         }
@@ -363,7 +363,7 @@ STRICTLY FORBIDDEN in this first message:
         const userRespondedToChallenge = botChallenges.length > 0 && userLastMessage.length > 30;
         
         if (botChallenges.length > 0 && !userRespondedToChallenge) {
-            historySummary += lang === 'de'
+            historySummary += language === 'de'
                 ? '⚠️ User hat auf letzte Challenge NICHT geantwortet (Ausweichen?) → Wähle anderen Blindspot oder warte ab\n\n'
                 : '⚠️ User did NOT respond to last challenge (Avoidance?) → Choose different blindspot or wait\n\n';
         }
@@ -453,7 +453,7 @@ STRICTLY FORBIDDEN in this first message:
                     .map(m => m.text || m.content || '');
                 
                 const enhancedResult = behaviorLogger.analyzeMessageEnhanced(
-                    messageToAnalyze, lang, recentUserMessages
+                    messageToAnalyze, language, recentUserMessages
                 );
                 
                 // Helper: extract keywords from framework analysis result
@@ -526,7 +526,7 @@ STRICTLY FORBIDDEN in this first message:
             setImmediate(async () => {
                 try {
                     // Analyze current user message
-                    const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, lang);
+                    const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, language);
                     
                     // Note: Full conversation logging will be done at session end
                     // This is just real-time analysis for debugging/monitoring
@@ -763,12 +763,12 @@ function deduplicateAnalysisResponse(jsonResponse, context) {
 
 // POST /api/gemini/session/analyze
 router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
-    const { history, context, lang } = req.body;
+    const { history, context, language } = req.body;
     
     // Detect the language of the context file. Default to 'en'.
     const docLang = (context && context.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
 
-    const analysisPromptConfig = lang === 'de' ? analysisPrompts.de : analysisPrompts.en;
+    const analysisPromptConfig = language === 'de' ? analysisPrompts.de : analysisPrompts.en;
     const conversation = history.map(msg => `${msg.role === 'user' ? 'User' : 'Coach'}: ${msg.text}`).join('\n\n');
     
     // Get current date in ISO format for deadline generation
@@ -919,11 +919,11 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
 // POST /api/gemini/session/format-interview
 router.post('/session/format-interview', optionalAuthMiddleware, async (req, res) => {
-    const { history, lang } = req.body;
+    const { history, language } = req.body;
 
-    const formattingPromptConfig = lang === 'de' ? interviewFormattingPrompts.de : interviewFormattingPrompts.en;
+    const formattingPromptConfig = language === 'de' ? interviewFormattingPrompts.de : interviewFormattingPrompts.en;
     const conversation = history.map(msg => `${msg.role === 'user' ? 'User' : 'Guide'}: ${msg.text}`).join('\n\n');
-    const template = getInterviewTemplate(lang);
+    const template = getInterviewTemplate(language);
 
     const fullPrompt = formattingPromptConfig.prompt({ conversation, template });
     const startTime = Date.now();
@@ -991,15 +991,15 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
 
 // POST /api/gemini/interview/transcript — Generate summary + corrected transcript for Gloria Interview
 router.post('/interview/transcript', optionalAuthMiddleware, async (req, res) => {
-    const { history, lang, userName } = req.body;
+    const { history, language, userName } = req.body;
     if (!history || !Array.isArray(history) || history.length === 0) {
         return res.status(400).json({ error: 'history is required and must be a non-empty array' });
     }
 
-    const userLabel = userName || (lang === 'de' ? 'Befragter' : 'Interviewee');
+    const userLabel = userName || (language === 'de' ? 'Befragter' : 'Interviewee');
     const conversation = history.map(msg => `${msg.role === 'user' ? userLabel : 'Interviewer'}: ${msg.text}`).join('\n\n');
     
-    const prompt = lang === 'de'
+    const prompt = language === 'de'
         ? `Du bist ein Redakteur. Dir wird ein Interview-Transkript zwischen einem Interviewer und ${userName ? userName : 'einem Befragten'} übergeben.
 
 Das Gespräch besteht aus zwei Phasen: Zuerst einer kurzen **Auftragsklärung** (Thema, Dauer, Perspektive), dann dem eigentlichen **Interview**. Trenne diese Phasen in der Ausgabe.
@@ -1071,7 +1071,7 @@ ${conversation}`;
         const durationMs = Date.now() - startTime;
         const text = response.text.trim();
 
-        const separator = lang === 'de' ? '---TRENNER---' : '---SEPARATOR---';
+        const separator = language === 'de' ? '---TRENNER---' : '---SEPARATOR---';
         const parts = text.split(separator);
         const summary = (parts[0] || '').trim();
         const setup = (parts[1] || '').trim();
@@ -1154,7 +1154,7 @@ router.post('/test/simulate-coachee', optionalAuthMiddleware, async (req, res) =
         lastUserMessage, 
         scenarioDescription, 
         personalityContext,
-        lang = 'de'
+        language = 'de'
     } = req.body;
 
     if (!lastBotMessage) {
@@ -1165,7 +1165,7 @@ router.post('/test/simulate-coachee', optionalAuthMiddleware, async (req, res) =
 
     try {
         // Build system prompt for coachee simulation
-        const systemPrompt = lang === 'de' 
+        const systemPrompt = language === 'de' 
             ? `Du bist ein Coachee (Klient) in einem Coaching-Gespräch. Du hast ein Problem und suchst Hilfe.
 
 WICHTIG: Du bist NICHT der Coach! Du bist der Klient, der Unterstützung sucht.
@@ -1199,7 +1199,7 @@ RULES for your response:
 7. NO action descriptions with asterisks (like *sighs*, *nods*, *looks away*)
 8. Respond like a real person with this problem would respond - in plain text without roleplay formatting`;
 
-        const userPrompt = lang === 'de'
+        const userPrompt = language === 'de'
             ? `Der Coach hat gerade gesagt:
 "${lastBotMessage}"
 
@@ -1269,7 +1269,7 @@ Your response as coachee (answer the coach's question directly):`;
 router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
     const startTime = Date.now();
     const userId = req.userId;
-    const { preAnswers, transcript, lang = 'de', decryptedPersonalityProfile } = req.body;
+    const { preAnswers, transcript, language = 'de', decryptedPersonalityProfile } = req.body;
 
     try {
         // Validate required fields
@@ -1355,7 +1355,7 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
         const currentDate = new Date().toISOString().split('T')[0];
 
         // Build evaluation prompt
-        const promptFn = transcriptEvaluationPrompts[lang]?.prompt || transcriptEvaluationPrompts.en.prompt;
+        const promptFn = transcriptEvaluationPrompts[language]?.prompt || transcriptEvaluationPrompts.en.prompt;
         const evaluationPrompt = promptFn({
             preAnswers,
             transcript,
@@ -1402,7 +1402,7 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
                 userId,
                 preAnswers: JSON.stringify(preAnswers),
                 evaluationData: JSON.stringify(evaluationResult),
-                lang,
+                language,
             }
         });
 
@@ -1450,7 +1450,7 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
 router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, async (req, res) => {
     const startTime = Date.now();
     const userId = req.userId;
-    const { topic, lang = 'de' } = req.body;
+    const { topic, language = 'de' } = req.body;
 
     try {
         if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
@@ -1461,7 +1461,7 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
             return res.status(400).json({ error: 'Topic exceeds maximum length of 2000 characters.' });
         }
 
-        const promptFn = botRecommendationPrompts[lang]?.prompt || botRecommendationPrompts.de.prompt;
+        const promptFn = botRecommendationPrompts[language]?.prompt || botRecommendationPrompts.de.prompt;
         const prompt = promptFn({ topic: topic.trim() });
 
         const modelName = 'gemini-2.5-flash';
@@ -1534,7 +1534,7 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
                 id: true,
                 preAnswers: true,
                 evaluationData: true,
-                lang: true,
+                language: true,
                 createdAt: true,
                 userRating: true,
                 userFeedback: true,
@@ -1555,7 +1555,7 @@ router.get('/transcript/evaluations', authMiddleware, async (req, res) => {
             return {
                 id: e.id,
                 createdAt: e.createdAt,
-                lang: e.lang,
+                language: e.language,
                 goal: preAnswers.goal || '',
                 summary: evaluationData.summary || '',
                 overallScore: evaluationData.overallScore || 0,
@@ -1608,8 +1608,8 @@ router.delete('/transcript/evaluations/:id', authMiddleware, async (req, res) =>
     }
 });
 
-// POST /api/gemini/transcript/:id/rate - Rate a transcript evaluation
-router.post('/transcript/:id/rate', authMiddleware, async (req, res) => {
+// POST /api/gemini/transcript/evaluations/:id/rate - Rate a transcript evaluation
+router.post('/transcript/evaluations/:id/rate', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const { rating, feedback, contactOptIn } = req.body;
     const userId = req.userId;
@@ -1665,14 +1665,14 @@ router.post('/transcript/transcribe-audio', authMiddleware, audioTranscribeLimit
             return res.status(400).json({ error: 'No audio file provided.' });
         }
 
-        const { lang = 'de', speakerHint } = req.body;
+        const { language = 'de', speakerHint } = req.body;
 
         // Reject extremely small files — they contain no meaningful audio and
         // cause Gemini to hallucinate entire transcripts from nothing.
         const MIN_AUDIO_BYTES = 10000; // ~10 KB
         if (req.file.size < MIN_AUDIO_BYTES) {
             return res.status(400).json({
-                error: lang === 'de'
+                error: language === 'de'
                     ? 'Die Audiodatei ist zu kurz oder leer. Bitte nimm mindestens einige Sekunden Audio auf.'
                     : 'The audio file is too short or empty. Please record at least a few seconds of audio.'
             });
@@ -1695,12 +1695,12 @@ router.post('/transcript/transcribe-audio', authMiddleware, audioTranscribeLimit
         // Build diarization prompt
         const speakerHintNum = speakerHint ? parseInt(speakerHint, 10) : null;
         const speakerInstruction = speakerHintNum && speakerHintNum >= 2 && speakerHintNum <= 4
-            ? (lang === 'de'
+            ? (language === 'de'
                 ? `Es sind genau ${speakerHintNum} Sprecher im Gespräch.`
                 : `There are exactly ${speakerHintNum} speakers in this conversation.`)
             : '';
 
-        const diarizationPrompt = lang === 'de'
+        const diarizationPrompt = language === 'de'
             ? `Transkribiere die folgende Audiodatei vollständig und wortgetreu.
 
 SPRECHERIDENTIFIKATION:
@@ -1779,14 +1779,14 @@ IMPORTANT: Output ONLY the speaker identification and transcript, no additional 
         if (audioTokens < 50 && outputTokens > 100) {
             console.warn(`[Audio Transcription] Hallucination suspected: audioTokens=${audioTokens}, outputTokens=${outputTokens}`);
             return res.status(400).json({
-                error: lang === 'de'
+                error: language === 'de'
                     ? 'Die Audiodatei enthält keine erkennbare Sprache. Bitte stelle sicher, dass die Aufnahme Gesprächsinhalte enthält.'
                     : 'The audio file does not contain recognizable speech. Please make sure the recording contains conversation content.'
             });
         }
 
         // Count speakers from the transcript
-        const speakerPattern = lang === 'de' ? /\[Sprecher (\d+)\]/g : /\[Speaker (\d+)\]/g;
+        const speakerPattern = language === 'de' ? /\[Sprecher (\d+)\]/g : /\[Speaker (\d+)\]/g;
         const speakerNumbers = new Set();
         let match;
         while ((match = speakerPattern.exec(transcript)) !== null) {
