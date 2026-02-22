@@ -10,6 +10,7 @@ import SpringBlossoms from './SpringBlossoms';
 import SummerButterflies from './SummerButterflies';
 import AutumnLeaves from './AutumnLeaves';
 import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
+import { brand } from '../config/brand';
 import Button from './shared/Button';
 
 interface LandingPageProps {
@@ -23,7 +24,7 @@ const removeGamificationKey = (text: string) => {
 };
 
 const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview }) => {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const [fileContent, setFileContent] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -120,7 +121,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
       <div className="w-full max-w-3xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('meaningfulConversations')}</h1>
+        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{language === 'de' ? brand.appNameDe : brand.appName}</h1>
         <p className="text-sm md:text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
           {t('landing_subtitle')}
         </p>

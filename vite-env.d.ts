@@ -10,6 +10,18 @@ interface ImportMetaEnv {
   readonly VITE_APP_VERSION?: string;
   readonly VITE_BUILD_NUMBER?: string;
   readonly VITE_REVENUECAT_IOS_KEY?: string;
+  readonly VITE_BRAND_APP_NAME?: string;
+  readonly VITE_BRAND_APP_NAME_DE?: string;
+  readonly VITE_BRAND_SHORT_NAME?: string;
+  readonly VITE_BRAND_PROVIDER_NAME?: string;
+  readonly VITE_BRAND_PROVIDER_URL?: string;
+  readonly VITE_BRAND_CONTACT_EMAIL?: string;
+  readonly VITE_BRAND_OWNER_NAME?: string;
+  readonly VITE_BRAND_PRIMARY_COLOR?: string;
+  readonly VITE_BRAND_PRIMARY_COLOR_DARK?: string;
+  readonly VITE_BRAND_DOMAIN_STAGING?: string;
+  readonly VITE_BRAND_DOMAIN_PRODUCTION?: string;
+  readonly VITE_BRAND_APP_URL_PRODUCTION?: string;
 }
 
 interface ImportMeta {

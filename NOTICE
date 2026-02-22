@@ -1,0 +1,15 @@
+Meaningful Conversations
+Copyright 2025 Günter Herold
+
+This product was developed with the assistance of AI tools:
+- Google Gemini (via Google AI Studio) — initial code composition
+- Anthropic Claude (via Cursor IDE) — ongoing development and refactoring
+
+The name "Meaningful Conversations", associated logos, and the "manualmode.at"
+brand identity are trademarks of Günter Herold and are NOT covered by the
+Apache 2.0 license. Use of these marks requires separate written permission.
+See Apache License 2.0, Section 6 (Trademarks).
+
+Branding configuration (colors, names, URLs) is injected via environment
+variables and is not part of the licensed Work. See DOCUMENTATION/WHITE-LABEL-GUIDE.md
+for details on how to deploy with your own branding.

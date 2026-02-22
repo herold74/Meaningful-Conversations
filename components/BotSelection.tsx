@@ -10,6 +10,7 @@ import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import Spinner from './shared/Spinner';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
+import { brand } from '../config/brand';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -656,7 +657,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 <span className="text-lg">🎓</span>
                 <div className="text-center">
                   <div className="text-[0.9375rem] font-semibold uppercase text-amber-700 dark:text-amber-400">
-                    {t('botSelection_section_client')}
+                    {t('botSelection_section_client', { providerName: brand.providerName })}
                   </div>
                   <div className="text-xs text-amber-700 dark:text-amber-400">
                     {t('botSelection_section_client_desc')}

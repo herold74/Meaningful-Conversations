@@ -7,6 +7,7 @@ import { usePayPal } from '../hooks/usePayPal';
 import { isNativeApp, isNativeIOS } from '../utils/platformDetection';
 import { User } from '../types';
 import NativePaywall from './NativePaywall';
+import { brand } from '../config/brand';
 
 interface Product {
   id: string;
@@ -130,7 +131,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
 
   const description = userEmail
     ? (userXp >= 100
-      ? t('paywall_description_engaged', { email: userEmail })
+      ? t('paywall_description_engaged', { email: userEmail, contactEmail: brand.contactEmail, primaryColor: brand.primaryColor })
       : t('paywall_description_expired', { email: userEmail }))
     : t('paywall_description_new');
 

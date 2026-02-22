@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { brand } from '../config/brand';
 
 interface InfoViewProps {
 }
@@ -12,7 +13,7 @@ const de_markdown = `<details>
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
-Willkommen bei "Sinnstiftende Gespräche"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
+Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
 
 </div>
 </details>
@@ -87,7 +88,7 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
 | **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
 | **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
-| **Klient** | Zugangscode von manualmode.at | + Rob, Victor | Audio-Transkription, alle Features |
+| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, alle Features |
 
 **So upgraden Sie:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe in verschiedenen Laufzeiten (1, 3 oder 12 Monate) sowie Einzelcoach-Freischaltungen. Alternativ können Sie unter **Kontoverwaltung → "Code einlösen"** einen Zugangscode eingeben.
 
@@ -100,7 +101,7 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App zum Homescreen hinzufügen</summary>
 <div style="padding: 16px;">
 
-Die Meaningful Conversations App ist eine Progressive Web App (PWA) und kann wie eine native App auf Ihrem Gerät installiert werden. So haben Sie schnellen Zugriff und ein App-ähnliches Erlebnis.
+Die ${brand.appName} App ist eine Progressive Web App (PWA) und kann wie eine native App auf Ihrem Gerät installiert werden. So haben Sie schnellen Zugriff und ein App-ähnliches Erlebnis.
 
 ### 3.1 Installation auf iOS (iPhone/iPad)
 
@@ -768,7 +769,7 @@ const en_markdown = `<details>
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
-Welcome to Meaningful Conversations! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
+Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
 
 </div>
 </details>
@@ -843,7 +844,7 @@ The app offers four access tiers with increasing functionality:
 | **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
 | **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
 | **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
-| **Client** | Access code from manualmode.at | + Rob, Victor | Audio transcription, all features |
+| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, all features |
 
 **How to upgrade:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes in various durations (1, 3, or 12 months) as well as individual coach unlocks. Alternatively, go to **Account Management → "Redeem Code"** to enter an access code.
 
@@ -856,14 +857,14 @@ The app offers four access tiers with increasing functionality:
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Adding the App to Your Home Screen</summary>
 <div style="padding: 16px;">
 
-The Meaningful Conversations app is a Progressive Web App (PWA) and can be installed like a native app on your device. This gives you quick access and an app-like experience.
+The ${brand.appName} app is a Progressive Web App (PWA) and can be installed like a native app on your device. This gives you quick access and an app-like experience.
 
 ### 3.1 Installation on iOS (iPhone/iPad)
 
 1. Open the app in **Safari** (important: must be Safari, Chrome won't work).
 2. Tap the **Share icon** (the square with an arrow pointing up) in the bottom bar.
 3. Scroll down and tap **"Add to Home Screen"**.
-4. Give the app a name (e.g., "Meaningful Conversations") and tap **"Add"**.
+4. Give the app a name (e.g., "${brand.appName}") and tap **"Add"**.
 5. The app will now appear as an icon on your home screen and open in full-screen mode without the browser bar.
 
 ### 3.2 Installation on Android

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line } from '@react-pdf/renderer';
+import { brand } from '../config/brand';
 import { TranscriptEvaluationResult, TranscriptPreAnswers } from '../types';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -10,7 +11,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 // ============================================================================
 
 const colors = {
-  primary: '#1B7272',
+  primary: brand.primaryColor,
   white: '#ffffff',
   gray100: '#f3f4f6',
   gray200: '#e5e7eb',
@@ -285,13 +286,13 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
               {preAnswers.situationName && (
                 <Text style={[styles.headerSubtitle, { fontSize: 11 }]}>{preAnswers.situationName}</Text>
               )}
-              <Text style={styles.headerSubtitle}>Meaningful Conversations</Text>
+              <Text style={styles.headerSubtitle}>{brand.appName}</Text>
             </View>
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.headerRightText}>{formatDate()}</Text>
             {userEmail && <Text style={styles.headerRightText}>{userEmail}</Text>}
-            <Text style={styles.headerRightText}>manualmode.at</Text>
+            <Text style={styles.headerRightText}>{brand.providerName}</Text>
           </View>
         </View>
 
@@ -537,7 +538,7 @@ const TranscriptEvaluationPDF: React.FC<TranscriptEvaluationPDFProps> = ({
               {t('footer_template').replace('{user}', userEmail || (language === 'de' ? 'Unbekannt' : 'Unknown')).replace('{date}', formatDate())}
             </Text>
             <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>
-              <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at
+              <Text style={styles.footerBold}>{brand.appName}</Text> by {brand.providerName}
             </Text>
           </View>
         </View>
