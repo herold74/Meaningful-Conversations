@@ -4,6 +4,7 @@ import * as userService from '../services/userService';
 import { User } from '../types';
 import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
+import { brand } from '../config/brand';
 
 interface RedeemCodeViewProps {
   onRedeemSuccess: (user: User) => void;
@@ -80,12 +81,12 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
         <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
             {t('redeem_info_text')}
             <a 
-                href="http://www.manualmode.at" 
+                href={brand.providerUrl}
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="font-medium text-accent-primary hover:text-accent-primary-hover"
             >
-                www.manualmode.at
+                {brand.providerName}
             </a>
         </p>
 

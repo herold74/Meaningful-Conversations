@@ -3,6 +3,7 @@
  */
 
 import { generateCalendarEvent, generateCalendarEventWithDate, CalendarEvent } from '../calendarExport';
+import { brand } from '../../config/brand';
 
 // Mock the ics library
 jest.mock('ics', () => ({
@@ -74,7 +75,7 @@ describe('calendarExport', () => {
       
       expect(result.error).toBeUndefined();
       expect(result.value).toContain(action); // Full action in description
-      expect(result.value).toContain('https://mc-app.manualmode.at'); // App link
+      expect(result.value).toContain(brand.appUrlProduction); // App link
       expect(result.value).toContain('SUMMARY:Team meeting to...'); // Shortened title
     });
 
@@ -198,7 +199,7 @@ describe('calendarExport', () => {
       
       expect(result.error).toBeUndefined();
       expect(result.value).toContain('Workshop on advanced topics'); // Full action in description
-      expect(result.value).toContain('https://mc-app.manualmode.at'); // App link
+      expect(result.value).toContain(brand.appUrlProduction); // App link
     });
   });
 

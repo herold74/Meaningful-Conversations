@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const { marked } = require('marked');
 const { sendNewsletterEmail } = require('../services/mailService.js');
 const aiProviderService = require('../services/aiProviderService.js');
+const brand = require('../config/brand');
 
 // Configure marked for email-safe HTML
 marked.setOptions({
@@ -510,8 +511,8 @@ router.post('/send-newsletter', async (req, res) => {
                     <div style="padding: 20px; background: #f9fafb;">
                         ${rawHtml}
                     </div>
-                    <div style="background: #1b7272; color: white; padding: 20px; text-align: center; font-size: 12px;">
-                        <p style="margin: 0;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
+                    <div style="background: ${brand.primaryColor}; color: white; padding: 20px; text-align: center; font-size: 12px;">
+                        <p style="margin: 0;">${brand.appName}&nbsp;|&nbsp;www.${brand.providerName}</p>
                     </div>
                 </div>
             `;

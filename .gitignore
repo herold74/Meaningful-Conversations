@@ -84,6 +84,9 @@ meaningful-conversations-backend/prisma/*.db-journal
 *.tmp
 .cache/
 
+# Brand-specific assets (not part of the open-source distribution)
+/assets/brand/
+
 # Personal Information Files
 # Use .example.tsx versions instead (they contain dummy data)
 components/ImprintView.tsx

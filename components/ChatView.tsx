@@ -33,6 +33,7 @@ import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { speechService, isNativeApp } from '../services/capacitorSpeechService';
 import { isDesktopWeb } from '../utils/platformDetection';
 import { useWakeLock } from '../hooks/useWakeLock';
+import { brand } from '../config/brand';
 
 // Extend Window for AudioContext vendor prefix (used by meditation gong fallback)
 interface CustomWindow extends Window {
@@ -595,7 +596,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     
     // Set metadata to signal this is a media/audio session
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: 'Meaningful Conversations',
+      title: brand.appName,
       artist: bot.name || 'Coach',
       album: 'Voice Chat'
     });
