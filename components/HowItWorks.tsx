@@ -8,6 +8,7 @@ import { LockIcon } from './icons/LockIcon';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { TrophyIcon } from './icons/TrophyIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { brand } from '../config/brand';
 
 export const HowItWorks: React.FC = () => {
   const { t } = useLocalization();
@@ -23,7 +24,7 @@ export const HowItWorks: React.FC = () => {
           </h2>
           <p className="text-lg text-content-secondary max-w-2xl mx-auto leading-relaxed">
             {t('how_it_works_subtitle_1')}
-            <span className="text-accent-primary font-semibold"> Meaningful Conversations</span> {t('how_it_works_subtitle_2')}
+            <span className="text-accent-primary font-semibold"> {brand.appName}</span> {t('how_it_works_subtitle_2')}
           </p>
         </div>
 

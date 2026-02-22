@@ -7,9 +7,10 @@ import SpringBlossoms from './SpringBlossoms';
 import SummerButterflies from './SummerButterflies';
 import AutumnLeaves from './AutumnLeaves';
 import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
+import { brand } from '../config/brand';
 
 const WelcomeScreen: React.FC = () => {
-    const { t } = useLocalization();
+    const { t, language } = useLocalization();
     const showChristmas = useMemo(() => isChristmasSeason(), []);
     const showSpring = useMemo(() => isSpringSeason(), []);
     const showSummer = useMemo(() => isSummerSeason(), []);
@@ -61,7 +62,7 @@ const WelcomeScreen: React.FC = () => {
       </div>
 
       <h1 className="mt-20 text-2xl font-bold text-content-primary uppercase tracking-widest">
-        {t('meaningfulConversations')}
+        {language === 'de' ? brand.appNameDe : brand.appName}
       </h1>
       <p className="mt-2 text-content-secondary">
         {t('welcome_loading')}

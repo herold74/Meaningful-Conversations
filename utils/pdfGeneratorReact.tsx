@@ -1,5 +1,6 @@
 import React from 'react';
 import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line, Polygon, Rect, G, Path } from '@react-pdf/renderer';
+import { brand } from '../config/brand';
 import { SurveyResult } from '../components/PersonalitySurvey';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -10,7 +11,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 // ============================================================================
 
 const colors = {
-  primary: '#1B7272',
+  primary: brand.primaryColor,
   primaryDark: '#0F5858',
   white: '#ffffff',
   gray50: '#f9fafb',
@@ -809,12 +810,12 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         <ShipWheelLogo />
         <View>
           <Text style={styles.headerTitle}>{t.title}</Text>
-          <Text style={styles.headerSubtitle}>Meaningful Conversations</Text>
+          <Text style={styles.headerSubtitle}>{brand.appName}</Text>
         </View>
       </View>
       <View style={styles.headerRight}>
         <Text style={styles.headerRightText}>{date}</Text>
-        <Text style={styles.headerRightText}>manualmode.at</Text>
+        <Text style={styles.headerRightText}>{brand.providerName}</Text>
       </View>
     </View>
   );
@@ -828,7 +829,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
       <View style={styles.footer}>
         <Text>{footerLine1}</Text>
         <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>
-          <Text style={styles.footerBold}>Meaningful Conversations</Text> by manualmode.at
+          <Text style={styles.footerBold}>{brand.appName}</Text> by {brand.providerName}
         </Text>
       </View>
     </View>

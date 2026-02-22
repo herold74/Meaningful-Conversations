@@ -6,6 +6,7 @@ import Spinner from './shared/Spinner';
 import { MailIcon } from './icons/MailIcon';
 import { ClockIcon } from './icons/ClockIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { brand } from '../config/brand';
 
 const NewsletterPanel: React.FC = () => {
   const { language, t } = useLocalization();
@@ -240,7 +241,7 @@ const NewsletterPanel: React.FC = () => {
               <input
                 id="subject-primary"
                 type="text"
-                placeholder={t(`newsletter_subject_placeholder_${primaryLang}`)}
+                placeholder={t(`newsletter_subject_placeholder_${primaryLang}`, { appName: brand.appName })}
                 value={subjectPrimary}
                 onChange={(e) => setSubjectPrimary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"
@@ -279,7 +280,7 @@ const NewsletterPanel: React.FC = () => {
               <input
                 id="subject-secondary"
                 type="text"
-                placeholder={t(`newsletter_subject_placeholder_${secondaryLang}`)}
+                placeholder={t(`newsletter_subject_placeholder_${secondaryLang}`, { appName: brand.appName })}
                 value={subjectSecondary}
                 onChange={(e) => setSubjectSecondary(e.target.value)}
                 className="w-full p-2 border border-border-secondary rounded bg-background-primary text-content-primary focus:ring-2 focus:ring-accent-primary focus:outline-none"

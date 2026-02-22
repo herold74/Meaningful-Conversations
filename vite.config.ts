@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import brandPlugin from './vite-plugin-brand';
 import path from 'path';
 import fs from 'fs';
 
@@ -15,6 +16,7 @@ const buildNumber = fs.existsSync('./BUILD_NUMBER')
 export default defineConfig({
   plugins: [
     react(),
+    brandPlugin(),
   ],
   // Inject version info at build time (env vars override file-based values)
   define: {

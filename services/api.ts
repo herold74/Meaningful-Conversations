@@ -1,4 +1,5 @@
 import { User } from '../types';
+import { brand } from '../config/brand';
 
 // Custom error class for API fetch errors.
 // This allows other parts of the app to inspect the error details.
@@ -40,11 +41,11 @@ export const getApiBaseUrl = (): string => {
     if (isCapacitor) {
         // Allow override via URL param even in Capacitor
         if (backendParam === 'production') {
-            return 'https://mc-app.manualmode.at';
+            return `https://${brand.domainProduction}`;
         }
         // Default to staging for Capacitor testing
         console.log('[API] Capacitor detected, using staging backend');
-        return 'https://mc-beta.manualmode.at';
+        return `https://${brand.domainStaging}`;
     }
 
     // 1. Priority: URL parameter for explicit override (for local development/testing)
@@ -52,10 +53,10 @@ export const getApiBaseUrl = (): string => {
         return 'http://localhost:3001';
     }
     if (backendParam === 'staging') {
-        return 'https://mc-beta.manualmode.at';
+        return `https://${brand.domainStaging}`;
     }
     if (backendParam === 'production') {
-        return 'https://mc-app.manualmode.at';
+        return `https://${brand.domainProduction}`;
     }
 
     // 2. Runtime detection based on hostname and port
@@ -65,8 +66,8 @@ export const getApiBaseUrl = (): string => {
     const backendMap: { [key: string]: string } = {
         // Manualmode Server Deployment (Podman-based with nginx reverse proxy)
         // Uses relative paths - nginx on host handles /api routing to backend containers
-        'mc-beta.manualmode.at': '',   // Staging: nginx proxies /api to backend pod
-        'mc-app.manualmode.at': '',    // Production: nginx proxies /api to backend pod
+        [brand.domainStaging]: '',   // Staging: nginx proxies /api to backend pod
+        [brand.domainProduction]: '',    // Production: nginx proxies /api to backend pod
         '<YOUR_SERVER_IP>': '',            // Manualmode server: IP fallback
         
         // Local development - connect to local backend

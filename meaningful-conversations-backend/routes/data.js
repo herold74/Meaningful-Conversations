@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
+const brand = require('../config/brand');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -478,7 +479,7 @@ function generateHtmlExport(exportData, language = 'de') {
 <body>
     <div class="container">
         <div class="header">
-            <div class="brand">manualmode.at ${isGerman ? 'präsentiert' : 'presents'}</div>
+            <div class="brand">${brand.providerName} ${isGerman ? 'präsentiert' : 'presents'}</div>
             <h1>📊 ${isGerman ? 'Ihr Datenexport' : 'Your Data Export'}</h1>
             <p>${isGerman ? 'Erstellt am' : 'Created on'}: ${formatDate(exportData.exportDate)}</p>
             <p style="margin-top: 10px; font-size: 0.9em;">
@@ -793,13 +794,13 @@ function generateHtmlExport(exportData, language = 'de') {
         </div>
 
         <div class="footer">
-            <p style="font-size: 1.2em; font-weight: 600; margin-bottom: 5px;">Meaningful Conversations</p>
-            <p style="font-size: 0.9em; color: #16A34A; margin-bottom: 20px;">${isGerman ? 'von' : 'by'} manualmode.at</p>
+            <p style="font-size: 1.2em; font-weight: 600; margin-bottom: 5px;">${brand.appName}</p>
+            <p style="font-size: 0.9em; color: #16A34A; margin-bottom: 20px;">${isGerman ? 'von' : 'by'} ${brand.providerName}</p>
             <p style="margin-bottom: 15px;">${isGerman ? 'Dieser Datenexport entspricht Ihren Rechten gemäß Art. 15 (Auskunftsrecht) und Art. 20 (Recht auf Datenübertragbarkeit) der DSGVO.' : 'This data export complies with your rights under Art. 15 (Right of Access) and Art. 20 (Right to Data Portability) of the GDPR.'}</p>
             <p>
-                <a href="https://manualmode.at" style="color: #16A34A; text-decoration: none; font-weight: 500;">www.manualmode.at</a>
+                <a href="${brand.providerUrl}" style="color: #16A34A; text-decoration: none; font-weight: 500;">www.${brand.providerName}</a>
             </p>
-            <p style="font-size: 0.85em; opacity: 0.7; margin-top: 15px;">© ${new Date().getFullYear()} manualmode.at</p>
+            <p style="font-size: 0.85em; opacity: 0.7; margin-top: 15px;">© ${new Date().getFullYear()} ${brand.providerName}</p>
         </div>
     </div>
 </body>

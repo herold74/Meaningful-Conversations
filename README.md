@@ -10,6 +10,14 @@ The intellectual achievement of the publisher thus lies in defining and compilin
 
 According to the rules and regulations of AI Studio this project is licensed under the Apache Licence 2.0
 
+## 🎨 Branding / White-Label
+
+This project supports full white-label rebranding via environment variables — no code changes required. All UI text, emails, PDFs, calendar events, and API routing read brand values from `VITE_BRAND_*` (frontend) and `BRAND_*` (backend) env vars. If no variables are set, the app uses its original "Meaningful Conversations / manualmode.at" branding.
+
+**➡️ [WHITE-LABEL-GUIDE.md](./DOCUMENTATION/WHITE-LABEL-GUIDE.md)** — Complete variable reference and deployment checklist
+
+> **Note:** The name "Meaningful Conversations", associated logos, and the "manualmode.at" brand identity are trademarks and are **not** covered by the Apache 2.0 license. See the [NOTICE](./NOTICE) file for details.
+
 ## ✨ Core Features
 
 *   **Multiple AI Coaches**: Choose from 7 distinct AI coaches:
