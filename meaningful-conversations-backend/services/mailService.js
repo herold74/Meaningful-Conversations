@@ -1,4 +1,5 @@
 const Mailjet = require('node-mailjet');
+const brand = require('../config/brand');
 
 let mailjet;
 const isProductionOrStaging = process.env.ENVIRONMENT_TYPE === 'production' || process.env.ENVIRONMENT_TYPE === 'staging';
@@ -18,20 +19,20 @@ if (process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY) {
 }
 
 const SENDER_EMAIL = process.env.MAILJET_SENDER_EMAIL || 'noreply@example.com';
-const SENDER_NAME = 'Meaningful Conversations | www.manualmode.at';
+const SENDER_NAME = brand.senderName;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 const sendConfirmationEmail = async (email, token, language = 'en') => {
     const confirmationUrl = `${FRONTEND_URL}?route=verify-email&token=${token}`;
 
     const subjects = {
-        en: 'Activate Your Meaningful Conversations Account',
-        de: 'Aktivieren Sie Ihr Konto bei Sinnstiftende Gespräche'
+        en: `Activate Your ${brand.appName} Account`,
+        de: `Aktivieren Sie Ihr Konto bei ${brand.appNameDe}`
     };
 
     const textBodies = {
         en: `========================================
-Welcome to Meaningful Conversations!
+Welcome to ${brand.appName}!
 Your account includes 14 days of free Premium access.
 ========================================
 
@@ -64,7 +65,7 @@ profiles. Premium access is available for 1, 3, or 12 months from EUR 9.90.
 
 If you did not sign up for an account, you can safely ignore this email.`,
         de: `========================================
-Willkommen bei Sinnstiftende Gespräche!
+Willkommen bei ${brand.appNameDe}!
 Ihr Konto enthält 14 Tage kostenlosen Premium-Zugang.
 ========================================
 
@@ -109,8 +110,8 @@ einfach ignorieren.`
 
                         <!-- Header -->
                         <tr>
-                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>Meaningful Conversations!</h2>
+                            <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>${brand.appName}!</h2>
                                 <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>14 days of free Premium access</strong></p>
                             </td>
                         </tr>
@@ -123,13 +124,13 @@ einfach ignorieren.`
                                     <a href="${confirmationUrl}" style="background-color: #22c55e; color: #ffffff; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px; font-family: sans-serif;">Activate Account</a>
                                 </p>
 
-                                <h3 style="color: #1b7272; margin-top: 30px;">What's included in each plan?</h3>
+                                <h3 style="color: ${brand.primaryColor}; margin-top: 30px;">What's included in each plan?</h3>
                                 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
                                     <thead>
                                         <tr>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Feature</th>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Guest</th>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registered</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Feature</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Guest</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registered</th>
                                             <th bgcolor="#d4af37" style="background-color: #d4af37; color: #000000; padding: 8px; text-align: center; border: 1px solid #ddd;">Premium ⭐</th>
                                         </tr>
                                     </thead>
@@ -145,19 +146,19 @@ einfach ignorieren.`
                                     </tbody>
                                 </table>
 
-                                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
+                                <div style="background: #e6f7ff; border-left: 4px solid ${brand.primaryColor}; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
                                     <strong>Your 14-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
                                 </div>
 
-                                <p style="font-size: 10px; color: #888888;">If you cannot click the button, copy this URL: <a href="${confirmationUrl}" style="color: #1b7272; word-break: break-all;">${confirmationUrl}</a></p>
+                                <p style="font-size: 10px; color: #888888;">If you cannot click the button, copy this URL: <a href="${confirmationUrl}" style="color: ${brand.primaryColor}; word-break: break-all;">${confirmationUrl}</a></p>
                                 <p style="font-size: 12px; color: #555555;">If you did not sign up for an account, you can safely ignore this email.</p>
                             </td>
                         </tr>
 
                         <!-- Footer -->
                         <tr>
-                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;<a href="https://www.manualmode.at" style="color: #ffffff; text-decoration: none;">www.manualmode.at</a></p>
+                            <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">${brand.appName}&nbsp;|&nbsp;<a href="${brand.providerUrl}" style="color: #ffffff; text-decoration: none;">www.${brand.providerName}</a></p>
                             </td>
                         </tr>
 
@@ -174,8 +175,8 @@ einfach ignorieren.`
 
                         <!-- Header -->
                         <tr>
-                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>Sinnstiftende Gespräche!</h2>
+                            <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>${brand.appNameDe}!</h2>
                                 <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
                             </td>
                         </tr>
@@ -188,13 +189,13 @@ einfach ignorieren.`
                                     <a href="${confirmationUrl}" style="background-color: #22c55e; color: #ffffff; padding: 14px 30px; text-align: center; text-decoration: none; display: inline-block; border-radius: 8px; font-weight: bold; font-size: 16px; font-family: sans-serif;">Konto aktivieren</a>
                                 </p>
 
-                                <h3 style="color: #1b7272; margin-top: 30px;">Was ist in welchem Plan enthalten?</h3>
+                                <h3 style="color: ${brand.primaryColor}; margin-top: 30px;">Was ist in welchem Plan enthalten?</h3>
                                 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 13px; margin-top: 10px; margin-bottom: 25px;">
                                     <thead>
                                         <tr>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Funktion</th>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Gast</th>
-                                            <th bgcolor="#1b7272" style="background-color: #1b7272; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registriert</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: left; border: 1px solid #ddd;">Funktion</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Gast</th>
+                                            <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 8px; text-align: center; border: 1px solid #ddd;">Registriert</th>
                                             <th bgcolor="#d4af37" style="background-color: #d4af37; color: #000000; padding: 8px; text-align: center; border: 1px solid #ddd;">Premium ⭐</th>
                                         </tr>
                                     </thead>
@@ -210,19 +211,19 @@ einfach ignorieren.`
                                     </tbody>
                                 </table>
 
-                                <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
+                                <div style="background: #e6f7ff; border-left: 4px solid ${brand.primaryColor}; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
                                     <strong>Ihre 14-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
                                 </div>
 
-                                <p style="font-size: 10px; color: #888888;">Wenn Sie den Button nicht anklicken können, kopieren Sie diese URL: <a href="${confirmationUrl}" style="color: #1b7272; word-break: break-all;">${confirmationUrl}</a></p>
+                                <p style="font-size: 10px; color: #888888;">Wenn Sie den Button nicht anklicken können, kopieren Sie diese URL: <a href="${confirmationUrl}" style="color: ${brand.primaryColor}; word-break: break-all;">${confirmationUrl}</a></p>
                                 <p style="font-size: 12px; color: #555555;">Wenn Sie sich nicht für ein Konto angemeldet haben, können Sie diese E-Mail einfach ignorieren.</p>
                             </td>
                         </tr>
 
                         <!-- Footer -->
                         <tr>
-                            <td bgcolor="#1b7272" style="background-color: #1b7272; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
-                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">Meaningful Conversations&nbsp;|&nbsp;<a href="https://www.manualmode.at" style="color: #ffffff; text-decoration: none;">www.manualmode.at</a></p>
+                            <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">${brand.appName}&nbsp;|&nbsp;<a href="${brand.providerUrl}" style="color: #ffffff; text-decoration: none;">www.${brand.providerName}</a></p>
                             </td>
                         </tr>
 
@@ -278,8 +279,8 @@ const sendPasswordResetEmail = async (email, token, language = 'en') => {
     const resetUrl = `${FRONTEND_URL}?route=reset-password&token=${token}`;
 
     const subjects = {
-        en: 'Password Reset for Your Meaningful Conversations Account',
-        de: 'Passwort zurücksetzen für Ihr Konto bei Sinnstiftende Gespräche'
+        en: `Password Reset for Your ${brand.appName} Account`,
+        de: `Passwort zurücksetzen für Ihr Konto bei ${brand.appNameDe}`
     };
 
     const textBodies = {
@@ -378,7 +379,7 @@ const sendPurchaseEmail = async (email, name, code, botId) => {
 
   const htmlBody = `
     <div style="font-family: sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-      <div style="background: linear-gradient(135deg, #1b7272 0%, #165a5a 100%); color: white; padding: 30px; text-align: center;">
+      <div style="background: linear-gradient(135deg, ${brand.primaryColor} 0%, ${brand.primaryColorDark} 100%); color: white; padding: 30px; text-align: center;">
         <h1 style="margin: 0; font-size: 28px;">🎉 Vielen Dank für deinen Kauf!</h1>
       </div>
       
@@ -386,28 +387,28 @@ const sendPurchaseEmail = async (email, name, code, botId) => {
         <p style="font-size: 16px;">${firstName ? `Hallo ${firstName},` : 'Hallo,'}</p>
         <p style="font-size: 16px;">dein <strong>${productName.de}</strong> wurde erfolgreich aktiviert!</p>
         
-        <div style="background: white; border: 2px solid #1b7272; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+        <div style="background: white; border: 2px solid ${brand.primaryColor}; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
           <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Dein Freischaltcode:</p>
-          <p style="font-size: 32px; font-weight: bold; color: #1b7272; letter-spacing: 4px; margin: 0;">${code}</p>
+          <p style="font-size: 32px; font-weight: bold; color: ${brand.primaryColor}; letter-spacing: 4px; margin: 0;">${code}</p>
         </div>
 
-        <h3 style="color: #1b7272;">So löst du deinen Code ein:</h3>
+        <h3 style="color: ${brand.primaryColor};">So löst du deinen Code ein:</h3>
         <ol style="line-height: 1.8;">
-          <li>Melde dich bei <strong>Meaningful Conversations</strong> an</li>
+          <li>Melde dich bei <strong>${brand.appName}</strong> an</li>
           <li>Öffne das Menü und wähle <strong>"Code einlösen"</strong></li>
           <li>Gib deinen Code ein: <strong>${code}</strong></li>
         </ol>
 
         <p style="margin: 30px 0; text-align: center;">
           <a href="${redeemUrl}" 
-             style="background-color: #1b7272; color: white; padding: 14px 30px; 
+             style="background-color: ${brand.primaryColor}; color: white; padding: 14px 30px; 
                     text-decoration: none; display: inline-block; border-radius: 8px; 
                     font-weight: bold; font-size: 16px;">
             Jetzt Code einlösen
           </a>
         </p>
 
-        <div style="background: #e6f7ff; border-left: 4px solid #1b7272; padding: 15px; margin: 20px 0;">
+        <div style="background: #e6f7ff; border-left: 4px solid ${brand.primaryColor}; padding: 15px; margin: 20px 0;">
           <p style="margin: 0; font-size: 14px;"><strong>💡 Tipp:</strong> Speichere diese E-Mail für deine Unterlagen. Bei Fragen stehe ich dir gerne zur Verfügung!</p>
         </div>
 
@@ -415,13 +416,13 @@ const sendPurchaseEmail = async (email, name, code, botId) => {
 
         <p style="font-size: 14px; color: #666;">
           Bei Fragen oder Problemen erreichst du mich unter:<br>
-          <a href="mailto:gherold@manualmode.at" style="color: #1b7272;">gherold@manualmode.at</a>
+          <a href="mailto:${brand.contactEmail}" style="color: ${brand.primaryColor};">${brand.contactEmail}</a>
         </p>
       </div>
 
-      <div style="background: #1b7272; color: white; padding: 20px; text-align: center; font-size: 12px;">
-        <p style="margin: 0;">Meaningful Conversations&nbsp;|&nbsp;www.manualmode.at</p>
-        <p style="margin: 5px 0 0 0;">Gerald Herold</p>
+      <div style="background: ${brand.primaryColor}; color: white; padding: 20px; text-align: center; font-size: 12px;">
+        <p style="margin: 0;">${brand.appName}&nbsp;|&nbsp;www.${brand.providerName}</p>
+        <p style="margin: 5px 0 0 0;">${brand.ownerName}</p>
       </div>
     </div>
   `;
@@ -456,11 +457,11 @@ const sendPurchaseEmail = async (email, name, code, botId) => {
 
 const sendAdminNotification = async (customerEmail, customerName, code, botId, amount) => {
   const productName = getProductName(botId);
-  const adminEmail = process.env.ADMIN_EMAIL || 'gherold@manualmode.at';
+  const adminEmail = process.env.ADMIN_EMAIL || brand.contactEmail;
 
   const htmlBody = `
     <div style="font-family: sans-serif; padding: 20px;">
-      <h2 style="color: #1b7272;">🛒 Neuer Kauf</h2>
+      <h2 style="color: ${brand.primaryColor};">🛒 Neuer Kauf</h2>
       <table style="border-collapse: collapse; width: 100%;">
         <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Produkt:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${productName.de}</td></tr>
         <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Kunde:</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${customerName} (${customerEmail})</td></tr>
@@ -526,12 +527,12 @@ const sendNewsletterEmail = async (email, subject, content, language = 'de') => 
             ? `<hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                <p style="text-align: center; font-size: 12px; color: #6b7280;">
                  Sie möchten keine weiteren Newsletter erhalten?<br>
-                 <a href="${unsubscribeUrl}" style="color: #1b7272; text-decoration: underline;">Hier klicken zum Abmelden</a>
+                 <a href="${unsubscribeUrl}" style="color: ${brand.primaryColor}; text-decoration: underline;">Hier klicken zum Abmelden</a>
                </p>`
             : `<hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                <p style="text-align: center; font-size: 12px; color: #6b7280;">
                  Don't want to receive further newsletters?<br>
-                 <a href="${unsubscribeUrl}" style="color: #1b7272; text-decoration: underline;">Click here to unsubscribe</a>
+                 <a href="${unsubscribeUrl}" style="color: ${brand.primaryColor}; text-decoration: underline;">Click here to unsubscribe</a>
                </p>`;
         finalHtmlBody += unsubscribeHtml;
     }

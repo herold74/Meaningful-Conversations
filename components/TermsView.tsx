@@ -3,11 +3,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { brand } from '../config/brand';
 
 interface InfoViewProps {
 }
 
-const de_markdown = `Diese Nutzungsbedingungen ("Bedingungen") regeln Ihre Nutzung der Anwendung "Sinnstiftende Gespräche" (der "Dienst"). Durch den Zugriff auf oder die Nutzung des Dienstes erklären Sie sich mit diesen Bedingungen einverstanden.
+const de_markdown = `Diese Nutzungsbedingungen ("Bedingungen") regeln Ihre Nutzung der Anwendung "${brand.appNameDe}" (der "Dienst"). Durch den Zugriff auf oder die Nutzung des Dienstes erklären Sie sich mit diesen Bedingungen einverstanden.
 
 ## 1. Leistungsbeschreibung
 Der Dienst bietet Zugang zu KI-gesteuerten Coaching-Gesprächen, die zur Selbstreflexion und persönlichen Weiterentwicklung dienen. Benutzer können ihre Gespräche mithilfe einer "Lebenskontext"-Datei personalisieren. Der Dienst ist in zwei Modi verfügbar:
@@ -32,7 +33,7 @@ Wir behalten uns das Recht vor, den Dienst oder einzelne Funktionen jederzeit zu
 Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu ändern. Wir werden Sie über alle Änderungen informieren, indem wir die neuen Bedingungen innerhalb des Dienstes veröffentlichen.
 `;
 
-const en_markdown = `These Terms of Service ("Terms") govern your use of the "Meaningful Conversations" application (the "Service"). By accessing or using the Service, you agree to be bound by these Terms.
+const en_markdown = `These Terms of Service ("Terms") govern your use of the "${brand.appName}" application (the "Service"). By accessing or using the Service, you agree to be bound by these Terms.
 
 ## 1. Description of Service
 The Service provides access to AI-powered coaching conversations intended for self-reflection and personal development. Users can personalize their sessions using a "Life Context" file. The service is available in two modes:

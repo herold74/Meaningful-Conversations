@@ -1,4 +1,5 @@
 import { createEvent, EventAttributes } from 'ics';
+import { brand } from '../config/brand';
 import { parseDeadline as parseDeadlineUtil } from './dateParser';
 
 export interface CalendarEvent {
@@ -73,11 +74,11 @@ export const generateCalendarEventWithDate = (
     const shortTitle = truncateToThreeWords(action);
     
     const reminderText = language === 'de'
-      ? 'Erinnerung: Besuchen Sie die Meaningful Conversations App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten.'
-      : 'Reminder: Revisit the Meaningful Conversations app to track progress and keep your Life Context file current.';
+      ? `Erinnerung: Besuchen Sie die ${brand.appName} App erneut, um Fortschritte zu verfolgen und Ihre Lebenskontext-Datei aktuell zu halten.`
+      : `Reminder: Revisit the ${brand.appName} app to track progress and keep your Life Context file current.`;
     
     // Build description with full action + reminder + app link
-    const eventDescription = `${action}\n\n${reminderText}\n\nhttps://mc-app.manualmode.at`;
+    const eventDescription = `${action}\n\n${reminderText}\n\n${brand.appUrlProduction}`;
     
     // Set event to 9:00 AM on the deadline day
     const eventStart: [number, number, number, number, number] = [

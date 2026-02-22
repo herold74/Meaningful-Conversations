@@ -4,11 +4,12 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { HowItWorks } from './HowItWorks';
+import { brand } from '../config/brand';
 
 interface InfoViewProps {
 }
 
-const de_markdown_part1 = `Möchten Sie die Erkenntnisse aus Ihrem Coaching im Alltag vertiefen oder suchen Sie einen unkomplizierten Weg zur Selbstreflexion? "Sinnstiftende Gespräche" wurde genau dafür entwickelt. Die App ist Ihre intelligente Ergänzung zum professionellen Coaching und eine moderne Alternative zum Selbsthilfebuch – ein persönlicher Raum für Ihre Weiterentwicklung, der Ihnen jederzeit zur Verfügung steht.
+const de_markdown_part1 = `Möchten Sie die Erkenntnisse aus Ihrem Coaching im Alltag vertiefen oder suchen Sie einen unkomplizierten Weg zur Selbstreflexion? "${brand.appNameDe}" wurde genau dafür entwickelt. Die App ist Ihre intelligente Ergänzung zum professionellen Coaching und eine moderne Alternative zum Selbsthilfebuch – ein persönlicher Raum für Ihre Weiterentwicklung, der Ihnen jederzeit zur Verfügung steht.
 
 ## Unsere Philosophie: Fragen statt Antworten
 
@@ -25,9 +26,9 @@ const de_markdown_part2 = `
 
 const de_final_sentence = `Diese Anwendung ist ein Projekt, das aus Leidenschaft für persönliches Wachstum und Technologie entstanden ist. Wir hoffen, dass sie Ihnen auf Ihrem Weg eine wertvolle Unterstützung ist.`;
 
-const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**manualmode.at**](http://manualmode.at) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
+const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**${brand.providerName}**](${brand.providerUrl}) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
 
-const en_markdown_part1 = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "Meaningful Conversations" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
+const en_markdown_part1 = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "${brand.appName}" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
 
 ## Our philosophy: Questions instead of Answers
 
@@ -44,7 +45,7 @@ const en_markdown_part2 = `
 
 const en_final_sentence = `This application is a project born from a passion for personal growth and technology. We hope it serves as a valuable support on your journey.`;
 
-const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**manualmode.at**](http://manualmode.at).`;
+const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](${brand.providerUrl}).`;
 
 
 type AboutTab = 'about' | 'coach';
@@ -63,7 +64,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
             <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-content-primary uppercase">{t('about_title')}</h1>
-                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.9.5</p>
+                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 1.9.6</p>
                 </div>
                 <div className="flex items-center justify-evenly border-b border-border-secondary dark:border-border-primary">
                     <button
