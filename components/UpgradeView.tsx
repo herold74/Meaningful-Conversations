@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { usePayPal } from '../hooks/usePayPal';
-import { isNativeApp } from '../utils/platformDetection';
+import { isNativeApp, isNativeIOS } from '../utils/platformDetection';
 import { KeyIcon } from './icons/KeyIcon';
 import Button from './shared/Button';
 import { User } from '../types';
+import NativePaywall from './NativePaywall';
 
 interface Product {
   id: string;
@@ -143,7 +144,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     return '';
   };
 
-  if (isLoading) {
+  if (isLoading && !isNativeIOS()) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
@@ -151,7 +152,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     );
   }
 
-  if (error && !data) {
+  if (error && !data && !isNativeIOS()) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
         <p className="text-red-600 dark:text-red-400">{error}</p>
@@ -159,13 +160,11 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     );
   }
 
-  if (!data) return null;
-
-  const tierLabel = TIER_LABELS[data.currentTier]?.[language] || data.currentTier;
-  const premiumProducts = data.products.filter(p => p.category === 'premium');
-  const botProducts = data.products.filter(p => p.category === 'bot');
-  const accessProducts = data.products.filter(p => p.category === 'access');
-  const hasProducts = data.products.length > 0;
+  const tierLabel = data ? (TIER_LABELS[data.currentTier]?.[language] || data.currentTier) : '';
+  const premiumProducts = data ? data.products.filter(p => p.category === 'premium') : [];
+  const botProducts = data ? data.products.filter(p => p.category === 'bot') : [];
+  const accessProducts = data ? data.products.filter(p => p.category === 'access') : [];
+  const hasProducts = data ? data.products.length > 0 : false;
   const selectedPremium = premiumProducts.find(p => p.id === selectedPremiumId) || null;
 
   const renderProductCard = (product: Product) => {
@@ -230,8 +229,8 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200">{t('upgrade_title')}</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
           {t('upgrade_current_tier')}: <span className="font-semibold text-accent-primary">{tierLabel}</span>
-          {data.isLifetime && <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Lifetime)</span>}
-          {data.isPremium && data.premiumExpiresAt && (
+          {data?.isLifetime && <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Lifetime)</span>}
+          {data?.isPremium && data.premiumExpiresAt && (
             <span className="ml-1 text-xs text-gray-500">
               ({t('upgrade_expires')} {new Date(data.premiumExpiresAt).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')})
             </span>
@@ -257,16 +256,16 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </div>
       )}
 
-      {/* Access passes */}
-      {accessProducts.length > 0 && (
+      {/* Access passes — web only (PayPal); hidden on native iOS where NativePaywall is used */}
+      {accessProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_access_section')}</h2>
           <div className="space-y-4">{accessProducts.map(renderProductCard)}</div>
         </section>
       )}
 
-      {/* Premium Passes — dropdown selector */}
-      {premiumProducts.length > 0 && (
+      {/* Premium Passes — dropdown selector; hidden on native iOS */}
+      {premiumProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_premium_section')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('upgrade_premium_description')}</p>
@@ -332,8 +331,8 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </section>
       )}
 
-      {/* Bot Unlocks */}
-      {botProducts.length > 0 && (
+      {/* Bot Unlocks — web only */}
+      {botProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_bot_section')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('upgrade_bot_description')}</p>
@@ -341,11 +340,11 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </section>
       )}
 
-      {/* iOS hint */}
-      {isNativeApp() && (
-        <div className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 rounded-lg text-blue-700 dark:text-blue-300 text-sm">
-          {t('paywall_ios_hint')}
-        </div>
+      {/* Native IAP for iOS */}
+      {isNativeIOS() && (
+        <section className="mb-8">
+          <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} showBotUnlocks={true} />
+        </section>
       )}
 
       {/* Divider + Redeem Code */}
