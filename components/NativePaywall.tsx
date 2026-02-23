@@ -11,9 +11,11 @@ import Button from './shared/Button';
 
 interface NativePaywallProps {
   onPurchaseSuccess: (user: User) => void;
+  currentUser?: User | null;
+  showBotUnlocks?: boolean;
 }
 
-const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
+const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, currentUser, showBotUnlocks = false }) => {
   const { t } = useLocalization();
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,13 +23,25 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  // #region agent log
+  const [debugInfo, setDebugInfo] = useState<string>('init');
+  // #endregion
 
   useEffect(() => {
     (async () => {
       try {
+        // #region agent log
+        setDebugInfo('fetching...');
+        // #endregion
         const available = await fetchAvailableProducts();
+        // #region agent log
+        setDebugInfo(`done: ${available.length} products [${available.map(p=>p.identifier).join(', ')}]`);
+        // #endregion
         setProducts(available);
-      } catch {
+      } catch (e) {
+        // #region agent log
+        setDebugInfo(`ERROR: ${String(e)}`);
+        // #endregion
         setError(t('iap_load_error'));
       } finally {
         setIsLoading(false);
@@ -41,11 +55,31 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
     setSuccess(null);
 
     const result = await purchaseProduct(product.identifier);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd59c1'},body:JSON.stringify({sessionId:'cd59c1',location:'NativePaywall.tsx:handlePurchase',message:'purchase-result',data:{success:result.success,hasUser:!!(result as any).user,hasCurrentUser:!!currentUser,error:result.error,transactionId:result.transactionId},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
 
     if (result.success) {
       setSuccess(t('paywall_payment_success'));
       if ((result as any).user) {
         setTimeout(() => onPurchaseSuccess((result as any).user), 1200);
+      } else if (currentUser) {
+        const patched = { ...currentUser };
+        const oneYear = new Date(Date.now() + 365 * 86400000).toISOString();
+        const iap = products.find(p => p.identifier === product.identifier)?.iapProduct;
+        if (iap?.tier === 'premium') {
+          patched.isPremium = true;
+          patched.premiumExpiresAt = oneYear;
+          patched.accessExpiresAt = oneYear;
+        } else if (iap?.tier === 'registered') {
+          patched.accessExpiresAt = oneYear;
+        }
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd59c1'},body:JSON.stringify({sessionId:'cd59c1',location:'NativePaywall.tsx:handlePurchase',message:'patched-user-fallback',data:{tier:iap?.tier,patched:{isPremium:patched.isPremium,accessExpiresAt:patched.accessExpiresAt}},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+        setTimeout(() => onPurchaseSuccess(patched), 1200);
+      } else {
+        setTimeout(() => window.location.reload(), 1500);
       }
     } else if (result.error === 'cancelled') {
       // User cancelled — no error message
@@ -77,7 +111,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
 
   const subscriptions = products.filter(p => p.iapProduct.type === 'subscription');
   const nonConsumables = products.filter(p => p.iapProduct.type === 'non_consumable');
-  const botUnlocks = nonConsumables.filter(p => p.iapProduct.tier === 'bot');
+  const botUnlocks = showBotUnlocks ? nonConsumables.filter(p => p.iapProduct.tier === 'bot') : [];
   const accessPasses = nonConsumables.filter(p => p.iapProduct.tier !== 'bot');
 
   if (isLoading) {
@@ -91,6 +125,9 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess }) => {
   if (products.length === 0) {
     return (
       <div className="space-y-4">
+        {/* #region agent log */}
+        <p className="text-xs text-red-500 text-center font-mono break-all">[DBG] {debugInfo}</p>
+        {/* #endregion */}
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
           {t('iap_not_available')}
         </p>

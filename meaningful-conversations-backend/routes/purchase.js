@@ -161,7 +161,7 @@ function checkProductEligibility(user, productId) {
     if (isLifetimeRegistered(user)) {
       return { eligible: false, reason: 'You already have Registered Lifetime access.' };
     }
-    if (tier === 'client' || tier === 'admin') {
+    if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
   }
@@ -170,7 +170,7 @@ function checkProductEligibility(user, productId) {
     if (isLifetimeRegistered(user)) {
       return { eligible: false, reason: 'You already have Registered Lifetime access.' };
     }
-    if (tier === 'client' || tier === 'admin') {
+    if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
   }
@@ -227,6 +227,7 @@ async function applyProductEffect(userId, productId) {
     baseDate.setDate(baseDate.getDate() + product.days);
     updateData.isPremium = true;
     updateData.premiumExpiresAt = baseDate;
+    updateData.accessExpiresAt = baseDate;
     botIdForCode = productId;
   } else if (product.category === 'bot') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -277,12 +278,12 @@ router.get('/products', auth, async (req, res) => {
     for (const product of Object.values(PRODUCTS)) {
       if (product.id === 'REGISTERED_LIFETIME') {
         if (lifetime) continue;
-        if (tier === 'client' || tier === 'admin') continue;
+        if (tier === 'client' || tier === 'admin' || tier === 'premium') continue;
       }
 
       if (product.id === 'REGISTERED_1M') {
         if (lifetime) continue;
-        if (tier === 'client' || tier === 'admin') continue;
+        if (tier === 'client' || tier === 'admin' || tier === 'premium') continue;
       }
 
       // Skip Premium passes if user is already active Premium or higher

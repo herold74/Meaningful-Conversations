@@ -33,7 +33,7 @@ const sendConfirmationEmail = async (email, token, language = 'en') => {
     const textBodies = {
         en: `========================================
 Welcome to ${brand.appName}!
-Your account includes 14 days of free Premium access.
+Your account includes 9 days of free Premium access.
 ========================================
 
 Please click the link below to activate your account.
@@ -56,7 +56,7 @@ Voice Mode               | Yes      | Yes        | Yes
 Unlimited Messages       | 50/week  | Yes        | Yes
 ----------------------------------------
 
-Your 14-day Premium trial gives you full access to all features.
+Your 9-day Premium trial gives you full access to all features.
 After the trial, you can continue for free as a guest and still manage
 your Life Context yourself. As a registered user (from EUR 3.90/month)
 you also benefit from automatic management, an individually created
@@ -66,7 +66,7 @@ profiles. Premium access is available for 1, 3, or 12 months from EUR 9.90.
 If you did not sign up for an account, you can safely ignore this email.`,
         de: `========================================
 Willkommen bei ${brand.appNameDe}!
-Ihr Konto enthält 14 Tage kostenlosen Premium-Zugang.
+Ihr Konto enthält 9 Tage kostenlosen Premium-Zugang.
 ========================================
 
 Bitte klicken Sie auf den untenstehenden Link, um Ihr Konto zu aktivieren.
@@ -89,7 +89,7 @@ Sprachmodus                 | Ja       | Ja          | Ja
 Unbegrenzte Nachrichten     | 50/Woche | Ja          | Ja
 ----------------------------------------
 
-Ihre 14-tägige Premium-Testphase bietet Ihnen den vollen Funktionsumfang.
+Ihre 9-tägige Premium-Testphase bietet Ihnen den vollen Funktionsumfang.
 Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context
 weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat)
 profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell
@@ -112,7 +112,7 @@ einfach ignorieren.`
                         <tr>
                             <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
                                 <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Welcome to<br>${brand.appName}!</h2>
-                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>14 days of free Premium access</strong></p>
+                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Your account includes <strong>9 days of free Premium access</strong></p>
                             </td>
                         </tr>
 
@@ -147,7 +147,7 @@ einfach ignorieren.`
                                 </table>
 
                                 <div style="background: #e6f7ff; border-left: 4px solid ${brand.primaryColor}; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
-                                    <strong>Your 14-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
+                                    <strong>Your 9-day Premium trial</strong> gives you full access to all features. After the trial, you can continue for free as a guest and still manage your Life Context yourself. As a registered user (from €3.90/month) you also benefit from automatic management, an individually created personality profile, and personalized guidance through our coaching profiles. Premium access is available for 1, 3, or 12 months from €9.90.
                                 </div>
 
                                 <p style="font-size: 10px; color: #888888;">If you cannot click the button, copy this URL: <a href="${confirmationUrl}" style="color: ${brand.primaryColor}; word-break: break-all;">${confirmationUrl}</a></p>
@@ -177,7 +177,7 @@ einfach ignorieren.`
                         <tr>
                             <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
                                 <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Willkommen bei<br>${brand.appNameDe}!</h2>
-                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>14 Tage kostenlosen Premium-Zugang</strong></p>
+                                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">Ihr Konto enthält <strong>9 Tage kostenlosen Premium-Zugang</strong></p>
                             </td>
                         </tr>
 
@@ -212,7 +212,7 @@ einfach ignorieren.`
                                 </table>
 
                                 <div style="background: #e6f7ff; border-left: 4px solid ${brand.primaryColor}; padding: 12px 15px; margin-top: 0; margin-bottom: 20px; font-size: 13px; color: #111827;">
-                                    <strong>Ihre 14-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
+                                    <strong>Ihre 9-tägige Premium-Testphase</strong> bietet Ihnen den vollen Funktionsumfang. Nach Ablauf können Sie kostenlos als Gast weitermachen und Ihren Life Context weiterhin selbst verwalten. Als registrierter Anwender (ab 3,90 € pro Monat) profitieren Sie zusätzlich von der automatischen Verwaltung, einem individuell erstellten Persönlichkeitsprofil und einer auf Sie abgestimmten Ansprache durch unsere Coaching Profile. Premium-Zugänge sind wahlweise für 1, 3 oder 12 Monate ab 9,90 € erhältlich.
                                 </div>
 
                                 <p style="font-size: 10px; color: #888888;">Wenn Sie den Button nicht anklicken können, kopieren Sie diese URL: <a href="${confirmationUrl}" style="color: ${brand.primaryColor}; word-break: break-all;">${confirmationUrl}</a></p>
