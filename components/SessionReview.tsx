@@ -577,18 +577,13 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         return finalContext ? `${finalContext.trim()}\n` : '';
     };
 
-    const handleDownloadContext = () => {
-        // Always embed the latest gamification state to ensure the download is a complete backup.
+    const handleDownloadContext = async () => {
         const contentToDownload = addGamificationDataToContext(editableContext);
-        const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Life_Context_Updated.md';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            await downloadTextFile(contentToDownload, 'Life_Context_Updated.md', 'text/markdown;charset=utf-8');
+        } catch (err) {
+            console.error('Context download failed:', err);
+        }
     };
 
     const handleContinue = async () => {

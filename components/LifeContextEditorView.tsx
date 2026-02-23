@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
+import { downloadTextFile } from '../utils/fileDownload';
 
 interface LifeContextEditorViewProps {
   lifeContext: string;
@@ -35,16 +36,12 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
     onSave(editableContext);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([editableContext], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Life_Context.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownload = async () => {
+    try {
+      await downloadTextFile(editableContext, 'Life_Context.md', 'text/markdown;charset=utf-8');
+    } catch (err) {
+      console.error('Context download failed:', err);
+    }
   };
 
   return (

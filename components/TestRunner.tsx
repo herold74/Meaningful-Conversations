@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useModalOpen } from '../utils/modalUtils';
+import { downloadTextFile } from '../utils/fileDownload';
 import { Bot, Message, SessionAnalysis } from '../types';
 import { BOTS } from '../constants';
 import { 
@@ -1919,7 +1920,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   };
 
   // Export test result as JSON
-  const exportTestResult = useCallback(() => {
+  const exportTestResult = useCallback(async () => {
     if (!testResult || !selectedScenario || !selectedBot) return;
 
     const exportData: any = {
@@ -1971,15 +1972,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       exportData.llmStats = llmStats;
     }
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `test-${selectedScenario.id}-${selectedBot.id}-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const jsonContent = JSON.stringify(exportData, null, 2);
+    const filename = `test-${selectedScenario.id}-${selectedBot.id}-${new Date().toISOString().slice(0, 10)}.json`;
+    await downloadTextFile(jsonContent, filename, 'application/json');
   }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult]);
 
   // Render complete phase
