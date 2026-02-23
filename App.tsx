@@ -1285,27 +1285,40 @@ const App: React.FC = () => {
             case 'paywall': return <PaywallView
                 userEmail={paywallUserEmail}
                 userXp={gamificationState.xp}
+                currentUser={currentUser}
                 onRedeem={() => { setMenuView('redeemCode'); }}
                 onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }}
                 onLogout={handleLogout}
-                onDownloadData={async () => {
-                    const parts: string[] = [];
-                    if (lifeContext) {
-                        parts.push('# Life Context\n\n' + lifeContext);
+                onDownloadLifeContext={lifeContext ? async () => {
+                    await downloadTextFile(lifeContext, 'life-context.md', 'text/markdown;charset=utf-8');
+                } : undefined}
+                onDownloadProfile={encryptionKey && hasPersonalityProfile ? async () => {
+                    try {
+                        const profileData = await api.loadPersonalityProfile();
+                        if (profileData?.encryptedData) {
+                            const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
+                            const surveyResult = {
+                                completedLenses: [
+                                    ...(decrypted.spiralDynamics ? ['sd' as const] : []),
+                                    ...(decrypted.riemann ? ['riemann' as const] : []),
+                                    ...(decrypted.big5 ? ['ocean' as const] : []),
+                                ],
+                                path: (profileData.testType || 'BIG5') as 'RIEMANN' | 'BIG5' | 'SD',
+                                filter: undefined,
+                                spiralDynamics: decrypted.spiralDynamics,
+                                riemann: decrypted.riemann,
+                                big5: decrypted.big5,
+                                narratives: decrypted.narratives,
+                                adaptationMode: decrypted.adaptationMode || 'stable',
+                                narrativeProfile: decrypted.narrativeProfile,
+                            } as SurveyResult;
+                            const filename = generateSurveyPdfFilename(surveyResult.path, language as 'de' | 'en');
+                            await generatePDF(surveyResult, filename, language as 'de' | 'en', currentUser?.email);
+                        }
+                    } catch (err) {
+                        console.error('Profile PDF export failed:', err);
                     }
-                    if (encryptionKey) {
-                        try {
-                            const profileData = await api.loadPersonalityProfile();
-                            if (profileData?.encryptedData) {
-                                const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
-                                parts.push('# Personality Profile\n\n' + JSON.stringify(decrypted, null, 2));
-                            }
-                        } catch { /* profile may not exist */ }
-                    }
-                    if (parts.length > 0) {
-                        await downloadTextFile(parts.join('\n\n---\n\n'), 'my-data-export.md', 'text/markdown;charset=utf-8');
-                    }
-                }}
+                } : undefined}
             />;
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
