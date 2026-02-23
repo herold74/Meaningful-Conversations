@@ -327,6 +327,7 @@ function buildUserUpdate(productMapping, transactionInfo, user) {
       : new Date(Date.now() + productMapping.days * 86400000);
     updateData.isPremium = true;
     updateData.premiumExpiresAt = expiresAt;
+    updateData.accessExpiresAt = expiresAt;
   } else if (productMapping.tier === 'bot') {
     const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
     if (!unlocked.includes(productMapping.botId)) {

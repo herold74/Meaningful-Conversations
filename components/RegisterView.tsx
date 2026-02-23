@@ -80,6 +80,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
         </button>
         <div className="text-center">
           <h1 className="text-3xl font-bold text-content-primary uppercase">{t('register_title')}</h1>
+          <p className="mt-2 text-sm text-content-secondary">{t('register_trial_info')}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">

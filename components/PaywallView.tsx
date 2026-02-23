@@ -23,13 +23,16 @@ interface Product {
 interface PaywallViewProps {
   userEmail: string | null;
   userXp?: number;
+  currentUser?: User | null;
   onRedeem: () => void;
   onPurchaseSuccess: (user: User) => void;
   onLogout: () => void;
   onDownloadData?: () => void;
+  onDownloadLifeContext?: () => void;
+  onDownloadProfile?: () => void;
 }
 
-const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRedeem, onPurchaseSuccess, onLogout, onDownloadData }) => {
+const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, currentUser, onRedeem, onPurchaseSuccess, onLogout, onDownloadData, onDownloadLifeContext, onDownloadProfile }) => {
   const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
@@ -202,7 +205,10 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center animate-fadeIn px-4 py-8">
+    <>
+    {/* Frosted glass overlay for Dynamic Island / notch — must be outside animated container to keep position:fixed working */}
+    <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-50/80 dark:bg-gray-900/80 backdrop-blur-md" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+    <div className="flex flex-col items-center min-h-screen text-center animate-fadeIn px-4 py-8 overflow-y-auto" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
       <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-white dark:bg-transparent border-2 border-yellow-400 dark:border-yellow-500 rounded-lg">
 
         {/* Header */}
@@ -227,8 +233,8 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
           </div>
         )}
 
-        {/* Product catalog */}
-        {!isLoading && products.length > 0 && (
+        {/* Product catalog — web only (PayPal); hidden on native iOS where NativePaywall is used */}
+        {!isLoading && products.length > 0 && !isNativeIOS() && (
           <div className="md:flex md:gap-6 md:items-start space-y-4 md:space-y-0 text-left mb-6">
 
             {/* Access products (Registered Monthly + Lifetime) */}
@@ -241,13 +247,21 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
               </div>
             )}
 
-            {/* Premium products — dropdown selector */}
+            {/* Premium products — dropdown selector (recommended) */}
             {premiumProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
-                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  {t('paywall_section_premium')}
-                </h2>
-                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {t('paywall_section_premium')}
+                  </h2>
+                  <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full font-semibold">
+                    {t('paywall_recommended')}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('paywall_premium_includes_all')}
+                </p>
+                <div className="bg-gray-50 dark:bg-gray-800/50 border-2 border-yellow-400 dark:border-yellow-500 rounded-lg p-4 space-y-3">
                   <select
                     value={selectedPremiumId || ''}
                     onChange={e => handlePremiumChange(e.target.value)}
@@ -311,13 +325,13 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
           </div>
         )}
 
-        {isLoading && (
+        {isLoading && !isNativeIOS() && (
           <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
         )}
 
         {isNativeIOS() && (
           <div className="mb-6">
-            <NativePaywall onPurchaseSuccess={onPurchaseSuccess} />
+            <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} />
           </div>
         )}
 
@@ -340,7 +354,27 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
             {t('paywall_redeem_button')}
           </Button>
 
-          {onDownloadData && (
+          {(onDownloadLifeContext || onDownloadProfile) && (
+            <div className="flex flex-col items-center gap-1">
+              {onDownloadLifeContext && (
+                <button
+                  onClick={onDownloadLifeContext}
+                  className="text-sm text-accent-primary hover:underline py-1"
+                >
+                  {t('paywall_download_life_context')}
+                </button>
+              )}
+              {onDownloadProfile && (
+                <button
+                  onClick={onDownloadProfile}
+                  className="text-sm text-accent-primary hover:underline py-1"
+                >
+                  {t('paywall_download_profile')}
+                </button>
+              )}
+            </div>
+          )}
+          {onDownloadData && !onDownloadLifeContext && !onDownloadProfile && (
             <button
               onClick={onDownloadData}
               className="w-full text-sm text-accent-primary hover:underline py-2"
@@ -360,6 +394,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, onRede
         </div>
       </div>
     </div>
+    </>
   );
 };
 

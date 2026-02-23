@@ -218,7 +218,7 @@ router.post('/redeem-code', async (req, res) => {
 
         const ACCESS_CODE_TYPES = [
             'ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M',
-            'REGISTERED_LIFETIME', 'premium', 'client',
+            'REGISTERED_1M', 'REGISTERED_LIFETIME', 'premium', 'client',
         ];
         const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
 
@@ -237,29 +237,35 @@ router.post('/redeem-code', async (req, res) => {
         let updateData = { updatedAt: new Date() };
 
         if (upgradeCode.botId === 'ACCESS_PASS_1Y') {
-            // Premium 1-Year Pass: grant premium via premiumExpiresAt (preserves accessExpiresAt)
             const now = new Date();
             const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
                 ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setFullYear(baseDate.getFullYear() + 1);
             updateData.isPremium = true;
             updateData.premiumExpiresAt = baseDate;
+            updateData.accessExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'ACCESS_PASS_3M') {
-            // Premium 3-Month Pass
             const now = new Date();
             const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
                 ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setMonth(baseDate.getMonth() + 3);
             updateData.isPremium = true;
             updateData.premiumExpiresAt = baseDate;
+            updateData.accessExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'ACCESS_PASS_1M') {
-            // Premium 1-Month Pass
             const now = new Date();
             const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
                 ? new Date(user.premiumExpiresAt) : new Date();
             baseDate.setMonth(baseDate.getMonth() + 1);
             updateData.isPremium = true;
             updateData.premiumExpiresAt = baseDate;
+            updateData.accessExpiresAt = baseDate;
+        } else if (upgradeCode.botId === 'REGISTERED_1M') {
+            const now = new Date();
+            const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
+                ? new Date(user.accessExpiresAt) : new Date();
+            baseDate.setMonth(baseDate.getMonth() + 1);
+            updateData.accessExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'REGISTERED_LIFETIME') {
             // Registered Lifetime: permanent registered access (no premium features)
             updateData.accessExpiresAt = null;

@@ -37,50 +37,80 @@ export interface PurchaseResult {
 
 // RevenueCat SDK is loaded dynamically only on native iOS
 let Purchases: any = null;
+let rcInitialized = false;
 
-async function getRevenueCatSDK() {
-  if (!isNativeIOS()) return null;
-  if (Purchases) return Purchases;
-
-  try {
-    const module = await import('@revenuecat/purchases-capacitor');
-    Purchases = module.Purchases;
-    return Purchases;
-  } catch {
-    console.warn('RevenueCat SDK not available');
-    return null;
-  }
-}
-
-export async function initializePurchases(): Promise<boolean> {
+async function ensureRevenueCatLoaded(): Promise<boolean> {
+  // #region agent log
+  console.log('[DEBUG-cd59c1] ensureRC-enter, cached:', !!Purchases);
+  // #endregion
   if (!isNativeIOS()) return false;
-
-  const RC = await getRevenueCatSDK();
-  if (!RC) return false;
+  if (Purchases) return true;
 
   try {
-    const apiKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
-    if (!apiKey) {
-      console.warn('VITE_REVENUECAT_IOS_KEY not configured');
-      return false;
-    }
-
-    await RC.configure({ apiKey });
-    console.log('RevenueCat initialized');
+    // #region agent log
+    console.log('[DEBUG-cd59c1] ensureRC-importing');
+    // #endregion
+    const module = await import('@revenuecat/purchases-capacitor');
+    // #region agent log
+    console.log('[DEBUG-cd59c1] ensureRC-imported');
+    // #endregion
+    Purchases = module.Purchases;
     return true;
-  } catch (err) {
-    console.error('RevenueCat init failed:', err);
+  } catch (e) {
+    // #region agent log
+    console.log('[DEBUG-cd59c1] ensureRC-error', String(e));
+    // #endregion
     return false;
   }
 }
 
-export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
-  const RC = await getRevenueCatSDK();
-  if (!RC) return [];
+async function ensureRevenueCatConfigured(): Promise<boolean> {
+  if (rcInitialized) return true;
+
+  const loaded = await ensureRevenueCatLoaded();
+  if (!loaded) return false;
 
   try {
-    const offerings = await RC.getOfferings();
+    const apiKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
+    // #region agent log
+    console.log('[DEBUG-cd59c1] configure, hasKey:', !!apiKey);
+    // #endregion
+    if (!apiKey) return false;
+
+    await Purchases.configure({ apiKey });
+    rcInitialized = true;
+    // #region agent log
+    console.log('[DEBUG-cd59c1] configure SUCCESS');
+    // #endregion
+    return true;
+  } catch (err) {
+    // #region agent log
+    console.error('[DEBUG-cd59c1] configure FAILED:', err);
+    // #endregion
+    return false;
+  }
+}
+
+export async function initializePurchases(): Promise<boolean> {
+  return ensureRevenueCatConfigured();
+}
+
+export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
+  // #region agent log
+  console.log('[DEBUG-cd59c1] F1-enter-fetchProducts');
+  // #endregion
+  const ready = await ensureRevenueCatConfigured();
+  // #region agent log
+  console.log('[DEBUG-cd59c1] F2-configured:', ready);
+  // #endregion
+  if (!ready) return [];
+
+  try {
+    const offerings = await Purchases.getOfferings();
     const current = offerings.current;
+    // #region agent log
+    console.log('[DEBUG-cd59c1] offerings:', JSON.stringify({hasCurrent:!!current, currentId:current?.identifier, pkgCount:current?.availablePackages?.length||0, pkgIds:(current?.availablePackages||[]).map((p:any)=>p.product?.identifier)}));
+    // #endregion
     if (!current) return [];
 
     const products: StoreProduct[] = [];
@@ -88,6 +118,9 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
     for (const pkg of current.availablePackages || []) {
       const storeProduct = pkg.product;
       const iapProduct = IAP_PRODUCTS.find(p => p.appStoreId === storeProduct.identifier);
+      // #region agent log
+      if (!iapProduct) { console.warn('[DEBUG-cd59c1] NO MATCH:', storeProduct.identifier); }
+      // #endregion
       if (!iapProduct) continue;
 
       products.push({
@@ -101,19 +134,24 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
       });
     }
 
+    // #region agent log
+    console.log('[DEBUG-cd59c1] final products:', products.length, products.map(p=>p.identifier));
+    // #endregion
     return products;
   } catch (err) {
-    console.error('Failed to fetch products:', err);
+    // #region agent log
+    console.error('[DEBUG-cd59c1] fetchProducts FAILED:', err);
+    // #endregion
     return [];
   }
 }
 
 export async function purchaseProduct(productId: string): Promise<PurchaseResult> {
-  const RC = await getRevenueCatSDK();
-  if (!RC) return { success: false, error: 'Store not available' };
+  const ready = await ensureRevenueCatConfigured();
+  if (!ready) return { success: false, error: 'Store not available' };
 
   try {
-    const offerings = await RC.getOfferings();
+    const offerings = await Purchases.getOfferings();
     const current = offerings.current;
     if (!current) return { success: false, error: 'No offerings available' };
 
@@ -122,7 +160,7 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
     );
     if (!pkg) return { success: false, error: 'Product not found' };
 
-    const result = await RC.purchasePackage({ aPackage: pkg });
+    const result = await Purchases.purchasePackage({ aPackage: pkg });
     const transaction = result.customerInfo?.originalAppUserId
       ? result.transaction
       : null;
@@ -130,7 +168,6 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
     const transactionId = transaction?.transactionIdentifier || result.transaction?.transactionIdentifier;
 
     if (transactionId) {
-      // Verify with our backend
       try {
         const verification = await apiFetch('/api/apple-iap/verify-receipt', {
           method: 'POST',
@@ -158,14 +195,13 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
 }
 
 export async function restorePurchases(): Promise<{ restored: number; error?: string }> {
-  const RC = await getRevenueCatSDK();
-  if (!RC) return { restored: 0, error: 'Store not available' };
+  const ready = await ensureRevenueCatConfigured();
+  if (!ready) return { restored: 0, error: 'Store not available' };
 
   try {
-    const info = await RC.restorePurchases();
+    const info = await Purchases.restorePurchases();
     const activeEntitlements = Object.keys(info.customerInfo?.entitlements?.active || {});
 
-    // Also verify with our backend
     if (activeEntitlements.length > 0) {
       try {
         const allTransactions = info.customerInfo?.nonSubscriptionTransactions || [];
