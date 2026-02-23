@@ -12,6 +12,7 @@ import { WarningIcon } from './icons/WarningIcon';
 import { XIcon } from './icons/XIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import Button from './shared/Button';
+import { downloadTextFile } from '../utils/fileDownload';
 
 interface ContextChoiceViewProps {
   user: User;
@@ -52,17 +53,13 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
     return finalContext ? `${finalContext.trim()}\n` : '';
   };
 
-  const handleDownloadContext = () => {
+  const handleDownloadContext = async () => {
     const contentToDownload = addGamificationDataToContext(savedContext);
-    const blob = new Blob([contentToDownload], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Life_Context_Backup.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      await downloadTextFile(contentToDownload, 'Life_Context_Backup.md', 'text/markdown;charset=utf-8');
+    } catch (err) {
+      console.error('Context download failed:', err);
+    }
   };
   
   const handleConfirmStartNew = () => {

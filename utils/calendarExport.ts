@@ -1,6 +1,7 @@
 import { createEvent, EventAttributes } from 'ics';
 import { brand } from '../config/brand';
 import { parseDeadline as parseDeadlineUtil } from './dateParser';
+import { downloadTextFile } from './fileDownload';
 
 export interface CalendarEvent {
   action: string;
@@ -155,15 +156,8 @@ export const generateCalendarEvent = (
 /**
  * Download ICS file to user's device
  */
-export const downloadICSFile = (content: string, filename: string): void => {
-  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
+export const downloadICSFile = async (content: string, filename: string): Promise<void> => {
+  await downloadTextFile(content, filename, 'text/calendar;charset=utf-8');
 };
 
 /**
@@ -185,7 +179,7 @@ export const exportSingleEvent = async (
     return { success: false, error: result.error || 'Failed to generate calendar event' };
   }
   
-  downloadICSFile(result.value, result.filename);
+  await downloadICSFile(result.value, result.filename);
   return { success: true };
 };
 
@@ -203,7 +197,7 @@ export const exportSingleEventWithDate = async (
     return { success: false, error: result.error || 'Failed to generate calendar event' };
   }
   
-  downloadICSFile(result.value, result.filename);
+  await downloadICSFile(result.value, result.filename);
   return { success: true };
 };
 
