@@ -169,7 +169,7 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
 
     if (transactionId) {
       try {
-        const verification = await apiFetch('/api/apple-iap/verify-receipt', {
+        const verification = await apiFetch('/apple-iap/verify-receipt', {
           method: 'POST',
           body: JSON.stringify({ transactionId, productId }),
         });
@@ -194,31 +194,68 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
   }
 }
 
-export async function restorePurchases(): Promise<{ restored: number; error?: string }> {
+export async function restorePurchases(): Promise<{ restored: number; error?: string; user?: any }> {
   const ready = await ensureRevenueCatConfigured();
   if (!ready) return { restored: 0, error: 'Store not available' };
 
   try {
     const info = await Purchases.restorePurchases();
     const activeEntitlements = Object.keys(info.customerInfo?.entitlements?.active || {});
+    // #region agent log
+    console.log('[DEBUG-cd59c1] restore-entitlements:', activeEntitlements.length, JSON.stringify({
+      entitlements: activeEntitlements,
+      nonSubTx: (info.customerInfo?.nonSubscriptionTransactions || []).length,
+      activeSubs: info.customerInfo?.activeSubscriptions || [],
+    }));
+    // #endregion
+
+    let backendUser: any = null;
 
     if (activeEntitlements.length > 0) {
       try {
-        const allTransactions = info.customerInfo?.nonSubscriptionTransactions || [];
-        const txIds = allTransactions.map((t: any) => t.transactionIdentifier).filter(Boolean);
+        const txIds: string[] = [];
+
+        const nonSubTx = info.customerInfo?.nonSubscriptionTransactions || [];
+        for (const t of nonSubTx) {
+          if (t.transactionIdentifier) txIds.push(t.transactionIdentifier);
+        }
+
+        const entitlementValues = Object.values(info.customerInfo?.entitlements?.active || {}) as any[];
+        for (const ent of entitlementValues) {
+          if (ent.latestPurchaseDateMillis || ent.productIdentifier) {
+            const subTxId = ent.originalPurchaseDateMillis
+              ? String(ent.originalPurchaseDateMillis)
+              : null;
+            if (ent.store === 'app_store' || ent.store === 'APP_STORE') {
+              // #region agent log
+              console.log('[DEBUG-cd59c1] restore-entitlement-detail:', JSON.stringify(ent));
+              // #endregion
+            }
+          }
+        }
+
+        // #region agent log
+        console.log('[DEBUG-cd59c1] restore-txIds:', txIds.length, txIds);
+        // #endregion
 
         if (txIds.length > 0) {
-          await apiFetch('/api/apple-iap/restore', {
+          const backendResult = await apiFetch('/apple-iap/restore', {
             method: 'POST',
             body: JSON.stringify({ transactionIds: txIds }),
           });
+          backendUser = backendResult?.user || null;
+          // #region agent log
+          console.log('[DEBUG-cd59c1] restore-backend-result:', JSON.stringify({ restored: backendResult?.restored, hasUser: !!backendUser }));
+          // #endregion
         }
-      } catch {
-        // Backend sync failed, but RevenueCat still has the purchases
+      } catch (err) {
+        // #region agent log
+        console.error('[DEBUG-cd59c1] restore-backend-failed:', err);
+        // #endregion
       }
     }
 
-    return { restored: activeEntitlements.length };
+    return { restored: activeEntitlements.length, user: backendUser };
   } catch (err: any) {
     console.error('Restore failed:', err);
     return { restored: 0, error: err?.message || 'Restore failed' };
