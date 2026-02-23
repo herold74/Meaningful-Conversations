@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalOpen } from '../utils/modalUtils';
+import { downloadTextFile } from '../utils/fileDownload';
 import * as userService from '../services/userService';
 import { User, UpgradeCode, Ticket, Feedback } from '../types';
 import { apiFetch, loadPersonalityProfile } from '../services/api';
@@ -450,7 +451,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         }
     };
 
-    const downloadCSV = () => {
+    const downloadCSV = async () => {
         if (!generatedBulkCodes || generatedBulkCodes.length === 0) return;
 
         const productName = getUnlockName(generatedBulkCodes[0].botId);
@@ -466,12 +467,9 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             ].join(','))
         ].join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
         const filePrefix = referrer ? `codes_${referrer}_` : `codes_`;
-        link.href = URL.createObjectURL(blob);
-        link.download = `${filePrefix}${newCodeBotId}_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
+        const filename = `${filePrefix}${newCodeBotId}_${new Date().toISOString().split('T')[0]}.csv`;
+        await downloadTextFile(csvContent, filename, 'text/csv;charset=utf-8;');
     };
     
     const handleCopyCode = (codeValue: string, codeId: string) => {
