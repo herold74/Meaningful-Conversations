@@ -70,9 +70,9 @@ router.post('/register', registerLimiter, async (req, res) => {
             premiumExpiresAt = new Date('2026-06-30T23:59:59.000Z');
             isPremiumTrial = true;
         } else {
-            // 14-day Premium trial for new users
+            // 9-day Premium trial for new users
             const trialEnd = new Date(registrationDate);
-            trialEnd.setDate(trialEnd.getDate() + 14);
+            trialEnd.setDate(trialEnd.getDate() + 9);
             accessExpiresAt = trialEnd;
             premiumExpiresAt = new Date(trialEnd);
             isPremiumTrial = true;
