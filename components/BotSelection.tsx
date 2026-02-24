@@ -21,6 +21,8 @@ interface BotSelectionProps {
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
+  highlightSection?: 'management' | 'topicSearch' | null;
+  onHighlightDone?: () => void;
 }
 
 interface BotCardProps {
@@ -380,11 +382,30 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const [activeHighlight, setActiveHighlight] = useState<'management' | 'topicSearch' | null>(null);
+  const managementRef = useRef<HTMLElement>(null);
+  const topicSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!highlightSection || isLoading) return;
+    const timer = setTimeout(() => {
+      const target = highlightSection === 'management' ? managementRef.current : topicSearchRef.current;
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setActiveHighlight(highlightSection);
+        setTimeout(() => {
+          setActiveHighlight(null);
+          onHighlightDone?.();
+        }, 2500);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [highlightSection, isLoading, onHighlightDone]);
 
   // Track window width for responsive Transcript Evaluation card
   useEffect(() => {
@@ -499,18 +520,20 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
       </div>
 
       {currentUser && (
-        <TopicSearchSection
-          bots={bots}
-          onStartSessionWithPrompt={onStartSessionWithPrompt}
-          onUpgrade={onUpgrade}
-          currentUser={currentUser}
-          language={language}
-        />
+        <div ref={topicSearchRef} className={`transition-all duration-700 rounded-2xl ${activeHighlight === 'topicSearch' ? 'ring-2 ring-accent-primary/60 shadow-lg shadow-accent-primary/10' : ''}`}>
+          <TopicSearchSection
+            bots={bots}
+            onStartSessionWithPrompt={onStartSessionWithPrompt}
+            onUpgrade={onUpgrade}
+            currentUser={currentUser}
+            language={language}
+          />
+        </div>
       )}
 
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}
-        <section className="w-full max-w-6xl mx-auto">
+        <section ref={managementRef} className={`w-full max-w-6xl mx-auto transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-2 ring-accent-primary/60 shadow-lg shadow-accent-primary/10' : ''}`}>
           {/* Section Divider */}
           <div className="mb-6">
             <div className="flex items-center gap-4">
