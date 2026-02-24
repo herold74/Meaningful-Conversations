@@ -39,7 +39,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         if (currentUser?.id && !syncAttemptedRef.current) {
           syncAttemptedRef.current = true;
           await logInRevenueCat(currentUser.id);
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise(r => setTimeout(r, 500));
           const trySync = async (): Promise<boolean> => {
             try {
               const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
@@ -59,9 +59,9 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
             return false;
           };
           if (await trySync()) return;
-          await new Promise(r => setTimeout(r, 4000));
+          await new Promise(r => setTimeout(r, 1000));
           if (await trySync()) return;
-          await new Promise(r => setTimeout(r, 6000));
+          await new Promise(r => setTimeout(r, 2000));
           if (await trySync()) return;
         }
 
@@ -133,7 +133,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     // If we have currentUser, logIn + sync first (RevenueCat merge may not have completed on mount)
     if (currentUser?.id) {
       await logInRevenueCat(currentUser.id);
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 500));
       try {
         const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
         const syncedUser = res?.user;
