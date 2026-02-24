@@ -12,10 +12,10 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.0.2"),
-        .package(name: "CapacitorCommunityNativeAudio", path: "../../../node_modules/@capacitor-community/native-audio"),
-        .package(name: "CapacitorFilesystem", path: "../../../node_modules/@capacitor/filesystem"),
-        .package(name: "CapacitorShare", path: "../../../node_modules/@capacitor/share"),
-        .package(name: "RevenuecatPurchasesCapacitor", path: "../../../node_modules/@revenuecat/purchases-capacitor")
+        .package(name: "CapacitorCommunityNativeAudio", path: "../../../../Meaningful-Conversations-Project/node_modules/@capacitor-community/native-audio"),
+        .package(name: "CapacitorFilesystem", path: "../../../../Meaningful-Conversations-Project/node_modules/@capacitor/filesystem"),
+        .package(name: "CapacitorShare", path: "../../../../Meaningful-Conversations-Project/node_modules/@capacitor/share"),
+        .package(name: "RevenuecatPurchasesCapacitor", path: "../../../../Meaningful-Conversations-Project/node_modules/@revenuecat/purchases-capacitor")
     ],
     targets: [
         .target(
