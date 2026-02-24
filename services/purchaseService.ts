@@ -32,12 +32,27 @@ export interface StoreProduct {
 export interface PurchaseResult {
   success: boolean;
   transactionId?: string;
+  user?: any;
   error?: string;
 }
 
 // RevenueCat SDK is loaded dynamically only on native iOS
 let Purchases: any = null;
-let rcInitialized = false;
+
+// Use globalThis so config state is shared across module instances (code-splitting can load this twice)
+const RC_STATE_KEY = '__mc_revenuecat_config__';
+const RC_PROMISE_KEY = '__mc_revenuecat_config_promise__';
+
+function getRCState(): { initialized: boolean } {
+  const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : {});
+  if (!(RC_STATE_KEY in g)) (g as any)[RC_STATE_KEY] = { initialized: false };
+  return (g as any)[RC_STATE_KEY];
+}
+
+function getRCGlobal(): Record<string, unknown> {
+  const g = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : {});
+  return g as Record<string, unknown>;
+}
 
 async function ensureRevenueCatLoaded(): Promise<boolean> {
   if (!isNativeIOS()) return false;
@@ -53,25 +68,45 @@ async function ensureRevenueCatLoaded(): Promise<boolean> {
 }
 
 async function ensureRevenueCatConfigured(): Promise<boolean> {
-  if (rcInitialized) return true;
+  const state = getRCState();
+  if (state.initialized) return true;
 
-  const loaded = await ensureRevenueCatLoaded();
-  if (!loaded) return false;
+  const g = getRCGlobal();
+  const existing = g[RC_PROMISE_KEY] as Promise<boolean> | undefined;
+  if (existing) return existing;
 
-  try {
-    const apiKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
-    if (!apiKey) return false;
+  // Store promise in globalThis BEFORE any await — ensures all chunks share the same promise
+  const promise = (async (): Promise<boolean> => {
+    try {
+      const loaded = await ensureRevenueCatLoaded();
+      if (!loaded) return false;
+      const apiKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
+      if (!apiKey) return false;
+      await Purchases.configure({ apiKey });
+      state.initialized = true;
+      return true;
+    } catch {
+      return false;
+    }
+  })();
 
-    await Purchases.configure({ apiKey });
-    rcInitialized = true;
-    return true;
-  } catch {
-    return false;
-  }
+  g[RC_PROMISE_KEY] = promise;
+  return promise;
 }
 
 export async function initializePurchases(): Promise<boolean> {
   return ensureRevenueCatConfigured();
+}
+
+/** Link RevenueCat identity to our backend user. Call after login so purchases sync correctly. */
+export async function logInRevenueCat(appUserId: string): Promise<void> {
+  const ready = await ensureRevenueCatConfigured();
+  if (!ready) return;
+  try {
+    await Purchases.logIn({ appUserID: appUserId });
+  } catch (err) {
+    console.warn('[Purchase] RevenueCat logIn failed:', err);
+  }
 }
 
 export async function getActiveProductIds(): Promise<Set<string>> {
@@ -89,6 +124,49 @@ export async function getActiveProductIds(): Promise<Set<string>> {
     return active;
   } catch {
     return new Set();
+  }
+}
+
+/** Returns access info from local RevenueCat cache. Use when backend sync fails (e.g. merge not complete). */
+export async function getAccessFromRevenueCat(): Promise<{
+  hasAccess: boolean;
+  accessExpiresAt: string | null;
+  isPremium?: boolean;
+} | null> {
+  const ready = await ensureRevenueCatConfigured();
+  if (!ready) return null;
+
+  try {
+    const { customerInfo } = await Purchases.getCustomerInfo();
+    const active = customerInfo?.entitlements?.active || {};
+    const activeIds = Object.keys(active);
+    const hasRegistered = activeIds.includes('registered');
+    const hasPremium = activeIds.includes('premium');
+    const activeSubs = customerInfo?.activeSubscriptions || [];
+    const hasAccessProduct = activeSubs.some(
+      (id: string) => id.startsWith('mc.registered.') || id.startsWith('mc.premium.')
+    );
+    if (!hasRegistered && !hasPremium && !hasAccessProduct) return { hasAccess: false, accessExpiresAt: null };
+
+    let expiresAt: string | null = null;
+    for (const id of activeIds) {
+      const ent = active[id];
+      const exp = ent?.expirationDate ?? ent?.expirationDateMillis;
+      if (exp) {
+        const expStr = typeof exp === 'string' ? exp : (typeof exp === 'number' ? new Date(exp).toISOString() : (exp as Date)?.toISOString?.());
+        if (expStr && (!expiresAt || expStr > expiresAt)) expiresAt = expStr;
+      }
+    }
+    const byProduct = customerInfo?.allExpirationDatesByProduct || {};
+    for (const exp of Object.values(byProduct)) {
+      if (exp) {
+        const expStr = typeof exp === 'string' ? exp : (typeof exp === 'number' ? new Date(exp).toISOString() : (exp as Date)?.toISOString?.());
+        if (expStr && (!expiresAt || expStr > expiresAt)) expiresAt = expStr;
+      }
+    }
+    return { hasAccess: true, accessExpiresAt: expiresAt, isPremium: hasPremium };
+  } catch {
+    return null;
   }
 }
 
