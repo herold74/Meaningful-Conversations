@@ -331,7 +331,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         )}
         
         <div className="relative flex-shrink-0">
-            <div className={`rounded-full p-0.5 ${isLocked ? '' : 'bg-gradient-to-br from-w4f-sky to-w4f-navy'}`}>
+            <div className={`rounded-full p-0.5 ${isLocked ? '' : 'bg-gradient-to-br from-brand-light to-brand-dark'}`}>
                 <img 
                     src={bot.avatar} 
                     alt={bot.name} 

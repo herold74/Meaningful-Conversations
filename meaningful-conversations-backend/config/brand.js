@@ -10,8 +10,8 @@ const brand = {
   providerUrl:      process.env.BRAND_PROVIDER_URL       || 'https://www.manualmode.at',
   contactEmail:     process.env.BRAND_CONTACT_EMAIL      || 'gherold@manualmode.at',
   ownerName:        process.env.BRAND_OWNER_NAME         || 'Günter Herold',
-  primaryColor:     process.env.BRAND_PRIMARY_COLOR      || '#4A7A9B',
-  primaryColorDark: process.env.BRAND_PRIMARY_COLOR_DARK || '#1B3A5C',
+  primaryColor:     process.env.BRAND_PRIMARY_COLOR      || '#1B7272',
+  primaryColorDark: process.env.BRAND_PRIMARY_COLOR_DARK || '#165a5a',
 };
 
 brand.senderName = process.env.BRAND_SENDER_NAME
