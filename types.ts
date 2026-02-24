@@ -38,7 +38,10 @@ export type NavView =
     | 'personalityProfile'
     | 'lifeContextEditor'
     | 'transcriptEval'
-    | 'interviewTranscript';
+    | 'interviewTranscript'
+    | 'oceanOnboarding'
+    | 'intentPicker'
+    | 'namePrompt';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
