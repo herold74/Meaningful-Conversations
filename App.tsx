@@ -510,7 +510,7 @@ const App: React.FC = () => {
         // On iOS we also call logIn first so RevenueCat merges anonymous → our user ID.
         if (isIAPAvailable()) {
             await logInRevenueCat(user.id);
-            await new Promise(r => setTimeout(r, 3500));
+            await new Promise(r => setTimeout(r, 500));
         }
 
         const trySync = async (): Promise<boolean> => {
@@ -538,9 +538,9 @@ const App: React.FC = () => {
         };
 
         if (await trySync()) return;
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 1000));
         if (await trySync()) return;
-        await new Promise(r => setTimeout(r, 4000));
+        await new Promise(r => setTimeout(r, 2000));
         if (await trySync()) return;
 
         // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
