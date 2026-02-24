@@ -53,6 +53,10 @@ import UpdateNotification from './components/UpdateNotification';
 import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
 import PersonalityProfileView from './components/PersonalityProfileView';
+import OceanOnboarding from './components/OceanOnboarding';
+import IntentPickerView, { type UserIntent } from './components/IntentPickerView';
+import NamePromptView from './components/NamePromptView';
+import type { Big5Result } from './utils/bfi2';
 import LifeContextEditorView from './components/LifeContextEditorView';
 import TranscriptPreQuestions from './components/TranscriptPreQuestions';
 import TranscriptInput from './components/TranscriptInput';
@@ -131,6 +135,9 @@ const App: React.FC = () => {
     const [existingProfileForExtension, setExistingProfileForExtension] = useState<Partial<SurveyResult> | null>(null);
     const [preselectedLensForSurvey, setPreselectedLensForSurvey] = useState<'sd' | 'riemann' | 'ocean' | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    // Intent Picker / Bot Selection highlight
+    const [highlightSection, setHighlightSection] = useState<'management' | 'topicSearch' | null>(null);
 
     // Transcript Evaluation States
     const [teStep, setTeStep] = useState<'pre' | 'input' | 'review' | 'history'>('pre');
@@ -462,7 +469,16 @@ const App: React.FC = () => {
             if (user.isAdmin) {
                 setView('admin');
             } else {
-                setView(data.context ? 'contextChoice' : 'landing');
+                const profileExists = await api.checkPersonalityProfile().catch(() => false);
+                setHasPersonalityProfile(profileExists);
+                const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
+                if (!pickerDisabled) {
+                    setView('intentPicker');
+                } else if (!profileExists) {
+                    setView('oceanOnboarding');
+                } else {
+                    setView(data.context ? 'contextChoice' : 'landing');
+                }
             }
         } catch (error) {
             console.error("Failed to load user data after login, logging out.", error);
@@ -535,6 +551,87 @@ const App: React.FC = () => {
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setTempContext(context);
         setView('piiWarning');
+    };
+
+    const handleIntentSelected = useCallback((intent: UserIntent) => {
+        try { localStorage.setItem('userIntent', intent); } catch {}
+
+        const goToOceanFirst = currentUser && !hasPersonalityProfile;
+
+        switch (intent) {
+            case 'communication':
+                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
+                if (!currentUser && !localStorage.getItem('guestName')) {
+                    setView('namePrompt');
+                    return;
+                }
+                setHighlightSection('management');
+                setView('botSelection');
+                break;
+
+            case 'coaching':
+                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
+                setView(lifeContext ? 'contextChoice' : 'landing');
+                break;
+
+            case 'lifecoaching':
+                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
+                if (!lifeContext) {
+                    setView('landing');
+                    return;
+                }
+                setHighlightSection('topicSearch');
+                setView('botSelection');
+                break;
+        }
+    }, [currentUser, hasPersonalityProfile, lifeContext]);
+
+    const routeByStoredIntent = useCallback(() => {
+        const intent = localStorage.getItem('userIntent') as UserIntent | null;
+        if (intent === 'communication') {
+            setHighlightSection('management');
+            setView('botSelection');
+        } else if (intent === 'lifecoaching' && lifeContext) {
+            setHighlightSection('topicSearch');
+            setView('botSelection');
+        } else {
+            setView(lifeContext ? 'contextChoice' : 'landing');
+        }
+    }, [lifeContext]);
+
+    const handleOceanOnboardingComplete = async (big5: Big5Result) => {
+        if (!currentUser || !encryptionKey) return;
+        try {
+            const surveyResult: Partial<SurveyResult> = {
+                path: 'BIG5',
+                completedLenses: ['ocean'],
+                big5,
+                adaptationMode: 'adaptive',
+            };
+
+            const encryptedData = await encryptPersonalityProfile(surveyResult as SurveyResult, encryptionKey);
+            await api.savePersonalityProfile({
+                testType: 'BIG5',
+                completedLenses: ['ocean'],
+                encryptedData,
+                adaptationMode: 'adaptive',
+            });
+            setHasPersonalityProfile(true);
+
+            try {
+                const { user: updatedUser } = await userService.updateCoachingMode('dpfl');
+                setCurrentUser(updatedUser);
+            } catch { /* non-critical */ }
+
+            routeByStoredIntent();
+        } catch (error) {
+            console.error('Onboarding profile save failed:', error);
+            routeByStoredIntent();
+        }
+    };
+
+    const handleOceanOnboardingSkip = () => {
+        routeByStoredIntent();
     };
 
     const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
@@ -1271,7 +1368,9 @@ const App: React.FC = () => {
                     onGuest={() => {
                         setMenuView(null);
                         analyticsService.trackGuestLogin();
-                        handleStartOver();
+                        try { localStorage.removeItem('guestName'); } catch {}
+                        setLifeContext('');
+                        setView('intentPicker');
                     }}
                     redirectReason={authRedirectReason}
                 />;
@@ -1322,9 +1421,18 @@ const App: React.FC = () => {
                     }
                 } : undefined}
             />;
-            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} />;
+            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} existingContext={lifeContext || undefined} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
+            case 'intentPicker': return <IntentPickerView onSelect={handleIntentSelected} isGuest={!currentUser} onSkipPermanently={() => { try { localStorage.setItem('intentPickerDisabled', 'true'); } catch {} setView(lifeContext ? 'contextChoice' : 'landing'); }} />;
+            case 'namePrompt': return <NamePromptView onContinue={(name) => {
+                const template = language === 'de'
+                    ? `# Lebenskontext\n\n## 👤 Kernprofil\n*Allgemeine, stabile Informationen über mich.*\n\n**Ich bin...**: ${name}\n**Land / Bundesland**: \n**Grundwerte**: \n**Allgemeine Stimmung**: \n`
+                    : `# My Life Context\n\n## 👤 Core Profile\n*High-level, stable information about me.*\n\n**I am...**: ${name}\n**Country / State**: \n**Core Values**: \n**General Sentiment**: \n`;
+                setLifeContext(template);
+                setView('landing');
+            }} />;
+            case 'oceanOnboarding': return <OceanOnboarding onComplete={handleOceanOnboardingComplete} onSkip={handleOceanOnboardingSkip} />;
             case 'personalitySurvey': {
                 console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension, 'preselectedLens:', preselectedLensForSurvey);
                 return <PersonalitySurvey 
@@ -1383,6 +1491,8 @@ const App: React.FC = () => {
                     currentUser={currentUser}
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={currentUser?.coachingMode || 'off'}
+                    highlightSection={highlightSection}
+                    onHighlightDone={() => setHighlightSection(null)}
                 />
             );
             case 'chat': return (
@@ -1493,7 +1603,7 @@ const App: React.FC = () => {
     };
     
     const isAnyModalOpen = useIsAnyModalOpen();
-    const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall'].includes(view);
+    const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall', 'intentPicker', 'oceanOnboarding', 'namePrompt'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning'].includes(view) && !menuView;
     const nativeBarHeight = minimalBar ? 48 : 60; // Must match Swift: barHeight in NativeGamificationBarView.updateLayout
     const previousViewRef = useRef<NavView>('welcome');

@@ -17,6 +17,7 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ currentUser, onBack, 
   const [lastName, setLastName] = useState(currentUser.lastName || '');
   const [newsletterConsent, setNewsletterConsent] = useState(currentUser.newsletterConsent || false);
   const [aiRegion, setAiRegion] = useState<AIRegionPreference>((currentUser as any).aiRegionPreference || 'optimal');
+  const [showIntentPicker, setShowIntentPicker] = useState(() => localStorage.getItem('intentPickerDisabled') !== 'true');
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdatingRegion, setIsUpdatingRegion] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -208,6 +209,31 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ currentUser, onBack, 
                       : 'Processing in USA. Fastest responses.'}
                   </p>
                 </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Intent Picker Toggle */}
+          <div className="pt-4 border-t border-border-secondary dark:border-border-primary">
+            <div className="flex items-start">
+              <input
+                type="checkbox"
+                id="intentPicker"
+                checked={showIntentPicker}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  setShowIntentPicker(enabled);
+                  try {
+                    if (enabled) localStorage.removeItem('intentPickerDisabled');
+                    else localStorage.setItem('intentPickerDisabled', 'true');
+                  } catch {}
+                }}
+                className="mt-1 w-4 h-4 text-accent-primary bg-background-tertiary border-border-secondary rounded focus:ring-accent-primary focus:ring-2"
+              />
+              <label htmlFor="intentPicker" className="ml-3 text-sm text-content-secondary">
+                <span className="font-bold">{t('profile_intent_picker_label')}</span>
+                <br />
+                <span className="text-xs">{t('profile_intent_picker_desc')}</span>
               </label>
             </div>
           </div>
