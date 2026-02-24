@@ -214,12 +214,12 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     {/* Frosted overlay rendered via portal to document.body — avoids motion.div transform breaking position:fixed */}
     {createPortal(frostedOverlay, document.body)}
     <div className="flex flex-col items-center min-h-screen text-center px-4 py-8 overflow-y-auto" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
-      <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-background-secondary border border-w4f-amber/40 rounded-card shadow-card-elevated">
+      <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-background-secondary border border-brand-accent/40 rounded-card shadow-card-elevated">
 
         {/* Header */}
         <div className="flex flex-col items-center mb-4 md:mb-6">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-w4f-amber/15 rounded-full flex items-center justify-center mb-3">
-            <LockIcon className="w-8 h-8 md:w-10 md:h-10 text-w4f-amber" />
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-brand-accent/15 rounded-full flex items-center justify-center mb-3">
+            <LockIcon className="w-8 h-8 md:w-10 md:h-10 text-brand-accent" />
           </div>
           <h1 className="text-2xl md:text-3xl font-semibold text-content-primary tracking-tight">{t('paywall_title')}</h1>
         </div>
@@ -259,14 +259,14 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                   <h2 className="text-sm font-semibold text-content-subtle uppercase tracking-wide">
                     {t('paywall_section_premium')}
                   </h2>
-                  <span className="text-xs px-2 py-0.5 bg-w4f-amber/15 text-w4f-amber rounded-pill font-semibold">
+                  <span className="text-xs px-2 py-0.5 bg-brand-accent/15 text-brand-accent rounded-pill font-semibold">
                     {t('paywall_recommended')}
                   </span>
                 </div>
                 <p className="text-xs text-content-subtle">
                   {t('paywall_premium_includes_all')}
                 </p>
-                <div className="bg-background-tertiary border-2 border-w4f-amber/40 rounded-card p-4 space-y-3">
+                <div className="bg-background-tertiary border-2 border-brand-accent/40 rounded-card p-4 space-y-3">
                   <select
                     value={selectedPremiumId || ''}
                     onChange={e => handlePremiumChange(e.target.value)}
