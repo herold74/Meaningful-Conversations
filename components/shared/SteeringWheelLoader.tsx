@@ -21,8 +21,8 @@ const SteeringWheelLoader: React.FC<LoaderProps> = ({ className = '', size = 'md
         animate={{ rotate: 360 }}
         transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
       >
-        <circle cx={cx} cy={cx} r={outerR} fill="none" className="stroke-w4f-slate" strokeWidth={s * 0.06} />
-        <circle cx={cx} cy={cx} r={innerR} fill="none" className="stroke-w4f-navy" strokeWidth={s * 0.06} />
+        <circle cx={cx} cy={cx} r={outerR} fill="none" className="stroke-brand-base" strokeWidth={s * 0.06} />
+        <circle cx={cx} cy={cx} r={innerR} fill="none" className="stroke-brand-dark" strokeWidth={s * 0.06} />
         {Array.from({ length: spokeCount }).map((_, i) => {
           const angle = (i * 360) / spokeCount;
           const rad = (angle * Math.PI) / 180;
@@ -34,7 +34,7 @@ const SteeringWheelLoader: React.FC<LoaderProps> = ({ className = '', size = 'md
             <line
               key={i}
               x1={x1} y1={y1} x2={x2} y2={y2}
-              className={i % 2 === 0 ? 'stroke-w4f-slate' : 'stroke-w4f-steel'}
+              className={i % 2 === 0 ? 'stroke-brand-base' : 'stroke-brand-mid'}
               strokeWidth={s * 0.05}
               strokeLinecap="round"
             />
@@ -49,7 +49,7 @@ const SteeringWheelLoader: React.FC<LoaderProps> = ({ className = '', size = 'md
             <circle
               key={`h${i}`}
               cx={hx} cy={hy} r={s * 0.04}
-              className="fill-w4f-navy"
+              className="fill-brand-dark"
             />
           );
         })}

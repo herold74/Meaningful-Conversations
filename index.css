@@ -19,15 +19,12 @@
 
 /* 
   === THEME DEFINITIONS ===
-  Work4Flow brand palette: 4 blue shades + amber accent.
-  W4F-Sky: #89C4E1 (137 196 225)
-  W4F-Steel: #6A9DBF (106 157 191)
-  W4F-Slate: #4A7A9B (74 122 155)
-  W4F-Navy: #1B3A5C (27 58 92)
-  W4F-Amber: #F59E0B (245 158 11)
+  Brand palette (4 shades + accent) is injected via CSS custom properties
+  from the Vite brand plugin (--brand-color-1 to --brand-color-4, --brand-accent).
+  Default: manualmode.at teal palette. Override via VITE_BRAND_COLOR_* env vars.
 */
 
-/* --- Winter Theme (Default / W4F Brand) --- */
+/* --- Winter Theme (Default / Brand Palette) --- */
 html[data-theme="winter"] {
   --bg-primary: 249 250 251; /* gray-50 */
   --bg-secondary: 255 255 255; /* white */

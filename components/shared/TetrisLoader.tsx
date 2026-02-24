@@ -9,10 +9,10 @@ const sizeMap = {
 };
 
 const FILL_CLASSES = [
-  'fill-w4f-sky',
-  'fill-w4f-steel',
-  'fill-w4f-slate',
-  'fill-w4f-navy',
+  'fill-brand-light',
+  'fill-brand-mid',
+  'fill-brand-base',
+  'fill-brand-dark',
 ] as const;
 
 const TetrisLoader: React.FC<LoaderProps> = ({ className = '', size = 'md' }) => {
