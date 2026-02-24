@@ -5,7 +5,17 @@
 **Staging:** Pending
 **Production:** Pending
 
+**Workspace Setup (2026-02):**
+- **Main project:** `/Users/gherold/Meaningful-Conversations-Project` — Branch: `feature/visual-redesign`
+- **Main worktree:** `/Users/gherold/MC-main` — Branch: `main` (für main-spezifische Arbeit)
+
 ## Recent Changes (Post v1.8.4)
+
+### iOS In-App Purchase Improvements (2026-02, main)
+- **Backend Receipt Verification Fix:** `APPLE_PRIVATE_KEY` Newline-Handling für .env, detailliertes Error-Logging
+- **Frontend Fallback:** Restore-Retry bei fehlgeschlagener verify-receipt; verbesserter patched-user-Fallback (yearly/monthly/lifetime, Bot-Unlocks)
+- **NativePaywall:** successUser + "Weiter"/"Continue"-Button; "Aktuell"-Badge für aktive Produkte; `getActiveProductIds`
+- **Commit:** `8750b9b` auf main
 
 ### Gloria Interview Bot (New Feature)
 - **New Bot:** `gloria-interview` — a professional interviewer for structured topic interviews (ideas, projects, workflows, concepts, strategies, decisions). Access tier: `registered`.
@@ -145,15 +155,12 @@
 ## Active Tasks
 - [ ] Android Voice Duplication weiter beobachten
 - [ ] Production Deployment fuer v1.8.4 planen
-- [ ] **iOS In-App Purchase:** StoreKit 2 Integration geplant (Skill: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`)
+- [x] **iOS In-App Purchase:** Backend + Frontend implementiert; Sandbox-Tests ausstehend
 
-## Planned: Native In-App Purchase (iOS)
-- **Strategy:** iOS uses StoreKit 2 (via RevenueCat or direct), Web keeps PayPal
-- **Products:** 3 subscriptions (Registered Monthly, Premium Monthly, Premium Yearly) + 3 non-consumables (Registered Lifetime, Kenji Unlock, Chloe Unlock)
-- **App Store Product IDs:** `mc.registered.monthly`, `mc.premium.monthly`, `mc.premium.yearly`, `mc.registered.lifetime`, `mc.coach.kenji`, `mc.coach.chloe`
-- **Backend:** New endpoints `/api/purchase/verify-receipt` and `/api/purchase/apple-notification`
-- **Apple Compliance:** PayPal links must be hidden on iOS; Restore Purchases button mandatory
-- **Implementation Phases:** A (App Store Setup) → B (Backend) → C (Frontend) → D (Testing)
+## iOS In-App Purchase — Aktueller Stand
+- **Implementiert (main):** NativePaywall, purchaseService (RevenueCat), Backend verify-receipt/restore/notification, Receipt-Verifizierung (Apple Server API v2), Paywall-Fallback, aktive Produkte
+- **Offen:** App Store Connect Produkte anlegen, TestFlight, Sandbox-Tests, Apple Server Notifications URL eintragen
+- **Skill:** `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`
 
 ## Decision Log
 - **2026-02-11:** Dockerfiles auf `npm ci` umgestellt nach express-rate-limit Crash auf Staging
