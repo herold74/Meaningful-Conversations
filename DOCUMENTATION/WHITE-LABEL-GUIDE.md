@@ -141,30 +141,15 @@ Full iOS rebranding requires additional steps beyond env vars:
 - App Store listing — separate Apple Developer Account required
 - In-App Purchases — new products in App Store Connect + RevenueCat config
 
-## Example: Work4Flow Brand Override
+## Pre-Built Brand Configs
 
-A colleague using the Work4Flow blue palette with Tetris loader:
+Ready-to-use brand configurations are stored in `brands/*.env`. To use one, copy the relevant values into your `.env.local`, `.env.staging`, or `.env.production`.
 
-```bash
-# .env (frontend) — only override what differs from defaults
-VITE_BRAND_APP_NAME="Work4Flow Coaching"
-VITE_BRAND_SHORT_NAME="W4F"
-VITE_BRAND_PROVIDER_NAME="work4flow.eu"
-VITE_BRAND_PROVIDER_URL="https://www.work4flow.eu"
-VITE_BRAND_CONTACT_EMAIL="info@work4flow.eu"
-VITE_BRAND_OWNER_NAME="Günter Herold"
+| File | Brand | Palette | Loader |
+|------|-------|---------|--------|
+| `brands/w4f.env` | Work4Flow | Blue (4 shades) | Tetris |
 
-VITE_BRAND_COLOR_1="#89C4E1"
-VITE_BRAND_COLOR_2="#6A9DBF"
-VITE_BRAND_COLOR_3="#4A7A9B"
-VITE_BRAND_COLOR_4="#1B3A5C"
-VITE_BRAND_ACCENT="#F59E0B"
-VITE_BRAND_PRIMARY_COLOR="#4A7A9B"
-VITE_BRAND_PRIMARY_COLOR_DARK="#1B3A5C"
-VITE_BRAND_LOADER="tetris"
-```
-
-The same codebase produces a completely different visual identity at build time.
+To add a new brand: create `brands/<name>.env` with the desired overrides. The same codebase produces a completely different visual identity at build time.
 
 ## Deployment Checklist
 
