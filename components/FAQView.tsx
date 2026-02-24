@@ -90,9 +90,9 @@ const FAQView: React.FC<InfoViewProps> = () => {
     const markdownContent = language === 'de' ? de_markdown : en_markdown;
     
     return (
-        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-content-primary uppercase">{t('faq_title')}</h1>
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('faq_title')}</h1>
             </div>
             <div className="prose dark:prose-invert max-w-none text-content-secondary space-y-4 leading-relaxed">
                 <ReactMarkdown 

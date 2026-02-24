@@ -86,7 +86,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-content-primary uppercase">{t('menu_title')}</h2>
+                    <h2 className="text-lg font-semibold text-content-primary tracking-tight">{t('menu_title')}</h2>
                     <button onClick={onClose} className="p-2 -mr-2 text-content-secondary hover:text-content-primary">
                         <XIcon className="w-6 h-6" />
                     </button>

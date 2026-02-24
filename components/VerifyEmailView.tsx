@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
 import Button from './shared/Button';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { CheckIcon } from './icons/CheckIcon';
 import { WarningIcon } from './icons/WarningIcon';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
@@ -79,10 +79,10 @@ const VerifyEmailView: React.FC<VerifyEmailViewProps> = ({ onVerificationSuccess
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8 text-center bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+      <div className="w-full max-w-md p-8 text-center bg-white border border-gray-300 dark:border-gray-700">
         {status === 'verifying' && (
           <div className="flex flex-col items-center gap-4">
-            <Spinner />
+            <BrandLoader size="md" />
             <p className="text-lg text-gray-600 dark:text-gray-400">{t('verifyEmail_loading')}</p>
           </div>
         )}

@@ -11,8 +11,8 @@ const RegistrationPendingView: React.FC<RegistrationPendingViewProps> = ({ onGoT
   const { t } = useLocalization();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 text-center bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-full max-w-md p-8 space-y-6 text-center bg-white border border-gray-300 dark:border-gray-700">
         <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center mb-4 mx-auto">
           <MailIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
         </div>

@@ -8,7 +8,7 @@ import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile, SpiralDynamicsResult, LensType } from './PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
 import { detectPII, PIIDetectionResult } from '../utils/piiDetection';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
 import NarrativeStoriesModal from './NarrativeStoriesModal';
@@ -40,16 +40,16 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
 
       {/* Superpowers */}
       <div className="mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-content-primary flex items-center gap-2">
+        <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_superpowers_title') || '⚡ Deine geheimen Superkräfte'}
         </h4>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {narrativeProfile.superpowers.map((power, index) => (
             <div 
               key={index}
-              className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800"
+              className="p-4 bg-status-warning-background rounded-card border border-status-warning-border"
             >
-              <div className="font-bold text-yellow-800 dark:text-yellow-300 mb-2">
+              <div className="font-semibold text-status-warning-foreground mb-1.5 text-sm">
                 {index + 1}. {power.name}
               </div>
               <p className="text-content-secondary text-sm leading-relaxed">
@@ -62,16 +62,16 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
 
       {/* Blindspots */}
       <div className="mb-8">
-        <h4 className="text-lg font-semibold mb-4 text-content-primary flex items-center gap-2">
+        <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_blindspots_title') || '🌑 Potenzielle Blindspots'}
         </h4>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {narrativeProfile.blindspots.map((spot, index) => (
             <div 
               key={index}
-              className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+              className="p-4 bg-status-danger-background rounded-card border border-status-danger-border"
             >
-              <div className="font-bold text-red-800 dark:text-red-300 mb-2">
+              <div className="font-semibold text-status-danger-foreground mb-1.5 text-sm">
                 {index + 1}. {spot.name}
               </div>
               <p className="text-content-secondary text-sm leading-relaxed">
@@ -84,16 +84,16 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
 
       {/* Growth Opportunities */}
       <div>
-        <h4 className="text-lg font-semibold mb-4 text-content-primary flex items-center gap-2">
+        <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_growth_title') || '🌱 Wachstumsmöglichkeiten'}
         </h4>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {narrativeProfile.growthOpportunities.map((opp, index) => (
             <div 
               key={index}
-              className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"
+              className="p-4 bg-status-success-background rounded-card border border-status-success-border"
             >
-              <div className="font-bold text-green-800 dark:text-green-300 mb-2">
+              <div className="font-semibold text-status-success-foreground mb-1.5 text-sm">
                 {index + 1}. {opp.title}
               </div>
               <p className="text-content-secondary text-sm leading-relaxed">
@@ -623,17 +623,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <Spinner />
-        <p className="mt-4 text-content-secondary">{t('profile_view_loading') || 'Profil wird geladen...'}</p>
+        <BrandLoader size="md" />
+        <p className="mt-4 text-sm text-content-secondary">{t('profile_view_loading') || 'Profil wird geladen...'}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
-        <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4 text-content-primary">{t('profile_view_error_title') || 'Fehler'}</h2>
+      <div className="pt-4 pb-10 max-w-4xl mx-auto">
+        <div className="bg-background-secondary border border-border-primary rounded-card shadow-card-elevated p-6">
+          <h2 className="text-xl font-semibold mb-4 text-content-primary">{t('profile_view_error_title') || 'Fehler'}</h2>
           <p className="text-status-danger-foreground mb-4">{error}</p>
           <Button onClick={loadProfile}>
             {t('profile_view_retry') || 'Erneut versuchen'}
@@ -645,9 +645,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
   if (!decryptedData || !profileMetadata) {
     return (
-      <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
-        <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-content-primary">
+      <div className="pt-4 pb-10 max-w-4xl mx-auto">
+        <div className="bg-background-secondary border border-border-primary rounded-card shadow-card-elevated p-6 text-center">
+          <h2 className="text-xl font-semibold mb-4 text-content-primary">
             {t('profile_view_no_profile_title') || 'Kein Profil vorhanden'}
           </h2>
           <p className="text-content-secondary mb-6">
@@ -685,14 +685,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       : 'bg-background-secondary dark:bg-background-secondary/60 border-accent-primary/50 text-accent-tertiary dark:text-accent-primary';
 
   return (
-    <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto">
-      <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
-        {/* Compact Header - Option A: Integrated with Dropdown */}
-        <div className="mb-6 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-4 sm:p-5">
+    <div className="pt-4 pb-10 max-w-4xl mx-auto">
+      <div className="bg-background-secondary border border-border-primary rounded-card shadow-card-elevated p-6">
+        <div className="mb-6 rounded-card border border-border-primary bg-background-tertiary p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-            {/* Left: title + created date */}
             <div className="flex flex-col gap-1 min-w-0">
-              <h2 className="text-2xl font-bold text-content-primary">
+              <h2 className="text-xl font-semibold text-content-primary tracking-tight">
                 {t('profile_view_title') || 'Mein Persönlichkeitsprofil'}
               </h2>
               <span className="text-xs text-content-secondary">

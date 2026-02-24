@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalOpen } from '../utils/modalUtils';
 import { apiFetch } from '../services/api';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { useLocalization } from '../context/LocalizationContext';
 import { DollarIcon } from './icons/DollarIcon';
 import { ActivityIcon } from './icons/ActivityIcon';
@@ -309,7 +309,7 @@ export const ApiUsageView: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Spinner />
+                <BrandLoader size="md" />
             </div>
         );
     }
@@ -410,7 +410,7 @@ export const ApiUsageView: React.FC = () => {
                                     disabled={switchingProvider || !providerConfig.providerHealth.google.available}
                                     className="mt-3 w-full px-3 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
-                                    {switchingProvider ? <Spinner /> : 'Switch to Google'}
+                                    {switchingProvider ? <BrandLoader size="sm" /> : 'Switch to Google'}
                                 </button>
                             )}
                         </div>
@@ -444,7 +444,7 @@ export const ApiUsageView: React.FC = () => {
                                     disabled={switchingProvider || !providerConfig.providerHealth.mistral.available}
                                     className="mt-3 w-full px-3 py-2 text-sm font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                 >
-                                    {switchingProvider ? <Spinner /> : 'Switch to Mistral'}
+                                    {switchingProvider ? <BrandLoader size="sm" /> : 'Switch to Mistral'}
                                 </button>
                             )}
                         </div>
@@ -604,7 +604,7 @@ export const ApiUsageView: React.FC = () => {
                             disabled={savingMapping}
                             className="px-6 py-2 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                         >
-                            {savingMapping ? <Spinner /> : 'Save Model Configuration'}
+                            {savingMapping ? <BrandLoader size="sm" /> : 'Save Model Configuration'}
                         </button>
                     </div>
                     </>

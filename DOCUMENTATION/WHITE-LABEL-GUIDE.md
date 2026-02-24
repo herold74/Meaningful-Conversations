@@ -18,6 +18,7 @@ Both files export the same set of branding properties with identical defaults (t
 ### 1. Set Frontend Variables (`.env` in project root)
 
 ```bash
+# Identity
 VITE_BRAND_APP_NAME="Your App Name"
 VITE_BRAND_APP_NAME_DE="Ihr App-Name"
 VITE_BRAND_SHORT_NAME="YourApp"
@@ -25,8 +26,20 @@ VITE_BRAND_PROVIDER_NAME="yourcompany.com"
 VITE_BRAND_PROVIDER_URL="https://www.yourcompany.com"
 VITE_BRAND_CONTACT_EMAIL="info@yourcompany.com"
 VITE_BRAND_OWNER_NAME="Your Name"
-VITE_BRAND_PRIMARY_COLOR="#2563EB"
-VITE_BRAND_PRIMARY_COLOR_DARK="#1D4ED8"
+VITE_BRAND_PRIMARY_COLOR="#4A7A9B"
+VITE_BRAND_PRIMARY_COLOR_DARK="#1B3A5C"
+
+# Color palette (4-shade gradient, lightest to darkest)
+VITE_BRAND_COLOR_1="#89C4E1"
+VITE_BRAND_COLOR_2="#6A9DBF"
+VITE_BRAND_COLOR_3="#4A7A9B"
+VITE_BRAND_COLOR_4="#1B3A5C"
+VITE_BRAND_ACCENT="#F59E0B"
+
+# Loader style: tetris | steering-wheel | dots | pulse
+VITE_BRAND_LOADER="tetris"
+
+# Domains
 VITE_BRAND_DOMAIN_STAGING="staging.yourcompany.com"
 VITE_BRAND_DOMAIN_PRODUCTION="app.yourcompany.com"
 VITE_BRAND_APP_URL_PRODUCTION="https://app.yourcompany.com"
@@ -74,8 +87,14 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `VITE_BRAND_PROVIDER_URL` | https://www.manualmode.at | About page highlight link, Imprint, Redeem Code link |
 | `VITE_BRAND_CONTACT_EMAIL` | gherold@manualmode.at | Imprint, Privacy Policy, locale interpolations |
 | `VITE_BRAND_OWNER_NAME` | Günter Herold | PDF footers |
-| `VITE_BRAND_PRIMARY_COLOR` | #1B7272 | PDF headers/accents, locale interpolations (paywall) |
-| `VITE_BRAND_PRIMARY_COLOR_DARK` | #165a5a | PDF gradient |
+| `VITE_BRAND_PRIMARY_COLOR` | #4A7A9B | PDF headers/accents, locale interpolations (paywall) |
+| `VITE_BRAND_PRIMARY_COLOR_DARK` | #1B3A5C | PDF gradient |
+| `VITE_BRAND_COLOR_1` | #89C4E1 | Lightest brand shade; CSS `--brand-color-1`, Tailwind `w4f-sky`, dark-mode accent-primary |
+| `VITE_BRAND_COLOR_2` | #6A9DBF | Second shade; CSS `--brand-color-2`, Tailwind `w4f-steel`, dark-mode accent-hover |
+| `VITE_BRAND_COLOR_3` | #4A7A9B | Third shade; CSS `--brand-color-3`, Tailwind `w4f-slate`, light-mode accent-primary |
+| `VITE_BRAND_COLOR_4` | #1B3A5C | Darkest shade; CSS `--brand-color-4`, Tailwind `w4f-navy`, light-mode accent-hover |
+| `VITE_BRAND_ACCENT` | #F59E0B | Accent / CTA color; CSS `--brand-accent`, Tailwind `w4f-amber` |
+| `VITE_BRAND_LOADER` | tetris | Loading indicator style: `tetris`, `steering-wheel`, `dots`, or `pulse` |
 | `VITE_BRAND_DOMAIN_STAGING` | mc-beta.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_DOMAIN_PRODUCTION` | mc-app.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_APP_URL_PRODUCTION` | https://mc-app.manualmode.at | Calendar event links |
@@ -90,8 +109,8 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `BRAND_PROVIDER_URL` | https://www.manualmode.at | Email footer links, export HTML |
 | `BRAND_CONTACT_EMAIL` | gherold@manualmode.at | Purchase emails, admin notification fallback |
 | `BRAND_OWNER_NAME` | Günter Herold | Purchase email signature |
-| `BRAND_PRIMARY_COLOR` | #1B7272 | Email template colors (~25 occurrences) |
-| `BRAND_PRIMARY_COLOR_DARK` | #165a5a | Email gradient backgrounds |
+| `BRAND_PRIMARY_COLOR` | #4A7A9B | Email template colors (~25 occurrences) |
+| `BRAND_PRIMARY_COLOR_DARK` | #1B3A5C | Email gradient backgrounds |
 | `BRAND_SENDER_NAME` | *(auto-generated)* | Email "From" name. Default: `{appName} \| www.{providerName}` |
 
 ## What's NOT Covered by Env Vars
@@ -109,9 +128,7 @@ These items require manual changes for a full rebrand:
 - **Terms of Service** (`components/TermsView.tsx`) — app name is configurable, but legal content may need review
 
 ### CSS Theme Colors
-The accent colors in `index.css` (seasonal themes) are separate from the brand primary color. To match your brand:
-1. Update `--accent-tertiary` in the summer theme (the default `27 114 114` is RGB for `#1B7272`)
-2. Optionally adjust winter and autumn themes
+The **winter theme** (default) and seasonal accent-secondary/tertiary colors are now driven by `VITE_BRAND_COLOR_*` and `VITE_BRAND_ACCENT` via CSS custom properties — no CSS changes needed. Seasonal **accent-primary** colors (green for summer, orange for autumn) remain season-specific and are not brand-overridable.
 
 ### Service Worker
 - `public/sw.js` — the `CACHE_NAME` prefix (`meaningful-conversations-cache-`) is cosmetic and doesn't affect functionality. Update it manually if desired.
@@ -123,6 +140,31 @@ Full iOS rebranding requires additional steps beyond env vars:
 - `ios/App/App.xcodeproj/project.pbxproj` — `PRODUCT_BUNDLE_IDENTIFIER`, `DEVELOPMENT_TEAM`
 - App Store listing — separate Apple Developer Account required
 - In-App Purchases — new products in App Store Connect + RevenueCat config
+
+## Example: Colleague Brand Configuration
+
+A colleague running their own instance with a teal palette and a steering-wheel loader:
+
+```bash
+# .env (frontend)
+VITE_BRAND_APP_NAME="Coaching Compass"
+VITE_BRAND_SHORT_NAME="Compass"
+VITE_BRAND_PROVIDER_NAME="coachingcompass.eu"
+VITE_BRAND_PROVIDER_URL="https://www.coachingcompass.eu"
+VITE_BRAND_CONTACT_EMAIL="hello@coachingcompass.eu"
+VITE_BRAND_OWNER_NAME="Maria Beispiel"
+
+VITE_BRAND_COLOR_1="#A7F3D0"
+VITE_BRAND_COLOR_2="#6EE7B7"
+VITE_BRAND_COLOR_3="#10B981"
+VITE_BRAND_COLOR_4="#065F46"
+VITE_BRAND_ACCENT="#EC4899"
+VITE_BRAND_PRIMARY_COLOR="#10B981"
+VITE_BRAND_PRIMARY_COLOR_DARK="#065F46"
+VITE_BRAND_LOADER="steering-wheel"
+```
+
+The same codebase produces a completely different visual identity at build time.
 
 ## Deployment Checklist
 
