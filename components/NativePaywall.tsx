@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import {
   fetchAvailableProducts,
   getActiveProductIds,
   purchaseProduct,
   restorePurchases,
+  logInRevenueCat,
   StoreProduct,
 } from '../services/purchaseService';
 import { User } from '../types';
 import Button from './shared/Button';
+import * as api from '../services/api';
 
 interface NativePaywallProps {
   onPurchaseSuccess: (user: User) => void;
@@ -27,13 +29,46 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const syncAttemptedRef = useRef(false);
+
+  // When we have currentUser: logIn FIRST (so RevenueCat uses our ID), then sync, then fetch products.
+  // This ensures we never fetch products with anonymous ID — logIn must run before getOfferings/getCustomerInfo.
   useEffect(() => {
     (async () => {
       try {
-        const [available, activeIds] = await Promise.all([
-          fetchAvailableProducts(),
-          getActiveProductIds(),
-        ]);
+        if (currentUser?.id && !syncAttemptedRef.current) {
+          syncAttemptedRef.current = true;
+          await logInRevenueCat(currentUser.id);
+          // RevenueCat server-side merge can take several seconds; logIn resolves when merge is done
+          await new Promise(r => setTimeout(r, 2000));
+          const trySync = async (): Promise<boolean> => {
+            try {
+              const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
+              const syncedUser = res?.user;
+              if (syncedUser) {
+                const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+                  || (syncedUser.accessExpiresAt == null)
+                  || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
+                if (hasAccess) {
+                  onPurchaseSuccess(syncedUser);
+                  return true;
+                }
+              }
+            } catch {
+              // Sync failed
+            }
+            return false;
+          };
+          if (await trySync()) return;
+          await new Promise(r => setTimeout(r, 4000));
+          if (await trySync()) return;
+          await new Promise(r => setTimeout(r, 6000));
+          if (await trySync()) return;
+        }
+
+        // Fetch products sequentially to avoid RevenueCat 429 "operation already in progress"
+        const available = await fetchAvailableProducts();
+        const activeIds = await getActiveProductIds();
         setProducts(available);
         setActiveProductIds(activeIds);
       } catch {
@@ -42,7 +77,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [currentUser?.id, onPurchaseSuccess]);
 
   const handlePurchase = async (product: StoreProduct) => {
     setPurchasingId(product.identifier);
@@ -65,7 +100,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
           patched.premiumExpiresAt = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
           patched.accessExpiresAt = expiresAt ?? patched.premiumExpiresAt;
         } else if (iap?.tier === 'registered') {
-          patched.accessExpiresAt = expiresAt;
+          patched.accessExpiresAt = expiresAt ?? undefined;
         } else if (iap?.tier === 'bot') {
           const productToBotId: Record<string, string> = { 'mc.coach.kenji': 'kenji-stoic', 'mc.coach.chloe': 'chloe-cbt' };
           const botId = productToBotId[product.identifier];
@@ -96,6 +131,28 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     setRestoring(true);
     setError(null);
     setSuccess(null);
+
+    // If we have currentUser, logIn + sync first (RevenueCat merge may not have completed on mount)
+    if (currentUser?.id) {
+      await logInRevenueCat(currentUser.id);
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
+        const syncedUser = res?.user;
+        if (syncedUser) {
+          const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+            || (syncedUser.accessExpiresAt == null)
+            || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
+          if (hasAccess) {
+            onPurchaseSuccess(syncedUser);
+            setRestoring(false);
+            return;
+          }
+        }
+      } catch {
+        // Continue to restore flow
+      }
+    }
 
     const result = await restorePurchases();
 

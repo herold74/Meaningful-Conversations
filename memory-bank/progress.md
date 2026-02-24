@@ -122,11 +122,9 @@
 - [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing
 
 ## Pending / Roadmap
-- [ ] **Android Voice Fix:** Investigate duplication issue (PWA)
 - [x] **Testing:** Comprehensive unit/integration tests (v1.8.2)
 - [ ] **Performance:** Large context file optimization
 - [ ] **Accessibility:** WCAG compliance audit
 
 ## Known Issues
-- **Android Voice Duplication:** Speech recognition shows repeated words on some Android devices. AI filters duplicates correctly, but UX is affected. Under investigation.
 - **Safari PDF:** Client-side PDF generation with `html2pdf.js` has Safari compatibility issues. Warning displayed to users.

@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.8.4+
+**Version:** 1.9.5
 **Staging:** Pending
 **Production:** Pending
 
@@ -9,7 +9,14 @@
 - **Main project:** `/Users/gherold/Meaningful-Conversations-Project` — Branch: `feature/visual-redesign`
 - **Main worktree:** `/Users/gherold/MC-main` — Branch: `main` (für main-spezifische Arbeit)
 
-## Recent Changes (Post v1.8.4)
+## Recent Changes (Post v1.9.4)
+
+### iOS Paywall Fix: Sync RevenueCat on accessExpired (2026-02)
+- **Problem:** User with active subscription (mc.premium.yearly) still saw Paywall after login.
+- **Root cause:** RevenueCat uses anonymous ID; backend DB never received verify-receipt (e.g. 529 error). No logIn → RevenueCat didn't know our user.
+- **Fix 1:** `Purchases.logIn(userId)` on login (handleLoginSuccess + handleAccessExpired) — links RevenueCat to our user.
+- **Fix 2:** Before showing Paywall, call `POST /apple-iap/sync-from-revenuecat` — backend fetches from RevenueCat REST API, updates user. If user now has access → redirect to landing.
+- **Backend:** New endpoint requires `REVENUECAT_SECRET_KEY` (sk_...) from RevenueCat Dashboard.
 
 ### iOS In-App Purchase Improvements (2026-02, main)
 - **Backend Receipt Verification Fix:** `APPLE_PRIVATE_KEY` Newline-Handling für .env, detailliertes Error-Logging
@@ -146,15 +153,10 @@
 
 ## Known Issues
 
-### Android Voice Duplication
-- **Status:** Unter Beobachtung
-- **Symptom:** Spracherkennung zeigt Wörter mehrfach an
-- **Hypothesen:** Kumulative Interim-Ergebnisse auf Android
-- **Workaround:** KI filtert Duplikate korrekt aus
+_(none)_
 
 ## Active Tasks
-- [ ] Android Voice Duplication weiter beobachten
-- [ ] Production Deployment fuer v1.8.4 planen
+- [ ] Production Deployment fuer v1.9.5 planen
 - [x] **iOS In-App Purchase:** Backend + Frontend implementiert; Sandbox-Tests ausstehend
 
 ## iOS In-App Purchase — Aktueller Stand
