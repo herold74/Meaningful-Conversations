@@ -9,7 +9,7 @@ function hexToRgb(hex: string): string {
 /**
  * Vite plugin that injects branding values into index.html and generates
  * a branded manifest.json at build time. Values are read from VITE_BRAND_*
- * env vars with sensible defaults (the Work4Flow / manualmode.at brand).
+ * env vars with sensible defaults (the manualmode.at teal palette).
  *
  * Brand colors are injected as CSS custom properties on :root so that
  * the theme system, Tailwind tokens, and components can reference them.
@@ -18,10 +18,10 @@ export default function brandPlugin(): Plugin {
   const getBrand = () => ({
     appName:   process.env.VITE_BRAND_APP_NAME   || 'Meaningful Conversations',
     shortName: process.env.VITE_BRAND_SHORT_NAME  || 'Meaningful',
-    color1:    process.env.VITE_BRAND_COLOR_1     || '#89C4E1',
-    color2:    process.env.VITE_BRAND_COLOR_2     || '#6A9DBF',
-    color3:    process.env.VITE_BRAND_COLOR_3     || '#4A7A9B',
-    color4:    process.env.VITE_BRAND_COLOR_4     || '#1B3A5C',
+    color1:    process.env.VITE_BRAND_COLOR_1     || '#5BBFBF',
+    color2:    process.env.VITE_BRAND_COLOR_2     || '#3D9E9E',
+    color3:    process.env.VITE_BRAND_COLOR_3     || '#1B7272',
+    color4:    process.env.VITE_BRAND_COLOR_4     || '#165a5a',
     accent:    process.env.VITE_BRAND_ACCENT      || '#F59E0B',
   });
 

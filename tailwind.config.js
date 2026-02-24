@@ -18,12 +18,12 @@ module.exports = {
       },
       colors: {
         /* Brand palette colors (driven by --brand-color-* CSS custom properties) */
-        w4f: {
-          sky: 'rgb(var(--brand-color-1) / <alpha-value>)',
-          steel: 'rgb(var(--brand-color-2) / <alpha-value>)',
-          slate: 'rgb(var(--brand-color-3) / <alpha-value>)',
-          navy: 'rgb(var(--brand-color-4) / <alpha-value>)',
-          amber: 'rgb(var(--brand-accent) / <alpha-value>)',
+        brand: {
+          light: 'rgb(var(--brand-color-1) / <alpha-value>)',
+          mid: 'rgb(var(--brand-color-2) / <alpha-value>)',
+          base: 'rgb(var(--brand-color-3) / <alpha-value>)',
+          dark: 'rgb(var(--brand-color-4) / <alpha-value>)',
+          accent: 'rgb(var(--brand-accent) / <alpha-value>)',
         },
         /* Theme-aware semantic colors */
         background: {

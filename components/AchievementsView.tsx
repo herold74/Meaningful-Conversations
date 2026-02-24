@@ -21,9 +21,9 @@ const AchievementsView: React.FC<AchievementsViewProps> = ({ gamificationState }
                 {ALL_ACHIEVEMENTS.map(ach => {
                     const isUnlocked = ach.isUnlocked(gamificationState);
                     return (
-                        <div key={ach.id} className={`p-4 border rounded-card transition-all ${isUnlocked ? 'border-w4f-amber/50 bg-w4f-amber/5 shadow-card' : 'border-border-primary bg-background-primary'} flex flex-col items-center text-center`}>
-                            <div className={`relative w-16 h-16 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-w4f-amber/15' : 'bg-background-tertiary'}`}>
-                                <ach.icon className={`w-8 h-8 ${isUnlocked ? 'text-w4f-amber' : 'text-content-subtle'}`} />
+                        <div key={ach.id} className={`p-4 border rounded-card transition-all ${isUnlocked ? 'border-brand-accent/50 bg-brand-accent/5 shadow-card' : 'border-border-primary bg-background-primary'} flex flex-col items-center text-center`}>
+                            <div className={`relative w-16 h-16 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-brand-accent/15' : 'bg-background-tertiary'}`}>
+                                <ach.icon className={`w-8 h-8 ${isUnlocked ? 'text-brand-accent' : 'text-content-subtle'}`} />
                                 {!isUnlocked && <LockIcon className="absolute w-4 h-4 bottom-0.5 right-0.5 text-content-subtle" />}
                             </div>
                             <h3 className={`text-sm font-semibold ${isUnlocked ? 'text-content-primary' : 'text-content-subtle'}`}>{ach.name}</h3>
