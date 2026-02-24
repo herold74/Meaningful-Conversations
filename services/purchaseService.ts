@@ -95,6 +95,24 @@ export async function initializePurchases(): Promise<boolean> {
   return ensureRevenueCatConfigured();
 }
 
+export async function getActiveProductIds(): Promise<Set<string>> {
+  const ready = await ensureRevenueCatConfigured();
+  if (!ready) return new Set();
+
+  try {
+    const { customerInfo } = await Purchases.getCustomerInfo();
+    const active = new Set<string>(customerInfo?.activeSubscriptions || []);
+    const purchased = customerInfo?.allPurchasedProductIdentifiers || [];
+    for (const id of purchased) {
+      const iap = IAP_PRODUCTS.find(p => p.appStoreId === id);
+      if (iap?.type === 'non_consumable') active.add(id);
+    }
+    return active;
+  } catch {
+    return new Set();
+  }
+}
+
 export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
   // #region agent log
   console.log('[DEBUG-cd59c1] F1-enter-fetchProducts');
@@ -180,6 +198,15 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
         };
       } catch (verifyErr) {
         console.error('Backend verification failed:', verifyErr);
+        // Retry via restore — new purchase is in RevenueCat; backend may succeed after transient failure
+        try {
+          const restoreResult = await restorePurchases();
+          if (restoreResult.user) {
+            return { success: true, transactionId, user: restoreResult.user };
+          }
+        } catch {
+          // Ignore restore failure; fall back to patched user in NativePaywall
+        }
         return { success: true, transactionId };
       }
     }

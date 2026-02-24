@@ -75,6 +75,22 @@
 - [x] **PayPal:** Donations/Payments
 
 ## UI/UX
+- [x] **Visual Redesign (feature/visual-redesign):**
+    - [x] Inter Variable Font (self-hosted, offline Capacitor support)
+    - [x] W4F Color Palette (4 blue shades + amber accent)
+    - [x] Semantic design tokens (CSS variables + Tailwind)
+    - [x] Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
+    - [x] Framer Motion page transitions & micro-interactions
+    - [x] 30+ views modernized (rounded cards, elevated shadows, pill buttons)
+- [x] **Brand-Driven Design System (feature/visual-redesign):**
+    - [x] 4-shade brand palette via `VITE_BRAND_COLOR_1` to `_4` env vars
+    - [x] Accent color via `VITE_BRAND_ACCENT`
+    - [x] Vite plugin injects CSS custom properties on `:root`
+    - [x] Tailwind `w4f.*` tokens reference CSS variables (brand-dynamic)
+    - [x] All themes (winter/summer/autumn) use brand variables
+    - [x] Configurable loader system: tetris, steering-wheel, dots, pulse (`VITE_BRAND_LOADER`)
+    - [x] BrandLoader wrapper component (lazy-loaded variants)
+    - [ ] OCEAN-Onboarding flow for registered users (Phase 3.5)
 - [x] **Seasonal Themes:**
     - [x] Spring: Falling blossoms
     - [x] Summer: Butterflies
@@ -97,7 +113,10 @@
     - [x] Project setup (Xcode, Capacitor CLI)
     - [x] Native Audio Service abstraction
     - [x] Native Speech Recognition Service abstraction
-    - [ ] Native In-App Purchase (StoreKit 2)
+    - [x] Native In-App Purchase (StoreKit 2 via RevenueCat)
+    - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
+    - [x] NativePaywall (`NativePaywall.tsx`) mit Restore, aktive Produkte, Fallback
+    - [ ] App Store Connect Produkte anlegen
     - [ ] App Store Deployment (TestFlight)
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
@@ -107,12 +126,13 @@
 - [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
 - [x] **Premium Trial:** 14-day trial for new registrations
-- [ ] **iOS In-App Purchase (StoreKit 2):**
+- [x] **iOS In-App Purchase (StoreKit 2):**
+    - [x] Backend receipt validation (`/api/apple-iap/verify-receipt`, `restore`)
+    - [x] Apple Server Notifications v2 (`/api/apple-iap/notification`)
+    - [x] Frontend native paywall (`NativePaywall.tsx`)
+    - [x] Restore Purchases functionality
     - [ ] App Store Connect product setup (subscriptions + non-consumables)
-    - [ ] Backend receipt validation (`/api/purchase/verify-receipt`)
-    - [ ] Apple Server Notifications v2 (`/api/purchase/apple-notification`)
-    - [ ] Frontend native paywall (`NativePaywall.tsx`)
-    - [ ] Restore Purchases functionality
+    - [ ] Apple Server Notifications URL in App Store Connect eintragen
     - [ ] Sandbox & TestFlight testing
 - [ ] **Registered Monthly Subscription:** 3,90 EUR/month (PayPal Subscriptions API)
 - [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing

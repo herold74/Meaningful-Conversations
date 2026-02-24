@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { LockIcon } from './icons/LockIcon';
 import { KeyIcon } from './icons/KeyIcon';
@@ -154,17 +155,17 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     const isPurchasing = purchasingId === product.id;
 
     return (
-      <div key={product.id} className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-2">
+      <div key={product.id} className="bg-background-tertiary border border-border-primary rounded-card p-4 space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-1">
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">{product.name}</p>
+            <p className="font-semibold text-content-primary text-sm sm:text-base truncate">{product.name}</p>
             {product.duration && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(product.duration)}</span>
+              <span className="text-xs text-content-subtle">{durationLabel(product.duration)}</span>
             )}
           </div>
           <div className="text-right flex-shrink-0">
             {hasDiscount && (
-              <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{product.price.toFixed(2).replace('.', ',')}</span>
+              <span className="text-xs sm:text-sm text-content-subtle line-through mr-1">€{product.price.toFixed(2).replace('.', ',')}</span>
             )}
             <span className={`text-lg sm:text-xl font-bold ${hasDiscount ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
               €{product.finalPrice.toFixed(2).replace('.', ',')}
@@ -204,31 +205,35 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     );
   };
 
+  const frostedOverlay = (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-background-secondary/80 backdrop-blur-md" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+  );
+
   return (
     <>
-    {/* Frosted glass overlay for Dynamic Island / notch — must be outside animated container to keep position:fixed working */}
-    <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-50/80 dark:bg-gray-900/80 backdrop-blur-md" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
-    <div className="flex flex-col items-center min-h-screen text-center animate-fadeIn px-4 py-8 overflow-y-auto" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
-      <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-white dark:bg-transparent border-2 border-yellow-400 dark:border-yellow-500 rounded-lg">
+    {/* Frosted overlay rendered via portal to document.body — avoids motion.div transform breaking position:fixed */}
+    {createPortal(frostedOverlay, document.body)}
+    <div className="flex flex-col items-center min-h-screen text-center px-4 py-8 overflow-y-auto" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
+      <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-background-secondary border border-w4f-amber/40 rounded-card shadow-card-elevated">
 
         {/* Header */}
         <div className="flex flex-col items-center mb-4 md:mb-6">
-          <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center mb-3">
-            <LockIcon className="w-8 h-8 md:w-10 md:h-10 text-yellow-500 dark:text-yellow-400" />
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-w4f-amber/15 rounded-full flex items-center justify-center mb-3">
+            <LockIcon className="w-8 h-8 md:w-10 md:h-10 text-w4f-amber" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('paywall_title')}</h1>
+          <h1 className="text-2xl md:text-3xl font-semibold text-content-primary tracking-tight">{t('paywall_title')}</h1>
         </div>
 
-        <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-5 md:mb-6" dangerouslySetInnerHTML={{ __html: description }} />
+        <p className="text-sm md:text-base text-content-secondary leading-relaxed mb-5 md:mb-6" dangerouslySetInnerHTML={{ __html: description }} />
 
         {successMessage && (
-          <div className="p-4 mb-6 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 font-medium">
-            ✅ {successMessage}
+          <div className="p-4 mb-6 bg-status-success-background border border-status-success-border rounded-card text-status-success-foreground font-medium">
+            {successMessage}
           </div>
         )}
 
         {(errorMessage || paypalError) && !successMessage && (
-          <div className="p-3 mb-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm">
+          <div className="p-3 mb-6 bg-status-danger-background border border-status-danger-border rounded-card text-status-danger-foreground text-sm">
             {errorMessage || paypalError}
           </div>
         )}
@@ -240,7 +245,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {/* Access products (Registered Monthly + Lifetime) */}
             {accessProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
-                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <h2 className="text-sm font-semibold text-content-subtle uppercase tracking-wide">
                   {t('paywall_section_basic')}
                 </h2>
                 {accessProducts.map(renderProductCard)}
@@ -251,21 +256,21 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {premiumProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <h2 className="text-sm font-semibold text-content-subtle uppercase tracking-wide">
                     {t('paywall_section_premium')}
                   </h2>
-                  <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full font-semibold">
+                  <span className="text-xs px-2 py-0.5 bg-w4f-amber/15 text-w4f-amber rounded-pill font-semibold">
                     {t('paywall_recommended')}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-content-subtle">
                   {t('paywall_premium_includes_all')}
                 </p>
-                <div className="bg-gray-50 dark:bg-gray-800/50 border-2 border-yellow-400 dark:border-yellow-500 rounded-lg p-4 space-y-3">
+                <div className="bg-background-tertiary border-2 border-w4f-amber/40 rounded-card p-4 space-y-3">
                   <select
                     value={selectedPremiumId || ''}
                     onChange={e => handlePremiumChange(e.target.value)}
-                    className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                    className="w-full p-2.5 bg-background-primary border border-border-primary rounded-lg text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/40"
                   >
                     {premiumProducts.map(p => (
                       <option key={p.id} value={p.id}>

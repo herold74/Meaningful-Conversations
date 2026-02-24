@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as userService from '../services/userService';
 import { NewsletterSubscriber, NewsletterHistoryEntry } from '../services/userService';
 import { apiFetch } from '../services/api';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { MailIcon } from './icons/MailIcon';
 import { ClockIcon } from './icons/ClockIcon';
 import { useLocalization } from '../context/LocalizationContext';
@@ -148,7 +148,7 @@ const NewsletterPanel: React.FC = () => {
     return (
       <div className="p-6 bg-background-secondary dark:bg-background-primary rounded-lg">
         <div className="flex items-center justify-center">
-          <Spinner />
+          <BrandLoader size="md" />
         </div>
       </div>
     );
@@ -223,7 +223,7 @@ const NewsletterPanel: React.FC = () => {
               >
                 {translating ? (
                   <>
-                    <Spinner />
+                    <BrandLoader size="sm" />
                     <span className="hidden sm:inline">{t('newsletter_translating')}</span>
                   </>
                 ) : (
@@ -321,7 +321,7 @@ const NewsletterPanel: React.FC = () => {
           >
             {sending ? (
               <>
-                <Spinner />
+                <BrandLoader size="sm" />
                 <span>{t('newsletter_sending')}</span>
               </>
             ) : (

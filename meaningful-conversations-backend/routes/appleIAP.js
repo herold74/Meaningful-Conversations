@@ -40,7 +40,7 @@ router.post('/verify-receipt', auth, async (req, res) => {
     try {
       transactionInfo = await verifyTransaction(transactionId);
     } catch (verifyError) {
-      console.error('❌ Apple receipt verification failed:', verifyError.message);
+      console.error('❌ Apple receipt verification failed:', verifyError.message, '| productId:', productId, '| txId:', transactionId);
       return res.status(502).json({ error: 'Receipt verification failed.' });
     }
 

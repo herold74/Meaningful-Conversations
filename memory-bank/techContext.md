@@ -18,10 +18,21 @@
     - `@capacitor-community/native-audio`: Audio handling
     - `@capacitor-community/speech-recognition`: Native speech recognition
 - **PDF:** html2pdf.js (client-side)
+- **Animation:** Framer Motion (page transitions, micro-interactions, loader animations)
+- **Font:** Inter Variable (self-hosted in `public/fonts/`)
 - **Utilities:**
     - `diff`: Text diffing
     - `ics`: Calendar generation
     - `react-markdown` + `remark-gfm`: Markdown rendering
+
+### Brand-Driven Design System (feature/visual-redesign)
+- **Config:** `config/brand.ts` — 4-shade palette (`color1`-`color4`), `accent`, `loader` type
+- **Build-time injection:** `vite-plugin-brand.ts` converts hex → RGB, injects CSS custom properties on `:root`
+- **CSS variables:** `--brand-color-1` to `--brand-color-4`, `--brand-accent` (space-separated RGB triplets)
+- **Tailwind tokens:** `w4f.sky/steel/slate/navy/amber` → `rgb(var(--brand-color-N) / <alpha-value>)`
+- **Themes:** `index.css` winter/summer/autumn reference brand vars for accent/info colors
+- **Loader:** `BrandLoader` wrapper with lazy-loaded variants: `tetris`, `steering-wheel`, `dots`, `pulse`
+- **Override:** Set `VITE_BRAND_COLOR_1` to `_4`, `VITE_BRAND_ACCENT`, `VITE_BRAND_LOADER` in `.env`
 
 ### iOS Audio Handling (v1.7.9)
 - **Problem:** iOS switches to "playAndRecord" mode after microphone use, degrading TTS quality

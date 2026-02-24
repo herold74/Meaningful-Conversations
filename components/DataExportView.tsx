@@ -75,9 +75,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-2xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
             <div className="text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">
                     {t('export_data_title')}
                 </h1>
             </div>

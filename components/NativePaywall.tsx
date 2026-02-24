@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import {
   fetchAvailableProducts,
+  getActiveProductIds,
   purchaseProduct,
   restorePurchases,
   StoreProduct,
@@ -18,30 +19,24 @@ interface NativePaywallProps {
 const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, currentUser, showBotUnlocks = false }) => {
   const { t } = useLocalization();
   const [products, setProducts] = useState<StoreProduct[]>([]);
+  const [activeProductIds, setActiveProductIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [successUser, setSuccessUser] = useState<User | null>(null);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  // #region agent log
-  const [debugInfo, setDebugInfo] = useState<string>('init');
-  // #endregion
 
   useEffect(() => {
     (async () => {
       try {
-        // #region agent log
-        setDebugInfo('fetching...');
-        // #endregion
-        const available = await fetchAvailableProducts();
-        // #region agent log
-        setDebugInfo(`done: ${available.length} products [${available.map(p=>p.identifier).join(', ')}]`);
-        // #endregion
+        const [available, activeIds] = await Promise.all([
+          fetchAvailableProducts(),
+          getActiveProductIds(),
+        ]);
         setProducts(available);
-      } catch (e) {
-        // #region agent log
-        setDebugInfo(`ERROR: ${String(e)}`);
-        // #endregion
+        setActiveProductIds(activeIds);
+      } catch {
         setError(t('iap_load_error'));
       } finally {
         setIsLoading(false);
@@ -55,29 +50,36 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     setSuccess(null);
 
     const result = await purchaseProduct(product.identifier);
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd59c1'},body:JSON.stringify({sessionId:'cd59c1',location:'NativePaywall.tsx:handlePurchase',message:'purchase-result',data:{success:result.success,hasUser:!!(result as any).user,hasCurrentUser:!!currentUser,error:result.error,transactionId:result.transactionId},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
 
     if (result.success) {
       setSuccess(t('paywall_payment_success'));
-      if ((result as any).user) {
-        setTimeout(() => onPurchaseSuccess((result as any).user), 1200);
-      } else if (currentUser) {
+      setActiveProductIds(await getActiveProductIds());
+      let userToUse: User | null = (result as any).user || null;
+      if (!userToUse && currentUser) {
         const patched = { ...currentUser };
-        const oneYear = new Date(Date.now() + 365 * 86400000).toISOString();
         const iap = products.find(p => p.identifier === product.identifier)?.iapProduct;
+        const days = product.identifier.includes('yearly') ? 365 : product.identifier.includes('lifetime') ? null : 30;
+        const expiresAt = days != null ? new Date(Date.now() + days * 86400000).toISOString() : null;
         if (iap?.tier === 'premium') {
           patched.isPremium = true;
-          patched.premiumExpiresAt = oneYear;
-          patched.accessExpiresAt = oneYear;
+          patched.premiumExpiresAt = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
+          patched.accessExpiresAt = expiresAt ?? patched.premiumExpiresAt;
         } else if (iap?.tier === 'registered') {
-          patched.accessExpiresAt = oneYear;
+          patched.accessExpiresAt = expiresAt;
+        } else if (iap?.tier === 'bot') {
+          const productToBotId: Record<string, string> = { 'mc.coach.kenji': 'kenji-stoic', 'mc.coach.chloe': 'chloe-cbt' };
+          const botId = productToBotId[product.identifier];
+          if (botId) {
+            const unlocked = [...(patched.unlockedCoaches || [])];
+            if (!unlocked.includes(botId)) unlocked.push(botId);
+            patched.unlockedCoaches = unlocked;
+          }
         }
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'cd59c1'},body:JSON.stringify({sessionId:'cd59c1',location:'NativePaywall.tsx:handlePurchase',message:'patched-user-fallback',data:{tier:iap?.tier,patched:{isPremium:patched.isPremium,accessExpiresAt:patched.accessExpiresAt}},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-        setTimeout(() => onPurchaseSuccess(patched), 1200);
+        userToUse = patched;
+      }
+      if (userToUse) {
+        setSuccessUser(userToUse);
+        setTimeout(() => { onPurchaseSuccess(userToUse!); setSuccessUser(null); }, 1200);
       } else {
         setTimeout(() => window.location.reload(), 1500);
       }
@@ -99,7 +101,20 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
 
     if (result.restored > 0) {
       setSuccess(t('iap_restore_success', { count: result.restored }));
-      setTimeout(() => window.location.reload(), 1500);
+      setActiveProductIds(await getActiveProductIds());
+      const userToUse = (result as any).user || (currentUser ? (() => {
+        const p = { ...currentUser };
+        const oneYear = new Date(Date.now() + 365 * 86400000).toISOString();
+        p.isPremium = true;
+        p.premiumExpiresAt = p.accessExpiresAt = oneYear;
+        return p;
+      })() : null);
+      if (userToUse) {
+        setSuccessUser(userToUse);
+        setTimeout(() => { onPurchaseSuccess(userToUse); setSuccessUser(null); }, 1200);
+      } else {
+        setTimeout(() => window.location.reload(), 1500);
+      }
     } else if (result.error) {
       setError(result.error);
     } else {
@@ -125,9 +140,6 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   if (products.length === 0) {
     return (
       <div className="space-y-4">
-        {/* #region agent log */}
-        <p className="text-xs text-red-500 text-center font-mono break-all">[DBG] {debugInfo}</p>
-        {/* #endregion */}
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
           {t('iap_not_available')}
         </p>
@@ -145,8 +157,13 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   return (
     <div className="space-y-4 text-left">
       {success && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 text-sm font-medium text-center">
-          {success}
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 text-sm font-medium text-center space-y-2">
+          <p>{success}</p>
+          {successUser && (
+            <Button onClick={() => { onPurchaseSuccess(successUser); setSuccessUser(null); }} size="md" fullWidth>
+              {t('paywall_continue_button')}
+            </Button>
+          )}
         </div>
       )}
 
@@ -167,6 +184,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               key={product.identifier}
               product={product}
               purchasing={purchasingId === product.identifier}
+              isActive={activeProductIds.has(product.identifier)}
               onPurchase={() => handlePurchase(product)}
               t={t}
             />
@@ -185,6 +203,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               key={product.identifier}
               product={product}
               purchasing={purchasingId === product.identifier}
+              isActive={activeProductIds.has(product.identifier)}
               onPurchase={() => handlePurchase(product)}
               t={t}
             />
@@ -203,6 +222,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               key={product.identifier}
               product={product}
               purchasing={purchasingId === product.identifier}
+              isActive={activeProductIds.has(product.identifier)}
               onPurchase={() => handlePurchase(product)}
               t={t}
             />
@@ -225,23 +245,31 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
 interface ProductCardProps {
   product: StoreProduct;
   purchasing: boolean;
+  isActive?: boolean;
   onPurchase: () => void;
   t: (key: string) => string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, onPurchase, t }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive, onPurchase, t }) => {
   const isSubscription = product.iapProduct.type === 'subscription';
   const periodLabel = product.identifier.endsWith('.yearly')
     ? t('iap_period_year')
     : t('iap_period_month');
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+    <div className={`rounded-lg p-4 border ${isActive ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-400 dark:border-emerald-600' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'}`}>
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
-            {product.localizedTitle}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
+              {product.localizedTitle}
+            </p>
+            {isActive && (
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
+                {t('iap_current')}
+              </span>
+            )}
+          </div>
           {product.localizedDescription && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
               {product.localizedDescription}
@@ -262,12 +290,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, onPurcha
 
       <Button
         onClick={onPurchase}
-        disabled={purchasing}
+        disabled={purchasing || isActive}
         size="md"
         fullWidth
         className="mt-3"
       >
-        {purchasing ? t('paywall_payment_processing') : t('iap_buy_button')}
+        {isActive ? t('iap_current') : purchasing ? t('paywall_payment_processing') : t('iap_buy_button')}
       </Button>
     </div>
   );

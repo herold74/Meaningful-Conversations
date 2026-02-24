@@ -4,7 +4,7 @@ import { TranscriptEvaluationSummary, TranscriptEvaluationResult, TranscriptPreA
 import { getTranscriptEvaluations, deleteTranscriptEvaluation } from '../services/geminiService';
 import EvaluationReview from './EvaluationReview';
 import EvaluationRating from './EvaluationRating';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF';
 
 interface EvaluationHistoryProps {
@@ -117,7 +117,7 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
-                <Spinner />
+                <BrandLoader size="md" />
             </div>
         );
     }

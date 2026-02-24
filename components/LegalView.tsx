@@ -15,9 +15,9 @@ const LegalView: React.FC = () => {
     ];
 
     return (
-        <div className="w-full max-w-4xl mx-auto mt-4 mb-10 animate-fadeIn">
+        <div className="w-full max-w-4xl mx-auto mt-4 mb-10">
             <div className="text-center mb-6">
-                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('legal_title')}</h1>
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('legal_title')}</h1>
             </div>
 
             {/* Tab Navigation */}
@@ -39,7 +39,7 @@ const LegalView: React.FC = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="animate-fadeIn">
+            <div>
                 {activeTab === 'imprint' && <ImprintView />}
                 {activeTab === 'privacy' && <PrivacyPolicyView />}
                 {activeTab === 'terms' && <TermsView />}

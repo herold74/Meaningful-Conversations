@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -7,7 +8,7 @@ import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
 import { MicrophoneIcon } from './icons/MicrophoneIcon';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
@@ -295,33 +296,34 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     };
     
     return (
-      <div
+      <motion.div
         onClick={() => isLocked ? onUpgrade?.() : onSelect(bot)}
         className={`
             relative flex flex-col items-center text-center p-6
-            bg-background-secondary dark:bg-transparent border transition-[box-shadow,transform] duration-200 rounded-lg shadow-md
+            bg-background-secondary border rounded-card transition-colors
             [-webkit-tap-highlight-color:transparent]
             ${isLocked
-              ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} bg-background-primary dark:bg-background-primary/50 opacity-60 ${getBorderClass()}`
-              : `cursor-pointer hover:shadow-xl dark:hover:shadow-none hover:-translate-y-1 ${getBorderClass()}`
+              ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} opacity-60 ${getBorderClass()}`
+              : `cursor-pointer ${getBorderClass()}`
             }
         `}
+        whileHover={isLocked ? undefined : { y: -3, boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)' }}
+        transition={{ duration: 0.15 }}
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
         aria-disabled={isLocked}
       >
-        {/* Client-Only Badge - shown for unlocked client-tier bots */}
         {isClientOnly && !isLocked && (
           <div 
-            className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold flex items-center gap-1"
+            className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-pill bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium flex items-center gap-1"
             title={t('botSelection_clientOnlyBadge')}
           >
             <span>🎓</span>
           </div>
         )}
         
-        {/* Coaching Mode Badge (non-interactive) - Text badge in top right */}
         {showCoachingBadge && (
           <div 
-            className="absolute top-3 right-3 z-10 px-2 py-1 rounded-md bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40 text-accent-tertiary dark:text-accent-primary text-xs font-bold"
+            className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-pill bg-accent-primary/10 border border-accent-primary/25 text-accent-primary text-xs font-medium"
             title={`${t('coaching_mode_title')}: ${effectiveCoachingMode?.toUpperCase()}`}
           >
             {effectiveCoachingMode?.toUpperCase()}
@@ -329,51 +331,52 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         )}
         
         <div className="relative flex-shrink-0">
-            <img 
-                src={bot.avatar} 
-                alt={bot.name} 
-                className={`w-24 h-24 rounded-full ${isLocked ? 'filter grayscale' : ''}`}
-            />
+            <div className={`rounded-full p-0.5 ${isLocked ? '' : 'bg-gradient-to-br from-w4f-sky to-w4f-navy'}`}>
+                <img 
+                    src={bot.avatar} 
+                    alt={bot.name} 
+                    className={`w-20 h-20 rounded-full border-2 border-background-secondary ${isLocked ? 'filter grayscale' : ''}`}
+                />
+            </div>
             {isLocked && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
-                    <LockIcon className="w-8 h-8 text-white" />
+                    <LockIcon className="w-7 h-7 text-white" />
                 </div>
             )}
             {hasMeditation && (
                 <div 
-                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent-primary flex items-center justify-center shadow-md"
+                    className="absolute -top-0.5 -right-0.5 w-6 h-6 rounded-full bg-accent-primary flex items-center justify-center shadow-sm"
                     title={t('botSelection_meditationBadge')}
                 >
-                    <MediationIcon className="w-4 h-4 text-button-foreground-on-accent" />
+                    <MediationIcon className="w-3.5 h-3.5 text-button-foreground-on-accent" />
                 </div>
             )}
         </div>
 
-        <div className="mt-4 flex flex-col flex-1 justify-between">
+        <div className="mt-3 flex flex-col flex-1 justify-between">
             <div>
-                <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{bot.name}</h2>
+                <h2 className="text-xl font-semibold text-content-primary tracking-tight">{bot.name}</h2>
                 
-                
-                <div className="flex flex-wrap justify-center gap-2 my-3">
+                <div className="flex flex-wrap justify-center gap-1.5 my-2.5">
                     {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
                         const isFirstTag = index === 0;
                         const tagClass = !isLocked && isFirstTag
-                            ? 'bg-accent-primary/20 text-accent-primary-hover'
-                            : 'bg-background-tertiary text-content-secondary dark:bg-background-tertiary dark:text-content-secondary';
+                            ? 'bg-accent-primary/15 text-accent-primary'
+                            : 'bg-background-tertiary text-content-secondary';
                         
                         return (
-                            <span key={tag} className={`px-2.5 py-1 text-xs font-bold tracking-wide uppercase rounded-full ${tagClass}`}>
+                            <span key={tag} className={`px-2 py-0.5 text-[0.6875rem] font-medium tracking-wide uppercase rounded-pill ${tagClass}`}>
                                 {tag}
                             </span>
                         );
                     })}
                 </div>
             </div>
-            <p className="mt-1 text-content-secondary dark:text-content-secondary leading-relaxed text-base">
+            <p className="mt-1 text-content-secondary leading-relaxed text-sm">
                 {language === 'de' ? bot.description_de : bot.description}
             </p>
         </div>
-      </div>
+      </motion.div>
     );
 };
 
@@ -448,7 +451,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   if (isLoading) {
       return (
           <div className="flex flex-col items-center justify-center py-20">
-              <Spinner />
+              <BrandLoader size="md" />
           </div>
       );
   }
@@ -487,10 +490,10 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
   
   return (
-    <div className="pt-4 pb-10 animate-fadeIn">
+    <div className="pt-4 pb-10">
       <div className="w-full max-w-6xl mx-auto mb-8 text-center">
-        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{t('botSelection_title')}</h1>
-        <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
+        <h1 className="text-3xl font-semibold text-content-primary tracking-tight">{t('botSelection_title')}</h1>
+        <p className="mt-2 text-base text-content-secondary leading-relaxed">
         {t('botSelection_subtitle')}
         </p>
       </div>

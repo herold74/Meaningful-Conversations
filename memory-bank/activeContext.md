@@ -1,11 +1,42 @@
 # Active Context
 
 ## Current Status
-**Version:** 1.8.4+
-**Staging:** Pending
+**Version:** 1.9.6+ (feature/visual-redesign)
+**Staging:** Pending (feature branch not yet merged)
 **Production:** Pending
 
-## Recent Changes (Post v1.8.4)
+**Workspace Setup (2026-02):**
+- **Main project:** `/Users/gherold/Meaningful-Conversations-Project` — Branch: `feature/visual-redesign`
+- **Main worktree:** `/Users/gherold/MC-main` — Branch: `main` (fuer iOS-Fixes, parallel)
+
+## Recent Changes — Visual Redesign & Brand System (feature/visual-redesign)
+
+### Phase 1: Design Foundation
+- **Inter Font:** Self-hosted Inter Variable (normal + italic), `public/fonts/`, primary sans in Tailwind
+- **W4F Color Palette:** 4 blue shades (#89C4E1, #6A9DBF, #4A7A9B, #1B3A5C) + Amber accent (#F59E0B)
+- **Semantic CSS Variables:** `--accent-primary`, `--bg-primary`, `--content-primary`, etc. in `index.css`
+- **Tailwind Tokens:** `w4f.*`, `background.*`, `content.*`, `accent.*`, `status.*`, `border.*`
+
+### Phase 2: Shared Component Library
+- **New components in `components/shared/`:** Card, SectionHeader, Badge, Avatar, Skeleton, InputField, ModalOverlay, PageTransition (framer-motion)
+- **Barrel export:** `components/shared/index.ts`
+
+### Phase 3: View Modernization
+- All 30+ views updated: rounded-card containers, shadow-card-elevated, framer-motion entrance animations, pill-style language buttons, semantic status colors
+- `animate-fadeIn` removed in favor of framer-motion `PageTransition`
+
+### Phase 4: Brand-Driven Design System
+- **`config/brand.ts`:** Extended with `color1`-`color4`, `accent`, `loader` (env-var-driven, W4F defaults)
+- **`vite-plugin-brand.ts`:** Injects `--brand-color-1` to `--brand-color-4` and `--brand-accent` as CSS custom properties on `:root`
+- **`index.css`:** All themes (winter/summer/autumn, light/dark) refactored to use `var(--brand-color-N)` references
+- **`tailwind.config.js`:** `w4f.*` tokens now reference CSS custom properties (brand-driven)
+- **BrandLoader System:** 4 loader variants (`tetris`, `steering-wheel`, `dots`, `pulse`) selectable via `VITE_BRAND_LOADER`. `BrandLoader` wrapper component, all 14 TetrisLoader usages migrated.
+- **Backend `brand.js`:** primaryColor defaults updated to W4F palette
+- **`WHITE-LABEL-GUIDE.md`:** Fully updated with new color env vars, loader selection, example colleague config
+
+### iOS In-App Purchase Improvements (committed to main)
+- Backend Receipt Verification Fix, Frontend Fallback, NativePaywall improvements
+- Commit `8750b9b` auf main
 
 ### Gloria Interview Bot (New Feature)
 - **New Bot:** `gloria-interview` — a professional interviewer for structured topic interviews (ideas, projects, workflows, concepts, strategies, decisions). Access tier: `registered`.
@@ -144,16 +175,10 @@
 
 ## Active Tasks
 - [ ] Android Voice Duplication weiter beobachten
-- [ ] Production Deployment fuer v1.8.4 planen
-- [ ] **iOS In-App Purchase:** StoreKit 2 Integration geplant (Skill: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`)
-
-## Planned: Native In-App Purchase (iOS)
-- **Strategy:** iOS uses StoreKit 2 (via RevenueCat or direct), Web keeps PayPal
-- **Products:** 3 subscriptions (Registered Monthly, Premium Monthly, Premium Yearly) + 3 non-consumables (Registered Lifetime, Kenji Unlock, Chloe Unlock)
-- **App Store Product IDs:** `mc.registered.monthly`, `mc.premium.monthly`, `mc.premium.yearly`, `mc.registered.lifetime`, `mc.coach.kenji`, `mc.coach.chloe`
-- **Backend:** New endpoints `/api/purchase/verify-receipt` and `/api/purchase/apple-notification`
-- **Apple Compliance:** PayPal links must be hidden on iOS; Restore Purchases button mandatory
-- **Implementation Phases:** A (App Store Setup) → B (Backend) → C (Frontend) → D (Testing)
+- [x] **Visual Redesign Phase 1-4:** Abgeschlossen auf `feature/visual-redesign`
+- [ ] **Phase 3.5: OCEAN-Onboarding:** Registrierte User Frage-fuer-Frage durch OCEAN-Fragebogen (mit Skip)
+- [ ] **Merge:** `feature/visual-redesign` nach `main` mergen (nach iOS-Fix-Abschluss)
+- [x] **iOS In-App Purchase:** Backend + Frontend implementiert (main); Sandbox-Tests ausstehend
 
 ## Decision Log
 - **2026-02-11:** Dockerfiles auf `npm ci` umgestellt nach express-rate-limit Crash auf Staging

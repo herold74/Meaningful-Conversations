@@ -223,7 +223,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 animate-fadeIn">
+    <div className="max-w-2xl mx-auto py-8 px-4">
       {/* Current Tier */}
       <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200">{t('upgrade_title')}</h1>

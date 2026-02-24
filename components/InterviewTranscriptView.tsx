@@ -4,7 +4,7 @@ import { Message, Language } from '../types';
 import { generateInterviewTranscript } from '../services/geminiService';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { downloadTextFile } from '../utils/fileDownload';
 
 interface InterviewTranscriptViewProps {
@@ -79,7 +79,7 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 animate-fadeIn">
-                <Spinner />
+                <BrandLoader size="md" />
                 <p className="mt-4 text-content-secondary text-lg">{t('interview_transcript_loading')}</p>
             </div>
         );

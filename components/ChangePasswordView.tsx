@@ -71,8 +71,8 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ currentUser, en
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
         <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('changePassword_title')}</h1>
         </div>

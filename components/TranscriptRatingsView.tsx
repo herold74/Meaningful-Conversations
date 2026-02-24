@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { getTranscriptRatings, TranscriptRating, TranscriptRatingStats } from '../services/userService';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 
 const TranscriptRatingsView: React.FC = () => {
     const { t } = useLocalization();
@@ -62,7 +62,7 @@ const TranscriptRatingsView: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
-                <Spinner />
+                <BrandLoader size="md" />
             </div>
         );
     }
