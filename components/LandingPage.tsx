@@ -17,16 +17,17 @@ interface LandingPageProps {
   onSubmit: (context: string) => void;
   onStartQuestionnaire: () => void;
   onStartInterview: () => void;
+  existingContext?: string;
 }
 
 const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, existingContext }) => {
   const { t, language } = useLocalization();
-  const [fileContent, setFileContent] = useState<string>('');
-  const [fileName, setFileName] = useState<string>('');
+  const [fileContent, setFileContent] = useState<string>(existingContext || '');
+  const [fileName, setFileName] = useState<string>(existingContext ? (language === 'de' ? 'Lebenskontext.md' : 'Life-Context.md') : '');
   const [error, setError] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   
@@ -207,13 +208,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
                 onClick={onStartQuestionnaire}
                 className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-secondary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
             >
-                {t('landing_createFile')}
+                {existingContext ? t('landing_extendFile') : t('landing_createFile')}
             </button>
              <button
                 onClick={onStartInterview}
                 className="w-full px-6 py-3 text-base font-bold text-accent-tertiary-foreground bg-accent-tertiary uppercase hover:bg-accent-tertiary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-tertiary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
             >
-                {t('landing_createWithInterview')}
+                {existingContext ? t('landing_extendWithInterview') : t('landing_createWithInterview')}
             </button>
         </div>
 
