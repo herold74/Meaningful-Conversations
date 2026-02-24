@@ -204,7 +204,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             <div 
                 ref={gbRef}
                 data-gamification-bar
-                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm border-b border-border-primary dark:border-border-primary shadow-md`}
+                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/80 backdrop-blur-md border-b border-border-primary shadow-card`}
                 style={{ top: safeAreaTop }}
             >
             {/* Left section: burger + level + streak */}
@@ -255,8 +255,8 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     <div className="flex-1" /> {/* Left spacer */}
                     <div className="flex flex-col items-center gap-1 mx-4">
                         <div className="hidden sm:flex items-center gap-3 w-32 md:w-48">
-                            <div className="w-full bg-border-primary h-2 rounded">
-                                <div className="bg-accent-primary h-2 rounded" style={{ width: `${progressPercentage}%` }}></div>
+                            <div className="w-full bg-border-primary h-1.5 rounded-pill">
+                                <div className="bg-accent-primary h-1.5 rounded-pill transition-all duration-300" style={{ width: `${progressPercentage}%` }}></div>
                             </div>
                         </div>
                         <span className="text-xs font-mono text-content-subtle whitespace-nowrap">{currentLevelXp}/{xpForNextLevel} XP</span>

@@ -5,7 +5,7 @@ import { Bot, Message, Language, User, CoachingMode } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { PaperPlaneIcon } from './icons/PaperPlaneIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -2131,7 +2131,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 {(isLoading || isLoadingAudio) ? (
                     <div className="flex flex-col items-center gap-3">
                         <div className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary shadow">
-                            <Spinner />
+                            <BrandLoader size="md" />
                         </div>
                         <p className="text-sm text-content-secondary">
                             {isLoading 
@@ -2156,8 +2156,8 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6">
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />}
-              <div className={`max-w-md p-3 ${message.role === 'user' ? 'bg-accent-tertiary text-accent-tertiary-foreground rounded-l-lg rounded-br-lg' : 'prose dark:prose-invert bg-background-tertiary text-content-primary dark:bg-background-tertiary dark:text-content-primary rounded-r-lg rounded-bl-lg'}`}>
+              {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
+              <div className={`max-w-md px-4 py-2.5 ${message.role === 'user' ? 'bg-accent-tertiary text-accent-tertiary-foreground rounded-2xl rounded-br-md shadow-sm' : 'prose dark:prose-invert bg-background-secondary text-content-primary border border-border-primary rounded-2xl rounded-bl-md shadow-card'}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
               </div>
                {message.role === 'bot' && index > 0 && !isLoading && (
@@ -2174,21 +2174,21 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           ))}
           {isLoading && (
               <div className="flex gap-3 justify-start animate-fadeIn">
-                  <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start" />
-                  <div className="max-w-md p-3 bg-background-tertiary dark:bg-background-tertiary rounded-r-lg rounded-bl-lg">
-                      <Spinner />
+                  <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />
+                  <div className="max-w-md px-4 py-3 bg-background-secondary border border-border-primary rounded-2xl rounded-bl-md shadow-card">
+                      <BrandLoader size="sm" />
                   </div>
               </div>
           )}
         </main>
         
-        <footer ref={footerRef} className="p-4 border-t border-border-primary">
+        <footer ref={footerRef} className="p-3 border-t border-border-primary bg-background-secondary/50 backdrop-blur-sm">
           {isTestMode ? (
             <div className="text-center py-2 text-content-secondary">
               <p className="text-sm">{t('test_mode_input_disabled')}</p>
             </div>
           ) : (
-            <form onSubmit={handleFormSubmit} className="flex items-end gap-3">
+            <form onSubmit={handleFormSubmit} className="flex items-end gap-2">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -2197,13 +2197,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 placeholder={t('chat_placeholder')}
                 disabled={isLoading}
                 rows={1}
-                className="flex-1 p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary resize-none overflow-y-auto max-h-40"
+                className="flex-1 px-4 py-2.5 bg-background-primary text-content-primary border border-border-primary rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
               />
-              <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:text-gray-300 dark:disabled:text-gray-700" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
-                  <MicrophoneIcon className={`w-6 h-6 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+              <button type="button" onClick={handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors" aria-label={isListening ? t('chat_send_message') : t('chat_voice_mode')}>
+                  <MicrophoneIcon className={`w-5 h-5 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
               </button>
-              <button type="submit" disabled={isLoading || !input.trim()} className="p-3 bg-accent-primary text-content-inverted hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg">
-                <PaperPlaneIcon className="w-6 h-6" />
+              <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover disabled:opacity-40 rounded-xl transition-colors">
+                <PaperPlaneIcon className="w-5 h-5" />
               </button>
             </form>
           )}

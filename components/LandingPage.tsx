@@ -120,9 +120,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
       {showSpring && <SpringBlossoms lightModeOnly={true} />}
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
-      <div className="w-full max-w-3xl p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold text-content-primary dark:text-content-primary uppercase">{language === 'de' ? brand.appNameDe : brand.appName}</h1>
-        <p className="text-sm md:text-lg text-content-secondary dark:text-content-secondary leading-relaxed">
+      <div className="w-full max-w-3xl p-6 sm:p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
+        <h1 className="text-3xl font-semibold text-content-primary tracking-tight">{language === 'de' ? brand.appNameDe : brand.appName}</h1>
+        <p className="text-sm md:text-base text-content-secondary leading-relaxed">
           {t('landing_subtitle')}
         </p>
         
@@ -164,7 +164,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".md,text/markdown" onChange={handleFileChange} />
             </label>
           ) : (
-             <div className="p-4 space-y-4 bg-background-secondary dark:bg-background-primary/50 border border-border-primary dark:border-border-primary rounded-lg animate-fadeIn shadow-md">
+             <div className="p-4 space-y-4 bg-background-secondary border border-border-primary rounded-card shadow-card animate-fadeIn">
                 <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 p-2 bg-accent-primary/20">
                         <CheckIcon className="w-6 h-6 text-accent-primary" />

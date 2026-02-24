@@ -64,6 +64,8 @@ import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/pe
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 import { downloadTextFile } from './utils/fileDownload';
+import PageTransition from './components/shared/PageTransition';
+import BrandLoader from './components/shared/BrandLoader';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -1626,7 +1628,9 @@ const App: React.FC = () => {
                 <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 20px)` }} />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
-                {renderView()}
+                <PageTransition viewKey={menuView || view}>
+                    {renderView()}
+                </PageTransition>
             </main>
             <BurgerMenu 
                 isOpen={isMenuOpen}
@@ -1640,7 +1644,7 @@ const App: React.FC = () => {
             {isAnalyzing && <AnalyzingView />}
             {isSavingProfile && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center">
-                    <div className="w-12 h-12 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
+                    <BrandLoader size="lg" />
                     <h1 className="mt-6 text-2xl font-bold text-gray-200">
                         {t('saving_profile_title') || 'Profil wird erstellt...'}
                     </h1>

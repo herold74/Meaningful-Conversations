@@ -45,8 +45,8 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
   };
 
   return (
-    <div className="pt-4 pb-10 animate-fadeIn max-w-4xl mx-auto px-4">
-      <div className="bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-md p-6">
+    <div className="pt-4 pb-10 max-w-4xl mx-auto px-4">
+      <div className="bg-background-secondary border border-border-primary rounded-card shadow-card-elevated p-6">
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-content-primary mb-2">

@@ -88,6 +88,17 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - Interview bots have no DPC/DPFL integration — coaching badge suppressed in `BotSelection.tsx`.
   - Bot IDs use clear prefixes (`gloria-life-context`, `gloria-interview`) to prevent confusion during future changes.
 
+### 12. Brand-Driven Design System
+- **Decision:** All visual branding (colors, loader style) driven by build-time environment variables via a single codebase.
+- **Reasoning:** Enables white-labeling for colleagues who want to run their own branded instance without code forks. Brand identity injected at build time, not runtime.
+- **Implementation:**
+  - `config/brand.ts` defines `color1`-`color4`, `accent`, `loader` with W4F defaults, overridable via `VITE_BRAND_*`.
+  - `vite-plugin-brand.ts` converts hex colors to RGB triplets and injects them as CSS custom properties (`--brand-color-1` to `--brand-color-4`, `--brand-accent`) on `:root` via `<style>` tag in `index.html`.
+  - `index.css` theme definitions reference `var(--brand-color-N)` instead of hardcoded RGB values. Seasonal accent-primary colors (green for summer, orange for autumn) remain season-specific.
+  - `tailwind.config.js` `w4f.*` tokens use `rgb(var(--brand-color-N) / <alpha-value>)` syntax.
+  - `BrandLoader` component reads `brand.loader` and lazy-loads the matching loader variant (tetris, steering-wheel, dots, pulse).
+  - Data flow: `.env` → Vite plugin → CSS custom properties → Tailwind tokens → Components.
+
 ### 11. Tiered User Access Control
 - **Decision:** Six-tier role system: Guest, Registered, Premium, Client, Admin, Developer.
 - **Reasoning:** Fine-grained access control for different feature sets and pricing tiers. Developer role separates test infrastructure access from general admin capabilities.

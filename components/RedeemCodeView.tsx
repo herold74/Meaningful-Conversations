@@ -105,7 +105,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-5 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
+    <div className="w-full max-w-xl mx-auto p-5 sm:p-8 space-y-6 bg-white border border-gray-300 dark:border-gray-700 mt-4 mb-10 rounded-lg shadow-lg">
         <div className="w-full mt-4 sm:mt-0">
             {renderContent()}
         </div>

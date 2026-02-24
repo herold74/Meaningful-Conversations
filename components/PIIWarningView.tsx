@@ -10,11 +10,11 @@ interface PIIWarningViewProps {
 const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) => {
   const { t } = useLocalization();
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80dvh] text-center animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-[80dvh] text-center">
       <div className="w-full max-w-2xl p-8 space-y-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
         <div className="flex flex-col items-center">
           <div className="text-5xl">⚠️</div>
-          <h1 className="mt-4 text-3xl font-bold text-content-primary uppercase">{t('piiWarning_title')}</h1>
+          <h1 className="mt-4 text-2xl font-semibold text-content-primary tracking-tight">{t('piiWarning_title')}</h1>
         </div>
         <p className="text-lg text-content-secondary leading-relaxed">
           {t('piiWarning_subtitle')}

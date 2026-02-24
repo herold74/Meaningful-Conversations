@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { apiFetch } from '../services/api';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import Button from './shared/Button';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
@@ -45,7 +45,7 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
     if (status === 'loading') {
       return (
         <div className="text-center p-8">
-          <Spinner />
+          <BrandLoader size="md" />
           <p className="mt-4 text-content-secondary">{t('unsubscribe_loading')}</p>
         </div>
       );
@@ -112,8 +112,8 @@ const UnsubscribeView: React.FC<UnsubscribeViewProps> = ({ token, onBack }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="w-full max-w-md p-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-full max-w-md p-8 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
         {renderContent()}
       </div>
     </div>
