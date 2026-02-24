@@ -97,7 +97,10 @@
     - [x] Project setup (Xcode, Capacitor CLI)
     - [x] Native Audio Service abstraction
     - [x] Native Speech Recognition Service abstraction
-    - [ ] Native In-App Purchase (StoreKit 2)
+    - [x] Native In-App Purchase (StoreKit 2 via RevenueCat)
+    - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
+    - [x] NativePaywall mit Restore, aktive Produkte, Fallback
+    - [ ] App Store Connect Produkte anlegen
     - [ ] App Store Deployment (TestFlight)
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
@@ -107,12 +110,13 @@
 - [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
 - [x] **Premium Trial:** 14-day trial for new registrations
-- [ ] **iOS In-App Purchase (StoreKit 2):**
+- [x] **iOS In-App Purchase (StoreKit 2):**
+    - [x] Backend receipt validation (`/api/apple-iap/verify-receipt`, `restore`)
+    - [x] Apple Server Notifications v2 (`/api/apple-iap/notification`)
+    - [x] Frontend native paywall (`NativePaywall.tsx`)
+    - [x] Restore Purchases functionality
     - [ ] App Store Connect product setup (subscriptions + non-consumables)
-    - [ ] Backend receipt validation (`/api/purchase/verify-receipt`)
-    - [ ] Apple Server Notifications v2 (`/api/purchase/apple-notification`)
-    - [ ] Frontend native paywall (`NativePaywall.tsx`)
-    - [ ] Restore Purchases functionality
+    - [ ] Apple Server Notifications URL in App Store Connect eintragen
     - [ ] Sandbox & TestFlight testing
 - [ ] **Registered Monthly Subscription:** 3,90 EUR/month (PayPal Subscriptions API)
 - [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing
