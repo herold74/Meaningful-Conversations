@@ -70,6 +70,7 @@ import { updateServiceWorker } from './utils/serviceWorkerUtils';
 import { downloadTextFile } from './utils/fileDownload';
 import PageTransition from './components/shared/PageTransition';
 import BrandLoader from './components/shared/BrandLoader';
+import { logInRevenueCat, isIAPAvailable, getAccessFromRevenueCat } from './services/purchaseService';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -461,6 +462,9 @@ const App: React.FC = () => {
     const handleLoginSuccess = async (user: User, key: CryptoKey) => {
         setAndProcessUser(user);
         setEncryptionKey(key);
+        if (isIAPAvailable()) {
+            logInRevenueCat(user.id); // Fire-and-forget: link RevenueCat for future purchases
+        }
         try {
             const data = await userService.loadUserData(key);
             setLifeContext(data.context || '');
@@ -494,11 +498,72 @@ const App: React.FC = () => {
         setAndProcessUser(user);
         setEncryptionKey(key);
         setPaywallUserEmail(email);
+        let hasContext = false;
         try {
             const data = await userService.loadUserData(key);
             setLifeContext(data.context || '');
             setGamificationState(deserializeGamificationState(data.gamificationState));
+            hasContext = !!data.context;
         } catch { /* data load failed — download button will be empty, but paywall still works */ }
+
+        // Sync from RevenueCat: Backend fetches subscription status. Works from web AND iOS.
+        // On iOS we also call logIn first so RevenueCat merges anonymous → our user ID.
+        if (isIAPAvailable()) {
+            await logInRevenueCat(user.id);
+            await new Promise(r => setTimeout(r, 3500));
+        }
+
+        const trySync = async (): Promise<boolean> => {
+            try {
+                const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', {
+                    method: 'POST',
+                    body: JSON.stringify({}),
+                });
+                const syncedUser = res?.user;
+                if (syncedUser) {
+                    const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+                        || (!syncedUser.accessExpiresAt)
+                        || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
+                    if (hasAccess) {
+                        setAndProcessUser(syncedUser);
+                        setPaywallUserEmail(null);
+                        setView(hasContext ? 'contextChoice' : 'landing');
+                        return true;
+                    }
+                }
+            } catch (err) {
+                console.warn('[Paywall] RevenueCat sync failed:', err);
+            }
+            return false;
+        };
+
+        if (await trySync()) return;
+        await new Promise(r => setTimeout(r, 3000));
+        if (await trySync()) return;
+        await new Promise(r => setTimeout(r, 4000));
+        if (await trySync()) return;
+
+        // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
+        // Backend sync returns 404, but local getCustomerInfo can still show active subscription.
+        if (isIAPAvailable()) {
+          const rcAccess = await getAccessFromRevenueCat();
+          if (rcAccess?.hasAccess) {
+            const patched = { ...user };
+            patched.accessExpiresAt = rcAccess.accessExpiresAt ?? undefined;
+            if (rcAccess.isPremium) {
+              patched.isPremium = true;
+              patched.premiumExpiresAt = rcAccess.accessExpiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
+            }
+            if (rcAccess.accessExpiresAt && !patched.premiumExpiresAt) {
+              patched.premiumExpiresAt = rcAccess.accessExpiresAt;
+            }
+            setAndProcessUser(patched);
+            setPaywallUserEmail(null);
+            setView(hasContext ? 'contextChoice' : 'landing');
+            return;
+          }
+        }
+
         setView('paywall');
     };
     

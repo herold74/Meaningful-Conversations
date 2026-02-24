@@ -237,6 +237,93 @@ router.post('/notification', async (req, res) => {
   }
 });
 
+// --- Helper: sync user from RevenueCat (used by login and /sync-from-revenuecat) ---
+// Returns the user from DB (possibly updated). Pure web users (no RevenueCat data) get 404 → unchanged user.
+async function syncUserFromRevenueCat(userId) {
+  const secretKey = process.env.REVENUECAT_SECRET_KEY;
+  if (!secretKey) return null;
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return null;
+
+  const rcRes = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`, {
+    headers: { Authorization: `Bearer ${secretKey}` },
+  });
+  if (!rcRes.ok) {
+    const text = await rcRes.text();
+    if (rcRes.status !== 404) {
+      console.warn(`[Apple IAP] RevenueCat subscriber fetch failed: ${rcRes.status} for user ${userId}`, text?.slice(0, 300));
+    }
+    return user; // 404 = no RevenueCat data (pure web user) → unchanged
+  }
+
+  const data = await rcRes.json();
+  const subscriber = data?.subscriber ?? data?.value?.subscriber;
+  if (!subscriber) return user;
+
+  const subscriptions = subscriber.subscriptions || {};
+  const nonSubs = subscriber.non_subscriptions || {};
+  let currentUser = user;
+  let updated = false;
+
+  for (const [productId, sub] of Object.entries(subscriptions)) {
+    const mapping = mapAppleProduct(productId);
+    if (!mapping) continue;
+    const expiresDate = sub.expires_date ? new Date(sub.expires_date) : null;
+    if (expiresDate && expiresDate > new Date()) {
+      const transactionInfo = { productId, expiresDate: expiresDate.toISOString() };
+      const updateData = buildUserUpdate(mapping, transactionInfo, currentUser);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { ...updateData, purchasePlatform: 'ios' },
+      });
+      currentUser = await prisma.user.findUnique({ where: { id: userId } });
+      updated = true;
+    }
+  }
+
+  for (const [productId, items] of Object.entries(nonSubs)) {
+    const mapping = mapAppleProduct(productId);
+    if (!mapping || !Array.isArray(items) || items.length === 0) continue;
+    const latest = items[items.length - 1];
+    const transactionInfo = {
+      productId,
+      expiresDate: null,
+      originalTransactionId: latest.id,
+    };
+    const updateData = buildUserUpdate(mapping, transactionInfo, currentUser);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { ...updateData, purchasePlatform: 'ios' },
+    });
+    currentUser = await prisma.user.findUnique({ where: { id: userId } });
+    updated = true;
+  }
+
+  if (updated) console.log(`🔄 RevenueCat sync: updated user ${userId}`);
+  return currentUser;
+}
+
+// POST /api/apple-iap/sync-from-revenuecat
+router.post('/sync-from-revenuecat', auth, async (req, res) => {
+  try {
+    const secretKey = process.env.REVENUECAT_SECRET_KEY;
+    if (!secretKey) {
+      return res.status(503).json({ error: 'RevenueCat sync not configured.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const syncedUser = await syncUserFromRevenueCat(req.userId);
+    const { passwordHash, ...userPayload } = syncedUser;
+    res.json({ success: true, user: userPayload });
+  } catch (error) {
+    console.error('❌ RevenueCat sync error:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // POST /api/apple-iap/restore
 // Called when user taps "Restore Purchases" — verifies all provided transaction IDs
 router.post('/restore', auth, async (req, res) => {
@@ -380,3 +467,4 @@ async function revokeAccess(user, productMapping) {
 }
 
 module.exports = router;
+module.exports.syncUserFromRevenueCat = syncUserFromRevenueCat;

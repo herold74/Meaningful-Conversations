@@ -667,6 +667,8 @@
   "iap_load_error": "Produkte konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
   "iap_period_month": "Monat",
   "iap_period_year": "Jahr",
+  "iap_current": "Aktuell",
+  "paywall_continue_button": "Weiter",
   "paywall_purchase_button": "Zugangspass kaufen",
   "paywall_redeem_button": "Code einlösen",
   "paywall_logout_button": "Abmelden",
