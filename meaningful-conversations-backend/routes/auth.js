@@ -10,6 +10,7 @@ const {
     forgotPasswordLimiter, 
     verifyEmailLimiter 
 } = require('../middleware/rateLimiter.js');
+const { syncUserFromRevenueCat } = require('./appleIAP.js');
 
 const router = express.Router();
 
@@ -122,7 +123,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     const lowerCaseEmail = email.toLowerCase();
     
     try {
-        const user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
+        let user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -152,11 +153,26 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         // Access Pass Check
         // Permanent access: admin, active premium, client, developer, or Lifetime (accessExpiresAt = null)
-        const hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
+        let hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
         let accessExpired = false;
         if (!hasPermanentAccess) {
             if (user.accessExpiresAt && new Date(user.accessExpiresAt) < now) {
                 accessExpired = true;
+            }
+        }
+
+        // If access would be expired, try syncing from RevenueCat (iOS users).
+        // Pure web users (PayPal only) get 404 from RevenueCat → unchanged user → no regression.
+        if (accessExpired) {
+            const syncedUser = await syncUserFromRevenueCat(user.id);
+            if (syncedUser) {
+                const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+                    || !syncedUser.accessExpiresAt
+                    || new Date(syncedUser.accessExpiresAt) >= now;
+                if (hasAccess) {
+                    user = syncedUser;
+                    accessExpired = false;
+                }
             }
         }
 

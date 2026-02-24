@@ -129,9 +129,9 @@
 ```
 
 #### Versionierung
-- **VERSION:** Semantische Version aus `package.json` (z.B. `1.8.4`)
+- **VERSION:** Semantische Version aus `package.json` (z.B. `1.9.5`)
 - **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei
-- **Anzeige:** `Version 1.8.4 (Build 2)`
+- **Anzeige:** `Version 1.9.5 (Build 2)`
 - **Service Worker:** Cache-Name enthält Version + Build
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**

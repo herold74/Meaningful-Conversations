@@ -116,6 +116,9 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY}
       
+      # RevenueCat (sync-from-revenuecat for Paywall fix)
+      REVENUECAT_SECRET_KEY: ${REVENUECAT_SECRET_KEY}
+      
       # PayPal Payment Integration
       PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
       PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
