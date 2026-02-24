@@ -5,7 +5,7 @@ import { useModalOpen } from '../utils/modalUtils';
 import { RefinementPreviewResult } from '../services/api';
 import { XIcon } from './icons/XIcon';
 import { CheckIcon } from './icons/CheckIcon';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 
 interface ProfileRefinementModalProps {
   isOpen: boolean;
@@ -118,7 +118,7 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <Spinner />
+              <BrandLoader size="md" />
               <p className="text-content-secondary">
                 {t('refinement_modal_loading') || 'Berechne Profil-Änderungen...'}
               </p>

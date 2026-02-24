@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
@@ -99,22 +100,29 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
     }
   };
 
+  const inputClass = "mt-1 w-full px-3 py-2.5 rounded-lg text-sm bg-background-primary border border-border-primary text-content-primary placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary transition-colors disabled:opacity-50";
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
       {showSpring && <SpringBlossoms lightModeOnly={true} />}
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
-        <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
-            <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated"
+      >
+        <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors">
+            <ArrowLeftIcon className="w-5 h-5 text-content-secondary" />
         </button>
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-content-primary uppercase">{t('login_title')}</h1>
+          <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('login_title')}</h1>
         </div>
 
         {reason && (
-            <div className="p-4 bg-status-info-background dark:bg-status-info-background border border-status-info-border dark:border-status-info-border/30 text-status-info-foreground dark:text-status-info-foreground flex items-start gap-3 text-sm text-left">
+            <div className="p-3 rounded-lg bg-status-info-background border border-status-info-border text-status-info-foreground flex items-start gap-3 text-sm text-left">
                 <InfoIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <p>{reason}</p>
             </div>
@@ -122,7 +130,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-bold text-content-secondary text-left">{t('login_email_label')}</label>
+            <label htmlFor="email" className="block text-sm font-medium text-content-primary text-left">{t('login_email_label')}</label>
             <input
               type="email"
               id="email"
@@ -131,14 +139,14 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
               placeholder={t('login_email_placeholder')}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary disabled:opacity-50"
+              className={inputClass}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
           </div>
           <div>
-            <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('login_password_label')}</label>
+            <label htmlFor="password" className="block text-sm font-medium text-content-primary text-left">{t('login_password_label')}</label>
             <input
               type="password"
               id="password"
@@ -146,7 +154,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary disabled:opacity-50"
+              className={inputClass}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
@@ -158,7 +166,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         disabled={isLoading}
-                        className="h-4 w-4 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary rounded disabled:opacity-50"
+                        className="h-4 w-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary disabled:opacity-50"
                     />
                     <span className="ml-2 text-xs text-content-secondary">{t('login_remember_email') || 'E-Mail merken'}</span>
                 </label>
@@ -181,7 +189,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
             {t('login_register_link')}
           </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

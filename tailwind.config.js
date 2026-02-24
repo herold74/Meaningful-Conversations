@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
   darkMode: 'class',
@@ -12,7 +13,19 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
+        /* Brand palette colors (driven by --brand-color-* CSS custom properties) */
+        w4f: {
+          sky: 'rgb(var(--brand-color-1) / <alpha-value>)',
+          steel: 'rgb(var(--brand-color-2) / <alpha-value>)',
+          slate: 'rgb(var(--brand-color-3) / <alpha-value>)',
+          navy: 'rgb(var(--brand-color-4) / <alpha-value>)',
+          amber: 'rgb(var(--brand-accent) / <alpha-value>)',
+        },
+        /* Theme-aware semantic colors */
         background: {
           primary: 'rgb(var(--bg-primary) / <alpha-value>)',
           secondary: 'rgb(var(--bg-secondary) / <alpha-value>)',
@@ -61,6 +74,15 @@ module.exports = {
         },
         'button-foreground-on-accent': 'rgb(var(--button-foreground-on-accent) / <alpha-value>)',
       },
+      borderRadius: {
+        'card': '0.75rem',   /* 12px - professional card radius */
+        'pill': '9999px',
+      },
+      boxShadow: {
+        'card': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+        'card-elevated': '0 4px 20px rgba(0,0,0,0.06)',
+      },
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
@@ -70,7 +92,6 @@ module.exports = {
             '--tw-prose-invert-body': 'rgb(var(--content-secondary))',
             '--tw-prose-invert-headings': 'rgb(var(--content-primary))',
             '--tw-prose-invert-bold': 'rgb(var(--content-primary))',
-            // Custom styling for horizontal rules
             hr: {
               borderColor: 'rgb(var(--border-secondary))',
               borderTopWidth: '2px',

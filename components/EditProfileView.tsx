@@ -75,10 +75,10 @@ const EditProfileView: React.FC<EditProfileViewProps> = ({ currentUser, onBack, 
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-full max-w-md p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-content-primary uppercase">{t('profile_edit_title')}</h1>
+          <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('profile_edit_title')}</h1>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">

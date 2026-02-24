@@ -18,11 +18,14 @@ const APPLE_PRODUCT_MAP = {
 };
 
 function getAppleConfig() {
+  // Private key from env often has literal \n; JWT signing requires actual newlines
+  const rawKey = process.env.APPLE_PRIVATE_KEY;
+  const privateKey = rawKey ? rawKey.replace(/\\n/g, '\n') : undefined;
   return {
     keyId: process.env.APPLE_KEY_ID,
     issuerId: process.env.APPLE_ISSUER_ID,
     bundleId: process.env.APPLE_BUNDLE_ID || 'at.manualmode.mc',
-    privateKey: process.env.APPLE_PRIVATE_KEY,
+    privateKey,
     environment: process.env.APPLE_IAP_ENVIRONMENT || 'sandbox',
   };
 }
@@ -63,6 +66,7 @@ async function verifyTransaction(transactionId) {
 
   if (!res.ok) {
     const text = await res.text();
+    console.error(`[Apple IAP] Transaction lookup failed: ${res.status} for tx ${transactionId}`, text);
     throw new Error(`Apple API error ${res.status}: ${text}`);
   }
 

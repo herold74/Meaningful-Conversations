@@ -16,9 +16,9 @@ interface AccountManagementViewProps {
 const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUser, onNavigate, onDeleteAccount }) => {
     const { t, language } = useLocalization();
     const menuItemBase =
-        'w-full p-4 text-left rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors';
+        'w-full p-4 text-left rounded-card border border-border-primary bg-background-tertiary hover:bg-background-secondary hover:shadow-card transition-all';
     const menuIconWrap =
-        'flex h-10 w-10 items-center justify-center rounded-full border border-border-secondary/70 dark:border-border-primary/70 bg-background-secondary dark:bg-background-secondary';
+        'flex h-10 w-10 items-center justify-center rounded-full bg-background-secondary border border-border-primary';
 
     const getTierLabel = () => {
         if (currentUser.isDeveloper) return t('account_tier_developer');
@@ -70,9 +70,9 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
     ];
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-md">
+        <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 space-y-6 bg-background-secondary border border-border-primary mt-4 mb-10 rounded-card shadow-card-elevated">
             <div className="text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-content-primary">{t('account_management_title')}</h1>
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('account_management_title')}</h1>
                 <p className="text-sm text-content-subtle mt-2">{currentUser.email}</p>
                 <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-primary bg-background-tertiary text-sm text-content-primary">
                     <span className="text-content-subtle">{t('account_current_status')}:</span>

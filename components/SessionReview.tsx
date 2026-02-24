@@ -684,15 +684,15 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const blockageGridClass = "grid grid-cols-1 gap-4";
 
     return (
-        <div className="flex flex-col items-center justify-center pt-4 pb-10 animate-fadeIn">
-            <div className="w-full max-w-4xl p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
+        <div className="flex flex-col items-center justify-center pt-4 pb-10">
+            <div className="w-full max-w-4xl p-6 sm:p-8 space-y-8 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
                 
                 {isTestMode && (
-                    <div className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg">
+                    <div className="p-4 mb-6 bg-status-info-background border border-status-info-border rounded-card">
                         <div className="flex items-start gap-3">
                             <div className="text-2xl mt-0.5">💡</div>
                             <div>
-                                <h3 className="font-bold text-lg text-content-primary">{t('sessionReview_testMode_warning_title')}</h3>
+                                <h3 className="font-semibold text-base text-content-primary">{t('sessionReview_testMode_warning_title')}</h3>
                                 <p className="mt-2 text-sm text-content-secondary md:hidden">{t('sessionReview_testMode_warning_desc_short')}</p>
                                 <p className="mt-2 text-sm text-content-secondary hidden md:block">{t('sessionReview_testMode_warning_desc')}</p>
                             </div>
@@ -701,11 +701,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 {isGuest && (
-                    <div className="p-4 mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+                    <div className="p-4 mb-6 bg-status-warning-background border border-status-warning-border rounded-card">
                         <div className="flex items-start gap-3">
                             <div className="text-2xl mt-0.5">⚠️</div>
                             <div>
-                                <h3 className="font-bold text-lg text-content-primary">{t('sessionReview_guestWarning_title')}</h3>
+                                <h3 className="font-semibold text-base text-content-primary">{t('sessionReview_guestWarning_title')}</h3>
                                 <p className="mt-2 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p1') }} />
                                 <p className="mt-1 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p2') }} />
                                 <p className="mt-1 text-sm text-content-secondary" dangerouslySetInnerHTML={{ __html: t('sessionReview_guestWarning_p3') }} />
@@ -715,8 +715,8 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-content-primary dark:text-content-primary uppercase">{t('sessionReview_title')}</h1>
-                    <p className="mt-2 text-lg text-content-secondary dark:text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
+                    <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('sessionReview_title')}</h1>
+                    <p className="mt-2 text-base text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
                 </div>
 
                 <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">

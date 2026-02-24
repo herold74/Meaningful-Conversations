@@ -50,8 +50,8 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white border border-gray-300 dark:border-gray-700">
         
         {status === 'success' ? (
              <div className="text-center p-4">

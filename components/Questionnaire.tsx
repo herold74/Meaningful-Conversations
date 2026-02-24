@@ -117,12 +117,12 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
     };
 
     return (
-        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
-            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
+        <div className="relative w-full max-w-3xl mx-auto p-8 space-y-8 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
+            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors">
                 <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
             </button>
             <div className="text-center mb-4">
-                <h1 className="text-3xl font-bold text-content-primary uppercase">{t('questionnaire_title')}</h1>
+                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('questionnaire_title')}</h1>
                 <p className="mt-2 text-content-secondary">{t('questionnaire_subtitle')}</p>
             </div>
 

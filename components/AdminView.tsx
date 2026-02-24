@@ -7,7 +7,7 @@ import { User, UpgradeCode, Ticket, Feedback } from '../types';
 import { apiFetch, loadPersonalityProfile } from '../services/api';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { BOTS } from '../constants';
 import { CheckIcon } from './icons/CheckIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
@@ -995,7 +995,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         />
                     </div>
                     <button type="submit" disabled={actionLoading['createCode']} className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md">
-                        {actionLoading['createCode'] ? <Spinner/> : t('admin_codes_generate')}
+                        {actionLoading['createCode'] ? <BrandLoader size="sm" /> : t('admin_codes_generate')}
                     </button>
                 </form>
                 
@@ -1026,7 +1026,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 disabled={actionLoading['bulkGenerate']}
                                 className="px-5 py-2 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 flex items-center justify-center rounded-lg shadow-md whitespace-nowrap"
                             >
-                                {actionLoading['bulkGenerate'] ? <Spinner/> : t('admin_codes_bulk_button', { count: bulkQuantity })}
+                                {actionLoading['bulkGenerate'] ? <BrandLoader size="sm" /> : t('admin_codes_bulk_button', { count: bulkQuantity })}
                             </button>
                             {generatedBulkCodes && generatedBulkCodes.length > 0 && (
                                 <button 
@@ -1565,7 +1565,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     };
 
     const renderContent = () => {
-        if (isLoading) return <div className="flex justify-center p-12"><Spinner /></div>;
+        if (isLoading) return <div className="flex justify-center p-12"><BrandLoader size="md" /></div>;
         if (error) return <p className="text-red-500 p-4">{error}</p>;
 
         const views: Record<AdminTab, React.ReactNode> = {

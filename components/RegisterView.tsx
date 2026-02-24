@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
 import { User } from '../types';
@@ -68,24 +69,34 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
     }
   };
 
+  const inputClass = (hasError: boolean) =>
+    `mt-1 w-full px-3 py-2.5 rounded-lg text-sm bg-background-primary border text-content-primary placeholder:text-content-subtle focus:outline-none focus:ring-2 transition-colors disabled:opacity-50 ${
+      hasError ? 'border-status-danger-border focus:ring-status-danger-border/40' : 'border-border-primary focus:ring-accent-primary/40 focus:border-accent-primary'
+    }`;
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen animate-fadeIn">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
       {showSpring && <SpringBlossoms lightModeOnly={true} />}
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
-      <div className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary dark:bg-transparent border border-border-secondary dark:border-border-primary rounded-lg shadow-lg">
-         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors">
-            <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated"
+      >
+         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors">
+            <ArrowLeftIcon className="w-5 h-5 text-content-secondary" />
         </button>
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-content-primary uppercase">{t('register_title')}</h1>
-          <p className="mt-2 text-sm text-content-secondary">{t('register_trial_info')}</p>
+          <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('register_title')}</h1>
+          <p className="mt-1 text-sm text-content-secondary">{t('register_trial_info')}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email"  className="block text-sm font-bold text-content-secondary text-left">{t('register_email_label')}</label>
+            <label htmlFor="email" className="block text-sm font-medium text-content-primary text-left">{t('register_email_label')}</label>
             <input
               type="email"
               id="email"
@@ -94,62 +105,64 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               placeholder={t('register_email_placeholder')}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'email' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={inputClass(error?.type === 'email')}
               aria-invalid={error?.type === 'email'}
               aria-describedby={error?.type === 'email' ? 'email-error' : undefined}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
-            {error?.type === 'email' && <p id="email-error" className="text-status-danger-foreground text-sm mt-1">{error.message}</p>}
+            {error?.type === 'email' && <p id="email-error" className="text-status-danger-foreground text-xs mt-1">{error.message}</p>}
           </div>
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-bold text-content-secondary text-left">{t('register_firstName_label')}</label>
-            <input
-              type="text"
-              id="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder={t('register_firstName_placeholder')}
-              disabled={isLoading}
-              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:ring-accent-primary focus:outline-none focus:ring-1 disabled:opacity-50"
-              autoCapitalize="words"
-              autoCorrect="off"
-              spellCheck="false"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-content-primary text-left">{t('register_firstName_label')}</label>
+              <input
+                type="text"
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder={t('register_firstName_placeholder')}
+                disabled={isLoading}
+                className={inputClass(false)}
+                autoCapitalize="words"
+                autoCorrect="off"
+                spellCheck="false"
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-content-primary text-left">{t('register_lastName_label')}</label>
+              <input
+                type="text"
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder={t('register_lastName_placeholder')}
+                disabled={isLoading}
+                className={inputClass(false)}
+                autoCapitalize="words"
+                autoCorrect="off"
+                spellCheck="false"
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-bold text-content-secondary text-left">{t('register_lastName_label')}</label>
-            <input
-              type="text"
-              id="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder={t('register_lastName_placeholder')}
-              disabled={isLoading}
-              className="mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border border-border-secondary dark:border-border-secondary focus:ring-accent-primary focus:outline-none focus:ring-1 disabled:opacity-50"
-              autoCapitalize="words"
-              autoCorrect="off"
-              spellCheck="false"
-            />
-          </div>
-          <div className="flex items-start">
+          <label htmlFor="newsletter" className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               id="newsletter"
               checked={newsletterConsent}
               onChange={(e) => setNewsletterConsent(e.target.checked)}
               disabled={isLoading}
-              className="mt-1 w-4 h-4 text-accent-primary bg-background-tertiary border-border-secondary rounded focus:ring-accent-primary focus:ring-2 disabled:opacity-50"
+              className="mt-0.5 w-4 h-4 rounded border-border-primary text-accent-primary focus:ring-accent-primary disabled:opacity-50"
             />
-            <label htmlFor="newsletter" className="ml-3 text-sm text-content-secondary">
-              <span className="font-bold">{t('register_newsletter_label')}</span>
+            <span className="text-sm text-content-secondary">
+              <span className="font-medium">{t('register_newsletter_label')}</span>
               <br />
               <span className="text-xs">{t('register_newsletter_desc')}</span>
-            </label>
-          </div>
+            </span>
+          </label>
           <div>
-            <label htmlFor="password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_password_label')}</label>
+            <label htmlFor="password" className="block text-sm font-medium text-content-primary text-left">{t('register_password_label')}</label>
             <input
               type="password"
               id="password"
@@ -157,7 +170,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'password' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={inputClass(error?.type === 'password')}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
               autoCapitalize="none"
@@ -166,7 +179,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
             />
           </div>
            <div>
-            <label htmlFor="confirm-password"  className="block text-sm font-bold text-content-secondary text-left">{t('register_confirm_password_label')}</label>
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-content-primary text-left">{t('register_confirm_password_label')}</label>
             <input
               type="password"
               id="confirm-password"
@@ -174,14 +187,14 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isLoading}
-              className={`mt-1 w-full p-3 bg-background-tertiary dark:bg-background-primary text-content-primary border ${error?.type === 'password' ? 'border-status-danger-border focus:ring-status-danger-border' : 'border-border-secondary dark:border-border-secondary focus:ring-accent-primary'} focus:outline-none focus:ring-1 disabled:opacity-50`}
+              className={inputClass(error?.type === 'password')}
               aria-invalid={error?.type === 'password'}
               aria-describedby={error?.type === 'password' ? 'password-error' : undefined}
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
             />
-            {error?.type === 'password' && <p id="password-error" className="text-status-danger-foreground text-sm mt-1">{error.message}</p>}
+            {error?.type === 'password' && <p id="password-error" className="text-status-danger-foreground text-xs mt-1">{error.message}</p>}
           </div>
 
           {error?.type === 'general' && <p className="text-status-danger-foreground text-sm whitespace-pre-wrap">{error.message}</p>}
@@ -197,7 +210,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
             {t('register_login_link')}
           </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

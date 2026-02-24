@@ -27,7 +27,7 @@ import { getApiBaseUrl, getSession, testRefinementWithMockSessions, RefinementPr
 import { analyzeSession } from '../services/geminiService';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
-import Spinner from './shared/Spinner';
+import BrandLoader from './shared/BrandLoader';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import ProfileRefinementModal from './ProfileRefinementModal';
 
@@ -1184,7 +1184,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
     return (
       <div className="text-center py-12">
-        <Spinner />
+        <BrandLoader size="md" />
         <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
         <p className="text-content-secondary mt-2">
           {t('test_runner_message_progress', { current: currentMessageIndex + 1, total: minTurns })}
@@ -1207,7 +1207,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   // Render analyzing phase (for session category tests)
   const renderAnalyzing = () => (
     <div className="text-center py-12">
-      <Spinner />
+      <BrandLoader size="md" />
       <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_analyzing')}</h3>
       <p className="text-content-secondary mt-2">
         {t('test_runner_analyzing_desc')}
