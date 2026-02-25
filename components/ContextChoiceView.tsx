@@ -70,7 +70,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
   return (
     <div className="flex flex-col items-center justify-center min-h-[80dvh] text-center">
       <div className="w-full max-w-2xl p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
-        <h1 className="text-2xl font-semibold text-content-primary tracking-tight">
+        <h1 className="text-3xl font-semibold text-content-primary tracking-tight">
           {t('contextChoice_welcome_back')}
         </h1>
         <p className="text-lg text-content-secondary leading-relaxed">
