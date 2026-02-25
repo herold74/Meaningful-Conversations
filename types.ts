@@ -41,7 +41,8 @@ export type NavView =
     | 'interviewTranscript'
     | 'oceanOnboarding'
     | 'intentPicker'
-    | 'namePrompt';
+    | 'namePrompt'
+    | 'profileHint';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 

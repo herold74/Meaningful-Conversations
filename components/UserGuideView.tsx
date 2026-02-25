@@ -138,7 +138,7 @@ Die ${brand.appName} App ist eine Progressive Web App (PWA) und kann wie eine na
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧠 Kapitel 4: Persönlichkeitsprofil für registrierte Benutzer</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil für registrierte Benutzer</summary>
 <div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
@@ -894,7 +894,7 @@ The ${brand.appName} app is a Progressive Web App (PWA) and can be installed lik
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧠 Chapter 4: Personality Profile for Registered Users</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile for Registered Users</summary>
 <div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
