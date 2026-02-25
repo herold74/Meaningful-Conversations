@@ -27,7 +27,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
       <div className="fixed top-0 left-0 right-0 z-50 bg-background-secondary/80 backdrop-blur-md" style={{ height: safeAreaTop }} />,
       document.body
     )}
-    <div className="flex flex-col items-center min-h-[85vh] px-4 sm:px-6 pb-6 max-w-lg mx-auto" style={{ paddingTop: Math.max(40, safeAreaTop) }}>
+    <div className="flex flex-col items-center min-h-[85vh] px-4 sm:px-6 pb-6 max-w-lg mx-auto" style={{ paddingTop: Math.max(64, safeAreaTop + 24) }}>
       <motion.h1
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

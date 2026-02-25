@@ -1,6 +1,6 @@
 {
   "name": "meaningful-conversations-frontend",
-  "private": true,
+  "description": "AI-powered coaching platform with Life Context memory, structured interviewing, and communication analysis.",
   "version": "1.9.7",
   "scripts": {
     "dev": "vite",
