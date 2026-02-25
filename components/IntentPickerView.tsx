@@ -41,7 +41,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
-        className="text-sm text-content-secondary text-center mb-10 max-w-xs"
+        className="text-sm text-content-secondary text-center mb-5 max-w-xs"
       >
         {t('intent_subtitle')}
       </motion.p>
@@ -55,26 +55,24 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
             transition={{ delay: 0.25 + i * 0.12, duration: 0.4, ease: 'easeOut' }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(intent.id)}
-            className="w-full text-left bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-primary rounded-2xl p-5 hover:border-accent-primary/50 hover:shadow-md transition-all group"
+            className="w-full text-left bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-primary rounded-2xl p-4 hover:border-accent-primary/50 hover:shadow-md transition-all group"
           >
-            <div className="flex items-start gap-4">
-              <span className="text-3xl flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+            <div className="flex items-center gap-3 mb-1.5">
+              <span className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
                 {intent.icon}
               </span>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-content-primary mb-1 group-hover:text-accent-primary transition-colors">
-                  {t(intent.titleKey)}
-                </h3>
-                <p className="text-sm text-content-secondary leading-relaxed">
-                  {isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
-                    ? t(`${intent.descKey}_guest`)
-                    : t(intent.descKey)}
-                </p>
-              </div>
-              <span className="text-content-tertiary group-hover:text-accent-primary transition-colors mt-1 flex-shrink-0">
+              <h3 className="text-base font-semibold text-content-primary flex-1 group-hover:text-accent-primary transition-colors">
+                {t(intent.titleKey)}
+              </h3>
+              <span className="text-content-tertiary group-hover:text-accent-primary transition-colors flex-shrink-0">
                 →
               </span>
             </div>
+            <p className="text-sm text-content-secondary leading-snug">
+              {isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
+                ? t(`${intent.descKey}_guest`)
+                : t(intent.descKey)}
+            </p>
           </motion.button>
         ))}
       </div>
