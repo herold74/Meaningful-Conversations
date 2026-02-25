@@ -11,6 +11,7 @@ import SummerButterflies from './SummerButterflies';
 import AutumnLeaves from './AutumnLeaves';
 import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 import { brand } from '../config/brand';
+import { LogoIcon } from './icons/LogoIcon';
 import Button from './shared/Button';
 import { isNativeIOS } from '../utils/platformDetection';
 
@@ -124,7 +125,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
       <div className={`w-full max-w-3xl ${native ? 'p-4 space-y-4' : 'p-6 sm:p-8 space-y-6'} bg-background-secondary border border-border-primary rounded-card shadow-card-elevated`}>
-        <h1 className={`${native ? 'text-2xl' : 'text-3xl'} font-semibold text-content-primary tracking-tight`}>{language === 'de' ? brand.appNameDe : brand.appName}</h1>
+        <div className="flex items-center justify-center gap-3">
+          <LogoIcon className={`${native ? 'w-8 h-8' : 'w-10 h-10'} text-accent-primary flex-shrink-0`} />
+          <h1 className={`${native ? 'text-2xl' : 'text-3xl'} font-semibold text-content-primary tracking-tight`}>{language === 'de' ? brand.appNameDe : brand.appName}</h1>
+        </div>
         <p className={`${native ? 'text-xs' : 'text-sm md:text-base'} text-content-secondary leading-relaxed`}>
           {t('landing_subtitle')}
         </p>
