@@ -1,6 +1,34 @@
 # Meaningful Conversations
 
-An application that provides access to several coaching bot characters with different perspectives and coaching styles. Users can create a "life context" file to personalize conversations and update it with new insights after each session.
+**Meaningful Conversations** is an AI-powered platform designed to support personal growth, structured thinking, and communication analysis. Unlike generic chat assistants, it offers three distinct, purpose-built use cases to address specific user needs:
+
+## 🎯 Three Core Use Cases
+
+### 1. AI Coaching & Personal Growth (The Core)
+**Problem:** People often need continuous, personalized guidance for self-reflection, mental fitness, and problem-solving, but human coaching is expensive and not always available when needed. Generic AI chatbots lack context and long-term memory of the user's life.
+
+**Solution:** A "Life Context" system that serves as the AI's long-term memory, combined with specialized coaching personas.
+*   **Life Context:** A structured Markdown file that evolves with every session, tracking goals, challenges, and background.
+*   **Specialized Coaches:** Distinct personas for different needs—from **Max** (Ambitious/Goal-Oriented) and **Ava** (Strategic) to **Rob** (Mental Fitness) and **Chloe** (Structured Reflection).
+*   **Adaptive Coaching:** Uses personality profiles (OCEAN, Riemann-Thomann, Spiral Dynamics) to tailor the coaching style to the user.
+
+### 2. Structured Interviewing (Gloria Interview)
+**Problem:** Users often have raw ideas, project concepts, or complex decisions they need to structure. They don't need advice or coaching; they need a neutral sounding board to help them extract, organize, and clarify their own thoughts.
+
+**Solution:** A dedicated **Interview Mode** where the AI acts strictly as a professional interviewer.
+*   **Pure Inquiry:** The AI asks structured, deepening questions without offering advice, judgment, or coaching.
+*   **Output-Focused:** The goal is to produce a clean, grammatically smoothed transcript and a structured summary of the user's own ideas.
+*   **Versatile:** Ideal for brainstorming, project planning, journaling, or preparing for difficult conversations.
+
+### 3. Communication Analysis (Transcript Evaluation)
+**Problem:** It is difficult to objectively evaluate one's own communication skills, identify blind spots, or check if a conversation actually achieved its intended goal.
+
+**Solution:** An **Evidence-Based Evaluation Tool** for analyzing existing conversation transcripts.
+*   **Upload & Analyze:** Users upload transcripts (text or SRT) of real-world conversations.
+*   **Objective Feedback:** The AI evaluates the interaction against stated goals, behavioral patterns, and (if available) the user's personality profile.
+*   **Actionable Insights:** Provides a detailed report with scores, blind spot identification, and concrete next steps.
+
+---
 
 The fundamental idea of using an .md file to preserve and update information in a structured way using AI was inspired by Chris Lovejoy (https://github.com/chris-lovejoy/personal-ai-coach). This method is very similar to human note-taking during a coaching process, but provides the benefit of creating the summary for the client instantly for further reflections. Meaningful conversations adds the graphical UI, and a reliable non-destructive process of updating the .md file using AI.
 

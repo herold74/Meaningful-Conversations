@@ -2116,7 +2116,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         >
                             {isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
-                        <div className="mt-4 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
+                        <div className="mt-8 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
                             <p className="h-14 flex items-center">{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
                             {isListening && !wakeLock.isSupported && (
                                 <p className="text-xs text-status-warning-foreground mt-1">{t('chat_keep_screen_on')}</p>

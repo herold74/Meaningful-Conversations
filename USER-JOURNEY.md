@@ -1,12 +1,94 @@
 # User Journey - Meaningful Conversations
 
-This document outlines the complete user experience through the Meaningful Conversations application.
+This document outlines the complete user experience through the Meaningful Conversations application, updated for version 1.9.6.
 
 ---
 
 ## Overview
 
 Meaningful Conversations provides AI-powered coaching through multiple specialized AI coaches, each with unique perspectives and methodologies. Users maintain a "Life Context" file that serves as the AI's memory across sessions. The app supports personality profiling, adaptive coaching, gamification, and full GDPR-compliant data management.
+
+**Version 1.9.6 introduces a significant Visual Redesign (W4F), new Brand-Driven Design System, and the "Gloria Interview" feature.**
+
+---
+
+## UX Flowchart
+
+```mermaid
+graph TD
+    Start((Start)) --> Landing[Landing Page]
+    Landing -->|Returning User| Login[Login]
+    Landing -->|New User| Register[Register]
+    Landing -->|Try App| Guest[Guest Mode]
+
+    Register --> Verify[Email Verification]
+    Verify --> Dashboard
+    Login --> Dashboard
+    Guest --> Dashboard
+
+    subgraph Dashboard [Main Dashboard / Coach Selection]
+        SelectCoach[Select Coach]
+        Menu[Menu / Settings]
+        Gamification[Gamification Bar]
+    end
+
+    Menu --> Profile[Personality Profile]
+    Menu --> Account[Account Management]
+    Menu --> Admin[Admin Console (Admins Only)]
+
+    SelectCoach -->|Coaching| ChatSession[Chat Session]
+    SelectCoach -->|Interview| GloriaInterview[Gloria Interview]
+    SelectCoach -->|Analysis| TranscriptEval[Transcript Evaluation]
+
+    subgraph Coaching [Coaching Session]
+        ChatSession -->|Input| Input[Text / Voice Input]
+        ChatSession -->|Output| Output[AI Response / TTS]
+        ChatSession -->|Feature| Meditation[Guided Meditation]
+        ChatSession --> EndSession[End Session]
+    end
+
+    subgraph Interview [Structured Interview]
+        GloriaInterview --> InterviewChat[Interview Chat]
+        InterviewChat --> EndInterview[End Interview]
+        EndInterview --> TranscriptView[Interview Transcript View]
+        TranscriptView --> ExportInterview[Export Transcript/Summary]
+    end
+
+    subgraph Evaluation [Transcript Evaluation]
+        TranscriptEval --> Upload[Upload/Paste Transcript]
+        Upload --> Analyze[AI Analysis]
+        Analyze --> EvalResult[Evaluation Result]
+        EvalResult --> ExportPDF[Export PDF]
+    end
+
+    EndSession --> Review[Session Review]
+
+    subgraph ReviewProcess [Session Review]
+        Review --> Insights[New Findings]
+        Review --> Goals[Accomplished Goals]
+        Review --> Steps[Next Steps & Calendar]
+        Review --> ContextUpdates[Context Updates]
+        ContextUpdates -->|Accept/Reject| FinalContext[Final Context]
+    end
+
+    FinalContext --> Save[Save & Continue]
+    Save --> Dashboard
+    ExportInterview --> Dashboard
+    ExportPDF --> Dashboard
+```
+
+---
+
+## Visual Design System (v1.9.6)
+
+The application features a completely modernized **Brand-Driven Design System (W4F)**:
+
+- **Color Palette:** A sophisticated 4-shade blue palette (#89C4E1 to #1B3A5C) with an Amber accent (#F59E0B), implemented via semantic CSS variables.
+- **Typography:** Self-hosted **Inter Variable** font for optimal readability and offline support.
+- **Components:** A shared component library with rounded cards, elevated shadows, and consistent spacing.
+- **Animations:** **Framer Motion** powers smooth page transitions, micro-interactions, and entrance animations.
+- **Loaders:** A configurable **BrandLoader** system with multiple variants (Tetris, Steering Wheel, Dots, Pulse).
+- **Themes:** Automatic Dark/Light mode switching and seasonal themes (Spring, Summer, Autumn, Winter) that adapt the color palette dynamically.
 
 ---
 
@@ -70,7 +152,7 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 - Optional: Country / State for local support resources
 - Generates a structured Life Context file
 
-#### Path B: Create with an Interview
+#### Path B: Create with an Interview (Gloria Life Context)
 - Conversation with Gloria, a friendly guide (not a coach)
 - She asks the questionnaire questions in a natural, conversational way
 - Automatically formats answers into a Life Context file
@@ -91,8 +173,8 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 
 ---
 
-### 5. Coach Selection
-*Choosing your AI coach*
+### 5. Coach Selection & Dashboard
+*Choosing your AI coach or tool*
 
 **Your Guide:**
 
@@ -110,6 +192,13 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 | **Chloe** | Reflective, Structured, Evidence-Based | Structured reflection to recognize thought patterns | Premium |
 | **Rob** | Mental Fitness, Empathetic, Mindful | Mental fitness against self-sabotaging patterns | Client |
 | **Victor** | Systemic, Analytical, Neutral | Family systems theory for relationship patterns | Client |
+
+**Special Tools:**
+
+| Tool | Function | Access |
+|------|----------|--------|
+| **Gloria Interview** | Structured Topic Interviews | Conducts structured interviews on specific topics (ideas, projects, decisions) and generates a polished transcript/summary. | Registered |
+| **Transcript Evaluation** | Communication Analysis | Upload a transcript to receive an AI analysis of communication patterns, goal alignment, and blind spots. | Client |
 
 **Display:**
 - Coach cards with avatar, name, style tags, and description
@@ -223,7 +312,28 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 
 ---
 
-### 8. Gamification & Progress
+### 8. Gloria Interview Flow (New in v1.9.6)
+*Structured topic exploration*
+
+**Purpose:**
+- Conducts focused interviews on specific topics (e.g., "My new business idea", "Project X strategy")
+- No coaching, advice, or judgment — purely inquisitive
+- Generates a clean, structured output
+
+**Flow:**
+1. **Select "Gloria Interview"** from the dashboard.
+2. **Define Topic:** State the topic, desired duration, and any specific focus.
+3. **Interview Session:** Gloria asks structured questions to explore the topic depth.
+4. **End Interview:** Click "End Session".
+5. **Interview Transcript View:**
+   - **Summary:** High-level overview of the discussed topic.
+   - **Interview Setup:** Extracted metadata (Topic, Duration, Focus).
+   - **Smoothed Transcript:** Grammatically corrected, readable version of the dialogue (labels: "Interviewer" / "User").
+6. **Export:** Download the interview as a Markdown (`.md`) file.
+
+---
+
+### 9. Gamification & Progress
 *Motivation through achievement*
 
 **Gamification Bar** (always visible at top):
@@ -256,7 +366,7 @@ Meaningful Conversations provides AI-powered coaching through multiple specializ
 
 ---
 
-### 9. Personality Profile (Registered Users)
+### 10. Personality Profile (Registered Users)
 *Personalized coaching experience*
 
 **Access:** Menu (hamburger) → "Personality Profile"
@@ -297,7 +407,7 @@ The Riemann-Thomann test captures three contexts (Beruf/Work, Privat/Private, Se
 
 ---
 
-### 10. Account Management (Registered Users)
+### 11. Account Management (Registered Users)
 *Privacy, data control, and settings*
 
 **Access:** Menu (hamburger) → "Account Management"
@@ -317,18 +427,18 @@ The Riemann-Thomann test captures three contexts (Beruf/Work, Privat/Private, Se
 
 ---
 
-### 11. PWA Installation
+### 12. PWA Installation
 *App-like experience on any device*
 
 **iOS (Safari):** Share → "Add to Home Screen"
 **Android (Chrome):** Menu → "Add to Home Screen" / "Install App"
 **Desktop:** Install icon in address bar
 
-**Benefits:** Quick access, full-screen mode, faster loading
+**Benefits:** Quick access, full-screen mode, faster loading, offline capabilities.
 
 ---
 
-### 12. Admin Console (Admin Users Only)
+### 13. Admin Console (Admin Users Only)
 *System management and analytics*
 
 **Tabs:**
@@ -364,35 +474,6 @@ The Riemann-Thomann test captures three contexts (Beruf/Work, Privat/Private, Se
 
 ---
 
-## Key User Flows Summary
-
-### Guest User Journey:
-```
-Landing → Continue as Guest → Create/Upload Context → Select Coach → Chat → Review → Download File → Exit
-```
-
-### New Registered User Journey:
-```
-Landing → Register → Verify Email → Create Context → PII Warning → Select Coach → Chat → Review → Auto-Save
-```
-
-### Returning Registered User Journey:
-```
-Landing → Login → Welcome Back → Context Choice → Select Coach → Chat → Review → Auto-Save
-```
-
-### Personality-Enhanced Journey:
-```
-... → Personality Profile → Take Test(s) → Answer Golden Questions → Enable DPC/DPFL → Chat → Review → Comfort Check → Profile Refinement → Auto-Save
-```
-
-### Admin User Journey:
-```
-Landing → Login → Admin Console → [Manage Users / Analytics / API Usage / Provider Management] → Return to App
-```
-
----
-
 ## Critical Moments
 
 ### High-Impact Screens:
@@ -402,6 +483,7 @@ Landing → Login → Admin Console → [Manage Users / Analytics / API Usage / 
 4. Achievement unlock (motivation)
 5. Personality Signature reveal (personal insight)
 6. Profile Refinement suggestion (adaptive coaching)
+7. **Gloria Interview Transcript View (new in v1.9.6)**
 
 ### Error States:
 - No internet connection
@@ -419,4 +501,4 @@ Landing → Login → Admin Console → [Manage Users / Analytics / API Usage / 
 ---
 
 **Last Updated**: February 2026
-**Version**: 1.8.2
+**Version**: 1.9.6

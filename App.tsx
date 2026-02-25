@@ -57,6 +57,7 @@ import OceanOnboarding from './components/OceanOnboarding';
 import ProfileHintView from './components/ProfileHintView';
 import IntentPickerView, { type UserIntent } from './components/IntentPickerView';
 import NamePromptView from './components/NamePromptView';
+import { getQuestionnaireStructure } from './components/questionnaireStructure';
 import type { Big5Result } from './utils/bfi2';
 import LifeContextEditorView from './components/LifeContextEditorView';
 import TranscriptPreQuestions from './components/TranscriptPreQuestions';
@@ -462,15 +463,29 @@ const App: React.FC = () => {
     
     // --- NAVIGATION & STATE HANDLERS ---
 
-    const isMinimalLifeContext = (lc: string): boolean => {
-        if (!lc) return true;
-        const lines = lc.split('\n');
-        let filledFields = 0;
-        for (const line of lines) {
-            const match = line.match(/^\*\*[^*]+\*\*:\s*(.+)/);
-            if (match && match[1].trim()) filledFields++;
+    const buildEmptyLifeContextTemplate = (name: string): string => {
+        const structure = getQuestionnaireStructure(t);
+        let md = `# ${t('questionnaire_main_title')}\n\n`;
+        for (const section of structure) {
+            md += `## ${section.title}\n`;
+            md += section.description ? `*${section.description}*\n\n` : '\n';
+            if (section.fields) {
+                for (const field of section.fields) {
+                    const value = field.id === 'profile_name' ? name : '';
+                    md += field.label ? `**${field.label}**: ${value}\n\n` : '\n\n';
+                }
+            }
+            if (section.subSections) {
+                for (const sub of section.subSections) {
+                    md += `### ${sub.title}\n`;
+                    md += sub.description ? `*${sub.description}*\n\n` : '\n';
+                    for (const field of sub.fields) {
+                        md += field.label ? `**${field.label}**: \n\n` : '\n\n';
+                    }
+                }
+            }
         }
-        return filledFields <= 1;
+        return md;
     };
 
     const loadProfileInfo = async () => {
@@ -535,7 +550,7 @@ const App: React.FC = () => {
         const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
         if (!pickerDisabled) {
             setView('intentPicker');
-        } else if (!hasContext || isMinimalLifeContext(lifeContext)) {
+        } else if (!hasContext) {
             setView('namePrompt');
         } else if (!profileExists) {
             setPostOceanRoute('intent');
@@ -716,7 +731,7 @@ const App: React.FC = () => {
         else if (intent === 'coaching' || intent === 'lifecoaching') setHighlightSection('topicSearch');
         else setHighlightSection(null);
 
-        // Guest flow: always name prompt (with skip), then landing
+        // Guest flow
         if (!currentUser) {
             if (!localStorage.getItem('guestName')) {
                 setView('namePrompt');
@@ -726,13 +741,13 @@ const App: React.FC = () => {
             return;
         }
 
-        // Registered user: no/minimal LC → always name prompt first
-        if (!lifeContext || isMinimalLifeContext(lifeContext)) {
+        // Registered user: no LC → name prompt first
+        if (!lifeContext) {
             setView('namePrompt');
             return;
         }
 
-        // Registered user: substantial LC but no profile → OCEAN first
+        // Registered user: LC exists but no profile → OCEAN first
         if (!hasPersonalityProfile) {
             setPostOceanRoute('intent');
             setView('oceanOnboarding');
@@ -1580,7 +1595,7 @@ const App: React.FC = () => {
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
             case 'intentPicker': return <IntentPickerView onSelect={handleIntentSelected} isGuest={!currentUser} safeAreaTop={iosSafeAreaTop} onSkipPermanently={() => {
                 try { localStorage.setItem('intentPickerDisabled', 'true'); } catch {}
-                if (!lifeContext || isMinimalLifeContext(lifeContext)) {
+                if (!lifeContext) {
                     setView('namePrompt');
                 } else if (!hasPersonalityProfile) {
                     setPostOceanRoute('intent');
@@ -1591,11 +1606,11 @@ const App: React.FC = () => {
             }} />;
             case 'namePrompt': return <NamePromptView
                 onContinue={(name) => {
-                    const template = language === 'de'
-                        ? `# Lebenskontext\n\n## 👤 Kernprofil\n*Allgemeine, stabile Informationen über mich.*\n\n**Ich bin...**: ${name}\n\n**Land / Bundesland**: \n\n**Grundwerte**: \n\n**Allgemeine Stimmung**: \n`
-                        : `# My Life Context\n\n## 👤 Core Profile\n*High-level, stable information about me.*\n\n**I am...**: ${name}\n\n**Country / State**: \n\n**Core Values**: \n\n**General Sentiment**: \n`;
-                    if (currentUser) {
-                        setLifeContext(template);
+                    const template = buildEmptyLifeContextTemplate(name);
+                    setQuestionnaireAnswers(prev => ({ ...prev, profile_name: name }));
+                    setLifeContext(template);
+                    if (currentUser && encryptionKey) {
+                        userService.saveUserData(template, serializeGamificationState(gamificationState), encryptionKey).catch(e => console.error('Failed to save initial LC:', e));
                         if (!hasPersonalityProfile) {
                             setPostOceanRoute('landing');
                             setView('oceanOnboarding');
@@ -1603,7 +1618,6 @@ const App: React.FC = () => {
                             setView('landing');
                         }
                     } else {
-                        setLifeContext(template);
                         setView('landing');
                     }
                 }}
