@@ -60,7 +60,9 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     useEffect(() => {
         if (topicTextareaRef.current) {
             topicTextareaRef.current.style.height = 'auto';
-            topicTextareaRef.current.style.height = `${topicTextareaRef.current.scrollHeight}px`;
+            const maxPx = 56; // max-h-14 = 3.5rem = ~2 lines
+            topicTextareaRef.current.style.height = `${Math.min(topicTextareaRef.current.scrollHeight, maxPx)}px`;
+            topicTextareaRef.current.scrollTop = topicTextareaRef.current.scrollHeight;
         }
     }, [topic]);
 
@@ -222,7 +224,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 onChange={e => setTopic(e.target.value)}
                                 placeholder={t('botSearch_placeholder')}
                             rows={1}
-                            className="flex-1 w-0 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-auto max-h-40 focus:outline-none"
+                            className="flex-1 w-0 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-scroll max-h-14 focus:outline-none"
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
