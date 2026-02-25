@@ -252,7 +252,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 </div>
 
                 {/* Bottom row: hint text centered */}
-                <div className="text-xs font-semibold text-accent-tertiary/70 dark:text-accent-primary/60 text-center pt-0.5">
+                <div className="text-xs font-semibold text-content-subtle text-center pt-0.5">
                     {t('botSearch_section_title')}
                 </div>
                 </div>
@@ -401,7 +401,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         setTimeout(() => {
           setActiveHighlight(null);
           onHighlightDone?.();
-        }, 2500);
+        }, 5000);
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -520,7 +520,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
       </div>
 
       {currentUser && (
-        <div ref={topicSearchRef} className={`transition-all duration-700 rounded-2xl ${activeHighlight === 'topicSearch' ? 'ring-2 ring-accent-primary/60 shadow-lg shadow-accent-primary/10' : ''}`}>
+        <div ref={topicSearchRef} className={`transition-all duration-700 rounded-2xl ${activeHighlight === 'topicSearch' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
           <TopicSearchSection
             bots={bots}
             onStartSessionWithPrompt={onStartSessionWithPrompt}
@@ -533,7 +533,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
 
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}
-        <section ref={managementRef} className={`w-full max-w-6xl mx-auto transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-2 ring-accent-primary/60 shadow-lg shadow-accent-primary/10' : ''}`}>
+        <section ref={managementRef} className={`w-full max-w-6xl mx-auto transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
           {/* Section Divider */}
           <div className="mb-6">
             <div className="flex items-center gap-4">
