@@ -20,7 +20,7 @@ const SteeringWheelLoader: React.FC<LoaderProps> = ({ className = '', size = 'md
         viewBox="0 0 24 24"
         animate={{ rotate: 360 }}
         transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
-        className="fill-brand-base"
+        className="fill-accent-primary"
       >
         {[0, 45, 90, 135].map(angle => (
           <g key={angle} transform={`rotate(${angle} 12 12)`}>

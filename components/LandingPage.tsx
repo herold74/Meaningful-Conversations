@@ -12,6 +12,7 @@ import AutumnLeaves from './AutumnLeaves';
 import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 import { brand } from '../config/brand';
 import Button from './shared/Button';
+import { isNativeIOS } from '../utils/platformDetection';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -26,6 +27,7 @@ const removeGamificationKey = (text: string) => {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, existingContext }) => {
   const { t, language } = useLocalization();
+  const native = isNativeIOS();
   const [fileContent, setFileContent] = useState<string>(existingContext || '');
   const [fileName, setFileName] = useState<string>(existingContext ? (language === 'de' ? 'Lebenskontext.md' : 'Life-Context.md') : '');
   const [error, setError] = useState<string>('');
@@ -121,9 +123,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
       {showSpring && <SpringBlossoms lightModeOnly={true} />}
       {showSummer && <SummerButterflies lightModeOnly={true} />}
       {showAutumn && <AutumnLeaves />}
-      <div className="w-full max-w-3xl p-6 sm:p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
-        <h1 className="text-3xl font-semibold text-content-primary tracking-tight">{language === 'de' ? brand.appNameDe : brand.appName}</h1>
-        <p className="text-sm md:text-base text-content-secondary leading-relaxed">
+      <div className={`w-full max-w-3xl ${native ? 'p-4 space-y-4' : 'p-6 sm:p-8 space-y-6'} bg-background-secondary border border-border-primary rounded-card shadow-card-elevated`}>
+        <h1 className={`${native ? 'text-2xl' : 'text-3xl'} font-semibold text-content-primary tracking-tight`}>{language === 'de' ? brand.appNameDe : brand.appName}</h1>
+        <p className={`${native ? 'text-xs' : 'text-sm md:text-base'} text-content-secondary leading-relaxed`}>
           {t('landing_subtitle')}
         </p>
         
@@ -131,7 +133,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           {!fileContent ? (
             <label 
               htmlFor="file-upload" 
-              className={`relative block w-full p-8 text-center border-2 transition-colors duration-300 rounded-lg cursor-pointer group
+              className={`relative block w-full ${native ? 'p-4' : 'p-8'} text-center border-2 transition-colors duration-300 rounded-lg cursor-pointer group
                 ${isDragging 
                   ? 'border-solid bg-status-success-background dark:bg-status-success-background border-status-success-border' 
                   : 'bg-background-primary dark:bg-background-primary/50 border-border-secondary dark:border-border-primary hover:border-accent-primary dark:hover:border-accent-primary shadow-inner'
@@ -142,23 +144,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               onDragOver={handleDragOver}
               onDrop={handleDrop}
             >
-              <div className="flex flex-col items-center justify-center space-y-4">
+              <div className={`flex ${native ? 'flex-row items-center gap-3' : 'flex-col items-center justify-center space-y-4'}`}>
                 {isDragging ? (
                   <>
-                    <UploadIcon className="w-16 h-16 text-accent-primary" />
-                    <span className="text-lg font-semibold text-status-success-foreground">
+                    <UploadIcon className={`${native ? 'w-8 h-8' : 'w-16 h-16'} text-accent-primary`} />
+                    <span className={`${native ? 'text-sm' : 'text-lg'} font-semibold text-status-success-foreground`}>
                       {t('landing_drop_prompt')}
                     </span>
                   </>
                 ) : (
                   <>
-                    <FileTextIcon className="w-16 h-16 text-content-subtle transition-colors group-hover:text-accent-primary" />
-                    <span className="text-xl font-bold text-content-primary">
-                      {t('landing_upload_title')}
-                    </span>
-                    <span className="text-sm text-content-secondary">
-                      {t('landing_dragDrop')}
-                    </span>
+                    <FileTextIcon className={`${native ? 'w-8 h-8 flex-shrink-0' : 'w-16 h-16'} text-content-subtle transition-colors group-hover:text-accent-primary`} />
+                    <div className={native ? 'text-left' : ''}>
+                      <span className={`${native ? 'text-sm' : 'text-xl'} font-bold text-content-primary`}>
+                        {t('landing_upload_title')}
+                      </span>
+                      {!native && (
+                        <span className="text-sm text-content-secondary block mt-1">
+                          {t('landing_dragDrop')}
+                        </span>
+                      )}
+                    </div>
                   </>
                 )}
               </div>

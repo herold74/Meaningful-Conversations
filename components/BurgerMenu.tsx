@@ -25,9 +25,10 @@ interface BurgerMenuProps {
     onNavigate: (view: NavView) => void;
     onLogout: () => void;
     onStartOver: () => void;
+    showProfileBadge?: boolean;
 }
 
-const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver }) => {
+const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver, showProfileBadge }) => {
     const { t } = useLocalization();
     useModalOpen(isOpen);
     
@@ -113,7 +114,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     {currentUser && (
                         <>
                             <MenuItem icon={UserIcon} text={t('menu_account_management')} onClick={() => onNavigate('accountManagement')} />
-                            <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} />
+                            <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} badge={showProfileBadge} />
                             {!currentUser.isClient && !currentUser.isAdmin && (
                                 <MenuItem icon={ShoppingBagIcon} text={t('menu_upgrade')} onClick={() => onNavigate('upgrade')} />
                             )}
@@ -162,7 +163,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
     );
 };
 
-const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void, specialColor?: string, customText?: React.ReactNode }> = ({ icon: Icon, text, onClick, specialColor, customText }) => (
+const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () => void, specialColor?: string, customText?: React.ReactNode, badge?: boolean }> = ({ icon: Icon, text, onClick, specialColor, customText, badge }) => (
     <button 
         onClick={onClick} 
         className={`w-full flex items-center gap-4 px-4 py-3 text-left rounded-md transition-colors ${
@@ -172,7 +173,8 @@ const MenuItem: React.FC<{ icon: React.ElementType, text: string, onClick: () =>
         }`}
     >
         <Icon className={`w-6 h-6 ${specialColor ? '' : 'text-content-subtle'}`} />
-        <span className="font-semibold">{customText ?? text}</span>
+        <span className="font-semibold flex-1">{customText ?? text}</span>
+        {badge && <span className="w-2.5 h-2.5 rounded-full bg-accent-primary flex-shrink-0" />}
     </button>
 );
 

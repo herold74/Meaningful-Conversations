@@ -7,6 +7,7 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 interface OceanOnboardingProps {
   onComplete: (result: Big5Result) => void;
   onSkip: () => void;
+  safeAreaTop?: number;
 }
 
 const LIKERT_VALUES = [1, 2, 3, 4, 5] as const;
@@ -25,7 +26,7 @@ const INTRO_BENEFITS = [
   { icon: '📈', key: 'ocean_onboarding_benefit_3' },
 ] as const;
 
-const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip }) => {
+const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
   const questions = useMemo(() => getBfi2Items('xs', t), [t]);
   const total = questions.length;
@@ -79,7 +80,7 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip })
   // --- INTRO SCREEN ---
   if (phase === 'intro') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 max-w-lg mx-auto">
+      <div className="flex flex-col items-center justify-center min-h-[80dvh] px-6 max-w-lg mx-auto" style={{ paddingTop: Math.max(32, safeAreaTop) }}>
         <motion.div
           initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -174,7 +175,7 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip })
 
   // --- QUESTIONS SCREEN ---
   return (
-    <div className="flex flex-col min-h-[80vh] px-4 sm:px-6 pt-8 pb-4 max-w-lg mx-auto relative">
+    <div className="flex flex-col min-h-[80dvh] px-4 sm:px-6 pb-4 max-w-lg mx-auto relative" style={{ paddingTop: Math.max(32, safeAreaTop) }}>
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-xl font-bold text-content-primary mb-1">

@@ -343,7 +343,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {/* Native IAP for iOS */}
       {isNativeIOS() && (
         <section className="mb-8">
-          <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} showBotUnlocks={true} />
+          <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} showBotUnlocks={true} skipAutoRestore={true} />
         </section>
       )}
 
