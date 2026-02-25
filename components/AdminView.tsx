@@ -237,6 +237,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [activeTab, setActiveTab] = useState<AdminTab>('users');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [startupPref, setStartupPref] = useState(() => localStorage.getItem('adminStartupPref') || 'admin');
     const [isUsersExpanded, setIsUsersExpanded] = useState(false);
     const [isNewsletterExpanded, setIsNewsletterExpanded] = useState(false);
     const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
@@ -1587,8 +1588,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                 <div className="mt-2 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <span>{t('admin_startup_label')}</span>
                     <select
-                        value={localStorage.getItem('adminStartupPref') || 'admin'}
-                        onChange={e => { localStorage.setItem('adminStartupPref', e.target.value); }}
+                        value={startupPref}
+                        onChange={e => { const v = e.target.value; setStartupPref(v); localStorage.setItem('adminStartupPref', v); }}
                         className="px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100"
                     >
                         <option value="admin">{t('admin_startup_admin')}</option>
