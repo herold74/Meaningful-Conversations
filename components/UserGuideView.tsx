@@ -24,15 +24,28 @@ Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Sch
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
-Wenn Sie die App zum ersten Mal öffnen, haben Sie die Wahl, wie Sie beginnen möchten.
+Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
 
-### 1.1 Gast vs. Registrierter Benutzer
+### 1.1 Intent Picker & Name
+
+Beim Start erscheint der **Intent Picker** -- eine Auswahlseite mit drei Optionen:
+- **Kommunikation** -- Leitet Sie zum Bereich Management & Kommunikation (Nobody, Gloria)
+- **Coaching** -- Leitet Sie zum Coaching-Bereich (Max, Ava, Kenji, Chloe)
+- **Begleitendes Coaching** -- Leitet Sie zum Exklusiv-Bereich (Rob, Victor -- nur für Klienten)
+
+Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird.
+
+**Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt überspringen.
+
+**Hinweis:** Registrierte Benutzer können den Intent Picker im Menü (☰) deaktivieren. Admins und Entwickler können in der Admin-Ansicht ihre bevorzugte Startseite einstellen (Intent Picker, Coach-Auswahl oder Admin Panel).
+
+### 1.2 Gast vs. Registrierter Benutzer
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur in Ihrem Browser verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
 - **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
 
-### 1.2 Ihre erste Lebenskontext-Datei erstellen
+### 1.3 Ihre erste Lebenskontext-Datei erstellen
 Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Sie drei Möglichkeiten haben:
 
 - **Option A: Mit einem Fragebogen erstellen**
@@ -48,7 +61,7 @@ Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Si
 - **Option C: Eine vorhandene Datei hochladen**
   - **Wenn Sie auf den Upload-Bereich klicken (oder eine Datei per Drag & Drop ziehen)**, können Sie eine \`.md\`-Datei von Ihrem Gerät auswählen. Dies ist die Methode, die Gastbenutzer verwenden, um ihren Fortschritt von einer früheren Sitzung fortzusetzen.
 
-### 1.3 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
+### 1.4 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
 Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehren, sehen Sie den Bildschirm **Kontextauswahl**.
 - **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
 - **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
@@ -90,7 +103,10 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
 | **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, alle Features |
 
-**So upgraden Sie:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe in verschiedenen Laufzeiten (1, 3 oder 12 Monate) sowie Einzelcoach-Freischaltungen. Alternativ können Sie unter **Kontoverwaltung → "Code einlösen"** einen Zugangscode eingeben.
+**So upgraden Sie:**
+- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
+- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
+- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben (auf beiden Plattformen).
 
 </div>
 </details>
@@ -98,20 +114,30 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App zum Homescreen hinzufügen</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
-Die ${brand.appName} App ist eine Progressive Web App (PWA) und kann wie eine native App auf Ihrem Gerät installiert werden. So haben Sie schnellen Zugriff und ein App-ähnliches Erlebnis.
+Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
 
-### 3.1 Installation auf iOS (iPhone/iPad)
+### 3.1 Native iOS App (empfohlen für iPhone/iPad)
 
+Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nach "${brand.appName}" oder nutzen Sie den direkten Link auf unserer Website.
+
+**Vorteile der nativen App:**
+- Optimiert für iOS mit nativer Performance
+- In-App Purchases direkt über Ihr Apple-Konto
+- Hochwertige Apple-Sprachausgabe (Enhanced/Premium-Stimmen)
+- Native Spracherkennung
+
+### 3.2 Installation als PWA auf iOS (Alternative)
+
+Falls Sie die Web-Version bevorzugen:
 1. Öffnen Sie die App in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
 2. Tippen Sie auf das **Teilen-Symbol** (das Quadrat mit dem Pfeil nach oben) in der unteren Leiste.
 3. Scrollen Sie nach unten und tippen Sie auf **"Zum Home-Bildschirm"**.
-4. Geben Sie der App einen Namen (z.B. "Sinnstiftende Gespräche") und tippen Sie auf **"Hinzufügen"**.
-5. Die App erscheint nun als Icon auf Ihrem Homescreen und öffnet sich im Vollbildmodus ohne Browser-Leiste.
+4. Geben Sie der App einen Namen und tippen Sie auf **"Hinzufügen"**.
 
-### 3.2 Installation auf Android
+### 3.3 Installation auf Android
 
 1. Öffnen Sie die App in **Chrome** oder einem anderen Browser.
 2. Tippen Sie auf das **Menü-Symbol** (drei Punkte) oben rechts.
@@ -119,7 +145,7 @@ Die ${brand.appName} App ist eine Progressive Web App (PWA) und kann wie eine na
 4. Bestätigen Sie mit **"Hinzufügen"** oder **"Installieren"**.
 5. Die App erscheint nun als Icon auf Ihrem Homescreen.
 
-### 3.3 Installation auf Desktop (Windows/Mac/Linux)
+### 3.4 Installation auf Desktop (Windows/Mac/Linux)
 
 1. Öffnen Sie die App in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
 2. Klicken Sie auf das **Install-Symbol** (⊕) in der Adressleiste oder das **Menü** (drei Punkte).
@@ -780,15 +806,28 @@ Welcome to ${brand.appName}! This guide will walk you through the app step-by-st
 <summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
-When you first open the app, you'll have a choice of how to begin.
+When you first open the app, you'll be guided through a brief onboarding process.
 
-### 1.1 Guest vs. Registered User
+### 1.1 Intent Picker & Name
+
+On launch, the **Intent Picker** appears -- a selection screen with three options:
+- **Communication** -- Routes you to the Management & Communication section (Nobody, Gloria)
+- **Coaching** -- Routes you to the Coaching section (Max, Ava, Kenji, Chloe)
+- **Augmented Coaching** -- Routes you to the Exclusive section (Rob, Victor -- Client only)
+
+Your chosen intent determines which section is highlighted in the coach selection screen.
+
+**Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. You can skip this step.
+
+**Note:** Registered users can disable the Intent Picker from the menu (☰). Admins and Developers can set their preferred startup view in the Admin Panel (Intent Picker, Coach Selection, or Admin Panel).
+
+### 1.2 Guest vs. Registered User
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only in your browser. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
 - **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
 **Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
 
-### 1.2 Creating Your First Life Context
+### 1.3 Creating Your First Life Context
 After making your choice, you'll arrive at the landing page with three options:
 
 - **Option A: Create with a Questionnaire**
@@ -804,7 +843,7 @@ After making your choice, you'll arrive at the landing page with three options:
 - **Option C: Upload an Existing File**
   - **If you click the upload area (or drag and drop a file),** you can select a \`.md\` file from your device. This is the method guest users will use to continue their progress from a previous session.
 
-### 1.3 Starting a New Session (for Returning Users)
+### 1.4 Starting a New Session (for Returning Users)
 If you are a registered user returning with a saved context, you will see the **Context Choice** screen.
 - **Continue with Saved Context:** Loads your last state and takes you to coach selection.
 - **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
@@ -846,7 +885,10 @@ The app offers four access tiers with increasing functionality:
 | **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
 | **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, all features |
 
-**How to upgrade:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes in various durations (1, 3, or 12 months) as well as individual coach unlocks. Alternatively, go to **Account Management → "Redeem Code"** to enter an access code.
+**How to upgrade:**
+- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
+- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes and individual coach unlocks via PayPal.
+- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code (on both platforms).
 
 </div>
 </details>
@@ -854,20 +896,30 @@ The app offers four access tiers with increasing functionality:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Adding the App to Your Home Screen</summary>
+<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
-The ${brand.appName} app is a Progressive Web App (PWA) and can be installed like a native app on your device. This gives you quick access and an app-like experience.
+The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
 
-### 3.1 Installation on iOS (iPhone/iPad)
+### 3.1 Native iOS App (recommended for iPhone/iPad)
 
+The app is available as a native iOS app on the **Apple App Store**. Search for "${brand.appName}" or use the direct link on our website.
+
+**Benefits of the native app:**
+- Optimized for iOS with native performance
+- In-App Purchases directly through your Apple account
+- High-quality Apple voice output (Enhanced/Premium voices)
+- Native speech recognition
+
+### 3.2 PWA Installation on iOS (Alternative)
+
+If you prefer the web version:
 1. Open the app in **Safari** (important: must be Safari, Chrome won't work).
 2. Tap the **Share icon** (the square with an arrow pointing up) in the bottom bar.
 3. Scroll down and tap **"Add to Home Screen"**.
-4. Give the app a name (e.g., "${brand.appName}") and tap **"Add"**.
-5. The app will now appear as an icon on your home screen and open in full-screen mode without the browser bar.
+4. Give the app a name and tap **"Add"**.
 
-### 3.2 Installation on Android
+### 3.3 Installation on Android
 
 1. Open the app in **Chrome** or another browser.
 2. Tap the **Menu icon** (three dots) in the top right.
@@ -875,7 +927,7 @@ The ${brand.appName} app is a Progressive Web App (PWA) and can be installed lik
 4. Confirm with **"Add"** or **"Install"**.
 5. The app will now appear as an icon on your home screen.
 
-### 3.3 Installation on Desktop (Windows/Mac/Linux)
+### 3.4 Installation on Desktop (Windows/Mac/Linux)
 
 1. Open the app in **Chrome**, **Edge**, or another supported browser.
 2. Click the **Install icon** (⊕) in the address bar or the **Menu** (three dots).

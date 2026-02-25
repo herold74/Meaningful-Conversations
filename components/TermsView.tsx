@@ -14,10 +14,14 @@ const de_markdown = `Diese Nutzungsbedingungen ("Bedingungen") regeln Ihre Nutzu
 Der Dienst bietet Zugang zu KI-gesteuerten Coaching-Gesprächen, die zur Selbstreflexion und persönlichen Weiterentwicklung dienen. Benutzer können ihre Gespräche mithilfe einer "Lebenskontext"-Datei personalisieren. Der Dienst ist in zwei Modi verfügbar:
 
 - **Gastmodus:** Die Datenverarbeitung erfolgt ausschließlich lokal im Browser des Nutzers. Der Nutzer ist für das Speichern und Verwalten seiner Daten verantwortlich.
-- **Registrierter Modus:** Bietet zusätzliche Funktionen wie die automatische Speicherung des Lebenskontextes, der Ende-zu-Ende-verschlüsselt wird.
+- **Registrierter Modus:** Bietet zusätzliche Funktionen wie die automatische Speicherung des Lebenskontextes und des Persönlichkeitsprofils, die Ende-zu-Ende-verschlüsselt werden.
+
+Der Dienst ist als Web-Anwendung und als native iOS-App verfügbar. Es gibt vier Zugangsstufen: Gast (kostenlos, lokal), Registriert (kostenloses Konto), Premium (kostenpflichtiges Upgrade) und Klient (Zugangscode von ${brand.providerName}). Details zu den Zugangsstufen finden Sie im Benutzerhandbuch.
 
 ## 2. Benutzerkonten und Datensicherheit
-**Registrierte Benutzer:** Sie sind für die Geheimhaltung Ihres Passworts verantwortlich. Aufgrund der Ende-zu-Ende-Verschlüsselung haben wir keinen Zugriff auf Ihr Passwort oder Ihre verschlüsselten "Lebenskontext"-Daten. **Wenn Sie Ihr Passwort verlieren oder zurücksetzen, gehen Ihre verschlüsselten Daten dauerhaft und unwiederbringlich verloren.** Es liegt in Ihrer Verantwortung, regelmäßig Sicherungskopien Ihrer Daten zu erstellen, indem Sie die Datei herunterladen.
+**Registrierte Benutzer:** Sie sind für die Geheimhaltung Ihres Passworts verantwortlich. Aufgrund der Ende-zu-Ende-Verschlüsselung haben wir keinen Zugriff auf Ihr Passwort oder Ihre verschlüsselten Daten (Lebenskontext und Persönlichkeitsprofil). **Wenn Sie Ihr Passwort verlieren oder zurücksetzen, gehen Ihre verschlüsselten Daten dauerhaft und unwiederbringlich verloren.** Es liegt in Ihrer Verantwortung, regelmäßig Sicherungskopien Ihrer Daten zu erstellen, indem Sie die Datei herunterladen.
+
+**In-App-Käufe (iOS):** Käufe über Apple In-App Purchase werden gemäß den Bedingungen von Apple abgewickelt. Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ablauf der aktuellen Laufzeit gekündigt werden. Die Verwaltung und Kündigung von Abonnements erfolgt über Ihre Apple-ID-Einstellungen.
 
 **Gastbenutzer:** Sie sind allein für das Sichern und Verwalten Ihrer "Lebenskontext"-Datei verantwortlich, da keine Daten auf unseren Servern gespeichert werden.
 
@@ -39,10 +43,14 @@ const en_markdown = `These Terms of Service ("Terms") govern your use of the "${
 The Service provides access to AI-powered coaching conversations intended for self-reflection and personal development. Users can personalize their sessions using a "Life Context" file. The service is available in two modes:
 
 - **Guest Mode:** Data processing occurs entirely locally in the user's browser. The user is responsible for saving and managing their data.
-- **Registered Mode:** Offers additional features, including automatic saving of the Life Context, which is end-to-end encrypted.
+- **Registered Mode:** Offers additional features, including automatic saving of the Life Context and Personality Profile, both of which are end-to-end encrypted.
+
+The Service is available as a web application and as a native iOS app. There are four access tiers: Guest (free, local), Registered (free account), Premium (paid upgrade), and Client (access code from ${brand.providerName}). Details about the access tiers can be found in the User Guide.
 
 ## 2. User Accounts and Data Security
-**Registered Users:** You are responsible for maintaining the confidentiality of your password. Due to end-to-end encryption, we have no access to your password or your encrypted "Life Context" data. **If you lose or reset your password, your encrypted data will be permanently and irrecoverably lost.** It is your responsibility to make regular backups of your data by downloading the file.
+**Registered Users:** You are responsible for maintaining the confidentiality of your password. Due to end-to-end encryption, we have no access to your password or your encrypted data (Life Context and Personality Profile). **If you lose or reset your password, your encrypted data will be permanently and irrecoverably lost.** It is your responsibility to make regular backups of your data by downloading the file.
+
+**In-App Purchases (iOS):** Purchases via Apple In-App Purchase are processed in accordance with Apple's terms. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Management and cancellation of subscriptions is done through your Apple ID settings.
 
 **Guest Users:** You are solely responsible for saving and managing your "Life Context" file, as no data is stored on our servers.
 

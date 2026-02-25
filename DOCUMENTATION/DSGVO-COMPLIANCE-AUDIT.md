@@ -1,9 +1,9 @@
 # DSGVO-KONFORMITAETSPRUEFUNG
 ## Meaningful Conversations App
 
-**Pruefungsdatum:** 15. Februar 2026  
-**Gepruefte Version:** 1.8.8  
-**Vorherige Pruefung:** 10. Februar 2026 (v1.8.4)  
+**Pruefungsdatum:** 25. Februar 2026  
+**Gepruefte Version:** 1.9.7  
+**Vorherige Pruefung:** 15. Februar 2026 (v1.8.8)  
 **Betreiber-Standort:** Oesterreich  
 **Server-Standort:** Hetzner, Deutschland (EU)  
 **Zustaendige Behoerde:** Datenschutzbehoerde Oesterreich (https://www.dsb.gv.at/)
@@ -100,6 +100,9 @@
   - E-Mail-Merken (`rememberedEmail`, nur bei aktiver Checkbox)
   - UI-Einstellungen (Dark Mode, Farbthema)
   - TTS-Einstellungen (Stimmpraeferenzen)
+  - **NEU (v1.9.7):** Nutzungsintent (`userIntent`) — kein Personenbezug
+  - **NEU (v1.9.7):** Gastname (`guestName`) — optional, verbleibt auf Geraet
+  - **NEU (v1.9.7):** UI-Praeferenzen (`intentPickerDisabled`, `profileHintDisabled`, `adminStartupPref`) — technisch notwendig
 - **KEIN Cookie-Banner erforderlich** (ePrivacy-konform)
 - Transparent in Datenschutzerklaerung dokumentiert
 
@@ -249,6 +252,48 @@
   - Gleiche Pseudonymisierung wie DPC/DPFL (keine Identifikatoren an KI)
 - **Rechtsgrundlage:** Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)
 
+### 19. Apple In-App Purchase Integration (NEU v1.9.7)
+- **Status:** DSGVO-KONFORM
+- **Implementierung:** Februar 2026
+- **Architektur:**
+  - StoreKit 2 (iOS-nativ) fuer Kaufabwicklung
+  - RevenueCat SDK fuer Subscription-Management und Cross-Platform-Sync
+  - Server-seitige Receipt-Validierung via Apple App Store Server API
+- **Verarbeitete Daten:**
+  - **Apple:** Kauf-Transaktionen, Subscription-Status (verarbeitet durch Apple als eigenstaendiger Verantwortlicher)
+  - **RevenueCat:** User-ID (interne DB-ID, keine E-Mail), Kauf-Transaktionen, Entitlements
+  - **Eigener Server:** TransactionId, ProductId, CustomerEmail, Subscription-Status
+- **Pseudonymisierung:** RevenueCat erhaelt nur die interne User-ID, keine E-Mail oder personenbezogenen Daten
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. b DSGVO (Vertragserfullung — Kauf)
+- **Art. 28 DSGVO:** RevenueCat als Auftragsverarbeiter (DPA via RevenueCat Terms of Service)
+
+### 20. Intent Picker & Onboarding-Flow (NEU v1.9.7)
+- **Status:** DSGVO-KONFORM
+- **Implementierung:** Februar 2026
+- **Funktion:**
+  - Intent Picker: Nutzer waehlt Nutzungszweck (Kommunikation, Coaching, Begleitendes Coaching)
+  - Name Prompt: Gaeste und neue Nutzer werden nach ihrem Vornamen/Synonym gefragt
+  - OCEAN Onboarding: Optionaler Persoenlichkeitstest fuer neue registrierte Nutzer
+  - Profile Hint: Hinweis fuer Premium-Nutzer auf weitere Persoenlichkeitstests
+- **Datenverarbeitung:**
+  - **Intent:** Gespeichert in localStorage (`userIntent`) — kein Personenbezug
+  - **Gastname:** Gespeichert in localStorage (`guestName`) — verbleibt auf dem Geraet
+  - **Registrierter Nutzer Name:** Wird in den verschluesselten Lebenskontext integriert (E2EE)
+  - **Intent Picker Einstellungen:** localStorage (`intentPickerDisabled`, `profileHintDisabled`) — technisch notwendig
+- **Datenminimierung:** Skip-Option fuer Gastname; Intent-Auswahl kann deaktiviert werden
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. b DSGVO (Vertragserfullung — App-Funktionalitaet)
+
+### 21. Apple Privacy Manifest (NEU v1.9.7)
+- **Status:** IMPLEMENTIERT
+- **Datei:** `ios/App/App/PrivacyInfo.xcprivacy`
+- **Deklarationen:**
+  - **Kein Tracking** (`NSPrivacyTracking = false`)
+  - **Keine Tracking-Domains**
+  - **Genutzte APIs:** UserDefaults (CA92.1 — App-Funktionalitaet), File Timestamps (C617.1 — App-Funktionalitaet)
+  - **Erhobene Daten:** E-Mail (App-Funktionalitaet), Name (App-Funktionalitaet), Kaufhistorie (App-Funktionalitaet)
+- **Apple-Anforderung:** Pflicht seit Mai 2024 fuer App Store Submissions
+- **Art. 25 DSGVO:** Privacy by Design (transparente API-Deklaration)
+
 ---
 
 ## VERBLEIBENDE EMPFEHLUNGEN
@@ -260,6 +305,8 @@
   - **Spracherkennung:** Web Speech API (Browser) bzw. iOS native Spracherkennung; Sprachdaten werden lokal verarbeitet und in Text umgewandelt
   - **rememberedEmail:** Bei aktivierter "Merken"-Checkbox wird die E-Mail-Adresse im localStorage gespeichert
   - **Mistral AI:** Als zusaetzlicher KI-Anbieter (EU) explizit erwaehnen
+  - **NEU (v1.9.7): RevenueCat** als Auftragsverarbeiter fuer In-App Purchases erwaehnen (USA, durch SCCs abgesichert)
+  - **NEU (v1.9.7):** Gastname-Speicherung im localStorage erwaehnen
 
 ---
 
@@ -294,7 +341,27 @@
 - **DPA Coverage:** Automatisch durch Sinch Service Agreement
 - **Dokumentation:** `DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md`
 
-### 4. DiceBear (Bot-Avatare)
+### 4. RevenueCat (In-App Purchase Management) (NEU v1.9.7)
+- **Status:** DSGVO-KONFORM (DPA Coverage verified)
+- **Auftragsverarbeiter:** RevenueCat, Inc. (San Francisco, USA)
+- **DSGVO:** Art. 28, Art. 46 (SCCs fuer US-Datenuebermittlung)
+- **An RevenueCat gesendete Daten:**
+  - Interne User-ID (nicht E-Mail, nicht Name)
+  - Kauf-Transaktionen und Subscription-Status
+  - App-Bundle-ID, Plattform (iOS)
+  - **KEINE** E-Mail-Adressen, Namen oder Chatinhalte
+- **DPA Coverage:** Automatisch durch RevenueCat Terms of Service (inkl. SCCs)
+- **Datenspeicherung:** USA (durch Standard Contractual Clauses abgesichert)
+- **Hinweis:** Nutzer mit `aiRegionPreference: EU` koennen RevenueCat nicht umgehen, da es fuer iOS-Kaeufe erforderlich ist
+
+### 5. Apple App Store (In-App Purchase Verification)
+- **Status:** DSGVO-KONFORM
+- **Apple als eigenstaendiger Verantwortlicher** (nicht Auftragsverarbeiter)
+- **Verarbeitete Daten:** Kauf-Transaktionen, Apple-ID-bezogene Daten
+- **Apple handelt als eigenstaendiger Verantwortlicher** gemaess Apple's Privacy Policy
+- **Server Notifications:** Apple sendet Subscription-Events an unseren Server (TransactionId, ProductId, Status)
+
+### 6. DiceBear (Bot-Avatare)
 - **Status:** DSGVO-KONFORM (kein Auftragsverarbeiter)
 - **Details:**
   - Generiert SVG-Avatare fuer Bot-Auswahl
@@ -307,28 +374,25 @@
 
 ## ZUSAMMENFASSUNG
 
-### Konformitaets-Score: 100/100 (+1 Punkt seit letzter Pruefung)
+### Konformitaets-Score: 100/100 (unveraendert seit v1.8.8)
 
 | Kategorie | Status | Note | Aenderung |
 |-----------|--------|------|-----------|
 | Datensicherheit | Exzellent | A+ | -- |
-| Transparenz | Exzellent | A+ | Aufwaerts (vorher: A) |
-| Nutzerrechte | Exzellent | A+ | Aufwaerts (vorher: A) |
-| Drittanbieter | Vollstaendig dokumentiert | A | Aufwaerts (vorher: B) |
+| Transparenz | Exzellent | A+ | -- |
+| Nutzerrechte | Exzellent | A+ | -- |
+| Drittanbieter | Vollstaendig dokumentiert | A+ | Aufwaerts (vorher: A) |
 | Technische Massnahmen | Best-in-Class | A++ | -- |
-| Datenminimierung | Best-in-Class | A++ | Aufwaerts (vorher: A+) |
+| Datenminimierung | Best-in-Class | A++ | -- |
 
-**Grund fuer Score-Erhoehung (v1.7.0 -> v1.8.8):**
-- Vollstaendiger Datenexport (PersonalityProfile, SessionBehaviorLog, UserEvents hinzugefuegt)
-- Vollstaendige Account-Loeschung (ApiUsage, UserEvent, UpgradeCode jetzt beruecksichtigt)
-- Automatische Daten-Retention (ApiUsage: 12 Monate, UserEvent: 6 Monate)
-- Transcript-Entfernung aus Session Behavior Logs (weitere Datenminimierung)
-- Mistral AI als EU-Alternative mit DPA-Dokumentation
-- TTS-Service lokal ohne externe Drittanbieter
-- Alle Platzhalter in Datenschutzerklaerung/Impressum personalisiert
-- **NEU (v1.8.8):** Transcript Evaluation mit DSGVO-konformem Admin-Zugang
-- **NEU (v1.8.8):** contactOptIn fuer datenschutzkonforme Kontaktaufnahme
-- **NEU (v1.8.8):** Admin-Datenminimierung (preAnswers/evaluationData nicht exponiert)
+**Aenderungen v1.8.8 -> v1.9.7:**
+- **RevenueCat** als neuer Drittanbieter fuer In-App Purchase Management (DPA via ToS, SCCs)
+- **Apple App Store** als eigenstaendiger Verantwortlicher fuer Kauftransaktionen dokumentiert
+- **Apple Privacy Manifest** (`PrivacyInfo.xcprivacy`) implementiert — Pflicht fuer App Store Submission
+- **Intent Picker** mit lokaler Speicherung (localStorage, kein Personenbezug)
+- **Gastname** optional erfasst und nur lokal gespeichert
+- **Registrierter Nutzername** wird in verschluesselten Lebenskontext integriert (E2EE)
+- **Erweiterte localStorage-Deklaration** um neue technisch notwendige Keys
 
 ### Rechtliche Risiken
 
@@ -341,13 +405,14 @@
 - ~~Fehlende AVV mit Google~~ -> VORHANDEN (automatisch durch GCP Account)
 - ~~Fehlende AVV mit Mailjet~~ -> VORHANDEN (automatisch durch Sinch Service Agreement)
 - ~~Fehlende AVV mit Mistral~~ -> VORHANDEN (automatisch durch Mistral AI ToS)
+- ~~Fehlende AVV mit RevenueCat~~ -> VORHANDEN (automatisch durch RevenueCat ToS, inkl. SCCs)
 - ~~Fehlender Datenexport~~ -> VOLLSTAENDIG IMPLEMENTIERT
 - ~~Unvollstaendige Account-Loeschung~~ -> BEHOBEN (v1.8.2)
 
 **NIEDRIG:**
 - ~~API-Usage ohne Retention~~ -> BEHOBEN (12 Monate, automatische Loeschung)
 - ~~UserEvent ohne Retention~~ -> BEHOBEN (6 Monate, automatische Loeschung)
-- Datenschutzerklaerung: DiceBear, Spracherkennung, rememberedEmail erwaehnen (EMPFOHLEN)
+- Datenschutzerklaerung: DiceBear, Spracherkennung, rememberedEmail, RevenueCat, Gastname erwaehnen (EMPFOHLEN)
 
 ---
 
@@ -393,6 +458,16 @@
 - [x] **Bot-Empfehlungen:** KI-generierte Coaching-Empfehlungen pro Entwicklungsbereich (nur Nutzer sichtbar)
 - [x] **PDF-Footer:** "Persoenlich und Vertraulich" auf jeder Seite mit Nutzername und Datum
 
+### v1.9.7 DSGVO-Ergaenzungen - ABGESCHLOSSEN (Feb 2026)
+- [x] **Apple In-App Purchase** via RevenueCat/StoreKit 2 — pseudonymisiert (nur interne User-ID)
+- [x] **RevenueCat als Auftragsverarbeiter** dokumentiert (DPA via ToS, SCCs fuer US-Transfer)
+- [x] **Apple App Store** als eigenstaendiger Verantwortlicher dokumentiert
+- [x] **Apple Privacy Manifest** (`PrivacyInfo.xcprivacy`) erstellt und in Xcode-Projekt integriert
+- [x] **Intent Picker** mit rein lokaler Datenhaltung (localStorage, kein Personenbezug)
+- [x] **Gastname-Erfassung** mit Opt-Out (Skip-Option), nur localStorage
+- [x] **Nutzername fuer Registrierte** in verschluesselten Lebenskontext integriert (E2EE)
+- [x] **Erweiterte localStorage-Deklaration** (userIntent, guestName, intentPickerDisabled, profileHintDisabled, adminStartupPref)
+
 ---
 
 ## NAECHSTE SCHRITTE
@@ -409,6 +484,7 @@
 2. **Google Cloud DPA Review** (Naechste: November 2026)
 3. **Mailjet DPA Review** (Naechste: November 2026)
 4. **Mistral AI DPA Review** (Naechste: Februar 2027)
+5. **RevenueCat DPA Review** (Naechste: Februar 2027)
 
 ---
 
@@ -450,7 +526,8 @@
 8. Auftragsverarbeitungsvertraege (AVV/DPA) mit allen Drittanbietern
    - Google Cloud (Gemini API): Automatische DPA Coverage
    - Mailjet (Sinch): Automatische DPA Coverage via Sinch DPA
-   - **Mistral AI: Automatische DPA Coverage via Mistral AI ToS**
+   - Mistral AI: Automatische DPA Coverage via Mistral AI ToS
+   - **RevenueCat: DPA Coverage via RevenueCat ToS (inkl. SCCs fuer US-Transfer)**
 9. **Persoenlichkeitsprofil-System mit E2EE** (Dez 2025)
    - Zero-Knowledge Server-Architektur
    - Client-seitige Verschluesselung aller sensiblen Profildaten
@@ -471,6 +548,12 @@
     - situationName als Pflichtfeld fuer Zuordnung
     - Bot-Empfehlungen nur fuer den Nutzer sichtbar
     - PDF markiert als "Persoenlich und Vertraulich"
+19. **Apple In-App Purchase via RevenueCat** (Feb 2026)
+    - Pseudonymisiert (nur interne User-ID an RevenueCat)
+    - Server-seitige Receipt-Validierung
+    - RevenueCat DPA (inkl. SCCs) dokumentiert
+20. **Intent Picker & Onboarding** (Feb 2026) — rein lokale Datenhaltung
+21. **Apple Privacy Manifest** (Feb 2026) — App Store Pflicht erfuellt
 
 **Rechtskonformitaet:**
 - Die App erfuellt die **wesentlichen Anforderungen der DSGVO**
@@ -490,6 +573,6 @@
 
 ---
 
-**Naechstes Review:** Februar 2027 (jaehrlich)  
+**Naechstes Review:** Maerz 2027 (jaehrlich)  
 **Maintained by:** Guenter Herold / Manualmode  
 **Contact:** gherold@manualmode.at
