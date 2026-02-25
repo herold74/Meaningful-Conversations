@@ -1,6 +1,34 @@
 # Meaningful Conversations
 
-Eine Anwendung, die Zugang zu verschiedenen Coaching-Bot-Charakteren mit unterschiedlichen Perspektiven und Coaching-Stilen bietet. Benutzer können eine "Lebenskontext"-Datei erstellen, um Gespräche zu personalisieren und diese nach jeder Sitzung mit neuen Erkenntnissen zu aktualisieren.
+**Meaningful Conversations** ist eine KI-gestützte Plattform zur Förderung von persönlichem Wachstum, strukturiertem Denken und Kommunikationsanalyse. Im Gegensatz zu generischen Chat-Assistenten bietet sie drei unterschiedliche, zweckgebundene Anwendungsfälle, um spezifische Nutzerbedürfnisse zu adressieren:
+
+## 🎯 Drei Kern-Anwendungsfälle
+
+### 1. KI-Coaching & Persönliches Wachstum (Der Kern)
+**Problem:** Menschen benötigen oft kontinuierliche, personalisierte Anleitung zur Selbstreflexion, mentalen Fitness und Problemlösung, aber menschliches Coaching ist teuer und nicht immer verfügbar. Generische KI-Chatbots haben keinen Kontext und kein Langzeitgedächtnis für das Leben des Nutzers.
+
+**Lösung:** Ein "Lebenskontext"-System, das als Langzeitgedächtnis der KI dient, kombiniert mit spezialisierten Coaching-Personas.
+*   **Lebenskontext:** Eine strukturierte Markdown-Datei, die sich mit jeder Sitzung weiterentwickelt und Ziele, Herausforderungen und Hintergründe speichert.
+*   **Spezialisierte Coaches:** Unterschiedliche Personas für verschiedene Bedürfnisse – von **Max** (Ehrgeizig/Zielorientiert) und **Ava** (Strategisch) bis zu **Rob** (Mentale Fitness) und **Chloe** (Strukturierte Reflexion).
+*   **Adaptives Coaching:** Nutzt Persönlichkeitsprofile (OCEAN, Riemann-Thomann, Spiral Dynamics), um den Coaching-Stil an den Nutzer anzupassen.
+
+### 2. Strukturiertes Interviewen (Gloria Interview)
+**Problem:** Nutzer haben oft rohe Ideen, Projektkonzepte oder komplexe Entscheidungen, die sie strukturieren müssen. Sie brauchen keinen Rat oder Coaching, sondern einen neutralen Resonanzboden, um ihre eigenen Gedanken zu extrahieren, zu ordnen und zu klären.
+
+**Lösung:** Ein dedizierter **Interview-Modus**, in dem die KI strikt als professioneller Interviewer agiert.
+*   **Reine Erkundung:** Die KI stellt strukturierte, vertiefende Fragen, ohne Ratschläge, Urteile oder Coaching anzubieten.
+*   **Ergebnisorientiert:** Das Ziel ist ein sauberes, grammatikalisch geglättetes Transkript und eine strukturierte Zusammenfassung der eigenen Ideen des Nutzers.
+*   **Vielseitig:** Ideal für Brainstorming, Projektplanung, Journaling oder die Vorbereitung auf schwierige Gespräche.
+
+### 3. Kommunikationsanalyse (Transkript-Evaluation)
+**Problem:** Es ist schwierig, die eigenen Kommunikationsfähigkeiten objektiv zu bewerten, blinde Flecken zu erkennen oder zu prüfen, ob ein Gespräch tatsächlich sein Ziel erreicht hat.
+
+**Lösung:** Ein **Evidenzbasiertes Evaluationstool** zur Analyse bestehender Gesprächstranskripte.
+*   **Hochladen & Analysieren:** Nutzer laden Transkripte (Text oder SRT) von echten Gesprächen hoch.
+*   **Objektives Feedback:** Die KI bewertet die Interaktion anhand der gesetzten Ziele, Verhaltensmuster und (falls vorhanden) des Persönlichkeitsprofils des Nutzers.
+*   **Umsetzbare Erkenntnisse:** Liefert einen detaillierten Bericht mit Bewertungen, Identifikation blinder Flecken und konkreten nächsten Schritten.
+
+---
 
 Die grundlegende Idee, eine .md-Datei zu verwenden, um Informationen auf strukturierte Weise mithilfe von KI zu bewahren und zu aktualisieren, wurde von Chris Lovejoy inspiriert (https://github.com/chris-lovejoy/personal-ai-coach). Diese Methode ist der menschlichen Notizführung während eines Coaching-Prozesses sehr ähnlich, bietet jedoch den Vorteil, die Zusammenfassung sofort für den Klienten zur weiteren Reflexion zu erstellen. Meaningful Conversations fügt die grafische Benutzeroberfläche und einen zuverlässigen, nicht-destruktiven Prozess zur Aktualisierung der .md-Datei mithilfe von KI hinzu.
 
@@ -79,8 +107,8 @@ Das Frontend ist eine Vite-gestützte React-Anwendung.
 Das Frontend bestimmt, mit welchem Backend es sich verbindet, basierend auf der `.env`-Datei und einem URL-Parameter.
 
 *   **Standardverhalten:** Standardmäßig (`http://localhost:3000`) verbindet sich das Frontend mit dem Live-**Staging**-Backend, das in Ihrer `.env`-Datei durch `VITE_BACKEND_URL_STAGING` definiert ist. Dies ist nützlich, um an der Benutzeroberfläche zu arbeiten, ohne ein lokales Backend auszuführen.
-*   `?backend=local`: Verwenden Sie dies (`http://localhost:3000?backend=local`), um sich mit Ihrem lokalen Backend-Server zu verbinden, unter Verwendung der URL aus `VITE_BACKEND_URL_LOCAL`.
-*   `?backend=production`: Verwenden Sie dies, um sich mit dem Produktions-Backend zu verbinden, unter Verwendung der URL aus `VITE_BACKEND_URL_PRODUCTION`.
+*   `?backend=local`: Verwenden Sie dies (`http://localhost:3000?backend=local`) to connect to your local backend server, using the URL from `VITE_BACKEND_URL_LOCAL`.
+*   `?backend=production`: Use this to connect to the production backend, using the URL from `VITE_BACKEND_URL_PRODUCTION`.
 
 ## 🧠 Schlüsselkonzepte
 
@@ -140,4 +168,3 @@ Diese Anwendung bietet keine professionelle psychologische oder medizinische Ber
 *   Inspiriert von [Chris Lovejoy's Personal AI Coach](https://github.com/chris-lovejoy/personal-ai-coach)
 *   Entwickelt mit [Google Gemini AI](https://ai.google.dev/)
 *   Gehostet auf [Hetzner](https://www.hetzner.com/) (Deutschland, EU)
-

@@ -41,9 +41,11 @@ interface TopicSearchProps {
     onUpgrade?: () => void;
     currentUser: User | null;
     language: Language;
+    highlighted?: boolean;
+    sectionRef?: React.Ref<HTMLDivElement>;
 }
 
-const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, currentUser, language }) => {
+const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, currentUser, language, highlighted, sectionRef }) => {
     const { t } = useLocalization();
     const [topic, setTopic] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -201,7 +203,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     return (
         <div className="w-full max-w-6xl mx-auto">
             {/* Unified capsule container — matches Management & Kommunikation pill structure */}
-            <div className="mb-10">
+            <div ref={sectionRef} className={`mb-10 transition-all duration-700 rounded-2xl ${highlighted ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
                 <div className="w-full min-w-0 max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
@@ -388,24 +390,30 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const [isLoading, setIsLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const [activeHighlight, setActiveHighlight] = useState<'management' | 'topicSearch' | null>(null);
-  const managementRef = useRef<HTMLElement>(null);
+  const managementRef = useRef<HTMLDivElement>(null);
   const topicSearchRef = useRef<HTMLDivElement>(null);
+  const coachingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!highlightSection || isLoading) return;
     const timer = setTimeout(() => {
-      const target = highlightSection === 'management' ? managementRef.current : topicSearchRef.current;
+      let target: HTMLElement | null = null;
+      if (highlightSection === 'management') {
+        target = managementRef.current;
+      } else if (highlightSection === 'topicSearch') {
+        target = currentUser ? topicSearchRef.current : coachingRef.current;
+      }
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setActiveHighlight(highlightSection);
         setTimeout(() => {
           setActiveHighlight(null);
           onHighlightDone?.();
-        }, 5000);
+        }, 3500);
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [highlightSection, isLoading, onHighlightDone]);
+  }, [highlightSection, isLoading, onHighlightDone, currentUser]);
 
   // Track window width for responsive Transcript Evaluation card
   useEffect(() => {
@@ -520,22 +528,22 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
       </div>
 
       {currentUser && (
-        <div ref={topicSearchRef} className={`transition-all duration-700 rounded-2xl ${activeHighlight === 'topicSearch' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
-          <TopicSearchSection
-            bots={bots}
-            onStartSessionWithPrompt={onStartSessionWithPrompt}
-            onUpgrade={onUpgrade}
-            currentUser={currentUser}
-            language={language}
-          />
-        </div>
+        <TopicSearchSection
+          bots={bots}
+          onStartSessionWithPrompt={onStartSessionWithPrompt}
+          onUpgrade={onUpgrade}
+          currentUser={currentUser}
+          language={language}
+          highlighted={activeHighlight === 'topicSearch'}
+          sectionRef={topicSearchRef}
+        />
       )}
 
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}
-        <section ref={managementRef} className={`w-full max-w-6xl mx-auto transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
+        <section className="w-full max-w-6xl mx-auto">
           {/* Section Divider */}
-          <div className="mb-6">
+          <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#CD7F32]/50 to-transparent"></div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#CD7F32]/10 dark:bg-[#CD7F32]/15 border border-[#CD7F32]/30 dark:border-[#CD7F32]/40">
@@ -620,7 +628,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         {/* 2. Coaching Section — Silver */}
         <section className="w-full max-w-6xl mx-auto">
           {/* Section Divider */}
-          <div className="mb-6">
+          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${!currentUser && activeHighlight === 'topicSearch' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-400 dark:via-slate-500 to-transparent"></div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600">

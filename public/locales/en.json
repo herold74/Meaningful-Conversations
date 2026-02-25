@@ -1375,8 +1375,8 @@
   "ocean_onboarding_complete": "Done!",
   "ocean_onboarding_saving": "Creating your profile…",
 
-  "intent_title": "What would you like to achieve?",
-  "intent_subtitle": "Choose what brings you here.",
+  "intent_title": "What would you like to achieve today?",
+  "intent_subtitle": "Choose what brings you to us.",
   "intent_communication_title": "Understand & improve communication",
   "intent_communication_desc": "Discover how you come across. Ideal for preparing and reflecting on important topics with an AI coach that knows your style.",
   "intent_communication_desc_guest": "Ideal for preparing and reflecting on current topics with an AI coach, or interview partner.",
