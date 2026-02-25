@@ -14,8 +14,10 @@ This document is for administrators only and provides detailed instructions for 
 6. [Test Runner](#6-test-runner)
 7. [API Usage Monitoring](#7-api-usage-monitoring)
 8. [Newsletter Management](#8-newsletter-management)
-9. [Server Administration](#9-server-administration)
-10. [Troubleshooting](#10-troubleshooting)
+9. [Onboarding & Intent Flow (NEU v1.9.7)](#9-onboarding--intent-flow-neu-v197)
+10. [In-App Purchases & RevenueCat (NEU v1.9.7)](#10-in-app-purchases--revenuecat-neu-v197)
+11. [Server Administration](#11-server-administration)
+12. [Troubleshooting](#12-troubleshooting)
 
 ---
 
@@ -281,7 +283,76 @@ The Newsletter panel allows sending bulk emails to users.
 
 ---
 
-## 9. Server Administration
+## 9. Onboarding & Intent Flow (NEU v1.9.7)
+
+Since v1.9.7, new users are guided through an onboarding flow before reaching the Bot Selection screen.
+
+### Intent Picker
+When a user opens the app, they are presented with three options:
+- **Kommunikation / Communication** — Routes to Management & Kommunikation section
+- **Coaching** — Routes to Coaching section
+- **Begleitendes Coaching / Augmented Coaching** — Routes to Exklusiv section (Client-only)
+
+The selected intent determines which section is highlighted in the Bot Selection view (search field + section header pulse briefly).
+
+**Registered users** can disable the Intent Picker from the Burger Menu. The preference is stored in `localStorage` (`intentPickerDisabled`).
+
+**Admin/Developer users** have a special startup preference dropdown in the Admin Panel that allows them to choose their default startup view (`adminStartupPref` in localStorage):
+- **Intent Picker** (default)
+- **Bot Selection** (skip to coach selection)
+- **Admin Panel** (open admin directly)
+
+### Name Prompt
+- **Guests** are prompted for their first name or a pseudonym. This is stored locally (`guestName` in localStorage) and used to generate a minimal Life Context template. The prompt can be skipped.
+- **Registered users** who don't yet have a Life Context are prompted for their name, which is then integrated into an encrypted Life Context.
+- Users who already have a Life Context are **not** prompted again.
+
+### OCEAN Onboarding
+New registered users without a Personality Profile are offered the OCEAN (Big Five) personality test as part of the onboarding flow, right after the Intent Picker.
+
+### Profile Hint
+Premium users who completed OCEAN but not Riemann-Thomann or Spiral Dynamics see a banner prompting them to complete additional personality assessments. The hint offers "Discover now", "Later", and "Don't show again" options. A badge appears in the Burger Menu when the hint is active.
+
+---
+
+## 10. In-App Purchases & RevenueCat (NEU v1.9.7)
+
+### How iOS Purchases Appear in the System
+
+iOS purchases made through StoreKit 2 / RevenueCat are automatically processed:
+
+1. User purchases a subscription in the iOS app
+2. RevenueCat verifies the receipt with Apple
+3. Our backend receives the purchase event and creates a `Purchase` record
+4. User's tier (`isPremium`, `accessExpiresAt`, etc.) is updated in the database
+
+### Viewing Purchase Data
+
+Purchase records appear in the **User Management** section. The Purchase table contains:
+- `transactionId` — Apple's unique transaction identifier
+- `productId` — App Store Product ID (e.g., `mc.premium.monthly`)
+- `customerEmail` — User's email
+- `status` — `completed`, `refunded`, etc.
+- `platform` — `ios` or `web`
+
+### Platform-Specific Purchase Flows
+
+| Platform | Payment Method | Where |
+|----------|---------------|-------|
+| **iOS App** | Apple In-App Purchase (StoreKit 2) | `NativePaywall.tsx` |
+| **Web Browser** | PayPal + Upgrade Codes | `PaywallView.tsx` |
+
+PayPal links are **hidden** in the iOS app (Apple Guideline 3.1.1).
+
+### Troubleshooting Purchases
+
+- **Sandbox subscriptions** auto-renew at an accelerated rate (monthly → every 5 min). To stop: Settings → App Store → Sandbox Account → Manage Subscriptions.
+- **RevenueCat Dashboard**: https://app.revenuecat.com — shows all purchase events, subscriber status, and revenue.
+- **Database reset** (if needed): Delete records from `Purchase` table and reset user's `isPremium`, `accessExpiresAt`, `unlockedCoaches` fields.
+
+---
+
+## 11. Server Administration
 
 ### Process Management (PM2)
 The backend now uses **PM2** in Cluster Mode (2 instances) for improved performance and stability.
@@ -341,7 +412,7 @@ SELECT * FROM Session ORDER BY createdAt DESC LIMIT 10;
 
 ---
 
-## 10. Troubleshooting
+## 12. Troubleshooting
 
 ### User Can't Login
 1. Check if the user exists in the database
@@ -387,5 +458,5 @@ This is expected behavior due to end-to-end encryption:
 
 For technical issues beyond this manual, contact the development team.
 
-**Version:** 1.9.5  
+**Version:** 1.9.7  
 **Last Updated:** February 2026
