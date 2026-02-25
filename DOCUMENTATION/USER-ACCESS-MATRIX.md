@@ -2,7 +2,7 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: February 19, 2026 — v1.9.2
+**Last Updated**: February 25, 2026 — v1.9.7
 
 ## User Types
 
@@ -52,8 +52,14 @@ This document outlines the different user types within the Meaningful Conversati
 | Bot Recommendations (in Evaluation) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Audio Transcription (Record & Upload) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Onboarding (NEU v1.9.7)** | | | | | | |
+| Intent Picker | ✅ | ✅ | ✅ | ✅ | Konfig. | Konfig. |
+| Name Prompt (Guest) | ✅ (localStorage) | — | — | — | — | — |
+| OCEAN Onboarding (nach Registrierung) | — | ✅ | — | — | — | — |
+| Profile Hint (Riemann/SD) | — | — | ✅ | ✅ | ✅ | ✅ |
 | **Payment & Access** | | | | | | |
-| PayPal Direct Checkout (Web) | — | — | — | — | — | — |
+| iOS In-App Purchase (RevenueCat) | — | ✅ | ✅ | — | — | — |
+| PayPal Direct Checkout (Web only) | — | ✅ | ✅ | — | — | — |
 | Code Redemption | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Bot Code blocked when expired | — | ✅ | — | — | — | — |
 | **Administration** | | | | | | |
@@ -253,33 +259,38 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 4. **Einfach kommunizierbar** — "Deine bisherigen Käufe werden angerechnet"
 5. **Technisch umsetzbar** — PayPal Custom IDs erlauben Tracking früherer Käufe
 
-### Implementierungsstand (v1.9.1)
+### Implementierungsstand (v1.9.7)
 
 | Feature | Status | Details |
 | :--- | :---: | :--- |
-| **28-Tage Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
-| **Paywall (abgelaufene User)** | ✅ | Responsive 2-Spalten-Layout, PayPal + Code |
+| **14-Tage Premium-Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
+| **Paywall (abgelaufene User)** | ✅ | Responsive Layout, PayPal (Web) + iOS IAP + Code |
 | **PayPal Direct Checkout** | ✅ | €14.90 Registered Lifetime (Web only, hidden on iOS) |
+| **iOS In-App Purchase** | ✅ | RevenueCat + StoreKit 2, Auto-Renewable Subscriptions (seit v1.9.7) |
 | **Bot-Code-Sperre bei Ablauf** | ✅ | Server blockiert Bot-Codes, zeigt Warnung |
 | **Paywall-Bypass-Schutz** | ✅ | Burger-Menü bei Paywall-View versteckt |
+| **Intent Picker** | ✅ | Onboarding-Flow mit 3 Intents (Kommunikation, Coaching, Begleitendes Coaching) |
+| **Name Prompt** | ✅ | Gaeste: localStorage; Registrierte: in E2EE Life Context |
+| **OCEAN Onboarding** | ✅ | Automatisch fuer neue registrierte Nutzer ohne Persoenlichkeitsprofil |
+| **Profile Hint** | ✅ | Premium-Banner fuer fehlende Riemann/SD-Profile |
 | **Registered Monatsabo** | ❌ | Noch nicht implementiert (3,90 €/Monat) |
 | **Premium-Pässe (PayPal)** | ❌ | Upgrade-UI und Backend-Endpoints fehlen |
 | **Bot-Unlock (PayPal)** | ❌ | Einzelkauf Kenji/Chloe fehlt |
 | **Upgrade-Rabatte** | ❌ | Loyalty-Rabatt-Logik fehlt |
-| **iOS In-App Purchase** | ❌ | Apple StoreKit-Integration geplant (siehe Sektion unten) |
 | **Referral-Programm** | ❌ | 1 Monat gratis für Einladung eines zahlenden Users |
 | **Team/Unternehmenslizenz** | ❌ | Firmentarif für 10+ User mit Admin-Dashboard |
 | **Jährliche Abrechnung** | ❌ | Automatisches Abo (PayPal Subscriptions API) |
 
 ---
 
-## iOS In-App Purchase (Geplant)
+## iOS In-App Purchase (Implementiert seit v1.9.7)
 
 ### Plattform-Strategie
 
-- **iOS (Capacitor App):** Native In-App Purchases via StoreKit 2
+- **iOS (Capacitor App):** Native In-App Purchases via StoreKit 2 + RevenueCat SDK
 - **Web-Browser:** PayPal bleibt bestehen (externer Link + Upgrade-Codes)
 - PayPal-Links werden in der iOS-Version ausgeblendet (Apple Guideline 3.1.1)
+- **RevenueCat** als Middleware fuer Subscription-Management, Receipt-Validierung und Cross-Platform-Sync
 
 ### App Store Produkt-Mapping
 
@@ -322,14 +333,18 @@ Apple Small Business Program (Umsatz < 1M USD/Jahr): **15% Provision**. iOS-Prei
 
 ### Implementierungsdetails
 
-Vollständige technische Dokumentation: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`
+- **Frontend:** `services/purchaseService.ts` (RevenueCat SDK), `components/NativePaywall.tsx` (iOS), `components/PaywallView.tsx` (Web)
+- **Backend:** `routes/appleIAP.js` (Receipt-Validierung), `routes/purchase.js` (Kauf-Verarbeitung)
+- **Datenbank:** `Purchase`-Tabelle (transactionId, productId, customerEmail, status)
+- Vollständige technische Dokumentation: `.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md`
 
 ---
 
 ## Notes on Data Storage
 
-*   **Guest:** All data (Life Context, Chat History, Settings) is stored in the browser's `localStorage`. Clearing browser data results in data loss.
+*   **Guest:** All data (Life Context, Chat History, Settings) is stored in the browser's `localStorage`. Clearing browser data results in data loss. Since v1.9.7, guests can optionally provide a name (`guestName` in localStorage), which is used to generate a minimal Life Context template.
 *   **Registered/Premium/Client:** Life Context and Personality Profiles are encrypted client-side (E2EE) before being sent to the server. The server (and Admins) cannot read this content.
+*   **Onboarding-Daten (v1.9.7):** Intent (`userIntent`), UI-Praeferenzen (`intentPickerDisabled`, `profileHintDisabled`, `adminStartupPref`) werden in `localStorage` gespeichert. Der Name registrierter Nutzer wird in den verschluesselten Lebenskontext integriert.
 
 ## Notes on Crisis Response
 

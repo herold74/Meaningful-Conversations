@@ -44,6 +44,27 @@ KI ist ein mächtiges Werkzeug, aber sie ist nicht perfekt. Wenn eine Antwort ni
 
 ### Kann ich während einer Sitzung den Coach wechseln?
 Sie wählen zu Beginn jeder Sitzung einen Coach aus. Wenn Sie das Gefühl haben, dass der Stil eines anderen Coaches vorteilhafter wäre, können Sie die aktuelle Sitzung beenden. Nach der Sitzungsüberprüfung haben Sie die Möglichkeit, "Coach wechseln" auszuwählen, was Sie mit Ihrem aktualisierten Lebenskontext zurück zum Coach-Auswahlbildschirm bringt.
+
+---
+
+## Onboarding & Plattform
+
+### Was ist der Intent Picker?
+Der Intent Picker erscheint beim Start der App und fragt Sie, was Sie heute erreichen möchten: **Kommunikation**, **Coaching** oder **Begleitendes Coaching**. Basierend auf Ihrer Wahl wird der passende Bereich in der Coach-Auswahl hervorgehoben. Registrierte Benutzer können den Intent Picker im Menü deaktivieren.
+
+### Warum werde ich nach meinem Namen gefragt?
+Der Name (oder ein Pseudonym) wird verwendet, um Ihren Lebenskontext zu personalisieren. Für Gäste wird er nur lokal auf Ihrem Gerät gespeichert. Für registrierte Nutzer wird er in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt jederzeit überspringen.
+
+### Wie kaufe ich ein Upgrade auf iOS?
+In der iOS-App werden Käufe direkt über Apple In-App Purchase abgewickelt. Öffnen Sie die Paywall (erscheint automatisch nach Ablauf der Trial-Phase oder über Menü → "Upgrade") und wählen Sie ein Abonnement. Die Zahlung erfolgt über Ihr Apple-Konto.
+
+### Wie kaufe ich ein Upgrade im Web-Browser?
+Im Web-Browser erfolgen Käufe über PayPal. Öffnen Sie das Menü (☰) → "Upgrade" und wählen Sie ein Produkt. Alternativ können Sie unter Kontoverwaltung einen Zugangscode einlösen.
+
+### Gibt es Unterschiede zwischen iOS-App und Web-Version?
+Die Kernfunktionen sind identisch. Unterschiede:
+- **iOS:** Native In-App Purchases, Apple-Stimmen (Enhanced/Premium), native Spracherkennung
+- **Web:** PayPal-Zahlung, Server-Stimmen (Piper TTS) zusätzlich zu Gerätestimmen, Browser-Spracherkennung
 `;
 
 const en_markdown = `
@@ -83,6 +104,27 @@ AI is a powerful tool, but it's not perfect. If a response is unhelpful, try rep
 
 ### Can I change coaches during a session?
 You choose a coach at the start of each session. If you feel another coach's style would be more beneficial, you can end the current session. After the session review, you will have the option to "Switch Coach," which will take you back to the coach selection screen with your updated Life Context.
+
+---
+
+## Onboarding & Platform
+
+### What is the Intent Picker?
+The Intent Picker appears when you launch the app and asks what you'd like to achieve today: **Communication**, **Coaching**, or **Augmented Coaching**. Based on your choice, the matching section in the coach selection is highlighted. Registered users can disable the Intent Picker from the menu.
+
+### Why am I asked for my name?
+Your name (or a pseudonym) is used to personalize your Life Context. For guests, it's stored locally on your device only. For registered users, it's integrated into the encrypted Life Context. You can always skip this step.
+
+### How do I purchase an upgrade on iOS?
+In the iOS app, purchases are made directly through Apple In-App Purchase. Open the paywall (appears automatically after trial expiration or via Menu → "Upgrade") and select a subscription. Payment is processed through your Apple account.
+
+### How do I purchase an upgrade in a web browser?
+In the web browser, purchases are made via PayPal. Open the menu (☰) → "Upgrade" and select a product. Alternatively, you can redeem an access code under Account Management.
+
+### Are there differences between the iOS app and the web version?
+The core features are identical. Differences:
+- **iOS:** Native In-App Purchases, Apple voices (Enhanced/Premium), native speech recognition
+- **Web:** PayPal payment, server voices (Piper TTS) in addition to device voices, browser speech recognition
 `;
 
 const FAQView: React.FC<InfoViewProps> = () => {

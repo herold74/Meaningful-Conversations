@@ -1,12 +1,12 @@
 # Transkript-Auswertung: Benutzerhandbuch
 
-> **Für Klienten**: Lassen Sie Ihre Gesprächstranskripte professionell analysieren und erhalten Sie wertvolle Insights für Ihre Kommunikationsentwicklung.
+> **Für Premium-Nutzer und Klienten**: Lassen Sie Ihre Gesprächstranskripte professionell analysieren und erhalten Sie wertvolle Insights für Ihre Kommunikationsentwicklung.
 
 ---
 
 ## 📋 Überblick
 
-Die **Transkript-Auswertung** ist ein KI-gestütztes Coaching-Tool, das Ihre Gesprächstranskripte analysiert und Ihnen detailliertes Feedback zu Ihrer Kommunikation gibt. Das Feature ist speziell für **Klienten** konzipiert und integriert Ihr Persönlichkeitsprofil für individualisierte Insights.
+Die **Transkript-Auswertung** ist ein KI-gestütztes Coaching-Tool, das Ihre Gesprächstranskripte analysiert und Ihnen detailliertes Feedback zu Ihrer Kommunikation gibt. Das Feature steht **Premium-Nutzern** und **Klienten** zur Verfügung und integriert Ihr Persönlichkeitsprofil für individualisierte Insights.
 
 ### Was wird analysiert?
 
@@ -256,9 +256,9 @@ Das exportierte PDF enthält:
 
 ## ❓ Häufige Fragen (FAQ)
 
-### Kann ich das Feature als Premium-User nutzen?
+### Wer kann das Feature nutzen?
 
-❌ Nein. Das Feature ist **ausschließlich für Klienten** verfügbar. Der PDF-Export ist für **Klienten, Admins und Developers** sichtbar.
+✅ **Premium-Nutzer**, **Klienten**, **Admins** und **Developers** haben Zugriff auf die Transkript-Auswertung. Der PDF-Export ist für **Klienten, Admins und Developers** sichtbar.
 
 ### Funktioniert es auf dem Smartphone?
 
@@ -383,6 +383,6 @@ Bei Fragen oder Problemen:
 
 ---
 
-**Version:** 1.9.3  
-**Zuletzt aktualisiert:** 20. Februar 2026  
-**Feature verfügbar für:** Klienten (Desktop-Browser) · Coach-Empfehlung: alle registrierten Nutzer
+**Version:** 1.9.7  
+**Zuletzt aktualisiert:** 25. Februar 2026  
+**Feature verfügbar für:** Premium-Nutzer & Klienten (Desktop-Browser) · PDF-Export: Klienten, Admins, Developers · Coach-Empfehlung: alle registrierten Nutzer
