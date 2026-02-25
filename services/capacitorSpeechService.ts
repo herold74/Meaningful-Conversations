@@ -265,7 +265,7 @@ class WebSpeechService implements ISpeechService {
         };
 
         recognition.onresult = (event: any) => {
-            // Process results with Android-adaptive logic
+            if (this.stoppedManually) return;
             const processed = this.processResults(event);
             onResult({
                 transcript: processed.transcript,
