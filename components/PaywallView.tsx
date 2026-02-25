@@ -25,6 +25,7 @@ interface PaywallViewProps {
   userEmail: string | null;
   userXp?: number;
   currentUser?: User | null;
+  safeAreaTop?: number;
   onRedeem: () => void;
   onPurchaseSuccess: (user: User) => void;
   onLogout: () => void;
@@ -33,7 +34,7 @@ interface PaywallViewProps {
   onDownloadProfile?: () => void;
 }
 
-const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, currentUser, onRedeem, onPurchaseSuccess, onLogout, onDownloadData, onDownloadLifeContext, onDownloadProfile }) => {
+const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, currentUser, safeAreaTop = 0, onRedeem, onPurchaseSuccess, onLogout, onDownloadData, onDownloadLifeContext, onDownloadProfile }) => {
   const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
@@ -205,15 +206,14 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     );
   };
 
-  const frostedOverlay = (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background-secondary/80 backdrop-blur-md" style={{ height: 'env(safe-area-inset-top, 0px)' }} />
-  );
+  const frostedOverlay = safeAreaTop > 0 ? (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-background-secondary/80 backdrop-blur-md" style={{ height: safeAreaTop }} />
+  ) : null;
 
   return (
     <>
-    {/* Frosted overlay rendered via portal to document.body — avoids motion.div transform breaking position:fixed */}
-    {createPortal(frostedOverlay, document.body)}
-    <div className="flex flex-col items-center min-h-screen text-center px-4 py-8 overflow-y-auto" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
+    {frostedOverlay && createPortal(frostedOverlay, document.body)}
+    <div className="flex flex-col items-center min-h-screen text-center px-4 py-8 overflow-y-auto" style={{ paddingTop: Math.max(32, safeAreaTop) }}>
       <div className="w-full max-w-md md:max-w-3xl p-6 md:p-8 bg-background-secondary border border-brand-accent/40 rounded-card shadow-card-elevated">
 
         {/* Header */}

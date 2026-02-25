@@ -753,7 +753,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                             ? 'bg-accent-primary text-white'
                                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}>
-                                    <span className="sm:hidden">{f === 'all' ? '👥' : f === 'with' ? '🧠' : '∅'}</span>
+                                    <span className="sm:hidden">{f === 'all' ? '👥' : f === 'with' ? '👩🏻‍🎨' : '∅'}</span>
                                     <span className="hidden sm:inline">{t(`admin_users_profile_filter_${f}`)}</span>
                                 </button>
                             ))}
@@ -1584,6 +1584,17 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
              <div className="text-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('admin_title')}</h1>
+                <div className="mt-2 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span>{t('admin_startup_label')}</span>
+                    <select
+                        value={localStorage.getItem('adminStartupPref') || 'admin'}
+                        onChange={e => { localStorage.setItem('adminStartupPref', e.target.value); }}
+                        className="px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="admin">{t('admin_startup_admin')}</option>
+                        <option value="normal">{t('admin_startup_normal')}</option>
+                    </select>
+                </div>
             </div>
             {renderTabs()}
             {renderContent()}

@@ -60,7 +60,7 @@ const WelcomeScreen: React.FC = () => {
       </motion.div>
 
       <motion.h1
-        className="mt-20 text-2xl font-semibold text-content-primary tracking-wide"
+        className="mt-20 text-3xl font-semibold text-content-primary tracking-wide"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.6 }}

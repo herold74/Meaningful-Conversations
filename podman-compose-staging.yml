@@ -116,6 +116,13 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       MISTRAL_API_KEY: ${MISTRAL_API_KEY}
       
+      # Apple IAP (Receipt Verification via App Store Server API)
+      APPLE_KEY_ID: ${APPLE_KEY_ID}
+      APPLE_ISSUER_ID: ${APPLE_ISSUER_ID}
+      APPLE_PRIVATE_KEY: ${APPLE_PRIVATE_KEY}
+      APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-at.manualmode.mc}
+      APPLE_IAP_ENVIRONMENT: ${APPLE_IAP_ENVIRONMENT:-sandbox}
+      
       # RevenueCat (sync-from-revenuecat for Paywall fix)
       REVENUECAT_SECRET_KEY: ${REVENUECAT_SECRET_KEY}
       

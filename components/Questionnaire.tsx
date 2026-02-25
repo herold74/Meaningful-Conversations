@@ -122,7 +122,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
                 <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
             </button>
             <div className="text-center mb-4">
-                <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('questionnaire_title')}</h1>
+                <h1 className="text-3xl font-semibold text-content-primary tracking-tight">{t('questionnaire_title')}</h1>
                 <p className="mt-2 text-content-secondary">{t('questionnaire_subtitle')}</p>
             </div>
 

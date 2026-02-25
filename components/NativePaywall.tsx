@@ -16,9 +16,10 @@ interface NativePaywallProps {
   onPurchaseSuccess: (user: User) => void;
   currentUser?: User | null;
   showBotUnlocks?: boolean;
+  skipAutoRestore?: boolean;
 }
 
-const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, currentUser, showBotUnlocks = false }) => {
+const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, currentUser, showBotUnlocks = false, skipAutoRestore = false }) => {
   const { t } = useLocalization();
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [activeProductIds, setActiveProductIds] = useState<Set<string>>(new Set());
@@ -40,7 +41,8 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
           syncAttemptedRef.current = true;
           await logInRevenueCat(currentUser.id);
           await new Promise(r => setTimeout(r, 500));
-          const trySync = async (): Promise<boolean> => {
+          if (!skipAutoRestore) {
+          const trySync = async (): Promise<'restored' | 'fatal' | false> => {
             try {
               const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
               const syncedUser = res?.user;
@@ -50,19 +52,27 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
                   || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
                 if (hasAccess) {
                   onPurchaseSuccess(syncedUser);
-                  return true;
+                  return 'restored';
                 }
               }
-            } catch {
-              // Sync failed
+            } catch (err: any) {
+              if (err?.status === 503) return 'fatal';
             }
             return false;
           };
-          if (await trySync()) return;
-          await new Promise(r => setTimeout(r, 1000));
-          if (await trySync()) return;
-          await new Promise(r => setTimeout(r, 2000));
-          if (await trySync()) return;
+          const s1 = await trySync();
+          if (s1 === 'restored') return;
+          if (s1 !== 'fatal') {
+            await new Promise(r => setTimeout(r, 1000));
+            const s2 = await trySync();
+            if (s2 === 'restored') return;
+            if (s2 !== 'fatal') {
+              await new Promise(r => setTimeout(r, 2000));
+              const s3 = await trySync();
+              if (s3 === 'restored') return;
+            }
+          }
+          }
         }
 
         const available = await fetchAvailableProducts();
@@ -316,7 +326,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
+            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
               {product.localizedTitle}
             </p>
             {isActive && (
@@ -326,7 +336,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive
             )}
           </div>
           {product.localizedDescription && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {product.localizedDescription}
             </p>
           )}

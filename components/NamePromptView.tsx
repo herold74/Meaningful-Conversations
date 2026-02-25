@@ -5,9 +5,11 @@ import Button from './shared/Button';
 
 interface NamePromptViewProps {
   onContinue: (name: string) => void;
+  onSkip?: () => void;
+  safeAreaTop?: number;
 }
 
-const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue }) => {
+const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
   const [name, setName] = useState('');
 
@@ -20,7 +22,7 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[80dvh] px-4" style={{ paddingTop: Math.max(32, safeAreaTop) }}>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,6 +53,15 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue }) => {
             {t('intent_ask_name_continue')}
           </Button>
         </form>
+        {onSkip && (
+          <button
+            type="button"
+            onClick={onSkip}
+            className="mt-4 text-sm text-content-tertiary hover:text-content-secondary transition-colors"
+          >
+            {t('intent_ask_name_skip')}
+          </button>
+        )}
       </motion.div>
     </div>
   );

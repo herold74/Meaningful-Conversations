@@ -54,6 +54,7 @@ import PaywallView from './components/PaywallView';
 import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
 import PersonalityProfileView from './components/PersonalityProfileView';
 import OceanOnboarding from './components/OceanOnboarding';
+import ProfileHintView from './components/ProfileHintView';
 import IntentPickerView, { type UserIntent } from './components/IntentPickerView';
 import NamePromptView from './components/NamePromptView';
 import type { Big5Result } from './utils/bfi2';
@@ -139,6 +140,8 @@ const App: React.FC = () => {
 
     // Intent Picker / Bot Selection highlight
     const [highlightSection, setHighlightSection] = useState<'management' | 'topicSearch' | null>(null);
+    const [postOceanRoute, setPostOceanRoute] = useState<'landing' | 'intent'>('intent');
+    const [completedLenses, setCompletedLenses] = useState<string[]>([]);
 
     // Transcript Evaluation States
     const [teStep, setTeStep] = useState<'pre' | 'input' | 'review' | 'history'>('pre');
@@ -458,31 +461,111 @@ const App: React.FC = () => {
     }, []);
     
     // --- NAVIGATION & STATE HANDLERS ---
+
+    const isMinimalLifeContext = (lc: string): boolean => {
+        if (!lc) return true;
+        const lines = lc.split('\n');
+        let filledFields = 0;
+        for (const line of lines) {
+            const match = line.match(/^\*\*[^*]+\*\*:\s*(.+)/);
+            if (match && match[1].trim()) filledFields++;
+        }
+        return filledFields <= 1;
+    };
+
+    const loadProfileInfo = async () => {
+        try {
+            const profile = await api.loadPersonalityProfile();
+            if (profile) {
+                const lenses = profile.completedLenses ? JSON.parse(profile.completedLenses) : [];
+                setHasPersonalityProfile(true);
+                setCompletedLenses(lenses);
+                return { exists: true, lenses };
+            }
+        } catch {}
+        setHasPersonalityProfile(false);
+        setCompletedLenses([]);
+        return { exists: false, lenses: [] as string[] };
+    };
+
+    const applyIntentLogic = useCallback((intent: UserIntent | null) => {
+        const i = intent || localStorage.getItem('userIntent') as UserIntent | null;
+        switch (i) {
+            case 'communication':
+                setHighlightSection('management');
+                setView('botSelection');
+                break;
+            case 'lifecoaching':
+                setHighlightSection('topicSearch');
+                setView('botSelection');
+                break;
+            case 'coaching':
+                setHighlightSection('topicSearch');
+                setView('botSelection');
+                break;
+            default:
+                setView(lifeContext ? 'contextChoice' : 'landing');
+                break;
+        }
+    }, [lifeContext]);
+
+    const shouldShowProfileHint = useCallback((): boolean => {
+        if (!currentUser?.isPremium) return false;
+        if (localStorage.getItem('profileHintDisabled') === 'true') return false;
+        const hasOcean = completedLenses.includes('ocean');
+        const hasSD = completedLenses.includes('sd');
+        const hasRiemann = completedLenses.includes('riemann');
+        return hasOcean && (!hasSD || !hasRiemann);
+    }, [currentUser?.isPremium, completedLenses]);
+
+    const routeWithProfileHint = useCallback((intent: UserIntent | null) => {
+        if (shouldShowProfileHint()) {
+            setView('profileHint');
+        } else {
+            applyIntentLogic(intent);
+        }
+    }, [shouldShowProfileHint, applyIntentLogic]);
+
+    const routeWithIntentPicker = async (hasContext: boolean) => {
+        const { exists: profileExists, lenses } = await loadProfileInfo();
+        if (!localStorage.getItem('intentPickerVersion')) {
+            localStorage.removeItem('intentPickerDisabled');
+            localStorage.setItem('intentPickerVersion', '1.9.7');
+        }
+        const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
+        if (!pickerDisabled) {
+            setView('intentPicker');
+        } else if (!hasContext || isMinimalLifeContext(lifeContext)) {
+            setView('namePrompt');
+        } else if (!profileExists) {
+            setPostOceanRoute('intent');
+            setView('oceanOnboarding');
+        } else {
+            setView(hasContext ? 'contextChoice' : 'landing');
+        }
+    };
     
     const handleLoginSuccess = async (user: User, key: CryptoKey) => {
         setAndProcessUser(user);
         setEncryptionKey(key);
+        setView('welcome');
         if (isIAPAvailable()) {
-            logInRevenueCat(user.id); // Fire-and-forget: link RevenueCat for future purchases
+            logInRevenueCat(user.id);
         }
         try {
             const data = await userService.loadUserData(key);
             setLifeContext(data.context || '');
             setGamificationState(deserializeGamificationState(data.gamificationState));
 
-            if (user.isAdmin) {
-                setView('admin');
-            } else {
-                const profileExists = await api.checkPersonalityProfile().catch(() => false);
-                setHasPersonalityProfile(profileExists);
-                const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
-                if (!pickerDisabled) {
-                    setView('intentPicker');
-                } else if (!profileExists) {
-                    setView('oceanOnboarding');
+            if (user.isAdmin || user.isDeveloper) {
+                const startupPref = localStorage.getItem('adminStartupPref');
+                if (startupPref === 'normal') {
+                    await routeWithIntentPicker(!!data.context);
                 } else {
-                    setView(data.context ? 'contextChoice' : 'landing');
+                    setView('admin');
                 }
+            } else {
+                await routeWithIntentPicker(!!data.context);
             }
         } catch (error) {
             console.error("Failed to load user data after login, logging out.", error);
@@ -498,6 +581,7 @@ const App: React.FC = () => {
         setAndProcessUser(user);
         setEncryptionKey(key);
         setPaywallUserEmail(email);
+        setView('welcome');
         let hasContext = false;
         try {
             const data = await userService.loadUserData(key);
@@ -513,7 +597,8 @@ const App: React.FC = () => {
             await new Promise(r => setTimeout(r, 500));
         }
 
-        const trySync = async (): Promise<boolean> => {
+        // Returns: 'restored' if access was restored, 'fatal' if the endpoint is not configured, false otherwise
+        const trySync = async (): Promise<'restored' | 'fatal' | false> => {
             try {
                 const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', {
                     method: 'POST',
@@ -527,24 +612,30 @@ const App: React.FC = () => {
                     if (hasAccess) {
                         setAndProcessUser(syncedUser);
                         setPaywallUserEmail(null);
-                        setView(hasContext ? 'contextChoice' : 'landing');
-                        return true;
+                        return 'restored';
                     }
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.warn('[Paywall] RevenueCat sync failed:', err);
+                if (err?.status === 503) return 'fatal';
             }
             return false;
         };
 
-        if (await trySync()) return;
-        await new Promise(r => setTimeout(r, 1000));
-        if (await trySync()) return;
-        await new Promise(r => setTimeout(r, 2000));
-        if (await trySync()) return;
+        const syncResult = await trySync();
+        if (syncResult === 'restored') { await routeWithIntentPicker(hasContext); return; }
+        if (syncResult !== 'fatal') {
+            await new Promise(r => setTimeout(r, 1000));
+            const r2 = await trySync();
+            if (r2 === 'restored') { await routeWithIntentPicker(hasContext); return; }
+            if (r2 !== 'fatal') {
+                await new Promise(r => setTimeout(r, 2000));
+                const r3 = await trySync();
+                if (r3 === 'restored') { await routeWithIntentPicker(hasContext); return; }
+            }
+        }
 
         // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
-        // Backend sync returns 404, but local getCustomerInfo can still show active subscription.
         if (isIAPAvailable()) {
           const rcAccess = await getAccessFromRevenueCat();
           if (rcAccess?.hasAccess) {
@@ -559,7 +650,7 @@ const App: React.FC = () => {
             }
             setAndProcessUser(patched);
             setPaywallUserEmail(null);
-            setView(hasContext ? 'contextChoice' : 'landing');
+            await routeWithIntentPicker(hasContext);
             return;
           }
         }
@@ -621,48 +712,44 @@ const App: React.FC = () => {
     const handleIntentSelected = useCallback((intent: UserIntent) => {
         try { localStorage.setItem('userIntent', intent); } catch {}
 
-        const goToOceanFirst = currentUser && !hasPersonalityProfile;
+        if (intent === 'communication') setHighlightSection('management');
+        else if (intent === 'coaching' || intent === 'lifecoaching') setHighlightSection('topicSearch');
+        else setHighlightSection(null);
 
-        switch (intent) {
-            case 'communication':
-                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
-                if (!currentUser && !localStorage.getItem('guestName')) {
-                    setView('namePrompt');
-                    return;
-                }
-                setHighlightSection('management');
-                setView('botSelection');
-                break;
-
-            case 'coaching':
-                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
-                setView(lifeContext ? 'contextChoice' : 'landing');
-                break;
-
-            case 'lifecoaching':
-                if (goToOceanFirst) { setView('oceanOnboarding'); return; }
-                if (!lifeContext) {
-                    setView('landing');
-                    return;
-                }
-                setHighlightSection('topicSearch');
-                setView('botSelection');
-                break;
+        // Guest flow: always name prompt (with skip), then landing
+        if (!currentUser) {
+            if (!localStorage.getItem('guestName')) {
+                setView('namePrompt');
+            } else {
+                setView('landing');
+            }
+            return;
         }
-    }, [currentUser, hasPersonalityProfile, lifeContext]);
 
-    const routeByStoredIntent = useCallback(() => {
-        const intent = localStorage.getItem('userIntent') as UserIntent | null;
-        if (intent === 'communication') {
-            setHighlightSection('management');
-            setView('botSelection');
-        } else if (intent === 'lifecoaching' && lifeContext) {
-            setHighlightSection('topicSearch');
-            setView('botSelection');
+        // Registered user: no/minimal LC → always name prompt first
+        if (!lifeContext || isMinimalLifeContext(lifeContext)) {
+            setView('namePrompt');
+            return;
+        }
+
+        // Registered user: substantial LC but no profile → OCEAN first
+        if (!hasPersonalityProfile) {
+            setPostOceanRoute('intent');
+            setView('oceanOnboarding');
+            return;
+        }
+
+        // Registered user: substantial LC + profile → profile hint or intent logic
+        routeWithProfileHint(intent);
+    }, [currentUser, hasPersonalityProfile, lifeContext, routeWithProfileHint]);
+
+    const routeAfterOcean = useCallback(() => {
+        if (postOceanRoute === 'landing') {
+            setView('landing');
         } else {
-            setView(lifeContext ? 'contextChoice' : 'landing');
+            routeWithProfileHint(null);
         }
-    }, [lifeContext]);
+    }, [postOceanRoute, routeWithProfileHint]);
 
     const handleOceanOnboardingComplete = async (big5: Big5Result) => {
         if (!currentUser || !encryptionKey) return;
@@ -682,21 +769,22 @@ const App: React.FC = () => {
                 adaptationMode: 'adaptive',
             });
             setHasPersonalityProfile(true);
+            setCompletedLenses(['ocean']);
 
             try {
                 const { user: updatedUser } = await userService.updateCoachingMode('dpfl');
                 setCurrentUser(updatedUser);
             } catch { /* non-critical */ }
 
-            routeByStoredIntent();
+            routeAfterOcean();
         } catch (error) {
             console.error('Onboarding profile save failed:', error);
-            routeByStoredIntent();
+            routeAfterOcean();
         }
     };
 
     const handleOceanOnboardingSkip = () => {
-        routeByStoredIntent();
+        routeAfterOcean();
     };
 
     const handlePersonalitySurveyComplete = async (result: SurveyResult) => {
@@ -1452,8 +1540,9 @@ const App: React.FC = () => {
                 userEmail={paywallUserEmail}
                 userXp={gamificationState.xp}
                 currentUser={currentUser}
+                safeAreaTop={iosSafeAreaTop}
                 onRedeem={() => { setMenuView('redeemCode'); }}
-                onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); setView(lifeContext ? 'contextChoice' : 'landing'); }}
+                onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); routeWithIntentPicker(!!lifeContext); }}
                 onLogout={handleLogout}
                 onDownloadLifeContext={lifeContext ? async () => {
                     await downloadTextFile(lifeContext, 'life-context.md', 'text/markdown;charset=utf-8');
@@ -1489,15 +1578,52 @@ const App: React.FC = () => {
             case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} existingContext={lifeContext || undefined} />;
             case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
             case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'intentPicker': return <IntentPickerView onSelect={handleIntentSelected} isGuest={!currentUser} onSkipPermanently={() => { try { localStorage.setItem('intentPickerDisabled', 'true'); } catch {} setView(lifeContext ? 'contextChoice' : 'landing'); }} />;
-            case 'namePrompt': return <NamePromptView onContinue={(name) => {
-                const template = language === 'de'
-                    ? `# Lebenskontext\n\n## 👤 Kernprofil\n*Allgemeine, stabile Informationen über mich.*\n\n**Ich bin...**: ${name}\n**Land / Bundesland**: \n**Grundwerte**: \n**Allgemeine Stimmung**: \n`
-                    : `# My Life Context\n\n## 👤 Core Profile\n*High-level, stable information about me.*\n\n**I am...**: ${name}\n**Country / State**: \n**Core Values**: \n**General Sentiment**: \n`;
-                setLifeContext(template);
-                setView('landing');
+            case 'intentPicker': return <IntentPickerView onSelect={handleIntentSelected} isGuest={!currentUser} safeAreaTop={iosSafeAreaTop} onSkipPermanently={() => {
+                try { localStorage.setItem('intentPickerDisabled', 'true'); } catch {}
+                if (!lifeContext || isMinimalLifeContext(lifeContext)) {
+                    setView('namePrompt');
+                } else if (!hasPersonalityProfile) {
+                    setPostOceanRoute('intent');
+                    setView('oceanOnboarding');
+                } else {
+                    setView(lifeContext ? 'contextChoice' : 'landing');
+                }
             }} />;
-            case 'oceanOnboarding': return <OceanOnboarding onComplete={handleOceanOnboardingComplete} onSkip={handleOceanOnboardingSkip} />;
+            case 'namePrompt': return <NamePromptView
+                onContinue={(name) => {
+                    const template = language === 'de'
+                        ? `# Lebenskontext\n\n## 👤 Kernprofil\n*Allgemeine, stabile Informationen über mich.*\n\n**Ich bin...**: ${name}\n\n**Land / Bundesland**: \n\n**Grundwerte**: \n\n**Allgemeine Stimmung**: \n`
+                        : `# My Life Context\n\n## 👤 Core Profile\n*High-level, stable information about me.*\n\n**I am...**: ${name}\n\n**Country / State**: \n\n**Core Values**: \n\n**General Sentiment**: \n`;
+                    if (currentUser) {
+                        setLifeContext(template);
+                        if (!hasPersonalityProfile) {
+                            setPostOceanRoute('landing');
+                            setView('oceanOnboarding');
+                        } else {
+                            setView('landing');
+                        }
+                    } else {
+                        setLifeContext(template);
+                        setView('landing');
+                    }
+                }}
+                onSkip={!currentUser ? () => setView('landing') : undefined}
+                safeAreaTop={iosSafeAreaTop}
+            />;
+            case 'oceanOnboarding': return <OceanOnboarding onComplete={handleOceanOnboardingComplete} onSkip={handleOceanOnboardingSkip} safeAreaTop={iosSafeAreaTop} />;
+            case 'profileHint': return <ProfileHintView
+                onDiscover={() => {
+                    setExistingProfileForExtension(null);
+                    setPreselectedLensForSurvey(null);
+                    setView('personalitySurvey');
+                }}
+                onLater={() => applyIntentLogic(null)}
+                onDisable={() => {
+                    try { localStorage.setItem('profileHintDisabled', 'true'); } catch {}
+                    applyIntentLogic(null);
+                }}
+                safeAreaTop={iosSafeAreaTop}
+            />;
             case 'personalitySurvey': {
                 console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension, 'preselectedLens:', preselectedLensForSurvey);
                 return <PersonalitySurvey 
@@ -1668,7 +1794,7 @@ const App: React.FC = () => {
     };
     
     const isAnyModalOpen = useIsAnyModalOpen();
-    const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall', 'intentPicker', 'oceanOnboarding', 'namePrompt'].includes(view);
+    const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall', 'intentPicker', 'oceanOnboarding', 'namePrompt', 'profileHint'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning'].includes(view) && !menuView;
     const nativeBarHeight = minimalBar ? 48 : 60; // Must match Swift: barHeight in NativeGamificationBarView.updateLayout
     const previousViewRef = useRef<NavView>('welcome');
@@ -1814,6 +1940,7 @@ const App: React.FC = () => {
                 onNavigate={handleNavigateFromMenu}
                 onLogout={handleLogout}
                 onStartOver={handleStartOver}
+                showProfileBadge={currentUser?.isPremium && completedLenses.includes('ocean') && (!completedLenses.includes('sd') || !completedLenses.includes('riemann'))}
             />
             <UpdateNotification onUpdate={updateServiceWorker} />
             {isAnalyzing && <AnalyzingView />}
