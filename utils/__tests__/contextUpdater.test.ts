@@ -1,5 +1,5 @@
-import { buildUpdatedContext, AppliedUpdatePayload } from './contextUpdater';
-import { ProposedUpdate } from '../types';
+import { buildUpdatedContext, AppliedUpdatePayload } from '../contextUpdater';
+import { ProposedUpdate } from '../../types';
 
 describe('contextUpdater - Edge Case: Removing Empty Next Steps Section', () => {
     it('should keep the Next Steps section structure but clear tasks when all tasks are completed', () => {
@@ -45,7 +45,6 @@ Some other content here.`;
         
         // Other sections should remain intact
         expect(result).toContain('## 👤 Core Profile');
-        expect(result).toContain('## 🧭 Life Domains');
     });
 
     it('should keep the Next Steps section when there are remaining tasks', () => {

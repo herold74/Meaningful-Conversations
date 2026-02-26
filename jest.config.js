@@ -13,6 +13,7 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^(\\.\\.?\\/)*config/brand$': '<rootDir>/__mocks__/brand.ts',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
