@@ -84,7 +84,7 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end -mt-2 -mr-2">
-            <button onClick={onClose} className="p-2 text-content-secondary hover:text-content-primary" aria-label="Close">
+            <button onClick={onClose} className="p-2 text-content-secondary hover:text-content-primary" aria-label={t('aria_close')}>
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
@@ -104,7 +104,7 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
           <div className="mt-4 p-3 bg-background-tertiary dark:bg-background-primary border border-border-primary rounded-lg">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-lg font-bold text-content-primary">
-                {coachingMode === 'dpc' ? 'DPC Modus' : 'DPFL Modus'}
+                {coachingMode === 'dpc' ? t('coaching_mode_label_dpc') : t('coaching_mode_label_dpfl')}
               </span>
             </div>
             <p className="text-xs text-content-secondary leading-relaxed">
@@ -1986,7 +1986,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <span className="text-xs hidden sm:inline">Audio...</span>
+                                    <span className="text-xs hidden sm:inline">{t('chat_audio_loading')}</span>
                                 </div>
                             )}
                             {!isLoadingAudio && ttsStatus === 'idle' && (
@@ -2112,12 +2112,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                             className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
                                 isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
                             } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
-                            aria-label={isListening ? 'Stop and send' : 'Start recording'}
+                            aria-label={isListening ? t('chat_voice_stop_and_send') : t('chat_voice_start_recording')}
                         >
                             {isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
                         <div className="mt-8 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
-                            <p className="h-14 flex items-center">{input || (isListening ? 'Listening...' : t('chat_tapToSpeak'))}</p>
+                            <p className="h-14 flex items-center">{input || (isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}</p>
                             {isListening && !wakeLock.isSupported && (
                                 <p className="text-xs text-status-warning-foreground mt-1">{t('chat_keep_screen_on')}</p>
                             )}
@@ -2141,10 +2141,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     </div>
                 ) : (
                     <div className="flex items-center justify-center gap-6">
-                        <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? 'Pause Speech' : 'Resume Speech'}>
+                        <button onClick={ttsStatus === 'speaking' ? handlePauseTTS : handleResumeTTS} disabled={ttsStatus === 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={ttsStatus === 'speaking' ? t('chat_voice_pause_speech') : t('chat_voice_resume_speech')}>
                             {ttsStatus === 'speaking' ? <PauseIcon className="w-8 h-8 text-content-primary"/> : <PlayIcon className="w-8 h-8 text-content-primary"/>}
                         </button>
-                        <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={'Repeat'}>
+                        <button onClick={handleRepeatTTS} disabled={!lastSpokenTextRef.current || ttsStatus !== 'idle'} className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary disabled:opacity-50 hover:bg-background-tertiary dark:hover:bg-border-primary shadow" aria-label={t('chat_voice_repeat')}>
                             <RepeatIcon className="w-8 h-8 text-content-primary"/>
                         </button>
                     </div>

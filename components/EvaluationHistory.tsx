@@ -180,7 +180,7 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                             toggleExpand(evalItem.id);
                                         }}
                                         className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
-                                        aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                                        aria-label={isExpanded ? t('aria_collapse') : t('aria_expand')}
                                     >
                                         <svg
                                             className={`w-5 h-5 text-content-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { LoaderProps } from './BrandLoader';
+import { useLocalization } from '../../context/LocalizationContext';
 
 const sizeMap = { sm: 24, md: 36, lg: 52 };
 
@@ -9,10 +10,11 @@ const sizeMap = { sm: 24, md: 36, lg: 52 };
  * Uses the same viewBox="0 0 24 24" SVG paths as LogoIcon.tsx.
  */
 const SteeringWheelLoader: React.FC<LoaderProps> = ({ className = '', size = 'md' }) => {
+  const { t } = useLocalization();
   const s = sizeMap[size];
 
   return (
-    <div className={`inline-flex items-center justify-center ${className}`} role="status" aria-label="Loading">
+    <div className={`inline-flex items-center justify-center ${className}`} role="status" aria-label={t('aria_loading')}>
       <motion.svg
         xmlns="http://www.w3.org/2000/svg"
         width={s}

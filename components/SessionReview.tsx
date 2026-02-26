@@ -758,7 +758,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                     onMouseEnter={() => setHoverRating(star)}
                                     onMouseLeave={() => setHoverRating(0)}
                                     className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}
-                                    aria-label={`Rate ${star} out of 5 stars`}
+                                    aria-label={t('sessionReview_rate_star', { star })}
                                     disabled={feedbackStatus !== 'idle'}
                                 >
                                     <StarIcon 
