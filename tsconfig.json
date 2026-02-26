@@ -35,7 +35,11 @@
     "node_modules",
     "meaningful-conversations-backend",
     "public/sw.js",
-    "components/icons/PlusCircleIcon.tsx"
+    "components/icons/PlusCircleIcon.tsx",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
