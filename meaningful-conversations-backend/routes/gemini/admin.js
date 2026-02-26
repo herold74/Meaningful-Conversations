@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
-const prisma = require('../prismaClient.js');
-const { getCacheStats } = require('../services/promptCache.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
+const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
+const prisma = require('../../prismaClient.js');
+const { getCacheStats } = require('../../services/promptCache.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
 
 // GET /api/gemini/cache/stats - Admin endpoint for cache statistics
 router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {

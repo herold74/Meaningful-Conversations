@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth.js');
-const { botRecommendationPrompts } = require('../services/geminiPrompts.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
-const { botRecommendationLimiter } = require('../middleware/rateLimiter.js');
+const authMiddleware = require('../../middleware/auth.js');
+const { botRecommendationPrompts } = require('../../services/geminiPrompts.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
+const { botRecommendationLimiter } = require('../../middleware/rateLimiter.js');
 
 // POST /api/gemini/bot-recommendation
 // Returns a primary and secondary bot recommendation for a given topic

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
+const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
 
 // POST /api/gemini/interview/transcript — Generate summary + corrected transcript for Gloria Interview
 router.post('/interview/transcript', optionalAuthMiddleware, async (req, res) => {
