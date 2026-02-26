@@ -116,3 +116,22 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - `services/api.ts`: uses `brand.serverIp` for the IP-fallback entry in the backend URL map.
   - `seed.js`: uses `process.env.SERVER_HOST` for production safety check.
 
+### 14. Backend Modularization (Facade Pattern)
+- **Decision:** Split large monolithic backend files into focused modules, keeping the original file as a re-exporting facade.
+- **Reasoning:** `gemini.js` (1,873 lines), `constants.js` (1,900 lines), and `behaviorLogger.js` (1,300 lines) were too large to maintain. Smaller modules improve readability, testability, and reduce merge conflicts.
+- **Implementation:**
+  - `routes/gemini.js` → Facade that `router.use()` mounts 8 sub-routers from `routes/gemini/` (translate, chat, session, interview, admin, transcript, botRecommendation, shared).
+  - `constants.js` → Facade re-exporting from `bots.js` (bot definitions) and `crisisText.js` (crisis response text).
+  - `services/behaviorLogger.js` → Facade re-exporting from `services/behavior/` (riemannKeywords, big5Keywords, sdKeywords, analyzerCore, analyzers).
+  - **Important:** Sub-modules in `routes/gemini/` use `../../middleware/` and `../../services/` paths (two levels up from the routes directory).
+  - All existing consumers require the original file path unchanged — zero-impact refactor.
+
+### 15. Test Infrastructure
+- **Decision:** Jest + ts-jest for frontend, Jest + supertest for backend, with shared mocks.
+- **Reasoning:** Comprehensive testing needed for security-critical code (encryption, auth, input validation) and complex business logic (personality analysis, coaching strategies).
+- **Implementation:**
+  - Frontend: `jest.config.js` with `moduleNameMapper` for `config/brand` mock (bypasses `import.meta.env`). Test files in `utils/__tests__/`.
+  - Backend: `meaningful-conversations-backend/__mocks__/prismaClient.js` provides shared Prisma mock. Test files in `services/__tests__/`, `routes/__tests__/`, `middleware/__tests__/`.
+  - `tsconfig.json` excludes `**/__tests__/**` and `**/*.test.ts` from production `tsc` build.
+  - 33 suites, 724+ tests total across both stacks.
+

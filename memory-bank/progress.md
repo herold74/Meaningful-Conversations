@@ -21,7 +21,7 @@
     - [x] Kenji (Mindful, Zen-inspired)
     - [x] Chloe (Structured Reflection)
     - [x] Rob (Mental Fitness)
-    - [x] Gloria Life Context (Onboarding interview, formerly G-Interviewer)
+    - [x] Gloria Life Context (Onboarding interview)
     - [x] Gloria Interview (Structured topic interviews with summary + corrected transcript export)
 - [x] **Data Privacy:**
     - [x] Guest Mode (Local only, no server storage)
@@ -51,6 +51,7 @@
     - [x] Web Speech API integration
     - [x] Continuous mode with interim results
     - [x] Multi-platform support (Chrome, Safari, Mobile)
+    - [x] Android voice duplication fix
 - [x] **Text-to-Speech:**
     - [x] Server TTS (Piper voices: Thorsten DE, Amy/Ryan EN)
     - [x] Local TTS (Web Speech API fallback)
@@ -75,14 +76,14 @@
 - [x] **PayPal:** Donations/Payments
 
 ## UI/UX
-- [x] **Visual Redesign (feature/visual-redesign):**
+- [x] **Visual Redesign (merged to main):**
     - [x] Inter Variable Font (self-hosted, offline Capacitor support)
     - [x] W4F Color Palette (4 blue shades + amber accent)
     - [x] Semantic design tokens (CSS variables + Tailwind)
     - [x] Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
     - [x] Framer Motion page transitions & micro-interactions
     - [x] 30+ views modernized (rounded cards, elevated shadows, pill buttons)
-- [x] **Brand-Driven Design System (feature/visual-redesign):**
+- [x] **Brand-Driven Design System:**
     - [x] 4-shade brand palette via `VITE_BRAND_COLOR_1` to `_4` env vars
     - [x] Accent color via `VITE_BRAND_ACCENT`
     - [x] Vite plugin injects CSS custom properties on `:root`
@@ -98,7 +99,30 @@
     - [x] Winter: Snowflakes (Dec 1 - Jan 6)
 - [x] **Dark/Light Mode:** User preference with auto-detection
 - [x] **PWA:** Installable, offline-capable
-- [x] **Multi-language:** German and English
+- [x] **Multi-language:** German and English (1,518 keys, perfect DE/EN parity)
+
+## Security (v1.9.8)
+- [x] **PayPal Webhook Verification:** Full signature verification via PayPal API
+- [x] **Debug Endpoints:** Protected with adminAuth middleware
+- [x] **Analytics:** userId derived from auth token, not request body
+- [x] **XSS Prevention:** escapeHtml for dangerouslySetInnerHTML usage
+- [x] **Input Validation:** Size limits on context (500KB) and gamificationState (50KB)
+- [x] **Error Leakage:** Generic error messages to clients
+- [x] **SQL Injection:** Replaced $queryRawUnsafe with tagged template literals
+- [x] **IP Externalization:** Server IP never hardcoded, git history scrubbed
+
+## Code Quality (v1.9.8)
+- [x] **Test Coverage:**
+    - [x] Frontend: 9 utility test suites (encryption, gamification, BFI-2, diff, PII, voice, dates, behavior, survey)
+    - [x] Backend: 7 service tests, 5 route integration tests, 4 middleware tests
+    - [x] Total: 33 suites, 724+ tests
+- [x] **Backend Modularization:**
+    - [x] gemini.js → 8 focused route modules in routes/gemini/
+    - [x] constants.js → bots.js + crisisText.js
+    - [x] behaviorLogger.js → 5 modules in services/behavior/
+    - [x] Facade pattern for backward compatibility
+- [x] **i18n Cleanup:** 311 unused keys removed, 27 hardcoded strings extracted
+- [x] **Documentation:** 48 docs audited, 28 drift issues fixed, 6 archived
 
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
@@ -115,8 +139,8 @@
     - [x] Native Speech Recognition Service abstraction
     - [x] Native In-App Purchase (StoreKit 2 via RevenueCat)
     - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
-    - [x] NativePaywall (`NativePaywall.tsx`) mit Restore, aktive Produkte, Fallback
-    - [ ] App Store Connect Produkte anlegen
+    - [x] NativePaywall with Restore, active products, fallback
+    - [ ] App Store Connect product setup
     - [ ] App Store Deployment (TestFlight)
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
@@ -132,17 +156,15 @@
     - [x] Frontend native paywall (`NativePaywall.tsx`)
     - [x] Restore Purchases functionality
     - [ ] App Store Connect product setup (subscriptions + non-consumables)
-    - [ ] Apple Server Notifications URL in App Store Connect eintragen
+    - [ ] Apple Server Notifications URL in App Store Connect
     - [ ] Sandbox & TestFlight testing
-- [ ] **Registered Monthly Subscription:** 3,90 EUR/month (PayPal Subscriptions API)
+- [ ] **Registered Monthly Subscription:** 3.90 EUR/month (PayPal Subscriptions API)
 - [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing
 
 ## Pending / Roadmap
-- [ ] **Android Voice Fix:** Investigate duplication issue (PWA)
-- [x] **Testing:** Comprehensive unit/integration tests (v1.8.2)
+- [ ] **OCEAN-Onboarding:** Question-by-question flow for registered users (Phase 3.5)
 - [ ] **Performance:** Large context file optimization
 - [ ] **Accessibility:** WCAG compliance audit
 
 ## Known Issues
-- **Android Voice Duplication:** Speech recognition shows repeated words on some Android devices. AI filters duplicates correctly, but UX is affected. Under investigation.
 - **Safari PDF:** Client-side PDF generation with `html2pdf.js` has Safari compatibility issues. Warning displayed to users.
