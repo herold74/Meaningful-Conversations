@@ -1,7 +1,7 @@
 #!/bin/bash
 ################################################################################
 # Deployment Script for Manualmode Server (Podman-based)
-# Deploys to ssh root@<YOUR_SERVER_IP>
+# Deploys to ssh root@$SERVER_HOST (set via .env.server or environment)
 ################################################################################
 
 set -e
@@ -13,8 +13,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configuration
-REMOTE_HOST="root@<YOUR_SERVER_IP>"  # Default, can be overridden with --server
+# Configuration — SERVER_HOST from environment or .env.server
+if [ -f "$(dirname "$0")/.env.server" ]; then
+    source "$(dirname "$0")/.env.server"
+fi
+REMOTE_HOST="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
 REMOTE_DIR="/opt/manualmode"
 
 # Will be set after parsing arguments
@@ -45,7 +48,7 @@ show_help() {
     echo "Options:"
     echo "  -e, --env ENV         Environment: staging (default) or production"
     echo "  -c, --component COMP  Component: all (default), app, frontend, backend, or tts"
-    echo "  --server HOST         Remote server (default: root@<YOUR_SERVER_IP>)"
+    echo "  --server HOST         Remote server (default: root@\$SERVER_HOST)"
     echo "  -s, --skip-build      Skip building images (use existing)"
     echo "  -p, --skip-push       Skip pushing to registry (deploy existing)"
     echo "  -d, --dry-run         Show what would be deployed without doing it"

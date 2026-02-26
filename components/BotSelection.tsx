@@ -437,7 +437,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         const unlockedCoaches = currentUser?.unlockedCoaches || [];
         
         if (currentUser) {
-          if (currentUser.isAdmin) {
+          if (currentUser.isAdmin || currentUser.isDeveloper) {
               userAccessLevel = 'client'; // Admins & Developers have full bot access
           } else if (currentUser.isClient) {
               userAccessLevel = 'client';

@@ -55,7 +55,7 @@ show_dashboard() {
     echo "║      Meaningful Conversations - Resource Monitor Dashboard       ║"
     echo "╚═══════════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
-    echo -e "${WHITE}Server: <YOUR_SERVER_IP> (manualmode)${NC}"
+    echo -e "${WHITE}Server: ${SERVER_HOST:-unknown} (manualmode)${NC}"
     echo -e "${WHITE}Updated: $(date '+%Y-%m-%d %H:%M:%S')${NC}"
     echo ""
     
