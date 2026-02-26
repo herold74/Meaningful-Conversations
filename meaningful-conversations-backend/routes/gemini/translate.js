@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
-const prisma = require('../prismaClient.js');
-const aiProviderService = require('../services/aiProviderService.js');
+const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
+const prisma = require('../../prismaClient.js');
+const aiProviderService = require('../../services/aiProviderService.js');
 
 // Timeout helper (local to translate - different default than shared)
 const withTimeout = (promise, timeoutMs = 25000) => {

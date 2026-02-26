@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
-const prisma = require('../prismaClient.js');
-const { BOTS } = require('../constants.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
-const dynamicPromptController = require('../services/dynamicPromptController.js');
-const behaviorLogger = require('../services/behaviorLogger.js');
+const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
+const prisma = require('../../prismaClient.js');
+const { BOTS } = require('../../constants.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
+const dynamicPromptController = require('../../services/dynamicPromptController.js');
+const behaviorLogger = require('../../services/behaviorLogger.js');
 const { withTimeout } = require('./shared.js');
 
 // POST /api/gemini/chat/send-message

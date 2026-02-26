@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const optionalAuthMiddleware = require('../middleware/optionalAuth.js');
-const prisma = require('../prismaClient.js');
-const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = require('../services/geminiPrompts.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
+const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
+const prisma = require('../../prismaClient.js');
+const { analysisPrompts, interviewFormattingPrompts, getInterviewTemplate } = require('../../services/geminiPrompts.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
 
 /**
  * Helper function to normalize text for comparison (remove punctuation, lowercase, trim)
