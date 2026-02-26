@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth.js');
-const prisma = require('../prismaClient.js');
-const { transcriptEvaluationPrompts } = require('../services/geminiPrompts.js');
-const { trackApiUsage } = require('../services/apiUsageTracker.js');
-const aiProviderService = require('../services/aiProviderService.js');
-const { audioTranscribeLimiter } = require('../middleware/rateLimiter.js');
+const authMiddleware = require('../../middleware/auth.js');
+const prisma = require('../../prismaClient.js');
+const { transcriptEvaluationPrompts } = require('../../services/geminiPrompts.js');
+const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const aiProviderService = require('../../services/aiProviderService.js');
+const { audioTranscribeLimiter } = require('../../middleware/rateLimiter.js');
 const { audioUpload, withTimeout } = require('./shared.js');
 
 // POST /api/gemini/transcript/evaluate
