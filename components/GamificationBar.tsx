@@ -137,7 +137,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
          <button
             onClick={toggleDarkMode}
             className="p-2 text-content-secondary hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
-            aria-label="Toggle theme"
+            aria-label={t('aria_toggle_theme')}
         >
             {isDarkMode === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
         </button>
@@ -147,7 +147,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
          <button
             onClick={toggleColorTheme}
             className="p-2 text-content-secondary hover:text-accent-primary transition-colors"
-            aria-label="Toggle color theme"
+            aria-label={t('aria_toggle_color_theme')}
         >
             <PaletteIcon className="w-6 h-6" />
         </button>
@@ -272,7 +272,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     <button 
                         onClick={onViewAchievements} 
                         className="p-2 text-content-secondary hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
-                        aria-label="View Achievements"
+                        aria-label={t('aria_view_achievements')}
                     >
                         <TrophyIcon className="w-6 h-6"/>
                     </button>

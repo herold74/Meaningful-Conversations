@@ -320,7 +320,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             >
                 <div className="flex justify-between items-center mb-4">
                     <h2 id="voice-modal-title" className="text-2xl font-bold text-content-primary uppercase">{t('voiceModal_title')}</h2>
-                    <button onClick={onClose} className="p-2 text-content-secondary hover:text-content-primary" aria-label="Close">
+                    <button onClick={onClose} className="p-2 text-content-secondary hover:text-content-primary" aria-label={t('aria_close')}>
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>
@@ -377,7 +377,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                             onClick={(e) => { e.preventDefault(); isVoiceEnabled(voice) && onPreviewServerVoice(voice.id); }}
                                             disabled={!isVoiceEnabled(voice)}
                                             className="p-2 text-content-secondary hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                                            aria-label={`Preview voice ${voice.name}`}
+                                            aria-label={t('voiceModal_preview_voice', { name: voice.name })}
                                         >
                                             <PlayIcon className="w-5 h-5" />
                                         </button>
@@ -425,7 +425,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         <button
                                             onClick={(e) => { e.preventDefault(); onPreviewNativeVoice?.(voice.identifier); }}
                                             className="p-2 text-content-secondary hover:text-accent-primary"
-                                            aria-label={`Preview voice ${voice.name}`}
+                                            aria-label={t('voiceModal_preview_voice', { name: voice.name })}
                                         >
                                             <PlayIcon className="w-5 h-5" />
                                         </button>
@@ -468,7 +468,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         <button
                                             onClick={(e) => { e.preventDefault(); onPreviewVoice(voice); }}
                                             className="p-2 text-content-secondary hover:text-accent-primary"
-                                            aria-label={`Preview voice ${voice.name}`}
+                                            aria-label={t('voiceModal_preview_voice', { name: voice.name })}
                                         >
                                             <PlayIcon className="w-5 h-5" />
                                         </button>
