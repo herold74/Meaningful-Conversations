@@ -181,6 +181,8 @@
 - [x] **iOS In-App Purchase:** Backend + Frontend implementiert (main); Sandbox-Tests ausstehend
 
 ## Decision Log
+- **2026-02-26:** Server IP externalized — all scripts/Makefile/api.ts read from `.env.server` (gitignored). Git history scrubbed with `git-filter-repo`. Repo is public.
+- **2026-02-26:** Documentation drift audit — 48 docs audited, 28 with drift fixed, 6 archived, 2 significantly outdated updated. PayPal webhook verification implemented. Developer bot access fixed. Trial period docs aligned (9 days).
 - **2026-02-11:** Dockerfiles auf `npm ci` umgestellt nach express-rate-limit Crash auf Staging
 - **2026-02-11:** Deploy-Script Health-Checks mit Retry-Logik und hartem Fehler-Exit
 - **2026-02-11:** isDeveloper Role eingefuehrt, isBetaTester → isPremium Rename

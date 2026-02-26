@@ -104,3 +104,15 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Fine-grained access control for different feature sets and pricing tiers. Developer role separates test infrastructure access from general admin capabilities.
 - **Implementation:** Boolean flags on User model (`isPremium`, `isClient`, `isAdmin`, `isDeveloper`). Server-side enforcement in route handlers. Frontend gating via `currentUser` flags. Access matrix documented in `DOCUMENTATION/USER-ACCESS-MATRIX.md`.
 
+### 13. Externalized Server IP (Security)
+- **Decision:** Never hardcode the server IP in committed code. Read from environment variables sourced from a gitignored `.env.server` file.
+- **Reasoning:** The GitHub repo is public. Hardcoded IPs expose infrastructure to scanning/attacks. Git history was scrubbed with `git-filter-repo` after the IP was found in 30+ files.
+- **Implementation:**
+  - `.env.server` (gitignored): contains `SERVER_HOST=<real-ip>`, sourced by all shell scripts and Makefile.
+  - `.env.server.example` (committed): template with placeholder.
+  - `Makefile`: `-include .env.server`, defines `REMOTE_SSH := root@$(SERVER_HOST)`.
+  - `deploy-manualmode.sh` and `scripts/*.sh`: source `.env.server`, use `${SERVER_HOST:?error}`.
+  - `config/brand.ts`: `serverIp` field from `VITE_BRAND_SERVER_IP` (set in `.env.local`, gitignored).
+  - `services/api.ts`: uses `brand.serverIp` for the IP-fallback entry in the backend URL map.
+  - `seed.js`: uses `process.env.SERVER_HOST` for production safety check.
+

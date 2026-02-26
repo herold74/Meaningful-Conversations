@@ -6,6 +6,11 @@
 
 set -e
 
+# Load server config
+if [ -f "$(dirname "$0")/.env.server" ]; then
+    source "$(dirname "$0")/.env.server"
+fi
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -268,12 +273,12 @@ EOF
 
 # Create staging environment
 if [ "$SETUP_STAGING" = true ]; then
-    create_env_file "staging" "Staging" "meaningful_conversations_staging" "http://<YOUR_SERVER_IP>:8080"
+    create_env_file "staging" "Staging" "meaningful_conversations_staging" "http://${SERVER_HOST}:8080"
 fi
 
 # Create production environment
 if [ "$SETUP_PRODUCTION" = true ]; then
-    create_env_file "production" "Production" "meaningful_conversations_production" "http://<YOUR_SERVER_IP>"
+    create_env_file "production" "Production" "meaningful_conversations_production" "http://${SERVER_HOST}"
 fi
 
 # Final summary
@@ -356,7 +361,7 @@ if [ -f .env.alternative ] || [ -f .env.staging ] || [ -f .env.production ]; the
     echo ""
     echo -e "${YELLOW}Existing environment files detected!${NC}"
     echo -e "${YELLOW}If migrating from the old alternative server (46.224.37.130):${NC}"
-    echo -e "${YELLOW}  - New server: <YOUR_SERVER_IP> (manualmode)${NC}"
+    echo -e "${YELLOW}  - New server: \${SERVER_HOST} (manualmode)${NC}"
     echo -e "${YELLOW}  - Review and update your .env files with new URLs${NC}"
     echo ""
 fi

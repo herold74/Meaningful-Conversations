@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const adminAuth = require('../middleware/adminAuth');
 
 // Debug log file path
 const DEBUG_LOG_PATH = process.env.DEBUG_LOG_PATH || '/tmp/mc-debug.log';
@@ -11,7 +12,7 @@ const DEBUG_LOG_PATH = process.env.DEBUG_LOG_PATH || '/tmp/mc-debug.log';
  * Receives debug logs from frontend and writes them to a file
  * Used for debugging issues on devices without developer tools access
  */
-router.post('/log', async (req, res) => {
+router.post('/log', adminAuth, async (req, res) => {
     try {
         const { location, message, data, timestamp, sessionId } = req.body;
         
@@ -41,7 +42,7 @@ router.post('/log', async (req, res) => {
  * GET /api/debug/logs
  * Retrieves recent debug logs (admin only in production)
  */
-router.get('/logs', async (req, res) => {
+router.get('/logs', adminAuth, async (req, res) => {
     try {
         if (!fs.existsSync(DEBUG_LOG_PATH)) {
             return res.json({ logs: [] });
@@ -70,7 +71,7 @@ router.get('/logs', async (req, res) => {
  * DELETE /api/debug/logs
  * Clears debug logs
  */
-router.delete('/logs', async (req, res) => {
+router.delete('/logs', adminAuth, async (req, res) => {
     try {
         if (fs.existsSync(DEBUG_LOG_PATH)) {
             fs.unlinkSync(DEBUG_LOG_PATH);

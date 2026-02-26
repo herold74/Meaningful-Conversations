@@ -1,5 +1,12 @@
 .PHONY: help build push deploy clean setup test logs status
 
+# Load server config from .env.server (gitignored, contains SERVER_HOST)
+-include .env.server
+export SERVER_HOST
+
+# Remote server — set SERVER_HOST in .env.server or environment
+REMOTE_SSH := root@$(SERVER_HOST)
+
 # Detect container engine (Podman or Docker)
 CONTAINER_ENGINE := $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
 COMPOSE_CMD := $(shell command -v podman-compose 2>/dev/null || command -v docker-compose 2>/dev/null)
@@ -283,68 +290,68 @@ deploy-manualmode-production: deploy-production
 deploy-manualmode: deploy-staging
 
 logs-staging: ## View logs from staging
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml logs -f'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml logs -f'
 
 logs-production: ## View logs from production
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
 
 status-staging: ## Check status on staging
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml ps'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml ps'
 
 status-production: ## Check status on production
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
 
 restart-staging: ## Restart staging with automatic Nginx IP update
 	@echo "$(GREEN)Restarting staging with automatic Nginx update...$(NC)"
-	@ssh root@<YOUR_SERVER_IP> 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging'
+	@ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging'
 
 restart-production: ## Restart production with automatic Nginx IP update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production services!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		ssh root@<YOUR_SERVER_IP> 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production'; \
+		ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production'; \
 	else \
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
 restart-staging-backend: ## Restart only staging backend with Nginx update
 	@echo "$(GREEN)Restarting staging backend...$(NC)"
-	@ssh root@<YOUR_SERVER_IP> 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging backend'
+	@ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging backend'
 
 restart-production-backend: ## Restart only production backend with Nginx update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production backend!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		ssh root@<YOUR_SERVER_IP> 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production backend'; \
+		ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh production backend'; \
 	else \
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
 stop-staging: ## Stop staging services
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
 
 stop-production: ## Stop production services
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml down'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml down'
 
 pod-status: ## Check pod status (both environments)
-	@ssh root@<YOUR_SERVER_IP> 'podman pod ps && echo "" && podman ps --pod'
+	@ssh $(REMOTE_SSH) 'podman pod ps && echo "" && podman ps --pod'
 
 db-shell-staging: ## Open MariaDB shell on staging
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_staging'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_staging'
 
 db-shell-production: ## Open MariaDB shell on production
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_production'
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_production'
 
 db-backup-staging: ## Backup MariaDB on staging
 	@echo "Backing up staging database..."
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-staging-$$(date +%Y%m%d-%H%M%S).sql"
 
 db-backup-production: ## Backup MariaDB on production
 	@echo "Backing up production database..."
-	@ssh root@<YOUR_SERVER_IP> 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
+	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-production-$$(date +%Y%m%d-%H%M%S).sql"
 
 # Legacy aliases for backward compatibility
@@ -370,18 +377,18 @@ monitor-dashboard: ## Show interactive resource monitoring dashboard (local)
 	@bash scripts/monitor-dashboard.sh
 
 monitor-dashboard-remote: ## Show resource dashboard on remote server
-	@ssh -t root@<YOUR_SERVER_IP> 'bash /opt/manualmode-production/scripts/monitor-dashboard.sh'
+	@ssh -t $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/monitor-dashboard.sh'
 
 monitor-stats: ## Show container stats on remote server
-	@ssh root@<YOUR_SERVER_IP> 'podman stats --no-stream'
+	@ssh $(REMOTE_SSH) 'podman stats --no-stream'
 
 monitor-system: ## Show system resources on remote server
-	@ssh root@<YOUR_SERVER_IP> 'free -h && echo "---" && uptime && echo "---" && df -h /'
+	@ssh $(REMOTE_SSH) 'free -h && echo "---" && uptime && echo "---" && df -h /'
 
 setup-swap: ## Setup 4GB swap on remote server
 	@echo "$(YELLOW)Setting up swap on remote server...$(NC)"
-	@scp scripts/setup-swap.sh root@<YOUR_SERVER_IP>:/tmp/
-	@ssh root@<YOUR_SERVER_IP> 'bash /tmp/setup-swap.sh && rm /tmp/setup-swap.sh'
+	@scp scripts/setup-swap.sh $(REMOTE_SSH):/tmp/
+	@ssh $(REMOTE_SSH) 'bash /tmp/setup-swap.sh && rm /tmp/setup-swap.sh'
 
 # Legacy aliases
 monitor-dashboard-manualmode: monitor-dashboard-remote

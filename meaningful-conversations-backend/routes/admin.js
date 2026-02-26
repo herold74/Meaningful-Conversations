@@ -236,7 +236,7 @@ let referrerColumnAvailable = null; // null = unknown, true/false = checked
 async function hasReferrerColumn() {
     if (referrerColumnAvailable !== null) return referrerColumnAvailable;
     try {
-        await prisma.$queryRawUnsafe(`SELECT referrer FROM UpgradeCode LIMIT 0`);
+        await prisma.$queryRaw`SELECT referrer FROM UpgradeCode LIMIT 0`;
         referrerColumnAvailable = true;
     } catch {
         referrerColumnAvailable = false;

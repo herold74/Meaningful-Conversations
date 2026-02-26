@@ -2,7 +2,11 @@
 # Schedule one-time restart for tomorrow at 06:00
 # This script sets up the cron job on the manualmode server
 
-SERVER="root@<YOUR_SERVER_IP>"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+if [ -f "$SCRIPT_DIR/.env.server" ]; then
+    source "$SCRIPT_DIR/.env.server"
+fi
+SERVER="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
 RESTART_TIME="06:00"
 
 echo "==========================================="

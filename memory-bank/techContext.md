@@ -80,9 +80,10 @@
 ## Infrastructure & Deployment
 
 ### Server
-- **Provider:** Hetzner VPS (<YOUR_SERVER_IP>)
+- **Provider:** Hetzner VPS
 - **Containerization:** Podman + podman-compose
 - **Reverse Proxy:** Nginx with auto-generated configs
+- **Server IP:** Externalized via `SERVER_HOST` env var (never hardcoded in repo — public GitHub repo)
 
 ### Environments
 - **Staging:** `/opt/manualmode-staging/` → mc-beta.manualmode.at
@@ -169,6 +170,15 @@ npx prisma migrate dev --name beschreibender_name
 - **PayPal:** Webhook integration for donations
 
 ## Configuration
-- **Frontend:** `.env` files (`VITE_BACKEND_URL_*`)
+- **Frontend:** `.env` files (`VITE_BACKEND_URL_*`, `VITE_BRAND_*`)
 - **Backend:** `.env` file (`DATABASE_URL`, `GEMINI_API_KEY`, `JWT_SECRET`, etc.)
 - **TTS:** `TTS_SERVICE_URL` environment variable
+- **Server IP:** `.env.server` file (gitignored) — contains `SERVER_HOST=<ip>`. Read by deploy scripts, Makefile, and monitoring scripts. Template: `.env.server.example`.
+- **Frontend server IP fallback:** `VITE_BRAND_SERVER_IP` in `.env.local` — used by `config/brand.ts` → `services/api.ts` for direct-IP access
+
+### Security: No Hardcoded IPs
+The repo is public on GitHub. Real server IPs are **never** committed:
+- Shell scripts source `.env.server` for `$SERVER_HOST`
+- Makefile uses `-include .env.server` and `$(REMOTE_SSH)` variable
+- Frontend uses `VITE_BRAND_SERVER_IP` via `config/brand.ts`
+- Git history was scrubbed with `git-filter-repo` (Feb 2026)
