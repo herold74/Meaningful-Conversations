@@ -48,16 +48,12 @@
 - Fixed relative import paths in `routes/gemini/*.js` (`../` → `../../` for middleware, services, prismaClient).
 - Developer bot access: `BotSelection.tsx` now grants full access to both `isAdmin` and `isDeveloper`.
 
-## Known Issues
-- **Safari PDF:** Client-side PDF generation has Safari compatibility issues. Warning displayed to users.
-
 ## Active Tasks
-- [ ] iOS App Store Connect product setup & TestFlight
-- [ ] OCEAN-Onboarding flow for registered users (Phase 3.5)
-- [ ] PayPal Monthly Subscription integration (3.90 EUR/month)
+- [ ] iOS App Store Connect: create products, set Notifications URL, TestFlight testing
 - [ ] Android Capacitor project setup
-- [ ] Accessibility (WCAG) compliance audit
-- [ ] Large context file performance optimization
+- [ ] PayPal Monthly Subscription on web (3.90 EUR/month — Subscriptions API not yet implemented)
+- [ ] Large context file performance optimization (no virtualization/chunking yet)
+- [ ] Formal WCAG accessibility audit tooling (aria attributes already in place throughout)
 
 ## Decision Log
 - **2026-02-26:** Memory bank updated to reflect v1.9.8 state. All stale references to `feature/visual-redesign` branch removed — that work was merged to `main` prior to this session.
