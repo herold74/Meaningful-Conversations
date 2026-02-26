@@ -121,11 +121,10 @@ router.post('/translate', optionalAuthMiddleware, async (req, res) => {
         if (error.message.includes('timeout')) {
             return res.status(504).json({ 
                 error: 'Translation timeout', 
-                message: 'The text is too long. Please try with shorter content.',
-                details: error.message 
+                message: 'The text is too long. Please try with shorter content.'
             });
         }
-        return res.status(500).json({ error: 'Translation failed', details: error.message });
+        return res.status(500).json({ error: 'Translation failed' });
     }
 });
 
@@ -1824,7 +1823,7 @@ IMPORTANT: Output ONLY the speaker identification and transcript, no additional 
         });
 
         if (error.message?.includes('Unsupported audio format')) {
-            return res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: 'Unsupported audio format. Please use a supported format.' });
         }
 
         res.status(500).json({ error: 'Failed to transcribe audio.' });

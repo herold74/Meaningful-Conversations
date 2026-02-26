@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const adminAuth = require('../middleware/adminAuth');
 const { checkGuestLimit, incrementGuestUsage, getGuestStats } = require('../services/guestLimitTracker');
 
 /**
@@ -60,13 +61,8 @@ router.post('/increment-usage', async (req, res) => {
  * GET /api/guest/stats
  * Get guest usage statistics (admin only)
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats', adminAuth, async (req, res) => {
     try {
-        // Optional: Add admin authentication check here
-        // if (!req.userId || !isAdmin(req.userId)) {
-        //     return res.status(403).json({ error: 'Unauthorized' });
-        // }
-
         const stats = await getGuestStats();
         res.status(200).json(stats);
 

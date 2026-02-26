@@ -34,6 +34,9 @@ interface PaywallViewProps {
   onDownloadProfile?: () => void;
 }
 
+const escapeHtml = (str: string): string =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
 const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, currentUser, safeAreaTop = 0, onRedeem, onPurchaseSuccess, onLogout, onDownloadData, onDownloadLifeContext, onDownloadProfile }) => {
   const { t } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
@@ -136,8 +139,8 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
 
   const description = userEmail
     ? (userXp >= 100
-      ? t('paywall_description_engaged', { email: userEmail, contactEmail: brand.contactEmail, primaryColor: brand.primaryColor })
-      : t('paywall_description_expired', { email: userEmail }))
+      ? t('paywall_description_engaged', { email: escapeHtml(userEmail), contactEmail: brand.contactEmail, primaryColor: brand.primaryColor })
+      : t('paywall_description_expired', { email: escapeHtml(userEmail) }))
     : t('paywall_description_new');
 
   const accessProducts = products.filter(p => p.category === 'access');

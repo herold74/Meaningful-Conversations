@@ -16,6 +16,7 @@ export const brand = {
   domainStaging:    import.meta.env.VITE_BRAND_DOMAIN_STAGING     || 'mc-beta.manualmode.at',
   domainProduction: import.meta.env.VITE_BRAND_DOMAIN_PRODUCTION  || 'mc-app.manualmode.at',
   appUrlProduction: import.meta.env.VITE_BRAND_APP_URL_PRODUCTION || 'https://mc-app.manualmode.at',
+  serverIp:         import.meta.env.VITE_BRAND_SERVER_IP           || '',
 
   /** 4-shade brand palette (lightest to darkest) */
   color1: import.meta.env.VITE_BRAND_COLOR_1 || '#5BBFBF',

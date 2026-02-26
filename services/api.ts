@@ -68,7 +68,7 @@ export const getApiBaseUrl = (): string => {
         // Uses relative paths - nginx on host handles /api routing to backend containers
         [brand.domainStaging]: '',   // Staging: nginx proxies /api to backend pod
         [brand.domainProduction]: '',    // Production: nginx proxies /api to backend pod
-        '<YOUR_SERVER_IP>': '',            // Manualmode server: IP fallback
+        ...(brand.serverIp ? { [brand.serverIp]: '' } : {}), // Server IP fallback (from VITE_BRAND_SERVER_IP)
         
         // Local development - connect to local backend
         'localhost:5173': 'http://localhost:3001',  // Vite dev server

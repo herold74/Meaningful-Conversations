@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../prismaClient.js');
 const adminAuthMiddleware = require('../middleware/adminAuth.js');
+const optionalAuth = require('../middleware/optionalAuth.js');
 
 /**
  * POST /api/analytics/event
  * Track a user event (public endpoint)
  */
-router.post('/event', async (req, res) => {
+router.post('/event', optionalAuth, async (req, res) => {
   try {
-    const { eventType, userId, metadata } = req.body;
+    const { eventType, metadata } = req.body;
+    const userId = req.userId || null;
 
     if (!eventType) {
       return res.status(400).json({ error: 'eventType is required' });

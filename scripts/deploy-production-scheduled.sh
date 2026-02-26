@@ -26,8 +26,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configuration
-REMOTE_HOST="root@<YOUR_SERVER_IP>"
+# Configuration — SERVER_HOST from environment or .env.server
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+if [ -f "$SCRIPT_DIR/.env.server" ]; then
+    source "$SCRIPT_DIR/.env.server"
+fi
+REMOTE_HOST="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
 REMOTE_DIR="/opt/manualmode-production"
 COMPOSE_FILE="podman-compose-production.yml"
 DOMAIN="mc-app.manualmode.at"
