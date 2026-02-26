@@ -25,7 +25,7 @@
     - `ics`: Calendar generation
     - `react-markdown` + `remark-gfm`: Markdown rendering
 
-### Brand-Driven Design System (feature/visual-redesign)
+### Brand-Driven Design System
 - **Config:** `config/brand.ts` — 4-shade palette (`color1`-`color4`), `accent`, `loader` type
 - **Build-time injection:** `vite-plugin-brand.ts` converts hex → RGB, injects CSS custom properties on `:root`
 - **CSS variables:** `--brand-color-1` to `--brand-color-4`, `--brand-accent` (space-separated RGB triplets)
@@ -164,10 +164,28 @@ npx prisma migrate dev --name beschreibender_name
 
 **Automatische Anwendung:** Backend-Container führt `prisma migrate deploy` beim Start aus.
 
+## Testing Stack
+- **Frontend:** Jest + ts-jest, tests in `utils/__tests__/`
+  - `jest.config.js`: `moduleNameMapper` mocks `config/brand` to bypass `import.meta.env`
+  - `__mocks__/brand.ts`: Static brand values for tests
+  - `tsconfig.json`: Excludes `**/__tests__/**` and `**/*.test.ts` from production `tsc` build
+- **Backend:** Jest + supertest, tests in `services/__tests__/`, `routes/__tests__/`, `middleware/__tests__/`
+  - `__mocks__/prismaClient.js`: Shared Prisma mock with `jest.fn()` for all model methods
+  - `supertest`: HTTP integration testing for route handlers
+- **Coverage:** 33 suites, 724+ tests (frontend utilities + backend services/routes/middleware)
+
+## Backend Module Structure (v1.9.8)
+Large files have been split into focused modules with facade re-exports:
+- `routes/gemini.js` → Facade mounting 8 sub-routers from `routes/gemini/`
+- `constants.js` → Facade re-exporting from `bots.js` + `crisisText.js`
+- `services/behaviorLogger.js` → Facade re-exporting from `services/behavior/`
+
+**Important:** Files in `routes/gemini/` use `../../middleware/` and `../../services/` paths (two directories up).
+
 ## External Services
-- **Google Gemini:** LLM provider (gemini-1.5-flash, gemini-2.0-flash-exp)
+- **Google Gemini:** LLM provider (gemini-2.0-flash, gemini-2.0-flash-lite)
 - **Mailjet:** Transactional emails (verification, password reset)
-- **PayPal:** Webhook integration for donations
+- **PayPal:** Webhook integration for donations (with full signature verification)
 
 ## Configuration
 - **Frontend:** `.env` files (`VITE_BACKEND_URL_*`, `VITE_BRAND_*`)
