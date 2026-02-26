@@ -34,7 +34,9 @@ export const HowItWorks: React.FC = () => {
           <div className="hidden md:flex absolute inset-0 m-auto w-32 h-32 z-10 pointer-events-none justify-center items-center">
             <div className="bg-accent-primary text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-background-primary">
               <FileTextIcon className="w-10 h-10 mb-1 text-white" />
-              <span className="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
+              <span className="text-xs font-bold uppercase text-center leading-tight text-white">{t('howItWorks_life_context').split('\n').map((line, i) => (
+              <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>
+            ))}</span>
             </div>
           </div>
           
@@ -42,7 +44,9 @@ export const HowItWorks: React.FC = () => {
           <div className="md:hidden flex justify-center mb-8">
             <div className="bg-accent-primary text-white p-6 rounded-full shadow-xl w-32 h-32 flex flex-col items-center justify-center border-4 border-background-primary">
               <FileTextIcon className="w-10 h-10 mb-1 text-white" />
-              <span className="text-xs font-bold uppercase text-center leading-tight text-white">Life<br/>Context</span>
+              <span className="text-xs font-bold uppercase text-center leading-tight text-white">{t('howItWorks_life_context').split('\n').map((line, i) => (
+              <React.Fragment key={i}>{i > 0 && <br />}{line}</React.Fragment>
+            ))}</span>
             </div>
           </div>
 
