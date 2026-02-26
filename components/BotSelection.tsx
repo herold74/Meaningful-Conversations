@@ -392,6 +392,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const [isLoading, setIsLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const [activeHighlight, setActiveHighlight] = useState<'management' | 'topicSearch' | null>(null);
+  const isPrivilegedUser = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+  const [clientSectionOpen, setClientSectionOpen] = useState(!!isPrivilegedUser);
   const managementRef = useRef<HTMLDivElement>(null);
   const topicSearchRef = useRef<HTMLDivElement>(null);
   const coachingRef = useRef<HTMLDivElement>(null);
@@ -685,9 +687,14 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
 
         {/* 3. Exklusiv für Klienten Section */}
         <section className="w-full max-w-6xl mx-auto">
-          {/* Client-Only Section Divider */}
+          {/* Client-Only Section Divider (collapsible for non-privileged users) */}
           <div className="mb-6">
-            <div className="flex items-center gap-4">
+            <div
+              className="flex items-center gap-4 cursor-pointer select-none"
+              onClick={() => setClientSectionOpen(prev => !prev)}
+              role="button"
+              aria-expanded={clientSectionOpen}
+            >
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
                 <span className="text-lg">🎓</span>
@@ -699,33 +706,43 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                     {t('botSelection_section_client_desc')}
                   </div>
                 </div>
+                <svg
+                  className={`w-4 h-4 text-amber-700 dark:text-amber-400 transition-transform duration-200 ${clientSectionOpen ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
             </div>
           </div>
 
-          {/* Client-Only Bots */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {clientOnlyBots.map((bot) => (
-              <BotCard 
-                key={bot.id} 
-                bot={bot} 
-                onSelect={onSelect} 
-                language={language}
-                hasPersonalityProfile={hasPersonalityProfile}
-                coachingMode={coachingMode}
-                isClientOnly={true}
-              />
-            ))}
-          </div>
-          
-          {/* Client contact info for non-clients */}
-          {!currentUser?.isClient && (
-            <div className="max-w-4xl mx-auto mt-6">
-              <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
-                {t('botSelection_clientContactMessage')}
-              </p>
-            </div>
+          {clientSectionOpen && (
+            <>
+              {/* Client-Only Bots */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                {clientOnlyBots.map((bot) => (
+                  <BotCard 
+                    key={bot.id} 
+                    bot={bot} 
+                    onSelect={onSelect} 
+                    language={language}
+                    hasPersonalityProfile={hasPersonalityProfile}
+                    coachingMode={coachingMode}
+                    isClientOnly={true}
+                  />
+                ))}
+              </div>
+              
+              {/* Client contact info for non-clients */}
+              {!currentUser?.isClient && (
+                <div className="max-w-4xl mx-auto mt-6">
+                  <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
+                    {t('botSelection_clientContactMessage')}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>
