@@ -89,15 +89,15 @@ const TranscriptRatingsView: React.FC = () => {
                         <p className="text-2xl font-bold text-content-primary">{stats.avgRating.toFixed(1)}</p>
                     </div>
                     <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                        <p className="text-xs text-green-700 dark:text-green-300 mb-1">Promoters</p>
+                        <p className="text-xs text-green-700 dark:text-green-300 mb-1">{t('te_ratings_promoters')}</p>
                         <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.promoters}</p>
                     </div>
                     <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mb-1">Passives</p>
+                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mb-1">{t('te_ratings_passives')}</p>
                         <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.passives}</p>
                     </div>
                     <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
-                        <p className="text-xs text-red-700 dark:text-red-300 mb-1">Detractors</p>
+                        <p className="text-xs text-red-700 dark:text-red-300 mb-1">{t('te_ratings_detractors')}</p>
                         <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.detractors}</p>
                     </div>
                 </div>
@@ -206,8 +206,8 @@ const TranscriptRatingsView: React.FC = () => {
                                             <div className="text-sm">
                                                 <p className="text-content-secondary">
                                                     <span className="font-medium text-content-primary">{t('admin_te_ratings_user')}:</span> {rating.userEmail}
-                                                    {rating.isClient && <span className="ml-2 text-xs bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded">Client</span>}
-                                                    {rating.isPremium && !rating.isClient && <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded">Premium</span>}
+                                                    {rating.isClient && <span className="ml-2 text-xs bg-accent-primary/10 text-accent-primary px-2 py-0.5 rounded">{t('te_ratings_tier_client')}</span>}
+                                                    {rating.isPremium && !rating.isClient && <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded">{t('te_ratings_tier_premium')}</span>}
                                                 </p>
                                             </div>
                                         </div>

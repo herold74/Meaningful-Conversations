@@ -83,7 +83,7 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ currentUser, en
                     <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
                 </div>
                 <p className="text-lg text-gray-700 dark:text-gray-300">{t('changePassword_success')}</p>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">You will be logged out and asked to log in again shortly.</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{t('changePassword_success_logout')}</p>
              </div>
         ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

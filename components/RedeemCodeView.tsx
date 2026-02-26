@@ -46,7 +46,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
                 <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
             </div>
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{t('redeem_success')}</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Redirecting...</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">{t('redeemCode_redirecting')}</p>
         </div>
       );
     }

@@ -83,7 +83,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             setRecommendation(result);
             setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
         } catch {
-            setError(language === 'de' ? 'Empfehlung konnte nicht geladen werden. Bitte versuche es erneut.' : 'Could not load recommendation. Please try again.');
+            setError(t('botSelection_recommendation_error'));
         } finally {
             setIsLoading(false);
         }
@@ -124,7 +124,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
 
     const getTierLabel = (tier: string) => {
         if (tier === 'premium') return 'Premium';
-        if (tier === 'client') return language === 'de' ? 'Klient' : 'Client';
+        if (tier === 'client') return t('botSelection_tier_client');
         return tier;
     };
 
@@ -146,7 +146,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                     {available ? (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            {language === 'de' ? 'Verfügbar' : 'Available'}
+                            {t('botSelection_available')}
                         </span>
                     ) : (
                         <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${rec.requiredTier === 'client' ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30' : 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/30'}`}>
@@ -157,7 +157,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 </div>
                 <p className="text-sm text-content-secondary mb-3 leading-relaxed">{rec.rationale}</p>
                 <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-border-primary dark:border-border-primary p-3 flex flex-col gap-2">
-                    <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">{language === 'de' ? 'Gesprächseinstieg' : 'Conversation starter'}</p>
+                    <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">{t('botSelection_conversation_starter')}</p>
                     <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
                     <div className="flex items-center justify-between pt-1">
                         <button

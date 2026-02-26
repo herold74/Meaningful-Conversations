@@ -167,7 +167,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
                 <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 id="feedback-modal-title" className="text-2xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('feedback_title')}</h2>
                     {submissionStatus !== 'submitting' && (
-                        <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label="Close">
+                        <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('aria_close')}>
                             <XIcon className="w-6 h-6" />
                         </button>
                     )}

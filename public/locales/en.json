@@ -26,6 +26,8 @@
   "auth_register": "Register",
   "auth_guest": "Continue as Guest",
 
+  "back": "Back",
+
   "login_title": "Login",
   "login_email_label": "Email",
   "login_password_label": "Password",
@@ -226,6 +228,13 @@
   "chat_play_last_message": "Play last message",
   "chat_tapToSpeak": "Voice mode is active. Tap the microphone to speak.",
   "chat_keep_screen_on": "Please keep your screen on so the recording is not interrupted.",
+  "chat_audio_loading": "Audio...",
+  "chat_voice_listening": "Listening...",
+  "chat_voice_pause_speech": "Pause Speech",
+  "chat_voice_repeat": "Repeat",
+  "chat_voice_resume_speech": "Resume Speech",
+  "chat_voice_start_recording": "Start recording",
+  "chat_voice_stop_and_send": "Stop and send",
 
   "analyzing_title": "Analyzing Session...",
   "analyzing_subtitle": "Your coach is preparing your session summary.",
@@ -405,6 +414,7 @@
   "how_it_works_step3_desc": "Get a summary and export Action Items directly to your calendar. Don't let resolutions fade away.",
   "how_it_works_step4_title": "The Growth",
   "how_it_works_step4_desc": "The app suggests updates for your Life Context. New insights are saved – you don't have to repeat yourself next time.",
+  "howItWorks_life_context": "Life\nContext",
   "how_it_works_trust1_title": "Privacy First",
   "how_it_works_trust1_desc": "End-to-end encryption or complete guest mode. Your thoughts belong to you.",
   "how_it_works_trust2_title": "Bilingual & Natural",
@@ -454,6 +464,7 @@
   "redeem_error_generic": "An error occurred. Please try again.",
   "redeem_info_text": "For information about upgrade codes, visit ",
   "redeem_back_button": "Back",
+  "redeemCode_redirecting": "Redirecting...",
 
   "admin_title": "Admin Console",
   "admin_startup_label": "Next login starts in:",
@@ -584,6 +595,7 @@
   "changePassword_error_mismatch": "New passwords do not match.",
   "changePassword_error_incorrect": "Your current password is incorrect.",
   "changePassword_error_generic": "An unknown error occurred. Please try again.",
+  "changePassword_success_logout": "You will be logged out and asked to log in again shortly.",
 
   "deleteAccount_title": "Delete Account",
   "deleteAccount_warning": "This action is final and cannot be undone. All of your data, including your profile and progress, will be permanently deleted.",
@@ -1442,6 +1454,8 @@
   "narrative_stories_modal_privacy": "Your stories are encrypted and only used for signature generation.",
 
   "coaching_mode_title": "Coaching Mode",
+  "coaching_mode_label_dpc": "DPC Mode",
+  "coaching_mode_label_dpfl": "DPFL Mode",
   "coaching_mode_off": "Off (Standard)",
   "coaching_mode_off_short": "Off",
   "profile_session_singular": "session",
@@ -1937,6 +1951,11 @@
   "admin_te_ratings_no_ratings": "No ratings yet.",
   "admin_te_ratings_contact_requested": "Contact Requested",
   "admin_te_ratings_filter_contact": "Contact Requested",
+  "te_ratings_promoters": "Promoters",
+  "te_ratings_passives": "Passives",
+  "te_ratings_detractors": "Detractors",
+  "te_ratings_tier_client": "Client",
+  "te_ratings_tier_premium": "Premium",
   "admin_ratings_session_feedback": "Session Feedback (Coaches)",
   
   "delete": "Delete",
@@ -1951,5 +1970,15 @@
   "interview_transcript_copy": "Copy",
   "interview_transcript_copied": "Copied!",
   "interview_transcript_download": "Download",
-  "interview_transcript_back": "Back to Coach Selection"
+  "interview_transcript_back": "Back to Coach Selection",
+
+  "aria_loading": "Loading",
+  "aria_close": "Close",
+  "aria_toggle_theme": "Toggle theme",
+  "aria_toggle_color_theme": "Toggle color theme",
+  "aria_view_achievements": "View Achievements",
+  "aria_collapse": "Collapse",
+  "aria_expand": "Expand",
+  "voiceModal_preview_voice": "Preview voice {{name}}",
+  "sessionReview_rate_star": "Rate {{star}} out of 5 stars"
 }
