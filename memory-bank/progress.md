@@ -91,7 +91,7 @@
     - [x] All themes (winter/summer/autumn) use brand variables
     - [x] Configurable loader system: tetris, steering-wheel, dots, pulse (`VITE_BRAND_LOADER`)
     - [x] BrandLoader wrapper component (lazy-loaded variants)
-    - [ ] OCEAN-Onboarding flow for registered users (Phase 3.5)
+    - [x] OCEAN-Onboarding flow for registered users (OceanOnboarding.tsx — BFI-2-XS step-by-step with skip)
 - [x] **Seasonal Themes:**
     - [x] Spring: Falling blossoms
     - [x] Summer: Butterflies
@@ -159,12 +159,11 @@
     - [ ] Apple Server Notifications URL in App Store Connect
     - [ ] Sandbox & TestFlight testing
 - [ ] **Registered Monthly Subscription:** 3.90 EUR/month (PayPal Subscriptions API)
-- [ ] **Upgrade Discounts:** Loyalty-based upgrade pricing
+- [x] **Upgrade Discounts:** Loyalty pricing + bot credit in purchase.js (LOYALTY_PRICES, BOT_CREDIT)
 
 ## Pending / Roadmap
-- [ ] **OCEAN-Onboarding:** Question-by-question flow for registered users (Phase 3.5)
-- [ ] **Performance:** Large context file optimization
-- [ ] **Accessibility:** WCAG compliance audit
-
-## Known Issues
-- **Safari PDF:** Client-side PDF generation with `html2pdf.js` has Safari compatibility issues. Warning displayed to users.
+- [ ] **iOS App Store:** Product setup in App Store Connect, Notifications URL, TestFlight testing
+- [ ] **Android:** Capacitor project setup (Android Studio)
+- [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
+- [ ] **Performance:** Large context file optimization (virtualization/chunking)
+- [ ] **Accessibility:** Formal WCAG audit tooling (aria attributes already in place)
