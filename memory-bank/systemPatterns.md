@@ -126,7 +126,24 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - **Important:** Sub-modules in `routes/gemini/` use `../../middleware/` and `../../services/` paths (two levels up from the routes directory).
   - All existing consumers require the original file path unchanged — zero-impact refactor.
 
-### 15. Test Infrastructure
+### 15. CI/CD with GitHub Actions
+- **Decision:** Automated test runs on every push to `main` via GitHub Actions.
+- **Reasoning:** Catches broken code (like the relative import path bug in gemini sub-modules) before it reaches staging. Lightweight first step before full CI/CD pipeline.
+- **Implementation:**
+  - `.github/workflows/test.yml`: 3 parallel jobs — frontend Jest, backend Jest, TypeScript check.
+  - No deployment automation yet — manual deploy via `deploy-manualmode.sh` remains.
+  - Future: matrix builds for multi-brand (MC + W4F), automated staging deploy.
+
+### 16. Multi-Brand Architecture
+- **Decision:** Same codebase produces different branded instances via build-time env vars. Each brand gets independent infrastructure (frontend, backend, TTS, DB).
+- **Reasoning:** Enables white-labeling for partners without code forks. Brand identity injected at build time, not runtime.
+- **Implementation:**
+  - Brand configs in `brands/*.env` (e.g., `brands/w4f.env`).
+  - Build: copy brand env as `.env.local` → Vite reads `VITE_BRAND_*` → Docker image tagged per brand (e.g., `frontend-w4f:1.9.8`).
+  - Server: separate containers per brand, nginx routes by domain.
+  - W4F demo (current): standalone frontend container sharing MC staging backend.
+
+### 17. Test Infrastructure
 - **Decision:** Jest + ts-jest for frontend, Jest + supertest for backend, with shared mocks.
 - **Reasoning:** Comprehensive testing needed for security-critical code (encryption, auth, input validation) and complex business logic (personality analysis, coaching strategies).
 - **Implementation:**

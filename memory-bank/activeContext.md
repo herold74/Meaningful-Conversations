@@ -48,7 +48,13 @@
 - Fixed relative import paths in `routes/gemini/*.js` (`../` → `../../` for middleware, services, prismaClient).
 - Developer bot access: `BotSelection.tsx` now grants full access to both `isAdmin` and `isDeveloper`.
 
+## CI/CD (2026-02-26)
+- **GitHub Actions** test-on-push workflow added (`.github/workflows/test.yml`): frontend tests, backend tests, TypeScript check — runs on every push to `main`.
+- **W4F demo frontend** built and deployed to server as standalone container. Shares MC staging backend. Pending DNS update (`w4f-beta.manualmode.at` → `91.99.193.87`) and SSL cert.
+- Brand config: `brands/w4f.env` (blue palette, tetris loader, "Work4Flow Coaching").
+
 ## Active Tasks
+- [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot --nginx -d w4f-beta.manualmode.at`
 - [ ] iOS App Store Connect: create products, set Notifications URL, TestFlight testing
 - [ ] Android Capacitor project setup
 - [ ] PayPal Monthly Subscription on web (3.90 EUR/month — Subscriptions API not yet implemented)
