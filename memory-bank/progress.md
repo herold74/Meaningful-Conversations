@@ -129,7 +129,7 @@
 - [x] **Dual Environment:** Staging + Production
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
-- [x] **CI/CD:** Deployment scripts with version management
+- [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
 - [x] **Admin UI:** Fully responsive design for mobile management
 
 ## Mobile App (Capacitor)
