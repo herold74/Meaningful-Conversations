@@ -172,9 +172,10 @@ router.get('/health', async (req, res) => {
             voices: voices,
         });
     } catch (error) {
+        console.error('Error getting voices:', error);
         res.status(503).json({
             status: 'error',
-            error: error.message,
+            error: 'Failed to get voice list',
         });
     }
 });

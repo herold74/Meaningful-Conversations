@@ -30,6 +30,25 @@ router.get('/user', async (req, res) => {
 // PUT /api/data/user - Update the current user's data
 router.put('/user', async (req, res) => {
     const { context, gamificationState } = req.body;
+
+    if (context !== undefined) {
+        if (typeof context !== 'string') {
+            return res.status(400).json({ error: 'context must be a string' });
+        }
+        if (context.length > 500000) {
+            return res.status(400).json({ error: 'context exceeds maximum length (500KB)' });
+        }
+    }
+
+    if (gamificationState !== undefined) {
+        if (typeof gamificationState !== 'string') {
+            return res.status(400).json({ error: 'gamificationState must be a string' });
+        }
+        if (gamificationState.length > 50000) {
+            return res.status(400).json({ error: 'gamificationState exceeds maximum length (50KB)' });
+        }
+    }
+
     try {
         await prisma.user.update({
             where: { id: req.userId },
@@ -50,7 +69,14 @@ router.put('/user', async (req, res) => {
 router.put('/user/profile', async (req, res) => {
     const { firstName, lastName, newsletterConsent } = req.body;
     const userId = req.userId;
-    
+
+    if (firstName !== undefined && (typeof firstName !== 'string' || firstName.length > 100)) {
+        return res.status(400).json({ error: 'firstName must be a string under 100 characters' });
+    }
+    if (lastName !== undefined && (typeof lastName !== 'string' || lastName.length > 100)) {
+        return res.status(400).json({ error: 'lastName must be a string under 100 characters' });
+    }
+
     try {
         const updateData = {
             updatedAt: new Date(),

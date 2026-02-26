@@ -77,7 +77,7 @@ async function seed() {
     
     if (dbUrl.includes('meaningful-convers-db-prod') || 
         dbUrl.includes('meaningful-convers-db-staging') ||
-        dbUrl.includes('<YOUR_SERVER_IP>')) {
+        (process.env.SERVER_HOST && dbUrl.includes(process.env.SERVER_HOST))) {
         console.error('❌ SAFETY CHECK FAILED!');
         console.error('   Detected production/staging database URL.');
         console.error('   This seed script is for LOCAL DEVELOPMENT ONLY.');
