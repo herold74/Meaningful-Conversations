@@ -194,6 +194,17 @@ Large files have been split into focused modules with facade re-exports:
 - **Server IP:** `.env.server` file (gitignored) — contains `SERVER_HOST=<ip>`. Read by deploy scripts, Makefile, and monitoring scripts. Template: `.env.server.example`.
 - **Frontend server IP fallback:** `VITE_BRAND_SERVER_IP` in `.env.local` — used by `config/brand.ts` → `services/api.ts` for direct-IP access
 
+### CI/CD: GitHub Actions
+- **Workflow:** `.github/workflows/test.yml` — runs on push/PR to `main`
+- **Jobs:** Frontend tests, Backend tests, TypeScript check (parallel)
+- **Results:** https://github.com/herold74/Meaningful-Conversations/actions
+
+### Multi-Brand (White-Label)
+- Brand config files in `brands/` directory (e.g., `brands/w4f.env`)
+- Build-time injection: copy brand env as `.env.local`, build Docker image, Vite reads `VITE_BRAND_*` vars
+- W4F demo: `frontend-w4f` image in registry, standalone container on server, nginx routes to MC backend
+- Same codebase, different visual identity per build
+
 ### Security: No Hardcoded IPs
 The repo is public on GitHub. Real server IPs are **never** committed:
 - Shell scripts source `.env.server` for `$SERVER_HOST`
