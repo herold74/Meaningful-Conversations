@@ -45,4 +45,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Ensure gitignored templates exist
+        run: |
+          for f in components/*.example.tsx; do
+            target="${f%.example.tsx}.tsx"
+            [ -f "$target" ] || cp "$f" "$target"
+          done
       - run: npx tsc --noEmit
