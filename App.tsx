@@ -8,71 +8,29 @@ import * as analyticsService from './services/analyticsService';
 import { deserializeGamificationState, serializeGamificationState } from './utils/gamificationSerializer';
 import { getAchievements } from './achievements';
 import { TestScenario } from './utils/testScenarios';
-import { getSeasonalColorTheme, getCurrentSeason } from './utils/dateUtils';
 import { useIsAnyModalOpen } from './utils/modalUtils';
-
+import { useTheme } from './hooks/useTheme';
+import { useAppRouting } from './hooks/useAppRouting';
+import { useAuthHandlers } from './hooks/useAuthHandlers';
 
 // Component Imports
-import WelcomeScreen from './components/WelcomeScreen';
 import GamificationBar from './components/GamificationBar';
 import BurgerMenu from './components/BurgerMenu';
-import LandingPage from './components/LandingPage';
-import BotSelection from './components/BotSelection';
-import ChatView from './components/ChatView';
-// FIX: The SessionReview component was missing a default export. This is fixed in the component file.
-import SessionReview from './components/SessionReview';
 import AnalyzingView from './components/AnalyzingView';
-import PIIWarningView from './components/PIIWarningView';
-import Questionnaire from './components/Questionnaire';
-import AchievementsView from './components/AchievementsView';
-import InterviewTranscriptView from './components/InterviewTranscriptView';
-import UserGuideView from './components/UserGuideView';
-import FormattingHelpView from './components/FormattingHelpView';
-import FAQView from './components/FAQView';
-import AboutView from './components/AboutView';
-import DisclaimerView from './components/DisclaimerView';
-import LegalView from './components/LegalView';
-import AccountManagementView from './components/AccountManagementView';
-import EditProfileView from './components/EditProfileView';
-import DataExportView from './components/DataExportView';
-import AuthView from './components/AuthView';
-import LoginView from './components/LoginView';
-import RegisterView from './components/RegisterView';
-import ContextChoiceView from './components/ContextChoiceView';
-import ForgotPasswordView from './components/ForgotPasswordView';
-import RedeemCodeView from './components/RedeemCodeView';
-import UpgradeView from './components/UpgradeView';
-import AdminView from './components/AdminView';
-import ChangePasswordView from './components/ChangePasswordView';
 import DeleteAccountModal from './components/DeleteAccountModal';
-import RegistrationPendingView from './components/RegistrationPendingView';
-import VerifyEmailView from './components/VerifyEmailView';
-import ResetPasswordView from './components/ResetPasswordView';
-import UnsubscribeView from './components/UnsubscribeView';
 import UpdateNotification from './components/UpdateNotification';
-import PaywallView from './components/PaywallView';
-import PersonalitySurvey, { SurveyResult } from './components/PersonalitySurvey';
-import PersonalityProfileView from './components/PersonalityProfileView';
-import OceanOnboarding from './components/OceanOnboarding';
-import ProfileHintView from './components/ProfileHintView';
-import IntentPickerView, { type UserIntent } from './components/IntentPickerView';
-import NamePromptView from './components/NamePromptView';
+import AppViewRouter from './components/AppViewRouter';
 import { getQuestionnaireStructure } from './components/questionnaireStructure';
 import type { Big5Result } from './utils/bfi2';
-import LifeContextEditorView from './components/LifeContextEditorView';
-import TranscriptPreQuestions from './components/TranscriptPreQuestions';
-import TranscriptInput from './components/TranscriptInput';
-import EvaluationReview from './components/EvaluationReview';
-import EvaluationHistory from './components/EvaluationHistory';
+import type { UserIntent } from './components/IntentPickerView';
+import type { SurveyResult } from './components/PersonalitySurvey';
 import { TranscriptPreAnswers, TranscriptEvaluationResult } from './types';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
-import { downloadTextFile } from './utils/fileDownload';
 import PageTransition from './components/shared/PageTransition';
 import BrandLoader from './components/shared/BrandLoader';
-import { logInRevenueCat, isIAPAvailable, getAccessFromRevenueCat } from './services/purchaseService';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -150,43 +108,7 @@ const App: React.FC = () => {
     const [teEvaluation, setTeEvaluation] = useState<TranscriptEvaluationResult | null>(null);
     const [teIsLoading, setTeIsLoading] = useState(false);
 
-    // Theme States
-    const [isDarkMode, setIsDarkMode] = useState<'light' | 'dark'>(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('isDarkMode') === 'dark' ? 'dark' : 'light';
-        }
-        return 'light';
-    });
-    const [isAutoThemeEnabled, setIsAutoThemeEnabled] = useState<boolean>(() => {
-        if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem('autoThemeEnabled');
-            return stored !== 'false'; // Default to true, only false if explicitly disabled
-        }
-        return true;
-    });
-    const [colorTheme, setColorTheme] = useState<'summer' | 'autumn' | 'winter'>(() => {
-        if (typeof window !== 'undefined') {
-            const currentSeason = getCurrentSeason();
-            const lastAppliedSeason = localStorage.getItem('lastAppliedSeason');
-            const storedTheme = localStorage.getItem('colorTheme');
-            
-            // Check if season has changed since last visit
-            if (currentSeason !== lastAppliedSeason) {
-                // New season! Apply seasonal theme once and save
-                const newTheme = getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
-                localStorage.setItem('lastAppliedSeason', currentSeason);
-                localStorage.setItem('colorTheme', newTheme);
-                return newTheme;
-            }
-            
-            // Same season - use stored preference if valid
-            if (storedTheme === 'summer' || storedTheme === 'autumn' || storedTheme === 'winter') {
-                return storedTheme;
-            }
-        }
-        // Default to seasonal theme
-        return getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
-    });
+    const { isDarkMode, setIsDarkMode, colorTheme, setColorTheme, isAutoThemeEnabled, setIsAutoThemeEnabled } = useTheme();
 
     const setAndProcessUser = (user: User | null) => {
         if (user) {
@@ -208,53 +130,8 @@ const App: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        if (isDarkMode === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        localStorage.setItem('isDarkMode', isDarkMode);
-    }, [isDarkMode]);
-    
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', colorTheme);
-        localStorage.setItem('colorTheme', colorTheme);
-    }, [colorTheme]);
-
-    // Automatic theme switching based on time of day (18:00-6:00 = dark, 6:00-18:00 = light)
-    // and season (spring/summer → summer theme, autumn → autumn theme, winter → winter theme)
-    useEffect(() => {
-        if (!isAutoThemeEnabled) return;
-
-        const checkTimeAndUpdateTheme = () => {
-            const now = new Date();
-            const hour = now.getHours();
-            
-            // Dark mode: 18:00 (6 PM) to 6:00 (6 AM)
-            // Light mode: 6:00 (6 AM) to 18:00 (6 PM)
-            const shouldBeDark = hour >= 18 || hour < 6;
-            const desiredMode = shouldBeDark ? 'dark' : 'light';
-            
-            if (isDarkMode !== desiredMode) {
-                setIsDarkMode(desiredMode);
-            }
-            
-            // Seasonal color theme switching
-            const seasonalTheme = getSeasonalColorTheme() as 'summer' | 'autumn' | 'winter';
-            if (colorTheme !== seasonalTheme) {
-                setColorTheme(seasonalTheme);
-            }
-        };
-
-        // Check immediately
-        checkTimeAndUpdateTheme();
-
-        // Check every minute for theme changes
-        const intervalId = setInterval(checkTimeAndUpdateTheme, 60000);
-
-        return () => clearInterval(intervalId);
-    }, [isAutoThemeEnabled, isDarkMode]); // Removed colorTheme to prevent override loops
+    const { loadProfileInfo, applyIntentLogic, routeWithIntentPicker, shouldShowProfileHint, routeWithProfileHint } = useAppRouting({ currentUser, lifeContext, completedLenses, setView, setHighlightSection, setPostOceanRoute, setHasPersonalityProfile, setCompletedLenses });
+    const { handleLoginSuccess, handleAccessExpired, handleLogout } = useAuthHandlers({ setAndProcessUser, setEncryptionKey, setLifeContext, setGamificationState, setView, setPaywallUserEmail, setAuthRedirectReason, setMenuView, routeWithIntentPicker, DEFAULT_GAMIFICATION_STATE });
 
     const toggleDarkMode = () => {
         // When user manually toggles, disable auto-theme
@@ -486,205 +363,6 @@ const App: React.FC = () => {
             }
         }
         return md;
-    };
-
-    const loadProfileInfo = async () => {
-        try {
-            const profile = await api.loadPersonalityProfile();
-            if (profile) {
-                const lenses = profile.completedLenses ? JSON.parse(profile.completedLenses) : [];
-                setHasPersonalityProfile(true);
-                setCompletedLenses(lenses);
-                return { exists: true, lenses };
-            }
-        } catch {}
-        setHasPersonalityProfile(false);
-        setCompletedLenses([]);
-        return { exists: false, lenses: [] as string[] };
-    };
-
-    const applyIntentLogic = useCallback((intent: UserIntent | null) => {
-        const i = intent || localStorage.getItem('userIntent') as UserIntent | null;
-        switch (i) {
-            case 'communication':
-                setHighlightSection('management');
-                setView('botSelection');
-                break;
-            case 'lifecoaching':
-                setHighlightSection('topicSearch');
-                setView('botSelection');
-                break;
-            case 'coaching':
-                setHighlightSection('topicSearch');
-                setView('botSelection');
-                break;
-            default:
-                setView(lifeContext ? 'contextChoice' : 'landing');
-                break;
-        }
-    }, [lifeContext]);
-
-    const shouldShowProfileHint = useCallback((): boolean => {
-        if (!currentUser?.isPremium) return false;
-        if (localStorage.getItem('profileHintDisabled') === 'true') return false;
-        const hasOcean = completedLenses.includes('ocean');
-        const hasSD = completedLenses.includes('sd');
-        const hasRiemann = completedLenses.includes('riemann');
-        return hasOcean && (!hasSD || !hasRiemann);
-    }, [currentUser?.isPremium, completedLenses]);
-
-    const routeWithProfileHint = useCallback((intent: UserIntent | null) => {
-        if (shouldShowProfileHint()) {
-            setView('profileHint');
-        } else {
-            applyIntentLogic(intent);
-        }
-    }, [shouldShowProfileHint, applyIntentLogic]);
-
-    const routeWithIntentPicker = async (hasContext: boolean) => {
-        const { exists: profileExists, lenses } = await loadProfileInfo();
-        if (!localStorage.getItem('intentPickerVersion')) {
-            localStorage.removeItem('intentPickerDisabled');
-            localStorage.setItem('intentPickerVersion', '1.9.7');
-        }
-        const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
-        if (!pickerDisabled) {
-            setView('intentPicker');
-        } else if (!hasContext) {
-            setView('namePrompt');
-        } else if (!profileExists) {
-            setPostOceanRoute('intent');
-            setView('oceanOnboarding');
-        } else {
-            setView(hasContext ? 'contextChoice' : 'landing');
-        }
-    };
-    
-    const handleLoginSuccess = async (user: User, key: CryptoKey) => {
-        setAndProcessUser(user);
-        setEncryptionKey(key);
-        setView('welcome');
-        if (isIAPAvailable()) {
-            logInRevenueCat(user.id);
-        }
-        try {
-            const data = await userService.loadUserData(key);
-            setLifeContext(data.context || '');
-            setGamificationState(deserializeGamificationState(data.gamificationState));
-
-            if (user.isAdmin || user.isDeveloper) {
-                const startupPref = localStorage.getItem('adminStartupPref');
-                if (startupPref === 'normal') {
-                    await routeWithIntentPicker(!!data.context);
-                } else {
-                    setView('admin');
-                }
-            } else {
-                await routeWithIntentPicker(!!data.context);
-            }
-        } catch (error) {
-            console.error("Failed to load user data after login, logging out.", error);
-            api.clearSession();
-            setAndProcessUser(null);
-            setEncryptionKey(null);
-            setView('auth');
-            setAuthRedirectReason("There was an issue loading your profile. Please try logging in again.");
-        }
-    };
-
-    const handleAccessExpired = async (email: string, user: User, key: CryptoKey) => {
-        setAndProcessUser(user);
-        setEncryptionKey(key);
-        setPaywallUserEmail(email);
-        setView('welcome');
-        let hasContext = false;
-        try {
-            const data = await userService.loadUserData(key);
-            setLifeContext(data.context || '');
-            setGamificationState(deserializeGamificationState(data.gamificationState));
-            hasContext = !!data.context;
-        } catch { /* data load failed — download button will be empty, but paywall still works */ }
-
-        // Sync from RevenueCat: Backend fetches subscription status. Works from web AND iOS.
-        // On iOS we also call logIn first so RevenueCat merges anonymous → our user ID.
-        if (isIAPAvailable()) {
-            await logInRevenueCat(user.id);
-            await new Promise(r => setTimeout(r, 500));
-        }
-
-        // Returns: 'restored' if access was restored, 'fatal' if the endpoint is not configured, false otherwise
-        const trySync = async (): Promise<'restored' | 'fatal' | false> => {
-            try {
-                const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', {
-                    method: 'POST',
-                    body: JSON.stringify({}),
-                });
-                const syncedUser = res?.user;
-                if (syncedUser) {
-                    const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
-                        || (!syncedUser.accessExpiresAt)
-                        || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
-                    if (hasAccess) {
-                        setAndProcessUser(syncedUser);
-                        setPaywallUserEmail(null);
-                        return 'restored';
-                    }
-                }
-            } catch (err: any) {
-                console.warn('[Paywall] RevenueCat sync failed:', err);
-                if (err?.status === 503) return 'fatal';
-            }
-            return false;
-        };
-
-        const syncResult = await trySync();
-        if (syncResult === 'restored') { await routeWithIntentPicker(hasContext); return; }
-        if (syncResult !== 'fatal') {
-            await new Promise(r => setTimeout(r, 1000));
-            const r2 = await trySync();
-            if (r2 === 'restored') { await routeWithIntentPicker(hasContext); return; }
-            if (r2 !== 'fatal') {
-                await new Promise(r => setTimeout(r, 2000));
-                const r3 = await trySync();
-                if (r3 === 'restored') { await routeWithIntentPicker(hasContext); return; }
-            }
-        }
-
-        // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
-        if (isIAPAvailable()) {
-          const rcAccess = await getAccessFromRevenueCat();
-          if (rcAccess?.hasAccess) {
-            const patched = { ...user };
-            patched.accessExpiresAt = rcAccess.accessExpiresAt ?? undefined;
-            if (rcAccess.isPremium) {
-              patched.isPremium = true;
-              patched.premiumExpiresAt = rcAccess.accessExpiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
-            }
-            if (rcAccess.accessExpiresAt && !patched.premiumExpiresAt) {
-              patched.premiumExpiresAt = rcAccess.accessExpiresAt;
-            }
-            setAndProcessUser(patched);
-            setPaywallUserEmail(null);
-            await routeWithIntentPicker(hasContext);
-            return;
-          }
-        }
-
-        setView('paywall');
-    };
-    
-    const handleLogout = () => {
-        api.clearSession();
-        setAndProcessUser(null);
-        setEncryptionKey(null);
-        setLifeContext('');
-        setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        setAuthRedirectReason(null);
-        setPaywallUserEmail(null);
-        setMenuView(null); // Clear any open menu view to prevent being stuck
-        // Go to welcome screen first, then to auth screen to mimic app start
-        setView('welcome');
-        setTimeout(() => setView('auth'), 1500);
     };
 
     const handleFileUpload = (context: string) => {
@@ -1517,296 +1195,95 @@ const App: React.FC = () => {
 
 
     // --- RENDER LOGIC ---
-    
-    const renderView = () => {
-        const currentView = menuView || view;
 
-        switch (currentView) {
-            case 'welcome': return <WelcomeScreen />;
-            case 'auth': {
-                return <AuthView 
-                    onLogin={() => {
-                        setMenuView(null);
-                        setView('login');
-                    }} 
-                    onRegister={() => {
-                        setMenuView(null);
-                        setView('register');
-                    }} 
-                    onGuest={() => {
-                        setMenuView(null);
-                        analyticsService.trackGuestLogin();
-                        try { localStorage.removeItem('guestName'); } catch {}
-                        setLifeContext('');
-                        setView('intentPicker');
-                    }}
-                    redirectReason={authRedirectReason}
-                />;
-            }
-            case 'login': return <LoginView onLoginSuccess={handleLoginSuccess} onAccessExpired={handleAccessExpired} onSwitchToRegister={() => { setAuthRedirectReason(null); setView('register'); }} onBack={() => { setAuthRedirectReason(null); setView('auth'); }} onForgotPassword={() => { setAuthRedirectReason(null); setView('forgotPassword'); }} reason={authRedirectReason} />;
-            case 'register': return <RegisterView onShowPending={() => setView('registrationPending')} onSwitchToLogin={() => setView('login')} onBack={() => setView('auth')} />;
-            case 'registrationPending': return <RegistrationPendingView onGoToLogin={() => setView('login')} />;
-            case 'verifyEmail': return <VerifyEmailView onVerificationSuccess={handleLoginSuccess} />;
-            case 'forgotPassword': return <ForgotPasswordView onBack={() => setView('login')} />;
-            case 'resetPassword': return <ResetPasswordView onResetSuccess={() => setView('login')} />;
-            case 'unsubscribe': return <UnsubscribeView token={new URLSearchParams(window.location.search).get('token') || ''} onBack={() => setView('auth')} />;
-            case 'contextChoice': return <ContextChoiceView user={currentUser!} savedContext={lifeContext} gamificationState={gamificationState} onContinue={() => { setCameFromContextChoice(true); setView('botSelection'); }} onStartNew={() => { setCameFromContextChoice(false); setLifeContext(''); setView('landing'); }} />;
-            case 'paywall': return <PaywallView
-                userEmail={paywallUserEmail}
-                userXp={gamificationState.xp}
-                currentUser={currentUser}
-                safeAreaTop={iosSafeAreaTop}
-                onRedeem={() => { setMenuView('redeemCode'); }}
-                onPurchaseSuccess={(user) => { setAndProcessUser(user); setPaywallUserEmail(null); routeWithIntentPicker(!!lifeContext); }}
-                onLogout={handleLogout}
-                onDownloadLifeContext={lifeContext ? async () => {
-                    await downloadTextFile(lifeContext, 'life-context.md', 'text/markdown;charset=utf-8');
-                } : undefined}
-                onDownloadProfile={encryptionKey && hasPersonalityProfile ? async () => {
-                    try {
-                        const profileData = await api.loadPersonalityProfile();
-                        if (profileData?.encryptedData) {
-                            const decrypted = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
-                            const surveyResult = {
-                                completedLenses: [
-                                    ...(decrypted.spiralDynamics ? ['sd' as const] : []),
-                                    ...(decrypted.riemann ? ['riemann' as const] : []),
-                                    ...(decrypted.big5 ? ['ocean' as const] : []),
-                                ],
-                                path: (profileData.testType || 'BIG5') as 'RIEMANN' | 'BIG5' | 'SD',
-                                filter: undefined,
-                                spiralDynamics: decrypted.spiralDynamics,
-                                riemann: decrypted.riemann,
-                                big5: decrypted.big5,
-                                narratives: decrypted.narratives,
-                                adaptationMode: decrypted.adaptationMode || 'stable',
-                                narrativeProfile: decrypted.narrativeProfile,
-                            } as SurveyResult;
-                            const filename = generateSurveyPdfFilename(surveyResult.path, language as 'de' | 'en');
-                            await generatePDF(surveyResult, filename, language as 'de' | 'en', currentUser?.email);
-                        }
-                    } catch (err) {
-                        console.error('Profile PDF export failed:', err);
-                    }
-                } : undefined}
-            />;
-            case 'landing': return <LandingPage onSubmit={handleFileUpload} onStartQuestionnaire={() => setView('questionnaire')} onStartInterview={handleStartInterview} existingContext={lifeContext || undefined} />;
-            case 'piiWarning': return <PIIWarningView onConfirm={handlePiiConfirm} onCancel={() => setView('questionnaire')} />;
-            case 'questionnaire': return <Questionnaire onSubmit={handleQuestionnaireSubmit} onBack={() => setView('landing')} answers={questionnaireAnswers} onAnswersChange={setQuestionnaireAnswers} />;
-            case 'intentPicker': return <IntentPickerView onSelect={handleIntentSelected} isGuest={!currentUser} safeAreaTop={iosSafeAreaTop} onSkipPermanently={() => {
-                try { localStorage.setItem('intentPickerDisabled', 'true'); } catch {}
-                if (!lifeContext) {
-                    setView('namePrompt');
-                } else if (!hasPersonalityProfile) {
-                    setPostOceanRoute('intent');
-                    setView('oceanOnboarding');
-                } else {
-                    setView(lifeContext ? 'contextChoice' : 'landing');
-                }
-            }} />;
-            case 'namePrompt': return <NamePromptView
-                onContinue={(name) => {
-                    const template = buildEmptyLifeContextTemplate(name);
-                    setQuestionnaireAnswers(prev => ({ ...prev, profile_name: name }));
-                    setLifeContext(template);
-                    if (currentUser && encryptionKey) {
-                        userService.saveUserData(template, serializeGamificationState(gamificationState), encryptionKey).catch(e => console.error('Failed to save initial LC:', e));
-                        if (!hasPersonalityProfile) {
-                            setPostOceanRoute('landing');
-                            setView('oceanOnboarding');
-                        } else {
-                            setView('landing');
-                        }
-                    } else {
-                        setView('landing');
-                    }
-                }}
-                onSkip={!currentUser ? () => setView('landing') : undefined}
-                safeAreaTop={iosSafeAreaTop}
-            />;
-            case 'oceanOnboarding': return <OceanOnboarding onComplete={handleOceanOnboardingComplete} onSkip={handleOceanOnboardingSkip} safeAreaTop={iosSafeAreaTop} />;
-            case 'profileHint': return <ProfileHintView
-                onDiscover={() => {
-                    setExistingProfileForExtension(null);
-                    setPreselectedLensForSurvey(null);
-                    setView('personalitySurvey');
-                }}
-                onLater={() => applyIntentLogic(null)}
-                onDisable={() => {
-                    try { localStorage.setItem('profileHintDisabled', 'true'); } catch {}
-                    applyIntentLogic(null);
-                }}
-                safeAreaTop={iosSafeAreaTop}
-            />;
-            case 'personalitySurvey': {
-                console.log('[App] Rendering PersonalitySurvey with existingProfileForExtension:', existingProfileForExtension, 'preselectedLens:', preselectedLensForSurvey);
-                return <PersonalitySurvey 
-                    onFinish={handlePersonalitySurveyComplete} 
-                    onCancel={existingProfileForExtension ? () => { setPreselectedLensForSurvey(null); setView('personalityProfile'); } : undefined}
-                    currentUser={currentUser} 
-                    existingProfile={existingProfileForExtension}
-                    preselectedLens={preselectedLensForSurvey}
-                />;
-            }
-            case 'personalityProfile': return (
-                <PersonalityProfileView 
-                    encryptionKey={encryptionKey}
-                    onStartNewTest={(existingProfile?: Partial<SurveyResult>, targetLens?: 'sd' | 'riemann' | 'ocean') => {
-                        console.log('[App] onStartNewTest called with:', existingProfile, 'targetLens:', targetLens);
-                        setMenuView(null);
-                        setExistingProfileForExtension(existingProfile || null);
-                        setPreselectedLensForSurvey(targetLens || null);
-                        setView('personalitySurvey');
-                    }}
-                    currentUser={currentUser}
-                    onUserUpdate={setCurrentUser}
-                    lifeContext={lifeContext}
-                    onEditLifeContext={() => setMenuView('lifeContextEditor')}
-                />
-            );
-            case 'lifeContextEditor': return (
-                <LifeContextEditorView
-                    lifeContext={lifeContext}
-                    onSave={async (newContext: string) => {
-                        setLifeContext(newContext);
-                        // Save to cloud for registered users
-                        if (currentUser && encryptionKey) {
-                            try {
-                                await userService.saveUserData(newContext, serializeGamificationState(gamificationState), encryptionKey);
-                            } catch (error) {
-                                console.error("Failed to save edited context:", error);
-                            }
-                        }
-                        setMenuView('personalityProfile');
-                    }}
-                    onCancel={() => setMenuView('personalityProfile')}
-                />
-            );
-            case 'botSelection': return (
-                <BotSelection 
-                    onSelect={handleSelectBot} 
-                    onTranscriptEval={() => {
-                        setTeStep('pre');
-                        setTePreAnswers(null);
-                        setTeEvaluation(null);
-                        setView('transcriptEval');
-                    }}
-                    onUpgrade={() => setMenuView('upgrade')}
-                    onStartSessionWithPrompt={handleStartSessionFromEval}
-                    currentUser={currentUser}
-                    hasPersonalityProfile={hasPersonalityProfile}
-                    coachingMode={currentUser?.coachingMode || 'off'}
-                    highlightSection={highlightSection}
-                    onHighlightDone={() => setHighlightSection(null)}
-                />
-            );
-            case 'chat': return (
-                <ChatView 
-                    bot={selectedBot!} 
-                    lifeContext={lifeContext} 
-                    chatHistory={chatHistory} 
-                    setChatHistory={setChatHistory} 
-                    onEndSession={handleEndSession} 
-                    onMessageSent={() => setUserMessageCount(c => c + 1)} 
-                    currentUser={currentUser} 
-                    isNewSession={!cameFromContextChoice}
-                    encryptionKey={encryptionKey}
-                    isTestMode={isTestMode}
-                />
-            );
-            case 'sessionReview': return <SessionReview {...sessionAnalysis!} originalContext={lifeContext} selectedBot={selectedBot!} onContinueSession={handleContinueSession} onSwitchCoach={handleSwitchCoach} onReturnToStart={handleStartOver} onReturnToAdmin={(options) => { setIsTestMode(false); setTestScenarioId(null); setNewGamificationState(null); setView('admin'); setMenuView(null); if (options?.openTestRunner) { setShouldOpenTestRunner(true); } }} gamificationState={newGamificationState || gamificationState} currentUser={currentUser} isInterviewReview={selectedBot?.id === 'gloria-life-context'} interviewResult={tempContext} chatHistory={chatHistory} isTestMode={isTestMode} refinementPreview={refinementPreview} isLoadingRefinementPreview={isLoadingRefinementPreview} refinementPreviewError={refinementPreviewError} hasPersonalityProfile={hasPersonalityProfile} onStartPersonalitySurvey={() => setView('personalitySurvey')} encryptionKey={encryptionKey} />;
-            case 'transcriptEval': {
-                const handleTePreSubmit = (answers: TranscriptPreAnswers) => {
-                    setTePreAnswers(answers);
-                    setTeStep('input');
-                };
-                const handleTeTranscriptSubmit = async (transcript: string) => {
-                    if (!tePreAnswers) return;
-                    setTeIsLoading(true);
-                    try {
-                        let profile = undefined;
-                        if (hasPersonalityProfile && encryptionKey) {
-                            try {
-                                const profileData = await api.loadPersonalityProfile();
-                                if (profileData?.encryptedData) {
-                                    profile = await decryptPersonalityProfile(profileData.encryptedData, encryptionKey);
-                                }
-                            } catch (err) { 
-                            }
-                        }
-                        const result = await geminiService.evaluateTranscript(tePreAnswers, transcript, language, profile);
-                        // Add id to evaluation result
-                        setTeEvaluation({ ...result.evaluation, id: result.id });
-                        setTeStep('review');
-                    } catch (error) {
-                        console.error('Transcript evaluation failed:', error);
-                        alert('Evaluation failed. Please try again.');
-                    } finally {
-                        setTeIsLoading(false);
-                    }
-                };
-
-                if (teStep === 'pre') {
-                    return <TranscriptPreQuestions onNext={handleTePreSubmit} onBack={() => setView('botSelection')} onHistory={() => setTeStep('history')} />;
-                }
-                if (teStep === 'input') {
-                    const showAudioTab = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
-                    return <TranscriptInput onSubmit={handleTeTranscriptSubmit} onBack={() => setTeStep('pre')} isLoading={teIsLoading} showAudioTab={showAudioTab} language={language} />;
-                }
-                if (teStep === 'review' && teEvaluation && tePreAnswers) {
-                    return <EvaluationReview evaluation={teEvaluation} preAnswers={tePreAnswers} currentUser={currentUser || undefined} onDone={() => setView('botSelection')} onStartSession={handleStartSessionFromEval} />;
-                }
-                if (teStep === 'history') {
-                    return <EvaluationHistory onBack={() => setTeStep('pre')} currentUser={currentUser || undefined} onStartSession={handleStartSessionFromEval} />;
-                }
-                return null;
-            }
-            case 'interviewTranscript': return (
-                <InterviewTranscriptView
-                    chatHistory={chatHistory}
-                    language={language}
-                    userName={currentUser?.firstName || undefined}
-                    onBack={() => {
-                        setSelectedBot(null);
-                        setChatHistory([]);
-                        setView('botSelection');
-                    }}
-                />
-            );
-            case 'achievements': return <AchievementsView gamificationState={gamificationState} />;
-            case 'userGuide': return <UserGuideView />;
-            case 'formattingHelp': return <FormattingHelpView />;
-            case 'faq': return <FAQView />;
-            case 'about': return <AboutView />;
-            case 'disclaimer': return <DisclaimerView />;
-            case 'legal': return <LegalView />;
-            case 'accountManagement': return <AccountManagementView currentUser={currentUser!} onNavigate={handleNavigateFromMenu} onDeleteAccount={() => setIsDeleteModalOpen(true)} />;
-            case 'editProfile': return <EditProfileView currentUser={currentUser!} onBack={() => setMenuView('accountManagement')} onProfileUpdated={(user) => setAndProcessUser(user)} />;
-            case 'exportData': return <DataExportView lifeContext={lifeContext} colorTheme={colorTheme} />;
-            case 'upgrade': return <UpgradeView
-                    currentUser={currentUser!}
-                    onPurchaseSuccess={(user) => { setAndProcessUser(user); setMenuView(null); }}
-                    onRedeem={() => setMenuView('redeemCode')}
-                />;
-            case 'redeemCode': return <RedeemCodeView
-                    onBack={view === 'paywall' ? () => setMenuView(null) : undefined}
-                    onRedeemSuccess={(user) => { 
-                    setAndProcessUser(user);
-                    setMenuView(null);
-                    if (paywallUserEmail) {
-                        setAuthRedirectReason("Your pass has been applied! Please log in again to continue.");
-                        setPaywallUserEmail(null);
-                        setView('login');
-                    } else {
-                        handleCloseSubMenu();
-                    }
-                }} />;
-            case 'admin': return <AdminView currentUser={currentUser} encryptionKey={encryptionKey!} onRunTestSession={handleRunTestSession} onTestComfortCheck={handleTestComfortCheck} lifeContext={lifeContext} shouldOpenTestRunner={shouldOpenTestRunner} onTestRunnerOpened={() => setShouldOpenTestRunner(false)} />;
-            case 'changePassword': return <ChangePasswordView currentUser={currentUser!} encryptionKey={encryptionKey!} lifeContext={lifeContext} />;
-            default: return <WelcomeScreen />;
-        }
+    const appViewRouterProps = {
+        view,
+        menuView,
+        setView,
+        setMenuView,
+        setAuthRedirectReason,
+        authRedirectReason,
+        handleLoginSuccess,
+        handleAccessExpired,
+        handleLogout,
+        currentUser,
+        setCurrentUser,
+        setAndProcessUser,
+        encryptionKey,
+        lifeContext,
+        setLifeContext,
+        gamificationState,
+        setGamificationState,
+        hasPersonalityProfile,
+        existingProfileForExtension,
+        setExistingProfileForExtension,
+        preselectedLensForSurvey,
+        setPreselectedLensForSurvey,
+        selectedBot,
+        setSelectedBot,
+        chatHistory,
+        setChatHistory,
+        sessionAnalysis,
+        newGamificationState,
+        setNewGamificationState,
+        tempContext,
+        setTempContext,
+        cameFromContextChoice,
+        setCameFromContextChoice,
+        userMessageCount,
+        setUserMessageCount,
+        questionnaireAnswers,
+        setQuestionnaireAnswers,
+        paywallUserEmail,
+        setPaywallUserEmail,
+        highlightSection,
+        setHighlightSection,
+        postOceanRoute,
+        setPostOceanRoute,
+        isTestMode,
+        setIsTestMode,
+        testScenarioId,
+        setTestScenarioId,
+        shouldOpenTestRunner,
+        setShouldOpenTestRunner,
+        teStep,
+        setTeStep,
+        tePreAnswers,
+        setTePreAnswers,
+        teEvaluation,
+        setTeEvaluation,
+        teIsLoading,
+        setTeIsLoading,
+        refinementPreview,
+        isLoadingRefinementPreview,
+        refinementPreviewError,
+        iosSafeAreaTop,
+        colorTheme,
+        language,
+        handleFileUpload,
+        handleQuestionnaireSubmit,
+        handlePiiConfirm,
+        handleSelectBot,
+        handleStartSessionFromEval,
+        handleStartInterview,
+        handleIntentSelected,
+        handleOceanOnboardingComplete,
+        handleOceanOnboardingSkip,
+        handlePersonalitySurveyComplete,
+        handleEndSession,
+        handleContinueSession,
+        handleSwitchCoach,
+        handleStartOver,
+        handleRunTestSession,
+        handleTestComfortCheck,
+        handleNavigateFromMenu,
+        onDeleteAccount: () => setIsDeleteModalOpen(true),
+        applyIntentLogic,
+        routeWithIntentPicker,
+        buildEmptyLifeContextTemplate,
+        t,
     };
-    
+
     const isAnyModalOpen = useIsAnyModalOpen();
     const showGamificationBar = !isAnyModalOpen && !['welcome', 'auth', 'login', 'register', 'forgotPassword', 'registrationPending', 'verifyEmail', 'resetPassword', 'paywall', 'intentPicker', 'oceanOnboarding', 'namePrompt', 'profileHint'].includes(view);
     const minimalBar = ['landing', 'questionnaire', 'piiWarning'].includes(view) && !menuView;
@@ -1944,7 +1421,7 @@ const App: React.FC = () => {
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 <PageTransition viewKey={menuView || view}>
-                    {renderView()}
+                    <AppViewRouter {...appViewRouterProps} />
                 </PageTransition>
             </main>
             <BurgerMenu 
