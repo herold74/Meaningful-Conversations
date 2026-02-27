@@ -9,6 +9,7 @@ export const InboxIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
+        aria-hidden="true"
         {...props}
     >
         <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />

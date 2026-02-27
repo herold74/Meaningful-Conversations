@@ -118,7 +118,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onSubmit, onBack, answers
 
     return (
         <div className="relative w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
-            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors">
+            <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors" aria-label={t('back')}>
                 <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
             </button>
             <div className="text-center">

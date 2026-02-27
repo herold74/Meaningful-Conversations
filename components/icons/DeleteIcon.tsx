@@ -9,6 +9,7 @@ export const DeleteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
         <polyline points="3 6 5 6 21 6" />

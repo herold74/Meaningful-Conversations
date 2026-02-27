@@ -9,6 +9,7 @@ export const DollarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
         <line x1="12" y1="1" x2="12" y2="23"></line>

@@ -34,6 +34,7 @@ import { speechService, isNativeApp } from '../services/capacitorSpeechService';
 import { isDesktopWeb } from '../utils/platformDetection';
 import { useWakeLock } from '../hooks/useWakeLock';
 import { brand } from '../config/brand';
+import { useFocusTrap } from '../utils/useFocusTrap';
 
 // Extend Window for AudioContext vendor prefix (used by meditation gong fallback)
 interface CustomWindow extends Window {
@@ -64,7 +65,9 @@ interface CoachInfoModalProps {
 
 const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, coachingMode }) => {
     const { language, t } = useLocalization();
+    const coachInfoModalRef = useRef<HTMLDivElement>(null);
     useModalOpen(isOpen);
+    useFocusTrap(coachInfoModalRef, onClose, isOpen);
     if (!isOpen) return null;
 
     const botDescription = language === 'de' ? bot.description_de : bot.description;
@@ -80,6 +83,7 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
         aria-labelledby="coach-info-title"
     >
       <div 
+        ref={coachInfoModalRef}
         className="bg-background-secondary dark:bg-background-tertiary w-full max-w-md p-6 border border-border-secondary dark:border-border-primary shadow-xl text-center animate-fadeIn rounded-lg" 
         onClick={(e) => e.stopPropagation()}
       >
@@ -2153,7 +2157,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         </main>
     ) : (
       <>
-        <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6">
+        <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6" aria-live="polite" aria-relevant="additions">
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}

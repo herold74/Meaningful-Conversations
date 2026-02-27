@@ -56,6 +56,7 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, saf
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder={t('intent_ask_name_placeholder')}
+            aria-label={t('intent_ask_name_placeholder')}
             autoFocus={!isIOSDevice}
             autoCapitalize="words"
             autoCorrect="off"

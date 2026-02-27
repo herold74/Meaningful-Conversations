@@ -9,6 +9,7 @@ export const UserCheckIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =>
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
       <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />

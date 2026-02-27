@@ -5,6 +5,7 @@ export const LogoIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         xmlns="http://www.w3.org/2000/svg" 
         viewBox="0 0 24 24" 
         fill="currentColor"
+        aria-hidden="true"
         {...props}
     >
         {/* Spokes and handles are drawn as 4 rotated paths to create 8 spokes with wider, rounded handles */}
