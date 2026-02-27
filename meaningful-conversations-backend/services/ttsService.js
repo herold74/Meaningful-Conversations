@@ -358,6 +358,23 @@ async function getAvailableVoices() {
     }
 }
 
+/**
+ * Pre-load a Piper voice model in the TTS container.
+ * @param {string} model - Model name (e.g., 'en_US-amy-medium')
+ * @returns {Promise<object>} - Warmup result
+ */
+async function warmupModel(model) {
+    if (!USE_TTS_CONTAINER) {
+        return { status: 'skipped', reason: 'no TTS container' };
+    }
+    const response = await axios.post(
+        `${TTS_SERVICE_URL}/warmup`,
+        { model },
+        { timeout: 10000 }
+    );
+    return response.data;
+}
+
 module.exports = {
     synthesizeSpeech,
     getVoiceForBot,
@@ -365,6 +382,7 @@ module.exports = {
     cleanTextForSpeech,
     isPiperAvailable,
     getAvailableVoices,
+    warmupModel,
     VOICE_MODELS,
 };
 

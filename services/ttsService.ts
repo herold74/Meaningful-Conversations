@@ -53,6 +53,30 @@ const getModelFromVoiceId = (voiceId: string): string | null => {
 };
 
 /**
+ * Pre-load a Piper voice model on the TTS server so first synthesis is fast.
+ * Fire-and-forget: failures are silently ignored.
+ */
+export async function warmupServerVoice(botId: string, language: 'de' | 'en'): Promise<void> {
+    try {
+        const apiBaseUrl = getApiBaseUrl();
+        const headers = getAuthHeaders();
+        console.log('[TTS Warmup] Requesting model pre-load for', botId, language);
+        const resp = await fetch(`${apiBaseUrl}/api/tts/warmup`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ botId, language }),
+            signal: AbortSignal.timeout(12000),
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            console.log('[TTS Warmup] Model loaded:', data);
+        }
+    } catch (e) {
+        console.warn('[TTS Warmup] Failed (non-critical):', e);
+    }
+}
+
+/**
  * Split text into sentences for progressive TTS synthesis.
  * Splits on sentence-ending punctuation (.!?…) and semicolons.
  * For very long single chunks (>200 chars), splits at comma + conjunction.
