@@ -572,7 +572,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             </div>
 
             {/* Middle third: Microphone/Meditation Timer */}
-            <div className="flex-1 flex flex-col items-center justify-center py-4 w-full min-h-[12rem]">
+            <div className="flex-1 flex flex-col items-center justify-center pt-12 pb-4 w-full min-h-[12rem]">
                 {meditation.meditationState?.isActive ? (
                     <div className="flex flex-col items-center">
                         <div className="relative w-40 h-40">
@@ -618,7 +618,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         <button
                             onClick={speech.handleVoiceInteraction}
                             disabled={isLoading}
-                            className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
+                            className={`w-28 h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
                                 speech.isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
                             } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
                             aria-label={speech.isListening ? t('chat_voice_stop_and_send') : t('chat_voice_start_recording')}
@@ -626,7 +626,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                             {speech.isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
                         <div className="mt-8 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
-                            <p className="h-14 flex items-center">{input || (speech.isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}</p>
+                            <p className="min-h-14 flex items-center text-center whitespace-pre-line">{input || (speech.isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}</p>
                             {speech.isListening && !wakeLock.isSupported && (
                                 <p className="text-xs text-status-warning-foreground mt-1">{t('chat_keep_screen_on')}</p>
                             )}
