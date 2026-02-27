@@ -83,7 +83,7 @@ function getUserTier(user) {
 }
 
 function isLifetimeRegistered(user) {
-  return !user.accessExpiresAt && !user.isClient && !user.isAdmin;
+  return !user.accessExpiresAt && !user.isClient && !user.isAdmin && !user.isDeveloper;
 }
 
 function getOwnedPremiumBots(user) {

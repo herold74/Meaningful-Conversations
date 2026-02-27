@@ -357,8 +357,7 @@ interface ProfileMetadata {
 
 const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate, lifeContext, onEditLifeContext }) => {
   const { t, language } = useLocalization();
-  // Premium or higher: isPremium (premium), isClient (client), or isAdmin (admin/developer)
-  const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin);
+  const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const [isLoading, setIsLoading] = useState(true);
   const [decryptedData, setDecryptedData] = useState<any>(null); // riemann or big5 data
   const [profileMetadata, setProfileMetadata] = useState<ProfileMetadata | null>(null);

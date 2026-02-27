@@ -153,7 +153,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         // Access Pass Check
         // Permanent access: admin, active premium, client, developer, or Lifetime (accessExpiresAt = null)
-        let hasPermanentAccess = user.isAdmin || user.isPremium || user.isClient;
+        let hasPermanentAccess = user.isAdmin || user.isDeveloper || user.isPremium || user.isClient;
         let accessExpired = false;
         if (!hasPermanentAccess) {
             if (user.accessExpiresAt && new Date(user.accessExpiresAt) < now) {
@@ -166,7 +166,7 @@ router.post('/login', loginLimiter, async (req, res) => {
         if (accessExpired) {
             const syncedUser = await syncUserFromRevenueCat(user.id);
             if (syncedUser) {
-                const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+                const hasAccess = syncedUser.isAdmin || syncedUser.isDeveloper || syncedUser.isPremium || syncedUser.isClient
                     || !syncedUser.accessExpiresAt
                     || new Date(syncedUser.accessExpiresAt) >= now;
                 if (hasAccess) {

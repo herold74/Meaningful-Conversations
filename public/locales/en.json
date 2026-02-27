@@ -252,7 +252,7 @@
   "sessionReview_guestWarning_p3": "If you decide to register or log in later, you will need to upload this downloaded file to restore your progress.",
   "sessionReview_questionnaire_hint": "Tip",
   "sessionReview_questionnaire_recommendation": "The questionnaire",
-  "sessionReview_questionnaire_could_help": "might help with your topic",
+  "sessionReview_questionnaire_could_help": "helps tailor the coaching to you",
   "sessionReview_questionnaire_learn_more": "Learn more",
   "sessionReview_testMode_warning_title": "Test Mode Active",
   "sessionReview_testMode_warning_desc": "You are in a test session. Saving will update the context for this test run only and will not affect your personal saved data. You will be returned to the admin console after saving.",

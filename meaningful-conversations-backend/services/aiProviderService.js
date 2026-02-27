@@ -422,13 +422,23 @@ async function setActiveProvider(provider, adminEmail) {
     throw new Error(`Invalid provider: ${provider}. Must be 'google' or 'mistral'`);
   }
   
-  await prisma.appConfig.update({
-    where: { key: 'AI_PROVIDER' },
-    data: {
-      value: provider,
-      updatedBy: adminEmail,
-    }
-  });
+  try {
+    await prisma.appConfig.upsert({
+      where: { key: 'AI_PROVIDER' },
+      update: {
+        value: provider,
+        updatedBy: adminEmail,
+      },
+      create: {
+        key: 'AI_PROVIDER',
+        value: provider,
+        description: 'Active AI provider: google or mistral',
+        updatedBy: adminEmail,
+      }
+    });
+  } catch (err) {
+    throw err;
+  }
   
   // Clear cache to force reload
   cachedProvider = null;

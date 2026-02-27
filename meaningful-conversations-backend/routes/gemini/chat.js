@@ -46,7 +46,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             userRegionPreference = user.aiRegionPreference || 'optimal';
 
             // Admins and Developers have full access to all bots
-            if (user.isAdmin) {
+            if (user.isAdmin || user.isDeveloper) {
                 hasAccess = true;
             } else if (bot.accessTier === 'registered') {
                 hasAccess = true; // Any registered user can access 'registered' bots

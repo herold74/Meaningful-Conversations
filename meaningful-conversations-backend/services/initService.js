@@ -8,6 +8,8 @@ async function ensureDefaultConfig() {
   console.log('🔧 Checking application configuration...');
   
   try {
+    // Ensure AI_PROVIDER row exists
+    await ensureAIProviderRow();
     // Ensure AI_MODEL_MAPPING has the correct multi-provider structure
     await ensureModelMappingStructure();
     
@@ -15,6 +17,27 @@ async function ensureDefaultConfig() {
   } catch (error) {
     console.error('❌ Error ensuring default configuration:', error);
     // Don't crash the server - log and continue
+  }
+}
+
+/**
+ * Ensure AI_PROVIDER row exists in AppConfig
+ */
+async function ensureAIProviderRow() {
+  const existing = await prisma.appConfig.findUnique({
+    where: { key: 'AI_PROVIDER' }
+  });
+  if (!existing) {
+    console.log('  → Creating default AI_PROVIDER...');
+    await prisma.appConfig.create({
+      data: {
+        key: 'AI_PROVIDER',
+        value: 'google',
+        description: 'Active AI provider: google or mistral',
+        updatedBy: 'system-init',
+      }
+    });
+    console.log('  ✓ AI_PROVIDER created (default: google)');
   }
 }
 

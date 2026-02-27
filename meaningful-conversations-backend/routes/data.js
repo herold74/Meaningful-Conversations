@@ -138,7 +138,7 @@ router.put('/user/coaching-mode', async (req, res) => {
     // DPFL requires premium (isPremium), client (isClient), or admin access
     if (coachingMode === 'dpfl') {
         const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (user && !user.isPremium && !user.isClient && !user.isAdmin) {
+        if (user && !user.isPremium && !user.isClient && !user.isAdmin && !user.isDeveloper) {
             return res.status(403).json({ error: 'DPFL requires Premium access.' });
         }
     }
@@ -249,7 +249,7 @@ router.post('/redeem-code', async (req, res) => {
         const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
 
         const premiumActive = user.isPremium && (!user.premiumExpiresAt || new Date(user.premiumExpiresAt) > new Date());
-        const hasPermanentAccess = user.isAdmin || premiumActive || user.isClient;
+        const hasPermanentAccess = user.isAdmin || user.isDeveloper || premiumActive || user.isClient;
         const accessExpired = !hasPermanentAccess &&
             user.accessExpiresAt && new Date(user.accessExpiresAt) < new Date();
 
