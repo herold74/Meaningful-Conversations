@@ -58,6 +58,11 @@
     - [x] Voice Selection Modal
     - [x] Automatic voice selection based on bot/language
     - [x] iOS forced to local TTS (autoplay restrictions)
+    - [x] Persistent Piper models (in-memory via PiperVoice library, ~8x faster)
+    - [x] Warmup endpoint (pre-loads model when user enters session)
+    - [x] Progressive sentence synthesis (parallel requests, play as they arrive)
+    - [x] Improved sentence splitting (semicolons, comma+conjunction for long chunks)
+    - [x] Opus audio compression (WAV → Opus via ffmpeg, ~7x smaller)
 - [x] **Voice Mode UX:**
     - [x] Loading spinner during AI response
     - [x] Play/Pause/Repeat controls

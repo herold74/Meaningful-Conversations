@@ -63,6 +63,16 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** High-quality server voices for desktop, reliable local fallback for mobile/iOS.
 - **Implementation:** TTS container on port 8082, frontend auto-detects availability.
 
+### 18. Persistent Piper Models with Warmup (TTS Performance)
+- **Decision:** Use PiperVoice as a Python library with in-memory model caching instead of spawning a Piper subprocess per request.
+- **Reasoning:** Each subprocess spawned loaded a 61MB ONNX model from scratch (~3-4s overhead), making every TTS request take ~5s even for short sentences. With persistent models, inference takes 500-700ms.
+- **Implementation:**
+  - `app.py`: Thread-safe `_model_cache` dict holds `PiperVoice` instances with 10-min TTL eviction.
+  - `POST /warmup`: Pre-loads a model on demand. Called by frontend when TTS init confirms server mode.
+  - Per-model locking: `PiperVoice.synthesize` is not thread-safe; a `threading.Lock` per model serializes calls for the same model while allowing different models in parallel.
+  - Progressive sentence synthesis: Frontend splits text into sentences, fires parallel requests. With 2 CPUs, two Piper inferences run simultaneously.
+  - Gunicorn: 2 workers × 4 threads. Each worker holds its own model cache (~120MB for 2 models). 2 workers = 2 CPUs for parallel requests.
+
 ### 6. iOS Audio Handling
 - **Decision:** Force local TTS on iOS, play silent audio after mic use.
 - **Reasoning:** iOS autoplay restrictions prevent server TTS; "playAndRecord" mode degrades quality.
