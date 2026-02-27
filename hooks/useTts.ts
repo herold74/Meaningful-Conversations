@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { Bot, Message, Language, User } from '../types';
-import { synthesizeSpeech, splitIntoSentences, getBotVoiceSettings, saveBotVoiceSettings, type TtsMode } from '../services/ttsService';
+import { synthesizeSpeech, splitIntoSentences, getBotVoiceSettings, saveBotVoiceSettings, warmupServerVoice, type TtsMode } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import { selectVoice } from '../utils/voiceUtils';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
@@ -152,6 +152,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             setTtsMode('local');
           } else {
             console.log('[TTS Init] Server voice available, keeping:', savedVoiceId);
+            warmupServerVoice(bot.id, language as 'de' | 'en');
           }
         } else if (savedMode === 'local' && savedVoiceId) {
           const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
@@ -216,6 +217,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
               saveLanguageVoiceSettings('server', bestVoice, true);
+              warmupServerVoice(bot.id, language as 'de' | 'en');
             } else {
               setSelectedVoiceURI(null);
               setTtsMode('local');
