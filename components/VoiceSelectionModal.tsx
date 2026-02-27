@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalOpen } from '../utils/modalUtils';
 import { XIcon } from './icons/XIcon';
@@ -10,6 +10,7 @@ import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import Button from './shared/Button';
+import { useFocusTrap } from '../utils/useFocusTrap';
 import { isNativeiOS, nativeTtsService, type NativeVoice } from '../services/nativeTtsService';
 
 type VoiceSelection = 
@@ -53,7 +54,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
     isGuest = false,
 }) => {
     const { t } = useLocalization();
+    const modalRef = useRef<HTMLDivElement>(null);
     useModalOpen(isOpen);
+    useFocusTrap(modalRef, onClose, isOpen);
     
     // iOS detection - server TTS doesn't work reliably on iOS (browser) due to autoplay restrictions
     // Native iOS apps use AVSpeechSynthesizer which works perfectly
@@ -315,6 +318,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             onClick={onClose}
         >
             <div 
+                ref={modalRef}
                 className="bg-background-secondary dark:bg-background-secondary w-full max-w-lg max-h-[80dvh] flex flex-col p-6 border border-border-secondary dark:border-border-primary shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >

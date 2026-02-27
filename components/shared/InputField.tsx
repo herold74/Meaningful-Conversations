@@ -9,6 +9,9 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
   ({ label, error, hint, className = '', id, ...rest }, ref) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    if (process.env.NODE_ENV === 'development' && !label && !rest['aria-label'] && !rest['aria-labelledby']) {
+      console.warn('InputField: Missing label, aria-label, or aria-labelledby. This input may not be accessible.');
+    }
     return (
       <div className="space-y-1">
         {label && (

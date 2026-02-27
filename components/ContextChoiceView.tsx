@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { User, GamificationState } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
@@ -13,6 +13,7 @@ import { XIcon } from './icons/XIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import Button from './shared/Button';
 import { downloadTextFile } from '../utils/fileDownload';
+import { useFocusTrap } from '../utils/useFocusTrap';
 
 interface ContextChoiceViewProps {
   user: User;
@@ -29,6 +30,8 @@ const removeGamificationKey = (text: string) => {
 const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContext, gamificationState, onContinue, onStartNew }) => {
   const { t } = useLocalization();
   const [isConfirmingStartNew, setIsConfirmingStartNew] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, () => setIsConfirmingStartNew(false), isConfirmingStartNew);
   useModalOpen(isConfirmingStartNew);
 
   const contextPreviewFull = useMemo(() => removeGamificationKey(savedContext.trim()), [savedContext]);
@@ -113,6 +116,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
       
       {isConfirmingStartNew && createPortal(
          <div 
+            ref={modalRef}
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn p-4"
             style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
             onClick={() => setIsConfirmingStartNew(false)}

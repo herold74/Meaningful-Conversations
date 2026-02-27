@@ -9,6 +9,7 @@ export const MicrophoneIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
     strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden="true"
     {...props}
   >
     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />

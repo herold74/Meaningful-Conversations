@@ -66,6 +66,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder={t('redeem_code_placeholder')}
+              aria-label={t('redeem_code_placeholder')}
               required
               disabled={status === 'loading'}
               className="w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"

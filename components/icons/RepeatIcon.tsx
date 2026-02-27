@@ -9,6 +9,7 @@ export const RepeatIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
         <polyline points="17 1 21 5 17 9" />

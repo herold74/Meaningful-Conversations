@@ -156,6 +156,9 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                 {/* Header - Always visible, clickable to expand */}
                                 <div
                                     onClick={() => toggleExpand(evalItem.id)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(evalItem.id); } }}
                                     className="p-4 cursor-pointer flex items-start justify-between gap-3"
                                 >
                                     <div className="flex-1 min-w-0">

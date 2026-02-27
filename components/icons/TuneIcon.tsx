@@ -10,6 +10,7 @@ export const TuneIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
+        aria-hidden="true"
         {...props}
     >
         <path d="M4 21v-7" />

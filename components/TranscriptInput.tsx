@@ -281,6 +281,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                                 value={speakerMap[speaker.label] || ''}
                                 onChange={(e) => setSpeakerMap(prev => ({ ...prev, [speaker.label]: e.target.value }))}
                                 placeholder={t('te_input_audio_speaker_map_name')}
+                                aria-label={t('te_input_audio_speaker_map_name')}
                                 className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-primary text-content-primary text-sm focus:ring-2 focus:ring-accent-primary focus:border-transparent"
                             />
                         </div>
@@ -333,6 +334,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                         onChange={(e) => { setText(e.target.value); setFileName(null); }}
                         placeholder={t('te_input_paste_placeholder')}
                         disabled={isLoading}
+                        aria-label={t('te_input_paste_placeholder')}
                         className="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-primary text-content-primary placeholder-content-secondary/50 resize-y focus:ring-2 focus:ring-accent-primary focus:border-transparent transition-all font-mono text-sm disabled:opacity-50"
                         rows={15}
                     />
@@ -366,6 +368,9 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                     onDrop={handleFileDrop}
                     onDragOver={(e) => e.preventDefault()}
                     onClick={() => fileInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
                     className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center cursor-pointer hover:border-accent-primary/50 transition-colors"
                 >
                     <div className="text-4xl mb-3">📄</div>
@@ -558,6 +563,9 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                                     onDrop={handleAudioDrop}
                                     onDragOver={(e) => e.preventDefault()}
                                     onClick={() => audioFileInputRef.current?.click()}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); audioFileInputRef.current?.click(); } }}
                                     className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-accent-primary/50 transition-colors"
                                 >
                                     <div className="text-3xl mb-2">🎙️</div>
@@ -588,6 +596,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
                                         <select
                                             value={speakerHint}
                                             onChange={(e) => setSpeakerHint(parseInt(e.target.value, 10))}
+                                            aria-label={t('te_input_audio_speakers')}
                                             className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-background-primary text-content-primary text-sm focus:ring-2 focus:ring-accent-primary"
                                         >
                                             <option value={0}>{t('te_input_audio_speakers_auto')}</option>

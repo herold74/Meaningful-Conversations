@@ -6,7 +6,7 @@ import React from 'react';
  * Used to indicate coaches (Rob, Kenji) who offer guided meditation support.
  */
 export const MediationIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true" {...props}>
         {/* Bell body */}
         <path strokeLinecap="round" strokeLinejoin="round" d="M 12 4 C 9 4, 7 6, 7 9 L 7 15 C 7 16, 6 17, 5 17 L 19 17 C 18 17, 17 16, 17 15 L 17 9 C 17 6, 15 4, 12 4 Z" />
         {/* Bell rim */}
