@@ -72,28 +72,26 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
             });
         }
         
-        // Synthesize speech
-        const audioBuffer = await synthesizeSpeech(text, botId, language, isMeditation, voiceId);
+        const result = await synthesizeSpeech(text, botId, language, isMeditation, voiceId);
         
-        // If no server voice available (returns null), fallback to local
-        if (!audioBuffer) {
+        if (!result) {
             return res.status(503).json({
                 error: 'No server voice available for this combination',
                 fallbackToWebSpeech: true
             });
         }
         
+        const { buffer: audioBuffer, contentType } = result;
         const durationMs = Date.now() - startTime;
         const characterCount = text.length;
         
-        // Track API usage
         await trackApiUsage({
             userId: userId || null,
             isGuest: !userId,
             endpoint: 'tts',
             model: 'piper-tts',
             botId: botId,
-            inputTokens: characterCount, // Use character count as "tokens" for TTS
+            inputTokens: characterCount,
             outputTokens: 0,
             durationMs,
             success: true,
@@ -105,12 +103,9 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
             },
         });
         
-        // Set appropriate headers for audio streaming
-        res.setHeader('Content-Type', 'audio/wav');
+        res.setHeader('Content-Type', contentType);
         res.setHeader('Content-Length', audioBuffer.length);
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-        
-        // Send the audio buffer
+        res.setHeader('Cache-Control', 'public, max-age=3600');
         res.send(audioBuffer);
         
     } catch (error) {
