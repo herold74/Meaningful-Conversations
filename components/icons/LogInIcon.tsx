@@ -9,6 +9,7 @@ export const LogInIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
+        aria-hidden="true"
         {...props}
     >
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />

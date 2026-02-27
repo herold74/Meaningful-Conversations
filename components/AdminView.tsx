@@ -91,7 +91,7 @@ const ResetPasswordSuccessModal: React.FC<{
             >
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-gray-200">{t('admin_reset_success_title')}</h2>
-                    <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+                    <button onClick={onClose} className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" aria-label={t('aria_close')}>
                         <XIcon className="w-6 h-6" />
                     </button>
                 </div>

@@ -304,6 +304,9 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     return (
       <motion.div
         onClick={() => isLocked ? onUpgrade?.() : onSelect(bot)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isLocked ? onUpgrade?.() : onSelect(bot); } }}
         className={`
             relative flex flex-col items-center text-center p-6
             bg-background-secondary border rounded-card transition-colors
@@ -602,6 +605,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               <div className="max-w-4xl mx-auto mt-4">
                 <div
                   onClick={() => locked ? onUpgrade?.() : onTranscriptEval?.()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); locked ? onUpgrade?.() : onTranscriptEval?.(); } }}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg border transition-all
                     ${locked
@@ -693,6 +699,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               className="flex items-center gap-4 cursor-pointer select-none"
               onClick={() => setClientSectionOpen(prev => !prev)}
               role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setClientSectionOpen(prev => !prev); } }}
               aria-expanded={clientSectionOpen}
             >
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>

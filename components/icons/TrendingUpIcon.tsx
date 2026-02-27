@@ -9,6 +9,7 @@ export const TrendingUpIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>

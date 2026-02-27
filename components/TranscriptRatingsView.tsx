@@ -181,6 +181,9 @@ const TranscriptRatingsView: React.FC = () => {
                             >
                                 <div
                                     onClick={() => rating.feedback && rating.feedback.trim().length > 0 && toggleExpand(rating.id)}
+                                    role="button"
+                                    tabIndex={rating.feedback && rating.feedback.trim().length > 0 ? 0 : -1}
+                                    onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && rating.feedback && rating.feedback.trim().length > 0) { e.preventDefault(); toggleExpand(rating.id); } }}
                                     className={`p-4 transition-colors ${rating.feedback && rating.feedback.trim().length > 0 ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''}`}
                                 >
                                     <div className="flex items-start justify-between gap-4">
@@ -220,6 +223,7 @@ const TranscriptRatingsView: React.FC = () => {
                                                     toggleExpand(rating.id);
                                                 }}
                                                 className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+                                                aria-label={isExpanded ? t('aria_collapse') : t('aria_expand')}
                                             >
                                                 <svg
                                                     className={`w-5 h-5 text-content-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}

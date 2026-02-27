@@ -9,6 +9,7 @@ export const CodeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
+        aria-hidden="true"
         {...props}
     >
         <polyline points="16 18 22 12 16 6" />
