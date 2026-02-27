@@ -216,8 +216,9 @@ if [[ "$SKIP_BUILD" == false ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would build: $TTS_IMAGE"
         else
             cd meaningful-conversations-backend
-            # Build-Context: current dir (parent von tts-service/)
-            podman build --platform linux/amd64 -f tts-service/Dockerfile -t "$TTS_IMAGE" .
+            # --no-cache: Podman on macOS often caches COPY layers even when files change
+            # --format docker: Required for HEALTHCHECK support (OCI format silently drops it)
+            podman build --no-cache --format docker --platform linux/amd64 -f tts-service/Dockerfile -t "$TTS_IMAGE" .
             podman tag "$TTS_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
             cd ..
             echo -e "${GREEN}✓ TTS image built${NC}"
@@ -427,6 +428,11 @@ fi
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
     echo "Pulling frontend image..."
     podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
+fi
+
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
+    echo "Pulling TTS image..."
+    podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
 fi
 
 # Save current version for rollback (before stopping anything)
