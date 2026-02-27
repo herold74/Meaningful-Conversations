@@ -95,8 +95,8 @@ DATABASE_URL="mysql://mcdev:your_secure_password@localhost:3306/meaningful_conve
 JWT_SECRET="your-random-jwt-secret-here"
 
 # Google Gemini API
-GOOGLE_GENAI_API_KEY="your-gemini-api-key"
-GOOGLE_GENAI_MODEL="gemini-2.0-flash-exp"
+GOOGLE_API_KEY="your-gemini-api-key"
+# GOOGLE_GENAI_MODEL is deprecated; model selection is managed via Admin Panel / Database
 
 # Mistral API (optional)
 MISTRAL_API_KEY="your-mistral-api-key-if-using"
@@ -104,8 +104,8 @@ MISTRAL_API_KEY="your-mistral-api-key-if-using"
 # Mailjet (for email features)
 MAILJET_API_KEY="your-mailjet-api-key"
 MAILJET_SECRET_KEY="your-mailjet-secret-key"
-MAILJET_FROM_EMAIL="noreply@yourdomain.com"
-MAILJET_FROM_NAME="Meaningful Conversations"
+MAILJET_SENDER_EMAIL="noreply@yourdomain.com"
+# MAILJET_FROM_NAME is deprecated; sender name is configured via BRAND_SENDER_NAME or defaults
 
 # Server Config
 PORT=3001
@@ -162,21 +162,18 @@ curl http://localhost:3001/api/health
 
 ## 🎨 Step 4: Frontend Setup
 
-Open a new terminal window:
-
-```bash
-# From project root
-cd Meaningful-Conversations-Project  # if not already there
-npm install
-```
-
 ### 4.1 Configure Frontend Environment
 
-The frontend uses Vite's environment variable system:
+The frontend uses Vite's environment variable system.
+
+**Branding & White-Labeling:**
+You can override the default branding by setting `VITE_BRAND_*` variables. See [WHITE-LABEL-GUIDE.md](./WHITE-LABEL-GUIDE.md) for a full list of options.
 
 ```bash
 # Create .env.local (optional - defaults work for local dev)
 echo "VITE_API_URL=http://localhost:3001" > .env.local
+# Example branding override:
+echo "VITE_BRAND_APP_NAME=My Local App" >> .env.local
 ```
 
 **Default values (no .env needed for local dev):**
@@ -195,7 +192,29 @@ Open your browser and navigate to `http://localhost:5173`
 
 ---
 
-## 🔊 Step 5: TTS Service Setup (Optional)
+## 📱 Step 5: Mobile App Setup (iOS/Capacitor) - Optional
+
+To build and run the iOS app, you need a Mac with Xcode installed.
+
+1.  **Initialize Capacitor:**
+    ```bash
+    npx cap sync
+    ```
+
+2.  **Open in Xcode:**
+    ```bash
+    npx cap open ios
+    ```
+
+3.  **Run in Simulator:**
+    - Select a simulator (e.g., iPhone 15) in Xcode.
+    - Click the "Run" (Play) button.
+
+**Note:** Native features like `native-audio` and `speech-recognition` require the app to be running in the iOS environment (Simulator or Device).
+
+---
+
+## 🔊 Step 6: TTS Service Setup (Optional)
 
 The Text-to-Speech service is optional for local development. The app will fall back to browser TTS if the server isn't available.
 
@@ -218,9 +237,9 @@ python tts_server.py
 
 ---
 
-## ✅ Step 6: Verify Setup
+## ✅ Step 7: Verify Setup
 
-### 6.1 Check All Services
+### 7.1 Check All Services
 
 | Service | URL | Expected Response |
 |---------|-----|-------------------|
@@ -228,7 +247,7 @@ python tts_server.py
 | Backend Health | http://localhost:3001/api/health | `{"status":"ok","database":"connected"}` |
 | TTS (optional) | http://localhost:5555/health | `{"status":"ok"}` |
 
-### 6.2 Test Core Features
+### 7.2 Test Core Features
 
 1. **Register/Login:**
    - Open http://localhost:5173
@@ -362,5 +381,5 @@ After setup:
 
 ---
 
-**Last Updated:** February 13, 2026  
+**Last Updated:** February 27, 2026
 **Tested With:** Node.js 22.x, MySQL 8.0, MariaDB 11.2

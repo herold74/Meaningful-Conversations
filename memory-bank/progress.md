@@ -17,8 +17,8 @@
 - [x] **AI Coaches:**
     - [x] Nobody (GPS-Framework, efficient problem-solving)
     - [x] Max (Ambitious, goal-oriented)
-    - [x] Ava (Empathetic, supportive)
-    - [x] Kenji (Mindful, Zen-inspired)
+    - [x] Ava (Strategic thinking, decision-making)
+    - [x] Kenji (Stoic philosophy, resilience)
     - [x] Chloe (Structured Reflection)
     - [x] Rob (Mental Fitness)
     - [x] Gloria Life Context (Onboarding interview)
@@ -60,7 +60,7 @@
     - [x] iOS forced to local TTS (autoplay restrictions)
     - [x] Persistent Piper models (in-memory via PiperVoice library, ~8x faster)
     - [x] Warmup endpoint (pre-loads model when user enters session)
-    - [x] Progressive sentence synthesis (parallel requests, play as they arrive)
+    - [x] Progressive sentence synthesis (sequential play-while-synthesize, each gets full CPU)
     - [x] Improved sentence splitting (semicolons, comma+conjunction for long chunks)
     - [x] Opus audio compression (WAV → Opus via ffmpeg, ~7x smaller)
 - [x] **Voice Mode UX:**
@@ -154,7 +154,7 @@
 - [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
 - [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
-- [x] **Premium Trial:** 14-day trial for new registrations
+- [x] **Premium Trial:** 9-day trial for new registrations
 - [x] **iOS In-App Purchase (StoreKit 2):**
     - [x] Backend receipt validation (`/api/apple-iap/verify-receipt`, `restore`)
     - [x] Apple Server Notifications v2 (`/api/apple-iap/notification`)
