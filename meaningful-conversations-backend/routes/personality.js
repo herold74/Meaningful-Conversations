@@ -33,7 +33,7 @@ router.post('/save', authMiddleware, async (req, res) => {
     
     // Premium enforcement: Riemann & SD require premium (isPremium), client (isClient), or admin access
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user && !user.isPremium && !user.isClient && !user.isAdmin) {
+    if (user && !user.isPremium && !user.isClient && !user.isAdmin && !user.isDeveloper) {
       const requestedPremiumLenses = (Array.isArray(completedLenses) ? completedLenses : [])
         .filter(l => premiumOnlyLenses.includes(l));
       

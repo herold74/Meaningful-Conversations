@@ -101,7 +101,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                     <MenuItem icon={RepeatIcon} text={t('menu_start_over')} onClick={handleStartOverAndClose} />
                     <hr className="border-border-primary my-2" />
                     
-                    {currentUser?.isAdmin && (
+                    {(currentUser?.isAdmin || currentUser?.isDeveloper) && (
                         <>
                             <MenuItem icon={GearIcon} text={t('menu_admin')} onClick={() => onNavigate('admin')} />
                              <hr className="border-border-primary my-2" />
@@ -119,7 +119,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         <>
                             <MenuItem icon={UserIcon} text={t('menu_account_management')} onClick={() => onNavigate('accountManagement')} />
                             <MenuItem icon={ClipboardCheckIcon} text={t('menu_personality_profile')} onClick={() => onNavigate('personalityProfile')} badge={showProfileBadge} />
-                            {!currentUser.isClient && !currentUser.isAdmin && (
+                            {!currentUser.isClient && !currentUser.isAdmin && !currentUser.isDeveloper && (
                                 <MenuItem icon={ShoppingBagIcon} text={t('menu_upgrade')} onClick={() => onNavigate('upgrade')} />
                             )}
                             <hr className="border-border-primary my-2" />

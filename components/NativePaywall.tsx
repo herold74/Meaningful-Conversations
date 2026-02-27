@@ -47,7 +47,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
               const syncedUser = res?.user;
               if (syncedUser) {
-                const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+                const hasAccess = syncedUser.isAdmin || syncedUser.isDeveloper || syncedUser.isPremium || syncedUser.isClient
                   || (syncedUser.accessExpiresAt == null)
                   || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
                 if (hasAccess) {
@@ -148,7 +148,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         const res = await api.apiFetch('/apple-iap/sync-from-revenuecat', { method: 'POST', body: JSON.stringify({}) });
         const syncedUser = res?.user;
         if (syncedUser) {
-          const hasAccess = syncedUser.isAdmin || syncedUser.isPremium || syncedUser.isClient
+          const hasAccess = syncedUser.isAdmin || syncedUser.isDeveloper || syncedUser.isPremium || syncedUser.isClient
             || (syncedUser.accessExpiresAt == null)
             || (syncedUser.accessExpiresAt && new Date(syncedUser.accessExpiresAt) > new Date());
           if (hasAccess) {
