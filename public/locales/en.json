@@ -186,7 +186,7 @@
   "chat_send_message": "Send Message",
   "chat_report_message": "Report an issue with this message",
   "meditation_early_stop": "Stop",
-  "chat_tapToSpeak": "Voice mode is active. Tap the microphone to speak.",
+  "chat_tapToSpeak": "Voice mode is active.\nTap the microphone to speak.",
   "chat_keep_screen_on": "Please keep your screen on so the recording is not interrupted.",
   "chat_audio_loading": "Audio...",
   "chat_voice_listening": "Listening...",

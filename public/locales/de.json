@@ -185,7 +185,7 @@
   "chat_send_message": "Nachricht senden",
   "chat_report_message": "Ein Problem mit dieser Nachricht melden",
   "meditation_early_stop": "Beenden",
-  "chat_tapToSpeak": "Sprachmodus ist aktiv. Tippen Sie auf das Mikrofon, um zu sprechen.",
+  "chat_tapToSpeak": "Sprachmodus ist aktiv.\nTippen Sie auf das Mikrofon, um zu sprechen.",
   "chat_keep_screen_on": "Bitte lassen Sie den Bildschirm eingeschaltet, damit die Aufnahme nicht unterbrochen wird.",
   "chat_audio_loading": "Audio...",
   "chat_voice_listening": "Hört zu...",
