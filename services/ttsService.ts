@@ -54,21 +54,40 @@ const getModelFromVoiceId = (voiceId: string): string | null => {
 
 /**
  * Split text into sentences for progressive TTS synthesis.
- * Merges very short fragments (< 15 chars, e.g. "Ja.", "OK.", "Genau.")
- * with the next sentence to avoid tiny standalone audio clips.
+ * Splits on sentence-ending punctuation (.!?…) and semicolons.
+ * For very long single chunks (>200 chars), splits at comma + conjunction.
+ * Merges very short fragments (< 15 chars) with the next sentence.
  */
 export function splitIntoSentences(text: string): string[] {
     if (!text || text.trim().length === 0) return [];
 
-    // Split on sentence-ending punctuation followed by whitespace
-    const parts = text.split(/(?<=[.!?…]+)\s+/).map(s => s.trim()).filter(Boolean);
+    // Phase 1: Split on sentence-ending punctuation or semicolons followed by whitespace
+    const parts = text.split(/(?<=[.!?…;]+)\s+/).map(s => s.trim()).filter(Boolean);
 
-    if (parts.length <= 1) return parts;
+    // Phase 2: Break remaining long chunks at comma + conjunction boundaries
+    const MAX_CHUNK = 200;
+    const expanded: string[] = [];
+    for (const part of parts) {
+        if (part.length > MAX_CHUNK) {
+            const subParts = part.split(/,\s+(?=and |but |or |so |yet |nor |also |then |however |because |while |since |although |wenn |und |aber |oder |also |denn |weil |obwohl )/i);
+            if (subParts.length > 1) {
+                subParts.forEach((sp, i) => {
+                    expanded.push(i < subParts.length - 1 ? sp + ',' : sp);
+                });
+            } else {
+                expanded.push(part);
+            }
+        } else {
+            expanded.push(part);
+        }
+    }
 
-    // Merge tiny fragments (< 15 chars) with the NEXT sentence
+    if (expanded.length <= 1) return expanded;
+
+    // Phase 3: Merge tiny fragments (< 15 chars) with the NEXT sentence
     const merged: string[] = [];
     let carry = '';
-    for (const part of parts) {
+    for (const part of expanded) {
         if (carry) {
             merged.push(carry + ' ' + part);
             carry = '';
