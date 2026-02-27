@@ -262,9 +262,14 @@ html[data-theme="autumn"] {
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Theme-aware scrollbar for Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--accent-primary)) rgb(var(--bg-tertiary));
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px).
+     max() preserves larger inherited sizes while enforcing 16px minimum. */
+  input, textarea, select, button {
+    font-size: max(16px, 1em);
   }
 }
 
