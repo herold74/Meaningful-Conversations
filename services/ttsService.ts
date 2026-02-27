@@ -53,6 +53,33 @@ const getModelFromVoiceId = (voiceId: string): string | null => {
 };
 
 /**
+ * Split text into sentences for progressive TTS synthesis.
+ * Merges short fragments (< 40 chars) with the previous sentence
+ * to avoid tiny audio clips with disproportionate overhead.
+ */
+export function splitIntoSentences(text: string): string[] {
+    if (!text || text.trim().length === 0) return [];
+
+    // Split on sentence-ending punctuation followed by whitespace.
+    // Lookbehind keeps the punctuation attached to the sentence.
+    const parts = text.split(/(?<=[.!?…]+)\s+/);
+
+    const merged: string[] = [];
+    for (const part of parts) {
+        const trimmed = part.trim();
+        if (!trimmed) continue;
+
+        if (merged.length > 0 && trimmed.length < 40) {
+            merged[merged.length - 1] += ' ' + trimmed;
+        } else {
+            merged.push(trimmed);
+        }
+    }
+
+    return merged;
+}
+
+/**
  * Synthesize speech using the server TTS
  */
 export const synthesizeSpeech = async (
