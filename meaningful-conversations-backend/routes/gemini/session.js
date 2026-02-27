@@ -302,7 +302,7 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
             let hasPepAccess = false;
             if (userId) {
                 const analysisUser = await prisma.user.findUnique({ where: { id: userId } });
-                hasPepAccess = analysisUser?.isClient === true || analysisUser?.isAdmin === true;
+                hasPepAccess = analysisUser?.isClient === true || analysisUser?.isAdmin === true || analysisUser?.isDeveloper === true;
             }
             if (!hasPepAccess) {
                 deduplicatedResponse.solutionBlockages = [];

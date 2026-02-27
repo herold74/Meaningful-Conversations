@@ -438,7 +438,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     
     const canSeeBlockages = useMemo(() => {
         // PEP Solution Blockages (Dr. Bohne) require Client, Admin, or Developer access
-        if (currentUser?.isClient || currentUser?.isAdmin) return true;
+        if (currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper) return true;
         return false;
     }, [currentUser]);
 

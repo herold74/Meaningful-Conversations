@@ -1255,13 +1255,13 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     // 1. No existing adaptation mode is set (prevents re-asking when adding additional lenses)
     // 2. User is premium or higher (DPFL/adaptive is premium-only; registered users get 'stable' automatically)
     const hasExistingAdaptationMode = existingProfile?.adaptationMode;
-    const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin);
+    const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
     if (!hasExistingAdaptationMode && isPremiumOrHigher) {
       steps.push('ADAPTATION_CHOICE');
     }
     
     return steps;
-  }, [selectedLens, hadNarrativesAtStart, existingProfile?.adaptationMode, currentUser?.isPremium, currentUser?.isClient, currentUser?.isAdmin, bfi2Variant]);
+  }, [selectedLens, hadNarrativesAtStart, existingProfile?.adaptationMode, currentUser?.isPremium, currentUser?.isClient, currentUser?.isAdmin, currentUser?.isDeveloper, bfi2Variant]);
 
   const currentStepId = flow[step] || 'DONE';
 
@@ -1372,7 +1372,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
           onSelect={handleLensSelect}
           completedLenses={result.completedLenses || []}
           t={t}
-          isPremiumOrHigher={!!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin)}
+          isPremiumOrHigher={!!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper)}
         />
       </Card>
     );

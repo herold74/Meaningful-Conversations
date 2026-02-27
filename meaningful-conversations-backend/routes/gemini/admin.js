@@ -16,7 +16,7 @@ router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.isAdmin) {
+    if (!user || (!user.isAdmin && !user.isDeveloper)) {
         return res.status(403).json({ error: 'Admin access required' });
     }
 
