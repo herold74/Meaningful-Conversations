@@ -62,6 +62,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     active: boolean;
   } | null>(null);
   const hasSpokenFirstMessageRef = useRef(false);
+  const warmupPromiseRef = useRef<Promise<void> | null>(null);
 
   const isIOS = useMemo(() => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -152,7 +153,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             setTtsMode('local');
           } else {
             console.log('[TTS Init] Server voice available, keeping:', savedVoiceId);
-            warmupServerVoice(bot.id, language as 'de' | 'en');
+            warmupPromiseRef.current = warmupServerVoice(bot.id, language as 'de' | 'en');
           }
         } else if (savedMode === 'local' && savedVoiceId) {
           const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
@@ -217,7 +218,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
               saveLanguageVoiceSettings('server', bestVoice, true);
-              warmupServerVoice(bot.id, language as 'de' | 'en');
+              warmupPromiseRef.current = warmupServerVoice(bot.id, language as 'de' | 'en');
             } else {
               setSelectedVoiceURI(null);
               setTtsMode('local');
@@ -591,41 +592,61 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             URL.revokeObjectURL(cachedAudioRef.current.url);
           }
 
+          if (warmupPromiseRef.current) {
+            console.log('[TTS] Waiting for model warmup before synthesis...');
+            await warmupPromiseRef.current;
+            warmupPromiseRef.current = null;
+          }
+
           const sentences = splitIntoSentences(cleanText);
           console.log(`[TTS] Text length: ${cleanText.length}, sentences: ${sentences.length}`, sentences.length <= 3 ? sentences : sentences.map(s => s.substring(0, 50) + '...'));
 
           if (sentences.length > 1) {
-            // ====== PARALLEL SENTENCE SYNTHESIS ======
-            // TTS container has 2 CPUs so parallel Piper processes each get ~1 full CPU.
-            // Play sentence 1 as soon as it's ready; remaining synthesize in parallel.
-            console.log(`[TTS] Progressive mode: ${sentences.length} sentences, firing parallel requests`);
-
-            const sentencePromises = sentences.map(s =>
-              synthesizeSpeech(s, bot.id, language, isMeditation, voiceIdToUse)
-            );
+            // ====== SEQUENTIAL SENTENCE SYNTHESIS (play-while-synthesizing) ======
+            // Synthesize one sentence at a time so each gets full CPU (~1.7s for 150 chars).
+            // Play each sentence immediately; synthesize the next while audio plays.
+            // Parallel was tested but shared vCPUs cause ~2x contention.
+            console.log(`[TTS] Progressive mode: ${sentences.length} sentences, sequential play-while-synth`);
 
             const resolvedBlobs: (Blob | null)[] = new Array(sentences.length).fill(null);
             const resolvedUrls: string[] = new Array(sentences.length).fill('');
             const queue = { blobs: resolvedBlobs, urls: resolvedUrls, currentIndex: 0, active: true };
             sentenceQueueRef.current = queue;
 
-            sentencePromises.forEach((promise, i) => {
-              promise.then(blob => {
-                if (queue.active) {
+            // Synthesize sentence 1 with full CPU
+            const firstBlob = await synthesizeSpeech(sentences[0], bot.id, language, isMeditation, voiceIdToUse);
+            if (!queue.active) return;
+
+            resolvedBlobs[0] = firstBlob;
+            resolvedUrls[0] = URL.createObjectURL(firstBlob);
+            const firstUrl = resolvedUrls[0];
+            console.log(`[TTS] Sentence 1/${sentences.length} ready, starting playback`);
+
+            // Synthesize remaining sentences sequentially in background.
+            // Each gets full CPU; runs while current sentence plays.
+            const synthRemaining = async () => {
+              for (let i = 1; i < sentences.length; i++) {
+                if (!queue.active) return;
+                try {
+                  const blob = await synthesizeSpeech(sentences[i], bot.id, language, isMeditation, voiceIdToUse);
+                  if (!queue.active) return;
                   resolvedBlobs[i] = blob;
                   resolvedUrls[i] = URL.createObjectURL(blob);
                   console.log(`[TTS] Sentence ${i + 1}/${sentences.length} ready`);
+                } catch (err) {
+                  console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
                 }
-              }).catch(err => {
-                console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
-              });
-            });
-
-            const firstBlob = await sentencePromises[0];
-            if (!queue.active) return;
-
-            const firstUrl = resolvedUrls[0] || URL.createObjectURL(firstBlob);
-            if (!resolvedUrls[0]) resolvedUrls[0] = firstUrl;
+              }
+              if (queue.active) {
+                cachedAudioRef.current = {
+                  text: cleanText,
+                  url: firstUrl,
+                  blob: firstBlob,
+                  sentenceBlobs: resolvedBlobs.filter(Boolean) as Blob[],
+                };
+              }
+            };
+            synthRemaining();
 
             const audio = new Audio();
             audioRef.current = audio;
@@ -681,17 +702,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             audio.src = firstUrl;
             currentAudioUrlRef.current = firstUrl;
             await audio.play();
-
-            Promise.all(sentencePromises).then(allBlobs => {
-              if (queue.active) {
-                cachedAudioRef.current = {
-                  text: cleanText,
-                  url: firstUrl,
-                  blob: firstBlob,
-                  sentenceBlobs: allBlobs,
-                };
-              }
-            }).catch(() => {});
 
           } else {
             // ====== SINGLE SENTENCE (original path) ======
