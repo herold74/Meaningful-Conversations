@@ -54,25 +54,35 @@ const getModelFromVoiceId = (voiceId: string): string | null => {
 
 /**
  * Split text into sentences for progressive TTS synthesis.
- * Merges short fragments (< 40 chars) with the previous sentence
- * to avoid tiny audio clips with disproportionate overhead.
+ * Merges very short fragments (< 15 chars, e.g. "Ja.", "OK.", "Genau.")
+ * with the next sentence to avoid tiny standalone audio clips.
  */
 export function splitIntoSentences(text: string): string[] {
     if (!text || text.trim().length === 0) return [];
 
-    // Split on sentence-ending punctuation followed by whitespace.
-    // Lookbehind keeps the punctuation attached to the sentence.
-    const parts = text.split(/(?<=[.!?…]+)\s+/);
+    // Split on sentence-ending punctuation followed by whitespace
+    const parts = text.split(/(?<=[.!?…]+)\s+/).map(s => s.trim()).filter(Boolean);
 
+    if (parts.length <= 1) return parts;
+
+    // Merge tiny fragments (< 15 chars) with the NEXT sentence
     const merged: string[] = [];
+    let carry = '';
     for (const part of parts) {
-        const trimmed = part.trim();
-        if (!trimmed) continue;
-
-        if (merged.length > 0 && trimmed.length < 40) {
-            merged[merged.length - 1] += ' ' + trimmed;
+        if (carry) {
+            merged.push(carry + ' ' + part);
+            carry = '';
+        } else if (part.length < 15) {
+            carry = part;
         } else {
-            merged.push(trimmed);
+            merged.push(part);
+        }
+    }
+    if (carry) {
+        if (merged.length > 0) {
+            merged[merged.length - 1] += ' ' + carry;
+        } else {
+            merged.push(carry);
         }
     }
 

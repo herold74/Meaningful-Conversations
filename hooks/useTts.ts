@@ -474,6 +474,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (effectiveTtsMode === 'server') {
+      console.log(`[TTS] Server mode speak(), text length: ${cleanText.length}, ttsMode: ${ttsMode}, effective: ${effectiveTtsMode}`);
       try {
         const loadingStartTime = Date.now();
 
@@ -589,10 +590,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
 
           const sentences = splitIntoSentences(cleanText);
+          console.log(`[TTS] Text length: ${cleanText.length}, sentences: ${sentences.length}`, sentences.length <= 3 ? sentences : sentences.map(s => s.substring(0, 50) + '...'));
 
           if (sentences.length > 1) {
             // ====== PROGRESSIVE SENTENCE SYNTHESIS ======
-            console.log(`[TTS] Progressive mode: ${sentences.length} sentences`);
+            console.log(`[TTS] Progressive mode: ${sentences.length} sentences, firing parallel requests`);
 
             const sentencePromises = sentences.map(s =>
               synthesizeSpeech(s, bot.id, language, isMeditation, voiceIdToUse)
