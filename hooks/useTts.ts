@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { Bot, Message, Language, User } from '../types';
-import { synthesizeSpeech, getBotVoiceSettings, saveBotVoiceSettings, type TtsMode } from '../services/ttsService';
+import { synthesizeSpeech, splitIntoSentences, getBotVoiceSettings, saveBotVoiceSettings, type TtsMode } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import { selectVoice } from '../utils/voiceUtils';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
@@ -53,8 +53,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const audioContextRef = useRef<AudioContext | null>(null);
   const gongAudioRef = useRef<HTMLAudioElement | null>(null);
   const currentAudioUrlRef = useRef<string | null>(null);
-  const cachedAudioRef = useRef<{ text: string; url: string; blob: Blob } | null>(null);
+  const cachedAudioRef = useRef<{ text: string; url: string; blob: Blob; sentenceBlobs?: Blob[] } | null>(null);
   const lastSpokenTextRef = useRef<string>('');
+  const sentenceQueueRef = useRef<{
+    blobs: (Blob | null)[];
+    urls: string[];
+    currentIndex: number;
+    active: boolean;
+  } | null>(null);
   const hasSpokenFirstMessageRef = useRef(false);
 
   const isIOS = useMemo(() => {
@@ -361,6 +367,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isIOS]);
 
   const stopTts = useCallback(() => {
+    if (sentenceQueueRef.current) {
+      sentenceQueueRef.current.active = false;
+      sentenceQueueRef.current.urls.forEach(u => u && URL.revokeObjectURL(u));
+      sentenceQueueRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
     }
@@ -466,94 +477,249 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       try {
         const loadingStartTime = Date.now();
 
+        // Abort any active sentence queue
+        if (sentenceQueueRef.current) {
+          sentenceQueueRef.current.active = false;
+          sentenceQueueRef.current.urls.forEach(u => u && URL.revokeObjectURL(u));
+          sentenceQueueRef.current = null;
+        }
+
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.src = '';
           audioRef.current = null;
         }
 
-        let audioUrl: string;
-        let audioBlob: Blob;
+        const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
 
+        // --- Shared error handler for the Audio element ---
+        const attachErrorHandler = (audio: HTMLAudioElement) => {
+          audio.addEventListener('error', (e) => {
+            const audioError = audio.error;
+            const errorCode = audioError?.code;
+            const errorMessage = audioError?.message || 'Unknown error';
+            if (isStoppingAudioRef.current) return;
+            if (audioRef.current !== audio) return;
+            if (errorCode === 4 && errorMessage.includes('Empty src')) return;
+
+            const errorCodes: Record<number, string> = { 1: 'MEDIA_ERR_ABORTED', 2: 'MEDIA_ERR_NETWORK', 3: 'MEDIA_ERR_DECODE', 4: 'MEDIA_ERR_SRC_NOT_SUPPORTED' };
+            console.error('[TTS] Audio playback error:', {
+              code: errorCode,
+              codeName: errorCode ? errorCodes[errorCode] : 'NO_CODE',
+              message: errorMessage,
+              src: audio.src ? 'blob URL present' : 'no src',
+              readyState: audio.readyState,
+              networkState: audio.networkState,
+              event: e
+            });
+            setTtsStatus('idle');
+            setIsLoadingAudio(false);
+            isSpeakingRef.current = false;
+          });
+        };
+
+        // --- Check cache (supports both single-blob and sentence-blobs) ---
         if (cachedAudioRef.current && cachedAudioRef.current.text === cleanText) {
           console.log('[TTS] Using cached audio for instant replay');
-          audioUrl = cachedAudioRef.current.url;
-          audioBlob = cachedAudioRef.current.blob;
-          setIsLoadingAudio(false);
+
+          const cached = cachedAudioRef.current;
+
+          if (cached.sentenceBlobs && cached.sentenceBlobs.length > 1) {
+            // Replay cached sentences sequentially
+            const urls = cached.sentenceBlobs.map(b => URL.createObjectURL(b));
+            const queue = { blobs: cached.sentenceBlobs as (Blob | null)[], urls, currentIndex: 0, active: true };
+            sentenceQueueRef.current = queue;
+
+            const audio = new Audio();
+            audioRef.current = audio;
+            attachErrorHandler(audio);
+
+            audio.addEventListener('play', () => {
+              setTtsStatus('speaking');
+              setIsLoadingAudio(false);
+            });
+            audio.addEventListener('pause', () => {
+              if (!audio.ended) setTtsStatus('paused');
+            });
+            audio.addEventListener('ended', () => {
+              if (!queue.active) return;
+              queue.currentIndex++;
+              if (queue.currentIndex >= urls.length) {
+                setTtsStatus('idle');
+                isSpeakingRef.current = false;
+                sentenceQueueRef.current = null;
+                return;
+              }
+              audio.src = urls[queue.currentIndex];
+              audio.play().catch(() => {
+                setTtsStatus('idle');
+                isSpeakingRef.current = false;
+              });
+            });
+
+            const elapsed = Date.now() - loadingStartTime;
+            if (elapsed < 300) await new Promise(r => setTimeout(r, 300 - elapsed));
+
+            audio.src = urls[0];
+            await audio.play();
+          } else {
+            // Single-blob cache replay (original path)
+            const audio = new Audio();
+            audioRef.current = audio;
+            attachErrorHandler(audio);
+            audio.addEventListener('play', () => { setTtsStatus('speaking'); setIsLoadingAudio(false); });
+            audio.addEventListener('pause', () => { if (!audio.ended) setTtsStatus('paused'); });
+            audio.addEventListener('ended', () => { setTtsStatus('idle'); isSpeakingRef.current = false; });
+
+            const elapsed = Date.now() - loadingStartTime;
+            if (elapsed < 300) await new Promise(r => setTimeout(r, 300 - elapsed));
+
+            audio.src = cached.url;
+            await audio.play();
+          }
         } else {
+          // --- Fresh synthesis ---
+          // Clean up previous URLs
           if (currentAudioUrlRef.current && currentAudioUrlRef.current !== cachedAudioRef.current?.url) {
             URL.revokeObjectURL(currentAudioUrlRef.current);
             currentAudioUrlRef.current = null;
           }
-
           if (cachedAudioRef.current && cachedAudioRef.current.url !== currentAudioUrlRef.current) {
             URL.revokeObjectURL(cachedAudioRef.current.url);
           }
 
-          const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
-          audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
+          const sentences = splitIntoSentences(cleanText);
 
-          const elapsed = Date.now() - loadingStartTime;
-          if (elapsed < 300) {
-            await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
+          if (sentences.length > 1) {
+            // ====== PROGRESSIVE SENTENCE SYNTHESIS ======
+            console.log(`[TTS] Progressive mode: ${sentences.length} sentences`);
+
+            const sentencePromises = sentences.map(s =>
+              synthesizeSpeech(s, bot.id, language, isMeditation, voiceIdToUse)
+            );
+
+            // Track resolved blobs
+            const resolvedBlobs: (Blob | null)[] = new Array(sentences.length).fill(null);
+            const resolvedUrls: string[] = new Array(sentences.length).fill('');
+            const queue = { blobs: resolvedBlobs, urls: resolvedUrls, currentIndex: 0, active: true };
+            sentenceQueueRef.current = queue;
+
+            // Resolve all promises in background, store blobs as they arrive
+            sentencePromises.forEach((promise, i) => {
+              promise.then(blob => {
+                if (queue.active) {
+                  resolvedBlobs[i] = blob;
+                  resolvedUrls[i] = URL.createObjectURL(blob);
+                }
+              }).catch(err => {
+                console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
+              });
+            });
+
+            // Wait for first sentence
+            const firstBlob = await sentencePromises[0];
+            if (!queue.active) return; // Stopped while waiting
+
+            const firstUrl = resolvedUrls[0] || URL.createObjectURL(firstBlob);
+            if (!resolvedUrls[0]) resolvedUrls[0] = firstUrl;
+
+            const audio = new Audio();
+            audioRef.current = audio;
+            attachErrorHandler(audio);
+
+            let hasStartedPlaying = false;
+            audio.addEventListener('play', () => {
+              if (!hasStartedPlaying) {
+                hasStartedPlaying = true;
+                setTtsStatus('speaking');
+                setIsLoadingAudio(false);
+              }
+            });
+            audio.addEventListener('pause', () => {
+              if (!audio.ended) setTtsStatus('paused');
+            });
+
+            // Chain to next sentence on ended
+            audio.addEventListener('ended', () => {
+              if (!queue.active) return;
+              queue.currentIndex++;
+
+              if (queue.currentIndex >= sentences.length) {
+                // All done
+                setTtsStatus('idle');
+                isSpeakingRef.current = false;
+                sentenceQueueRef.current = null;
+                return;
+              }
+
+              const nextUrl = resolvedUrls[queue.currentIndex];
+              if (nextUrl) {
+                // Next sentence already available
+                audio.src = nextUrl;
+                audio.play().catch(() => {
+                  setTtsStatus('idle');
+                  isSpeakingRef.current = false;
+                });
+              } else {
+                // Next sentence still synthesizing - poll until ready
+                setIsLoadingAudio(true);
+                const waitIdx = queue.currentIndex;
+                const poll = setInterval(() => {
+                  if (!queue.active) { clearInterval(poll); return; }
+                  const url = resolvedUrls[waitIdx];
+                  if (url) {
+                    clearInterval(poll);
+                    setIsLoadingAudio(false);
+                    audio.src = url;
+                    audio.play().catch(() => {
+                      setTtsStatus('idle');
+                      isSpeakingRef.current = false;
+                    });
+                  }
+                }, 50);
+              }
+            });
+
+            audio.src = firstUrl;
+            currentAudioUrlRef.current = firstUrl;
+            await audio.play();
+
+            // Cache all sentence blobs once all are resolved
+            Promise.all(sentencePromises).then(allBlobs => {
+              if (queue.active) {
+                cachedAudioRef.current = {
+                  text: cleanText,
+                  url: firstUrl,
+                  blob: firstBlob,
+                  sentenceBlobs: allBlobs,
+                };
+              }
+            }).catch(() => {});
+
+          } else {
+            // ====== SINGLE SENTENCE (original path) ======
+            const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
+
+            const elapsed = Date.now() - loadingStartTime;
+            if (elapsed < 300) {
+              await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
+            }
+
+            const audioUrl = URL.createObjectURL(audioBlob);
+            cachedAudioRef.current = { text: cleanText, url: audioUrl, blob: audioBlob };
+            currentAudioUrlRef.current = audioUrl;
+
+            const audio = new Audio();
+            audioRef.current = audio;
+            attachErrorHandler(audio);
+            audio.addEventListener('play', () => { setTtsStatus('speaking'); setIsLoadingAudio(false); });
+            audio.addEventListener('pause', () => { if (!audio.ended) setTtsStatus('paused'); });
+            audio.addEventListener('ended', () => { setTtsStatus('idle'); isSpeakingRef.current = false; });
+
+            audio.src = audioUrl;
+            await audio.play();
           }
-
-          audioUrl = URL.createObjectURL(audioBlob);
-          cachedAudioRef.current = { text: cleanText, url: audioUrl, blob: audioBlob };
         }
-
-        currentAudioUrlRef.current = audioUrl;
-
-        const audio = new Audio();
-        audioRef.current = audio;
-
-        audio.addEventListener('play', () => {
-          setTtsStatus('speaking');
-          setIsLoadingAudio(false);
-        });
-        audio.addEventListener('pause', () => {
-          if (!audio.ended) setTtsStatus('paused');
-        });
-        audio.addEventListener('ended', () => {
-          setTtsStatus('idle');
-          isSpeakingRef.current = false;
-        });
-        audio.addEventListener('error', (e) => {
-          const audioError = audio.error;
-          const errorCode = audioError?.code;
-          const errorMessage = audioError?.message || 'Unknown error';
-          if (isStoppingAudioRef.current) {
-            console.log('[TTS] Audio stopped intentionally, ignoring error event');
-            return;
-          }
-
-          if (audioRef.current !== audio) {
-            console.log('[TTS] Ignoring error from stale audio object (replaced by new speak call)');
-            return;
-          }
-
-          if (errorCode === 4 && errorMessage.includes('Empty src')) {
-            console.log('[TTS] Ignoring "Empty src" error (benign race condition)');
-            return;
-          }
-
-          const errorCodes: Record<number, string> = { 1: 'MEDIA_ERR_ABORTED', 2: 'MEDIA_ERR_NETWORK', 3: 'MEDIA_ERR_DECODE', 4: 'MEDIA_ERR_SRC_NOT_SUPPORTED' };
-          console.error('[TTS] Audio playback error:', {
-            code: errorCode,
-            codeName: errorCode ? errorCodes[errorCode] : 'NO_CODE',
-            message: errorMessage,
-            src: audio.src ? 'blob URL present' : 'no src',
-            readyState: audio.readyState,
-            networkState: audio.networkState,
-            event: e
-          });
-          setTtsStatus('idle');
-          setIsLoadingAudio(false);
-          isSpeakingRef.current = false;
-        });
-
-        audio.src = audioUrl;
-        await audio.play();
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
         setTtsStatus('idle');
