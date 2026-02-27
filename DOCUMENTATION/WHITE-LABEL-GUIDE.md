@@ -98,6 +98,7 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `VITE_BRAND_DOMAIN_STAGING` | mc-beta.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_DOMAIN_PRODUCTION` | mc-app.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_APP_URL_PRODUCTION` | https://mc-app.manualmode.at | Calendar event links |
+| `VITE_BRAND_SERVER_IP` | *(empty)* | Server IP for direct-IP fallback in `api.ts` when domain fails (Capacitor/local); leave empty unless needed |
 
 ### Backend (`BRAND_*`)
 
