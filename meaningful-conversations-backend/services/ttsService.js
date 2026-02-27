@@ -133,7 +133,7 @@ function getVoiceModelFromId(voiceId) {
  * @param {boolean} isMeditation - Whether to use meditation mode (slower)
  * @param {string} voiceId - Optional: Specific voice ID to use (overrides bot default)
  * @param {boolean} stream - Not used (kept for backwards compatibility)
- * @returns {Promise<Buffer>} - Audio data as WAV buffer
+ * @returns {Promise<{buffer: Buffer, contentType: string}|null>} - Audio data with content type, or null for Web Speech fallback
  */
 async function synthesizeSpeech(text, botId, language, isMeditation = false, voiceId = null, stream = true) {
     if (!text || text.trim().length === 0) {
@@ -176,26 +176,28 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
             const requestPayload = {
                 text: cleanText,
                 model: model,
-                lengthScale: lengthScale
+                lengthScale: lengthScale,
+                format: 'opus',
             };
             
-            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}`);
+            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}, format=opus`);
             
             const response = await axios.post(
                 `${TTS_SERVICE_URL}/synthesize`,
                 requestPayload,
                 {
-                    timeout: 65000, // 65 seconds (Gunicorn timeout is 60s, Piper subprocess timeout is 45s)
+                    timeout: 65000,
                     responseType: 'arraybuffer'
                 }
             );
             
-            console.log(`TTS via container: ${response.headers['x-tts-duration-ms']}ms`);
-            return Buffer.from(response.data);
+            const contentType = response.headers['content-type'] || 'audio/ogg; codecs=opus';
+            const audioFormat = response.headers['x-audio-format'] || 'opus';
+            console.log(`TTS via container: ${response.headers['x-tts-duration-ms']}ms (piper=${response.headers['x-tts-piper-ms']}ms, encode=${response.headers['x-tts-encode-ms']}ms), ${response.data.byteLength} bytes, format=${audioFormat}`);
+            return { buffer: Buffer.from(response.data), contentType };
             
         } catch (error) {
             console.warn('TTS container failed, falling back to local Piper:', error.message);
-            // Fall through to local Piper
         }
     }
     
@@ -227,7 +229,7 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
         }
         
         console.log('TTS via local Piper');
-        return stdout;
+        return { buffer: stdout, contentType: 'audio/wav' };
     } catch (error) {
         console.error('Piper TTS error:', error);
         throw new Error(`Failed to synthesize speech: ${error.message}`);
