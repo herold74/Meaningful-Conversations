@@ -593,53 +593,37 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           console.log(`[TTS] Text length: ${cleanText.length}, sentences: ${sentences.length}`, sentences.length <= 3 ? sentences : sentences.map(s => s.substring(0, 50) + '...'));
 
           if (sentences.length > 1) {
-            // ====== SEQUENTIAL SENTENCE SYNTHESIS (play-while-synthesizing) ======
-            // Fire ONE request at a time to avoid CPU contention on the TTS server.
-            // Play each sentence as soon as it arrives; synthesize the next one
-            // while the current one is playing.
-            console.log(`[TTS] Progressive mode: ${sentences.length} sentences (sequential, play-while-synth)`);
+            // ====== PARALLEL SENTENCE SYNTHESIS ======
+            // TTS container has 2 CPUs so parallel Piper processes each get ~1 full CPU.
+            // Play sentence 1 as soon as it's ready; remaining synthesize in parallel.
+            console.log(`[TTS] Progressive mode: ${sentences.length} sentences, firing parallel requests`);
+
+            const sentencePromises = sentences.map(s =>
+              synthesizeSpeech(s, bot.id, language, isMeditation, voiceIdToUse)
+            );
 
             const resolvedBlobs: (Blob | null)[] = new Array(sentences.length).fill(null);
             const resolvedUrls: string[] = new Array(sentences.length).fill('');
             const queue = { blobs: resolvedBlobs, urls: resolvedUrls, currentIndex: 0, active: true };
             sentenceQueueRef.current = queue;
 
-            // Synthesize sentence 1 (gets full CPU)
-            const firstBlob = await synthesizeSpeech(sentences[0], bot.id, language, isMeditation, voiceIdToUse);
-            if (!queue.active) return;
-
-            resolvedBlobs[0] = firstBlob;
-            resolvedUrls[0] = URL.createObjectURL(firstBlob);
-            const firstUrl = resolvedUrls[0];
-
-            console.log(`[TTS] Sentence 1/${sentences.length} ready, starting playback + synthesizing rest`);
-
-            // Start synthesizing remaining sentences sequentially in background
-            // Each request gets full CPU since the previous one is already done.
-            const synthRemaining = async () => {
-              for (let i = 1; i < sentences.length; i++) {
-                if (!queue.active) return;
-                try {
-                  const blob = await synthesizeSpeech(sentences[i], bot.id, language, isMeditation, voiceIdToUse);
-                  if (!queue.active) return;
+            sentencePromises.forEach((promise, i) => {
+              promise.then(blob => {
+                if (queue.active) {
                   resolvedBlobs[i] = blob;
                   resolvedUrls[i] = URL.createObjectURL(blob);
                   console.log(`[TTS] Sentence ${i + 1}/${sentences.length} ready`);
-                } catch (err) {
-                  console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
                 }
-              }
-              // Cache all blobs for replay
-              if (queue.active) {
-                cachedAudioRef.current = {
-                  text: cleanText,
-                  url: firstUrl,
-                  blob: firstBlob,
-                  sentenceBlobs: resolvedBlobs.filter(Boolean) as Blob[],
-                };
-              }
-            };
-            synthRemaining(); // fire-and-forget, runs in background
+              }).catch(err => {
+                console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
+              });
+            });
+
+            const firstBlob = await sentencePromises[0];
+            if (!queue.active) return;
+
+            const firstUrl = resolvedUrls[0] || URL.createObjectURL(firstBlob);
+            if (!resolvedUrls[0]) resolvedUrls[0] = firstUrl;
 
             const audio = new Audio();
             audioRef.current = audio;
@@ -676,7 +660,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                   isSpeakingRef.current = false;
                 });
               } else {
-                // Next sentence still synthesizing - poll until ready
                 const waitIdx = queue.currentIndex;
                 const poll = setInterval(() => {
                   if (!queue.active) { clearInterval(poll); return; }
@@ -696,6 +679,17 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             audio.src = firstUrl;
             currentAudioUrlRef.current = firstUrl;
             await audio.play();
+
+            Promise.all(sentencePromises).then(allBlobs => {
+              if (queue.active) {
+                cachedAudioRef.current = {
+                  text: cleanText,
+                  url: firstUrl,
+                  blob: firstBlob,
+                  sentenceBlobs: allBlobs,
+                };
+              }
+            }).catch(() => {});
 
           } else {
             // ====== SINGLE SENTENCE (original path) ======
