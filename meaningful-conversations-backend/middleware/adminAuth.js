@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
         
         const user = await prisma.user.findUnique({ where: { id: decodedToken.userId } });
 
-        if (!user || !user.isAdmin) {
+        if (!user || (!user.isAdmin && !user.isDeveloper)) {
             return res.status(403).json({ error: 'Forbidden: Admin access required.' });
         }
         
