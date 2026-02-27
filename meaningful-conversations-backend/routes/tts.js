@@ -135,6 +135,31 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
 });
 
 /**
+ * POST /api/tts/warmup
+ * Pre-load a Piper voice model into memory for fast subsequent synthesis.
+ * Called when user enters a coaching session with server TTS enabled.
+ *
+ * Body:
+ * - language: string (required) - 'de' or 'en'
+ * - botId: string (required) - Bot ID for voice selection
+ */
+router.post('/warmup', authMiddleware, async (req, res) => {
+    const { language, botId } = req.body;
+    if (!language || !botId) {
+        return res.status(400).json({ error: 'language and botId are required' });
+    }
+    try {
+        const { getVoiceForBot, warmupModel } = require('../services/ttsService.js');
+        const { model } = getVoiceForBot(botId, language);
+        const result = await warmupModel(model);
+        res.json(result);
+    } catch (error) {
+        console.error('TTS warmup error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * GET /api/tts/voices
  * Get list of available voice models
  */
