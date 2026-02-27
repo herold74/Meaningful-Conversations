@@ -10,13 +10,18 @@
 **Focus: Establishing the coaching foundation**
 
 - ✅ **Multiple Coach Personalities**
-  - Max (Ambitious), Kenji (Stoic), Chloe (Structured Reflection), Rob (Powerful Questions)
+  - Nobody (GPS-Framework, efficient problem-solving)
+  - Max (Ambitious, goal-oriented)
+  - Ava (Strategic thinking, decision-making)
+  - Kenji (Stoic philosophy, resilience)
+  - Chloe (Structured Reflection)
+  - Rob (Mental Fitness)
   - Unique coaching styles and approaches
   - DiceBear avatar system for consistent visual identity
 
 - ✅ **Life Context System**
   - Questionnaire for capturing user background
-  - Interview mode for conversational context gathering
+  - Interview mode for conversational context gathering (Gloria Life Context)
   - File upload for existing context documents
 
 - ✅ **Chat Interface**
@@ -54,9 +59,11 @@
 ### Phase 3: Seasonal Engagement & Smart Features (Late 2025)
 **Focus: Delight and automation**
 
-- ✅ **Christmas Seasonal Features** (December 2025)
-  - Animated snowflakes in dark mode (Nov 1 - Jan 6)
-  - Applied to: Landing Page, Login, Welcome Screen, Registration
+- ✅ **Seasonal Themes** (November–December 2025)
+  - Spring: Falling blossoms
+  - Summer: Butterflies
+  - Autumn: Falling leaves
+  - Winter: Snowflakes (Dec 1 – Jan 6)
   - Non-intrusive, elegant animations
 
 - ✅ **Automatic Theme Switching** (December 2025)
@@ -65,8 +72,9 @@
   - Smooth transitions
 
 - ✅ **Voice Selection**
-  - Multiple TTS voice options
+  - Multiple TTS voice options (Piper: Thorsten DE, Amy/Ryan EN)
   - Local and server-side TTS support
+  - Automatic voice selection based on bot/language
   - Fallback mechanisms for reliability
 
 ---
@@ -80,7 +88,7 @@
   - Profile editing (name, email, password changes)
 
 - ✅ **Data Privacy**
-  - Encrypted life context storage (AES-GCM)
+  - Encrypted life context storage (AES-GCM, E2EE)
   - GDPR compliance
   - Data export functionality
   - Account deletion with data cleanup
@@ -100,6 +108,7 @@
   - Riemann-Thomann Model — 3 contexts (work, private, self-image) + stress pattern
   - Spiral Dynamics — 24 Likert questions mapped to 8 value levels
   - E2EE encrypted profile storage
+  - PDF export with professional formatting
 
 - ✅ **Coaching Modes (DPC & DPFL)**
   - DPC: Dynamic Personality Coaching — profile-based prompt adaptation
@@ -127,6 +136,8 @@
   - Bot-level access control with individual unlock codes
   - Upgrade codes with referrer tracking
   - PayPal webhook integration for automated tier upgrades
+  - Premium 9-day trial for new registrations
+  - Loyalty pricing and bot credit system
 
 - ✅ **Transcript Evaluation** (v1.8.7–v1.8.9)
   - Upload real conversation transcripts for AI-powered analysis
@@ -161,10 +172,6 @@
   - Copy/download per section + complete .md export
   - User's first name used as transcript label (fallback: Befragter/Interviewee)
 
-- ✅ **Gloria Life Context Rename**
-  - `g-interviewer` → `gloria-life-context` for clear bot distinction
-  - `gloria-interview` uses separate prompt, avatar, and post-session flow
-
 - ✅ **BotSelection Redesign**
   - Gloria Interview placed in "Management & Communication" section next to Nobody
   - Transcript Evaluation as slim inline option (not a bot tile)
@@ -172,30 +179,132 @@
 
 ---
 
-### Phase 8: Native In-App Purchases (Planned)
+### Phase 8: Native iOS App & In-App Purchases (February 2026)
 **Focus: iOS App Store monetization with StoreKit 2**
 
-- ⬜ **iOS Native Paywall**
-  - StoreKit 2 integration via RevenueCat or direct plugin
-  - Platform detection: native IAP on iOS, PayPal on web
-  - New `NativePaywall.tsx` component for iOS purchase flow
+- ✅ **iOS Capacitor Integration**
+  - Native Audio service abstraction for TTS playback
+  - Native Speech Recognition service abstraction
+  - iOS-specific audio session handling (playAndRecord mode fix)
+  - Voice mode with wake lock support
+
+- ✅ **iOS In-App Purchase Infrastructure**
+  - StoreKit 2 integration via RevenueCat
+  - `NativePaywall.tsx` component for iOS purchase flow
   - Restore Purchases button (Apple mandatory)
+  - Platform detection: native IAP on iOS, PayPal on web
+  - Backend receipt validation (`/api/apple-iap/verify-receipt`, `/restore`)
+  - Apple Server Notifications v2 endpoint (`/api/apple-iap/notification`)
 
-- ⬜ **Auto-Renewable Subscriptions**
-  - Registered Monthly (3,99 EUR/mo) — `mc.registered.monthly`
-  - Premium Monthly (9,99 EUR/mo) — `mc.premium.monthly`
-  - Premium Yearly (79,99 EUR/yr) — `mc.premium.yearly`
-  - Subscription group with upgrade/downgrade support
+- ⬜ **App Store Connect Setup** (remaining)
+  - Product configuration (subscriptions + non-consumables)
+  - Apple Server Notifications URL
+  - Sandbox testers and TestFlight testing
 
-- ⬜ **Non-Consumable Purchases**
-  - Registered Lifetime (14,99 EUR) — `mc.registered.lifetime`
-  - Kenji Coach Unlock (3,99 EUR) — `mc.coach.kenji`
-  - Chloe Coach Unlock (3,99 EUR) — `mc.coach.chloe`
+---
 
-- ⬜ **Apple Compliance**
-  - PayPal links removed from iOS version (Guideline 3.1.1)
-  - No external purchase links in native app (Guideline 3.1.3b)
-  - Subscription management view linking to Apple settings
+### Phase 9: Visual Redesign & White-Label (v1.9.6–v1.9.8)
+**Focus: Modernization, brand flexibility, and quality**
+
+- ✅ **Visual Redesign**
+  - Inter Variable font (self-hosted, offline Capacitor support)
+  - Rounded card UI with elevated shadows and pill buttons
+  - Framer Motion animations for page transitions and micro-interactions
+  - 30+ views modernized
+  - Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
+
+- ✅ **Brand-Driven Design System (White-Label)**
+  - 4-shade brand palette via `VITE_BRAND_COLOR_*` env vars
+  - Semantic CSS variables + Tailwind tokens
+  - Vite plugin injects CSS custom properties at build time
+  - Configurable BrandLoaders (Tetris, Steering Wheel, Dots, Pulse)
+  - W4F (Work4Flow) demo: separate frontend image sharing MC backend
+  - All seasonal themes reference brand variables
+
+- ✅ **Security Hardening** (v1.9.8)
+  - PayPal webhook: Full signature verification via PayPal API
+  - XSS prevention: `escapeHtml` for dynamic HTML rendering
+  - SQL injection: Replaced `$queryRawUnsafe` with tagged template literals
+  - Input validation: Size limits on context (500KB) and gamification state (50KB)
+  - Debug endpoints protected with adminAuth middleware
+  - Generic error messages to clients (no stack trace leakage)
+  - Server IP externalized from all scripts; git history scrubbed
+
+- ✅ **Test Coverage & CI/CD** (v1.9.8)
+  - 33 test suites, 724+ tests (frontend + backend combined)
+  - GitHub Actions: test-on-push workflow (frontend tests, backend tests, TypeScript check)
+  - Frontend: 9 utility test suites (encryption, gamification, BFI-2, diff, PII, voice, dates, behavior, survey)
+  - Backend: 7 service tests, 5 route integration tests, 4 middleware tests
+
+- ✅ **Backend Modularization** (v1.9.8)
+  - `gemini.js` (1,873 lines) → facade + 8 sub-modules in `routes/gemini/`
+  - `constants.js` (1,900 lines) → `bots.js` + `crisisText.js`
+  - `behaviorLogger.js` (1,300 lines) → 5 sub-modules in `services/behavior/`
+  - Facade pattern preserves backward compatibility
+
+- ✅ **i18n Audit** (v1.9.8)
+  - 311 unused keys removed, 27 hardcoded strings extracted
+  - 1,518 translation keys with perfect DE/EN parity
+
+---
+
+### Phase 10: TTS Performance & Voice UX (v1.9.9)
+**Focus: Server TTS latency reduction and voice experience**
+
+- ✅ **Persistent Piper Models**
+  - Replaced subprocess-per-request with PiperVoice library (in-memory model cache)
+  - ~8x faster synthesis (5000ms → ~600ms per sentence when warm)
+  - Thread-safe per-model locking for concurrent requests
+  - 10-minute TTL with automatic model eviction
+
+- ✅ **Warmup Endpoint**
+  - `POST /api/tts/warmup` pre-loads voice model when user enters session
+  - Frontend awaits warmup completion before first synthesis (race condition fix)
+
+- ✅ **Progressive Sentence Synthesis**
+  - Bot responses split into sentences, synthesized sequentially
+  - Each sentence plays immediately; next synthesizes during playback
+  - Improved sentence splitting: semicolons + comma/conjunction boundaries for long chunks
+
+- ✅ **Audio Compression**
+  - Opus encoding via ffmpeg (WAV → Opus, ~7x smaller)
+  - Configurable format (Opus, MP3, WAV) per request
+
+- ✅ **Infrastructure Tuning**
+  - TTS container: 2.0 vCPUs allocated (up from 1.0)
+  - Gunicorn: 2 workers × 4 threads (optimized for in-memory models)
+  - ~10-12 concurrent TTS sessions supported on current hardware
+
+---
+
+### Phase 11: Coaching Framework Expansion (Planned)
+**Focus: Advanced coaching methodologies and specialized tools**
+
+- ⬜ **New Bots (Premium Features)**
+  - **Clean Language Bot** (David Grove): Uses client's exact metaphors without interpretation. Focus on exploring the architecture of inner landscapes.
+  - **The Work Bot** (Byron Katie): Structured 4-question protocol to investigate stressful thoughts and dissolve identification with destructive patterns.
+
+- ⬜ **Coaching Lenses (Client Features)**
+  - **NLP Meta-Model Lens:** Detects deletions, generalizations, and distortions in user statements. Intervenes to clarify linguistic ambiguities. Can be activated as a layer on any existing bot.
+  - **Logical Levels Lens** (Robert Dilts): Hierarchical sorting (Environment → Identity → Vision) to find the most effective leverage point for change. Activated as a reflection layer on existing bots.
+
+---
+
+### Phase 12: Scaling & Platform Independence (Planned)
+**Focus: Self-hosted AI, Android, and infrastructure growth**
+
+- ⬜ **Self-Hosted SLM (Small Language Model)**
+  - Replace Gemini with server-based model (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german)
+  - Target: >1000 paying users to justify dedicated server
+  - Eliminates per-request API costs and reduces Google dependency
+
+- ⬜ **Android Integration**
+  - Capacitor project setup for Android Studio
+  - Feature parity with iOS (Native Audio, Speech Recognition)
+  - Play Store deployment pipeline
+
+- ⬜ **PayPal Monthly Subscription**
+  - Recurring 3.90 EUR/month via PayPal Subscriptions API (web platform)
 
 ---
 
@@ -217,7 +326,7 @@
 - ✅ **Environment Configuration**
   - Separate `.env` files for staging/production
   - Secure credential management
-  - API key rotation support
+  - Server IP never hardcoded (`.env.server`, gitignored)
 
 ---
 
@@ -225,15 +334,15 @@
 **Focus: Flexibility and cost optimization**
 
 - ✅ **Dual AI Provider Support** (November 2025)
-  - Google Gemini (primary)
+  - Google Gemini (primary: gemini-2.0-flash, gemini-2.0-flash-lite)
   - Mistral AI (alternative)
   - Runtime switching without server restart
 
 - ✅ **API Usage Tracking** (November 2025)
   - Real-time token consumption monitoring
-  - Per-model usage breakdown (input/output tokens)
+  - Per-model and per-endpoint usage breakdown (chat, analysis, interview, transcript-eval, etc.)
+  - Bot-level attribution for cost analysis
   - Cost projection calculations
-  - Usage history and analytics
 
 - ✅ **Provider Management UI**
   - Admin console for provider switching
@@ -252,16 +361,10 @@
   - P3009 error prevention (migration history mismatch)
 
 - ✅ **Deployment Automation**
-  - Makefile commands renamed for clarity (`meaningful-conversations-*`)
+  - Makefile commands for all operations (`deploy-staging`, `deploy-production`, `logs-*`, `db-*`)
   - Automated staging deployments
-  - Scheduled production deployments (daily at 05:00)
   - Nginx IP auto-update after container restarts
-
-- ✅ **Command-Line Tools**
-  - `make deploy-staging` / `make deploy-production`
-  - `make logs-staging` / `make logs-production`
-  - `make db-shell-staging` / `make db-shell-production`
-  - `make db-backup-staging` / `make db-backup-production`
+  - `--no-cache --format docker` for TTS builds (Podman caching pitfall fix)
 
 - ✅ **MariaDB Standardization**
   - Replaced all `mysql` CLI references with `mariadb`
@@ -274,40 +377,34 @@
 **Focus: User engagement and support**
 
 - ✅ **Admin Console Enhancements**
-  - User management interface
+  - User management interface (status: ACTIVE, PENDING, SUSPENDED)
   - Session monitoring (active users, session counts)
-  - User status tracking (ACTIVE, PENDING, SUSPENDED)
+  - Responsive admin UI for mobile management
 
 - ✅ **Newsletter Management** (November 2025)
   - Subscriber list with consent tracking
-  - PENDING user visibility fix (includes unverified accounts)
-  - User status badges in subscriber list
+  - PENDING user visibility (includes unverified accounts)
   - Newsletter history tracking
-
-- ✅ **Responsive Admin UI** (November 2025)
-  - Mobile-optimized admin console
-  - Adaptive layout for small screens
-  - "Last updated" info repositioned for mobile
 
 ---
 
 ### Phase 5: Monitoring & Observability (Ongoing)
 **Focus: Proactive issue detection**
 
+- ✅ **Health Checks & Rollback**
+  - Container health monitoring (MariaDB, TTS, Backend, Frontend)
+  - Deployment verification (3 retries, 10s intervals)
+  - Automatic rollback on failure (pulls previous version from `.previous-version`)
+
 - ✅ **Error Tracking**
   - Backend error logging with context
   - Frontend error boundary implementation
   - User-friendly error messages
 
-- ✅ **Health Checks**
-  - Container health monitoring (MariaDB, TTS, Backend, Frontend)
-  - Deployment verification (connectivity tests)
-  - Service status reporting
-
 - ✅ **Migration Safety**
   - Pre-deployment migration checks
   - Warning system for schema drift
-  - Non-blocking startup for migration issues (logs warnings, allows server to start)
+  - Non-blocking startup for migration issues
 
 ---
 
@@ -320,15 +417,22 @@
   - Referrer prefix tracking for attribution
   - PayPal custom_id mapping for automated activation
 
-- ✅ **API Usage Tracking Enhancements**
-  - Per-endpoint tracking (chat, analysis, format-interview, interview-transcript, transcript-eval)
-  - Bot-level attribution for cost analysis
-  - Provider metadata (Gemini model, actual model used)
+- ✅ **iOS In-App Purchase Backend**
+  - Receipt validation via Apple App Store Server API v2 (JWT-based auth)
+  - Apple Server Notifications v2 (DID_RENEW, EXPIRED, REFUND, etc.)
+  - Purchase records with `platform` field (`'paypal'` | `'ios'`)
+  - Grace period and automatic tier fallback logic
+
+- ⬜ **App Store Connect Setup** (remaining)
+  - Product configuration (3 subscriptions + 3 non-consumables)
+  - Subscription group with upgrade/downgrade levels
+  - Server Notifications v2 URL
+  - Sandbox testers
 
 ---
 
-### Phase 7: Testing & Quality (February 2026)
-**Focus: Automated testing and quality assurance**
+### Phase 7: Quality & Testing (February 2026)
+**Focus: Automated testing and code quality**
 
 - ✅ **Test Runner** (Admin/Developer only)
   - Automated test scenarios for all bot types
@@ -340,132 +444,141 @@
   - Contact request tracking
   - Filter and sort capabilities
 
----
+- ✅ **CI/CD Pipeline**
+  - GitHub Actions test-on-push (frontend tests, backend tests, TypeScript check)
+  - 33 test suites, 724+ tests
+  - Build-once-deploy-everywhere with version management
 
-### Phase 8: In-App Purchase Infrastructure (Planned)
-**Focus: Apple App Store payment processing and subscription management**
-
-- ⬜ **Server-Side Receipt Validation**
-  - New endpoint `POST /api/purchase/verify-receipt` for Apple receipts
-  - Apple App Store Server API v2 client (JWT-based auth)
-  - Purchase records with `platform` field (`'paypal'` | `'ios'`)
-
-- ⬜ **Apple Server Notifications v2**
-  - New endpoint `POST /api/purchase/apple-notification`
-  - Handles: DID_RENEW, DID_FAIL_TO_RENEW, EXPIRED, REFUND, DID_CHANGE_RENEWAL_STATUS
-  - Grace period and automatic tier fallback logic
-
-- ⬜ **Database Extensions**
-  - Purchase table: `platform`, `appleTransactionId`, `appleOriginalTransactionId`, `subscriptionStatus`, `renewsAt`
-  - User table: `purchasePlatform` for support attribution
-  - Daily subscription status sync cron (safety net)
-
-- ⬜ **App Store Connect Setup**
-  - Product configuration (3 subscriptions + 3 non-consumables)
-  - Subscription group with upgrade/downgrade levels
-  - Sandbox testers and Server Notifications v2 URL
-  - Apple Small Business Program enrollment (15% commission)
+- ✅ **Backend Modularization**
+  - `gemini.js` → facade + 8 sub-modules
+  - `constants.js` → `bots.js` + `crisisText.js`
+  - `behaviorLogger.js` → 5 sub-modules
+  - 48 documentation files audited, 28 drift issues fixed
 
 ---
 
-## 📊 TIMELINE VISUALIZATION SUGGESTIONS
+### Phase 8: TTS Performance Engineering (v1.9.9)
+**Focus: Voice synthesis speed and scalability**
 
-### For Slide Deck:
+- ✅ **Persistent Piper Model Cache**
+  - PiperVoice library replaces subprocess-per-request
+  - Thread-safe model cache with per-model locking
+  - `/warmup` endpoint for pre-loading models
+  - ~8x synthesis speedup (5000ms → ~600ms warm)
 
-#### **Option 1: Dual-Track Timeline**
-```
-User Track:     ●────●────●────●────●────●────●────◯
-                ↓    ↓    ↓    ↓    ↓    ↓    ↓    ↓
-               P1   P2   P3   P4   P5   P6   P7   P8
-                ↑    ↑    ↑    ↑    ↑    ↑    ↑    ↑
-Admin Track:    ●────●────●────●────●────●────●────◯
-```
+- ✅ **Deployment Hardening**
+  - TTS container: 2.0 vCPU, 1.8GB memory (production)
+  - Gunicorn: 2 workers × 4 threads for in-memory model caching
+  - `--no-cache --format docker` build flags (Podman caching pitfall documented)
+  - TTS pull step added to deploy script (was missing, caused stale deploys)
 
-#### **Option 2: Quarterly Roadmap**
-```
-Q3 2025          Q4 2025           Q1 2026
-├─────────────────┼──────────────────┼────────────────────►
-User:  Coach System  Victor+Seasonal  Personality+Transcript+Interview
-Admin: Infrastructure  AI+Newsletter  Access Tiers+Testing+PayPal
-```
+- ✅ **Capacity Analysis**
+  - ~10-12 concurrent TTS sessions on current 4-vCPU server
+  - ~50-80 total logged-in users supported simultaneously
+  - Scaling path documented (8 vCPU doubles capacity)
 
-#### **Option 3: Feature Categories (Matrix)**
+---
+
+### Phase 9: Infrastructure & Scaling (Planned)
+**Focus: Independence, performance, and platform expansion**
+
+- ⬜ **Self-Hosted SLM**
+  - Dedicated server with Llama-3.1-8B-Instruct or LeoLM-8B-chat
+  - Milestone: >1000 paying users
+  - Eliminates per-request API costs and Google dependency
+
+- ⬜ **W4F White-Label DNS & SSL**
+  - DNS: `w4f-beta.manualmode.at` → server IP
+  - SSL: `certbot --nginx -d w4f-beta.manualmode.at`
+
+- ⬜ **Android Deployment Pipeline**
+  - Capacitor project for Android Studio
+  - Play Store build and release workflow
+
+---
+
+## 📊 TIMELINE VISUALIZATION
+
+### Quarterly Roadmap
 ```
-              | User Experience      | Admin Tools      | Infrastructure
-──────────────┼──────────────────────┼──────────────────┼──────────────────
-Early 2025    | Coaches + Chat       | Deployment       | Containers
-Mid 2025      | Victor + UX          | AI Tracking      | DB Stability
-Late 2025     | Christmas Theme      | Newsletter       | Automation
-Jan 2026      | Personality + DPC    | Access Tiers     | Build Pipeline
-Feb 2026      | Transcript + Gloria  | Test Runner      | Health Checks
+Q3 2025            Q4 2025              Q1 2026                Q2+ 2026
+├──────────────────┼────────────────────┼──────────────────────┼──────────►
+User:  6 Coaches    Victor+Seasonal     Personality+DPC/DPFL   Coaching Frameworks
+       Chat+Voice   Theme Switching     Transcript+Gloria      Clean Language
+       Life Context                     IAP+Paywall            The Work
+                                        Visual Redesign        SLM / Android
+Admin: Containers   AI Tracking         Access Tiers           App Store Connect
+       DB+Nginx     Newsletter          Security Hardening     W4F DNS/SSL
+       Deployment   DB Stability        CI/CD+Testing          SLM Server
+                                        TTS Performance
 ```
 
 ---
 
-## 🎯 KEY MILESTONES FOR SLIDES
+## 🎯 KEY MILESTONES
 
 ### User-Facing Highlights:
-1. **5 Unique Coaching Personalities** — Diverse approaches to personal development
-2. **Victor Launch** — Systemic coaching for relationship patterns (Nov 2025)
-3. **Personality Profiling** — OCEAN, Riemann-Thomann, Spiral Dynamics with E2EE (Jan 2026)
-4. **Adaptive Coaching (DPC/DPFL)** — AI adapts coaching style to user personality (Jan 2026)
-5. **Transcript Evaluation** — AI-powered analysis of real conversations (Jan–Feb 2026)
-6. **Gloria Interview** — Professional interviewing with structured transcript export (Feb 2026)
-7. **Multi-Tier Monetization** — Guest, Registered, Premium, Client access levels (Jan 2026)
-8. **Privacy-First** — Encrypted data, GDPR compliance, user control
-9. **Native In-App Purchases** — Seamless iOS purchasing with subscriptions and one-time unlocks (Planned)
+1. **6 Coaching Personalities + Gloria** — Diverse approaches from GPS problem-solving to systemic coaching
+2. **Personality Profiling** — OCEAN, Riemann-Thomann, Spiral Dynamics with E2EE (Jan 2026)
+3. **Adaptive Coaching (DPC/DPFL)** — AI adapts coaching style to user personality (Jan 2026)
+4. **Transcript Evaluation** — AI-powered analysis of real conversations with PDF export (Jan–Feb 2026)
+5. **Gloria Interview** — Professional interviewing with structured transcript export (Feb 2026)
+6. **Multi-Tier Monetization** — Guest, Registered, Premium, Client access levels (Jan 2026)
+7. **iOS Native App** — StoreKit 2 In-App Purchases via RevenueCat (Feb 2026)
+8. **TTS Performance** — Persistent Piper models with ~8x speedup and progressive playback (Feb 2026)
+9. **White-Label System** — Brand-driven design supporting multiple visual identities (Feb 2026)
+10. **Privacy-First** — E2EE profiles, GDPR compliance, no server-stored transcripts
 
 ### Admin-Facing Highlights:
-1. **Dual AI Provider System** — Cost optimization + flexibility (Nov 2025)
-2. **API Usage Dashboard** — Per-endpoint token tracking with bot attribution
-3. **Build-Once-Deploy-Everywhere** — Staging builds promoted to production (Jan 2026)
-4. **Upgrade Code System** — Flexible monetization with PayPal automation (Jan 2026)
-5. **Test Runner** — Automated scenario-based testing for all bot types (Feb 2026)
-6. **Automated Deployments** — Scheduled production updates from staging builds (Dec 2025)
-7. **Apple Receipt Validation** — Server-side verification with App Store Server API v2 (Planned)
+1. **Dual AI Provider System** — Gemini + Mistral with per-endpoint cost tracking (Nov 2025)
+2. **Build-Once-Deploy-Everywhere** — Staging builds promoted to production with auto-rollback (Jan 2026)
+3. **Security Hardening** — PayPal webhook verification, XSS/SQLi fixes, IP externalization (Feb 2026)
+4. **724+ Automated Tests** — Frontend + backend with GitHub Actions CI/CD (Feb 2026)
+5. **TTS Engineering** — Persistent models, warmup, Opus compression, capacity analysis (Feb 2026)
+6. **Upgrade Code System** — Flexible monetization with PayPal + iOS IAP automation (Jan–Feb 2026)
 
 ---
 
-## 📈 IMPACT METRICS (Suggested for Slides)
+## 📈 IMPACT METRICS
 
 ### User Metrics:
-- 5 coaching personalities + 1 interview bot + Gloria Life Context
+- 6 coaching personalities + Gloria (life context + interview)
 - 3 personality profile systems (OCEAN, Riemann-Thomann, Spiral Dynamics)
 - 2 adaptive coaching modes (DPC + DPFL)
 - Transcript Evaluation with PDF export and coaching recommendations
 - Interview transcript generation with 3-section analysis
 - 4 access tiers (Guest, Registered, Premium, Client)
 - 100% E2EE for personality profiles and life context data
-- Multi-voice TTS support with gender-aware assignment
+- Multi-voice TTS with ~600ms warm synthesis and progressive playback
 - Gamification with XP, levels, streaks, and achievements
+- 1,518 translation keys with perfect DE/EN parity
 
 ### Admin Metrics:
 - 2 AI providers (Google Gemini + Mistral AI)
 - 6 tracked API endpoints for cost attribution
-- Build-once-deploy-everywhere with health checks and rollback
-- Upgrade code system with PayPal webhook automation
-- Automated test runner for all bot scenarios
-- 4 environments (local dev, staging, production, cloud)
-- 10+ Makefile commands for operations
+- 33 test suites, 724+ automated tests with CI/CD
+- Build-once-deploy-everywhere with health checks and auto-rollback
+- Upgrade code system with PayPal + iOS IAP backends
+- White-label build system (MC + W4F brands)
+- TTS: ~10-12 concurrent sessions, ~50-80 total users on 4 vCPU
 
 ---
 
-## 🔮 FUTURE ROADMAP (Optional Slide)
+## 🔮 ROADMAP (Planned Features)
 
-### User Perspective:
-- Voice input for conversations (STT)
-- Additional coach personalities and interview modes
-- Progress tracking dashboard with goal visualization
-- Group coaching sessions
-- Community features (anonymized insights)
+### Coaching Frameworks (Feature Pipeline)
+- **Clean Language Bot** (David Grove) — Premium feature, new bot
+- **The Work Bot** (Byron Katie) — Premium feature, new bot
+- **NLP Meta-Model Lens** — Client feature, overlay on existing bots
+- **Logical Levels Lens** (Robert Dilts) — Client feature, overlay on existing bots
 
-### Admin Perspective:
-- Advanced analytics dashboard with revenue metrics
-- A/B testing framework for coaching approaches
-- Multi-region deployment
-- Automated scaling based on usage patterns
-- Cost optimization alerts and budget controls
+### Platform Expansion
+- **Self-Hosted SLM** — Server-based Llama/LeoLM as Gemini replacement (>1000 users milestone)
+- **Android App** — Capacitor project with Play Store pipeline
+- **PayPal Subscriptions** — Monthly recurring payments on web (3.90 EUR/month)
+- **App Store Connect** — Product setup, Notifications URL, TestFlight
+- **W4F DNS + SSL** — `w4f-beta.manualmode.at` live with HTTPS
 
 ---
 
-*Last updated: February 19, 2026. Reflects the evolution of the Meaningful Conversations platform from inception through Gloria Interview Bot, Transcript Evaluation, Personality Profiling, Adaptive Coaching (DPC/DPFL), Multi-Tier Monetization, and planned Native In-App Purchases.*
+*Last updated: February 27, 2026. Reflects the evolution of the Meaningful Conversations platform through v1.9.9 and the strategic roadmap for Coaching Frameworks and Self-Hosted AI.*

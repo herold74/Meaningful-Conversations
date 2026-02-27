@@ -11,9 +11,9 @@
 ### TTS Performance Overhaul (2026-02-27)
 - **Persistent Piper models**: Replaced subprocess-per-request with PiperVoice library. Model loaded once into memory, reused across requests. ~8x speedup (5000ms → 500-700ms per sentence).
 - **Warmup endpoint**: `POST /api/tts/warmup` pre-loads voice model when user enters session with server TTS. Model ready before first bot message.
-- **Progressive sentence synthesis**: Bot responses split into sentences, synthesized in parallel (2 CPU cores), played progressively as they arrive.
+- **Progressive sentence synthesis**: Bot responses split into sentences, synthesized sequentially (each gets full CPU). Play first sentence immediately, synthesize next during playback.
 - **Improved sentence splitting**: Now splits on semicolons (`;`) and comma+conjunction boundaries for long chunks (>200 chars). Both EN and DE conjunctions supported.
-- **TTS container CPU**: Increased from 1.0 → 2.0 CPUs (staging) and 1.5 → 2.0 CPUs (production) to support parallel Piper processes.
+- **TTS container CPU**: Increased from 1.0 → 2.0 CPUs (staging and production). Sequential synthesis gives each Piper call full CPU (~1.7s per 150 chars).
 - **Gunicorn tuning**: 2 workers × 4 threads (down from 3×2) — optimized for in-memory model caching.
 - **VoiceModal performance**: Memoized `relevantVoices` in ChatView to prevent VoiceSelectionModal from recalculating on every parent re-render (was firing 60+ times per session).
 - **Deploy script fix**: Added `--no-cache --format docker` to TTS build, added missing TTS pull step in remote deploy.

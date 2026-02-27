@@ -1,8 +1,8 @@
-# UX Flows — Meaningful Conversations v1.9.7
+# UX Flows — Meaningful Conversations v1.9.9
 
 Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visuelle Flow-Diagramme.
 
-**Zuletzt aktualisiert:** 25. Februar 2026
+**Zuletzt aktualisiert:** 27. Februar 2026
 
 ---
 
@@ -11,9 +11,9 @@ Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visue
 | Typ | Beschreibung | Einstieg |
 |:---|:---|:---|
 | **Gast** | Unregistriert, Daten nur lokal | "Als Gast fortfahren" |
-| **Registriert (Neu)** | Frisch registriert, 14-Tage Premium-Trial | Registrierung + E-Mail-Verifizierung |
+| **Registriert (Neu)** | Frisch registriert, 9-Tage Premium-Trial | Registrierung + E-Mail-Verifizierung |
 | **Registriert (Wiederkehrend)** | Hat Lebenskontext + Profil | Login |
-| **Registriert (Trial abgelaufen)** | 14-Tage-Trial vorbei, kein Kauf | Login → Paywall |
+| **Registriert (Trial abgelaufen)** | 9-Tage-Trial vorbei, kein Kauf | Login → Paywall |
 | **Premium** | Aktives Abo oder Pass | Login |
 | **Klient** | Coaching-Klient bei manualmode.at | Login (vom Coach freigeschaltet) |
 | **Admin / Developer** | Verwaltungszugang | Login → Admin-Panel |
@@ -91,7 +91,7 @@ flowchart TD
     NAME_PROMPT -->|Ueberspringen| LANDING_SKIP[LandingPage<br/>ohne Name]
 
     TEMPLATE --> LANDING_NAME[LandingPage]
-    LANDING_NAME --> EXPLORE[App erkunden<br/>4 Bots verfuegbar:<br/>Nobody, Gloria, Max, Ava]
+    LANDING_NAME --> EXPLORE[App erkunden<br/>3 Bots verfuegbar:<br/>Nobody, Max, Ava]
 
     LANDING_SKIP --> EXPLORE
 
@@ -105,7 +105,7 @@ flowchart TD
 
 | Feature | Verfuegbar | Hinweis |
 |:---|:---:|:---|
-| Chat mit Nobody, Gloria, Max, Ava | Ja | Vollwertiges Coaching |
+| Chat mit Nobody, Max, Ava | Ja | Vollwertiges Coaching |
 | Voice Mode (Web Speech) | Ja | Browser-TTS |
 | Server TTS (hohe Qualitaet) | Nein | Nur registriert |
 | Lebenskontext | Ja | Nur lokal im Browser |
@@ -122,7 +122,7 @@ flowchart TD
     REG_START([Registrieren]) --> REG_FORM[RegisterView<br/>Name, E-Mail, Passwort]
     REG_FORM --> PENDING[RegistrationPendingView<br/>'Bestaetigen Sie Ihre E-Mail']
     PENDING --> VERIFY[VerifyEmailView<br/>Token aus E-Mail-Link]
-    VERIFY -->|Erfolgreich| LOGIN_SUCCESS[handleLoginSuccess<br/>14-Tage Premium-Trial aktiv]
+    VERIFY -->|Erfolgreich| LOGIN_SUCCESS[handleLoginSuccess<br/>9-Tage Premium-Trial aktiv]
 
     LOGIN_SUCCESS --> WELCOME_SPLASH[WelcomeScreen<br/>Kurz sichtbar]
     WELCOME_SPLASH --> LOAD_DATA[Nutzerdaten laden<br/>Lebenskontext, Gamification]
@@ -197,7 +197,7 @@ flowchart TD
     DEST -->|keiner| CONTEXT_CHOICE
 
     CONTEXT_CHOICE --> CONTINUE[Weiter mit gespeichertem Kontext]
-    CONTEXT_CHOICE --> NEW[Neu starten → LandingPage]
+    CONTEXT_CHOICE --> NEW[Neu starten - LandingPage]
 
     CONTINUE --> BOT_SELECT[BotSelection]
     NEW --> LANDING[LandingPage]
@@ -228,7 +228,7 @@ flowchart TD
     OPTIONS -->|iOS| IOS_OPTIONS[Native In-App Purchase<br/>RevenueCat / StoreKit 2]
     OPTIONS -->|Web| WEB_OPTIONS[PayPal Checkout<br/>oder Code eingeben]
 
-    IOS_OPTIONS --> IAP_PRODUCTS[Produktauswahl:<br/>• Registered Monthly 3,99 EUR<br/>• Premium Monthly 9,99 EUR<br/>• Premium Yearly 79,99 EUR<br/>• Registered Lifetime 14,99 EUR]
+    IOS_OPTIONS --> IAP_PRODUCTS[Produktauswahl:<br/>Registered Monthly 3,99 EUR<br/>Premium Monthly 9,99 EUR<br/>Premium Yearly 79,99 EUR<br/>Registered Lifetime 14,99 EUR]
     WEB_OPTIONS --> PAYPAL[PayPal-Link<br/>oder Upgrade-Code]
 
     IAP_PRODUCTS -->|Kauf erfolgreich| PURCHASE_SUCCESS[onPurchaseSuccess<br/>User aktualisieren]
@@ -366,7 +366,13 @@ flowchart TD
     style PREF fill:#fff9c4
 ```
 
-### Admin Startup-Praeferenz
+### Visual Redesign (Brand-Driven Design System)
+Seit v1.9.6 nutzt die App ein markengesteuertes Design-System mit White-Label-Unterstuetzung:
+- **Farben:** 4-stufige Markenpallette + Akzentfarbe (definiert über CSS-Variablen, per Brand konfigurierbar).
+- **Typografie:** Inter Variable Font.
+- **Komponenten:** Abgerundete Karten, schwebende Schatten, Pill-Buttons.
+- **Animationen:** Framer Motion für weiche Übergänge.
+- **White-Label:** W4F (Work4Flow) als erste Zusatzmarke mit eigenem Farbschema und Loader.
 
 Admins und Developer koennen in den Einstellungen (`AdminView`) waehlen:
 - **Admin-Panel** (Standard): Direkt zum Verwaltungsbereich
@@ -411,10 +417,6 @@ flowchart TD
 | Coaching | "Arbeiten Sie an Ihren persoenlichen Zielen" | "Work on your personal goals" | TopicSearch (Coaching) |
 | Begleitendes Coaching | "Professionelles Coaching mit KI-Unterstuetzung" | "Professional coaching with AI support" | TopicSearch (Coaching) |
 
-**Hinweis:** Die Kommunikations-Beschreibung unterscheidet sich fuer Gaeste:
-- **Gast:** "Bereiten Sie schwierige Gespraeche vor" / "Prepare for difficult conversations"
-- **Registriert:** "Bereiten Sie schwierige Gespraeche vor" / "Prepare for difficult conversations"
-
 ---
 
 ## 10. Onboarding-Komponenten (Detail)
@@ -451,7 +453,34 @@ flowchart TD
 
 ---
 
-## 11. Gesamtansicht: Bildschirm-Abfolge pro User-Typ
+## 10.5 Gloria Interview Flow (v1.8.9+)
+
+```mermaid
+flowchart TD
+    START([BotSelection]) --> BTN[Gloria Interview waehlen]
+    BTN --> CHAT[ChatView<br/>Bot: gloria-interview]
+    
+    CHAT --> INTRO[Bot: Fragt nach Thema und Dauer]
+    INTRO --> USER[User: Definiert Thema]
+    USER --> INTERVIEW[Interview-Phase<br/>Strukturierte Fragen]
+    
+    INTERVIEW --> END[Sitzung beenden]
+    END --> REVIEW[SessionReview<br/>isInterviewReview = true]
+    
+    REVIEW --> TABS{Ansicht}
+    TABS -->|Zusammenfassung| SUMMARY[Zusammenfassung<br/>des Themas]
+    TABS -->|Setup| SETUP[Metadaten:<br/>Thema, Dauer, Fokus]
+    TABS -->|Transkript| TRANSCRIPT[Geglaettetes Transkript<br/>(Interviewer / User)]
+    
+    TRANSCRIPT --> EXPORT[Als Markdown exportieren]
+    EXPORT --> DASHBOARD[Zurueck zum Dashboard]
+```
+
+### Gloria Interview
+Ein spezialisierter Flow für strukturierte Interviews ohne Coaching-Ratschläge.
+- **Einstieg:** Über die "Management & Kommunikation"-Sektion in der BotSelection.
+- **Bot:** `gloria-interview` (nicht zu verwechseln mit `gloria-life-context`).
+- **Output:** Ein grammatikalisch geglättetes Transkript und eine strukturierte Zusammenfassung, ideal für Brainstorming oder Projektplanung.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -477,51 +506,45 @@ flowchart TD
 
 ---
 
-## 12. Bot-Zugang nach Tier
+## 11. Bot-Zugang nach Tier
 
 ```mermaid
 flowchart LR
-    subgraph GUEST["Gast (Tier 0)"]
+    subgraph GUEST[Gast]
         G_NOBODY[Nobody]
-        G_GLORIA[Gloria]
         G_MAX[Max]
         G_AVA[Ava]
     end
 
-    subgraph REGISTERED["Registriert (Tier 1)"]
-        R_ALL["+ Gloria Interview<br/>+ Cloud Sync<br/>+ Server TTS<br/>+ OCEAN<br/>+ DPC"]
+    subgraph REGISTERED[Registriert]
+        R_ALL["Gloria Interview<br/>Cloud Sync<br/>Server TTS<br/>OCEAN, DPC"]
     end
 
-    subgraph PREMIUM["Premium (Tier 2)"]
-        P_KENJI[+ Kenji]
-        P_CHLOE[+ Chloe]
-        P_MORE["+ Riemann/SD<br/>+ DPFL<br/>+ Transcript Eval"]
+    subgraph PREMIUM[Premium]
+        P_KENJI[Kenji]
+        P_CHLOE[Chloe]
+        P_MORE["Riemann, SD<br/>DPFL<br/>Transcript Eval"]
     end
 
-    subgraph CLIENT["Klient (Tier 3)"]
-        C_ROB[+ Rob]
-        C_VICTOR[+ Victor]
-        C_MORE["+ PEP<br/>+ Audio Upload"]
+    subgraph CLIENT[Klient]
+        C_ROB[Rob]
+        C_VICTOR[Victor]
+        C_MORE["PEP<br/>Audio Upload"]
     end
 
     GUEST --> REGISTERED --> PREMIUM --> CLIENT
-
-    style GUEST fill:#e8eaf6
-    style REGISTERED fill:#e8f5e9
-    style PREMIUM fill:#fff8e1
-    style CLIENT fill:#fce4ec
 ```
 
 ---
 
-## 13. Plattform-Unterschiede: iOS vs. Web
+## 12. Plattform-Unterschiede: iOS vs. Web
 
 | Aspekt | iOS (Capacitor) | Web (Browser) |
 |:---|:---|:---|
 | Installation | App Store Download | PWA zum Homescreen |
 | Zahlungen | In-App Purchase (RevenueCat) | PayPal Direct Checkout |
 | PayPal-Links | Ausgeblendet (Apple 3.1.1) | Sichtbar |
-| TTS | Native iOS Stimmen | Web Speech API |
+| TTS | Native iOS Stimmen | Server TTS (Piper, ab Registered) + Web Speech API Fallback |
 | STT | Native Speech Recognition | Web Speech API |
 | Safe Area | Dynamic Island / Notch beruecksichtigt | Standard-Padding |
 | Datenexport | Ueber Share-Sheet | Browser-Download |
@@ -529,4 +552,4 @@ flowchart LR
 
 ---
 
-*Dieses Dokument basiert auf dem implementierten Code in `App.tsx` (v1.9.7) und spiegelt die tatsaechliche Routing-Logik wider.*
+*Dieses Dokument basiert auf dem implementierten Code in `App.tsx` (v1.9.9) und spiegelt die tatsaechliche Routing-Logik wider.*

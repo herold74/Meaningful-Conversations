@@ -70,8 +70,9 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - `app.py`: Thread-safe `_model_cache` dict holds `PiperVoice` instances with 10-min TTL eviction.
   - `POST /warmup`: Pre-loads a model on demand. Called by frontend when TTS init confirms server mode.
   - Per-model locking: `PiperVoice.synthesize` is not thread-safe; a `threading.Lock` per model serializes calls for the same model while allowing different models in parallel.
-  - Progressive sentence synthesis: Frontend splits text into sentences, fires parallel requests. With 2 CPUs, two Piper inferences run simultaneously.
-  - Gunicorn: 2 workers × 4 threads. Each worker holds its own model cache (~120MB for 2 models). 2 workers = 2 CPUs for parallel requests.
+  - Progressive sentence synthesis: Frontend splits text into sentences, synthesizes sequentially (one at a time). Each Piper call gets full CPU (~1.7s for 150 chars). First sentence plays immediately; next synthesizes during playback. Parallel was tested but shared vCPUs caused ~2x contention.
+  - Warmup race condition fix: Frontend stores warmup promise in a ref and `await`s it before first synthesis, ensuring the model is loaded before the first bot message hits the TTS service.
+  - Gunicorn: 2 workers × 4 threads. Each worker holds its own model cache (~120MB for 2 models). Capacity: ~10-12 concurrent TTS sessions on 4-vCPU server.
 
 ### 6. iOS Audio Handling
 - **Decision:** Force local TTS on iOS, play silent audio after mic use.

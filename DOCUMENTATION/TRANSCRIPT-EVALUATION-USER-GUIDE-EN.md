@@ -1,12 +1,12 @@
 # Transcript Evaluation: User Guide
 
-> **For Clients**: Get your conversation transcripts professionally analyzed and receive valuable insights for your communication development.
+> **For Premium Users, Clients, Admins and Developers**: Get your conversation transcripts professionally analyzed and receive valuable insights for your communication development.
 
 ---
 
 ## 📋 Overview
 
-The **Transcript Evaluation** is an AI-powered coaching tool that analyzes your conversation transcripts and provides detailed feedback on your communication. This feature is designed specifically for **Clients** and integrates your personality profile for individualized insights.
+The **Transcript Evaluation** is an AI-powered coaching tool that analyzes your conversation transcripts and provides detailed feedback on your communication. This feature is designed for **Premium Users**, **Clients**, **Admins**, and **Developers**, and integrates your personality profile for individualized insights.
 
 ### What is analyzed?
 
@@ -143,9 +143,9 @@ Click **"Start session"** — the app opens the recommended coach and automatica
 
 ---
 
-## 📄 PDF Export (Clients, Admins & Developers)
+## 📄 PDF Export (Premium Users, Clients, Admins & Developers)
 
-As a **Client, Admin, or Developer**, you can export your evaluations as PDF.
+As a **Premium User, Client, Admin, or Developer**, you can export your evaluations as PDF.
 
 ### 📍 Where to Find the PDF Export Button?
 
@@ -196,7 +196,7 @@ The export button is available in **two locations**:
 - Shows spinner during export ("Exporting..." / "Exportiere...")
 - Grayed out (disabled) during export
 
-**Important:** The button is **only visible to Clients, Admins, and Developers**. Premium users and other roles cannot see the button.
+**Important:** The button is **visible to Premium Users, Clients, Admins, and Developers**.
 
 ---
 
@@ -218,10 +218,10 @@ The exported PDF contains:
 
 ### What happens to my data?
 
-- ✅ **Transcripts** are sent to AI (Google Gemini) for analysis
-- ✅ **Evaluations** are stored in your personal database
-- ✅ **Personality Profile** is transmitted end-to-end encrypted
-- ✅ **PDFs** are generated locally in your browser (no server storage)
+- ✅ **Transcripts** are sent to AI (Google Gemini) for analysis but are **not stored on the server**.
+- ✅ **Evaluations** (results) are stored in your personal database.
+- ✅ **Personality Profile** is transmitted end-to-end encrypted.
+- ✅ **PDFs** are generated locally in your browser (no server storage).
 
 ### Who can see my evaluations?
 
@@ -343,6 +343,6 @@ For questions or issues:
 
 ---
 
-**Version:** 1.9.3  
-**Last Updated:** February 20, 2026  
-**Feature Available For:** Clients (Desktop Browser) · Coach Recommendation: all registered users
+**Version:** 1.9.9  
+**Last Updated:** February 27, 2026  
+**Feature Available For:** Premium Users, Clients, Admins, Developers (Desktop Browser) · Coach Recommendation: all registered users

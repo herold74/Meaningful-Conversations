@@ -1,12 +1,12 @@
 # Transkript-Auswertung: Benutzerhandbuch
 
-> **Für Premium-Nutzer und Klienten**: Lassen Sie Ihre Gesprächstranskripte professionell analysieren und erhalten Sie wertvolle Insights für Ihre Kommunikationsentwicklung.
+> **Für Premium-Nutzer, Klienten, Admins und Developer**: Lassen Sie Ihre Gesprächstranskripte professionell analysieren und erhalten Sie wertvolle Insights für Ihre Kommunikationsentwicklung.
 
 ---
 
 ## 📋 Überblick
 
-Die **Transkript-Auswertung** ist ein KI-gestütztes Coaching-Tool, das Ihre Gesprächstranskripte analysiert und Ihnen detailliertes Feedback zu Ihrer Kommunikation gibt. Das Feature steht **Premium-Nutzern** und **Klienten** zur Verfügung und integriert Ihr Persönlichkeitsprofil für individualisierte Insights.
+Die **Transkript-Auswertung** ist ein KI-gestütztes Coaching-Tool, das Ihre Gesprächstranskripte analysiert und Ihnen detailliertes Feedback zu Ihrer Kommunikation gibt. Das Feature steht **Premium-Nutzern**, **Klienten**, **Admins** und **Developern** zur Verfügung und integriert Ihr Persönlichkeitsprofil für individualisierte Insights.
 
 ### Was wird analysiert?
 
@@ -143,9 +143,9 @@ Klicken Sie auf **"Session starten"** – die App öffnet den empfohlenen Coach 
 
 ---
 
-## 📄 PDF Export (für Klienten, Admins & Developers)
+## 📄 PDF Export (für Premium-Nutzer, Klienten, Admins & Developers)
 
-Als **Klient, Admin oder Developer** können Sie Ihre Auswertungen als PDF exportieren.
+Als **Premium-Nutzer, Klient, Admin oder Developer** können Sie Ihre Auswertungen als PDF exportieren.
 
 ### 📍 Wo finde ich den PDF Export Button?
 
@@ -196,7 +196,7 @@ Der Export-Button ist an **zwei Stellen** verfügbar:
 - Zeigt Spinner während des Exports ("Exportiere..." / "Exporting...")
 - Wird ausgegraut (disabled) während des Exports
 
-**Wichtig:** Der Button ist **nur für Klienten, Admins und Developers sichtbar**. Premium-User und andere Rollen sehen den Button nicht.
+**Wichtig:** Der Button ist **für Premium-Nutzer, Klienten, Admins und Developers sichtbar**.
 
 ---
 
@@ -218,10 +218,10 @@ Das exportierte PDF enthält:
 
 ### Was passiert mit meinen Daten?
 
-- ✅ **Transkripte** werden zur Analyse an die AI (Google Gemini) gesendet
-- ✅ **Auswertungen** werden in Ihrer persönlichen Datenbank gespeichert
-- ✅ **Persönlichkeitsprofil** wird Ende-zu-Ende verschlüsselt übertragen
-- ✅ **PDFs** werden lokal in Ihrem Browser generiert (keine Server-Speicherung)
+- ✅ **Transkripte** werden zur Analyse an die AI (Google Gemini) gesendet, aber **nicht auf dem Server gespeichert**.
+- ✅ **Auswertungen** (Ergebnisse) werden in Ihrer persönlichen Datenbank gespeichert.
+- ✅ **Persönlichkeitsprofil** wird Ende-zu-Ende verschlüsselt übertragen.
+- ✅ **PDFs** werden lokal in Ihrem Browser generiert (keine Server-Speicherung).
 
 ### Wer kann meine Auswertungen sehen?
 
@@ -383,6 +383,6 @@ Bei Fragen oder Problemen:
 
 ---
 
-**Version:** 1.9.7  
-**Zuletzt aktualisiert:** 25. Februar 2026  
-**Feature verfügbar für:** Premium-Nutzer & Klienten (Desktop-Browser) · PDF-Export: Klienten, Admins, Developers · Coach-Empfehlung: alle registrierten Nutzer
+**Version:** 1.9.9  
+**Zuletzt aktualisiert:** 27. Februar 2026  
+**Feature verfügbar für:** Premium-Nutzer, Klienten, Admins, Developer (Desktop-Browser) · Coach-Empfehlung: alle registrierten Nutzer
