@@ -9,6 +9,7 @@ export const PuzzleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         strokeWidth="1.5" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
+        aria-hidden="true"
         {...props}
     >
         <path d="M19.43,12.57a1,1,0,0,0-1.42,0,1,1,0,0,1-1.41,0,1,1,0,0,0-1.42,0,1,1,0,0,0,0,1.42,1,1,0,0,1,0,1.41,1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0,1,1,0,0,1,1.41,0,1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42,1,1,0,0,1,0-1.41A1,1,0,0,0,19.43,12.57Z" />

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { User, NavView } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
@@ -17,6 +17,7 @@ import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
+import { useFocusTrap } from '../utils/useFocusTrap';
 
 interface BurgerMenuProps {
     isOpen: boolean;
@@ -30,6 +31,8 @@ interface BurgerMenuProps {
 
 const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver, showProfileBadge }) => {
     const { t } = useLocalization();
+    const menuRef = useRef<HTMLDivElement>(null);
+    useFocusTrap(menuRef, onClose, isOpen);
     useModalOpen(isOpen);
     
     // iOS Safe Area calculation (same as GamificationBar)
@@ -76,6 +79,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
 
     return createPortal(
         <div 
+            ref={menuRef}
             className="fixed inset-0 z-[9998] flex justify-start"
             onClick={onClose}
             role="dialog"

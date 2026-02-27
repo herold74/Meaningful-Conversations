@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Message, User } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { useModalOpen } from '../utils/modalUtils';
 import { XIcon } from './icons/XIcon';
 import Button from './shared/Button';
+import { useFocusTrap } from '../utils/useFocusTrap';
 import { CheckIcon } from './icons/CheckIcon';
 
 interface FeedbackModalProps {
@@ -18,7 +19,9 @@ interface FeedbackModalProps {
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit, lastUserMessage, botMessage, currentUser }) => {
     const { t } = useLocalization();
+    const modalRef = useRef<HTMLDivElement>(null);
     useModalOpen(isOpen);
+    useFocusTrap(modalRef, onClose, isOpen);
     const [comments, setComments] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(true);
     const [email, setEmail] = useState('');
@@ -161,6 +164,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, onSubmit
             onClick={onClose}
         >
             <div 
+                ref={modalRef}
                 className="bg-white dark:bg-gray-900 w-full max-w-2xl max-h-[90dvh] flex flex-col border border-gray-300 dark:border-gray-700 shadow-xl rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >

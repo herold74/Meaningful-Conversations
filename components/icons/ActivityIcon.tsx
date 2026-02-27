@@ -9,6 +9,7 @@ export const ActivityIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        aria-hidden="true"
         {...props}
     >
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
