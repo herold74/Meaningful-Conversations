@@ -57,7 +57,7 @@ The user list displays:
 | Column | Description |
 |--------|-------------|
 | Email | User's email address |
-| Roles | `admin`, `premium`, or regular user |
+| Roles | `admin`, `developer`, `client`, `premium`, or regular user |
 | Created | Account creation date |
 | Last Login | Most recent login timestamp |
 | Logins | Total number of logins |
@@ -298,9 +298,22 @@ The selected intent determines which section is highlighted in the Bot Selection
 **Registered users** can disable the Intent Picker from the Burger Menu. The preference is stored in `localStorage` (`intentPickerDisabled`).
 
 **Admin/Developer users** have a special startup preference dropdown in the Admin Panel that allows them to choose their default startup view (`adminStartupPref` in localStorage):
-- **Intent Picker** (default)
+- **Admin Panel** (default)
+- **Intent Picker**
 - **Bot Selection** (skip to coach selection)
-- **Admin Panel** (open admin directly)
+
+### Gloria Interview (Structured Interviews)
+The "Management & Kommunikation" section includes **Gloria Interview**, a specialized bot for conducting structured interviews on specific topics (ideas, projects, decisions).
+- **Purpose:** Pure inquiry without coaching advice.
+- **Output:** Generates a structured summary and a grammatically smoothed transcript.
+- **Export:** Users can download the interview results as a Markdown file.
+
+### Visual Redesign (W4F)
+Version 1.9.6 introduced a comprehensive visual redesign ("W4F") featuring:
+- **New Color Palette:** 4 shades of blue + amber accent.
+- **Typography:** Inter Variable font for improved readability.
+- **UI Components:** Rounded cards, elevated shadows, and pill-shaped buttons.
+- **Animations:** Smooth page transitions using Framer Motion.
 
 ### Name Prompt
 - **Guests** are prompted for their first name or a pseudonym. This is stored locally (`guestName` in localStorage) and used to generate a minimal Life Context template. The prompt can be skipped.
@@ -458,5 +471,5 @@ This is expected behavior due to end-to-end encryption:
 
 For technical issues beyond this manual, contact the development team.
 
-**Version:** 1.9.7  
-**Last Updated:** February 2026
+**Version:** 1.9.9  
+**Last Updated:** February 27, 2026

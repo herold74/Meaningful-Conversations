@@ -2,12 +2,12 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: February 25, 2026 — v1.9.7
+**Last Updated**: February 27, 2026 — v1.9.9
 
 ## User Types
 
 1.  **Guest (Gast)**: Unregistered users who can try out the application with limited features. Data is stored locally in the browser.
-2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **14-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Lifetime, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered Lifetime users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026.
+2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Lifetime, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered Lifetime users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026.
 3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
 4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor), Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
 5.  **Admin**: Administrators with access to the backend management panel.
@@ -190,9 +190,9 @@ Guest (kostenlos, sofort nutzbar)
   → Erlebt: Nobody, Max, Ava, Gloria, Chat, Voice, Life Context (lokal) — kein Gloria Interview
   → Trigger: "Daten nur im Browser" + kein TTS + kein Profil
   ↓
-14-Tage Premium-Trial (kostenlos nach Registrierung)
+9-Tage Premium-Trial (kostenlos nach Registrierung)
   → Erlebt: ALLES was Premium bietet — Kenji, Chloe, Riemann, SD, DPFL, etc.
-  → Nach 14 Tagen: Paywall mit vollem Produktkatalog
+  → Nach 9 Tagen: Paywall mit vollem Produktkatalog
   → Daten-Download (Life Context, Profil) auch nach Ablauf möglich
   ↓
 Registered (3,90 €/Monat oder 14,90 € einmalig)
@@ -263,7 +263,7 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 
 | Feature | Status | Details |
 | :--- | :---: | :--- |
-| **14-Tage Premium-Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
+| **9-Tage Premium-Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
 | **Paywall (abgelaufene User)** | ✅ | Responsive Layout, PayPal (Web) + iOS IAP + Code |
 | **PayPal Direct Checkout** | ✅ | €14.90 Registered Lifetime (Web only, hidden on iOS) |
 | **iOS In-App Purchase** | ✅ | RevenueCat + StoreKit 2, Auto-Renewable Subscriptions (seit v1.9.7) |

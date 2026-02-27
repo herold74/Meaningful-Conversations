@@ -85,12 +85,20 @@ The personality data sent to the AI is **pseudonymized** - it cannot be traced b
 
 We collect the minimum data necessary to provide the service:
 
+-   **Session Transcripts (Chat History):**
+    -   **NEVER stored on our servers.**
+    -   For **Registered Users**: Chat history is E2EE encrypted as part of your Life Context but is not stored as plain text. You can download transcripts after each session.
+    -   For **Guests**: Transcripts exist only in your browser's memory and are lost when you close the tab unless you download them.
+
 -   **For Registered Users:**
     -   Your email address (for login and password resets).
     -   A securely hashed version of your password (we never store the plain text).
     -   Your unique, randomly generated encryption salt.
     -   Your gamification state (XP, level, achievements). This is encoded, not encrypted.
     -   Your encrypted "Life Context" file (unreadable by us).
+    -   **Transcript Evaluations**: Only the *results* (scores, insights) are stored. The raw transcript used for analysis is processed by the AI and then discarded; it is **not** saved.
+
 -   **For All Feedback Submissions:**
     -   The content of the feedback (rating, comments, and the relevant parts of the conversation if you report a specific message). This data is visible to administrators to help improve the service.
+
 -   **Anonymized Analytics:** We may collect high-level, anonymized usage data (e.g., which coaches are most popular, average session length) to improve the application. This data is never tied to your personal identity.
