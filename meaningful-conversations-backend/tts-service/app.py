@@ -52,6 +52,43 @@ def get_voices():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+AUDIO_FORMATS = {
+    'opus': {
+        'args': ['-c:a', 'libopus', '-b:a', '48k', '-vbr', 'on', '-application', 'voip', '-f', 'ogg'],
+        'mime': 'audio/ogg; codecs=opus',
+    },
+    'mp3': {
+        'args': ['-c:a', 'libmp3lame', '-q:a', '6', '-f', 'mp3'],
+        'mime': 'audio/mpeg',
+    },
+    'wav': {
+        'args': [],
+        'mime': 'audio/wav',
+    },
+}
+
+def convert_audio(wav_data, output_format='opus'):
+    """Convert WAV to compressed format using ffmpeg pipes (no disk I/O)."""
+    if output_format == 'wav' or output_format not in AUDIO_FORMATS:
+        return wav_data, 'audio/wav'
+
+    config = AUDIO_FORMATS[output_format]
+    cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-i', 'pipe:0'] + config['args'] + ['pipe:1']
+
+    try:
+        result = subprocess.run(cmd, input=wav_data, capture_output=True, timeout=30)
+        if result.returncode != 0:
+            logger.warning(f"ffmpeg {output_format} conversion failed, returning WAV: {result.stderr.decode()}")
+            return wav_data, 'audio/wav'
+
+        compressed = result.stdout
+        ratio = len(wav_data) / max(len(compressed), 1)
+        logger.info(f"Audio encoded: WAV {len(wav_data)} → {output_format.upper()} {len(compressed)} bytes ({ratio:.1f}x smaller)")
+        return compressed, config['mime']
+    except subprocess.TimeoutExpired:
+        logger.warning("ffmpeg conversion timed out, returning WAV")
+        return wav_data, 'audio/wav'
+
 def synthesize_with_piper(text, model, length_scale, speaker=None):
     """Synthesize speech using Piper TTS"""
     model_path = f"{VOICE_DIR}/{model}.onnx"
@@ -73,7 +110,7 @@ def synthesize_with_piper(text, model, length_scale, speaker=None):
             cmd,
             input=text.encode('utf-8'),
             capture_output=True,
-            timeout=45  # Increased from 15s to handle longer texts (Gunicorn timeout is 60s)
+            timeout=45
         )
         
         if result.returncode != 0:
@@ -87,7 +124,7 @@ def synthesize_with_piper(text, model, length_scale, speaker=None):
 
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
-    """Synthesize speech from text using Piper"""
+    """Synthesize speech from text using Piper, with optional Opus/MP3 encoding."""
     start_time = time.time()
     
     try:
@@ -96,25 +133,29 @@ def synthesize():
         model = data.get('model', 'de_DE-thorsten-medium')
         length_scale = data.get('lengthScale', 1.0)
         speaker = data.get('speaker')
+        output_format = data.get('format', 'opus')
         
-        logger.info(f"TTS Request: model={model}, speaker={speaker}, text_length={len(text)}")
+        logger.info(f"TTS Request: model={model}, speaker={speaker}, format={output_format}, text_length={len(text)}")
         
         if not text:
             return jsonify({'error': 'Text is required'}), 400
         
-        # Synthesize with Piper
-        audio_data = synthesize_with_piper(text, model, length_scale, speaker)
+        wav_data = synthesize_with_piper(text, model, length_scale, speaker)
         
-        # Metrics
+        piper_ms = int((time.time() - start_time) * 1000)
+        audio_data, mimetype = convert_audio(wav_data, output_format)
+        
         duration_ms = int((time.time() - start_time) * 1000)
-        audio_size = len(audio_data)
+        encode_ms = duration_ms - piper_ms
         
-        logger.info(f"TTS Success: {duration_ms}ms, {audio_size} bytes, engine=piper")
+        logger.info(f"TTS Success: piper={piper_ms}ms, encode={encode_ms}ms, total={duration_ms}ms, {len(audio_data)} bytes ({output_format})")
         
-        # Return audio with metrics headers
-        response = Response(audio_data, mimetype='audio/wav')
+        response = Response(audio_data, mimetype=mimetype)
         response.headers['X-TTS-Duration-Ms'] = str(duration_ms)
-        response.headers['X-Audio-Size-Bytes'] = str(audio_size)
+        response.headers['X-TTS-Piper-Ms'] = str(piper_ms)
+        response.headers['X-TTS-Encode-Ms'] = str(encode_ms)
+        response.headers['X-Audio-Size-Bytes'] = str(len(audio_data))
+        response.headers['X-Audio-Format'] = output_format
         response.headers['X-TTS-Engine'] = 'piper'
         response.headers['Cache-Control'] = 'public, max-age=3600'
         
@@ -129,35 +170,8 @@ def synthesize():
 
 @app.route('/synthesize-stream', methods=['POST'])
 def synthesize_stream():
-    """Synthesize speech using Piper (streaming not needed for Piper)"""
-    start_time = time.time()
-    
-    try:
-        data = request.json
-        text = data.get('text', '')
-        model = data.get('model', 'de_DE-thorsten-medium')
-        length_scale = data.get('lengthScale', 1.0)
-        
-        logger.info(f"TTS Stream Request: model={model}, text_length={len(text)}")
-        
-        if not text:
-            return jsonify({'error': 'Text is required'}), 400
-        
-        # Piper doesn't need streaming, just return normal synthesis
-        audio_data = synthesize_with_piper(text, model, length_scale, None)
-        duration_ms = int((time.time() - start_time) * 1000)
-        logger.info(f"TTS Success: {duration_ms}ms, {len(audio_data)} bytes, engine=piper")
-        
-        return Response(audio_data, mimetype='audio/wav', headers={
-            'X-TTS-Duration-Ms': str(duration_ms),
-            'X-Audio-Size-Bytes': str(len(audio_data)),
-            'X-TTS-Engine': 'piper',
-            'Cache-Control': 'public, max-age=3600'
-        })
-    
-    except Exception as e:
-        logger.error(f"TTS stream synthesis error: {e}", exc_info=True)
-        return jsonify({'error': str(e)}), 500
+    """Synthesize speech using Piper (delegates to /synthesize)"""
+    return synthesize()
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8082))
