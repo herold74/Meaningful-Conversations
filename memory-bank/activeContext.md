@@ -70,8 +70,9 @@
 - [ ] iOS App Store Connect: create products, set Notifications URL, TestFlight testing
 - [ ] Android Capacitor project setup
 - [ ] PayPal Monthly Subscription on web (3.90 EUR/month — Subscriptions API not yet implemented)
-- [ ] Large context file performance optimization (no virtualization/chunking yet)
 - [ ] Formal WCAG accessibility audit tooling (aria attributes already in place throughout)
+- [ ] Server-based SLM as Gemini replacement (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Target: >1000 paying users, dedicated larger server. Reduces per-request cost and Google dependency.
+- [ ] Coaching Framework Roadmap: 2 new bots (Clean Language, The Work) + 2 coaching "lenses" (NLP Meta-Modell, Logische Ebenen). See progress.md for details.
 
 ## Decision Log
 - **2026-02-26:** Memory bank updated to reflect v1.9.8 state. All stale references to `feature/visual-redesign` branch removed — that work was merged to `main` prior to this session.

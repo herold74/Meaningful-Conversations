@@ -170,5 +170,18 @@
 - [ ] **iOS App Store:** Product setup in App Store Connect, Notifications URL, TestFlight testing
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
-- [ ] **Performance:** Large context file optimization (virtualization/chunking)
+- [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
 - [ ] **Accessibility:** Formal WCAG audit tooling (aria attributes already in place)
+- [ ] **Self-hosted SLM:** Replace Gemini with server-based model (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Milestone: >1000 paying users. Requires dedicated larger server with GPU. Eliminates per-request API costs and Google dependency.
+
+## Coaching Framework Roadmap (Feature Pipeline)
+
+Vier spezialisierte Frameworks als neue Features über das Jahr verteilt, um Registered/Premium/Client-Nutzer mit kontinuierlichem Mehrwert zu versorgen:
+
+### New Bots (eigenständige Coaching-Stile)
+- [ ] **Clean Language Bot** (David Grove) — Arbeitet ausschließlich mit den exakten Metaphern und Symbolen des Klienten. Keine Interpretation, keine eigenen Annahmen. Spezifische Fragetechnik: „Was für ein X ist dieses X?", „Gibt es noch etwas über X?" Ziel: Architektur der inneren Bilderlandschaft verstehen. *(Premium Feature)*
+- [ ] **The Work Bot** (Byron Katie) — Strukturiertes 4-Fragen-Protokoll zur Untersuchung stressiger Gedanken: 1) Ist das wahr? 2) Absolut sicher? 3) Wie reagierst du mit diesem Gedanken? 4) Wer wärst du ohne ihn? + Umkehrung. Ziel: Identifikation mit destruktiven Gedankenmustern auflösen. *(Premium Feature)*
+
+### Coaching "Linsen" (Overlay-Modus für erfahrene User)
+- [ ] **NLP Meta-Modell Linse** — Erkennt Tilgungen („man"), Generalisierungen („immer/nie"), Verzerrungen („er macht mich wütend") in User-Aussagen. Hakt gezielt nach, um sprachliche Unschärfen aufzulösen. Kann als Layer auf jeden bestehenden Bot aktiviert werden. *(Client Feature)*
+- [ ] **Logische Ebenen Linse** (Robert Dilts) — Sortiert Aussagen hierarchisch: Umwelt → Verhalten → Fähigkeiten → Glaubenssysteme → Identität → Vision. Findet den „Hebel" für Veränderung (oft eine Ebene über dem Problem). Als Reflexions-Layer auf bestehende Bots. *(Client Feature)*
