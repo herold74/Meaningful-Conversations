@@ -428,7 +428,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     });
 };
   
-  const relevantVoices = tts.voices.filter(v => v.lang.toLowerCase().startsWith(language));
+  const relevantVoices = useMemo(() =>
+    tts.voices.filter(v => v.lang.toLowerCase().startsWith(language)),
+    [tts.voices, language]
+  );
 
   return (
     <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
