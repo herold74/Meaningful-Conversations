@@ -848,7 +848,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             { key: 'C', name: t.conscientiousness, score: result.big5.conscientiousness },
             { key: 'E', name: t.extraversion, score: result.big5.extraversion },
             { key: 'A', name: t.agreeableness, score: result.big5.agreeableness },
-            { key: 'N', name: t.neuroticism, score: result.big5.neuroticism },
+            { key: 'N', name: t.neuroticism, score: 6 - result.big5.neuroticism },
           ].map((trait) => (
             <View key={trait.key} style={styles.oceanItem}>
               <Text style={styles.oceanName}>{trait.name}</Text>
