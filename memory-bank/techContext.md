@@ -64,7 +64,7 @@
 - **Framework:** Express
 - **ORM:** Prisma
 - **Database:** MariaDB 11.2
-- **AI:** Google Generative AI SDK (`@google/genai`)
+- **AI:** Google Generative AI SDK (`@google/genai`), Mistral AI SDK (`@mistralai/mistralai`)
 - **Auth:** `jsonwebtoken`, `bcrypt`
 - **Email:** `node-mailjet`
 
@@ -183,7 +183,12 @@ Large files have been split into focused modules with facade re-exports:
 **Important:** Files in `routes/gemini/` use `../../middleware/` and `../../services/` paths (two directories up).
 
 ## External Services
-- **Google Gemini:** LLM provider (gemini-2.0-flash, gemini-2.0-flash-lite)
+- **Google Gemini:** Primary LLM provider (gemini-2.0-flash, gemini-2.0-flash-lite)
+- **Mistral AI:** Secondary LLM provider (EU-based, GDPR-friendly alternative)
+  - SDK: `@mistralai/mistralai`
+  - Models: `mistral-medium-latest`, `mistral-small-latest`
+  - Provider switching: `aiProviderService.js` handles routing, format conversion (`convertToMistralFormat`), and response post-processing (`stripMistralMetaCommentary`)
+  - Behavioral overlay: Mistral-specific system prompt rules appended in `convertToMistralFormat()` to enforce session structure, conciseness, and suppress meta-commentary
 - **Mailjet:** Transactional emails (verification, password reset)
 - **PayPal:** Webhook integration for donations (with full signature verification)
 

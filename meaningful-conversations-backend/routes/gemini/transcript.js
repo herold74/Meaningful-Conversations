@@ -44,16 +44,6 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
             return res.status(403).json({ error: 'Transcript evaluation requires Premium access or higher.' });
         }
 
-        // Build personality profile summary for prompt (if provided)
-        // #region agent log
-        console.log('[TE DEBUG] Profile check:', {
-            hasDecryptedProfile: !!decryptedPersonalityProfile,
-            profileKeys: decryptedPersonalityProfile ? Object.keys(decryptedPersonalityProfile) : null,
-            hasRiemann: !!decryptedPersonalityProfile?.riemann,
-            hasBig5: !!decryptedPersonalityProfile?.big5,
-            userId
-        });
-        // #endregion
         let personalityProfileSummary = null;
         if (decryptedPersonalityProfile) {
             const parts = [];
@@ -80,17 +70,6 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
                 }
             }
             personalityProfileSummary = parts.join('\n');
-            // #region agent log
-            console.log('[TE DEBUG] Profile summary built:', {
-                summaryLength: personalityProfileSummary.length,
-                partsCount: parts.length,
-                preview: personalityProfileSummary.substring(0, 100)
-            });
-            // #endregion
-        } else {
-            // #region agent log
-            console.log('[TE DEBUG] No profile provided - evaluation will proceed without personality insights');
-            // #endregion
         }
 
         // Determine document language from context

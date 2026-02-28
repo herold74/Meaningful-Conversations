@@ -24,4 +24,4 @@ Hier sind die wichtigsten Unterschiede im Detail:
     *   **Aktuelle Version:** Enthält den Bot `gloria-life-context` (Gloria) mit einem sehr spezifischen Prompt, der sie als Interviewerin und nicht als Coach definiert, inklusive PII-Warnung und Zeitabfrage.
     *   **Originalversion:** Dieser Bot existierte in der ursprünglichen Version überhaupt nicht.
 
-Insgesamt haben sich die Anweisungen von einer reinen Wissensdatenbank (was ist KVT, was ist Stoizismus?) zu einer echten Verhaltenssteuerung entwickelt, die den Coaches hilft, kontextbezogener, natürlicher und effektiver auf den Benutzer einzugehen.
+Insgesamt haben sich die Anweisungen von einer reinen Wissensdatenbank (was ist strukturierte Reflexion, was ist Stoizismus?) zu einer echten Verhaltenssteuerung entwickelt, die den Coaches hilft, kontextbezogener, natürlicher und effektiver auf den Benutzer einzugehen.
