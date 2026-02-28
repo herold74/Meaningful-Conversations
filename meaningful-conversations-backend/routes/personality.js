@@ -392,6 +392,14 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       .replace('{{frictionStory}}', narratives.frictionStory);
     
     
+    // Respect user's AI region preference (GDPR)
+    const userId = req.userId;
+    let userRegionPreference = 'optimal';
+    if (userId) {
+        const narUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+        userRegionPreference = narUser?.aiRegionPreference || 'optimal';
+    }
+
     // Call AI provider
     const result = await aiProvider.generateContent({
       model: 'gemini-2.5-flash',
@@ -403,7 +411,9 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
         systemInstruction: normalizedLang === 'de' 
           ? 'Antworte ausschließlich mit validem JSON gemäß dem angeforderten Schema. Keine Erklärungen außerhalb des JSON.'
           : 'Respond only with valid JSON matching the requested schema. No explanations outside the JSON.'
-      }
+      },
+      userRegionPreference,
+      language: normalizedLang,
     });
     
     // Parse the response - strip markdown code fences if present
