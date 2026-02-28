@@ -1134,8 +1134,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </div>
               <div className="space-y-4">
                 {domainKeys.map(trait => {
-                  const score = big5[trait] as number;
-                  if (typeof score !== 'number') return null;
+                  const rawScore = big5[trait] as number;
+                  if (typeof rawScore !== 'number') return null;
+                  const score = trait === 'neuroticism' ? (6 - rawScore) : rawScore;
                   const percentage = score * 20;
                   const traitKey = `big5_${trait}`;
                   const translatedTrait = t(traitKey) || trait;
@@ -1163,8 +1164,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                         {facets && (
                           <div className="mt-2 pt-2 border-t border-border-secondary/50 space-y-1.5">
                             {facets.map(facetKey => {
-                              const facetScore = (big5.facets as any)?.[facetKey] as number;
-                              if (typeof facetScore !== 'number') return null;
+                              const rawFacetScore = (big5.facets as any)?.[facetKey] as number;
+                              if (typeof rawFacetScore !== 'number') return null;
+                              const facetScore = trait === 'neuroticism' ? (6 - rawFacetScore) : rawFacetScore;
                               const facetPct = facetScore * 20;
                               const facetLabel = t(`bfi2_facet_${facetKey.replace(/([A-Z])/g, '_$1').toLowerCase()}`) || facetKey;
                               return (

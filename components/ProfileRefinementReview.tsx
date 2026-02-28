@@ -185,16 +185,20 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
               {Object.entries(suggestions.deltas).map(([trait, delta]: [string, any]) => {
                 if (Math.abs(delta) < 0.3) return null;
                 
-                const arrow = delta > 0 ? '↑' : '↓';
-                const color = delta > 0 ? 'text-green-600' : 'text-red-600';
+                const isNeuro = trait.toLowerCase() === 'neuroticism';
+                const displayDelta = isNeuro ? -delta : delta;
+                const arrow = displayDelta > 0 ? '↑' : '↓';
+                const color = displayDelta > 0 ? 'text-green-600' : 'text-red-600';
                 const traitKey = `big5_${trait.toLowerCase()}`;
                 const translatedTrait = t(traitKey) || trait;
+                const currentDisplay = isNeuro ? (6 - suggestions.current[trait]).toFixed(1) : suggestions.current[trait];
+                const suggestedDisplay = isNeuro ? (6 - suggestions.suggested[trait]).toFixed(1) : suggestions.suggested[trait];
                 
                 return (
                   <div key={trait} className="flex justify-between items-center">
                     <span className="text-sm text-content-secondary">{translatedTrait}</span>
                     <span className={`text-sm font-bold ${color}`}>
-                      {suggestions.current[trait]} → {suggestions.suggested[trait]} ({arrow} {Math.abs(delta).toFixed(1)})
+                      {currentDisplay} → {suggestedDisplay} ({arrow} {Math.abs(delta).toFixed(1)})
                     </span>
                   </div>
                 );
