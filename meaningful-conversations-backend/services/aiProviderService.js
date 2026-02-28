@@ -172,10 +172,7 @@ async function getModelForContext(provider, context = 'chat') {
 async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
   // Determine provider based on user preference
   let provider;
-  if (config?.responseMimeType === 'application/json') {
-    provider = 'google';
-    console.log(`📋 JSON schema output requested - using Google (native JSON mode)`);
-  } else if (userRegionPreference === 'eu') {
+  if (userRegionPreference === 'eu') {
     provider = 'mistral';  // Mistral AI is EU-based (Paris)
     console.log(`🇪🇺 User requested EU processing - using Mistral`);
   } else if (userRegionPreference === 'us') {
@@ -281,9 +278,19 @@ async function generateWithMistral({ model, contents, config, context = 'chat', 
   if (config.responseMimeType === 'application/json' || config.responseSchema) {
     mistralConfig.response_format = { type: "json_object" };
     
-    // Add schema instructions to system message for better structure adherence
     if (config.responseSchema) {
-      const schemaInstruction = `\n\n## CRITICAL: JSON Response Format\nYou MUST respond with ONLY valid JSON that exactly matches this schema. Do not include any explanatory text, markdown formatting, or additional content outside the JSON structure.\n\nRequired JSON Schema:\n${JSON.stringify(config.responseSchema, null, 2)}`;
+      const schemaInstruction = `\n\n## CRITICAL: JSON Response Format
+You MUST respond with ONLY valid, parseable JSON. No markdown, no code blocks, no text before or after.
+STRICT RULES:
+- Every key MUST be a simple string with ONE pair of double quotes: "key"
+- Every colon MUST appear exactly once between key and value: "key": "value"
+- NEVER use double colons (::) or double quotes around keys (""key"")
+- NEVER output ""key":: — this is INVALID JSON
+- All string values must be properly quoted and escaped
+- Use \\n for newlines inside strings, not actual line breaks
+
+Required JSON Schema:
+${JSON.stringify(config.responseSchema, null, 2)}`;
       
       // Find or create system message
       const systemMessageIndex = messages.findIndex(m => m.role === 'system');
