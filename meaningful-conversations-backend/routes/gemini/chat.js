@@ -306,6 +306,7 @@ STRICTLY FORBIDDEN in this first message:
                 config,
                 context: 'chat',
                 userRegionPreference,
+                language,
             });
 
             let finalEvent = null;
@@ -375,6 +376,7 @@ STRICTLY FORBIDDEN in this first message:
                 config,
                 context: 'chat',
                 userRegionPreference,
+                language,
             }),
             30000,
             'Chat AI response'
