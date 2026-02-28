@@ -405,10 +405,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const processStreamingSynthQueue = useCallback(async () => {
     const s = streamingTtsRef.current;
-    if (!s || !s.active || s.synthInProgress) return;
+    if (!s || s.synthInProgress) return;
 
     const nextIdx = s.resolvedBlobs.length;
     if (nextIdx >= s.synthQueue.length) return;
+
+    // #region agent log
+    console.log('[TTS-DBG] synth-start', {nextIdx, queueLen:s.synthQueue.length, active:s.active, hasStartedPlaying:s.hasStartedPlaying});
+    // #endregion
 
     s.synthInProgress = true;
     try {
@@ -418,11 +422,15 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       }
 
       const blob = await synthesizeSpeech(s.synthQueue[nextIdx], bot.id, language, false, s.voiceId);
-      if (!s.active) return;
+      if (!streamingTtsRef.current) return;
 
       s.resolvedBlobs.push(blob);
       const url = URL.createObjectURL(blob);
       s.resolvedUrls.push(url);
+
+      // #region agent log
+      console.log('[TTS-DBG] sentence-ready', {idx:nextIdx, active:s.active, resolvedCount:s.resolvedBlobs.length, queueLen:s.synthQueue.length});
+      // #endregion
 
       if (nextIdx === 0 && !s.hasStartedPlaying) {
         s.hasStartedPlaying = true;
@@ -452,6 +460,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           queue.currentIndex++;
 
           const totalSentences = streaming ? streaming.synthQueue.length : queue.urls.length;
+
+          // #region agent log
+          console.log('[TTS-DBG] sentence-ended', {currentIdx:queue.currentIndex, totalSentences, streamActive:streaming?.active, urlReady:!!queue.urls[queue.currentIndex]});
+          // #endregion
+
           if (queue.currentIndex >= totalSentences) {
             if (!streaming || !streaming.active) {
               setTtsStatus('idle');
@@ -470,6 +483,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             });
           } else {
             const waitIdx = queue.currentIndex;
+            // #region agent log
+            console.log('[TTS-DBG] waiting-for-url', {waitIdx, resolvedCount:streaming?.resolvedBlobs.length, queueLen:streaming?.synthQueue.length, synthInProgress:streaming?.synthInProgress, active:streaming?.active});
+            // #endregion
             const poll = setInterval(() => {
               if (!queue.active) { clearInterval(poll); return; }
               if (queue.urls[waitIdx]) {
@@ -492,10 +508,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       s.resolvedBlobs.push(null);
       s.resolvedUrls.push('');
     } finally {
-      if (s.active) s.synthInProgress = false;
+      s.synthInProgress = false;
     }
 
-    if (s.active) processStreamingSynthQueue();
+    if (s.synthQueue.length > s.resolvedBlobs.length) processStreamingSynthQueue();
   }, [bot.id, language]);
 
   /**
@@ -515,6 +531,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       : nativeForcesLocal ? 'local'
       : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI) ? 'local'
       : ttsMode;
+
+    // #region agent log
+    console.log('[TTS-DBG] initStreaming', {isTtsEnabled, ttsMode, effectiveMode, selectedVoiceURI, isValidServerVoice, willStream:effectiveMode==='server'});
+    // #endregion
 
     if (effectiveMode !== 'server') return false;
 
@@ -572,6 +592,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const finishStreamingTts = useCallback((finalText: string) => {
     const s = streamingTtsRef.current;
     if (!s) return;
+    // #region agent log
+    console.log('[TTS-DBG] finishStreaming', {sentenceCount:s.sentenceCount, resolvedCount:s.resolvedBlobs.length, synthInProgress:s.synthInProgress, hasStartedPlaying:s.hasStartedPlaying, queueCurrentIdx:sentenceQueueRef.current?.currentIndex});
+    // #endregion
     s.active = false;
     lastSpokenTextRef.current = finalText
       .replace(/#{1,6}\s/g, '')
