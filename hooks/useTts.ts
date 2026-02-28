@@ -157,6 +157,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         });
         const healthData = await healthResponse.json();
         const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
+        // #region agent log
+        console.log('[TTS-DBG] HEALTH-CHECK', {serverAvailable, healthStatus: healthData.status, piperAvailable: healthData.piperAvailable, savedMode, savedVoiceId, savedIsAuto});
+        // #endregion
 
         if (savedMode === 'server' && savedVoiceId) {
           if (!serverAvailable) {
@@ -242,6 +245,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
         }
       } catch (error) {
+        // #region agent log
+        console.error('[TTS-DBG] HEALTH-CHECK-FAILED', {error: String(error), savedMode, savedVoiceId});
+        // #endregion
         console.warn('[TTS Init] Could not check voice availability:', error);
         if (savedMode === 'server') {
           console.warn('[TTS Init] Temporarily switching to local mode (keeping saved preference)');
@@ -410,10 +416,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     const nextIdx = s.resolvedBlobs.length;
     if (nextIdx >= s.synthQueue.length) return;
 
-    // #region agent log
-    console.log('[TTS-DBG] synth-start', {nextIdx, queueLen:s.synthQueue.length, active:s.active, hasStartedPlaying:s.hasStartedPlaying});
-    // #endregion
-
     s.synthInProgress = true;
     try {
       if (warmupPromiseRef.current) {
@@ -427,10 +429,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       s.resolvedBlobs.push(blob);
       const url = URL.createObjectURL(blob);
       s.resolvedUrls.push(url);
-
-      // #region agent log
-      console.log('[TTS-DBG] sentence-ready', {idx:nextIdx, active:s.active, resolvedCount:s.resolvedBlobs.length, queueLen:s.synthQueue.length});
-      // #endregion
 
       if (nextIdx === 0 && !s.hasStartedPlaying) {
         s.hasStartedPlaying = true;
@@ -461,10 +459,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
           const totalSentences = streaming ? streaming.synthQueue.length : queue.urls.length;
 
-          // #region agent log
-          console.log('[TTS-DBG] sentence-ended', {currentIdx:queue.currentIndex, totalSentences, streamActive:streaming?.active, urlReady:!!queue.urls[queue.currentIndex]});
-          // #endregion
-
           if (queue.currentIndex >= totalSentences) {
             if (!streaming || !streaming.active) {
               setTtsStatus('idle');
@@ -483,9 +477,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             });
           } else {
             const waitIdx = queue.currentIndex;
-            // #region agent log
-            console.log('[TTS-DBG] waiting-for-url', {waitIdx, resolvedCount:streaming?.resolvedBlobs.length, queueLen:streaming?.synthQueue.length, synthInProgress:streaming?.synthInProgress, active:streaming?.active});
-            // #endregion
             const poll = setInterval(() => {
               if (!queue.active) { clearInterval(poll); return; }
               if (queue.urls[waitIdx]) {
@@ -504,6 +495,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         await audio.play();
       }
     } catch (err) {
+      // #region agent log
+      console.error('[TTS-DBG] SYNTH-ERROR', {idx: nextIdx, error: String(err), queueLen: s.synthQueue.length, voiceId: s.voiceId});
+      // #endregion
       console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed:`, err);
       s.resolvedBlobs.push(null);
       s.resolvedUrls.push('');
@@ -531,10 +525,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       : nativeForcesLocal ? 'local'
       : (ttsMode === 'server' && !isValidServerVoice && selectedVoiceURI) ? 'local'
       : ttsMode;
-
-    // #region agent log
-    console.log('[TTS-DBG] initStreaming', {isTtsEnabled, ttsMode, effectiveMode, selectedVoiceURI, isValidServerVoice, willStream:effectiveMode==='server'});
-    // #endregion
 
     if (effectiveMode !== 'server') return false;
 
@@ -592,9 +582,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const finishStreamingTts = useCallback((finalText: string) => {
     const s = streamingTtsRef.current;
     if (!s) return;
-    // #region agent log
-    console.log('[TTS-DBG] finishStreaming', {sentenceCount:s.sentenceCount, resolvedCount:s.resolvedBlobs.length, synthInProgress:s.synthInProgress, hasStartedPlaying:s.hasStartedPlaying, queueCurrentIdx:sentenceQueueRef.current?.currentIndex});
-    // #endregion
     s.active = false;
     lastSpokenTextRef.current = finalText
       .replace(/#{1,6}\s/g, '')
@@ -635,6 +622,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, []);
 
   const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false, forceLocalTts: boolean = false) => {
+    // #region agent log
+    console.log('[TTS-DBG] SPEAK-CALLED', {textLen: text.length, ttsMode, selectedVoiceURI, isRetry, forceLocalTts, isTtsEnabled});
+    // #endregion
     if (!isTtsEnabled || !text.trim()) {
       return;
     }
@@ -970,6 +960,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
         }
       } catch (error) {
+        // #region agent log
+        console.error('[TTS-DBG] SPEAK-FALLBACK-TO-LOCAL', {error: String(error), textLen: cleanText.length, ttsMode, selectedVoiceURI, isRetry});
+        // #endregion
         console.error('[TTS] Server TTS error:', error);
         setTtsStatus('idle');
         setTtsMode('local');
@@ -1283,6 +1276,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       setTtsMode('local');
       saveLanguageVoiceSettings('local', selection.voiceURI, false);
     } else if (selection.type === 'server') {
+      // #region agent log
+      console.log('[TTS-DBG] SELECT-SERVER-VOICE', {voiceId: selection.voiceId});
+      // #endregion
       setIsAutoMode(false);
       setSelectedVoiceURI(selection.voiceId);
       setTtsMode('server');
