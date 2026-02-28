@@ -151,6 +151,8 @@
   "botSelection_clientOnlyBadge": "Client Only",
   "botSelection_clientContactMessage": "Contact us for more information.",
   "botSelection_meditationBadge": "Offers guided meditation 🔔",
+  "botSelection_available": "Available",
+  "botSelection_conversation_starter": "Conversation starter",
   "botSearch_placeholder": "Describe your situation or topic ...",
   "botSearch_button": "Find coach",
   "botSearch_result_primary": "Recommended coach",
