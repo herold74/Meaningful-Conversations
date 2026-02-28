@@ -36,6 +36,7 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
                 temperature: 0.3,
             },
             context: 'bot-recommendation',
+            language,
         });
 
         const durationMs = Date.now() - startTime;
