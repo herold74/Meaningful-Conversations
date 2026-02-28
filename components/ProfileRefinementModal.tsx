@@ -299,14 +299,20 @@ const ProfileRefinementModal: React.FC<ProfileRefinementModalProps> = ({
                                 );
                               }
                               
-                              return changedTraits.map(trait => (
-                                <tr key={trait} className="border-t border-gray-100 dark:border-gray-700">
-                                  <td className="py-2 text-content-secondary">{formatDimension(trait)}</td>
-                                  <td className="py-2 text-center font-mono">{(currentProfile[trait] ?? 0).toFixed(1)}</td>
-                                  <td className="py-2 text-center font-mono font-bold">{(suggestedProfile[trait] ?? 0).toFixed(1)}</td>
-                                  <td className="py-2 text-right font-mono">{renderDelta(deltas[trait] ?? 0)}</td>
-                                </tr>
-                              ));
+                              return changedTraits.map(trait => {
+                                const isNeuro = trait === 'neuroticism';
+                                const cur = currentProfile[trait] ?? 0;
+                                const sug = suggestedProfile[trait] ?? 0;
+                                const d = deltas[trait] ?? 0;
+                                return (
+                                  <tr key={trait} className="border-t border-gray-100 dark:border-gray-700">
+                                    <td className="py-2 text-content-secondary">{formatDimension(trait)}</td>
+                                    <td className="py-2 text-center font-mono">{(isNeuro ? 6 - cur : cur).toFixed(1)}</td>
+                                    <td className="py-2 text-center font-mono font-bold">{(isNeuro ? 6 - sug : sug).toFixed(1)}</td>
+                                    <td className="py-2 text-right font-mono">{renderDelta(isNeuro ? -d : d)}</td>
+                                  </tr>
+                                );
+                              });
                             })()}
                           </tbody>
                         </table>
