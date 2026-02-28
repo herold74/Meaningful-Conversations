@@ -122,34 +122,71 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     setChatHistory(historyWithUserMessage);
     setIsLoading(true);
 
+    const botMessageId = `bot-${Date.now()}`;
+
     try {
-      const response = await geminiService.sendMessage(
+      // Try streaming first; falls back to JSON if server responds non-SSE
+      const useStreamingTts = tts.initStreamingTts();
+      let sentenceBuffer = '';
+      let streamedText = '';
+      let chunkCount = 0;
+
+      const flushSentences = (text: string, isFinal: boolean) => {
+        sentenceBuffer += text;
+        // Split on sentence-ending punctuation followed by whitespace
+        const parts = sentenceBuffer.split(/(?<=[.!?…;]+)\s+/);
+        // Keep the last part as buffer (may be incomplete sentence)
+        sentenceBuffer = isFinal ? '' : (parts.pop() || '');
+        for (const sentence of parts) {
+          if (sentence.trim()) tts.enqueueSentence(sentence.trim());
+        }
+        if (isFinal && sentenceBuffer.trim()) {
+          tts.enqueueSentence(sentenceBuffer.trim());
+          sentenceBuffer = '';
+        }
+      };
+
+      const response = await geminiService.sendMessageStream(
         bot.id,
         lifeContext,
         historyWithUserMessage,
         language,
         false,
+        (chunk: string) => {
+          streamedText += chunk;
+          chunkCount++;
+          // Update the bot message progressively
+          setChatHistory(prev => {
+            const last = prev[prev.length - 1];
+            if (last && last.id === botMessageId) {
+              return [...prev.slice(0, -1), { ...last, text: streamedText }];
+            }
+            return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
+          });
+          if (useStreamingTts) flushSentences(chunk, false);
+        },
         effectiveCoachingMode,
         decryptedProfile
       );
 
-      const meditationData = meditation.parseMeditationMarkers(response.text);
+      // Final text (may be stripped of meta-commentary)
+      const finalText = response.text;
+      const meditationData = meditation.parseMeditationMarkers(finalText);
 
-      const botMessage: Message = {
-        id: `bot-${Date.now()}`,
-        text: meditationData.displayText,
-        role: 'bot',
-        timestamp: new Date().toISOString(),
-      };
-      setChatHistory(prev => [...prev, botMessage]);
+      setChatHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last && last.id === botMessageId) {
+          return [...prev.slice(0, -1), { ...last, text: meditationData.displayText }];
+        }
+        return [...prev, { id: botMessageId, text: meditationData.displayText, role: 'bot' as const, timestamp: new Date().toISOString() }];
+      });
 
       if (meditationData.hasMeditation) {
+        if (useStreamingTts) tts.cancelPendingSentences();
         tts.speak(meditationData.introText, true);
 
         const wasInTextMode = !isVoiceMode;
-        if (wasInTextMode) {
-          setIsVoiceMode(true);
-        }
+        if (wasInTextMode) setIsVoiceMode(true);
 
         setTimeout(() => {
           meditation.setMeditationState({
@@ -161,10 +198,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
             originalMode: wasInTextMode ? 'text' : 'voice'
           });
         }, 1000);
+      } else if (useStreamingTts) {
+        flushSentences('', true);
+        tts.finishStreamingTts(finalText);
       } else {
-        tts.speak(botMessage.text);
+        tts.speak(finalText);
       }
-
       if (isGuest && guestFingerprint) {
         guestService.incrementGuestUsage(guestFingerprint).then(result => {
           setGuestLimitRemaining(result.remaining);
@@ -174,13 +213,20 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }
     } catch (err) {
       console.error('Error sending message:', err);
+      tts.cancelPendingSentences();
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         text: t('chat_error'),
         role: 'bot',
         timestamp: new Date().toISOString(),
       };
-      setChatHistory(prev => [...prev, errorMessage]);
+      setChatHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last && last.id === botMessageId) {
+          return [...prev.slice(0, -1), errorMessage];
+        }
+        return [...prev, errorMessage];
+      });
     } finally {
       setIsLoading(false);
     }

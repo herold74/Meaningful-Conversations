@@ -1,5 +1,5 @@
 import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry } from '../types';
-import { apiFetch } from './api';
+import { apiFetch, getApiBaseUrl, getSession } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
 
@@ -25,6 +25,86 @@ export const sendMessage = async (
             decryptedPersonalityProfile
         }),
     });
+};
+
+/**
+ * Send a chat message with SSE streaming support.
+ * Calls onChunk for each text fragment as it arrives.
+ * Returns the final (post-processed) full text.
+ * Falls back to non-streaming JSON if the server responds with JSON.
+ */
+export const sendMessageStream = async (
+    botId: string,
+    context: string,
+    history: Message[],
+    language: Language,
+    isNewSession: boolean,
+    onChunk: (chunk: string) => void,
+    coachingMode?: string,
+    decryptedPersonalityProfile?: any,
+): Promise<{ text: string }> => {
+    const session = getSession();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/gemini/chat/send-message`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            botId, context, history, language, isNewSession,
+            coachingMode, decryptedPersonalityProfile,
+            stream: true,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+        const data = await response.json();
+        onChunk(data.text);
+        return { text: data.text };
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamedText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+                const data = JSON.parse(line.slice(6));
+                if (data.error) throw new Error(data.error);
+                if (data.chunk) {
+                    streamedText += data.chunk;
+                    onChunk(data.chunk);
+                } else if (data.done) {
+                    return { text: data.fullText };
+                }
+            } catch (e) {
+                if ((e as Error).message?.startsWith('Failed')) throw e;
+            }
+        }
+    }
+
+    return { text: streamedText };
 };
 
 

@@ -769,6 +769,12 @@ CRITICAL rules for examplePrompt:
 - Do NOT include questions — the coach will ask those
 - Think of it as: "What would a user type to START the conversation?"
 
+CRITICAL terminology rules (STRICT — this is a coaching app, NOT a therapy app):
+- NEVER use the terms: CBT, KVT, cognitive behavioral therapy, psychotherapy, therapeutic, therapy (except when referring to seeing a human therapist)
+- NEVER describe any coach as using a "therapeutic approach" or "evidence-based therapy"
+- Instead use: coaching method, structured reflection, thought analysis, behavioral strategies
+- Chloe uses structured reflection techniques — NOT cognitive behavioral therapy
+
 Primary and secondary must be different bots. Write rationale and examplePrompt in English.`
     },
     de: {
@@ -798,6 +804,12 @@ KRITISCHE Regeln für examplePrompt:
 - KEINE Annahmen über Gefühle, Ursachen oder Hintergründe
 - KEINE Fragen — der Coach wird die Fragen stellen
 - Denke: "Was würde ein Nutzer tippen, um das Gespräch zu BEGINNEN?"
+
+KRITISCHE Terminologie-Regeln (STRIKT — dies ist eine Coaching-App, KEINE Therapie-App):
+- NIEMALS diese Begriffe verwenden: KVT, CBT, kognitive Verhaltenstherapie, Psychotherapie, therapeutisch, Therapie (außer beim Verweis auf einen menschlichen Therapeuten)
+- NIEMALS einen Coach als "therapeutischen Ansatz" oder "evidenzbasierte Therapie" beschreiben
+- Stattdessen verwenden: Coaching-Methode, strukturierte Reflexion, Gedankenanalyse, Verhaltensstrategien
+- Chloe nutzt strukturierte Reflexionstechniken — KEINE kognitive Verhaltenstherapie
 
 Primary und Secondary müssen unterschiedliche Bots sein. Schreibe rationale und examplePrompt auf Deutsch.`
     }

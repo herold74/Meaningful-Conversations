@@ -284,21 +284,97 @@ STRICTLY FORBIDDEN in this first message:
     let cacheUsed = false;
     const activeProvider = await aiProviderService.getActiveProvider();
 
-    try {
-        const config = {
-            temperature: 0.7,
-            systemInstruction: finalSystemInstruction,
-        };
+    const config = {
+        temperature: 0.7,
+        systemInstruction: finalSystemInstruction,
+    };
 
+    const chatContents = isInitialMessage ? "" : modelHistory;
+
+    // --- SSE Streaming path (Mistral only, non-test mode) ---
+    if (req.body.stream && !isTestMode) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders();
+
+        try {
+            const generator = aiProviderService.streamContent({
+                model: modelName,
+                contents: chatContents,
+                config,
+                context: 'chat',
+                userRegionPreference,
+            });
+
+            let finalEvent = null;
+            let chunkCount = 0;
+
+            for await (const event of generator) {
+                if (event.type === 'chunk') {
+                    chunkCount++;
+                    res.write(`data: ${JSON.stringify({ chunk: event.text })}\n\n`);
+                } else if (event.type === 'done') {
+                    finalEvent = event;
+                }
+            }
+
+            if (finalEvent) {
+                const durationMs = Date.now() - startTime;
+                const actualModel = finalEvent.model || modelName;
+                const tokenUsage = finalEvent.usage || { inputTokens: 0, outputTokens: 0 };
+
+                // Track API usage (async, don't block stream close)
+                trackApiUsage({
+                    userId: userId || null,
+                    isGuest: !userId,
+                    endpoint: 'chat',
+                    model: actualModel,
+                    botId,
+                    inputTokens: tokenUsage.inputTokens,
+                    outputTokens: tokenUsage.outputTokens,
+                    durationMs,
+                    success: true,
+                    metadata: { provider: finalEvent.provider, streamed: true },
+                }).catch(err => console.error('[Stream] Usage tracking error:', err));
+
+                // DPFL in background
+                if (coachingMode === 'dpfl' && userId) {
+                    const messageToAnalyze = testUserMessage || req.body.userMessage || '';
+                    setImmediate(() => {
+                        try { behaviorLogger.analyzeMessage(messageToAnalyze, language); }
+                        catch (e) { /* fail silently */ }
+                    });
+                }
+
+                res.write(`data: ${JSON.stringify({ done: true, fullText: finalEvent.fullText })}\n\n`);
+            }
+
+            res.end();
+        } catch (error) {
+            console.error('AI streaming error in /chat/send-message:', error);
+            const durationMs = Date.now() - startTime;
+            trackApiUsage({
+                userId: userId || null, isGuest: !userId, endpoint: 'chat',
+                model: modelName, botId, inputTokens: 0, outputTokens: 0,
+                durationMs, success: false, errorMessage: error.message,
+            }).catch(() => {});
+            res.write(`data: ${JSON.stringify({ error: 'Failed to get response from AI model.' })}\n\n`);
+            res.end();
+        }
+        return;
+    }
+
+    // --- Standard JSON path (Google, test mode, or non-streaming) ---
+    try {
         const response = await withTimeout(
             aiProviderService.generateContent({
                 model: modelName,
-                // For the initial message, we send an empty string to prompt the model's greeting.
-                // For subsequent messages, we send the entire chat history.
-                contents: isInitialMessage ? "" : modelHistory,
-                config: config,
-                context: 'chat', // Chat messages use chat context
-                userRegionPreference: userRegionPreference // User's EU/US preference
+                contents: chatContents,
+                config,
+                context: 'chat',
+                userRegionPreference,
             }),
             30000,
             'Chat AI response'
@@ -307,7 +383,6 @@ STRICTLY FORBIDDEN in this first message:
         const durationMs = Date.now() - startTime;
         const text = response.text;
 
-        // Track API usage with actual model and provider used
         const actualModel = response.model || modelName;
         const tokenUsage = response.usage || { inputTokens: 0, outputTokens: 0 };
 
@@ -328,13 +403,10 @@ STRICTLY FORBIDDEN in this first message:
         });
 
         // DPFL: Behavior logging
-        // In test mode, we do this synchronously to collect telemetry
-        // Otherwise, async (does not block response)
         const messageToAnalyze = testUserMessage || req.body.userMessage || '';
 
         if (isTestMode && messageToAnalyze) {
             try {
-                // Phase 2a: Use enhanced analysis with adaptive weighting + sentiment
                 const recentUserMessages = (req.body.chatHistory || [])
                     .filter(m => m.role === 'user')
                     .slice(-5)
@@ -344,7 +416,6 @@ STRICTLY FORBIDDEN in this first message:
                     messageToAnalyze, language, recentUserMessages
                 );
 
-                // Helper: extract keywords from framework analysis result
                 const extractKeywords = (frameworkResult, prefix) => {
                     const keywords = [];
                     for (const [dimension, data] of Object.entries(frameworkResult)) {
@@ -360,14 +431,12 @@ STRICTLY FORBIDDEN in this first message:
                     return keywords;
                 };
 
-                // Collect detected keywords for ALL frameworks
                 const allDetectedKeywords = {
                     riemann: extractKeywords(enhancedResult.riemann, 'riemann'),
                     big5: extractKeywords(enhancedResult.big5, 'big5'),
                     spiralDynamics: extractKeywords(enhancedResult.spiralDynamics, 'sd')
                 };
 
-                // Legacy format (Riemann-only, without prefix) for backward compatibility
                 const detectedKeywords = [];
                 for (const [dimension, data] of Object.entries(enhancedResult.riemann)) {
                     if (data.foundKeywords) {
@@ -382,7 +451,6 @@ STRICTLY FORBIDDEN in this first message:
                 testTelemetry.dpflKeywordsDetected = detectedKeywords;
                 testTelemetry.allFrameworkKeywords = allDetectedKeywords;
 
-                // Phase 2a: Include adaptive weighting metadata in telemetry
                 if (enhancedResult.adaptive) {
                     testTelemetry.adaptiveWeighting = {
                         context: enhancedResult.adaptive.context,
@@ -392,14 +460,10 @@ STRICTLY FORBIDDEN in this first message:
                     };
                 }
 
-                // Test-only: Track if message contains stress keywords for telemetry
-                // Note: Comfort Check is shown after EVERY DPFL session, not just when keywords are found
                 const stressKeywords = [
-                    // German keywords (15)
                     'stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos',
                     'verzweifelt', 'erschöpft', 'deprimiert', 'ausgebrannt', 'hilflos',
                     'panik', 'einsam', 'mutlos', 'leer', 'verloren',
-                    // English keywords (15)
                     'overwhelmed', 'anxious', 'sad', 'hopeless', 'depressed',
                     'desperate', 'exhausted', 'burnt out', 'burnout', 'helpless',
                     'panic', 'lonely', 'discouraged', 'empty', 'lost'
@@ -410,25 +474,17 @@ STRICTLY FORBIDDEN in this first message:
                 console.error('[DPFL] Test mode behavior logging error:', error);
             }
         } else if (coachingMode === 'dpfl' && userId) {
-            // Run in background - don't await
             setImmediate(async () => {
                 try {
-                    // Analyze current user message
-                    const frequencies = behaviorLogger.analyzeMessage(messageToAnalyze, language);
-
-                    // Note: Full conversation logging will be done at session end
-                    // This is just real-time analysis for debugging/monitoring
+                    behaviorLogger.analyzeMessage(messageToAnalyze, language);
                 } catch (error) {
                     console.error('[DPFL] Behavior logging error:', error);
-                    // Fail silently - don't impact user experience
                 }
             });
         }
 
-        // Build response
         const responseData = { text };
 
-        // Add LLM metadata in test mode for comparison purposes
         if (isTestMode) {
             responseData.llmMetadata = {
                 model: actualModel,
@@ -443,7 +499,6 @@ STRICTLY FORBIDDEN in this first message:
                 timestamp: new Date().toISOString()
             };
 
-            // Include telemetry in test mode
             if (includeTestTelemetry) {
                 responseData.testTelemetry = testTelemetry;
             }
@@ -456,7 +511,6 @@ STRICTLY FORBIDDEN in this first message:
         const durationMs = Date.now() - startTime;
         const isTimeout = error.message && error.message.includes('timeout');
 
-        // Track failed API call
         await trackApiUsage({
             userId: userId || null,
             isGuest: !userId,

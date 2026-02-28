@@ -463,6 +463,68 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
 }
 
 /**
+ * Stream content using the active AI provider (Mistral only, chat context)
+ * Returns an async generator yielding { type: 'chunk', text } and finally { type: 'done', fullText, usage, model, provider }
+ */
+async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal' }) {
+  // Only Mistral supports streaming in this implementation
+  const provider = userRegionPreference === 'eu' ? 'mistral'
+    : userRegionPreference === 'us' ? 'google'
+    : await getActiveProvider();
+
+  if (provider !== 'mistral') {
+    // Fallback: generate complete response and yield as single chunk
+    const result = await generateContent({ model, contents, config, context, userRegionPreference });
+    yield { type: 'chunk', text: result.text };
+    yield { type: 'done', fullText: result.text, usage: result.usage, model: result.model, provider: result.provider };
+    return;
+  }
+
+  console.log(`🤖 Streaming with Mistral (context: ${context}, region: ${userRegionPreference})`);
+
+  const client = getMistralClient();
+  const mistralModel = await getModelForContext('mistral', context);
+
+  console.log(`  → Streaming Mistral model: ${mistralModel} (requested: ${model}, context: ${context})`);
+
+  const messages = convertToMistralFormat(contents, config);
+
+  const mistralConfig = {
+    model: mistralModel,
+    messages,
+    temperature: config.temperature || 0.7,
+    maxTokens: config.maxOutputTokens,
+  };
+
+  const stream = await client.chat.stream(mistralConfig);
+
+  let fullText = '';
+  let usage = null;
+
+  for await (const event of stream) {
+    const chunk = event.data;
+    const delta = chunk.choices?.[0]?.delta?.content;
+    if (delta) {
+      fullText += delta;
+      yield { type: 'chunk', text: delta };
+    }
+    if (chunk.usage) {
+      usage = {
+        inputTokens: chunk.usage.promptTokens || chunk.usage.prompt_tokens || 0,
+        outputTokens: chunk.usage.completionTokens || chunk.usage.completion_tokens || 0,
+        totalTokens: chunk.usage.totalTokens || chunk.usage.total_tokens || 0,
+      };
+    }
+  }
+
+  if (context === 'chat') {
+    fullText = stripMistralMetaCommentary(fullText);
+  }
+
+  yield { type: 'done', fullText, usage, model: mistralModel, provider: 'mistral' };
+}
+
+/**
  * Set the active AI provider
  * @param {string} provider - 'google' or 'mistral'
  * @param {string} adminEmail - Email of admin making the change
@@ -564,6 +626,7 @@ module.exports = {
   getActiveProvider,
   getGoogleClient,
   generateContent,
+  streamContent,
   setActiveProvider,
   getProviderStats,
   checkProvidersHealth,
