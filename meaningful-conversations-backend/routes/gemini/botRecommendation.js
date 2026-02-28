@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth.js');
+const prisma = require('../../prismaClient.js');
 const { botRecommendationPrompts } = require('../../services/geminiPrompts.js');
 const { trackApiUsage } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
@@ -26,6 +27,13 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
         const promptFn = botRecommendationPrompts[language]?.prompt || botRecommendationPrompts.de.prompt;
         const prompt = promptFn({ topic: topic.trim() });
 
+        // Respect user's AI region preference (GDPR)
+        let userRegionPreference = 'optimal';
+        if (userId) {
+            const recUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+            userRegionPreference = recUser?.aiRegionPreference || 'optimal';
+        }
+
         const modelName = 'gemini-2.5-flash';
         const result = await aiProviderService.generateContent({
             model: modelName,
@@ -36,6 +44,7 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
                 temperature: 0.3,
             },
             context: 'bot-recommendation',
+            userRegionPreference,
             language,
         });
 
@@ -44,8 +53,21 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
 
         let recommendation;
         try {
-            const cleanedText = (result.text || '').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            recommendation = JSON.parse(cleanedText);
+            let cleanedText = (result.text || '').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            try {
+                recommendation = JSON.parse(cleanedText);
+            } catch (firstParseErr) {
+                cleanedText = cleanedText
+                    .replace(/""(\w+)":\s*:/g, '"$1":')
+                    .replace(/""(\w+)":/g, '"$1":')
+                    .replace(/"(\w+)"::/g, '"$1":')
+                    .replace(/:\s*\\"/g, ': "')
+                    .replace(/\\",/g, '",')
+                    .replace(/\\"(\s*[}\]])/g, '"$1')
+                    .replace(/,(\s*[}\]])/g, '$1');
+                recommendation = JSON.parse(cleanedText);
+                console.log('✓ Bot recommendation JSON sanitization successful');
+            }
         } catch (parseErr) {
             console.error('Failed to parse bot recommendation response:', parseErr);
             return res.status(500).json({ error: 'Failed to parse recommendation response.' });
