@@ -58,7 +58,10 @@ const SD_KEYWORDS = {
         // Alltagssprache
         'alle mitnehmen', 'gemeinsam entscheiden', 'jeder ist gleich wichtig',
         'zuhören', 'auf augenhöhe', 'miteinander', 'füreinander', 'fair play',
-        'zusammen schaffen', 'jede stimme zählt'
+        'zusammen schaffen', 'jede stimme zählt',
+        // Natürliche Alltagssprache: Zugehörigkeit/Akzeptanz
+        'dazugehör', 'teilhaben', 'einbezogen', 'akzeptanz', 'akzeptiert',
+        'verstanden werden', 'willkommen', 'angenommen', 'gebraucht werden'
       ],
       low: [
         'hierarchie', 'ausgrenzung', 'konkurrenz', 'dominanz', 'elitär', 'ausbeutung',
@@ -76,7 +79,10 @@ const SD_KEYWORDS = {
         // Alltagssprache
         'vorankommen', 'besser werden', 'das beste rausholen', 'weiterkommen',
         'aufsteigen', 'smart arbeiten', 'ergebnisorientiert', 'machbar',
-        'problem lösen', 'daten zeigen', 'evidenzbasiert', 'rennen machen'
+        'problem lösen', 'daten zeigen', 'evidenzbasiert', 'rennen machen',
+        // Natürliche Alltagssprache: Anerkennung/Aufstieg/Chance
+        'anerkennung', 'aufstieg', 'beförderung', 'chance', 'ambition',
+        'vorwärtskommen', 'herausforderung', 'leistungsdruck', 'konkurrenzfähig'
       ],
       low: [
         'mittelmäßigkeit', 'stagnation', 'ineffizient', 'unprofessionell', 'amateurhaft',
@@ -95,7 +101,10 @@ const SD_KEYWORDS = {
         // Kulturell vielfältige Blue-Ausdrucksformen
         'hingabe', 'opferbereitschaft', 'gemeinschaftsdienst', 'tradition bewahren',
         'prinzipien treu bleiben', 'pflichterfüllung', 'ehrgefühl', 'anstand',
-        'so gehört sich das', 'richtig und falsch', 'das macht man so'
+        'so gehört sich das', 'richtig und falsch', 'das macht man so',
+        // Natürliche Alltagssprache: Schuld/Pflicht/Gewissen
+        'schuld', 'schuldgefühl', 'gewissen', 'pflichtgefühl', 'dankbar',
+        'undankbar', 'verpflichtung', 'gehorsam', 'respekt vor regeln'
       ],
       low: [
         'chaos', 'regellos', 'unverantwortlich', 'undiszipliniert', 'anarchisch',
@@ -152,7 +161,9 @@ const SD_KEYWORDS = {
         'zeremonie', 'heilig', 'verbunden', 'geborgenheit',
         // Alltagssprache
         'meine leute', 'wo ich herkomme', 'familiäre wurzeln', 'heimat',
-        'zusammengehören', 'unsere art', 'das haben wir schon immer so gemacht'
+        'zusammengehören', 'unsere art', 'das haben wir schon immer so gemacht',
+        // Natürliche Alltagssprache: Herkunft/Verwurzelung
+        'herkunft', 'wurzel', 'verwurzelt', 'abstammung', 'meine kultur'
       ],
       low: [
         'entwurzelt', 'traditionslos', 'heimatlos', 'entfremdet',
@@ -171,7 +182,10 @@ const SD_KEYWORDS = {
         'erstmal essen', 'bin müde', 'brauche schlaf', 'mein körper sagt',
         'grundbedürfnisse', 'erstmal zur ruhe kommen',
         // "funktionieren" entfernt (False Positive: "das funktioniert nicht" etc.)
-        'nur noch funktionieren', 'im überlebensmodus'
+        'nur noch funktionieren', 'im überlebensmodus',
+        // Natürliche Alltagssprache: Erschöpfung/Grundbedürfnisse
+        'ausgebrannt', 'burnout', 'kaum atmen', 'nicht mehr können',
+        'am ende', 'am limit', 'überlebensmodus', 'nur überleben'
       ],
       low: [
         'überfluss', 'luxus',
@@ -237,7 +251,10 @@ const SD_KEYWORDS = {
         // "together" entfernt (False Positive: "put it together")
         'work together', 'come together', 'grow together',
         'for each other', 'fair play',
-        'achieve together', 'every voice counts'
+        'achieve together', 'every voice counts',
+        // Natural everyday language: belonging/acceptance
+        'belong', 'included', 'accepted', 'understood',
+        'welcomed', 'needed', 'valued'
       ],
       low: [
         'hierarchy', 'exclusion', 'competition', 'dominance', 'elitist', 'exploitation',
@@ -255,7 +272,10 @@ const SD_KEYWORDS = {
         // Colloquial
         'get ahead', 'get better', 'make the most of it', 'move forward',
         'climb the ladder', 'work smart', 'results-driven', 'doable',
-        'problem solving', 'data shows', 'evidence-based', 'win the race'
+        'problem solving', 'data shows', 'evidence-based', 'win the race',
+        // Natural everyday language: recognition/advancement/opportunity
+        'recognition', 'promotion', 'opportunity', 'ambition',
+        'challenge', 'performance pressure', 'competitive'
       ],
       low: [
         'mediocrity', 'stagnation', 'inefficient', 'unprofessional', 'amateur',
@@ -274,7 +294,10 @@ const SD_KEYWORDS = {
         // Culturally diverse Blue expressions
         'devotion', 'self-sacrifice', 'community service', 'preserve tradition',
         'stay true to principles', 'fulfill duties', 'sense of honor', 'decency',
-        'that is how it should be', 'right and wrong', 'the proper way'
+        'that is how it should be', 'right and wrong', 'the proper way',
+        // Natural everyday language: guilt/duty/conscience
+        'guilt', 'guilty', 'conscience', 'sense of duty', 'grateful',
+        'ungrateful', 'obligation', 'obedient', 'respect for rules'
       ],
       low: [
         'chaos', 'lawless', 'irresponsible', 'undisciplined', 'anarchic',
@@ -318,7 +341,9 @@ const SD_KEYWORDS = {
         'custom', 'ceremony', 'sacred', 'connected', 'security',
         // Colloquial
         'my people', 'where i come from', 'family roots', 'homeland',
-        'belong together', 'our way', 'we have always done it this way'
+        'belong together', 'our way', 'we have always done it this way',
+        // Natural everyday language: heritage/roots
+        'heritage', 'roots', 'rooted', 'ancestry', 'my culture'
       ],
       low: [
         'uprooted', 'traditionless', 'homeless', 'alienated',
@@ -335,7 +360,10 @@ const SD_KEYWORDS = {
         'wellbeing', 'essential', 'vital',
         // Colloquial
         'need to eat first', 'am tired', 'need sleep', 'my body tells me',
-        'need to rest first', 'just functioning'
+        'need to rest first', 'just functioning',
+        // Natural everyday language: exhaustion/basic needs
+        'burned out', 'burnout', 'can barely breathe', 'cannot take it anymore',
+        'at my limit', 'survival mode', 'just surviving'
       ],
       low: [
         'abundance', 'luxury',

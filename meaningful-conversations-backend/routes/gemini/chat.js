@@ -411,7 +411,6 @@ STRICTLY FORBIDDEN in this first message:
             try {
                 const recentUserMessages = (req.body.chatHistory || [])
                     .filter(m => m.role === 'user')
-                    .slice(-5)
                     .map(m => m.text || m.content || '');
 
                 const enhancedResult = behaviorLogger.analyzeMessageEnhanced(
@@ -472,6 +471,19 @@ STRICTLY FORBIDDEN in this first message:
                 ];
                 const lowerMessage = messageToAnalyze.toLowerCase();
                 testTelemetry.stressKeywordsDetected = stressKeywords.some(k => lowerMessage.includes(k));
+
+                // Console telemetry for automated test evaluation
+                const rCount = allDetectedKeywords.riemann.length;
+                const bCount = allDetectedKeywords.big5.length;
+                const sCount = allDetectedKeywords.spiralDynamics.length;
+                const total = rCount + bCount + sCount;
+                console.log(`[DPFL-TEST] Keywords: ${total} (R:${rCount} B5:${bCount} SD:${sCount}) | ` +
+                  `Topic: ${enhancedResult.adaptive?.context?.topic || 'none'} | ` +
+                  `Msg: "${messageToAnalyze.substring(0, 80)}..."`);
+                if (rCount) console.log(`[DPFL-TEST]   Riemann: ${allDetectedKeywords.riemann.join(', ')}`);
+                if (bCount) console.log(`[DPFL-TEST]   Big5: ${allDetectedKeywords.big5.join(', ')}`);
+                if (sCount) console.log(`[DPFL-TEST]   SD: ${allDetectedKeywords.spiralDynamics.join(', ')}`);
+                if (!total) console.log(`[DPFL-TEST]   ⚠ No keywords detected in this message`);
             } catch (error) {
                 console.error('[DPFL] Test mode behavior logging error:', error);
             }

@@ -31,7 +31,7 @@ const { SD_KEYWORDS } = require('./behavior/sdKeywords');
  * Enhanced analysis that applies adaptive weighting (context + sentiment) to keyword detections.
  * This wraps the standard analyzeMessage/analyzeBig5Message/analyzeSDMessage functions
  * and adjusts the weights based on conversation context, linguistic patterns, and sentiment.
- *
+ * 
  * @param {string} message - Current user message
  * @param {string} language - Language code ('de' or 'en')
  * @param {string[]} recentMessages - Last 3-5 user messages for topic detection
@@ -70,7 +70,7 @@ function analyzeMessageEnhanced(message, language, recentMessages) {
       var adj = adaptiveWeighting.getKeywordAdjustment(
         keyword, message, 'riemann', dimension, 'high', adaptiveResult, language
       );
-
+      
       if (adj.direction !== 'high') {
         // Negation detected: move from high to low
         data.high = Math.max(0, data.high - 1);

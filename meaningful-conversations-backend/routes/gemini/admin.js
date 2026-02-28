@@ -5,6 +5,7 @@ const prisma = require('../../prismaClient.js');
 const { getCacheStats } = require('../../services/promptCache.js');
 const { trackApiUsage } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
+const behaviorLogger = require('../../services/behaviorLogger.js');
 
 // GET /api/gemini/cache/stats - Admin endpoint for cache statistics
 router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
@@ -122,6 +123,7 @@ Your response as coachee (answer the coach's question directly):`;
         // Track usage
         await trackApiUsage({
             userId,
+            model: result.model || 'mistral-medium-latest',
             endpoint: '/api/gemini/test/simulate-coachee',
             botId: 'test-coachee-simulator',
             inputTokens: result.usage?.inputTokens || 0,
@@ -141,6 +143,7 @@ Your response as coachee (answer the coach's question directly):`;
 
         await trackApiUsage({
             userId,
+            model: 'mistral-medium-latest',
             endpoint: '/api/gemini/test/simulate-coachee',
             botId: 'test-coachee-simulator',
             inputTokens: 0,
@@ -151,6 +154,85 @@ Your response as coachee (answer the coach's question directly):`;
         });
 
         res.status(500).json({ error: 'Failed to generate coachee response' });
+    }
+});
+
+// POST /api/gemini/test/analyze-keywords - Diagnostic endpoint for keyword analysis
+// Runs all three analyzers (Riemann, Big5, SD) + adaptive weighting on provided messages
+router.post('/test/analyze-keywords', optionalAuthMiddleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.isDeveloper) return res.status(403).json({ error: 'Developer access required' });
+
+    const { messages, language = 'de' } = req.body;
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'messages array required' });
+    }
+
+    try {
+        const perMessage = [];
+        const cumulative = {
+            riemann: {}, big5: {}, spiralDynamics: {},
+            totalKeywords: 0, frameworkCoverage: { riemann: 0, big5: 0, sd: 0 }
+        };
+
+        for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            const recentMsgs = messages.slice(Math.max(0, i - 4), i);
+            const result = behaviorLogger.analyzeMessageEnhanced(msg, language, recentMsgs);
+
+            const extractKws = (frameworkResult) => {
+                const kws = [];
+                for (const [dim, data] of Object.entries(frameworkResult)) {
+                    for (const kw of (data.foundKeywords?.high || [])) kws.push({ dim, dir: 'high', kw });
+                    for (const kw of (data.foundKeywords?.low || [])) kws.push({ dim, dir: 'low', kw });
+                }
+                return kws;
+            };
+
+            const rKws = extractKws(result.riemann);
+            const bKws = extractKws(result.big5);
+            const sKws = extractKws(result.spiralDynamics);
+
+            cumulative.frameworkCoverage.riemann += rKws.length;
+            cumulative.frameworkCoverage.big5 += bKws.length;
+            cumulative.frameworkCoverage.sd += sKws.length;
+            cumulative.totalKeywords += rKws.length + bKws.length + sKws.length;
+
+            perMessage.push({
+                index: i,
+                text: msg.substring(0, 120) + (msg.length > 120 ? '...' : ''),
+                keywords: { riemann: rKws, big5: bKws, sd: sKws },
+                count: rKws.length + bKws.length + sKws.length,
+                adaptive: result.adaptive ? {
+                    topic: result.adaptive.context?.topic,
+                    sentiment: result.adaptive.sentiment?.polarity,
+                    adjustments: result.adaptive.adjustedKeywordCount
+                } : null
+            });
+        }
+
+        const frameworksHit = [
+            cumulative.frameworkCoverage.riemann > 0 ? 'riemann' : null,
+            cumulative.frameworkCoverage.big5 > 0 ? 'big5' : null,
+            cumulative.frameworkCoverage.sd > 0 ? 'sd' : null
+        ].filter(Boolean);
+
+        res.json({
+            summary: {
+                messageCount: messages.length,
+                totalKeywords: cumulative.totalKeywords,
+                frameworkCoverage: cumulative.frameworkCoverage,
+                frameworksHit: frameworksHit.length,
+                frameworks: frameworksHit
+            },
+            perMessage
+        });
+    } catch (error) {
+        console.error('[analyze-keywords] Error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

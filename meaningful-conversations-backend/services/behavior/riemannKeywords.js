@@ -24,7 +24,8 @@ const RIEMANN_KEYWORDS = {
         'zusammen sein', 'füreinander da', 'kuscheln', 'umarmen', 'vermisse',
         'brauche jemanden', 'nicht allein', 'enger kontakt', 'herzensmenschen',
         // Verbindung / Anerkennung
-        'verbinden mit', 'verbindung mit', 'anschluss finden', 'wahrgenommen', 'anerkenn', 'gesehen werden'
+        'verbinden mit', 'verbindung mit', 'anschluss finden', 'wahrgenommen', 'anerkenn', 'gesehen werden',
+        'dazugehör'
       ],
       low: [
         // Bestehend
@@ -143,7 +144,8 @@ const RIEMANN_KEYWORDS = {
         'hugging', 'hugged', 'hugs',
         'need someone', 'not alone', 'close contact', 'dear ones',
         // Verbindung / Anerkennung
-        'connect with', 'connecting with', 'feel connected', 'acknowledge', 'recogniz', 'seen'
+        'connect with', 'connecting with', 'feel connected', 'acknowledge', 'recogniz', 'seen',
+        'belong'
       ],
       low: [
         // Existing

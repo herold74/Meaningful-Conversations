@@ -27,14 +27,19 @@ const BIG5_KEYWORDS = {
         'bleibe lieber beim alten', 'muss nicht sein', 'kenne mich aus',
         'funktioniert doch', 'wozu ändern', 'lieber sicher',
         // Komfortzone / Gewohnheit
-        'komfortzone', 'wie gewohnt', 'was ich kenne', 'beim bekannten bleiben'
+        'komfortzone', 'wie gewohnt', 'was ich kenne', 'beim bekannten bleiben',
+        // Flexiblere Varianten (Wortstellungsvarianten)
+        'lieber beim alten', 'beim alten bleiben', 'gewohnte umgebung',
+        'vertraute umgebung', 'immer das gleiche', 'immer gleich',
+        'nichts neues', 'kenne ich schon', 'veränderung scheuen'
       ]
     },
     conscientiousness: {
       high: [
         'organisiert', 'pünktlich', 'strukturiert', 'diszipliniert', 'gewissenhaft',
         'zuverlässig', 'ordentlich', 'geplant', 'sorgfältig', 'pflichtbewusst',
-        'verantwortungsvoll', 'gründlich', 'systematisch', 'methodisch', 'genau',
+        'verantwortungsvoll', 'gründlich', 'systematisch', 'methodisch',
+        'sehr genau', 'arbeite genau', 'genau planen', 'genau nehmen',
         'akribisch', 'detailorientiert', 'termingerecht', 'effizient', 'zielorientiert',
         'rechenschaftspflicht', 'verantwortlichkeit',
         // Alltagssprache
@@ -165,7 +170,10 @@ const BIG5_KEYWORDS = {
         'rather stick with', 'stick with', 'not necessary', 'know my way around',
         'it works fine', 'why change', 'rather safe',
         // Komfortzone / Gewohnheit
-        'comfort zone', 'usual', 'what i know'
+        'comfort zone', 'usual', 'what i know',
+        // Flexible variants
+        'familiar environment', 'same old', 'nothing new',
+        'already know', 'afraid of change', 'avoid change'
       ]
     },
     conscientiousness: {
