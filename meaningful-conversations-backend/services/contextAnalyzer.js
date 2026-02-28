@@ -18,34 +18,51 @@ const TOPIC_PATTERNS = {
   work: {
     de: ['arbeit', 'job', 'karriere', 'beruf', 'projekt', 'kollege', 'chef', 'unternehmen',
          'büro', 'meeting', 'deadline', 'firma', 'abteilung', 'vorgesetzt', 'aufgabe',
-         'professionell', 'geschäft', 'angestellt', 'branche', 'position'],
+         'professionell', 'geschäft', 'angestellt', 'branche', 'position',
+         'stelle', 'angebot', 'bewerbung', 'kündigung', 'team', 'gehalt',
+         'arbeitsplatz', 'jobwechsel', 'beförderung', 'vorstellungsgespräch'],
     en: ['work', 'job', 'career', 'profession', 'project', 'colleague', 'boss', 'company',
          'office', 'meeting', 'deadline', 'firm', 'department', 'supervisor', 'task',
-         'professional', 'business', 'employee', 'industry', 'position']
+         'professional', 'business', 'employee', 'industry', 'position',
+         'offer', 'application', 'resignation', 'team', 'salary',
+         'workplace', 'job change', 'promotion', 'interview']
   },
   relationships: {
     de: ['beziehung', 'freund', 'familie', 'partner', 'liebe', 'nähe', 'ehe',
          'eltern', 'kinder', 'geschwister', 'vertrauen', 'trennung', 'zusammen',
-         'bindung', 'zuneigung', 'intimität', 'freundschaft'],
+         'bindung', 'zuneigung', 'intimität', 'freundschaft',
+         'einsam', 'rückzug', 'zurückgezogen', 'halt', 'verbindung', 'verbunden',
+         'geborgenheit', 'zugehörigkeit', 'kontakt', 'gemeinschaft'],
     en: ['relationship', 'friend', 'family', 'partner', 'love', 'closeness', 'marriage',
          'parents', 'children', 'siblings', 'trust', 'separation', 'together',
-         'bond', 'affection', 'intimacy', 'friendship']
+         'bond', 'affection', 'intimacy', 'friendship',
+         'lonely', 'withdrawn', 'connection', 'belonging', 'contact', 'community']
   },
   values: {
     de: ['wert', 'prinzip', 'moral', 'ethik', 'glaube', 'überzeugung', 'bedeutung',
          'sinn', 'zweck', 'gerechtigkeit', 'wahrheit', 'ideal', 'verantwortung',
-         'pflicht', 'gewissen', 'haltung', 'einstellung'],
+         'pflicht', 'gewissen', 'haltung', 'einstellung',
+         'verpflichtung', 'tradition', 'treue', 'schuld', 'undankbar', 'loyalität',
+         'ehre', 'schuldig', 'dankbar', 'opfer', 'integrität'],
     en: ['value', 'principle', 'moral', 'ethic', 'belief', 'conviction', 'meaning',
          'purpose', 'justice', 'truth', 'ideal', 'responsibility',
-         'duty', 'conscience', 'attitude', 'stance']
+         'duty', 'conscience', 'attitude', 'stance',
+         'obligation', 'tradition', 'loyalty', 'guilt', 'ungrateful', 'honor',
+         'grateful', 'sacrifice', 'integrity']
   },
   personalGrowth: {
     de: ['entwicklung', 'wachstum', 'lernen', 'veränderung', 'ziel', 'potential',
          'stärke', 'schwäche', 'reflexion', 'fortschritt', 'selbst', 'bewusst',
-         'erkenntnis', 'reife', 'persönlichkeit', 'verbessern'],
+         'erkenntnis', 'reife', 'persönlichkeit', 'verbessern',
+         'ausgebrannt', 'burnout', 'erschöpft', 'überlast', 'grenz', 'am limit',
+         'achtsamkeit', 'selbstfürsorge', 'balance', 'ressource', 'energie',
+         'belastbar', 'resilienz', 'regenerat'],
     en: ['development', 'growth', 'learning', 'change', 'goal', 'potential',
          'strength', 'weakness', 'reflection', 'progress', 'self', 'aware',
-         'insight', 'maturity', 'personality', 'improve']
+         'insight', 'maturity', 'personality', 'improve',
+         'burned out', 'burnout', 'exhausted', 'overload', 'boundar', 'at my limit',
+         'mindfulness', 'self-care', 'balance', 'resource', 'energy',
+         'resilience', 'recovery']
   }
 };
 
@@ -120,9 +137,10 @@ const LINGUISTIC_PATTERNS = {
 
 /**
  * Detect conversation topic from recent messages.
- * Uses keyword counting across recent history.
+ * Uses keyword counting across full conversation history with recency weighting.
+ * Earlier messages that established the topic still contribute (topic persistence).
  * 
- * @param {string[]} recentMessages - Last 3-5 user messages
+ * @param {string[]} recentMessages - All available user messages
  * @param {string} language - Language code ('de' or 'en')
  * @returns {{ topic: string|null, confidence: number, scores: object }}
  */
@@ -131,35 +149,38 @@ function detectTopic(recentMessages, language = 'de') {
     return { topic: null, confidence: 0, scores: {} };
   }
 
-  const combinedText = recentMessages.join(' ').toLowerCase();
   const scores = {};
 
   for (const [topic, patterns] of Object.entries(TOPIC_PATTERNS)) {
     const langPatterns = patterns[language] || patterns.de;
     let score = 0;
 
-    for (const keyword of langPatterns) {
-      // Count occurrences
-      const regex = new RegExp(`\\b${keyword}\\w*\\b`, 'gi');
-      const matches = combinedText.match(regex);
-      if (matches) {
-        score += matches.length;
+    for (let i = 0; i < recentMessages.length; i++) {
+      const msgText = recentMessages[i].toLowerCase();
+      // Older messages get slightly reduced weight (0.7 base + 0.3 recency)
+      const recencyWeight = 0.7 + 0.3 * (i / Math.max(1, recentMessages.length - 1));
+
+      for (const keyword of langPatterns) {
+        const regex = new RegExp(`\\b${keyword}\\w*\\b`, 'gi');
+        const matches = msgText.match(regex);
+        if (matches) {
+          score += matches.length * recencyWeight;
+        }
       }
     }
 
-    scores[topic] = score;
+    scores[topic] = Math.round(score * 100) / 100;
   }
 
-  // Find dominant topic
   const sortedTopics = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const topScore = sortedTopics[0][1];
   const secondScore = sortedTopics.length > 1 ? sortedTopics[1][1] : 0;
 
-  // Only return topic if there's a clear winner (at least 2 keywords, and 1.5x the runner-up)
-  if (topScore >= 2 && (secondScore === 0 || topScore / secondScore >= 1.5)) {
+  // Threshold: at least 1.5 weighted score, and 1.3x the runner-up (lowered for topic persistence)
+  if (topScore >= 1.5 && (secondScore === 0 || topScore / secondScore >= 1.3)) {
     return {
       topic: sortedTopics[0][0],
-      confidence: Math.min(1.0, topScore / 5), // 5 keywords = max confidence
+      confidence: Math.min(1.0, topScore / 4),
       scores
     };
   }

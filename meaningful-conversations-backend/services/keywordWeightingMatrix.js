@@ -281,6 +281,65 @@ const KEYWORD_WEIGHT_MATRIX = {
       { framework: 'riemann', dimension: 'naehe', weight: 0.3 }
     ]
   },
+
+  // ============================================
+  // CROSS-FRAMEWORK: SD ↔ Riemann ↔ Big5
+  // ============================================
+  'anerkennung': {
+    primary: { framework: 'sd', dimension: 'orange', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'naehe', weight: 0.4 }
+    ]
+  },
+  'schuld': {
+    primary: { framework: 'sd', dimension: 'blue', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'neuroticism', weight: 0.4 }
+    ]
+  },
+  'schuldgefühl': {
+    primary: { framework: 'sd', dimension: 'blue', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'neuroticism', weight: 0.5 }
+    ]
+  },
+  'dazugehör': {
+    primary: { framework: 'riemann', dimension: 'naehe', weight: 1.0 },
+    secondary: [
+      { framework: 'sd', dimension: 'green', weight: 0.5 }
+    ]
+  },
+  'zugehörigkeit': {
+    primary: { framework: 'sd', dimension: 'purple', weight: 1.0 },
+    secondary: [
+      { framework: 'riemann', dimension: 'naehe', weight: 0.4 },
+      { framework: 'sd', dimension: 'green', weight: 0.3 }
+    ]
+  },
+  'verantwortung': {
+    primary: { framework: 'sd', dimension: 'blue', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'conscientiousness', weight: 0.4 }
+    ]
+  },
+  'dankbar': {
+    primary: { framework: 'sd', dimension: 'blue', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'agreeableness', weight: 0.3 }
+    ]
+  },
+  'lieber beim alten': {
+    primary: { framework: 'riemann', dimension: 'wechsel', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'openness', weight: 0.6 }
+    ]
+  },
+  'gewissen': {
+    primary: { framework: 'sd', dimension: 'blue', weight: 1.0 },
+    secondary: [
+      { framework: 'big5', dimension: 'conscientiousness', weight: 0.3 }
+    ]
+  },
 };
 
 /**
