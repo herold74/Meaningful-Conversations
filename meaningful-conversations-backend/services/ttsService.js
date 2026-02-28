@@ -197,7 +197,25 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
             return { buffer: Buffer.from(response.data), contentType };
             
         } catch (error) {
-            console.warn('TTS container failed, falling back to local Piper:', error.message);
+            console.warn('TTS container failed:', error.message, '- retrying with sanitized text');
+            try {
+                const sanitized = cleanText
+                    .replace(/[^\p{L}\p{N}\s.,!?;:'"()\-–—]/gu, '')
+                    .replace(/\s{2,}/g, ' ')
+                    .trim();
+                if (sanitized && sanitized !== cleanText) {
+                    const retryResponse = await axios.post(
+                        `${TTS_SERVICE_URL}/synthesize`,
+                        { text: sanitized, model, lengthScale, format: 'opus' },
+                        { timeout: 65000, responseType: 'arraybuffer' }
+                    );
+                    const contentType = retryResponse.headers['content-type'] || 'audio/ogg; codecs=opus';
+                    console.log(`TTS retry succeeded after sanitization: ${retryResponse.data.byteLength} bytes`);
+                    return { buffer: Buffer.from(retryResponse.data), contentType };
+                }
+            } catch (retryErr) {
+                console.warn('TTS retry also failed:', retryErr.message);
+            }
         }
     }
     

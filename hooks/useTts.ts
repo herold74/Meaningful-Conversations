@@ -469,6 +469,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
 
           const nextUrl = queue.urls[queue.currentIndex];
+          if (nextUrl === 'skip') {
+            audio.dispatchEvent(new Event('ended'));
+            return;
+          }
           if (nextUrl) {
             audio.src = nextUrl;
             audio.play().catch(() => {
@@ -479,9 +483,15 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             const waitIdx = queue.currentIndex;
             const poll = setInterval(() => {
               if (!queue.active) { clearInterval(poll); return; }
-              if (queue.urls[waitIdx]) {
+              const url = queue.urls[waitIdx];
+              if (url === 'skip') {
                 clearInterval(poll);
-                audio.src = queue.urls[waitIdx];
+                audio.dispatchEvent(new Event('ended'));
+                return;
+              }
+              if (url) {
+                clearInterval(poll);
+                audio.src = url;
                 audio.play().catch(() => {
                   setTtsStatus('idle');
                   isSpeakingRef.current = false;
@@ -497,10 +507,12 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     } catch (err) {
       // #region agent log
       console.error('[TTS-DBG] SYNTH-ERROR', {idx: nextIdx, error: String(err), queueLen: s.synthQueue.length, voiceId: s.voiceId});
+      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'stream-synth-fail',location:'useTts.ts:processStreamingSynthQueue',message:'Streaming sentence synthesis failed',data:{idx:nextIdx,error:String(err),queueLen:s.synthQueue.length},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
-      console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed:`, err);
+      console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed, skipping:`, err);
       s.resolvedBlobs.push(null);
-      s.resolvedUrls.push('');
+      const skipUrl = 'skip';
+      s.resolvedUrls.push(skipUrl);
     } finally {
       s.synthInProgress = false;
     }
@@ -709,6 +721,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (effectiveTtsMode === 'server') {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'entry',location:'useTts.ts:speak-server',message:'speak() server mode entry',data:{textLen:cleanText.length,ttsMode,effectiveTtsMode,selectedVoiceURI,isRetry,forceLocalTts},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       console.log(`[TTS] Server mode speak(), text length: ${cleanText.length}, ttsMode: ${ttsMode}, effective: ${effectiveTtsMode}`);
       try {
         const loadingStartTime = Date.now();
@@ -866,7 +881,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                   resolvedUrls[i] = URL.createObjectURL(blob);
                   console.log(`[TTS] Sentence ${i + 1}/${sentences.length} ready`);
                 } catch (err) {
-                  console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed:`, err);
+                  // #region agent log
+                  fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'sentence-fail',location:'useTts.ts:synthRemaining',message:'Sentence synthesis failed, marking skip',data:{sentenceIdx:i,total:sentences.length,error:String(err)},timestamp:Date.now()})}).catch(()=>{});
+                  // #endregion
+                  console.warn(`[TTS] Sentence ${i + 1}/${sentences.length} failed, skipping:`, err);
+                  resolvedUrls[i] = 'skip';
                 }
               }
               if (queue.active) {
@@ -908,6 +927,13 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               }
 
               const nextUrl = resolvedUrls[queue.currentIndex];
+              if (nextUrl === 'skip') {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'skip-sentence',location:'useTts.ts:ended-handler',message:'Skipping failed sentence in sequential path',data:{idx:queue.currentIndex,total:sentences.length},timestamp:Date.now()})}).catch(()=>{});
+                // #endregion
+                audio.dispatchEvent(new Event('ended'));
+                return;
+              }
               if (nextUrl) {
                 audio.src = nextUrl;
                 audio.play().catch(() => {
@@ -919,6 +945,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                 const poll = setInterval(() => {
                   if (!queue.active) { clearInterval(poll); return; }
                   const url = resolvedUrls[waitIdx];
+                  if (url === 'skip') {
+                    clearInterval(poll);
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'skip-sentence-poll',location:'useTts.ts:poll',message:'Skipping failed sentence in poll loop',data:{idx:waitIdx,total:sentences.length},timestamp:Date.now()})}).catch(()=>{});
+                    // #endregion
+                    audio.dispatchEvent(new Event('ended'));
+                    return;
+                  }
                   if (url) {
                     clearInterval(poll);
                     audio.src = url;
@@ -964,9 +998,16 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         console.error('[TTS-DBG] SPEAK-FALLBACK-TO-LOCAL', {error: String(error), textLen: cleanText.length, ttsMode, selectedVoiceURI, isRetry});
         // #endregion
         console.error('[TTS] Server TTS error:', error);
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'16d25a'},body:JSON.stringify({sessionId:'16d25a',runId:'tts-fix-v1',hypothesisId:'speak-catch',location:'useTts.ts:speak-catch',message:'Server TTS error caught',data:{error:String(error),isRetry,ttsMode,textLen:cleanText.length},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         setTtsStatus('idle');
-        setTtsMode('local');
-        setTimeout(() => speak(text, isMeditation, true, true), 100);
+        if (!isRetry) {
+          setTimeout(() => speak(text, isMeditation, true, true), 100);
+        } else {
+          isSpeakingRef.current = false;
+          setIsLoadingAudio(false);
+        }
       }
       return;
     }
