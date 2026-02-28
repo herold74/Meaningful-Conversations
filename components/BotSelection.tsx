@@ -156,7 +156,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                     )}
                 </div>
                 <p className="text-sm text-content-secondary mb-3 leading-relaxed">{rec.rationale}</p>
-                <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-border-primary dark:border-border-primary p-3 flex flex-col gap-2">
+                <div className="mt-auto bg-background-primary dark:bg-gray-900/50 rounded-lg border border-border-primary dark:border-border-primary p-3 flex flex-col gap-2">
                     <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide">{t('botSelection_conversation_starter')}</p>
                     <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
                     <div className="flex items-center justify-between pt-1">
@@ -269,7 +269,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             )}
 
             {recommendation && (
-                <div ref={resultRef} className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+                <div ref={resultRef} className="mt-5 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
                     {renderRecCard(recommendation.primary, t('botSearch_result_primary'), 'primary')}
                     {renderRecCard(recommendation.secondary, t('botSearch_result_secondary'), 'secondary')}
                 </div>

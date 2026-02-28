@@ -86,7 +86,15 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
 
     const isInitialMessage = history.length === 0;
 
-    if (isInitialMessage && isNewSession) {
+    const isPreSeededTopic = !isInitialMessage && isNewSession && history.length === 1 && history[0]?.role === 'user';
+
+    if (isPreSeededTopic) {
+        if (language === 'de') {
+            systemInstruction += "\n\n## ⚠️ KRITISCH — Der Benutzer hat bereits sein Thema genannt:\nDer Benutzer hat sein Thema in der ersten Nachricht klar definiert. Sie MÜSSEN dieses Thema direkt ansprechen. IGNORIEREN Sie vollständig alle 'Initial Interaction Priority'-Regeln und alle 'Achievable Next Steps' aus dem Lebenskontext. Fragen Sie NICHT nach früheren Vorhaben oder Zielen. Beginnen Sie direkt mit dem Thema des Benutzers.";
+        } else {
+            systemInstruction += "\n\n## ⚠️ CRITICAL — The user has already stated their topic:\nThe user has clearly defined their topic in the first message. You MUST address this topic directly. COMPLETELY IGNORE any 'Initial Interaction Priority' rules and any 'Achievable Next Steps' from the life context. Do NOT ask about previous intentions or goals. Start directly with the user's topic.";
+        }
+    } else if (isInitialMessage && isNewSession) {
         if (language === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
         } else {
