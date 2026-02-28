@@ -234,6 +234,10 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
                 // Pattern: ": \" at the start of a value should be ": "
                 // Pattern: \" at end of value before comma/newline should be "
                 let sanitizedText = cleanedText
+                    // Fix ""key":: pattern (Mistral double-quote/double-colon)
+                    .replace(/""(\w+)":\s*:/g, '"$1":')
+                    // Fix ""key": pattern (extra leading quote)
+                    .replace(/""(\w+)":/g, '"$1":')
                     // Fix ": \" (colon followed by escaped quote) -> ": "
                     .replace(/:\s*\\"/g, ': "')
                     // Fix \", (escaped quote before comma) -> ",

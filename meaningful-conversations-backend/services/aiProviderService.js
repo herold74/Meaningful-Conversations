@@ -172,7 +172,10 @@ async function getModelForContext(provider, context = 'chat') {
 async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
   // Determine provider based on user preference
   let provider;
-  if (userRegionPreference === 'eu') {
+  if (config?.responseMimeType === 'application/json') {
+    provider = 'google';
+    console.log(`📋 JSON schema output requested - using Google (native JSON mode)`);
+  } else if (userRegionPreference === 'eu') {
     provider = 'mistral';  // Mistral AI is EU-based (Paris)
     console.log(`🇪🇺 User requested EU processing - using Mistral`);
   } else if (userRegionPreference === 'us') {
