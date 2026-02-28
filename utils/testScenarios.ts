@@ -572,6 +572,92 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_dpfl_naehe_coverage'),
       t('test_check_dpfl_no_false_positives'),
       t('test_check_dpfl_keyword_count'),
+      t('test_check_dpfl_topic_detected'),
+    ]
+  },
+
+  {
+    id: 'dpfl_deep_dive_career',
+    name: '🔬 ' + t('test_dpfl_deep_career'),
+    description: t('test_dpfl_deep_career_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_deep_career_msg_1'),
+        expectedBehavior: t('test_dpfl_deep_career_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 7,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+    },
+    manualChecks: [
+      t('test_check_dpfl_multi_framework'),
+      t('test_check_dpfl_distanz_coverage'),
+      t('test_check_dpfl_sd_orange_coverage'),
+      t('test_check_dpfl_neuroticism_coverage'),
+      t('test_check_dpfl_no_false_positives'),
+      t('test_check_dpfl_keyword_count'),
+      t('test_check_dpfl_topic_detected'),
+    ]
+  },
+  {
+    id: 'dpfl_deep_dive_values',
+    name: '🔬 ' + t('test_dpfl_deep_values'),
+    description: t('test_dpfl_deep_values_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_deep_values_msg_1'),
+        expectedBehavior: t('test_dpfl_deep_values_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 7,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+    },
+    manualChecks: [
+      t('test_check_dpfl_multi_framework'),
+      t('test_check_dpfl_wechsel_coverage'),
+      t('test_check_dpfl_sd_blue_coverage'),
+      t('test_check_dpfl_openness_coverage'),
+      t('test_check_dpfl_no_false_positives'),
+      t('test_check_dpfl_keyword_count'),
+      t('test_check_dpfl_topic_detected'),
+    ]
+  },
+  {
+    id: 'dpfl_deep_dive_burnout',
+    name: '🔬 ' + t('test_dpfl_deep_burnout'),
+    description: t('test_dpfl_deep_burnout_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_deep_burnout_msg_1'),
+        expectedBehavior: t('test_dpfl_deep_burnout_msg_1_expected')
+      }
+    ],
+    minConversationTurns: 7,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+    },
+    manualChecks: [
+      t('test_check_dpfl_multi_framework'),
+      t('test_check_dpfl_sd_beige_coverage'),
+      t('test_check_dpfl_neuroticism_coverage'),
+      t('test_check_dpfl_naehe_coverage'),
+      t('test_check_dpfl_no_false_positives'),
+      t('test_check_dpfl_keyword_count'),
+      t('test_check_dpfl_topic_detected'),
     ]
   },
 
