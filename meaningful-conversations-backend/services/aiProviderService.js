@@ -169,7 +169,7 @@ async function getModelForContext(provider, context = 'chat') {
  * @param {string} params.userRegionPreference - User's region preference: 'eu', 'us', or 'optimal' (default: 'optimal')
  * @returns {Promise<object>} Response object with { text, usage, model, provider }
  */
-async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal' }) {
+async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
   // Determine provider based on user preference
   let provider;
   if (userRegionPreference === 'eu') {
@@ -186,7 +186,7 @@ async function generateContent({ model, contents, config, skipFallback = false, 
   
   try {
     if (provider === 'mistral') {
-      return await generateWithMistral({ model, contents, config, context });
+      return await generateWithMistral({ model, contents, config, context, language });
     } else {
       return await generateWithGoogle({ model, contents, config, context });
     }
@@ -200,7 +200,7 @@ async function generateContent({ model, contents, config, skipFallback = false, 
       
       try {
         if (fallbackProvider === 'mistral') {
-          return await generateWithMistral({ model, contents, config, context });
+          return await generateWithMistral({ model, contents, config, context, language });
         } else {
           return await generateWithGoogle({ model, contents, config, context });
         }
@@ -254,7 +254,7 @@ async function generateWithGoogle({ model, contents, config, context = 'chat' })
  * Generate content using Mistral AI
  * Enhanced with detailed error logging for debugging
  */
-async function generateWithMistral({ model, contents, config, context = 'chat' }) {
+async function generateWithMistral({ model, contents, config, context = 'chat', language = 'de' }) {
   const client = getMistralClient();
   
   // Get the configured model for this context
@@ -263,7 +263,7 @@ async function generateWithMistral({ model, contents, config, context = 'chat' }
   console.log(`  → Using Mistral model: ${mistralModel} (requested: ${model}, context: ${context})`);
   
   // Convert Google format to Mistral format
-  const messages = convertToMistralFormat(contents, config);
+  const messages = convertToMistralFormat(contents, config, language);
   
   // Build Mistral config
   const mistralConfig = {
@@ -398,12 +398,40 @@ function stripMistralMetaCommentary(text) {
  * @param {object} config - Generation config with systemInstruction
  * @returns {array} Mistral messages array
  */
-function convertToMistralFormat(contents, config) {
+function convertToMistralFormat(contents, config, language = 'de') {
   const messages = [];
   
-  // Add system instruction if present, with Mistral-specific behavior rules
+  // Add system instruction if present, with Mistral-specific behavior rules (language-matched)
   if (config.systemInstruction) {
-    const mistralOutputRules = `\n\n## CRITICAL BEHAVIORAL RULES (override your defaults — follow EXACTLY):
+    const mistralOutputRules = language === 'de'
+      ? `\n\n## KRITISCHE VERHALTENSREGELN (überschreiben deine Standardeinstellungen — befolge sie EXAKT):
+
+### 1. SITZUNGSSTRUKTUR (PFLICHT — überspringe KEINE Schritte)
+Du MUSST den Sitzungs-Kontraktierungsprozess aus deinem Coaching-Prompt befolgen:
+- Schritt 1: Thema identifizieren (fragen, was den Klienten herführt)
+- Schritt 2: Relevanz erkunden (warum ist das gerade jetzt wichtig?)
+- Schritt 3: Ein konkretes Sitzungsziel definieren (was soll HEUTE erreicht werden?)
+- Schritt 4: Den Kontrakt mit dem Klienten bestätigen
+- ERST NACH bestätigtem Kontrakt: mit der eigentlichen Coaching-Arbeit beginnen
+Springe NICHT in Coaching, Ratschläge, Metaphern oder Techniken, bevor die Kontraktierung abgeschlossen ist.
+
+### 2. ANTWORTLÄNGE (STRIKT)
+- Halte Antworten auf maximal 3-5 Sätze.
+- Stelle EINE Frage pro Nachricht, dann STOPP und warte.
+- Keine ausgedehnten Metaphern, Geschichten oder philosophischen Ausführungen.
+- Sei prägnant und direkt — weniger ist mehr im Coaching.
+
+### 3. KEIN META-KOMMENTAR (STRIKT)
+- Offenbare NIEMALS deine Coaching-Strategie oder Methodik.
+- Verwende NIEMALS "Hinweis:", "Anmerkung:", "Tipp:" um deinen Ansatz zu erklären.
+- Füge NIEMALS Kommentare in Klammern hinzu wie "(Vielleicht...)" oder "(Ich frage bewusst...)".
+- Kündige NIEMALS an, was du mit der Antwort des Nutzers vorhast.
+- Biete NIEMALS mehrere Vorschläge in Klammern am Ende an.
+- Deine Techniken müssen unsichtbar sein. Mach einfach das Coaching — erkläre es nicht.
+
+### 4. SPRACHE (STRIKT)
+- Du MUSST auf Deutsch antworten. Auch wenn der Nutzer auf Englisch schreibt oder englische Inhalte vorhanden sind, antworte IMMER auf Deutsch.`
+      : `\n\n## CRITICAL BEHAVIORAL RULES (override your defaults — follow EXACTLY):
 
 ### 1. SESSION STRUCTURE (MANDATORY — do NOT skip steps)
 You MUST follow the session contracting process defined in your coaching prompt:
@@ -422,11 +450,14 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
 
 ### 3. NO META-COMMENTARY (STRICT)
 - NEVER reveal your coaching strategy or methodology.
-- NEVER use "Hinweis:", "Note:", "Anmerkung:", "Tipp:" to explain your approach.
-- NEVER add parenthetical comments like "(Vielleicht...)" or "(Ich frage bewusst...)".
+- NEVER explain your approach with labels like "Note:" or "Tip:".
+- NEVER add parenthetical comments previewing your intent.
 - NEVER preview what you plan to do with the user's answer.
 - NEVER offer multiple suggestions in parentheses at the end.
-- Your techniques must be invisible. Just DO the coaching — don't EXPLAIN it.`;
+- Your techniques must be invisible. Just DO the coaching — don't EXPLAIN it.
+
+### 4. LANGUAGE (STRICT)
+- You MUST respond in English. Even if the user's life context or notes are in another language, your responses must ALWAYS be in English.`;
 
     messages.push({
       role: 'system',
@@ -438,10 +469,11 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
   if (typeof contents === 'string') {
     // Simple string prompt
     if (contents.trim() === '') {
-      // Empty string means initial greeting - we need to prompt the assistant
       messages.push({
         role: 'user',
-        content: 'Please start the conversation with your greeting.'
+        content: language === 'de'
+          ? 'Bitte beginne das Gespräch mit deiner Begrüßung.'
+          : 'Please start the conversation with your greeting.'
       });
     } else {
       messages.push({
@@ -466,7 +498,7 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
  * Stream content using the active AI provider (Mistral only, chat context)
  * Returns an async generator yielding { type: 'chunk', text } and finally { type: 'done', fullText, usage, model, provider }
  */
-async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal' }) {
+async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
   // Only Mistral supports streaming in this implementation
   const provider = userRegionPreference === 'eu' ? 'mistral'
     : userRegionPreference === 'us' ? 'google'
@@ -487,7 +519,7 @@ async function* streamContent({ model, contents, config, context = 'chat', userR
 
   console.log(`  → Streaming Mistral model: ${mistralModel} (requested: ${model}, context: ${context})`);
 
-  const messages = convertToMistralFormat(contents, config);
+  const messages = convertToMistralFormat(contents, config, language);
 
   const mistralConfig = {
     model: mistralModel,
