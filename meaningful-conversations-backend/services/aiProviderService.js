@@ -313,12 +313,19 @@ async function generateWithMistral({ model, contents, config, context = 'chat' }
     const response = await client.chat.complete(mistralConfig);
     
     const choice = response.choices[0];
+    let responseText = choice.message.content;
+
+    // Strip meta-commentary that Mistral models sometimes generate
+    // (coaching strategy leaking into user-facing output)
+    if (context === 'chat') {
+      responseText = stripMistralMetaCommentary(responseText);
+    }
     
     // Mistral SDK v1.10+ returns camelCase property names (promptTokens, completionTokens)
     // Older versions used snake_case (prompt_tokens, completion_tokens)
     // Support both for compatibility
     return {
-      text: choice.message.content,
+      text: responseText,
       usage: response.usage ? {
         inputTokens: response.usage.promptTokens || response.usage.prompt_tokens || 0,
         outputTokens: response.usage.completionTokens || response.usage.completion_tokens || 0,
@@ -367,6 +374,25 @@ async function generateWithMistral({ model, contents, config, context = 'chat' }
 }
 
 /**
+ * Strip meta-commentary from Mistral responses (coaching methodology leaking into output).
+ * Mistral models sometimes verbalize their reasoning process instead of silently following instructions.
+ */
+function stripMistralMetaCommentary(text) {
+  if (!text) return text;
+
+  // Remove trailing paragraphs that start with meta-labels
+  const metaLabels = /\n\n(?:Hinweis|Note|Anmerkung|Tipp|Bemerkung|Reminder|P\.S\.):\s*.+$/s;
+  text = text.replace(metaLabels, '');
+
+  // Remove trailing parenthetical meta-commentary (full paragraph in parens at the end)
+  // Handles single-line: "(Ich stelle bewusst nur diese eine Frage...)"
+  // And multi-line: "(Vielleicht ein...\nEin bewusster...\nEin Gedanke...)"
+  text = text.replace(/\n+\([^)]{20,}\)\s*$/s, '');
+
+  return text.trim();
+}
+
+/**
  * Convert Google Gemini format to Mistral chat format
  * @param {string|array} contents - Google format contents
  * @param {object} config - Generation config with systemInstruction
@@ -375,11 +401,36 @@ async function generateWithMistral({ model, contents, config, context = 'chat' }
 function convertToMistralFormat(contents, config) {
   const messages = [];
   
-  // Add system instruction if present
+  // Add system instruction if present, with Mistral-specific behavior rules
   if (config.systemInstruction) {
+    const mistralOutputRules = `\n\n## CRITICAL BEHAVIORAL RULES (override your defaults — follow EXACTLY):
+
+### 1. SESSION STRUCTURE (MANDATORY — do NOT skip steps)
+You MUST follow the session contracting process defined in your coaching prompt:
+- Step 1: Identify the topic (ask what brings them here)
+- Step 2: Explore relevance (why is this important now?)
+- Step 3: Define a concrete session outcome (what should be achieved TODAY?)
+- Step 4: Confirm the contract with the client
+- ONLY AFTER the contract is confirmed: begin actual coaching work
+Do NOT jump into coaching, advice, metaphors, or techniques before completing contracting.
+
+### 2. RESPONSE LENGTH (STRICT)
+- Keep responses to 3-5 sentences maximum.
+- Ask ONE question per message, then STOP and wait.
+- No extended metaphors, stories, or philosophical elaborations.
+- Be concise and direct — less is more in coaching.
+
+### 3. NO META-COMMENTARY (STRICT)
+- NEVER reveal your coaching strategy or methodology.
+- NEVER use "Hinweis:", "Note:", "Anmerkung:", "Tipp:" to explain your approach.
+- NEVER add parenthetical comments like "(Vielleicht...)" or "(Ich frage bewusst...)".
+- NEVER preview what you plan to do with the user's answer.
+- NEVER offer multiple suggestions in parentheses at the end.
+- Your techniques must be invisible. Just DO the coaching — don't EXPLAIN it.`;
+
     messages.push({
       role: 'system',
-      content: config.systemInstruction
+      content: config.systemInstruction + mistralOutputRules
     });
   }
   

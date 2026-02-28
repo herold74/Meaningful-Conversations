@@ -757,9 +757,17 @@ ${BOT_CATALOG_EN}
 For each, provide:
 - The exact botId
 - The bot display name
-- A 1-2 sentence rationale why this bot fits
-- A concrete, copy-paste-ready conversation starter the user could use to begin a session on this topic
+- A 1-2 sentence rationale explaining which METHOD of this coach fits the topic (not what the user might feel or want)
+- A conversation starter (examplePrompt): 2-3 sentences MAX where the user states their topic in their own words. This is ONLY an opening message to start the session — NOT a coaching intervention.
 - The required access tier ("guest", "premium", or "client")
+
+CRITICAL rules for examplePrompt:
+- Keep it short and natural (2-3 sentences, like a real person would type)
+- The user simply describes their situation and what they want to work on
+- Do NOT ask for methods, exercises, techniques, or specific approaches
+- Do NOT make assumptions about feelings, causes, or backgrounds
+- Do NOT include questions — the coach will ask those
+- Think of it as: "What would a user type to START the conversation?"
 
 Primary and secondary must be different bots. Write rationale and examplePrompt in English.`
     },
@@ -779,9 +787,17 @@ ${BOT_CATALOG_DE}
 Für jedes Profil gib an:
 - Die exakte botId
 - Den Anzeigenamen des Bots
-- Eine 1-2-Satz-Begründung, warum dieser Bot passt
-- Einen konkreten, kopierfertigen Gesprächseinstieg für das Thema
+- Eine 1-2-Satz-Begründung, welche METHODE dieses Coaches zum Thema passt (nicht was der Nutzer fühlen oder wollen könnte)
+- Einen Gesprächseinstieg (examplePrompt): Maximal 2-3 Sätze, in denen der Nutzer sein Thema in eigenen Worten beschreibt. Das ist NUR eine Eröffnungsnachricht — KEINE Coaching-Intervention.
 - Die benötigte Zugangsstufe ("guest", "premium", oder "client")
+
+KRITISCHE Regeln für examplePrompt:
+- Kurz und natürlich halten (2-3 Sätze, wie ein echter Mensch tippen würde)
+- Der Nutzer beschreibt einfach seine Situation und woran er arbeiten möchte
+- KEINE Fragen nach Methoden, Übungen, Techniken oder konkreten Ansätzen
+- KEINE Annahmen über Gefühle, Ursachen oder Hintergründe
+- KEINE Fragen — der Coach wird die Fragen stellen
+- Denke: "Was würde ein Nutzer tippen, um das Gespräch zu BEGINNEN?"
 
 Primary und Secondary müssen unterschiedliche Bots sein. Schreibe rationale und examplePrompt auf Deutsch.`
     }

@@ -151,6 +151,8 @@
   "botSelection_clientOnlyBadge": "Nur für Klienten",
   "botSelection_clientContactMessage": "Kontaktieren Sie uns für mehr Informationen.",
   "botSelection_meditationBadge": "Bietet geführte Meditation 🔔",
+  "botSelection_available": "Verfügbar",
+  "botSelection_conversation_starter": "Gesprächseinstieg",
   "botSearch_placeholder": "Beschreiben Sie Ihre Situation oder Thema ...",
   "botSearch_button": "Coach empfehlen",
   "botSearch_result_primary": "Empfohlener Coach",
