@@ -154,6 +154,23 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - Server: separate containers per brand, nginx routes by domain.
   - W4F demo (current): standalone frontend container sharing MC staging backend.
 
+### 19. Multi-Provider AI Handling (Mistral Overlay Pattern)
+- **Decision:** Use shared base prompts with a provider-specific behavioral overlay rather than maintaining separate prompt sets per AI provider.
+- **Reasoning:** Mistral models follow instructions differently from Gemini — they tend to "think out loud" (leaking coaching methodology in parenthetical comments), generate verbose philosophical responses, and skip structured session flows like contracting. Separate prompts would double maintenance burden. An overlay approach keeps one source of truth for coaching content.
+- **Implementation:**
+  - `aiProviderService.js` → `convertToMistralFormat()` appends strict behavioral rules to the system instruction: 4-step session contracting, 3-5 sentence limit, one question per message, no meta-commentary.
+  - `stripMistralMetaCommentary()` post-processes Mistral responses to remove trailing "Hinweis:"/"Note:" paragraphs and parenthetical comments via regex. Applied only when `context === 'chat'`.
+  - Pattern is extensible: if a third provider is added, a similar overlay + post-processing pair can be introduced without touching base prompts.
+- **Known limitation:** Mistral occasionally still asks two questions in one message despite the "one question" rule. Acceptable trade-off vs. fully separate prompts.
+
+### 20. Pre-Seeded Topic Detection (TopicSearch → Chat)
+- **Decision:** Detect when a user starts a new session with an explicit topic from TopicSearch and override the "Achievable Next Steps" check-in.
+- **Reasoning:** The frontend correctly sets `isNewSession = true` for TopicSearch-initiated sessions, but sends the user's topic as the first history message. This makes `isInitialMessage` false in the backend (history is non-empty), so the existing "skip Next Steps" branch was not triggered.
+- **Implementation:**
+  - `chat.js`: `isPreSeededTopic = !isInitialMessage && isNewSession && history.length === 1 && history[0]?.role === 'user'`
+  - When true, injects a strong system instruction override telling the bot to "COMPLETELY IGNORE" any Next Steps and address the user's stated topic directly.
+  - Works for both DE and EN prompts.
+
 ### 17. Test Infrastructure
 - **Decision:** Jest + ts-jest for frontend, Jest + supertest for backend, with shared mocks.
 - **Reasoning:** Comprehensive testing needed for security-critical code (encryption, auth, input validation) and complex business logic (personality analysis, coaching strategies).
