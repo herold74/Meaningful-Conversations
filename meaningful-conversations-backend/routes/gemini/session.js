@@ -192,19 +192,28 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
     const fullPrompt = analysisPromptConfig.prompt({ conversation, context, docLang, currentDate });
     const startTime = Date.now();
-    const modelName = 'gemini-2.5-pro'; // Using Gemini 2.5 Pro for improved reasoning
+    const modelName = 'gemini-2.5-pro';
     const userId = req.userId;
+
+    // Respect user's AI region preference (GDPR)
+    let userRegionPreference = 'optimal';
+    if (userId) {
+        const analysisUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+        userRegionPreference = analysisUser?.aiRegionPreference || 'optimal';
+    }
 
     try {
         const response = await aiProviderService.generateContent({
-            model: modelName, // Use a more powerful model for structured analysis
+            model: modelName,
             contents: fullPrompt,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: analysisPrompts.schema,
-                temperature: 0.2, // Lower temperature for more deterministic, structured output
+                temperature: 0.2,
             },
-            context: 'analysis' // Session analysis uses analysis context
+            context: 'analysis',
+            userRegionPreference,
+            language: language || 'de',
         });
 
         const durationMs = Date.now() - startTime;
@@ -234,18 +243,22 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
                 // Pattern: ": \" at the start of a value should be ": "
                 // Pattern: \" at end of value before comma/newline should be "
                 let sanitizedText = cleanedText
-                    // Fix ""key":: pattern (Mistral double-quote/double-colon)
+                    // Fix ""key":: "value" → "key": "value"
                     .replace(/""(\w+)":\s*:/g, '"$1":')
-                    // Fix ""key": pattern (extra leading quote)
+                    // Fix ""key": "value" → "key": "value"
                     .replace(/""(\w+)":/g, '"$1":')
-                    // Fix ": \" (colon followed by escaped quote) -> ": "
+                    // Fix "key":: "value" → "key": "value"
+                    .replace(/"(\w+)"::/g, '"$1":')
+                    // Fix ": \" → ": "
                     .replace(/:\s*\\"/g, ': "')
-                    // Fix \", (escaped quote before comma) -> ",
+                    // Fix \", → ",
                     .replace(/\\",/g, '",')
-                    // Fix \" at end of line before } or ] -> "
+                    // Fix \" before } or ] → "
                     .replace(/\\"(\s*[}\]])/g, '"$1')
-                    // Fix \"\n (escaped quote before newline) -> "\n
-                    .replace(/\\"\s*\n/g, '"\n');
+                    // Fix \" before newline → "
+                    .replace(/\\"\s*\n/g, '"\n')
+                    // Fix trailing commas before } or ]
+                    .replace(/,(\s*[}\]])/g, '$1');
 
                 jsonResponse = JSON.parse(sanitizedText);
                 console.log('✓ Mistral sanitization successful');
@@ -347,14 +360,23 @@ router.post('/session/format-interview', optionalAuthMiddleware, async (req, res
 
     const fullPrompt = formattingPromptConfig.prompt({ conversation, template });
     const startTime = Date.now();
-    const modelName = 'gemini-2.5-pro'; // Using Gemini 2.5 Pro for improved formatting
+    const modelName = 'gemini-2.5-pro';
     const userId = req.userId;
+
+    // Respect user's AI region preference (GDPR)
+    let userRegionPreference = 'optimal';
+    if (userId) {
+        const fmtUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+        userRegionPreference = fmtUser?.aiRegionPreference || 'optimal';
+    }
 
     try {
         const response = await aiProviderService.generateContent({
             model: modelName,
             contents: fullPrompt,
-            context: 'analysis' // Formatting uses analysis context
+            context: 'analysis',
+            userRegionPreference,
+            language: language || 'de',
         });
 
         const durationMs = Date.now() - startTime;

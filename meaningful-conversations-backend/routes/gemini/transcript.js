@@ -88,7 +88,8 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
             currentDate
         });
 
-        // AI call
+        // AI call — respect user's AI region preference (GDPR)
+        const userRegionPreference = user.aiRegionPreference || 'optimal';
         const modelName = 'gemini-2.5-pro';
         const result = await withTimeout(
             aiProviderService.generateContent({
@@ -100,6 +101,8 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
                     temperature: 0.2,
                 },
                 context: 'transcript-evaluation',
+                userRegionPreference,
+                language: language || 'de',
             }),
             120000,
             'Transcript evaluation'
@@ -112,8 +115,21 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
         // Parse response
         let evaluationResult;
         try {
-            const cleanedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            evaluationResult = JSON.parse(cleanedText);
+            let cleanedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            try {
+                evaluationResult = JSON.parse(cleanedText);
+            } catch (firstParseErr) {
+                cleanedText = cleanedText
+                    .replace(/""(\w+)":\s*:/g, '"$1":')
+                    .replace(/""(\w+)":/g, '"$1":')
+                    .replace(/"(\w+)"::/g, '"$1":')
+                    .replace(/:\s*\\"/g, ': "')
+                    .replace(/\\",/g, '",')
+                    .replace(/\\"(\s*[}\]])/g, '"$1')
+                    .replace(/,(\s*[}\]])/g, '$1');
+                evaluationResult = JSON.parse(cleanedText);
+                console.log('✓ Transcript evaluation JSON sanitization successful');
+            }
         } catch (parseErr) {
             console.error('Failed to parse transcript evaluation response:', parseErr);
             return res.status(500).json({ error: 'Failed to parse evaluation response.' });
