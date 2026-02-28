@@ -34,4 +34,4 @@
 ## Tech Stack High-Level
 - **Frontend:** React (Vite), TypeScript, Tailwind CSS.
 - **Backend:** Node.js, Express, Prisma, MySQL.
-- **AI:** Google Gemini API.
+- **AI:** Google Gemini API (primary), Mistral AI (secondary, EU-based).

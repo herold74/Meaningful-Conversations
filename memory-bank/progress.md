@@ -76,7 +76,12 @@
 
 ## Integrations
 - [x] **Calendar (ICS export):** Actionable next steps as events
-- [x] **Google Gemini API:** AI provider (proxied through backend)
+- [x] **Google Gemini API:** Primary AI provider (proxied through backend)
+- [x] **Mistral AI:** Secondary AI provider (EU-based alternative)
+    - [x] Provider switching via `aiProviderService.js`
+    - [x] Mistral-specific behavioral overlay (session contracting, conciseness, meta-commentary suppression)
+    - [x] Post-processing filter (`stripMistralMetaCommentary`) for response cleanup
+    - [x] Gemini-to-Mistral message format conversion (`convertToMistralFormat`)
 - [x] **Mailjet:** Transactional emails
 - [x] **PayPal:** Donations/Payments
 
@@ -104,7 +109,7 @@
     - [x] Winter: Snowflakes (Dec 1 - Jan 6)
 - [x] **Dark/Light Mode:** User preference with auto-detection
 - [x] **PWA:** Installable, offline-capable
-- [x] **Multi-language:** German and English (1,518 keys, perfect DE/EN parity)
+- [x] **Multi-language:** German and English (1,520 keys, perfect DE/EN parity)
 
 ## Security (v1.9.8)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API

@@ -8,6 +8,14 @@
 
 ## Recent Changes (v1.9.9)
 
+### Mistral AI Provider Quality & Coaching Flow (2026-02-28)
+- **Mistral-specific behavioral rules** (`aiProviderService.js`): Injected strict system prompt overlay for Mistral models enforcing 4-step session contracting (topic → relevance → outcome → confirmation), response length limits (3-5 sentences, one question per message), and meta-commentary suppression.
+- **Post-processing safety net**: `stripMistralMetaCommentary()` strips trailing "Hinweis:"/"Note:" paragraphs and parenthetical coaching notes (e.g., `(Ich frage bewusst...)`) from Mistral responses via regex.
+- **Pre-seeded topic detection** (`chat.js`): New `isPreSeededTopic` condition detects when a user starts a session with an explicit topic from TopicSearch (`!isInitialMessage && isNewSession && history.length === 1 && role === 'user'`). Injects strong override to bypass "Achievable Next Steps" check-in and address the user's topic directly.
+- **Bot recommendation prompt refinement** (`geminiPrompts.js`): `examplePrompt` limited to 2-3 sentences, no coaching interventions or assumptions. `rationale` must focus on which METHOD fits the topic.
+- **BotSelection layout fixes** (`BotSelection.tsx`): `mt-auto` on conversation starter boxes for bottom-alignment; `mb-8` on grid container to prevent collision with next section heading.
+- **i18n keys**: Added missing `botSelection_available` and `botSelection_conversation_starter` to DE/EN locale files.
+
 ### TTS Performance Overhaul (2026-02-27)
 - **Persistent Piper models**: Replaced subprocess-per-request with PiperVoice library. Model loaded once into memory, reused across requests. ~8x speedup (5000ms → 500-700ms per sentence).
 - **Warmup endpoint**: `POST /api/tts/warmup` pre-loads voice model when user enters session with server TTS. Model ready before first bot message.
@@ -75,6 +83,8 @@
 - [ ] Coaching Framework Roadmap: 2 new bots (Clean Language, The Work) + 2 coaching "lenses" (NLP Meta-Modell, Logische Ebenen). See progress.md for details.
 
 ## Decision Log
+- **2026-02-28:** Mistral requires separate behavioral overlay instead of separate prompts. Shared base prompts + Mistral-specific rules appended in `convertToMistralFormat()` + post-processing filter. Keeps prompt maintenance in one place.
+- **2026-02-28:** Pre-seeded topic detection uses a heuristic (`isNewSession && history.length === 1 && role === 'user'`) rather than an explicit flag from the frontend, because the frontend already correctly sets `isNewSession` and passing extra flags would add unnecessary complexity.
 - **2026-02-26:** Memory bank updated to reflect v1.9.8 state. All stale references to `feature/visual-redesign` branch removed — that work was merged to `main` prior to this session.
 - **2026-02-26:** Server IP externalized — all scripts/Makefile/api.ts read from `.env.server` (gitignored). Git history scrubbed with `git-filter-repo`.
 - **2026-02-26:** Backend large files refactored into modules with facade pattern for backward compatibility. Test files excluded from `tsc` production build.
