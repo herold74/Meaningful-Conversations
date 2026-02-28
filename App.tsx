@@ -1056,16 +1056,7 @@ const App: React.FC = () => {
      * with mock data and configurable hasConversationalEnd parameter
      */
     const handleTestComfortCheck = (withConversationalEnd: boolean) => {
-        // #region agent log
-        console.log('[COMFORT-TEST] Starting quick test with conversationalEnd:', withConversationalEnd);
-        console.log('[COMFORT-TEST] Current user:', currentUser?.email, 'coachingMode:', currentUser?.coachingMode);
-        // #endregion
-        
-        // Ensure user has DPFL mode
         if (currentUser?.coachingMode !== 'dpfl') {
-            // #region agent log
-            console.log('[COMFORT-TEST] BLOCKED: User does not have DPFL mode');
-            // #endregion
             alert('Comfort Check test requires coachingMode = "dpfl". Please update your user settings.');
             return;
         }
@@ -1129,15 +1120,6 @@ const App: React.FC = () => {
             mockChatHistory.length
         );
 
-        // #region agent log
-        console.log('[COMFORT-TEST] Setting up test state:', {
-            bot: alexBot.id,
-            hasConversationalEnd: mockAnalysis.hasConversationalEnd,
-            isTestMode: true,
-            refinementPreview: { suggestedChanges: [], reasoning: 'Quick test mode' }
-        });
-        // #endregion
-
         // Set state
         setSessionAnalysis(mockAnalysis);
         setChatHistory(mockChatHistory);
@@ -1159,11 +1141,7 @@ const App: React.FC = () => {
             message: "Quick test mode - no actual refinement suggestions"
         });
         
-        setMenuView(null); // Close menu
-        
-        // #region agent log
-        console.log('[COMFORT-TEST] Navigating to sessionReview...');
-        // #endregion
+        setMenuView(null);
         
         // Navigate to SessionReview
         setView('sessionReview');
