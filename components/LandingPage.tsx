@@ -28,7 +28,7 @@ const removeGamificationKey = (text: string) => {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, existingContext }) => {
   const { t, language } = useLocalization();
-  const native = isNativeIOS();
+  const native = isNativeIOS() && window.innerWidth < 768;
   const [fileContent, setFileContent] = useState<string>(existingContext || '');
   const [fileName, setFileName] = useState<string>(existingContext ? (language === 'de' ? 'Lebenskontext.md' : 'Life-Context.md') : '');
   const [error, setError] = useState<string>('');
@@ -190,7 +190,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
                 {previewContent && (
                     <div className="text-left">
                         <p className="text-xs font-bold text-content-subtle uppercase mb-1">{t('landing_file_preview')}</p>
-                        <div className="prose prose-sm dark:prose-invert max-w-none h-48 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-md">
+                        <div className="prose prose-sm dark:prose-invert max-w-none h-48 md:h-[28vh] overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-md">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {previewContent}
                             </ReactMarkdown>
