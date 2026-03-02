@@ -19,14 +19,16 @@ interface LandingPageProps {
   onSubmit: (context: string) => void;
   onStartQuestionnaire: () => void;
   onStartInterview: () => void;
+  onEditContext?: (context: string) => void;
   existingContext?: string;
+  isTemplateContext?: boolean;
 }
 
 const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, existingContext }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, onEditContext, existingContext, isTemplateContext }) => {
   const { t, language } = useLocalization();
   const native = isNativeIOS() && window.innerWidth < 768;
   const [fileContent, setFileContent] = useState<string>(existingContext || '');
@@ -214,17 +216,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-                onClick={onStartQuestionnaire}
-                className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-secondary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
-            >
-                {existingContext ? t('landing_extendFile') : t('landing_createFile')}
-            </button>
+            {(() => {
+              const isNewUpload = !!fileContent && fileContent !== existingContext;
+              const showEdit = !!fileContent && (isNewUpload || !isTemplateContext);
+              return (
+                <button
+                    onClick={showEdit ? () => onEditContext?.(fileContent) : onStartQuestionnaire}
+                    className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-secondary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
+                >
+                    {!fileContent
+                        ? t('landing_createFile')
+                        : showEdit
+                            ? t('landing_editFile')
+                            : t('landing_extendFile')}
+                </button>
+              );
+            })()}
              <button
                 onClick={onStartInterview}
                 className="w-full px-6 py-3 text-base font-bold text-accent-tertiary-foreground bg-accent-tertiary uppercase hover:bg-accent-tertiary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-tertiary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
             >
-                {existingContext ? t('landing_extendWithInterview') : t('landing_createWithInterview')}
+                {fileContent ? t('landing_extendWithInterview') : t('landing_createWithInterview')}
             </button>
         </div>
 

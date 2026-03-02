@@ -352,13 +352,20 @@ router.post('/session/analyze', optionalAuthMiddleware, async (req, res) => {
 
 // POST /api/gemini/session/format-interview
 router.post('/session/format-interview', optionalAuthMiddleware, async (req, res) => {
-    const { history, language } = req.body;
+    const { history, language, existingContext } = req.body;
 
     const formattingPromptConfig = language === 'de' ? interviewFormattingPrompts.de : interviewFormattingPrompts.en;
     const conversation = history.map(msg => `${msg.role === 'user' ? 'User' : 'Guide'}: ${msg.text}`).join('\n\n');
     const template = getInterviewTemplate(language);
 
-    const fullPrompt = formattingPromptConfig.prompt({ conversation, template });
+    let fullPrompt = formattingPromptConfig.prompt({ conversation, template });
+
+    if (existingContext && existingContext.trim()) {
+        const mergeInstruction = language === 'de'
+            ? `\n\nWICHTIG: Der Benutzer hat bereits einen bestehenden Lebenskontext. Führe die neuen Informationen aus dem Interview mit dem bestehenden Kontext zusammen. Behalte ALLE bestehenden detaillierten Informationen bei und ERGÄNZE sie mit den neuen Erkenntnissen aus dem Interview. Überschreibe bestehende Inhalte NUR wenn das Interview explizit aktuellere oder detailliertere Informationen liefert.\n\n<bestehender_kontext>\n${existingContext}\n</bestehender_kontext>`
+            : `\n\nIMPORTANT: The user already has an existing Life Context. MERGE the new information from the interview with the existing context. KEEP ALL existing detailed information and SUPPLEMENT it with new insights from the interview. Only OVERWRITE existing content if the interview explicitly provides more current or detailed information.\n\n<existing_context>\n${existingContext}\n</existing_context>`;
+        fullPrompt += mergeInstruction;
+    }
     const startTime = Date.now();
     const modelName = 'gemini-2.5-pro';
     const userId = req.userId;

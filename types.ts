@@ -42,6 +42,7 @@ export type NavView =
     | 'oceanOnboarding'
     | 'intentPicker'
     | 'namePrompt'
+    | 'lcEditorFromLanding'
     | 'profileHint';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';

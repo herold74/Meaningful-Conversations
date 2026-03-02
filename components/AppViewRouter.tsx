@@ -405,15 +405,31 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           }
         />
       );
-    case 'landing':
+    case 'landing': {
+      const isTemplateContext = (() => {
+        if (!lifeContext) return false;
+        const fieldPattern = /\*\*[^*]+\*\*:\s*(.+)/g;
+        let filledCount = 0;
+        let m;
+        while ((m = fieldPattern.exec(lifeContext)) !== null) {
+          if (m[1].trim()) filledCount++;
+        }
+        return filledCount <= 1;
+      })();
       return (
         <LandingPage
           onSubmit={handleFileUpload}
           onStartQuestionnaire={() => setView('questionnaire')}
           onStartInterview={handleStartInterview}
+          onEditContext={(ctx) => {
+            setLifeContext(ctx);
+            setView('lcEditorFromLanding');
+          }}
           existingContext={lifeContext || undefined}
+          isTemplateContext={isTemplateContext}
         />
       );
+    }
     case 'piiWarning':
       return (
         <PIIWarningView
@@ -428,6 +444,31 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onBack={() => setView('landing')}
           answers={questionnaireAnswers}
           onAnswersChange={setQuestionnaireAnswers}
+        />
+      );
+    case 'lcEditorFromLanding':
+      return (
+        <LifeContextEditorView
+          lifeContext={lifeContext}
+          showPiiTips={false}
+          title={t('lc_editor_title')}
+          description={t('lc_editor_desc')}
+          onSave={async (newContext: string) => {
+            setLifeContext(newContext);
+            if (currentUser && encryptionKey) {
+              try {
+                await userService.saveUserData(
+                  newContext,
+                  serializeGamificationState(gamificationState),
+                  encryptionKey
+                );
+              } catch (error) {
+                console.error('Failed to save edited context:', error);
+              }
+            }
+            setView('landing');
+          }}
+          onCancel={() => setView('landing')}
         />
       );
     case 'intentPicker':
