@@ -63,14 +63,14 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
     : 'Here you can edit your Life Context directly. Replace real names and company names with pseudonyms (e.g., "my boss" instead of "John Smith").');
 
   return (
-    <div className="flex flex-col items-center py-4 md:py-6 animate-fadeIn">
-      <div className="w-full max-w-3xl p-6 sm:p-8 space-y-4 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
+    <div className="flex flex-col items-center py-2 md:py-6 animate-fadeIn">
+      <div className="w-full max-w-3xl p-4 sm:p-6 md:p-8 space-y-3 md:space-y-4 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-bold text-content-primary mb-2">
+          <h2 className="text-xl md:text-2xl font-bold text-content-primary mb-1 md:mb-2">
             {headerTitle}
           </h2>
-          <p className="text-content-secondary text-sm">
+          <p className="text-content-secondary text-xs md:text-sm">
             {headerDesc}
           </p>
         </div>
@@ -120,7 +120,7 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
               <textarea
                 value={editableContext}
                 onChange={handleTextChange}
-                className="w-full h-64 md:h-[55vh] p-4 bg-background-primary dark:bg-gray-900 border border-border-secondary dark:border-border-primary rounded-lg 
+                className="w-full h-[45vh] md:h-[55vh] p-3 md:p-4 bg-background-primary dark:bg-gray-900 border border-border-secondary dark:border-border-primary rounded-lg 
                            text-content-primary font-mono text-sm resize-y
                            focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent"
                 placeholder={language === 'de' ? 'Dein Lebenskontext...' : 'Your Life Context...'}
@@ -137,7 +137,7 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
               </p>
             </>
           ) : (
-            <div className="w-full h-64 md:h-[55vh] overflow-y-auto p-4 bg-background-primary dark:bg-gray-900 border border-border-secondary dark:border-border-primary rounded-lg prose prose-sm dark:prose-invert max-w-none">
+            <div className="w-full h-[45vh] md:h-[55vh] overflow-y-auto p-3 md:p-4 bg-background-primary dark:bg-gray-900 border border-border-secondary dark:border-border-primary rounded-lg prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {editableContext || (language === 'de' ? '*Kein Inhalt*' : '*No content*')}
               </ReactMarkdown>

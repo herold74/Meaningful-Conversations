@@ -61,8 +61,35 @@ Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Si
 - **Option C: Eine vorhandene Datei hochladen**
   - **Wenn Sie auf den Upload-Bereich klicken (oder eine Datei per Drag & Drop ziehen)**, können Sie eine \`.md\`-Datei von Ihrem Gerät auswählen. Dies ist die Methode, die Gastbenutzer verwenden, um ihren Fortschritt von einer früheren Sitzung fortzusetzen.
 
-### 1.4 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
+### 1.4 Ihren Lebenskontext verwalten
+
+Sobald Sie einen Lebenskontext erstellt haben, stehen Ihnen auf dem Startbildschirm erweiterte Optionen zur Verfügung. Der Hauptbutton passt sich automatisch an:
+
+- **"Lebenskontext-Datei erweitern"** — Erscheint, wenn Ihr Kontext noch eine Vorlage ist (z.B. nur Ihr Name wurde eingetragen). Ein Klick öffnet den Fragebogen, um die leeren Felder zu befüllen.
+- **"Lebenskontext-Datei editieren"** — Erscheint, wenn Ihr Kontext bereits angereichert ist (z.B. nach einem Interview mit Gloria, einer Coaching-Sitzung oder einem Datei-Upload). Ein Klick öffnet den **Markdown-Editor**.
+
+#### Der Lebenskontext-Editor
+Der Editor ermöglicht Ihnen die direkte Bearbeitung Ihres Lebenskontexts:
+- **Bearbeiten-Modus:** Zeigt den rohen Markdown-Text in einem Textfeld. Hier können Sie frei Abschnitte hinzufügen, ändern oder entfernen.
+- **Vorschau-Modus:** Zeigt Ihren Lebenskontext formatiert an (Überschriften, Fettdruck, Listen etc.), so wie ihn auch der Coach sieht.
+- **Umschalten:** Verwenden Sie die Tabs "Bearbeiten" und "Vorschau" über dem Textfeld.
+- **Downloads:** Zwei Buttons unter dem Editor ermöglichen den Export:
+  - **📥 .md** — Speichert den Lebenskontext als Markdown-Datei auf Ihrem Gerät.
+  - **📄 PDF** — Generiert ein formatiertes PDF-Dokument mit Ihrem Lebenskontext.
+- **Speichern & Zurück:** Übernimmt Ihre Änderungen und kehrt zum Startbildschirm zurück.
+- **Abbrechen:** Verwirft alle Änderungen.
+
+#### Lebenskontext mit Gloria erweitern
+**Wenn Sie auf "Mit einem Interview erweitern" klicken**, wird Ihr bestehender Kontext an Gloria übergeben. Im Erweiterungsmodus verhält sie sich anders als bei der Ersterstellung:
+- Gloria begrüßt Sie **persönlich mit Ihrem Namen** und fragt, wie viel Zeit Sie sich heute nehmen möchten.
+- Sie analysiert Ihren bestehenden Kontext und identifiziert **Lücken** — also Abschnitte, die noch leer oder nur oberflächlich ausgefüllt sind.
+- Bereits ausführlich beschriebene Bereiche werden **übersprungen**.
+- **Wenn Sie gezielt einen bestehenden Bereich aktualisieren möchten**, respektiert Gloria das und hilft Ihnen dabei, statt auf der vorgegebenen Reihenfolge zu bestehen.
+- Am Ende des Gesprächs werden die neuen Informationen **mit Ihrem bestehenden Kontext zusammengeführt** — nichts geht verloren.
+
+### 1.5 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
 Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehren, sehen Sie den Bildschirm **Kontextauswahl**.
+
 - **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
 - **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
 
@@ -843,8 +870,35 @@ After making your choice, you'll arrive at the landing page with three options:
 - **Option C: Upload an Existing File**
   - **If you click the upload area (or drag and drop a file),** you can select a \`.md\` file from your device. This is the method guest users will use to continue their progress from a previous session.
 
-### 1.4 Starting a New Session (for Returning Users)
+### 1.4 Managing Your Life Context
+
+Once you have created a Life Context, the landing page offers extended options. The main button adapts automatically:
+
+- **"Extend Life Context File"** — Appears when your context is still a template (e.g., only your name has been entered). Clicking opens the questionnaire to fill in the empty fields.
+- **"Edit Life Context File"** — Appears when your context is already enriched (e.g., after an interview with Gloria, a coaching session, or a file upload). Clicking opens the **Markdown Editor**.
+
+#### The Life Context Editor
+The editor allows you to directly edit your Life Context:
+- **Edit Mode:** Shows the raw Markdown text in a text field. Here you can freely add, change, or remove sections.
+- **Preview Mode:** Shows your Life Context formatted (headings, bold text, lists, etc.), just as the coach sees it.
+- **Toggle:** Use the "Edit" and "Preview" tabs above the text field to switch between modes.
+- **Downloads:** Two buttons below the editor allow you to export:
+  - **📥 .md** — Saves the Life Context as a Markdown file to your device.
+  - **📄 PDF** — Generates a formatted PDF document with your Life Context.
+- **Save & Return:** Applies your changes and returns to the landing page.
+- **Cancel:** Discards all changes.
+
+#### Extending Your Life Context with Gloria
+**If you click "Extend with an Interview,"** your existing context is passed to Gloria. In extension mode, she behaves differently than during initial creation:
+- Gloria greets you **personally by name** and asks how much time you'd like to spend today.
+- She analyzes your existing context and identifies **gaps** — sections that are still empty or only sparsely filled.
+- Sections that are already detailed are **skipped**.
+- **If you specifically want to update an existing section**, Gloria respects that and helps you with it, rather than insisting on a fixed order.
+- At the end of the conversation, the new information is **merged with your existing context** — nothing is lost.
+
+### 1.5 Starting a New Session (for Returning Users)
 If you are a registered user returning with a saved context, you will see the **Context Choice** screen.
+
 - **Continue with Saved Context:** Loads your last state and takes you to coach selection.
 - **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
 
