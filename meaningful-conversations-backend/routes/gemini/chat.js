@@ -259,10 +259,70 @@ STRICTLY FORBIDDEN in this first message:
         finalSystemInstruction += historySummary;
     }
 
-    // Exclude context injection for bots that don't need it:
-    // - gloria-life-context: creates the context, doesn't read one
-    // - gloria-interview: conducts topic-based interviews independent of life context
-    if (bot.id !== 'gloria-life-context' && bot.id !== 'gloria-interview') {
+    // Context injection logic per bot type:
+    if (bot.id === 'gloria-life-context' && context && context.trim()) {
+        // Gloria with existing context: extend & enrich instead of starting from scratch
+        const lang = language === 'de' ? 'de' : 'en';
+        const extensionPrompt = lang === 'de'
+            ? `\n\n## MODUS: Bestehenden Lebenskontext erweitern
+
+WICHTIG: Die folgenden Anweisungen ÜBERSCHREIBEN die Regeln zur Erstbegrüßung, Namensfrage, PII-Warnung und Standortfrage aus dem Basis-Prompt. Du befindest dich im Erweiterungs-Modus.
+
+### Bestehender Kontext des Benutzers:
+<bestehender_kontext>
+${context}
+</bestehender_kontext>
+
+### Deine Aufgabe:
+Du hilfst dem Benutzer, seinen bestehenden Lebenskontext zu ERWEITERN und ANZUREICHERN.
+
+### Begrüßung (Erste Nachricht):
+1. Begrüße den Benutzer PERSÖNLICH mit seinem Namen (aus dem Feld "Ich bin..." im Kontext).
+2. Erkläre kurz, dass du seinen bestehenden Lebenskontext kennst und ihm helfen wirst, ihn zu ergänzen.
+3. Frage, wie viel Zeit er sich heute nehmen möchte. WARTE auf die Antwort, bevor du fortfährst.
+4. Frage NICHT nach Name, Standort oder PII — diese Informationen hast du bereits.
+
+### Analyse & Gesprächsführung:
+- Analysiere den bestehenden Kontext und identifiziere LEERE oder SPÄRLICHE Abschnitte (Felder mit leerem Wert nach dem Doppelpunkt, z.B. "**Routinen & Systeme**: " ohne Inhalt).
+- Überspringe Abschnitte, die bereits AUSFÜHRLICH beschrieben sind.
+- Beginne nach der Zeitfrage mit dem ersten lückenhaften Bereich und erkläre kurz, welchen Bereich du als nächstes vertiefen möchtest.
+- Stelle pro Nachricht NUR EINE Frage (wie im Basis-Prompt).
+
+### Wenn der Benutzer einen bestehenden Bereich aktualisieren möchte:
+- Respektiere das! Wenn der Benutzer gezielt einen bereits ausgefüllten Bereich bearbeiten oder aktualisieren möchte, hilf ihm dabei.
+- Frage nach, was sich geändert hat oder was er ergänzen möchte.
+- Erzwinge NICHT die Reihenfolge der leeren Abschnitte.`
+            : `\n\n## MODE: Extend Existing Life Context
+
+IMPORTANT: The following instructions OVERRIDE the initial greeting, name question, PII warning, and location question from the base prompt. You are in extension mode.
+
+### User's Existing Context:
+<existing_context>
+${context}
+</existing_context>
+
+### Your Task:
+Help the user EXTEND and ENRICH their existing Life Context.
+
+### Greeting (First Message):
+1. Greet the user PERSONALLY by their name (from the "I am..." field in the context).
+2. Briefly explain that you're familiar with their existing Life Context and will help them expand it.
+3. Ask how much time they'd like to spend today. WAIT for their answer before proceeding.
+4. Do NOT ask for name, location, or PII — you already have this information.
+
+### Analysis & Conversation Flow:
+- Analyze the existing context and identify EMPTY or SPARSE sections (fields with empty values after the colon, e.g. "**Routines & Systems**: " with no content).
+- Skip sections that are already DETAILED.
+- After the time question, start with the first gap area and briefly explain which area you'd like to explore next.
+- Ask only ONE question per message (as in the base prompt).
+
+### When the user wants to update an existing section:
+- Respect that! If the user specifically wants to edit or update an already-filled section, help them with it.
+- Ask what has changed or what they'd like to add.
+- Do NOT force the order of empty sections.`;
+        finalSystemInstruction += extensionPrompt;
+    } else if (bot.id !== 'gloria-life-context' && bot.id !== 'gloria-interview') {
+        // Standard context injection for coaching bots
         finalSystemInstruction += `\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
     }
 

@@ -256,12 +256,13 @@ export const recommendBotForTopic = async (
 
 export const generateContextFromInterview = async (
     history: Message[],
-    language: Language
+    language: Language,
+    existingContext?: string
 ): Promise<string> => {
     try {
         const response = await apiFetch('/gemini/session/format-interview', {
             method: 'POST',
-            body: JSON.stringify({ history, language }),
+            body: JSON.stringify({ history, language, existingContext }),
         });
         return response.markdown;
     } catch (error) {

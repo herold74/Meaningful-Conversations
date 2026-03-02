@@ -665,8 +665,9 @@ const App: React.FC = () => {
     const handleStartInterview = () => {
         const interviewBot = BOTS.find(b => b.id === 'gloria-life-context');
         if (interviewBot) {
-            setLifeContext(''); // Ensure interview starts with a blank slate
-            setGamificationState(DEFAULT_GAMIFICATION_STATE);
+            if (!lifeContext) {
+                setGamificationState(DEFAULT_GAMIFICATION_STATE);
+            }
             handleSelectBot(interviewBot);
         } else {
             console.error("Interview bot 'gloria-life-context' not found in BOTS constant.");
@@ -701,7 +702,7 @@ const App: React.FC = () => {
 
             setIsAnalyzing(true);
             try {
-                const generatedContext = await geminiService.generateContextFromInterview(chatHistory, language);
+                const generatedContext = await geminiService.generateContextFromInterview(chatHistory, language, lifeContext || undefined);
                 setTempContext(generatedContext); // Pass the result to the review screen
 
                 // Create a simplified analysis object for the review screen
