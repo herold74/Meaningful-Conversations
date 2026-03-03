@@ -107,6 +107,7 @@ const App: React.FC = () => {
     const [tePreAnswers, setTePreAnswers] = useState<TranscriptPreAnswers | null>(null);
     const [teEvaluation, setTeEvaluation] = useState<TranscriptEvaluationResult | null>(null);
     const [teIsLoading, setTeIsLoading] = useState(false);
+    const [tePrefillTranscript, setTePrefillTranscript] = useState<string | null>(null);
 
     const { isDarkMode, setIsDarkMode, colorTheme, setColorTheme, isAutoThemeEnabled, setIsAutoThemeEnabled } = useTheme();
 
@@ -1233,6 +1234,8 @@ const App: React.FC = () => {
         setTeEvaluation,
         teIsLoading,
         setTeIsLoading,
+        tePrefillTranscript,
+        setTePrefillTranscript,
         refinementPreview,
         isLoadingRefinementPreview,
         refinementPreviewError,

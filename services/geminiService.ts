@@ -244,6 +244,19 @@ export const transcribeAudio = async (
     return { transcript: response.transcript, speakerCount: response.speakerCount };
 };
 
+export const smoothTranscript = async (
+    transcript: string,
+    language: Language
+): Promise<{ summary: string; smoothedTranscript: string }> => {
+    const response = await apiFetch('/gemini/transcript/smooth', {
+        method: 'POST',
+        body: JSON.stringify({ transcript, language }),
+        signal: AbortSignal.timeout(120000),
+    });
+
+    return { summary: response.summary, smoothedTranscript: response.smoothedTranscript };
+};
+
 export const recommendBotForTopic = async (
     topic: string,
     language: Language

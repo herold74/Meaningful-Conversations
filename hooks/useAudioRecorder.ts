@@ -2,11 +2,15 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useWakeLock } from './useWakeLock';
 
 const MAX_DURATION_S = 3600; // 60 minutes
+const WARN_BEFORE_S = 300; // warn 5 minutes before limit
 
 export interface UseAudioRecorder {
     isRecording: boolean;
     isPaused: boolean;
     duration: number;
+    maxDuration: number;
+    remainingSeconds: number;
+    isNearLimit: boolean;
     audioBlob: Blob | null;
     startRecording: () => Promise<void>;
     pauseRecording: () => void;
@@ -163,10 +167,16 @@ export function useAudioRecorder(): UseAudioRecorder {
         };
     }, [clearTimer]);
 
+    const remainingSeconds = Math.max(0, MAX_DURATION_S - duration);
+    const isNearLimit = isRecording && !isPaused && remainingSeconds <= WARN_BEFORE_S && remainingSeconds > 0;
+
     return {
         isRecording,
         isPaused,
         duration,
+        maxDuration: MAX_DURATION_S,
+        remainingSeconds,
+        isNearLimit,
         audioBlob,
         startRecording,
         pauseRecording,
