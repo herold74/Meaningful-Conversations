@@ -248,6 +248,8 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [feedback, setFeedback] = useState<Feedback[]>([]);
     const [guestLoginStats, setGuestLoginStats] = useState<GuestLoginStats | null>(null);
     const [showGuestLoginDetails, setShowGuestLoginDetails] = useState(false);
+    const [intentStats, setIntentStats] = useState<{ total: number; distribution: { intent: string; count: number; percentage: number }[]; daily: Record<string, any>[] } | null>(null);
+    const [showIntentDetails, setShowIntentDetails] = useState(false);
 
     const [sortConfig, setSortConfig] = useState<{ key: CodeSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
     const [userSortConfig, setUserSortConfig] = useState<{ key: UserSortKeys; direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
@@ -282,18 +284,20 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         setIsLoading(true);
         setError('');
         try {
-            const [usersData, codesData, ticketsData, feedbackData, guestLoginData] = await Promise.all([
+            const [usersData, codesData, ticketsData, feedbackData, guestLoginData, intentData] = await Promise.all([
                 userService.getAdminUsers(),
                 userService.getUpgradeCodes(),
                 userService.getAdminTickets(),
                 userService.getAdminFeedback(),
                 apiFetch('/analytics/guest-logins/stats'),
+                apiFetch('/analytics/intent-stats'),
             ]);
             setUsers(usersData.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()));
-            setCodes(codesData); // Sorting is now handled in useMemo
+            setCodes(codesData);
             setTickets(ticketsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
             setFeedback(feedbackData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
             setGuestLoginStats(guestLoginData);
+            setIntentStats(intentData);
         } catch (err: any) {
             setError(err.message || 'Failed to load admin data.');
             console.error(err);
@@ -1184,6 +1188,91 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         ) : (
                             <p className="text-center py-8 text-gray-500 dark:text-gray-400">
                                 {t('admin_guest_logins_none')}
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Intent Distribution */}
+            <div className="bg-white dark:bg-transparent rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <button
+                    onClick={() => setShowIntentDetails(!showIntentDetails)}
+                    className="w-full flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl">🧭</span>
+                        <div className="text-left">
+                            <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+                                {t('admin_intent_title')}
+                            </h3>
+                            {intentStats && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    {t('admin_intent_total', { count: intentStats.total })}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    {showIntentDetails ? (
+                        <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                    ) : (
+                        <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                    )}
+                </button>
+
+                {showIntentDetails && intentStats && (
+                    <div className="p-4">
+                        {intentStats.total > 0 ? (
+                            <>
+                                {/* Distribution bars */}
+                                <div className="space-y-3 mb-6">
+                                    {intentStats.distribution.map(({ intent, count, percentage }) => (
+                                        <div key={intent} className="flex items-center gap-3">
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 shrink-0">{intent}</span>
+                                            <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+                                                <div
+                                                    className="h-full bg-accent-primary rounded-full flex items-center justify-end pr-2 transition-all duration-500"
+                                                    style={{ width: `${Math.max(percentage, 8)}%` }}
+                                                >
+                                                    <span className="text-xs font-bold text-white">{percentage}%</span>
+                                                </div>
+                                            </div>
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 w-10 text-right shrink-0">{count}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Daily table */}
+                                <div className="overflow-x-auto max-h-72 overflow-y-auto">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-gray-50 dark:bg-gray-900/50 text-left text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0">
+                                            <tr>
+                                                <th className="p-3">{t('admin_intent_date')}</th>
+                                                {intentStats.distribution.map(d => (
+                                                    <th key={d.intent} className="p-3 text-right">{d.intent}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                                            {[...intentStats.daily].reverse().map((day) => (
+                                                <tr key={day.date} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <td className="p-3 font-medium text-gray-700 dark:text-gray-300">
+                                                        {new Date(day.date).toLocaleDateString()}
+                                                    </td>
+                                                    {intentStats.distribution.map(d => (
+                                                        <td key={d.intent} className="p-3 text-right text-gray-600 dark:text-gray-400">
+                                                            {day[d.intent] || 0}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                {t('admin_intent_no_data')}
                             </p>
                         )}
                     </div>

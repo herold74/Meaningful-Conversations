@@ -1,7 +1,7 @@
 import { apiFetch } from './api';
 
 export interface TrackEventParams {
-    eventType: 'GUEST_LOGIN' | 'PAGE_VIEW' | 'FEATURE_USE';
+    eventType: 'GUEST_LOGIN' | 'PAGE_VIEW' | 'FEATURE_USE' | 'INTENT_SELECTED';
     userId?: string;
     metadata?: Record<string, any>;
 }
