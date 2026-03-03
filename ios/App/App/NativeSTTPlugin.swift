@@ -51,8 +51,8 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         
         print("[NativeSTT] start() called with language: \(language)")
         
-        // Stop any existing recognition
-        stopRecognition()
+        // Stop any existing recognition without firing stopped event (cleanup for new session)
+        stopRecognition(notify: false)
         
         // Check authorization
         let authStatus = SFSpeechRecognizer.authorizationStatus()
@@ -166,7 +166,6 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
                         let transcript = result.bestTranscription.formattedString
                         let isFinal = result.isFinal
                         
-                        // Send partial results to JS
                         self.notifyListeners("partialResult", data: [
                             "transcript": transcript,
                             "isFinal": isFinal
@@ -178,11 +177,12 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
                     }
                     
                     if let error = error {
-                        print("[NativeSTT] Recognition error: \(error.localizedDescription)")
+                        let nsError = error as NSError
+                        print("[NativeSTT] Recognition error: \(error.localizedDescription) (domain: \(nsError.domain), code: \(nsError.code))")
                         self.notifyListeners("error", data: [
                             "message": error.localizedDescription
                         ])
-                        self.stopRecognition()
+                        self.stopRecognition(notify: true)
                     }
                 }
                 
@@ -206,8 +206,12 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
     
-    private func stopRecognition() {
-        print("[NativeSTT] Stopping recognition...")
+    private func stopRecognition(notify: Bool = true) {
+        let wasRecording = isRecording
+        
+        if wasRecording {
+            print("[NativeSTT] Stopping recognition... (notify: \(notify))")
+        }
         
         // Stop audio engine
         if let engine = audioEngine, engine.isRunning {
@@ -227,15 +231,17 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         isRecording = false
         
         // Deactivate audio session to release it for TTS
-        do {
-            try AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
-            print("[NativeSTT] ✅ Audio session deactivated after STT stop")
-            print("[NativeSTT] isOtherAudioPlaying: \(AVAudioSession.sharedInstance().isOtherAudioPlaying)")
-        } catch {
-            print("[NativeSTT] ⚠️ Failed to deactivate audio session: \(error)")
+        if wasRecording {
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+                print("[NativeSTT] ✅ Audio session deactivated after STT stop")
+            } catch {
+                print("[NativeSTT] ⚠️ Failed to deactivate audio session: \(error)")
+            }
         }
         
-        // Notify JS that recognition ended
-        notifyListeners("stopped", data: [:])
+        if notify && wasRecording {
+            notifyListeners("stopped", data: [:])
+        }
     }
 }
