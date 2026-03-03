@@ -405,6 +405,7 @@ const App: React.FC = () => {
 
     const handleIntentSelected = useCallback((intent: UserIntent) => {
         try { localStorage.setItem('userIntent', intent); } catch {}
+        analyticsService.trackEvent({ eventType: 'INTENT_SELECTED', metadata: { intent } });
 
         if (intent === 'communication') setHighlightSection('management');
         else if (intent === 'coaching' || intent === 'lifecoaching') setHighlightSection('topicSearch');
