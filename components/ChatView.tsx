@@ -290,11 +290,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   useEffect(() => {
     if (isVoiceMode && voiceTextRef.current) {
       voiceTextRef.current.scrollTop = voiceTextRef.current.scrollHeight;
-      // #region agent log
-      const el = voiceTextRef.current;
-      const mainEl = el.closest('main');
-      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'ChatView.tsx:voiceTextEffect',message:'Voice text area dimensions',data:{textScrollH:el.scrollHeight,textClientH:el.clientHeight,textScrollTop:el.scrollTop,mainH:mainEl?.clientHeight,inputLen:input.length},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
     }
   }, [input, isVoiceMode]);
   
