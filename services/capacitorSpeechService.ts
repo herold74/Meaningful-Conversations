@@ -170,10 +170,7 @@ class WebSpeechService implements ISpeechService {
         this.accumulatedTranscript = '';
         this.currentSessionTranscript = '';
 
-        // Save args for Android auto-restart
-        if (isAndroidBrowser) {
-            this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
-        }
+        this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
 
         const SpeechRecognitionAPI = (window as any).SpeechRecognition || 
                                      (window as any).webkitSpeechRecognition;
@@ -196,20 +193,17 @@ class WebSpeechService implements ISpeechService {
         };
 
         recognition.onend = () => {
-            // Android Chrome fires onend after 2-3s of silence even with
-            // continuous=true. Auto-restart keeps the mic open so the user
-            // can pause naturally without having to tap the button again.
-            // This ONLY runs on Android — PC and iOS are unaffected.
-            if (isAndroidBrowser && !this.stoppedManually && this.lastStartArgs) {
-                // Preserve text from the session that just ended so it
-                // survives the fresh event.results after restart.
+            // Browsers may fire onend after silence even with continuous=true
+            // (Android Chrome: ~2-3s, Safari: varies, desktop Chrome: rare but possible).
+            // Auto-restart keeps the mic open so the user can pause naturally.
+            if (!this.stoppedManually && this.lastStartArgs) {
                 if (this.currentSessionTranscript.trim()) {
                     this.accumulatedTranscript = this.accumulatedTranscript
                         ? this.accumulatedTranscript + ' ' + this.currentSessionTranscript
                         : this.currentSessionTranscript;
                     this.currentSessionTranscript = '';
                 }
-                console.log('[WebSpeechService] 🔄 Android auto-restart after silence timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
+                console.log('[WebSpeechService] 🔄 Auto-restart after silence timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
                 try {
                     recognition.start();
                     return;
@@ -229,10 +223,10 @@ class WebSpeechService implements ISpeechService {
         recognition.onerror = (event: any) => {
             const errorCode = event.error || 'unknown';
 
-            // On Android, 'no-speech' fires before the automatic onend.
-            // We allow auto-restart to handle it — don't kill the session.
-            if (isAndroidBrowser && errorCode === 'no-speech' && !this.stoppedManually) {
-                console.log('[WebSpeechService] 🤖 Android no-speech — will auto-restart on end');
+            // 'no-speech' fires before the automatic onend on silence timeout.
+            // Auto-restart in onend will handle it — don't kill the session.
+            if (errorCode === 'no-speech' && !this.stoppedManually) {
+                console.log('[WebSpeechService] no-speech — will auto-restart on end');
                 return;
             }
 
@@ -298,15 +292,11 @@ class WebSpeechService implements ISpeechService {
     }
 
     /**
-     * Process speech recognition results with adaptive handling for different
-     * Android devices/browser implementations.
-     * 
-     * ANDROID BUG FIX v2: Different Android devices/versions behave differently:
-     * Type A (Cumulative): Each result builds on previous - results = [{t:"hello"}, {t:"hello world"}]
-     * Type B (Incremental): Each result is a separate segment - results = [{t:"hello"}, {t:"world"}]
-     * 
-     * Detection: If the last result's transcript starts with the previous result's transcript,
-     * it's cumulative (Type A). Otherwise it's incremental (Type B).
+     * Process speech recognition results.
+     *
+     * Desktop/iOS browsers always deliver incremental results (one entry per
+     * phrase). Android devices vary between cumulative (Type A) and incremental
+     * (Type B), so adaptive detection is used only there.
      */
     private processResults(event: any): { transcript: string; isFinal: boolean; confidence: number } {
         const resultsArray = Array.from(event.results) as any[];
@@ -319,19 +309,18 @@ class WebSpeechService implements ISpeechService {
                 transcript: r[0].transcript,
                 confidence: r[0].confidence
             }));
-            const srDebugData1 = {
+            console.log('[SR-DEBUG] onresult RAW', {
                 resultIndex: event.resultIndex,
                 resultsLength: event.results.length,
                 results: resultsDebug
-            };
-            console.log('[SR-DEBUG] onresult RAW', srDebugData1);
+            });
             fetch(`${this.debugLogBaseUrl}/api/debug/log`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     location: 'WebSpeechService:onresult',
                     message: 'SR onresult RAW',
-                    data: srDebugData1,
+                    data: { resultIndex: event.resultIndex, resultsLength: event.results.length, results: resultsDebug },
                     timestamp: Date.now(),
                     sessionId: 'sr-android-debug'
                 })
@@ -342,67 +331,48 @@ class WebSpeechService implements ISpeechService {
         let finalTranscript = '';
 
         if (resultsArray.length === 1) {
-            // Only one result - use it directly
             finalTranscript = resultsArray[0][0].transcript;
-        } else {
-            // Multiple results - detect cumulative vs incremental
+        } else if (isAndroidBrowser) {
+            // Android adaptive detection — devices may deliver cumulative or incremental results
             const lastTranscript = resultsArray[resultsArray.length - 1][0].transcript;
             const secondLastTranscript = resultsArray[resultsArray.length - 2][0].transcript;
 
             if (lastTranscript.startsWith(secondLastTranscript) ||
                 lastTranscript.toLowerCase().startsWith(secondLastTranscript.toLowerCase())) {
-                // Cumulative (Type A) - use last result directly
                 finalTranscript = lastTranscript;
             } else if (lastTranscript.length > secondLastTranscript.length * 0.8) {
-                // Last is significantly long - probably cumulative but with corrections
                 finalTranscript = lastTranscript;
             } else {
-                // Incremental (Type B) - concatenate all isFinal results
                 finalTranscript = resultsArray
                     .filter((r: any) => r.isFinal)
                     .map((r: any) => r[0].transcript)
                     .join(' ');
-                // If nothing is final yet, just use the last result
                 if (!finalTranscript.trim()) {
                     finalTranscript = lastTranscript;
                 }
             }
+        } else {
+            // Desktop / iOS browsers: results are always incremental — concatenate all
+            const finals = resultsArray
+                .filter((r: any) => r.isFinal)
+                .map((r: any) => r[0].transcript)
+                .join(' ');
+            const lastResult = resultsArray[resultsArray.length - 1];
+            if (!lastResult.isFinal) {
+                finalTranscript = finals
+                    ? finals + ' ' + lastResult[0].transcript
+                    : lastResult[0].transcript;
+            } else {
+                finalTranscript = finals;
+            }
         }
 
-        // #region Android SR debug logging
-        if (this.debugLogBaseUrl) {
-            const srDebugData2 = {
-                detectedType: resultsArray.length > 1 &&
-                    resultsArray[resultsArray.length - 1][0].transcript.startsWith(
-                        resultsArray[resultsArray.length - 2][0].transcript
-                    ) ? 'cumulative' : 'incremental',
-                finalTranscript,
-                strategy: 'adaptive-v2'
-            };
-            console.log('[SR-DEBUG] after adaptive processing', srDebugData2);
-            fetch(`${this.debugLogBaseUrl}/api/debug/log`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    location: 'WebSpeechService:adaptive',
-                    message: 'SR adaptive result',
-                    data: srDebugData2,
-                    timestamp: Date.now(),
-                    sessionId: 'sr-android-debug'
-                })
-            }).catch(() => {});
-        }
-        // #endregion
-
-        // Track what we got from the current session (for accumulation on auto-restart)
         this.currentSessionTranscript = finalTranscript;
 
-        // Prepend text from previous auto-restart sessions so nothing is lost
         if (this.accumulatedTranscript) {
             finalTranscript = this.accumulatedTranscript + ' ' + finalTranscript;
         }
 
-        // Get confidence from last result
         const lastResult = resultsArray[resultsArray.length - 1];
         const isFinal = lastResult.isFinal;
         const confidence = lastResult[0].confidence || 0;
