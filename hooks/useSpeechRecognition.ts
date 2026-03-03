@@ -68,7 +68,8 @@ export function useSpeechRecognition({
             debugLogBaseUrl: getApiBaseUrl()
           },
           (result) => {
-            setInput(baseTranscriptRef.current + result.transcript);
+            const combined = baseTranscriptRef.current + result.transcript;
+            setInput(combined.length <= 5000 ? combined : combined.slice(0, 5000));
           },
           (error) => {
             setIsListening(false);

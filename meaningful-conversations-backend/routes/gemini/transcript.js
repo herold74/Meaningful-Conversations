@@ -314,6 +314,136 @@ router.post('/transcript/evaluations/:id/rate', authMiddleware, async (req, res)
     }
 });
 
+// POST /api/gemini/transcript/smooth
+// Smooths a raw transcript: fixes grammar, removes filler words, preserves meaning.
+// Optionally returns a summary. Respects user's AI region preference (GDPR).
+// Requires authentication and Client+ access
+router.post('/transcript/smooth', authMiddleware, async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.userId;
+
+    try {
+        const { transcript, language = 'de' } = req.body;
+
+        if (!transcript || typeof transcript !== 'string' || !transcript.trim()) {
+            return res.status(400).json({ error: 'transcript is required.' });
+        }
+
+        if (transcript.length > 50000) {
+            return res.status(400).json({ error: 'Transcript exceeds maximum length of 50,000 characters.' });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { isClient: true, isAdmin: true, isDeveloper: true, aiRegionPreference: true }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        if (!user.isClient && !user.isAdmin && !user.isDeveloper) {
+            return res.status(403).json({ error: 'Transcript smoothing requires Client access or higher.' });
+        }
+
+        const prompt = language === 'de'
+            ? `Du bist ein erfahrener Redakteur. Dir wird ein Gesprächstranskript übergeben.
+
+Erstelle ZWEI Abschnitte, getrennt durch die exakte Zeile "---TRENNER---":
+
+**ABSCHNITT 1 — Zusammenfassung:**
+Erstelle eine prägnante Zusammenfassung des Gesprächs (5-10 Sätze). Erfasse die wichtigsten Themen, Erkenntnisse und Schlussfolgerungen.
+
+**ABSCHNITT 2 — Geglättetes Transkript:**
+Erstelle eine bereinigte, lesbare Version des Gesprächs:
+- Korrigiere Grammatik, Rechtschreibung und Zeichensetzung
+- Entferne Füllwörter (ähm, also, halt, quasi, sozusagen) und Wiederholungen
+- Bewahre den Inhalt, die Bedeutung und den Ton des Gesagten exakt
+- Behalte die Sprecher-Labels bei (z.B. [Sprecher 1]:, [Person A]:)
+- Füge Absätze bei thematischen Wechseln ein
+- Füge NICHTS hinzu, was nicht gesagt wurde
+
+Das Transkript:
+
+${transcript}`
+            : `You are an experienced editor. You are given a conversation transcript.
+
+Produce TWO sections, separated by the exact line "---SEPARATOR---":
+
+**SECTION 1 — Summary:**
+Write a concise summary of the conversation (5-10 sentences). Capture the key topics, insights, and conclusions.
+
+**SECTION 2 — Smoothed Transcript:**
+Produce a clean, readable version of the conversation:
+- Fix grammar, spelling, and punctuation
+- Remove filler words (um, like, you know, basically, sort of) and repetitions
+- Preserve the content, meaning, and tone of what was said exactly
+- Keep speaker labels intact (e.g. [Speaker 1]:, [Person A]:)
+- Add paragraph breaks at topical shifts
+- Do NOT add anything that was not said
+
+The transcript:
+
+${transcript}`;
+
+        const userRegionPreference = user.aiRegionPreference || 'optimal';
+        const modelName = 'gemini-2.5-pro';
+
+        const result = await withTimeout(
+            aiProviderService.generateContent({
+                model: modelName,
+                contents: prompt,
+                config: { temperature: 0.2 },
+                context: 'analysis',
+                userRegionPreference,
+                language: language || 'de',
+            }),
+            120000,
+            'Transcript smoothing'
+        );
+
+        const durationMs = Date.now() - startTime;
+        const text = result.text || '';
+        const tokenUsage = result.usage || {};
+
+        const separator = language === 'de' ? '---TRENNER---' : '---SEPARATOR---';
+        const parts = text.split(separator);
+        const summary = (parts[0] || '').trim();
+        const smoothedTranscript = (parts[1] || '').trim();
+
+        await trackApiUsage({
+            userId,
+            endpoint: 'transcript-smooth',
+            model: result.model || modelName,
+            botId: null,
+            inputTokens: tokenUsage.inputTokens || 0,
+            outputTokens: tokenUsage.outputTokens || 0,
+            durationMs,
+            success: true,
+        });
+
+        res.json({ summary, smoothedTranscript });
+
+    } catch (error) {
+        console.error('Transcript smoothing error:', error);
+        const durationMs = Date.now() - startTime;
+
+        await trackApiUsage({
+            userId,
+            endpoint: 'transcript-smooth',
+            model: 'gemini-2.5-pro',
+            botId: null,
+            inputTokens: 0,
+            outputTokens: 0,
+            durationMs,
+            success: false,
+            errorMessage: error.message,
+        });
+
+        res.status(500).json({ error: 'Transcript smoothing failed. Please try again.' });
+    }
+});
+
 // POST /api/gemini/transcript/transcribe-audio
 // Transcribes audio with speaker diarization via Gemini (Google-only, no Mistral fallback)
 // Requires authentication and Client+ access

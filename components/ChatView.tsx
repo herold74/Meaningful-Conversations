@@ -54,6 +54,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const footerRef = useRef<HTMLElement>(null);
+  const voiceTextRef = useRef<HTMLDivElement>(null);
   const initialFetchInitiated = useRef<boolean>(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
 
@@ -284,6 +285,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       }, 100);
     }
   }, [isVoiceMode]);
+
+  // Voice mode: auto-scroll text area to show latest transcription
+  useEffect(() => {
+    if (isVoiceMode && voiceTextRef.current) {
+      voiceTextRef.current.scrollTop = voiceTextRef.current.scrollHeight;
+      // #region agent log
+      const el = voiceTextRef.current;
+      const mainEl = el.closest('main');
+      fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'ChatView.tsx:voiceTextEffect',message:'Voice text area dimensions',data:{textScrollH:el.scrollHeight,textClientH:el.clientHeight,textScrollTop:el.scrollTop,mainH:mainEl?.clientHeight,inputLen:input.length},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    }
+  }, [input, isVoiceMode]);
   
   // Initialize guest limit checking
   useEffect(() => {
@@ -608,21 +621,19 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
       )}
       
     {isVoiceMode ? (
-        <main className="flex-1 flex flex-col items-center gap-4 p-6 text-center bg-background-primary dark:bg-background-primary/50 overflow-y-auto">
-            {/* Top third: Bot Avatar & Name */}
-            <div className="flex-1 flex flex-col items-center justify-center py-4 min-h-[12rem]">
+        <main className="flex-1 flex flex-col items-center text-center bg-background-primary dark:bg-background-primary/50 overflow-hidden">
+            {/* Top: Bot Avatar & Name — pinned */}
+            <div className="shrink-0 flex flex-col items-center pt-6 pb-2">
                 <div className="animate-fadeIn">
                     <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
                     <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
                 </div>
             </div>
 
-            {/* Middle third: Microphone/Meditation Timer */}
-            <div className="flex-1 flex flex-col items-center justify-center pt-12 pb-4 w-full min-h-[12rem]">
-                {meditation.meditationState?.isActive ? (
+            {meditation.meditationState?.isActive ? (
+                <div className="flex-1 flex flex-col items-center justify-center w-full px-6">
                     <div className="flex flex-col items-center">
                         <div className="relative w-40 h-40">
-                            {/* Circular progress ring */}
                             <svg className="transform -rotate-90 w-40 h-40">
                                 <circle 
                                     cx="80" 
@@ -659,8 +670,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                             {t('meditation_early_stop')}
                         </button>
                     </div>
-                ) : (
-                    <>
+                </div>
+            ) : (
+                <>
+                    {/* Mic / Send Button — pinned */}
+                    <div className="shrink-0 flex flex-col items-center pt-6 pb-4">
                         <button
                             onClick={speech.handleVoiceInteraction}
                             disabled={isLoading}
@@ -671,18 +685,24 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         >
                             {speech.isListening ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
                         </button>
-                        <div className="mt-8 text-lg text-content-secondary flex flex-col items-center justify-center px-4 w-full max-w-md">
-                            <p className="min-h-14 flex items-center text-center whitespace-pre-line">{input || (speech.isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}</p>
+                    </div>
+
+                    {/* Transcribed text — scrollable, auto-scrolls to latest */}
+                    <div ref={voiceTextRef} className="flex-1 min-h-0 overflow-y-auto w-full max-w-md px-4">
+                        <div className="flex flex-col justify-end min-h-full">
+                            <p className="text-lg text-content-secondary text-center whitespace-pre-line py-2">
+                                {input || (speech.isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}
+                            </p>
                             {speech.isListening && !wakeLock.isSupported && (
-                                <p className="text-xs text-status-warning-foreground mt-1">{t('chat_keep_screen_on')}</p>
+                                <p className="text-xs text-status-warning-foreground text-center mt-1">{t('chat_keep_screen_on')}</p>
                             )}
                         </div>
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
 
-            {/* Bottom third: Control Buttons - Doppelter Abstand nach oben */}
-            <div className="flex-1 flex flex-col items-center justify-center pt-8 pb-4 min-h-[8rem]">
+            {/* Bottom: Control Buttons — pinned */}
+            <div className="shrink-0 flex flex-col items-center justify-center pt-4 pb-6 px-6">
                 {(isLoading || tts.isLoadingAudio) ? (
                     <div className="flex flex-col items-center gap-3">
                         <div className="p-4 rounded-full bg-background-secondary dark:bg-background-tertiary shadow">
@@ -743,23 +763,31 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
               <p className="text-sm">{t('test_mode_input_disabled')}</p>
             </div>
           ) : (
-            <form onSubmit={handleFormSubmit} className="flex items-end gap-2">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t('chat_placeholder')}
-                disabled={isLoading}
-                rows={1}
-                className="flex-1 px-4 py-2.5 bg-background-primary text-content-primary border border-border-primary rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
-              />
-              <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
-                  <MicrophoneIcon className={`w-5 h-5 ${speech.isListening ? 'text-red-500 animate-pulse' : ''}`} />
-              </button>
-              <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover disabled:opacity-40 rounded-xl transition-colors">
-                <PaperPlaneIcon className="w-5 h-5" />
-              </button>
+            <form onSubmit={handleFormSubmit} className="flex flex-col gap-1">
+              <div className="flex items-end gap-2">
+                <textarea
+                  ref={textareaRef}
+                  value={input}
+                  onChange={(e) => { if (e.target.value.length <= 5000) setInput(e.target.value); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t('chat_placeholder')}
+                  disabled={isLoading}
+                  maxLength={5000}
+                  rows={1}
+                  className="flex-1 px-4 py-2.5 bg-background-primary text-content-primary border border-border-primary rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
+                />
+                <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
+                    <MicrophoneIcon className={`w-5 h-5 ${speech.isListening ? 'text-red-500 animate-pulse' : ''}`} />
+                </button>
+                <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover disabled:opacity-40 rounded-xl transition-colors">
+                  <PaperPlaneIcon className="w-5 h-5" />
+                </button>
+              </div>
+              {input.length >= 4000 && (
+                <div className={`text-xs text-right pr-1 transition-colors ${input.length >= 4800 ? 'text-red-500' : 'text-content-subtle'}`}>
+                  {input.length.toLocaleString()} / 5.000
+                </div>
+              )}
             </form>
           )}
         </footer>

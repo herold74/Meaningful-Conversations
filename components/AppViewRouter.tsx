@@ -44,6 +44,7 @@ import TranscriptInput from './TranscriptInput';
 import EvaluationReview from './EvaluationReview';
 import EvaluationHistory from './EvaluationHistory';
 import InterviewTranscriptView from './InterviewTranscriptView';
+import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
 import UserGuideView from './UserGuideView';
 import FormattingHelpView from './FormattingHelpView';
@@ -134,6 +135,8 @@ export interface AppViewRouterProps {
   setTeEvaluation: React.Dispatch<React.SetStateAction<TranscriptEvaluationResult | null>>;
   teIsLoading: boolean;
   setTeIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  tePrefillTranscript: string | null;
+  setTePrefillTranscript: React.Dispatch<React.SetStateAction<string | null>>;
 
   // Refinement preview (DPFL test)
   refinementPreview: RefinementPreviewResult | null;
@@ -231,6 +234,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setTeEvaluation,
     teIsLoading,
     setTeIsLoading,
+    tePrefillTranscript,
+    setTePrefillTranscript,
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
@@ -408,11 +413,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'landing': {
       const isTemplateContext = (() => {
         if (!lifeContext) return false;
-        const fieldPattern = /\*\*[^*]+\*\*:\s*(.+)/g;
+        const lines = lifeContext.split('\n');
+        const fieldPattern = /^\*\*[^*]+\*\*:\s*(.+)/;
         let filledCount = 0;
-        let m;
-        while ((m = fieldPattern.exec(lifeContext)) !== null) {
-          if (m[1].trim()) filledCount++;
+        for (const line of lines) {
+          const m = line.match(fieldPattern);
+          if (m && m[1].trim()) filledCount++;
         }
         return filledCount <= 1;
       })();
@@ -606,7 +612,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setTeStep('pre');
             setTePreAnswers(null);
             setTeEvaluation(null);
+            setTePrefillTranscript(null);
             setView('transcriptEval');
+          }}
+          onTranscriptRecord={() => {
+            setView('transcriptRecord');
           }}
           onUpgrade={() => setMenuView('upgrade')}
           onStartSessionWithPrompt={handleStartSessionFromEval}
@@ -665,6 +675,20 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           encryptionKey={encryptionKey}
         />
       );
+    case 'transcriptRecord':
+      return (
+        <TranscriptRecorder
+          onBack={() => setView('botSelection')}
+          onSubmitToEvaluation={(transcript) => {
+            setTePrefillTranscript(transcript);
+            setTeStep('pre');
+            setTePreAnswers(null);
+            setTeEvaluation(null);
+            setView('transcriptEval');
+          }}
+          language={language}
+        />
+      );
     case 'transcriptEval': {
       const handleTePreSubmit = (answers: TranscriptPreAnswers) => {
         setTePreAnswers(answers);
@@ -704,13 +728,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         );
       }
       if (teStep === 'input') {
-        const showAudioTab = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
         return (
           <TranscriptInput
-            onSubmit={handleTeTranscriptSubmit}
+            onSubmit={(transcript) => { setTePrefillTranscript(null); handleTeTranscriptSubmit(transcript); }}
             onBack={() => setTeStep('pre')}
             isLoading={teIsLoading}
-            showAudioTab={showAudioTab}
+            initialTranscript={tePrefillTranscript || undefined}
             language={language}
           />
         );
