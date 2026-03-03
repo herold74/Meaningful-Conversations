@@ -361,10 +361,6 @@ Help the user EXTEND and ENRICH their existing Life Context.
         config.skipMistralBehaviorRules = true;
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'chat.js:config',message:'Chat config built',data:{botId,isInterviewBot,skipRules:!!config.skipMistralBehaviorRules,isInitialMessage,isNewSession,userRegionPreference,provider:activeProvider,sysInstrLen:finalSystemInstruction.length},timestamp:Date.now(),hypothesisId:'A,B,E'})}).catch(()=>{});
-    // #endregion
-
     const chatContents = isInitialMessage ? "" : modelHistory;
 
     // --- SSE Streaming path (Mistral only, non-test mode) ---
