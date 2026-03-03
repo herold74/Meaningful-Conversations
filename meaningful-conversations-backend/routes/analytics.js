@@ -18,7 +18,7 @@ router.post('/event', optionalAuth, async (req, res) => {
     }
 
     // Validate eventType (whitelist allowed events)
-    const allowedEventTypes = ['GUEST_LOGIN', 'PAGE_VIEW', 'FEATURE_USE'];
+    const allowedEventTypes = ['GUEST_LOGIN', 'PAGE_VIEW', 'FEATURE_USE', 'INTENT_SELECTED'];
     if (!allowedEventTypes.includes(eventType)) {
       return res.status(400).json({ error: 'Invalid eventType' });
     }
@@ -99,6 +99,58 @@ router.get('/guest-logins/stats', adminAuthMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching guest login stats:', error);
     res.status(500).json({ error: 'Failed to fetch guest login statistics' });
+  }
+});
+
+/**
+ * GET /api/analytics/intent-stats
+ * Get intent selection distribution (admin only)
+ */
+router.get('/intent-stats', adminAuthMiddleware, async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const events = await prisma.userEvent.findMany({
+      where: {
+        eventType: 'INTENT_SELECTED',
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      select: {
+        metadata: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const intentCounts = {};
+    const dailyMap = {};
+
+    events.forEach(event => {
+      const intent = event.metadata?.intent || 'unknown';
+      intentCounts[intent] = (intentCounts[intent] || 0) + 1;
+
+      const dateKey = event.createdAt.toISOString().split('T')[0];
+      if (!dailyMap[dateKey]) dailyMap[dateKey] = {};
+      dailyMap[dateKey][intent] = (dailyMap[dateKey][intent] || 0) + 1;
+    });
+
+    const total = events.length;
+    const distribution = Object.entries(intentCounts)
+      .map(([intent, count]) => ({
+        intent,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 1000) / 10 : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const daily = Object.entries(dailyMap)
+      .map(([date, intents]) => ({ date, ...intents }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({ total, distribution, daily });
+  } catch (error) {
+    console.error('Error fetching intent stats:', error);
+    res.status(500).json({ error: 'Failed to fetch intent statistics' });
   }
 });
 
