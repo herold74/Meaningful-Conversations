@@ -413,11 +413,25 @@ class WebSpeechService implements ISpeechService {
 
 /**
  * Native Speech Service - Uses custom NativeSTTPlugin (SFSpeechRecognizer)
- * Used in native iOS apps - provides proper audio session management
+ * Used in native iOS apps - provides proper audio session management.
+ *
+ * Includes auto-restart on silence/timeout to match the Android WebSpeechService
+ * behavior: when iOS ends recognition after a pause, the service transparently
+ * restarts and preserves all previously recognized text via accumulatedTranscript.
  */
 class NativeSpeechService implements ISpeechService {
     private listening: boolean = false;
     private listeners: Array<{ remove: () => void }> = [];
+    private stoppedManually: boolean = false;
+    private accumulatedTranscript: string = '';
+    private currentSessionTranscript: string = '';
+    private lastStartArgs: {
+        options: SpeechOptions;
+        onResult: (result: SpeechResult) => void;
+        onError?: (error: Error) => void;
+        onStart?: () => void;
+        onEnd?: () => void;
+    } | null = null;
 
     async isAvailable(): Promise<boolean> {
         try {
@@ -449,18 +463,39 @@ class NativeSpeechService implements ISpeechService {
         // Stop any existing recognition
         await this.stop();
 
+        this.stoppedManually = false;
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
+        this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
+
+        await this.startInternal(options, onResult, onError, onStart, onEnd);
+    }
+
+    private async startInternal(
+        options: SpeechOptions,
+        onResult: (result: SpeechResult) => void,
+        onError?: (error: Error) => void,
+        onStart?: () => void,
+        onEnd?: () => void
+    ): Promise<void> {
         try {
-            // Set up event listeners BEFORE starting
             const partialResultListener = await NativeSTT.addListener('partialResult', (data) => {
-                console.log('[NativeSpeechService] Result:', data.transcript);
+                this.currentSessionTranscript = data.transcript;
+                const combined = this.accumulatedTranscript
+                    ? this.accumulatedTranscript + ' ' + data.transcript
+                    : data.transcript;
                 onResult({
-                    transcript: data.transcript,
+                    transcript: combined,
                     isFinal: data.isFinal
                 });
             });
             this.listeners.push(partialResultListener);
 
             const errorListener = await NativeSTT.addListener('error', (data) => {
+                if (!this.stoppedManually) {
+                    console.log('[NativeSpeechService] Error during active session (auto-restart will handle):', data.message);
+                    return;
+                }
                 console.error('[NativeSpeechService] Error event:', data.message);
                 this.listening = false;
                 onError?.(new Error(data.message));
@@ -475,15 +510,44 @@ class NativeSpeechService implements ISpeechService {
             this.listeners.push(startedListener);
 
             const stoppedListener = await NativeSTT.addListener('stopped', () => {
+                if (!this.stoppedManually && this.lastStartArgs) {
+                    if (this.currentSessionTranscript.trim()) {
+                        this.accumulatedTranscript = this.accumulatedTranscript
+                            ? this.accumulatedTranscript + ' ' + this.currentSessionTranscript
+                            : this.currentSessionTranscript;
+                        this.currentSessionTranscript = '';
+                    }
+                    console.log('[NativeSpeechService] 🔄 Auto-restart after silence/timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
+
+                    this.removeAllListeners();
+
+                    setTimeout(async () => {
+                        if (this.stoppedManually || !this.lastStartArgs) return;
+                        try {
+                            const args = this.lastStartArgs;
+                            await this.startInternal(args.options, args.onResult, args.onError, args.onStart, args.onEnd);
+                        } catch (e) {
+                            console.error('[NativeSpeechService] Auto-restart failed:', e);
+                            this.listening = false;
+                            this.lastStartArgs = null;
+                            this.accumulatedTranscript = '';
+                            this.currentSessionTranscript = '';
+                            onEnd?.();
+                        }
+                    }, 300);
+                    return;
+                }
+
                 console.log('[NativeSpeechService] 🎙️ Stopped');
                 this.listening = false;
+                this.lastStartArgs = null;
+                this.accumulatedTranscript = '';
+                this.currentSessionTranscript = '';
                 onEnd?.();
             });
             this.listeners.push(stoppedListener);
 
-            // Start recognition via native plugin
             await NativeSTT.start({ language: options.language });
-            
             console.log('[NativeSpeechService] start() resolved');
 
         } catch (error) {
@@ -497,12 +561,15 @@ class NativeSpeechService implements ISpeechService {
     }
 
     async stop(): Promise<void> {
+        this.stoppedManually = true;
+        this.lastStartArgs = null;
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
         try {
             this.removeAllListeners();
             await NativeSTT.stop();
             console.log('[NativeSpeechService] stop() resolved');
         } catch (e) {
-            // Ignore errors during stop
             console.warn('[NativeSpeechService] Stop error (ignored):', e);
         }
         this.listening = false;
