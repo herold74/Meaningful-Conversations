@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenschutzerklärung — Sinnstiftende Gespräche</title>
+    <style>
+        :root { --bg: #f8faf8; --card: #ffffff; --text: #1a2e1a; --muted: #4a5a4a; --border: #d4e4d4; --accent: #2d8a4e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header .subtitle { color: var(--muted); font-size: 0.95rem; }
+        .lang-switch { text-align: center; margin-bottom: 2rem; }
+        .lang-switch button { padding: 0.4rem 1.2rem; margin: 0 0.3rem; border: 2px solid var(--border); border-radius: 2rem; background: var(--card); cursor: pointer; font-size: 0.9rem; }
+        .lang-switch button.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .content { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 2rem; }
+        h2 { font-size: 1.3rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--accent); }
+        h3 { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        h4 { font-size: 1rem; margin-top: 1.2rem; margin-bottom: 0.4rem; }
+        p { margin-bottom: 0.8rem; }
+        ul, ol { margin-bottom: 0.8rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.3rem; }
+        strong { color: var(--text); }
+        hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+        .footer { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        @media (max-width: 600px) { .container { padding: 1rem; } .content { padding: 1.2rem; } .header h1 { font-size: 1.4rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 id="page-title">Datenschutzerklärung</h1>
+        <div class="subtitle" id="page-subtitle">Sinnstiftende Gespräche — KI-Coaching App</div>
+    </div>
+    <div class="lang-switch">
+        <button id="btn-de" class="active" onclick="showLang('de')">Deutsch</button>
+        <button id="btn-en" onclick="showLang('en')">English</button>
+    </div>
+    <div class="content">
+        <div id="content-de">
+<p>Diese Datenschutzerklärung klärt Sie über die Art, den Umfang und Zweck der Verarbeitung von personenbezogenen Daten (nachfolgend kurz „Daten") im Rahmen der Erbringung unserer Leistungen sowie innerhalb unseres Angebotes und der mit ihm verbundenen Anwendungen, Funktionen und Inhalte auf (nachfolgend gemeinsam bezeichnet als „Angebot").</p>
+
+<h2>1. Verantwortlicher</h2>
+<p><strong>Verantwortlich für die Datenverarbeitung:</strong></p>
+<p>Günter Herold, MSc<br>Lebens- und Sozialberatung<br>Gersthofer Strasse 148<br>1180 Wien<br>Österreich</p>
+<p><strong>Kontakt:</strong><br>E-Mail: gherold@manualmode.at<br>Telefon: +43 664 9628694<br>Website: www.manualmode.at</p>
+
+<h2>2. Arten der verarbeiteten Daten</h2>
+<ul>
+<li>E-Mail-Adresse (bei Registrierung)</li>
+<li><strong>Vorname und Nachname (optional, freiwillig bei Registrierung)</strong></li>
+<li>Passwort (verschlüsselt gespeichert mit bcrypt)</li>
+<li>Ende-zu-Ende-verschlüsselte Lebenskontext-Daten</li>
+<li>Ende-zu-Ende-verschlüsselte Persönlichkeitsprofil-Daten</li>
+<li>Gamification-Daten (XP, Level, Streak, Achievements)</li>
+<li>Technische Zugriffsdaten (IP-Adresse, Browser-Typ, Zugriffszeitpunkt)</li>
+<li>API-Nutzungsdaten (Anzahl API-Aufrufe, verwendete Modelle, Zeitstempel)</li>
+<li>Feedback (optional und nur wenn vom Nutzer eingereicht)</li>
+</ul>
+
+<h2>3. Zweck der Verarbeitung</h2>
+<ul>
+<li><strong>Bereitstellung der Coaching-Funktionen:</strong> Ermöglichung von KI-gestützten Coaching-Gesprächen</li>
+<li><strong>Personalisiertes Coaching:</strong> Nutzung Ihres Persönlichkeitsprofils zur Anpassung der Coaching-Gespräche an Ihre individuellen Bedürfnisse</li>
+<li><strong>Account-Verwaltung:</strong> Registrierung, Login, Passwortverwaltung</li>
+<li><strong>Personalisierte Ansprache (optional):</strong> Verwendung Ihres Namens für eine persönlichere Coaching-Gesprächsführung</li>
+<li><strong>E-Mail-Kommunikation:</strong> Versand von Verifizierungs- und Passwort-Reset-E-Mails; Newsletter nur mit Ihrer Einwilligung</li>
+<li><strong>Fortschrittstracking:</strong> Speicherung von Gamification-Daten</li>
+<li><strong>Kostenkontrolle:</strong> Überwachung der API-Nutzung</li>
+<li><strong>Service-Verbesserung:</strong> Analyse von Feedback</li>
+</ul>
+
+<h2>4. Rechtsgrundlage der Verarbeitung</h2>
+<ul>
+<li><strong>Art. 6 Abs. 1 lit. b DSGVO:</strong> Verarbeitung zur Erfüllung eines Vertrags</li>
+<li><strong>Art. 6 Abs. 1 lit. a DSGVO:</strong> Einwilligung (Name, Newsletter, Feedback)</li>
+<li><strong>Art. 6 Abs. 1 lit. f DSGVO:</strong> Berechtigtes Interesse (API-Kostenkontrolle, Sicherheit)</li>
+</ul>
+<p>Sie können Ihre Einwilligung jederzeit widerrufen — per App-Einstellung oder E-Mail an gherold@manualmode.at.</p>
+
+<h2>5. Empfänger und Übermittlung von Daten</h2>
+
+<h3>5.1 KI-Dienste (Auftragsverarbeiter)</h3>
+<h4>Google Gemini API</h4>
+<ul>
+<li><strong>Zweck:</strong> KI-gestützte Gesprächsverarbeitung</li>
+<li><strong>Standort:</strong> USA (mit EU-Standardvertragsklauseln)</li>
+</ul>
+<h4>Mistral AI API</h4>
+<ul>
+<li><strong>Zweck:</strong> Alternative KI-gestützte Gesprächsverarbeitung</li>
+<li><strong>Standort:</strong> Frankreich (EU)</li>
+</ul>
+<p>Ihre Gespräche werden an den jeweils konfigurierten KI-Dienst zur Verarbeitung gesendet. Sensible Daten werden <strong>nicht</strong> dauerhaft beim KI-Anbieter gespeichert.</p>
+
+<h4>Performance-Optimierung (Prompt Caching)</h4>
+<p>Teile Ihres Lebenskontexts werden für maximal <strong>5 Minuten</strong> auf Servern von Google zwischengespeichert, sind nur für Ihre eigenen Anfragen zugänglich und werden danach automatisch gelöscht.</p>
+
+<h3>5.2 Mailjet (Auftragsverarbeiter)</h3>
+<ul>
+<li><strong>Zweck:</strong> E-Mail-Versand (Verifizierung, Passwort-Reset)</li>
+<li><strong>Standort:</strong> Frankreich (EU)</li>
+</ul>
+
+<h3>5.3 Hetzner Online GmbH (Auftragsverarbeiter)</h3>
+<ul>
+<li><strong>Zweck:</strong> Server-Hosting</li>
+<li><strong>Standort:</strong> Deutschland (EU)</li>
+</ul>
+
+<h2>6. Datensicherheit</h2>
+<ul>
+<li><strong>Ende-zu-Ende-Verschlüsselung (E2EE):</strong> Ihr Lebenskontext und Persönlichkeitsprofil werden auf Ihrem Gerät verschlüsselt. Nur Sie können die Daten entschlüsseln.</li>
+<li><strong>Passwort-Hashing:</strong> Passwörter werden mit bcrypt gehashed.</li>
+<li><strong>HTTPS/TLS:</strong> Alle Datenübertragungen sind verschlüsselt.</li>
+</ul>
+<p><strong>WICHTIG:</strong> Wir können Ihr Passwort NICHT wiederherstellen. Bei Verlust gehen verschlüsselte Daten unwiederbringlich verloren.</p>
+
+<h2>7. Speicherdauer</h2>
+<ul>
+<li><strong>Account-Daten:</strong> Bis zur Löschung Ihres Accounts</li>
+<li><strong>Verschlüsselte Daten:</strong> Bis zur Löschung Ihres Accounts</li>
+<li><strong>API-Nutzungsdaten:</strong> 12 Monate</li>
+<li><strong>Feedback:</strong> Bis zur Löschung Ihres Accounts</li>
+<li><strong>Verifizierungstoken:</strong> 24 Stunden</li>
+<li><strong>Passwort-Reset-Token:</strong> 1 Stunde</li>
+<li><strong>Server-Logs:</strong> 7 Tage</li>
+</ul>
+
+<h2>8. Ihre Rechte</h2>
+<p>Sie haben folgende Rechte gemäß DSGVO:</p>
+<ul>
+<li><strong>Auskunft</strong> (Art. 15) — Informationen über Ihre gespeicherten Daten</li>
+<li><strong>Berichtigung</strong> (Art. 16) — Korrektur unrichtiger Daten</li>
+<li><strong>Löschung</strong> (Art. 17) — Löschung Ihrer Daten (jederzeit in der App: Menü → Haftungsausschluss → Konto löschen)</li>
+<li><strong>Datenübertragbarkeit</strong> (Art. 20) — Export Ihrer Daten (in der App: Menü → Daten exportieren)</li>
+<li><strong>Widerspruch</strong> (Art. 21) — Widerspruch gegen die Verarbeitung</li>
+<li><strong>Beschwerde</strong> bei der Österreichischen Datenschutzbehörde (Barichgasse 40-42, 1030 Wien, <a href="https://www.dsb.gv.at/">www.dsb.gv.at</a>)</li>
+</ul>
+
+<h2>9. Cookies und lokale Speicherung</h2>
+<p>Die App verwendet <strong>localStorage</strong> und <strong>sessionStorage</strong> für technisch notwendige Funktionen (Login-Token, Spracheinstellung, Gastmodus-Daten). Diese Daten werden ausschließlich lokal in Ihrem Browser gespeichert.</p>
+<p><strong>Wir verwenden KEINE Tracking-Cookies, keine Marketing-Cookies und keine Analyse-Tools von Drittanbietern.</strong></p>
+
+<h2>10. Gastmodus</h2>
+<p>Im Gastmodus werden Ihre Daten <strong>ausschließlich lokal</strong> in Ihrem Browser verarbeitet. Es erfolgt keine Speicherung auf unseren Servern. Um Missbrauch zu verhindern, nutzen wir ein wöchentliches Nachrichtenlimit mit einem Browser-Fingerprint (gespeichert für maximal 7 Tage, nicht mit anderen Daten verknüpft).</p>
+
+<h2>11. Kontolöschung</h2>
+<p>Sie können Ihren Account jederzeit in der App vollständig löschen. Bei Löschung werden alle personenbezogenen Daten unwiderruflich entfernt.</p>
+
+<h2>12. Änderungen</h2>
+<p>Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets den aktuellen rechtlichen Anforderungen entspricht.</p>
+
+<hr>
+<p><strong>Stand:</strong> März 2026</p>
+        </div>
+
+        <div id="content-en" style="display:none">
+<p>This Privacy Policy explains the nature, scope, and purpose of the processing of personal data within our application "Meaningful Conversations".</p>
+
+<h2>1. Controller</h2>
+<p><strong>Responsible for data processing:</strong></p>
+<p>Günter Herold, MSc<br>Life and Social Counseling<br>Gersthofer Strasse 148<br>1180 Vienna<br>Austria</p>
+<p><strong>Contact:</strong><br>Email: gherold@manualmode.at<br>Phone: +43 664 9628694<br>Website: www.manualmode.at</p>
+
+<h2>2. Types of Data Processed</h2>
+<ul>
+<li>Email address (upon registration)</li>
+<li><strong>First and last name (optional, voluntary)</strong></li>
+<li>Password (encrypted with bcrypt)</li>
+<li>End-to-end encrypted Life Context data</li>
+<li>End-to-end encrypted personality profile data</li>
+<li>Gamification data (XP, Level, Streak, Achievements)</li>
+<li>Technical access data (IP address, browser type, access time)</li>
+<li>API usage data (number of API calls, models used, timestamps)</li>
+<li>Feedback (optional, only if submitted by user)</li>
+</ul>
+
+<h2>3. Purpose of Processing</h2>
+<ul>
+<li><strong>Coaching functions:</strong> Enabling AI-powered coaching conversations</li>
+<li><strong>Personalized coaching:</strong> Using your personality profile to adapt conversations</li>
+<li><strong>Account management:</strong> Registration, login, password management</li>
+<li><strong>Email communication:</strong> Verification and password reset emails; newsletter only with consent</li>
+<li><strong>Progress tracking:</strong> Storing gamification data</li>
+<li><strong>Cost control:</strong> Monitoring API usage</li>
+<li><strong>Service improvement:</strong> Analyzing feedback</li>
+</ul>
+
+<h2>4. Legal Basis (GDPR)</h2>
+<ul>
+<li><strong>Art. 6(1)(b):</strong> Contract fulfillment (provision of services)</li>
+<li><strong>Art. 6(1)(a):</strong> Consent (name, newsletter, feedback)</li>
+<li><strong>Art. 6(1)(f):</strong> Legitimate interest (cost control, security)</li>
+</ul>
+<p>You can withdraw your consent at any time — via app settings or by emailing gherold@manualmode.at.</p>
+
+<h2>5. Data Recipients</h2>
+
+<h3>5.1 AI Services (Data Processors)</h3>
+<p><strong>Google Gemini API</strong> (USA, with EU Standard Contractual Clauses) and <strong>Mistral AI API</strong> (France, EU) process your coaching conversations. Sensitive data is <strong>not</strong> permanently stored by AI providers. Prompt caching stores parts of your context for up to <strong>5 minutes</strong> on Google servers.</p>
+
+<h3>5.2 Mailjet (Data Processor)</h3>
+<p>Email delivery (verification, password reset) — France (EU).</p>
+
+<h3>5.3 Hetzner Online GmbH (Data Processor)</h3>
+<p>Server hosting — Germany (EU).</p>
+
+<h2>6. Data Security</h2>
+<ul>
+<li><strong>End-to-End Encryption (E2EE):</strong> Your Life Context and personality profile are encrypted on your device. Only you can decrypt them.</li>
+<li><strong>Password Hashing:</strong> bcrypt with salting.</li>
+<li><strong>HTTPS/TLS:</strong> All transmissions are encrypted.</li>
+</ul>
+<p><strong>IMPORTANT:</strong> We CANNOT recover your password. If lost, your encrypted data is irretrievably gone.</p>
+
+<h2>7. Storage Duration</h2>
+<ul>
+<li><strong>Account data:</strong> Until you delete your account</li>
+<li><strong>Encrypted data:</strong> Until you delete your account</li>
+<li><strong>API usage data:</strong> 12 months</li>
+<li><strong>Verification tokens:</strong> 24 hours</li>
+<li><strong>Password reset tokens:</strong> 1 hour</li>
+<li><strong>Server logs:</strong> 7 days</li>
+</ul>
+
+<h2>8. Your Rights (GDPR)</h2>
+<ul>
+<li><strong>Access</strong> (Art. 15) — Information about your stored data</li>
+<li><strong>Rectification</strong> (Art. 16) — Correction of inaccurate data</li>
+<li><strong>Erasure</strong> (Art. 17) — Deletion of your data (in-app: Menu → Disclaimer → Delete Account)</li>
+<li><strong>Data Portability</strong> (Art. 20) — Export your data (in-app: Menu → Export Data)</li>
+<li><strong>Objection</strong> (Art. 21) — Object to processing</li>
+<li><strong>Complaint</strong> with the Austrian Data Protection Authority (Barichgasse 40-42, 1030 Vienna, <a href="https://www.dsb.gv.at/">www.dsb.gv.at</a>)</li>
+</ul>
+
+<h2>9. Cookies and Local Storage</h2>
+<p>The app uses <strong>localStorage</strong> and <strong>sessionStorage</strong> for essential functions (login token, language, guest data). Data is stored exclusively locally in your browser.</p>
+<p><strong>We do NOT use tracking cookies, marketing cookies, or third-party analytics tools.</strong></p>
+
+<h2>10. Guest Mode</h2>
+<p>In guest mode, all data is processed <strong>exclusively locally</strong> in your browser. No server storage occurs. To prevent abuse, a weekly message limit with a browser fingerprint is used (stored for max 7 days, not linked to other data).</p>
+
+<h2>11. Account Deletion</h2>
+<p>You can permanently delete your account at any time in the app. All personal data will be irretrievably removed.</p>
+
+<h2>12. Changes</h2>
+<p>We reserve the right to update this privacy policy to comply with current legal requirements.</p>
+
+<hr>
+<p><strong>Last updated:</strong> March 2026</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2026 Günter Herold — <a href="https://mc-app.manualmode.at">Sinnstiftende Gespräche</a></p>
+    </div>
+</div>
+<script>
+function showLang(lang) {
+    document.getElementById('content-de').style.display = lang === 'de' ? 'block' : 'none';
+    document.getElementById('content-en').style.display = lang === 'en' ? 'block' : 'none';
+    document.getElementById('btn-de').className = lang === 'de' ? 'active' : '';
+    document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+    document.getElementById('page-title').textContent = lang === 'de' ? 'Datenschutzerklärung' : 'Privacy Policy';
+    document.getElementById('page-subtitle').textContent = lang === 'de'
+        ? 'Sinnstiftende Gespräche — KI-Coaching App'
+        : 'Meaningful Conversations — AI Coaching App';
+}
+</script>
+</body>
+</html>
