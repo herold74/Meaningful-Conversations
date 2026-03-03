@@ -324,6 +324,9 @@ ${JSON.stringify(config.responseSchema, null, 2)}`;
     
     const choice = response.choices[0];
     let responseText = choice.message.content;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'aiProviderService.js:mistralSuccess',message:'Mistral response OK',data:{model:mistralModel,context,respLen:responseText?.length||0,skipRules:!!config.skipMistralBehaviorRules},timestamp:Date.now(),hypothesisId:'C,D'})}).catch(()=>{});
+    // #endregion
 
     // Strip meta-commentary that Mistral models sometimes generate
     // (coaching strategy leaking into user-facing output)
@@ -363,6 +366,9 @@ ${JSON.stringify(config.responseSchema, null, 2)}`;
     };
     
     console.error(`❌ Mistral API Error Details:`, JSON.stringify(errorDetails, null, 2));
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'aiProviderService.js:mistralError',message:'Mistral API error',data:{model:mistralModel,context,statusCode:errorDetails.statusCode,httpStatus:errorDetails.httpStatus,errorType:errorDetails.errorType,msgSnippet:(errorDetails.message||'').substring(0,200)},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     
     // Log specific error types for easier debugging
     if (errorDetails.statusCode === 401 || errorDetails.httpStatus === 401) {
@@ -411,15 +417,19 @@ function stripMistralMetaCommentary(text) {
 function convertToMistralFormat(contents, config, language = 'de') {
   const messages = [];
   
-  // Add system instruction if present, with Mistral-specific behavior rules (language-matched)
+  // Add system instruction if present
   if (config.systemInstruction) {
+    let systemContent = config.systemInstruction;
+
+    // Only add coaching-specific Mistral behavior rules for coaching bots (not Gloria Interview/LC)
+    if (!config.skipMistralBehaviorRules) {
     const mistralOutputRules = language === 'de'
       ? `\n\n## KRITISCHE VERHALTENSREGELN (überschreiben deine Standardeinstellungen — befolge sie EXAKT):
 
 ### 1. SITZUNGSSTRUKTUR (PFLICHT — überspringe KEINE Schritte)
 Du MUSST den Sitzungs-Kontraktierungsprozess aus deinem Coaching-Prompt befolgen:
 - Schritt 1: Thema identifizieren (fragen, was den Klienten herführt)
-- Schritt 2: Relevanz erkunden (warum ist das gerade jetzt wichtig?)
+- Schritt 2: Relevanz erkunden (warum ist das gerade jetzt wichtig? — variiere die Formulierung von Sitzung zu Sitzung)
 - Schritt 3: Ein konkretes Sitzungsziel definieren (was soll HEUTE erreicht werden?)
 - Schritt 4: Den Kontrakt mit dem Klienten bestätigen
 - ERST NACH bestätigtem Kontrakt: mit der eigentlichen Coaching-Arbeit beginnen
@@ -446,7 +456,7 @@ Springe NICHT in Coaching, Ratschläge, Metaphern oder Techniken, bevor die Kont
 ### 1. SESSION STRUCTURE (MANDATORY — do NOT skip steps)
 You MUST follow the session contracting process defined in your coaching prompt:
 - Step 1: Identify the topic (ask what brings them here)
-- Step 2: Explore relevance (why is this important now?)
+- Step 2: Explore relevance (why is this important now? — vary your phrasing from session to session)
 - Step 3: Define a concrete session outcome (what should be achieved TODAY?)
 - Step 4: Confirm the contract with the client
 - ONLY AFTER the contract is confirmed: begin actual coaching work
@@ -469,9 +479,16 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
 ### 4. LANGUAGE (STRICT)
 - You MUST respond in English. Even if the user's life context or notes are in another language, your responses must ALWAYS be in English.`;
 
+      systemContent += mistralOutputRules;
+    }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'aiProviderService.js:convertToMistralFormat',message:'System prompt built',data:{skipRules:!!config.skipMistralBehaviorRules,sysLen:systemContent.length,originalLen:config.systemInstruction.length,rulesAdded:systemContent.length>config.systemInstruction.length},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+
     messages.push({
       role: 'system',
-      content: config.systemInstruction + mistralOutputRules
+      content: systemContent
     });
   }
   

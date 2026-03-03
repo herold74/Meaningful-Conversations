@@ -80,7 +80,7 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
         return (
             <div className="flex flex-col items-center justify-center py-20 animate-fadeIn">
                 <BrandLoader size="md" />
-                <p className="mt-4 text-content-secondary text-lg">{t('interview_transcript_loading')}</p>
+                <p className="mt-4 text-content-secondary text-lg text-center whitespace-pre-line">{t('interview_transcript_loading')}</p>
             </div>
         );
     }

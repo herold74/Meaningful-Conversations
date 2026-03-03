@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — Sinnstiftende Gespräche</title>
+    <style>
+        :root { --bg: #f8faf8; --card: #ffffff; --text: #1a2e1a; --muted: #4a5a4a; --border: #d4e4d4; --accent: #2d8a4e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .header { text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .header .subtitle { color: var(--muted); font-size: 0.95rem; }
+        .lang-switch { text-align: center; margin-bottom: 2rem; }
+        .lang-switch button { padding: 0.4rem 1.2rem; margin: 0 0.3rem; border: 2px solid var(--border); border-radius: 2rem; background: var(--card); cursor: pointer; font-size: 0.9rem; }
+        .lang-switch button.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .content { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 2rem; }
+        h2 { font-size: 1.3rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--accent); }
+        h2:first-child { margin-top: 0; }
+        p { margin-bottom: 0.8rem; }
+        ul { margin-bottom: 0.8rem; padding-left: 1.5rem; }
+        li { margin-bottom: 0.3rem; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .contact-box { background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.2rem; margin: 1rem 0; }
+        .contact-box p { margin-bottom: 0.4rem; }
+        .faq-item { margin-bottom: 1.5rem; }
+        .faq-item h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
+        hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+        .footer { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem; }
+        @media (max-width: 600px) { .container { padding: 1rem; } .content { padding: 1.2rem; } .header h1 { font-size: 1.4rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 id="page-title">Support</h1>
+        <div class="subtitle" id="page-subtitle">Sinnstiftende Gespräche — KI-Coaching App</div>
+    </div>
+    <div class="lang-switch">
+        <button id="btn-de" class="active" onclick="showLang('de')">Deutsch</button>
+        <button id="btn-en" onclick="showLang('en')">English</button>
+    </div>
+    <div class="content">
+        <div id="content-de">
+
+<h2>Über die App</h2>
+<p><strong>Sinnstiftende Gespräche</strong> verbindet KI-Coaching mit einem einzigartigen Gedächtnis-System. Verschiedene KI-Coaches mit eigenem Stil begleiten Sie durch Reflexion, Entscheidungsfindung und persönliches Wachstum — gestützt auf Ihren individuellen Lebenskontext.</p>
+
+<h2>Kontakt</h2>
+<div class="contact-box">
+    <p><strong>Günter Herold, MSc</strong></p>
+    <p>Lebens- und Sozialberatung</p>
+    <p>E-Mail: <a href="mailto:gherold@manualmode.at">gherold@manualmode.at</a></p>
+    <p>Website: <a href="https://manualmode.at">manualmode.at</a></p>
+</div>
+<p>Bitte beschreiben Sie Ihr Anliegen möglichst genau. Wir antworten in der Regel innerhalb von 24 Stunden.</p>
+
+<h2>Häufige Fragen</h2>
+
+<div class="faq-item">
+    <h3>Brauche ich ein Konto, um die App zu nutzen?</h3>
+    <p>Nein. Im Gastmodus können Sie die App ohne Registrierung nutzen. Alle Daten bleiben dabei ausschließlich in Ihrem Browser. Ein Konto ermöglicht die serverseitige Speicherung (Ende-zu-Ende-verschlüsselt) und den Zugang zu weiteren Coaches.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Was ist der Lebenskontext?</h3>
+    <p>Eine strukturierte Datei mit Ihren Zielen, Werten und Herausforderungen. Sie können sie per Fragebogen, im Interview mit Gloria oder im Markdown-Editor erstellen. Ihre Coaches nutzen diesen Kontext, um Gespräche individuell zu gestalten.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Sind meine Daten sicher?</h3>
+    <p>Ja. Lebenskontext und Persönlichkeitsprofil werden auf Ihrem Gerät verschlüsselt, bevor sie an den Server übermittelt werden (Ende-zu-Ende-Verschlüsselung). Im Gastmodus verlassen Ihre Daten Ihren Browser nicht. Details finden Sie in unserer <a href="/privacy">Datenschutzerklärung</a>.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Wie kann ich mein Konto löschen?</h3>
+    <p>Öffnen Sie das Menü (☰) → „Haftungsausschluss" → scrollen Sie zu „Konto löschen". Alle Daten werden unwiderruflich entfernt.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Wie kann ich meine Daten exportieren?</h3>
+    <p>Öffnen Sie das Menü (☰) → „Daten exportieren". Sie erhalten eine JSON-Datei mit allen Ihren Daten. Den Lebenskontext können Sie zusätzlich als Markdown oder PDF herunterladen.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Die App funktioniert nicht richtig. Was kann ich tun?</h3>
+    <p>Stellen Sie sicher, dass Sie eine aktive Internetverbindung haben — die KI-Coaches benötigen eine Verbindung zu unserem Server. Falls das Problem bestehen bleibt, senden Sie uns bitte eine E-Mail mit einer Beschreibung des Problems.</p>
+</div>
+
+<hr>
+<p><a href="/privacy">Datenschutzerklärung</a></p>
+
+        </div>
+
+        <div id="content-en" style="display:none">
+
+<h2>About the App</h2>
+<p><strong>Meaningful Conversations</strong> combines AI coaching with a unique memory system. Various AI coaches with distinct styles guide you through reflection, decision-making, and personal growth — supported by your individual Life Context.</p>
+
+<h2>Contact</h2>
+<div class="contact-box">
+    <p><strong>Günter Herold, MSc</strong></p>
+    <p>Life and Social Counseling</p>
+    <p>Email: <a href="mailto:gherold@manualmode.at">gherold@manualmode.at</a></p>
+    <p>Website: <a href="https://manualmode.at">manualmode.at</a></p>
+</div>
+<p>Please describe your issue as clearly as possible. We typically respond within 24 hours.</p>
+
+<h2>Frequently Asked Questions</h2>
+
+<div class="faq-item">
+    <h3>Do I need an account to use the app?</h3>
+    <p>No. In Guest Mode, you can use the app without registration. All data stays exclusively in your browser. An account enables server-side storage (end-to-end encrypted) and access to additional coaches.</p>
+</div>
+
+<div class="faq-item">
+    <h3>What is the Life Context?</h3>
+    <p>A structured file containing your goals, values, and challenges. You can create it via questionnaire, in an interview with Gloria, or in the Markdown editor. Your coaches use this context to personalize conversations.</p>
+</div>
+
+<div class="faq-item">
+    <h3>Is my data secure?</h3>
+    <p>Yes. Your Life Context and personality profile are encrypted on your device before being transmitted to the server (end-to-end encryption). In Guest Mode, your data never leaves your browser. See our <a href="/privacy">Privacy Policy</a> for details.</p>
+</div>
+
+<div class="faq-item">
+    <h3>How can I delete my account?</h3>
+    <p>Open the menu (☰) → "Disclaimer" → scroll to "Delete Account". All data will be permanently removed.</p>
+</div>
+
+<div class="faq-item">
+    <h3>How can I export my data?</h3>
+    <p>Open the menu (☰) → "Export My Data". You'll receive a JSON file with all your data. You can also download your Life Context as Markdown or PDF.</p>
+</div>
+
+<div class="faq-item">
+    <h3>The app isn't working properly. What can I do?</h3>
+    <p>Make sure you have an active internet connection — the AI coaches require a connection to our server. If the problem persists, please send us an email describing the issue.</p>
+</div>
+
+<hr>
+<p><a href="/privacy">Privacy Policy</a></p>
+
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2026 Günter Herold — <a href="https://mc-app.manualmode.at">Sinnstiftende Gespräche</a></p>
+    </div>
+</div>
+<script>
+function showLang(lang) {
+    document.getElementById('content-de').style.display = lang === 'de' ? 'block' : 'none';
+    document.getElementById('content-en').style.display = lang === 'en' ? 'block' : 'none';
+    document.getElementById('btn-de').className = lang === 'de' ? 'active' : '';
+    document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+    document.getElementById('page-title').textContent = 'Support';
+    document.getElementById('page-subtitle').textContent = lang === 'de'
+        ? 'Sinnstiftende Gespräche — KI-Coaching App'
+        : 'Meaningful Conversations — AI Coaching App';
+}
+</script>
+</body>
+</html>

@@ -5,6 +5,8 @@ server {
     # Anonymized access logs for GDPR compliance
     access_log /var/log/nginx/staging-access.log anonymized;
     
+    client_max_body_size 30m;
+    
     # Frontend
     location / {
         proxy_pass http://FRONTEND_IP:3000;
@@ -29,6 +31,8 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
     }
 
     # IMPORTANT: Both IPv4 and IPv6 listeners are required

@@ -168,19 +168,58 @@ Once you have screenshots, update the main README.md:
    git push
    ```
 
-## 📊 Current Status
+## 📊 Current Status (Updated 2026-03-02)
 
-- [ ] 01-landing (0 screenshots)
+**Devices:** iPad Pro 13" (M5) — App Store required, iPhone 17 Pro Max — App Store required
+**Language:** German (DE)
+**Modes:** Light Mode + Dark Mode
+
+- [x] 01-landing (5 screenshots)
+  - `01-welcome-dark-ipad13-de.png` — Welcome screen: Login/Register/Guest (Dark)
+  - `02-landing-template-context-ipad13-de.png` — Landing with template LC + Extend/Interview buttons
+  - `03-welcome-dark-iphone-de.png` — Welcome screen (Dark, iPhone)
+  - `04-landing-template-context-iphone-de.png` — Landing with template LC (iPhone)
+  - `05-landing-empty-new-session-iphone-de.png` — Landing empty, new session (iPhone)
 - [ ] 02-auth (0 screenshots)
-- [ ] 03-context-setup (0 screenshots)
-- [ ] 04-bot-selection (0 screenshots)
-- [ ] 05-chat (0 screenshots)
-- [ ] 06-session-review (0 screenshots)
-- [ ] 07-achievements (0 screenshots)
+- [x] 03-context-setup (12 screenshots)
+  - `01-intent-picker-dark-ipad13-de.png` — Intent selection (Dark)
+  - `02-questionnaire-empty-ipad13-de.png` — LC questionnaire, Kernprofil empty
+  - `03-questionnaire-filled-ipad13-de.png` — LC questionnaire, Kernprofil filled
+  - `04-questionnaire-career-ipad13-de.png` — LC questionnaire, Karriere & Beruf filled
+  - `05-lc-editor-preview-enriched-ipad13-de.png` — LC editor preview, post-session enriched content
+  - `06-intent-picker-dark-iphone-de.png` — Intent selection (Dark, iPhone)
+  - `07-questionnaire-filled-iphone-de.png` — LC questionnaire, Kernprofil filled (iPhone)
+  - `08-questionnaire-career-iphone-de.png` — LC questionnaire, Karriere section (iPhone)
+  - `09-lc-editor-edit-mode-iphone-de.png` — LC Markdown editor, edit tab (iPhone)
+  - `10-lc-editor-preview-iphone-de.png` — LC Markdown editor, preview tab (iPhone)
+  - `11-lc-editor-preview-dark-iphone-de.png` — LC Markdown editor, preview (Dark, iPhone)
+  - `12-gloria-interview-extension-iphone-de.png` — Gloria extending existing LC via interview (iPhone)
+- [x] 04-bot-selection (2 screenshots)
+  - `01-coach-grid-full-ipad13-de.png` — Full coach grid: Management + Coaching sections
+  - `02-coaching-section-iphone-de.png` — Coaching section: Max & Ava (iPhone)
+- [x] 05-chat (7 screenshots)
+  - `01-voice-mode-nobody-ipad13-de.png` — Voice mode with Nobody
+  - `02-coaching-session-ava-ipad13-de.png` — Ava coaching session, full conversation
+  - `03-voice-mode-ava-iphone-de.png` — Voice mode with Ava (iPhone)
+  - `04-coaching-session-ava-iphone-de.png` — Ava coaching session (iPhone)
+  - `05-coaching-session-ava-dark-iphone-de.png` — Ava coaching session (Dark, iPhone)
+  - `06-coaching-deep-tts-active-iphone-de.png` — Deep coaching, TTS active (iPhone)
+  - `07-session-analyzing-iphone-de.png` — Session analyzing spinner (iPhone)
+- [x] 06-session-review (9 screenshots)
+  - `01-review-findings-steps-ipad13-de.png` — Diskursanalyse + Findings + Next Steps + Proposed Updates
+  - `02-review-diff-final-ipad13-de.png` — Proposed Updates + Diff View + Final Context + Buttons
+  - `03-review-updates-diff-ipad13-de.png` — More Updates + Diff View + Buttons
+  - `04-review-updates-diff-dark-ipad13-de.png` — Same as above (Dark)
+  - `05-review-findings-iphone-de.png` — Diskursanalyse + Findings (iPhone)
+  - `06-review-updates-diff-iphone-de.png` — Proposed Updates + Diff View (iPhone)
+  - `07-review-updates-diff-dark-iphone-de.png` — Same as above (Dark, iPhone)
+  - `08-review-diff-final-buttons-iphone-de.png` — Diff View + Final Context + Buttons (iPhone)
+  - `09-review-diff-career-iphone-de.png` — Diff Career section detail (iPhone)
+- [x] 07-achievements (2 screenshots)
+  - `01-achievements-dark-ipad13-de.png` — Achievements grid (Dark)
+  - `02-achievements-light-ipad13-de.png` — Achievements grid (Light)
 - [ ] 08-admin (0 screenshots)
-- [ ] 09-mobile (0 screenshots)
+- [ ] 09-mobile (0 screenshots — covered by iPhone screenshots in other categories)
 
-**Total: 0 screenshots captured**
-
-Update this checklist as you add screenshots!
+**Total: 37 screenshots (iPad 13": 16, iPhone Pro Max: 21)**
 

@@ -28,6 +28,12 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         stressKeywordsDetected: false, // Track stress keywords (not used for triggering comfort check)
     };
 
+    const MAX_MESSAGE_LENGTH = 5000;
+    const lastUserMsg = testUserMessage || history?.[history.length - 1]?.parts?.[0]?.text || '';
+    if (lastUserMsg.length > MAX_MESSAGE_LENGTH) {
+        return res.status(413).json({ error: `Message too long (${lastUserMsg.length} chars). Maximum is ${MAX_MESSAGE_LENGTH}.` });
+    }
+
     const bot = BOTS.find(b => b.id === botId);
     if (!bot) {
         return res.status(404).json({ error: 'Bot not found' });
@@ -85,22 +91,23 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     systemInstruction = systemInstruction.replace(/\[CURRENT_DATE\]/g, formattedDate);
 
     const isInitialMessage = history.length === 0;
+    const isInterviewBot = bot.id === 'gloria-life-context' || bot.id === 'gloria-interview';
 
     const isPreSeededTopic = !isInitialMessage && isNewSession && history.length === 1 && history[0]?.role === 'user';
 
-    if (isPreSeededTopic) {
+    if (isPreSeededTopic && !isInterviewBot) {
         if (language === 'de') {
             systemInstruction += "\n\n## ⚠️ KRITISCH — Der Benutzer hat bereits sein Thema genannt:\nDer Benutzer hat sein Thema in der ersten Nachricht klar definiert. Sie MÜSSEN dieses Thema direkt ansprechen. IGNORIEREN Sie vollständig alle 'Initial Interaction Priority'-Regeln und alle 'Achievable Next Steps' aus dem Lebenskontext. Fragen Sie NICHT nach früheren Vorhaben oder Zielen. Beginnen Sie direkt mit dem Thema des Benutzers.";
         } else {
             systemInstruction += "\n\n## ⚠️ CRITICAL — The user has already stated their topic:\nThe user has clearly defined their topic in the first message. You MUST address this topic directly. COMPLETELY IGNORE any 'Initial Interaction Priority' rules and any 'Achievable Next Steps' from the life context. Do NOT ask about previous intentions or goals. Start directly with the user's topic.";
         }
-    } else if (isInitialMessage && isNewSession) {
+    } else if (isInitialMessage && isNewSession && !isInterviewBot) {
         if (language === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
         } else {
             systemInstruction += "\n\n## Special Instruction for this First Message:\nThis is the user's very first interaction in this session. You MUST ignore any 'Initial Interaction Priority' rules about checking 'Next Steps'. Your first message MUST be your standard, warm welcome, asking what is on their mind. Do not mention anything about 'welcome back' or previous steps.";
         }
-    } else if (isInitialMessage && !isNewSession) {
+    } else if (isInitialMessage && !isNewSession && !isInterviewBot) {
         // Returning user - enforce strict first-message rules for Next Steps check-in
         if (language === 'de') {
             systemInstruction += `\n\n## ⚠️ STRIKTE REGELN FÜR DIESE ERSTE NACHRICHT (ÜBERSCHREIBT ALLES ANDERE):
@@ -348,6 +355,15 @@ Help the user EXTEND and ENRICH their existing Life Context.
         temperature: 0.7,
         systemInstruction: finalSystemInstruction,
     };
+
+    // Gloria bots have their own interview methodology — skip coaching-specific Mistral rules
+    if (bot.id === 'gloria-life-context' || bot.id === 'gloria-interview') {
+        config.skipMistralBehaviorRules = true;
+    }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/dff6960f-8664-465f-9bd4-f1c623f3e204',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5096c7'},body:JSON.stringify({sessionId:'5096c7',location:'chat.js:config',message:'Chat config built',data:{botId,isInterviewBot,skipRules:!!config.skipMistralBehaviorRules,isInitialMessage,isNewSession,userRegionPreference,provider:activeProvider,sysInstrLen:finalSystemInstruction.length},timestamp:Date.now(),hypothesisId:'A,B,E'})}).catch(()=>{});
+    // #endregion
 
     const chatContents = isInitialMessage ? "" : modelHistory;
 

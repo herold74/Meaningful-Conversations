@@ -38,6 +38,7 @@ export type NavView =
     | 'personalityProfile'
     | 'lifeContextEditor'
     | 'transcriptEval'
+    | 'transcriptRecord'
     | 'interviewTranscript'
     | 'oceanOnboarding'
     | 'intentPicker'

@@ -36,7 +36,8 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'dist'), {
     etag: false,
     lastModified: false,
-    maxAge: 0
+    maxAge: 0,
+    extensions: ['html']
 }));
 
 // For a Single Page Application (SPA), all other routes should fall back to index.html

@@ -16,6 +16,7 @@ import { brand } from '../config/brand';
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
+  onTranscriptRecord?: () => void;
   onUpgrade?: () => void;
   onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
   currentUser: User | null;
@@ -389,7 +390,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -629,6 +630,31 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                   {!locked && (
                     <span className="ml-auto text-content-secondary text-sm">→</span>
                   )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Transcript Recording — Client+ only */}
+          {(() => {
+            const isClientPlus = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+            if (!isClientPlus) return null;
+
+            return (
+              <div className="max-w-4xl mx-auto mt-3">
+                <div
+                  onClick={() => onTranscriptRecord?.()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTranscriptRecord?.(); } }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl"
+                >
+                  <span className="text-xl flex-shrink-0">🎙️</span>
+                  <span className="text-base font-semibold text-content-primary">
+                    {t('tr_title')}
+                  </span>
+                  <span className="text-sm text-content-secondary hidden sm:inline">{t('tr_short_description')}</span>
+                  <span className="ml-auto text-content-secondary text-sm">→</span>
                 </div>
               </div>
             );

@@ -45,6 +45,8 @@ server {
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
     
+    client_max_body_size 30m;
+    
     location /api/ {
         proxy_pass http://${backend_ip}:8080;
         proxy_http_version 1.1;
@@ -55,6 +57,8 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
     }
     
     location /tts/ {
@@ -99,6 +103,8 @@ server {
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
     
+    client_max_body_size 30m;
+    
     location /api/ {
         proxy_pass http://${backend_ip}:8080;
         proxy_http_version 1.1;
@@ -109,6 +115,8 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
     }
     
     location /tts/ {
