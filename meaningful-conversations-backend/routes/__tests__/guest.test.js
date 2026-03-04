@@ -92,6 +92,7 @@ describe('POST /api/guest/check-limit', () => {
 
 describe('POST /api/guest/increment-usage', () => {
     it('increments successfully and returns count', async () => {
+        checkGuestLimit.mockResolvedValue({ allowed: true, remaining: 44, messageCount: 6 });
         incrementGuestUsage.mockResolvedValue({
             messageCount: 6,
             remaining: 44,

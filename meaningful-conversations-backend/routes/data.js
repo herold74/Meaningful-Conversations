@@ -1040,6 +1040,12 @@ router.post('/export', handleExport);
 router.put('/user/password', async (req, res) => {
     const { oldPassword, newPassword, newEncryptedLifeContext } = req.body;
 
+    const { validatePassword } = require('./auth.js');
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+    }
+
     try {
         const user = await prisma.user.findUnique({ where: { id: req.userId } });
         if (!user) {
@@ -1061,6 +1067,8 @@ router.put('/user/password', async (req, res) => {
                 updatedAt: new Date(),
             },
         });
+        const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
+        invalidateTokensForUser(req.userId);
         res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         console.error("Error changing password:", error);

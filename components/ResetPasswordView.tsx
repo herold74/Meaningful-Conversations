@@ -22,8 +22,12 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
     e.preventDefault();
     setError('');
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       setError(t('changePassword_error_short'));
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      setError(t('changePassword_error_weak'));
       return;
     }
     if (newPassword !== confirmPassword) {

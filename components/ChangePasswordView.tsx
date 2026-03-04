@@ -30,8 +30,12 @@ const ChangePasswordView: React.FC<ChangePasswordViewProps> = ({ currentUser, en
     const trimmedNewPassword = newPassword.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
 
-    if (trimmedNewPassword.length < 6) {
+    if (trimmedNewPassword.length < 8) {
       setError(t('changePassword_error_short'));
+      return;
+    }
+    if (!/[A-Z]/.test(trimmedNewPassword) || !/[a-z]/.test(trimmedNewPassword) || !/[0-9]/.test(trimmedNewPassword)) {
+      setError(t('changePassword_error_weak'));
       return;
     }
     if (trimmedNewPassword !== trimmedConfirmPassword) {

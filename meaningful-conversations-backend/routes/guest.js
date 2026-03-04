@@ -1,9 +1,21 @@
 // meaningful-conversations-backend/routes/guest.js
 
 const express = require('express');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
 const { checkGuestLimit, incrementGuestUsage, getGuestStats } = require('../services/guestLimitTracker');
+
+const guestEndpointLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 15,
+    message: { error: 'Too many requests. Please slow down.', errorCode: 'RATE_LIMIT_GUEST' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+router.use(guestEndpointLimiter);
 
 /**
  * POST /api/guest/check-limit
@@ -48,7 +60,16 @@ router.post('/increment-usage', async (req, res) => {
             return res.status(400).json({ error: 'Invalid fingerprint format' });
         }
 
+        // Secondary IP-based limit to prevent fingerprint rotation abuse (GDPR-safe: hashed, non-reversible)
+        const ipHash = crypto.createHash('sha256').update(req.ip || 'unknown').digest('hex').slice(0, 32);
+        const ipKey = `iph:${ipHash}`;
+        const ipResult = await checkGuestLimit(ipKey);
+        if (!ipResult.allowed) {
+            return res.status(429).json({ error: 'Guest message limit reached.', allowed: false, remaining: 0 });
+        }
+
         const result = await incrementGuestUsage(fingerprint);
+        await incrementGuestUsage(ipKey);
         res.status(200).json(result);
 
     } catch (error) {
