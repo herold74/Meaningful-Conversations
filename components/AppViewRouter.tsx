@@ -776,7 +776,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'achievements':
       return <AchievementsView gamificationState={gamificationState} />;
     case 'userGuide':
-      return <UserGuideView />;
+      return <UserGuideView currentUser={currentUser} />;
     case 'formattingHelp':
       return <FormattingHelpView />;
     case 'faq':
