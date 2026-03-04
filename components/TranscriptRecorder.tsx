@@ -33,6 +33,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
     const audioFileInputRef = useRef<HTMLInputElement>(null);
 
     const [step, setStep] = useState<RecorderStep>('consent');
+    const [hasConsent, setHasConsent] = useState(false);
     const [audioFile, setAudioFile] = useState<File | null>(null);
     const [audioMode, setAudioMode] = useState<'record' | 'upload' | null>(null);
     const [speakerHint, setSpeakerHint] = useState<number>(0);
@@ -228,26 +229,50 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                 </button>
 
                 <h2 className="text-2xl font-bold text-content-primary mb-2">{t('tr_title')}</h2>
-                <p className="text-content-secondary mb-6">{t('tr_description')}</p>
+                <p className="text-content-secondary mb-4">{t('tr_description')}</p>
 
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="flex items-start gap-2.5 p-3 mb-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <span className="text-base mt-0.5 shrink-0">ℹ️</span>
+                    <p className="text-xs text-blue-800 dark:text-blue-300">{t('tr_gemini_hint')}</p>
+                </div>
+
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
                     <div className="flex items-start gap-3">
-                        <div className="text-2xl mt-0.5">🔒</div>
+                        <div className="text-2xl mt-0.5">⚠️</div>
                         <div className="flex-1">
                             <h3 className="font-semibold text-content-primary mb-2">
-                                {t('te_input_audio_gdpr_title')}
+                                {t('te_consent_title')}
                             </h3>
-                            <p className="text-sm text-content-secondary mb-4">
+                            <p className="text-sm text-content-secondary mb-3">
                                 {t('te_input_audio_gdpr_warning')}
                             </p>
-                            <button
-                                onClick={() => setStep('record')}
-                                className="w-full py-3 rounded-lg font-semibold text-white bg-accent-primary hover:bg-accent-primary/90 shadow-md transition-all"
-                            >
-                                {t('te_input_audio_gdpr_consent')}
-                            </button>
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={hasConsent}
+                                    onChange={(e) => setHasConsent(e.target.checked)}
+                                    className="mt-1 w-5 h-5 text-accent-primary border-gray-300 rounded focus:ring-2 focus:ring-accent-primary"
+                                />
+                                <span className="text-sm text-content-primary group-hover:text-accent-primary transition-colors">
+                                    {t('te_input_audio_gdpr_consent')}
+                                </span>
+                            </label>
                         </div>
                     </div>
+                </div>
+
+                <div className="mt-6">
+                    <button
+                        onClick={() => setStep('record')}
+                        disabled={!hasConsent}
+                        className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
+                            hasConsent
+                                ? 'bg-accent-primary hover:bg-accent-primary/90 shadow-md hover:shadow-lg'
+                                : 'bg-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        {t('survey_btn_next')}
+                    </button>
                 </div>
             </div>
         );
