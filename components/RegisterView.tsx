@@ -42,8 +42,12 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
     const trimmedConfirmPassword = confirmPassword.trim();
     const trimmedEmail = email.trim().toLowerCase();
 
-    if (trimmedPassword.length < 6) {
+    if (trimmedPassword.length < 8) {
       setError({ type: 'password', message: t('register_error_short_password') });
+      return;
+    }
+    if (!/[A-Z]/.test(trimmedPassword) || !/[a-z]/.test(trimmedPassword) || !/[0-9]/.test(trimmedPassword)) {
+      setError({ type: 'password', message: t('register_error_weak_password') });
       return;
     }
     if (trimmedPassword !== trimmedConfirmPassword) {

@@ -75,9 +75,9 @@ describe('rateLimiter exports', () => {
     });
   });
 
-  it('exports exactly 8 limiters', () => {
+  it('exports exactly 10 limiters', () => {
     const exported = Object.keys(require('../rateLimiter'));
-    expect(exported).toHaveLength(8);
+    expect(exported).toHaveLength(10);
     expect(exported).toContain('loginLimiter');
     expect(exported).toContain('registerLimiter');
     expect(exported).toContain('forgotPasswordLimiter');
@@ -86,6 +86,8 @@ describe('rateLimiter exports', () => {
     expect(exported).toContain('audioTranscribeLimiter');
     expect(exported).toContain('botRecommendationLimiter');
     expect(exported).toContain('purchaseLimiter');
+    expect(exported).toContain('resetPasswordLimiter');
+    expect(exported).toContain('globalApiLimiter');
   });
 });
 

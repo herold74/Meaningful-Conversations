@@ -35,6 +35,23 @@ jobs:
       - run: npm ci
       - run: npx jest --ci --forceExit
 
+  security-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=critical
+      - name: Backend audit
+        working-directory: meaningful-conversations-backend
+        run: |
+          npm ci
+          npm audit --audit-level=critical
+
   typecheck:
     name: TypeScript Check
     runs-on: ubuntu-latest
