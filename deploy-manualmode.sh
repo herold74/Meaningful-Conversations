@@ -239,7 +239,10 @@ if [[ "$SKIP_BUILD" == false ]]; then
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would build: $FRONTEND_IMAGE (Build $NEXT_BUILD_NUM)"
+            echo -e "${YELLOW}[DRY RUN]${NC} Would sync sw.js and project.pbxproj to Build $NEXT_BUILD_NUM"
         else
+            # Sync sw.js cache name BEFORE build so Docker image gets the correct value
+            sed -i.bak "s/meaningful-conversations-cache-v[0-9.]*-b[0-9]*/meaningful-conversations-cache-v${VERSION}-b${NEXT_BUILD_NUM}/" public/sw.js && rm -f public/sw.js.bak
             if podman build --platform linux/amd64 \
                 --build-arg BUILD_NUMBER="$NEXT_BUILD_NUM" \
                 --build-arg APP_VERSION="$VERSION" \
@@ -247,8 +250,19 @@ if [[ "$SKIP_BUILD" == false ]]; then
                 -t "$FRONTEND_IMAGE" .; then
                 # Only increment build number after successful build
                 echo "$NEXT_BUILD_NUM" > BUILD_NUMBER
+                # Sync Xcode project version
+                sed -i.bak "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${NEXT_BUILD_NUM};/g" ios/App/App.xcodeproj/project.pbxproj && rm -f ios/App/App.xcodeproj/project.pbxproj.bak
                 podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
                 echo -e "${GREEN}✓ Frontend image built (v$VERSION, Build $NEXT_BUILD_NUM)${NC}"
+                # Auto-commit build number sync
+                if git diff --quiet BUILD_NUMBER public/sw.js ios/App/App.xcodeproj/project.pbxproj 2>/dev/null; then
+                    echo -e "${GREEN}✓ Build files already in sync${NC}"
+                else
+                    git add BUILD_NUMBER public/sw.js ios/App/App.xcodeproj/project.pbxproj
+                    git commit -m "chore: build ${NEXT_BUILD_NUM} sync" --no-verify
+                    git push
+                    echo -e "${GREEN}✓ Build ${NEXT_BUILD_NUM} synced and pushed (BUILD_NUMBER, sw.js, project.pbxproj)${NC}"
+                fi
             else
                 echo -e "${RED}✗ Frontend build failed${NC}"
                 exit 1
