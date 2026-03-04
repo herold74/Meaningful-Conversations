@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { brand } from '../config/brand';
+import { User } from '../types';
 
 interface InfoViewProps {
+    currentUser?: User | null;
 }
 
 const de_markdown = `<details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
 Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
@@ -21,7 +23,7 @@ Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Sch
 ---
 
 <details open>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
 Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
@@ -37,7 +39,7 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 
 **Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt überspringen.
 
-**Hinweis:** Registrierte Benutzer können den Intent Picker im Menü (☰) deaktivieren. Admins und Entwickler können in der Admin-Ansicht ihre bevorzugte Startseite einstellen (Intent Picker, Coach-Auswahl oder Admin Panel).
+**Hinweis:** Registrierte Benutzer können den Intent Picker im Menü (☰) deaktivieren.
 
 ### 1.2 Gast vs. Registrierter Benutzer
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur in Ihrem Browser verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
@@ -99,7 +101,7 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit für registrierte Benutzer</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit für registrierte Benutzer</summary>
 <div style="padding: 16px;">
 
 Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselung (E2EE)** für Ihre Lebenskontext-Datei und Ihr Persönlichkeitsprofil.
@@ -141,7 +143,7 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
 Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
@@ -191,7 +193,7 @@ Falls Sie die Web-Version bevorzugen:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil für registrierte Benutzer</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil für registrierte Benutzer</summary>
 <div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
@@ -403,7 +405,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 5: Die Coaching-Sitzung</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 5: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Einen Coach auswählen
@@ -629,7 +631,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 6: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 6: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
 ### 6.1 Die Analyse
@@ -677,7 +679,7 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 4), erschein
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 7: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 7: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
@@ -714,11 +716,13 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 
 </div>
 </details>
+`;
 
+const de_chapter8 = `
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -779,7 +783,7 @@ Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungs
 
 ### Zusätzliche Funktionen
 
-- **PDF-Export** für Klienten, Admins und Developers
+- **PDF-Export** für Klienten
 - **History-Ansicht** zum Überprüfen und Löschen vergangener Auswertungen
 
 ### Datenschutz
@@ -818,8 +822,65 @@ Für kurze Gespräche können Sie auch einfach aus der Erinnerung ein Protokoll 
 </details>
 `;
 
+const de_chapter9 = `
+---
+
+<details>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Kapitel 9: Audio-Transkription (Klienten-Feature)</summary>
+<div style="padding: 16px;">
+
+### Was ist die Audio-Transkription?
+
+Die Audio-Transkription ermöglicht es Ihnen, **echte Gespräche direkt in der App aufzuzeichnen oder als Audiodatei hochzuladen** und automatisch in Text umwandeln zu lassen. So können Sie z.B. ein Kundengespräch, ein Meeting oder ein Coaching-Gespräch aufnehmen und anschließend auswerten lassen.
+
+### Wer kann es nutzen?
+
+Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm.
+
+### Wie funktioniert es?
+
+**Schritt 1: Einwilligung**
+Bevor Sie beginnen, müssen Sie bestätigen, dass alle Gesprächsteilnehmer der Aufzeichnung zugestimmt haben. Ein Hinweis informiert Sie darüber, dass die Audio-Transkription immer **Google Gemini** verwendet — auch wenn Sie Mistral als bevorzugten KI-Anbieter eingestellt haben. Die anschließende Glättung und Auswertung respektieren hingegen Ihre KI-Anbieter-Einstellung.
+
+**Schritt 2: Aufnehmen oder Hochladen**
+Sie haben zwei Möglichkeiten:
+- **Live-Aufnahme:** Klicken Sie auf den Aufnahme-Button, um das Gespräch direkt aufzuzeichnen. Die Aufnahme kann jederzeit pausiert und fortgesetzt werden.
+- **Datei hochladen:** Laden Sie eine vorhandene Audiodatei hoch (z.B. von einer externen Aufnahme-App).
+
+**Aufnahmelimits:** Maximal **60 Minuten** Aufnahmedauer bzw. **25 MB** Dateigröße.
+
+**Schritt 3: Transkription**
+Nach der Aufnahme bzw. dem Upload wird die Audiodatei automatisch transkribiert. Dieser Vorgang kann je nach Länge einige Sekunden bis Minuten dauern.
+
+**Schritt 4: Ergebnis verwenden**
+Nach der Transkription haben Sie folgende Möglichkeiten:
+- **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
+- **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
+- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (Kapitel 8) ein, um eine strukturierte Analyse zu erhalten.
+
+### KI-Anbieter-Hinweis
+
+Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral keine Audio-Eingabe unterstützt. Die nachfolgenden Schritte (**Glättung** und **Auswertung**) verwenden den KI-Anbieter, den Sie in Ihren Einstellungen festgelegt haben (bzw. die globale Einstellung, falls Sie keine persönliche Auswahl getroffen haben).
+
+### Datenschutz
+
+- **Audiodateien werden nicht dauerhaft gespeichert.** Die Aufnahme wird nach der Transkription verworfen.
+- Die Transkription erfolgt über Google Gemini — die Audiodaten werden dafür an Google übermittelt.
+- Nur das resultierende Text-Transkript kann lokal gespeichert oder zur Auswertung weitergeleitet werden.
+
+### Tipps für beste Ergebnisse
+
+- **Ruhige Umgebung:** Hintergrundgeräusche können die Transkriptionsqualität beeinträchtigen.
+- **Deutliches Sprechen:** Klare Aussprache verbessert die Genauigkeit erheblich.
+- **Sprecherwechsel:** Bei Gesprächen mit mehreren Teilnehmern versucht die KI, Sprecher zu unterscheiden. Eindeutige Sprecherwechsel erleichtern dies.
+- **Optimale Länge:** Gespräche von 5–30 Minuten liefern die besten Ergebnisse.
+
+</div>
+</details>
+`;
+
 const en_markdown = `<details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
 Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
@@ -830,7 +891,7 @@ Welcome to ${brand.appName}! This guide will walk you through the app step-by-st
 ---
 
 <details open>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
 When you first open the app, you'll be guided through a brief onboarding process.
@@ -846,7 +907,7 @@ Your chosen intent determines which section is highlighted in the coach selectio
 
 **Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. You can skip this step.
 
-**Note:** Registered users can disable the Intent Picker from the menu (☰). Admins and Developers can set their preferred startup view in the Admin Panel (Intent Picker, Coach Selection, or Admin Panel).
+**Note:** Registered users can disable the Intent Picker from the menu (☰).
 
 ### 1.2 Guest vs. Registered User
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only in your browser. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
@@ -908,7 +969,7 @@ If you are a registered user returning with a saved context, you will see the **
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security for Registered Users</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security for Registered Users</summary>
 <div style="padding: 16px;">
 
 Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file and your Personality Profile.
@@ -950,7 +1011,7 @@ The app offers four access tiers with increasing functionality:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
 The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
@@ -1000,7 +1061,7 @@ If you prefer the web version:
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile for Registered Users</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile for Registered Users</summary>
 <div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
@@ -1181,7 +1242,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 5: The Coaching Session</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 5: The Coaching Session</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Choosing Your Coach
@@ -1407,7 +1468,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 6: After the Session - The Review Process</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 6: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
 ### 6.1 The Analysis
@@ -1455,7 +1516,7 @@ If you have the **DPFL coaching mode** activated (see Chapter 4), two additional
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 7: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 7: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
@@ -1492,11 +1553,13 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 
 </div>
 </details>
+`;
 
+const en_chapter8 = `
 ---
 
 <details>
-<summary style="font-size: 1.25rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1557,7 +1620,7 @@ The recommendations also appear in the **PDF export**, so you can document your 
 
 ### Additional Features
 
-- **PDF Export** for Clients, Admins, and Developers
+- **PDF Export** for Clients
 - **History view** to review and delete past evaluations
 
 ### Privacy
@@ -1596,10 +1659,75 @@ For short conversations, you can simply write a protocol from memory. Use the fo
 </details>
 `;
 
-// Fix: Add the component definition and default export.
-const UserGuideView: React.FC<InfoViewProps> = () => {
+const en_chapter9 = `
+---
+
+<details>
+<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Chapter 9: Audio Transcription (Client Feature)</summary>
+<div style="padding: 16px;">
+
+### What is Audio Transcription?
+
+Audio Transcription allows you to **record live conversations directly in the app or upload audio files** and have them automatically converted to text. This lets you capture and later analyze client meetings, coaching sessions, or any other conversation.
+
+### Who Can Use It?
+
+This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen.
+
+### How Does It Work?
+
+**Step 1: Consent**
+Before you begin, you must confirm that all conversation participants have consented to the recording. A notice informs you that audio transcription always uses **Google Gemini** — even if you have set Mistral as your preferred AI provider. The subsequent smoothing and evaluation, however, respect your AI provider setting.
+
+**Step 2: Record or Upload**
+You have two options:
+- **Live Recording:** Click the record button to capture the conversation in real time. The recording can be paused and resumed at any time.
+- **File Upload:** Upload an existing audio file (e.g., from an external recording app).
+
+**Recording Limits:** Maximum **60 minutes** recording duration or **25 MB** file size.
+
+**Step 3: Transcription**
+After recording or uploading, the audio file is automatically transcribed. Depending on length, this may take a few seconds to a few minutes.
+
+**Step 4: Using the Result**
+After transcription, you have the following options:
+- **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
+- **Download Transcript:** Save the raw or smoothed transcript as a text file.
+- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (Chapter 8) for a structured analysis.
+
+### AI Provider Note
+
+**Audio transcription** always uses Google Gemini, as Mistral does not support audio input. The subsequent steps (**smoothing** and **evaluation**) use the AI provider configured in your settings (or the global setting if you haven't made a personal choice).
+
+### Privacy
+
+- **Audio files are not stored permanently.** The recording is discarded after transcription.
+- Transcription is performed via Google Gemini — audio data is transmitted to Google for this purpose.
+- Only the resulting text transcript can be saved locally or forwarded for evaluation.
+
+### Tips for Best Results
+
+- **Quiet environment:** Background noise can impact transcription quality.
+- **Speak clearly:** Clear pronunciation significantly improves accuracy.
+- **Speaker turns:** For multi-participant conversations, the AI attempts to distinguish speakers. Clear speaker transitions help with this.
+- **Optimal length:** Conversations of 5–30 minutes yield the best results.
+
+</div>
+</details>
+`;
+
+const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const { t, language } = useLocalization();
-    const markdownContent = language === 'de' ? de_markdown : en_markdown;
+
+    const showChapter8 = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+    const showChapter9 = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+
+    const markdownContent = useMemo(() => {
+        const base = language === 'de' ? de_markdown : en_markdown;
+        const ch8 = language === 'de' ? de_chapter8 : en_chapter8;
+        const ch9 = language === 'de' ? de_chapter9 : en_chapter9;
+        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '');
+    }, [language, showChapter8, showChapter9]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
@@ -1616,6 +1744,8 @@ const UserGuideView: React.FC<InfoViewProps> = () => {
                         table: ({node, ...props}) => <table className="w-full my-4 text-sm" {...props} />,
                         th: ({node, ...props}) => <th className="border border-border-secondary p-2 bg-background-tertiary" {...props} />,
                         td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc list-outside pl-5 space-y-1 my-2" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal list-outside pl-5 space-y-1 my-2" {...props} />,
                         details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden" {...props} />,
                         summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none" {...props} />,
                     }}
