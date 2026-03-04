@@ -13,14 +13,14 @@
 
 ## App Store Connect — Metadata
 
-- [ ] App name: "Meaningful Conversations"
+- [ ] App name: "MyCoach AI"
 - [ ] Subtitle (max 30 chars)
 - [ ] Description (EN + DE)
 - [ ] Keywords (max 100 chars, EN + DE)
 - [ ] Category (primary + secondary)
-- [ ] Screenshots: iPhone 6.7" (iPhone 15 Pro Max) — min 3
-- [ ] Screenshots: iPhone 6.5" (iPhone 14 Plus) — min 3
-- [ ] Screenshots: iPad (if supporting iPad)
+- [x] Screenshots: iPhone 6.7" (iPhone 15 Pro Max) — min 3
+- [x] Screenshots: iPhone 6.5" (iPhone 14 Plus) — min 3
+- [x] Screenshots: iPad (if supporting iPad)
 - [ ] App Preview Video (optional but recommended)
 - [ ] App icon (1024x1024 PNG, no alpha)
 
@@ -76,4 +76,4 @@
 
 | Version | Date | Notes |
 |---------|------|-------|
-| 1.9.7   | TBD  | Initial App Store submission |
+| 1.9.9   | TBD  | Initial App Store submission |

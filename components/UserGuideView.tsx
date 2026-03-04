@@ -11,8 +11,8 @@ interface InfoViewProps {
     currentUser?: User | null;
 }
 
-const de_markdown = `<details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
+const de_markdown = (isRegistered: boolean, isPremium: boolean) => `<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
 Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
@@ -23,7 +23,7 @@ Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Sch
 ---
 
 <details open>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
 Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
@@ -101,7 +101,7 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit für registrierte Benutzer</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit</summary>
 <div style="padding: 16px;">
 
 Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselung (E2EE)** für Ihre Lebenskontext-Datei und Ihr Persönlichkeitsprofil.
@@ -143,7 +143,7 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
 Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
@@ -193,7 +193,7 @@ Falls Sie die Web-Version bevorzugen:
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil für registrierte Benutzer</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil</summary>
 <div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
@@ -214,7 +214,7 @@ Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet 
 ---
 
 **OCEAN (Big Five) -- "Wer Sie sind"**
-✅ *Verfügbar für alle registrierten Nutzer*
+<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Verfügbar für alle registrierten Nutzer*</span>
 
 Der OCEAN-Test basiert auf dem **Big Five Inventory-2 (BFI-2)** -- dem weltweit am besten erforschten und validierten Persönlichkeitsmodell. Er misst fünf zentrale Dimensionen, die gemeinsam ein fundiertes Bild Ihrer Persönlichkeit ergeben:
 
@@ -258,7 +258,7 @@ Das **Big Five-Modell** (auch OCEAN-Modell) ist das wissenschaftlich am besten a
 ---
 
 **Riemann-Thomann -- "Wie Sie mit anderen interagieren"**
-🔒 *Verfügbar ab Premium*
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
 
 Das Riemann-Thomann-Modell stammt aus der systemischen Beratung und erfasst vier Grundstrebungen, die Ihr Verhalten in Beziehungen und Teams maßgeblich beeinflussen:
 
@@ -305,7 +305,7 @@ Jeder Mensch hat Anteile aller vier Strebungen -- die individuelle Mischung mach
 ---
 
 **Spiral Dynamics -- "Was Sie antreibt"**
-🔒 *Verfügbar ab Premium*
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
 
 Spiral Dynamics ist ein Modell aus der Entwicklungspsychologie, das Ihre Wertesysteme und inneren Antriebskräfte auf acht Ebenen abbildet. Es zeigt nicht nur, *was* Ihnen wichtig ist, sondern auch *warum* -- und wie sich Ihre Werte im Laufe des Lebens entwickelt haben.
 
@@ -381,14 +381,14 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 - Ihr Profil wird nicht verwendet -- auch wenn eines vorhanden ist
 
 **DPC (Dynamic Personality Coaching):**
-✅ *Verfügbar für alle registrierten Nutzer*
+<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Verfügbar für alle registrierten Nutzer*</span>
 - Der Coach nutzt Ihr Profil, um seinen Kommunikationsstil an Ihre Persönlichkeit anzupassen
 - Er erkennt, wenn Herausforderungen mit Ihren **Stärken** bewältigt werden können, und weist behutsam auf **potenzielle Blind Spots** hin
 - Ihr Profil bleibt dabei **unverändert** (stabil)
 - Ideal für: Personalisiertes Coaching mit voller Kontrolle über das Profil
 
 **DPFL (Dynamic Personality-Focused Learning):**
-🔒 *Verfügbar ab Premium*
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
 - Alles was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
 - Der Coach schlägt nach dem Gespräch Profilanpassungen vor -- eine Art "Fremdbild"-Feedback, das Ihr "Selbstbild" ergänzt
 - Nach jeder Sitzung findet ein **Comfort Check** statt: Sie bewerten, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
@@ -405,7 +405,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 5: Die Coaching-Sitzung</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 5: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Einen Coach auswählen
@@ -631,7 +631,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 6: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 6: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
 ### 6.1 Die Analyse
@@ -679,7 +679,7 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 4), erschein
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 7: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 7: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
@@ -722,7 +722,7 @@ const de_chapter8 = `
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -826,7 +826,7 @@ const de_chapter9 = `
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Kapitel 9: Audio-Transkription (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Kapitel 9: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Audio-Transkription?
@@ -879,8 +879,8 @@ Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral k
 </details>
 `;
 
-const en_markdown = `<details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
+const en_markdown = (isRegistered: boolean, isPremium: boolean) => `<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
 Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
@@ -891,7 +891,7 @@ Welcome to ${brand.appName}! This guide will walk you through the app step-by-st
 ---
 
 <details open>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
 When you first open the app, you'll be guided through a brief onboarding process.
@@ -969,7 +969,7 @@ If you are a registered user returning with a saved context, you will see the **
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security for Registered Users</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security</summary>
 <div style="padding: 16px;">
 
 Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life Context file and your Personality Profile.
@@ -1011,7 +1011,7 @@ The app offers four access tiers with increasing functionality:
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
 The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
@@ -1061,7 +1061,7 @@ If you prefer the web version:
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile for Registered Users</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile</summary>
 <div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
@@ -1218,14 +1218,14 @@ Having a personality profile alone does not change coaching. Only when you activ
 - Your profile is not used -- even if one exists
 
 **DPC (Dynamic Personality Coaching):**
-✅ *Available for all registered users*
+<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Available for all registered users*</span>
 - The coach uses your profile to adapt their communication style to your personality
 - They recognize when challenges can be addressed with your **strengths**, and gently point out **potential blind spots**
 - Your profile remains **unchanged** (stable)
 - Ideal for: Personalized coaching with full control over your profile
 
 **DPFL (Dynamic Personality-Focused Learning):**
-🔒 *Available from Premium*
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
 - Everything DPC offers, plus: your profile becomes **adaptive** and can be refined from the **second session** onwards
 - The coach suggests profile adjustments after the conversation -- a form of "external perspective" feedback that complements your "self-image"
 - After each session, a **Comfort Check** takes place: you rate how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
@@ -1242,7 +1242,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 5: The Coaching Session</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 5: The Coaching Session</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Choosing Your Coach
@@ -1468,7 +1468,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 6: After the Session - The Review Process</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 6: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
 ### 6.1 The Analysis
@@ -1516,7 +1516,7 @@ If you have the **DPFL coaching mode** activated (see Chapter 4), two additional
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 7: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 7: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
@@ -1559,7 +1559,7 @@ const en_chapter8 = `
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1663,7 +1663,7 @@ const en_chapter9 = `
 ---
 
 <details>
-<summary style="font-size: 1rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Chapter 9: Audio Transcription (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Chapter 9: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Audio Transcription?
@@ -1722,12 +1722,15 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const showChapter8 = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
     const showChapter9 = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
 
+    const isRegistered = !!currentUser;
+    const isPremiumUser = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+
     const markdownContent = useMemo(() => {
-        const base = language === 'de' ? de_markdown : en_markdown;
+        const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser) : en_markdown(isRegistered, !!isPremiumUser);
         const ch8 = language === 'de' ? de_chapter8 : en_chapter8;
         const ch9 = language === 'de' ? de_chapter9 : en_chapter9;
         return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '');
-    }, [language, showChapter8, showChapter9]);
+    }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">

@@ -89,6 +89,7 @@
 - Brand config: `brands/w4f.env` (blue palette, tetris loader, "Work4Flow Coaching").
 
 ## Active Tasks
+- [ ] **Console.log Cleanup (pre-production):** ~43 frontend files with hundreds of console.log calls. Heaviest: `useTts.ts` (33), `VoiceSelectionModal.tsx` (19), `capacitorSpeechService.ts` (13). Keep for now (debugging), remove before production release or when stability confirmed. TTS debug logs (`[TTS-DBG]`) intentionally kept per decision 2026-02-28.
 - [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot --nginx -d w4f-beta.manualmode.at`
 - [ ] iOS App Store Connect: create products, set Notifications URL, TestFlight testing
 - [ ] Android Capacitor project setup

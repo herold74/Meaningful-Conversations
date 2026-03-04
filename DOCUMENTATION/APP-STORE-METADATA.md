@@ -1,7 +1,7 @@
 # App Store Metadata
 
 ## App-Name
-Sinnstiftende Gespräche
+MyCoach AI
 
 ## Untertitel (max 30 Zeichen)
 KI-Coaching für Wachstum

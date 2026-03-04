@@ -59,6 +59,7 @@
 <li>Technische Zugriffsdaten (IP-Adresse, Browser-Typ, Zugriffszeitpunkt)</li>
 <li>API-Nutzungsdaten (Anzahl API-Aufrufe, verwendete Modelle, Zeitstempel)</li>
 <li>Feedback (optional und nur wenn vom Nutzer eingereicht)</li>
+<li>Audiodaten (temporär, bei Nutzung der Audio-Transkription — werden nach der Transkription sofort verworfen)</li>
 </ul>
 
 <h2>3. Zweck der Verarbeitung</h2>
@@ -71,6 +72,7 @@
 <li><strong>Fortschrittstracking:</strong> Speicherung von Gamification-Daten</li>
 <li><strong>Kostenkontrolle:</strong> Überwachung der API-Nutzung</li>
 <li><strong>Service-Verbesserung:</strong> Analyse von Feedback</li>
+<li><strong>Audio-Transkription:</strong> Umwandlung von Audioaufnahmen in Text mittels Google Gemini. Audiodaten werden ausschließlich zur Transkription übertragen und nicht dauerhaft gespeichert.</li>
 </ul>
 
 <h2>4. Rechtsgrundlage der Verarbeitung</h2>
@@ -86,7 +88,7 @@
 <h3>5.1 KI-Dienste (Auftragsverarbeiter)</h3>
 <h4>Google Gemini API</h4>
 <ul>
-<li><strong>Zweck:</strong> KI-gestützte Gesprächsverarbeitung</li>
+<li><strong>Zweck:</strong> KI-gestützte Gesprächsverarbeitung und Audio-Transkription</li>
 <li><strong>Standort:</strong> USA (mit EU-Standardvertragsklauseln)</li>
 </ul>
 <h4>Mistral AI API</h4>
@@ -128,6 +130,7 @@
 <li><strong>Verifizierungstoken:</strong> 24 Stunden</li>
 <li><strong>Passwort-Reset-Token:</strong> 1 Stunde</li>
 <li><strong>Server-Logs:</strong> 7 Tage</li>
+<li><strong>Audiodaten (Transkription):</strong> Werden sofort nach der Transkription verworfen — keine dauerhafte Speicherung</li>
 </ul>
 
 <h2>8. Ihre Rechte</h2>
@@ -177,6 +180,7 @@
 <li>Technical access data (IP address, browser type, access time)</li>
 <li>API usage data (number of API calls, models used, timestamps)</li>
 <li>Feedback (optional, only if submitted by user)</li>
+<li>Audio data (temporary, when using Audio Transcription — discarded immediately after transcription)</li>
 </ul>
 
 <h2>3. Purpose of Processing</h2>
@@ -188,6 +192,7 @@
 <li><strong>Progress tracking:</strong> Storing gamification data</li>
 <li><strong>Cost control:</strong> Monitoring API usage</li>
 <li><strong>Service improvement:</strong> Analyzing feedback</li>
+<li><strong>Audio transcription:</strong> Converting audio recordings to text via Google Gemini. Audio data is transmitted solely for transcription and is not permanently stored.</li>
 </ul>
 
 <h2>4. Legal Basis (GDPR)</h2>
@@ -201,7 +206,7 @@
 <h2>5. Data Recipients</h2>
 
 <h3>5.1 AI Services (Data Processors)</h3>
-<p><strong>Google Gemini API</strong> (USA, with EU Standard Contractual Clauses) and <strong>Mistral AI API</strong> (France, EU) process your coaching conversations. Sensitive data is <strong>not</strong> permanently stored by AI providers. Prompt caching stores parts of your context for up to <strong>5 minutes</strong> on Google servers.</p>
+<p><strong>Google Gemini API</strong> (USA, with EU Standard Contractual Clauses) and <strong>Mistral AI API</strong> (France, EU) process your coaching conversations and audio transcriptions. Sensitive data is <strong>not</strong> permanently stored by AI providers. Prompt caching stores parts of your context for up to <strong>5 minutes</strong> on Google servers.</p>
 
 <h3>5.2 Mailjet (Data Processor)</h3>
 <p>Email delivery (verification, password reset) — France (EU).</p>
@@ -225,6 +230,7 @@
 <li><strong>Verification tokens:</strong> 24 hours</li>
 <li><strong>Password reset tokens:</strong> 1 hour</li>
 <li><strong>Server logs:</strong> 7 days</li>
+<li><strong>Audio data (transcription):</strong> Discarded immediately after transcription — no permanent storage</li>
 </ul>
 
 <h2>8. Your Rights (GDPR)</h2>
