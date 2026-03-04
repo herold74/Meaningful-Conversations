@@ -81,7 +81,7 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
             <p className="text-blue-800 dark:text-blue-300 font-medium mb-2">
               💡 {language === 'de' ? 'Tipps für mehr Privatsphäre:' : 'Tips for more privacy:'}
             </p>
-            <ul className="text-blue-700 dark:text-blue-400 text-sm list-disc list-inside space-y-1">
+            <ul className="text-blue-700 dark:text-blue-400 text-sm list-disc list-outside pl-5 space-y-1">
               <li>{language === 'de' ? '"Hans Müller" → "mein Chef" oder "Herr M."' : '"John Smith" → "my boss" or "Mr. S."'}</li>
               <li>{language === 'de' ? '"Beispiel GmbH" → "meine Firma" oder "das Unternehmen"' : '"Example Inc." → "my company" or "the company"'}</li>
               <li>{language === 'de' ? '"Hauptstraße 15, 1180 Wien" → "meine Wohnung" oder "Wien"' : '"123 Main Street, NYC" → "my apartment" or "New York"'}</li>

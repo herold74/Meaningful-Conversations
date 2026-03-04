@@ -21,7 +21,7 @@ const PIIWarningView: React.FC<PIIWarningViewProps> = ({ onConfirm, onCancel }) 
         </p>
         <div className="p-4 bg-white/60 dark:bg-background-primary border border-yellow-300 dark:border-yellow-700 rounded-lg text-left text-sm text-content-secondary">
           <p className="font-bold text-content-primary">{t('piiWarning_examples')}</p>
-          <ul className="list-disc list-inside mt-2 space-y-1 whitespace-pre-line">
+          <ul className="list-disc list-outside pl-5 mt-2 space-y-1.5">
             {t('piiWarning_list').split('\n').map((item, index) => <li key={index}>{item}</li>)}
           </ul>
            <p className="mt-4">{t('piiWarning_advice')}</p>

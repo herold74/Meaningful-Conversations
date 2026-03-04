@@ -1257,7 +1257,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                     ? 'Um dein Coaching-Erlebnis zu personalisieren, werden folgende Daten an den KI-Anbieter (Google oder Mistral) übermittelt:'
                     : 'To personalize your coaching experience, the following data will be sent to the AI provider (Google or Mistral):'}
                 </p>
-                <ul className="text-blue-700 dark:text-blue-400 text-sm list-disc list-inside space-y-1 mt-3">
+                <ul className="text-blue-700 dark:text-blue-400 text-sm list-disc list-outside pl-5 space-y-1 mt-3">
                   <li>{language === 'de' ? 'Abstrakte Persönlichkeitsmerkmale (z.B. Nähe-Präferenz, Wechsel-Präferenz)' : 'Abstract personality traits (e.g., proximity preference, change preference)'}</li>
                   <li>{language === 'de' ? 'Deine Persönlichkeits-Signatur (falls generiert)' : 'Your personality signature (if generated)'}</li>
                   <li>{language === 'de' ? 'Kommunikationsstil-Präferenzen' : 'Communication style preferences'}</li>
@@ -1268,7 +1268,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 <p className="text-green-800 dark:text-green-300 font-medium mb-2">
                   ✅ {language === 'de' ? 'Was NICHT übermittelt wird:' : 'What is NOT transmitted:'}
                 </p>
-                <ul className="text-green-700 dark:text-green-400 text-sm list-disc list-inside space-y-1">
+                <ul className="text-green-700 dark:text-green-400 text-sm list-disc list-outside pl-5 space-y-1">
                   <li>{language === 'de' ? 'Deine E-Mail-Adresse oder Benutzer-ID' : 'Your email address or user ID'}</li>
                   <li>{language === 'de' ? 'Deine IP-Adresse' : 'Your IP address'}</li>
                   <li>{language === 'de' ? 'Direkt identifizierende Informationen' : 'Directly identifying information'}</li>
@@ -1283,7 +1283,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                       ? 'Mögliche persönliche Daten in deinem Lebenskontext erkannt:'
                       : 'Potential personal data detected in your Life Context:'}
                   </p>
-                  <ul className="text-amber-700 dark:text-amber-400 text-sm list-disc list-inside space-y-1">
+                  <ul className="text-amber-700 dark:text-amber-400 text-sm list-disc list-outside pl-5 space-y-1">
                     {piiDetectionResult.detectedTypes.map((type, idx) => (
                       <li key={idx}>
                         {type}
