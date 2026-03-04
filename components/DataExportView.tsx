@@ -93,7 +93,7 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
                         : 'bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600'
                 }`}>
                     <h3 className="font-semibold text-content-primary mb-2">{t('export_data_includes')}</h3>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-content-primary">
+                    <ul className="list-disc list-outside pl-5 space-y-1 text-sm text-content-primary">
                         <li>{t('export_data_includes_account')}</li>
                         <li>{t('export_data_includes_gamification')}</li>
                         <li>{t('export_data_includes_context')}</li>

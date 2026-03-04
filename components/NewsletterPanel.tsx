@@ -335,7 +335,7 @@ const NewsletterPanel: React.FC = () => {
           {/* Info Box */}
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-sm text-content-secondary">
             <p className="font-semibold mb-1">ℹ️ {t('newsletter_info_title')}</p>
-            <ul className="list-disc list-inside space-y-1 text-xs">
+            <ul className="list-disc list-outside pl-5 space-y-1 text-xs">
               <li>✨ <strong>{t('newsletter_info_markdown')}</strong></li>
               <li>{t('newsletter_info_active_only')}</li>
               <li>{t('newsletter_info_language')}</li>
