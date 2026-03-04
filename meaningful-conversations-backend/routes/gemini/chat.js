@@ -3,7 +3,7 @@ const router = express.Router();
 const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
 const prisma = require('../../prismaClient.js');
 const { BOTS } = require('../../constants.js');
-const { trackApiUsage } = require('../../services/apiUsageTracker.js');
+const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const dynamicPromptController = require('../../services/dynamicPromptController.js');
 const behaviorLogger = require('../../services/behaviorLogger.js');
@@ -32,6 +32,13 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const lastUserMsg = testUserMessage || history?.[history.length - 1]?.parts?.[0]?.text || '';
     if (lastUserMsg.length > MAX_MESSAGE_LENGTH) {
         return res.status(413).json({ error: `Message too long (${lastUserMsg.length} chars). Maximum is ${MAX_MESSAGE_LENGTH}.` });
+    }
+
+    if (userId && !isTestMode) {
+        const costCheck = await checkDailyCostCap(userId);
+        if (!costCheck.allowed) {
+            return res.status(429).json({ error: 'Daily usage limit reached. Please try again tomorrow.', errorCode: 'DAILY_COST_CAP' });
+        }
     }
 
     const bot = BOTS.find(b => b.id === botId);
