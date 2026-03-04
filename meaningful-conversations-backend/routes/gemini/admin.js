@@ -232,7 +232,7 @@ router.post('/test/analyze-keywords', optionalAuthMiddleware, async (req, res) =
         });
     } catch (error) {
         console.error('[analyze-keywords] Error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 

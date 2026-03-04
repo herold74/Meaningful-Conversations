@@ -291,6 +291,41 @@ async function getTopUsers(startDate, endDate, limit = 10) {
   return result;
 }
 
+const DAILY_COST_CAP_USD = 2.00;
+
+/**
+ * Check if a user has exceeded their daily API cost cap.
+ * @param {string} userId
+ * @returns {Promise<{allowed: boolean, todayCost: number, cap: number}>}
+ */
+async function checkDailyCostCap(userId) {
+  if (!userId) return { allowed: true, todayCost: 0, cap: DAILY_COST_CAP_USD };
+
+  try {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const result = await prisma.apiUsage.aggregate({
+      where: {
+        userId,
+        createdAt: { gte: todayStart },
+        success: true,
+      },
+      _sum: { estimatedCostUSD: true },
+    });
+
+    const todayCost = result._sum.estimatedCostUSD || 0;
+    return {
+      allowed: todayCost < DAILY_COST_CAP_USD,
+      todayCost: Math.round(todayCost * 10000) / 10000,
+      cap: DAILY_COST_CAP_USD,
+    };
+  } catch (error) {
+    console.error('Error checking daily cost cap:', error);
+    return { allowed: true, todayCost: 0, cap: DAILY_COST_CAP_USD };
+  }
+}
+
 module.exports = {
   calculateCost,
   estimateTokens,
@@ -298,6 +333,8 @@ module.exports = {
   trackApiUsage,
   getUsageStats,
   getTopUsers,
+  checkDailyCostCap,
   PRICING,
+  DAILY_COST_CAP_USD,
 };
 

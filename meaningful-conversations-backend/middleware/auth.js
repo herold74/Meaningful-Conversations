@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { isTokenInvalidated } = require('../services/tokenInvalidation.js');
 
 module.exports = (req, res, next) => {
     try {
@@ -11,7 +12,10 @@ module.exports = (req, res, next) => {
         
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         
-        // Attach the user's ID to the request object for use in protected routes
+        if (isTokenInvalidated(decodedToken.userId, decodedToken.iat)) {
+            return res.status(401).json({ error: 'Token has been invalidated. Please log in again.' });
+        }
+        
         req.userId = decodedToken.userId;
         
         next();

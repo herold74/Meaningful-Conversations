@@ -155,7 +155,7 @@ router.post('/warmup', authMiddleware, async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error('TTS warmup error:', error.message);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'TTS warmup failed.' });
     }
 });
 

@@ -184,6 +184,44 @@ const purchaseLimiter = rateLimit({
     },
 });
 
+/**
+ * Reset-password rate limiter - Prevents token brute-force attacks
+ * 5 attempts per 15 minutes per IP
+ */
+const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5,
+    message: { 
+        error: 'Too many password reset attempts. Please try again later.',
+        errorCode: 'RATE_LIMIT_RESET_PASSWORD'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        console.warn(`🚫 Rate limit exceeded for reset-password from IP: ${req.ip}`);
+        res.status(429).json(options.message);
+    },
+});
+
+/**
+ * Global API rate limiter - Catch-all for unprotected endpoints
+ * 60 requests per minute per IP
+ */
+const globalApiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 60,
+    message: { 
+        error: 'Too many requests. Please slow down.',
+        errorCode: 'RATE_LIMIT_GLOBAL'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        console.warn(`🚫 Global rate limit exceeded from IP: ${req.ip}`);
+        res.status(429).json(options.message);
+    },
+});
+
 module.exports = { 
     loginLimiter, 
     registerLimiter, 
@@ -192,5 +230,7 @@ module.exports = {
     geminiLimiter,
     audioTranscribeLimiter,
     botRecommendationLimiter,
-    purchaseLimiter
+    purchaseLimiter,
+    resetPasswordLimiter,
+    globalApiLimiter
 };

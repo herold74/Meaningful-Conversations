@@ -8,11 +8,23 @@ const {
     loginLimiter, 
     registerLimiter, 
     forgotPasswordLimiter, 
-    verifyEmailLimiter 
+    verifyEmailLimiter,
+    resetPasswordLimiter
 } = require('../middleware/rateLimiter.js');
 const { syncUserFromRevenueCat } = require('./appleIAP.js');
+const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
 
 const router = express.Router();
+
+function validatePassword(password) {
+    if (!password || typeof password !== 'string') return 'Password is required.';
+    if (password.length < 8) return 'Password must be at least 8 characters long.';
+    if (password.length > 128) return 'Password must not exceed 128 characters.';
+    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter.';
+    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter.';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number.';
+    return null;
+}
 
 /**
  * Serializes a GamificationState-like object into a JSON string.
@@ -38,6 +50,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 router.post('/register', registerLimiter, async (req, res) => {
     const { email, password, firstName, lastName, newsletterConsent, language } = req.body;
     const lowerCaseEmail = email.toLowerCase();
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+    }
 
     try {
         const existingUser = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
@@ -272,8 +289,14 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
 });
 
 // POST /api/auth/reset-password
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
     const { token, newPassword } = req.body;
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+    }
+
     try {
         const user = await prisma.user.findFirst({
             where: {
@@ -298,6 +321,7 @@ router.post('/reset-password', async (req, res) => {
                 updatedAt: new Date(),
             },
         });
+        invalidateTokensForUser(user.id);
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {
         console.error('Reset password error:', error);
@@ -306,3 +330,4 @@ router.post('/reset-password', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.validatePassword = validatePassword;

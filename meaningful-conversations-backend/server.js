@@ -226,10 +226,20 @@ async function startServer() {
         
         app.use(express.json());
 
+        // Security headers (fallback when not behind nginx)
+        const helmet = require('helmet');
+        app.use(helmet({
+            contentSecurityPolicy: false, // CSP managed by nginx in production
+            crossOriginEmbedderPolicy: false, // Required for Capacitor WebView
+        }));
+
+        // Global rate limiter for all API endpoints (60 req/min per IP)
+        const { geminiLimiter, globalApiLimiter } = require('./middleware/rateLimiter.js');
+        app.use('/api', globalApiLimiter);
+
         // --- API Routes ---
         app.use('/api/auth', require('./routes/auth.js'));
         app.use('/api/data', require('./routes/data.js'));
-        const { geminiLimiter } = require('./middleware/rateLimiter.js');
         const optionalAuthForRateLimit = require('./middleware/optionalAuth.js');
         app.use('/api/gemini', optionalAuthForRateLimit, geminiLimiter, require('./routes/gemini.js'));
         app.use('/api/bots', require('./routes/bots.js'));

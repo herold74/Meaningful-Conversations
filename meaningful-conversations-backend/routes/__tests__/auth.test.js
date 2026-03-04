@@ -16,6 +16,11 @@ jest.mock('../../middleware/rateLimiter.js', () => ({
     registerLimiter: (req, res, next) => next(),
     forgotPasswordLimiter: (req, res, next) => next(),
     verifyEmailLimiter: (req, res, next) => next(),
+    resetPasswordLimiter: (req, res, next) => next(),
+}));
+jest.mock('../../services/tokenInvalidation.js', () => ({
+    invalidateTokensForUser: jest.fn(),
+    isTokenInvalidated: jest.fn().mockReturnValue(false),
 }));
 jest.mock('../appleIAP.js', () => ({
     syncUserFromRevenueCat: jest.fn().mockResolvedValue(null),
@@ -131,9 +136,9 @@ describe('POST /api/auth/register', () => {
         const res = await request(app)
             .post('/api/auth/register')
             .send({ email: 'test@example.com' });
-        // No password - bcrypt.hash throws
-        expect(res.status).toBe(500);
-        expect(res.body.error).toContain('Internal server error');
+        // No password - validatePassword catches this before bcrypt
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('Password is required');
     });
 });
 
