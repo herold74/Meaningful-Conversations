@@ -55,7 +55,7 @@ This project supports full white-label rebranding via environment variables — 
     - **Kenji** - Mindful, Zen-inspired reflection
     - **Chloe** - Structured Reflection & Reframing
     - **Rob** - Mental Fitness & Resilience focus
-    - **G-Interviewer** - Structured reflection interviews
+    - **Gloria** - Structured reflection interviews
 *   **Transcript Evaluation** (Client-only): AI-powered analysis of conversation transcripts with personality-aware insights and PDF export.
     - **➡️ [User Guide (DE)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE.md)** | **[User Guide (EN)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md)**
 *   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations.
