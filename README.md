@@ -1,4 +1,4 @@
-# Meaningful Conversations
+# Meaningful Conversations (v2.0.0)
 
 **Meaningful Conversations** is an AI-powered platform designed to support personal growth, structured thinking, and communication analysis. Unlike generic chat assistants, it offers three distinct, purpose-built use cases to address specific user needs:
 
@@ -32,9 +32,7 @@
 
 The fundamental idea of using an .md file to preserve and update information in a structured way using AI was inspired by Chris Lovejoy (https://github.com/chris-lovejoy/personal-ai-coach). This method is very similar to human note-taking during a coaching process, but provides the benefit of creating the summary for the client instantly for further reflections. Meaningful conversations adds the graphical UI, and a reliable non-destructive process of updating the .md file using AI.
 
-Programming was performed entirely using Google AI Studio. Therefore, the application was "composed" using Gemini-PRO.
-
-The intellectual achievement of the publisher thus lies in defining and compiling the functions, the user experience and all considerations regarding real-world implementation in compliance with the legal framework and data security requirements relating to the handling of personal data in the coaching process.
+The intellectual achievement of the publisher lies in defining and compiling the functions, the user experience, and all considerations regarding real-world implementation in compliance with the legal framework and data security requirements relating to the handling of personal data in the coaching process.
 
 According to the rules and regulations of AI Studio this project is licensed under the Apache Licence 2.0
 
@@ -48,59 +46,84 @@ This project supports full white-label rebranding via environment variables — 
 
 ## ✨ Core Features
 
-*   **Multiple AI Coaches**: Choose from 7 distinct AI coaches:
-    - **Nobody** - Efficient problem-solving with GPS framework
-    - **Max** - Ambitious, goal-oriented coaching
-    - **Ava** - Empathetic, supportive guidance
-    - **Kenji** - Mindful, Zen-inspired reflection
-    - **Chloe** - Structured Reflection & Reframing
-    - **Rob** - Mental Fitness & Resilience focus
-    - **Gloria** - Structured reflection interviews
-*   **Transcript Evaluation** (Client-only): AI-powered analysis of conversation transcripts with personality-aware insights and PDF export.
-    - **➡️ [User Guide (DE)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE.md)** | **[User Guide (EN)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md)**
-*   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations.
-*   **Personality Profile & Adaptive Coaching**:
-    - Complete personality surveys (Riemann-Thomann, Big Five/OCEAN, Spiral Dynamics)
-    - DPC (Dynamic Prompt Composition) - Profile-informed coaching
-    - DPFL (Dynamic Prompt & Feedback Learning) - Adaptive learning from sessions
-    - **Personality Simulator**: Test runner to simulate client interactions with different personality profiles for QA.
-*   **Voice & Text Chat**: 
+### AI Coaches
+
+8 distinct AI coaches, organized by access tier:
+
+| Coach | Style | Available from |
+|-------|-------|---------------|
+| **Nobody** | GPS framework, efficient problem-solving | Guest |
+| **Max** | Ambitious, goal-oriented | Guest |
+| **Ava** | Strategic thinking & decision management | Guest |
+| **Gloria Interview** | Structured interviewing with transcript export | Registered |
+| **Kenji** | Stoic philosophy & resilience | Premium |
+| **Chloe** | Structured Reflection & Reframing | Premium |
+| **Rob** | Mental Fitness (PQ/Shirzad Chamine) | Client only |
+| **Victor** | Systemic & analytical coaching | Client only |
+
+*Gloria (Onboarding) is a separate bot used automatically during first-time Life Context creation and is not part of the regular bot selection.*
+
+### Core Functionality
+
+*   **Persistent Memory**: A "Life Context" file (`.md`) acts as the AI's long-term memory for personalized conversations. Encrypted client-side (E2EE) for registered users — the server cannot read your data.
+*   **Automated Context Updates**: AI proposes structured updates to your Life Context after each session with diff preview.
+*   **Voice & Text Chat**:
     - Text input with Markdown rendering
-    - Voice input via Web Speech API
-    - High-quality TTS output (Server voices: Thorsten, Amy, Ryan)
-    - Local TTS fallback for all platforms
-*   **End-to-End Encryption**: Life Context and personality profiles are encrypted client-side. Only you can decrypt your data.
-*   **Automated Context Updates**: AI proposes updates to your Life Context after each session.
-*   **Calendar Integration**: Export actionable next steps as .ics calendar events.
-*   **Gamification**: XP, levels, streaks, and achievements for regular self-reflection.
+    - Voice input via Web Speech API (all platforms)
+    - High-quality server TTS (Piper voices: Thorsten DE, Amy/Ryan EN) — *Registered+*
+    - Local TTS fallback (all platforms, including iOS)
+*   **Personality Profile & Adaptive Coaching** *(Registered+)*:
+    - Big Five / OCEAN survey (Registered+)
+    - Riemann-Thomann & Spiral Dynamics surveys (Premium+)
+    - AI-generated Narrative Profile (Signature) with superpowers & blind spots
+    - PDF export of full personality report
+    - DPC (Dynamic Prompt Composition) — profile-informed coaching *(Registered+)*
+    - DPFL (Dynamic Prompt & Feedback Learning) — adaptive learning across sessions *(Premium+)*
+    - Comfort Check after sessions *(Premium/DPFL)*
+*   **Transcript Evaluation** *(Premium+)*: Upload real-world conversation transcripts (text or `.srt`), receive AI-powered analysis with goal achievement scoring, behavioral pattern detection, blind spot identification, and coach recommendations. Includes PDF export.
+    - **➡️ [User Guide (DE)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE.md)** | **[User Guide (EN)](./DOCUMENTATION/TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md)**
+*   **Audio Transcription** *(Client only)*: Record or upload audio files directly in the app for transcription before evaluation.
+*   **PEP Solution Blockages (Dr. Bohne)** *(Client only)*: Specialized coaching framework for identifying and resolving psychological solution blockages.
+*   **Calendar Integration**: Export actionable next steps as `.ics` calendar events.
+*   **Gamification**: XP, levels, streaks, and achievement badges for regular self-reflection.
+*   **Cloud Sync** *(Registered+)*: Life Context and personality profiles synchronized across all your devices.
 *   **Seasonal Themes**: Automatic visual themes (Spring blossoms, Summer butterflies, Autumn leaves, Winter snowflakes).
-*   **Guest Mode**: Full functionality without account. Data stays in your browser.
-*   **Safety & Comfort**: "Comfort Check" feature to ensure emotional safety during intense sessions.
-*   **Multi-language Support**: English and German.
+*   **Guest Mode**: Try the app without an account — 4 coaches (Nobody, Max, Ava, Gloria), voice/text chat, and local Life Context. Data stays in your browser only.
+*   **9-Day Premium Trial**: Every new registration includes a full 9-day Premium trial with access to all features.
+*   **Crisis Response**: All coaches include a built-in crisis detection protocol that provides helpline information for all user types, including guests.
+*   **Multi-language Support**: English and German (1,500+ i18n keys, full parity).
+*   **iOS Native App**: Available via Capacitor with native speech recognition, audio playback, and In-App Purchase (StoreKit 2).
 
 ## 🛠️ Technology Stack
 
 *   **Frontend**:
     *   React 18 & Vite 7
     *   TypeScript
-    *   Tailwind CSS
+    *   Tailwind CSS + Framer Motion (animations & page transitions)
     *   Web Speech API for voice input/output
     *   Web Crypto API for End-to-End Encryption (E2EE)
+    *   Capacitor (iOS native app, StoreKit 2 In-App Purchases)
     *   html2pdf.js for PDF export
     *   ICS library for calendar events
 *   **Backend**:
     *   Node.js & Express.js
     *   Prisma ORM with MariaDB
     *   JSON Web Tokens (JWT) for authentication
-    *   Google Gemini API (`@google/genai`) for AI coaching
+    *   Google Gemini API (`@google/genai`) — primary AI provider
+    *   Mistral AI — secondary EU-based AI provider
+    *   PM2 Process Manager (cluster mode, graceful shutdown)
+    *   Mailjet for transactional emails
+    *   PayPal REST API v2 for payments
 *   **TTS Service**:
-    *   Piper TTS (Python/Flask container)
-    *   High-quality neural voices
+    *   Piper TTS (Python/Flask container, persistent in-memory models)
+    *   Progressive sentence synthesis (~8x faster than subprocess-based approach)
+    *   Opus audio compression (WAV → Opus via ffmpeg)
     *   Automatic fallback to Web Speech API
 *   **Infrastructure**:
     *   Podman containerization
     *   Nginx reverse proxy
     *   Dual environment (Staging/Production)
+    *   GitHub Actions CI (test-on-push)
 
 ## 📂 Project Structure
 
