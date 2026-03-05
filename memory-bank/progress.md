@@ -176,7 +176,7 @@
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
 - [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
-- [ ] **Accessibility:** Formal WCAG audit tooling (aria attributes already in place)
+- [ ] **Accessibility:** Formal WCAG audit (axe-core/Lighthouse tooling, prefers-reduced-motion, color contrast verification, screen reader testing)
 - [ ] **Self-hosted SLM:** Replace Gemini with server-based model (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Milestone: >1000 paying users. Requires dedicated larger server with GPU. Eliminates per-request API costs and Google dependency.
 
 ## Coaching Framework Roadmap (Feature Pipeline)
