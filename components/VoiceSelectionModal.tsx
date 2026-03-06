@@ -517,8 +517,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                         </div>
                     )}
 
-                    {/* Subtle footnote on iOS: server voices available in browser version */}
-                    {(isIOSBrowser || isNativeiOS) && (
+                    {/* Subtle footnote on iOS browser: server voices available in browser version */}
+                    {isIOSBrowser && !isNativeiOS && (
                         <p className="text-xs text-content-subtle mt-4 text-center">
                             {t('voiceModal_server_voices_web_hint')}
                         </p>

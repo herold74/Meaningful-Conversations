@@ -3,11 +3,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import { isNativeApp } from '../utils/platformDetection';
 
 interface InfoViewProps {
 }
 
-const de_markdown = `
+const de_markdown = (isNative: boolean) => `
 ## Allgemein
 
 ### Was ist die "Lebenskontext"-Datei?
@@ -58,23 +59,24 @@ Der Name (oder ein Pseudonym) wird verwendet, um Ihren Lebenskontext zu personal
 ### Wie kaufe ich ein Upgrade auf iOS?
 In der iOS-App werden Käufe direkt über Apple In-App Purchase abgewickelt. Öffnen Sie die Paywall (erscheint automatisch nach Ablauf der Trial-Phase oder über Menü → "Upgrade") und wählen Sie ein Abonnement. Die Zahlung erfolgt über Ihr Apple-Konto.
 
-### Wie kaufe ich ein Upgrade im Web-Browser?
+${isNative ? `### Kann ich meinen Account auch im Browser nutzen?
+Ja. Ihr Benutzerkonto funktioniert auch über den Web-Browser unter mc-app.manualmode.at. Dort stehen andere Stimmen und PayPal als Zahlungsoption zur Verfügung.` : `### Wie kaufe ich ein Upgrade im Web-Browser?
 Im Web-Browser erfolgen Käufe über PayPal. Öffnen Sie das Menü (☰) → "Upgrade" und wählen Sie ein Produkt. Alternativ können Sie unter Kontoverwaltung einen Zugangscode einlösen.
 
 ### Gibt es Unterschiede zwischen iOS-App und Web-Version?
 Die Kernfunktionen sind identisch. Unterschiede:
 - **iOS:** Native In-App Purchases, Apple-Stimmen (Enhanced/Premium), native Spracherkennung
-- **Web:** PayPal-Zahlung, Server-Stimmen (Piper TTS) zusätzlich zu Gerätestimmen, Browser-Spracherkennung
+- **Web:** PayPal-Zahlung, Server-Stimmen (Piper TTS) zusätzlich zu Gerätestimmen, Browser-Spracherkennung`}
 `;
 
-const en_markdown = `
+const en_markdown = (isNative: boolean) => `
 ## General
 
 ### What is the "Life Context" file?
 The Life Context file (.md) is a central document that serves as your coach's memory. It contains your goals, challenges, routines, and important background information. After each session, the AI analyzes your conversation and suggests updates to keep this file current, allowing for continuous and contextual coaching. You have full control over what gets saved.
 
 ### Can I use the app for free?
-Yes! The app offers a guest mode with access to a selection of coaches. In guest mode, all your data, including your Life Context file, is processed locally in your browser and is never sent to our servers. You are responsible for saving and loading your file for each session. Registered users get access to more coaches and features like encrypted cloud storage.
+Yes! The app offers a guest mode with access to a selection of coaches. In guest mode, all your data, including your Life Context file, is processed locally on your device and is never sent to our servers. You are responsible for saving and loading your file for each session. Registered users get access to more coaches and features like encrypted cloud storage.
 
 ### What is Gamification?
 Gamification elements like XP, levels, and streaks are designed to motivate you to engage in regular self-reflection. You earn XP for participating in conversations, and you can receive special bonuses. A **50 XP bonus** is awarded for guiding a session to a natural conclusion, and a **25 XP bonus** is awarded if you report completing a pre-existing goal. Completing sessions and reaching milestones unlocks achievements and rewards your commitment to personal growth.
@@ -118,18 +120,20 @@ Your name (or a pseudonym) is used to personalize your Life Context. For guests,
 ### How do I purchase an upgrade on iOS?
 In the iOS app, purchases are made directly through Apple In-App Purchase. Open the paywall (appears automatically after trial expiration or via Menu → "Upgrade") and select a subscription. Payment is processed through your Apple account.
 
-### How do I purchase an upgrade in a web browser?
+${isNative ? `### Can I use my account in a web browser too?
+Yes. Your user account also works via web browser at mc-app.manualmode.at. Different voices and PayPal as a payment option are available there.` : `### How do I purchase an upgrade in a web browser?
 In the web browser, purchases are made via PayPal. Open the menu (☰) → "Upgrade" and select a product. Alternatively, you can redeem an access code under Account Management.
 
 ### Are there differences between the iOS app and the web version?
 The core features are identical. Differences:
 - **iOS:** Native In-App Purchases, Apple voices (Enhanced/Premium), native speech recognition
-- **Web:** PayPal payment, server voices (Piper TTS) in addition to device voices, browser speech recognition
+- **Web:** PayPal payment, server voices (Piper TTS) in addition to device voices, browser speech recognition`}
 `;
 
 const FAQView: React.FC<InfoViewProps> = () => {
     const { t, language } = useLocalization();
-    const markdownContent = language === 'de' ? de_markdown : en_markdown;
+    const native = isNativeApp();
+    const markdownContent = language === 'de' ? de_markdown(native) : en_markdown(native);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
