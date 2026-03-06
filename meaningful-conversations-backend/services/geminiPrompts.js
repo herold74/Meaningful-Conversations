@@ -697,6 +697,7 @@ Stelle deine Bewertung als JSON-Objekt bereit.`
 const BOT_CATALOG_EN = `- Nobody (nexus-gps, guest): Pragmatic management advisor and communication strategist, GPS method. For: management and communication topics, concrete problem-solving, next steps, conversation preparation.
 - Max (max-ambitious, guest): Inspiring, questioning, reflective. For: potential, motivation, new perspectives, confidence.
 - Ava (ava-strategic, guest): Strategic, decisive, organized. For: prioritization, planning, complex decisions, organizational topics.
+- Gloria (gloria-interview, registered): Structured professional interviewer – no advice, pure questioning. For: working through life context section by section, identifying gaps and empty fields, checking consistency and overlaps across life areas, articulating ideas and projects.
 - Kenji (kenji-stoic, premium): Stoic, composed, wise. For: stress, perspective shifts, inner calm, philosophical reflection.
 - Chloe (chloe-cbt, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
 - Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
@@ -705,6 +706,7 @@ const BOT_CATALOG_EN = `- Nobody (nexus-gps, guest): Pragmatic management adviso
 const BOT_CATALOG_DE = `- Nobody (nexus-gps, guest): Pragmatischer Management-Berater und Kommunikationsstratege, GPS-Methode. Für: Management- und Kommunikationsthemen, konkrete Problemlösung, nächste Schritte, Gesprächsvorbereitung.
 - Max (max-ambitious, guest): Inspirierend, hinterfragend, reflektierend. Für: Potenzial, Motivation, neue Perspektiven, Selbstvertrauen.
 - Ava (ava-strategic, guest): Strategisch, entschlossen, organisiert. Für: Priorisierung, Planung, komplexe Entscheidungen, organisatorische Themen.
+- Gloria (gloria-interview, registered): Strukturierte professionelle Interviewerin – keine Beratung, reine Fragetechnik. Für: Lebenskontext Abschnitt für Abschnitt durcharbeiten, Lücken und leere Felder identifizieren, Konsistenz und Überschneidungen zwischen Lebensbereichen prüfen, Ideen und Projekte artikulieren.
 - Kenji (kenji-stoic, premium): Stoisch, gelassen, weise. Für: Stress, Perspektivwechsel, innere Ruhe, philosophische Reflexion.
 - Chloe (chloe-cbt, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
 - Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotagemuster, emotionale Resilienz, innere Blockaden.
@@ -759,7 +761,7 @@ For each, provide:
 - The bot display name
 - A 1-2 sentence rationale explaining which METHOD of this coach fits the topic (not what the user might feel or want)
 - A conversation starter (examplePrompt): 2-3 sentences MAX where the user states their topic in their own words. This is ONLY an opening message to start the session — NOT a coaching intervention.
-- The required access tier ("guest", "premium", or "client")
+- The required access tier ("guest", "registered", "premium", or "client")
 
 CRITICAL rules for examplePrompt:
 - Keep it short and natural (2-3 sentences, like a real person would type)
@@ -795,7 +797,7 @@ Für jedes Profil gib an:
 - Den Anzeigenamen des Bots
 - Eine 1-2-Satz-Begründung, welche METHODE dieses Coaches zum Thema passt (nicht was der Nutzer fühlen oder wollen könnte)
 - Einen Gesprächseinstieg (examplePrompt): Maximal 2-3 Sätze, in denen der Nutzer sein Thema in eigenen Worten beschreibt. Das ist NUR eine Eröffnungsnachricht — KEINE Coaching-Intervention.
-- Die benötigte Zugangsstufe ("guest", "premium", oder "client")
+- Die benötigte Zugangsstufe ("guest", "registered", "premium", oder "client")
 
 KRITISCHE Regeln für examplePrompt:
 - Kurz und natürlich halten (2-3 Sätze, wie ein echter Mensch tippen würde)
