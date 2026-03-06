@@ -47,6 +47,9 @@ Sammeln Sie Erfahrungspunkte, erreichen Sie neue Level und schalten Sie Erfolge 
 
 MyCoach AI eignet sich für Führungskräfte, Unternehmer:innen und alle, die ihre Gedanken strukturieren, berufliche Entscheidungen klären oder persönlich wachsen möchten — unterstützt von KI, die Sie wirklich kennt.
 
+Datenschutzerklärung: https://mc-app.manualmode.at/privacy
+Nutzungsbedingungen: https://mc-app.manualmode.at/terms
+
 ## Keywords (Deutsch, max 100 Zeichen)
 Coaching,KI,Reflexion,Selbstentwicklung,Ziele,Achtsamkeit,Persönlichkeit,Gespräch,Wachstum
 
@@ -108,3 +111,13 @@ Die vollständige Datenschutzerklärung (DE/EN) ist als statische HTML-Seite unt
 **Quelldatei:** `public/privacy.html` (wird über Nginx direkt ausgeliefert, kein SPA-Routing)
 
 Diese URL wird in App Store Connect als "Privacy Policy URL" eingetragen.
+
+## Terms of Use (EULA)
+
+Die Nutzungsbedingungen (DE/EN) sind als statische HTML-Seite unter folgender URL öffentlich erreichbar:
+
+**URL:** https://mc-app.manualmode.at/terms
+
+**Quelldatei:** `public/terms.html` (wird über Nginx direkt ausgeliefert, kein SPA-Routing)
+
+Diese URL wird in App Store Connect im EULA-Feld eingetragen und ist am Ende der App-Beschreibung verlinkt.
