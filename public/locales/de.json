@@ -592,6 +592,8 @@
   "iap_current": "Aktuell",
   "iap_restore_button": "Käufe wiederherstellen",
   "iap_restoring": "Wird wiederhergestellt…",
+  "paywall_privacy_link": "Datenschutz",
+  "paywall_terms_link": "Nutzungsbedingungen",
   "iap_restore_success": "{{count}} Kauf/Käufe erfolgreich wiederhergestellt.",
   "iap_restore_none": "Keine früheren Käufe gefunden.",
   "iap_not_available": "In-App-Käufe sind derzeit nicht verfügbar. Bitte verwenden Sie stattdessen einen Code.",

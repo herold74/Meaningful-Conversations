@@ -125,7 +125,8 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
 
     const getTierLabel = (tier: string) => {
         if (tier === 'premium') return 'Premium';
-        if (tier === 'client') return t('botSelection_tier_client');
+        if (tier === 'client') return t('account_tier_client');
+        if (tier === 'registered') return t('account_tier_registered');
         return tier;
     };
 

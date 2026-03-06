@@ -11,6 +11,7 @@ import {
 import { User } from '../types';
 import Button from './shared/Button';
 import * as api from '../services/api';
+import { brand } from '../config/brand';
 
 interface NativePaywallProps {
   onPurchaseSuccess: (user: User) => void;
@@ -303,6 +304,13 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       >
         {restoring ? t('iap_restoring') : t('iap_restore_button')}
       </button>
+
+      {/* Legal links — Apple mandatory for auto-renewable subscriptions */}
+      <div className="flex justify-center gap-4 text-xs text-content-subtle pt-2 pb-1">
+        <a href={`https://${brand.domainProduction}/privacy`} target="_blank" rel="noopener noreferrer" className="underline">{t('paywall_privacy_link')}</a>
+        <span>·</span>
+        <a href={`https://${brand.domainProduction}/terms`} target="_blank" rel="noopener noreferrer" className="underline">{t('paywall_terms_link')}</a>
+      </div>
     </div>
   );
 };
