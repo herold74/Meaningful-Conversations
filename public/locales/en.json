@@ -592,6 +592,8 @@
   "iap_current": "Current",
   "iap_restore_button": "Restore Purchases",
   "iap_restoring": "Restoring…",
+  "paywall_privacy_link": "Privacy Policy",
+  "paywall_terms_link": "Terms of Use",
   "iap_restore_success": "{{count}} purchase(s) restored successfully.",
   "iap_restore_none": "No previous purchases found.",
   "iap_not_available": "In-app purchases are currently not available. Please use a code instead.",

@@ -34,22 +34,22 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
             userRegionPreference = recUser?.aiRegionPreference || 'optimal';
         }
 
-        const modelName = 'gemini-2.5-flash';
         const result = await aiProviderService.generateContent({
-            model: modelName,
+            model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
                 responseSchema: botRecommendationPrompts.schema,
                 temperature: 0.3,
             },
-            context: 'bot-recommendation',
+            context: 'chat',
             userRegionPreference,
             language,
         });
 
         const durationMs = Date.now() - startTime;
         const tokenUsage = result.usage || {};
+        const actualModel = result.model || 'unknown';
 
         let recommendation;
         try {
@@ -76,7 +76,7 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
         await trackApiUsage({
             userId,
             endpoint: 'bot-recommendation',
-            model: modelName,
+            model: actualModel,
             botId: null,
             inputTokens: tokenUsage.inputTokens || 0,
             outputTokens: tokenUsage.outputTokens || 0,
@@ -93,7 +93,7 @@ router.post('/bot-recommendation', authMiddleware, botRecommendationLimiter, asy
         await trackApiUsage({
             userId,
             endpoint: 'bot-recommendation',
-            model: 'gemini-2.5-flash',
+            model: 'unknown',
             botId: null,
             inputTokens: 0,
             outputTokens: 0,
