@@ -366,7 +366,7 @@ const App: React.FC = () => {
         return md;
     };
 
-    const handleFileUpload = (context: string) => {
+    const handleFileUpload = async (context: string) => {
         // New regex to find the key "do_not_delete" and handle legacy "gmf-data"
         const dataRegex = /<!-- (do_not_delete|gmf-data): (.*?) -->/;
         const match = context.match(dataRegex);
@@ -389,11 +389,20 @@ const App: React.FC = () => {
             }
         }
         
+        const newGamificationState = deserializeGamificationState(gamificationJson);
         setCameFromContextChoice(true);
-        setGamificationState(deserializeGamificationState(gamificationJson));
+        setGamificationState(newGamificationState);
 
         setLifeContext(context);
         setView('botSelection');
+
+        if (currentUser && encryptionKey) {
+            try {
+                await userService.saveUserData(context, serializeGamificationState(newGamificationState), encryptionKey);
+            } catch (error) {
+                console.error('Failed to auto-save Life Context after file upload:', error);
+            }
+        }
     };
 
     const handleQuestionnaireSubmit = (context: string) => {
@@ -612,10 +621,18 @@ const App: React.FC = () => {
         }
     };
 
-    const handlePiiConfirm = () => {
+    const handlePiiConfirm = async () => {
         setLifeContext(tempContext);
         setTempContext('');
         setView('botSelection');
+
+        if (currentUser && encryptionKey) {
+            try {
+                await userService.saveUserData(tempContext, serializeGamificationState(gamificationState), encryptionKey);
+            } catch (error) {
+                console.error('Failed to auto-save Life Context after questionnaire:', error);
+            }
+        }
     };
     
     const handleSelectBot = (bot: Bot) => {

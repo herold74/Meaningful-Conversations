@@ -44,6 +44,7 @@ export type NavView =
     | 'intentPicker'
     | 'namePrompt'
     | 'lcEditorFromLanding'
+    | 'lcEditorFromContextChoice'
     | 'profileHint';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';

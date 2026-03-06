@@ -5,13 +5,14 @@ import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { brand } from '../config/brand';
+import { isNativeApp } from '../utils/platformDetection';
 import { User } from '../types';
 
 interface InfoViewProps {
     currentUser?: User | null;
 }
 
-const de_markdown = (isRegistered: boolean, isPremium: boolean) => `<details>
+const de_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
@@ -42,10 +43,12 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 **Hinweis:** Registrierte Benutzer können den Intent Picker im Menü (☰) deaktivieren.
 
 ### 1.2 Gast vs. Registrierter Benutzer
-- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur in Ihrem Browser verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
+- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
 - **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
+
+**Plattformübergreifend:** Ihr Benutzerkonto funktioniert sowohl in der iOS-App als auch über den Web-Browser unter **${brand.domainProduction}**. Alle Daten werden automatisch synchronisiert.
 
 ### 1.3 Ihre erste Lebenskontext-Datei erstellen
 Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Sie drei Möglichkeiten haben:
@@ -133,20 +136,20 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, alle Features |
 
 **So upgraden Sie:**
-- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
-- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
-- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben (auf beiden Plattformen).
+${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
+- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe sowie Einzelcoach-Freischaltungen via PayPal.`}
+- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.
 
 </div>
 </details>
 
 ---
 
-<details>
+${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
-Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
+Die ${brand.appName} App (MyCoach AI) ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
 
 ### 3.1 Native iOS App (empfohlen für iPhone/iPad)
 
@@ -192,8 +195,8 @@ Falls Sie die Web-Version bevorzugen:
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Kapitel 4: Persönlichkeitsprofil</summary>
+`}<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${isNative ? 'Kapitel 3' : 'Kapitel 4'}: Persönlichkeitsprofil</summary>
 <div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
@@ -405,7 +408,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Kapitel 5: Die Coaching-Sitzung</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${isNative ? 'Kapitel 4' : 'Kapitel 5'}: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Einen Coach auswählen
@@ -610,15 +613,15 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - **Textmodus (Standard):**
   - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
   - **Klicken Sie auf das Papierflieger-Symbol**, um Ihre Nachricht zu senden.
-  - **Klicken Sie auf das Mikrofon-Symbol**, um die Sprache-zu-Text-Funktion Ihres Browsers zu nutzen und Ihre Nachricht zu diktieren.
+  - **Klicken Sie auf das Mikrofon-Symbol**, um die Sprache-zu-Text-Funktion ${isNative ? 'Ihres Gerätes' : 'Ihres Browsers'} zu nutzen und Ihre Nachricht zu diktieren.
 - **Sprachausgabe (TTS):**
   - **Klicken Sie auf das Lautsprecher-Symbol**, um die Sprachausgabe ein- oder auszuschalten.
   - Wenn sie aktiviert ist, können Sie die Wiedergabe mit den Symbolen **Pause/Wiedergabe** und **Wiederholen** steuern.
   - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie folgende Optionen:
     - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches -- wird automatisch ausgewählt.
     - **Gerätestimmen:** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Sofortige Reaktionszeiten und funktionieren auch offline.
-    - **Server-Stimmen:** *(Nur im Web-Browser verfügbar)* Professionelle Stimmen, die auf unserem Server generiert werden.
-  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit -- Server-Stimmen sind hier nicht verfügbar und auch nicht nötig.
+${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser verfügbar)* Professionelle Stimmen, die auf unserem Server generiert werden.
+  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit -- Server-Stimmen sind hier nicht verfügbar und auch nicht nötig.`}
 - **Sprachmodus:**
   - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
   - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
@@ -631,7 +634,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Kapitel 6: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${isNative ? 'Kapitel 5' : 'Kapitel 6'}: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
 ### 6.1 Die Analyse
@@ -679,7 +682,7 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 4), erschein
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Kapitel 7: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${isNative ? 'Kapitel 6' : 'Kapitel 7'}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
@@ -718,11 +721,11 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 </details>
 `;
 
-const de_chapter8 = `
+const de_chapter8 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Kapitel 8: Transkript-Auswertung (Premium-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Kapitel 7' : 'Kapitel 8'}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -822,11 +825,11 @@ Für kurze Gespräche können Sie auch einfach aus der Erinnerung ein Protokoll 
 </details>
 `;
 
-const de_chapter9 = `
+const de_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Kapitel 9: Audio-Transkription (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Kapitel 8' : 'Kapitel 9'}: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Audio-Transkription?
@@ -856,7 +859,7 @@ Nach der Aufnahme bzw. dem Upload wird die Audiodatei automatisch transkribiert.
 Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
 - **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
-- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (Kapitel 8) ein, um eine strukturierte Analyse zu erhalten.
+- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${isNative ? 'Kapitel 7' : 'Kapitel 8'}) ein, um eine strukturierte Analyse zu erhalten.
 
 ### KI-Anbieter-Hinweis
 
@@ -879,7 +882,7 @@ Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral k
 </details>
 `;
 
-const en_markdown = (isRegistered: boolean, isPremium: boolean) => `<details>
+const en_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
@@ -910,10 +913,12 @@ Your chosen intent determines which section is highlighted in the coach selectio
 **Note:** Registered users can disable the Intent Picker from the menu (☰).
 
 ### 1.2 Guest vs. Registered User
-- **Continue as Guest:** Perfect for trying the app. All your data is processed only in your browser. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
+- **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
 - **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
 **Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
+
+**Cross-platform:** Your user account works both in the iOS app and via web browser at **${brand.domainProduction}**. All data is synchronized automatically.
 
 ### 1.3 Creating Your First Life Context
 After making your choice, you'll arrive at the landing page with three options:
@@ -1001,20 +1006,20 @@ The app offers four access tiers with increasing functionality:
 | **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, all features |
 
 **How to upgrade:**
-- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
-- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes and individual coach unlocks via PayPal.
-- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code (on both platforms).
+${isNative ? `- Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
+- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes and individual coach unlocks via PayPal.`}
+- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.
 
 </div>
 </details>
 
 ---
 
-<details>
+${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
-The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
+The ${brand.appName} app (MyCoach AI) is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
 
 ### 3.1 Native iOS App (recommended for iPhone/iPad)
 
@@ -1060,8 +1065,8 @@ If you prefer the web version:
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 Chapter 4: Personality Profile</summary>
+`}<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${isNative ? 'Chapter 3' : 'Chapter 4'}: Personality Profile</summary>
 <div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
@@ -1242,7 +1247,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 Chapter 5: The Coaching Session</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${isNative ? 'Chapter 4' : 'Chapter 5'}: The Coaching Session</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Choosing Your Coach
@@ -1447,15 +1452,15 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 - **Text Mode (Default):**
   - Type your message in the text area at the bottom.
   - **Click the paper plane icon** to send your message.
-  - **Click the microphone icon** to use your browser's speech-to-text feature and dictate your message.
+  - **Click the microphone icon** to use your ${isNative ? "device's" : "browser's"} speech-to-text feature and dictate your message.
 - **Voice Output (TTS) Controls:**
   - **Click the Speaker icon** to toggle text-to-speech on or off.
   - When enabled, you can control playback with the **Pause/Play** and **Repeat** icons.
   - **Click the Gear icon** to open the **Voice Settings** modal. You have the following options:
     - **Coach Signature Voice:** The best available voice for the coach's language and personality -- automatically selected.
     - **Device Voices:** Voices generated directly on your device. **Advantage:** Instant response times and work offline.
-    - **Server Voices:** *(Web browser only)* Professional voices generated on our server.
-  - **Note for iOS App:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times -- server voices are not available or needed here.
+${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times.` : `    - **Server Voices:** *(Web browser only)* Professional voices generated on our server.
+  - **Note for iOS App:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times -- server voices are not available or needed here.`}
 - **Voice Mode:**
   - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
   - **Tap the large microphone icon** to start recording. Speak your message.
@@ -1468,7 +1473,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 Chapter 6: After the Session - The Review Process</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${isNative ? 'Chapter 5' : 'Chapter 6'}: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
 ### 6.1 The Analysis
@@ -1516,7 +1521,7 @@ If you have the **DPFL coaching mode** activated (see Chapter 4), two additional
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 Chapter 7: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${isNative ? 'Chapter 6' : 'Chapter 7'}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
@@ -1555,11 +1560,11 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 </details>
 `;
 
-const en_chapter8 = `
+const en_chapter8 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 Chapter 8: Transcript Evaluation (Premium Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Chapter 7' : 'Chapter 8'}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1659,11 +1664,11 @@ For short conversations, you can simply write a protocol from memory. Use the fo
 </details>
 `;
 
-const en_chapter9 = `
+const en_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ Chapter 9: Audio Transcription (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Chapter 8' : 'Chapter 9'}: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Audio Transcription?
@@ -1693,7 +1698,7 @@ After recording or uploading, the audio file is automatically transcribed. Depen
 After transcription, you have the following options:
 - **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
 - **Download Transcript:** Save the raw or smoothed transcript as a text file.
-- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (Chapter 8) for a structured analysis.
+- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${isNative ? 'Chapter 7' : 'Chapter 8'}) for a structured analysis.
 
 ### AI Provider Note
 
@@ -1726,9 +1731,10 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const isPremiumUser = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
 
     const markdownContent = useMemo(() => {
-        const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser) : en_markdown(isRegistered, !!isPremiumUser);
-        const ch8 = language === 'de' ? de_chapter8 : en_chapter8;
-        const ch9 = language === 'de' ? de_chapter9 : en_chapter9;
+        const native = isNativeApp();
+        const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser, native) : en_markdown(isRegistered, !!isPremiumUser, native);
+        const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
+        const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
         return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9]);
     

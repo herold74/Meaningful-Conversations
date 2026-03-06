@@ -352,6 +352,10 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setLifeContext('');
             setView('landing');
           }}
+          onEdit={() => {
+            setCameFromContextChoice(true);
+            setView('lcEditorFromContextChoice');
+          }}
         />
       );
     case 'paywall':
@@ -475,6 +479,32 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setView('landing');
           }}
           onCancel={() => setView('landing')}
+        />
+      );
+    case 'lcEditorFromContextChoice':
+      return (
+        <LifeContextEditorView
+          lifeContext={lifeContext}
+          showPiiTips={false}
+          title={t('lc_editor_title')}
+          description={t('lc_editor_desc')}
+          onSave={async (newContext: string) => {
+            setLifeContext(newContext);
+            if (currentUser && encryptionKey) {
+              try {
+                await userService.saveUserData(
+                  newContext,
+                  serializeGamificationState(gamificationState),
+                  encryptionKey
+                );
+              } catch (error) {
+                console.error('Failed to save edited context:', error);
+              }
+            }
+            setCameFromContextChoice(true);
+            setView('botSelection');
+          }}
+          onCancel={() => setView('contextChoice')}
         />
       );
     case 'intentPicker':

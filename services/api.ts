@@ -40,12 +40,12 @@ export const getApiBaseUrl = (): string => {
     
     if (isCapacitor) {
         // Allow override via URL param even in Capacitor
-        if (backendParam === 'production') {
-            return `https://${brand.domainProduction}`;
+        if (backendParam === 'staging') {
+            return `https://${brand.domainStaging}`;
         }
-        // Default to staging for Capacitor testing
-        console.log('[API] Capacitor detected, using staging backend');
-        return `https://${brand.domainStaging}`;
+        // Default to production for App Store release
+        console.log('[API] Capacitor detected, using production backend');
+        return `https://${brand.domainProduction}`;
     }
 
     // 1. Priority: URL parameter for explicit override (for local development/testing)
