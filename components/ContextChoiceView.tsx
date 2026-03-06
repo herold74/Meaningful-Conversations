@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { WarningIcon } from './icons/WarningIcon';
+import PencilIcon from './icons/PencilIcon';
 import { XIcon } from './icons/XIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import Button from './shared/Button';
@@ -20,6 +21,7 @@ interface ContextChoiceViewProps {
   savedContext: string;
   onContinue: () => void;
   onStartNew: () => void;
+  onEdit?: () => void;
   gamificationState: GamificationState;
 }
 
@@ -27,7 +29,7 @@ const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
-const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContext, gamificationState, onContinue, onStartNew }) => {
+const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContext, gamificationState, onContinue, onStartNew, onEdit }) => {
   const { t } = useLocalization();
   const [isConfirmingStartNew, setIsConfirmingStartNew] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -82,7 +84,19 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({ user, savedContex
         </p>
         
         <div className="p-4 bg-background-primary dark:bg-background-primary border border-border-primary dark:border-border-primary text-left">
-          <h2 className="text-sm font-bold text-accent-primary mb-2 uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-bold text-accent-primary uppercase tracking-wider">{t('contextChoice_preview_title')}</h2>
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                title={t('contextChoice_edit')}
+                aria-label={t('contextChoice_edit')}
+                className="p-1 -mr-1 text-content-tertiary hover:text-accent-primary transition-colors rounded"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           
           {/* Full preview is now shown on all screen sizes */}
           <div className="prose prose-sm dark:prose-invert max-w-none max-h-60 overflow-y-auto">
