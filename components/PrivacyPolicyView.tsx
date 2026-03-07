@@ -20,7 +20,7 @@ Gersthofer Strasse 148
 Österreich
 
 **Kontakt:**  
-E-Mail: gherold@manualmode.at  
+E-Mail: support@manualmode.at  
 Telefon: +43 664 9628694  
 Website: www.manualmode.at
 
@@ -66,7 +66,7 @@ Die Verarbeitung Ihrer personenbezogenen Daten erfolgt auf folgenden Rechtsgrund
 ### Widerruf Ihrer Einwilligung
 Sie können Ihre Einwilligung zur Newsletter-Nutzung jederzeit widerrufen:
 1. In den App-Einstellungen unter "Mein Account" → "Profil bearbeiten"
-2. Per E-Mail an gherold@manualmode.at
+2. Per E-Mail an support@manualmode.at
 
 Der Widerruf wirkt sich nicht auf die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung aus.
 
@@ -288,7 +288,7 @@ Gersthofer Strasse 148
 Austria
 
 **Contact:**  
-Email: gherold@manualmode.at  
+Email: support@manualmode.at  
 Phone: +43 664 9628694  
 Website: www.manualmode.at
 
@@ -334,7 +334,7 @@ The processing of your personal data is based on the following legal grounds:
 ### Withdrawal of Consent
 You can withdraw your consent to newsletter use at any time:
 1. In app settings under "My Account" → "Edit Profile"
-2. By email to gherold@manualmode.at
+2. By email to support@manualmode.at
 
 Withdrawal does not affect the lawfulness of processing carried out before withdrawal.
 
