@@ -575,4 +575,4 @@
 
 **Naechstes Review:** Maerz 2027 (jaehrlich)  
 **Maintained by:** Guenter Herold / Manualmode  
-**Contact:** gherold@manualmode.at
+**Contact:** support@manualmode.at

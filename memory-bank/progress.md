@@ -190,3 +190,32 @@ Vier spezialisierte Frameworks als neue Features über das Jahr verteilt, um Reg
 ### Coaching "Linsen" (Overlay-Modus für erfahrene User)
 - [ ] **NLP Meta-Modell Linse** — Erkennt Tilgungen („man"), Generalisierungen („immer/nie"), Verzerrungen („er macht mich wütend") in User-Aussagen. Hakt gezielt nach, um sprachliche Unschärfen aufzulösen. Kann als Layer auf jeden bestehenden Bot aktiviert werden. *(Client Feature)*
 - [ ] **Logische Ebenen Linse** (Robert Dilts) — Sortiert Aussagen hierarchisch: Umwelt → Verhalten → Fähigkeiten → Glaubenssysteme → Identität → Vision. Findet den „Hebel" für Veränderung (oft eine Ebene über dem Problem). Als Reflexions-Layer auf bestehende Bots. *(Client Feature)*
+
+### Feature Extensions (Existing Infrastructure)
+- [ ] **Presentation Evaluator** — Erweiterung des Transcript-Features für die Evaluation vorgetragener Reden unter realistischen Bedingungen. Zielgruppe: Speaker in Vorbereitung (öffentliche Reden, Pitches, Präsentationen).
+
+  **Primary Flow:**
+  1. **Setup:** Generisch (Best-Practice-Bewertung ohne Kontext) oder Spezifisch (Redezweck, Zielgruppe, Ziel-Redezeit) — Spezifisch per Formular oder Datei-Upload (`.txt`, `.docx`, `.pdf`). Bei Upload: KI extrahiert Felder, füllt Formular vor, User prüft und schließt Lücken.
+  2. **Recording:** Timer läuft sichtbar, Web Speech API transkribiert live (Continuous Mode, bereits im Projekt). Stressreaktion durch Timing-Druck ist bewusstes Feature.
+  3. **Review:** Transkript, Endzeit, Wortanzahl, WPM werden angezeigt.
+  4. **Evaluation:** KI bewertet Content (Aufbau, logischer Ablauf, Sprachklarheit, Redezweck, Zielerreichung) UND Delivery-Artifacts aus dem Transkript (WPM vs. Zielzeit, wiederholte Wörter, Satzfragmente, vergessene Abschnitte).
+
+  **Output (Sandwich-Struktur):** Stärken → Entwicklungsbereiche (mit Textzitaten) → Präsentationsempfehlungen (Betonungen, Interaktionspunkte mit Publikum).
+
+  **Ralph** — On-demand Bot, der den Evaluationsbericht vorliest und auf Rückfragen eingeht. Leicht ironischer Charakter, sachlich in der Sache.
+
+  **Corner Case:** Upload eines fertigen Skripts → reine Inhaltsevaluierung ohne Delivery-Signals.
+
+  **Evaluierbare Delivery-Signale via Transkript:**
+  - Pacing/Sprechtempo (Wörter ÷ Timer = WPM)
+  - Wiederholte Wörter und Phrasen
+  - Unvollständige Sätze (Grammatikstruktur)
+  - Inhaltliche Lücken vs. geplante Struktur
+  - Nicht evaluierbar (erfordern Audio/Video): Vocal Variety, Körpersprache, Stimmvolumen
+
+  **Technischer Aufbau:**
+  - `PresentationRecorder.tsx` — Timer + Live-Transkription (Web Speech API)
+  - `POST /api/gemini/presentation-evaluate` — erweitertes Prompt-Schema (Content + Delivery), aufbauend auf `routes/gemini/transcript.js`
+  - Text-Extraktion für Upload: `pdf-parse` (PDF), `mammoth` (DOCX) — neue Dependencies
+  - KI-Prefill-Endpunkt für Upload-Kontext-Extraktion
+  - Ralph: neuer Bot-Eintrag in `bots.js`, TTS-fähig, Premium Feature, respektiert `aiRegionPreference`

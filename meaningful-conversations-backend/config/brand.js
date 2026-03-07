@@ -8,7 +8,7 @@ const brand = {
   appNameDe:        process.env.BRAND_APP_NAME_DE        || 'Sinnstiftende Gespräche',
   providerName:     process.env.BRAND_PROVIDER_NAME      || 'manualmode.at',
   providerUrl:      process.env.BRAND_PROVIDER_URL       || 'https://www.manualmode.at',
-  contactEmail:     process.env.BRAND_CONTACT_EMAIL      || 'gherold@manualmode.at',
+  contactEmail:     process.env.BRAND_CONTACT_EMAIL      || 'support@manualmode.at',
   ownerName:        process.env.BRAND_OWNER_NAME         || 'Günter Herold',
   primaryColor:     process.env.BRAND_PRIMARY_COLOR      || '#1B7272',
   primaryColorDark: process.env.BRAND_PRIMARY_COLOR_DARK || '#165a5a',

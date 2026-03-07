@@ -141,7 +141,7 @@ Mistral AI provides:
 ---
 
 **Maintained by**: Günter Herold / Manualmode  
-**Contact**: gherold@manualmode.at  
+**Contact**: support@manualmode.at  
 **Project**: Meaningful Conversations  
 **Jurisdiction**: Austria (Österreich)  
 **Server**: manualmode.at (Hetzner, Germany - EU)  

@@ -258,7 +258,7 @@ Voice-Modus aktiv → Bildschirm bleibt aktiv
 ---
 
 **Maintained by**: Günter Herold / Manualmode  
-**Contact**: gherold@manualmode.at  
+**Contact**: support@manualmode.at  
 **Project**: Meaningful Conversations  
 **Server**: manualmode.at
 

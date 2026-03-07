@@ -9,7 +9,7 @@ export const brand = {
   shortName:        import.meta.env.VITE_BRAND_SHORT_NAME         || 'Meaningful',
   providerName:     import.meta.env.VITE_BRAND_PROVIDER_NAME      || 'manualmode.at',
   providerUrl:      import.meta.env.VITE_BRAND_PROVIDER_URL       || 'https://www.manualmode.at',
-  contactEmail:     import.meta.env.VITE_BRAND_CONTACT_EMAIL      || 'gherold@manualmode.at',
+  contactEmail:     import.meta.env.VITE_BRAND_CONTACT_EMAIL      || 'support@manualmode.at',
   ownerName:        import.meta.env.VITE_BRAND_OWNER_NAME         || 'Günter Herold',
   primaryColor:     import.meta.env.VITE_BRAND_PRIMARY_COLOR      || '#1B7272',
   primaryColorDark: import.meta.env.VITE_BRAND_PRIMARY_COLOR_DARK || '#165a5a',

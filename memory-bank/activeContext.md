@@ -97,6 +97,7 @@
 - [ ] Formal WCAG accessibility audit tooling (aria attributes already in place throughout)
 - [ ] Server-based SLM as Gemini replacement (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Target: >1000 paying users, dedicated larger server. Reduces per-request cost and Google dependency.
 - [ ] Coaching Framework Roadmap: 2 new bots (Clean Language, The Work) + 2 coaching "lenses" (NLP Meta-Modell, Logische Ebenen). See progress.md for details.
+- [ ] **[BACKLOG] Presentation Evaluator:** Redevorbereitung mit Live-Recording (Web Speech API + Timer → WPM, Wiederholungen, Satzfragmente) + KI-Evaluation (Content & Delivery-Artifacts). Setup: Generisch oder Spezifisch (Formular / Upload mit KI-Prefill). Output: Sandwich-Report (Stärken → Entwicklung → Präsentationstipps), vorgelesen von Bot "Ralph" (on-demand, TTS). Aufbauend auf `routes/gemini/transcript.js`. Premium Feature. Details in progress.md → "Feature Extensions".
 
 ## Decision Log
 - **2026-02-28:** Mistral requires separate behavioral overlay instead of separate prompts. Shared base prompts + Mistral-specific rules appended in `convertToMistralFormat()` + post-processing filter. Keeps prompt maintenance in one place.

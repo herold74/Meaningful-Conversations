@@ -85,7 +85,7 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `VITE_BRAND_SHORT_NAME` | Meaningful | PWA manifest `short_name` |
 | `VITE_BRAND_PROVIDER_NAME` | manualmode.at | About page, Imprint, Privacy Policy, User Guide, Redeem Code, locale interpolations |
 | `VITE_BRAND_PROVIDER_URL` | https://www.manualmode.at | About page highlight link, Imprint, Redeem Code link |
-| `VITE_BRAND_CONTACT_EMAIL` | gherold@manualmode.at | Imprint, Privacy Policy, locale interpolations |
+| `VITE_BRAND_CONTACT_EMAIL` | support@manualmode.at | Imprint, Privacy Policy, locale interpolations |
 | `VITE_BRAND_OWNER_NAME` | Günter Herold | PDF footers |
 | `VITE_BRAND_PRIMARY_COLOR` | #1B7272 | PDF headers/accents, locale interpolations (paywall) |
 | `VITE_BRAND_PRIMARY_COLOR_DARK` | #165a5a | PDF gradient |
@@ -108,7 +108,7 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `BRAND_APP_NAME_DE` | Sinnstiftende Gespräche | German email subjects, Gloria DE prompt |
 | `BRAND_PROVIDER_NAME` | manualmode.at | Email footers, crisis protocol, export HTML |
 | `BRAND_PROVIDER_URL` | https://www.manualmode.at | Email footer links, export HTML |
-| `BRAND_CONTACT_EMAIL` | gherold@manualmode.at | Purchase emails, admin notification fallback |
+| `BRAND_CONTACT_EMAIL` | support@manualmode.at | Purchase emails, admin notification fallback |
 | `BRAND_OWNER_NAME` | Günter Herold | Purchase email signature |
 | `BRAND_PRIMARY_COLOR` | #1B7272 | Email template colors (~25 occurrences) |
 | `BRAND_PRIMARY_COLOR_DARK` | #165a5a | Email gradient backgrounds |
