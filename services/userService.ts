@@ -144,6 +144,7 @@ export const submitFeedback = async (feedbackData: {
     botResponse?: string | null;
     isAnonymous: boolean;
     email?: string;
+    llmProvider?: string;
 }): Promise<void> => {
     await apiFetch('/feedback', {
         method: 'POST',

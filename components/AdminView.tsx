@@ -210,6 +210,17 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
                     )}
                 </td>
                 <td className="p-3 align-top whitespace-normal break-words text-gray-600 dark:text-gray-400">{bot?.name || item.botId}</td>
+                <td className="p-3 align-top">
+                    {item.llmProvider === 'google' && (
+                        <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">Google</span>
+                    )}
+                    {item.llmProvider === 'mistral' && (
+                        <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">Mistral</span>
+                    )}
+                    {!item.llmProvider && (
+                        <span className="italic text-xs text-gray-400 dark:text-gray-600">—</span>
+                    )}
+                </td>
                 <td className="p-3 align-top whitespace-normal break-all text-gray-600 dark:text-gray-400">
                     {!item.user
                         ? <span className="italic">{t('admin_feedback_guest')}</span>
@@ -222,7 +233,7 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
             </tr>
             {isCommentExpanded && (
                 <tr className="bg-gray-50 dark:bg-gray-900/30 animate-fadeIn">
-                    <td colSpan={5} className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <td colSpan={6} className="p-4 border-b border-gray-200 dark:border-gray-700">
                         <h5 className="font-bold text-gray-600 dark:text-gray-300 text-sm mb-1">{t('admin_feedback_full_comment')}</h5>
                         <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{item.comments}</p>
                     </td>
@@ -271,6 +282,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [resetSuccessData, setResetSuccessData] = useState<{ email: string; newPass: string } | null>(null);
     const [userToReset, setUserToReset] = useState<User | null>(null);
     const [selectedBotFilter, setSelectedBotFilter] = useState<string | null>(null);
+    const [selectedProviderFilter, setSelectedProviderFilter] = useState<'all' | 'google' | 'mistral' | 'unknown'>('all');
     const [selectedScenarioId, setSelectedScenarioId] = useState<string>(testScenarios[0]?.id || '');
     const [adminProfileType, setAdminProfileType] = useState<'RIEMANN' | 'BIG5' | null>(null);
     const [showMismatchWarning, setShowMismatchWarning] = useState(false);
@@ -686,9 +698,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, [sessionFeedback]);
     
     const filteredFeedback = useMemo(() => {
-        if (!selectedBotFilter) return sessionFeedback;
-        return sessionFeedback.filter(item => item.botId === selectedBotFilter);
-    }, [sessionFeedback, selectedBotFilter]);
+        return sessionFeedback.filter(item => {
+            if (selectedBotFilter && item.botId !== selectedBotFilter) return false;
+            if (selectedProviderFilter === 'google') return item.llmProvider === 'google';
+            if (selectedProviderFilter === 'mistral') return item.llmProvider === 'mistral';
+            if (selectedProviderFilter === 'unknown') return !item.llmProvider;
+            return true;
+        });
+    }, [sessionFeedback, selectedBotFilter, selectedProviderFilter]);
 
     const renderTabs = () => (
         <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
@@ -1410,11 +1427,33 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             {ratingStats.totalRatings > 0 ? (
                 <>
                     <div>
-                         <div className="flex justify-between items-center mb-2">
+                        <div className="flex flex-wrap justify-between items-center mb-2 gap-2">
                             <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{selectedBotFilter ? t('admin_ratings_details_for', { name: ratingStats.botStats.find(b => b.id === selectedBotFilter)?.name || '' }) : t('admin_ratings_all_feedback')}</h3>
-                            {selectedBotFilter && (
-                                <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
-                            )}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {/* LLM Provider Filter */}
+                                <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 bg-gray-50 dark:bg-gray-900/30">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium mr-1">LLM:</span>
+                                    {(['all', 'google', 'mistral', 'unknown'] as const).map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setSelectedProviderFilter(p)}
+                                            className={`px-2.5 py-0.5 rounded text-xs font-semibold transition-all ${
+                                                selectedProviderFilter === p
+                                                    ? p === 'google' ? 'bg-blue-600 text-white'
+                                                    : p === 'mistral' ? 'bg-orange-500 text-white'
+                                                    : p === 'unknown' ? 'bg-gray-500 text-white'
+                                                    : 'bg-accent-primary text-white'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:border-accent-primary'
+                                            }`}
+                                        >
+                                            {p === 'all' ? 'Alle' : p === 'google' ? 'Google' : p === 'mistral' ? 'Mistral' : '—'}
+                                        </button>
+                                    ))}
+                                </div>
+                                {selectedBotFilter && (
+                                    <button onClick={() => setSelectedBotFilter(null)} className="text-sm text-yellow-600 dark:text-yellow-400 hover:underline">{t('admin_ratings_clear_filter')}</button>
+                                )}
+                            </div>
                         </div>
                         <div className={`overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-md overflow-hidden ${filteredFeedback.length > 5 ? 'max-h-96 overflow-y-auto' : ''}`}>
                             <table className="w-full text-left text-sm">
@@ -1423,6 +1462,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         <th className="p-3 w-28">{t('admin_feedback_rating')}</th>
                                         <th className="p-3">{t('admin_feedback_comments')}</th>
                                         <th className="p-3 w-24">{t('admin_feedback_bot')}</th>
+                                        <th className="p-3 w-20">LLM</th>
                                         <th className="p-3 w-48">{t('admin_feedback_user')}</th>
                                         <th className="p-3 w-44">{t('admin_feedback_submitted')}</th>
                                     </tr>
