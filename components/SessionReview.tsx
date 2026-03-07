@@ -351,6 +351,11 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const cleanOriginalContext = useMemo(() => isInterviewReview ? '' : removeGamificationKey(originalContext), [originalContext, isInterviewReview]);
     const isGuest = !currentUser;
 
+    const sessionLlmProvider = useMemo(() => {
+        const botMessages = chatHistory.filter(m => m.role === 'bot' && m.llmProvider);
+        return botMessages.length > 0 ? (botMessages[botMessages.length - 1].llmProvider ?? undefined) : undefined;
+    }, [chatHistory]);
+
     const submitRating = useCallback(async (ratingToSubmit: number, comments: string) => {
         if (feedbackStatus === 'submitting' || feedbackStatus === 'submitted') return;
 
@@ -362,6 +367,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 comments,
                 botId: selectedBot.id,
                 isAnonymous: !currentUser,
+                llmProvider: sessionLlmProvider,
             });
             setFeedbackStatus('submitted');
         } catch (err) {
