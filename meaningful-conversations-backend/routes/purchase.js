@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const prisma = require('../prismaClient');
 const auth = require('../middleware/auth');
 const { purchaseLimiter } = require('../middleware/rateLimiter');
-const { sendPurchaseEmail, sendAdminNotification } = require('../services/mailService');
+const { sendPurchaseEmail, sendAdminNotification, generateInvoiceNumber, sendInvoiceEmail } = require('../services/mailService');
 
 // --- Product Catalog ---
 
@@ -478,6 +478,22 @@ router.post('/capture-order', auth, purchaseLimiter, async (req, res) => {
       updatedUser.email, payerName || updatedUser.email, code, productId, amount
     );
 
+    // Generate and send invoice
+    try {
+      const invoiceNumber = await generateInvoiceNumber();
+      await prisma.purchase.update({
+        where: { paypalOrderId: orderId },
+        data: { invoiceNumber, invoiceSentAt: new Date() },
+      });
+      await sendInvoiceEmail(
+        updatedUser.email, payerName || updatedUser.email,
+        invoiceNumber, productId, amount, new Date()
+      );
+      console.log(`🧾 Invoice ${invoiceNumber} sent to ${updatedUser.email}`);
+    } catch (invoiceErr) {
+      console.error('⚠️ Invoice generation/send failed (purchase still valid):', invoiceErr.message);
+    }
+
     const { passwordHash, ...userPayload } = updatedUser;
     console.log(`✅ Direct purchase: ${orderId} → user ${req.userId} — ${productId} @ €${amount}`);
     res.json({ success: true, user: userPayload });
@@ -552,6 +568,22 @@ router.post('/webhook', express.json(), async (req, res) => {
 
     await sendPurchaseEmail(customerEmail, customerName, code, botId);
     await sendAdminNotification(customerEmail, customerName, code, botId, amount);
+
+    // Generate and send invoice
+    try {
+      const invoiceNumber = await generateInvoiceNumber();
+      await prisma.purchase.update({
+        where: { paypalOrderId },
+        data: { invoiceNumber, invoiceSentAt: new Date() },
+      });
+      await sendInvoiceEmail(
+        customerEmail, customerName,
+        invoiceNumber, productId, amount, new Date()
+      );
+      console.log(`🧾 Invoice ${invoiceNumber} sent to ${customerEmail}`);
+    } catch (invoiceErr) {
+      console.error('⚠️ Invoice generation/send failed (purchase still valid):', invoiceErr.message);
+    }
 
     console.log(`✅ Purchase processed: ${paypalOrderId} -> Code: ${code} -> Customer: ${customerEmail}`);
     res.status(200).json({ status: 'ok' });
