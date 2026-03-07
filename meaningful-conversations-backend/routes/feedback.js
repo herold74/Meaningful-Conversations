@@ -21,11 +21,16 @@ const truncate = (str, length) => {
 
 // POST /api/feedback
 router.post('/', optionalAuthMiddleware, async (req, res) => {
-    let { rating, comments, botId, lastUserMessage, botResponse, isAnonymous, email } = req.body;
+    let { rating, comments, botId, lastUserMessage, botResponse, isAnonymous, email, llmProvider } = req.body;
     
     if (typeof comments !== 'string' || !botId) {
         return res.status(400).json({ error: 'A `botId` and string `comments` field are required.' });
     }
+
+    const VALID_PROVIDERS = ['google', 'mistral'];
+    const sanitizedLlmProvider = (typeof llmProvider === 'string' && VALID_PROVIDERS.includes(llmProvider))
+        ? llmProvider
+        : null;
 
     try {
         let userIdForDb = null;
@@ -56,9 +61,8 @@ router.post('/', optionalAuthMiddleware, async (req, res) => {
             botId,
             lastUserMessage: truncate(lastUserMessage, MAX_TEXT_LENGTH) ?? null,
             botResponse: truncate(botResponse, MAX_TEXT_LENGTH) ?? null,
-            // isAnonymous now correctly reflects the user's explicit choice.
-            // For guests, this will be true from the client, but their guest status is determined by the null userId.
             isAnonymous: isAnonymous,
+            llmProvider: sanitizedLlmProvider,
         };
 
         // Conditionally connect the user relation if they are a logged-in user.

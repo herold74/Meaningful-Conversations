@@ -428,7 +428,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                     });
                 }
 
-                res.write(`data: ${JSON.stringify({ done: true, fullText: finalEvent.fullText })}\n\n`);
+                res.write(`data: ${JSON.stringify({ done: true, fullText: finalEvent.fullText, provider: finalEvent.provider || null })}\n\n`);
             }
 
             res.end();
@@ -576,7 +576,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
             });
         }
 
-        const responseData = { text };
+        const responseData = { text, provider: response.provider || null };
 
         if (isTestMode) {
             responseData.llmMetadata = {
