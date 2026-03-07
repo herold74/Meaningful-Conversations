@@ -136,6 +136,8 @@ model Purchase {
   appleOriginalTransactionId  String?
   subscriptionStatus          String?      // active | expired | grace_period | cancelled | refunded
   renewsAt                    DateTime?
+  invoiceNumber               String?      @unique
+  invoiceSentAt               DateTime?
   createdAt                   DateTime     @default(now())
 
   @@index([customerEmail])
