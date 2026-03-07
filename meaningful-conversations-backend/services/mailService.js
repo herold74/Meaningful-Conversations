@@ -1,5 +1,6 @@
 const Mailjet = require('node-mailjet');
 const brand = require('../config/brand');
+const prisma = require('../prismaClient');
 
 let mailjet;
 const isProductionOrStaging = process.env.ENVIRONMENT_TYPE === 'production' || process.env.ENVIRONMENT_TYPE === 'staging';
@@ -578,10 +579,179 @@ const sendNewsletterEmail = async (email, subject, content, language = 'de') => 
     return request;
 };
 
+async function generateInvoiceNumber() {
+  const year = new Date().getFullYear();
+  const prefix = `MC-${year}-`;
+
+  const lastInvoice = await prisma.purchase.findFirst({
+    where: { invoiceNumber: { startsWith: prefix } },
+    orderBy: { invoiceNumber: 'desc' },
+    select: { invoiceNumber: true },
+  });
+
+  let seq = 1;
+  if (lastInvoice?.invoiceNumber) {
+    const lastSeq = parseInt(lastInvoice.invoiceNumber.replace(prefix, ''), 10);
+    if (!isNaN(lastSeq)) seq = lastSeq + 1;
+  }
+
+  return `${prefix}${String(seq).padStart(4, '0')}`;
+}
+
+const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, amount, purchaseDate) => {
+  const productName = getProductName(productId);
+  const dateStr = new Date(purchaseDate).toLocaleDateString('de-AT', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+  const firstName = customerName ? customerName.split(' ')[0] : '';
+
+  const htmlBody = `
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: sans-serif; line-height: 1.6;">
+      <tr>
+        <td align="center" style="padding: 0;">
+          <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+
+            <!-- Header -->
+            <tr>
+              <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Rechnung</h2>
+                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">${brand.appName} (MyCoach AI)</p>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td bgcolor="#f9fafb" style="background-color: #f9fafb; padding: 30px; color: #111827;">
+
+                <!-- Seller Info -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 25px;">
+                  <tr>
+                    <td style="font-size: 13px; color: #555; vertical-align: top; width: 50%;">
+                      <strong style="color: #111827;">Leistungserbringer:</strong><br>
+                      Günter Herold<br>
+                      Gersthofer Straße 148/1/Top 10<br>
+                      1180 Wien, Österreich<br>
+                      <a href="mailto:${brand.contactEmail}" style="color: ${brand.primaryColor};">${brand.contactEmail}</a>
+                    </td>
+                    <td style="font-size: 13px; color: #555; vertical-align: top; text-align: right;">
+                      <strong style="color: #111827;">Rechnungsnr.:</strong> ${invoiceNumber}<br>
+                      <strong style="color: #111827;">Datum:</strong> ${dateStr}<br>
+                      <strong style="color: #111827;">Zahlungsart:</strong> PayPal
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Greeting -->
+                <p style="margin-top: 0;">${firstName ? `Hallo ${firstName},` : 'Hallo,'}</p>
+                <p>vielen Dank für Ihren Kauf. Nachfolgend finden Sie Ihre Rechnung.</p>
+
+                <!-- Invoice Table -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 20px 0;">
+                  <thead>
+                    <tr>
+                      <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 10px 12px; text-align: left; border: 1px solid #ddd; font-size: 13px;">Beschreibung</th>
+                      <th bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; color: #ffffff; padding: 10px 12px; text-align: right; border: 1px solid #ddd; font-size: 13px;">Betrag</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding: 12px; border: 1px solid #eee; font-size: 14px;">${productName.de}</td>
+                      <td style="padding: 12px; border: 1px solid #eee; text-align: right; font-size: 14px; font-weight: bold;">${amount.toFixed(2)} €</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td style="padding: 12px; border: 1px solid #eee; font-size: 14px; font-weight: bold; text-align: right;">Gesamtbetrag:</td>
+                      <td style="padding: 12px; border: 1px solid #eee; text-align: right; font-size: 16px; font-weight: bold; color: ${brand.primaryColor};">${amount.toFixed(2)} €</td>
+                    </tr>
+                  </tfoot>
+                </table>
+
+                <!-- Tax Notice -->
+                <div style="background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 12px 15px; margin: 20px 0; font-size: 12px; color: #555;">
+                  Umsatzsteuerbefreit — Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG.<br>
+                  Es wird keine Umsatzsteuer ausgewiesen.
+                </div>
+
+                <!-- Payment Confirmation -->
+                <div style="background: #ecfdf5; border-left: 4px solid #22c55e; padding: 12px 15px; margin: 20px 0; font-size: 13px; color: #111827;">
+                  <strong>✅ Zahlung erhalten</strong> — Der Betrag wurde per PayPal beglichen.
+                </div>
+
+                <p style="font-size: 13px; color: #555;">
+                  Bitte bewahren Sie diese E-Mail als Beleg auf. Bei Fragen wenden Sie sich an
+                  <a href="mailto:${brand.contactEmail}" style="color: ${brand.primaryColor};">${brand.contactEmail}</a>.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px;">
+                <p style="margin: 0; color: #ffffff; font-family: sans-serif;">${brand.appName}&nbsp;|&nbsp;<a href="${brand.providerUrl}" style="color: #ffffff; text-decoration: none;">www.${brand.providerName}</a></p>
+                <p style="margin: 5px 0 0 0; color: #ffffff; font-family: sans-serif;">${brand.ownerName}</p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const textBody = `Rechnung ${invoiceNumber}
+Datum: ${dateStr}
+
+Leistungserbringer:
+Günter Herold
+Gersthofer Straße 148/1/Top 10
+1180 Wien, Österreich
+${brand.contactEmail}
+
+Leistung: ${productName.de}
+Betrag: ${amount.toFixed(2)} €
+
+Umsatzsteuerbefreit — Kleinunternehmer gemäß § 6 Abs. 1 Z 27 UStG.
+Es wird keine Umsatzsteuer ausgewiesen.
+
+Zahlung erhalten per PayPal.
+
+Bei Fragen: ${brand.contactEmail}`;
+
+  if (!isProductionOrStaging) {
+    console.log('\n--- SIMULATED INVOICE EMAIL ---');
+    console.log(`To: ${email}`);
+    console.log(`Subject: Rechnung ${invoiceNumber} — ${brand.appName}`);
+    console.log(`Product: ${productName.de}`);
+    console.log(`Amount: ${amount.toFixed(2)} €`);
+    console.log('-------------------------------\n');
+    return;
+  }
+
+  if (!mailjet) {
+    console.error('Mailjet client is not initialized. Cannot send invoice email.');
+    throw new Error('Email service is not configured.');
+  }
+
+  const request = mailjet.post('send', { version: 'v3.1' }).request({
+    Messages: [{
+      From: { Email: SENDER_EMAIL, Name: SENDER_NAME },
+      To: [{ Email: email, Name: customerName || email }],
+      Subject: `Rechnung ${invoiceNumber} — ${brand.appName}`,
+      TextPart: textBody,
+      HTMLPart: htmlBody,
+    }]
+  });
+
+  return request;
+};
+
 module.exports = {
     sendConfirmationEmail,
     sendPasswordResetEmail,
     sendPurchaseEmail,
     sendAdminNotification,
-    sendNewsletterEmail
+    sendNewsletterEmail,
+    generateInvoiceNumber,
+    sendInvoiceEmail
 };
