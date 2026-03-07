@@ -71,6 +71,9 @@ Located in `/memory-bank/`:
 
 *Note: TTS-SETUP-STATUS and TTS-HYBRID-README are marked as historical/superseded. Use TTS-FINAL-STATUS for current info.*
 
+### App Store
+- **APP-STORE-METADATA.md** - **⭐ App Store Connect metadata (description, keywords, review notes, test account, URLs)**
+
 ### Compliance & Security
 - **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit
 - **DSGVO-COMPLIANCE-AUDIT.html/md** - German GDPR audit
@@ -133,6 +136,7 @@ Located in `/memory-bank/`:
 3. QUICK-START-MANUALMODE-SERVER.md
 4. VERSION-MANAGEMENT.md
 5. MANUALMODE-DUAL-ENVIRONMENT.md
+6. **APP-STORE-METADATA.md** (iOS App Store updates)
 
 ### Understanding Features
 1. memory-bank/progress.md (feature list)
@@ -151,7 +155,7 @@ Located in `/memory-bank/`:
 
 ## Current Setup
 
-- **Version:** 1.8.7
+- **Version:** 2.0.0
 - **Server:** Hetzner VPS (<YOUR_SERVER_IP>)
 - **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
 - **Container Engine:** Podman + podman-compose
@@ -160,4 +164,4 @@ Located in `/memory-bank/`:
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** February 13, 2026
+**Last Updated:** March 1, 2026
