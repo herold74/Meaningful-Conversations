@@ -172,14 +172,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
       // Final text (may be stripped of meta-commentary)
       const finalText = response.text;
+      const llmProvider = response.provider ?? null;
       const meditationData = meditation.parseMeditationMarkers(finalText);
 
       setChatHistory(prev => {
         const last = prev[prev.length - 1];
         if (last && last.id === botMessageId) {
-          return [...prev.slice(0, -1), { ...last, text: meditationData.displayText }];
+          return [...prev.slice(0, -1), { ...last, text: meditationData.displayText, llmProvider }];
         }
-        return [...prev, { id: botMessageId, text: meditationData.displayText, role: 'bot' as const, timestamp: new Date().toISOString() }];
+        return [...prev, { id: botMessageId, text: meditationData.displayText, role: 'bot' as const, timestamp: new Date().toISOString(), llmProvider }];
       });
 
       if (meditationData.hasMeditation) {
@@ -372,6 +373,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     text: response.text,
                     role: 'bot',
                     timestamp: new Date().toISOString(),
+                    llmProvider: response.provider ?? null,
                 };
                 setChatHistory([initialBotMessage]);
             } catch (err) {
@@ -413,6 +415,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     text: response.text,
                     role: 'bot',
                     timestamp: new Date().toISOString(),
+                    llmProvider: response.provider ?? null,
                 };
                 setChatHistory(prev => [...prev, botMessage]);
             } catch (err) {
@@ -479,6 +482,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         botResponse: feedbackMessages.bot.text,
         isAnonymous: feedback.isAnonymous,
         email: feedback.email,
+        llmProvider: feedbackMessages.bot.llmProvider ?? undefined,
     });
 };
   

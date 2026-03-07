@@ -97,6 +97,7 @@ export interface Message {
     role: 'user' | 'bot';
     text: string;
     timestamp: string;
+    llmProvider?: string | null;
 }
 
 export interface GamificationState {
@@ -169,6 +170,7 @@ export interface Feedback {
     lastUserMessage: string | null;
     botResponse: string | null;
     isAnonymous: boolean;
+    llmProvider: string | null;
     createdAt: string;
     user: { email: string } | null;
     guestEmail?: string | null;

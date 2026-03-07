@@ -77,11 +77,13 @@ model Feedback {
   lastUserMessage String?  @db.Text
   botResponse     String?  @db.Text
   isAnonymous     Boolean  @default(false)
+  llmProvider     String?  // 'google' | 'mistral' | null (legacy records)
   createdAt       DateTime @default(now())
   userId          String?
   feedbackByUser  User?    @relation("UserToFeedbacks", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([llmProvider])
 }
 
 model ApiUsage {

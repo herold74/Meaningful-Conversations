@@ -11,15 +11,15 @@ export const sendMessage = async (
     isNewSession: boolean,
     coachingMode?: string,
     decryptedPersonalityProfile?: any
-): Promise<{ text: string }> => {
-    
+): Promise<{ text: string; provider?: string | null }> => {
+
     return await apiFetch('/gemini/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ 
-            botId, 
-            context, 
-            history: history, 
-            language, 
+        body: JSON.stringify({
+            botId,
+            context,
+            history: history,
+            language,
             isNewSession,
             coachingMode,
             decryptedPersonalityProfile
@@ -42,7 +42,7 @@ export const sendMessageStream = async (
     onChunk: (chunk: string) => void,
     coachingMode?: string,
     decryptedPersonalityProfile?: any,
-): Promise<{ text: string }> => {
+): Promise<{ text: string; provider?: string | null }> => {
     const session = getSession();
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
     if (session?.token) {
@@ -70,7 +70,7 @@ export const sendMessageStream = async (
     if (contentType.includes('application/json')) {
         const data = await response.json();
         onChunk(data.text);
-        return { text: data.text };
+        return { text: data.text, provider: data.provider ?? null };
     }
 
     const reader = response.body!.getReader();
@@ -96,7 +96,7 @@ export const sendMessageStream = async (
                     streamedText += data.chunk;
                     onChunk(data.chunk);
                 } else if (data.done) {
-                    return { text: data.fullText };
+                    return { text: data.fullText, provider: data.provider ?? null };
                 }
             } catch (e) {
                 if ((e as Error).message?.startsWith('Failed')) throw e;
