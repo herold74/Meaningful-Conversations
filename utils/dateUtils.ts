@@ -65,7 +65,7 @@ export const isWinterSeason = (): boolean => {
 
 /**
  * Get the color theme name for the current season
- * Maps seasons to CSS theme names
+ * Maps seasons to CSS theme names (winter season → manualmode.at)
  */
 export const getSeasonalColorTheme = (): string => {
   const season = getCurrentSeason();
@@ -77,6 +77,6 @@ export const getSeasonalColorTheme = (): string => {
       return 'autumn';
     case 'winter':
     default:
-      return 'winter';
+      return 'brand';
   }
 };

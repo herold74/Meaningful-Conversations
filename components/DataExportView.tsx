@@ -7,7 +7,7 @@ import Button from './shared/Button';
 
 interface DataExportViewProps {
     lifeContext?: string; // The decrypted life context from App.tsx
-    colorTheme?: 'summer' | 'autumn' | 'winter';
+    colorTheme?: 'summer' | 'autumn' | 'brand';
 }
 
 const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', colorTheme = 'summer' }) => {
@@ -86,8 +86,8 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
                 <p>{t('export_data_description')}</p>
 
                 <div className={`p-4 rounded-lg border ${
-                    colorTheme === 'winter' 
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-600' 
+                    colorTheme === 'brand'
+                        ? 'border-accent-primary bg-accent-primary/10 dark:bg-accent-primary/20'
                         : colorTheme === 'autumn'
                         ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 dark:border-orange-600'
                         : 'bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600'
@@ -109,8 +109,8 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
                     <div className="space-y-3">
                         <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
                             exportFormat === 'html' 
-                                ? colorTheme === 'winter'
-                                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                ? colorTheme === 'brand'
+                                    ? 'border-accent-primary bg-accent-primary/10 dark:bg-accent-primary/20'
                                     : colorTheme === 'autumn'
                                     ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20'
                                     : 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'
@@ -131,9 +131,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
                         </label>
 
                         <label className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                            exportFormat === 'json' 
-                                ? colorTheme === 'winter'
-                                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                            exportFormat === 'json'
+                                ? colorTheme === 'brand'
+                                    ? 'border-accent-primary bg-accent-primary/10 dark:bg-accent-primary/20'
                                     : colorTheme === 'autumn'
                                     ? 'border-orange-500 dark:border-orange-400 bg-orange-50 dark:bg-orange-900/20'
                                     : 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20'

@@ -30,7 +30,7 @@
 - **Build-time injection:** `vite-plugin-brand.ts` converts hex → RGB, injects CSS custom properties on `:root`
 - **CSS variables:** `--brand-color-1` to `--brand-color-4`, `--brand-accent` (space-separated RGB triplets)
 - **Tailwind tokens:** `w4f.sky/steel/slate/navy/amber` → `rgb(var(--brand-color-N) / <alpha-value>)`
-- **Themes:** `index.css` winter/summer/autumn reference brand vars for accent/info colors
+- **Themes:** `index.css` summer/autumn/manualmode (manualmode replaces winter, used in winter season)
 - **Loader:** `BrandLoader` wrapper with lazy-loaded variants: `tetris`, `steering-wheel`, `dots`, `pulse`
 - **Override:** Set `VITE_BRAND_COLOR_1` to `_4`, `VITE_BRAND_ACCENT`, `VITE_BRAND_LOADER` in `.env`
 
@@ -50,13 +50,20 @@
 
 ## Mobile Environment (Capacitor)
 - **Platform:** iOS (Native App)
-- **IDE:** Xcode 15+
+- **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
+- **App Store:** Live as "MyCoach AI" (v2.0.0, AT/DE/CH)
+- **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control
   - `StatusBar`: Status bar styling
   - `SpeechRecognition`: Native iOS speech recognition (avoids Safari limitations)
   - `NativeAudio`: Audio session management
+  - `RevenueCat`: In-App Purchase (StoreKit 2)
+- **Compliance Pages (Nginx-served static HTML):**
+  - `/privacy` → `public/privacy.html`
+  - `/support` → `public/support.html`
+  - `/terms` → `public/terms.html`
 
 ## Backend Stack
 - **Runtime:** Node.js v22.x

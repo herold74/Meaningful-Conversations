@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import brandPlugin from './vite-plugin-brand';
 import path from 'path';
@@ -13,10 +13,15 @@ const buildNumber = fs.existsSync('./BUILD_NUMBER')
   : 'dev';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // loadEnv loads .env, .env.local, .env.[mode], .env.[mode].local
+  // Needed so brand plugin gets VITE_BRAND_* from .env.local (e.g. cp brands/w4f.env .env.local)
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
   plugins: [
     react(),
-    brandPlugin(),
+    brandPlugin(env),
   ],
   // Inject version info at build time (env vars override file-based values)
   define: {
@@ -87,4 +92,5 @@ export default defineConfig({
       },
     },
   },
+};
 });

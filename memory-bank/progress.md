@@ -98,7 +98,7 @@
     - [x] Accent color via `VITE_BRAND_ACCENT`
     - [x] Vite plugin injects CSS custom properties on `:root`
     - [x] Tailwind `w4f.*` tokens reference CSS variables (brand-dynamic)
-    - [x] All themes (winter/summer/autumn) use brand variables
+    - [x] Themes: summer, autumn, manualmode (replaced winter)
     - [x] Configurable loader system: tetris, steering-wheel, dots, pulse (`VITE_BRAND_LOADER`)
     - [x] BrandLoader wrapper component (lazy-loaded variants)
     - [x] OCEAN-Onboarding flow for registered users (OceanOnboarding.tsx — BFI-2-XS step-by-step with skip)
@@ -149,15 +149,19 @@
     - [x] Native Speech Recognition Service abstraction
     - [x] Native In-App Purchase (StoreKit 2 via RevenueCat)
     - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
-    - [x] NativePaywall with Restore, active products, fallback
-    - [ ] App Store Connect product setup
-    - [ ] App Store Deployment (TestFlight)
+    - [x] NativePaywall with Restore, active products, legal links (Privacy/Terms)
+    - [x] App Store Launch (v2.0.0, 2026-03-07) — AT/DE/CH
+    - [x] Apple Review compliance (Guideline 3.1.2c — EULA/Terms links)
+    - [x] Static compliance pages (`privacy.html`, `support.html`, `terms.html`)
+    - [x] Test account for Apple Review (`premium@manualmode.at` on production)
+    - [ ] App Store Connect IAP product setup (subscriptions + non-consumables)
+    - [ ] Apple Server Notifications URL in App Store Connect
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
 
 ## Monetization & Payments
 - [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
-- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption
+- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (iOS)
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
 - [x] **Premium Trial:** 9-day trial for new registrations
 - [x] **iOS In-App Purchase (StoreKit 2):**
@@ -167,12 +171,19 @@
     - [x] Restore Purchases functionality
     - [ ] App Store Connect product setup (subscriptions + non-consumables)
     - [ ] Apple Server Notifications URL in App Store Connect
-    - [ ] Sandbox & TestFlight testing
 - [ ] **Registered Monthly Subscription:** 3.90 EUR/month (PayPal Subscriptions API)
 - [x] **Upgrade Discounts:** Loyalty pricing + bot credit in purchase.js (LOYALTY_PRICES, BOT_CREDIT)
 
+## Life Context Editor (v2.0.0)
+- [x] **Markdown Editor with Preview Toggle** (`LifeContextEditorView.tsx`)
+- [x] **Three-state button logic** ("Erstellen" / "Erweitern" / "Editieren") based on content analysis
+- [x] **Gloria context extension mode** — extends existing LCs instead of creating from scratch
+- [x] **Auto-save on creation** — LC saved to server immediately for registered users
+- [x] **PDF download** from editor (`lifeContextPDF.tsx`)
+- [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
+
 ## Pending / Roadmap
-- [ ] **iOS App Store:** Product setup in App Store Connect, Notifications URL, TestFlight testing
+- [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
 - [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
