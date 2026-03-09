@@ -54,12 +54,35 @@ const NativeTTS = registerPlugin<NativeTTSPluginInterface>('NativeTTS');
 // Debug: Log Capacitor state at module load
 console.log('[NativeTTS] Module loaded, Capacitor state:', {
     isNativePlatform: Capacitor.isNativePlatform(),
-    platform: Capacitor.getPlatform()
+    platform: Capacitor.getPlatform(),
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+    maxTouchPoints: typeof navigator !== 'undefined' ? navigator.maxTouchPoints : 'N/A',
 });
 
-// Check if we're in a native iOS app
-export const isNativeiOS = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
-console.log('[NativeTTS] isNativeiOS =', isNativeiOS);
+// Detect a real iOS/iPadOS touch device.
+// Excludes macOS running an iOS app (Apple Silicon "iPhone & iPad Apps" feature):
+//   - Real iPhone/iPad:       UA contains "iPhone/iPad/iPod"  ← matches
+//   - iPad (iPadOS 13+ UA):   platform=MacIntel, maxTouchPoints > 1  ← matches
+//   - macOS running iOS app:  UA contains "Macintosh", maxTouchPoints = 0  ← excluded
+const _isRealIOSDevice = (): boolean => {
+    if (typeof navigator === 'undefined') return false;
+    return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
+// True only for real native iOS/iPadOS apps built with Capacitor.
+// False when an iOS App Store app runs on macOS (Apple Silicon).
+export const isNativeiOS = Capacitor.isNativePlatform() &&
+    Capacitor.getPlatform() === 'ios' &&
+    _isRealIOSDevice();
+
+// True when an iOS App Store app runs on a macOS machine (Apple Silicon).
+// These get Web Speech API + server TTS instead of the native iOS plugin.
+export const isNativeMacOS = Capacitor.isNativePlatform() &&
+    Capacitor.getPlatform() === 'ios' &&
+    !_isRealIOSDevice();
+
+console.log('[NativeTTS] isNativeiOS =', isNativeiOS, '| isNativeMacOS =', isNativeMacOS);
 
 /**
  * Native TTS Service class
