@@ -72,8 +72,8 @@ export function useTheme() {
                 setIsDarkMode(desiredMode);
             }
 
-            // Seasonal color theme switching (skip when single-theme brand)
-            if (!isSingleTheme && (colorTheme !== 'brand' || getCurrentSeason() === 'winter')) {
+            // Seasonal color theme switching: when auto is on, always sync to seasonal (skip single-theme brands)
+            if (!isSingleTheme) {
                 const seasonalTheme = getSeasonalColorTheme() as 'summer' | 'autumn' | 'brand';
                 if (colorTheme !== seasonalTheme) {
                     setColorTheme(seasonalTheme);
@@ -88,7 +88,7 @@ export function useTheme() {
         const intervalId = setInterval(checkTimeAndUpdateTheme, 60000);
 
         return () => clearInterval(intervalId);
-    }, [isAutoThemeEnabled, isDarkMode]); // Removed colorTheme to prevent override loops
+    }, [isAutoThemeEnabled, isDarkMode, colorTheme]);
 
     return {
         isDarkMode,
