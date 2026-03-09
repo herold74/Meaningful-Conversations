@@ -9,6 +9,7 @@ import { MoonIcon } from './icons/MoonIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { XIcon } from './icons/XIcon';
 import { PaletteIcon } from './icons/PaletteIcon';
+import { HAS_MULTIPLE_THEMES } from '../config/themes';
 
 interface GamificationBarProps {
     gamificationState: GamificationState;
@@ -20,7 +21,7 @@ interface GamificationBarProps {
     isSubMenuOpen: boolean;
     isDarkMode: 'light' | 'dark';
     toggleDarkMode: () => void;
-    colorTheme: 'summer' | 'autumn' | 'winter';
+    colorTheme: 'summer' | 'autumn' | 'brand';
     toggleColorTheme: () => void;
     minimal?: boolean;
 }
@@ -115,7 +116,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 </button>
                 <div className="flex items-center">
                     {themeToggleButton}
-                    {colorThemeToggleButton}
+                    {HAS_MULTIPLE_THEMES && colorThemeToggleButton}
                 </div>
             </div>
             </>
@@ -210,7 +211,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                     </button>
                 )}
                 {themeToggleButton}
-                {colorThemeToggleButton}
+                {HAS_MULTIPLE_THEMES && colorThemeToggleButton}
             </div>
         </div>
         </>

@@ -154,11 +154,11 @@ describe('dateUtils', () => {
       expect(getSeasonalColorTheme()).toBe('autumn');
     });
 
-    test('returns winter for winter', () => {
+    test('returns brand for winter', () => {
       mockDate(2025, 1, 15);
-      expect(getSeasonalColorTheme()).toBe('winter');
+      expect(getSeasonalColorTheme()).toBe('brand');
       mockDate(2025, 12, 15);
-      expect(getSeasonalColorTheme()).toBe('winter');
+      expect(getSeasonalColorTheme()).toBe('brand');
     });
   });
 });

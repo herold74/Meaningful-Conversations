@@ -95,6 +95,7 @@ npm run build       # Frontend picks up VITE_BRAND_* at build time
 | `VITE_BRAND_COLOR_4` | #165a5a | Darkest shade; CSS `--brand-color-4`, Tailwind `brand-dark`, light-mode accent-hover |
 | `VITE_BRAND_ACCENT` | #F59E0B | Accent / CTA color; CSS `--brand-accent`, Tailwind `brand-accent` |
 | `VITE_BRAND_LOADER` | steering-wheel | Loading indicator style: `tetris`, `steering-wheel`, `dots`, or `pulse` |
+| `VITE_BRAND_SINGLE_THEME` | *(empty)* | When `true`: nur Brand-Palette, kein Sommer/Herbst, Palette-Icon ausgeblendet (z.B. W4F) |
 | `VITE_BRAND_DOMAIN_STAGING` | mc-beta.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_DOMAIN_PRODUCTION` | mc-app.manualmode.at | API URL routing (Capacitor + hostname map) |
 | `VITE_BRAND_APP_URL_PRODUCTION` | https://mc-app.manualmode.at | Calendar event links |
@@ -128,8 +129,9 @@ These items require manual changes for a full rebrand:
 - **Privacy Policy** (`components/PrivacyPolicyView.tsx`) — contact email and provider are configurable, but legal text (data processors, GDPR sections) may need updating
 - **Terms of Service** (`components/TermsView.tsx`) — app name is configurable, but legal content may need review
 
-### CSS Theme Colors
-The **winter theme** (default) and seasonal accent-secondary/tertiary colors are now driven by `VITE_BRAND_COLOR_*` and `VITE_BRAND_ACCENT` via CSS custom properties — no CSS changes needed. Seasonal **accent-primary** colors (green for summer, orange for autumn) remain season-specific and are not brand-overridable.
+### CSS Theme Colors (Modular)
+- **summer** (green), **autumn** (orange), **brand** (uses `VITE_BRAND_COLOR_*` — W4F blue, manualmode teal, etc., used for winter season).
+- **Neue Farbschemata:** `config/themes.ts` — `THEME_CYCLE` erweitern, `CUSTOM_THEMES` für Runtime-Themes mit eigenem CSS.
 
 ### Service Worker
 - `public/sw.js` — the `CACHE_NAME` prefix (`meaningful-conversations-cache-`) is cosmetic and doesn't affect functionality. Update it manually if desired.
@@ -144,13 +146,26 @@ Full iOS rebranding requires additional steps beyond env vars:
 
 ## Pre-Built Brand Configs
 
-Ready-to-use brand configurations are stored in `brands/*.env`. To use one, copy the relevant values into your `.env.local`, `.env.staging`, or `.env.production`.
+Ready-to-use brand configurations are stored in `brands/*.env`. To use one, copy the file to `.env.local` (local dev) or into `.env.staging` / `.env.production` (deploy).
 
 | File | Brand | Palette | Loader |
 |------|-------|---------|--------|
-| `brands/w4f.env` | Work4Flow | Blue (4 shades) | Tetris |
+| `brands/manualmode.env` | manualmode.at | Teal/Petrol + Peach accent | steering-wheel |
+| `brands/w4f.env` | Work4Flow Coaching | Blue (4 shades) | Tetris (single-theme: nur Brand-Palette, kein Sommer/Herbst) |
 
-To add a new brand: create `brands/<name>.env` with the desired overrides. The same codebase produces a completely different visual identity at build time.
+### Lokale Entwicklung: W4F oder manualmode getrennt starten
+
+```bash
+# W4F-gebrandete App lokal starten
+cp brands/w4f.env .env.local
+npm run dev
+
+# manualmode-gebrandete App (z.B. nach W4F-Test)
+cp brands/manualmode.env .env.local
+npm run dev
+```
+
+Der Dev-Server liest `.env.local` via Vites `loadEnv`; Titel, Farben und Loader werden sofort übernommen. Nach dem Wechsel `npm run dev` einmal neu starten.
 
 ## Deployment Checklist
 

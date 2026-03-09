@@ -28,6 +28,7 @@ interface ImportMetaEnv {
   readonly VITE_BRAND_COLOR_4?: string;
   readonly VITE_BRAND_ACCENT?: string;
   readonly VITE_BRAND_LOADER?: string;
+  readonly VITE_BRAND_SINGLE_THEME?: string;
   readonly VITE_BRAND_SERVER_IP?: string;
 }
 
