@@ -31,6 +31,9 @@ import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 import PageTransition from './components/shared/PageTransition';
 import BrandLoader from './components/shared/BrandLoader';
+import { getNextThemeInCycle, HAS_MULTIPLE_THEMES } from './config/themes';
+import { brand } from './config/brand';
+import { hexToRgb } from './utils/colorUtils';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -141,16 +144,11 @@ const App: React.FC = () => {
         setIsDarkMode(prev => prev === 'light' ? 'dark' : 'light');
     };
     
-    // Cycle through color themes: summer → autumn → winter → summer
+    // Cycle through color themes: summer → autumn → brand → summer (uses getNextThemeInCycle)
     const toggleColorTheme = () => {
-        // When user manually toggles color theme, disable auto-theme
         setIsAutoThemeEnabled(false);
         localStorage.setItem('autoThemeEnabled', 'false');
-        setColorTheme(prev => {
-            if (prev === 'summer') return 'autumn';
-            if (prev === 'autumn') return 'winter';
-            return 'summer';
-        });
+        setColorTheme(prev => getNextThemeInCycle(prev) as 'summer' | 'autumn' | 'brand');
     };
     
     // Check for personality profile when user logs in
@@ -1365,7 +1363,7 @@ const App: React.FC = () => {
         const currentLevelXp = xp - xpToReachCurrentLevel;
         const progress = xpForNextLevel > 0 ? currentLevelXp / xpForNextLevel : 0;
 
-        const payload = {
+        const payload: Record<string, unknown> = {
             visible: showGamificationBar,
             minimal: minimalBar,
             view,
@@ -1379,6 +1377,11 @@ const App: React.FC = () => {
             isMenuOpen,
             isDarkMode: isDarkMode === 'dark',
         };
+        payload.showColorThemeToggle = HAS_MULTIPLE_THEMES;
+        if (colorTheme === 'brand') {
+            payload.brandAccentRgbLight = hexToRgb(brand.color3);
+            payload.brandAccentRgbDark = hexToRgb(brand.color1);
+        }
 
         if (!nativeBar?.setState) {
             return;

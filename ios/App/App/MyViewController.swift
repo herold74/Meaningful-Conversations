@@ -112,6 +112,9 @@ struct NativeGamificationBarState {
     let activeView: String
     let menuView: String?
     let colorTheme: String
+    let showColorThemeToggle: Bool   // false for W4F single-theme (hide palette icon)
+    let brandAccentRgbLight: String?  // "r g b" for light mode accent (brand.color3)
+    let brandAccentRgbDark: String?  // "r g b" for dark mode accent (brand.color1)
     let levelText: String
     let streakText: String
     let xpText: String
@@ -329,12 +332,13 @@ final class NativeGamificationBarView: UIView {
     
     func applyState(_ state: NativeGamificationBarState) {
         isMinimal = state.minimal
+        paletteButton.isHidden = !state.showColorThemeToggle
         levelLabel.text = state.levelText
         streakLabel.text = state.streakText
         xpLabel.text = state.xpText
         progressView.progress = state.progress
 
-        let palette = themePalette(for: state.colorTheme, isDarkMode: state.isDarkMode)
+        let palette = themePalette(for: state.colorTheme, isDarkMode: state.isDarkMode, brandAccentRgbLight: state.brandAccentRgbLight, brandAccentRgbDark: state.brandAccentRgbDark)
         tintOverlay.backgroundColor = palette.accent.withAlphaComponent(palette.backgroundAlpha)
         progressView.progressTintColor = palette.accent
         progressView.trackTintColor = palette.secondaryText.withAlphaComponent(palette.trackAlpha)
@@ -387,7 +391,7 @@ final class NativeGamificationBarView: UIView {
         let trackAlpha: CGFloat
     }
 
-    private func themePalette(for theme: String, isDarkMode: Bool) -> ThemePalette {
+    private func themePalette(for theme: String, isDarkMode: Bool, brandAccentRgbLight: String? = nil, brandAccentRgbDark: String? = nil) -> ThemePalette {
         switch theme {
         case "summer":
             return ThemePalette(
@@ -413,20 +417,25 @@ final class NativeGamificationBarView: UIView {
                 backgroundAlpha: isDarkMode ? 0.18 : 0.14,
                 trackAlpha: isDarkMode ? 0.35 : 0.22
             )
-        case "winter":
-            fallthrough
-        default:
+        case "brand", "manualmode", "winter": // brand + legacy aliases
+            let rgbStr = isDarkMode ? (brandAccentRgbDark ?? "128 227 238") : (brandAccentRgbLight ?? "45 95 110")
+            let parts = rgbStr.split(separator: " ")
+            let r = CGFloat(parts.count >= 1 ? (Double(parts[0]) ?? 128) / 255 : 128/255)
+            let g = CGFloat(parts.count >= 2 ? (Double(parts[1]) ?? 227) / 255 : 227/255)
+            let b = CGFloat(parts.count >= 3 ? (Double(parts[2]) ?? 238) / 255 : 238/255)
             return ThemePalette(
-                accent: UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0), // sky-400
+                accent: UIColor(red: r, green: g, blue: b, alpha: 1.0),
                 primaryText: isDarkMode
-                    ? UIColor(red: 226/255, green: 232/255, blue: 240/255, alpha: 1.0) // slate-200
-                    : UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), // slate-900
+                    ? UIColor(red: 226/255, green: 232/255, blue: 240/255, alpha: 1.0)
+                    : UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0),
                 secondaryText: isDarkMode
-                    ? UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0) // slate-400
-                    : UIColor(red: 71/255, green: 85/255, blue: 105/255, alpha: 1.0), // slate-600
+                    ? UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+                    : UIColor(red: 71/255, green: 85/255, blue: 105/255, alpha: 1.0),
                 backgroundAlpha: isDarkMode ? 0.18 : 0.14,
                 trackAlpha: isDarkMode ? 0.35 : 0.22
             )
+        default:
+            return themePalette(for: "brand", isDarkMode: isDarkMode, brandAccentRgbLight: brandAccentRgbLight, brandAccentRgbDark: brandAccentRgbDark)
         }
     }
 
@@ -461,7 +470,7 @@ public class NativeGamificationBarPlugin: CAPPlugin, CAPBridgedPlugin {
         let view = call.getString("view") ?? ""
         let activeView = call.getString("activeView") ?? view
         let menuView = call.getString("menuView")
-        let colorTheme = call.getString("colorTheme") ?? "winter"
+        let colorTheme = call.getString("colorTheme") ?? "brand"
         let levelText = call.getString("levelText") ?? ""
         let streakText = call.getString("streakText") ?? ""
         let xpText = call.getString("xpText") ?? ""
@@ -476,6 +485,9 @@ public class NativeGamificationBarPlugin: CAPPlugin, CAPBridgedPlugin {
             activeView: activeView,
             menuView: menuView,
             colorTheme: colorTheme,
+            showColorThemeToggle: call.getBool("showColorThemeToggle") ?? true,
+            brandAccentRgbLight: call.getString("brandAccentRgbLight"),
+            brandAccentRgbDark: call.getString("brandAccentRgbDark"),
             levelText: levelText,
             streakText: streakText,
             xpText: xpText,

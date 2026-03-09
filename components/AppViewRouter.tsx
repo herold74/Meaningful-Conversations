@@ -145,7 +145,7 @@ export interface AppViewRouterProps {
 
   // UI & Layout
   iosSafeAreaTop: number;
-  colorTheme: 'summer' | 'autumn' | 'winter';
+  colorTheme: 'summer' | 'autumn' | 'brand';
   language: 'de' | 'en';
 
   // Handlers

@@ -715,7 +715,7 @@ Oben auf dem Bildschirm sehen Sie:
 In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung:
 
 - **Hell-/Dunkelmodus (Mond-/Sonnen-Symbol):** Schaltet zwischen hellem und dunklem Erscheinungsbild um. Standardmäßig wechselt die App automatisch basierend auf der Uhrzeit: **Dunkelmodus** von 18:00 bis 6:00 Uhr, **Hellmodus** von 6:00 bis 18:00 Uhr. Ein manuelles Umschalten deaktiviert den automatischen Wechsel.
-- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Winter. Die App wählt automatisch das passende Schema zur aktuellen Jahreszeit, Sie können es aber jederzeit manuell ändern.
+- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Brand (W4F/manualmode.at je nach Marke). Die App wählt automatisch das passende saisonale Schema (Brand im Winter), Sie können es aber jederzeit manuell ändern.
 
 </div>
 </details>
@@ -1554,7 +1554,7 @@ At the top of the screen, you will see:
 In the Gamification Bar, you'll find two icons to customize the appearance:
 
 - **Light/Dark Mode (Moon/Sun Icon):** Switches between light and dark appearance. By default, the app switches automatically based on the time of day: **Dark mode** from 6:00 PM to 6:00 AM, **Light mode** from 6:00 AM to 6:00 PM. Manually toggling disables the automatic switching.
-- **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Winter. The app automatically selects the matching scheme for the current season, but you can change it manually at any time.
+- **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Brand (W4F/manualmode.at depending on active brand). The app automatically selects the matching seasonal scheme (Brand in winter), but you can change it manually at any time.
 
 </div>
 </details>

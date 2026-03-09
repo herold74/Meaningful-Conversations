@@ -18,8 +18,13 @@ The user journey is circular and iterative:
 6.  **Commit:** Review and accept changes, export calendar items for action steps.
 
 ## Privacy First
-- **Guest Mode:** Zero server data. Everything happens in the browser. The user manages the `.md` file manually.
+- **Guest Mode:** Zero server data. Everything happens locally on the device. The user manages the `.md` file manually.
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
+
+## Distribution
+- **iOS App Store:** Live as "MyCoach AI" (v2.0.0) in AT/DE/CH. Regional restriction intentional for manageable support coverage.
+- **PWA:** Available at https://mc-app.manualmode.at for all platforms.
+- **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 
 ## Gamification Strategy
 To encourage the habit of reflection:
