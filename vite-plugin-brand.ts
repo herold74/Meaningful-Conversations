@@ -6,23 +6,28 @@ function hexToRgb(hex: string): string {
   return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 }
 
+function getEnv(env: Record<string, string> | undefined, key: string, fallback: string): string {
+  const v = env?.[key] ?? process.env[key];
+  return (typeof v === 'string' && v.trim() ? v : fallback).trim();
+}
+
 /**
  * Vite plugin that injects branding values into index.html and generates
  * a branded manifest.json at build time. Values are read from VITE_BRAND_*
- * env vars with sensible defaults (the manualmode.at teal palette).
+ * env vars (via loadEnv from .env.local etc.) with sensible defaults.
  *
  * Brand colors are injected as CSS custom properties on :root so that
  * the theme system, Tailwind tokens, and components can reference them.
  */
-export default function brandPlugin(): Plugin {
+export default function brandPlugin(env?: Record<string, string>): Plugin {
   const getBrand = () => ({
-    appName:   process.env.VITE_BRAND_APP_NAME   || 'Meaningful Conversations',
-    shortName: process.env.VITE_BRAND_SHORT_NAME  || 'Meaningful',
-    color1:    process.env.VITE_BRAND_COLOR_1     || '#5BBFBF',
-    color2:    process.env.VITE_BRAND_COLOR_2     || '#3D9E9E',
-    color3:    process.env.VITE_BRAND_COLOR_3     || '#1B7272',
-    color4:    process.env.VITE_BRAND_COLOR_4     || '#165a5a',
-    accent:    process.env.VITE_BRAND_ACCENT      || '#F59E0B',
+    appName:   getEnv(env, 'VITE_BRAND_APP_NAME',   'Meaningful Conversations'),
+    shortName: getEnv(env, 'VITE_BRAND_SHORT_NAME', 'Meaningful'),
+    color1:    getEnv(env, 'VITE_BRAND_COLOR_1',    '#5BBFBF'),
+    color2:    getEnv(env, 'VITE_BRAND_COLOR_2',    '#3D9E9E'),
+    color3:    getEnv(env, 'VITE_BRAND_COLOR_3',    '#1B7272'),
+    color4:    getEnv(env, 'VITE_BRAND_COLOR_4',    '#165a5a'),
+    accent:    getEnv(env, 'VITE_BRAND_ACCENT',     '#F59E0B'),
   });
 
   return {
