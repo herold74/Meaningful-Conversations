@@ -18,11 +18,24 @@ export const isNativeApp = (): boolean => {
 };
 
 /**
- * Returns true if running inside a native iOS Capacitor app.
+ * Returns true if running inside a real native iOS/iPadOS Capacitor app.
+ * False when an iOS App Store app runs on macOS (Apple Silicon).
  * Used to show native In-App Purchase flow instead of PayPal.
  */
 export const isNativeIOS = (): boolean => {
-    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') return false;
+    return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
+/**
+ * Returns true when an iOS App Store app runs on a macOS machine (Apple Silicon).
+ * These devices get Web Speech API + server TTS instead of the native iOS plugin.
+ */
+export const isNativeMacOS = (): boolean => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') return false;
+    return !/iPhone|iPad|iPod/.test(navigator.userAgent) &&
+        !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 };
 
 // ─── Android Detection ───────────────────────────────────────────────
