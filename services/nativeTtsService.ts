@@ -71,18 +71,11 @@ const _isRealIOSDevice = (): boolean => {
 };
 
 // True only for real native iOS/iPadOS apps built with Capacitor.
-// False when an iOS App Store app runs on macOS (Apple Silicon).
 export const isNativeiOS = Capacitor.isNativePlatform() &&
     Capacitor.getPlatform() === 'ios' &&
     _isRealIOSDevice();
 
-// True when an iOS App Store app runs on a macOS machine (Apple Silicon).
-// These get Web Speech API + server TTS instead of the native iOS plugin.
-export const isNativeMacOS = Capacitor.isNativePlatform() &&
-    Capacitor.getPlatform() === 'ios' &&
-    !_isRealIOSDevice();
-
-console.log('[NativeTTS] isNativeiOS =', isNativeiOS, '| isNativeMacOS =', isNativeMacOS);
+console.log('[NativeTTS] isNativeiOS =', isNativeiOS);
 
 /**
  * Native TTS Service class

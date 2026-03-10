@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.0.0
+**Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed (2026-03-07) — https://mc-beta.manualmode.at
-**Production:** Deployed (2026-03-07) — https://mc-app.manualmode.at
-**App Store:** LIVE (2026-03-07) — "MyCoach AI" in AT/DE/CH
+**Staging:** Deployed (2026-03-10) — https://mc-beta.manualmode.at
+**Production:** Deployed (2026-03-08) — https://mc-app.manualmode.at
+**App Store:** LIVE v2.0.1 (2026-03-08) — "MyCoach AI" in AT/DE/CH
 
 ## Milestone: App Store Launch (2026-03-07)
 
@@ -54,6 +54,21 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Post-processing filter for meta-commentary suppression
 - Pre-seeded topic detection from TopicSearch
 - GDPR-consistent AI routing across all endpoints
+
+### macOS Compatibility Removed (2026-03)
+- **Scope:** iPhone and iPad support only. Web version covers Mac use case.
+- **Code cleanup:** Removed `isNativeMacOS` from `nativeTtsService.ts`, `platformDetection.ts`; removed all Mac-specific TTS workarounds in `useTts.ts` (retry, warmup, handleOpenVoiceModal branch); removed `warmupAudioIfNeeded` and its ChatView calls.
+- **App Store Connect:** To disable Mac availability: Pricing and Availability → iPhone and iPad Apps on Apple Silicon Mac → uncheck "Make this app available".
+
+### TTS Stuck Spinner Fix (2026-03-10)
+- **Root cause:** `isLoadingAudio` stuck `true` when `audio.play()` rejected or backend returned 500 during streaming sentence synthesis
+- **Fixes:** Corrected `processStreamingSynthQueue` catch block (prevent double-push, reset loading state on first-sentence failure), added `setIsLoadingAudio(false)` to all `play().catch()` handlers, added 15s safety timeout watchdog
+- **Documented in:** `.cursor/skills/meaningful-conversations/tts-debugging/SKILL.md`
+
+### PayPal Invoice Automation (2026-03-08)
+- Automatic Kleinbetragsrechnung (simplified invoice) sent via Mailjet after PayPal purchase
+- Sequential invoice numbers (`MC-YYYY-NNNN`), tracked via `invoiceNumber` / `invoiceSentAt` fields on `Purchase` model
+- Compliant with Austrian Kleinunternehmerregelung (§ 6 Abs. 1 Z 27 UStG)
 
 ### TTS Performance & Resilience (2026-02-27 – 2026-02-28)
 - Persistent Piper models (~8x speedup), warmup endpoint, progressive sentence synthesis

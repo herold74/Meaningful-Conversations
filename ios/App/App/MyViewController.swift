@@ -1,18 +1,33 @@
 import UIKit
+import WebKit
 import Capacitor
 
 /// Custom CAPBridgeViewController that registers local plugins
 class MyViewController: CAPBridgeViewController {
     
+    /// Ensure WKWebView allows audio playback without strict user gesture (TTS autoplay on iPad)
+    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
+        let config = super.webViewConfiguration(for: instanceConfiguration)
+        config.mediaTypesRequiringUserActionForPlayback = []
+        config.allowsInlineMediaPlayback = true
+        return config
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         NativeGamificationBarManager.shared.attach(to: self)
         
-        // Disable zoom on the WKWebView to prevent magnification issues on rotation
+        // Match native background to dark theme so no light bleed on Mac/iPad edges
+        let darkBg = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1) // #0f172a slate-900
+        view.backgroundColor = darkBg
+        
         if let webView = self.webView {
             webView.scrollView.minimumZoomScale = 1.0
             webView.scrollView.maximumZoomScale = 1.0
             webView.scrollView.bouncesZoom = false
+            webView.isOpaque = false
+            webView.backgroundColor = darkBg
+            webView.scrollView.backgroundColor = darkBg
         }
     }
     
