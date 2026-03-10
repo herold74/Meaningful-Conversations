@@ -264,13 +264,14 @@ router.post('/verify-email', verifyEmailLimiter, async (req, res) => {
 router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
     const { email, language } = req.body;
     const lowerCaseEmail = email.toLowerCase();
-    
+    const isStagingOrDev = process.env.ENVIRONMENT_TYPE === 'staging' || process.env.ENVIRONMENT_TYPE === 'development';
+
     try {
         const user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
         if (user) {
             const token = crypto.randomBytes(32).toString('hex');
             const expires = new Date(Date.now() + 3600000); // 1 hour
-            
+
             await prisma.user.update({
                 where: { id: user.id },
                 data: {
@@ -279,12 +280,20 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
                 },
             });
             await sendPasswordResetEmail(lowerCaseEmail, token, language);
+            return res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
         }
-        res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
+        // Production: generic message to prevent email enumeration
+        if (!isStagingOrDev) {
+            return res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
+        }
+        // Staging/development: explicit feedback for testing
+        res.status(404).json({ error: 'account_not_found', message: 'No account found with this email address.' });
     } catch (error) {
         console.error('Forgot password error:', error);
-        // Silently fail to prevent email enumeration
-        res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
+        if (!isStagingOrDev) {
+            return res.status(200).json({ message: 'If an account with this email exists, a password reset link has been sent.' });
+        }
+        res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
