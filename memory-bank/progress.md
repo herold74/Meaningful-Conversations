@@ -143,7 +143,7 @@
 - [x] **Admin UI:** Fully responsive design for mobile management
 
 ## Mobile App (Capacitor)
-- [x] **iOS Integration:**
+- [x] **iOS Integration:** (iPhone and iPad only — macOS availability disabled)
     - [x] Project setup (Xcode, Capacitor CLI)
     - [x] Native Audio Service abstraction
     - [x] Native Speech Recognition Service abstraction

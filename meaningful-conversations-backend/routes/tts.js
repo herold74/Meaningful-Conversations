@@ -36,7 +36,7 @@ router.use(checkTtsAvailable);
  * - voiceId: string (optional) - Specific voice ID (e.g., 'de-mls', 'en-ryan')
  */
 router.post('/synthesize', authMiddleware, async (req, res) => {
-    const { text, botId, language, isMeditation = false, voiceId = null } = req.body;
+    const { text, botId, language, isMeditation = false, voiceId = null, format = 'opus' } = req.body;
     const userId = req.userId;
     const startTime = Date.now();
     
@@ -72,7 +72,7 @@ router.post('/synthesize', authMiddleware, async (req, res) => {
             });
         }
         
-        const result = await synthesizeSpeech(text, botId, language, isMeditation, voiceId);
+        const result = await synthesizeSpeech(text, botId, language, isMeditation, voiceId, format);
         
         if (!result) {
             return res.status(503).json({
