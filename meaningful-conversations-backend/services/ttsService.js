@@ -135,7 +135,7 @@ function getVoiceModelFromId(voiceId) {
  * @param {boolean} stream - Not used (kept for backwards compatibility)
  * @returns {Promise<{buffer: Buffer, contentType: string}|null>} - Audio data with content type, or null for Web Speech fallback
  */
-async function synthesizeSpeech(text, botId, language, isMeditation = false, voiceId = null, stream = true) {
+async function synthesizeSpeech(text, botId, language, isMeditation = false, voiceId = null, format = 'opus', stream = true) {
     if (!text || text.trim().length === 0) {
         throw new Error('Text is required for speech synthesis');
     }
@@ -177,10 +177,10 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
                 text: cleanText,
                 model: model,
                 lengthScale: lengthScale,
-                format: 'opus',
+                format: format === 'wav' ? 'wav' : 'opus',
             };
             
-            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}, format=opus`);
+            console.log(`TTS request: model=${model}, lengthScale=${lengthScale}, format=${requestPayload.format}`);
             
             const response = await axios.post(
                 `${TTS_SERVICE_URL}/synthesize`,
@@ -206,7 +206,7 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
                 if (sanitized && sanitized !== cleanText) {
                     const retryResponse = await axios.post(
                         `${TTS_SERVICE_URL}/synthesize`,
-                        { text: sanitized, model, lengthScale, format: 'opus' },
+                        { text: sanitized, model, lengthScale, format: format === 'wav' ? 'wav' : 'opus' },
                         { timeout: 65000, responseType: 'arraybuffer' }
                     );
                     const contentType = retryResponse.headers['content-type'] || 'audio/ogg; codecs=opus';
