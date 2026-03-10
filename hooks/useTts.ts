@@ -38,7 +38,23 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     const settings = getBotVoiceSettings(bot.id);
     return settings[language].isAuto;
   });
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [isLoadingAudio, _setIsLoadingAudio] = useState(false);
+  const audioLoadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const setIsLoadingAudio = useCallback((loading: boolean) => {
+    if (audioLoadingTimeoutRef.current) {
+      clearTimeout(audioLoadingTimeoutRef.current);
+      audioLoadingTimeoutRef.current = null;
+    }
+    if (loading) {
+      audioLoadingTimeoutRef.current = setTimeout(() => {
+        console.warn('[TTS] Audio loading timeout (15s) — resetting stuck state');
+        _setIsLoadingAudio(false);
+        setTtsStatus('idle');
+        isSpeakingRef.current = false;
+      }, 15000);
+    }
+    _setIsLoadingAudio(loading);
+  }, []);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
     const settings = getBotVoiceSettings(bot.id);
@@ -322,6 +338,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
+      if (audioLoadingTimeoutRef.current) {
+        clearTimeout(audioLoadingTimeoutRef.current);
+        audioLoadingTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -470,6 +490,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             audio.src = nextUrl;
             audio.play().catch(() => {
               setTtsStatus('idle');
+              setIsLoadingAudio(false);
               isSpeakingRef.current = false;
             });
           } else {
@@ -487,6 +508,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                 audio.src = url;
                 audio.play().catch(() => {
                   setTtsStatus('idle');
+                  setIsLoadingAudio(false);
                   isSpeakingRef.current = false;
                 });
               }
@@ -499,9 +521,21 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       }
     } catch (err) {
       console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed, skipping:`, err);
-      s.resolvedBlobs.push(null);
-      const skipUrl = 'skip';
-      s.resolvedUrls.push(skipUrl);
+      // Only push skip markers if synthesis failed (not if audio.play() failed after push)
+      if (s.resolvedBlobs.length <= nextIdx) {
+        s.resolvedBlobs.push(null);
+        s.resolvedUrls.push('skip');
+      } else {
+        // audio.play() failed after blob was already pushed — replace URL with skip
+        s.resolvedUrls[nextIdx] = 'skip';
+      }
+      // If first sentence failed, reset loading state regardless of hasStartedPlaying
+      // (hasStartedPlaying is set before audio.play(), so it's true even if play() throws)
+      if (nextIdx === 0) {
+        setIsLoadingAudio(false);
+        setTtsStatus('idle');
+        isSpeakingRef.current = false;
+      }
     } finally {
       s.synthInProgress = false;
     }
@@ -915,6 +949,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                 audio.src = nextUrl;
                 audio.play().catch(() => {
                   setTtsStatus('idle');
+                  setIsLoadingAudio(false);
                   isSpeakingRef.current = false;
                 });
               } else {
@@ -932,6 +967,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                     audio.src = url;
                     audio.play().catch(() => {
                       setTtsStatus('idle');
+                      setIsLoadingAudio(false);
                       isSpeakingRef.current = false;
                     });
                   }
