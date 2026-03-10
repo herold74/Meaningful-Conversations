@@ -438,7 +438,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
       const blob = await synthesizeSpeech(s.synthQueue[nextIdx], bot.id, language, false, s.voiceId);
       if (!streamingTtsRef.current) return;
-
       s.resolvedBlobs.push(blob);
       const url = URL.createObjectURL(blob);
       s.resolvedUrls.push(url);
@@ -461,6 +460,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           setTtsStatus('speaking');
           setIsLoadingAudio(false);
         });
+        audio.addEventListener('error', () => {});
         audio.addEventListener('pause', () => {
           if (!audio.ended) setTtsStatus('paused');
         });
@@ -526,7 +526,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         s.resolvedBlobs.push(null);
         s.resolvedUrls.push('skip');
       } else {
-        // audio.play() failed after blob was already pushed — replace URL with skip
         s.resolvedUrls[nextIdx] = 'skip';
       }
       // If first sentence failed, reset loading state regardless of hasStartedPlaying

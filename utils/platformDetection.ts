@@ -28,16 +28,6 @@ export const isNativeIOS = (): boolean => {
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 };
 
-/**
- * Returns true when an iOS App Store app runs on a macOS machine (Apple Silicon).
- * These devices get Web Speech API + server TTS instead of the native iOS plugin.
- */
-export const isNativeMacOS = (): boolean => {
-    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') return false;
-    return !/iPhone|iPad|iPod/.test(navigator.userAgent) &&
-        !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-};
-
 // ─── Android Detection ───────────────────────────────────────────────
 // Standalone Android detection so that Android-specific fixes
 // (speech recognition, TTS, etc.) never affect PC or iOS code paths.
