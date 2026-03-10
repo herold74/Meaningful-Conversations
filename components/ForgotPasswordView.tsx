@@ -25,8 +25,13 @@ const ForgotPasswordView: React.FC<ForgotPasswordViewProps> = ({ onBack }) => {
       setStatus('success');
     } catch (err: any) {
       console.error("Password reset request failed:", err);
-      // For security, always show success to prevent email enumeration.
-      // The error is logged for the developer.
+      // Staging/development: show "account not found" when backend returns 404
+      if (err?.data?.error === 'account_not_found' || err?.status === 404) {
+        setError(t('forgotPassword_account_not_found'));
+        setStatus('error');
+        return;
+      }
+      // Production: always show success to prevent email enumeration
       setStatus('success');
     }
   };

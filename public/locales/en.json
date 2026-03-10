@@ -75,6 +75,7 @@
   "forgotPassword_button": "Send Reset Link",
   "forgotPassword_back_to_login": "Back to Login",
   "forgotPassword_success": "If an account with this email exists, a password reset link has been sent.",
+  "forgotPassword_account_not_found": "No account exists for this email address. Please check the address or register.",
   "resetPassword_title": "Set New Password",
   "resetPassword_warning_title": "⚠️ Data Loss Due to Encryption",
   "resetPassword_warning_text": "Due to end-to-end encryption, all your stored life context data will be deleted when you reset your password. You will start with an empty context.",
