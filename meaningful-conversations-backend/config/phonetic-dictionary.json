@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -223,6 +223,30 @@
         {
           "term": "management",
           "phonetic": "mänätschment",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Klient",
+          "phonetic": "Klie-ent",
+          "caseSensitive": true,
+          "notes": "Singular"
+        },
+        {
+          "term": "klient",
+          "phonetic": "klie-ent",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Klienten",
+          "phonetic": "Klie-enten",
+          "caseSensitive": true,
+          "notes": "Plural"
+        },
+        {
+          "term": "klienten",
+          "phonetic": "klie-enten",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
         }
