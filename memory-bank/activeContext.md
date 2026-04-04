@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed (2026-03-10) — https://mc-beta.manualmode.at
+**Staging:** Deployed (2026-04-04, build 5) — https://mc-beta.manualmode.at
 **Production:** Deployed (2026-03-08) — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 (2026-03-08) — "MyCoach AI" in AT/DE/CH
 
@@ -37,6 +37,10 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Memory Bank rule refresh: tiered reading, how Memory Bank relates to `DOCUMENTATION/` and skills; post-commit checklist consolidated in `.cursor/rules/memory-bank.mdc`; `memory-bank/README.md` added.
 - **Working agreement:** Owner delegates routine memory-bank / documentation / skills maintenance to the assistant and does not review every doc edit; assistant keeps these current after substantive work (see `systemPatterns.md` Decision #21).
 - **Portable template:** `templates/portable-memory-bank/` — generic six-file bank + Cursor rule + `INSTALL.md` for copying into other repos; indexed in `DOCUMENTATION/DOCUMENTATION-STRUCTURE.md`.
+
+### Docs & marketing (2026-04-04)
+- **Committed:** `DOCUMENTATION/USP-POSITIONING.md`, `NEWSLETTER/NEWSLETTER-v2.0.0-LINKEDIN.md`, newsletter body updates, `templates/portable-memory-bank/`, memory-bank edits; removed large `.key` binaries; `.gitignore` adjustments.
+- **Staging:** Redeployed v2.0.1 (`-c app`); `BUILD_NUMBER` → 5 (auto sync commit `chore: build 5 sync`).
 
 ### Life Context Editor (2026-03-01 – 2026-03-05)
 - **Markdown editor with preview toggle** (`LifeContextEditorView.tsx`): Edit/preview mode for Life Context files, with download as .md and PDF
