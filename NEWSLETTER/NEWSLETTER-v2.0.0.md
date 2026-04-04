@@ -1,33 +1,58 @@
-# Newsletter: Meaningful Conversations 2.0 – Eine neue Ära
+# Newsletter: MyCoach AI 2.0 – Was sich seit dem letzten Update alles verändert hat
 
-Liebe Meaningful Conversations Community,
+Liebe Community,
 
-seit unserem letzten Newsletter hat sich die App grundlegend weiterentwickelt. Mit **Version 2.0** liefern wir nicht nur neue Features – wir haben die gesamte Plattform von Grund auf erneuert.
+seit unserem letzten Newsletter (v1.8.0) ist eine Menge passiert. Wir haben die App in fast jedem Bereich weiterentwickelt – von der Oberfläche bis zu neuen Werkzeugen, die eure tägliche Reflexionsarbeit wirklich unterstützen.
+
+Hier sind die wichtigsten Neuerungen.
+
+---
+
+## 📱 Jetzt auch als iOS-App im App Store
+
+Das ist der Meilenstein seit v1.8.0: **MyCoach AI ist jetzt im Apple App Store verfügbar** – für Österreich, Deutschland und die Schweiz.
+
+Die App bietet dieselben Funktionen wie die Web-Version, ist aber vollständig für das iPhone optimiert:
+
+- Sprachausgabe läuft nativ über euer Gerät – ruhiger, schneller, akkuschonender
+- Kauf eines Premium-Accounts direkt über Apple Pay möglich
+
+Die Web-Version bleibt wie gewohnt verfügbar – beide Versionen teilen euren Account und euren Lebenskontext.
 
 ---
 
 ## ✨ Ein komplett neues Erscheinungsbild
 
-Das erste, was euch auffallen wird: Die App sieht aus wie neu. Wir haben das gesamte Design überarbeitet.
+Die App sieht aus wie neu. Wir haben das gesamte Design von Grund auf überarbeitet.
 
-- **Modernes Farbkonzept:** Ruhiges Blau in vier Abstufungen, kombiniert mit einem warmen Bernstein-Akzent. Klar. Fokussiert. Professionell.
+- **Ruhigeres Farbkonzept:** Abgestimmte Blautöne kombiniert mit einem warmen Akzent – klar, fokussiert, professionell.
 - **Neue Schrift:** *Inter* – eine der besten Lesbarkeitsschriften für digitale Anwendungen.
-- **Weichere Übergänge:** Alle Bildschirme wechseln jetzt mit sanften Animationen, statt abrupt umzuschalten. Die App fühlt sich dadurch deutlich ruhiger an.
-- **Abgerundete Karten:** Das gesamte Layout wurde modernisiert – weniger kantig, mehr Luft.
+- **Sanfte Übergänge:** Alle Bildschirme wechseln jetzt mit weichen Animationen. Die App fühlt sich dadurch deutlich ruhiger an.
+- **Moderneres Layout:** Mehr Luft, weichere Karten, durchdachtere Abstände.
+
+---
+
+## 📝 Lebenskontext selbst bearbeiten
+
+Euer Lebenskontext ist das Gedächtnis eures Coaches – je genauer er ist, desto besser werden eure Gespräche. Bis jetzt war er nur über den Fragebogen oder Gloria befüllbar. Das ändert sich:
+
+- **Direkter Editor:** Öffnet euren Lebenskontext, lest ihn durch und passt ihn manuell an.
+- **Vorschau:** Wechselt zwischen Bearbeitungs- und Leseansicht – so seht ihr sofort, wie der Coach euren Kontext wahrnimmt.
+- **Download:** Speichert euren Lebenskontext als Markdown-Datei oder als **PDF** – praktisch für die Arbeit mit einem menschlichen Coach.
 
 ---
 
 ## 🎙️ Strukturierte Interviews: Denken durch Sprechen
 
-Neu in der App: **Gloria Interview** – ein spezialisiertes Tool, das euch hilft, komplexe Gedanken zu strukturieren.
+Neu in der App: **Gloria Interview** – ein spezialisiertes Werkzeug, das euch hilft, komplexe Gedanken zu strukturieren.
 
-Statt Coaching bekommt ihr hier einen professionellen Interviewer, der gezielt nachfragt. Ideal für:
+Statt Coaching bekommt ihr hier einen professionellen Interviewer, der ausschließlich fragt – kein Ratschlag, keine Bewertung. Ideal für:
 
-- **Ideen entwickeln** – ein Konzept, das ihr noch nicht ganz greifen könnt
-- **Projekte planen** – ein strukturierter Gedankengang als Ausgangspunkt
-- **Schwierige Gespräche vorbereiten** – eure Argumente vorher durchdenken
+- **Schwierige Gespräche vorbereiten** – eure eigene Position schärfen, bevor ihr in ein wichtiges Gespräch geht
+- **Ideen entwickeln** – ein Konzept durchdenken, das ihr noch nicht ganz greifen könnt
+- **Klarheit finden** – wenn die Gedanken kreisen und ihr einen strukturierten Ausgang braucht
 
-Am Ende erhaltet ihr automatisch eine **zusammengefasste Transkription** eures Gesprächs: eine strukturierte Zusammenfassung, eine bereinigte Version des Dialogs – alles als Markdown-Datei zum Herunterladen.
+Am Ende erhaltet ihr automatisch eine **Zusammenfassung eures Gesprächs** als Markdown-Datei zum Herunterladen.
 
 *Verfügbar ab: Registrierter Account*
 
@@ -35,19 +60,19 @@ Am Ende erhaltet ihr automatisch eine **zusammengefasste Transkription** eures G
 
 ## 📊 Transkript-Auswertung: Wie gut war mein Gespräch wirklich?
 
-Habt ihr ein schwieriges Gespräch geführt – ein Mitarbeitergespräch, eine Verhandlung, ein Konfliktgespräch – und fragt euch hinterher: "War das gut? Was hätte ich besser machen können?"
+Ihr habt ein schwieriges Gespräch geführt – ein Mitarbeitergespräch, eine Verhandlung, ein Konfliktgespräch – und fragt euch hinterher: *"War das gut? Was hätte ich anders machen können?"*
 
 Die **Transkript-Auswertung** gibt euch evidenzbasiertes Feedback:
 
-1. Ladet euer Transkript hoch (Text einfügen oder als `.srt`-Datei von Zoom/Teams)
+1. Fügt euer Transkript ein (Text einfügen oder als `.srt`-Datei von Zoom/Teams)
 2. Beantwortet kurz: Was war euer Ziel? Was habt ihr erwartet?
 3. Die KI analysiert und liefert:
    - **Zielerreichung:** Habt ihr erreicht, was ihr wolltet?
-   - **Verhaltensanalyse:** Welche Kommunikationsmuster zeigt ihr?
-   - **Blindspots:** Was habt ihr vielleicht nicht gesehen?
-   - **Coach-Empfehlungen:** Welcher Coach passt für eure nächste Entwicklungsarbeit?
+   - **Kommunikationsmuster:** Welche Verhaltenstendenzen zeigt ihr?
+   - **Blinde Flecken:** Was habt ihr möglicherweise nicht gesehen?
+   - **Coach-Empfehlung:** Welcher Coach passt für eure nächste Entwicklungsarbeit?
 
-Das Ergebnis kann als **PDF exportiert** werden – perfekt für die Reflexion mit eurem Coach.
+Das Ergebnis kann als **PDF exportiert** werden – zur Weiterarbeit mit eurem Coach.
 
 *Verfügbar ab: Premium Account*
 
@@ -55,21 +80,17 @@ Das Ergebnis kann als **PDF exportiert** werden – perfekt für die Reflexion m
 
 ## 🔊 Deutlich bessere Sprachausgabe
 
-Server-TTS war schon immer hochwertig – aber langsam. Das haben wir grundlegend geändert:
+Server-TTS war schon immer hochwertig – aber die Wartezeit vor der ersten Wiedergabe war spürbar. Das haben wir grundlegend geändert:
 
-- **~8x schneller:** Lange Wartezeiten vor der ersten Wiedergabe gehören der Vergangenheit an.
-- **Progressiv:** Die erste Antwort-Passage beginnt zu spielen, während die nächste bereits aufgebaut wird.
+- **Deutlich schneller:** Die erste gesprochene Passage beginnt, während der Rest noch aufgebaut wird – keine langen Pausen mehr.
+- **Stabiler:** Hänger und Ladefehler bei der Sprachausgabe werden jetzt zuverlässig abgefangen.
 - **Mehr Kontrolle:** Lautstärke, Pause/Weiter und Wiederholen direkt im Chat.
 
 ---
 
-## 🔒 Verbesserte Sicherheit
+## 🧾 Automatische Rechnung nach jedem Kauf
 
-Wir haben in diesem Update besonders viel Energie in die Sicherheitsarchitektur gesteckt – auch wenn man das als User nicht direkt sieht:
-
-- Alle sicherheitsrelevanten Verbindungen wurden überprüft und gehärtet.
-- Eure verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) sind weiterhin nur für euch lesbar – kein Server kann sie entschlüsseln.
-- Zahlungswebhooks werden jetzt mit kryptografischer Signaturprüfung verifiziert.
+Nach jedem erfolgreichen Kauf erhaltet ihr jetzt automatisch eine **Rechnung per E-Mail**. Keine manuelle Anfrage mehr nötig – die Rechnung kommt direkt in euer Postfach.
 
 ---
 
@@ -77,98 +98,50 @@ Wir haben in diesem Update besonders viel Energie in die Sicherheitsarchitektur 
 
 Das Update ist bereits aktiv. Beim nächsten Öffnen der App seht ihr das neue Design automatisch.
 
+Die iOS-App kann im App Store unter **"MyCoach AI"** gesucht oder direkt heruntergeladen werden.
+
 **Habt ihr Feedback?** Nutzt die Feedback-Funktion in der App – wir lesen alles.
 
 Herzliche Grüße,
 
-Euer Meaningful Conversations Team 💙
+Euer MyCoach AI Team
 
 ---
 ---
 
-## 🔧 Technische Details – Für Technologieinteressierte
+## Technische Informationen – Für Admins & Interessierte
 
-*Dieser Abschnitt richtet sich an alle, die wissen möchten, was hinter den Kulissen passiert ist.*
-
----
-
-### Design System: Brand-Driven Architektur
-
-Das neue UI ist nicht nur ein Redesign – es ist ein vollständig neues Design-System:
-
-- **CSS Custom Properties:** Alle Farben werden über `--brand-color-1` bis `--brand-color-4` und `--brand-accent` gesteuert. Das ermöglicht vollständiges White-Labeling ohne Code-Änderungen.
-- **Tailwind-Tokens:** Alle Design-Tokens (`w4f.*`, `background.*`, `content.*`) referenzieren CSS-Variablen – jede Theme-Änderung wirkt sich konsistent auf alle Komponenten aus.
-- **Framer Motion:** Alle Seitenübergänge laufen über eine zentrale `PageTransition`-Komponente mit einheitlicher Timing-Kurve.
-- **BrandLoader:** Der Ladeindikator ist nun konfigurierbar – `tetris`, `steering-wheel`, `dots`, `pulse` – steuerbar via `VITE_BRAND_LOADER`.
+*Was im Hintergrund passiert ist – ohne Fachjargon.*
 
 ---
 
-### Backend-Modularisierung
+### Sprachausgabe: Warum sie jetzt ~8x schneller ist
 
-Im Zuge des v1.9.8-Updates wurden drei monolithische Backend-Dateien refaktorisiert:
-
-| Datei | Vorher | Nachher |
-|-------|--------|---------|
-| `gemini.js` | 1.873 Zeilen | Facade + 8 Sub-Module in `routes/gemini/` |
-| `constants.js` | 1.900 Zeilen | Facade + `bots.js` + `crisisText.js` |
-| `behaviorLogger.js` | 1.300 Zeilen | Facade + 5 Module in `services/behavior/` |
-
-Alle Facades halten Rückwärtskompatibilität – keine Consumer mussten angepasst werden.
+Bisher wurde für jede Anfrage ein eigener Prozess gestartet, der das Sprachmodell neu laden musste – das dauerte mehrere Sekunden. Jetzt bleibt das Modell dauerhaft im Speicher, Antworten werden satzweise parallel aufgebaut und sofort abgespielt. Die Audiodateien sind durch ein effizienteres Format außerdem ~7x kleiner als vorher.
 
 ---
 
-### TTS Performance-Overhaul
+### iOS-App: Wie Kauf und Account zusammenspielen
 
-Der Piper-TTS-Dienst wurde grundlegend überarbeitet:
-
-- **Persistente Modelle:** `PiperVoice`-Library hält das Sprachmodell dauerhaft im Speicher. Vorher: ein Subprocess pro Anfrage (~5.000ms). Jetzt: 500–700ms pro Satz.
-- **Parallele Synthese:** Bot-Antworten werden in Sätze aufgeteilt, parallel auf 2 CPU-Kernen synthetisiert und progressiv abgespielt.
-- **Warmup-Endpoint:** `POST /api/tts/warmup` lädt das Modell, sobald ein User eine Session mit Server-TTS betritt – bevor die erste Nachricht kommt.
-- **Opus-Kompression:** WAV → Opus via ffmpeg (~7x kleinere Audiodateien).
+Auf iOS können Upgrades über Apple In-App Purchase (StoreKit 2) oder über die bestehende PayPal-Methode im Web abgeschlossen werden. Beide Wege aktualisieren denselben Account. Apple-Käufe werden serverseitig verifiziert – keine manuelle Freischaltung nötig.
 
 ---
 
-### Sicherheits-Audit (v1.9.8)
+### Backend-Wartbarkeit
 
-Acht Schwachstellen wurden identifiziert und behoben:
-
-1. **PayPal Webhook:** Stub durch vollständige kryptografische Signaturverifikation über PayPal API ersetzt.
-2. **Debug-Endpoints:** `/api/debug/log`, `/logs` mit `adminAuth`-Middleware geschützt.
-3. **Analytics:** `userId` wird aus JWT-Token abgeleitet, nicht aus dem Request-Body.
-4. **XSS:** `escapeHtml()` für alle `dangerouslySetInnerHTML`-Verwendungen.
-5. **Input Validation:** Größenlimits für `context` (500KB) und `gamificationState` (50KB).
-6. **Error Leakage:** `error.message` wird nicht mehr an Client-Responses weitergegeben.
-7. **SQL Injection:** `$queryRawUnsafe()` durch typsichere Tagged-Template-Literale ersetzt.
-8. **Server-IP:** Externalisiert in `.env.server` (gitignored). Git-History mit `git-filter-repo` bereinigt.
+Drei zentrale Backend-Dateien, die über die Zeit auf mehrere tausend Zeilen angewachsen waren, wurden in kleinere, eigenständige Module aufgeteilt. Das macht zukünftige Änderungen schneller und sicherer – für die Nutzer unsichtbar, für den Betrieb relevant.
 
 ---
 
-### i18n-Audit
+### Sicherheit
 
-- Resultat: Vollständige DE/EN-Parität.
-
----
-
-### Test Coverage
-
-| Bereich | Suiten | Tests |
-|---------|--------|-------|
-| Frontend Utilities | 9 | ~400 |
-| Backend Services | 7 | ~180 |
-| Backend Routes | 5 | ~100 |
-| Middleware | 4 | ~44 |
-| **Gesamt** | **33** | **724+** |
-
-**CI/CD:** GitHub Actions Workflow läuft bei jedem Push auf `main` – Frontend-Tests, Backend-Tests, TypeScript-Check.
+Im Rahmen des v1.9.8-Audits wurden acht Schwachstellen behoben – darunter die Absicherung von Zahlungs-Webhooks mit kryptografischer Signaturprüfung und die vollständige Bereinigung von Fehlermeldungen, die interne Details nach außen geleakt hatten. Eure verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) bleiben ausschließlich auf euren Geräten lesbar – der Server kann sie nicht entschlüsseln.
 
 ---
 
-### PM2 & Prozess-Management
+### Test-Abdeckung
 
-Der Backend-Prozess läuft seit v1.9.6 unter **PM2 in Cluster Mode** (2 Instanzen):
-- Automatischer Restart bei >700MB Memory-Verbrauch.
-- Logs mit Instanz-Präfixen (`[0]`, `[1]`) für einfachere Diagnose.
-- `pm2-runtime` als Container-Einstiegspunkt für Graceful Shutdown.
+Die App wird jetzt durch über 700 automatisierte Tests abgesichert – Frontend, Backend und Middleware. Jede Änderung am Code löst automatisch alle Tests aus, bevor sie live geht.
 
 ---
 
