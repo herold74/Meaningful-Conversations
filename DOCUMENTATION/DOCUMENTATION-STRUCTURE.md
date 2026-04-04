@@ -14,12 +14,14 @@ The project documentation is organized by purpose and environment.
 
 ### Memory Bank (Active Development Context)
 Located in `/memory-bank/`:
+- **README.md** - Index of core vs optional files; pointers to Cursor rules
 - **activeContext.md** - Current work focus, recent changes
 - **progress.md** - Feature status, roadmap
 - **techContext.md** - Technical details, deployment
 - **productContext.md** - Product vision, UX goals
 - **systemPatterns.md** - Architecture decisions
 - **projectbrief.md** - Project overview
+- **Optional** - e.g. **capacitor-audio-plan.md** (feature/spec plans; fold into core docs when stable)
 
 ---
 
@@ -73,6 +75,11 @@ Located in `/memory-bank/`:
 
 ### App Store
 - **APP-STORE-METADATA.md** - **⭐ App Store Connect metadata (description, keywords, review notes, test account, URLs)**
+
+### Social & marketing (local workspace)
+- **`DOCUMENTATION/SOCIAL-MEDIA/`** — LinkedIn carousel HTML, video scripts, blog-series drafts, strategy notes. **Gitignored** (not in the public repo). Conventions and workflow: **`.cursor/skills/meaningful-conversations/linkedin-social-assets/SKILL.md`**. Committable article/newsletter copy may also live under **`NEWSLETTER/`** (e.g. LinkedIn article Markdown).
+  - **SOCIAL-MEDIA/LINKEDIN-VIDEO-SKRIPTE.md** — Video-Leitfäden (Serien, z. B. „Gespräche, die entscheiden“).
+  - **SOCIAL-MEDIA/LINKEDIN-LAUNCH-FUEHRUNGSTOPICS-TOP10.md** — Top-10-Themen für Führungskräfte, aligned mit Launch-Kampagne / Micro-Learning-Kontext.
 
 ### Compliance & Security
 - **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit
@@ -153,6 +160,12 @@ Located in `/memory-bank/`:
 
 ---
 
+## Portable templates
+
+- **`templates/portable-memory-bank/`** — Generic Memory Bank (six core Markdown files + Cursor `memory-bank.mdc` + install instructions) for reuse in other projects. See **`templates/portable-memory-bank/INSTALL.md`**.
+
+---
+
 ## Current Setup
 
 - **Version:** 2.0.0
@@ -164,4 +177,4 @@ Located in `/memory-bank/`:
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** March 1, 2026
+**Last Updated:** March 24, 2026

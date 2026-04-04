@@ -1,0 +1,75 @@
+---
+description: Memory Bank — persistent project context for AI sessions
+globs: 
+alwaysApply: true
+---
+# Cursor's Memory Bank
+
+Between sessions, context resets. The Memory Bank is **durable Markdown** at `memory-bank/` so work can continue without re-deriving the whole project every time.
+
+## How this fits the project
+
+Use these layers together; they are not duplicates:
+
+| Layer | Role |
+|-------|------|
+| **`memory-bank/`** | **Handoff context:** version, recent changes, next steps, architecture snapshot — “what changed / what’s next.” |
+| **`DOCUMENTATION/`** (if present) | **Long-form** guides, runbooks, troubleshooting, deep reference. |
+| **`.cursor/skills/`** (if present) | **Task-specific procedures.** Prefer a skill when it matches the work. *Edit this row or remove it if unused.* |
+| **`.cursor/rules/`** | **Global constraints** and cross-cutting patterns. |
+
+Check existing docs and skills before improvising. Use the Memory Bank to **orient** quickly.
+
+**Optional — stewardship:** If maintainers delegate routine doc updates to the assistant, state that in `systemPatterns.md` (or a dedicated doc) and keep a one-line reminder here. Otherwise delete this paragraph.
+
+## What to read at task start (tiered)
+
+1. **Minimum (most tasks):** **`activeContext.md`**. Add **`progress.md`** if the task touches status or roadmap.
+2. **Architecture / decisions:** **`systemPatterns.md`** (and **`techContext.md`** if stack or env is relevant).
+3. **Product / scope:** **`productContext.md`** or **`projectbrief.md`** as needed.
+4. **Full pass:** Read **all** core files when the task is ambiguous, crosses subsystems, or the user says **update memory bank**.
+
+## Memory Bank structure
+
+```mermaid
+flowchart TD
+    PB[projectbrief.md] --> PC[productContext.md]
+    PB --> SP[systemPatterns.md]
+    PB --> TC[techContext.md]
+    PC --> AC[activeContext.md]
+    SP --> AC
+    TC --> AC
+    AC --> P[progress.md]
+```
+
+### Core files
+
+1. **`projectbrief.md`** — Scope, requirements, goals.
+2. **`productContext.md`** — Problem, solution, UX intent.
+3. **`activeContext.md`** — Current focus, recent changes, next steps.
+4. **`systemPatterns.md`** — Architecture, decisions, patterns.
+5. **`techContext.md`** — Stack, setup, dependencies.
+6. **`progress.md`** — What works, what’s left, known issues.
+
+### Optional files
+
+Extra Markdown under `memory-bank/` for temporary plans (e.g. `feature-x-plan.md`). Merge into core files or `DOCUMENTATION/` when stable.
+
+## When to update
+
+1. After meaningful implementation or infra changes.
+2. On **update memory bank** — review every core file; prioritize **`activeContext.md`** and **`progress.md`**.
+3. When you establish a new pattern worth preserving — **`systemPatterns.md`** / **`techContext.md`**.
+
+### After commits (routine)
+
+1. **`activeContext.md`** — version, what changed, active tasks.
+2. **`progress.md`** — checkboxes, status.
+3. **`systemPatterns.md`** — new decisions.
+4. **`techContext.md`** — deps/tooling changes.
+
+If unsure, at least update **`activeContext.md`**. *If you use a separate “core” rule, it may point here for this checklist — keep wording in one place to avoid drift.*
+
+---
+
+**Remember:** Each new session starts fresh; keep the bank factual and concise.
