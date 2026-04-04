@@ -180,3 +180,8 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
   - `tsconfig.json` excludes `**/__tests__/**` and `**/*.test.ts` from production `tsc` build.
   - 33 suites, 724+ tests total across both stacks.
 
+### 21. Documentation stewardship (AI-assisted)
+- **Decision:** The product owner delegates routine upkeep of the Memory Bank (`memory-bank/`), `DOCUMENTATION/`, and `.cursor/skills/` to the coding assistant. The owner focuses on product and user experience; they do not review every documentation change.
+- **Reasoning:** Keeps handoff context and guides accurate without adding a standing doc-review obligation. Trust is explicit so assistants default to updating what matters after substantive work.
+- **Implementation:** After meaningful sessions (especially commits), the assistant updates `activeContext.md`, `progress.md`, and related docs/skills per `.cursor/rules/memory-bank.mdc` without waiting for a separate "please update docs" request.
+
