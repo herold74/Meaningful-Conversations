@@ -33,6 +33,11 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 
 ## Recent Changes (v2.0.0)
 
+### Process & Cursor rules (2026-03-20)
+- Memory Bank rule refresh: tiered reading, how Memory Bank relates to `DOCUMENTATION/` and skills; post-commit checklist consolidated in `.cursor/rules/memory-bank.mdc`; `memory-bank/README.md` added.
+- **Working agreement:** Owner delegates routine memory-bank / documentation / skills maintenance to the assistant and does not review every doc edit; assistant keeps these current after substantive work (see `systemPatterns.md` Decision #21).
+- **Portable template:** `templates/portable-memory-bank/` — generic six-file bank + Cursor rule + `INSTALL.md` for copying into other repos; indexed in `DOCUMENTATION/DOCUMENTATION-STRUCTURE.md`.
+
 ### Life Context Editor (2026-03-01 – 2026-03-05)
 - **Markdown editor with preview toggle** (`LifeContextEditorView.tsx`): Edit/preview mode for Life Context files, with download as .md and PDF
 - **Button logic** (`LandingPage.tsx`): Three states — "Erstellen" (new), "Erweitern" (template), "Editieren" (enriched) — based on content analysis
@@ -59,6 +64,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - **Scope:** iPhone and iPad support only. Web version covers Mac use case.
 - **Code cleanup:** Removed `isNativeMacOS` from `nativeTtsService.ts`, `platformDetection.ts`; removed all Mac-specific TTS workarounds in `useTts.ts` (retry, warmup, handleOpenVoiceModal branch); removed `warmupAudioIfNeeded` and its ChatView calls.
 - **App Store Connect:** To disable Mac availability: Pricing and Availability → iPhone and iPad Apps on Apple Silicon Mac → uncheck "Make this app available".
+- **Validation:** Tested on both iPhone and iPad — local voices (AVSpeechSynthesizer) work well, stable.
 
 ### TTS Stuck Spinner Fix (2026-03-10)
 - **Root cause:** `isLoadingAudio` stuck `true` when `audio.play()` rejected or backend returned 500 during streaming sentence synthesis
@@ -85,8 +91,10 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - [ ] Self-hosted SLM as Gemini replacement (milestone: >1000 paying users)
 - [ ] Coaching Framework Roadmap: Clean Language bot, The Work bot, NLP Meta-Modell lens, Logische Ebenen lens
 - [ ] Presentation Evaluator (Premium Feature, backlog)
+- [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)
 
 ## Decision Log
+- **2026-03-20:** Documentation stewardship delegated to the AI assistant — Memory Bank, `DOCUMENTATION/`, and Cursor skills updated proactively without expecting owner line-by-line review (`systemPatterns.md` #21).
 - **2026-03-07:** App Store availability limited to AT/DE/CH — manageable support timezone for solo developer. Can expand later via App Store Connect.
 - **2026-03-07:** Apple's standard EULA used (not custom). Terms of Use link in App Store description satisfies Guideline 3.1.2(c).
 - **2026-03-05:** Life Context auto-saved to server immediately after creation (questionnaire or file upload) for registered users — prevents data loss on logout.

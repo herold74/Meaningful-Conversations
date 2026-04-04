@@ -61,6 +61,7 @@
     - [x] Persistent Piper models (in-memory via PiperVoice library, ~8x faster)
     - [x] Warmup endpoint (pre-loads model when user enters session)
     - [x] Progressive sentence synthesis (sequential play-while-synthesize, each gets full CPU)
+    - [x] Native iOS voices validated on iPhone and iPad (stable)
     - [x] Improved sentence splitting (semicolons, comma+conjunction for long chunks)
     - [x] Opus audio compression (WAV → Opus via ffmpeg, ~7x smaller)
 - [x] **Voice Mode UX:**
@@ -189,6 +190,7 @@
 - [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
 - [ ] **Accessibility:** Formal WCAG audit (axe-core/Lighthouse tooling, prefers-reduced-motion, color contrast verification, screen reader testing)
 - [ ] **Self-hosted SLM:** Replace Gemini with server-based model (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Milestone: >1000 paying users. Requires dedicated larger server with GPU. Eliminates per-request API costs and Google dependency.
+- [ ] **Leuchtfeuer – Micro-Learning für Führungskräfte** *(EN: Beacon)*: Kurz-Lernangebote in den Management-Bereich integrieren. Produktname leitet sich von der Leuchtturm-/Steuerrad-Metapher von manualmode.at ab. **Nobody** als passendes Coach-Profil für proaktive ML-Vorschläge im Gespräch; Verweise auf kuratierte Inhalte (Deep Links / Ressourcenliste). Subline: „Leuchtfeuer – Micro-Learning für Führungskräfte".
 
 ## Coaching Framework Roadmap (Feature Pipeline)
 
