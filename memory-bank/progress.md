@@ -138,6 +138,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
+- **Staging ↔ Production images:** Resolved **2026-04-05** — production deploy pulled same `2.0.1` images as staging; brief session disruption possible during cutover (per deploy playbook).
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
