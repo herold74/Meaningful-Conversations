@@ -165,6 +165,14 @@ npx prisma migrate resolve --applied 20260213120000_add_your_feature
 4. **Don't run `prisma migrate reset`** on staging/production databases
    - This DROPS ALL DATA!
 
+### Staging vs production schema parity (pre-deployment checks)
+
+Automated checks compare **live** table DDL between environments. If an older `migration.sql` omitted `NOT NULL` while `schema.prisma` required it, databases can diverge even when both ran `migrate deploy`.
+
+**Remediation:** Add a **new** corrective migration (never rewrite already-applied migrations — Prisma checksums). Then run `npx prisma migrate deploy` in **each** backend container (staging first, then production after verification), not a manual `ALTER` on only one side.
+
+Example fixed in repo: `20260405120000_user_preferred_language_not_null` (`User.preferredLanguage`).
+
 ---
 
 ## 🔄 Common Workflows
