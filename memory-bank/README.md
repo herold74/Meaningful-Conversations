@@ -19,4 +19,4 @@ Extra plans or specs that should not bloat the core six, e.g. **`capacitor-audio
 
 ## Rule of record
 
-Agent behavior, reading strategy, and post-commit updates: **`.cursor/rules/memory-bank.mdc`**. **`core.mdc`** also reminds assistants to refresh the bank after commits.
+Agent behavior, reading strategy, and post-commit updates: **`.cursor/rules/memory-bank.mdc`**. **`core.mdc`** also reminds assistants to refresh the bank after commits. Assistants also update the bank **proactively** after deploy/server checks when material facts change (`systemPatterns.md` Decision #21).

@@ -183,5 +183,5 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 ### 21. Documentation stewardship (AI-assisted)
 - **Decision:** The product owner delegates routine upkeep of the Memory Bank (`memory-bank/`), `DOCUMENTATION/`, and `.cursor/skills/` to the coding assistant. The owner focuses on product and user experience; they do not review every documentation change.
 - **Reasoning:** Keeps handoff context and guides accurate without adding a standing doc-review obligation. Trust is explicit so assistants default to updating what matters after substantive work.
-- **Implementation:** After meaningful sessions (especially commits), the assistant updates `activeContext.md`, `progress.md`, and related docs/skills per `.cursor/rules/memory-bank.mdc` without waiting for a separate "please update docs" request.
+- **Implementation:** After meaningful sessions (especially commits), the assistant updates `activeContext.md`, `progress.md`, and related docs/skills per `.cursor/rules/memory-bank.mdc` without waiting for a separate "please update docs" request. **Also:** after **server verification** (SSH, staging vs production digests, deploy outcomes) or any chat that fixes **material project facts**, the assistant refreshes the Memory Bank **in the same session** — the owner should not need to prompt for routine bank updates.
 

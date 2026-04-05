@@ -1,8 +1,8 @@
-# UX Flows — Meaningful Conversations v1.9.9
+# UX Flows — Meaningful Conversations v2.0.1
 
 Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visuelle Flow-Diagramme.
 
-**Zuletzt aktualisiert:** 27. Februar 2026
+**Zuletzt aktualisiert:** April 2026 (ausgerichtet auf App-Version 2.0.1)
 
 ---
 
@@ -228,7 +228,7 @@ flowchart TD
     OPTIONS -->|iOS| IOS_OPTIONS[Native In-App Purchase<br/>RevenueCat / StoreKit 2]
     OPTIONS -->|Web| WEB_OPTIONS[PayPal Checkout<br/>oder Code eingeben]
 
-    IOS_OPTIONS --> IAP_PRODUCTS[Produktauswahl:<br/>Registered Monthly 3,99 EUR<br/>Premium Monthly 9,99 EUR<br/>Premium Yearly 79,99 EUR<br/>Registered Lifetime 14,99 EUR]
+    IOS_OPTIONS --> IAP_PRODUCTS[NativePaywall<br/>RevenueCat / StoreKit 2<br/>Nutzungsbedingungen + Datenschutz<br/>(App Store 3.1.2)<br/>Preise z. B.:<br/>Registered Monthly 3,99 EUR<br/>Premium Monthly 9,99 EUR<br/>Premium Yearly 79,99 EUR<br/>Registered Lifetime 14,99 EUR]
     WEB_OPTIONS --> PAYPAL[PayPal-Link<br/>oder Upgrade-Code]
 
     IAP_PRODUCTS -->|Kauf erfolgreich| PURCHASE_SUCCESS[onPurchaseSuccess<br/>User aktualisieren]
@@ -367,7 +367,7 @@ flowchart TD
 ```
 
 ### Visual Redesign (Brand-Driven Design System)
-Seit v1.9.6 nutzt die App ein markengesteuertes Design-System mit White-Label-Unterstuetzung:
+Seit v1.9.6, unveraendert relevant in v2.0.1: markengesteuertes Design-System mit White-Label-Unterstuetzung:
 - **Farben:** 4-stufige Markenpallette + Akzentfarbe (definiert über CSS-Variablen, per Brand konfigurierbar).
 - **Typografie:** Inter Variable Font.
 - **Komponenten:** Abgerundete Karten, schwebende Schatten, Pill-Buttons.
@@ -396,7 +396,7 @@ flowchart TD
     COACH --> BS_TOPIC[BotSelection<br/>TopicSearch hervorgehoben]
     LIFE --> BS_TOPIC
 
-    BS_MGMT --> BOT_TILES[Bot-Kacheln anzeigen<br/>Hervorhebung = Suchfeld +<br/>zugehoeriger Sektions-Header<br/>Pulsierender Ring, Shadow, 8s Dauer]
+    BS_MGMT --> BOT_TILES[Bot-Kacheln anzeigen<br/>Hervorhebung = Suchfeld +<br/>zugehoeriger Sektions-Header<br/>Pulsierender Ring, Schatten, ca. 3,5s]
     BS_TOPIC --> BOT_TILES
 
     INTENT -->|Permanent ueberspringen| SKIP{Kontext?}
@@ -411,11 +411,15 @@ flowchart TD
 
 ### Intent-Beschreibungen
 
-| Intent | Deutsch | Englisch | Ziel-Sektion |
+UI-Texte aus `public/locales/de.json` / `en.json` (Kurzfassung):
+
+| Intent | Deutsch (Titel) | Englisch (Titel) | Ziel-Sektion |
 |:---|:---|:---|:---|
-| Kommunikation | "Bereiten Sie schwierige Gespraeche vor" | "Prepare for difficult conversations" | Management & Kommunikation |
-| Coaching | "Arbeiten Sie an Ihren persoenlichen Zielen" | "Work on your personal goals" | TopicSearch (Coaching) |
-| Begleitendes Coaching | "Professionelles Coaching mit KI-Unterstuetzung" | "Professional coaching with AI support" | TopicSearch (Coaching) |
+| Kommunikation | Kommunikation verstehen & verbessern | Understand & improve communication | Management & Kommunikation |
+| Coaching | Gedanken strukturieren & Herausforderungen meistern | Structure thoughts & tackle challenges | TopicSearch (Coaching) |
+| Begleitendes Coaching | Begleitendes Coaching | Augmented Coaching | TopicSearch (Coaching) |
+
+Details und Laengenbeschreibungen: Keys `intent_*_desc` (bzw. `*_guest` fuer Gaeste).
 
 ---
 
@@ -423,7 +427,7 @@ flowchart TD
 
 ### 10.1 IntentPickerView
 
-- **Anzeige:** Drei Karten mit Icon, Titel, Beschreibung
+- **Anzeige:** Drei Karten mit Icon, Titel, Beschreibung (Icons: Kommunikation 🗣️, Coaching 💭, Begleitendes Coaching 🧭)
 - **"Nicht mehr anzeigen":** Setzt `intentPickerDisabled = true` in localStorage
 - **Positionierung:** Zentriert, etwas tiefer als Bildschirmmitte
 - **Animation:** Framer Motion fade-in
@@ -453,7 +457,7 @@ flowchart TD
 
 ---
 
-## 10.5 Gloria Interview Flow (v1.8.9+)
+## 10.5 Gloria Interview Flow (seit v1.8.9, v2.0.1)
 
 ```mermaid
 flowchart TD
@@ -541,8 +545,9 @@ flowchart LR
 
 | Aspekt | iOS (Capacitor) | Web (Browser) |
 |:---|:---|:---|
-| Installation | App Store Download | PWA zum Homescreen |
-| Zahlungen | In-App Purchase (RevenueCat) | PayPal Direct Checkout |
+| Installation | App Store Download („MyCoach AI“) | PWA zum Homescreen |
+| Zahlungen | In-App Purchase (`NativePaywall`, RevenueCat / StoreKit 2) | PayPal Direct Checkout |
+| Paywall-Pflichtfelder | Nutzungsbedingungen + Datenschutz verlinkt (Review 3.1.2) | — |
 | PayPal-Links | Ausgeblendet (Apple 3.1.1) | Sichtbar |
 | TTS | Native iOS Stimmen | Server TTS (Piper, ab Registered) + Web Speech API Fallback |
 | STT | Native Speech Recognition | Web Speech API |
@@ -552,4 +557,6 @@ flowchart LR
 
 ---
 
-*Dieses Dokument basiert auf dem implementierten Code in `App.tsx` (v1.9.9) und spiegelt die tatsaechliche Routing-Logik wider.*
+*Dieses Dokument basiert auf dem implementierten Code in `App.tsx`, `hooks/useAppRouting.ts`, `components/BotSelection.tsx` und `components/IntentPickerView.tsx` (Stand App-Version **2.0.1**) und spiegelt die tatsaechliche Routing-Logik wider.*
+
+**Routing-Migration:** Einmaliges Zuruecksetzen von „Intent Picker dauerhaft ausblenden“ fuer Bestandsnutzer ueber `localStorage.intentPickerVersion` (Wert `1.9.7`), siehe `routeWithIntentPicker` in `useAppRouting.ts`.
