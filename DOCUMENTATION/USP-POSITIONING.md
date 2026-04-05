@@ -1,6 +1,6 @@
 # USP & Positioning – Meaningful Conversations v2.0
 
-**Last Updated:** March 2026  
+**Last Updated:** April 2026  
 **Version:** 2.0.0
 
 ---
@@ -118,7 +118,11 @@ Die drei Anwendungsfälle teilen denselben Persönlichkeitskontext. Das ist der 
 *Drei separate Tools würden diesen Kontext verlieren. Das ist der strukturelle Vorteil der integrierten Plattform.*
 
 ### White-Label
-Coaches können die App unter eigenem Namen betreiben – mit eigenem Farbschema, eigenem Domain-Namen und eigenem Branding. Kein Entwicklungsaufwand, keine Infrastrukturkosten, keine Lizenzgebühren für die Plattform. Konfiguration ausschließlich über Umgebungsvariablen.
+Das Projekt unterstützt eine **White-Label-Variante**: eigener Auftritt (z. B. Farbschema, Domain, Branding) ist über Konfiguration – u. a. über Umgebungsvariablen und Marken-Env-Dateien – grundsätzlich abbildbar.
+
+**Voraussetzung:** Der Betreiber betreibt die Software **in eigener Verantwortung**. Dazu gehören **eigene Infrastruktur** (Hosting, Container/Compose, Domains, Zertifikate), **Betriebswissen** (Deployments, Monitoring, Backups, Incident-Handling), die **rechtliche und organisatorische Verantwortung für Datenschutz** (Rollen gemäß DSGVO, TOMs, AV-Verträge, ggf. Unterauftragsverhältnisse zur KI) sowie die **Weiterentwicklung und Pflege** (Updates, Sicherheitspatches, Anpassungen).
+
+Es fallen **keine Lizenzgebühren an die Plattform** an (Apache-2.0-Basis); das bedeutet nicht „kosten- und aufwandsfrei“, sondern: **Aufwand und Kosten verschieben sich** auf den Betreiber statt auf eine SaaS-Lizenz.
 
 ---
 
