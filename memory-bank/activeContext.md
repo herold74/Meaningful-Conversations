@@ -4,7 +4,7 @@
 **Version:** 2.0.1
 **Branch:** `main`
 **Staging:** Deployed (2026-04-05, build 6); backend image includes Prisma migration `20260405120000_user_preferred_language_not_null` — https://mc-beta.manualmode.at
-**Production:** Deployed **2026-04-05** — `VERSION=2.0.1`, images **aligned with staging** (registry pull: backend `46d5f3c1a921…`, frontend `d5382c80c7d2…`, TTS `17b76fdf36c5…`). Health checks OK. — https://mc-app.manualmode.at
+**Production:** Deployed **2026-04-05** (nach Staging Build 6) — `VERSION=2.0.1`, gleiche Registry-Tags wie Staging: Backend `97ab50a654d5…`, Frontend `6a8917fdd0ac…`, TTS `17b76fdf36c5…`. Health checks OK. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -43,14 +43,14 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 ### Database (2026-04-05)
 - **Drift:** `User.preferredLanguage` — Staging NOT NULL vs Production nullable (Migration `20251120_add_newsletter_improvements` ohne `NOT NULL`).
 - **Fix:** `prisma/migrations/20260405120000_user_preferred_language_not_null` — `UPDATE … WHERE NULL` dann `MODIFY NOT NULL` (datensicher).
-- **Ops:** Backend ruft bei Start `prisma migrate deploy` auf (`server.js`) — Staging nach Deploy **2026-04-05** sollte die neue Migration automatisch angewendet haben. Production: nächster Deploy zieht dasselbe Image; gleiches Verhalten.
+- **Ops:** Backend startet `prisma migrate deploy` (`server.js`). Staging + Production **2026-04-05:** laufen Backend-Image mit Migration `20260405120000_…`; DB sollte auf beiden nach Start angeglichen sein.
 
 ### Docs & marketing (2026-04-04)
 - **Committed:** `DOCUMENTATION/USP-POSITIONING.md`, `NEWSLETTER/NEWSLETTER-v2.0.0-LINKEDIN.md`, newsletter body updates, `templates/portable-memory-bank/`, memory-bank edits; removed large `.key` binaries; `.gitignore` adjustments.
 - **USP follow-up:** White-Label-Abschnitt faktisch korrigiert (Selbstbetrieb, Kosten/Aufwand, kein „null Infrastruktur“); committed + gepusht.
 - **`DOCUMENTATION/UX-FLOWS.md`:** Auf v2.0.1 gebracht (Intent-Locales, Highlight ~3,5s, NativePaywall/Legal, Code-Verweise).
 - **Staging:** Redeployed v2.0.1 (`-c app`); `BUILD_NUMBER` → 5 (auto sync commit `chore: build 5 sync`).
-- **Staging vs Production:** SSH-Vergleich 2026-04-04 zeigte Digest-Drift; **2026-04-05:** `./deploy-manualmode.sh -e production` — Parität mit Staging-Images hergestellt (kein App-Store-Submit).
+- **Staging vs Production:** `./deploy-manualmode.sh -e production` **2026-04-05** — zieht dieselben `:2.0.1`-Images wie zuletzt auf Staging gebaut (Build 6); kein App-Store-Submit.
 
 ### Life Context Editor (2026-03-01 – 2026-03-05)
 - **Markdown editor with preview toggle** (`LifeContextEditorView.tsx`): Edit/preview mode for Life Context files, with download as .md and PDF
@@ -108,8 +108,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)
 
 ## Decision Log
-- **2026-04-05:** Prisma migration `20260405120000_user_preferred_language_not_null` — Schema-Parität Staging/Production.
-- **2026-04-05:** Production deploy — gleiche Container-Images wie Staging (`2.0.1`); Frontend/Backend-Healthchecks grün.
+- **2026-04-05:** Production redeploy — Registry-Images wie Staging Build 6 (`2.0.1`); `preferredLanguage`-Migration per Backend-Start; Healthchecks grün.
 - **2026-04-04:** Memory Bank maintenance is **routine assistant duty**: after server checks (e.g. staging/prod image drift), Q&A that establishes material facts, or doc/session outcomes — update `activeContext` / `progress` / `#21` as needed without the owner asking each time.
 - **2026-03-20:** Documentation stewardship delegated to the AI assistant — Memory Bank, `DOCUMENTATION/`, and Cursor skills updated proactively without expecting owner line-by-line review (`systemPatterns.md` #21).
 - **2026-03-07:** App Store availability limited to AT/DE/CH — manageable support timezone for solo developer. Can expand later via App Store Connect.
