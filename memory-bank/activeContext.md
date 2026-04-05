@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed (2026-04-04, build 5); running backend/frontend images built **2026-04-04** — https://mc-beta.manualmode.at
+**Staging:** Deployed (2026-04-05, build 6); backend image includes Prisma migration `20260405120000_user_preferred_language_not_null` — https://mc-beta.manualmode.at
 **Production:** Deployed **2026-04-05** — `VERSION=2.0.1`, images **aligned with staging** (registry pull: backend `46d5f3c1a921…`, frontend `d5382c80c7d2…`, TTS `17b76fdf36c5…`). Health checks OK. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
@@ -43,7 +43,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 ### Database (2026-04-05)
 - **Drift:** `User.preferredLanguage` — Staging NOT NULL vs Production nullable (Migration `20251120_add_newsletter_improvements` ohne `NOT NULL`).
 - **Fix:** `prisma/migrations/20260405120000_user_preferred_language_not_null` — `UPDATE … WHERE NULL` dann `MODIFY NOT NULL` (datensicher).
-- **Ops:** Nach `git pull` auf beiden Umgebungen `npx prisma migrate deploy` im Backend-Container; Pre-Deployment-Schema-Check soll danach grün sein.
+- **Ops:** Backend ruft bei Start `prisma migrate deploy` auf (`server.js`) — Staging nach Deploy **2026-04-05** sollte die neue Migration automatisch angewendet haben. Production: nächster Deploy zieht dasselbe Image; gleiches Verhalten.
 
 ### Docs & marketing (2026-04-04)
 - **Committed:** `DOCUMENTATION/USP-POSITIONING.md`, `NEWSLETTER/NEWSLETTER-v2.0.0-LINKEDIN.md`, newsletter body updates, `templates/portable-memory-bank/`, memory-bank edits; removed large `.key` binaries; `.gitignore` adjustments.
