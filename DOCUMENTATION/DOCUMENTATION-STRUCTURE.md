@@ -78,6 +78,7 @@ Located in `/memory-bank/`:
 
 ### Social & marketing (local workspace)
 - **`DOCUMENTATION/SOCIAL-MEDIA/`** — LinkedIn carousel HTML, video scripts, blog-series drafts, strategy notes. **Gitignored** (not in the public repo). Conventions and workflow: **`.cursor/skills/meaningful-conversations/linkedin-social-assets/SKILL.md`**. Committable article/newsletter copy may also live under **`NEWSLETTER/`** (e.g. LinkedIn article Markdown).
+- **132 content structure (1 Kernaussage / 3 Punkte / 2 Schlüsse):** **`.cursor/skills/meaningful-conversations/132-content-structure/SKILL.md`**
   - **SOCIAL-MEDIA/LINKEDIN-VIDEO-SKRIPTE.md** — Video-Leitfäden (Serien, z. B. „Gespräche, die entscheiden“).
   - **SOCIAL-MEDIA/LINKEDIN-LAUNCH-FUEHRUNGSTOPICS-TOP10.md** — Top-10-Themen für Führungskräfte, aligned mit Launch-Kampagne / Micro-Learning-Kontext.
 
