@@ -41,6 +41,7 @@ Located in `/memory-bank/`:
 - **PODMAN-GUIDE.md** - Container engine reference
 - **MARIADB-POD-CONFIGURATION.md** - Database setup
 - **NGINX-REVERSE-PROXY-SETUP.md** - Nginx configuration
+- **HTTPS-WWW-DNS-GUIDE.md** - Schrittfolge: Deploy (automatisch), DNS beim Anbieter, TLS/Certbot für Apex+`www` ohne Browser-Warnung
 - **NGINX-IP-ANONYMIZATION.md** - Privacy-compliant logging
 
 ### Server Migration (Historical - Completed Nov 2024)
