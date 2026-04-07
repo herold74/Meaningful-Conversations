@@ -4,11 +4,21 @@
 # Nginx ssl_certificate paths use: /etc/letsencrypt/live/mc-app.manualmode.at/
 #
 # Usage: sudo bash certbot-expand-manualmode-hosts.sh
+# Non-interactive: no TOS prompt, no stdin wait. If certbot ever asks for email
+# (rare with an existing account), run once with: CERTBOT_EMAIL=you@domain sudo -E ...
 set -euo pipefail
 
 CERT_NAME="${CERT_NAME:-mc-app.manualmode.at}"
 
+CERTBOT_EMAIL_ARGS=()
+if [[ -n "${CERTBOT_EMAIL:-}" ]]; then
+  CERTBOT_EMAIL_ARGS=(--email "$CERTBOT_EMAIL")
+fi
+
 certbot certonly --nginx \
+  --non-interactive \
+  --agree-tos \
+  "${CERTBOT_EMAIL_ARGS[@]}" \
   --cert-name "$CERT_NAME" \
   --expand \
   -d mc-app.manualmode.at \
