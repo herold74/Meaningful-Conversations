@@ -4,7 +4,7 @@
 **Version:** 2.0.1
 **Branch:** `main`
 **Staging:** Deployed **2026-04-07**, build **11**; v2.0.1 images — https://mc-beta.manualmode.at — **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
-**Production:** Deployed **2026-04-05** (nach Staging Build 6) — `VERSION=2.0.1`, gleiche Registry-Tags wie Staging: Backend `97ab50a654d5…`, Frontend `6a8917fdd0ac…`, TTS `17b76fdf36c5…`. Health checks OK. — https://mc-app.manualmode.at
+**Production:** Zuletzt deploy **2026-04-05** (Build 6) — **nach Commit `02be385` bitte Production-Deploy** (CORS: kein HTML-500 bei falscher `FRONTEND_URL`; Allowlist-Log beim Backend-Start). Prüfe auf dem Server **`FRONTEND_URL=https://mc-app.manualmode.at`** in Production-`.env` (nicht Staging-URL). — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
