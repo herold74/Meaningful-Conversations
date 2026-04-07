@@ -1,6 +1,6 @@
-# Staging Environment
+# Staging Environment — include www so Host: www.mc-beta.manualmode.at matches this vhost
 server {
-    server_name mc-beta.manualmode.at;
+    server_name mc-beta.manualmode.at www.mc-beta.manualmode.at;
     
     # Anonymized access logs for GDPR compliance
     access_log /var/log/nginx/staging-access.log anonymized;
@@ -46,6 +46,13 @@ server {
 }
 
 # HTTP → HTTPS (must match server-scripts/update-nginx-ips.sh staging block)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.mc-beta.manualmode.at;
+    return 301 https://mc-beta.manualmode.at$request_uri;
+}
+
 server {
     listen 80;
     listen [::]:80;
