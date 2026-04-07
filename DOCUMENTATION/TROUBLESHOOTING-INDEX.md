@@ -42,6 +42,14 @@ Quick reference guide for common issues and where to find solutions.
 
 ---
 
+### 🌐 HTTPS, `www` und DNS
+
+| Thema | Anleitung |
+|-------|-----------|
+| Apex + `www` ohne Zertifikatsfehler, was ist automatisch vs. DNS vs. Certbot | [HTTPS-WWW-DNS-GUIDE.md](./HTTPS-WWW-DNS-GUIDE.md) |
+
+---
+
 ### 🔒 Security & npm audit
 
 | Issue | Notes |
