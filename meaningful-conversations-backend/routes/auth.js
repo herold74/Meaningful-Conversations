@@ -137,9 +137,9 @@ router.post('/register', registerLimiter, async (req, res) => {
 // POST /api/auth/login
 router.post('/login', loginLimiter, async (req, res) => {
     const { email, password } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
-    
+
     try {
+        const lowerCaseEmail = typeof email === 'string' ? email.toLowerCase() : '';
         let user = await prisma.user.findUnique({ where: { email: lowerCaseEmail } });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });

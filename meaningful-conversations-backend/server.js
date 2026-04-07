@@ -56,22 +56,25 @@ function expandFrontendUrlForCors(url) {
     if (!url || typeof url !== 'string') return [];
     const trimmed = url.trim();
     if (!trimmed) return [];
-    out.add(trimmed);
     try {
         const parsed = new URL(trimmed);
         const h = parsed.hostname;
+        const origin = parsed.origin;
         if (h === 'localhost' || /^\d{1,3}(\.\d{1,3}){3}$/.test(h)) {
+            out.add(origin);
             return [...out];
         }
         const port = parsed.port ? `:${parsed.port}` : '';
-        const base = `${parsed.protocol}//`;
+        const proto = parsed.protocol;
+        out.add(origin);
         if (h.startsWith('www.')) {
-            out.add(`${base}${h.slice(4)}${port}`);
+            out.add(`${proto}//${h.slice(4)}${port}`);
         } else {
-            out.add(`${base}www.${h}${port}`);
+            out.add(`${proto}//www.${h}${port}`);
         }
     } catch {
-        /* keep FRONTEND_URL only */
+        const stripped = trimmed.replace(/\/+$/, '');
+        if (stripped) out.add(stripped);
     }
     return [...out];
 }
@@ -228,7 +231,8 @@ async function startServer() {
             'capacitor://localhost',  // iOS Capacitor apps
             'http://localhost',       // Android Capacitor apps
         ];
-        
+        console.log(`CORS allowlist (${allowedOrigins.length} entries): ${allowedOrigins.join(', ')}`);
+
         const corsOptions = {
             origin: function (origin, callback) {
                 if (!origin) return callback(null, true);
@@ -240,10 +244,24 @@ async function startServer() {
                 if (origin === 'capacitor://localhost' || origin === 'http://localhost') {
                     return callback(null, true);
                 }
-                if (allowedOrigins.indexOf(origin) !== -1) {
-                    return callback(null, true);
+                let requestOrigin = origin;
+                try {
+                    requestOrigin = new URL(origin).origin;
+                } catch {
+                    /* compare as-is below */
                 }
-                return callback(new Error('Not allowed by CORS'));
+                const allowed = allowedOrigins.some((ao) => {
+                    try {
+                        return new URL(ao).origin === requestOrigin;
+                    } catch {
+                        return ao === origin || ao === requestOrigin;
+                    }
+                });
+                if (allowed) return callback(null, true);
+                // Deny without throwing: callback(Error) becomes Express HTML 500 and breaks same-site
+                // SPAs that send an Origin header (e.g. login). Browsers still enforce CORS for
+                // cross-origin callers when ACAO is omitted.
+                return callback(null, false);
             },
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'Authorization', 'X-Test-Mode'],
