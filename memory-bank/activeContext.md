@@ -42,6 +42,10 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - **Symptom:** Login auf **`https://www.mc-beta.manualmode.at`** zeigte **HTTP 500** (Browser-`Origin` www, `FRONTEND_URL` nur Apex).
 - **Fix:** `expandFrontendUrlForCors()` in `meaningful-conversations-backend/server.js` — Staging-Deploy **Build 11** abgeschlossen (`deploy-manualmode.sh -e staging`, exit 0).
 
+### Production = Staging-Parität (2026-04-07)
+- **`./deploy-manualmode.sh -e production`:** gleiche **`:2.0.1` Registry-Images** wie zuletzt Staging (Build **11**); Server-Skripte (`update-nginx-ips.sh`, `certbot-expand-manualmode-hosts.sh`) wie bei Staging-Deploy aktualisiert; Nginx neu generiert/reload.
+- **Prod-CORS-Smoke:** `POST /api/auth/login` mit `Origin` `https://mc-app.manualmode.at` und `https://www.mc-app.manualmode.at` → **401 JSON** (nicht HTML-500).
+
 ### Nginx (2026-04-07)
 - Production: `server_name` erweitert um `www.mc-app.manualmode.at`; `update-nginx-ips.sh` generiert Production (und Staging) mit `listen [::]:443` für IPv6. **`deploy-manualmode.sh` installiert `server-scripts/update-nginx-ips.sh` automatisch** nach `/usr/local/bin/` und spiegelt nach `/opt/manualmode-staging|production/` (für Restart-Skripte). Zertifikat ggf. um `-d www.mc-app.manualmode.at` erweitern.
 - **`update-nginx-ips.sh`** schreibt wieder **Port-80-Blöcke** (HTTP→HTTPS), damit Deploys die Redirects nicht entfernen.
