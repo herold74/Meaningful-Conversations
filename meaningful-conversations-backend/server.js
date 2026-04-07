@@ -47,6 +47,35 @@ function runCommand(command) {
     }
 }
 
+/**
+ * Build CORS allowlist: FRONTEND_URL plus www/apex twin (e.g. mc-beta + www.mc-beta).
+ * Skips localhost / raw IPs so dev URLs are not polluted with www.localhost.
+ */
+function expandFrontendUrlForCors(url) {
+    const out = new Set();
+    if (!url || typeof url !== 'string') return [];
+    const trimmed = url.trim();
+    if (!trimmed) return [];
+    out.add(trimmed);
+    try {
+        const parsed = new URL(trimmed);
+        const h = parsed.hostname;
+        if (h === 'localhost' || /^\d{1,3}(\.\d{1,3}){3}$/.test(h)) {
+            return [...out];
+        }
+        const port = parsed.port ? `:${parsed.port}` : '';
+        const base = `${parsed.protocol}//`;
+        if (h.startsWith('www.')) {
+            out.add(`${base}${h.slice(4)}${port}`);
+        } else {
+            out.add(`${base}www.${h}${port}`);
+        }
+    } catch {
+        /* keep FRONTEND_URL only */
+    }
+    return [...out];
+}
+
 
 // --- DATABASE INITIALIZATION & SEEDING ---
 
@@ -193,7 +222,7 @@ async function startServer() {
 
         // --- Express App Configuration ---
         const allowedOrigins = [
-            process.env.FRONTEND_URL,
+            ...expandFrontendUrlForCors(process.env.FRONTEND_URL),
             'http://localhost:3000',
             'http://localhost:5173',
             'capacitor://localhost',  // iOS Capacitor apps
