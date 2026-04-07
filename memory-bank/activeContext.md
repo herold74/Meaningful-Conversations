@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-04-08**, build **10**; v2.0.1 images — https://mc-beta.manualmode.at — **www + HTTPS:** siehe **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` Skript auf Server; TLS SAN: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Staging:** Deployed **2026-04-07**, build **11**; v2.0.1 images — https://mc-beta.manualmode.at — **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
 **Production:** Deployed **2026-04-05** (nach Staging Build 6) — `VERSION=2.0.1`, gleiche Registry-Tags wie Staging: Backend `97ab50a654d5…`, Frontend `6a8917fdd0ac…`, TTS `17b76fdf36c5…`. Health checks OK. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
@@ -37,6 +37,10 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 
 ### Cursor skill: 132 content structure (2026-04-06)
 - **Skill:** `.cursor/skills/meaningful-conversations/132-content-structure/SKILL.md` — **1** Kernaussage, **3** tragende Punkte, **2** Schlüsse/nächste Schritte; kombinierbar mit What/So what/Now what und LinkedIn-Longform.
+
+### CORS / www staging (2026-04-07)
+- **Symptom:** Login auf **`https://www.mc-beta.manualmode.at`** zeigte **HTTP 500** (Browser-`Origin` www, `FRONTEND_URL` nur Apex).
+- **Fix:** `expandFrontendUrlForCors()` in `meaningful-conversations-backend/server.js` — Staging-Deploy **Build 11** abgeschlossen (`deploy-manualmode.sh -e staging`, exit 0).
 
 ### Nginx (2026-04-07)
 - Production: `server_name` erweitert um `www.mc-app.manualmode.at`; `update-nginx-ips.sh` generiert Production (und Staging) mit `listen [::]:443` für IPv6. **`deploy-manualmode.sh` installiert `server-scripts/update-nginx-ips.sh` automatisch** nach `/usr/local/bin/` und spiegelt nach `/opt/manualmode-staging|production/` (für Restart-Skripte). Zertifikat ggf. um `-d www.mc-app.manualmode.at` erweitern.
