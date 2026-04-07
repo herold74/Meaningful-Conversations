@@ -77,6 +77,7 @@ Quick reference guide for common issues and where to find solutions.
 
 | Issue | Solution | Guide |
 |-------|----------|-------|
+| Login shows **HTTP 500** (often **with** `Origin` header, **without** works in `curl`) | **`FRONTEND_URL`** in server `.env` must match the public site (e.g. production `https://mc-app.manualmode.at`, not staging). After deploy, backend logs show `CORS allowlist (… entries): …`. | `meaningful-conversations-backend/server.js` (`expandFrontendUrlForCors`), `podman-compose-*.yml` defaults |
 | "Unauthorized" errors | Check JWT token validity | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
 | Role-based access not working | Verify user role in database | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
 | Can't access Premium features | Check subscription status | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
