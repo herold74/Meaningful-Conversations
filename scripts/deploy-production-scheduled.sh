@@ -235,7 +235,7 @@ if [[ ! -f "$NGINX_IPS_SCRIPT" ]]; then
 fi
 log "${YELLOW}Installing update-nginx-ips.sh on server...${NC}"
 scp "$NGINX_IPS_SCRIPT" "$REMOTE_HOST:/usr/local/bin/update-nginx-ips.sh"
-ssh "$REMOTE_HOST" "chmod 0755 /usr/local/bin/update-nginx-ips.sh && mkdir -p /opt/manualmode-staging /opt/manualmode-production && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-staging/update-nginx-ips.sh && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh && chmod 0755 /opt/manualmode-staging/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh"
+ssh "$REMOTE_HOST" 'chmod 0755 /usr/local/bin/update-nginx-ips.sh && mkdir -p /opt/manualmode-staging /opt/manualmode-production && for d in /opt/manualmode-staging/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh; do if [ ! /usr/local/bin/update-nginx-ips.sh -ef "$d" ]; then cp -f /usr/local/bin/update-nginx-ips.sh "$d" && chmod 0755 "$d"; fi; done'
 log "${GREEN}✓ update-nginx-ips.sh synced to server${NC}"
 
 # Transfer and execute
