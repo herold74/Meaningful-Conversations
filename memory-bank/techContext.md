@@ -108,6 +108,7 @@
 - **Lockfile:** `package-lock.json` is the source of truth for production dependencies
 - **Local dev:** `npm install` is fine; always commit updated `package-lock.json` afterwards
 - **Lesson Learned (v1.8.4):** `npm install` in Dockerfile resolved `express-rate-limit ^8.2.1` to a newer 8.x with a breaking validation (`ERR_ERL_KEY_GEN_IPV6`), crashing the staging backend. Fixed by switching to `npm ci`.
+- **PM2 / `npm audit`:** A remaining low-severity PM2 advisory with no npm fix is an **accepted risk** (PM2 only runs in-container, not exposed like Express). See **`systemPatterns.md` §8 (subsection “Accepted risk”)**.
 
 ### Post-Deploy Health Checks & Automatic Rollback
 - Deploy script (`deploy-manualmode.sh`) performs connectivity checks after deployment

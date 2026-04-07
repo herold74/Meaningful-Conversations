@@ -41,6 +41,14 @@ Quick reference guide for common issues and where to find solutions.
 
 ---
 
+### 🔒 Security & npm audit
+
+| Issue | Notes |
+|-------|--------|
+| Backend `npm audit` still flags **pm2** (no fix from npm) | **Accepted:** PM2 runs only inside the backend container (`pm2-runtime`), not as a public endpoint. Rationale and review cadence: [systemPatterns.md §8](../memory-bank/systemPatterns.md) (subsection *Accepted risk: npm audit / PM2*). |
+
+---
+
 ### 🔊 Text-to-Speech (TTS)
 
 | Issue | Solution | Guide |
