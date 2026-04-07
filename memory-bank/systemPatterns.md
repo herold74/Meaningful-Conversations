@@ -56,6 +56,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Node.js is single-threaded. PM2 allows utilizing multi-core systems via "Cluster Mode" without changing code. It also provides automatic restarts on crash.
 - **Implementation:** `ecosystem.config.js` defines 2 instances. Docker container runs `pm2-runtime`.
 
+#### Accepted risk: `npm audit` / PM2 (GHSA-x5gf-qvw8-r2rm)
+- **Decision:** Keep PM2 even when `npm audit` in `meaningful-conversations-backend` still reports a **low-severity** PM2 advisory and npm shows **no fix available**.
+- **Reasoning:** PM2 is used **only inside** the backend container (`CMD`: `npx pm2-runtime ecosystem.config.js`). It is **not** a publicly exposed service; clients reach **Express** via Nginx. The reported issue does not warrant removing cluster mode or switching process managers until upstream ships a fix or the advisory’s practical impact for this deployment model changes.
+- **Review:** Re-run `npm audit` in the backend directory after dependency updates; revisit if the advisory severity increases, a patched PM2 release exists, or we intentionally simplify to a single Node process.
+
 ## Key Technical Decisions (Recent)
 
 ### 5. Hybrid TTS Architecture
