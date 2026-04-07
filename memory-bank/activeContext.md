@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed (2026-04-05, build 6); backend image includes Prisma migration `20260405120000_user_preferred_language_not_null` — https://mc-beta.manualmode.at
+**Staging:** Deployed **2026-04-07**, build **8** (nginx `update-nginx-ips` auto-sync + IPv6/`www` script fixes); v2.0.1 images — https://mc-beta.manualmode.at
 **Production:** Deployed **2026-04-05** (nach Staging Build 6) — `VERSION=2.0.1`, gleiche Registry-Tags wie Staging: Backend `97ab50a654d5…`, Frontend `6a8917fdd0ac…`, TTS `17b76fdf36c5…`. Health checks OK. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
