@@ -138,7 +138,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** **2026-04-05** — beide auf Build-6-Stand (`2.0.1`); bei Cutover kurz Sessions möglich (Deploy-Playbook).
+- **Staging ↔ Production images:** Staging **2026-04-07** Build **11** (CORS www-Zwilling für `mc-beta`); Production zuletzt **2026-04-05** Build **6** (`2.0.1`). Bei Cutover kurz Sessions möglich (Deploy-Playbook).
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
