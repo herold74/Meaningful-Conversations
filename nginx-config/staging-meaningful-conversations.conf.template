@@ -45,3 +45,11 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 
+# HTTP → HTTPS (must match server-scripts/update-nginx-ips.sh staging block)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name mc-beta.manualmode.at;
+    return 301 https://$host$request_uri;
+}
+
