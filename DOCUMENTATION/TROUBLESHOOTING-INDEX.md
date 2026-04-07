@@ -47,6 +47,7 @@ Quick reference guide for common issues and where to find solutions.
 | Thema | Anleitung |
 |-------|-----------|
 | Apex + `www` ohne Zertifikatsfehler, was ist automatisch vs. DNS vs. Certbot | [HTTPS-WWW-DNS-GUIDE.md](./HTTPS-WWW-DNS-GUIDE.md) |
+| `NET::ERR_CERT_COMMON_NAME_INVALID` für `www.mc-*` | Zertifikat erweitern (Certbot), siehe [HTTPS-WWW-DNS-GUIDE.md § Chrome-Fehler](./HTTPS-WWW-DNS-GUIDE.md#chrome--edge-neterr_cert_common_name_invalid-für-wwwmc-beta-oder-wwwmc-app) |
 
 ---
 
