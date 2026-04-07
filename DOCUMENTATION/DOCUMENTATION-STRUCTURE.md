@@ -29,7 +29,7 @@ Located in `/memory-bank/`:
 
 ### Essential Guides (Start Here!)
 - **LOCAL-DEV-SETUP.md** - **⭐ Complete setup guide from scratch**
-- **TROUBLESHOOTING-INDEX.md** - **⭐ Quick reference for common issues**
+- **TROUBLESHOOTING-INDEX.md** - **⭐ Quick reference for common issues** (includes **Security & npm audit**, e.g. accepted PM2 advisory → `memory-bank/systemPatterns.md` §8)
 - **DEPLOYMENT-CHECKLIST.md** - **⭐ MANDATORY deployment procedures (production/staging)**
 - **LOCAL-DEV-MIGRATIONS.md** - **⭐ Local database migration guide & troubleshooting**
 
