@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-04-08**, build **9**; v2.0.1 images — https://mc-beta.manualmode.at
+**Staging:** Deployed **2026-04-08**, build **9**; v2.0.1 images — https://mc-beta.manualmode.at — **www.mc-beta:** nginx/`update-nginx-ips.sh` ergänzt um `www.mc-beta.manualmode.at` + HTTP-Redirects; **DNS + ggf. certbot SAN** für `www.mc-beta` nötig wenn noch nicht gesetzt.
 **Production:** Deployed **2026-04-05** (nach Staging Build 6) — `VERSION=2.0.1`, gleiche Registry-Tags wie Staging: Backend `97ab50a654d5…`, Frontend `6a8917fdd0ac…`, TTS `17b76fdf36c5…`. Health checks OK. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 

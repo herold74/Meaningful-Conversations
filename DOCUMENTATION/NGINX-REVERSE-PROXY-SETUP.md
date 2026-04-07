@@ -433,6 +433,16 @@ certbot certonly --nginx -d mc-app.manualmode.at -d www.mc-app.manualmode.at
 
 DNS must resolve `www.mc-app.manualmode.at` to the same host as production.
 
+#### 1c. Staging: `www.mc-beta.manualmode.at` unreachable or 502
+
+**Cause:** Same pattern as production: `server_name` listed only `mc-beta.manualmode.at`, so `Host: www.mc-beta…` missed the TLS vhost.
+
+**Fix (repo):** `server-scripts/update-nginx-ips.sh` and [`nginx-config/staging-meaningful-conversations.conf.template`](../nginx-config/staging-meaningful-conversations.conf.template) include `www.mc-beta.manualmode.at` on HTTPS and port 80 redirects (www → apex). Redeploy or run `/usr/local/bin/update-nginx-ips.sh staging`.
+
+**DNS:** Create **A/AAAA** (or CNAME) for `www.mc-beta.manualmode.at` pointing to the same host as `mc-beta.manualmode.at`.
+
+**TLS:** Staging uses the same cert path as in the generated config (often shared with `mc-app.manualmode.at`). If the certificate does not list `www.mc-beta.manualmode.at`, expand it, e.g. `certbot --expand -d mc-beta.manualmode.at -d www.mc-beta.manualmode.at` (exact flags depend on your existing cert names).
+
 #### 2. Connection Refused
 
 **Cause:** Port not accessible or firewall blocking

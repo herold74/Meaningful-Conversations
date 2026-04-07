@@ -41,7 +41,7 @@ generate_staging_config() {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name mc-beta.manualmode.at;
+    server_name mc-beta.manualmode.at www.mc-beta.manualmode.at;
     
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
@@ -77,6 +77,21 @@ server {
         proxy_set_header Host \$host;
         proxy_cache_bypass \$http_upgrade;
     }
+}
+
+# Port 80: HTTP→HTTPS + www→apex (TLS cert must include www.mc-beta if clients use HTTPS on www)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.mc-beta.manualmode.at;
+    return 301 https://mc-beta.manualmode.at\$request_uri;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name mc-beta.manualmode.at;
+    return 301 https://\$host\$request_uri;
 }
 EOF
     print_success "Generated staging-meaningful-conversations.conf"
