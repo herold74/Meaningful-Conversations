@@ -18,6 +18,10 @@ listen [::]:443 ssl http2;  # <- This line is REQUIRED!
 - Serve stale/cached content
 - Fail entirely
 
+### Production `www` hostname
+
+Production HTTPS must include **`www.mc-app.manualmode.at`** in `server_name` (same vhost as `mc-app.manualmode.at`), otherwise `www` requests can miss the vhost and return **502**. The template and `update-nginx-ips.sh` include both names; ensure TLS covers `www` if you serve HTTPS on that hostname (see `DOCUMENTATION/NGINX-REVERSE-PROXY-SETUP.md` §502 / `www`).
+
 ### Config Management
 
 The nginx configs on the server are **NOT automatically deployed**. They are managed manually on the server at:

@@ -40,6 +40,7 @@ generate_staging_config() {
     cat > /etc/nginx/conf.d/staging-meaningful-conversations.conf << EOF
 server {
     listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name mc-beta.manualmode.at;
     
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
@@ -98,7 +99,8 @@ generate_production_config() {
     cat > /etc/nginx/conf.d/production-meaningful-conversations.conf << EOF
 server {
     listen 443 ssl http2;
-    server_name mc-app.manualmode.at;
+    listen [::]:443 ssl http2;
+    server_name mc-app.manualmode.at www.mc-app.manualmode.at;
     
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;

@@ -418,6 +418,21 @@ podman inspect <container-name> | grep IPAddress
 /usr/local/bin/update-nginx-ips.sh staging
 ```
 
+#### 1b. `www` subdomain (e.g. `www.mc-app.manualmode.at`) → 502 while apex works
+
+**Cause:** The production `server_name` only listed `mc-app.manualmode.at`. Requests with `Host: www.mc-app.manualmode.at` did not match that vhost and could hit `default_server`, which may proxy to a dead upstream → **502**.
+
+**Fix (repo):** Production nginx template and `server-scripts/update-nginx-ips.sh` include `www.mc-app.manualmode.at` in `server_name`. **`deploy-manualmode.sh` copies this script to `/usr/local/bin/update-nginx-ips.sh` (and mirrors it under `/opt/manualmode-staging` / `/opt/manualmode-production`) on every deploy** — no manual install. Run a normal deploy or execute `/usr/local/bin/update-nginx-ips.sh production` on the server once nginx config should be regenerated.
+
+**TLS:** Ensure the Let’s Encrypt certificate includes the `www` name if you want HTTPS without browser warnings:
+
+```bash
+certbot certonly --nginx -d mc-app.manualmode.at -d www.mc-app.manualmode.at
+# or: certbot --expand …
+```
+
+DNS must resolve `www.mc-app.manualmode.at` to the same host as production.
+
 #### 2. Connection Refused
 
 **Cause:** Port not accessible or firewall blocking
