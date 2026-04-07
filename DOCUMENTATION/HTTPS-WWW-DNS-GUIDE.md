@@ -134,6 +134,29 @@ Erwartung: HTTP 200 oder 301 auf eure kanonische URL, **ohne** Zertifikatswarnun
 
 ---
 
+## Chrome / Edge: `NET::ERR_CERT_COMMON_NAME_INVALID` für `www.mc-beta…` oder `www.mc-app…`
+
+**Bedeutung:** Die Verbindung geht zum richtigen Server (DNS + Nginx), aber das **TLS-Zertifikat** enthält den Hostnamen in der Adresszeile **nicht** in der Liste der gültigen Namen (SAN). Typisch direkt nach DNS + Nginx-Fix, **bevor** Schritt **C** (Certbot `--expand`) gelaufen ist.
+
+**Lösung:** Auf dem VPS Schritt **[C. TLS-Zertifikat](#c-tls-zertifikat-alle-namen-in-einem-zertifikat-einmalig-auf-dem-server)** ausführen — danach Seite neu laden (ggf. harter Reload / anderer Browser-Cache).
+
+**Prüfen vor Certbot** (optional):
+
+```bash
+sudo certbot certificates
+# Cert-Name notieren (oft mc-app.manualmode.at); bei Abweichung CERT_NAME=... beim Skript setzen
+```
+
+**Ein Befehl** (wenn das Skript schon per Deploy auf dem Server liegt):
+
+```bash
+sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh
+```
+
+Falls das Skript noch fehlt: zuerst einmal **`./deploy-manualmode.sh -e staging`** von deinem Rechner aus, oder den `certbot certonly`-Block aus Abschnitt C manuell auf dem Server ausführen.
+
+---
+
 ## Verwandte Dateien
 
 - [`server-scripts/update-nginx-ips.sh`](../server-scripts/update-nginx-ips.sh) — generierte Konfiguration  
