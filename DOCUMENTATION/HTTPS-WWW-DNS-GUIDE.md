@@ -88,6 +88,8 @@ Damit **https://www.mc-beta…** und **https://www.mc-app…** ohne Browser-Warn
 
 ```bash
 sudo certbot certonly --nginx \
+  --non-interactive \
+  --agree-tos \
   --cert-name mc-app.manualmode.at \
   --expand \
   -d mc-app.manualmode.at \
@@ -96,6 +98,7 @@ sudo certbot certonly --nginx \
   -d www.mc-beta.manualmode.at
 ```
 
+- **`--non-interactive --agree-tos`:** verhindert, dass der Lauf an Eingabeaufforderungen hängen bleibt (entspricht dem Skript unter `/usr/local/bin/certbot-expand-manualmode-hosts.sh`). Falls Certbot eine **E-Mail** verlangt: `CERTBOT_EMAIL=… sudo -E certbot …` oder dieselbe Variable vor dem Skript setzen.
 - Wenn euer bestehendes Zertifikat einen **anderen** `--cert-name` hat: Ausgabe von `certbot certificates` anpassen.
 - `--expand` fügt neue `-d`-Namen zum bestehenden Zertifikat hinzu (kein zweites Zertifikat nötig, solange ein gemeinsamer Eintrag sinnvoll ist).
 
