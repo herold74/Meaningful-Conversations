@@ -1,5 +1,7 @@
+# Include www in server_name so HTTPS requests to www.mc-app.manualmode.at match this vhost
+# (avoids falling through to default_server → 502). TLS cert must cover www (see certbot -d … below).
 server {
-    server_name mc-app.manualmode.at;
+    server_name mc-app.manualmode.at www.mc-app.manualmode.at;
     access_log /var/log/nginx/production-access.log anonymized;
     
     client_max_body_size 30m;
@@ -41,6 +43,13 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+# Plain HTTP: redirect www → canonical host (HTTPS block above handles both names on 443)
+server {
+    listen 80;
+    server_name www.mc-app.manualmode.at;
+    return 301 https://mc-app.manualmode.at$request_uri;
 }
 
 server {

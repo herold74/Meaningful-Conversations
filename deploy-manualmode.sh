@@ -501,6 +501,18 @@ REMOTE_SCRIPT
     sed -i.bak "s/COMPOSE_FILE_PLACEHOLDER/$COMPOSE_FILE/g" /tmp/remote-deploy.sh
     rm /tmp/remote-deploy.sh.bak
 
+    # Always install latest nginx IP script from repo (no manual /usr/local/bin deploy)
+    NGINX_IPS_SCRIPT="$(cd "$(dirname "$0")" && pwd)/server-scripts/update-nginx-ips.sh"
+    if [[ ! -f "$NGINX_IPS_SCRIPT" ]]; then
+        echo -e "${RED}Error: Missing $NGINX_IPS_SCRIPT${NC}"
+        exit 1
+    fi
+    echo -e "${YELLOW}Installing update-nginx-ips.sh on server...${NC}"
+    scp "$NGINX_IPS_SCRIPT" "$REMOTE_HOST:/usr/local/bin/update-nginx-ips.sh"
+    ssh "$REMOTE_HOST" "chmod 0755 /usr/local/bin/update-nginx-ips.sh && mkdir -p /opt/manualmode-staging /opt/manualmode-production && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-staging/update-nginx-ips.sh && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh && chmod 0755 /opt/manualmode-staging/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh"
+    echo -e "${GREEN}✓ update-nginx-ips.sh → /usr/local/bin and /opt/manualmode-{staging,production}/${NC}"
+    echo ""
+
     # Transfer deployment files
     echo -e "${YELLOW}Transferring deployment configuration...${NC}"
     scp "$COMPOSE_FILE" "$REMOTE_HOST:$REMOTE_ENV_DIR/"
