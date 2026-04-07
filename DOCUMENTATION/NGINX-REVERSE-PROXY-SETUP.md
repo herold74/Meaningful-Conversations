@@ -418,6 +418,8 @@ podman inspect <container-name> | grep IPAddress
 /usr/local/bin/update-nginx-ips.sh staging
 ```
 
+**Vollständige Schrittfolge (Deploy, DNS, Zertifikat):** siehe [**HTTPS-WWW-DNS-GUIDE.md**](./HTTPS-WWW-DNS-GUIDE.md).
+
 #### 1b. `www` subdomain (e.g. `www.mc-app.manualmode.at`) → 502 while apex works
 
 **Cause:** The production `server_name` only listed `mc-app.manualmode.at`. Requests with `Host: www.mc-app.manualmode.at` did not match that vhost and could hit `default_server`, which may proxy to a dead upstream → **502**.

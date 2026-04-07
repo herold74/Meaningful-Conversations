@@ -514,6 +514,17 @@ REMOTE_SCRIPT
     echo -e "${GREEN}✓ update-nginx-ips.sh → /usr/local/bin and /opt/manualmode-{staging,production}/${NC}"
     echo ""
 
+    # Let's Encrypt SAN helper (optional one-time run on server after DNS; see DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md)
+    CERTBOT_EXPAND_SCRIPT="$(cd "$(dirname "$0")" && pwd)/server-scripts/certbot-expand-manualmode-hosts.sh"
+    if [[ -f "$CERTBOT_EXPAND_SCRIPT" ]]; then
+        echo -e "${YELLOW}Installing certbot-expand-manualmode-hosts.sh on server...${NC}"
+        scp "$CERTBOT_EXPAND_SCRIPT" "$REMOTE_HOST:/usr/local/bin/certbot-expand-manualmode-hosts.sh"
+        ssh "$REMOTE_HOST" "chmod 0755 /usr/local/bin/certbot-expand-manualmode-hosts.sh"
+        echo -e "${GREEN}✓ certbot-expand-manualmode-hosts.sh → /usr/local/bin${NC}"
+        echo -e "  ${BLUE}One-time TLS:${NC} after DNS for all apex+www hosts, run on server: sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh"
+        echo ""
+    fi
+
     # Transfer deployment files
     echo -e "${YELLOW}Transferring deployment configuration...${NC}"
     scp "$COMPOSE_FILE" "$REMOTE_HOST:$REMOTE_ENV_DIR/"
