@@ -227,6 +227,17 @@ sed -i.bak "s|REGISTRY_URL_PLACEHOLDER|$REGISTRY_URL|g" /tmp/remote-production-d
 sed -i.bak "s/REGISTRY_USER_PLACEHOLDER/$REGISTRY_USER/g" /tmp/remote-production-deploy.sh
 rm -f /tmp/remote-production-deploy.sh.bak
 
+# Sync nginx IP script from repo (same behavior as deploy-manualmode.sh)
+NGINX_IPS_SCRIPT="$PROJECT_ROOT/server-scripts/update-nginx-ips.sh"
+if [[ ! -f "$NGINX_IPS_SCRIPT" ]]; then
+    log "${RED}❌ ERROR: Missing $NGINX_IPS_SCRIPT${NC}"
+    exit 1
+fi
+log "${YELLOW}Installing update-nginx-ips.sh on server...${NC}"
+scp "$NGINX_IPS_SCRIPT" "$REMOTE_HOST:/usr/local/bin/update-nginx-ips.sh"
+ssh "$REMOTE_HOST" "chmod 0755 /usr/local/bin/update-nginx-ips.sh && mkdir -p /opt/manualmode-staging /opt/manualmode-production && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-staging/update-nginx-ips.sh && cp -f /usr/local/bin/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh && chmod 0755 /opt/manualmode-staging/update-nginx-ips.sh /opt/manualmode-production/update-nginx-ips.sh"
+log "${GREEN}✓ update-nginx-ips.sh synced to server${NC}"
+
 # Transfer and execute
 log "${YELLOW}Transferring deployment script...${NC}"
 scp /tmp/remote-production-deploy.sh "$REMOTE_HOST:/tmp/"

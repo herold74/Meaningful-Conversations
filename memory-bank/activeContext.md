@@ -38,6 +38,9 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 ### Cursor skill: 132 content structure (2026-04-06)
 - **Skill:** `.cursor/skills/meaningful-conversations/132-content-structure/SKILL.md` — **1** Kernaussage, **3** tragende Punkte, **2** Schlüsse/nächste Schritte; kombinierbar mit What/So what/Now what und LinkedIn-Longform.
 
+### Nginx (2026-04-07)
+- Production: `server_name` erweitert um `www.mc-app.manualmode.at`; `update-nginx-ips.sh` generiert Production (und Staging) mit `listen [::]:443` für IPv6. **`deploy-manualmode.sh` installiert `server-scripts/update-nginx-ips.sh` automatisch** nach `/usr/local/bin/` und spiegelt nach `/opt/manualmode-staging|production/` (für Restart-Skripte). Zertifikat ggf. um `-d www.mc-app.manualmode.at` erweitern.
+
 ### Process & Cursor rules (2026-03-20)
 - Memory Bank rule refresh: tiered reading, how Memory Bank relates to `DOCUMENTATION/` and skills; post-commit checklist consolidated in `.cursor/rules/memory-bank.mdc`; `memory-bank/README.md` added.
 - **Working agreement:** Owner delegates routine memory-bank / documentation / skills maintenance to the assistant and does not review every doc edit; assistant keeps these current after substantive work (see `systemPatterns.md` Decision #21).

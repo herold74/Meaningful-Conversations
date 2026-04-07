@@ -31,6 +31,7 @@ Quick reference guide for common issues and where to find solutions.
 | Issue | Solution | Guide |
 |-------|----------|-------|
 | 502 Bad Gateway after deploy | Update Nginx IPs | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md#502-bad-gateway) |
+| 502 on `www.mc-app…` but apex works | Add `www` to nginx `server_name`; TLS/DNS for `www` | [NGINX-REVERSE-PROXY-SETUP.md](./NGINX-REVERSE-PROXY-SETUP.md) (§502 / `www`) |
 | Health check fails | Check backend logs, verify migrations | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md#pre-deployment-checklist) |
 | Version mismatch after deploy | Update all 5 version files | [deployment.mdc](../.cursor/rules/deployment.mdc) |
 | Containers not starting | Check `podman ps`, verify compose file | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md) |
