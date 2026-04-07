@@ -118,7 +118,7 @@ https://mc-app.manualmode.at
 
 ## 🔄 Automatic IP Management
 
-Container IPs can change when pods are restarted. The `update-nginx-ips.sh` script automatically updates nginx configurations with current container IPs.
+Container IPs can change when pods are restarted. The `update-nginx-ips.sh` script regenerates the full vhost files (HTTPS proxy to containers **and** port 80 servers for HTTP→HTTPS redirects), matching `nginx-config/*.template`, so deploys cannot strip TLS enforcement.
 
 ### Script Location
 

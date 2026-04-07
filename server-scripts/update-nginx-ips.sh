@@ -137,6 +137,25 @@ server {
         proxy_cache_bypass \$http_upgrade;
     }
 }
+
+# Port 80: match production-meaningful-conversations.conf.template (deploy overwrites this file)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.mc-app.manualmode.at;
+    return 301 https://mc-app.manualmode.at\$request_uri;
+}
+
+server {
+    if (\$host = mc-app.manualmode.at) {
+        return 301 https://\$host\$request_uri;
+    }
+
+    listen 80;
+    listen [::]:80;
+    server_name mc-app.manualmode.at;
+    return 404;
+}
 EOF
     print_success "Generated production-meaningful-conversations.conf"
 }
