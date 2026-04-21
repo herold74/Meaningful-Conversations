@@ -405,7 +405,7 @@ const transcriptEvaluationSchema = {
                 blindspotEvidence: {
                     type: 'ARRAY',
                     items: { type: 'STRING' },
-                    description: 'Specific moments where known personality blindspots (from personality profile) surfaced in the transcript. Each entry should cite the relevant behavior and which blindspot it relates to.'
+                    description: 'Specific moments where known personality WEAKNESSES or underdeveloped dimensions (from personality profile) led to suboptimal, limiting, or counterproductive behavior in the transcript. Do NOT include well-functioning traits or strengths here — those belong in the strengths field. Each entry should cite the relevant behavior and which weakness or blind spot it relates to.'
                 }
             },
             required: ['score', 'evidence', 'blindspotEvidence']
@@ -457,7 +457,7 @@ const transcriptEvaluationSchema = {
         strengths: {
             type: 'ARRAY',
             items: { type: 'STRING' },
-            description: 'What went well in the interaction — specific behaviors, communication patterns, or decisions that were effective.'
+            description: 'What went well in the interaction — specific behaviors, communication patterns, or decisions that were effective. If a personality profile is provided, explicitly link observed strengths to the relevant high-scoring or dominant personality dimensions (e.g., "High Conscientiousness (C=4) was evident in..."). This is the correct place for personality traits that showed up positively.'
         },
         developmentAreas: {
             type: 'ARRAY',
@@ -573,7 +573,7 @@ ${transcript}
 
 1. **Goal Alignment (score 1-5):** How well did the actual interaction achieve the user's stated goal? Cite specific transcript moments as evidence. Identify gaps between intention and reality.
 
-2. **Behavioral Alignment (score 1-5):** Did the user act the way they intended to? Reference their "personal target" and compare with actual behavior in the transcript. If a personality profile is available, identify moments where known blindspots surfaced.
+2. **Behavioral Alignment (score 1-5):** Did the user act the way they intended to? Reference their "personal target" and compare with actual behavior in the transcript. If a personality profile is available, identify only moments where known WEAKNESSES or underdeveloped dimensions led to limiting or counterproductive behavior (blindspotEvidence). Positive personality traits that showed up effectively belong in Strengths, not here.
 
 3. **Assumption Check:** Sort the user's stated assumptions into confirmed, challenged, or note any unexpected insights that emerged.
 
@@ -581,7 +581,7 @@ ${transcript}
 
 5. **Personality Insights:** Only if a profile was provided. Link specific transcript moments to personality dimensions. Be specific — don't just name the dimension, show how it manifested.
 
-6. **Strengths:** What did the user do well? Be specific and cite transcript evidence.
+6. **Strengths:** What did the user do well? Be specific and cite transcript evidence. If a personality profile is provided, explicitly connect observed strengths to the relevant high-scoring or dominant personality dimensions (e.g., "Your high Conscientiousness (C=4) drove your focus on..."). This is the right place for personality traits that manifested positively — not in blindspotEvidence.
 
 7. **Development Areas:** What could improve? Be constructive and specific.
 
@@ -652,7 +652,7 @@ ${transcript}
 
 1. **Zielübereinstimmung (Score 1-5):** Wie gut hat die tatsächliche Interaktion das formulierte Ziel erreicht? Zitiere spezifische Transkriptmomente als Beleg. Identifiziere Lücken zwischen Absicht und Realität.
 
-2. **Verhaltensübereinstimmung (Score 1-5):** Hat die Person so gehandelt, wie beabsichtigt? Vergleiche das "persönliche Ziel" mit dem tatsächlichen Verhalten im Transkript. Wenn ein Persönlichkeitsprofil vorhanden ist, identifiziere Momente, in denen bekannte Blindspots auftraten.
+2. **Verhaltensübereinstimmung (Score 1-5):** Hat die Person so gehandelt, wie beabsichtigt? Vergleiche das "persönliche Ziel" mit dem tatsächlichen Verhalten im Transkript. Wenn ein Persönlichkeitsprofil vorhanden ist, identifiziere ausschließlich Momente, in denen bekannte SCHWÄCHEN oder unterentwickelte Dimensionen zu einschränkendem oder kontraproduktivem Verhalten geführt haben (blindspotEvidence). Positive Persönlichkeitseigenschaften, die sich konstruktiv gezeigt haben, gehören unter Stärken – nicht hierher.
 
 3. **Annahmencheck:** Sortiere die Annahmen in bestätigt, widerlegt, oder notiere unerwartete Erkenntnisse.
 
@@ -660,7 +660,7 @@ ${transcript}
 
 5. **Persönlichkeitserkenntnisse:** Nur wenn ein Profil vorhanden ist. Verknüpfe spezifische Transkriptmomente mit Persönlichkeitsdimensionen.
 
-6. **Stärken:** Was wurde gut gemacht? Sei konkret mit Transkriptbelegen.
+6. **Stärken:** Was wurde gut gemacht? Sei konkret mit Transkriptbelegen. Wenn ein Persönlichkeitsprofil vorhanden ist, verknüpfe beobachtete Stärken explizit mit den relevanten hochscorenden oder dominanten Persönlichkeitsdimensionen (z.B. "Deine hohe Gewissenhaftigkeit (C=4) zeigte sich in deinem Fokus auf..."). Hier ist der richtige Ort für Persönlichkeitseigenschaften, die sich positiv gezeigt haben – nicht unter blindspotEvidence.
 
 7. **Entwicklungsbereiche:** Was kann verbessert werden? Konstruktiv und spezifisch.
 
