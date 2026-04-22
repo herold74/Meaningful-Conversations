@@ -18,7 +18,7 @@ module.exports = (req, res, next) => {
         }
         
         req.userId = decodedToken.userId;
-        recordActivity();
+        if (!req.path.startsWith('/admin/')) recordActivity();
         next();
     } catch (error) {
         return res.status(401).json({ error: 'Authentication failed: Invalid token.' });
