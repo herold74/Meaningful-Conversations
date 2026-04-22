@@ -291,6 +291,22 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
     useModalOpen(showMismatchWarning);
 
+    const [activityStats, setActivityStats] = useState<{ requestsLast5Min: number; requestsLast15Min: number; requestsLastHour: number } | null>(null);
+
+    useEffect(() => {
+        const fetchActivity = async () => {
+            try {
+                const data = await apiFetch('/admin/stats/activity');
+                setActivityStats(data);
+            } catch {
+                // non-critical
+            }
+        };
+        fetchActivity();
+        const interval = setInterval(fetchActivity, 30_000);
+        return () => clearInterval(interval);
+    }, []);
+
 
     const loadData = useCallback(async () => {
         setIsLoading(true);
@@ -1725,6 +1741,21 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         <option value="normal">{t('admin_startup_normal')}</option>
                     </select>
                 </div>
+                {activityStats !== null && (
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                            activityStats.requestsLast5Min > 0
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+                        }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${activityStats.requestsLast5Min > 0 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                            {activityStats.requestsLast5Min > 0
+                                ? `${activityStats.requestsLast5Min} Req. (5 Min) · ${activityStats.requestsLast15Min} (15 Min) — Aktive Nutzung`
+                                : `Keine Aktivität (letzte 15 Min: ${activityStats.requestsLast15Min})`
+                            }
+                        </span>
+                    </div>
+                )}
             </div>
             {renderTabs()}
             {renderContent()}
