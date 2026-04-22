@@ -37,9 +37,10 @@ export const isChristmasSeason = (): boolean => {
 
 /**
  * Check if current season is Spring (Mar 1 - May 31)
+ * Manually disabled — set back to `getCurrentSeason() === 'spring'` to re-enable
  */
 export const isSpringSeason = (): boolean => {
-  return getCurrentSeason() === 'spring';
+  return false;
 };
 
 /**

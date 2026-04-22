@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const { marked } = require('marked');
 const { sendNewsletterEmail } = require('../services/mailService.js');
 const aiProviderService = require('../services/aiProviderService.js');
+const { getActivityStats } = require('../services/activityTracker.js');
 const brand = require('../config/brand');
 
 // Configure marked for email-safe HTML
@@ -775,6 +776,11 @@ router.get('/transcript-ratings', async (req, res) => {
         console.error("Admin: Error fetching transcript ratings:", error);
         res.status(500).json({ error: 'Failed to fetch transcript ratings.' });
     }
+});
+
+// GET /api/admin/stats/activity
+router.get('/stats/activity', (req, res) => {
+    res.json(getActivityStats());
 });
 
 module.exports = router;
