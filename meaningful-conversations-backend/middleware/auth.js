@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { isTokenInvalidated } = require('../services/tokenInvalidation.js');
+const { recordActivity } = require('../services/activityTracker.js');
 
 module.exports = (req, res, next) => {
     try {
@@ -17,7 +18,7 @@ module.exports = (req, res, next) => {
         }
         
         req.userId = decodedToken.userId;
-        
+        recordActivity();
         next();
     } catch (error) {
         return res.status(401).json({ error: 'Authentication failed: Invalid token.' });
