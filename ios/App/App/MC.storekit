@@ -1,0 +1,246 @@
+{
+  "identifier" : "MC_StoreKit_Config",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : false,
+      "internalID" : "mc_registered_lifetime",
+      "localizations" : [
+        {
+          "description" : "Permanent registered access to Meaningful Conversations.",
+          "displayName" : "Registered Lifetime",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Dauerhafter Registered-Zugang zu Meaningful Conversations.",
+          "displayName" : "Registriert Lifetime",
+          "locale" : "de_DE"
+        }
+      ],
+      "productID" : "mc.registered.lifetime",
+      "referenceName" : "Registered Lifetime",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "mc_coach_kenji",
+      "localizations" : [
+        {
+          "description" : "Unlock the Kenji Stoic coach.",
+          "displayName" : "Coach Kenji",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Coach Kenji freischalten.",
+          "displayName" : "Coach Kenji",
+          "locale" : "de_DE"
+        }
+      ],
+      "productID" : "mc.coach.kenji",
+      "referenceName" : "Coach Kenji",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "mc_coach_chloe",
+      "localizations" : [
+        {
+          "description" : "Unlock the Chloe CBT coach.",
+          "displayName" : "Coach Chloe",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Coach Chloe freischalten.",
+          "displayName" : "Coach Chloe",
+          "locale" : "de_DE"
+        }
+      ],
+      "productID" : "mc.coach.chloe",
+      "referenceName" : "Coach Chloe",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "en_US",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "mc_registered_group",
+      "localizations" : [
+        {
+          "displayName" : "Registered Access",
+          "locale" : "en_US"
+        },
+        {
+          "displayName" : "Registrierter Zugang",
+          "locale" : "de_DE"
+        }
+      ],
+      "name" : "Registered Access",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "mc_registered_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly registered access to Meaningful Conversations.",
+              "displayName" : "Registered Monthly Pass",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Monatlicher Registered-Zugang zu Meaningful Conversations.",
+              "displayName" : "Registriert Monats-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.registered.monthly",
+          "referenceName" : "Registered Monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "subscriptionGroupID" : "mc_registered_group",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "14.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "mc_registered_yearly_v2",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Annual registered access to Meaningful Conversations.",
+              "displayName" : "Registered Annual Pass",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Jährlicher Registered-Zugang zu Meaningful Conversations.",
+              "displayName" : "Registriert Jahres-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.registered.yearly.v2",
+          "referenceName" : "Registered Annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "subscriptionGroupID" : "mc_registered_group",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    },
+    {
+      "id" : "mc_premium_group",
+      "localizations" : [
+        {
+          "displayName" : "Premium Access",
+          "locale" : "en_US"
+        },
+        {
+          "displayName" : "Premium-Zugang",
+          "locale" : "de_DE"
+        }
+      ],
+      "name" : "Premium Access",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "mc_premium_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly premium access to Meaningful Conversations.",
+              "displayName" : "Premium Monthly Pass",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Monatlicher Premium-Zugang zu Meaningful Conversations.",
+              "displayName" : "Premium Monats-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.premium.monthly",
+          "referenceName" : "Premium Monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "subscriptionGroupID" : "mc_premium_group",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "74.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "mc_premium_yearly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Annual premium access to Meaningful Conversations.",
+              "displayName" : "Premium Annual Pass",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Jährlicher Premium-Zugang zu Meaningful Conversations.",
+              "displayName" : "Premium Jahres-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.premium.yearly",
+          "referenceName" : "Premium Annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "subscriptionGroupID" : "mc_premium_group",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
