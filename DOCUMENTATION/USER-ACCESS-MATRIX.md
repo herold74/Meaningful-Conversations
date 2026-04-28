@@ -2,12 +2,12 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: February 27, 2026 — v1.9.9
+**Last Updated**: April 28, 2026 — v2.0.1
 
 ## User Types
 
 1.  **Guest (Gast)**: Unregistered users who can try out the application with limited features. Data is stored locally in the browser.
-2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Lifetime, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered Lifetime users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026.
+2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Annual/Monthly, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026. Legacy Lifetime buyers (`accessExpiresAt = null`) are supported permanently.
 3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
 4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor), Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
 5.  **Admin**: Administrators with access to the backend management panel.
@@ -90,12 +90,14 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 
 | Product | Custom ID (PayPal) | Internal botId | Duration | Tier Granted |
 | :--- | :--- | :--- | :--- | :--- |
-| Registered Lifetime | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered |
+| Registered Jahres-Pass | `REGISTERED_1Y` | `REGISTERED_1Y` | 365 Tage | Registered |
+| Registered Monats-Pass | `REGISTERED_1M` | `REGISTERED_1M` | 30 Tage | Registered |
 | Premium 1-Monats-Pass | `ACCESS_PASS_1M` | `ACCESS_PASS_1M` | 30 Tage | Premium |
 | Premium 3-Monats-Pass | `ACCESS_PASS_3M` | `ACCESS_PASS_3M` | 90 Tage | Premium |
 | Premium 1-Jahres-Pass | `ACCESS_PASS_1Y` | `ACCESS_PASS_1Y` | 365 Tage | Premium |
 | Kenji Coach Unlock | `KENJI_UNLOCK` | `kenji-stoic` | Permanent | Kenji (einzeln) |
 | Chloe Coach Unlock | `CHLOE_UNLOCK` | `chloe-cbt` | Permanent | Chloe (einzeln) |
+| ~~Registered Lifetime~~ *(Legacy)* | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered (Legacy-Käufer) |
 
 ### Upgrade-Produkte (rabattiert, gleiche Wirkung wie Standardprodukte)
 
@@ -148,7 +150,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 | :--- | ---: | :--- | :--- |
 | | | **Registered** | |
 | **Registered Monatsabo** | 3,90 €/Monat | Alle Nutzer | Cloud-Sync, TTS, OCEAN, Signature, DPC, PDF |
-| **Registered Einmalzahlung** | 14,90 € (einmalig) | Abo-Skeptiker | Wie Monatsabo, permanent (≈ 4 Monate) |
+| **Registered Jahresabo** | 14,90 €/Jahr | Sparfüchse | Wie Monatsabo, 1 Jahr (≈ 4 Monate Preisvorteil) |
 | | | **Premium** | |
 | **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation (PDF & Bot-Empfehlungen) |
 | **Premium 3-Monats-Pass** | 24,90 € | Regelmäßige Nutzer | Wie 1M; ~17% Ersparnis; genug Zeit für DPFL-Lerneffekt |
@@ -164,7 +166,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 - Deckt reale Infrastrukturkosten: Server-TTS (~0,01–0,03 $/Anfrage), Cloud-Storage, E2EE-Sync, API-Tokens für OCEAN-Auswertung
 - Filtert Gelegenheitsnutzer, die Serverressourcen verbrauchen aber nicht konvertieren
 - Genug Abstand zu Premium (2,5x), damit das Upgrade attraktiv bleibt
-- **Einmalzahlung 14,90 €** als Alternative für Abo-Skeptiker (≈ 4 Monate, amortisiert sich schnell)
+- **Jahresabo 14,90 €/Jahr** als Alternative zum Monatsabo (≈ 4 Monate, amortisiert sich schnell)
 
 **Warum 9,90 €/Monat für Premium?**
 - Positionierung zwischen kostenlosen Chat-Tools und professionellem Coaching (80–150 €/Stunde)
@@ -195,7 +197,7 @@ Guest (kostenlos, sofort nutzbar)
   → Nach 9 Tagen: Paywall mit vollem Produktkatalog
   → Daten-Download (Life Context, Profil) auch nach Ablauf möglich
   ↓
-Registered (3,90 €/Monat oder 14,90 € einmalig)
+Registered (3,90 €/Monat oder 14,90 €/Jahr)
   → Erlebt: Cloud-Sync, Server-TTS, OCEAN-Profil, Signature, DPC, PDF
   → Trigger: Riemann/SD gesperrt, DPFL gesperrt, Kenji/Chloe gesperrt
   ↓
@@ -217,9 +219,9 @@ Premium *ersetzt* Registered (alle Registered-Features sind in Premium enthalten
 
 - Kein zusätzlicher Rabatt nötig — der User spart die 3,90 €/Monat automatisch
 
-#### 2. Registered Lifetime (14,90 €) → Premium
+#### 2. Registered Jahresabo / Registered Lifetime (Legacy) → Premium
 
-Loyalty-Rabatt als Anerkennung der Einmalzahlung. Die Registered-Features bleiben permanent aktiv — auch wenn der Premium-Pass abläuft, fällt der User auf Registered Lifetime zurück (nicht auf Guest).
+Loyalty-Rabatt als Anerkennung der bisherigen Investition. Die Registered-Features bleiben aktiv — auch wenn der Premium-Pass abläuft, fällt der User auf Registered zurück (nicht auf Guest).
 
 | Premium-Produkt | Normalpreis | Upgrade-Preis | Ersparnis |
 | :--- | ---: | ---: | :--- |
@@ -265,7 +267,7 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 | :--- | :---: | :--- |
 | **9-Tage Premium-Trial** | ✅ | `accessExpiresAt` bei Registrierung gesetzt |
 | **Paywall (abgelaufene User)** | ✅ | Responsive Layout, PayPal (Web) + iOS IAP + Code |
-| **PayPal Direct Checkout** | ✅ | €14.90 Registered Lifetime (Web only, hidden on iOS) |
+| **PayPal Direct Checkout** | ✅ | €14.90 Registered Annual / €3.90 Registered Monthly (Web only, hidden on iOS) |
 | **iOS In-App Purchase** | ✅ | RevenueCat + StoreKit 2, Auto-Renewable Subscriptions (seit v1.9.7) |
 | **Bot-Code-Sperre bei Ablauf** | ✅ | Server blockiert Bot-Codes, zeigt Warnung |
 | **Paywall-Bypass-Schutz** | ✅ | Burger-Menü bei Paywall-View versteckt |
@@ -298,17 +300,20 @@ Kein Rabatt. Premium enthält bereits alle Registered-Features. Der User spart s
 
 | Level | App Store Product ID | Typ | iOS-Preis | Web-Preis | Netto (15%) | Tier |
 | :--- | :--- | :--- | ---: | ---: | ---: | :--- |
-| 1 | `mc.registered.monthly` | Auto-Renewable | 3,99 €/Mo | 3,90 €/Mo | ~3,39 € | Registered |
+| 1 | `mc.premium.yearly` | Auto-Renewable | 79,99 €/Jr | 79,90 €/Jr | ~67,99 € | Premium |
 | 2 | `mc.premium.monthly` | Auto-Renewable | 9,99 €/Mo | 9,90 €/Mo | ~8,49 € | Premium |
-| 3 | `mc.premium.yearly` | Auto-Renewable | 79,99 €/Jr | 79,90 €/Jr | ~67,99 € | Premium |
+| 3 | `mc.registered.yearly.v2` | Auto-Renewable | 14,99 €/Jr | 14,90 €/Jr | ~12,74 € | Registered |
+| 4 | `mc.registered.monthly` | Auto-Renewable | 3,99 €/Mo | 3,90 €/Mo | ~3,39 € | Registered |
+
+> Hinweis: `mc.registered.yearly` (ohne `.v2`) war als Non-Consumable in App Store Connect reserviert und kann laut Apple-Policy nicht gelöscht werden.
 
 #### Non-Consumable Purchases
 
 | App Store Product ID | Typ | iOS-Preis | Web-Preis | Netto (15%) | Effekt |
 | :--- | :--- | ---: | ---: | ---: | :--- |
-| `mc.registered.lifetime` | Non-Consumable | 14,99 € | 14,90 € | ~12,74 € | Permanent Registered |
 | `mc.coach.kenji` | Non-Consumable | 3,99 € | 3,90 € | ~3,39 € | Kenji Unlock (permanent) |
 | `mc.coach.chloe` | Non-Consumable | 3,99 € | 3,90 € | ~3,39 € | Chloe Unlock (permanent) |
+| ~~`mc.registered.lifetime`~~ *(Legacy, Removed)* | Non-Consumable | 14,99 € | 14,90 € | ~12,74 € | Permanent Registered (Altbestand) |
 
 #### Nicht als IAP verfügbar
 
@@ -324,12 +329,13 @@ Apple Small Business Program (Umsatz < 1M USD/Jahr): **15% Provision**. iOS-Prei
 
 | App Store Product ID | Internal botId / Effekt |
 | :--- | :--- |
-| `mc.registered.monthly` | Registered-Tier setzen, `accessExpiresAt` +30d |
+| `mc.registered.yearly.v2` | Entspricht `REGISTERED_1Y`, `accessExpiresAt` +365d |
+| `mc.registered.monthly` | Entspricht `REGISTERED_1M`, `accessExpiresAt` +30d |
 | `mc.premium.monthly` | Entspricht `ACCESS_PASS_1M`, `isPremium`, `accessExpiresAt` +30d |
 | `mc.premium.yearly` | Entspricht `ACCESS_PASS_1Y`, `isPremium`, `accessExpiresAt` +365d |
-| `mc.registered.lifetime` | Entspricht `REGISTERED_LIFETIME`, permanent |
 | `mc.coach.kenji` | `kenji-stoic` zu `unlockedCoaches` hinzugefügt |
 | `mc.coach.chloe` | `chloe-cbt` zu `unlockedCoaches` hinzugefügt |
+| ~~`mc.registered.lifetime`~~ *(Legacy)* | Entspricht `REGISTERED_LIFETIME`, `accessExpiresAt = null` (permanent) |
 
 ### Implementierungsdetails
 
