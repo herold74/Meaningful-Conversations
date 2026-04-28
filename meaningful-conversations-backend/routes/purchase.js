@@ -165,12 +165,18 @@ function checkProductEligibility(user, productId) {
   const tier = getUserTier(user);
 
   if (productId === 'REGISTERED_1Y' || productId === 'REGISTERED_LIFETIME') {
+    if (isLifetimeRegistered(user)) {
+      return { eligible: false, reason: 'You already have permanent Registered access.' };
+    }
     if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
   }
 
   if (productId === 'REGISTERED_1M') {
+    if (isLifetimeRegistered(user)) {
+      return { eligible: false, reason: 'You already have permanent Registered access.' };
+    }
     if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
