@@ -36,11 +36,13 @@ export const isChristmasSeason = (): boolean => {
 };
 
 /**
- * Check if current season is Spring (Mar 1 - May 31)
- * Manually disabled — set back to `getCurrentSeason() === 'spring'` to re-enable
+ * Cherry blossom season: April 1–21
  */
 export const isSpringSeason = (): boolean => {
-  return false;
+  const now = new Date();
+  const month = now.getMonth(); // 3 = April
+  const day = now.getDate();
+  return month === 3 && day >= 1 && day <= 21;
 };
 
 /**
