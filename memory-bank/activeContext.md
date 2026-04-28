@@ -3,8 +3,8 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-04-07**, build **11**; v2.0.1 images — https://mc-beta.manualmode.at — **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
-**Production:** **Server-Stand** (zuletzt hier notiert): Deploy **2026-04-05**, Build **6**, v2.0.1 — das ist **nicht** automatisch der aktuelle `main`-Stand. **`main` enthält u. a. Commit `02be385`** (CORS: kein HTML-500 bei abgelehntem Origin; Allowlist-Log beim Backend-Start) — **bis ein neuer Production-Deploy läuft und verifiziert ist, gilt der Server noch als „pre-02be385“**. Nach Deploy: **`FRONTEND_URL=https://mc-app.manualmode.at`** in Production-`.env` prüfen (nicht Staging-URL). — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-04-22**, build **12**; v2.0.1 images — https://mc-beta.manualmode.at — **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Production:** Deployed **2026-04-22**, Build **12**, v2.0.1 — in Parität mit Staging. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -32,6 +32,21 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Email: `premium@manualmode.at`
 - Pre-filled Life Context (Sarah) and OCEAN personality profile
 - Used for Apple review
+
+## Recent Changes (v2.0.1 — Build 13, 2026-04-28)
+
+### Registered→Premium upgrade: accessExpiresAt fallback fix (2026-04-28)
+- **Bug:** Beim Premium-Kauf wurde `accessExpiresAt` immer auf das Premium-Ablaufdatum gesetzt — auch wenn die Registered-Subscription länger läuft. Nach Premium-Ablauf verlor der User den Registered-Zugang statt darauf zurückzufallen.
+- **Fix:** `purchase.js` (`applyProductEffect`), `appleIAP.js` (`buildUserUpdate`), `NativePaywall.tsx` (2× optimistischer Patch): `accessExpiresAt` wird nur dann vorgerückt, wenn das neue Premium-Datum *später* als das bestehende `accessExpiresAt` liegt.
+
+## Recent Changes (v2.0.1 — Build 12, 2026-04-22)
+
+### GDPR-safe activity tracker + spring animation off (2026-04-22)
+- **`services/activityTracker.js`** (neu): anonyme In-Memory-Timestamps pro Auth-Request; kein User-Bezug, kein DB-Schreiben, flüchtig
+- **`middleware/auth.js`**: `recordActivity()` nach jeder validen JWT-Anfrage
+- **`routes/admin.js`**: `GET /api/admin/stats/activity` (adminAuth) — `{ requestsLast5Min, requestsLast15Min, requestsLastHour }`
+- **`components/AdminView.tsx`**: Live-Activity-Badge im Header (Polling 30s, grün/amber) zum sicheren Deploy-Window-Abschätzen
+- **`utils/dateUtils.ts`**: `isSpringSeason()` gibt `false` zurück — Kirschblüten-Animation deaktiviert bis zur manuellen Reaktivierung
 
 ## Recent Changes (v2.0.0)
 
@@ -120,6 +135,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)
 
 ## Decision Log
+- **2026-04-22:** Staging + Production auf Build 12 (v2.0.1) — GDPR-Activity-Tracker + Spring-off; kein App-Store-Submit nötig (Web/PWA-only-Änderungen).
 - **2026-04-05:** Production redeploy — Registry-Images wie Staging Build 6 (`2.0.1`); `preferredLanguage`-Migration per Backend-Start; Healthchecks grün.
 - **2026-04-04:** Memory Bank maintenance is **routine assistant duty**: after server checks (e.g. staging/prod image drift), Q&A that establishes material facts, or doc/session outcomes — update `activeContext` / `progress` / `#21` as needed without the owner asking each time.
 - **2026-03-20:** Documentation stewardship delegated to the AI assistant — Memory Bank, `DOCUMENTATION/`, and Cursor skills updated proactively without expecting owner line-by-line review (`systemPatterns.md` #21).
