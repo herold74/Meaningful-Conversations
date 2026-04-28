@@ -229,7 +229,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200">{t('upgrade_title')}</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
           {t('upgrade_current_tier')}: <span className="font-semibold text-accent-primary">{tierLabel}</span>
-          {data?.isLifetime && <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Lifetime)</span>}
+          {data?.isLifetime && <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Annual)</span>}
           {data?.isPremium && data.premiumExpiresAt && (
             <span className="ml-1 text-xs text-gray-500">
               ({t('upgrade_expires')} {new Date(data.premiumExpiresAt).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')})

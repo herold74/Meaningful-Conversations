@@ -14,6 +14,12 @@ const PRODUCTS = {
     category: 'access', duration: '1M', days: 30,
     description: 'Meaningful Conversations — Registered 1 Month',
   },
+  REGISTERED_1Y: {
+    id: 'REGISTERED_1Y', name: 'Registered Annual', price: 14.90,
+    category: 'access', duration: '1Y', days: 365,
+    description: 'Meaningful Conversations — Registered Annual',
+  },
+  // Legacy: kept for existing Lifetime buyers (web PayPal purchases before 2026-04)
   REGISTERED_LIFETIME: {
     id: 'REGISTERED_LIFETIME', name: 'Registered Lifetime', price: 14.90,
     category: 'access', duration: null,
@@ -53,6 +59,7 @@ const MIN_PRICE = 0.10;
 // Product ID Mapping (PayPal Button IDs → internal botIds, used by legacy webhook)
 const PRODUCT_MAPPING = {
   'REGISTERED_1M':        'REGISTERED_1M',
+  'REGISTERED_1Y':        'REGISTERED_1Y',
   'REGISTERED_LIFETIME':  'REGISTERED_LIFETIME',
   'ACCESS_PASS_1M':       'ACCESS_PASS_1M',
   'ACCESS_PASS_3M':       'ACCESS_PASS_3M',
@@ -157,19 +164,13 @@ function checkProductEligibility(user, productId) {
   if (!product) return { eligible: false, reason: 'Unknown product.' };
   const tier = getUserTier(user);
 
-  if (productId === 'REGISTERED_LIFETIME') {
-    if (isLifetimeRegistered(user)) {
-      return { eligible: false, reason: 'You already have Registered Lifetime access.' };
-    }
+  if (productId === 'REGISTERED_1Y' || productId === 'REGISTERED_LIFETIME') {
     if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
   }
 
   if (productId === 'REGISTERED_1M') {
-    if (isLifetimeRegistered(user)) {
-      return { eligible: false, reason: 'You already have Registered Lifetime access.' };
-    }
     if (tier === 'client' || tier === 'admin' || tier === 'premium') {
       return { eligible: false, reason: 'Your current access level already includes this.' };
     }
@@ -210,7 +211,14 @@ async function applyProductEffect(userId, productId) {
   let updateData = { updatedAt: new Date() };
   let botIdForCode = productId;
 
-  if (productId === 'REGISTERED_LIFETIME') {
+  if (productId === 'REGISTERED_1Y') {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const now = new Date();
+    const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
+      ? new Date(user.accessExpiresAt) : new Date();
+    baseDate.setDate(baseDate.getDate() + 365);
+    updateData.accessExpiresAt = baseDate;
+  } else if (productId === 'REGISTERED_LIFETIME') {
     updateData.accessExpiresAt = null;
   } else if (productId === 'REGISTERED_1M') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -276,13 +284,10 @@ router.get('/products', auth, async (req, res) => {
     const products = [];
 
     for (const product of Object.values(PRODUCTS)) {
-      if (product.id === 'REGISTERED_LIFETIME') {
-        if (lifetime) continue;
-        if (tier === 'client' || tier === 'admin' || tier === 'premium') continue;
-      }
+      // Never show legacy Lifetime product to new users
+      if (product.id === 'REGISTERED_LIFETIME') continue;
 
-      if (product.id === 'REGISTERED_1M') {
-        if (lifetime) continue;
+      if (product.id === 'REGISTERED_1Y' || product.id === 'REGISTERED_1M') {
         if (tier === 'client' || tier === 'admin' || tier === 'premium') continue;
       }
 
@@ -334,7 +339,7 @@ router.get('/products', auth, async (req, res) => {
 router.post('/create-order', auth, purchaseLimiter, async (req, res) => {
   try {
     const { productId } = req.body;
-    const product = PRODUCTS[productId || 'REGISTERED_LIFETIME'];
+    const product = PRODUCTS[productId || 'REGISTERED_1Y'];
     if (!product) return res.status(400).json({ error: 'Unknown product.' });
 
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
@@ -403,7 +408,7 @@ router.post('/capture-order', auth, purchaseLimiter, async (req, res) => {
     const orderUnit = order.purchase_units?.[0];
     const orderAmount = parseFloat(orderUnit?.amount?.value || '0');
     const orderCurrency = orderUnit?.amount?.currency_code || 'EUR';
-    const productId = orderUnit?.custom_id || 'REGISTERED_LIFETIME';
+    const productId = orderUnit?.custom_id || 'REGISTERED_1Y';
 
     if (orderCurrency !== 'EUR') {
       console.error(`❌ Currency mismatch: ${orderCurrency} (expected EUR)`);

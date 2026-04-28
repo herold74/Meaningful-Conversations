@@ -9,12 +9,14 @@ const APPLE_SANDBOX_URL = 'https://api.storekit-sandbox.itunes.apple.com';
 
 // App Store Product ID → internal product mapping
 const APPLE_PRODUCT_MAP = {
-  'mc.registered.monthly':  { botId: 'REGISTERED_1M',       type: 'subscription', tier: 'registered', days: 30 },
-  'mc.premium.monthly':     { botId: 'ACCESS_PASS_1M',      type: 'subscription', tier: 'premium',    days: 30 },
-  'mc.premium.yearly':      { botId: 'ACCESS_PASS_1Y',      type: 'subscription', tier: 'premium',    days: 365 },
-  'mc.registered.lifetime': { botId: 'REGISTERED_LIFETIME',  type: 'non_consumable', tier: 'registered' },
-  'mc.coach.kenji':         { botId: 'kenji-stoic',          type: 'non_consumable', tier: 'bot' },
-  'mc.coach.chloe':         { botId: 'chloe-cbt',           type: 'non_consumable', tier: 'bot' },
+  'mc.registered.monthly':   { botId: 'REGISTERED_1M',       type: 'subscription',   tier: 'registered', days: 30 },
+  'mc.registered.yearly.v2': { botId: 'REGISTERED_1Y',       type: 'subscription',   tier: 'registered', days: 365 },
+  'mc.premium.monthly':      { botId: 'ACCESS_PASS_1M',      type: 'subscription',   tier: 'premium',    days: 30 },
+  'mc.premium.yearly':       { botId: 'ACCESS_PASS_1Y',      type: 'subscription',   tier: 'premium',    days: 365 },
+  // Legacy: bestehende Non-Consumable-Käufer (mc.registered.yearly war als IAP reserviert, daher .v2)
+  'mc.registered.lifetime':  { botId: 'REGISTERED_LIFETIME', type: 'non_consumable', tier: 'registered' },
+  'mc.coach.kenji':          { botId: 'kenji-stoic',         type: 'non_consumable', tier: 'bot' },
+  'mc.coach.chloe':          { botId: 'chloe-cbt',          type: 'non_consumable', tier: 'bot' },
 };
 
 function getAppleConfig() {

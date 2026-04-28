@@ -14,7 +14,9 @@ export const IAP_PRODUCTS: IAPProduct[] = [
   { id: 'mc.registered.monthly',  appStoreId: 'mc.registered.monthly',  name: 'Registered Monthly',  type: 'subscription',    tier: 'registered' },
   { id: 'mc.premium.monthly',     appStoreId: 'mc.premium.monthly',     name: 'Premium Monthly',     type: 'subscription',    tier: 'premium' },
   { id: 'mc.premium.yearly',      appStoreId: 'mc.premium.yearly',      name: 'Premium Yearly',      type: 'subscription',    tier: 'premium' },
-  { id: 'mc.registered.lifetime', appStoreId: 'mc.registered.lifetime', name: 'Registered Lifetime', type: 'non_consumable',  tier: 'registered' },
+  { id: 'mc.registered.yearly.v2', appStoreId: 'mc.registered.yearly.v2', name: 'Registered Annual',   type: 'subscription',    tier: 'registered' },
+  // Legacy: bestehende Lifetime-Käufer (mc.registered.yearly war als IAP reserviert, daher .v2)
+  { id: 'mc.registered.lifetime',  appStoreId: 'mc.registered.lifetime',  name: 'Registered Lifetime', type: 'non_consumable',  tier: 'registered' },
   { id: 'mc.coach.kenji',         appStoreId: 'mc.coach.kenji',         name: 'Kenji Coach',         type: 'non_consumable',  tier: 'bot' },
   { id: 'mc.coach.chloe',         appStoreId: 'mc.coach.chloe',         name: 'Chloe Coach',         type: 'non_consumable',  tier: 'bot' },
 ];
