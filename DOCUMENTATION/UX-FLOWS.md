@@ -228,7 +228,7 @@ flowchart TD
     OPTIONS -->|iOS| IOS_OPTIONS[Native In-App Purchase<br/>RevenueCat / StoreKit 2]
     OPTIONS -->|Web| WEB_OPTIONS[PayPal Checkout<br/>oder Code eingeben]
 
-    IOS_OPTIONS --> IAP_PRODUCTS[NativePaywall<br/>RevenueCat / StoreKit 2<br/>Nutzungsbedingungen + Datenschutz<br/>(App Store 3.1.2)<br/>Preise z. B.:<br/>Registered Monthly 3,99 EUR<br/>Premium Monthly 9,99 EUR<br/>Premium Yearly 79,99 EUR<br/>Registered Lifetime 14,99 EUR]
+    IOS_OPTIONS --> IAP_PRODUCTS[NativePaywall<br/>RevenueCat / StoreKit 2<br/>Nutzungsbedingungen + Datenschutz<br/>(App Store 3.1.2)<br/>Preise z. B.:<br/>Registered Monthly 3,99 EUR/Mo<br/>Registered Annual 14,99 EUR/Jr<br/>Premium Monthly 9,99 EUR/Mo<br/>Premium Yearly 79,99 EUR/Jr]
     WEB_OPTIONS --> PAYPAL[PayPal-Link<br/>oder Upgrade-Code]
 
     IAP_PRODUCTS -->|Kauf erfolgreich| PURCHASE_SUCCESS[onPurchaseSuccess<br/>User aktualisieren]
@@ -250,7 +250,7 @@ flowchart TD
 | Produkt | iOS (IAP) | Web (PayPal) | Tier |
 |:---|---:|---:|:---|
 | Registered Monthly | 3,99 EUR/Mo | 3,90 EUR/Mo | Registered |
-| Registered Lifetime | 14,99 EUR | 14,90 EUR | Registered (permanent) |
+| Registered Annual | 14,99 EUR/Jr | 14,90 EUR/Jr | Registered |
 | Premium Monthly | 9,99 EUR/Mo | 9,90 EUR/Mo | Premium |
 | Premium Yearly | 79,99 EUR/Jr | 79,90 EUR/Jr | Premium |
 | Kenji Unlock | 3,99 EUR | 3,90 EUR | Einzelbot |
