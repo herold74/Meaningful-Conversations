@@ -25,7 +25,7 @@
       "type" : "NonConsumable"
     },
     {
-      "displayPrice" : "2.99",
+      "displayPrice" : "3.90",
       "familyShareable" : false,
       "internalID" : "mc_coach_kenji",
       "localizations" : [
@@ -45,7 +45,7 @@
       "type" : "NonConsumable"
     },
     {
-      "displayPrice" : "2.99",
+      "displayPrice" : "3.90",
       "familyShareable" : false,
       "internalID" : "mc_coach_chloe",
       "localizations" : [
@@ -213,7 +213,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "74.99",
+          "displayPrice" : "79.90",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "mc_premium_yearly",
