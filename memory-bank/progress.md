@@ -138,7 +138,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** Staging **2026-04-22** Build **12**; Production **2026-04-22** — **`2.0.1`-Tag aus derselben Registry** wie Staging (Build-once-deploy-everywhere); Nginx-Skripte bei Deploy synchron. Kurze Session-Unterbrechung beim Prod-Cutover möglich (Deploy-Playbook).
+- **Staging ↔ Production images:** Staging **2026-04-28** Build **13**; Production **2026-04-22** Build **12** (pending deploy) — **`2.0.1`-Tag aus derselben Registry** wie Staging (Build-once-deploy-everywhere); Nginx-Skripte bei Deploy synchron. Kurze Session-Unterbrechung beim Prod-Cutover möglich (Deploy-Playbook).
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
