@@ -138,7 +138,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** Staging **2026-04-07** Build **11**; Production **2026-04-07** — **`2.0.1`-Tag aus derselben Registry** wie Staging (Build-once-deploy-everywhere); Nginx-Skripte bei Deploy synchron. Kurze Session-Unterbrechung beim Prod-Cutover möglich (Deploy-Playbook).
+- **Staging ↔ Production images:** Staging **2026-04-22** Build **12**; Production **2026-04-22** — **`2.0.1`-Tag aus derselben Registry** wie Staging (Build-once-deploy-everywhere); Nginx-Skripte bei Deploy synchron. Kurze Session-Unterbrechung beim Prod-Cutover möglich (Deploy-Playbook).
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
@@ -187,6 +187,12 @@
 ## Pending / Roadmap
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
+- [ ] **Apple Watch Integration:** watchOS Companion-App (natives Swift/SwiftUI, WatchConnectivity). Kein Capacitor-Support auf watchOS — Watch-App muss nativ in Xcode gebaut werden.
+  - **MVP (Einstieg):** watchOS Extension im bestehenden Xcode-Projekt anlegen; WatchConnectivity überträgt Daily Prompt + Streak-Daten vom iPhone zur Watch; Complication zeigt Streak + Tagesfrage auf dem Zifferblatt; APNs-Notification mit Coaching-Impuls.
+  - **Tier 1 — hoher Nutzen:** Kurzcoaching-Session per Voice auf der Watch (2-3 Austausche, Voice-only); Rob-Atemübung / Mental-Fitness-Check-in; Streak & XP als Complication.
+  - **Tier 2 — mittelfristig:** HealthKit-Integration (Herzrate/HRV als Coaching-Kontext); vollständige Voice-Session ohne iPhone-Bildschirm (WKExtendedRuntimeSession).
+  - **Technologie:** WatchConnectivity, WidgetKit/ClockKit (Complications), WKExtendedRuntimeSession, HealthKit (optional). App Store: Watch-App als Teil der iPhone-App, kein separates Review.
+  - **Einschränkung:** Kein Web-Rendering auf watchOS; Watch muss bei fehlender iPhone-Verbindung graceful degradieren.
 - [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
 - [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
 - [ ] **Accessibility:** Formal WCAG audit (axe-core/Lighthouse tooling, prefers-reduced-motion, color contrast verification, screen reader testing)

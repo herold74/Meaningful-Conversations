@@ -107,7 +107,12 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         if (iap?.tier === 'premium') {
           patched.isPremium = true;
           patched.premiumExpiresAt = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
-          patched.accessExpiresAt = expiresAt ?? patched.premiumExpiresAt;
+          // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
+          const currentAccess = patched.accessExpiresAt ? new Date(patched.accessExpiresAt) : null;
+          const newExpiry = new Date(patched.premiumExpiresAt);
+          if (!currentAccess || currentAccess < newExpiry) {
+            patched.accessExpiresAt = patched.premiumExpiresAt;
+          }
         } else if (iap?.tier === 'registered') {
           patched.accessExpiresAt = expiresAt ?? undefined;
         } else if (iap?.tier === 'bot') {
@@ -172,7 +177,11 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         const p = { ...currentUser };
         const oneYear = new Date(Date.now() + 365 * 86400000).toISOString();
         p.isPremium = true;
-        p.premiumExpiresAt = p.accessExpiresAt = oneYear;
+        p.premiumExpiresAt = oneYear;
+        const currentAccess = p.accessExpiresAt ? new Date(p.accessExpiresAt) : null;
+        if (!currentAccess || currentAccess < new Date(oneYear)) {
+          p.accessExpiresAt = oneYear;
+        }
         return p;
       })() : null);
       if (userToUse) {

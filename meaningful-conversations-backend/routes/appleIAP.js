@@ -414,7 +414,12 @@ function buildUserUpdate(productMapping, transactionInfo, user) {
       : new Date(Date.now() + productMapping.days * 86400000);
     updateData.isPremium = true;
     updateData.premiumExpiresAt = expiresAt;
-    updateData.accessExpiresAt = expiresAt;
+    // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
+    // than the existing registered subscription, so users fall back to Registered (not Guest)
+    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
+    if (!currentAccess || currentAccess < expiresAt) {
+      updateData.accessExpiresAt = expiresAt;
+    }
   } else if (productMapping.tier === 'bot') {
     const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
     if (!unlocked.includes(productMapping.botId)) {
