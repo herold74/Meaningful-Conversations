@@ -241,7 +241,12 @@ async function applyProductEffect(userId, productId) {
     baseDate.setDate(baseDate.getDate() + product.days);
     updateData.isPremium = true;
     updateData.premiumExpiresAt = baseDate;
-    updateData.accessExpiresAt = baseDate;
+    // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
+    // than the existing registered subscription, so users fall back to Registered (not Guest)
+    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
+    if (!currentAccess || currentAccess < baseDate) {
+      updateData.accessExpiresAt = baseDate;
+    }
     botIdForCode = productId;
   } else if (product.category === 'bot') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
