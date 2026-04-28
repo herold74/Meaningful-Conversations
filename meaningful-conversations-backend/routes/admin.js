@@ -39,6 +39,7 @@ router.get('/users', async (req, res) => {
                 lastLogin: true,
                 gamificationState: true,
                 status: true,
+                accessExpiresAt: true,
                 personalityProfile: {
                     select: { completedLenses: true }
                 },
@@ -143,6 +144,26 @@ router.put('/users/:id/toggle-client', async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling client:", error);
+        res.status(500).json({ error: 'Operation failed.' });
+    }
+});
+
+// PUT /api/admin/users/:id/toggle-registered
+router.put('/users/:id/toggle-registered', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await prisma.user.findUnique({ where: { id } });
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        // null = lifetime registered (active); set to now = revoke
+        const isRegistered = user.accessExpiresAt === null;
+        await prisma.user.update({
+            where: { id },
+            data: { accessExpiresAt: isRegistered ? new Date() : null },
+        });
+        res.status(204).send();
+    } catch (error) {
+        console.error("Admin: Error toggling registered:", error);
         res.status(500).json({ error: 'Operation failed.' });
     }
 });
