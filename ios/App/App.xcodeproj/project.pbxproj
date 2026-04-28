@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		483CF5D72F47A7E300410ABD /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 483CF5D62F47A7E300410ABD /* AppIcon.icon */; };
+		48C5ED5D2FA1130F00BB29D3 /* MC.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 48C5ED5C2FA1130F00BB29D3 /* MC.storekit */; };
 		48E62D962F236E5D00D024C7 /* MyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E62D942F236E5D00D024C7 /* MyViewController.swift */; };
 		48E62D972F236E5D00D024C7 /* NativeTTSPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E62D952F236E5D00D024C7 /* NativeTTSPlugin.swift */; };
 		48E62D982F236E5D00D024C7 /* NativeSTTPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E62D992F236E5D00D024C7 /* NativeSTTPlugin.swift */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		483CF5D62F47A7E300410ABD /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		48C5ED5C2FA1130F00BB29D3 /* MC.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = MC.storekit; sourceTree = "<group>"; };
 		48E62D932F23533800D024C7 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		48E62D942F236E5D00D024C7 /* MyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyViewController.swift; sourceTree = "<group>"; };
 		48E62D952F236E5D00D024C7 /* NativeTTSPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTTSPlugin.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				48C5ED5C2FA1130F00BB29D3 /* MC.storekit */,
 				48E62D942F236E5D00D024C7 /* MyViewController.swift */,
 				48E62D952F236E5D00D024C7 /* NativeTTSPlugin.swift */,
 				48E62D992F236E5D00D024C7 /* NativeSTTPlugin.swift */,
@@ -159,6 +162,7 @@
 			files = (
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
+				48C5ED5D2FA1130F00BB29D3 /* MC.storekit in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				483CF5D72F47A7E300410ABD /* AppIcon.icon in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
@@ -335,7 +339,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -361,7 +365,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
