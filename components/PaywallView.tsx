@@ -154,6 +154,18 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     return '';
   };
 
+  const PRODUCT_NAME_KEYS: Record<string, string> = {
+    REGISTERED_1M:       'paywall_product_registered_1m',
+    REGISTERED_1Y:       'paywall_product_registered_1y',
+    REGISTERED_LIFETIME: 'paywall_product_registered_lifetime',
+    ACCESS_PASS_1M:      'paywall_product_premium_1m',
+    ACCESS_PASS_3M:      'paywall_product_premium_3m',
+    ACCESS_PASS_1Y:      'paywall_product_premium_1y',
+    KENJI_UNLOCK:        'paywall_product_kenji',
+    CHLOE_UNLOCK:        'paywall_product_chloe',
+  };
+  const productName = (product: Product) => t(PRODUCT_NAME_KEYS[product.id]) || product.name;
+
   const renderProductCard = (product: Product) => {
     const hasDiscount = product.finalPrice < product.price;
     const isPurchasing = purchasingId === product.id;
@@ -162,7 +174,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
       <div key={product.id} className="bg-background-tertiary border border-border-primary rounded-card p-4 space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-1">
           <div className="min-w-0">
-            <p className="font-semibold text-content-primary text-sm sm:text-base truncate">{product.name}</p>
+            <p className="font-semibold text-content-primary text-sm sm:text-base truncate">{productName(product)}</p>
             {product.duration && (
               <span className="text-xs text-content-subtle">{durationLabel(product.duration)}</span>
             )}
