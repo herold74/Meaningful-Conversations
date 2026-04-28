@@ -363,6 +363,7 @@ const sendPasswordResetEmail = async (email, token, language = 'en') => {
 const getProductName = (botId) => {
   const names = {
     'REGISTERED_1M': { de: 'Registriert 1-Monats-Pass', en: 'Registered 1-Month Pass' },
+    'REGISTERED_1Y': { de: 'Registered Jahres-Zugang', en: 'Registered Annual Access' },
     'REGISTERED_LIFETIME': { de: 'Registered Lifetime-Zugang', en: 'Registered Lifetime Access' },
     'ACCESS_PASS_1M': { de: 'Premium 1-Monats-Pass', en: 'Premium 1-Month Pass' },
     'ACCESS_PASS_3M': { de: 'Premium 3-Monats-Pass', en: 'Premium 3-Month Pass' },

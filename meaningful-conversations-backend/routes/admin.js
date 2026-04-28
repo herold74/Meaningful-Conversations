@@ -333,8 +333,8 @@ router.post('/codes/:id/revoke', async (req, res) => {
                 // Revoke premium pass: reset isPremium and expire access
                 updateData.isPremium = false;
                 updateData.accessExpiresAt = new Date();
-            } else if (code.botId === 'REGISTERED_LIFETIME') {
-                // Revoke registered lifetime: set expiry to now
+            } else if (code.botId === 'REGISTERED_1Y' || code.botId === 'REGISTERED_LIFETIME') {
+                // Revoke registered annual/lifetime: set expiry to now
                 updateData.accessExpiresAt = new Date();
             } else if (code.botId === 'premium') {
                 updateData.isPremium = false;

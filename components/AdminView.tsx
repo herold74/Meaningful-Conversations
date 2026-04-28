@@ -603,6 +603,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, [codes, codeEmailFilter]);
 
     const getUnlockName = useCallback((botId: string): string => {
+        if (botId === 'REGISTERED_1Y') return t('admin_codes_registered_annual');
         if (botId === 'REGISTERED_LIFETIME') return t('admin_codes_registered_lifetime');
         if (botId === 'ACCESS_PASS_1Y') return t('admin_codes_unlock_access_pass');
         if (botId === 'ACCESS_PASS_3M') return t('admin_codes_unlock_access_pass_3m');
@@ -1000,6 +1001,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         <label htmlFor="bot-select" className="sr-only">{t('admin_codes_for_coach')}</label>
                         <select id="bot-select" value={newCodeBotId} onChange={e => setNewCodeBotId(e.target.value)} className="w-full h-full px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary">
                             <option disabled>— {t('admin_codes_section_registered')} —</option>
+                            <option value="REGISTERED_1Y">{t('admin_codes_registered_annual')}</option>
                             <option value="REGISTERED_LIFETIME">{t('admin_codes_registered_lifetime')}</option>
                             <option disabled>— {t('admin_codes_section_premium')} —</option>
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>

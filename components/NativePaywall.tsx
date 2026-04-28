@@ -102,7 +102,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       if (!userToUse && currentUser) {
         const patched = { ...currentUser };
         const iap = products.find(p => p.identifier === product.identifier)?.iapProduct;
-        const days = product.identifier.includes('yearly') ? 365 : product.identifier.includes('lifetime') ? null : 30;
+        const days = product.identifier.includes('yearly') || product.identifier.includes('yearly.v2') ? 365 : product.identifier.includes('lifetime') ? null : 30;
         const expiresAt = days != null ? new Date(Date.now() + days * 86400000).toISOString() : null;
         if (iap?.tier === 'premium') {
           patched.isPremium = true;
@@ -325,7 +325,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive, onPurchase, t }) => {
   const isSubscription = product.iapProduct.type === 'subscription';
-  const periodLabel = product.identifier.endsWith('.yearly')
+  const periodLabel = product.identifier.includes('yearly')
     ? t('iap_period_year')
     : t('iap_period_month');
 

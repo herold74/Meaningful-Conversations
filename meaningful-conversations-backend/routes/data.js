@@ -244,7 +244,7 @@ router.post('/redeem-code', async (req, res) => {
 
         const ACCESS_CODE_TYPES = [
             'ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M',
-            'REGISTERED_1M', 'REGISTERED_LIFETIME', 'premium', 'client',
+            'REGISTERED_1M', 'REGISTERED_1Y', 'REGISTERED_LIFETIME', 'premium', 'client',
         ];
         const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
 
@@ -292,8 +292,14 @@ router.post('/redeem-code', async (req, res) => {
                 ? new Date(user.accessExpiresAt) : new Date();
             baseDate.setMonth(baseDate.getMonth() + 1);
             updateData.accessExpiresAt = baseDate;
+        } else if (upgradeCode.botId === 'REGISTERED_1Y') {
+            const now = new Date();
+            const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)
+                ? new Date(user.accessExpiresAt) : new Date();
+            baseDate.setDate(baseDate.getDate() + 365);
+            updateData.accessExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'REGISTERED_LIFETIME') {
-            // Registered Lifetime: permanent registered access (no premium features)
+            // Legacy: permanent registered access for existing Lifetime buyers
             updateData.accessExpiresAt = null;
         } else if (upgradeCode.botId === 'premium') {
              // Permanent Premium (admin-granted, no expiry)
