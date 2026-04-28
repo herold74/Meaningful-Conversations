@@ -289,7 +289,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                   >
                     {premiumProducts.map(p => (
                       <option key={p.id} value={p.id}>
-                        {p.name} — €{p.finalPrice.toFixed(2).replace('.', ',')}
+                        {productName(p)} — €{p.finalPrice.toFixed(2).replace('.', ',')}
                         {p.finalPrice < p.price ? ` (${t('upgrade_loyalty_badge')})` : ''}
                       </option>
                     ))}
