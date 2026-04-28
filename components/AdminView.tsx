@@ -866,6 +866,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                         <td className="p-3 text-gray-600 dark:text-gray-400">{new Date(user.createdAt!).toLocaleDateString()}</td>
                                         <td className="p-3">
                                             <div className="flex items-center gap-3">
+                                                {user.accessExpiresAt === null && !user.isPremium && !user.isClient && (
+                                                    <span title={t('admin_users_registered')} className="text-xs font-bold px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                                        R
+                                                    </span>
+                                                )}
                                                 {user.isPremium && (
                                                     <span title={t('admin_users_premium')}>
                                                         <StarIcon className="w-5 h-5 text-status-info-foreground" />
@@ -928,6 +933,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                                         <UnlockIcon className="w-5 h-5" />
                                                     </button>
                                                 )}
+                                                <button
+                                                    onClick={() => handleAction(`toggle-registered-${user.id}`, () => userService.toggleUserRegistered(user.id))}
+                                                    disabled={actionLoading[`toggle-registered-${user.id}`]}
+                                                    className="p-2 text-green-600 dark:text-green-400 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 disabled:opacity-50"
+                                                    title={t('admin_users_toggle_registered')}
+                                                >
+                                                    <span className="text-xs font-bold">R</span>
+                                                </button>
                                                 <button onClick={() => handleAction(`toggle-premium-${user.id}`, () => userService.toggleUserPremium(user.id))} disabled={actionLoading[`toggle-premium-${user.id}`]} className="p-2 text-status-info-foreground rounded-full hover:bg-status-info-background disabled:opacity-50" title={t('admin_users_toggle_premium')}><StarIcon className="w-5 h-5" /></button>
                                                 <button 
                                                     onClick={() => handleAction(`toggle-client-${user.id}`, () => userService.toggleUserClient(user.id))} 
