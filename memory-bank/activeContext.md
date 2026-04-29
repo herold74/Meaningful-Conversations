@@ -33,7 +33,12 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Pre-filled Life Context (Sarah) and OCEAN personality profile
 - Used for Apple review
 
-## Recent Changes (v2.0.1 — Build 13, 2026-04-28)
+## Recent Changes (v2.0.1 — Build 13, 2026-04-28/29)
+
+### Registered Annual (mc.registered.yearly.v2) — vollständig live (2026-04-29)
+- Apple-Genehmigung erhalten 2026-04-29; in Production getestet und verifiziert ✅
+- Apple Server Notifications bereits konfiguriert (Production + Sandbox) ✅
+- Migration Registered Lifetime → Registered Annual vollständig abgeschlossen
 
 ### Registered→Premium upgrade: accessExpiresAt fallback fix (2026-04-28)
 - **Bug:** Beim Premium-Kauf wurde `accessExpiresAt` immer auf das Premium-Ablaufdatum gesetzt — auch wenn die Registered-Subscription länger läuft. Nach Premium-Ablauf verlor der User den Registered-Zugang statt darauf zurückzufallen.
@@ -135,6 +140,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)
 
 ## Decision Log
+- **2026-04-29:** `mc.registered.yearly.v2` von Apple genehmigt; Production verifiziert; Migration Registered Lifetime → Annual vollständig abgeschlossen.
 - **2026-04-22:** Staging + Production auf Build 12 (v2.0.1) — GDPR-Activity-Tracker + Spring-off; kein App-Store-Submit nötig (Web/PWA-only-Änderungen).
 - **2026-04-05:** Production redeploy — Registry-Images wie Staging Build 6 (`2.0.1`); `preferredLanguage`-Migration per Backend-Start; Healthchecks grün.
 - **2026-04-04:** Memory Bank maintenance is **routine assistant duty**: after server checks (e.g. staging/prod image drift), Q&A that establishes material facts, or doc/session outcomes — update `activeContext` / `progress` / `#21` as needed without the owner asking each time.
