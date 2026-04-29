@@ -42,11 +42,11 @@
 
 - [x] IAP products submitted for review (must match RevenueCat config)
 - [x] Subscription group: pricing tiers confirmed (Level 1: Premium Yearly, 2: Premium Monthly, 3: Registered Annual, 4: Registered Monthly)
-- [x] `mc.registered.yearly.v2` (Auto-Renewable, 14,99 €/Jahr) — zur Prüfung übermittelt 2026-04-28
+- [x] `mc.registered.yearly.v2` (Auto-Renewable, 14,99 €/Jahr) — genehmigt 2026-04-29, in Production verifiziert
 - [x] `mc.registered.lifetime` auf Removed gesetzt (neue Käufe deaktiviert; Legacy-Käufer weiterhin unterstützt)
 - [x] Non-consumable coach unlocks: pricing confirmed (Kenji + Chloe je 3,99 €)
 - [x] Restore Purchases button accessible (required by Apple)
-- [ ] Apple Server Notifications URL in App Store Connect hinterlegen (für Subscription-Events)
+- [x] Apple Server Notifications URL in App Store Connect hinterlegt (Production + Sandbox)
 
 ## App Store Connect — Privacy Labels
 
