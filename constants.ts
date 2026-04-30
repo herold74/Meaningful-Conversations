@@ -95,8 +95,8 @@ export const BOTS: Bot[] = [
     {
         id: 'bekky-thought-audit',
         name: 'Bekky',
-        description: 'An analytical coach who helps you deconstruct stressful beliefs through a structured thought audit — restoring clarity and agency in professional and personal contexts.',
-        description_de: 'Eine analytische Beraterin, die Ihnen hilft, belastende Überzeugungen durch ein strukturiertes Gedanken-Audit zu dekonstruieren – und so Klarheit und Handlungsfähigkeit in beruflichen wie privaten Situationen zurückzugewinnen.',
+        description: 'An analytical coach who deconstructs stressful beliefs through a structured thought audit — restoring clarity and agency in work and life.',
+        description_de: 'Eine analytische Beraterin, die belastende Überzeugungen durch ein strukturiertes Gedanken-Audit dekonstruiert – für mehr Klarheit und Handlungsfähigkeit in Beruf und Privatleben.',
         avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=BekkyAudit&backgroundColor=c7e0f4&radius=50&mouth=smirk&shirtColor=ffffff',
         style: 'Analytical, Systematic, Neutral',
         style_de: 'Analytisch, Systematisch, Neutral',
