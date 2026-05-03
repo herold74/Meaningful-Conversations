@@ -46,6 +46,24 @@ const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     coachesUsed: new Set<string>(),
 };
 
+/** Merge Bekky AUDIT_TASK payloads from chat metadata into session-analysis next steps (before LC merge). */
+function appendBekkyAuditTasksFromMessages(
+    chatHistory: Message[],
+    analysis: SessionAnalysis,
+    lifeContext: string,
+    botId: string
+): void {
+    if (botId !== 'bekky-thought-audit') return;
+    const docLang = lifeContext && /^#\s*(Mein\s)?Lebenskontext/im.test(lifeContext) ? 'de' : 'en';
+    const deadlineWord = docLang === 'de' ? 'flexibel' : 'flexible';
+    for (const m of chatHistory) {
+        if (m.role !== 'bot' || !m.auditTaskPayload?.trim()) continue;
+        const action = m.auditTaskPayload.trim().replace(/^\*\s*/, '').trim();
+        if (!action) continue;
+        analysis.nextSteps.push({ action, deadline: deadlineWord });
+    }
+}
+
 const App: React.FC = () => {
     const { t, language } = useLocalization();
     const [view, setView] = useState<NavView>('welcome');
@@ -652,6 +670,33 @@ const App: React.FC = () => {
         setView('chat');
     };
 
+    const handleReferralSwitch = useCallback((targetBotId: string, seedUserMessage: string) => {
+        const targetBot = BOTS.find((b) => b.id === targetBotId);
+        if (!targetBot) return;
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach((audio) => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+
+        setSelectedBot(targetBot);
+        setUserMessageCount(0);
+        setCameFromContextChoice(false);
+        setChatHistory([
+            {
+                id: `user-${Date.now()}`,
+                text: seedUserMessage,
+                role: 'user',
+                timestamp: new Date().toISOString(),
+            },
+        ]);
+        setView('chat');
+    }, []);
+
     const handleStartSessionFromEval = (botId: string, examplePrompt: string) => {
         const bot = BOTS.find(b => b.id === botId);
         if (!bot) return;
@@ -775,6 +820,7 @@ const App: React.FC = () => {
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
+            appendBekkyAuditTasksFromMessages(chatHistory, analysis, lifeContext || '', selectedBot.id);
 
             // Handle "Next Steps" and "Completed Steps" logic.
             const hasNewSteps = analysis.nextSteps && analysis.nextSteps.length > 0;
@@ -1262,6 +1308,7 @@ const App: React.FC = () => {
         handleQuestionnaireSubmit,
         handlePiiConfirm,
         handleSelectBot,
+        handleReferralSwitch,
         handleStartSessionFromEval,
         handleStartInterview,
         handleIntentSelected,
