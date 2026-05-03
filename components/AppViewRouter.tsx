@@ -153,6 +153,7 @@ export interface AppViewRouterProps {
   handleQuestionnaireSubmit: (context: string) => void;
   handlePiiConfirm: () => void;
   handleSelectBot: (bot: Bot) => void;
+  handleReferralSwitch: (targetBotId: string, seedUserMessage: string) => void;
   handleStartSessionFromEval: (botId: string, examplePrompt: string) => void;
   handleStartInterview: () => void;
   handleIntentSelected: (intent: UserIntent) => void;
@@ -246,6 +247,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleQuestionnaireSubmit,
     handlePiiConfirm,
     handleSelectBot,
+    handleReferralSwitch,
     handleStartSessionFromEval,
     handleStartInterview,
     handleIntentSelected,
@@ -670,6 +672,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           isNewSession={!cameFromContextChoice}
           encryptionKey={encryptionKey}
           isTestMode={isTestMode}
+          onReferralSwitch={handleReferralSwitch}
         />
       );
     case 'sessionReview':

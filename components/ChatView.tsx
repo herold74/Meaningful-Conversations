@@ -30,6 +30,23 @@ import CoachInfoModal from './CoachInfoModal';
 import { useTts } from '../hooks/useTts';
 import { useMeditation } from '../hooks/useMeditation';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { parseMeditationMarkers } from '../hooks/useMeditation';
+import { stripReferralAndAuditMarkers } from '../utils/messageMarkers';
+import { BOTS } from '../constants';
+
+/** Meditation markers first; then strip referral / AUDIT_TASK from visible bubble text. */
+function processAssistantReply(rawText: string) {
+  const meditationParsed = parseMeditationMarkers(rawText);
+  const stripped = stripReferralAndAuditMarkers(meditationParsed.displayText);
+  return {
+    meditationData: {
+      ...meditationParsed,
+      displayText: stripped.displayText,
+    },
+    referralBotIds: stripped.referralBotIds.length > 0 ? stripped.referralBotIds : undefined,
+    auditTaskPayload: stripped.auditTaskPayload ?? undefined,
+  };
+}
 
 interface ChatViewProps {
   bot: Bot;
@@ -42,10 +59,12 @@ interface ChatViewProps {
   isNewSession: boolean;
   encryptionKey?: CryptoKey | null;
   isTestMode?: boolean;
+  /** Start a new session with another coach and seed the composer/history with the given message. */
+  onReferralSwitch?: (targetBotId: string, seedUserMessage: string) => void;
 }
 
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch }) => {
   const { t, language } = useLocalization();
 
   const [input, setInput] = useState('');
@@ -85,6 +104,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       case 'gloria-interview':
       case 'ava-strategic':
       case 'chloe-cbt':
+      case 'bekky-thought-audit':
         return 'female';
       case 'max-ambitious':
       case 'rob':
@@ -97,6 +117,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const coachingMode = currentUser?.coachingMode || 'off';
   const effectiveCoachingMode = (bot.id === 'nexus-gps' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+
+  const handleReferralSwitchClick = useCallback((targetBotId: string, botMessageIndex: number) => {
+    if (!onReferralSwitch) return;
+    let seed = '';
+    for (let i = botMessageIndex - 1; i >= 0; i--) {
+      if (chatHistory[i].role === 'user') {
+        seed = chatHistory[i].text;
+        break;
+      }
+    }
+    onReferralSwitch(targetBotId, seed.trim() ? seed : t('chat_referral_default_seed'));
+  }, [onReferralSwitch, chatHistory, t]);
 
   const sendMessage = useCallback(async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
@@ -173,14 +205,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       // Final text (may be stripped of meta-commentary)
       const finalText = response.text;
       const llmProvider = response.provider ?? null;
-      const meditationData = meditation.parseMeditationMarkers(finalText);
+      const processed = processAssistantReply(finalText);
+      const meditationData = processed.meditationData;
 
       setChatHistory(prev => {
         const last = prev[prev.length - 1];
         if (last && last.id === botMessageId) {
-          return [...prev.slice(0, -1), { ...last, text: meditationData.displayText, llmProvider }];
+          return [...prev.slice(0, -1), {
+            ...last,
+            text: meditationData.displayText,
+            llmProvider,
+            referralBotIds: processed.referralBotIds,
+            auditTaskPayload: processed.auditTaskPayload ?? null,
+          }];
         }
-        return [...prev, { id: botMessageId, text: meditationData.displayText, role: 'bot' as const, timestamp: new Date().toISOString(), llmProvider }];
+        return [...prev, {
+          id: botMessageId,
+          text: meditationData.displayText,
+          role: 'bot' as const,
+          timestamp: new Date().toISOString(),
+          llmProvider,
+          referralBotIds: processed.referralBotIds,
+          auditTaskPayload: processed.auditTaskPayload ?? null,
+        }];
       });
 
       if (meditationData.hasMeditation) {
@@ -202,9 +249,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }, 1000);
       } else if (useStreamingTts) {
         flushSentences('', true);
-        tts.finishStreamingTts(finalText);
+        tts.finishStreamingTts(meditationData.displayText);
       } else {
-        tts.speak(finalText);
+        tts.speak(meditationData.displayText);
       }
       if (isGuest && guestFingerprint) {
         guestService.incrementGuestUsage(guestFingerprint).then(result => {
@@ -368,12 +415,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     effectiveCoachingMode,
                     decryptedProfile
                 );
+                const pr = processAssistantReply(response.text);
                 const initialBotMessage: Message = {
                     id: `bot-${Date.now()}`,
-                    text: response.text,
+                    text: pr.meditationData.displayText,
                     role: 'bot',
                     timestamp: new Date().toISOString(),
                     llmProvider: response.provider ?? null,
+                    referralBotIds: pr.referralBotIds,
+                    auditTaskPayload: pr.auditTaskPayload ?? null,
                 };
                 setChatHistory([initialBotMessage]);
             } catch (err) {
@@ -410,12 +460,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     effectiveCoachingMode,
                     decryptedProfile
                 );
+                const pr = processAssistantReply(response.text);
                 const botMessage: Message = {
                     id: `bot-${Date.now()}`,
-                    text: response.text,
+                    text: pr.meditationData.displayText,
                     role: 'bot',
                     timestamp: new Date().toISOString(),
                     llmProvider: response.provider ?? null,
+                    referralBotIds: pr.referralBotIds,
+                    auditTaskPayload: pr.auditTaskPayload ?? null,
                 };
                 setChatHistory(prev => [...prev, botMessage]);
             } catch (err) {
@@ -731,9 +784,35 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
-              <div className={`max-w-md px-4 py-2.5 ${message.role === 'user' ? 'bg-accent-tertiary text-accent-tertiary-foreground rounded-2xl rounded-br-md shadow-sm' : 'prose dark:prose-invert bg-background-secondary text-content-primary border border-border-primary rounded-2xl rounded-bl-md shadow-card'}`}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-              </div>
+              {message.role === 'user' ? (
+                <div className={`max-w-md px-4 py-2.5 bg-accent-tertiary text-accent-tertiary-foreground rounded-2xl rounded-br-md shadow-sm`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 items-start max-w-md">
+                  <div className="prose dark:prose-invert bg-background-secondary text-content-primary border border-border-primary rounded-2xl rounded-bl-md shadow-card px-4 py-2.5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                  </div>
+                  {message.referralBotIds && message.referralBotIds.length > 0 && onReferralSwitch && (
+                    <div className="flex flex-col gap-1.5 w-full">
+                      {message.referralBotIds.map((rid) => {
+                        const coach = BOTS.find((b) => b.id === rid);
+                        const coachName = coach?.name ?? rid;
+                        return (
+                          <button
+                            key={`${message.id}-${rid}`}
+                            type="button"
+                            onClick={() => handleReferralSwitchClick(rid, index)}
+                            className="text-left text-sm px-3 py-2 rounded-xl bg-accent-primary/15 hover:bg-accent-primary/25 text-accent-primary border border-accent-primary/30 transition-colors"
+                          >
+                            {t('chat_referral_switch', { coachName })}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
                {message.role === 'bot' && index > 0 && !isLoading && (
                     <button
                         onClick={() => handleOpenFeedbackModal(message)}

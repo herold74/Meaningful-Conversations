@@ -101,5 +101,15 @@ export const BOTS: Bot[] = [
         style: 'Analytical, Systematic, Neutral',
         style_de: 'Analytisch, Systematisch, Neutral',
         accessTier: 'client',
-    }
+    },
+    {
+        id: 'dan-clean-language',
+        name: 'Dan',
+        description: 'A coach who helps you explore and transform inner beliefs through your own language and imagery — without introducing his own words or interpretations.',
+        description_de: 'Ein Berater, der Ihnen hilft, innere Überzeugungen durch Ihre eigene Sprache und Bildwelt zu erkunden und zu verändern – ohne eigene Worte oder Interpretationen einzubringen.',
+        avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=DanCoach&backgroundColor=e8dcc8&radius=50&mouth=smile&shirtColor=ffffff',
+        style: 'Clean Language, Non-Directive, Exploratory',
+        style_de: 'Reine Sprache, Nicht-direktiv, Erkundend',
+        accessTier: 'premium',
+    },
 ];

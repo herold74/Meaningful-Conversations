@@ -195,6 +195,8 @@
   "chat_voice_settings": "Voice Settings",
   "chat_send_message": "Send Message",
   "chat_report_message": "Report an issue with this message",
+  "chat_referral_switch": "Continue with {{coachName}}",
+  "chat_referral_default_seed": "I'd like to pick up here with this topic.",
   "meditation_early_stop": "Stop",
   "chat_tapToSpeak": "Voice mode is active.\nTap the microphone to speak.",
   "chat_keep_screen_on": "Please keep your screen on so the recording is not interrupted.",
