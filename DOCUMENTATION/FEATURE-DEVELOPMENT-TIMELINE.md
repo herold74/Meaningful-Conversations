@@ -282,7 +282,7 @@
 
 - ⬜ **New Bots (Premium Features)**
   - **Clean Language Bot** (David Grove): Uses client's exact metaphors without interpretation. Focus on exploring the architecture of inner landscapes.
-  - **The Work Bot** (Byron Katie): Structured 4-question protocol to investigate stressful thoughts and dissolve identification with destructive patterns.
+  - **The Work Bot**: Structured 4-question protocol to investigate stressful thoughts and dissolve identification with destructive patterns.
 
 - ⬜ **Coaching Lenses (Client Features)**
   - **NLP Meta-Model Lens:** Detects deletions, generalizations, and distortions in user statements. Intervenes to clarify linguistic ambiguities. Can be activated as a layer on any existing bot.
@@ -568,7 +568,7 @@ Admin: Containers   AI Tracking         Access Tiers           App Store Connect
 
 ### Coaching Frameworks (Feature Pipeline)
 - **Clean Language Bot** (David Grove) — Premium feature, new bot
-- **The Work Bot** (Byron Katie) — Premium feature, new bot
+- **The Work Bot** — Structured 4-question protocol
 - **NLP Meta-Model Lens** — Client feature, overlay on existing bots
 - **Logical Levels Lens** (Robert Dilts) — Client feature, overlay on existing bots
 
