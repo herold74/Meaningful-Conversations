@@ -21,6 +21,9 @@
     - [x] Kenji (Stoic philosophy, resilience)
     - [x] Chloe (Structured Reflection)
     - [x] Rob (Mental Fitness)
+    - [x] Victor (Bowen-inspired systemic coaching — client tier)
+    - [x] Bekky (Thought audit — client tier; referral buttons + AUDIT_TASK merge into Session Review)
+    - [x] Dan (Clean Language — premium tier)
     - [x] Gloria Life Context (Onboarding interview)
     - [x] Gloria Interview (Structured topic interviews with summary + corrected transcript export)
 - [x] **Data Privacy:**

@@ -33,6 +33,13 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Pre-filled Life Context (Sarah) and OCEAN personality profile
 - Used for Apple review
 
+## Recent Changes (v2.0.1 — Bekky + Dan, 2026-05-03)
+
+### Bekky thought-audit upgrades + referral handoff + Dan (Clean Language)
+- **Backend:** \`meaningful-conversations-backend/bots.js\` — Bekky EN/DE: Thought Audit Log continuity prompt, pace calibration, thought-type routing with trailing \`[REFERRAL:…]\`, flexible turnaround examples (1–2), Phase 4 specificity + optional Life Context step + paired \`[AUDIT_TASK]…[/AUDIT_TASK]\`; DE duplicate header removed; new premium bot **Dan** (\`dan-clean-language\`, Clean Language EN/DE, referral to Bekky, optional meditation markers).
+- **Frontend:** \`utils/messageMarkers.ts\` — strip referral + audit blocks **after** meditation parsing; \`Message\` gains \`referralBotIds\` / \`auditTaskPayload\`; \`ChatView\` shows localized “Continue with …” buttons → \`handleReferralSwitch\` pre-seeds target coach session; session analysis merges Bekky audit payloads into \`nextSteps\` before LC merge (\`App.tsx\`).
+- **Commit:** \`8e54933\` — **staging/production deploy:** pending (run \`./deploy-manualmode.sh\` when ready); **Cap sync** was run locally after build.
+
 ## Recent Changes (v2.0.1 — Build 13, 2026-04-28/29)
 
 ### Registered Annual (mc.registered.yearly.v2) — vollständig live (2026-04-29)
