@@ -515,7 +515,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   // Kategorisierung nach Themen
   const kommunikationBotIds = ['nexus-gps', 'gloria-interview']; // Nobody + Gloria Interview
   const coachingBotIds = ['max-ambitious', 'ava-strategic', 'kenji-stoic', 'chloe-cbt'];
-  const clientOnlyBotIds = ['rob', 'victor-bowen', 'bekky-thought-audit'];
+  const clientOnlyBotIds = ['rob', 'victor-bowen', 'bekky-thought-audit', 'dan-clean-language'];
   
   const kommunikationBots = bots.filter(b => kommunikationBotIds.includes(b.id));
   const coachingBots = bots.filter(b => coachingBotIds.includes(b.id));

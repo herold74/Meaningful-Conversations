@@ -2099,7 +2099,7 @@ Bekky passt die Formulierung der Wirkungs-Analyse (Frage 3) basierend auf dem er
           avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=DanCoach&backgroundColor=e8dcc8&radius=50&mouth=smile&shirtColor=ffffff',
           style: 'Clean Language, Non-Directive, Exploratory',
           style_de: 'Reine Sprache, Nicht-direktiv, Erkundend',
-          accessTier: 'premium',
+          accessTier: 'client',
           systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
 
 ${CRISIS_RESPONSE_EN}
