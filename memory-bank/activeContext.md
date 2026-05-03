@@ -3,8 +3,8 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-04-28**, build **13**; v2.0.1 images — https://mc-beta.manualmode.at — **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — in Parität mit Staging. — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-05-03**, build **26**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **26**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -38,7 +38,7 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 ### Bekky thought-audit upgrades + referral handoff + Dan (Clean Language)
 - **Backend:** \`meaningful-conversations-backend/bots.js\` — Bekky EN/DE: Thought Audit Log continuity prompt, pace calibration, thought-type routing with trailing \`[REFERRAL:…]\`, flexible turnaround examples (1–2), Phase 4 specificity + optional Life Context step + paired \`[AUDIT_TASK]…[/AUDIT_TASK]\`; DE duplicate header removed; new premium bot **Dan** (\`dan-clean-language\`, Clean Language EN/DE, referral to Bekky, optional meditation markers).
 - **Frontend:** \`utils/messageMarkers.ts\` — strip referral + audit blocks **after** meditation parsing; \`Message\` gains \`referralBotIds\` / \`auditTaskPayload\`; \`ChatView\` shows localized “Continue with …” buttons → \`handleReferralSwitch\` pre-seeds target coach session; session analysis merges Bekky audit payloads into \`nextSteps\` before LC merge (\`App.tsx\`).
-- **Commit:** \`8e54933\` — **staging/production deploy:** pending (run \`./deploy-manualmode.sh\` when ready); **Cap sync** was run locally after build.
+- **Commits:** \`8e54933\` (feature), \`707e331\` (memory-bank notes), \`71f2d34\` (**build 26** sync: \`BUILD_NUMBER\`, \`sw.js\`, \`project.pbxproj\` via staging deploy script). **Staging:** deployed **2026-05-03** (\`./deploy-manualmode.sh -e staging\`, exit 0). **Production:** still Build **13** (2026-04-28) until explicit prod deploy. **Xcode:** run \`npm run build && npx cap sync ios\` locally before archive — **Cap sync** completed for this session (assets under gitignored \`ios/App/App/public/\`).
 
 ## Recent Changes (v2.0.1 — Build 13, 2026-04-28/29)
 
