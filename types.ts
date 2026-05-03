@@ -98,6 +98,10 @@ export interface Message {
     text: string;
     timestamp: string;
     llmProvider?: string | null;
+    /** Parsed from trailing [REFERRAL:id,...] marker (stripped from text). */
+    referralBotIds?: string[];
+    /** Parsed from [AUDIT_TASK]...[/AUDIT_TASK] block (stripped from text). */
+    auditTaskPayload?: string | null;
 }
 
 export interface GamificationState {

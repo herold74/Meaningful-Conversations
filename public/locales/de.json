@@ -194,6 +194,8 @@
   "chat_voice_settings": "Spracheinstellungen",
   "chat_send_message": "Nachricht senden",
   "chat_report_message": "Ein Problem mit dieser Nachricht melden",
+  "chat_referral_switch": "Mit {{coachName}} weitermachen",
+  "chat_referral_default_seed": "Ich möchte hier mit diesem Thema weitermachen.",
   "meditation_early_stop": "Beenden",
   "chat_tapToSpeak": "Sprachmodus ist aktiv.\nTippen Sie auf das Mikrofon, um zu sprechen.",
   "chat_keep_screen_on": "Bitte lassen Sie den Bildschirm eingeschaltet, damit die Aufnahme nicht unterbrochen wird.",
