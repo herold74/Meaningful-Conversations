@@ -10,13 +10,19 @@
 
 const rateLimit = require('express-rate-limit');
 
+const isDevEnvironment =
+    process.env.NODE_ENV === 'development' ||
+    process.env.LOGIN_RATE_LIMIT_DISABLED === 'true';
+
 /**
  * Login rate limiter - Protects against brute force password attacks
- * 5 attempts per 10 minutes per IP
+ * 5 attempts per 10 minutes per IP (production / staging).
+ * Development: rate limiting skipped (`skip`) so local password resets / retries do not lock you out for 10 minutes.
  */
 const loginLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 5, // 5 attempts
+    max: 5, // 5 attempts (ignored when skip is true)
+    skip: () => isDevEnvironment,
     message: { 
         error: 'Too many login attempts. Please try again in 10 minutes.',
         errorCode: 'RATE_LIMIT_LOGIN'
