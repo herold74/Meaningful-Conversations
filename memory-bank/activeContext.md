@@ -3,8 +3,8 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-05-03**, build **27**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **27**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-05-03**, build **28**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -35,10 +35,15 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 
 ## Recent Changes (v2.0.1 — Bekky + Dan, 2026-05-03)
 
+### Referral UI hardening + pre-seed + Dan openings + DPC (Build **28**)
+- **Frontend:** `utils/messageMarkers.ts` — unwrap inline-code `REFERRAL`, spaces after colon, fullwidth brackets; `stripInterCoachHandoffMeta`; tests in `utils/__tests__/messageMarkers.test.ts`. `components/ChatView.tsx` — `initialFetchInitiated` resets on `bot.id` so pre-seed runs after coach switch.
+- **Backend:** `routes/gemini/chat.js` — `skipMistralBehaviorRules` when `isPreSeededTopic`. `bots.js` — Bekky handoff without stage directions; Dan EN/DE session-opening variant pools + newcomer hint. `services/dynamicPromptController.js` — restricted adaptive injection for `dan-clean-language` (pacing/courtesy only).
+- **Rollout:** `d607680` + `17a53ef` (build 28 sync). **Staging:** Build **28** deployed **2026-05-03**. **Xcode:** `npm run build && npx cap sync ios` run locally after commit so `ios/App/App/public/` matches this build.
+
 ### Bekky thought-audit upgrades + referral handoff + Dan (Clean Language)
 - **Backend:** \`meaningful-conversations-backend/bots.js\` — Bekky EN/DE: Thought Audit Log continuity prompt, pace calibration, thought-type routing with trailing \`[REFERRAL:…]\`, flexible turnaround examples (1–2), Phase 4 specificity + optional Life Context step + paired \`[AUDIT_TASK]…[/AUDIT_TASK]\`; DE duplicate header removed; **Dan** (\`dan-clean-language\`, Clean Language EN/DE, referral to Bekky, optional meditation markers) — **\`accessTier: 'client'\`** (nur Klienten / Freischaltung / Admin).
 - **Frontend:** \`utils/messageMarkers.ts\` — strip referral + audit blocks **after** meditation parsing; \`Message\` gains \`referralBotIds\` / \`auditTaskPayload\`; \`ChatView\` shows localized “Continue with …” buttons → \`handleReferralSwitch\` pre-seeds target coach session; session analysis merges Bekky audit payloads into \`nextSteps\` before LC merge (\`App.tsx\`). **BotSelection:** Dan unter Klienten-Sektion (\`clientOnlyBotIds\`).
-- **Rollout:** \`c05a762\` (Dan client-tier + UI); \`faec01a\` (**Build 27** sync via staging deploy). **Staging:** Build **27** deployed **2026-05-03**. **Production:** Build **13** bis Prod-Cutover. **Xcode:** nach Deploy erneut \`npm run build && npx cap sync ios\` für konsistente Build-Nummer (\`ios/App/App/public/\` gitignored).
+- **Rollout:** \`c05a762\` (Dan client-tier + UI); später **Build 28** (siehe Abschnitt „Referral UI hardening“ oben). **Production:** Build **13** bis Prod-Cutover. **Xcode:** nach Deploy erneut \`npm run build && npx cap sync ios\` für konsistente Build-Nummer (\`ios/App/App/public/\` gitignored).
 
 ## Recent Changes (v2.0.1 — Build 13, 2026-04-28/29)
 
