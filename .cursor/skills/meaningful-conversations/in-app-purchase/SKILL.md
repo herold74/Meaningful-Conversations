@@ -131,6 +131,21 @@ Handles Apple Server-to-Server Notifications v2:
 5. Add Restore Purchases button
 
 ### Phase D: Testing & App Store Review
+
+> **⚠️ KRITISCH — Immer mit echtem iPhone testen, NICHT mit dem iOS Simulator!**
+>
+> Der iOS Simulator hat zwei strukturelle Schwächen bei IAP-Tests:
+> 1. **RevenueCat** gibt im Simulator `offerings.current = null` zurück — Produkte werden nicht geladen.
+> 2. **Sandbox-Account-Login** ist im Simulator fehleranfällig (falsche Login-Maske, 2FA-Chaos).
+>
+> **Korrekte Teststrategie:**
+> 1. Sandbox Tester in App Store Connect anlegen (echte, funktionierende E-Mail-Adresse verwenden)
+> 2. App über Xcode direkt auf das eigene iPhone deployen (USB oder Wireless)
+> 3. Auf dem iPhone: **Einstellungen → App Store → Sandbox-Account** — dort mit Sandbox Tester einloggen (NICHT über den normalen Apple ID-Login!)
+> 4. App öffnen → Paywall → Kauf testen
+>
+> **Erfahrungswert:** Mit echtem iPhone + Sandbox Account funktioniert der gesamte IAP-Flow inkl. RevenueCat zuverlässig in <15 Minuten. Im Simulator können Stunden verloren gehen ohne Ergebnis.
+
 1. Sandbox testing for all product types
 2. Subscription lifecycle testing (purchase, renewal, cancellation, refund)
 3. Edge cases: offline purchase, family sharing, promotional offers
