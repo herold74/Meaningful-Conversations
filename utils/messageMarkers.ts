@@ -3,18 +3,54 @@
  * Parse order when chaining after meditation: referral strip → audit strip.
  */
 
-const REFERRAL_SUFFIX_RE = /\[REFERRAL:([\w\-,.]+)\]\s*$/;
+const REFERRAL_SUFFIX_RE =
+  /(?:\*\*)?\[REFERRAL:\s*([\w\-,.]+(?:\s*,\s*[\w\-,.]+)*)\](?:\*\*)?\s*$/i;
+
+/** Gemini often wraps the marker in inline code (`[REFERRAL:…]`), which breaks suffix parsing and shows raw markdown. */
+function unwrapInlineCodeReferrals(text: string): string {
+  return text.replace(
+    /`\s*(\[REFERRAL:\s*[\w\-,.]+(?:\s*,\s*[\w\-,.]+)*\])\s*`/gi,
+    '$1',
+  );
+}
+
+/** Some models emit fullwidth brackets (［ ］) or stray bold around the marker. */
+function normalizeReferralSyntax(text: string): string {
+  return text.replace(/［/g, '[').replace(/］/g, ']');
+}
+
+/**
+ * Remove leaked "stage directions" some models print when handing off to another coach
+ * (e.g. "[Dan übernimmt …] Dan: \"…\"" or parenthetical notes about the next coach waiting).
+ */
+export function stripInterCoachHandoffMeta(text: string): string {
+  let t = text;
+  // Markdown HR before a leaked bracket block
+  t = t.replace(/\n-{3,}\s*\n(?=\s*\[[^\]\n]*(?:übernimmt|takes over))/gi, '\n');
+  // Bracketed handoff note, optionally followed on the same span by CoachName: "sample line"
+  t = t.replace(
+    /\s*\[[^\]\n]*(?:übernimmt|takes over)[^\]\n]*\]\s*(?:[A-Za-z][A-Za-z\-]*\s*:\s*"[^"]*"\s*)?/gi,
+    ' ',
+  );
+  t = t.replace(
+    /\s*\([^)\n]*(?:wartet auf Ihre Antwort|wartet auf deine Antwort|waits for your answer)[^)\n]*\)\s*/gi,
+    ' ',
+  );
+  return t.replace(/\n{3,}/g, '\n\n').trim();
+}
 
 export function stripReferralMarker(text: string): { displayText: string; referralBotIds: string[] } {
-  const match = text.trimEnd().match(REFERRAL_SUFFIX_RE);
+  const unwrapped = unwrapInlineCodeReferrals(text);
+  const normalized = normalizeReferralSyntax(unwrapped);
+  const match = normalized.trimEnd().match(REFERRAL_SUFFIX_RE);
   if (!match || match.index === undefined) {
-    return { displayText: text, referralBotIds: [] };
+    return { displayText: normalized, referralBotIds: [] };
   }
   const referralBotIds = match[1]
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-  const displayText = text.slice(0, match.index).trimEnd();
+  const displayText = normalized.slice(0, match.index).trimEnd();
   return { displayText, referralBotIds };
 }
 
@@ -41,7 +77,8 @@ export function stripReferralAndAuditMarkers(text: string): {
   referralBotIds: string[];
   auditTaskPayload: string | null;
 } {
-  const ref = stripReferralMarker(text);
+  const metaStripped = stripInterCoachHandoffMeta(text);
+  const ref = stripReferralMarker(metaStripped);
   const audit = stripAuditTaskMarker(ref.displayText);
   return {
     displayText: audit.displayText,
