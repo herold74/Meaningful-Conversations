@@ -389,12 +389,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // (WebSpeechService for browsers, NativeSpeechService for iOS)
   // No per-language setup needed - language is passed at start() time
 
+  // Referral / coach switch reuses the same ChatView instance; clear the init guard
+  // so the new bot can run greeting (empty history) or pre-seed auto-send (one user row).
+  useEffect(() => {
+    initialFetchInitiated.current = false;
+  }, [bot.id]);
+
   useEffect(() => {
     // This effect handles two cases on mount:
     // 1. Normal start (empty history) → fetch the bot's initial greeting.
-    // 2. Pre-seeded user message (e.g., from transcript evaluation "Start session")
+    // 2. Pre-seeded user message (e.g. from transcript evaluation "Start session" or referral handoff)
     //    → skip greeting, auto-send the user message to get the bot's response.
-    // The ref guard prevents this from running more than once (e.g., due to StrictMode).
+    // The ref guard prevents duplicate runs until bot.id changes (see effect above).
     if (initialFetchInitiated.current) {
         return;
     }
@@ -460,6 +466,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     effectiveCoachingMode,
                     decryptedProfile
                 );
+
                 const pr = processAssistantReply(response.text);
                 const botMessage: Message = {
                     id: `bot-${Date.now()}`,

@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-const TEST_PASSWORD = 'Icepin 2025';
+const TEST_PASSWORD = 'Icepin2025';
 
 const testUsers = [
     {
