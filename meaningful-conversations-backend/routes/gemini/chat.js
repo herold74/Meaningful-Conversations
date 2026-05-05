@@ -363,8 +363,10 @@ Help the user EXTEND and ENRICH their existing Life Context.
         systemInstruction: finalSystemInstruction,
     };
 
-    // Gloria bots have their own interview methodology — skip coaching-specific Mistral rules
-    if (bot.id === 'gloria-life-context' || bot.id === 'gloria-interview') {
+    // Gloria bots: own methodology. Referral / eval pre-seed: single user turn — Mistral's
+    // mandatory "contracting step 1" block contradicts the pre-seed override and tends to
+    // make the model echo or re-frame the user's line as if it were the coach opening.
+    if (bot.id === 'gloria-life-context' || bot.id === 'gloria-interview' || isPreSeededTopic) {
         config.skipMistralBehaviorRules = true;
     }
 

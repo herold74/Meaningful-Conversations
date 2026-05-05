@@ -585,6 +585,10 @@ async function generatePromptForUser(userId, decryptedProfile, language = 'de', 
       botId
     );
 
+    if (botId === 'dan-clean-language' && adaptivePrompt) {
+      console.log('🧪 [DPC] Dan: restricted Clean Language injection (no blindspots/challenges)');
+    }
+
     // Build human-readable strategy list for telemetry
     const strategiesUsed = buildStrategyTelemetry(mergeResult, language);
 
@@ -611,13 +615,101 @@ async function generatePromptForUser(userId, decryptedProfile, language = 'de', 
         mergeType: mergeResult.metadata.mergeType,
         conflicts: mergeResult.conflicts.length,
         topDimensions: mergeResult.metadata.topDimensions,
-        narrativeConsistent: narrativeValidation?.isConsistent ?? true
+        narrativeConsistent: narrativeValidation?.isConsistent ?? true,
+        ...(botId === 'dan-clean-language' ? { danRestrictedInjection: true } : {})
       }
     };
   } catch (error) {
     console.error('DPC Error:', error);
     return { prompt: '', strategiesUsed: [], mergeMetadata: null }; // Fail gracefully
   }
+}
+
+/**
+ * DPC/DPFL injection for Dan (Clean Language): pacing / courtesy only — no blindspots,
+ * challenges, or narrative blindspots/growth (conflicts with verbatim Clean Language).
+ */
+function buildDanCleanLanguageAdaptivePrompt(mergeResult, narrativeProfile, narrativeValidation, language, t) {
+  const dan = {
+    de: {
+      header: '\n\n--- PERSONALISIERTES PROFIL (Clean Language — eingeschränkt) ---\n\n',
+      intro:
+        'Du arbeitest als Dan mit Clean Language (Hauptprompt). Die folgenden Profilhinweise wirken **nur** auf Tempo, Ruhe und Höflichkeit im Gespräch — **nicht** auf Inhaltsdeutungen, Ziele oder Entwicklungsthemen.\n\n',
+      pacingGuide: '**Wie du Ton/Ansatz nutzt (intern — dem Klienten gegenüber nicht erklären):**\n',
+      pacingBullets:
+        '- Übersetze „Ton“ und „Ansatz“ **nicht** in neue Wörter im Gespräch. Nutze sie nur, um zu entscheiden: etwas langsamer/mehr Raum vs. knapper vs. warm-sparsam bleiben.\n' +
+        '- Es gilt weiterhin: nur **Clean-Language-Fragen** mit **exakten** Zitaten der Person; maximal **eine** zentrale Frage pro Nachricht.\n' +
+        '- Keine empathischen Etikettierungen („das ist belastend“), keine Blindspot-/Challenge-/Coaching-Jargon-Anteile aus dem Profil.\n\n',
+      forbiddenBlock:
+        '**Ignorieren:** sämtliche Blindspots, Entwicklungsfelder, Beispiel-Challenges sowie narrative „Blinde Flecken“ oder Wachstum — nicht verwenden. Keine Modellnamen (Riemann, OCEAN, Spiral Dynamics).\n\n',
+      narrativeCoreHeader: '**Optionaler Kontext (nur Timing/Sensibilität, nicht ansprechen):**\n',
+      narrativeCorePrefix: '- Kern (aus Signatur): ',
+      narrativeInconsistent:
+        '(Quantitatives vs. narratives Profil kann divergieren — für Dan keine Entwicklungs-/Challenge-Inhalte daraus ableiten.)\n\n',
+      formatFooter:
+        '**Output:** Natürliche Sprache; keine Markdown-Trennlinien (---); keine Meta-Kommentare zur Strategie; keine „Verstanden, dein Ziel ist …“-Paraphrasen — bei Bedarf höchstens eine kurze neutrale Bestätigung vor der einen Clean-Language-Frage.\n'
+    },
+    en: {
+      header: '\n\n--- PERSONALIZED PROFILE (Clean Language — restricted) ---\n\n',
+      intro:
+        'You are Dan using Clean Language (main prompt). The profile notes below affect **only** pacing, spaciousness, and conversational courtesy — **not** interpretations, goals, or development agendas.\n\n',
+      pacingGuide: '**How to use tone/approach (internal — never explain this to the client):**\n',
+      pacingBullets:
+        '- Do **not** translate "tone" or "approach" into new wording in dialogue. Use them only to choose: slightly slower/more spacious vs. tighter vs. staying warm-sparse.\n' +
+        '- Still follow: **Clean Language questions** using **exact** client wording; at most **one** primary question per message.\n' +
+        '- No empathic labeling ("that sounds distressing"), no blindspot/challenge/coaching jargon from the profile.\n\n',
+      forbiddenBlock:
+        '**Ignore:** all blind spots, development fields, example challenges, and narrative blind spots or growth — do not use. No model names (Riemann, Big Five, Spiral Dynamics).\n\n',
+      narrativeCoreHeader: '**Optional context (timing/sensitivity only — do not surface):**\n',
+      narrativeCorePrefix: '- Core (from signature): ',
+      narrativeInconsistent:
+        '(Quantitative vs. narrative profiles may diverge — do not derive development/challenge content for Dan.)\n\n',
+      formatFooter:
+        '**Output:** Natural language; no markdown dividers (---); no strategy meta-comments; no "I understand, your goal is…" paraphrases — at most one brief neutral acknowledgment before the single Clean Language question.\n'
+    }
+  };
+
+  const d = dan[language] || dan.de;
+  let adaptivePrompt = d.header + d.intro;
+
+  if (mergeResult.conflicts && mergeResult.conflicts.length > 0) {
+    adaptivePrompt += t.conflictsHeader;
+    mergeResult.conflicts.forEach(conflict => {
+      adaptivePrompt += `- Kept: ${conflict.kept}, Excluded: ${conflict.excluded} (${conflict.reason})\n`;
+    });
+    adaptivePrompt += '\n';
+  }
+
+  if (mergeResult.primary && (mergeResult.primary.language || mergeResult.primary.tone || mergeResult.primary.approach)) {
+    adaptivePrompt += t.preferredComm;
+    if (mergeResult.primary.language) {
+      adaptivePrompt += `- ${t.language}: ${mergeResult.primary.language}\n`;
+    }
+    if (mergeResult.primary.tone) {
+      adaptivePrompt += `- ${t.tone}: ${mergeResult.primary.tone}\n`;
+    }
+    if (mergeResult.primary.approach) {
+      adaptivePrompt += `- ${t.approach}: ${mergeResult.primary.approach}\n`;
+    }
+    adaptivePrompt += '\n';
+  }
+
+  adaptivePrompt += d.pacingGuide + d.pacingBullets;
+  adaptivePrompt += d.forbiddenBlock;
+
+  if (narrativeProfile?.operatingSystem) {
+    adaptivePrompt += d.narrativeCoreHeader;
+    adaptivePrompt += `${d.narrativeCorePrefix}${narrativeProfile.operatingSystem}\n`;
+    if (narrativeValidation && !narrativeValidation.isConsistent) {
+      adaptivePrompt += d.narrativeInconsistent;
+    } else {
+      adaptivePrompt += '\n';
+    }
+  }
+
+  adaptivePrompt += d.formatFooter;
+
+  return adaptivePrompt;
 }
 
 /**
@@ -864,6 +956,17 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
   };
 
   const t = translations[language] || translations['de'];
+
+  if (botId === 'dan-clean-language') {
+    return buildDanCleanLanguageAdaptivePrompt(
+      mergeResult,
+      narrativeProfile,
+      narrativeValidation,
+      language,
+      t
+    );
+  }
+
   let adaptivePrompt = t.header;
   adaptivePrompt += t.intro;
 
