@@ -56,6 +56,7 @@ interface SessionReviewProps {
     hasConversationalEnd: boolean;
     hasAccomplishedGoal: boolean;
     hasSessionGoalAchieved: boolean;
+    isSessionQualified?: boolean;
     originalContext: string;
     selectedBot: Bot;
     onContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
@@ -211,6 +212,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     hasConversationalEnd,
     hasAccomplishedGoal,
     hasSessionGoalAchieved,
+    isSessionQualified = true,
     originalContext,
     selectedBot,
     onContinueSession,
@@ -818,7 +820,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     </div>
                 )}
 
-                {!isInterviewReview && (hasConversationalEnd || hasAccomplishedGoal) && (
+                {!isInterviewReview && isSessionQualified && (hasConversationalEnd || hasAccomplishedGoal) && (
                     <div className="p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 space-y-2 rounded-lg">
                         {hasConversationalEnd && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
                         {hasAccomplishedGoal && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}

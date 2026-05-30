@@ -103,6 +103,8 @@ const App: React.FC = () => {
     const [questionnaireAnswers, setQuestionnaireAnswers] = useState<Record<string, string>>({});
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [userMessageCount, setUserMessageCount] = useState(0);
+    const [baselineMessageCount, setBaselineMessageCount] = useState(0);
+    const [isSessionQualified, setIsSessionQualified] = useState(false);
     const [paywallUserEmail, setPaywallUserEmail] = useState<string | null>(null);
     const [cameFromContextChoice, setCameFromContextChoice] = useState(false);
     const [isTestMode, setIsTestMode] = useState(false);
@@ -187,14 +189,17 @@ const App: React.FC = () => {
         currentState: GamificationState,
         analysis: SessionAnalysis | null,
         botId: string,
-        messageCount: number
+        messageCount: number,
+        baselineMsgCount: number = 0
     ): GamificationState => {
         const isQualifiedSession = messageCount >= 5;
+        const effectiveNewMessages = Math.max(0, messageCount - baselineMsgCount);
 
         // Bug 5 fix: no XP for sessions with fewer than 5 messages
+        // Only new messages (since last continue) count toward XP to prevent double-counting
         let xpGained = 0;
         if (isQualifiedSession) {
-            xpGained = (messageCount * 5) + ((analysis?.nextSteps?.length || 0) * 10);
+            xpGained = (effectiveNewMessages * 5) + ((analysis?.nextSteps?.length || 0) * 10);
             if (analysis?.hasConversationalEnd) xpGained += 50;
             if (analysis?.hasAccomplishedGoal) xpGained += 25;
         }
@@ -666,6 +671,7 @@ const App: React.FC = () => {
         
         setSelectedBot(bot);
         setUserMessageCount(0);
+        setBaselineMessageCount(0);
         setChatHistory([]);
         setView('chat');
     };
@@ -685,6 +691,7 @@ const App: React.FC = () => {
 
         setSelectedBot(targetBot);
         setUserMessageCount(0);
+        setBaselineMessageCount(0);
         setCameFromContextChoice(false);
         setChatHistory([
             {
@@ -720,6 +727,7 @@ const App: React.FC = () => {
         setSelectedBot(bot);
         setChatHistory([userMessage]);
         setUserMessageCount(0);
+        setBaselineMessageCount(0);
         setCameFromContextChoice(false);
         setView('chat');
     };
@@ -810,7 +818,7 @@ const App: React.FC = () => {
 
         // --- Standard Session Analysis for all other bots ---
         // In test mode, skip the "no messages" check since test scenarios always have messages
-        if (userMessageCount === 0 && !isTestMode) {
+        if ((userMessageCount - baselineMessageCount) === 0 && !isTestMode) {
             setSelectedBot(null);
             setChatHistory([]);
             setView('botSelection');
@@ -895,7 +903,9 @@ const App: React.FC = () => {
             setSessionAnalysis(analysis);
 
             const messageCount = isTestMode ? chatHistory.length : userMessageCount;
-            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, messageCount);
+            const baseline = isTestMode ? 0 : baselineMessageCount;
+            const newState = calculateNewGamificationState(gamificationState, analysis, selectedBot.id, messageCount, baseline);
+            setIsSessionQualified(messageCount >= 5);
             setNewGamificationState(newState);
 
             setView('sessionReview');
@@ -956,7 +966,9 @@ const App: React.FC = () => {
             };
             setSessionAnalysis(fallbackAnalysis);
             const messageCount = isTestMode ? chatHistory.length : userMessageCount;
-            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id, messageCount);
+            const baseline = isTestMode ? 0 : baselineMessageCount;
+            const newState = calculateNewGamificationState(gamificationState, fallbackAnalysis, selectedBot.id, messageCount, baseline);
+            setIsSessionQualified(messageCount >= 5);
             setNewGamificationState(newState);
             setView('sessionReview');
         } finally {
@@ -1020,6 +1032,8 @@ const App: React.FC = () => {
 
         await saveData(newContext, newGamificationState || gamificationState, options.preventCloudSave);
         
+        setBaselineMessageCount(userMessageCount);
+
         if (!currentUser) {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
@@ -1071,6 +1085,7 @@ const App: React.FC = () => {
         setSessionAnalysis(null);
         setNewGamificationState(null);
         setUserMessageCount(0);
+        setBaselineMessageCount(0);
         setIsTestMode(false);
         setTestScenarioId(null);
         
@@ -1274,6 +1289,7 @@ const App: React.FC = () => {
         setCameFromContextChoice,
         userMessageCount,
         setUserMessageCount,
+        isSessionQualified,
         questionnaireAnswers,
         setQuestionnaireAnswers,
         paywallUserEmail,
