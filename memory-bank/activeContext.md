@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-05-03**, build **28**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Staging:** Deployed **2026-05-30**, build **29**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
 **Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
