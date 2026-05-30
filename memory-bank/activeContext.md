@@ -33,6 +33,14 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Pre-filled Life Context (Sarah) and OCEAN personality profile
 - Used for Apple review
 
+## Recent Changes (v2.0.1 — Gamification fix, 2026-05-30)
+
+### Bonus XP double-award fix (Build 29)
+- **Bug:** After ending a session and clicking "Continue with same coach", immediately ending again (no new messages) triggered a second session analysis on the same chat history, re-awarding XP and re-showing the +50/+25 bonus banners.
+- **Fix:** New `baselineMessageCount` state tracks how many messages existed at the last continue point. Guard and XP calculation now use `effectiveNewMessages = userMessageCount - baselineMessageCount`. Zero effective new messages → early exit to bot selection, no analysis, no XP.
+- **Secondary fix:** `isSessionQualified` prop added to `SessionReview` — bonus banner (+50 XP Formal Close / +25 XP Goal Accomplished) only renders when the session actually qualified (`messageCount >= 5`).
+- **Files:** `App.tsx` (state + logic), `components/AppViewRouter.tsx` (prop passthrough), `components/SessionReview.tsx` (display guard).
+
 ## Recent Changes (v2.0.1 — Bekky + Dan, 2026-05-03)
 
 ### Referral UI hardening + pre-seed + Dan openings + DPC (Build **28**)
@@ -138,6 +146,12 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - Persistent Piper models (~8x speedup), warmup endpoint, progressive sentence synthesis
 - Skip failed sentences instead of permanent mode switch
 - Opus audio compression (~7x smaller)
+
+## Recent Changes (Presentation Templates — 2026-05-11)
+
+### WLC / MC Master Template polish (build_mc_master.py)
+- **Italic quote marks:** Both opening and closing `"` marks in the Zitat layout are now italic (`i="1"`). `_italicize_quote_marks()` post-processes the injected opening mark; `_add_closing_quote()` sets italic directly. Applied to all three themes.
+- **Blank (Leer) layout background:** `_set_blank_layout_background()` injects a full-slide `<p:sp>` solid rectangle at Z-order 0 — `#111827` (dark), `#FFFFFF` (light/winterlight) — using the correct 16:9 slide width `12191695 × 6858000` EMU. `<p:bg>` approach was abandoned as Keynote ignores it on layout XML.
 
 ## Active Tasks
 - [ ] **Console.log Cleanup:** ~43 frontend files with hundreds of console.log calls. TTS debug logs (`[TTS-DBG]`) intentionally kept for stability monitoring.
