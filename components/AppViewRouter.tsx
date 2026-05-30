@@ -105,6 +105,7 @@ export interface AppViewRouterProps {
   setCameFromContextChoice: React.Dispatch<React.SetStateAction<boolean>>;
   userMessageCount: number;
   setUserMessageCount: React.Dispatch<React.SetStateAction<number>>;
+  isSessionQualified: boolean;
 
   // Transient state
   questionnaireAnswers: Record<string, string>;
@@ -265,6 +266,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     applyIntentLogic,
     routeWithIntentPicker,
     buildEmptyLifeContextTemplate,
+    isSessionQualified,
     t,
   } = props;
 
@@ -706,6 +708,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           hasPersonalityProfile={hasPersonalityProfile}
           onStartPersonalitySurvey={() => setView('personalitySurvey')}
           encryptionKey={encryptionKey}
+          isSessionQualified={isSessionQualified}
         />
       );
     case 'transcriptRecord':
