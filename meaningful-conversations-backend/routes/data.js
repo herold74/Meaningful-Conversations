@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
 const brand = require('../config/brand');
+const { sanitizeUserForClient } = require('../utils/userHelpers.js');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -114,8 +115,7 @@ router.put('/user/profile', async (req, res) => {
             data: updateData,
         });
         
-        // Return updated user without sensitive fields
-        const { passwordHash, ...userResponse } = updatedUser;
+        const userResponse = sanitizeUserForClient(updatedUser);
         res.json({ message: 'Profile updated successfully', user: userResponse });
         
     } catch (error) {
@@ -152,8 +152,7 @@ router.put('/user/coaching-mode', async (req, res) => {
             },
         });
         
-        // Return updated user without sensitive fields
-        const { passwordHash, ...userResponse } = updatedUser;
+        const userResponse = sanitizeUserForClient(updatedUser);
         
         // Parse unlockedCoaches from JSON string
         if (userResponse.unlockedCoaches) {
@@ -197,8 +196,7 @@ router.put('/user/ai-region', async (req, res) => {
         // Log region change for analytics
         console.log(`🌍 User ${userId} changed AI region preference to: ${aiRegionPreference}`);
         
-        // Return updated user without sensitive fields
-        const { passwordHash, ...userResponse } = updatedUser;
+        const userResponse = sanitizeUserForClient(updatedUser);
         
         // Parse unlockedCoaches from JSON string
         if (userResponse.unlockedCoaches) {
@@ -331,7 +329,7 @@ router.post('/redeem-code', async (req, res) => {
             }),
         ]);
 
-        const { passwordHash, ...userPayload } = updatedUser;
+        const userPayload = sanitizeUserForClient(updatedUser);
         res.status(200).json({ user: userPayload });
 
     } catch (error) {
@@ -1074,7 +1072,7 @@ router.put('/user/password', async (req, res) => {
             },
         });
         const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
-        invalidateTokensForUser(req.userId);
+        await invalidateTokensForUser(req.userId);
         res.status(200).json({ message: 'Password updated successfully.' });
     } catch (error) {
         console.error("Error changing password:", error);
