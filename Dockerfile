@@ -14,8 +14,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json to leverage Docker's layer caching.
 COPY package*.json ./
 
-# Use npm ci for reproducible builds (strictly follows package-lock.json)
-RUN npm ci
+# npm install instead of npm ci: macOS-generated lockfile omits linux/amd64
+# optional binary entries (e.g. @emnapi/core) that npm ci rejects cross-platform.
+RUN npm install
 
 # Copy the rest of the frontend application source code.
 COPY . .
@@ -50,8 +51,8 @@ COPY package*.json ./
 COPY server.js ./
 COPY --from=builder /app/dist ./dist
 
-# Install ONLY production dependencies to keep the final image small.
-RUN npm ci --omit=dev
+# npm install instead of npm ci (cross-platform lockfile compatibility, see builder stage).
+RUN npm install --omit=dev
 
 # The Cloud Run environment provides a PORT environment variable.
 # Our server.js is configured to listen on process.env.PORT || 8080.
