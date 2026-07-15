@@ -44,6 +44,8 @@ function serializeGamificationState(state) {
     return JSON.stringify(serializableState);
 }
 
+const { sanitizeUserForClient } = require('../utils/userHelpers.js');
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
@@ -202,7 +204,7 @@ router.post('/login', loginLimiter, async (req, res) => {
             },
         });
 
-        const { passwordHash, ...userPayload } = user;
+        const userPayload = sanitizeUserForClient(user);
         const token = jwt.sign({ 
             userId: user.id
         }, JWT_SECRET, { expiresIn: '7d' });
@@ -246,7 +248,7 @@ router.post('/verify-email', verifyEmailLimiter, async (req, res) => {
             },
         });
 
-        const { passwordHash, ...userPayload } = updatedUser;
+        const userPayload = sanitizeUserForClient(updatedUser);
         // Automatically log the user in by creating a session token
         const sessionToken = jwt.sign({ 
             userId: updatedUser.id
@@ -330,7 +332,7 @@ router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
                 updatedAt: new Date(),
             },
         });
-        invalidateTokensForUser(user.id);
+        await invalidateTokensForUser(user.id);
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {
         console.error('Reset password error:', error);
