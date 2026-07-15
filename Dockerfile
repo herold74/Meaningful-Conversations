@@ -1,6 +1,7 @@
 # ---- Stage 1: Build the React Application ----
 # Use a Node.js image to get the tools needed for building the app.
-FROM node:22-bullseye AS builder
+# Bookworm (Debian 12) — LTS with active security support until 2028.
+FROM node:22-bookworm AS builder
 
 # Build arguments for version tracking
 ARG BUILD_NUMBER=0
@@ -31,7 +32,7 @@ RUN npm run build
 
 # ---- Stage 2: Create the lean production image ----
 # Use a slim Node.js base image for a smaller final container.
-FROM node:22-bullseye-slim
+FROM node:22-bookworm-slim
 
 # Set the working directory.
 WORKDIR /app

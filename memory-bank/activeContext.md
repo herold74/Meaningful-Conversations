@@ -3,11 +3,32 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-05-30**, build **29**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Staging:** Deployed **2026-07-15**, build **30**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
 **Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-15 — Security & Infrastructure Hardening)
+
+### Security Improvements (deployed to staging, Build 30)
+- **Sensitive data sanitization:** `sanitizeUserForClient()` allowlist function in `utils/userHelpers.js` — applied to all user-returning routes (`auth.js`, `data.js`). Prevents accidental exposure of `activationToken`, `passwordResetToken`, `unsubscribeToken`, `lifeContext`, `tokensInvalidatedAt`, and any future columns.
+- **DB-backed token invalidation:** `tokensInvalidatedAt DateTime?` column added to `User` (migration `20260715000000_add_tokens_invalidated_at`). `services/tokenInvalidation.js` now writes to DB on logout/password-change — cross-worker revocation guaranteed in PM2 cluster mode. In-memory cache retained for performance with DB as source of truth.
+- **Auth middleware async:** `middleware/auth.js` is now `async` and `await`s `isTokenInvalidated`. `optionalAuth.js` uses `isTokenInvalidatedSync()` (in-memory only, safe for optional paths).
+- **Tests updated:** `middleware/__tests__/auth.test.js` mocks tokenInvalidation, async middleware calls; all 557 backend tests passing.
+
+### Package Updates (2026-07-15 — Tier 1 + Tier 2)
+- **Frontend (`npm update` + `npm audit fix`):** 0 vulnerabilities. 153 packages updated within semver ranges (Capacitor 8.0.x→8.4.x, framer-motion 12.34→12.42, React PDF 4.3→4.5, autoprefixer, postcss, tailwindcss/typography, etc.). `browserslist-db` confirmed up to date.
+- **Backend (`npm update` + `npm install pm2@7.0.3`):** 0 vulnerabilities. pm2 upgraded 6.0.14→7.0.3 (major; safe: CJS project, Node 22 ≥ required 18, ecosystem.config.js unchanged). Key security fixes in pm2 7: CVE-2025-5891 ReDoS, CVE-2026-27699 proxy-agent, command injection in WebAuth/PM2IO/tools, prototype pollution in Configuration.
+- **Dockerfiles (frontend + backend):** Base images upgraded `node:22-bullseye` → `node:22-bookworm` (Debian 12 — active security support until 2028; Bullseye EOL Nov 2026). Backend slim stage: added `openssl` to apt-get install (bookworm-slim does not ship OpenSSL; required by Prisma query engine for libssl.so.3).
+- **Server OS (`dnf upgrade -y`):** 493 packages upgraded — kernel 5.14.0-687.25.1.el9_8, OpenSSL 3.5.5, Podman 5.8.2, glibc 2.34-272, openssh 9.9p1, curl 7.76.1, crypto-policies 20260224, and more. AlmaLinux 9 → 9.8.
+
+### Backup Script Fix (2026-07-15)
+- **Duplicate log lines fixed:** `log()` function in `/usr/local/bin/backup-databases.sh` now writes directly to file (`>>`) and echoes to stdout separately. Cron changed from `>> log 2>&1` to `2>> log` — eliminates double-write. Verified with live test run: 0 duplicates.
+- **Backup health confirmed:** Daily run at 06:00 UTC — today's production dump `production-20260715-060002.sql.gz` (184 KB, gzip integrity OK, 14 tables). 7-day retention active (16 files, 2.8 MB).
+
+### Skipped (Tier 3 — dedicated sessions)
+- Prisma 5→7, Express 4→5, React 18→19, @google/genai 1→2, @mistralai 1→2, bcryptjs 2→3, dotenv 16→17, RevenueCat 12→13, @vitejs/plugin-react 4→6.
 
 ## Milestone: App Store Launch (2026-03-07)
 
