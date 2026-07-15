@@ -4,7 +4,8 @@ const { execSync } = require('child_process');
 const dotenv = require('dotenv');
 
 // Load environment variables from .env file FIRST.
-dotenv.config();
+// quiet: true suppresses the dotenv 17+ console notice when .env is not found (e.g. in Docker).
+dotenv.config({ quiet: true });
 
 // CRITICAL: Construct DATABASE_URL for Cloud Run environments before any other modules are imported.
 // This ensures that Prisma Client (imported below) and any CLI commands have access to the correct database URL from the very beginning.
