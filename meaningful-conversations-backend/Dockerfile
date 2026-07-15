@@ -8,9 +8,11 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# --omit=optional skips platform-specific native binary packages (e.g. @emnapi)
-# that differ between macOS (lock file origin) and linux/amd64 (build target).
-RUN npm ci --ignore-scripts --omit=optional && npx prisma generate
+# npm install instead of npm ci: the macOS-generated package-lock.json omits
+# linux/amd64 optional binary entries (e.g. @emnapi/core@1.11.2) that npm ci
+# would reject. npm install resolves them correctly on the build platform while
+# still respecting all explicit version pins in package-lock.json.
+RUN npm install --ignore-scripts && npx prisma generate
 
 COPY . .
 
