@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { isTokenInvalidated } = require('../services/tokenInvalidation.js');
 const { recordActivity } = require('../services/activityTracker.js');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
         
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
         
-        if (isTokenInvalidated(decodedToken.userId, decodedToken.iat)) {
+        if (await isTokenInvalidated(decodedToken.userId, decodedToken.iat)) {
             return res.status(401).json({ error: 'Token has been invalidated. Please log in again.' });
         }
         

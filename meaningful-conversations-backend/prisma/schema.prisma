@@ -39,6 +39,7 @@ model User {
   accessExpiresAt           DateTime?
   premiumExpiresAt          DateTime?
   purchasePlatform          String?       // paypal | ios | android — primary purchase platform
+  tokensInvalidatedAt       DateTime?     // set on password change/reset; JWTs issued before this are rejected across all PM2 workers
   feedbacksByUser           Feedback[]    @relation("UserToFeedbacks")
   upgradeCodesUsedByUser    UpgradeCode[] @relation("UserToUpgradeCodes")
   personalityProfile        PersonalityProfile?
