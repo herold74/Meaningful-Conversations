@@ -8,8 +8,9 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Use npm ci for reproducible builds (strictly follows package-lock.json)
-RUN npm ci --ignore-scripts && npx prisma generate
+# --omit=optional skips platform-specific native binary packages (e.g. @emnapi)
+# that differ between macOS (lock file origin) and linux/amd64 (build target).
+RUN npm ci --ignore-scripts --omit=optional && npx prisma generate
 
 COPY . .
 
