@@ -727,7 +727,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     <p className="mt-2 text-base text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
                 </div>
 
-                <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
                     <div className="flex justify-between items-center gap-4">
                         <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{isInterviewReview ? t('sessionReview_g_summary_title') : t('sessionReview_summary')}</h2>
                          {!isInterviewReview && (
@@ -759,7 +759,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 </div>
 
                 {!isInterviewReview && (
-                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
                         <h2 className="text-xl font-semibold text-center text-content-primary dark:text-content-primary">{t('sessionReview_rating_title')}</h2>
                         <p className="mt-1 text-center text-content-secondary dark:text-content-secondary">{t('sessionReview_rating_prompt', { botName: selectedBot.name })}</p>
                         <div className="flex justify-center items-center gap-2 my-4">
@@ -832,7 +832,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
                 
                 {!isInterviewReview && nextSteps && nextSteps.length > 0 && (
-                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
                             <div className="flex items-center gap-2">
@@ -864,12 +864,12 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         </p>
                         <ul className="text-content-secondary dark:text-content-secondary space-y-2 list-none">
                             {nextSteps.map((step, index) => (
-                                <li key={index} className={`flex items-start gap-3 p-2 rounded-md transition-colors ${selectedNextSteps.has(index) ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800/50 opacity-60'}`}>
+                                <li key={index} className={`flex items-start gap-3 p-2 rounded-lg transition-colors ${selectedNextSteps.has(index) ? 'bg-status-success-background/50 dark:bg-status-success-background/30' : 'bg-background-tertiary/60 opacity-60'}`}>
                                     <input
                                         type="checkbox"
                                         checked={selectedNextSteps.has(index)}
                                         onChange={() => toggleNextStep(index)}
-                                        className="mt-1 w-4 h-4 accent-green-600 cursor-pointer"
+                                        className="mt-1 w-4 h-4 accent-accent-primary cursor-pointer"
                                     />
                                     <button
                                         onClick={() => handleExportSingleStep(step.action, step.deadline)}
@@ -912,7 +912,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                         <>
                                             <div className={blockageGridClass}>
                                                 {solutionBlockages.map((blockage, index) => (
-                                                    <div key={index} className="p-3 bg-background-secondary dark:bg-background-tertiary/50 border border-border-primary dark:border-border-primary/50">
+                                                    <div key={index} className="p-3 bg-background-secondary dark:bg-background-tertiary/50 border border-border-primary dark:border-border-primary/50 rounded-lg">
                                                         <h4 className="font-bold text-blue-800 dark:text-blue-300">{getBlockageNameTranslation(blockage.blockage)}</h4>
                                                         <p className="text-sm text-content-secondary dark:text-content-secondary mt-1">{blockage.explanation}</p>
                                                         <p className="text-sm text-content-subtle dark:text-content-subtle mt-2 border-l-2 border-blue-300 dark:border-blue-500 pl-2 italic">"{blockage.quote}"</p>
@@ -958,7 +958,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                             }} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
                             <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
                         </div>
-                        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary">
+                        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
                             {effectiveProposedUpdates.map((update, index) => {
                                 const appliedUpdate = appliedUpdates.get(index);
                                 const isApplied = !!appliedUpdate;
@@ -966,7 +966,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                                 const canChangeType = isApplied && !isNewHeadline;
 
                                 return (
-                                    <div key={index} className={`flex items-start gap-3 p-3 transition-colors ${isApplied ? 'bg-background-secondary dark:bg-background-secondary/50' : 'bg-background-primary dark:bg-background-primary/20 opacity-60'} border border-border-secondary dark:border-border-primary/50`}>
+                                    <div key={index} className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${isApplied ? 'bg-background-secondary dark:bg-background-secondary/50' : 'bg-background-primary dark:bg-background-primary/20 opacity-60'} border border-border-secondary dark:border-border-primary/50`}>
                                         <input type="checkbox" id={`update-${index}`} checked={isApplied} onChange={() => handleToggleUpdate(index)} className="mt-1 h-5 w-5 rounded bg-background-secondary dark:bg-background-tertiary border-border-secondary dark:border-border-secondary text-accent-primary focus:ring-accent-primary cursor-pointer [color-scheme:light] dark:[color-scheme:dark]" />
                                         <div className="flex-1">
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">

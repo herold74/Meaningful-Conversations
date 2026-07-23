@@ -552,8 +552,8 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
   );
 
   return (
-    <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary dark:bg-transparent border border-border-primary dark:border-border-primary shadow-lg rounded-lg overflow-hidden">
-      <header className="flex items-center justify-between p-4 border-b border-border-primary dark:border-border-primary gap-2">
+    <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card overflow-hidden">
+      <header className="flex items-center justify-between p-4 border-b border-border-primary/50 gap-2">
         {/* Left: Coach Info (responsive) */}
         <div className="flex-1 min-w-0">
              <button 
@@ -561,7 +561,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-accent-primary rounded-lg p-1 -ml-1 transition-colors hover:bg-background-tertiary dark:hover:bg-background-tertiary/50"
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
-                <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0" />
+                <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0 ring-2 ring-accent-primary/30" />
                 <div className="min-w-0 flex items-center gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                 </div>
@@ -792,12 +792,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
               {message.role === 'user' ? (
-                <div className={`max-w-md px-4 py-2.5 bg-accent-tertiary text-accent-tertiary-foreground rounded-2xl rounded-br-md shadow-sm`}>
+                <div className={`max-w-md px-4 py-2.5 bg-gradient-to-br from-accent-primary to-accent-tertiary text-button-foreground-on-accent rounded-2xl rounded-br-md shadow-sm`}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2 items-start max-w-md">
-                  <div className="prose dark:prose-invert bg-background-secondary text-content-primary border border-border-primary rounded-2xl rounded-bl-md shadow-card px-4 py-2.5">
+                  <div className="prose dark:prose-invert bg-background-tertiary/80 text-content-primary rounded-2xl rounded-bl-md shadow-sm px-4 py-2.5">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
                   </div>
                   {message.referralBotIds && message.referralBotIds.length > 0 && onReferralSwitch && (
@@ -835,21 +835,21 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {isLoading && (
               <div className="flex gap-3 justify-start animate-fadeIn">
                   <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />
-                  <div className="max-w-md px-4 py-3 bg-background-secondary border border-border-primary rounded-2xl rounded-bl-md shadow-card">
+                  <div className="max-w-md px-4 py-3 bg-background-tertiary/80 rounded-2xl rounded-bl-md shadow-sm">
                       <BrandLoader size="sm" />
                   </div>
               </div>
           )}
         </main>
         
-        <footer ref={footerRef} className="p-3 border-t border-border-primary bg-background-secondary/50 backdrop-blur-sm">
+        <footer ref={footerRef} className="p-3 border-t border-border-primary/50 bg-background-secondary/60 backdrop-blur-md">
           {isTestMode ? (
             <div className="text-center py-2 text-content-secondary">
               <p className="text-sm">{t('test_mode_input_disabled')}</p>
             </div>
           ) : (
             <form onSubmit={handleFormSubmit} className="flex flex-col gap-1">
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-2 px-2 py-1.5 bg-background-primary/90 border border-border-primary/60 rounded-full shadow-card backdrop-blur-sm">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -859,12 +859,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                   disabled={isLoading}
                   maxLength={5000}
                   rows={1}
-                  className="flex-1 px-4 py-2.5 bg-background-primary text-content-primary border border-border-primary rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
+                  className="flex-1 w-0 px-3 py-2 bg-transparent text-content-primary rounded-full text-sm focus:outline-none resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
                 />
-                <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
+                <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors shrink-0" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
                     <MicrophoneIcon className={`w-5 h-5 ${speech.isListening ? 'text-red-500 animate-pulse' : ''}`} />
                 </button>
-                <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover disabled:opacity-40 rounded-xl transition-colors">
+                <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-gradient-to-br from-accent-primary to-accent-primary-hover text-button-foreground-on-accent hover:brightness-105 disabled:opacity-40 rounded-full transition-all shrink-0">
                   <PaperPlaneIcon className="w-5 h-5" />
                 </button>
               </div>

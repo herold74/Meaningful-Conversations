@@ -312,16 +312,15 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); isLocked ? onUpgrade?.() : onSelect(bot); } }}
         className={`
             relative flex flex-col items-center text-center p-6
-            bg-background-secondary border rounded-card transition-colors
+            bg-background-secondary border rounded-card shadow-card transition-all duration-200
             [-webkit-tap-highlight-color:transparent]
             ${isLocked
-              ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} opacity-60 ${getBorderClass()}`
-              : `cursor-pointer ${getBorderClass()}`
+              ? `${onUpgrade ? 'cursor-pointer hover:opacity-75' : 'cursor-not-allowed'} opacity-70 ${getBorderClass()}`
+              : `cursor-pointer hover:shadow-card-hover ${getBorderClass()}`
             }
         `}
-        whileHover={isLocked ? undefined : { y: -3, boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)' }}
+        whileHover={isLocked ? undefined : { y: -3 }}
         transition={{ duration: 0.15 }}
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
         aria-disabled={isLocked}
       >
         {isClientOnly && !isLocked && (
@@ -343,16 +342,16 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         )}
         
         <div className="relative flex-shrink-0">
-            <div className={`rounded-full p-0.5 ${isLocked ? '' : 'bg-gradient-to-br from-brand-light to-brand-dark'}`}>
+            <div className={`rounded-full p-0.5 ${isLocked ? 'bg-border-primary/40' : 'bg-gradient-to-br from-brand-light to-brand-dark'}`}>
                 <img 
                     src={bot.avatar} 
                     alt={bot.name} 
-                    className={`w-20 h-20 rounded-full border-2 border-background-secondary ${isLocked ? 'filter grayscale' : ''}`}
+                    className={`w-20 h-20 rounded-full border-2 border-background-secondary ${isLocked ? 'filter grayscale opacity-80' : ''}`}
                 />
             </div>
             {isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
-                    <LockIcon className="w-7 h-7 text-white" />
+                <div className="absolute inset-0 flex items-center justify-center bg-background-primary/50 backdrop-blur-[2px] rounded-full">
+                    <LockIcon className="w-7 h-7 text-content-primary" />
                 </div>
             )}
             {hasMeditation && (
@@ -373,11 +372,11 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
                     {(language === 'de' ? bot.style_de : bot.style).split(', ').map((tag, index) => {
                         const isFirstTag = index === 0;
                         const tagClass = !isLocked && isFirstTag
-                            ? 'bg-accent-primary/15 text-accent-primary'
-                            : 'bg-background-tertiary text-content-secondary';
+                            ? 'bg-accent-primary/12 text-accent-primary border border-accent-primary/20'
+                            : 'bg-background-tertiary text-content-secondary border border-border-primary/40';
                         
                         return (
-                            <span key={tag} className={`px-2 py-0.5 text-[0.6875rem] font-medium tracking-wide uppercase rounded-pill ${tagClass}`}>
+                            <span key={tag} className={`px-2.5 py-0.5 text-[0.6875rem] font-medium tracking-wide rounded-pill ${tagClass}`}>
                                 {tag}
                             </span>
                         );
