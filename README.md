@@ -87,7 +87,7 @@ This project supports full white-label rebranding via environment variables — 
 *   **Calendar Integration**: Export actionable next steps as `.ics` calendar events.
 *   **Gamification**: XP, levels, streaks, and achievement badges for regular self-reflection.
 *   **Cloud Sync** *(Registered+)*: Life Context and personality profiles synchronized across all your devices.
-*   **Seasonal Themes**: Automatic visual themes (Spring blossoms, Summer butterflies, Autumn leaves, Winter snowflakes).
+*   **Seasonal color themes**: Automatic palette shifts by season (summer / autumn / winter via `data-theme`; particle decorations removed July 2026).
 *   **Guest Mode**: Try the app without an account — 4 coaches (Nobody, Max, Ava, Gloria), voice/text chat, and local Life Context. Data stays in your browser only.
 *   **9-Day Premium Trial**: Every new registration includes a full 9-day Premium trial with access to all features.
 *   **Crisis Response**: All coaches include a built-in crisis detection protocol that provides helpline information for all user types, including guests.

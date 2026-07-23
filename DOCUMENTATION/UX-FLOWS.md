@@ -2,7 +2,7 @@
 
 Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visuelle Flow-Diagramme.
 
-**Zuletzt aktualisiert:** April 2026 (ausgerichtet auf App-Version 2.0.1)
+**Zuletzt aktualisiert:** Juli 2026 (Entry-screen 3-card hubs, build 35)
 
 ---
 
@@ -29,7 +29,7 @@ Die folgenden Screenshots dokumentieren den vollstaendigen Guest-Flow der Web-Ve
 | 1 | AuthView (Willkommen) | `screenshots/01-auth-welcome.png` |
 | 2 | IntentPickerView | `screenshots/02-intent-picker.png` |
 | 3 | NamePromptView | `screenshots/03-name-prompt.png` |
-| 4 | LandingPage (mit Life-Context-Template) | `screenshots/04-landing-page-guest.png` |
+| 4 | LandingPage (3-Karten-Hub + Upload) | `screenshots/04-landing-page-guest.png` |
 | 5 | BotSelection (Management + Coaching) | `screenshots/05-bot-selection-guest.png` |
 | 6 | BotSelection (Gesperrte Premium-Bots) | `screenshots/06-bot-selection-locked.png` |
 | 7 | BotSelection (Klienten-Sektion) | `screenshots/07-bot-selection-client-locked.png` |
@@ -40,7 +40,7 @@ Die folgenden Screenshots dokumentieren den vollstaendigen Guest-Flow der Web-Ve
 
 ```mermaid
 flowchart TD
-    START([App oeffnen]) --> WELCOME[WelcomeScreen<br/>Logo + Ladeanimation]
+    START([App oeffnen]) --> WELCOME[WelcomeScreen<br/>Logo, Hero-Subtitle,<br/>Coach-Avatare, Loader]
     WELCOME -->|Session vorhanden?| CHECK{Gespeicherte<br/>Session?}
     CHECK -->|Ja| AUTO_LOGIN[Automatischer Login<br/>Session wiederherstellen]
     CHECK -->|Nein| AUTH[AuthView<br/>Willkommen-Bildschirm]
@@ -425,12 +425,30 @@ Details und Laengenbeschreibungen: Keys `intent_*_desc` (bzw. `*_guest` fuer Gae
 
 ## 10. Onboarding-Komponenten (Detail)
 
+### 10.0 WelcomeScreen
+
+- **Anzeige:** Zentriertes Logo mit weichem Teal-Glow, **6 Coach-Avatare** im Orbit (`BOTS.slice(1,7)`), App-Name, Hero-Subtitle (`welcome_hero_subtitle`), BrandLoader
+- **Trigger:** Kurz nach Login / Registrierung waehrend Session-Daten geladen werden
+- **Keine Interaktion:** Rein informativ; Routing folgt automatisch ueber `routeWithIntentPicker`
+
 ### 10.1 IntentPickerView
 
-- **Anzeige:** Drei Karten mit Icon, Titel, Beschreibung (Icons: Kommunikation 🗣️, Coaching 💭, Begleitendes Coaching 🧭)
+- **Anzeige:** Logo + Titel + Subtitle; **drei Karten** im Grid (`md:grid-cols-3`) mit Lucide-Icons (MessageCircle, Lightbulb, Compass), Titel, Beschreibung, CTA „Auswählen“
+- **Featured:** Mittlere Karte „AI Coaching“ nutzt `.action-card-featured` (dunkel-teal Gradient, weisse Schrift)
 - **"Nicht mehr anzeigen":** Setzt `intentPickerDisabled = true` in localStorage
-- **Positionierung:** Zentriert, etwas tiefer als Bildschirmmitte
-- **Animation:** Framer Motion fade-in
+- **Positionierung:** Zentriert, `min-h-[80dvh]`, Safe-Area-Portal auf iOS
+- **Animation:** Framer Motion fade-in (gestaffelt pro Karte)
+
+### 10.1b LandingPage (Lebenskontext-Hub)
+
+- **Initialzustand:** Immer **3 Aktionskarten** + Upload/Drop-Zone darunter — auch wenn ein gespeicherter Lebenskontext existiert
+- **Karten:**
+  1. **Mit Lebenskontext fortfahren** — laedt `existingContext` in die Vorschau (nur bei Klick; nicht beim Mount). Bei Template-only → oeffnet Datei-Picker
+  2. **Neues Gespräch starten** (featured) → `onStartQuestionnaire`
+  3. **Mit Interview erstellen** → `onStartInterview`
+- **Upload:** Drag-and-drop / Datei-Picker fuer `.md` (Header-Validierung unveraendert)
+- **Vorschau-Zustand:** Nach Upload oder Kontext-Karte — Dateiname, Markdown-Vorschau, „Sitzung starten“, sekundaere Buttons Bearbeiten/Erweitern + Interview
+- **Wichtig:** `fileContent` startet leer; **nicht** aus `existingContext` initialisieren (Regression: Hub wurde uebersprungen)
 
 ### 10.2 NamePromptView
 
@@ -557,6 +575,6 @@ flowchart LR
 
 ---
 
-*Dieses Dokument basiert auf dem implementierten Code in `App.tsx`, `hooks/useAppRouting.ts`, `components/BotSelection.tsx` und `components/IntentPickerView.tsx` (Stand App-Version **2.0.1**) und spiegelt die tatsaechliche Routing-Logik wider.*
+*Dieses Dokument basiert auf dem implementierten Code in `App.tsx`, `hooks/useAppRouting.ts`, `components/LandingPage.tsx`, `components/WelcomeScreen.tsx`, `components/BotSelection.tsx` und `components/IntentPickerView.tsx` (Stand App-Version **2.0.1**, Build **35**) und spiegelt die tatsaechliche Routing-Logik wider.*
 
 **Routing-Migration:** Einmaliges Zuruecksetzen von „Intent Picker dauerhaft ausblenden“ fuer Bestandsnutzer ueber `localStorage.intentPickerVersion` (Wert `1.9.7`), siehe `routeWithIntentPicker` in `useAppRouting.ts`.

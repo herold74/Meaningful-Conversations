@@ -4,7 +4,7 @@
 **Version:** 2.0.1
 **Branch:** `main`
 **Staging:** Deployed **2026-07-24**, build **35**; v2.0.1 — https://mc-beta.manualmode.at — landing/intent 3-card hubs, welcome hero, stronger corner gradients, featured action cards. Registry pull on server still fails (Quay HTML); frontend image streamed manually post-deploy. Avatars verified (`/avatars/kenji.png` → 200). Health checks OK.
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **35**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -162,9 +162,9 @@ MyCoach AI v2.0.0 is live in the Apple App Store for Austria, Germany, and Switz
 - **Staging:** Redeployed v2.0.1 (`-c app`); `BUILD_NUMBER` → 5 (auto sync commit `chore: build 5 sync`).
 - **Staging vs Production:** `./deploy-manualmode.sh -e production` **2026-04-05** — zieht dieselben `:2.0.1`-Images wie zuletzt auf Staging gebaut (Build 6); kein App-Store-Submit.
 
-### Life Context Editor (2026-03-01 – 2026-03-05)
+### Life Context Editor (2026-03-01 – 2026-03-05, Landing UI 2026-07-24)
 - **Markdown editor with preview toggle** (`LifeContextEditorView.tsx`): Edit/preview mode for Life Context files, with download as .md and PDF
-- **Button logic** (`LandingPage.tsx`): Three states — "Erstellen" (new), "Erweitern" (template), "Editieren" (enriched) — based on content analysis
+- **LandingPage 3-card hub (2026-07-24):** Cards for context / new conversation / interview always shown first; `fileContent` starts empty (never preloaded from `existingContext`). Card 1 loads saved LC on click; upload drop zone below cards. Preview state still offers Edit/Extend + interview CTAs via `showEdit` / `isTemplateContext`.
 - **Content-based template detection** (`AppViewRouter.tsx`): Analyzes LC markdown line-by-line to determine if it's a template or enriched context
 - **Gloria context extension** (`chat.js`, `session.js`): Gloria now extends existing LCs instead of creating from scratch, with gap-filling instructions
 - **Auto-save on creation** (`App.tsx`): Life Context saved to server immediately after questionnaire completion or file upload for registered users

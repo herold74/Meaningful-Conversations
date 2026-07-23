@@ -109,7 +109,25 @@ html.dark[data-theme="winter"] {
 - `--bg-primary`, `--bg-secondary`, `--bg-tertiary` — backgrounds
 - `--content-primary`, `--content-secondary` — text
 - `--accent-primary`, `--accent-secondary` — interactive elements
+- `--brand-color-2` … `--brand-color-4` — dark teal scale (featured cards)
 - `--border-primary` — borders
+
+### Ambient background & featured cards (2026-07-24)
+
+**Dual corner gradients** — `body::before` fixed layer (teal top-left, warm amber bottom-right; stronger opacity in light mode). Uses `--accent-primary` / `--accent-secondary`. Rules: `z-index: -1`, `pointer-events: none`, **no** `background-attachment: fixed` (iOS WKWebView).
+
+**`.action-card-featured`** — linear gradient `brand-color-4 → 3 → 2` for selection tiles that need white text (IntentPicker coaching card, LandingPage conversation card). Hover: `brightness(1.06)`.
+
+### Entry-screen locale keys (2026-07-24)
+
+| Key | Usage |
+|-----|--------|
+| `welcome_hero_subtitle` | WelcomeScreen tagline |
+| `landing_welcome_subtitle` | LandingPage subtitle |
+| `landing_card_context_title` / `_desc` | Hub card 1 |
+| `landing_card_conversation_title` / `_desc` | Hub card 2 (featured) |
+| `landing_card_interview_title` / `_desc` | Hub card 3 |
+| `intent_card_cta` | „Auswählen“ / „Choose“ on all selection cards |
 
 ## Key Constraints
 

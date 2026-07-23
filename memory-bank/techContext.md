@@ -138,10 +138,11 @@
 ```
 
 #### Versionierung
-- **VERSION:** Semantische Version aus `package.json` (z.B. `1.9.5`)
-- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei
-- **Anzeige:** `Version 1.9.5 (Build 2)`
-- **Service Worker:** Cache-Name enthält Version + Build
+- **VERSION:** Semantische Version aus `package.json` (z.B. `2.0.1`)
+- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei (**aktuell: 35**, Staging 2026-07-24)
+- **Anzeige:** `Version 2.0.1 (Build 35)` im Burger-Menü via `VITE_BUILD_NUMBER`
+- **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.0.1-b35`)
+- **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.4.2** (synced 2026-07-24)
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
 ```
