@@ -5,6 +5,12 @@ const { Mistral } = require('@mistralai/mistralai');
 let googleAI = null;
 let mistralAI = null;
 
+// Test seam: allows unit tests to inject a mock client without needing to
+// intercept the @google/genai dynamic import (which Jest CJS cannot mock).
+function _setGoogleClientForTesting(client) { googleAI = client; }
+function _setMistralClientForTesting(client) { mistralAI = client; }
+function _resetClientsForTesting() { googleAI = null; mistralAI = null; cachedProvider = null; cachedModelMapping = null; }
+
 // Cache for active provider
 let cachedProvider = null;
 let cachedProviderTimestamp = 0;
@@ -682,5 +688,9 @@ module.exports = {
   getModelMapping,
   getModelForContext,
   clearModelMappingCache,
+  // Test seams (underscore-prefixed = not part of public API)
+  _setGoogleClientForTesting,
+  _setMistralClientForTesting,
+  _resetClientsForTesting,
 };
 
