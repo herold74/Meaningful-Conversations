@@ -206,7 +206,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
 
   if (isLoading) {
     return (
-      <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400 text-center">
+      <div className="py-6 animate-pulse text-content-subtle text-center">
         {t('upgrade_loading')}
       </div>
     );
@@ -215,7 +215,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   if (products.length === 0) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+        <p className="text-sm text-content-subtle text-center">
           {t('iap_not_available')}
         </p>
         <button
@@ -232,7 +232,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   return (
     <div className="space-y-4 text-left">
       {success && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 text-sm font-medium text-center space-y-2">
+        <div className="p-3 bg-status-success-background border border-status-success-border rounded-lg text-status-success-foreground text-sm font-medium text-center space-y-2">
           <p>{success}</p>
           {successUser && (
             <Button onClick={() => { onPurchaseSuccess(successUser); setSuccessUser(null); }} size="md" fullWidth>
@@ -243,7 +243,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       )}
 
       {error && !success && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm text-center">
+        <div className="p-3 bg-status-danger-background border border-status-danger-border rounded-lg text-status-danger-foreground text-sm text-center">
           {error}
         </div>
       )}
@@ -251,7 +251,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       {/* Subscriptions */}
       {subscriptions.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
             {t('iap_section_subscriptions')}
           </h3>
           {subscriptions.map(product => (
@@ -270,7 +270,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       {/* One-time access passes */}
       {accessPasses.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
             {t('iap_section_lifetime')}
           </h3>
           {accessPasses.map(product => (
@@ -289,7 +289,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
       {/* Bot unlocks */}
       {botUnlocks.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
             {t('iap_section_coaches')}
           </h3>
           {botUnlocks.map(product => (
@@ -339,21 +339,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive
     : t('iap_period_month');
 
   return (
-    <div className={`rounded-lg p-4 border ${isActive ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-400 dark:border-emerald-600' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'}`}>
+    <div className={`rounded-lg p-4 border ${isActive ? 'bg-status-success-background/50 border-status-success-border' : 'bg-background-tertiary border-border-primary'}`}>
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            <p className="font-semibold text-content-primary text-sm sm:text-base">
               {product.localizedTitle}
             </p>
             {isActive && (
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
+              <span className="text-xs font-medium text-status-success-foreground bg-status-success-background px-2 py-0.5 rounded">
                 {t('iap_current')}
               </span>
             )}
           </div>
           {product.localizedDescription && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="text-xs text-content-subtle mt-0.5">
               {product.localizedDescription}
             </p>
           )}
@@ -363,7 +363,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive
             {product.priceString}
           </span>
           {isSubscription && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 block">
+            <span className="text-xs text-content-subtle block">
               /{periodLabel}
             </span>
           )}

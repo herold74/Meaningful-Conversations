@@ -17,28 +17,16 @@
 - **CSS:** all four animation blocks (`snowfall`, `blossom-fall`, `leaf-fall`, `butterfly-flutter` + particle classes) removed from `index.css`.
 - **dateUtils:** `isChristmasSeason`, `isSpringSeason`, `isSummerSeason`, `isAutumnSeason` removed (decoration-only); `getCurrentSeason`/`isWinterSeason`/`getSeasonalColorTheme` kept (drive color themes). Tests updated (14 passing); `tsc --noEmit` clean.
 - **Skill updated:** `i18n-and-theming/SKILL.md` — decorations documented as removed; do not re-add without explicit request.
-- **Not yet committed** as of this session.
+- **Not yet committed** as of this session (seasonal removal landed in `3001035`; Phase 4 paywall/auth/dark palette pending commit).
 
-### Visual modernization — Phases 1–3 complete (2026-07-23)
-- **3a–3c** (latest commit): ChatView gradient bubbles + frosted pill composer; SessionReview rounded cards + semantic next-step chips; BotSelection softer lock overlay + tinted tag pills. Layout/safe-area/spacer mechanics untouched.
-- **Remaining:** Phase 3d avatars (Ava, Rob, Victor, Bekky, Dan still on DiceBear); owner E2E session smoke recommended.
+### Visual modernization — Phase 4 complete (2026-07-23)
+- **Dark palette:** brand/winter/manualmode `.dark` surfaces → teal-tinted `#0d1420` family (`index.css`).
+- **Paywall/auth:** PaywallView + NativePaywall semantic status tokens; ForgotPassword/ResetPassword/VerifyEmail aligned with LoginView card + input patterns.
+- **BotSelection polish:** section headers → Lucide (MessageCircle, Target, GraduationCap); sentence-case; `border-primary` dividers.
+- **ChatView:** meditation stop button → status-danger token styling.
+- **Remaining (optional):** Gloria/Max/Victor avatar style consistency; secondary screens (AdminView, PersonalityProfileView, FeedbackModal); owner E2E sign-off.
 
-### Visual modernization — Phases 1–2c complete (2026-07-23)
-- **2a** (`af3e785`): uppercase CTAs → shared Button (LandingPage, SessionReview, ChatView end-session).
-- **2b** (`1472bd1`): hardcoded gray/blue/bronze → semantic tokens (Upgrade/Redeem/RegistrationPending/TranscriptRatings/EvaluationReview/BotSelection bronze/PersonalitySurvey neutrals).
-- **2c** (`3ef9e9c`): lucide-react onboarding icons (IntentPicker, NamePrompt, OceanOnboarding, ProfileHint, BotSelection topic search). Section-header emoji in BotSelection left as-is.
-- **Next:** Phase 3 (chat / session review / bot selection polish) + remaining Style-A avatars (Ava, Rob, Victor, Bekky, Dan).
-
-### Visual modernization — Phase 1 implemented (2026-07-23)
-- **Tokens:** `tailwind.config.js` — `content.tertiary` defined (alias of `--content-subtle`; was silently inert), `borderRadius.card` 12px→16px.
-- **Ambient background:** `index.css` — `body::before` fixed gradient layer (z-index -1, pointer-events none, theme-aware via `--accent-*` triplets; NOT background-attachment:fixed per iOS WKWebView constraint). Dark mode variant included.
-- **Button:** new `gradient` variant in `shared/Button.tsx` (from-accent-primary to-accent-primary-hover — theme-var based, not hex). No existing variants changed.
-- **Avatars (Phase 3d partial, pulled forward):** 5 Style-A avatars live in `public/avatars/` (gloria/max/kenji/chloe/nobody, 512px PNG, center-cropped 92%). `constants.ts` + backend `bots.js` updated for 6 bot entries (both Gloria bots share gloria.png). Ava/Rob/Victor/Bekky/Dan still on DiceBear until generated.
-- **Gates:** `tsc --noEmit` clean, 167/167 jest tests pass, vite build OK. Owner visual smoke (light/dark/seasonal, iOS rotation) pending.
-
-### Visual modernization plan (in progress, not yet implemented)
-- Plan file: `~/.cursor/plans/visual_modernization_proposal_fb954fd5.plan.md` — restyle-only modernization (gradient-tinted surfaces, unified Button, line icons, sentence-case CTAs) with per-screen functionality contracts (SessionReview 41 features incl. DiffViewer/edit mode; ChatView 30 features). Four mockup images in `~/.cursor/projects/Users-gherold-Meaningful-Conversations-Project/assets/`. Guardrail: mockups are mood boards, not layout specs; zero functionality loss.
-- **Avatar refresh APPROVED (2026-07-23):** Style A — soft illustrated portraits, teal/amber palette, self-hosted in `public/avatars/` replacing runtime `api.dicebear.com` hotlinks in `constants.ts` (GDPR + availability). Approved samples (Gloria/Kenji/Chloe/Max + abstract "Nobody" mark) in the assets folder above; remaining coaches (Ava, Rob, Victor, Bekky, Dan, 2nd Gloria) still to generate. Real stock photos ruled out (licensing/personality rights, AI transparency).
+### Visual modernization — Phases 1–3 + 3d complete (2026-07-23)
 
 ## Recent Changes (2026-07-15 — Security & Infrastructure Hardening)
 

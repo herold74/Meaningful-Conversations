@@ -217,9 +217,10 @@ html[data-theme="manualmode"] {
 .dark[data-theme="brand"],
 .dark[data-theme="winter"],
 .dark[data-theme="manualmode"] {
-  --bg-primary: 17 24 39;
-  --bg-secondary: 17 24 39;
-  --bg-tertiary: 31 41 55;
+  /* Teal-tinted dark surfaces (Phase 1/4 modernization) — not flat gray-900 */
+  --bg-primary: 13 20 32;
+  --bg-secondary: 20 28 42;
+  --bg-tertiary: 26 35 50;
 
   --content-primary: 229 231 235;
   --content-secondary: 156 163 175;
