@@ -14,7 +14,7 @@ interface EvaluationReviewProps {
 
 const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) => {
     const ratio = score / max;
-    const color = ratio >= 0.7 ? 'bg-green-500' : ratio >= 0.4 ? 'bg-yellow-500' : 'bg-red-500';
+    const color = ratio >= 0.7 ? 'bg-status-success-foreground' : ratio >= 0.4 ? 'bg-status-warning-foreground' : 'bg-status-danger-foreground';
     return (
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-white font-bold text-sm ${color}`}>
             {score}/{max}
@@ -23,7 +23,7 @@ const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) =>
 };
 
 const Section: React.FC<{ title: string; children: React.ReactNode; badge?: React.ReactNode }> = ({ title, children, badge }) => (
-    <div className="bg-background-primary rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-4">
+    <div className="bg-background-primary rounded-xl border border-border-primary p-5 mb-4">
         <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-bold text-content-primary">{title}</h3>
             {badge}
@@ -84,7 +84,7 @@ const BotRecCard: React.FC<{
     };
 
     return (
-        <div className={`rounded-lg border p-4 flex flex-col h-full ${available ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'}`}>
+        <div className={`rounded-lg border p-4 flex flex-col h-full ${available ? 'border-status-success-border bg-status-success-background/50' : 'border-border-primary bg-background-tertiary/50'}`}>
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                     <span className={`text-xs font-semibold uppercase tracking-wide ${label === t('te_review_bot_primary') ? 'text-accent-primary' : 'text-content-tertiary'}`}>
@@ -93,19 +93,19 @@ const BotRecCard: React.FC<{
                     <span className="text-sm font-bold text-content-primary">{rec.botName}</span>
                 </div>
                 {available ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-status-success-foreground bg-status-success-background px-2 py-0.5 rounded-full">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         {t('te_review_bot_available')}
                     </span>
                 ) : (
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${rec.requiredTier === 'client' ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30' : 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${rec.requiredTier === 'client' ? 'text-status-info-foreground bg-status-info-background' : 'text-status-warning-foreground bg-status-warning-background'}`}>
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                         {tierLabel}
                     </span>
                 )}
             </div>
             <p className="text-sm text-content-secondary mb-3 line-clamp-6 min-h-[7.5rem]" title={rec.rationale}>{rec.rationale}</p>
-            <div className="bg-background-primary dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex-1 flex flex-col">
+            <div className="bg-background-primary rounded-lg border border-border-primary p-3 flex-1 flex flex-col">
                 <p className="text-xs font-semibold text-content-tertiary uppercase tracking-wide mb-1">{t('te_review_bot_example_prompt')}</p>
                 <p className="text-sm text-content-primary italic leading-relaxed">&ldquo;{rec.examplePrompt}&rdquo;</p>
                 <div className="mt-auto pt-2 flex items-center justify-between">
@@ -128,7 +128,7 @@ const BotRecCard: React.FC<{
                     {available && onStartSession && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onStartSession(rec.botId, rec.examplePrompt); }}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-white bg-accent-primary hover:bg-accent-primary/90 px-3 py-1.5 rounded-md shadow-sm transition-colors"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover px-3 py-1.5 rounded-md shadow-sm transition-colors"
                         >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                             {t('te_review_bot_start_session')}
@@ -206,7 +206,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                 {evaluation.behavioralAlignment.blindspotEvidence.length > 0 && (
                     <div>
                         <p className="text-xs font-semibold text-content-secondary uppercase tracking-wide mb-2">{t('te_review_blindspots')}</p>
-                        <BulletList items={evaluation.behavioralAlignment.blindspotEvidence} color="text-amber-700 dark:text-amber-400" />
+                        <BulletList items={evaluation.behavioralAlignment.blindspotEvidence} color="text-status-warning-foreground" />
                     </div>
                 )}
             </Section>
@@ -215,22 +215,22 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
             <Section title={t('te_review_assumptions')}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <p className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-status-success-foreground uppercase tracking-wide mb-2">
                             ✓ {t('te_review_assumptions_confirmed')}
                         </p>
-                        <BulletList items={evaluation.assumptionCheck.confirmed} color="text-green-700 dark:text-green-300" />
+                        <BulletList items={evaluation.assumptionCheck.confirmed} color="text-status-success-foreground" />
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-status-danger-foreground uppercase tracking-wide mb-2">
                             ✗ {t('te_review_assumptions_challenged')}
                         </p>
-                        <BulletList items={evaluation.assumptionCheck.challenged} color="text-red-700 dark:text-red-300" />
+                        <BulletList items={evaluation.assumptionCheck.challenged} color="text-status-danger-foreground" />
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-status-info-foreground uppercase tracking-wide mb-2">
                             ★ {t('te_review_assumptions_new')}
                         </p>
-                        <BulletList items={evaluation.assumptionCheck.newInsights} color="text-blue-700 dark:text-blue-300" />
+                        <BulletList items={evaluation.assumptionCheck.newInsights} color="text-status-info-foreground" />
                     </div>
                 </div>
             </Section>
@@ -268,7 +268,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
             )}
 
             {evaluation.personalityInsights.length === 0 && (
-                <div className="bg-background-primary rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-4 text-center">
+                <div className="bg-background-primary rounded-xl border border-border-primary p-5 mb-4 text-center">
                     <p className="text-sm text-content-secondary">{t('te_review_no_personality')}</p>
                 </div>
             )}
@@ -276,10 +276,10 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
             {/* Strengths & Development Areas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <Section title={t('te_review_strengths')}>
-                    <BulletList items={evaluation.strengths} color="text-green-700 dark:text-green-300" />
+                    <BulletList items={evaluation.strengths} color="text-status-success-foreground" />
                 </Section>
                 <Section title={t('te_review_development')}>
-                    <BulletList items={evaluation.developmentAreas} color="text-amber-700 dark:text-amber-400" />
+                    <BulletList items={evaluation.developmentAreas} color="text-status-warning-foreground" />
                 </Section>
             </div>
 
@@ -288,7 +288,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                 <div className="space-y-3">
                     {evaluation.nextSteps.map((step, i) => (
                         <div key={i} className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent-primary text-white text-xs font-bold flex items-center justify-center mt-0.5">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent-primary text-button-foreground-on-accent text-xs font-bold flex items-center justify-center mt-0.5">
                                 {i + 1}
                             </span>
                             <div>
@@ -315,7 +315,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
 
                             return (
                                 <div key={i}>
-                                    <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-3 leading-relaxed">
+                                    <p className="text-sm font-medium text-status-warning-foreground mb-3 leading-relaxed">
                                         {rec.developmentArea}
                                     </p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -337,7 +337,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                                         />
                                     </div>
                                     {i < evaluation.botRecommendations!.length - 1 && (
-                                        <hr className="mt-6 border-gray-200 dark:border-gray-700" />
+                                        <hr className="mt-6 border-border-primary" />
                                     )}
                                 </div>
                             );
@@ -353,7 +353,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                     <button
                         onClick={handleExportPDF}
                         disabled={isExporting}
-                        className="w-full py-3 rounded-lg font-semibold text-accent-primary bg-white dark:bg-gray-800 border-2 border-accent-primary hover:bg-accent-primary hover:text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="w-full py-3 rounded-lg font-semibold text-accent-primary bg-background-secondary border-2 border-accent-primary hover:bg-accent-primary hover:text-button-foreground-on-accent shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {isExporting ? (
                             <>
@@ -377,7 +377,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                 {/* Done button */}
                 <button
                     onClick={onDone}
-                    className="w-full py-3 rounded-lg font-semibold text-white bg-accent-primary hover:bg-accent-primary/90 shadow-md hover:shadow-lg transition-all"
+                    className="w-full py-3 rounded-lg font-semibold text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover shadow-md hover:shadow-lg transition-all"
                 >
                     {t('te_review_done')}
                 </button>
@@ -385,7 +385,7 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
 
             {/* Rating Section */}
             {evaluation.id && (
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="mt-6 pt-6 border-t border-border-primary">
                     <EvaluationRating
                         evaluationId={evaluation.id}
                         existingRating={evaluation.userRating}
