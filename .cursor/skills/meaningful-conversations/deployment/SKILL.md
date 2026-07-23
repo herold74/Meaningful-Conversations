@@ -338,9 +338,16 @@ ssh root@$SERVER_HOST 'podman load -i /tmp/mc-frontend-2.0.1.tar && cd /opt/manu
 ```bash
 curl -sI https://mc-beta.manualmode.at/avatars/kenji.png | grep content-type
 # Must be: content-type: image/png
+
+# Confirm correct frontend build (registry pull may leave stale image with same tag)
+JS=$(curl -sS https://mc-beta.manualmode.at/ | grep -o 'assets/main-[^"]*\.js' | head -1)
+curl -sS "https://mc-beta.manualmode.at/$JS" | grep -o 'Build [0-9]*' | head -1
+# Must match BUILD_NUMBER from repo after deploy
 ```
 
-**`server.js`:** SPA fallback skips `/avatars/*.png` — returns 404 instead of HTML when assets are missing (makes failures obvious).
+If avatars OK but Build number is stale → stream frontend image manually (see above) even when `dist/avatars/kenji.png` exists in the container.
+
+**`server.js`:** SPA fallback skips static extensions — returns 404 instead of HTML when assets are missing (makes failures obvious).
 
 ### 🚨 TTS Image Deployment (CRITICAL — recurring issue!)
 
