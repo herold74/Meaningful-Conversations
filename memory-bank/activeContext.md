@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-23**, build **33**; v2.0.1 images — https://mc-beta.manualmode.at — Phase 4 visual modernization (paywall/auth tokens, teal dark palette, bot selection headers) + full avatar set. Health checks OK post-deploy.
+**Staging:** Deployed **2026-07-24**, build **35**; v2.0.1 — https://mc-beta.manualmode.at — landing/intent 3-card hubs, welcome hero, stronger corner gradients, featured action cards. Registry pull on server still fails (Quay HTML); frontend image streamed manually post-deploy. Avatars verified (`/avatars/kenji.png` → 200). Health checks OK.
 **Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
@@ -18,9 +18,16 @@
 - **dateUtils:** `isChristmasSeason`, `isSpringSeason`, `isSummerSeason`, `isAutumnSeason` removed (decoration-only); `getCurrentSeason`/`isWinterSeason`/`getSeasonalColorTheme` kept (drive color themes). Tests updated (14 passing); `tsc --noEmit` clean.
 - **Skill updated:** `i18n-and-theming/SKILL.md` — decorations documented as removed; do not re-add without explicit request.
 
+### Entry screens + selection hub fix (2026-07-24, `6148b6c`, staging build 35)
+- **LandingPage:** 3-card hub (context / conversation / interview) always shown first; `existingContext` loaded only on card click (fixes regression skipping cards).
+- **IntentPickerView:** 3-column card grid, featured coaching card (`.action-card-featured`), logo + subtitle header.
+- **WelcomeScreen:** mockup hero subtitle + orbiting coach avatars restored.
+- **CSS:** stronger dual corner gradients; dark-teal featured card gradient for white text contrast.
+- **Deploy hardening:** `server.js` SPA fallback returns 404 for static extensions; `deploy-manualmode.sh` `--tls-verify=false` on pulls + avatar verify/stream fallback.
+- **iOS:** `npm run build && npx cap sync ios` 2026-07-24 — BUILD_NUMBER **35**; Capacitor SPM **8.4.2**.
+
 ### Visual modernization — Phase 4 complete (2026-07-23, `2665e69`, staging build 33)
 - **Committed + deployed:** paywall/auth semantic tokens, teal-tinted dark brand palette, BotSelection Lucide section headers, ChatView meditation stop styling.
-- **iOS:** `npm run build && npx cap sync ios` run 2026-07-23 — web assets + avatars in `ios/App/App/public/`; BUILD_NUMBER **33** synced in `project.pbxproj` / `sw.js`.
 - **Remaining (optional):** Gloria/Max/Victor avatar style consistency; secondary screens token migration; owner E2E sign-off.
 
 ### Visual modernization — Phases 1–3 + 3d complete (2026-07-23)
