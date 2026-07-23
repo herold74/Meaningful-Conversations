@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -211,9 +212,9 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
                 <div className="w-full min-w-0 max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
-                {/* Top row: 🔍 left | gray input box [textarea | mic | send] */}
+                {/* Top row: search icon left | gray input box [textarea | mic | send] */}
                 <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[1.3rem] leading-none flex-shrink-0 opacity-60">🔍</span>
+                    <Search className="w-5 h-5 text-accent-primary flex-shrink-0 opacity-60" aria-hidden="true" />
                     <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
                         {!isLoggedIn ? (
                             <p className="flex-1 text-sm text-content-secondary py-1">
