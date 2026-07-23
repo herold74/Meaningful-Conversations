@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Compass, Target, MessageCircle, TrendingUp, type LucideIcon } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBfi2Items, calculateBfi2, type Big5Result } from '../utils/bfi2';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
@@ -20,11 +21,11 @@ const slideVariants = {
   exitBackward:  { x: '60%', opacity: 0 },
 };
 
-const INTRO_BENEFITS = [
-  { icon: '🎯', key: 'ocean_onboarding_benefit_1' },
-  { icon: '💬', key: 'ocean_onboarding_benefit_2' },
-  { icon: '📈', key: 'ocean_onboarding_benefit_3' },
-] as const;
+const INTRO_BENEFITS: { Icon: LucideIcon; key: string }[] = [
+  { Icon: Target, key: 'ocean_onboarding_benefit_1' },
+  { Icon: MessageCircle, key: 'ocean_onboarding_benefit_2' },
+  { Icon: TrendingUp, key: 'ocean_onboarding_benefit_3' },
+];
 
 const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
@@ -85,9 +86,11 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
           initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="text-6xl mb-6"
+          className="mb-6"
         >
-          🧭
+          <div className="w-20 h-20 rounded-xl bg-accent-primary/10 flex items-center justify-center mx-auto">
+            <Compass className="w-10 h-10 text-accent-primary" aria-hidden="true" />
+          </div>
         </motion.div>
 
         <motion.h1
@@ -117,7 +120,9 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
               transition={{ delay: 0.5 + i * 0.15, duration: 0.35 }}
               className="flex items-start gap-3 bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-primary rounded-xl px-4 py-3"
             >
-              <span className="text-xl flex-shrink-0 mt-0.5">{b.icon}</span>
+              <div className="w-9 h-9 rounded-lg bg-accent-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <b.Icon className="w-4 h-4 text-accent-primary" aria-hidden="true" />
+              </div>
               <p className="text-sm text-content-primary">{t(b.key)}</p>
             </motion.div>
           ))}

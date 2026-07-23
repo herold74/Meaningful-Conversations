@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { MessageCircle, Lightbulb, Compass, type LucideIcon } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 
 export type UserIntent = 'communication' | 'coaching' | 'lifecoaching';
@@ -12,10 +13,10 @@ interface IntentPickerViewProps {
   onSkipPermanently?: () => void;
 }
 
-const INTENTS: { id: UserIntent; icon: string; titleKey: string; descKey: string }[] = [
-  { id: 'communication',  icon: '🗣️', titleKey: 'intent_communication_title',  descKey: 'intent_communication_desc' },
-  { id: 'coaching',       icon: '💭', titleKey: 'intent_coaching_title',       descKey: 'intent_coaching_desc' },
-  { id: 'lifecoaching',   icon: '🧭', titleKey: 'intent_lifecoaching_title',   descKey: 'intent_lifecoaching_desc' },
+const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string }[] = [
+  { id: 'communication',  Icon: MessageCircle, titleKey: 'intent_communication_title',  descKey: 'intent_communication_desc' },
+  { id: 'coaching',       Icon: Lightbulb,     titleKey: 'intent_coaching_title',       descKey: 'intent_coaching_desc' },
+  { id: 'lifecoaching',   Icon: Compass,       titleKey: 'intent_lifecoaching_title',   descKey: 'intent_lifecoaching_desc' },
 ];
 
 const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, safeAreaTop = 0, onSkipPermanently }) => {
@@ -58,9 +59,9 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
             className="w-full text-left bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-primary rounded-2xl p-4 hover:border-accent-primary/50 hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-3 mb-1.5">
-              <span className="text-2xl flex-shrink-0 group-hover:scale-110 transition-transform">
-                {intent.icon}
-              </span>
+              <div className="w-10 h-10 rounded-xl bg-accent-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <intent.Icon className="w-5 h-5 text-accent-primary" aria-hidden="true" />
+              </div>
               <h3 className="text-base font-semibold text-content-primary flex-1 group-hover:text-accent-primary transition-colors">
                 {t(intent.titleKey)}
               </h3>
