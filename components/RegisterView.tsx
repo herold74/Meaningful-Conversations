@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocalization } from '../context/LocalizationContext';
 import * as userService from '../services/userService';
@@ -6,12 +6,6 @@ import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Button from './shared/Button';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
-import ChristmasSnowflakes from './ChristmasSnowflakes';
-import SpringBlossoms from './SpringBlossoms';
-import SummerButterflies from './SummerButterflies';
-import AutumnLeaves from './AutumnLeaves';
-import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
-
 interface RegisterViewProps {
   onShowPending: () => void;
   onSwitchToLogin: () => void;
@@ -29,11 +23,6 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
   const [error, setError] = useState<{ type: 'email' | 'password' | 'general', message: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const showChristmas = useMemo(() => isChristmasSeason(), []);
-  const showSpring = useMemo(() => isSpringSeason(), []);
-  const showSummer = useMemo(() => isSummerSeason(), []);
-  const showAutumn = useMemo(() => isAutumnSeason(), []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -80,10 +69,6 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onShowPending, onSwitchToLo
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
-      {showSpring && <SpringBlossoms lightModeOnly={true} />}
-      {showSummer && <SummerButterflies lightModeOnly={true} />}
-      {showAutumn && <AutumnLeaves />}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
