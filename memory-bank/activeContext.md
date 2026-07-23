@@ -3,11 +3,32 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-15**, build **30**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Staging:** Deployed **2026-07-15**, build **32**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend responding). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
 **Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-23 — Seasonal decorations removed + visual modernization plan)
+
+### Seasonal decoration animations removed (all themes)
+- **Owner decision:** butterflies, snowflakes, blossoms, and falling leaves removed from all themes; seasonal *color* themes remain.
+- **Deleted components:** `ChristmasSnowflakes.tsx`, `SpringBlossoms.tsx`, `SummerButterflies.tsx`, `AutumnLeaves.tsx`; renders removed from `WelcomeScreen`, `LoginView`, `RegisterView`, `LandingPage`.
+- **CSS:** all four animation blocks (`snowfall`, `blossom-fall`, `leaf-fall`, `butterfly-flutter` + particle classes) removed from `index.css`.
+- **dateUtils:** `isChristmasSeason`, `isSpringSeason`, `isSummerSeason`, `isAutumnSeason` removed (decoration-only); `getCurrentSeason`/`isWinterSeason`/`getSeasonalColorTheme` kept (drive color themes). Tests updated (14 passing); `tsc --noEmit` clean.
+- **Skill updated:** `i18n-and-theming/SKILL.md` — decorations documented as removed; do not re-add without explicit request.
+- **Not yet committed** as of this session.
+
+### Visual modernization — Phase 1 implemented (2026-07-23, not yet committed)
+- **Tokens:** `tailwind.config.js` — `content.tertiary` defined (alias of `--content-subtle`; was silently inert), `borderRadius.card` 12px→16px.
+- **Ambient background:** `index.css` — `body::before` fixed gradient layer (z-index -1, pointer-events none, theme-aware via `--accent-*` triplets; NOT background-attachment:fixed per iOS WKWebView constraint). Dark mode variant included.
+- **Button:** new `gradient` variant in `shared/Button.tsx` (from-accent-primary to-accent-primary-hover — theme-var based, not hex). No existing variants changed.
+- **Avatars (Phase 3d partial, pulled forward):** 5 Style-A avatars live in `public/avatars/` (gloria/max/kenji/chloe/nobody, 512px PNG, center-cropped 92%). `constants.ts` + backend `bots.js` updated for 6 bot entries (both Gloria bots share gloria.png). Ava/Rob/Victor/Bekky/Dan still on DiceBear until generated.
+- **Gates:** `tsc --noEmit` clean, 167/167 jest tests pass, vite build OK. Owner visual smoke (light/dark/seasonal, iOS rotation) pending.
+
+### Visual modernization plan (in progress, not yet implemented)
+- Plan file: `~/.cursor/plans/visual_modernization_proposal_fb954fd5.plan.md` — restyle-only modernization (gradient-tinted surfaces, unified Button, line icons, sentence-case CTAs) with per-screen functionality contracts (SessionReview 41 features incl. DiffViewer/edit mode; ChatView 30 features). Four mockup images in `~/.cursor/projects/Users-gherold-Meaningful-Conversations-Project/assets/`. Guardrail: mockups are mood boards, not layout specs; zero functionality loss.
+- **Avatar refresh APPROVED (2026-07-23):** Style A — soft illustrated portraits, teal/amber palette, self-hosted in `public/avatars/` replacing runtime `api.dicebear.com` hotlinks in `constants.ts` (GDPR + availability). Approved samples (Gloria/Kenji/Chloe/Max + abstract "Nobody" mark) in the assets folder above; remaining coaches (Ava, Rob, Victor, Bekky, Dan, 2nd Gloria) still to generate. Real stock photos ruled out (licensing/personality rights, AI transparency).
 
 ## Recent Changes (2026-07-15 — Security & Infrastructure Hardening)
 
@@ -27,8 +48,22 @@
 - **Duplicate log lines fixed:** `log()` function in `/usr/local/bin/backup-databases.sh` now writes directly to file (`>>`) and echoes to stdout separately. Cron changed from `>> log 2>&1` to `2>> log` — eliminates double-write. Verified with live test run: 0 duplicates.
 - **Backup health confirmed:** Daily run at 06:00 UTC — today's production dump `production-20260715-060002.sql.gz` (184 KB, gzip integrity OK, 14 tables). 7-day retention active (16 files, 2.8 MB).
 
-### Skipped (Tier 3 — dedicated sessions)
-- Prisma 5→7, Express 4→5, React 18→19, @google/genai 1→2, @mistralai 1→2, bcryptjs 2→3, dotenv 16→17, RevenueCat 12→13, @vitejs/plugin-react 4→6.
+### Docker cross-platform lockfile fix (2026-07-15, Build 31)
+- Both Dockerfiles changed from `npm ci` → `npm install` (with `--ignore-scripts` in backend): macOS arm64-generated `package-lock.json` lacks linux/amd64 optional entries (`@emnapi/core@1.11.2`, `@emnapi/runtime@1.11.2`) that `npm ci` strictly requires. `npm install` resolves them at build time without breaking pinned versions.
+- **Podman VM note:** Deploy requires chaining `podman machine start → podman machine ssh -- "podman system reset -f" → deploy-manualmode.sh` in ONE shell invocation. gvproxy dies between separate shell calls. If overlay storage becomes corrupted mid-build, `podman machine ssh -- "podman system reset -f"` inside the same chain clears it.
+
+### Tier 3 Session 1 — Trivial majors (2026-07-15, Build 32)
+- **dotenv 16→17:** `dotenv.config({ quiet: true })` in `server.js` — suppresses new v17 console notice when `.env` is absent (Docker)
+- **bcryptjs 2→3:** CJS `require()` API unchanged; 557 backend tests pass
+- **marked 17→18:** `setOptions()` + `marked.parse()` still intact; admin newsletter route verified
+- **@revenuecat/purchases-capacitor 12→13:** Breaking changes are Android-only; iOS-only project — zero code changes
+
+### Skipped (Tier 3 — remaining sessions)
+- Session 2: @google/genai 1→2
+- Session 3: @mistralai 1→2 (ESM-only → dynamic import needed)
+- Session 4: express 4→5 (path-to-regexp breaking changes, codemod)
+- Session 5: React 18→19 + @vitejs/plugin-react 4→6
+- Session 6: Prisma 5→7 (driver adapter architecture change — highest risk)
 
 ## Milestone: App Store Launch (2026-03-07)
 
