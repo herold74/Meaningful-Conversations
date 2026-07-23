@@ -1,23 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { LogoIcon } from './icons/LogoIcon';
 import { BOTS } from '../constants';
 import { useLocalization } from '../context/LocalizationContext';
-import ChristmasSnowflakes from './ChristmasSnowflakes';
-import SpringBlossoms from './SpringBlossoms';
-import SummerButterflies from './SummerButterflies';
-import AutumnLeaves from './AutumnLeaves';
-import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 import { brand } from '../config/brand';
 import BrandLoader from './shared/BrandLoader';
 
 const WelcomeScreen: React.FC = () => {
     const { t, language } = useLocalization();
-    const showChristmas = useMemo(() => isChristmasSeason(), []);
-    const showSpring = useMemo(() => isSpringSeason(), []);
-    const showSummer = useMemo(() => isSummerSeason(), []);
-    const showAutumn = useMemo(() => isAutumnSeason(), []);
-    
+
     const avatarPositions = [
         { top: '-1.75rem', left: 'calc(50% - 1.75rem)' },
         { top: 'calc(25% - 1rem)', right: '-1.75rem' },
@@ -29,11 +20,6 @@ const WelcomeScreen: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center">
-      {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
-      {showSpring && <SpringBlossoms lightModeOnly={true} />}
-      {showSummer && <SummerButterflies lightModeOnly={true} />}
-      {showAutumn && <AutumnLeaves />}
-
       <motion.div
         className="relative w-48 h-48"
         initial={{ opacity: 0, scale: 0.9 }}

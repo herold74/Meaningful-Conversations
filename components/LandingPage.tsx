@@ -5,11 +5,6 @@ import { FileTextIcon } from './icons/FileTextIcon';
 import { CheckIcon } from './icons/CheckIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import ChristmasSnowflakes from './ChristmasSnowflakes';
-import SpringBlossoms from './SpringBlossoms';
-import SummerButterflies from './SummerButterflies';
-import AutumnLeaves from './AutumnLeaves';
-import { isChristmasSeason, isSpringSeason, isSummerSeason, isAutumnSeason } from '../utils/dateUtils';
 import { brand } from '../config/brand';
 import { LogoIcon } from './icons/LogoIcon';
 import Button from './shared/Button';
@@ -36,11 +31,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   const [error, setError] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   
-  const showChristmas = useMemo(() => isChristmasSeason(), []);
-  const showSpring = useMemo(() => isSpringSeason(), []);
-  const showSummer = useMemo(() => isSummerSeason(), []);
-  const showAutumn = useMemo(() => isAutumnSeason(), []);
-
   const previewContent = useMemo(() => {
       if (!fileContent) return '';
       return removeGamificationKey(fileContent);
@@ -122,10 +112,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
 
   return (
     <div className="flex flex-col items-center py-4 md:py-6 text-center animate-fadeIn">
-      {showChristmas && <ChristmasSnowflakes darkModeOnly={true} />}
-      {showSpring && <SpringBlossoms lightModeOnly={true} />}
-      {showSummer && <SummerButterflies lightModeOnly={true} />}
-      {showAutumn && <AutumnLeaves />}
       <div className={`w-full max-w-3xl ${native ? 'p-4 space-y-4' : 'p-6 sm:p-8 space-y-6'} bg-background-secondary border border-border-primary rounded-card shadow-card-elevated`}>
         <div className="flex items-center justify-center gap-3">
           <LogoIcon className={`${native ? 'w-8 h-8' : 'w-10 h-10'} text-accent-primary flex-shrink-0`} />
