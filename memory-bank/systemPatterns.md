@@ -190,3 +190,14 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Keeps handoff context and guides accurate without adding a standing doc-review obligation. Trust is explicit so assistants default to updating what matters after substantive work.
 - **Implementation:** After meaningful sessions (especially commits), the assistant updates `activeContext.md`, `progress.md`, and related docs/skills per `.cursor/rules/memory-bank.mdc` without waiting for a separate "please update docs" request. **Also:** after **server verification** (SSH, staging vs production digests, deploy outcomes) or any chat that fixes **material project facts**, the assistant refreshes the Memory Bank **in the same session** — the owner should not need to prompt for routine bank updates.
 
+### 22. Entry-screen 3-card selection hubs (2026-07-24)
+- **Decision:** LandingPage and IntentPickerView use a shared visual pattern — three action cards in a responsive grid, with the primary path on a `.action-card-featured` dark-teal gradient tile (white text).
+- **Reasoning:** Mockup-aligned entry UX; clearer choice architecture than upload-first or stacked list layouts.
+- **LandingPage state rule (critical):** `fileContent` initializes **empty**. Never `useState(existingContext || '')` — that skips the hub for returning users. Load `existingContext` only when the user clicks the context card (and context is not a name-only template).
+- **Implementation:** `components/LandingPage.tsx`, `components/IntentPickerView.tsx`, `index.css` (`.action-card-featured`), locale keys `landing_card_*`, `intent_card_cta`, `welcome_hero_subtitle`.
+
+### 23. SPA static asset 404 (frontend `server.js`, 2026-07-24)
+- **Decision:** The catch-all SPA route returns **404** for missing static extensions (`.png`, `.jpg`, `.woff2`, `.md`, etc.) instead of `index.html`.
+- **Reasoning:** When a stale Docker image lacks `dist/avatars/`, the old fallback served HTML for `/avatars/*.png`, breaking coach portraits silently. Explicit 404 makes deploy/asset gaps obvious in DevTools and curl.
+- **Implementation:** `server.js` — regex test on `req.path` before `sendFile(index.html)`.
+

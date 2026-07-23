@@ -103,7 +103,7 @@ The application features a completely modernized **Brand-Driven Design System (W
   - **Login** - For returning users
   - **Register** - Create a new account
   - **Continue as Guest** - Try without registration
-- Seasonal decorations (snowflakes in winter, blossoms in spring, butterflies in summer, leaves in autumn)
+- After login: **WelcomeScreen** (logo, hero subtitle, orbiting coach avatars) → **IntentPicker** (3 cards) → **LandingPage** (3-card Life Context hub + upload zone)
 
 **User Decision Point:**
 - **Guest**: Data stays local in browser, manual file management required

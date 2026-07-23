@@ -97,6 +97,12 @@
     - [x] Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
     - [x] Framer Motion page transitions & micro-interactions
     - [x] 30+ views modernized (rounded cards, elevated shadows, pill buttons)
+- [x] **Visual modernization Phases 1–4 (2026-07-23 – 2026-07-24, staging build 35):**
+    - [x] Ambient dual corner gradients (`body::before`), teal-tinted dark palette, 16px card radius, Button gradient variant
+    - [x] Chat shell, session review dashboard, bot selection polish (Lucide headers, featured glow)
+    - [x] Paywall/auth semantic tokens
+    - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
+    - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **Brand-Driven Design System:**
     - [x] 4-shade brand palette via `VITE_BRAND_COLOR_1` to `_4` env vars
     - [x] Accent color via `VITE_BRAND_ACCENT`
@@ -106,11 +112,8 @@
     - [x] Configurable loader system: tetris, steering-wheel, dots, pulse (`VITE_BRAND_LOADER`)
     - [x] BrandLoader wrapper component (lazy-loaded variants)
     - [x] OCEAN-Onboarding flow for registered users (OceanOnboarding.tsx — BFI-2-XS step-by-step with skip)
-- [x] **Seasonal Themes:**
-    - [x] Spring: Falling blossoms
-    - [x] Summer: Butterflies
-    - [x] Autumn: Falling leaves
-    - [x] Winter: Snowflakes (Dec 1 - Jan 6)
+- [x] **Seasonal color themes:** summer / autumn / winter palette via `data-theme` (automatic season detection)
+- [x] **Seasonal decoration animations:** removed 2026-07-23 (snowflakes, blossoms, butterflies, leaves)
 - [x] **Dark/Light Mode:** User preference with auto-detection
 - [x] **PWA:** Installable, offline-capable
 - [x] **Multi-language:** German and English (1,520 keys, perfect DE/EN parity)
@@ -147,7 +150,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** Staging **2026-07-15** Build **32** (Tier 1+2 hardening: pm2@7, bookworm images, 0 vulns, security improvements); Production **2026-04-28** Build **13** — **Prod hinter Staging** bis nächster `./deploy-manualmode.sh -e production`. — **`2.0.1`-Tag Registry:** Staging nutzt aktuell gebaute Images; Prod-Cutover zieht dieselben Tags nach Release-Fenster.
+- **Staging ↔ Production images:** Staging **2026-07-24** Build **35** (entry-screen 3-card hubs, welcome hero, deploy hardening: SPA static 404, registry pull `--tls-verify=false`, avatar stream fallback); Production **2026-04-28** Build **13** — **Prod hinter Staging** bis nächster `./deploy-manualmode.sh -e production`. — **`2.0.1`-Tag Registry:** Remote `podman pull` can fail (Quay HTML); verify Build number + `/avatars/kenji.png` after deploy.
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
@@ -162,6 +165,7 @@
     - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
     - [x] NativePaywall with Restore, active products, legal links (Privacy/Terms)
     - [x] App Store Launch (v2.0.0, 2026-03-07) — AT/DE/CH
+    - [x] Capacitor SPM **8.4.2** synced (2026-07-24, build 35)
     - [x] Apple Review compliance (Guideline 3.1.2c — EULA/Terms links)
     - [x] Static compliance pages (`privacy.html`, `support.html`, `terms.html`)
     - [x] Test account for Apple Review (`premium@manualmode.at` on production)
