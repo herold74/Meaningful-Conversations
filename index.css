@@ -313,182 +313,23 @@ html[data-modal-open] [data-gamification-bg] {
 @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
 
-/* Christmas snowflakes animation - active Dec 1 to Jan 6 */
-@keyframes snowfall {
-  0% {
-    transform: translateY(-10vh) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.6;
-  }
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(110vh) translateX(50px);
-    opacity: 0;
-  }
-}
-
-.snowflake {
+/* Ambient branded background (Phase 1 modernization).
+   Implemented as a fixed pseudo-element layer — NOT background-attachment: fixed,
+   which is broken in iOS WKWebView. z-index -1 keeps it behind all content;
+   pointer-events none keeps scroll/touch untouched. Colors derive from theme
+   accent variables so seasonal themes stay coherent. */
+body::before {
+  content: '';
   position: fixed;
-  top: -10vh;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 1em;
+  inset: 0;
+  z-index: -1;
   pointer-events: none;
-  z-index: 1;
-  animation: snowfall linear infinite;
+  background:
+    radial-gradient(1200px 800px at 0% 0%, rgb(var(--accent-primary) / 0.06), transparent 60%),
+    radial-gradient(1000px 700px at 100% 100%, rgb(var(--accent-secondary) / 0.04), transparent 60%);
 }
-
-.snowflake:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; }
-.snowflake:nth-child(2) { left: 20%; animation-duration: 15s; animation-delay: 2s; font-size: 0.8em; }
-.snowflake:nth-child(3) { left: 30%; animation-duration: 13s; animation-delay: 4s; }
-.snowflake:nth-child(4) { left: 40%; animation-duration: 14s; animation-delay: 1s; font-size: 1.2em; }
-.snowflake:nth-child(5) { left: 50%; animation-duration: 16s; animation-delay: 3s; }
-.snowflake:nth-child(6) { left: 60%; animation-duration: 12s; animation-delay: 5s; font-size: 0.9em; }
-.snowflake:nth-child(7) { left: 70%; animation-duration: 15s; animation-delay: 2s; }
-.snowflake:nth-child(8) { left: 80%; animation-duration: 13s; animation-delay: 4s; font-size: 1.1em; }
-.snowflake:nth-child(9) { left: 90%; animation-duration: 14s; animation-delay: 1s; }
-.snowflake:nth-child(10) { left: 25%; animation-duration: 16s; animation-delay: 6s; font-size: 0.7em; }
-
-/* Spring blossoms animation - active Mar 1 to May 31 (semi-transparent) */
-@keyframes blossom-fall {
-  0% {
-    transform: translateY(-10vh) translateX(0) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.5;
-  }
-  50% {
-    transform: translateY(50vh) translateX(30px) rotate(180deg);
-  }
-  90% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateY(110vh) translateX(-20px) rotate(360deg);
-    opacity: 0;
-  }
+html.dark body::before {
+  background:
+    radial-gradient(1200px 800px at 50% -10%, rgb(var(--accent-primary) / 0.09), transparent 65%),
+    radial-gradient(900px 600px at 100% 110%, rgb(var(--accent-tertiary) / 0.07), transparent 60%);
 }
-
-.blossom {
-  position: fixed;
-  top: -10vh;
-  font-size: 1.2em;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.5;
-  animation: blossom-fall ease-in-out infinite;
-}
-
-/* Varied positions, speeds, and delays for natural floating look */
-.blossom:nth-child(1) { left: 5%; animation-duration: 18s; animation-delay: 0s; }
-.blossom:nth-child(2) { left: 15%; animation-duration: 22s; animation-delay: 3s; font-size: 0.9em; }
-.blossom:nth-child(3) { left: 25%; animation-duration: 19s; animation-delay: 1s; }
-.blossom:nth-child(4) { left: 35%; animation-duration: 24s; animation-delay: 5s; font-size: 1.1em; }
-.blossom:nth-child(5) { left: 45%; animation-duration: 20s; animation-delay: 2s; }
-.blossom:nth-child(6) { left: 55%; animation-duration: 23s; animation-delay: 4s; font-size: 0.8em; }
-.blossom:nth-child(7) { left: 65%; animation-duration: 18s; animation-delay: 6s; }
-.blossom:nth-child(8) { left: 75%; animation-duration: 21s; animation-delay: 1s; font-size: 1.0em; }
-.blossom:nth-child(9) { left: 85%; animation-duration: 25s; animation-delay: 3s; }
-.blossom:nth-child(10) { left: 10%; animation-duration: 19s; animation-delay: 7s; font-size: 0.7em; }
-.blossom:nth-child(11) { left: 50%; animation-duration: 22s; animation-delay: 8s; }
-.blossom:nth-child(12) { left: 95%; animation-duration: 20s; animation-delay: 2s; font-size: 1.2em; }
-
-/* Autumn leaves animation - active Sep 1 to Nov 30 (semi-transparent) */
-@keyframes leaf-fall {
-  0% {
-    transform: translateY(-10vh) translateX(0) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.6;
-  }
-  25% {
-    transform: translateY(25vh) translateX(40px) rotate(90deg);
-  }
-  50% {
-    transform: translateY(50vh) translateX(-20px) rotate(180deg);
-  }
-  75% {
-    transform: translateY(75vh) translateX(30px) rotate(270deg);
-  }
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(110vh) translateX(10px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-.leaf {
-  position: fixed;
-  top: -10vh;
-  font-size: 1.3em;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.6;
-  animation: leaf-fall ease-in-out infinite;
-}
-
-/* Varied positions, speeds, and delays for tumbling leaf effect */
-.leaf:nth-child(1) { left: 8%; animation-duration: 16s; animation-delay: 0s; }
-.leaf:nth-child(2) { left: 18%; animation-duration: 20s; animation-delay: 2s; font-size: 1.1em; }
-.leaf:nth-child(3) { left: 28%; animation-duration: 17s; animation-delay: 4s; }
-.leaf:nth-child(4) { left: 38%; animation-duration: 22s; animation-delay: 1s; font-size: 1.4em; }
-.leaf:nth-child(5) { left: 48%; animation-duration: 18s; animation-delay: 3s; }
-.leaf:nth-child(6) { left: 58%; animation-duration: 21s; animation-delay: 5s; font-size: 1.0em; }
-.leaf:nth-child(7) { left: 68%; animation-duration: 16s; animation-delay: 2s; }
-.leaf:nth-child(8) { left: 78%; animation-duration: 19s; animation-delay: 6s; font-size: 1.2em; }
-.leaf:nth-child(9) { left: 88%; animation-duration: 23s; animation-delay: 1s; }
-.leaf:nth-child(10) { left: 15%; animation-duration: 17s; animation-delay: 7s; font-size: 0.9em; }
-
-/* Summer butterflies animation - active Jun 1 to Aug 31 (semi-transparent, fluttering) */
-@keyframes butterfly-flutter {
-  0% {
-    transform: translateX(-10vw) translateY(30vh) rotate(0deg) scale(1);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.5;
-  }
-  25% {
-    transform: translateX(20vw) translateY(20vh) rotate(15deg) scale(1.1);
-  }
-  50% {
-    transform: translateX(50vw) translateY(40vh) rotate(-10deg) scale(0.9);
-  }
-  75% {
-    transform: translateX(80vw) translateY(25vh) rotate(20deg) scale(1.05);
-  }
-  90% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateX(110vw) translateY(35vh) rotate(5deg) scale(1);
-    opacity: 0;
-  }
-}
-
-.butterfly {
-  position: fixed;
-  left: -10vw;
-  font-size: 1.5em;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.5;
-  animation: butterfly-flutter ease-in-out infinite;
-}
-
-/* Varied positions, speeds, and delays for natural fluttering */
-.butterfly:nth-child(1) { top: 15%; animation-duration: 25s; animation-delay: 0s; }
-.butterfly:nth-child(2) { top: 35%; animation-duration: 30s; animation-delay: 4s; font-size: 1.3em; }
-.butterfly:nth-child(3) { top: 55%; animation-duration: 22s; animation-delay: 8s; }
-.butterfly:nth-child(4) { top: 25%; animation-duration: 28s; animation-delay: 2s; font-size: 1.6em; }
-.butterfly:nth-child(5) { top: 65%; animation-duration: 26s; animation-delay: 12s; }
-.butterfly:nth-child(6) { top: 45%; animation-duration: 32s; animation-delay: 6s; font-size: 1.2em; }
-.butterfly:nth-child(7) { top: 75%; animation-duration: 24s; animation-delay: 10s; }
-.butterfly:nth-child(8) { top: 20%; animation-duration: 29s; animation-delay: 15s; font-size: 1.4em; }

@@ -23,43 +23,6 @@ export const getCurrentSeason = (): Season => {
 };
 
 /**
- * Check if current date is within Christmas decoration period (Dec 1 - Jan 6)
- * Used for snowflakes animation overlay during winter
- */
-export const isChristmasSeason = (): boolean => {
-  const now = new Date();
-  const month = now.getMonth();
-  const day = now.getDate();
-  
-  // December (month 11) or January 1-6 (month 0, day 1-6)
-  return (month === 11) || (month === 0 && day <= 6);
-};
-
-/**
- * Cherry blossom season: April 1–21
- */
-export const isSpringSeason = (): boolean => {
-  const now = new Date();
-  const month = now.getMonth(); // 3 = April
-  const day = now.getDate();
-  return month === 3 && day >= 1 && day <= 21;
-};
-
-/**
- * Check if current season is Summer (Jun 1 - Aug 31)
- */
-export const isSummerSeason = (): boolean => {
-  return getCurrentSeason() === 'summer';
-};
-
-/**
- * Check if current season is Autumn (Sep 1 - Nov 30)
- */
-export const isAutumnSeason = (): boolean => {
-  return getCurrentSeason() === 'autumn';
-};
-
-/**
  * Check if current season is Winter (Dec 1 - Feb 28/29)
  */
 export const isWinterSeason = (): boolean => {
