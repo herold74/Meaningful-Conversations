@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-15**, build **32**; v2.0.1 images — https://mc-beta.manualmode.at — Health checks OK post-deploy (frontend + backend responding). **Login von `https://www.mc-beta.manualmode.at`:** Backend erlaubt CORS auch für www-Zwilling von `FRONTEND_URL` (`expandFrontendUrlForCors` in `server.js`). **www + HTTPS:** **`DOCUMENTATION/HTTPS-WWW-DNS-GUIDE.md`** (Deploy = nginx + `certbot-expand` auf Server; TLS: `sudo /usr/local/bin/certbot-expand-manualmode-hosts.sh`).
+**Staging:** Deployed **2026-07-23**, build **33**; v2.0.1 images — https://mc-beta.manualmode.at — Phase 4 visual modernization (paywall/auth tokens, teal dark palette, bot selection headers) + full avatar set. Health checks OK post-deploy.
 **Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **28**, 2026-05-03) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
@@ -17,14 +17,11 @@
 - **CSS:** all four animation blocks (`snowfall`, `blossom-fall`, `leaf-fall`, `butterfly-flutter` + particle classes) removed from `index.css`.
 - **dateUtils:** `isChristmasSeason`, `isSpringSeason`, `isSummerSeason`, `isAutumnSeason` removed (decoration-only); `getCurrentSeason`/`isWinterSeason`/`getSeasonalColorTheme` kept (drive color themes). Tests updated (14 passing); `tsc --noEmit` clean.
 - **Skill updated:** `i18n-and-theming/SKILL.md` — decorations documented as removed; do not re-add without explicit request.
-- **Not yet committed** as of this session (seasonal removal landed in `3001035`; Phase 4 paywall/auth/dark palette pending commit).
 
-### Visual modernization — Phase 4 complete (2026-07-23)
-- **Dark palette:** brand/winter/manualmode `.dark` surfaces → teal-tinted `#0d1420` family (`index.css`).
-- **Paywall/auth:** PaywallView + NativePaywall semantic status tokens; ForgotPassword/ResetPassword/VerifyEmail aligned with LoginView card + input patterns.
-- **BotSelection polish:** section headers → Lucide (MessageCircle, Target, GraduationCap); sentence-case; `border-primary` dividers.
-- **ChatView:** meditation stop button → status-danger token styling.
-- **Remaining (optional):** Gloria/Max/Victor avatar style consistency; secondary screens (AdminView, PersonalityProfileView, FeedbackModal); owner E2E sign-off.
+### Visual modernization — Phase 4 complete (2026-07-23, `2665e69`, staging build 33)
+- **Committed + deployed:** paywall/auth semantic tokens, teal-tinted dark brand palette, BotSelection Lucide section headers, ChatView meditation stop styling.
+- **iOS:** `npm run build && npx cap sync ios` run 2026-07-23 — web assets + avatars in `ios/App/App/public/`; BUILD_NUMBER **33** synced in `project.pbxproj` / `sw.js`.
+- **Remaining (optional):** Gloria/Max/Victor avatar style consistency; secondary screens token migration; owner E2E sign-off.
 
 ### Visual modernization — Phases 1–3 + 3d complete (2026-07-23)
 
