@@ -41,9 +41,9 @@ const TranscriptRatingsView: React.FC = () => {
     };
 
     const getRatingColor = (rating: number) => {
-        if (rating <= 6) return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20';
-        if (rating <= 8) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20';
-        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20';
+        if (rating <= 6) return 'text-status-danger-foreground bg-status-danger-background';
+        if (rating <= 8) return 'text-status-warning-foreground bg-status-warning-background';
+        return 'text-status-success-foreground bg-status-success-background';
     };
 
     const getRatingCategory = (rating: number) => {
@@ -76,29 +76,29 @@ const TranscriptRatingsView: React.FC = () => {
             {/* Statistics Cards */}
             {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="bg-background-secondary rounded-lg p-4 border border-border-primary">
                         <p className="text-xs text-content-secondary mb-1">{t('admin_te_ratings_total')}</p>
                         <p className="text-2xl font-bold text-content-primary">{stats.total}</p>
                     </div>
-                    <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="bg-background-secondary rounded-lg p-4 border border-border-primary">
                         <p className="text-xs text-content-secondary mb-1">{t('admin_te_ratings_nps')}</p>
                         <p className="text-2xl font-bold text-accent-primary">{stats.nps.toFixed(1)}</p>
                     </div>
-                    <div className="bg-background-secondary dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="bg-background-secondary rounded-lg p-4 border border-border-primary">
                         <p className="text-xs text-content-secondary mb-1">{t('admin_te_ratings_avg')}</p>
                         <p className="text-2xl font-bold text-content-primary">{stats.avgRating.toFixed(1)}</p>
                     </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                        <p className="text-xs text-green-700 dark:text-green-300 mb-1">{t('te_ratings_promoters')}</p>
-                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.promoters}</p>
+                    <div className="bg-status-success-background rounded-lg p-4 border border-status-success-border">
+                        <p className="text-xs text-status-success-foreground mb-1">{t('te_ratings_promoters')}</p>
+                        <p className="text-2xl font-bold text-status-success-foreground">{stats.promoters}</p>
                     </div>
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mb-1">{t('te_ratings_passives')}</p>
-                        <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.passives}</p>
+                    <div className="bg-status-warning-background rounded-lg p-4 border border-status-warning-border">
+                        <p className="text-xs text-status-warning-foreground mb-1">{t('te_ratings_passives')}</p>
+                        <p className="text-2xl font-bold text-status-warning-foreground">{stats.passives}</p>
                     </div>
-                    <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
-                        <p className="text-xs text-red-700 dark:text-red-300 mb-1">{t('te_ratings_detractors')}</p>
-                        <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.detractors}</p>
+                    <div className="bg-status-danger-background rounded-lg p-4 border border-status-danger-border">
+                        <p className="text-xs text-status-danger-foreground mb-1">{t('te_ratings_detractors')}</p>
+                        <p className="text-2xl font-bold text-status-danger-foreground">{stats.detractors}</p>
                     </div>
                 </div>
             )}
@@ -110,8 +110,8 @@ const TranscriptRatingsView: React.FC = () => {
                     title={t('admin_te_ratings_filter_all')}
                     className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'all'
-                            ? 'bg-accent-primary text-white'
-                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-accent-primary text-button-foreground-on-accent'
+                            : 'bg-background-secondary text-content-secondary hover:bg-background-tertiary'
                     }`}
                 >
                     <span className="sm:hidden">📋</span>
@@ -122,8 +122,8 @@ const TranscriptRatingsView: React.FC = () => {
                     title={t('admin_te_ratings_filter_with_feedback')}
                     className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'with'
-                            ? 'bg-accent-primary text-white'
-                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-accent-primary text-button-foreground-on-accent'
+                            : 'bg-background-secondary text-content-secondary hover:bg-background-tertiary'
                     }`}
                 >
                     <span className="sm:hidden">💬</span>
@@ -134,8 +134,8 @@ const TranscriptRatingsView: React.FC = () => {
                     title={t('admin_te_ratings_filter_no_feedback')}
                     className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'without'
-                            ? 'bg-accent-primary text-white'
-                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-accent-primary text-button-foreground-on-accent'
+                            : 'bg-background-secondary text-content-secondary hover:bg-background-tertiary'
                     }`}
                 >
                     <span className="sm:hidden">🔢</span>
@@ -146,8 +146,8 @@ const TranscriptRatingsView: React.FC = () => {
                     title={t('admin_te_ratings_filter_contact')}
                     className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         feedbackFilter === 'contact'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
+                            ? 'bg-accent-primary text-button-foreground-on-accent'
+                            : 'bg-background-secondary text-content-secondary hover:bg-background-tertiary'
                     }`}
                 >
                     <span className="sm:hidden">📬</span>
@@ -177,14 +177,14 @@ const TranscriptRatingsView: React.FC = () => {
                         return (
                             <div
                                 key={rating.id}
-                                className="rounded-lg border border-gray-200 dark:border-gray-700 bg-background-secondary dark:bg-transparent"
+                                className="rounded-lg border border-border-primary bg-background-secondary dark:bg-transparent"
                             >
                                 <div
                                     onClick={() => rating.feedback && rating.feedback.trim().length > 0 && toggleExpand(rating.id)}
                                     role="button"
                                     tabIndex={rating.feedback && rating.feedback.trim().length > 0 ? 0 : -1}
                                     onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && rating.feedback && rating.feedback.trim().length > 0) { e.preventDefault(); toggleExpand(rating.id); } }}
-                                    className={`p-4 transition-colors ${rating.feedback && rating.feedback.trim().length > 0 ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''}`}
+                                    className={`p-4 transition-colors ${rating.feedback && rating.feedback.trim().length > 0 ? 'cursor-pointer hover:bg-background-tertiary' : ''}`}
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1 min-w-0">
@@ -200,7 +200,7 @@ const TranscriptRatingsView: React.FC = () => {
                                                 {rating.contactOptIn && (
                                                     <>
                                                         <span className="text-xs text-content-tertiary">•</span>
-                                                        <span className="inline-flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                                                        <span className="inline-flex items-center gap-1 text-xs bg-status-info-background text-status-info-foreground px-2 py-0.5 rounded-full font-medium">
                                                             {t('admin_te_ratings_contact_requested')}
                                                         </span>
                                                     </>
@@ -222,7 +222,7 @@ const TranscriptRatingsView: React.FC = () => {
                                                     e.stopPropagation();
                                                     toggleExpand(rating.id);
                                                 }}
-                                                className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+                                                className="flex-shrink-0 w-8 h-8 rounded-lg hover:bg-background-tertiary transition-colors flex items-center justify-center"
                                                 aria-label={isExpanded ? t('aria_collapse') : t('aria_expand')}
                                             >
                                                 <svg
@@ -240,11 +240,11 @@ const TranscriptRatingsView: React.FC = () => {
 
                                 {/* Expanded Content */}
                                 {isExpanded && rating.feedback && rating.feedback.trim().length > 0 && (
-                                    <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+                                    <div className="px-4 pb-4 border-t border-border-primary pt-3">
                                         <p className="text-xs font-semibold text-content-secondary uppercase tracking-wide mb-2">
                                             {t('admin_te_ratings_feedback')}:
                                         </p>
-                                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+                                        <div className="bg-background-tertiary rounded-lg p-3">
                                             <p className="text-sm text-content-primary whitespace-pre-wrap">
                                                 {rating.feedback}
                                             </p>

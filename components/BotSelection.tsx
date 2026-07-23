@@ -554,19 +554,19 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           {/* Section Divider */}
           <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#CD7F32]/50 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#CD7F32]/10 dark:bg-[#CD7F32]/15 border border-[#CD7F32]/30 dark:border-[#CD7F32]/40">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
                 <span className="text-lg">💬</span>
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold uppercase text-[#8B5A2B] dark:text-[#D4944C]">
+                  <div className="text-[0.9375rem] font-semibold uppercase text-accent-primary">
                     {t('botSelection_section_kommunikation')}
                   </div>
-                  <div className="text-xs text-[#8B5A2B]/80 dark:text-[#D4944C]/80">
+                  <div className="text-xs text-accent-primary/80">
                     {t('botSelection_section_kommunikation_desc')}
                   </div>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#CD7F32]/50 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
             </div>
           </div>
           
