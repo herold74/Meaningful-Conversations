@@ -34,6 +34,8 @@ module.exports = {
         content: {
           primary: 'rgb(var(--content-primary) / <alpha-value>)',
           secondary: 'rgb(var(--content-secondary) / <alpha-value>)',
+          /* tertiary was used in components but never defined — alias to subtle */
+          tertiary: 'rgb(var(--content-subtle) / <alpha-value>)',
           subtle: 'rgb(var(--content-subtle) / <alpha-value>)',
           inverted: 'rgb(var(--content-inverted) / <alpha-value>)',
         },
@@ -75,7 +77,7 @@ module.exports = {
         'button-foreground-on-accent': 'rgb(var(--button-foreground-on-accent) / <alpha-value>)',
       },
       borderRadius: {
-        'card': '0.75rem',   /* 12px - professional card radius */
+        'card': '1rem',      /* 16px - modern card radius */
         'pill': '9999px',
       },
       boxShadow: {
