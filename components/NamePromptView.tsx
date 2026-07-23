@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Hand } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
 
@@ -42,7 +43,9 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, saf
         transition={{ duration: 0.4 }}
         className="w-full max-w-sm text-center"
       >
-        <span className="text-5xl mb-4 block">👋</span>
+        <div className="w-16 h-16 rounded-xl bg-accent-primary/10 flex items-center justify-center mx-auto mb-4">
+          <Hand className="w-8 h-8 text-accent-primary" aria-hidden="true" />
+        </div>
         <h1 className="text-2xl font-bold text-content-primary mb-2">
           {t('intent_ask_name_title')}
         </h1>
