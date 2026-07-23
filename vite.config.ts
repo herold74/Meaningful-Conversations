@@ -63,31 +63,34 @@ export default defineConfig(({ mode }) => {
       output: {
         // Manual chunking to split large bundles
         manualChunks: (id) => {
-          // React core libraries
-          if (id.includes('node_modules/react') || 
-              id.includes('node_modules/react-dom') || 
-              id.includes('node_modules/react-router') ||
-              id.includes('node_modules/scheduler')) {
+          if (!id.includes('node_modules')) return;
+
+          // React core only — must NOT use id.includes('node_modules/react') because that
+          // also matches react-markdown, react-is, etc. and creates vendor ↔ react-vendor cycles.
+          if (
+            /node_modules\/react-dom(\/|$)/.test(id) ||
+            /node_modules\/react(\/|$)/.test(id) ||
+            id.includes('node_modules/scheduler')
+          ) {
             return 'react-vendor';
           }
-          
+
           // @react-pdf/renderer and dependencies in separate chunk
           if (id.includes('node_modules/@react-pdf') ||
               id.includes('node_modules/pdfkit') ||
               id.includes('node_modules/fontkit')) {
             return 'pdf-vendor';
           }
-          
-          // UI/Design libraries (if you're using any specific ones)
+
+          // UI/Design libraries
           if (id.includes('node_modules/@headlessui') ||
-              id.includes('node_modules/framer-motion')) {
+              id.includes('node_modules/framer-motion') ||
+              id.includes('node_modules/lucide-react')) {
             return 'ui-vendor';
           }
-          
+
           // Other large vendor libraries
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
+          return 'vendor';
         },
       },
     },
