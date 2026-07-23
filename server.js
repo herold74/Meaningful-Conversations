@@ -41,7 +41,11 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 }));
 
 // For a Single Page Application (SPA), all other routes should fall back to index.html
-app.get('*', (req, res) => {
+// Skip SPA fallback for missing static assets (e.g. /avatars/*.png) so broken images are obvious.
+app.get('*', (req, res, next) => {
+    if (/\.(png|jpg|jpeg|gif|webp|svg|ico|woff2?|mp3|md)$/i.test(req.path)) {
+        return res.status(404).send('Not found');
+    }
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
