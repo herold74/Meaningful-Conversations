@@ -29,18 +29,22 @@ Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Sch
 
 Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
 
+### 1.0 Willkommensbildschirm
+
+Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare im Kreis und der Hinweis „Deine Sitzung wird geladen…“, während Ihre Daten vorbereitet werden.
+
 ### 1.1 Intent Picker & Name
 
-Beim Start erscheint der **Intent Picker** -- eine Auswahlseite mit drei Optionen:
-- **Kommunikation** -- Leitet Sie zum Bereich Management & Kommunikation (Nobody, Gloria)
-- **Coaching** -- Leitet Sie zum Coaching-Bereich (Max, Ava, Kenji, Chloe)
-- **Begleitendes Coaching** -- Leitet Sie zum Exklusiv-Bereich (Rob, Victor -- nur für Klienten)
+Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
+- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Gloria)
+- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Max, Ava, Kenji, Chloe)
+- **Begleitendes Coaching** — Leitet Sie zum Exklusiv-Bereich (Rob, Victor — nur für Klienten)
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird.
 
-**Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt überspringen.
+**Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Gäste können diesen Schritt überspringen.
 
-**Hinweis:** Registrierte Benutzer können den Intent Picker im Menü (☰) deaktivieren.
+**Hinweis:** Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
 
 ### 1.2 Gast vs. Registrierter Benutzer
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
@@ -50,28 +54,30 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 
 **Plattformübergreifend:** Ihr Benutzerkonto funktioniert sowohl in der iOS-App als auch über den Web-Browser unter **${brand.domainProduction}**. Alle Daten werden automatisch synchronisiert.
 
-### 1.3 Ihre erste Lebenskontext-Datei erstellen
-Nachdem Sie Ihre Wahl getroffen haben, landen Sie auf dem Startbildschirm, wo Sie drei Möglichkeiten haben:
+### 1.3 Der Lebenskontext-Startbildschirm
 
-- **Option A: Mit einem Fragebogen erstellen**
-  - **Wenn Sie auf "Neue Lebenskontext-Datei erstellen" klicken**, gelangen Sie zu einem geführten Fragebogen.
-  - Füllen Sie die Felder zu Ihrem Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist ein Pflichtfeld. Optional können Sie Ihr **Land / Bundesland** angeben (z.B. "Österreich - Wien"), um bei Bedarf lokale Hilfsangebote zu erhalten.
-  - **Wenn Sie auf "Datei erstellen & Weiter" klicken**, wird Ihr Lebenskontext formatiert und Sie werden zur Coach-Auswahl weitergeleitet.
+Nach Auth und Intent landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
 
-- **Option B: Mit einem Interview erstellen**
-  - **Wenn Sie auf "Mit einem Interview erstellen" klicken**, beginnen Sie ein Gespräch mit Gloria, unserem Guide.
-  - Sie ist **kein** Coach, sondern stellt Ihnen einfach die Fragen aus dem Fragebogen in einem natürlichen Gesprächsfluss.
-  - Am Ende des Gesprächs formatiert sie Ihre Antworten automatisch in eine Lebenskontext-Datei.
+- **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext (wiederkehrende Nutzer) oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
+- **Neues Gespräch starten** (hervorgehoben) — Startet den Fragebogen zum Erstellen oder Erweitern Ihres Kontexts.
+- **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
 
-- **Option C: Eine vorhandene Datei hochladen**
-  - **Wenn Sie auf den Upload-Bereich klicken (oder eine Datei per Drag & Drop ziehen)**, können Sie eine \`.md\`-Datei von Ihrem Gerät auswählen. Dies ist die Methode, die Gastbenutzer verwenden, um ihren Fortschritt von einer früheren Sitzung fortzusetzen.
+**Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
 
-### 1.4 Ihren Lebenskontext verwalten
+**Fragebogen (über „Neues Gespräch starten"):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
 
-Sobald Sie einen Lebenskontext erstellt haben, stehen Ihnen auf dem Startbildschirm erweiterte Optionen zur Verfügung. Der Hauptbutton passt sich automatisch an:
+**Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
 
-- **"Lebenskontext-Datei erweitern"** — Erscheint, wenn Ihr Kontext noch eine Vorlage ist (z.B. nur Ihr Name wurde eingetragen). Ein Klick öffnet den Fragebogen, um die leeren Felder zu befüllen.
-- **"Lebenskontext-Datei editieren"** — Erscheint, wenn Ihr Kontext bereits angereichert ist (z.B. nach einem Interview mit Gloria, einer Coaching-Sitzung oder einem Datei-Upload). Ein Klick öffnet den **Markdown-Editor**.
+### 1.4 Lebenskontext-Vorschau und Bearbeitung
+
+Wenn Sie eine Karte wählen oder eine Datei hochladen, wechseln Sie in die **Vorschau** mit Dateiname, Markdown-Vorschau und Aktionen:
+
+- **Sitzung starten** — Geht zur Coach-Auswahl mit dem geladenen Kontext.
+- **Lebenskontext-Datei erweitern** — Wenn Ihr Kontext noch eine Vorlage ist (z. B. nur Ihr Name). Öffnet den Fragebogen.
+- **Lebenskontext-Datei editieren** — Wenn der Kontext bereits angereichert ist. Öffnet den **Markdown-Editor**.
+- **Mit einem Interview erweitern** — Übergibt den Kontext an Gloria im Erweiterungsmodus.
+
+**Zurück zum Startbildschirm:** Über **Andere Datei wählen** kehren Sie zu den drei Karten zurück.
 
 #### Der Lebenskontext-Editor
 Der Editor ermöglicht Ihnen die direkte Bearbeitung Ihres Lebenskontexts:
@@ -189,6 +195,16 @@ Falls Sie die Web-Version bevorzugen:
 - Vollbildansicht ohne Browser-Chrome
 - Push-Benachrichtigungen (falls aktiviert)
 - Funktioniert teilweise auch offline
+
+### 3.5 App aktualisieren (Web & PWA)
+
+Nach größeren Updates kann eine zwischengespeicherte Version die App kurz blockieren (z. B. **leere Seite** nach dem Laden).
+
+1. Öffnen Sie das **Menü** (☰).
+2. Tippen Sie auf **App aktualisieren** (↻-Symbol).
+3. Die App lädt die neueste Version neu.
+
+**Tipp:** Wenn das nicht hilft, leeren Sie den Browser-Cache oder führen Sie einen Hard-Reload durch (Strg+F5 / Cmd+Shift+R).
 
 </div>
 </details>
@@ -899,18 +915,22 @@ Welcome to ${brand.appName}! This guide will walk you through the app step-by-st
 
 When you first open the app, you'll be guided through a brief onboarding process.
 
+### 1.0 Welcome Screen
+
+After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatars, and a “Loading your session…” message while your data is prepared.
+
 ### 1.1 Intent Picker & Name
 
-On launch, the **Intent Picker** appears -- a selection screen with three options:
-- **Communication** -- Routes you to the Management & Communication section (Nobody, Gloria)
-- **Coaching** -- Routes you to the Coaching section (Max, Ava, Kenji, Chloe)
-- **Augmented Coaching** -- Routes you to the Exclusive section (Rob, Victor -- Client only)
+On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
+- **Communication** — Routes you to the Management & Communication section (Nobody, Gloria)
+- **Coaching** (featured) — Routes you to the Coaching section (Max, Ava, Kenji, Chloe)
+- **Augmented Coaching** — Routes you to the Exclusive section (Rob, Victor — Client only)
 
 Your chosen intent determines which section is highlighted in the coach selection screen.
 
-**Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. You can skip this step.
+**Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. Guests can skip this step.
 
-**Note:** Registered users can disable the Intent Picker from the menu (☰).
+**Note:** Registered users can disable the Intent Picker under **My Account**.
 
 ### 1.2 Guest vs. Registered User
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
@@ -920,28 +940,30 @@ Your chosen intent determines which section is highlighted in the coach selectio
 
 **Cross-platform:** Your user account works both in the iOS app and via web browser at **${brand.domainProduction}**. All data is synchronized automatically.
 
-### 1.3 Creating Your First Life Context
-After making your choice, you'll arrive at the landing page with three options:
+### 1.3 The Life Context Start Screen
 
-- **Option A: Create with a Questionnaire**
-  - **If you click "Create a New Life Context File,"** you'll be taken to a guided questionnaire.
-  - Fill out the fields about your background, goals, and challenges. Only your name is a required field. Optionally, you can specify your **Country / State** (e.g., "Austria - Vienna") to receive local support resources if needed.
-  - **When you click "Generate File & Continue,"** your Life Context will be formatted, and you'll proceed to coach selection.
+After auth and intent, you arrive at the **start screen** with **three action cards** and an upload area below:
 
-- **Option B: Create with an Interview**
-  - **If you click "Start with an interview,"** you'll begin a conversation with Gloria, our guide.
-  - She is **not** a coach; she simply asks you the questions from the questionnaire in a natural, conversational way.
-  - At the end of the conversation, she will automatically format your answers into a Life Context file.
+- **Continue with your Life Context** — Loads your saved context (returning users) or opens the file picker if no substantial file exists yet.
+- **Start a new conversation** (featured) — Starts the questionnaire to create or extend your context.
+- **Build with an interview** — Begins a guided interview with Gloria.
 
-- **Option C: Upload an Existing File**
-  - **If you click the upload area (or drag and drop a file),** you can select a \`.md\` file from your device. This is the method guest users will use to continue their progress from a previous session.
+**Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
 
-### 1.4 Managing Your Life Context
+**Questionnaire (via “Start a new conversation”):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Generate File & Continue** takes you to coach selection.
 
-Once you have created a Life Context, the landing page offers extended options. The main button adapts automatically:
+**Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
 
-- **"Extend Life Context File"** — Appears when your context is still a template (e.g., only your name has been entered). Clicking opens the questionnaire to fill in the empty fields.
-- **"Edit Life Context File"** — Appears when your context is already enriched (e.g., after an interview with Gloria, a coaching session, or a file upload). Clicking opens the **Markdown Editor**.
+### 1.4 Life Context Preview & Editing
+
+When you choose a card or upload a file, you enter **preview mode** with file name, Markdown preview, and actions:
+
+- **Start session** — Proceeds to coach selection with the loaded context.
+- **Extend Life Context File** — When your context is still a template (e.g., only your name). Opens the questionnaire.
+- **Edit Life Context File** — When your context is already enriched. Opens the **Markdown Editor**.
+- **Extend with an Interview** — Passes your context to Gloria in extension mode.
+
+**Back to start screen:** Use **Choose a different file** to return to the three cards.
 
 #### The Life Context Editor
 The editor allows you to directly edit your Life Context:
@@ -951,7 +973,7 @@ The editor allows you to directly edit your Life Context:
 - **Downloads:** Two buttons below the editor allow you to export:
   - **📥 .md** — Saves the Life Context as a Markdown file to your device.
   - **📄 PDF** — Generates a formatted PDF document with your Life Context.
-- **Save & Return:** Applies your changes and returns to the landing page.
+- **Save & Return:** Applies your changes and returns to the start screen.
 - **Cancel:** Discards all changes.
 
 #### Extending Your Life Context with Gloria
@@ -1059,6 +1081,16 @@ If you prefer the web version:
 - Full-screen view without browser chrome
 - Push notifications (if enabled)
 - Works partially offline
+
+### 3.5 Refresh App (Web & PWA)
+
+After major updates, a cached version can briefly block the app (e.g. a **blank page** after loading).
+
+1. Open the **menu** (☰).
+2. Tap **Refresh App** (↻ icon).
+3. The app reloads the latest version.
+
+**Tip:** If that doesn't help, clear your browser cache or perform a hard reload (Ctrl+F5 / Cmd+Shift+R).
 
 </div>
 </details>
