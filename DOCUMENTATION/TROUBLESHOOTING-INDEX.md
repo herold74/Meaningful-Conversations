@@ -37,6 +37,9 @@ Quick reference guide for common issues and where to find solutions.
 | Version mismatch after deploy | Update all 5 version files | [deployment.mdc](../.cursor/rules/deployment.mdc) |
 | Containers not starting | Check `podman ps`, verify compose file | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md) |
 | Auto-rollback triggered | Check health endpoint, review logs | [deployment.mdc](../.cursor/rules/deployment.mdc#automatic-rollback) |
+| Registry pull fails (`invalid character '<'`) | Remote uses stale cached image; deploy script uses `--tls-verify=false` + avatar verify + stream fallback | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
+| Coach avatars broken / `/avatars/*.png` returns HTML | Stale frontend image; stream fresh image; verify `content-type: image/png` | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
+| Staging UI old but avatars OK | Verify `Build N` in JS bundle; stream frontend if BUILD_NUMBER mismatch | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
 
 **Primary Resource:** [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)
 
@@ -112,6 +115,18 @@ Quick reference guide for common issues and where to find solutions.
 | Language switch not working | Verify i18n initialization | [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc) |
 
 **Primary Resource:** [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc)
+
+---
+
+### 🧭 Onboarding & Entry Screens
+
+| Issue | Solution | Guide |
+|-------|----------|-------|
+| Landing shows upload preview instead of 3 cards | `LandingPage` must not init `fileContent` from `existingContext`; cards show when `!fileContent` | [ux-flow/SKILL.md](../.cursor/skills/meaningful-conversations/ux-flow/SKILL.md), [systemPatterns.md §22](../memory-bank/systemPatterns.md) |
+| Intent picker never appears | Check `localStorage.intentPickerDisabled === 'true'`; clear or use profile setting | [UX-FLOWS.md §10.1](./UX-FLOWS.md) |
+| Selection cards missing on staging only | Hard-refresh / SW cache; verify Build number in bundle matches repo | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
+
+**Primary Resource:** [UX-FLOWS.md](./UX-FLOWS.md)
 
 ---
 
