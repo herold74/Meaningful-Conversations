@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import Button from './shared/Button';
 
@@ -21,7 +22,9 @@ const ProfileHintView: React.FC<ProfileHintViewProps> = ({ onDiscover, onLater, 
         transition={{ duration: 0.4 }}
         className="w-full max-w-sm text-center space-y-6"
       >
-        <span className="text-5xl block">🔍</span>
+        <div className="w-16 h-16 rounded-xl bg-accent-primary/10 flex items-center justify-center mx-auto">
+          <Search className="w-8 h-8 text-accent-primary" aria-hidden="true" />
+        </div>
         <h1 className="text-2xl font-bold text-content-primary">
           {t('profile_hint_title')}
         </h1>
