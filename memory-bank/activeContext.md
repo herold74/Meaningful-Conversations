@@ -19,7 +19,17 @@
 - **Skill updated:** `i18n-and-theming/SKILL.md` — decorations documented as removed; do not re-add without explicit request.
 - **Not yet committed** as of this session.
 
-### Visual modernization — Phase 1 implemented (2026-07-23, not yet committed)
+### Visual modernization — Phases 1–3 complete (2026-07-23)
+- **3a–3c** (latest commit): ChatView gradient bubbles + frosted pill composer; SessionReview rounded cards + semantic next-step chips; BotSelection softer lock overlay + tinted tag pills. Layout/safe-area/spacer mechanics untouched.
+- **Remaining:** Phase 3d avatars (Ava, Rob, Victor, Bekky, Dan still on DiceBear); owner E2E session smoke recommended.
+
+### Visual modernization — Phases 1–2c complete (2026-07-23)
+- **2a** (`af3e785`): uppercase CTAs → shared Button (LandingPage, SessionReview, ChatView end-session).
+- **2b** (`1472bd1`): hardcoded gray/blue/bronze → semantic tokens (Upgrade/Redeem/RegistrationPending/TranscriptRatings/EvaluationReview/BotSelection bronze/PersonalitySurvey neutrals).
+- **2c** (`3ef9e9c`): lucide-react onboarding icons (IntentPicker, NamePrompt, OceanOnboarding, ProfileHint, BotSelection topic search). Section-header emoji in BotSelection left as-is.
+- **Next:** Phase 3 (chat / session review / bot selection polish) + remaining Style-A avatars (Ava, Rob, Victor, Bekky, Dan).
+
+### Visual modernization — Phase 1 implemented (2026-07-23)
 - **Tokens:** `tailwind.config.js` — `content.tertiary` defined (alias of `--content-subtle`; was silently inert), `borderRadius.card` 12px→16px.
 - **Ambient background:** `index.css` — `body::before` fixed gradient layer (z-index -1, pointer-events none, theme-aware via `--accent-*` triplets; NOT background-attachment:fixed per iOS WKWebView constraint). Dark mode variant included.
 - **Button:** new `gradient` variant in `shared/Button.tsx` (from-accent-primary to-accent-primary-hover — theme-var based, not hex). No existing variants changed.
