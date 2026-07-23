@@ -45,7 +45,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
         </p>
       </motion.div>
 
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 md:items-stretch">
         {INTENTS.map((intent, i) => {
           const description = isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
             ? t(`${intent.descKey}_guest`)
@@ -61,7 +61,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(intent.id)}
               className={`
-                w-full text-left rounded-card p-5 transition-all group
+                w-full h-full flex flex-col text-left rounded-card p-5 transition-all group
                 ${featured
                   ? 'action-card-featured shadow-card-elevated border border-transparent'
                   : 'bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated'
@@ -71,13 +71,13 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${featured ? 'bg-white/20' : 'bg-accent-primary/10'}`}>
                 <intent.Icon className={`w-5 h-5 ${featured ? 'text-white' : 'text-accent-primary'}`} aria-hidden="true" />
               </div>
-              <h3 className={`text-base font-semibold leading-snug mb-2 ${featured ? 'text-white' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
+              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${featured ? 'text-white' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
                 {t(intent.titleKey)}
               </h3>
-              <p className={`text-sm leading-relaxed ${featured ? 'text-white/90' : 'text-content-secondary'}`}>
+              <p className={`text-sm leading-relaxed flex-1 ${featured ? 'text-white/90' : 'text-content-secondary'}`}>
                 {description}
               </p>
-              <div className={`mt-4 flex items-center gap-1 text-sm font-medium ${featured ? 'text-white' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
+              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${featured ? 'text-white' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
                 <span>{t('intent_card_cta')}</span>
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </div>

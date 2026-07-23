@@ -153,20 +153,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
 
         {!fileContent ? (
           <>
-            <div className={`grid grid-cols-1 ${native ? '' : 'md:grid-cols-3'} gap-4 md:gap-5`}>
+            <div className={`grid grid-cols-1 ${native ? '' : 'md:grid-cols-3'} gap-4 md:gap-5 md:items-stretch`}>
               <button
                 type="button"
                 onClick={handleContextCard}
-                className="text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
+                className="h-full flex flex-col text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
               >
-                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4 shrink-0">
                   <FileTextIcon className="w-5 h-5 text-accent-primary" />
                 </div>
-                <h2 className="text-base font-semibold text-content-primary mb-2 group-hover:text-accent-primary transition-colors">
+                <h2 className="text-base font-semibold leading-snug text-content-primary mb-2 min-h-[2.75rem] group-hover:text-accent-primary transition-colors">
                   {t('landing_card_context_title')}
                 </h2>
-                <p className="text-sm text-content-secondary leading-relaxed">{t('landing_card_context_desc')}</p>
-                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity">
+                <p className="text-sm text-content-secondary leading-relaxed flex-1">{t('landing_card_context_desc')}</p>
+                <div className="mt-auto pt-4 flex items-center gap-1 text-sm font-medium text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity shrink-0">
                   <span>{t('intent_card_cta')}</span>
                   <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 </div>
@@ -175,14 +175,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <button
                 type="button"
                 onClick={onStartQuestionnaire}
-                className="text-left rounded-card p-5 action-card-featured shadow-card-elevated border border-transparent transition-all"
+                className="h-full flex flex-col text-left rounded-card p-5 action-card-featured shadow-card-elevated border border-transparent transition-all"
               >
-                <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center mb-4 shrink-0">
                   <MessageCircle className="w-5 h-5 text-white" aria-hidden="true" />
                 </div>
-                <h2 className="text-base font-semibold text-white mb-2">{t('landing_card_conversation_title')}</h2>
-                <p className="text-sm text-white/90 leading-relaxed">{t('landing_card_conversation_desc')}</p>
-                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-white">
+                <h2 className="text-base font-semibold leading-snug text-white mb-2 min-h-[2.75rem]">{t('landing_card_conversation_title')}</h2>
+                <p className="text-sm text-white/90 leading-relaxed flex-1">{t('landing_card_conversation_desc')}</p>
+                <div className="mt-auto pt-4 flex items-center gap-1 text-sm font-medium text-white shrink-0">
                   <span>{t('intent_card_cta')}</span>
                   <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 </div>
@@ -191,16 +191,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <button
                 type="button"
                 onClick={onStartInterview}
-                className="text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
+                className="h-full flex flex-col text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
               >
-                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4">
+                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4 shrink-0">
                   <Mic className="w-5 h-5 text-accent-primary" aria-hidden="true" />
                 </div>
-                <h2 className="text-base font-semibold text-content-primary mb-2 group-hover:text-accent-primary transition-colors">
+                <h2 className="text-base font-semibold leading-snug text-content-primary mb-2 min-h-[2.75rem] group-hover:text-accent-primary transition-colors">
                   {t('landing_card_interview_title')}
                 </h2>
-                <p className="text-sm text-content-secondary leading-relaxed">{t('landing_card_interview_desc')}</p>
-                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity">
+                <p className="text-sm text-content-secondary leading-relaxed flex-1">{t('landing_card_interview_desc')}</p>
+                <div className="mt-auto pt-4 flex items-center gap-1 text-sm font-medium text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity shrink-0">
                   <span>{t('intent_card_cta')}</span>
                   <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 </div>
