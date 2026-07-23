@@ -432,21 +432,22 @@ if [ -f .env ] && grep -q REGISTRY_PASSWORD .env; then
     fi
 fi
 
-# Pull latest images from registry
+# Pull latest images from registry (--tls-verify=false: Quay on AlmaLinux may return HTML without this)
+PULL_OPTS="--tls-verify=false"
 echo "Pulling images from registry..."
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
     echo "Pulling backend image..."
-    podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION" || echo "Warning: Could not pull backend image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION" || echo "Warning: Could not pull backend image"
 fi
 
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
     echo "Pulling frontend image..."
-    podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
 fi
 
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
     echo "Pulling TTS image..."
-    podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
 fi
 
 # Save current version for rollback (before stopping anything)
@@ -544,6 +545,27 @@ REMOTE_SCRIPT
     # Transfer and execute deployment script
     scp /tmp/remote-deploy.sh "$REMOTE_HOST:/tmp/"
     ssh "$REMOTE_HOST" "chmod +x /tmp/remote-deploy.sh && /tmp/remote-deploy.sh"
+    
+    # Frontend post-deploy: if registry pull failed, container may lack public/avatars in dist/.
+    # Stream the freshly built image directly (podman save → scp → podman load).
+    if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ) ]]; then
+        FRONTEND_CONTAINER="meaningful-conversations-frontend-${ENVIRONMENT}"
+        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        if ! ssh "$REMOTE_HOST" "podman exec $FRONTEND_CONTAINER test -f /app/dist/avatars/kenji.png 2>/dev/null"; then
+            echo -e "${YELLOW}⚠ Frontend missing dist/avatars — streaming image to server (registry pull workaround)...${NC}"
+            STREAM_TAR="/tmp/mc-frontend-${VERSION}.tar"
+            podman save -o "$STREAM_TAR" "$FRONTEND_IMAGE"
+            scp "$STREAM_TAR" "$REMOTE_HOST:/tmp/"
+            ssh "$REMOTE_HOST" "podman load -i /tmp/mc-frontend-${VERSION}.tar && rm -f /tmp/mc-frontend-${VERSION}.tar && cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE up -d --force-recreate frontend && /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT"
+            rm -f "$STREAM_TAR"
+            if ssh "$REMOTE_HOST" "podman exec $FRONTEND_CONTAINER test -f /app/dist/avatars/kenji.png 2>/dev/null"; then
+                echo -e "${GREEN}✓ Frontend image streamed successfully (avatars verified)${NC}"
+            else
+                echo -e "${RED}ERROR: Frontend still missing dist/avatars after stream — check podman image tag${NC}"
+                exit 1
+            fi
+        fi
+    fi
     
     # Cleanup
     rm /tmp/remote-deploy.sh

@@ -7,36 +7,37 @@ import { brand } from '../config/brand';
 import BrandLoader from './shared/BrandLoader';
 
 const WelcomeScreen: React.FC = () => {
-    const { t, language } = useLocalization();
+  const { t, language } = useLocalization();
+  const appName = language === 'de' ? brand.appNameDe : brand.appName;
 
-    const avatarPositions = [
-        { top: '-1.75rem', left: 'calc(50% - 1.75rem)' },
-        { top: 'calc(25% - 1rem)', right: '-1.75rem' },
-        { bottom: 'calc(25% - 1rem)', right: '-1.75rem' },
-        { bottom: '-1.75rem', left: 'calc(50% - 1.75rem)' },
-        { bottom: 'calc(25% - 1rem)', left: '-1.75rem' },
-        { top: 'calc(25% - 1rem)', left: '-1.75rem' },
-    ];
+  const avatarPositions = [
+    { top: '-1.75rem', left: 'calc(50% - 1.75rem)' },
+    { top: 'calc(25% - 1rem)', right: '-1.75rem' },
+    { bottom: 'calc(25% - 1rem)', right: '-1.75rem' },
+    { bottom: '-1.75rem', left: 'calc(50% - 1.75rem)' },
+    { bottom: 'calc(25% - 1rem)', left: '-1.75rem' },
+    { top: 'calc(25% - 1rem)', left: '-1.75rem' },
+  ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
       <motion.div
-        className="relative w-48 h-48"
-        initial={{ opacity: 0, scale: 0.9 }}
+        className="relative w-48 h-48 mb-6"
+        initial={{ opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <LogoIcon className="w-32 h-32 text-accent-primary" />
-            <div className="absolute inset-0 rounded-full border-4 border-accent-primary/20 animate-ping"></div>
+          <div className="absolute inset-0 rounded-full bg-accent-primary/15 blur-2xl scale-150" aria-hidden="true" />
+          <LogoIcon className="relative w-24 h-24 text-accent-primary drop-shadow-sm" />
         </div>
-        
+
         {BOTS.slice(1, 7).map((bot, index) => (
           <motion.img
             key={bot.id}
             src={bot.avatar}
             alt={bot.name}
-            className="absolute w-14 h-14 rounded-full border-2 border-background-secondary dark:border-background-tertiary shadow-card"
+            className="absolute w-14 h-14 rounded-full border-2 border-background-secondary shadow-card object-cover"
             style={avatarPositions[index]}
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -46,23 +47,30 @@ const WelcomeScreen: React.FC = () => {
       </motion.div>
 
       <motion.h1
-        className="mt-20 text-3xl font-semibold text-content-primary tracking-wide"
+        className="text-3xl sm:text-4xl font-semibold text-content-primary tracking-tight"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.6 }}
+        transition={{ duration: 0.4, delay: 0.45 }}
       >
-        {language === 'de' ? brand.appNameDe : brand.appName}
+        {appName}
       </motion.h1>
+      <motion.p
+        className="mt-3 text-base text-content-secondary leading-relaxed max-w-sm"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.55 }}
+      >
+        {t('welcome_hero_subtitle')}
+      </motion.p>
+
       <motion.div
-        className="mt-4"
+        className="mt-10 flex flex-col items-center gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
       >
         <BrandLoader size="sm" />
-        <p className="mt-2 text-sm text-content-secondary">
-          {t('welcome_loading')}
-        </p>
+        <p className="text-sm text-content-subtle">{t('welcome_loading')}</p>
       </motion.div>
     </div>
   );

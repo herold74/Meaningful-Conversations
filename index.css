@@ -314,11 +314,7 @@ html[data-modal-open] [data-gamification-bg] {
 @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
 
-/* Ambient branded background (Phase 1 modernization).
-   Implemented as a fixed pseudo-element layer — NOT background-attachment: fixed,
-   which is broken in iOS WKWebView. z-index -1 keeps it behind all content;
-   pointer-events none keeps scroll/touch untouched. Colors derive from theme
-   accent variables so seasonal themes stay coherent. */
+/* Ambient branded background — two corner glows (mockup: teal top-left, warm bottom-right). */
 body::before {
   content: '';
   position: fixed;
@@ -326,11 +322,25 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(1200px 800px at 0% 0%, rgb(var(--accent-primary) / 0.06), transparent 60%),
-    radial-gradient(1000px 700px at 100% 100%, rgb(var(--accent-secondary) / 0.04), transparent 60%);
+    radial-gradient(ellipse 75% 60% at 0% 0%, rgb(var(--accent-primary) / 0.32), transparent 72%),
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--accent-secondary) / 0.26), transparent 72%);
 }
 html.dark body::before {
   background:
-    radial-gradient(1200px 800px at 50% -10%, rgb(var(--accent-primary) / 0.09), transparent 65%),
-    radial-gradient(900px 600px at 100% 110%, rgb(var(--accent-tertiary) / 0.07), transparent 60%);
+    radial-gradient(ellipse 75% 60% at 0% 0%, rgb(var(--accent-primary) / 0.28), transparent 72%),
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--accent-secondary) / 0.22), transparent 72%);
+}
+
+/* Featured action card — dark teal gradient for readable white text (mockup center tile). */
+.action-card-featured {
+  background: linear-gradient(
+    to bottom right,
+    rgb(var(--brand-color-4)),
+    rgb(var(--brand-color-3)),
+    rgb(var(--brand-color-2))
+  );
+  color: rgb(255 255 255);
+}
+.action-card-featured:hover {
+  filter: brightness(1.06);
 }
