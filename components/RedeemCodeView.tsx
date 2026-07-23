@@ -42,11 +42,11 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
     if (status === 'success') {
       return (
         <div className="text-center p-4 animate-fadeIn">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4 mx-auto">
-                <CheckIcon className="w-10 h-10 text-green-500 dark:text-green-400" />
+            <div className="w-16 h-16 bg-status-success-background rounded-full flex items-center justify-center mb-4 mx-auto">
+                <CheckIcon className="w-10 h-10 text-status-success-foreground" />
             </div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">{t('redeem_success')}</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">{t('redeemCode_redirecting')}</p>
+          <h2 className="text-xl font-bold text-content-primary">{t('redeem_success')}</h2>
+          <p className="mt-2 text-content-secondary">{t('redeemCode_redirecting')}</p>
         </div>
       );
     }
@@ -54,8 +54,8 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
     return (
       <>
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('redeem_title')}</h1>
-          <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-8">{t('redeem_subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-content-primary uppercase">{t('redeem_title')}</h1>
+          <p className="mt-2 text-sm sm:text-base text-content-secondary mb-8">{t('redeem_subtitle')}</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,7 +69,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
               aria-label={t('redeem_code_placeholder')}
               required
               disabled={status === 'loading'}
-              className="w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-accent-primary"
+              className="w-full p-3 bg-background-tertiary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary"
             />
           </div>
 
@@ -79,7 +79,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
             {t('redeem_button')}
           </Button>
         </form>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+        <p className="text-center text-sm text-content-secondary mt-6">
             {t('redeem_info_text')}
             <a 
                 href={brand.providerUrl}
@@ -92,10 +92,10 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
         </p>
 
         {onBack && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-6 text-center">
+          <div className="pt-4 border-t border-border-primary mt-6 text-center">
             <button
               onClick={onBack}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+              className="text-sm text-content-subtle hover:underline"
             >
               ← {t('redeem_back_button')}
             </button>
@@ -106,7 +106,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto p-5 sm:p-8 space-y-6 bg-white border border-gray-300 dark:border-gray-700 mt-4 mb-10 rounded-lg shadow-lg">
+    <div className="w-full max-w-xl mx-auto p-5 sm:p-8 space-y-6 bg-background-secondary border border-border-primary mt-4 mb-10 rounded-lg shadow-lg">
         <div className="w-full mt-4 sm:mt-0">
             {renderContent()}
         </div>

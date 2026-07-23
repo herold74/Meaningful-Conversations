@@ -147,7 +147,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   if (isLoading && !isNativeIOS()) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
+        <div className="animate-pulse text-content-subtle">{t('upgrade_loading')}</div>
       </div>
     );
   }
@@ -155,7 +155,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   if (error && !data && !isNativeIOS()) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-status-danger-foreground">{error}</p>
       </div>
     );
   }
@@ -172,19 +172,19 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     const isPurchasing = purchasingId === product.id;
 
     return (
-      <div key={product.id} className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-5 space-y-3">
+      <div key={product.id} className="bg-background-secondary border border-border-primary rounded-lg p-4 sm:p-5 space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-1">
           <div className="min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">{product.name}</h3>
+            <h3 className="font-semibold text-content-primary text-sm sm:text-base truncate">{product.name}</h3>
             {product.duration && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(product.duration)}</span>
+              <span className="text-xs text-content-subtle">{durationLabel(product.duration)}</span>
             )}
           </div>
           <div className="text-right flex-shrink-0">
             {hasDiscount && (
-              <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{product.price.toFixed(2).replace('.', ',')}</span>
+              <span className="text-xs sm:text-sm text-content-subtle line-through mr-1">€{product.price.toFixed(2).replace('.', ',')}</span>
             )}
-            <span className={`text-lg sm:text-xl font-bold ${hasDiscount ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+            <span className={`text-lg sm:text-xl font-bold ${hasDiscount ? 'text-status-success-foreground' : 'text-accent-primary'}`}>
               €{product.finalPrice.toFixed(2).replace('.', ',')}
             </span>
           </div>
@@ -193,12 +193,12 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         {hasDiscount && product.discountReasons.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {product.discountReasons.includes('loyalty') && (
-              <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-status-warning-background text-status-warning-foreground rounded-full">
                 {t('upgrade_loyalty_badge')}
               </span>
             )}
             {product.discountReasons.includes('bot_credit') && (
-              <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-status-info-background text-status-info-foreground rounded-full">
                 {t('upgrade_bot_credit_badge')}
               </span>
             )}
@@ -206,7 +206,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         )}
 
         {isPurchasing && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+          <div className="p-3 bg-status-info-background border border-status-info-border rounded text-status-info-foreground text-sm animate-pulse">
             {t('upgrade_payment_processing')}
           </div>
         )}
@@ -226,12 +226,12 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
     <div className="max-w-2xl mx-auto py-8 px-4">
       {/* Current Tier */}
       <div className="text-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-200">{t('upgrade_title')}</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl md:text-3xl font-bold text-content-primary">{t('upgrade_title')}</h1>
+        <p className="mt-2 text-content-secondary">
           {t('upgrade_current_tier')}: <span className="font-semibold text-accent-primary">{tierLabel}</span>
-          {data?.isLifetime && <span className="ml-1 text-xs text-emerald-600 dark:text-emerald-400">(Lifetime)</span>}
+          {data?.isLifetime && <span className="ml-1 text-xs text-status-success-foreground">(Lifetime)</span>}
           {data?.isPremium && data.premiumExpiresAt && (
-            <span className="ml-1 text-xs text-gray-500">
+            <span className="ml-1 text-xs text-content-subtle">
               ({t('upgrade_expires')} {new Date(data.premiumExpiresAt).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')})
             </span>
           )}
@@ -239,19 +239,19 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       </div>
 
       {successMessage && (
-        <div className="p-4 mb-6 bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-400 rounded-lg text-emerald-700 dark:text-emerald-300 font-medium text-center">
+        <div className="p-4 mb-6 bg-status-success-background border-2 border-status-success-border rounded-lg text-status-success-foreground font-medium text-center">
           ✅ {successMessage}
         </div>
       )}
 
       {(error || paypalError) && !successMessage && (
-        <div className="p-3 mb-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 rounded-lg text-red-700 dark:text-red-300 text-sm text-center">
+        <div className="p-3 mb-6 bg-status-danger-background border-2 border-status-danger-border rounded-lg text-status-danger-foreground text-sm text-center">
           {error || paypalError}
         </div>
       )}
 
       {!hasProducts && (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12 text-content-subtle">
           <p className="text-lg">{t('upgrade_all_unlocked')}</p>
         </div>
       )}
@@ -259,7 +259,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {/* Access passes — web only (PayPal); hidden on native iOS where NativePaywall is used */}
       {accessProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_access_section')}</h2>
+          <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_access_section')}</h2>
           <div className="space-y-4">{accessProducts.map(renderProductCard)}</div>
         </section>
       )}
@@ -267,13 +267,13 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {/* Premium Passes — dropdown selector; hidden on native iOS */}
       {premiumProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_premium_section')}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('upgrade_premium_description')}</p>
-          <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-5 space-y-3">
+          <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_premium_section')}</h2>
+          <p className="text-sm text-content-subtle mb-4">{t('upgrade_premium_description')}</p>
+          <div className="bg-background-secondary border border-border-primary rounded-lg p-4 sm:p-5 space-y-3">
             <select
               value={selectedPremiumId || ''}
               onChange={e => handlePremiumChange(e.target.value)}
-              className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+              className="w-full p-2.5 bg-background-secondary border border-border-secondary rounded-md text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-accent-primary"
             >
               {premiumProducts.map(p => (
                 <option key={p.id} value={p.id}>
@@ -286,12 +286,12 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
             {selectedPremium && (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-1">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(selectedPremium.duration)}</span>
+                  <span className="text-xs text-content-subtle">{durationLabel(selectedPremium.duration)}</span>
                   <div className="text-right flex-shrink-0">
                     {selectedPremium.finalPrice < selectedPremium.price && (
-                      <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
+                      <span className="text-xs sm:text-sm text-content-subtle line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
                     )}
-                    <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+                    <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-status-success-foreground' : 'text-accent-primary'}`}>
                       €{selectedPremium.finalPrice.toFixed(2).replace('.', ',')}
                     </span>
                   </div>
@@ -300,12 +300,12 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
                 {selectedPremium.discountReasons.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {selectedPremium.discountReasons.includes('loyalty') && (
-                      <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-status-warning-background text-status-warning-foreground rounded-full">
                         {t('upgrade_loyalty_badge')}
                       </span>
                     )}
                     {selectedPremium.discountReasons.includes('bot_credit') && (
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-status-info-background text-status-info-foreground rounded-full">
                         {t('upgrade_bot_credit_badge')}
                       </span>
                     )}
@@ -313,7 +313,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
                 )}
 
                 {purchasingId === selectedPremium.id && (
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+                  <div className="p-3 bg-status-info-background border border-status-info-border rounded text-status-info-foreground text-sm animate-pulse">
                     {t('upgrade_payment_processing')}
                   </div>
                 )}
@@ -334,8 +334,8 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {/* Bot Unlocks — web only */}
       {botProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">{t('upgrade_bot_section')}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('upgrade_bot_description')}</p>
+          <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_bot_section')}</h2>
+          <p className="text-sm text-content-subtle mb-4">{t('upgrade_bot_description')}</p>
           <div className="space-y-4">{botProducts.map(renderProductCard)}</div>
         </section>
       )}
@@ -348,10 +348,10 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       )}
 
       {/* Divider + Redeem Code */}
-      <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600 my-6">
-        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+      <div className="flex items-center gap-3 text-content-subtle my-6">
+        <div className="flex-1 h-px bg-border-primary" />
         <span className="text-sm">{t('paywall_or_divider')}</span>
-        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+        <div className="flex-1 h-px bg-border-primary" />
       </div>
 
       <Button

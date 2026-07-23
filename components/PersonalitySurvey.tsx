@@ -321,7 +321,7 @@ export type { Big5Result, Big5Facets };
 // --- HILFSKOMPONENTEN (UI) ---
 
 const Card: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => (
-  <div className="border border-border-secondary dark:border-border-primary rounded-lg p-6 max-w-xl mx-auto font-sans shadow-md bg-background-secondary dark:bg-background-secondary">
+  <div className="border border-border-secondary dark:border-border-primary rounded-lg p-6 max-w-xl mx-auto font-sans shadow-md bg-background-secondary">
     <h2 className="mb-4 text-xl font-bold text-content-primary">{title}</h2>
     {children}
   </div>
@@ -407,7 +407,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
         <span
           key={i}
           className={`inline-block w-2.5 h-2.5 rounded-full mx-0.5 transition-colors
-            ${i < value ? 'bg-accent-primary' : 'bg-gray-200 dark:bg-gray-600'}`}
+            ${i < value ? 'bg-accent-primary' : 'bg-border-primary'}`}
         />
       );
     }
@@ -422,7 +422,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
           ? 'bg-green-100 dark:bg-green-900/30 border-green-400 dark:border-green-600' 
           : 'bg-accent-primary/10 border-accent-primary'}`}
       >
-        <div className="text-sm text-gray-600 dark:text-gray-300 mb-2"
+        <div className="text-sm text-content-secondary mb-2"
              dangerouslySetInnerHTML={{ __html: t('survey_points_distribute') }}
         />
         <div className={`text-3xl font-bold
@@ -430,7 +430,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
         >
           {remaining}
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-content-subtle">
           {remaining === 0 ? t('survey_points_all_distributed') : remaining === 1 ? t('survey_points_remaining_one') : t('survey_points_remaining')}
         </div>
       </div>
@@ -439,13 +439,13 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
       {items.map(item => (
         <div key={item.id} className={`mb-4 p-4 border rounded-xl transition-colors
           ${values[item.id] > 0 
-            ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600' 
-            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}
+            ? 'bg-background-tertiary border-border-secondary' 
+            : 'bg-background-secondary border-border-primary'}`}
         >
           {/* Label */}
           <div className="mb-3">
-            <strong className="text-base text-gray-800 dark:text-gray-100">{item.label}</strong>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.text}</div>
+            <strong className="text-base text-content-primary">{item.label}</strong>
+            <div className="text-sm text-content-subtle mt-1">{item.text}</div>
           </div>
           
           {/* Stepper controls */}
@@ -457,7 +457,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
               disabled={values[item.id] <= 0}
               className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
                 ${values[item.id] <= 0 
-                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+                  ? 'bg-background-tertiary text-content-subtle cursor-not-allowed' 
                   : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_remove')}
             >
@@ -467,7 +467,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
             {/* Value display with dots */}
             <div className="flex-1 text-center flex flex-col items-center gap-1.5">
               <div className={`text-2xl font-bold min-w-[40px]
-                ${values[item.id] > 0 ? 'text-accent-primary' : 'text-gray-400 dark:text-gray-500'}`}
+                ${values[item.id] > 0 ? 'text-accent-primary' : 'text-content-subtle'}`}
               >
                 {values[item.id]}
               </div>
@@ -483,7 +483,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
               disabled={remaining <= 0}
               className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
                 ${remaining <= 0 
-                  ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+                  ? 'bg-background-tertiary text-content-subtle cursor-not-allowed' 
                   : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_add')}
             >
@@ -525,21 +525,21 @@ const NarrativeQuestionsBlock = ({ onComplete, t }: {
   const getTextareaBorderClass = (isValid: boolean, hasContent: boolean) => {
     if (isValid) return 'border-green-400 dark:border-green-500';
     if (hasContent) return 'border-orange-400 dark:border-orange-500';
-    return 'border-gray-200 dark:border-gray-600';
+    return 'border-border-primary';
   };
 
   return (
     <div>
-      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed"
+      <p className="mb-6 text-content-secondary leading-relaxed"
          dangerouslySetInnerHTML={{ __html: t('survey_narrative_intro') }}
       />
 
       {/* Frage A: Flow */}
       <div className="mb-7">
-        <label className="block font-semibold mb-2 text-gray-800 dark:text-gray-100">
+        <label className="block font-semibold mb-2 text-content-primary">
           {t('survey_narrative_flow_label')}
         </label>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+        <p className="text-sm text-content-subtle mb-3 leading-relaxed">
           {t('survey_narrative_flow_desc')}
         </p>
         <textarea
@@ -547,13 +547,13 @@ const NarrativeQuestionsBlock = ({ onComplete, t }: {
           onChange={(e) => setFlowStory(e.target.value)}
           placeholder={t('survey_narrative_flow_placeholder')}
           className={`w-full min-h-[120px] p-3 rounded-lg border-2 text-sm leading-relaxed resize-y font-inherit transition-colors
-            bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-            placeholder-gray-400 dark:placeholder-gray-500
+            bg-background-secondary text-content-primary
+            placeholder-content-subtle
             focus:outline-none focus:ring-2 focus:ring-accent-primary/50
             ${getTextareaBorderClass(flowValid, flowStory.length > 0)}`}
         />
         <div className={`flex justify-between text-xs mt-1.5
-          ${flowValid ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}
+          ${flowValid ? 'text-green-600 dark:text-green-400' : 'text-content-subtle'}`}
         >
           <span>{flowValid ? t('survey_narrative_sufficient') : t('survey_narrative_min_chars', { count: MIN_CHARS })}</span>
           <span>{flowStory.length} / {MIN_CHARS}+</span>
@@ -562,10 +562,10 @@ const NarrativeQuestionsBlock = ({ onComplete, t }: {
 
       {/* Frage B: Friction */}
       <div className="mb-6">
-        <label className="block font-semibold mb-2 text-gray-800 dark:text-gray-100">
+        <label className="block font-semibold mb-2 text-content-primary">
           {t('survey_narrative_friction_label')}
         </label>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+        <p className="text-sm text-content-subtle mb-3 leading-relaxed">
           {t('survey_narrative_friction_desc')}
         </p>
         <textarea
@@ -573,13 +573,13 @@ const NarrativeQuestionsBlock = ({ onComplete, t }: {
           onChange={(e) => setFrictionStory(e.target.value)}
           placeholder={t('survey_narrative_friction_placeholder')}
           className={`w-full min-h-[120px] p-3 rounded-lg border-2 text-sm leading-relaxed resize-y font-inherit transition-colors
-            bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200
-            placeholder-gray-400 dark:placeholder-gray-500
+            bg-background-secondary text-content-primary
+            placeholder-content-subtle
             focus:outline-none focus:ring-2 focus:ring-accent-primary/50
             ${getTextareaBorderClass(frictionValid, frictionStory.length > 0)}`}
         />
         <div className={`flex justify-between text-xs mt-1.5
-          ${frictionValid ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}
+          ${frictionValid ? 'text-green-600 dark:text-green-400' : 'text-content-subtle'}`}
         >
           <span>{frictionValid ? t('survey_narrative_sufficient') : t('survey_narrative_min_chars', { count: MIN_CHARS })}</span>
           <span>{frictionStory.length} / {MIN_CHARS}+</span>
@@ -610,28 +610,28 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
         className={`p-5 border-2 rounded-xl cursor-pointer transition-all mb-4
           ${isSelected 
             ? 'border-accent-primary bg-accent-primary/10' 
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'}`}
+            : 'border-border-primary bg-background-secondary hover:border-border-secondary'}`}
         onClick={() => setSelected(value)}
       >
         <div className="flex items-center mb-3">
           <div className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center
             ${isSelected 
               ? 'border-accent-primary bg-accent-primary' 
-              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'}`}
+              : 'border-border-secondary bg-background-secondary'}`}
           >
             {isSelected && <span className="text-white text-sm">✓</span>}
           </div>
-          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          <span className="text-lg font-semibold text-content-primary">
             {title}
           </span>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 ml-9 leading-relaxed"
+        <p className="text-sm text-content-subtle ml-9 leading-relaxed"
            dangerouslySetInnerHTML={{ __html: t(descKey) }}
         />
         <div className={`ml-9 mt-3 py-2 px-3 rounded-md text-sm
           ${isSelected 
-            ? 'bg-accent-primary/20 text-gray-700 dark:text-gray-300' 
-            : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}
+            ? 'bg-accent-primary/20 text-content-secondary' 
+            : 'bg-background-tertiary text-content-secondary'}`}
         >
           {t(idealKey)}
         </div>
@@ -641,7 +641,7 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
 
   return (
     <div>
-      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
+      <p className="mb-6 text-content-secondary leading-relaxed">
         {t('survey_adaptation_intro')}
       </p>
 
@@ -659,7 +659,7 @@ const AdaptationChoiceBlock = ({ onComplete, t }: {
         idealKey="survey_adaptation_stable_ideal"
       />
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center">
+      <p className="text-sm text-content-subtle mb-4 text-center">
         {t('survey_adaptation_changeable')}
       </p>
 
@@ -687,23 +687,23 @@ const Bfi2VariantChoiceBlock = ({ onComplete, t }: {
         className={`p-5 border-2 rounded-xl cursor-pointer transition-all mb-4
           ${isSelected
             ? 'border-accent-primary bg-accent-primary/10'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'}`}
+            : 'border-border-primary bg-background-secondary hover:border-border-secondary'}`}
         onClick={() => setSelected(value)}
       >
         <div className="flex items-center mb-3">
           <div className={`w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center
             ${isSelected
               ? 'border-accent-primary bg-accent-primary'
-              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'}`}
+              : 'border-border-secondary bg-background-secondary'}`}
           >
             {isSelected && <span className="text-white text-sm">✓</span>}
           </div>
           <span className="text-base mr-2">{icon}</span>
-          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          <span className="text-lg font-semibold text-content-primary">
             {t(titleKey)}
           </span>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 ml-9 leading-relaxed">
+        <p className="text-sm text-content-subtle ml-9 leading-relaxed">
           {t(descKey)}
         </p>
       </div>
@@ -712,7 +712,7 @@ const Bfi2VariantChoiceBlock = ({ onComplete, t }: {
 
   return (
     <div>
-      <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
+      <p className="mb-6 text-content-secondary leading-relaxed">
         {t('survey_bfi2_variant_intro')}
       </p>
 
@@ -887,7 +887,7 @@ const LensSelectionBlock = ({
             className={`p-5 border-2 rounded-xl transition-all
               ${index === 0 
                 ? 'border-accent-primary bg-accent-primary/5 dark:bg-accent-primary/10' 
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                : 'border-border-primary bg-background-secondary'
               }`}
           >
             <div className="flex items-start gap-4">
@@ -904,7 +904,7 @@ const LensSelectionBlock = ({
                   className={`py-2 px-4 rounded-lg font-medium text-sm transition-colors
                     ${index === 0 
                       ? 'bg-accent-primary text-white hover:bg-accent-primary/90' 
-                      : 'bg-gray-100 dark:bg-gray-700 text-content-primary hover:bg-gray-200 dark:hover:bg-gray-600'
+                      : 'bg-background-tertiary text-content-primary hover:bg-border-primary'
                     }`}
                 >
                   {t('survey_lens_start_button')} →
@@ -1025,7 +1025,7 @@ const SDQuestionnaireBlock = ({
       </div>
 
       {/* Current portrait description */}
-      <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="mb-6 p-4 bg-background-secondary rounded-lg border border-border-primary">
         <p className="font-medium text-content-primary text-lg leading-relaxed">
           {currentQuestion.text}
         </p>
@@ -1040,13 +1040,13 @@ const SDQuestionnaireBlock = ({
             className={`w-full p-3.5 rounded-lg border-2 transition-all text-left flex items-center gap-3
               ${answers[currentQuestion.id] === val
                 ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 text-content-primary'
+                : 'border-border-primary bg-background-secondary hover:border-border-secondary text-content-primary'
               }`}
           >
             <span className={`w-9 h-9 flex items-center justify-center rounded-full text-base font-bold shrink-0
               ${answers[currentQuestion.id] === val
                 ? 'bg-accent-primary text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-content-secondary'
+                : 'bg-background-tertiary text-content-secondary'
               }`}>
               {val}
             </span>
@@ -1075,7 +1075,7 @@ const SDQuestionnaireBlock = ({
         <div className="mt-4">
           <button
             onClick={goBack}
-            className="px-4 py-2 text-sm rounded-lg transition-colors text-content-secondary hover:text-content-primary hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="px-4 py-2 text-sm rounded-lg transition-colors text-content-secondary hover:text-content-primary hover:bg-background-tertiary"
           >
             ← {t('survey_btn_back')}
           </button>
@@ -1112,14 +1112,14 @@ const RankingBlock = ({ items, onComplete, t, initialOrder }: { items: any[], on
 
   return (
     <div>
-      <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+      <p className="mb-4 text-sm text-content-secondary">
         {t('survey_ranking_intro')} <br/>
         <span dangerouslySetInnerHTML={{ __html: t('survey_ranking_hint') }} />
       </p>
 
       {/* Die Rangliste */}
       <div className="mb-5">
-        <h3 className="text-base font-semibold mb-2 text-gray-800 dark:text-gray-100">{t('survey_ranking_your_priority', { count: items.length })}</h3>
+        <h3 className="text-base font-semibold mb-2 text-content-primary">{t('survey_ranking_your_priority', { count: items.length })}</h3>
         <div className="min-h-[50px] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-800/50">
           {ranked.map((item, index) => (
             <div 
@@ -1134,24 +1134,24 @@ const RankingBlock = ({ items, onComplete, t, initialOrder }: { items: any[], on
               </div>
             </div>
           ))}
-          {ranked.length === 0 && <div className="text-gray-400 dark:text-gray-500 text-center py-2.5">{t('survey_ranking_nothing_selected')}</div>}
+          {ranked.length === 0 && <div className="text-content-subtle text-center py-2.5">{t('survey_ranking_nothing_selected')}</div>}
         </div>
       </div>
 
       {/* Der Pool */}
       {pool.length > 0 && (
         <div>
-          <h3 className="text-base font-semibold mb-2 text-gray-800 dark:text-gray-100">{t('survey_ranking_options')}</h3>
+          <h3 className="text-base font-semibold mb-2 text-content-primary">{t('survey_ranking_options')}</h3>
           <div className="flex flex-col gap-2">
             {pool.map(item => (
               <div 
                 key={item.id} 
                 onClick={() => moveToRanked(item)}
-                className="p-3 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-800 cursor-pointer 
-                  hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                className="p-3 border border-border-primary rounded bg-background-secondary cursor-pointer 
+                  hover:bg-background-tertiary hover:border-border-secondary transition-colors"
               >
-                <div className="font-semibold text-gray-800 dark:text-gray-100">{item.label}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">{item.text}</div>
+                <div className="font-semibold text-content-primary">{item.label}</div>
+                <div className="text-sm text-content-subtle">{item.text}</div>
               </div>
             ))}
           </div>
@@ -1413,8 +1413,8 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
     const bfi2Questions = getBfi2Items(effectiveVariant, t);
     content = (
       <Card title={t('survey_bfi2_title')}>
-        <p className="mb-2 text-gray-600 dark:text-gray-400">{t('survey_bfi2_intro')}</p>
-        <div className="mb-4 text-xs text-gray-400 dark:text-gray-500 italic">
+        <p className="mb-2 text-content-secondary">{t('survey_bfi2_intro')}</p>
+        <div className="mb-4 text-xs text-content-subtle italic">
           <p>{t('survey_bfi2_citation')}</p>
           <a 
             href={t('survey_bfi2_source_url')} 
@@ -1547,7 +1547,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
         <div className="mb-4">
           <button 
             onClick={onCancel} 
-            className="p-2 rounded-full bg-background-tertiary dark:bg-background-tertiary hover:bg-border-primary dark:hover:bg-border-primary transition-colors"
+            className="p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors"
             aria-label={t('survey_cancel') || 'Zurück'}
           >
             <ArrowLeftIcon className="w-6 h-6 text-content-secondary" />
@@ -1556,7 +1556,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
       )}
       {selectedLens && (
         <div className="max-w-xl mx-auto mb-4">
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
+          <div className="flex items-center justify-between text-sm text-content-subtle mb-1">
             <span>{t('survey_progress', { current: step + 1, total: totalSteps })}</span>
             <span>{progressPercent}%</span>
           </div>
@@ -1595,7 +1595,7 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
                   setShowOverwriteWarning(false);
                   setPendingLensSelection(null);
                 }} 
-                className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                className="p-2 text-content-subtle hover:text-content-primary"
                 aria-label={t('modal_close') || 'Schließen'}
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1621,19 +1621,19 @@ export const PersonalitySurvey: React.FC<PersonalitySurveyProps> = ({
                 </div>
               </div>
               
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-content-secondary">
                 {t('profile_overwrite_warning_question') || 'Ein neuer Test bedeutet einen NEUBEGINN. Das bisherige Profil kann nachträglich nicht wieder hergestellt werden. Bist du sicher, oder möchtest du vorher eine neue Signatur erstellen?'}
               </p>
             </div>
             
-            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-border-primary">
               <button 
                 onClick={() => {
                   setShowOverwriteWarning(false);
                   setPendingLensSelection(null);
                   if (onCancel) onCancel(); // Go back to profile view
                 }} 
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="px-4 py-2 border border-border-secondary rounded-lg text-content-secondary hover:bg-background-tertiary"
               >
                 {t('profile_overwrite_cancel') || 'Zurück zur Signatur'}
               </button>
