@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -556,9 +556,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
-                <span className="text-lg">💬</span>
+                <MessageCircle className="w-5 h-5 text-accent-primary" aria-hidden="true" />
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold uppercase text-accent-primary">
+                  <div className="text-[0.9375rem] font-semibold text-accent-primary">
                     {t('botSelection_section_kommunikation')}
                   </div>
                   <div className="text-xs text-accent-primary/80">
@@ -667,19 +667,19 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           {/* Section Divider */}
           <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${!currentUser && activeHighlight === 'topicSearch' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-400 dark:via-slate-500 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600">
-                <span className="text-lg">🎯</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background-tertiary border border-border-primary">
+                <Target className="w-5 h-5 text-content-secondary" aria-hidden="true" />
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold uppercase text-slate-700 dark:text-slate-300">
+                  <div className="text-[0.9375rem] font-semibold text-content-primary">
                     {t('botSelection_section_coaching')}
                   </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                  <div className="text-xs text-content-secondary">
                     {t('botSelection_section_coaching_desc')}
                   </div>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-400 dark:via-slate-500 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
             </div>
           </div>
           
@@ -730,25 +730,25 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setClientSectionOpen(prev => !prev); } }}
               aria-expanded={clientSectionOpen}
             >
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
-                <span className="text-lg">🎓</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30">
+                <GraduationCap className="w-5 h-5 text-brand-accent" aria-hidden="true" />
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold uppercase text-amber-700 dark:text-amber-400">
+                  <div className="text-[0.9375rem] font-semibold text-brand-accent">
                     {t('botSelection_section_client', { providerName: brand.providerName })}
                   </div>
-                  <div className="text-xs text-amber-700 dark:text-amber-400">
+                  <div className="text-xs text-content-secondary">
                     {t('botSelection_section_client_desc')}
                   </div>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-amber-700 dark:text-amber-400 transition-transform duration-200 ${clientSectionOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-brand-accent transition-transform duration-200 ${clientSectionOpen ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
             </div>
           </div>
 
