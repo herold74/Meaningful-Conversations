@@ -183,7 +183,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {hasDiscount && (
               <span className="text-xs sm:text-sm text-content-subtle line-through mr-1">€{product.price.toFixed(2).replace('.', ',')}</span>
             )}
-            <span className={`text-lg sm:text-xl font-bold ${hasDiscount ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+            <span className={`text-lg sm:text-xl font-bold ${hasDiscount ? 'text-status-success-foreground' : 'text-accent-primary'}`}>
               €{product.finalPrice.toFixed(2).replace('.', ',')}
             </span>
           </div>
@@ -192,12 +192,12 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
         {hasDiscount && product.discountReasons.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {product.discountReasons.includes('loyalty') && (
-              <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-status-warning-background text-status-warning-foreground rounded-full">
                 {t('upgrade_loyalty_badge')}
               </span>
             )}
             {product.discountReasons.includes('bot_credit') && (
-              <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-status-info-background text-status-info-foreground rounded-full">
                 {t('upgrade_bot_credit_badge')}
               </span>
             )}
@@ -205,7 +205,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
         )}
 
         {isPurchasing && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+          <div className="p-3 bg-status-info-background border border-status-info-border rounded text-status-info-foreground text-sm animate-pulse">
             {t('paywall_payment_processing')}
           </div>
         )}
@@ -260,7 +260,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {/* Access products (Registered Monthly + Lifetime) */}
             {accessProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
-                <h2 className="text-sm font-semibold text-content-subtle uppercase tracking-wide">
+                <h2 className="text-sm font-semibold text-content-subtle tracking-wide">
                   {t('paywall_section_basic')}
                 </h2>
                 {accessProducts.map(renderProductCard)}
@@ -271,7 +271,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {premiumProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-content-subtle uppercase tracking-wide">
+                  <h2 className="text-sm font-semibold text-content-subtle tracking-wide">
                     {t('paywall_section_premium')}
                   </h2>
                   <span className="text-xs px-2 py-0.5 bg-brand-accent/15 text-brand-accent rounded-pill font-semibold">
@@ -298,12 +298,12 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                   {selectedPremium && (
                     <>
                       <div className="flex flex-wrap items-center justify-between gap-1">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{durationLabel(selectedPremium.duration)}</span>
+                        <span className="text-xs text-content-subtle">{durationLabel(selectedPremium.duration)}</span>
                         <div className="text-right flex-shrink-0">
                           {selectedPremium.finalPrice < selectedPremium.price && (
-                            <span className="text-xs sm:text-sm text-gray-400 line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
+                            <span className="text-xs sm:text-sm text-content-subtle line-through mr-1">€{selectedPremium.price.toFixed(2).replace('.', ',')}</span>
                           )}
-                          <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-emerald-600 dark:text-emerald-400' : 'text-accent-primary'}`}>
+                          <span className={`text-lg sm:text-xl font-bold ${selectedPremium.finalPrice < selectedPremium.price ? 'text-status-success-foreground' : 'text-accent-primary'}`}>
                             €{selectedPremium.finalPrice.toFixed(2).replace('.', ',')}
                           </span>
                         </div>
@@ -312,12 +312,12 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                       {selectedPremium.discountReasons.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {selectedPremium.discountReasons.includes('loyalty') && (
-                            <span className="text-xs px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
+                            <span className="text-xs px-2 py-0.5 bg-status-warning-background text-status-warning-foreground rounded-full">
                               {t('upgrade_loyalty_badge')}
                             </span>
                           )}
                           {selectedPremium.discountReasons.includes('bot_credit') && (
-                            <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                            <span className="text-xs px-2 py-0.5 bg-status-info-background text-status-info-foreground rounded-full">
                               {t('upgrade_bot_credit_badge')}
                             </span>
                           )}
@@ -325,7 +325,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                       )}
 
                       {purchasingId === selectedPremium.id && (
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded text-blue-700 dark:text-blue-300 text-sm animate-pulse">
+                        <div className="p-3 bg-status-info-background border border-status-info-border rounded text-status-info-foreground text-sm animate-pulse">
                           {t('paywall_payment_processing')}
                         </div>
                       )}
@@ -346,7 +346,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
         )}
 
         {isLoading && !isNativeIOS() && (
-          <div className="py-6 animate-pulse text-gray-500 dark:text-gray-400">{t('upgrade_loading')}</div>
+          <div className="py-6 animate-pulse text-content-subtle">{t('upgrade_loading')}</div>
         )}
 
         {isNativeIOS() && (
@@ -356,7 +356,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
         )}
 
         {/* Divider */}
-        <div className="flex items-center gap-3 text-gray-400 dark:text-gray-600 my-5">
+        <div className="flex items-center gap-3 text-content-subtle my-5">
           <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
           <span className="text-sm">{t('paywall_or_divider')}</span>
           <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
@@ -403,10 +403,10 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             </button>
           )}
 
-          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-3 border-t border-border-primary">
             <button
               onClick={onLogout}
-              className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+              className="text-sm text-content-subtle hover:underline"
             >
               {t('paywall_logout_button')}
             </button>

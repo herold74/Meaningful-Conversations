@@ -9,6 +9,9 @@ interface ResetPasswordViewProps {
   onResetSuccess: () => void;
 }
 
+const inputClass =
+  'mt-1 w-full px-3 py-2.5 rounded-lg text-sm bg-background-primary border border-border-primary text-content-primary placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-accent-primary/40 focus:border-accent-primary transition-colors disabled:opacity-50';
+
 const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess }) => {
   const { t } = useLocalization();
   const [newPassword, setNewPassword] = useState('');
@@ -55,15 +58,15 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white border border-gray-300 dark:border-gray-700">
+      <div className="w-full max-w-md p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
         
         {status === 'success' ? (
              <div className="text-center p-4">
                 <div className="w-16 h-16 bg-status-success-background dark:bg-status-success-background rounded-full flex items-center justify-center mb-4 mx-auto">
                     <CheckIcon className="w-10 h-10 text-status-success-foreground dark:text-status-success-foreground" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{t('resetPassword_success_title')}</h1>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">{t('resetPassword_success_subtitle')}</p>
+                <h1 className="text-2xl font-semibold text-content-primary">{t('resetPassword_success_title')}</h1>
+                <p className="mt-2 text-content-secondary">{t('resetPassword_success_subtitle')}</p>
                 <Button onClick={onResetSuccess} size="lg" fullWidth className="mt-6">
                     {t('login_button')}
                 </Button>
@@ -71,14 +74,13 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
         ) : (
             <>
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase flex items-center justify-center gap-3">
+                    <h1 className="text-2xl font-semibold text-content-primary tracking-tight flex items-center justify-center gap-3">
                         <KeyIcon className="w-8 h-8"/>
                         {t('resetPassword_title')}
                     </h1>
                 </div>
                 
-                {/* E2EE Warning */}
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg">
+                <div className="p-4 bg-status-danger-background border border-status-danger-border rounded-lg">
                   <div className="flex items-start gap-3">
                     <div className="text-2xl mt-0.5">🚨</div>
                     <div>
@@ -90,7 +92,7 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="newPassword" className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('changePassword_new_label')}</label>
+                        <label htmlFor="newPassword" className="block text-sm font-medium text-content-primary text-left">{t('changePassword_new_label')}</label>
                         <input
                         type="password"
                         id="newPassword"
@@ -98,11 +100,11 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         disabled={status === 'loading'}
-                        className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                        className={inputClass}
                         />
                     </div>
                     <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 dark:text-gray-300 text-left">{t('changePassword_confirm_label')}</label>
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-content-primary text-left">{t('changePassword_confirm_label')}</label>
                         <input
                         type="password"
                         id="confirmPassword"
@@ -110,7 +112,7 @@ const ResetPasswordView: React.FC<ResetPasswordViewProps> = ({ onResetSuccess })
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         disabled={status === 'loading'}
-                        className="mt-1 w-full p-3 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 disabled:opacity-50"
+                        className={inputClass}
                         />
                     </div>
 
