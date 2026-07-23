@@ -647,13 +647,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             {/* End Session Button/Icon */}
             <button
                 onClick={handleEndSession}
-                className="hidden md:flex items-center px-4 py-2 text-sm font-bold text-red-600 dark:text-accent-primary bg-transparent border border-red-600 dark:border-accent-primary uppercase hover:bg-red-600 dark:hover:bg-accent-primary hover:text-white dark:hover:text-black rounded-lg shadow-md"
+                className="hidden md:flex items-center px-4 py-2 text-sm font-medium text-status-danger-foreground dark:text-accent-primary bg-transparent border border-status-danger-foreground dark:border-accent-primary hover:bg-status-danger-foreground dark:hover:bg-accent-primary hover:text-white dark:hover:text-black rounded-lg transition-colors"
             >
                 {t('chat_end_session')}
             </button>
             <button
                 onClick={handleEndSession}
-                className="md:hidden p-2 text-red-600 dark:text-accent-primary rounded-full hover:bg-red-50 dark:hover:bg-accent-primary/10"
+                className="md:hidden p-2 text-status-danger-foreground dark:text-accent-primary rounded-full hover:bg-status-danger-background dark:hover:bg-accent-primary/10"
                 aria-label={t('chat_end_session')}
             >
                 <LogOutIcon className="w-5 h-5 sm:w-6 sm:h-6" />
