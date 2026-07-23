@@ -3,8 +3,8 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, build **35**; v2.0.1 — https://mc-beta.manualmode.at — landing/intent 3-card hubs, welcome hero, stronger corner gradients, featured action cards. Registry pull on server still fails (Quay HTML); frontend image streamed manually post-deploy. Avatars verified (`/avatars/kenji.png` → 200). Health checks OK.
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **35**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-07-24**, build **37**; v2.0.1 — https://mc-beta.manualmode.at — in-app docs (burger menu), welcome avatar clock order, SPA 404 for missing JS/CSS, deploy script streams frontend when build number drifts. Registry pull on server still fails (Quay HTML); **Build 37 verified live** after `podman save → scp → load` fallback.
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **37**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
@@ -23,7 +23,7 @@
 - **IntentPickerView:** 3-column card grid, featured coaching card (`.action-card-featured`), logo + subtitle header.
 - **WelcomeScreen:** mockup hero subtitle + orbiting coach avatars restored.
 - **CSS:** stronger dual corner gradients; dark-teal featured card gradient for white text contrast.
-- **Deploy hardening:** `server.js` SPA fallback returns 404 for static extensions; `deploy-manualmode.sh` `--tls-verify=false` on pulls + avatar verify/stream fallback.
+- **Deploy hardening:** `server.js` SPA fallback returns 404 for static extensions (incl. `.js`/`.css`); `deploy-manualmode.sh` streams frontend when avatars missing **or build number stale** after failed registry pulls.
 - **iOS:** `npm run build && npx cap sync ios` 2026-07-24 — BUILD_NUMBER **35**; Capacitor SPM **8.4.2**.
 
 ### Visual modernization — Phase 4 complete (2026-07-23, `2665e69`, staging build 33)
