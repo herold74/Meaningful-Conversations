@@ -150,7 +150,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** Staging **2026-07-24** Build **35** (entry-screen 3-card hubs, welcome hero, deploy hardening: SPA static 404, registry pull `--tls-verify=false`, avatar stream fallback); Production **2026-04-28** Build **13** — **Prod hinter Staging** bis nächster `./deploy-manualmode.sh -e production`. — **`2.0.1`-Tag Registry:** Remote `podman pull` can fail (Quay HTML); verify Build number + `/avatars/kenji.png` after deploy.
+- **Staging:** Build **37** deployed 2026-07-24 (`6670420` + `11c9c50`) — in-app docs, welcome avatars, SPA asset 404, deploy build-verify stream fallback verified live.
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
