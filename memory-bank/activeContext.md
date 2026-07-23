@@ -3,8 +3,8 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, build **37**; v2.0.1 — https://mc-beta.manualmode.at — in-app docs (burger menu), welcome avatar clock order, SPA 404 for missing JS/CSS, deploy script streams frontend when build number drifts. Registry pull on server still fails (Quay HTML); **Build 37 verified live** after `podman save → scp → load` fallback.
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **37**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-07-24**, build **38**; v2.0.1 — https://mc-beta.manualmode.at — action card tile alignment (intent + landing), in-app docs, welcome avatars, SPA asset 404. Registry pull fails; frontend streamed via build-verify fallback.
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **38**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
