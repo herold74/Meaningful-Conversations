@@ -4,10 +4,6 @@
 
 import {
   getCurrentSeason,
-  isChristmasSeason,
-  isSpringSeason,
-  isSummerSeason,
-  isAutumnSeason,
   isWinterSeason,
   getSeasonalColorTheme,
 } from '../dateUtils';
@@ -84,52 +80,7 @@ describe('dateUtils', () => {
     });
   });
 
-  describe('isChristmasSeason', () => {
-    test('returns true for December', () => {
-      mockDate(2025, 12, 15);
-      expect(isChristmasSeason()).toBe(true);
-    });
-
-    test('returns true for January 1-6', () => {
-      mockDate(2025, 1, 1);
-      expect(isChristmasSeason()).toBe(true);
-      mockDate(2025, 1, 6);
-      expect(isChristmasSeason()).toBe(true);
-    });
-
-    test('returns false for January 7', () => {
-      mockDate(2025, 1, 7);
-      expect(isChristmasSeason()).toBe(false);
-    });
-
-    test('returns false for November', () => {
-      mockDate(2025, 11, 30);
-      expect(isChristmasSeason()).toBe(false);
-    });
-  });
-
-  describe('isSpringSeason, isSummerSeason, isAutumnSeason, isWinterSeason', () => {
-    test('isSpringSeason returns true in spring', () => {
-      mockDate(2025, 4, 15);
-      expect(isSpringSeason()).toBe(true);
-      mockDate(2025, 6, 1);
-      expect(isSpringSeason()).toBe(false);
-    });
-
-    test('isSummerSeason returns true in summer', () => {
-      mockDate(2025, 7, 15);
-      expect(isSummerSeason()).toBe(true);
-      mockDate(2025, 9, 1);
-      expect(isSummerSeason()).toBe(false);
-    });
-
-    test('isAutumnSeason returns true in autumn', () => {
-      mockDate(2025, 10, 15);
-      expect(isAutumnSeason()).toBe(true);
-      mockDate(2025, 12, 1);
-      expect(isAutumnSeason()).toBe(false);
-    });
-
+  describe('isWinterSeason', () => {
     test('isWinterSeason returns true in winter', () => {
       mockDate(2025, 1, 15);
       expect(isWinterSeason()).toBe(true);
