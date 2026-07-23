@@ -51,7 +51,13 @@ Sie wählen zu Beginn jeder Sitzung einen Coach aus. Wenn Sie das Gefühl haben,
 ## Onboarding & Plattform
 
 ### Was ist der Intent Picker?
-Der Intent Picker erscheint beim Start der App und fragt Sie, was Sie heute erreichen möchten: **Kommunikation**, **Coaching** oder **Begleitendes Coaching**. Basierend auf Ihrer Wahl wird der passende Bereich in der Coach-Auswahl hervorgehoben. Registrierte Benutzer können den Intent Picker im Menü deaktivieren.
+Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation**, **Coaching** (hervorgehoben) oder **Begleitendes Coaching**. Ihre Wahl bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird. Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+
+### Was passiert nach dem Intent Picker?
+Sie gelangen zum **Lebenskontext-Startbildschirm** mit drei Aktionskarten: Kontext fortsetzen, neues Gespräch starten oder mit Gloria interviewen. Darunter können Sie eine \`.md\`-Lebenskontext-Datei hochladen.
+
+### Die App zeigt eine leere Seite — was tun?
+Nach einem Update kann eine zwischengespeicherte Version kurz Probleme machen. Öffnen Sie das Menü (☰) und wählen Sie **App aktualisieren** (↻). Alternativ: Hard-Reload im Browser (Strg+F5 / Cmd+Shift+R) oder den Website-Cache in den Browser-Einstellungen leeren.
 
 ### Warum werde ich nach meinem Namen gefragt?
 Der Name (oder ein Pseudonym) wird verwendet, um Ihren Lebenskontext zu personalisieren. Für Gäste wird er nur lokal auf Ihrem Gerät gespeichert. Für registrierte Nutzer wird er in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt jederzeit überspringen.
@@ -112,7 +118,13 @@ You choose a coach at the start of each session. If you feel another coach's sty
 ## Onboarding & Platform
 
 ### What is the Intent Picker?
-The Intent Picker appears when you launch the app and asks what you'd like to achieve today: **Communication**, **Coaching**, or **Augmented Coaching**. Based on your choice, the matching section in the coach selection is highlighted. Registered users can disable the Intent Picker from the menu.
+After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication**, **Coaching** (featured), or **Augmented Coaching**. Your choice determines which section is highlighted in coach selection. Registered users can disable the Intent Picker under **My Account**.
+
+### What happens after the Intent Picker?
+You reach the **Life Context start screen** with three action cards: continue with context, start a new conversation, or build with an interview (Gloria). Below the cards, you can upload a \`.md\` Life Context file.
+
+### The app shows a blank page — what should I do?
+After an update, a cached version can briefly cause loading issues. Open the menu (☰) and select **Refresh App** (↻). Alternatively, hard-reload in your browser (Ctrl+F5 / Cmd+Shift+R) or clear the site cache in browser settings.
 
 ### Why am I asked for my name?
 Your name (or a pseudonym) is used to personalize your Life Context. For guests, it's stored locally on your device only. For registered users, it's integrated into the encrypted Life Context. You can always skip this step.
