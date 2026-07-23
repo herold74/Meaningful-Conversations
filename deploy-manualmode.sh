@@ -546,23 +546,67 @@ REMOTE_SCRIPT
     scp /tmp/remote-deploy.sh "$REMOTE_HOST:/tmp/"
     ssh "$REMOTE_HOST" "chmod +x /tmp/remote-deploy.sh && /tmp/remote-deploy.sh"
     
-    # Frontend post-deploy: if registry pull failed, container may lack public/avatars in dist/.
-    # Stream the freshly built image directly (podman save → scp → podman load).
+    # Frontend post-deploy: registry pull often fails silently (Quay returns HTML).
+    # Stream the freshly built image when avatars are missing OR build number is stale.
     if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ) ]]; then
         FRONTEND_CONTAINER="meaningful-conversations-frontend-${ENVIRONMENT}"
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
-        if ! ssh "$REMOTE_HOST" "podman exec $FRONTEND_CONTAINER test -f /app/dist/avatars/kenji.png 2>/dev/null"; then
-            echo -e "${YELLOW}⚠ Frontend missing dist/avatars — streaming image to server (registry pull workaround)...${NC}"
+        EXPECTED_BUILD=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
+        if [[ "$ENVIRONMENT" == "staging" ]]; then
+            VERIFY_URL="https://mc-beta.manualmode.at"
+        else
+            VERIFY_URL="https://mc-app.manualmode.at"
+        fi
+
+        stream_frontend_image() {
+            echo -e "${YELLOW}⚠ Streaming frontend image to server (registry pull workaround)...${NC}"
             STREAM_TAR="/tmp/mc-frontend-${VERSION}.tar"
             podman save -o "$STREAM_TAR" "$FRONTEND_IMAGE"
             scp "$STREAM_TAR" "$REMOTE_HOST:/tmp/"
             ssh "$REMOTE_HOST" "podman load -i /tmp/mc-frontend-${VERSION}.tar && rm -f /tmp/mc-frontend-${VERSION}.tar && cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE up -d --force-recreate frontend && /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT"
             rm -f "$STREAM_TAR"
+        }
+
+        NEED_STREAM=false
+        STREAM_REASON=""
+
+        if ! ssh "$REMOTE_HOST" "podman exec $FRONTEND_CONTAINER test -f /app/dist/avatars/kenji.png 2>/dev/null"; then
+            NEED_STREAM=true
+            STREAM_REASON="missing dist/avatars"
+        elif [[ "$EXPECTED_BUILD" != "0" ]]; then
+            sleep 5
+            JS_BUNDLE=$(curl -sS --max-time 15 "$VERIFY_URL/" | grep -o 'assets/main-[^"]*\.js' | head -1 || true)
+            if [[ -n "$JS_BUNDLE" ]]; then
+                REMOTE_BUILD=$(curl -sS --max-time 15 "$VERIFY_URL/$JS_BUNDLE" | grep -o 'Build [0-9]*' | head -1 | awk '{print $2}' || true)
+                if [[ -n "$REMOTE_BUILD" && "$REMOTE_BUILD" != "$EXPECTED_BUILD" ]]; then
+                    NEED_STREAM=true
+                    STREAM_REASON="Build $REMOTE_BUILD on server, expected Build $EXPECTED_BUILD"
+                fi
+            else
+                NEED_STREAM=true
+                STREAM_REASON="could not read frontend JS bundle for build verification"
+            fi
+        fi
+
+        if [[ "$NEED_STREAM" == true ]]; then
+            echo -e "${YELLOW}⚠ Frontend needs image stream ($STREAM_REASON)${NC}"
+            stream_frontend_image
             if ssh "$REMOTE_HOST" "podman exec $FRONTEND_CONTAINER test -f /app/dist/avatars/kenji.png 2>/dev/null"; then
                 echo -e "${GREEN}✓ Frontend image streamed successfully (avatars verified)${NC}"
             else
                 echo -e "${RED}ERROR: Frontend still missing dist/avatars after stream — check podman image tag${NC}"
                 exit 1
+            fi
+            if [[ "$EXPECTED_BUILD" != "0" ]]; then
+                sleep 5
+                JS_BUNDLE=$(curl -sS --max-time 15 "$VERIFY_URL/" | grep -o 'assets/main-[^"]*\.js' | head -1 || true)
+                REMOTE_BUILD=$(curl -sS --max-time 15 "$VERIFY_URL/$JS_BUNDLE" | grep -o 'Build [0-9]*' | head -1 | awk '{print $2}' || true)
+                if [[ "$REMOTE_BUILD" == "$EXPECTED_BUILD" ]]; then
+                    echo -e "${GREEN}✓ Frontend build verified: Build $REMOTE_BUILD${NC}"
+                else
+                    echo -e "${RED}ERROR: Frontend build mismatch after stream (got Build ${REMOTE_BUILD:-?}, expected Build $EXPECTED_BUILD)${NC}"
+                    exit 1
+                fi
             fi
         fi
     fi

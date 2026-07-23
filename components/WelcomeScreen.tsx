@@ -10,14 +10,19 @@ const WelcomeScreen: React.FC = () => {
   const { t, language } = useLocalization();
   const appName = language === 'de' ? brand.appNameDe : brand.appName;
 
-  const avatarPositions = [
-    { top: '-1.75rem', left: 'calc(50% - 1.75rem)' },
-    { top: 'calc(25% - 1rem)', right: '-1.75rem' },
-    { bottom: 'calc(25% - 1rem)', right: '-1.75rem' },
-    { bottom: '-1.75rem', left: 'calc(50% - 1.75rem)' },
-    { bottom: 'calc(25% - 1rem)', left: '-1.75rem' },
-    { top: 'calc(25% - 1rem)', left: '-1.75rem' },
+  // Clock positions: yellow-bg avatars at 2–6 o'clock; teal-bg at 8–12 o'clock
+  const avatarSlots: { botId: string; style: React.CSSProperties }[] = [
+    { botId: 'gloria-interview', style: { top: '-1.75rem', left: 'calc(50% - 1.75rem)' } },           // 12
+    { botId: 'chloe-cbt', style: { top: 'calc(25% - 1rem)', right: '-1.75rem' } },                    // 2
+    { botId: 'rob', style: { bottom: 'calc(25% - 1rem)', right: '-1.75rem' } },                       // 4
+    { botId: 'kenji-stoic', style: { bottom: '-1.75rem', left: 'calc(50% - 1.75rem)' } },             // 6
+    { botId: 'ava-strategic', style: { bottom: 'calc(25% - 1rem)', left: '-1.75rem' } },              // 8
+    { botId: 'max-ambitious', style: { top: 'calc(25% - 1rem)', left: '-1.75rem' } },                 // 10
   ];
+
+  const orbitBots = avatarSlots
+    .map((slot) => ({ ...slot, bot: BOTS.find((b) => b.id === slot.botId) }))
+    .filter((entry): entry is typeof entry & { bot: NonNullable<typeof entry.bot> } => !!entry.bot);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
@@ -32,13 +37,13 @@ const WelcomeScreen: React.FC = () => {
           <LogoIcon className="relative w-24 h-24 text-accent-primary drop-shadow-sm" />
         </div>
 
-        {BOTS.slice(1, 7).map((bot, index) => (
+        {orbitBots.map(({ bot, style }, index) => (
           <motion.img
             key={bot.id}
             src={bot.avatar}
             alt={bot.name}
             className="absolute w-14 h-14 rounded-full border-2 border-background-secondary shadow-card object-cover"
-            style={avatarPositions[index]}
+            style={style}
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.35, delay: 0.2 + index * 0.08, ease: 'easeOut' }}
