@@ -147,7 +147,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging ↔ Production images:** Staging **2026-05-03** Build **27** (Dan client-tier UI/API + frontend bundle); Production **2026-04-28** Build **13** — **Prod hinter Staging**, bis nächster \`./deploy-manualmode.sh -e production\`. — **`2.0.1`-Tag Registry:** Staging nutzt aktuell gebaute Images; Prod-Cutover zieht dieselben Tags nach Release-Fenster (Deploy-Playbook).
+- **Staging ↔ Production images:** Staging **2026-07-15** Build **32** (Tier 1+2 hardening: pm2@7, bookworm images, 0 vulns, security improvements); Production **2026-04-28** Build **13** — **Prod hinter Staging** bis nächster `./deploy-manualmode.sh -e production`. — **`2.0.1`-Tag Registry:** Staging nutzt aktuell gebaute Images; Prod-Cutover zieht dieselben Tags nach Release-Fenster.
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push

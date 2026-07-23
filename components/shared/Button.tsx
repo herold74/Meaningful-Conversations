@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Button style variant */
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' | 'gradient';
   /** Button size */
   size?: 'sm' | 'md' | 'lg';
   /** Make button full width */
@@ -42,6 +42,14 @@ const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
     bg-transparent hover:bg-accent-primary/10
     text-accent-primary
     border border-accent-primary
+  `,
+  /* Theme-aware gradient primary: built from accent variables (NOT hardcoded hex)
+     so seasonal themes (summer/autumn) keep a coherent gradient. */
+  gradient: `
+    bg-gradient-to-br from-accent-primary to-accent-primary-hover
+    hover:brightness-105
+    text-button-foreground-on-accent
+    border border-transparent
   `,
 };
 
