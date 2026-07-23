@@ -732,22 +732,26 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{isInterviewReview ? t('sessionReview_g_summary_title') : t('sessionReview_summary')}</h2>
                          {!isInterviewReview && (
                             <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={handleDownloadTranscript} 
-                                    className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-accent-primary bg-transparent border border-accent-primary uppercase hover:bg-accent-primary hover:text-button-foreground-on-accent rounded-lg shadow-sm hover:shadow-md"
+                                <Button
+                                    onClick={handleDownloadTranscript}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-shrink-0"
+                                    leftIcon={<FileTextIcon className="w-4 h-4" />}
                                     title={t('sessionReview_downloadTranscript')}
                                 >
-                                    <FileTextIcon className="w-4 h-4" />
                                     <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadTranscript')}</span>
-                                </button>
-                                <button 
-                                    onClick={handleDownloadSummary} 
-                                    className="flex-shrink-0 flex items-center gap-2 px-3 py-1 text-xs font-bold text-accent-primary bg-transparent border border-accent-primary uppercase hover:bg-accent-primary hover:text-button-foreground-on-accent rounded-lg shadow-sm hover:shadow-md"
+                                </Button>
+                                <Button
+                                    onClick={handleDownloadSummary}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-shrink-0"
+                                    leftIcon={<DownloadIcon className="w-4 h-4" />}
                                     title={t('sessionReview_downloadSummary')}
                                 >
-                                    <DownloadIcon className="w-4 h-4" />
                                     <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </div>
@@ -1095,7 +1099,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                         {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
                     </Button>
                     {!isInterviewReview && (
-                        <Button onClick={handleContinue} disabled={isSaving} loading={isSaving} size="lg" className="flex-1">
+                        <Button onClick={handleContinue} disabled={isSaving} loading={isSaving} variant="gradient" size="lg" className="flex-1">
                             {primaryActionText}
                         </Button>
                     )}

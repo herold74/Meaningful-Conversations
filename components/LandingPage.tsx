@@ -190,7 +190,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           
           {error && <p className="text-status-danger-foreground text-sm">{error}</p>}
           
-          <Button type="submit" disabled={!fileContent} size="lg" fullWidth>
+          <Button type="submit" variant="gradient" disabled={!fileContent} size="lg" fullWidth>
             {t('landing_startSession')}
           </Button>
         </form>
@@ -206,24 +206,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               const isNewUpload = !!fileContent && fileContent !== existingContext;
               const showEdit = !!fileContent && (isNewUpload || !isTemplateContext);
               return (
-                <button
+                <Button
                     onClick={showEdit ? () => onEditContext?.(fileContent) : onStartQuestionnaire}
-                    className="w-full px-6 py-3 text-base font-bold text-button-foreground-on-accent bg-accent-secondary uppercase hover:bg-accent-secondary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-secondary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
+                    size="lg"
+                    fullWidth
+                    className="bg-accent-secondary hover:bg-accent-secondary-hover text-button-foreground-on-accent focus:ring-accent-secondary"
                 >
                     {!fileContent
                         ? t('landing_createFile')
                         : showEdit
                             ? t('landing_editFile')
                             : t('landing_extendFile')}
-                </button>
+                </Button>
               );
             })()}
-             <button
+             <Button
                 onClick={onStartInterview}
-                className="w-full px-6 py-3 text-base font-bold text-accent-tertiary-foreground bg-accent-tertiary uppercase hover:bg-accent-tertiary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-tertiary dark:focus:ring-offset-background-primary transition-all duration-200 rounded-lg shadow-md"
+                size="lg"
+                fullWidth
+                className="bg-accent-tertiary hover:bg-accent-tertiary-hover text-accent-tertiary-foreground focus:ring-accent-tertiary"
             >
                 {fileContent ? t('landing_extendWithInterview') : t('landing_createWithInterview')}
-            </button>
+            </Button>
         </div>
 
         <div className="text-xs text-content-subtle pt-4">
