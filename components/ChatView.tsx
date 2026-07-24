@@ -64,6 +64,13 @@ interface ChatViewProps {
 }
 
 
+/** Prevents duplicate greeting / pre-seed API calls (React StrictMode remounts reset component refs). */
+const chatInitInflight = new Set<string>();
+
+function chatInitKey(botId: string, kind: 'greeting' | 'preseed', seedMessageId?: string) {
+  return kind === 'greeting' ? `greeting:${botId}` : `preseed:${botId}:${seedMessageId ?? ''}`;
+}
+
 const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch }) => {
   const { t, language } = useLocalization();
 
@@ -407,6 +414,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // Case 1: Empty history → fetch greeting
     if (chatHistory.length === 0) {
+        const initKey = chatInitKey(bot.id, 'greeting');
+        if (chatInitInflight.has(initKey)) {
+            initialFetchInitiated.current = true;
+            return;
+        }
+        chatInitInflight.add(initKey);
         initialFetchInitiated.current = true;
 
         const fetchInitialMessage = async () => {
@@ -443,6 +456,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                 setChatHistory([errorMessage]);
             } finally {
                 setIsLoading(false);
+                chatInitInflight.delete(initKey);
             }
         };
 
@@ -452,6 +466,18 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // Case 2: Pre-seeded with a user message → auto-send to get bot response
     if (chatHistory.length === 1 && chatHistory[0].role === 'user') {
+        if (chatHistory.some((m) => m.role === 'bot')) {
+            initialFetchInitiated.current = true;
+            return;
+        }
+
+        const seedId = chatHistory[0].id;
+        const initKey = chatInitKey(bot.id, 'preseed', seedId);
+        if (chatInitInflight.has(initKey)) {
+            initialFetchInitiated.current = true;
+            return;
+        }
+        chatInitInflight.add(initKey);
         initialFetchInitiated.current = true;
 
         const autoSendPreSeeded = async () => {
@@ -477,7 +503,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     referralBotIds: pr.referralBotIds,
                     auditTaskPayload: pr.auditTaskPayload ?? null,
                 };
-                setChatHistory(prev => [...prev, botMessage]);
+                setChatHistory(prev => {
+                    if (prev.some((m) => m.role === 'bot')) return prev;
+                    return [...prev, botMessage];
+                });
             } catch (err) {
                 console.error('Error auto-sending pre-seeded message:', err);
                 const errorMessage: Message = {
@@ -486,9 +515,13 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     role: 'bot',
                     timestamp: new Date().toISOString(),
                 };
-                setChatHistory(prev => [...prev, errorMessage]);
+                setChatHistory(prev => {
+                    if (prev.some((m) => m.role === 'bot')) return prev;
+                    return [...prev, errorMessage];
+                });
             } finally {
                 setIsLoading(false);
+                chatInitInflight.delete(initKey);
             }
         };
 
@@ -792,12 +825,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
               {message.role === 'user' ? (
-                <div className={`max-w-md px-4 py-2.5 bg-gradient-to-br from-accent-primary to-accent-tertiary text-button-foreground-on-accent rounded-2xl rounded-br-md shadow-sm`}>
+                <div className="max-w-md px-4 py-2.5 gradient-accent rounded-2xl rounded-br-md shadow-sm prose prose-sm prose-invert [&_*]:text-inherit">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2 items-start max-w-md">
-                  <div className="prose dark:prose-invert bg-background-tertiary/80 text-content-primary rounded-2xl rounded-bl-md shadow-sm px-4 py-2.5">
+                  <div className="prose dark:prose-invert chat-bubble-bot rounded-2xl rounded-bl-md px-4 py-2.5">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
                   </div>
                   {message.referralBotIds && message.referralBotIds.length > 0 && onReferralSwitch && (
@@ -835,7 +868,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {isLoading && (
               <div className="flex gap-3 justify-start animate-fadeIn">
                   <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />
-                  <div className="max-w-md px-4 py-3 bg-background-tertiary/80 rounded-2xl rounded-bl-md shadow-sm">
+                  <div className="max-w-md px-4 py-3 chat-bubble-bot rounded-2xl rounded-bl-md">
                       <BrandLoader size="sm" />
                   </div>
               </div>
@@ -864,7 +897,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors shrink-0" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
                     <MicrophoneIcon className={`w-5 h-5 ${speech.isListening ? 'text-red-500 animate-pulse' : ''}`} />
                 </button>
-                <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 bg-gradient-to-br from-accent-primary to-accent-primary-hover text-button-foreground-on-accent hover:brightness-105 disabled:opacity-40 rounded-full transition-all shrink-0">
+                <button type="submit" disabled={isLoading || !input.trim()} className="p-2.5 gradient-accent disabled:opacity-40 rounded-full transition-all shrink-0">
                   <PaperPlaneIcon className="w-5 h-5" />
                 </button>
               </div>

@@ -108,15 +108,17 @@ html.dark[data-theme="winter"] {
 ### Key Variables
 - `--bg-primary`, `--bg-secondary`, `--bg-tertiary` — backgrounds
 - `--content-primary`, `--content-secondary` — text
-- `--accent-primary`, `--accent-secondary` — interactive elements
+- `--accent-primary`, `--accent-secondary`, `--accent-tertiary` — interactive elements (tertiary hover stays in the same hue family per schema; no hardcoded navy blue)
 - `--brand-color-2` … `--brand-color-4` — dark teal scale (featured cards)
 - `--border-primary` — borders
 
 ### Ambient background & featured cards (2026-07-24)
 
-**Dual corner gradients** — `body::before` fixed layer (teal top-left, warm amber bottom-right; stronger opacity in light mode). Uses `--accent-primary` / `--accent-secondary`. Rules: `z-index: -1`, `pointer-events: none`, **no** `background-attachment: fixed` (iOS WKWebView).
+**Dual corner gradients** — `body::before` fixed layer: top-left follows seasonal `--accent-primary`; **bottom-right always `--brand-accent`** (amber/yellow). Light-mode opacity kept subtle (≈22%/18%) so foreground content stays readable.
 
-**`.action-card-featured`** — linear gradient `brand-color-4 → 3 → 2` for selection tiles that need white text (IntentPicker coaching card, LandingPage conversation card). Hover: `brightness(1.06)`.
+**`.gradient-accent` / `.action-card-featured`** — shared 3-stop gradient via `--featured-card-from/via/to`, plus a **bottom-right amber overlay** (`--brand-accent`) so CTAs echo the page ambient glow. Tune with `--gradient-accent-amber-opacity` and `--gradient-accent-amber-start` (autumn uses lower opacity). **Convention:** `from` = lighter/brighter → `to` = darkest. Text uses `--button-foreground-on-accent`.
+
+**`.chat-bubble-bot`** — frosted secondary surface + border for coach messages (readable on ambient background in all schemas).
 
 ### Entry-screen locale keys (2026-07-24)
 

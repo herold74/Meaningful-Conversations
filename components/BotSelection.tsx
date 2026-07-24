@@ -211,7 +211,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
             <div ref={sectionRef} className={`mb-10 transition-all duration-700 rounded-2xl ${highlighted ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
               <div className="flex items-center gap-4">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-                <div className="w-full min-w-0 max-w-[506px] rounded-full border border-accent-primary/30 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
+                <div className="w-full min-w-0 max-w-[506px] rounded-full border border-accent-primary/40 dark:border-accent-primary/40 bg-accent-primary/10 dark:bg-accent-primary/15 px-5 pt-3 pb-2.5">
                 {/* Top row: search icon left | gray input box [textarea | mic | send] */}
                 <div className="flex items-center gap-2 mb-2">
                     <Search className="w-5 h-5 text-accent-primary flex-shrink-0 opacity-60" aria-hidden="true" />
@@ -227,7 +227,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 onChange={e => setTopic(e.target.value)}
                                 placeholder={t('botSearch_placeholder')}
                             rows={1}
-                            className="flex-1 w-0 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-scroll max-h-14 focus:outline-none"
+                            className="flex-1 w-0 bg-transparent text-content-primary placeholder:text-content-tertiary text-sm resize-none overflow-y-auto max-h-14 focus:outline-none scrollbar-themed"
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
@@ -555,7 +555,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/30 dark:border-accent-primary/40">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/40 dark:border-accent-primary/40">
                 <MessageCircle className="w-5 h-5 text-accent-primary" aria-hidden="true" />
                 <div className="text-center">
                   <div className="text-[0.9375rem] font-semibold text-accent-primary">

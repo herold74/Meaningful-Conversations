@@ -56,13 +56,13 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ oldText, newText }) => {
     }, [diff]);
 
     return (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 h-96 overflow-y-auto rounded-lg">
+        <div className="bg-background-secondary border border-border-primary h-96 overflow-y-auto rounded-lg scrollbar-themed">
             {groupedDiff.map((group, index) => {
                 let groupClass = 'transition-colors';
                 if (group.type === 'added') {
-                    groupClass += ' bg-green-100/60 dark:bg-green-900/40';
+                    groupClass += ' bg-status-success-background/80';
                 } else if (group.type === 'removed') {
-                    groupClass += ' bg-red-100/60 dark:bg-red-900/40 line-through text-gray-500 dark:text-gray-500';
+                    groupClass += ' bg-status-danger-background/80 line-through text-content-subtle';
                 }
                 
                 // If content is just whitespace, render a div to preserve the space without prose styling
