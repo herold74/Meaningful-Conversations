@@ -546,17 +546,18 @@ REMOTE_SCRIPT
     scp /tmp/remote-deploy.sh "$REMOTE_HOST:/tmp/"
     ssh "$REMOTE_HOST" "chmod +x /tmp/remote-deploy.sh && /tmp/remote-deploy.sh"
     
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+        VERIFY_URL="https://mc-beta.manualmode.at"
+    else
+        VERIFY_URL="https://mc-app.manualmode.at"
+    fi
+
     # Frontend post-deploy: registry pull often fails silently (Quay returns HTML).
     # Stream the freshly built image when avatars are missing OR build number is stale.
     if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ) ]]; then
         FRONTEND_CONTAINER="meaningful-conversations-frontend-${ENVIRONMENT}"
         FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
         EXPECTED_BUILD=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
-        if [[ "$ENVIRONMENT" == "staging" ]]; then
-            VERIFY_URL="https://mc-beta.manualmode.at"
-        else
-            VERIFY_URL="https://mc-app.manualmode.at"
-        fi
 
         stream_frontend_image() {
             echo -e "${YELLOW}⚠ Streaming frontend image to server (registry pull workaround)...${NC}"
@@ -607,6 +608,53 @@ REMOTE_SCRIPT
                     echo -e "${RED}ERROR: Frontend build mismatch after stream (got Build ${REMOTE_BUILD:-?}, expected Build $EXPECTED_BUILD)${NC}"
                     exit 1
                 fi
+            fi
+        fi
+    fi
+
+    # Backend post-deploy: registry pull often fails — BotSelection loads avatars from /api/bots.
+    # Stream freshly built backend when API still returns legacy Dicebear URLs.
+    if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ) ]]; then
+        BACKEND_CONTAINER="meaningful-conversations-backend-${ENVIRONMENT}"
+        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
+
+        stream_backend_image() {
+            echo -e "${YELLOW}⚠ Streaming backend image to server (registry pull workaround)...${NC}"
+            STREAM_TAR="/tmp/mc-backend-${VERSION}.tar"
+            podman save -o "$STREAM_TAR" "$BACKEND_IMAGE"
+            scp "$STREAM_TAR" "$REMOTE_HOST:/tmp/"
+            ssh "$REMOTE_HOST" "podman load -i /tmp/mc-backend-${VERSION}.tar && rm -f /tmp/mc-backend-${VERSION}.tar && cd $REMOTE_ENV_DIR && podman-compose -f $COMPOSE_FILE up -d --force-recreate backend && /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT"
+            rm -f "$STREAM_TAR"
+        }
+
+        NEED_BACKEND_STREAM=false
+        BACKEND_STREAM_REASON=""
+        sleep 5
+        BOTS_JSON=$(curl -sS --max-time 15 "$VERIFY_URL/api/bots" 2>/dev/null || true)
+        if [[ -z "$BOTS_JSON" ]]; then
+            NEED_BACKEND_STREAM=true
+            BACKEND_STREAM_REASON="could not read /api/bots"
+        elif echo "$BOTS_JSON" | grep -q 'dicebear\.com'; then
+            NEED_BACKEND_STREAM=true
+            BACKEND_STREAM_REASON="/api/bots still returns Dicebear avatar URLs"
+        elif ! echo "$BOTS_JSON" | grep -q '"/avatars/'; then
+            NEED_BACKEND_STREAM=true
+            BACKEND_STREAM_REASON="/api/bots missing /avatars/ paths"
+        fi
+
+        if [[ "$NEED_BACKEND_STREAM" == true ]]; then
+            echo -e "${YELLOW}⚠ Backend needs image stream ($BACKEND_STREAM_REASON)${NC}"
+            stream_backend_image
+            sleep 5
+            BOTS_JSON=$(curl -sS --max-time 15 "$VERIFY_URL/api/bots" 2>/dev/null || true)
+            if echo "$BOTS_JSON" | grep -q 'dicebear\.com'; then
+                echo -e "${RED}ERROR: /api/bots still returns Dicebear URLs after backend stream${NC}"
+                exit 1
+            elif echo "$BOTS_JSON" | grep -q '"/avatars/'; then
+                echo -e "${GREEN}✓ Backend avatar paths verified (/avatars/*.png in /api/bots)${NC}"
+            else
+                echo -e "${RED}ERROR: /api/bots missing /avatars/ paths after backend stream${NC}"
+                exit 1
             fi
         fi
     fi
