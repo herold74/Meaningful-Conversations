@@ -3,6 +3,14 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.2.1] - 2026-07-24
+
+Mistral API maintenance release — SDK pin and transcript evaluation model context fix.
+
+### Changed
+- Pin `@mistralai/mistralai` to ^1.15.1 (latest v1 SDK before v2 ESM migration)
+- Transcript evaluation uses `analysis` model context for Mistral/Google mapping (was incorrectly falling back to chat model)
+
 ## [2.2.0] - 2026-07-24
 
 Coach Practice mode for Client-tier users and user manual updates.
@@ -79,6 +87,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.2.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.1
 [2.2.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.0
 [2.1.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.1
 [2.1.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.0

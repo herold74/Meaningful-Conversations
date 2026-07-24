@@ -1,6 +1,6 @@
 {
   "name": "meaningful-conversations-backend",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Backend server for the Meaningful Conversations application.",
   "main": "server.js",
   "scripts": {
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.20.0",
-    "@mistralai/mistralai": "^1.10.0",
+    "@mistralai/mistralai": "^1.15.1",
     "@prisma/client": "^5.22.0",
     "axios": "^1.6.0",
     "bcryptjs": "^3.0.3",
