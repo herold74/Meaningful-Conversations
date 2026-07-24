@@ -228,7 +228,7 @@ const EvaluationHistory: React.FC<EvaluationHistoryProps> = ({ onBack, currentUs
                                                     e.stopPropagation();
                                                     setSelectedEval(evalItem);
                                                 }}
-                                                className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-white bg-accent-primary hover:bg-accent-primary/90 transition-colors"
+                                                className="flex-1 py-2 px-3 rounded-lg text-sm font-medium btn-accent-solid hover:bg-accent-primary/90 transition-colors"
                                             >
                                                 {t('te_history_view_details') || 'Details anzeigen'}
                                             </button>

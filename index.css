@@ -94,7 +94,7 @@ html[data-theme="summer"] {
 
   --content-primary: 229 231 235; /* gray-200 */
   --content-secondary: 156 163 175; /* gray-400 */
-  --content-subtle: 107 114 128; /* gray-500 */
+  --content-subtle: 156 163 175; /* gray-400 — readable on dark surfaces (was gray-500) */
   --content-inverted: 17 24 39; /* gray-900 */
 
   --border-primary: 55 65 81; /* gray-700 */
@@ -182,7 +182,7 @@ html[data-theme="autumn"] {
 
   --content-primary: 229 231 235; /* gray-200 */
   --content-secondary: 156 163 175; /* gray-400 */
-  --content-subtle: 107 114 128; /* gray-500 */
+  --content-subtle: 156 163 175; /* gray-400 — readable on dark surfaces (was gray-500) */
   --content-inverted: 17 24 39; /* gray-900 */
 
   --border-primary: 55 65 81; /* gray-700 */
@@ -276,7 +276,7 @@ html[data-theme="manualmode"] {
 
   --content-primary: 229 231 235;
   --content-secondary: 156 163 175;
-  --content-subtle: 107 114 128;
+  --content-subtle: 156 163 175; /* gray-400 — readable on dark surfaces */
   --content-inverted: 17 24 39;
 
   --border-primary: 55 65 81;
@@ -434,6 +434,43 @@ html.dark body::before {
 .gradient-accent:hover:not(:disabled),
 .action-card-featured:hover {
   filter: brightness(1.06);
+}
+
+/* Solid accent CTA — use instead of bg-accent-primary + text-white */
+.btn-accent-solid {
+  background-color: rgb(var(--accent-primary));
+  color: rgb(var(--button-foreground-on-accent));
+}
+.btn-accent-solid:hover:not(:disabled) {
+  background-color: rgb(var(--accent-primary-hover));
+}
+.btn-accent-solid:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Elevated info tiles — readable border/surface on ambient backgrounds */
+.surface-elevated {
+  background: rgb(var(--bg-tertiary) / 0.95);
+  border: 1px solid rgb(var(--border-secondary));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+html.dark .surface-elevated {
+  border-color: rgb(var(--border-primary));
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+
+/* Secondary/outline action on elevated surfaces */
+.btn-surface-outline {
+  background: rgb(var(--bg-primary));
+  color: rgb(var(--content-primary));
+  border: 1px solid rgb(var(--border-secondary));
+}
+.btn-surface-outline:hover:not(:disabled) {
+  background: rgb(var(--bg-tertiary));
+}
+html.dark .btn-surface-outline {
+  border-color: rgb(var(--border-primary));
 }
 
 /* Coach/bot message bubble — readable on ambient background in all schemas */
