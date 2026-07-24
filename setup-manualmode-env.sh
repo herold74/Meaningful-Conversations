@@ -362,7 +362,7 @@ if [ -f .env.alternative ] || [ -f .env.staging ] || [ -f .env.production ]; the
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${YELLOW}Existing environment files detected!${NC}"
-    echo -e "${YELLOW}If migrating from the old alternative server (46.224.37.130):${NC}"
+    echo -e "${YELLOW}If migrating from the old alternative server (<YOUR_SERVER_IP>):${NC}"
     echo -e "${YELLOW}  - New server: \${SERVER_HOST} (manualmode)${NC}"
     echo -e "${YELLOW}  - Review and update your .env files with new URLs${NC}"
     echo ""

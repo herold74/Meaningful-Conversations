@@ -144,6 +144,7 @@ These static pages are served by Nginx (`location = /privacy`, etc.) and linked 
 ### Test Account for Apple Review
 
 - Email: `premium@manualmode.at` (must exist on **production**)
+- Password: **App Store Connect only** (App Review Information) — never commit to the public repo
 - Has pre-filled Life Context (Sarah) and OCEAN personality profile
 - Demo instructions are in `DOCUMENTATION/APP-STORE-METADATA.md` under "Review Notes"
 
