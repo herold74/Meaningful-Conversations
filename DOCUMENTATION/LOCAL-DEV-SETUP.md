@@ -206,9 +206,11 @@ To build and run the iOS app, you need a Mac with Xcode installed.
     npx cap open ios
     ```
 
-3.  **Run in Simulator:**
-    - Select a simulator (e.g., iPhone 15) in Xcode.
-    - Click the "Run" (Play) button.
+3.  **Run in Simulator or on device:**
+    - Open `ios/App/App.xcodeproj` in Xcode (`npx cap open ios`)
+    - Select scheme **App** (not RevenueCatUI or other dependency schemes)
+    - Select a simulator (e.g., iPhone 15) or your connected iPhone
+    - Click the "Run" (Play) button
 
 **Note:** Native features like `native-audio` and `speech-recognition` require the app to be running in the iOS environment (Simulator or Device).
 

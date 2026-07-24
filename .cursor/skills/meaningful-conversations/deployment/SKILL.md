@@ -44,7 +44,8 @@ The `BUILD_NUMBER` file is incremented by staging deployments; reset to `1` when
 npx cap sync ios
 ```
 - Copies web assets from `dist/` to `ios/App/App/public/` and syncs Capacitor plugins
-- After sync, user opens `ios/App/App.xcworkspace` in Xcode and builds
+- After sync, open `ios/App/App.xcodeproj` in Xcode and build with the **App** scheme (shared in repo — do not use dependency schemes like RevenueCatUI)
+- **`npm run build` before `cap sync`** — see Build & Sync section below
 - **Do NOT increment `BUILD_NUMBER`** — set `CURRENT_PROJECT_VERSION` in `project.pbxproj` to match the current `BUILD_NUMBER` (= the staging build number)
 - Update `sw.js` CACHE_NAME suffix to match the current `BUILD_NUMBER` (e.g., `-b14`)
 
@@ -106,7 +107,8 @@ npm run build && npx cap sync ios
 > **`npm run build` is mandatory before every `cap sync`.** Skipping it causes Xcode to bundle stale web assets — changes to frontend code (components, utils, CSS) will silently not appear in the iOS build.
 
 **3. Xcode Archive & Upload:**
-- Open `ios/App/App.xcworkspace` in Xcode
+- Open `ios/App/App.xcodeproj` in Xcode
+- Select scheme **App** (not RevenueCatUI or other SPM dependency schemes)
 - Product → Archive
 - Distribute App → App Store Connect → Upload
 
