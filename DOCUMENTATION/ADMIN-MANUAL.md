@@ -308,12 +308,16 @@ The "Management & Kommunikation" section includes **Gloria Interview**, a specia
 - **Output:** Generates a structured summary and a grammatically smoothed transcript.
 - **Export:** Users can download the interview results as a Markdown file.
 
-### Visual Redesign (W4F)
-Version 1.9.6 introduced a comprehensive visual redesign ("W4F") featuring:
-- **New Color Palette:** 4 shades of blue + amber accent.
-- **Typography:** Inter Variable font for improved readability.
-- **UI Components:** Rounded cards, elevated shadows, and pill-shaped buttons.
-- **Animations:** Smooth page transitions using Framer Motion.
+### Visual Redesign (v2.1.0 — Teal)
+Version 2.1.0 introduced a comprehensive visual redesign featuring:
+- **Color Palette:** Teal-centric brand scale (`#1B7272` primary) with semantic CSS variables; seasonal color themes (winter, summer, autumn) without particle animations.
+- **Ambient Background:** Dual-corner gradients — seasonal accent top-left, amber (`--brand-accent`) bottom-right.
+- **UI Components:** Shared `Button` gradient variant with amber overlay, 16px card radius, frosted surfaces, featured dark-teal action cards.
+- **Icons:** Lucide line icons in onboarding flows (replacing emoji).
+- **Key Screens:** Landing 3-card hub, Intent Picker featured card, borderless chat with gradient user bubbles, dashboard Session Review, polished Bot Selection.
+- **Avatars:** Self-hosted Style-A PNG set with diversity mapping.
+
+Previous redesign (v1.9.6 "W4F") used a blue palette; superseded by v2.1.0.
 
 ### Name Prompt
 - **Guests** are prompted for their first name or a pseudonym. This is stored locally (`guestName` in localStorage) and used to generate a minimal Life Context template. The prompt can be skipped.

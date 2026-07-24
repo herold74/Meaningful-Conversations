@@ -121,3 +121,16 @@ Die Nutzungsbedingungen (DE/EN) sind als statische HTML-Seite unter folgender UR
 **Quelldatei:** `public/terms.html` (wird über Nginx direkt ausgeliefert, kein SPA-Routing)
 
 Diese URL wird in App Store Connect im EULA-Feld eingetragen und ist am Ende der App-Beschreibung verlinkt.
+
+---
+
+## What's New — v2.1.0 (Entwurf für App Store Connect)
+
+**Deutsch:**
+
+Frisches Design für ein noch klareres Coaching-Erlebnis: Die App präsentiert sich in einem modernen Teal-Look mit sanften Hintergrundverläufen und einheitlichen Buttons. Der Einstieg über Welcome und Landing wurde übersichtlicher gestaltet, der Chat wirkt luftiger, und die Sitzungsauswertung liefert Erkenntnisse und nächste Schritte auf einen Blick. Die Coach-Auswahl ist übersichtlicher, Avatare wurden überarbeitet. Saisonale Farb-Themes bleiben erhalten — dekoratives Schneeflocken- und Blüten-Overlay entfällt zugunsten einer ruhigeren Oberfläche.
+
+**English:**
+
+A fresh design for a clearer coaching experience: the app now features a modern teal look with soft background gradients and consistent buttons. Welcome and landing flows are easier to navigate, the chat feels more open, and session review surfaces insights and next steps at a glance. Coach selection is cleaner with updated avatars. Seasonal color themes remain — decorative particle overlays were removed for a calmer interface.
+
