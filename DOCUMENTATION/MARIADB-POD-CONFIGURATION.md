@@ -27,7 +27,7 @@ A **Pod** is a group of containers that:
 You have **two separate pods** on your server:
 
 ```
-Server: 46.224.37.130
+Server: <YOUR_SERVER_IP>
 ┌─────────────────────────────────────────────────────────────┐
 │                                                              │
 │  📦 Staging Pod (meaningful-conversations-staging)          │
@@ -127,7 +127,7 @@ Each environment needs **two** passwords for MariaDB:
 
 ```bash
 # SSH into server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # List all pods
 podman pod ps
@@ -227,11 +227,11 @@ podman exec -it meaningful-conversations-production-frontend /bin/bash
 
 ```bash
 # Using root
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   podman-compose -f podman-compose-staging.yml exec mariadb mysql -u root -p'
 
 # Using application user
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   podman-compose -f podman-compose-staging.yml exec mariadb mysql -u mcuser -p meaningful_conversations_staging'
 
 # Or use Make command
@@ -242,11 +242,11 @@ make db-shell-alternative-staging
 
 ```bash
 # Using root
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   podman-compose -f podman-compose-production.yml exec mariadb mysql -u root -p'
 
 # Using application user
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   podman-compose -f podman-compose-production.yml exec mariadb mysql -u mcuser -p meaningful_conversations_production'
 
 # Or use Make command
@@ -262,7 +262,7 @@ make db-shell-alternative-production
 make db-backup-alternative-staging
 
 # Or manually
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging | gzip > /backup/staging-backup.sql.gz'
 ```
@@ -274,7 +274,7 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
 make db-backup-alternative-production
 
 # Or manually
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production | gzip > /backup/production-backup.sql.gz'
 ```
@@ -285,10 +285,10 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
 
 ```bash
 # Upload backup to server
-scp backup.sql root@46.224.37.130:/tmp/staging-backup.sql
+scp backup.sql root@<YOUR_SERVER_IP>:/tmp/staging-backup.sql
 
 # Restore
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-staging.yml exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging < /tmp/staging-backup.sql'
 ```
@@ -297,10 +297,10 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
 
 ```bash
 # Upload backup to server
-scp backup.sql root@46.224.37.130:/tmp/production-backup.sql
+scp backup.sql root@<YOUR_SERVER_IP>:/tmp/production-backup.sql
 
 # Restore
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-production.yml exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production < /tmp/production-backup.sql'
 ```
@@ -312,13 +312,13 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
 make db-backup-alternative-staging
 
 # Download staging backup
-scp root@46.224.37.130:/backup/staging-latest.sql.gz ./staging-to-prod.sql.gz
+scp root@<YOUR_SERVER_IP>:/backup/staging-latest.sql.gz ./staging-to-prod.sql.gz
 
 # Upload as production backup
-scp ./staging-to-prod.sql.gz root@46.224.37.130:/tmp/
+scp ./staging-to-prod.sql.gz root@<YOUR_SERVER_IP>:/tmp/
 
 # Restore to production
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   gunzip < /tmp/staging-to-prod.sql.gz | \
   podman-compose -f podman-compose-production.yml exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production'
 ```
@@ -329,14 +329,14 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
 
 ```bash
 # Check if MariaDB is ready
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-staging.yml exec mariadb mysqladmin -u root -p${DB_ROOT_PASSWORD} ping'
 
 # Should output: mysqld is alive
 
 # Show databases
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-staging.yml exec mariadb mysql -u root -p${DB_ROOT_PASSWORD} -e "SHOW DATABASES;"'
 ```
@@ -345,14 +345,14 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
 
 ```bash
 # Check if MariaDB is ready
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-production.yml exec mariadb mysqladmin -u root -p${DB_ROOT_PASSWORD} ping'
 
 # Should output: mysqld is alive
 
 # Show databases
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-production.yml exec mariadb mysql -u root -p${DB_ROOT_PASSWORD} -e "SHOW DATABASES;"'
 ```
@@ -382,12 +382,12 @@ Or use a migration tool like `pgloader` or your ORM's migration system (Prisma c
 
 ```bash
 # Import to staging for testing
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-staging && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-staging && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-staging.yml exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_staging < /tmp/converted-backup.sql'
 
 # After testing, import to production
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations-production && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations-production && \
   export $(cat .env | grep DB_ROOT_PASSWORD | xargs) && \
   podman-compose -f podman-compose-production.yml exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations_production < /tmp/converted-backup.sql'
 ```

@@ -44,7 +44,7 @@ systemctl enable --now podman nginx
 
 ```bash
 # SSH zum ALTEN Server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Backup-Verzeichnis
 mkdir -p /tmp/mc-migration
@@ -81,7 +81,7 @@ cd ~/Meaningful-Conversations-Project
 mkdir -p ./migration-backups
 
 # Vom alten Server holen
-scp root@46.224.37.130:/tmp/mc-migration/* ./migration-backups/
+scp root@<YOUR_SERVER_IP>:/tmp/mc-migration/* ./migration-backups/
 
 # Zum neuen Server kopieren
 scp ./migration-backups/* root@<NEUE_IP>:/tmp/mc-migration/
@@ -244,7 +244,7 @@ sudo nano /etc/hosts
 1. **24-48 Stunden warten** (sicherstellen dass alles läuft)
 2. **Alten Server aufräumen:**
    ```bash
-   ssh root@46.224.37.130
+   ssh root@<YOUR_SERVER_IP>
    podman pod stop --all
    podman volume rm meaningful-conversations-staging-mariadb-data
    podman volume rm meaningful-conversations-production-mariadb-data
@@ -280,7 +280,7 @@ certbot --nginx -d mc-beta.manualmode.at --force-renewal
 ### Rollback nötig?
 ```bash
 # DNS einfach zurück auf alte IP ändern:
-# Ziel: 46.224.37.130
+# Ziel: <YOUR_SERVER_IP>
 # Alter Server läuft noch, nichts geht verloren!
 ```
 

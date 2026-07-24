@@ -93,7 +93,7 @@ All documentation now reflects:
 - ✅ Production environment
 - ✅ Cloud SQL with MySQL
 
-### Alternative Server (46.224.37.130)
+### Alternative Server (<YOUR_SERVER_IP>)
 - ✅ Staging pod (port 8080, 8081, 3307)
   - Database: `meaningful_conversations_staging`
 - ✅ Production pod (port 80, 8082, 3308)
