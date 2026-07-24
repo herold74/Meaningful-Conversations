@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.2.1 (committed, Mistral SDK pin — deploy pending)
+**Version:** 2.2.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, Build **2**, v2.2.0 — https://mc-beta.manualmode.at
-**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at (production not yet on 2.2.0)
-**App Store:** LIVE v2.0.1 — Xcode synced for **2.2.0 Build 2**; ready to Archive
+**Staging:** Deployed **2026-07-24**, Build **2**, v2.2.1 — https://mc-beta.manualmode.at (health OK; Mistral SDK ^1.15.1)
+**Production:** v2.1.0 — https://mc-app.manualmode.at
+**App Store:** Xcode synced **2.2.1 Build 2** — ready to Archive
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
