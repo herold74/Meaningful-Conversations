@@ -97,7 +97,7 @@
 - **Production:** `/opt/manualmode-production/` → mc-app.manualmode.at
 
 ### Container Registry
-- **URL:** quay.myandi.de/gherold
+- **URL:** regy.rhepds.com/gherold/meaningful-conversations (GitLab Container Registry; UI at git.rhepds.com)
 - **Images:**
   - `meaningful-conversations-frontend:VERSION`
   - `meaningful-conversations-backend:VERSION`
