@@ -637,7 +637,7 @@ REMOTE_SCRIPT
         elif echo "$BOTS_JSON" | grep -q 'dicebear\.com'; then
             NEED_BACKEND_STREAM=true
             BACKEND_STREAM_REASON="/api/bots still returns Dicebear avatar URLs"
-        elif ! echo "$BOTS_JSON" | grep -q '"/avatars/'; then
+        elif ! echo "$BOTS_JSON" | grep -q '/avatars/'; then
             NEED_BACKEND_STREAM=true
             BACKEND_STREAM_REASON="/api/bots missing /avatars/ paths"
         fi
@@ -650,7 +650,7 @@ REMOTE_SCRIPT
             if echo "$BOTS_JSON" | grep -q 'dicebear\.com'; then
                 echo -e "${RED}ERROR: /api/bots still returns Dicebear URLs after backend stream${NC}"
                 exit 1
-            elif echo "$BOTS_JSON" | grep -q '"/avatars/'; then
+            elif echo "$BOTS_JSON" | grep -q '/avatars/'; then
                 echo -e "${GREEN}✓ Backend avatar paths verified (/avatars/*.png in /api/bots)${NC}"
             else
                 echo -e "${RED}ERROR: /api/bots missing /avatars/ paths after backend stream${NC}"

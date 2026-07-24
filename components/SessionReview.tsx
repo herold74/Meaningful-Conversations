@@ -1,14 +1,15 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { FileDiff, FileText, Lightbulb } from 'lucide-react';
 import { ProposedUpdate, Bot, GamificationState, SolutionBlockage, User, Message } from '../types';
 import { DownloadIcon } from './icons/DownloadIcon';
 import DiffViewer from './DiffViewer';
 import { useLocalization } from '../context/LocalizationContext';
 import { UsersIcon } from './icons/UsersIcon';
 import BlockageScoreGauge from './BlockageScoreGauge';
-import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { StarIcon } from './icons/StarIcon';
 import Button from './shared/Button';
+import ReviewSection from './shared/ReviewSection';
 import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline, fuzzyMatchHeadline, getEmojiForHeadline } from '../utils/contextUpdater';
 import { FileTextIcon } from './icons/FileTextIcon';
@@ -19,6 +20,7 @@ import DatePickerModal from './DatePickerModal';
 import ComfortCheckModal from './ComfortCheckModal';
 import ProfileRefinementModal from './ProfileRefinementModal';
 import { RefinementPreviewResult } from '../services/api';
+import { createDiff } from '../utils/diff';
 
 
 const removeGamificationKey = (text: string) => {
@@ -234,6 +236,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
 }) => {
     const { t, language } = useLocalization();
     const [isBlockagesExpanded, setIsBlockagesExpanded] = useState(false);
+    const [isDiffExpanded, setIsDiffExpanded] = useState(false);
     
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
@@ -565,6 +568,16 @@ const SessionReview: React.FC<SessionReviewProps> = ({
         setEditableContext(updatedContext);
     }, [updatedContext]);
 
+    const diffStats = useMemo(() => {
+        const diff = createDiff(cleanOriginalContext, updatedContext);
+        return {
+            added: diff.filter((line) => line.type === 'added').length,
+            removed: diff.filter((line) => line.type === 'removed').length,
+        };
+    }, [cleanOriginalContext, updatedContext]);
+
+    const isContextEdited = editableContext.trim() !== updatedContext.trim();
+
     const addGamificationDataToContext = (context: string): string => {
         // Remove any old gamification data comment to ensure a clean slate.
         let finalContext = context.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->/g, '').trim();
@@ -690,15 +703,114 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     const secondaryActionText = (currentUser && !preventCloudSave) ? t('sessionReview_saveAndSwitch') : t('sessionReview_switchCoach');
     
     const blockageGridClass = "grid grid-cols-1 gap-4";
+    const reviewCardClass = 'p-4 sm:p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary rounded-card shadow-card';
+
+    const ratingCard = !isInterviewReview ? (
+        <div className={`${reviewCardClass} md:sticky md:top-4`}>
+            <h2 className="text-lg font-semibold text-content-primary">{t('sessionReview_rating_title')}</h2>
+            <p className="mt-1 text-sm text-content-secondary">{t('sessionReview_rating_prompt', { botName: selectedBot.name })}</p>
+            <div className="flex justify-center items-center gap-1.5 sm:gap-2 my-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                        key={star}
+                        type="button"
+                        onClick={() => handleRatingClick(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}
+                        aria-label={t('sessionReview_rate_star', { star })}
+                        disabled={feedbackStatus !== 'idle'}
+                    >
+                        <StarIcon
+                            className={`w-8 h-8 sm:w-10 sm:h-10 transition-colors ${
+                                star <= (hoverRating || rating) ? 'text-yellow-400' : 'text-border-secondary'
+                            }`}
+                            fill={star <= (hoverRating || rating) ? 'currentColor' : 'none'}
+                        />
+                    </button>
+                ))}
+            </div>
+
+            {rating > 0 && feedbackStatus !== 'submitted' && (
+                <form onSubmit={handleFeedbackSubmit} className="space-y-3 animate-fadeIn">
+                    <label htmlFor="feedback" className="font-semibold text-sm text-content-primary">
+                        {rating <= 3 ? t('sessionReview_feedback_prompt') : t('sessionReview_feedback_prompt_optional')}
+                    </label>
+                    <textarea
+                        id="feedback"
+                        rows={3}
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder={rating <= 3 ? t('sessionReview_feedback_placeholder') : t('sessionReview_feedback_placeholder_optional')}
+                        className="w-full p-2 bg-background-primary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary rounded-lg"
+                        required={rating <= 3}
+                    />
+                    {currentUser && (
+                        <p className="text-xs text-content-subtle text-center">{t('sessionReview_contact_consent')}</p>
+                    )}
+                    <Button
+                        type="submit"
+                        disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
+                        loading={feedbackStatus === 'submitting'}
+                        fullWidth
+                        className="bg-accent-secondary hover:bg-accent-secondary-hover"
+                    >
+                        {t('sessionReview_feedback_submit')}
+                    </Button>
+                </form>
+            )}
+
+            {feedbackStatus === 'submitted' && (
+                <div className="text-center p-4 bg-status-success-background border border-status-success-border animate-fadeIn rounded-lg">
+                    <p className="font-semibold text-status-success-foreground">{t('sessionReview_feedback_thanks')}</p>
+                </div>
+            )}
+        </div>
+    ) : null;
+
+    const findingsCard = (
+        <div className={reviewCardClass}>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                <h2 className="text-lg font-semibold text-content-primary">
+                    {isInterviewReview ? t('sessionReview_g_summary_title') : t('sessionReview_summary')}
+                </h2>
+                {!isInterviewReview && (
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                            onClick={handleDownloadTranscript}
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0"
+                            leftIcon={<FileTextIcon className="w-4 h-4" />}
+                            title={t('sessionReview_downloadTranscript')}
+                        >
+                            <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadTranscript')}</span>
+                        </Button>
+                        <Button
+                            onClick={handleDownloadSummary}
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0"
+                            leftIcon={<DownloadIcon className="w-4 h-4" />}
+                            title={t('sessionReview_downloadSummary')}
+                        >
+                            <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
+                        </Button>
+                    </div>
+                )}
+            </div>
+            <p className="mt-3 text-content-secondary whitespace-pre-wrap leading-relaxed">{newFindings}</p>
+        </div>
+    );
 
     return (
-        <div className="flex flex-col items-center justify-center pt-4 pb-10">
-            <div className="w-full max-w-4xl p-6 sm:p-8 space-y-8 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated">
+        <div className="flex flex-col items-center pt-4 pb-10 px-4">
+            <div className="w-full max-w-4xl space-y-6">
                 
                 {isTestMode && (
-                    <div className="p-4 mb-6 bg-status-info-background border border-status-info-border rounded-card">
+                    <div className="p-4 bg-status-info-background border border-status-info-border rounded-card">
                         <div className="flex items-start gap-3">
-                            <div className="text-2xl mt-0.5">💡</div>
+                            <Lightbulb className="w-5 h-5 text-status-info-foreground flex-shrink-0 mt-0.5" aria-hidden="true" />
                             <div>
                                 <h3 className="font-semibold text-base text-content-primary">{t('sessionReview_testMode_warning_title')}</h3>
                                 <p className="mt-2 text-sm text-content-secondary md:hidden">{t('sessionReview_testMode_warning_desc_short')}</p>
@@ -709,7 +821,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 {isGuest && (
-                    <div className="p-4 mb-6 bg-status-warning-background border border-status-warning-border rounded-card">
+                    <div className="p-4 bg-status-warning-background border border-status-warning-border rounded-card">
                         <div className="flex items-start gap-3">
                             <div className="text-2xl mt-0.5">⚠️</div>
                             <div>
@@ -727,112 +839,24 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     <p className="mt-2 text-base text-content-secondary">{isInterviewReview ? t('sessionReview_g_subtitle') : t('sessionReview_subtitle')}</p>
                 </div>
 
-                <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
-                    <div className="flex justify-between items-center gap-4">
-                        <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{isInterviewReview ? t('sessionReview_g_summary_title') : t('sessionReview_summary')}</h2>
-                         {!isInterviewReview && (
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    onClick={handleDownloadTranscript}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-shrink-0"
-                                    leftIcon={<FileTextIcon className="w-4 h-4" />}
-                                    title={t('sessionReview_downloadTranscript')}
-                                >
-                                    <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadTranscript')}</span>
-                                </Button>
-                                <Button
-                                    onClick={handleDownloadSummary}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-shrink-0"
-                                    leftIcon={<DownloadIcon className="w-4 h-4" />}
-                                    title={t('sessionReview_downloadSummary')}
-                                >
-                                    <span className="hidden sm:inline whitespace-nowrap">{t('sessionReview_downloadSummary')}</span>
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                    <p className="mt-2 text-content-secondary dark:text-content-secondary whitespace-pre-wrap">{newFindings}</p>
-                </div>
-
-                {!isInterviewReview && (
-                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
-                        <h2 className="text-xl font-semibold text-center text-content-primary dark:text-content-primary">{t('sessionReview_rating_title')}</h2>
-                        <p className="mt-1 text-center text-content-secondary dark:text-content-secondary">{t('sessionReview_rating_prompt', { botName: selectedBot.name })}</p>
-                        <div className="flex justify-center items-center gap-2 my-4">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    onClick={() => handleRatingClick(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    className={`focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-yellow-400 rounded-full ${feedbackStatus !== 'idle' ? 'cursor-default' : ''}`}
-                                    aria-label={t('sessionReview_rate_star', { star })}
-                                    disabled={feedbackStatus !== 'idle'}
-                                >
-                                    <StarIcon 
-                                        className={`w-10 h-10 transition-colors ${
-                                            star <= (hoverRating || rating)
-                                            ? 'text-yellow-400'
-                                            : 'text-gray-300 dark:text-gray-600'
-                                        }`}
-                                        fill={star <= (hoverRating || rating) ? 'currentColor' : 'none'}
-                                    />
-                                </button>
-                            ))}
-                        </div>
-
-                        {rating > 0 && feedbackStatus !== 'submitted' && (
-                            <form onSubmit={handleFeedbackSubmit} className="space-y-3 animate-fadeIn max-w-lg mx-auto">
-                                <label htmlFor="feedback" className="font-semibold text-content-primary dark:text-content-primary">
-                                    {rating <= 3 ? t('sessionReview_feedback_prompt') : t('sessionReview_feedback_prompt_optional')}
-                                </label>
-                                <textarea
-                                    id="feedback"
-                                    rows={3}
-                                    value={feedbackText}
-                                    onChange={(e) => setFeedbackText(e.target.value)}
-                                    placeholder={rating <= 3 ? t('sessionReview_feedback_placeholder') : t('sessionReview_feedback_placeholder_optional')}
-                                    className="w-full p-2 bg-background-secondary dark:bg-background-secondary text-content-primary dark:text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary"
-                                    required={rating <= 3}
-                                />
-                                {currentUser && (
-                                    <p className="text-xs text-content-subtle dark:text-content-subtle !mt-2 text-center">
-                                        {t('sessionReview_contact_consent')}
-                                    </p>
-                                )}
-                                <Button
-                                    type="submit"
-                                    disabled={(rating <= 3 && !feedbackText.trim()) || feedbackStatus === 'submitting'}
-                                    loading={feedbackStatus === 'submitting'}
-                                    fullWidth
-                                    className="bg-accent-secondary hover:bg-accent-secondary-hover"
-                                >
-                                    {t('sessionReview_feedback_submit')}
-                                </Button>
-                            </form>
-                        )}
-                        
-                        {feedbackStatus === 'submitted' && (
-                            <div className="text-center p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 max-w-lg mx-auto animate-fadeIn">
-                                <p className="font-semibold text-status-success-foreground dark:text-status-success-foreground">{t('sessionReview_feedback_thanks')}</p>
-                            </div>
-                        )}
+                {!isInterviewReview && isSessionQualified && (hasConversationalEnd || hasAccomplishedGoal) && (
+                    <div className="p-4 bg-status-success-background border border-status-success-border space-y-2 rounded-card">
+                        {hasConversationalEnd && <p className="text-sm text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
+                        {hasAccomplishedGoal && <p className="text-sm text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}
                     </div>
                 )}
 
-                {!isInterviewReview && isSessionQualified && (hasConversationalEnd || hasAccomplishedGoal) && (
-                    <div className="p-4 bg-status-success-background dark:bg-status-success-background border border-status-success-border dark:border-status-success-border/30 space-y-2 rounded-lg">
-                        {hasConversationalEnd && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_formalClose')}</p>}
-                        {hasAccomplishedGoal && <p className="text-sm text-status-success-foreground dark:text-status-success-foreground font-semibold">{t('sessionReview_xpBonus_goalAccomplished')}</p>}
+                {!isInterviewReview ? (
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_min(320px,34%)] gap-6 md:items-start">
+                        {findingsCard}
+                        {ratingCard}
                     </div>
+                ) : (
+                    findingsCard
                 )}
                 
                 {!isInterviewReview && nextSteps && nextSteps.length > 0 && (
-                    <div className="p-4 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
+                    <div className={reviewCardClass}>
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_nextSteps')}</h2>
                             <div className="flex items-center gap-2">
@@ -891,46 +915,58 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 )}
 
                 {!isInterviewReview && canSeeBlockages && solutionBlockages && (
-                    <div className="bg-blue-50 dark:bg-background-primary/30 border border-blue-300 dark:border-blue-500/50 rounded-lg overflow-hidden">
-                        <button onClick={() => setIsBlockagesExpanded(p => !p)} className="w-full p-4 flex justify-between items-center text-left hover:bg-blue-100/50 dark:hover:bg-background-tertiary/50 transition-colors" aria-expanded={isBlockagesExpanded} aria-controls="blockages-content">
-                            <div className="flex items-center gap-3">
-                                <UsersIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />
-                                <h2 className="text-xl font-semibold text-content-primary dark:text-content-primary">{t('sessionReview_blockages_title')}</h2>
-                                {!isBlockagesExpanded && solutionBlockages.length > 0 && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs font-bold text-white bg-blue-500 rounded-full animate-fadeIn">
+                    <ReviewSection
+                        id="blockages-content"
+                        title={t('sessionReview_blockages_title')}
+                        subtitle={
+                            !isBlockagesExpanded
+                                ? solutionBlockages.length === 0
+                                    ? t('sessionReview_blockages_summary_none')
+                                    : t('sessionReview_blockages_summary_count', { count: solutionBlockages.length })
+                                : undefined
+                        }
+                        icon={<UsersIcon className="w-6 h-6" />}
+                        expanded={isBlockagesExpanded}
+                        onToggle={() => setIsBlockagesExpanded((p) => !p)}
+                        badge={
+                            !isBlockagesExpanded ? (
+                                solutionBlockages.length > 0 ? (
+                                    <span className="px-2 py-0.5 text-xs font-bold text-content-inverted bg-accent-primary rounded-pill">
                                         {solutionBlockages.length}
                                     </span>
-                                )}
-                            </div>
-                            <ChevronDownIcon className={`w-6 h-6 text-content-secondary dark:text-content-secondary transition-transform duration-300 ${isBlockagesExpanded ? 'rotate-180' : ''}`} />
-                        </button>
-                        {isBlockagesExpanded && (
-                            <div id="blockages-content" className="p-4 pt-0 space-y-4 animate-fadeIn">
-                                <div className="border-t border-blue-200 dark:border-blue-500/30 mt-4 pt-4 space-y-4">
-                                     <p className="text-sm text-blue-700 dark:text-blue-300 italic">{t('sessionReview_blockages_subtitle')}</p>
-                                    {solutionBlockages.length > 0 ? (
-                                        <>
-                                            <div className={blockageGridClass}>
-                                                {solutionBlockages.map((blockage, index) => (
-                                                    <div key={index} className="p-3 bg-background-secondary dark:bg-background-tertiary/50 border border-border-primary dark:border-border-primary/50 rounded-lg">
-                                                        <h4 className="font-bold text-blue-800 dark:text-blue-300">{getBlockageNameTranslation(blockage.blockage)}</h4>
-                                                        <p className="text-sm text-content-secondary dark:text-content-secondary mt-1">{blockage.explanation}</p>
-                                                        <p className="text-sm text-content-subtle dark:text-content-subtle mt-2 border-l-2 border-blue-300 dark:border-blue-500 pl-2 italic">"{blockage.quote}"</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <BlockageScoreGauge score={blockageScore} />
-                                        </>
-                                    ) : ( <p className="text-center text-content-secondary dark:text-content-secondary py-4">{t('sessionReview_no_blockages')}</p> )}
+                                ) : (
+                                    <span className="px-2 py-0.5 text-xs font-medium text-content-secondary bg-background-tertiary border border-border-primary rounded-pill">
+                                        0
+                                    </span>
+                                )
+                            ) : undefined
+                        }
+                    >
+                        <p className="text-sm text-content-secondary italic">{t('sessionReview_blockages_subtitle')}</p>
+                        {solutionBlockages.length > 0 ? (
+                            <>
+                                <div className={`${blockageGridClass} mt-4`}>
+                                    {solutionBlockages.map((blockage, index) => (
+                                        <div key={index} className="p-3 bg-background-primary border border-border-primary rounded-lg">
+                                            <h4 className="font-bold text-content-primary">{getBlockageNameTranslation(blockage.blockage)}</h4>
+                                            <p className="text-sm text-content-secondary mt-1">{blockage.explanation}</p>
+                                            <p className="text-sm text-content-subtle mt-2 border-l-2 border-accent-primary/40 pl-2 italic">&quot;{blockage.quote}&quot;</p>
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
+                                <div className="mt-4">
+                                    <BlockageScoreGauge score={blockageScore} />
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-center text-content-secondary py-4">{t('sessionReview_no_blockages')}</p>
                         )}
-                    </div>
+                    </ReviewSection>
                 )}
 
                 {!isInterviewReview && effectiveProposedUpdates && effectiveProposedUpdates.length > 0 && (
-                    <div>
-                        <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-4 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_proposedUpdates')}</h2>
+                    <div className={reviewCardClass}>
+                        <h2 className="text-lg font-semibold text-content-primary mb-4">{t('sessionReview_proposedUpdates')}</h2>
                         <div className="flex items-center gap-4 mb-3">
                             <button onClick={() => {
                                 const newUpdates = effectiveProposedUpdates.map((update, index) => {
@@ -958,7 +994,7 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                             }} className="text-sm text-green-500 dark:text-green-400 hover:underline">{t('sessionReview_select_all')}</button>
                             <button onClick={() => setAppliedUpdates(new Map())} className="text-sm text-yellow-500 dark:text-yellow-400 hover:underline">{t('sessionReview_deselect_all')}</button>
                         </div>
-                        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-tertiary dark:bg-background-tertiary border border-border-primary dark:border-border-primary rounded-card">
+                        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-background-primary border border-border-primary rounded-lg scrollbar-themed">
                             {effectiveProposedUpdates.map((update, index) => {
                                 const appliedUpdate = appliedUpdates.get(index);
                                 const isApplied = !!appliedUpdate;
@@ -1016,24 +1052,56 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     </div>
                 )}
 
-                <div>
-                    <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary mb-2 border-b border-border-primary dark:border-border-primary pb-2">{t('sessionReview_diffView')}</h2>
-                     <div className="flex items-center gap-4 text-sm mb-2 text-content-secondary dark:text-content-secondary">
-                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-500"></span><span>{t('sessionReview_removed')}</span></div>
-                        <div className="flex items-center gap-2"><span className="w-4 h-4 bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-500"></span><span>{t('sessionReview_added')}</span></div>
+                <ReviewSection
+                    id="diff-view-content"
+                    title={t('sessionReview_diffView')}
+                    subtitle={t('sessionReview_diff_summary', { added: diffStats.added, removed: diffStats.removed })}
+                    icon={<FileDiff className="w-5 h-5" aria-hidden="true" />}
+                    expanded={isDiffExpanded}
+                    onToggle={() => setIsDiffExpanded((p) => !p)}
+                    badge={
+                        !isDiffExpanded && (diffStats.added > 0 || diffStats.removed > 0) ? (
+                            <span className="px-2 py-0.5 text-xs font-medium text-accent-primary bg-accent-primary/10 border border-accent-primary/25 rounded-pill">
+                                +{diffStats.added} / −{diffStats.removed}
+                            </span>
+                        ) : undefined
+                    }
+                >
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-content-secondary mb-3">
+                        <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 bg-status-danger-background border border-status-danger-border rounded-sm" />
+                            <span>{t('sessionReview_removed')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 bg-status-success-background border border-status-success-border rounded-sm" />
+                            <span>{t('sessionReview_added')}</span>
+                        </div>
                     </div>
                     <DiffViewer oldText={cleanOriginalContext} newText={updatedContext} />
-                </div>
-                
-                 <div>
-                    <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-2xl font-bold text-content-primary dark:text-content-primary">{t('sessionReview_finalContext')}</h2>
-                        <button onClick={() => setIsFinalContextVisible(p => !p)} className="text-sm text-accent-primary hover:text-accent-primary-hover hover:underline">
-                            {isFinalContextVisible ? t('sessionReview_hide') : t('sessionReview_showEdit')}
-                        </button>
-                    </div>
-                    {isFinalContextVisible && ( <textarea value={editableContext} onChange={(e) => setEditableContext(e.target.value)} rows={15} className="w-full p-3 font-mono text-sm bg-background-secondary dark:bg-background-tertiary text-content-primary dark:text-content-primary border border-border-secondary dark:border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary" /> )}
-                </div>
+                </ReviewSection>
+
+                <ReviewSection
+                    id="final-context-content"
+                    title={t('sessionReview_finalContext')}
+                    subtitle={t('sessionReview_finalContext_hint')}
+                    icon={<FileText className="w-5 h-5" aria-hidden="true" />}
+                    expanded={isFinalContextVisible}
+                    onToggle={() => setIsFinalContextVisible((p) => !p)}
+                    badge={
+                        !isFinalContextVisible && isContextEdited ? (
+                            <span className="px-2 py-0.5 text-xs font-medium text-status-warning-foreground bg-status-warning-background border border-status-warning-border rounded-pill">
+                                {t('sessionReview_finalContext_edited')}
+                            </span>
+                        ) : undefined
+                    }
+                >
+                    <textarea
+                        value={editableContext}
+                        onChange={(e) => setEditableContext(e.target.value)}
+                        rows={15}
+                        className="w-full p-3 font-mono text-sm bg-background-primary text-content-primary border border-border-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary rounded-lg scrollbar-themed"
+                    />
+                </ReviewSection>
 
                 {currentUser && (
                     <div className="p-4 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 rounded-md">
@@ -1094,20 +1162,29 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                     );
                 })()}
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border-primary dark:border-border-primary">
-                    <Button onClick={handleDownloadContext} size="lg" className="flex-1 bg-accent-secondary hover:bg-accent-secondary-hover" leftIcon={<DownloadIcon className="w-5 h-5"/>}>
-                        {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
-                    </Button>
+                <div className={`${reviewCardClass} space-y-3 pt-2`}>
                     {!isInterviewReview && (
-                        <Button onClick={handleContinue} disabled={isSaving} loading={isSaving} variant="gradient" size="lg" className="flex-1">
+                        <Button onClick={handleContinue} disabled={isSaving} loading={isSaving} variant="gradient" size="lg" fullWidth>
                             {primaryActionText}
                         </Button>
                     )}
-                    <Button onClick={handleSwitch} disabled={isSaving} loading={isSaving} variant="outline" size="lg" className="flex-1">
-                        {secondaryActionText}
-                    </Button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Button
+                            onClick={handleDownloadContext}
+                            disabled={isSaving}
+                            variant="secondary"
+                            size="lg"
+                            fullWidth
+                            leftIcon={<DownloadIcon className="w-5 h-5" />}
+                        >
+                            {currentUser ? t('sessionReview_backupContext') : t('sessionReview_downloadContext')}
+                        </Button>
+                        <Button onClick={handleSwitch} disabled={isSaving} loading={isSaving} variant="outline" size="lg" fullWidth>
+                            {secondaryActionText}
+                        </Button>
+                    </div>
                 </div>
-                 <div className="text-center pt-4">
+                 <div className="text-center pt-2">
                     <button onClick={onReturnToStart} className="text-sm text-content-subtle dark:text-content-subtle hover:underline">
                         {t('sessionReview_startOver')}
                     </button>

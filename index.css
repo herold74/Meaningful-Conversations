@@ -24,6 +24,20 @@
   Default: manualmode.at teal palette. Override via VITE_BRAND_COLOR_* env vars.
 */
 
+/* Fallback featured-card gradient (overridden per data-theme) — from → via → to: lighter/brighter → darkest */
+html {
+  --featured-card-from: var(--brand-color-2);
+  --featured-card-via: var(--brand-color-3);
+  --featured-card-to: var(--brand-color-4);
+  /* Bottom-right amber wash on CTAs — echoes body::before ambient glow */
+  --gradient-accent-amber-opacity: 0.18;
+  --gradient-accent-amber-start: 40%;
+}
+
+html.dark {
+  --gradient-accent-amber-opacity: 0.22;
+}
+
 /* --- Summer Theme (Spring & Summer seasons) --- */
 html[data-theme="summer"] {
   --bg-primary: 249 250 251; /* gray-50 */
@@ -38,12 +52,12 @@ html[data-theme="summer"] {
   --border-primary: 229 231 235; /* gray-200 */
   --border-secondary: 209 213 219; /* gray-300 */
   
-  --accent-primary: 74 222 128; /* green-400 (seasonal) */
-  --accent-primary-hover: 34 197 94; /* green-500 */
+  --accent-primary: 22 163 74; /* green-600 — readable on light surfaces */
+  --accent-primary-hover: 21 128 61; /* green-700 */
   --accent-secondary: var(--brand-accent);
   --accent-secondary-hover: 217 119 6; /* amber-600 (default accent hover) */
-  --accent-tertiary: var(--brand-color-4);
-  --accent-tertiary-hover: 35 70 110;
+  --accent-tertiary: 21 128 61; /* green-700 — tertiary actions stay in seasonal hue */
+  --accent-tertiary-hover: 20 83 45; /* green-800 */
   --accent-tertiary-foreground: 255 255 255;
 
   --status-warning-background: 254 252 232; /* yellow-50 */
@@ -51,24 +65,32 @@ html[data-theme="summer"] {
   --status-warning-foreground: 180 83 9; /* yellow-600 */
   
   --status-success-background: 240 253 244; /* green-50 */
-  --status-success-border: 134 239 172; /* green-300 */
-  --status-success-foreground: 22 101 52; /* green-700 */
+  --status-success-border: 74 222 128; /* green-400 */
+  --status-success-foreground: 21 128 61; /* green-700 */
 
   --status-danger-background: 254 242 242; /* red-50 */
   --status-danger-border: 248 113 113; /* red-400 */
   --status-danger-foreground: 185 28 28; /* red-700 */
 
-  --status-info-background: 239 246 255; /* blue-50 */
-  --status-info-border: var(--brand-color-1);
-  --status-info-foreground: var(--brand-color-4);
+  --status-info-background: 240 253 244; /* green-50 */
+  --status-info-border: 134 239 172; /* green-300 */
+  --status-info-foreground: 21 128 61; /* green-700 */
 
-  --button-foreground-on-accent: 17 24 39;
+  --button-foreground-on-accent: 255 255 255;
+
+  /* Featured card gradient (same hue family as seasonal accent) */
+  --featured-card-from: 22 163 74;
+  --featured-card-via: 21 128 61;
+  --featured-card-to: 20 83 45;
 }
 
 .dark[data-theme="summer"] {
   --bg-primary: 17 24 39; /* gray-900 */
   --bg-secondary: 17 24 39;
   --bg-tertiary: 31 41 55; /* gray-800 */
+
+  --accent-primary: 74 222 128; /* green-400 — bright on dark surfaces */
+  --accent-primary-hover: 134 239 172; /* green-300 */
 
   --content-primary: 229 231 235; /* gray-200 */
   --content-secondary: 156 163 175; /* gray-400 */
@@ -95,6 +117,14 @@ html[data-theme="summer"] {
   --status-info-foreground: var(--brand-color-1);
 
   --button-foreground-on-accent: 0 0 0;
+
+  --accent-tertiary: 74 222 128; /* green-400 */
+  --accent-tertiary-hover: 134 239 172; /* green-300 */
+  --accent-tertiary-foreground: 17 24 39;
+
+  --featured-card-from: 34 197 94;
+  --featured-card-via: 22 163 74;
+  --featured-card-to: 21 128 61;
 }
 
 /* --- Autumn Theme (seasonal orange/amber accents, consistent gray neutrals) --- */
@@ -115,8 +145,8 @@ html[data-theme="autumn"] {
   --accent-primary-hover: 234 88 12; /* orange-600 */
   --accent-secondary: var(--brand-accent);
   --accent-secondary-hover: 217 119 6; /* amber-600 (default accent hover) */
-  --accent-tertiary: var(--brand-color-4);
-  --accent-tertiary-hover: 35 70 110;
+  --accent-tertiary: 194 65 12; /* orange-700 */
+  --accent-tertiary-hover: 154 52 18; /* orange-800 */
   --accent-tertiary-foreground: 255 255 255;
 
   --status-warning-background: 254 252 232; /* yellow-50 */
@@ -136,6 +166,13 @@ html[data-theme="autumn"] {
   --status-info-foreground: 154 52 18; /* orange-800 */
 
   --button-foreground-on-accent: 255 255 255;
+
+  --featured-card-from: 234 88 12;
+  --featured-card-via: 194 65 12;
+  --featured-card-to: 154 52 18;
+
+  /* Already warm-hued — lighter amber overlay */
+  --gradient-accent-amber-opacity: 0.12;
 }
 
 .dark[data-theme="autumn"] {
@@ -168,6 +205,16 @@ html[data-theme="autumn"] {
   --status-info-foreground: 251 146 60; /* orange-400 */
 
   --button-foreground-on-accent: 255 255 255;
+
+  --accent-tertiary: 251 146 60; /* orange-400 */
+  --accent-tertiary-hover: 249 115 22; /* orange-500 */
+  --accent-tertiary-foreground: 17 24 39;
+
+  --featured-card-from: 249 115 22;
+  --featured-card-via: 234 88 12;
+  --featured-card-to: 194 65 12;
+
+  --gradient-accent-amber-opacity: 0.15;
 }
 
 /* --- Brand Theme (uses --brand-color-* from Vite plugin: W4F blue, manualmode teal, etc.) --- */
@@ -191,8 +238,8 @@ html[data-theme="manualmode"] {
   --accent-primary-hover: var(--brand-color-4);
   --accent-secondary: var(--brand-accent);
   --accent-secondary-hover: 217 119 6;
-  --accent-tertiary: var(--brand-color-4);
-  --accent-tertiary-hover: 35 70 110;
+  --accent-tertiary: var(--brand-color-3);
+  --accent-tertiary-hover: var(--brand-color-4);
   --accent-tertiary-foreground: 255 255 255;
 
   --status-warning-background: 254 252 232;
@@ -207,11 +254,16 @@ html[data-theme="manualmode"] {
   --status-danger-border: 248 113 113;
   --status-danger-foreground: 185 28 28;
 
-  --status-info-background: 239 246 255;
+  --status-info-background: 240 253 250; /* teal-50 */
   --status-info-border: var(--brand-color-1);
   --status-info-foreground: var(--brand-color-4);
 
   --button-foreground-on-accent: 255 255 255;
+
+  /* Teal scale: lighter → darkest (same stop order as summer/autumn) */
+  --featured-card-from: var(--brand-color-2);
+  --featured-card-via: var(--brand-color-3);
+  --featured-card-to: var(--brand-color-4);
 }
 
 .dark[data-theme="brand"],
@@ -235,7 +287,7 @@ html[data-theme="manualmode"] {
   --accent-secondary: var(--brand-accent);
   --accent-secondary-hover: 251 191 36;
   --accent-tertiary: var(--brand-color-1);
-  --accent-tertiary-hover: 170 215 235;
+  --accent-tertiary-hover: var(--brand-color-2);
   --accent-tertiary-foreground: 17 24 39;
 
   --status-warning-background: 60 43 6;
@@ -255,6 +307,10 @@ html[data-theme="manualmode"] {
   --status-info-foreground: var(--brand-color-1);
 
   --button-foreground-on-accent: 17 24 39;
+
+  --featured-card-from: var(--brand-color-1);
+  --featured-card-via: var(--brand-color-2);
+  --featured-card-to: var(--brand-color-3);
 }
 
 /* === END THEME DEFINITIONS === */
@@ -305,6 +361,31 @@ html[data-modal-open] [data-gamification-bg] {
   background-color: rgb(var(--accent-primary-hover));
 }
 
+/* Themed scrollbars for nested scroll areas (textareas, panels) — body rules don't always apply. */
+.scrollbar-themed {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent-primary)) rgb(var(--bg-tertiary));
+}
+.scrollbar-themed::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-themed::-webkit-scrollbar-track {
+  background: rgb(var(--bg-tertiary));
+  border-radius: 3px;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--accent-primary));
+  border-radius: 3px;
+  border: 1px solid rgb(var(--bg-tertiary));
+}
+.scrollbar-themed::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--accent-primary-hover));
+}
+html.dark .scrollbar-themed {
+  color-scheme: dark;
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .animate-fadeIn { animation: fadeIn 0.5s ease-in-out both; }
 @keyframes slideInFromRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -314,7 +395,7 @@ html[data-modal-open] [data-gamification-bg] {
 @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 .animate-slideDown { animation: slideDown 0.3s ease-out forwards; }
 
-/* Ambient branded background — two corner glows (mockup: teal top-left, warm bottom-right). */
+/* Ambient branded background — top-left follows seasonal accent; bottom-right always brand amber. */
 body::before {
   content: '';
   position: fixed;
@@ -322,25 +403,48 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 75% 60% at 0% 0%, rgb(var(--accent-primary) / 0.32), transparent 72%),
-    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--accent-secondary) / 0.26), transparent 72%);
+    radial-gradient(ellipse 75% 60% at 0% 0%, rgb(var(--accent-primary) / 0.22), transparent 72%),
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--brand-accent) / 0.18), transparent 72%);
 }
 html.dark body::before {
   background:
     radial-gradient(ellipse 75% 60% at 0% 0%, rgb(var(--accent-primary) / 0.28), transparent 72%),
-    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--accent-secondary) / 0.22), transparent 72%);
+    radial-gradient(ellipse 70% 55% at 100% 100%, rgb(var(--brand-accent) / 0.22), transparent 72%);
 }
 
-/* Featured action card — dark teal gradient for readable white text (mockup center tile). */
+/* Theme-aware accent gradient — featured cards, CTAs, user chat bubbles, send button.
+   Convention: --featured-card-from (lighter/brighter) → --featured-card-to (darkest).
+   Bottom-right layer ties CTAs to the page ambient glow (--brand-accent). */
+.gradient-accent,
 .action-card-featured {
-  background: linear-gradient(
-    to bottom right,
-    rgb(var(--brand-color-4)),
-    rgb(var(--brand-color-3)),
-    rgb(var(--brand-color-2))
-  );
-  color: rgb(255 255 255);
+  background:
+    linear-gradient(
+      to bottom right,
+      transparent var(--gradient-accent-amber-start),
+      rgb(var(--brand-accent) / var(--gradient-accent-amber-opacity)) 100%
+    ),
+    linear-gradient(
+      to bottom right,
+      rgb(var(--featured-card-from)),
+      rgb(var(--featured-card-via)),
+      rgb(var(--featured-card-to))
+    );
+  color: rgb(var(--button-foreground-on-accent));
 }
+.gradient-accent:hover:not(:disabled),
 .action-card-featured:hover {
   filter: brightness(1.06);
+}
+
+/* Coach/bot message bubble — readable on ambient background in all schemas */
+.chat-bubble-bot {
+  background: rgb(var(--bg-secondary) / 0.97);
+  border: 1px solid rgb(var(--border-primary));
+  color: rgb(var(--content-primary));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+}
+html.dark .chat-bubble-bot {
+  background: rgb(var(--bg-tertiary) / 0.9);
+  border-color: rgb(var(--border-primary));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
 }

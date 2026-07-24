@@ -97,7 +97,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated"
+        className="relative w-full max-w-md p-8 space-y-6 bg-background-secondary/90 backdrop-blur-sm border border-border-primary rounded-card shadow-card"
       >
         <button onClick={onBack} className="absolute left-4 top-4 p-2 rounded-full bg-background-tertiary hover:bg-border-primary transition-colors">
             <ArrowLeftIcon className="w-5 h-5 text-content-secondary" />
