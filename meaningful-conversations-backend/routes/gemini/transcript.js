@@ -100,7 +100,7 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
                     responseSchema: transcriptEvaluationPrompts.schema,
                     temperature: 0.2,
                 },
-                context: 'transcript-evaluation',
+                context: 'analysis',
                 userRegionPreference,
                 language: language || 'de',
             }),
