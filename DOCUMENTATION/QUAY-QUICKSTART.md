@@ -45,7 +45,7 @@ Login Succeeded!
 ### 2. Login to Quay (Server)
 
 ```bash
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 podman login quay.myandi.de -u gherold
 exit
 ```
@@ -131,7 +131,7 @@ podman images | grep quay.myandi.de
 podman login quay.myandi.de -u gherold
 
 # On server too
-ssh root@46.224.37.130 'podman login quay.myandi.de -u gherold'
+ssh root@<YOUR_SERVER_IP> 'podman login quay.myandi.de -u gherold'
 ```
 
 ### "manifest unknown: manifest unknown"
@@ -150,7 +150,7 @@ podman push quay.myandi.de/gherold/meaningful-conversations-backend:latest
 
 ```bash
 # SSH to server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Check login status
 cat ~/.config/containers/auth.json

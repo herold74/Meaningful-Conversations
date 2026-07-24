@@ -75,11 +75,11 @@ https://mc-app.manualmode.at/privacy
 
 ### Test Account
 - Email: premium@manualmode.at
-- Password: Icepin2025
+- Password: **not stored in this repo** — enter the current demo password in [App Store Connect](https://appstoreconnect.apple.com) → App → App Review Information → Sign-in required. Keep the same value in your private password manager when rotating.
 
 ### Demo Instructions
 1. Open the app. The Welcome screen appears with language selection — choose "Deutsch" or "English".
-2. Tap "Anmelden" (Login), then enter the test account credentials above and tap "Anmelden".
+2. Tap "Anmelden" (Login), then enter the test account email and the demo password from App Store Connect and tap "Anmelden".
 3. After login, the Intent Picker screen appears ("Was möchten Sie heute erreichen?" / "What would you like to achieve today?"). Select "Coaching" to proceed.
 4. The Coach Selection screen opens with the Coaching section highlighted. Select "Ava" (empathetic coaching style).
 5. The coaching session begins. Type a message like: "Ich überlege einen Karrierewechsel und möchte herausfinden, was mich zurückhält." The coach responds with personalized questions based on Sarah's pre-loaded Life Context.

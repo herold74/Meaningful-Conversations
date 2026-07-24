@@ -172,7 +172,7 @@ make status-alternative-production
 - ✅ Cloud SQL with MySQL
 - ✅ Automatic scaling
 
-### Alternative Server (46.224.37.130)
+### Alternative Server (<YOUR_SERVER_IP>)
 
 #### Staging Pod (`meaningful-conversations-staging`)
 - **Frontend:** Port 8080

@@ -14,7 +14,7 @@ Complete guide for migrating the Meaningful Conversations application to a new s
 ## 🎯 Migration Overview
 
 ```
-Old Server (46.224.37.130) → New Server (YOUR_NEW_IP)
+Old Server (<YOUR_SERVER_IP>) → New Server (YOUR_NEW_IP)
 ├── Database backups
 ├── Container images
 ├── Configuration files
@@ -60,7 +60,7 @@ firewall-cmd --reload
 
 ```bash
 # SSH to old server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Create backup directory
 mkdir -p /tmp/mc-migration
@@ -107,7 +107,7 @@ cd ~/Meaningful-Conversations-Project
 mkdir -p ./migration-backups
 
 # Download from old server
-scp -r root@46.224.37.130:/tmp/mc-migration/* ./migration-backups/
+scp -r root@<YOUR_SERVER_IP>:/tmp/mc-migration/* ./migration-backups/
 
 # Verify checksums locally
 cd ./migration-backups
@@ -302,7 +302,7 @@ Or use the `--server` parameter when deploying:
 Make sure you know your database passwords from the `.env` files:
 ```bash
 # Check old server:
-ssh root@46.224.37.130 'cat /opt/meaningful-conversations-staging/.env | grep MARIADB_ROOT_PASSWORD'
+ssh root@<YOUR_SERVER_IP> 'cat /opt/meaningful-conversations-staging/.env | grep MARIADB_ROOT_PASSWORD'
 ```
 
 ### Podman Registry
@@ -315,10 +315,10 @@ If you're using a local registry, you may need to:
 If you have uploaded files or other persistent data outside the database:
 ```bash
 # Check for additional volumes:
-ssh root@46.224.37.130 'podman volume ls'
+ssh root@<YOUR_SERVER_IP> 'podman volume ls'
 
 # Backup if needed:
-ssh root@46.224.37.130 'podman volume export volume_name -o /tmp/volume_name.tar'
+ssh root@<YOUR_SERVER_IP> 'podman volume export volume_name -o /tmp/volume_name.tar'
 ```
 
 ### Downtime Window
@@ -339,7 +339,7 @@ If something goes wrong:
 
 1. **DNS Rollback:**
    ```bash
-   # Change DNS back to old server IP: 46.224.37.130
+   # Change DNS back to old server IP: <YOUR_SERVER_IP>
    # Wait 5-10 minutes
    ```
 
@@ -359,7 +359,7 @@ After successful migration (wait 24-48 hours):
 
 ```bash
 # On OLD server:
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Stop pods
 podman-compose -f /opt/meaningful-conversations-staging/podman-compose.yml down
