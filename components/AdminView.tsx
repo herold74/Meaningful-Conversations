@@ -288,6 +288,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [showMismatchWarning, setShowMismatchWarning] = useState(false);
     const [pendingScenario, setPendingScenario] = useState<TestScenario | null>(null);
     const [showDynamicTestRunner, setShowDynamicTestRunner] = useState(false);
+    const [dynamicRunnerOptions, setDynamicRunnerOptions] = useState<{ initialScenarioId?: string; autoStart?: boolean }>({});
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
     useModalOpen(showMismatchWarning);
 
@@ -1568,7 +1569,10 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         </div>
                         <div className="flex justify-end shrink-0">
                             <button
-                                onClick={() => setShowDynamicTestRunner(true)}
+                                onClick={() => {
+                                    setDynamicRunnerOptions({});
+                                    setShowDynamicTestRunner(true);
+                                }}
                                 className="w-40 px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-colors"
                             >
                                 🚀 {t('admin_dynamic_runner_start')}
@@ -1605,6 +1609,39 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         </div>
                     </div>
                 )}
+
+                {/* Coach Practice Quick Test */}
+                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
+                    <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
+                                    🎯 {t('admin_practice_test_title')}
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    {t('admin_practice_test_desc')}
+                                </p>
+                            </div>
+                            <div className="flex justify-end shrink-0">
+                                <button
+                                    onClick={() => {
+                                        setDynamicRunnerOptions({
+                                            initialScenarioId: 'practice_grow_career',
+                                            autoStart: true,
+                                        });
+                                        setShowDynamicTestRunner(true);
+                                    }}
+                                    className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
+                                >
+                                    {t('admin_practice_test_run')}
+                                </button>
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                            {t('admin_practice_test_note')}
+                        </p>
+                    </div>
+                </div>
                 
                 {/* Legacy Test Runner Section */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
@@ -1716,9 +1753,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                 {/* Dynamic Test Runner Modal */}
                 {showDynamicTestRunner && (
                     <TestRunner 
-                        onClose={() => setShowDynamicTestRunner(false)}
+                        onClose={() => {
+                            setShowDynamicTestRunner(false);
+                            setDynamicRunnerOptions({});
+                        }}
                         userProfile={adminPersonalityProfile}
                         encryptionKey={encryptionKey}
+                        initialScenarioId={dynamicRunnerOptions.initialScenarioId}
+                        autoStart={dynamicRunnerOptions.autoStart}
                     />
                 )}
             </div>

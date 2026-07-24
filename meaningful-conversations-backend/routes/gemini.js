@@ -7,6 +7,7 @@ router.use('/', require('./gemini/session'));
 router.use('/', require('./gemini/interview'));
 router.use('/', require('./gemini/admin'));
 router.use('/', require('./gemini/transcript'));
+router.use('/', require('./gemini/practice'));
 router.use('/', require('./gemini/botRecommendation'));
 
 module.exports = router;

@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useModalOpen } from '../utils/modalUtils';
 import { downloadTextFile } from '../utils/fileDownload';
-import { Bot, Message, SessionAnalysis } from '../types';
+import { Bot, Message, SessionAnalysis, CoachPracticeConfig, PracticeDifficulty } from '../types';
 import { BOTS } from '../constants';
 import { 
   DynamicTestScenario, 
@@ -24,7 +24,7 @@ import {
   CombinedTestProfile
 } from '../utils/testScenarios';
 import { getApiBaseUrl, getSession, testRefinementWithMockSessions, RefinementPreviewResult } from '../services/api';
-import { analyzeSession } from '../services/geminiService';
+import { analyzeSession, sendPracticeMessageStream, evaluatePracticeSession } from '../services/geminiService';
 import { CheckIcon } from './icons/CheckIcon';
 import { XIcon } from './icons/XIcon';
 import BrandLoader from './shared/BrandLoader';
@@ -173,11 +173,15 @@ interface TestRunnerProps {
   onClose: () => void;
   userProfile?: any; // User's actual personality profile (encrypted from DB)
   encryptionKey: CryptoKey | null; // Encryption key to decrypt the profile
+  /** Pre-select a scenario when opening (e.g. practice smoke test from admin) */
+  initialScenarioId?: string;
+  /** Start the selected scenario immediately on open */
+  autoStart?: boolean;
 }
 
 type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
 
-const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey }) => {
+const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey, initialScenarioId, autoStart }) => {
   const { t, language } = useLocalization();
   useModalOpen();
   
@@ -245,7 +249,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const scenarios = getDynamicTestScenarios(t);
   const bots = getTestableBots();
   const interviewBot = BOTS.find(b => b.id === 'gloria-life-context') || null;
-  const categories: TestCategory[] = ['core', 'session', 'personality', 'safety', 'bot'];
+  const categories: TestCategory[] = ['core', 'session', 'personality', 'safety', 'bot', 'practice'];
+  
+  const isPracticeScenario = selectedScenario?.specialTestMode === 'practice_eval';
   
   const filteredScenarios = categoryFilter === 'all' 
     ? scenarios 
@@ -254,7 +260,9 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   // Handle scenario selection - auto-select interview bot for interview scenario
   const handleScenarioSelect = (scenario: DynamicTestScenario) => {
     setSelectedScenario(scenario);
-    if (scenario.id === 'bot_interview' && interviewBot) {
+    if (scenario.specialTestMode === 'practice_eval') {
+      setSelectedBot(null);
+    } else if (scenario.id === 'bot_interview' && interviewBot) {
       setSelectedBot(interviewBot);
     } else if (selectedBot?.id === 'gloria-life-context') {
       // Clear interview bot if switching away from interview scenario
@@ -462,12 +470,120 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   // Run the full test scenario
   const runTest = useCallback(async () => {
-    if (!selectedBot || !hasProfileSelection || !selectedScenario) return;
+    if (!selectedScenario) return;
+    const isPractice = selectedScenario.specialTestMode === 'practice_eval';
+    if (!isPractice && (!selectedBot || !hasProfileSelection)) return;
 
     setPhase('running');
     setIsRunning(true);
     setError(null);
     setCurrentMessageIndex(0);
+
+    if (isPractice && selectedScenario.practiceConfig) {
+      const pc = selectedScenario.practiceConfig;
+      const practiceConfig: CoachPracticeConfig = {
+        frameworkId: pc.frameworkId,
+        frameworkName: pc.frameworkId.toUpperCase(),
+        scenarioId: pc.scenarioId,
+        scenarioName: pc.scenarioId,
+        coacheeName: 'Test Coachee',
+        coacheeAvatar: '🧑‍💼',
+        difficulty: pc.difficulty as PracticeDifficulty,
+        difficultyLabel: pc.difficulty,
+      };
+
+      const responses: TestRunResult['responses'] = [];
+      const chatHistory: Message[] = [];
+
+      try {
+        for (let i = 0; i < selectedScenario.testMessages.length; i++) {
+          setCurrentMessageIndex(i);
+          const coachText = selectedScenario.testMessages[i].text;
+          const userMessage: Message = {
+            id: `practice-coach-${i}`,
+            role: 'user',
+            text: coachText,
+            timestamp: new Date().toISOString(),
+          };
+          chatHistory.push(userMessage);
+
+          const startTime = Date.now();
+          const result = await sendPracticeMessageStream(
+            practiceConfig,
+            chatHistory,
+            language,
+            () => {},
+          );
+          const responseTime = Date.now() - startTime;
+
+          const coacheeMessage: Message = {
+            id: `practice-coachee-${i}`,
+            role: 'bot',
+            text: result.text,
+            timestamp: new Date().toISOString(),
+          };
+          chatHistory.push(coacheeMessage);
+
+          responses.push({
+            userMessage: coachText,
+            botResponse: result.text,
+            responseTime,
+          });
+        }
+
+        setPhase('analyzing');
+        const evalResult = await evaluatePracticeSession(
+          practiceConfig,
+          chatHistory,
+          language,
+          pc.selfRating,
+        );
+
+        const ev = evalResult.evaluation;
+        const scoresValid = typeof ev.overallScore === 'number'
+          && ev.overallScore >= 1 && ev.overallScore <= 10
+          && ev.methodCompliance?.score >= 1 && ev.methodCompliance?.score <= 10
+          && ev.effectiveness?.score >= 1 && ev.effectiveness?.score <= 10
+          && ev.clarity?.score >= 1 && ev.clarity?.score <= 10
+          && ev.coacheeSatisfaction?.score >= 1 && ev.coacheeSatisfaction?.score <= 10;
+
+        const autoCheckResults: TestRunResult['autoCheckResults'] = [
+          {
+            checkId: 'practice_eval',
+            passed: scoresValid,
+            details: t('test_runner_autocheck_practice_eval'),
+          },
+          {
+            checkId: 'practice_persist',
+            passed: !!evalResult.id && !evalResult.saveWarning,
+            details: evalResult.saveWarning
+              ? `${t('test_runner_autocheck_practice_persist')}: ${evalResult.saveWarning}`
+              : t('test_runner_autocheck_practice_persist'),
+          },
+        ];
+
+        setTestResult({
+          scenarioId: selectedScenario.id,
+          botId: 'practice-coachee',
+          profileId: 'n/a',
+          timestamp: new Date().toISOString(),
+          responses,
+          autoCheckResults,
+          manualCheckResults: [],
+          practiceEvaluation: evalResult,
+        });
+        setPhase('complete');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Practice test failed');
+        setPhase('setup');
+      } finally {
+        setIsRunning(false);
+      }
+      return;
+    }
+
+    if (!selectedBot) return;
+    const activeBot = selectedBot;
     
     const profile = getTestProfile();
     const responses: TestRunResult['responses'] = [];
@@ -516,7 +632,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         chatHistory.push(userMessage);
 
         // Run the API call
-        const result = await runTestMessage(testMsg.text, selectedBot, profile, chatHistory);
+        const result = await runTestMessage(testMsg.text, activeBot, profile, chatHistory);
         
         // Add bot response to history
         const botMessage: Message = {
@@ -554,7 +670,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
             chatHistory,
             selectedScenario.description,
             currentTurn + 1,
-            selectedBot.id
+            activeBot.id
           );
 
           // Add generated user message to history
@@ -567,7 +683,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           chatHistory.push(userMessage);
 
           // Run the API call
-          const result = await runTestMessage(followUpText, selectedBot, profile, chatHistory);
+          const result = await runTestMessage(followUpText, activeBot, profile, chatHistory);
 
           // Add bot response to history
           const botMessage: Message = {
@@ -811,7 +927,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
       const result: TestRunResult = {
         scenarioId: selectedScenario.id,
-        botId: selectedBot.id,
+        botId: activeBot.id,
         profileId: profileId || 'no_profile',
         timestamp: new Date().toISOString(),
         responses,
@@ -923,6 +1039,26 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     }
   }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, generateFollowUpMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t, language]);
 
+  const autoStartPending = useRef(!!autoStart);
+
+  useEffect(() => {
+    if (!initialScenarioId) return;
+    const scenario = scenarios.find((s) => s.id === initialScenarioId);
+    if (!scenario) return;
+    setSelectedScenario(scenario);
+    setCategoryFilter(scenario.category);
+    if (scenario.specialTestMode === 'practice_eval') {
+      setSelectedBot(null);
+    }
+  }, [initialScenarioId, scenarios]);
+
+  useEffect(() => {
+    if (!autoStartPending.current || !selectedScenario || phase !== 'setup' || isRunning) return;
+    if (initialScenarioId && selectedScenario.id !== initialScenarioId) return;
+    autoStartPending.current = false;
+    void runTest();
+  }, [selectedScenario, initialScenarioId, phase, isRunning, runTest]);
+
   // Update manual check
   const handleManualCheck = (checkId: string, passed: boolean) => {
     setManualCheckResults(prev => ({ ...prev, [checkId]: passed }));
@@ -951,6 +1087,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const renderSetup = () => (
     <div className="space-y-6">
       {/* Bot Selection */}
+      {!isPracticeScenario && (
       <div>
         <h4 className="font-semibold mb-2 text-content-primary">1. {t('test_runner_step_bot')}</h4>
         {selectedScenario?.id === 'bot_interview' ? (
@@ -981,8 +1118,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           </div>
         )}
       </div>
+      )}
 
-      {/* Profile Selection - Multi-Select */}
+      {isPracticeScenario ? (
+        <div className="p-4 bg-accent-primary/10 border border-accent-primary/30 rounded-lg">
+          <div className="font-medium text-content-primary">🎯 {t('test_category_practice')}</div>
+          <p className="text-sm text-content-secondary mt-1">{t('test_runner_practice_info')}</p>
+          <p className="text-sm text-content-secondary mt-1">{t('test_runner_practice_no_profile')}</p>
+        </div>
+      ) : (
       <div>
         <h4 className="font-semibold mb-2 text-content-primary">2. {t('test_runner_step_profile')}</h4>
         
@@ -1100,10 +1244,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           </div>
         )}
       </div>
+      )}
 
       {/* Scenario Selection */}
       <div>
-        <h4 className="font-semibold mb-2 text-content-primary">3. {t('test_runner_step_scenario')}</h4>
+        <h4 className="font-semibold mb-2 text-content-primary">{isPracticeScenario ? '1.' : '3.'} {t('test_runner_step_scenario')}</h4>
         
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-3">
@@ -1160,7 +1305,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       {/* Run Button */}
       <button
         onClick={runTest}
-        disabled={!selectedBot || !hasProfileSelection || !selectedScenario}
+        disabled={(!isPracticeScenario && (!selectedBot || !hasProfileSelection)) || !selectedScenario}
         className="w-full py-3 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg font-semibold
                    disabled:opacity-50 disabled:cursor-not-allowed
                    hover:bg-accent-primary/90 transition-colors"
@@ -1207,7 +1352,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       <BrandLoader size="md" />
       <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_analyzing')}</h3>
       <p className="text-content-secondary mt-2">
-        {t('test_runner_analyzing_desc')}
+        {isPracticeScenario ? t('test_runner_practice_evaluating') : t('test_runner_analyzing_desc')}
       </p>
     </div>
   );
@@ -1918,7 +2063,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   // Export test result as JSON
   const exportTestResult = useCallback(async () => {
-    if (!testResult || !selectedScenario || !selectedBot) return;
+    if (!testResult || !selectedScenario) return;
 
     const exportData: any = {
       exportVersion: '1.0',
@@ -1928,10 +2073,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         name: selectedScenario.name,
         category: selectedScenario.category,
       },
-      bot: {
+      bot: selectedBot ? {
         id: selectedBot.id,
         name: selectedBot.name,
-      },
+      } : { id: testResult.botId, name: 'Coach Practice' },
       profile: {
         type: useMyProfile ? 'user_profile' : 'manual',
         riemann: selectedRiemann?.id || null,
@@ -1970,7 +2115,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     }
 
     const jsonContent = JSON.stringify(exportData, null, 2);
-    const filename = `test-${selectedScenario.id}-${selectedBot.id}-${new Date().toISOString().slice(0, 10)}.json`;
+    const botSlug = selectedBot?.id || testResult.botId;
+    const filename = `test-${selectedScenario.id}-${botSlug}-${new Date().toISOString().slice(0, 10)}.json`;
     await downloadTextFile(jsonContent, filename, 'application/json');
   }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult]);
 
@@ -1984,7 +2130,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const manualTotalCount = selectedScenario.manualChecks.length;
     const totalPassed = autoPassCount + manualPassCount;
     const totalChecks = autoTotalCount + manualTotalCount;
-    const passRate = Math.round((totalPassed / totalChecks) * 100);
+    const passRate = totalChecks > 0 ? Math.round((totalPassed / totalChecks) * 100) : 100;
+    const practiceEval = testResult.practiceEvaluation;
 
     return (
       <div className="text-center py-8">
@@ -1997,17 +2144,58 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         <p className="text-4xl font-bold mt-2 text-accent-primary">
           {passRate}%
         </p>
+        {totalChecks > 0 && (
         <p className="text-content-secondary mt-1">
           {t('test_runner_checks_passed', { passed: totalPassed, total: totalChecks })}
         </p>
+        )}
+
+        {practiceEval && (
+          <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-lg mx-auto space-y-3">
+            <h4 className="font-semibold text-content-primary">🎯 {t('test_runner_practice_eval_title')}</h4>
+            <div className="text-sm">
+              <span className="text-content-secondary">{t('test_runner_practice_overall')}:</span>{' '}
+              <span className="font-bold text-accent-primary text-lg">{practiceEval.evaluation.overallScore}/10</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs text-content-primary">
+              <div>Method: {practiceEval.evaluation.methodCompliance.score}/10</div>
+              <div>Effectiveness: {practiceEval.evaluation.effectiveness.score}/10</div>
+              <div>Clarity: {practiceEval.evaluation.clarity.score}/10</div>
+              <div>Satisfaction: {practiceEval.evaluation.coacheeSatisfaction.score}/10</div>
+            </div>
+            <p className="text-sm text-content-secondary">{practiceEval.evaluation.summary}</p>
+            {practiceEval.id ? (
+              <p className="text-xs text-green-600 dark:text-green-400">✓ {t('test_runner_practice_saved')}</p>
+            ) : practiceEval.saveWarning ? (
+              <p className="text-xs text-yellow-600 dark:text-yellow-400">⚠ {t('test_runner_practice_save_warning')}: {practiceEval.saveWarning}</p>
+            ) : null}
+            <details className="text-xs">
+              <summary className="cursor-pointer text-accent-primary">Transcript ({testResult.responses.length} turns)</summary>
+              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                {testResult.responses.map((r, i) => (
+                  <div key={i} className="p-2 bg-background-secondary rounded">
+                    <div className="font-medium text-content-primary">Coach: {r.userMessage}</div>
+                    <div className="text-content-secondary mt-1">Coachee: {r.botResponse}</div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
+        )}
         
         <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-md mx-auto">
           <div className="text-sm space-y-1">
-            <div>{t('test_runner_result_bot')}: <span className="font-medium">{selectedBot?.name}</span></div>
-            <div>{t('test_runner_result_profile')}: <span className="font-medium">{getProfileDisplayName()}</span></div>
+            {!isPracticeScenario && (
+              <>
+                <div>{t('test_runner_result_bot')}: <span className="font-medium">{selectedBot?.name}</span></div>
+                <div>{t('test_runner_result_profile')}: <span className="font-medium">{getProfileDisplayName()}</span></div>
+              </>
+            )}
             <div>{t('test_runner_result_scenario')}: <span className="font-medium">{selectedScenario.name}</span></div>
             <div>{t('test_runner_result_auto')}: <span className="font-medium">{autoPassCount}/{autoTotalCount}</span></div>
-            <div>{t('test_runner_result_manual')}: <span className="font-medium">{manualPassCount}/{manualTotalCount}</span></div>
+            {manualTotalCount > 0 && (
+              <div>{t('test_runner_result_manual')}: <span className="font-medium">{manualPassCount}/{manualTotalCount}</span></div>
+            )}
           </div>
         </div>
 
