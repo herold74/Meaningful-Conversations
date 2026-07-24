@@ -10,7 +10,7 @@ const WelcomeScreen: React.FC = () => {
   const { t, language } = useLocalization();
   const appName = language === 'de' ? brand.appNameDe : brand.appName;
 
-  // Clock positions: yellow-bg avatars at 2–6 o'clock; teal-bg at 8–12 o'clock
+  // Clock positions around the logo; avatar rings alternate teal (brand) / amber
   const avatarSlots: { botId: string; style: React.CSSProperties }[] = [
     { botId: 'gloria-interview', style: { top: '-1.75rem', left: 'calc(50% - 1.75rem)' } },           // 12
     { botId: 'chloe-cbt', style: { top: 'calc(25% - 1rem)', right: '-1.75rem' } },                    // 2
@@ -27,7 +27,7 @@ const WelcomeScreen: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
       <motion.div
-        className="relative w-48 h-48 mb-6"
+        className="relative w-48 h-48 mb-14"
         initial={{ opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -37,18 +37,28 @@ const WelcomeScreen: React.FC = () => {
           <LogoIcon className="relative w-24 h-24 text-accent-primary drop-shadow-sm" />
         </div>
 
-        {orbitBots.map(({ bot, style }, index) => (
-          <motion.img
-            key={bot.id}
-            src={bot.avatar}
-            alt={bot.name}
-            className="absolute w-14 h-14 rounded-full border-2 border-background-secondary shadow-card object-cover"
-            style={style}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35, delay: 0.2 + index * 0.08, ease: 'easeOut' }}
-          />
-        ))}
+        {orbitBots.map(({ bot, style }, index) => {
+          const ringBg = index % 2 === 0
+            ? 'bg-accent-primary'
+            : 'bg-amber-400 dark:bg-amber-500';
+
+          return (
+            <motion.div
+              key={bot.id}
+              className={`absolute w-14 h-14 rounded-full p-0.5 shadow-card ${ringBg}`}
+              style={style}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, delay: 0.2 + index * 0.08, ease: 'easeOut' }}
+            >
+              <img
+                src={bot.avatar}
+                alt={bot.name}
+                className="w-full h-full rounded-full border-2 border-background-secondary object-cover"
+              />
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       <motion.h1

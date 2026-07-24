@@ -569,7 +569,7 @@ const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({ onBack }) => {
                 <div className="flex justify-center pt-6">
                     <button
                         onClick={onBack}
-                        className="px-6 py-2 text-base font-bold text-white bg-accent-primary uppercase hover:bg-accent-primary-hover disabled:bg-accent-disabled rounded-lg shadow-md"
+                        className="px-6 py-2 text-base font-bold btn-accent-solid uppercase disabled:opacity-50 rounded-lg shadow-md"
                     >
                         {t('back')}
                     </button>

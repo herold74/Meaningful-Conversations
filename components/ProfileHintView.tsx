@@ -44,7 +44,7 @@ const ProfileHintView: React.FC<ProfileHintViewProps> = ({ onDiscover, onLater, 
         <button
           type="button"
           onClick={onDisable}
-          className="text-sm text-content-tertiary hover:text-content-secondary transition-colors"
+          className="text-sm text-content-secondary hover:text-content-primary transition-colors"
         >
           {t('profile_hint_disable')}
         </button>

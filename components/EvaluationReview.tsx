@@ -3,6 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { TranscriptEvaluationResult, TranscriptPreAnswers, BotRecommendation, BotRecommendationEntry } from '../types';
 import { exportTranscriptEvaluationPDF } from '../utils/transcriptEvaluationPDF';
 import EvaluationRating from './EvaluationRating';
+import ScoreBadge from './shared/ScoreBadge';
 
 interface EvaluationReviewProps {
     evaluation: TranscriptEvaluationResult;
@@ -12,18 +13,8 @@ interface EvaluationReviewProps {
     onStartSession?: (botId: string, examplePrompt: string) => void;
 }
 
-const ScoreBadge: React.FC<{ score: number; max: number }> = ({ score, max }) => {
-    const ratio = score / max;
-    const color = ratio >= 0.7 ? 'bg-status-success-foreground' : ratio >= 0.4 ? 'bg-status-warning-foreground' : 'bg-status-danger-foreground';
-    return (
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-white font-bold text-sm ${color}`}>
-            {score}/{max}
-        </span>
-    );
-};
-
 const Section: React.FC<{ title: string; children: React.ReactNode; badge?: React.ReactNode }> = ({ title, children, badge }) => (
-    <div className="bg-background-primary rounded-xl border border-border-primary p-5 mb-4">
+    <div className="surface-elevated rounded-xl p-5 mb-4">
         <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-bold text-content-primary">{title}</h3>
             {badge}

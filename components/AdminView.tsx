@@ -789,7 +789,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                     title={t(`admin_users_profile_filter_${f}`)}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                                         profileFilter === f
-                                            ? 'bg-accent-primary text-white'
+                                            ? 'bg-accent-primary text-button-foreground-on-accent'
                                             : 'bg-background-secondary text-content-secondary hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}>
                                     <span className="sm:hidden">{f === 'all' ? '👥' : f === 'with' ? '👩🏻‍🎨' : '∅'}</span>
@@ -1473,7 +1473,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                                     ? p === 'google' ? 'bg-blue-600 text-white'
                                                     : p === 'mistral' ? 'bg-orange-500 text-white'
                                                     : p === 'unknown' ? 'bg-gray-500 text-white'
-                                                    : 'bg-accent-primary text-white'
+                                                    : 'bg-accent-primary text-button-foreground-on-accent'
                                                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:border-accent-primary'
                                             }`}
                                         >

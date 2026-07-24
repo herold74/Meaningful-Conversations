@@ -140,7 +140,7 @@ const EvaluationRating: React.FC<EvaluationRatingProps> = ({
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="w-full py-2.5 rounded-lg font-semibold text-white bg-accent-primary hover:bg-accent-primary/90 shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-2.5 rounded-lg font-semibold btn-accent-solid shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {isSubmitting ? (
                         <>
