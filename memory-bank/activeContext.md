@@ -4,8 +4,8 @@
 **Version:** 2.1.0
 **Branch:** `main`
 **Staging:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-beta.manualmode.at (health OK; GitLab registry `regy.rhepds.com`)
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** bis nächster Prod-Deploy. — https://mc-app.manualmode.at
-**App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH (Xcode sync for 2.1.0 in progress)
+**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at — visual redesign + GitLab registry; parität mit Staging.
+**App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH (native bundle noch 2.0.1 bis Xcode-Submit 2.1.0)
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
@@ -13,7 +13,8 @@
 
 ### GitHub releases: v2.0.2 (Mistral), v2.0.3 (Registry), v2.1.0 (Visual Redesign)
 - **CHANGELOG.md**, **RELEASE-NOTES-2.1.0.md**; version **2.1.0**, BUILD_NUMBER **1**
-- **Staging deploy (2026-07-24):** `./deploy-manualmode.sh -e staging -c app` — Build **2** synced/pushed (`chore: build 2 sync`); frontend 200, `/api/health` OK. `cap sync ios` may follow separately.
+- **Staging deploy (2026-07-24):** Build **2** — health OK
+- **Production deploy (2026-07-24):** `./deploy-manualmode.sh -e production -c app` — v2.1.0 Build **2**, GitLab registry on prod, health OK; Web/PWA users see full visual redesign immediately
 
 ## Recent Changes (2026-07-24 — GitLab Container Registry migration)
 

@@ -104,6 +104,7 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.0 release (2026-07-24):** Documented on GitHub — CHANGELOG, RELEASE-NOTES-2.1.0, version bump, staging + Xcode sync
+- [x] **Production v2.1.0 (2026-07-24):** Deployed to https://mc-app.manualmode.at — Build 2, GitLab registry, parity with staging (Web/PWA); App Store native still 2.0.1 until submit
 - [x] **Brand-Driven Design System:**
     - [x] 4-shade brand palette via `VITE_BRAND_COLOR_1` to `_4` env vars
     - [x] Accent color via `VITE_BRAND_ACCENT`
