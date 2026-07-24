@@ -50,12 +50,11 @@ fi
 
 # Load environment configuration
 ENV_FILE="$PROJECT_ROOT/.env.production"
+# shellcheck source=registry-env.sh
+source "$SCRIPT_DIR/registry-env.sh"
 if [ -f "$ENV_FILE" ]; then
-    export $(grep -E '^REGISTRY_URL=|^REGISTRY_USER=|^REGISTRY_PASSWORD=' "$ENV_FILE" | xargs)
+    load_registry_env "$ENV_FILE"
 fi
-
-REGISTRY_URL="${REGISTRY_URL:-ghcr.io}"
-REGISTRY_USER="${REGISTRY_USER:-gherold}"
 
 # Logging function
 log() {
@@ -80,7 +79,7 @@ log "${GREEN}╚═════════════════════�
 log ""
 log "${BLUE}📋 Configuration:${NC}"
 log "   Version:     $VERSION"
-log "   Registry:    $REGISTRY_URL/$REGISTRY_USER"
+log "   Registry:    $REGISTRY_URL/$REGISTRY_IMAGE_PREFIX"
 log "   Target:      $REMOTE_HOST"
 log "   Domain:      $DOMAIN"
 log "   Log file:    $LOG_FILE"
@@ -134,7 +133,8 @@ set -e
 
 VERSION="VERSION_PLACEHOLDER"
 REGISTRY_URL="REGISTRY_URL_PLACEHOLDER"
-REGISTRY_USER="REGISTRY_USER_PLACEHOLDER"
+REGISTRY_LOGIN_USER="REGISTRY_LOGIN_USER_PLACEHOLDER"
+REGISTRY_IMAGE_PREFIX="REGISTRY_IMAGE_PREFIX_PLACEHOLDER"
 COMPOSE_FILE="podman-compose-production.yml"
 ENV_DIR="/opt/manualmode-production"
 
@@ -148,9 +148,9 @@ cd "$ENV_DIR"
 # Login to registry
 echo "📦 Logging in to registry..."
 if [ -f .env ] && grep -q REGISTRY_PASSWORD .env; then
-    export $(grep REGISTRY_PASSWORD .env | xargs)
+    export $(grep -E '^REGISTRY_URL=|^REGISTRY_LOGIN_USER=|^REGISTRY_PASSWORD=' .env | xargs)
     if [ -n "$REGISTRY_PASSWORD" ]; then
-        echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_USER" --password-stdin 2>/dev/null || true
+        echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_LOGIN_USER" --password-stdin 2>/dev/null || true
     fi
 fi
 
@@ -161,13 +161,13 @@ echo "   (These are the same images tested on staging)"
 echo ""
 
 echo "   Pulling backend:$VERSION..."
-podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
+podman pull "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:$VERSION"
 
 echo "   Pulling frontend:$VERSION..."
-podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+podman pull "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION"
 
 echo "   Pulling TTS:$VERSION..."
-podman pull "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION" || echo "   (TTS image not found, skipping)"
+podman pull "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION" || echo "   (TTS image not found, skipping)"
 
 echo ""
 echo "✓ Images pulled successfully"
@@ -224,7 +224,8 @@ REMOTE_SCRIPT
 # Replace placeholders
 sed -i.bak "s/VERSION_PLACEHOLDER/$VERSION/g" /tmp/remote-production-deploy.sh
 sed -i.bak "s|REGISTRY_URL_PLACEHOLDER|$REGISTRY_URL|g" /tmp/remote-production-deploy.sh
-sed -i.bak "s/REGISTRY_USER_PLACEHOLDER/$REGISTRY_USER/g" /tmp/remote-production-deploy.sh
+sed -i.bak "s/REGISTRY_LOGIN_USER_PLACEHOLDER/$REGISTRY_LOGIN_USER/g" /tmp/remote-production-deploy.sh
+sed -i.bak "s|REGISTRY_IMAGE_PREFIX_PLACEHOLDER|$REGISTRY_IMAGE_PREFIX|g" /tmp/remote-production-deploy.sh
 rm -f /tmp/remote-production-deploy.sh.bak
 
 # Sync nginx IP script from repo (same behavior as deploy-manualmode.sh)

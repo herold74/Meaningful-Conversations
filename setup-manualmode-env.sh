@@ -102,8 +102,9 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo -e "${GREEN}Container Registry Configuration${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-REGISTRY_URL=$(read_with_default "Registry URL" "quay.myandi.de")
-REGISTRY_USER=$(read_with_default "Registry Username" "gherold")
+REGISTRY_URL=$(read_with_default "Registry URL" "regy.rhepds.com")
+REGISTRY_LOGIN_USER=$(read_with_default "Registry login username" "gherold@redhat.com")
+REGISTRY_IMAGE_PREFIX=$(read_with_default "Registry image prefix (GitLab project path)" "gherold/meaningful-conversations")
 
 echo ""
 echo -e "${YELLOW}Registry Password (will be hidden)${NC}"
@@ -208,9 +209,10 @@ create_env_file() {
 # Version
 VERSION=${VERSION}
 
-# Container Registry Configuration
+# Container Registry (GitLab Container Registry)
 REGISTRY_URL=${REGISTRY_URL}
-REGISTRY_USER=${REGISTRY_USER}
+REGISTRY_LOGIN_USER=${REGISTRY_LOGIN_USER}
+REGISTRY_IMAGE_PREFIX=${REGISTRY_IMAGE_PREFIX}
 REGISTRY_PASSWORD=${REGISTRY_PASSWORD}
 
 # Database Configuration (MariaDB)
@@ -263,8 +265,8 @@ Generated on $(date)
 ⚠ IMPORTANT: Save these credentials securely and delete this file!
 
 Shared Configuration:
-  Registry: ${REGISTRY_URL}
-  Registry User: ${REGISTRY_USER}
+  Registry: ${REGISTRY_URL}/${REGISTRY_IMAGE_PREFIX}
+  Login user: ${REGISTRY_LOGIN_USER}
   Registry Password: ${REGISTRY_PASSWORD:0:20}...
   Gemini API Key: ${API_KEY:0:20}...
   Mailjet API Key: ${MAILJET_API_KEY:0:20}...
