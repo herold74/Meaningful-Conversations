@@ -60,7 +60,7 @@
 
 1. Bump version if needed (see deployment skill for 5-file update)
 2. `npm run build && npx cap sync ios`
-3. Open Xcode: `ios/App/App.xcworkspace`
+3. Open Xcode: `ios/App/App.xcodeproj` — use scheme **App**
 4. Select "Any iOS Device (arm64)" as build target
 5. Product → Archive
 6. Distribute App → App Store Connect

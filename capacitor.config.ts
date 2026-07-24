@@ -5,6 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Meaningful Conversations',
   webDir: 'dist',
   ios: {
+    scheme: 'App',
     contentInset: 'never',
     backgroundColor: '#0f172a'
   },
