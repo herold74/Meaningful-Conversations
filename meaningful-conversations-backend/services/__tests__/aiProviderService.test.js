@@ -416,9 +416,11 @@ describe('checkProvidersHealth()', () => {
   });
 
   test('reports mistral available when API key is set', async () => {
+    mockMistralChatComplete.mockResolvedValue(MISTRAL_RESPONSE);
     service._setMistralClientForTesting(mockMistralClientImpl);
     const h = await service.checkProvidersHealth();
     expect(h.mistral.available).toBe(true);
+    expect(mockMistralChatComplete).toHaveBeenCalled();
   });
 
   test('reports mistral unavailable when API key is missing', async () => {
@@ -468,5 +470,98 @@ describe('generateContent() — error propagation', () => {
         skipFallback: true,
       })
     ).rejects.toThrow();
+  });
+
+  test('retries Mistral on transient 503 then succeeds', async () => {
+    const err503 = new Error('API error occurred: Status 503');
+    err503.statusCode = 503;
+    mockMistralChatComplete
+      .mockRejectedValueOnce(err503)
+      .mockResolvedValueOnce(MISTRAL_RESPONSE);
+    mockProviderDb('mistral');
+    service._setMistralClientForTesting(mockMistralClientImpl);
+    const r = await service.generateContent({
+      contents: 'hi',
+      config: { skipMistralBehaviorRules: true },
+      skipFallback: true,
+    });
+    expect(r.provider).toBe('mistral');
+    expect(mockMistralChatComplete).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 9. STREAMING — retry + Google fallback
+// ═══════════════════════════════════════════════════════════════════════════════
+async function collectStreamEvents(generator) {
+  const events = [];
+  for await (const event of generator) {
+    events.push(event);
+  }
+  return events;
+}
+
+describe('streamContent() — Mistral resilience', () => {
+  beforeEach(() => {
+    mockGoogleGenerateContent.mockResolvedValue(GOOGLE_RESPONSE);
+    mockProviderDb('mistral');
+    service._setMistralClientForTesting(mockMistralClientImpl);
+  });
+
+  test('falls back to Google when Mistral stream fails (optimal region)', async () => {
+    mockMistralChatStream.mockRejectedValue(new Error('API error occurred: Status 503'));
+
+    const events = await collectStreamEvents(
+      service.streamContent({
+        contents: 'hi',
+        config: { skipMistralBehaviorRules: true },
+        userRegionPreference: 'optimal',
+      })
+    );
+
+    const done = events.find((e) => e.type === 'done');
+    expect(done).toBeDefined();
+    expect(done.provider).toBe('google');
+    expect(mockGoogleGenerateContent).toHaveBeenCalled();
+  });
+
+  test('does not fallback when user explicitly chose EU region', async () => {
+    mockMistralChatStream.mockRejectedValue(new Error('API error occurred: Status 503'));
+
+    await expect(async () => {
+      await collectStreamEvents(
+        service.streamContent({
+          contents: 'hi',
+          config: { skipMistralBehaviorRules: true },
+          userRegionPreference: 'eu',
+        })
+      );
+    }).rejects.toThrow(/EU \(Mistral\)/);
+  });
+
+  test('retries Mistral stream on 503 before succeeding', async () => {
+    const err503 = new Error('API error occurred: Status 503');
+    err503.statusCode = 503;
+
+    async function* mockStream() {
+      yield { data: { choices: [{ delta: { content: 'Hi' } }] } };
+      yield { data: { choices: [{ delta: { content: '!' } }], usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 } } };
+    }
+
+    mockMistralChatStream
+      .mockRejectedValueOnce(err503)
+      .mockResolvedValueOnce(mockStream());
+
+    const events = await collectStreamEvents(
+      service.streamContent({
+        contents: 'hi',
+        config: { skipMistralBehaviorRules: true },
+        userRegionPreference: 'optimal',
+      })
+    );
+
+    const done = events.find((e) => e.type === 'done');
+    expect(done?.provider).toBe('mistral');
+    expect(mockMistralChatStream).toHaveBeenCalledTimes(2);
   });
 });

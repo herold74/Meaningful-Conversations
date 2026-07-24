@@ -16,6 +16,45 @@ let cachedProvider = null;
 let cachedProviderTimestamp = 0;
 const CACHE_TTL_MS = 5000; // 5 seconds
 
+// Mistral intermittently returns 503 (code 3800) — retry transient errors before fallback
+const MISTRAL_RETRY_MAX_ATTEMPTS = 3;
+const MISTRAL_RETRY_BASE_MS = 400;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getMistralHttpStatus(error) {
+  const status = error?.status ?? error?.statusCode ?? error?.response?.status;
+  if (typeof status === 'number') return status;
+  const match = String(error?.message || '').match(/Status (\d{3})/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function isMistralRetryableError(error) {
+  const status = getMistralHttpStatus(error);
+  return status === 429 || status === 502 || status === 503 || status === 504;
+}
+
+async function withMistralRetry(operation, label = 'Mistral API call') {
+  let lastError;
+  for (let attempt = 1; attempt <= MISTRAL_RETRY_MAX_ATTEMPTS; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (!isMistralRetryableError(error) || attempt === MISTRAL_RETRY_MAX_ATTEMPTS) {
+        throw error;
+      }
+      const delayMs = MISTRAL_RETRY_BASE_MS * (2 ** (attempt - 1));
+      const status = getMistralHttpStatus(error);
+      console.warn(`  ↻ ${label} failed (${status}), retry ${attempt}/${MISTRAL_RETRY_MAX_ATTEMPTS - 1} in ${delayMs}ms...`);
+      await sleep(delayMs);
+    }
+  }
+  throw lastError;
+}
+
 // Model mapping configuration
 let cachedModelMapping = null;
 
@@ -326,7 +365,10 @@ ${JSON.stringify(config.responseSchema, null, 2)}`;
   }
   
   try {
-    const response = await client.chat.complete(mistralConfig);
+    const response = await withMistralRetry(
+      () => client.chat.complete(mistralConfig),
+      'Mistral chat.complete'
+    );
     
     const choice = response.choices[0];
     let responseText = choice.message.content;
@@ -379,6 +421,8 @@ ${JSON.stringify(config.responseSchema, null, 2)}`;
       console.error('  ⚠️ HINT: Model not found. Check if model name is correct:', mistralModel);
     } else if (errorDetails.statusCode === 400 || errorDetails.httpStatus === 400) {
       console.error('  ⚠️ HINT: Bad request - check message format or token limits');
+    } else if (errorDetails.statusCode === 503 || errorDetails.httpStatus === 503) {
+      console.error('  ⚠️ HINT: Mistral service unavailable (transient) — retries exhausted');
     }
     
     // Re-throw with enhanced message
@@ -518,24 +562,10 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
 }
 
 /**
- * Stream content using the active AI provider (Mistral only, chat context)
- * Returns an async generator yielding { type: 'chunk', text } and finally { type: 'done', fullText, usage, model, provider }
+ * Stream tokens from Mistral (internal — retries on transient 503/429).
  */
-async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
-  // Only Mistral supports streaming in this implementation
-  const provider = userRegionPreference === 'eu' ? 'mistral'
-    : userRegionPreference === 'us' ? 'google'
-    : await getActiveProvider();
-
-  if (provider !== 'mistral') {
-    // Fallback: generate complete response and yield as single chunk
-    const result = await generateContent({ model, contents, config, context, userRegionPreference });
-    yield { type: 'chunk', text: result.text };
-    yield { type: 'done', fullText: result.text, usage: result.usage, model: result.model, provider: result.provider };
-    return;
-  }
-
-  console.log(`🤖 Streaming with Mistral (context: ${context}, region: ${userRegionPreference})`);
+async function* streamWithMistral({ model, contents, config, context = 'chat', language = 'de' }) {
+  console.log(`🤖 Streaming with Mistral (context: ${context})`);
 
   const client = getMistralClient();
   const mistralModel = await getModelForContext('mistral', context);
@@ -551,7 +581,10 @@ async function* streamContent({ model, contents, config, context = 'chat', userR
     maxTokens: config.maxOutputTokens,
   };
 
-  const stream = await client.chat.stream(mistralConfig);
+  const stream = await withMistralRetry(
+    () => client.chat.stream(mistralConfig),
+    'Mistral chat.stream'
+  );
 
   let fullText = '';
   let usage = null;
@@ -559,7 +592,7 @@ async function* streamContent({ model, contents, config, context = 'chat', userR
   for await (const event of stream) {
     const chunk = event.data;
     const delta = chunk.choices?.[0]?.delta?.content;
-    if (delta) {
+    if (typeof delta === 'string' && delta) {
       fullText += delta;
       yield { type: 'chunk', text: delta };
     }
@@ -577,6 +610,41 @@ async function* streamContent({ model, contents, config, context = 'chat', userR
   }
 
   yield { type: 'done', fullText, usage, model: mistralModel, provider: 'mistral' };
+}
+
+/**
+ * Stream content using the active AI provider (Mistral only, chat context)
+ * Returns an async generator yielding { type: 'chunk', text } and finally { type: 'done', fullText, usage, model, provider }
+ */
+async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
+  const provider = userRegionPreference === 'eu' ? 'mistral'
+    : userRegionPreference === 'us' ? 'google'
+    : await getActiveProvider();
+
+  if (provider !== 'mistral') {
+    const result = await generateContent({ model, contents, config, context, userRegionPreference });
+    yield { type: 'chunk', text: result.text };
+    yield { type: 'done', fullText: result.text, usage: result.usage, model: result.model, provider: result.provider };
+    return;
+  }
+
+  console.log(`🤖 Streaming with Mistral (context: ${context}, region: ${userRegionPreference})`);
+
+  try {
+    yield* streamWithMistral({ model, contents, config, context, language });
+  } catch (error) {
+    console.error(`❌ Mistral streaming error:`, error.message);
+
+    if (userRegionPreference !== 'optimal') {
+      const regionName = userRegionPreference === 'eu' ? 'EU (Mistral)' : 'US (Google)';
+      throw new Error(`${regionName} provider failed: ${error.message}. User preference prevents fallback.`);
+    }
+
+    console.log('🔄 Streaming fallback to Google...');
+    const result = await generateWithGoogle({ model, contents, config, context });
+    yield { type: 'chunk', text: result.text };
+    yield { type: 'done', fullText: result.text, usage: result.usage, model: result.model, provider: result.provider };
+  }
 }
 
 /**
@@ -653,13 +721,21 @@ async function checkProvidersHealth() {
     results.google.error = error.message;
   }
   
-  // Test Mistral
+  // Test Mistral — ping API (key presence alone is not enough; 503 can still occur at runtime)
   try {
-    const client = getMistralClient();
-    if (client && process.env.MISTRAL_API_KEY) {
-      results.mistral.available = true;
-    } else if (!process.env.MISTRAL_API_KEY) {
+    if (!process.env.MISTRAL_API_KEY) {
       results.mistral.error = 'API key not configured';
+    } else {
+      const client = getMistralClient();
+      await withMistralRetry(
+        () => client.chat.complete({
+          model: 'mistral-small-latest',
+          messages: [{ role: 'user', content: 'ping' }],
+          maxTokens: 1,
+        }),
+        'Mistral health check'
+      );
+      results.mistral.available = true;
     }
   } catch (error) {
     results.mistral.error = error.message;
