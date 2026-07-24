@@ -20,12 +20,17 @@ fi
 REMOTE_HOST="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
 REMOTE_DIR="/opt/manualmode"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/registry-env.sh
+source "$SCRIPT_DIR/scripts/registry-env.sh"
+
 # Will be set after parsing arguments
 ENV_FILE=""
 
-# Use registry from env or default
+# Registry defaults (overridden by load_registry_env from .env.staging / .env.production)
 REGISTRY_URL="${REGISTRY_URL:-localhost}"
-REGISTRY_USER="${REGISTRY_USER:-gherold}"
+REGISTRY_LOGIN_USER="${REGISTRY_LOGIN_USER:-gherold}"
+REGISTRY_IMAGE_PREFIX="${REGISTRY_IMAGE_PREFIX:-gherold/meaningful-conversations}"
 
 # Version from package.json (SINGLE SOURCE OF TRUTH)
 # IMPORTANT: Do NOT add VERSION to .env files - it will be ignored!
@@ -136,8 +141,7 @@ fi
 # Load environment-specific configuration
 ENV_FILE=".env.$ENVIRONMENT"
 if [ -f "$ENV_FILE" ]; then
-    # Note: VERSION is intentionally NOT imported from env file - it comes from package.json
-    export $(grep -E '^REGISTRY_URL=|^REGISTRY_USER=' "$ENV_FILE" | xargs)
+    load_registry_env "$ENV_FILE"
     echo -e "${GREEN}✓ Loaded configuration from $ENV_FILE${NC}"
 else
     echo -e "${YELLOW}⚠ Warning: $ENV_FILE not found${NC}"
@@ -161,7 +165,7 @@ echo -e "${GREEN}╚════════════════════
 echo ""
 echo -e "${BLUE}Target:${NC}       $REMOTE_HOST"
 echo -e "${BLUE}Environment:${NC}  $ENVIRONMENT"
-echo -e "${BLUE}Registry:${NC}     $REGISTRY_URL/$REGISTRY_USER"
+echo -e "${BLUE}Registry:${NC}     $REGISTRY_URL/$REGISTRY_IMAGE_PREFIX"
 echo -e "${BLUE}Component:${NC}    $COMPONENT"
 echo -e "${BLUE}Version:${NC}      $VERSION"
 echo -e "${BLUE}Dry Run:${NC}      $DRY_RUN"
@@ -191,14 +195,14 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo -e "${BLUE}Building Backend Image${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
-        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
+        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would build: $BACKEND_IMAGE"
         else
             cd meaningful-conversations-backend
             podman build --platform linux/amd64 -t "$BACKEND_IMAGE" .
-            podman tag "$BACKEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:latest"
+            podman tag "$BACKEND_IMAGE" "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:latest"
             cd ..
             echo -e "${GREEN}✓ Backend image built${NC}"
         fi
@@ -210,7 +214,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo -e "${BLUE}Building TTS Image${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
-        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would build: $TTS_IMAGE"
@@ -219,7 +223,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
             # --no-cache: Podman on macOS often caches COPY layers even when files change
             # --format docker: Required for HEALTHCHECK support (OCI format silently drops it)
             podman build --no-cache --format docker --platform linux/amd64 -f tts-service/Dockerfile -t "$TTS_IMAGE" .
-            podman tag "$TTS_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+            podman tag "$TTS_IMAGE" "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:latest"
             cd ..
             echo -e "${GREEN}✓ TTS image built${NC}"
         fi
@@ -231,7 +235,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
         echo -e "${BLUE}Building Frontend Image${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
-        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION"
         
         # Read current build number (will be incremented only after successful build)
         BUILD_NUM=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
@@ -252,7 +256,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
                 echo "$NEXT_BUILD_NUM" > BUILD_NUMBER
                 # Sync Xcode project version
                 sed -i.bak "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = ${NEXT_BUILD_NUM};/g" ios/App/App.xcodeproj/project.pbxproj && rm -f ios/App/App.xcodeproj/project.pbxproj.bak
-                podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
+                podman tag "$FRONTEND_IMAGE" "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:latest"
                 echo -e "${GREEN}✓ Frontend image built (v$VERSION, Build $NEXT_BUILD_NUM)${NC}"
                 # Auto-commit build number sync
                 if git diff --quiet BUILD_NUMBER public/sw.js ios/App/App.xcodeproj/project.pbxproj 2>/dev/null; then
@@ -273,8 +277,8 @@ if [[ "$SKIP_BUILD" == false ]]; then
 
     # Re-tag TTS image when using -c app (TTS not rebuilt but compose needs matching version tag)
     if [[ "$COMPONENT" == "app" ]]; then
-        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
-        TTS_LATEST="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
+        TTS_LATEST="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:latest"
 
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would re-tag TTS image: $TTS_LATEST → $TTS_IMAGE"
@@ -310,57 +314,58 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
     if [[ "$DRY_RUN" == false ]]; then
         echo -e "${YELLOW}Logging in to registry $REGISTRY_URL...${NC}"
         if [ -f "$ENV_FILE" ]; then
-            export $(grep REGISTRY_PASSWORD "$ENV_FILE" | xargs)
+            export $(grep -E '^REGISTRY_URL=|^REGISTRY_LOGIN_USER=|^REGISTRY_PASSWORD=' "$ENV_FILE" | xargs)
+            REGISTRY_LOGIN_USER="${REGISTRY_LOGIN_USER:-gherold@redhat.com}"
             if [ -n "$REGISTRY_PASSWORD" ]; then
-                echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_USER" --password-stdin
+                echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_LOGIN_USER" --password-stdin
                 echo -e "${GREEN}✓ Logged in to registry${NC}"
             else
                 echo -e "${YELLOW}⚠ No REGISTRY_PASSWORD found, attempting login without it...${NC}"
-                podman login "$REGISTRY_URL" -u "$REGISTRY_USER"
+                podman login "$REGISTRY_URL" -u "$REGISTRY_LOGIN_USER"
             fi
         else
-            podman login "$REGISTRY_URL" -u "$REGISTRY_USER"
+            podman login "$REGISTRY_URL" -u "$REGISTRY_LOGIN_USER"
         fi
         echo ""
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
-        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
+        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would push: $BACKEND_IMAGE"
         else
             echo -e "${YELLOW}Pushing backend image...${NC}"
             podman push "$BACKEND_IMAGE"
-            podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:latest"
+            podman push "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:latest"
             echo -e "${GREEN}✓ Backend image pushed${NC}"
         fi
         echo ""
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
-        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would push: $TTS_IMAGE"
         else
             echo -e "${YELLOW}Pushing TTS image...${NC}"
             podman push "$TTS_IMAGE"
-            podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:latest"
+            podman push "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:latest"
             echo -e "${GREEN}✓ TTS image pushed${NC}"
         fi
         echo ""
     fi
     
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
-        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION"
         
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would push: $FRONTEND_IMAGE"
         else
             echo -e "${YELLOW}Pushing frontend image...${NC}"
             podman push "$FRONTEND_IMAGE"
-            podman push "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:latest"
+            podman push "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:latest"
             echo -e "${GREEN}✓ Frontend image pushed${NC}"
         fi
         echo ""
@@ -368,7 +373,7 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
 
     # Push re-tagged TTS image when using -c app
     if [[ "$COMPONENT" == "app" ]]; then
-        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION"
+        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
 
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "${YELLOW}[DRY RUN]${NC} Would push re-tagged TTS: $TTS_IMAGE"
@@ -409,7 +414,8 @@ ENVIRONMENT="ENVIRONMENT_PLACEHOLDER"
 VERSION="VERSION_PLACEHOLDER"
 COMPONENT="COMPONENT_PLACEHOLDER"
 REGISTRY_URL="REGISTRY_URL_PLACEHOLDER"
-REGISTRY_USER="REGISTRY_USER_PLACEHOLDER"
+REGISTRY_LOGIN_USER="REGISTRY_LOGIN_USER_PLACEHOLDER"
+REGISTRY_IMAGE_PREFIX="REGISTRY_IMAGE_PREFIX_PLACEHOLDER"
 COMPOSE_FILE="COMPOSE_FILE_PLACEHOLDER"
 
 # Set environment-specific directory
@@ -426,28 +432,28 @@ cd "$ENV_DIR"
 # Login to registry if credentials are available
 if [ -f .env ] && grep -q REGISTRY_PASSWORD .env; then
     echo "Logging in to registry..."
-    export $(grep REGISTRY_PASSWORD .env | xargs)
+    export $(grep -E '^REGISTRY_URL=|^REGISTRY_LOGIN_USER=|^REGISTRY_PASSWORD=' .env | xargs)
     if [ -n "$REGISTRY_PASSWORD" ]; then
-        echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_USER" --password-stdin 2>/dev/null || true
+        echo "$REGISTRY_PASSWORD" | podman login "$REGISTRY_URL" -u "$REGISTRY_LOGIN_USER" --password-stdin 2>/dev/null || true
     fi
 fi
 
-# Pull latest images from registry (--tls-verify=false: Quay on AlmaLinux may return HTML without this)
-PULL_OPTS="--tls-verify=false"
+# Pull latest images from registry
+PULL_OPTS=""
 echo "Pulling images from registry..."
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
     echo "Pulling backend image..."
-    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION" || echo "Warning: Could not pull backend image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:$VERSION" || echo "Warning: Could not pull backend image"
 fi
 
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
     echo "Pulling frontend image..."
-    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
 fi
 
 if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
     echo "Pulling TTS image..."
-    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
+    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
 fi
 
 # Save current version for rollback (before stopping anything)
@@ -498,7 +504,8 @@ REMOTE_SCRIPT
     sed -i.bak "s/VERSION_PLACEHOLDER/$VERSION/g" /tmp/remote-deploy.sh
     sed -i.bak "s/COMPONENT_PLACEHOLDER/$COMPONENT/g" /tmp/remote-deploy.sh
     sed -i.bak "s|REGISTRY_URL_PLACEHOLDER|$REGISTRY_URL|g" /tmp/remote-deploy.sh
-    sed -i.bak "s/REGISTRY_USER_PLACEHOLDER/$REGISTRY_USER/g" /tmp/remote-deploy.sh
+    sed -i.bak "s/REGISTRY_LOGIN_USER_PLACEHOLDER/$REGISTRY_LOGIN_USER/g" /tmp/remote-deploy.sh
+    sed -i.bak "s|REGISTRY_IMAGE_PREFIX_PLACEHOLDER|$REGISTRY_IMAGE_PREFIX|g" /tmp/remote-deploy.sh
     sed -i.bak "s/COMPOSE_FILE_PLACEHOLDER/$COMPOSE_FILE/g" /tmp/remote-deploy.sh
     rm /tmp/remote-deploy.sh.bak
 
@@ -556,7 +563,7 @@ REMOTE_SCRIPT
     # Stream the freshly built image when avatars are missing OR build number is stale.
     if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ) ]]; then
         FRONTEND_CONTAINER="meaningful-conversations-frontend-${ENVIRONMENT}"
-        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-frontend:$VERSION"
+        FRONTEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION"
         EXPECTED_BUILD=$(cat BUILD_NUMBER 2>/dev/null || echo "0")
 
         stream_frontend_image() {
@@ -616,7 +623,7 @@ REMOTE_SCRIPT
     # Stream freshly built backend when API still returns legacy Dicebear URLs.
     if [[ "$SKIP_BUILD" == false && ( "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ) ]]; then
         BACKEND_CONTAINER="meaningful-conversations-backend-${ENVIRONMENT}"
-        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_USER/meaningful-conversations-backend:$VERSION"
+        BACKEND_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:$VERSION"
 
         stream_backend_image() {
             echo -e "${YELLOW}⚠ Streaming backend image to server (registry pull workaround)...${NC}"
@@ -757,15 +764,15 @@ cd "$REMOTE_ENV_DIR"
 COMPOSE_FILE="$COMPOSE_FILE"
 PREV_VERSION="$PREV_VERSION"
 REGISTRY_URL="$REGISTRY_URL"
-REGISTRY_USER="$REGISTRY_USER"
+REGISTRY_IMAGE_PREFIX="$REGISTRY_IMAGE_PREFIX"
 
 echo "=== ROLLBACK: Stopping failed deployment ==="
 podman-compose -f "\$COMPOSE_FILE" down 2>/dev/null || true
 
 echo "=== ROLLBACK: Pulling previous images (v\$PREV_VERSION) ==="
-podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-backend:\$PREV_VERSION" || true
-podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-frontend:\$PREV_VERSION" || true
-podman pull "\$REGISTRY_URL/\$REGISTRY_USER/meaningful-conversations-tts:\$PREV_VERSION" || true
+podman pull "\$REGISTRY_URL/\$REGISTRY_IMAGE_PREFIX/meaningful-conversations-backend:\$PREV_VERSION" || true
+podman pull "\$REGISTRY_URL/\$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:\$PREV_VERSION" || true
+podman pull "\$REGISTRY_URL/\$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:\$PREV_VERSION" || true
 
 echo "=== ROLLBACK: Restoring VERSION in .env ==="
 sed -i '/^VERSION=/d' .env

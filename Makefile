@@ -114,8 +114,8 @@ update-version: ## Update version everywhere in the application
 	fi
 
 # Registry configuration
-REGISTRY_URL := quay.myandi.de
-REGISTRY_USER := gherold
+REGISTRY_URL := git.rhepds.com
+REGISTRY_IMAGE_PREFIX := gherold/meaningful-conversations
 
 build-release: ## Build release images (requires VERSION=x.y.z)
 	@if [ -z "$(VERSION)" ]; then \
@@ -137,8 +137,8 @@ build-release: ## Build release images (requires VERSION=x.y.z)
 	echo ""; \
 	echo "$(GREEN)Building Backend...$(NC)"; \
 	$(CONTAINER_ENGINE) build \
-		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION) \
-		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD \
+		-t $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION) \
+		-t $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD \
 		-f meaningful-conversations-backend/Dockerfile \
 		meaningful-conversations-backend/; \
 	echo ""; \
@@ -146,17 +146,17 @@ build-release: ## Build release images (requires VERSION=x.y.z)
 	$(CONTAINER_ENGINE) build \
 		--build-arg BUILD_NUMBER=$$NEW_BUILD \
 		--build-arg APP_VERSION=$(VERSION) \
-		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION) \
-		-t $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD \
+		-t $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION) \
+		-t $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD \
 		-f Dockerfile .; \
 	echo ""; \
 	echo "$(GREEN)✓ Build complete: $(VERSION) (Build $$NEW_BUILD)$(NC)"; \
 	echo ""; \
 	echo "Images created:"; \
-	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)"; \
-	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD"; \
-	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)"; \
-	echo "  - $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION)"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION)-build$$NEW_BUILD"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION)"; \
+	echo "  - $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION)-build$$NEW_BUILD"; \
 	echo ""; \
 	echo "$(YELLOW)Next: make push-release VERSION=$(VERSION)$(NC)"
 
@@ -170,12 +170,12 @@ push-release: ## Push release images to registry (requires VERSION=x.y.z)
 	echo "$(GREEN)=== Pushing $(VERSION) (Build $$BUILD) to $(REGISTRY_URL) ===$(NC)"; \
 	echo ""; \
 	echo "Pushing Backend..."; \
-	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION); \
-	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-backend:$(VERSION)-build$$BUILD; \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION); \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-backend:$(VERSION)-build$$BUILD; \
 	echo ""; \
 	echo "Pushing Frontend..."; \
-	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION); \
-	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_USER)/meaningful-conversations-frontend:$(VERSION)-build$$BUILD; \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION); \
+	$(CONTAINER_ENGINE) push $(REGISTRY_URL)/$(REGISTRY_IMAGE_PREFIX)/meaningful-conversations-frontend:$(VERSION)-build$$BUILD; \
 	echo ""; \
 	echo "$(GREEN)✓ Push complete$(NC)"; \
 	echo ""; \

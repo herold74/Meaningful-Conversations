@@ -150,7 +150,7 @@ Quick reference guide for common issues and where to find solutions.
 | Docker/Podman build fails | Check Dockerfile, verify npm ci | [deployment.mdc](../.cursor/rules/deployment.mdc) |
 | Image size too large | Review COPY instructions, .dockerignore | [PODMAN-GUIDE.md](./PODMAN-GUIDE.md) |
 | Container networking issues | Check compose file networks | [MARIADB-POD-CONFIGURATION.md](./MARIADB-POD-CONFIGURATION.md) |
-| Registry push fails | Verify credentials, check connection | [QUAY-REGISTRY-SETUP.md](./QUAY-REGISTRY-SETUP.md) |
+| Registry push fails | Verify GitLab token scopes (`read_registry`, `write_registry`) | [GITLAB-REGISTRY-SETUP.md](./GITLAB-REGISTRY-SETUP.md) |
 
 **Primary Resources:**
 - [deployment.mdc](../.cursor/rules/deployment.mdc)
