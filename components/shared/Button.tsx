@@ -19,8 +19,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary: `
-    bg-accent-primary hover:bg-accent-primary-hover 
-    text-button-foreground-on-accent
+    gradient-accent
     border border-transparent
   `,
   secondary: `
@@ -46,9 +45,7 @@ const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
   /* Theme-aware gradient primary: built from accent variables (NOT hardcoded hex)
      so seasonal themes (summer/autumn) keep a coherent gradient. */
   gradient: `
-    bg-gradient-to-br from-accent-primary to-accent-primary-hover
-    hover:brightness-105
-    text-button-foreground-on-accent
+    gradient-accent
     border border-transparent
   `,
 };
