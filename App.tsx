@@ -24,7 +24,7 @@ import { getQuestionnaireStructure } from './components/questionnaireStructure';
 import type { Big5Result } from './utils/bfi2';
 import type { UserIntent } from './components/IntentPickerView';
 import type { SurveyResult } from './components/PersonalitySurvey';
-import { TranscriptPreAnswers, TranscriptEvaluationResult } from './types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult } from './types';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
@@ -131,6 +131,11 @@ const App: React.FC = () => {
     const [teEvaluation, setTeEvaluation] = useState<TranscriptEvaluationResult | null>(null);
     const [teIsLoading, setTeIsLoading] = useState(false);
     const [tePrefillTranscript, setTePrefillTranscript] = useState<string | null>(null);
+
+    // Coach Practice states
+    const [practiceConfig, setPracticeConfig] = useState<CoachPracticeConfig | null>(null);
+    const [practiceEvaluation, setPracticeEvaluation] = useState<PracticeEvaluationResult | null>(null);
+    const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
 
     const { isDarkMode, setIsDarkMode, colorTheme, setColorTheme, isAutoThemeEnabled, setIsAutoThemeEnabled } = useTheme();
 
@@ -746,6 +751,19 @@ const App: React.FC = () => {
 
     const handleEndSession = async () => {
         if (!selectedBot) return;
+
+        // --- Coach Practice mode ---
+        if (practiceConfig && selectedBot.id === 'practice-coachee') {
+            if (userMessageCount === 0) {
+                setPracticeConfig(null);
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('botSelection');
+                return;
+            }
+            setView('practiceSelfRating');
+            return;
+        }
         
         // --- Special Handling for Gloria Interview Bot ---
         if (selectedBot.id === 'gloria-interview') {
@@ -1129,6 +1147,71 @@ const App: React.FC = () => {
         setView('chat');
     };
 
+    const handleStartPractice = (config: CoachPracticeConfig) => {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setPracticeConfig(config);
+        setPracticeEvaluation(null);
+        setPracticeSelfRating(undefined);
+        setSelectedBot({
+            id: 'practice-coachee',
+            name: config.coacheeName,
+            description: config.scenarioName,
+            description_de: config.scenarioName,
+            avatar: config.coacheeAvatar,
+            style: config.frameworkName,
+            style_de: config.frameworkName,
+            accessTier: 'client',
+        });
+        setUserMessageCount(0);
+        setBaselineMessageCount(0);
+        setChatHistory([]);
+        setView('practiceChat');
+    };
+
+    const runPracticeEvaluation = async (selfRating?: number) => {
+        if (!practiceConfig) return;
+        setIsAnalyzing(true);
+        setPracticeSelfRating(selfRating);
+        try {
+            const result = await geminiService.evaluatePracticeSession(
+                practiceConfig,
+                chatHistory,
+                language,
+                selfRating,
+            );
+            setPracticeEvaluation({ ...result.evaluation, id: result.id || undefined });
+            if (result.saveWarning) {
+                console.warn('[Practice]', result.saveWarning);
+            }
+            setView('practiceReview');
+        } catch (error) {
+            console.error('Practice evaluation failed:', error);
+            const message = error instanceof api.ApiError && error.message
+                ? error.message
+                : t('practice_eval_error');
+            alert(message);
+            setView('practiceChat');
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handlePracticeSelfRatingSubmit = (rating: number | undefined) => {
+        runPracticeEvaluation(rating);
+    };
+
+    const handlePracticeSelfRatingSkip = () => {
+        runPracticeEvaluation(undefined);
+    };
+
+    const handlePracticeDone = () => {
+        setPracticeConfig(null);
+        setPracticeEvaluation(null);
+        setSelectedBot(null);
+        setChatHistory([]);
+        setView('botSelection');
+    };
+
     /**
      * Quick test for Comfort Check Modal
      * Bypasses full 20-30 min coaching session by directly navigating to SessionReview
@@ -1314,6 +1397,14 @@ const App: React.FC = () => {
         setTeIsLoading,
         tePrefillTranscript,
         setTePrefillTranscript,
+        practiceConfig,
+        setPracticeConfig,
+        practiceEvaluation,
+        setPracticeEvaluation,
+        handleStartPractice,
+        handlePracticeSelfRatingSubmit,
+        handlePracticeSelfRatingSkip,
+        handlePracticeDone,
         refinementPreview,
         isLoadingRefinementPreview,
         refinementPreviewError,

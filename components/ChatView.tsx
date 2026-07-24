@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, User } from '../types';
+import { Bot, Message, User, CoachPracticeConfig } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
@@ -61,6 +61,8 @@ interface ChatViewProps {
   isTestMode?: boolean;
   /** Start a new session with another coach and seed the composer/history with the given message. */
   onReferralSwitch?: (targetBotId: string, seedUserMessage: string) => void;
+  /** Coach Practice mode: human is coach, AI is coachee */
+  coachPracticeConfig?: CoachPracticeConfig | null;
 }
 
 
@@ -71,7 +73,7 @@ function chatInitKey(botId: string, kind: 'greeting' | 'preseed', seedMessageId?
   return kind === 'greeting' ? `greeting:${botId}` : `preseed:${botId}:${seedMessageId ?? ''}`;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig }) => {
   const { t, language } = useLocalization();
 
   const [input, setInput] = useState('');
@@ -186,7 +188,25 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
       };
 
-      const response = await geminiService.sendMessageStream(
+      const response = coachPracticeConfig
+        ? await geminiService.sendPracticeMessageStream(
+            coachPracticeConfig,
+            historyWithUserMessage,
+            language,
+            (chunk: string) => {
+              streamedText += chunk;
+              chunkCount++;
+              setChatHistory(prev => {
+                const last = prev[prev.length - 1];
+                if (last && last.id === botMessageId) {
+                  return [...prev.slice(0, -1), { ...last, text: streamedText }];
+                }
+                return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
+              });
+              if (useStreamingTts) flushSentences(chunk, false);
+            },
+          )
+        : await geminiService.sendMessageStream(
         bot.id,
         lifeContext,
         historyWithUserMessage,
@@ -286,7 +306,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     } finally {
       setIsLoading(false);
     }
-  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode]);
+  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode, coachPracticeConfig]);
 
   const speech = useSpeechRecognition({
     input,
@@ -412,6 +432,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         return;
     }
 
+    // Coach Practice: human coach speaks first — no AI greeting
+    if (coachPracticeConfig) {
+        initialFetchInitiated.current = true;
+        return;
+    }
+
     // Case 1: Empty history → fetch greeting
     if (chatHistory.length === 0) {
         const initKey = chatInitKey(bot.id, 'greeting');
@@ -528,7 +554,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         autoSendPreSeeded();
         return;
     }
-  }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length, effectiveCoachingMode, decryptedProfile]);
+  }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length, effectiveCoachingMode, decryptedProfile, coachPracticeConfig]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -595,8 +621,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
                 <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0 ring-2 ring-accent-primary/30" />
-                <div className="min-w-0 flex items-center gap-2">
+                <div className="min-w-0 flex flex-col">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
+                    {coachPracticeConfig && (
+                      <p className="text-xs text-content-secondary truncate">
+                        {t('practice_chat_you_are_coach')} · {coachPracticeConfig.frameworkName} · {coachPracticeConfig.difficultyLabel}
+                      </p>
+                    )}
                 </div>
             </button>
         </div>

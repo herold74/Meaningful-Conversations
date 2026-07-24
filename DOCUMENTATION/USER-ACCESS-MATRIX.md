@@ -49,6 +49,7 @@ This document outlines the different user types within the Meaningful Conversati
 | PEP Solution Blockages (Dr. Bohne) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Transcript Evaluation | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Transcript Evaluation PDF Export | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Coach Practice** (AI-as-coachee training) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Bot Recommendations (in Evaluation) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Audio Transcription (Record & Upload) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |

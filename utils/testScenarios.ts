@@ -20,7 +20,7 @@ export type TestScenario = LegacyTestScenario;
 // New Dynamic Test System
 // ============================================
 
-export type TestCategory = 'core' | 'session' | 'personality' | 'safety' | 'bot';
+export type TestCategory = 'core' | 'session' | 'personality' | 'safety' | 'bot' | 'practice';
 export type TestFeature = 'dpc' | 'dpfl' | 'context' | 'formatting' | 'comfort' | 'refinement';
 
 export interface TestMessage {
@@ -49,7 +49,15 @@ export interface DynamicTestScenario {
   enableDynamicContinuation?: boolean;  // If true, AI generates follow-up messages after predefined ones
   
   // Special test modes
-  specialTestMode?: 'refinement_mock';  // Triggers custom test logic (e.g., mock multi-session refinement)
+  specialTestMode?: 'refinement_mock' | 'practice_eval';
+
+  /** Coach Practice smoke test config (when specialTestMode === 'practice_eval') */
+  practiceConfig?: {
+    frameworkId: string;
+    scenarioId: string;
+    difficulty: 'easy' | 'moderate' | 'challenging';
+    selfRating?: number;
+  };
   
   // Automatic validation
   autoChecks: {
@@ -227,6 +235,14 @@ export interface TestRunResult {
     passed: boolean | null;  // null = not yet checked
     notes?: string;
   }[];
+
+  /** Coach Practice evaluation payload (practice_eval special mode) */
+  practiceEvaluation?: {
+    id: string | null;
+    evaluation: import('../types').PracticeEvaluationResult;
+    durationMs: number;
+    saveWarning?: string;
+  };
 }
 
 // ============================================
@@ -787,6 +803,48 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_refinement_context_specific'),
     ]
   },
+
+  // ============================================
+  // COACH PRACTICE — automated GROW smoke test
+  // ============================================
+  {
+    id: 'practice_grow_career',
+    name: '🎯 ' + t('test_practice_grow'),
+    description: t('test_practice_grow_desc'),
+    category: 'practice',
+    testsFeatures: [],
+    testMessages: [
+      {
+        text: t('test_practice_grow_msg_1'),
+        expectedBehavior: t('test_practice_grow_msg_1_expected'),
+      },
+      {
+        text: t('test_practice_grow_msg_2'),
+        expectedBehavior: t('test_practice_grow_msg_2_expected'),
+      },
+      {
+        text: t('test_practice_grow_msg_3'),
+        expectedBehavior: t('test_practice_grow_msg_3_expected'),
+      },
+      {
+        text: t('test_practice_grow_msg_4'),
+        expectedBehavior: t('test_practice_grow_msg_4_expected'),
+      },
+    ],
+    minConversationTurns: 4,
+    enableDynamicContinuation: false,
+    specialTestMode: 'practice_eval',
+    practiceConfig: {
+      frameworkId: 'grow',
+      scenarioId: 'career-decision',
+      difficulty: 'moderate',
+      selfRating: 7,
+    },
+    autoChecks: {
+      dpcRequired: false,
+    },
+    manualChecks: [],
+  },
 ];
 
 // ============================================
@@ -804,6 +862,7 @@ export const getCategoryIcon = (category: TestCategory): string => {
     personality: '🧑🏼‍💼',
     safety: '💚',
     bot: '🤖',
+    practice: '🎯',
   };
   return icons[category];
 };
@@ -815,6 +874,7 @@ export const getCategoryName = (category: TestCategory, t: (key: string) => stri
     personality: t('test_category_personality'),
     safety: t('test_category_safety'),
     bot: t('test_category_bot'),
+    practice: t('test_category_practice'),
   };
   return names[category];
 };
