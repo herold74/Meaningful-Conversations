@@ -104,7 +104,9 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **v2.2.0 release (2026-07-24):** Coach Practice mode (Client+), user manual chapter — committed; deploy + migration pending
+- [x] **v2.2.1 release (2026-07-24):** Mistral SDK ^1.15.1, transcript eval analysis context — committed; staging deploy pending
+- [x] **Staging v2.2.0 (2026-07-24):** Deployed Build **2** to https://mc-beta.manualmode.at
+- [x] **Xcode sync (2026-07-24):** `npm run build && npx cap sync ios` — MARKETING_VERSION 2.2.0, CURRENT_PROJECT_VERSION 2
 - [x] **v2.1.0 release (2026-07-24):** Documented on GitHub — CHANGELOG, RELEASE-NOTES-2.1.0, version bump, staging + Xcode sync
 - [x] **Production v2.1.0 (2026-07-24):** Deployed to https://mc-app.manualmode.at — Build 2, GitLab registry, parity with staging (Web/PWA); App Store native still 2.0.1 until submit
 - [x] **Brand-Driven Design System:**

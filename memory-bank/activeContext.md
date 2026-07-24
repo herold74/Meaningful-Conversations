@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.2.0 (committed, not yet deployed)
+**Version:** 2.2.1 (committed, Mistral SDK pin — deploy pending)
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-beta.manualmode.at
-**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at
-**App Store:** LIVE v2.0.1 — native bundle pending submit (2.1.1 readability + 2.2.0 Coach Practice)
+**Staging:** Deployed **2026-07-24**, Build **2**, v2.2.0 — https://mc-beta.manualmode.at
+**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at (production not yet on 2.2.0)
+**App Store:** LIVE v2.0.1 — Xcode synced for **2.2.0 Build 2**; ready to Archive
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
@@ -13,6 +13,9 @@
 
 ### v2.1.1 — Readability & contrast (patch)
 - `ScoreBadge`, semantic surface/button tokens, teal button contrast, OCEAN/Intent/evaluation screen fixes, WelcomeScreen avatar rings.
+
+### v2.2.1 — Mistral API maintenance (patch)
+- Pin `@mistralai/mistralai` ^1.15.1; transcript evaluation uses `analysis` model context for Mistral mapping.
 
 ### v2.2.0 — Coach Practice (minor)
 - **Feature:** Human coach practices curated methods against AI simulated coachee; post-session evaluation on method compliance, effectiveness, clarity, coachee satisfaction (all /10).
