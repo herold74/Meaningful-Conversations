@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.0.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, build **39**; v2.0.1 — https://mc-beta.manualmode.at — **vite chunk fix** (react-vendor no longer circular with vendor; fixes blank page / createContext undefined), action card alignment, SPA asset 404. Registry pull fails; frontend streamed via build-verify fallback (**Build 39 verified live**).
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **39**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-07-24**, build **40**; v2.0.1 — https://mc-beta.manualmode.at — self-hosted coach avatars live in BotSelection (`/api/bots` → `/avatars/*.png`); WelcomeScreen orbit order by bg color. Registry pull fails; **frontend + backend streamed** when pull fails (Build **40** verified live).
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **40**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
 **App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-24 — Staging avatar fix, Build 40)
+
+### BotSelection “new avatars not visible” (staging Build 39 → 40)
+- **Root cause:** Frontend had self-hosted PNGs in `dist/avatars/` and WelcomeScreen used `constants.ts`, but **staging backend was stale** — `/api/bots` still returned legacy Dicebear URLs. BotSelection loads avatars from the API, so coach cards showed old/missing images.
+- **Not the issue:** Static `/avatars/*.png` already served `image/png` (not SPA `index.html`); WelcomeScreen bundle already included clock-order avatar slots.
+- **Fix:** `./deploy-manualmode.sh -e staging -c app` + **manual backend image stream** (registry pull returns HTML); force-recreate backend container on new image digest. Verified `/api/bots` → `/avatars/kenji.png` etc.; Build **40** live.
 
 ## Recent Changes (2026-07-23 — Seasonal decorations removed + visual modernization plan)
 
