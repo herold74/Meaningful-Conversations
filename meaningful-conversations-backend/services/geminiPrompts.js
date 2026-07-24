@@ -817,10 +817,196 @@ Primary und Secondary müssen unterschiedliche Bots sein. Schreibe rationale und
     }
 };
 
+const practiceEvaluationSchema = {
+    type: 'OBJECT',
+    properties: {
+        summary: {
+            type: 'STRING',
+            description: 'A concise 2-3 sentence overview of the coaching practice session evaluation. Written in second person addressing the human coach ("You...").'
+        },
+        methodCompliance: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 (poor compliance) to 10 (excellent compliance) with the selected framework.' },
+                evidence: { type: 'STRING', description: 'Specific quotes from the transcript showing method compliance or violations.' },
+                gaps: { type: 'STRING', description: 'What stages or principles were missed or applied poorly.' },
+                stagesCovered: {
+                    type: 'ARRAY',
+                    items: { type: 'STRING' },
+                    description: 'List of framework stages the coach adequately addressed.'
+                }
+            },
+            required: ['score', 'evidence', 'gaps', 'stagesCovered']
+        },
+        effectiveness: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 to 10 — did the session move the coachee toward insight or useful next steps?' },
+                evidence: { type: 'STRING', description: 'Transcript evidence for effectiveness.' },
+                gaps: { type: 'STRING', description: 'Missed opportunities or premature closure.' }
+            },
+            required: ['score', 'evidence', 'gaps']
+        },
+        clarity: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 to 10 — were questions and interventions clear, well-paced, and non-leading where required?' },
+                evidence: { type: 'STRING', description: 'Examples of clear or unclear coaching interventions.' },
+                gaps: { type: 'STRING', description: 'What reduced clarity or pacing.' }
+            },
+            required: ['score', 'evidence', 'gaps']
+        },
+        coacheeSatisfaction: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 to 10 — simulated coachee would feel heard, safe, and willing to continue.' },
+                evidence: { type: 'STRING', description: 'Moments that built or eroded trust and rapport.' },
+                gaps: { type: 'STRING', description: 'What would reduce the coachee\'s willingness to continue.' }
+            },
+            required: ['score', 'evidence', 'gaps']
+        },
+        strengths: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: 'Specific coaching behaviors that worked well — cite transcript evidence.'
+        },
+        developmentAreas: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: 'Specific areas for the coach to improve.'
+        },
+        nextDrills: {
+            type: 'ARRAY',
+            items: {
+                type: 'OBJECT',
+                properties: {
+                    action: { type: 'STRING', description: 'A concrete practice drill or focus for the next session.' },
+                    rationale: { type: 'STRING', description: 'Why this drill addresses the evaluation findings.' }
+                },
+                required: ['action', 'rationale']
+            }
+        },
+        calibration: {
+            type: 'OBJECT',
+            properties: {
+                selfRating: { type: 'INTEGER', description: 'Coach self-rating 1-10 if provided, else 0.' },
+                evidenceRating: { type: 'INTEGER', description: 'AI-assessed overall coaching quality 1-10 from transcript.' },
+                delta: { type: 'STRING', description: 'Gap between self-rating and evidence-based rating.' },
+                interpretation: { type: 'STRING', description: 'What the calibration gap reveals about self-perception.' }
+            },
+            required: ['selfRating', 'evidenceRating', 'delta', 'interpretation']
+        },
+        overallScore: {
+            type: 'INTEGER',
+            description: 'Overall score 1-10: round(average of methodCompliance, effectiveness, clarity, and coacheeSatisfaction scores). Example: 8,7,9,8 → 8/10.'
+        }
+    },
+    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore']
+};
+
+const practiceEvaluationPrompts = {
+    schema: practiceEvaluationSchema,
+    en: {
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate }) => `
+You are an expert coaching supervisor evaluating a **practice session** where a human coach practiced a specific methodology with a simulated coachee (AI role-play).
+
+**Today's Date:** ${currentDate}
+
+## Framework Being Practiced
+**${framework.name}**
+
+Stages:
+${framework.stages}
+
+Compliance criteria:
+${framework.complianceCriteria}
+${framework.forbiddenPatterns ? `\nForbidden patterns:\n${framework.forbiddenPatterns}` : ''}
+
+Evaluator rubric:
+${framework.evaluatorRubric}
+
+## Simulated Coachee Scenario
+${scenarioSummary}
+
+**Difficulty level:** ${difficulty}
+${selfRating ? `\n**Coach self-rating (1-10):** ${selfRating}` : '\n**Coach self-rating:** not provided'}
+
+## Session Transcript
+In this transcript, "Coach" messages are from the human practicing. "Coachee" messages are from the simulated client.
+
+\`\`\`
+${transcript}
+\`\`\`
+
+## Evaluation Instructions
+
+Score these four dimensions (1-10 each) with specific transcript quotes as evidence:
+
+1. **Method compliance:** Did the coach follow the framework stages and principles?
+2. **Effectiveness:** Did the session help the coachee move toward insight or actionable next steps?
+3. **Clarity:** Were questions clear, well-paced, and appropriately non-leading?
+4. **Coachee satisfaction:** Would the simulated coachee feel heard, safe, and willing to continue?
+
+Also provide strengths, development areas, 2-4 nextDrills (concrete practice suggestions), and calibration (compare self-rating to evidence if provided).
+
+**Overall score (1-10):** Calculate as round(average of the four dimension scores). Example: 8,7,9,8 → 8/10.
+
+Write all output in English. Be constructive and specific — this is training, not punishment.`
+    },
+    de: {
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate }) => `
+Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Übungssession**, in der ein menschlicher Coach eine Methodik mit einem simulierten Coachee (KI-Rollenspiel) geübt hat.
+
+**Heutiges Datum:** ${currentDate}
+
+## Geübte Methode
+**${framework.name}**
+
+Phasen:
+${framework.stages}
+
+Compliance-Kriterien:
+${framework.complianceCriteria}
+${framework.forbiddenPatterns ? `\nVerbotene Muster:\n${framework.forbiddenPatterns}` : ''}
+
+Evaluator-Rubrik:
+${framework.evaluatorRubric}
+
+## Simuliertes Coachee-Szenario
+${scenarioSummary}
+
+**Schwierigkeitsgrad:** ${difficulty}
+${selfRating ? `\n**Selbsteinschätzung des Coaches (1-10):** ${selfRating}` : '\n**Selbsteinschätzung des Coaches:** nicht angegeben'}
+
+## Session-Transkript
+Im Transkript sind „Coach"-Nachrichten vom übenden Menschen. „Coachee"-Nachrichten vom simulierten Klienten.
+
+\`\`\`
+${transcript}
+\`\`\`
+
+## Bewertungsanweisungen
+
+Bewerte diese vier Dimensionen (je 1-10) mit konkreten Transkript-Zitaten:
+
+1. **Methodentreue:** Hat der Coach die Phasen und Prinzipien der Methode befolgt?
+2. **Wirksamkeit:** Hat die Session den Coachee Richtung Erkenntnis oder nächste Schritte bewegt?
+3. **Klarheit:** Waren Fragen klar, gut getaktet und angemessen nicht-führend?
+4. **Coachee-Zufriedenheit:** Würde der simulierte Coachee sich gehört, sicher fühlen und weitermachen wollen?
+
+Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorschläge) und Kalibrierung (Selbsteinschätzung vs. Evidenz).
+
+**Gesamtscore (1-10):** Berechne als round(Durchschnitt der vier Dimensionen). Beispiel: 8,7,9,8 → 8/10.
+
+Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`
+    }
+};
+
 module.exports = {
     analysisPrompts,
     interviewFormattingPrompts,
     getInterviewTemplate,
     transcriptEvaluationPrompts,
     botRecommendationPrompts,
+    practiceEvaluationPrompts,
 };

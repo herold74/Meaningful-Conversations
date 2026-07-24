@@ -23,4 +23,38 @@ const withTimeout = (promise, timeoutMs, label = 'Operation') => {
     ]);
 };
 
-module.exports = { audioUpload, withTimeout };
+/** Parse Gemini/Mistral structured JSON responses with sanitization fallbacks. */
+function parseStructuredJsonResponse(rawText, label = 'response') {
+    let cleanedText = (rawText || '').trim();
+    const codeBlockRegex = /^```(?:json)?\s*\n?([\s\S]*?)\n?```$/;
+    const match = cleanedText.match(codeBlockRegex);
+    if (match && match[1]) {
+        cleanedText = match[1].trim();
+    } else {
+        cleanedText = cleanedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    }
+
+    try {
+        return JSON.parse(cleanedText);
+    } catch (firstParseErr) {
+        try {
+            const sanitizedText = cleanedText
+                .replace(/""(\w+)":\s*:/g, '"$1":')
+                .replace(/""(\w+)":/g, '"$1":')
+                .replace(/"(\w+)"::/g, '"$1":')
+                .replace(/:\s*\\"/g, ': "')
+                .replace(/\\",/g, '",')
+                .replace(/\\"(\s*[}\]])/g, '"$1')
+                .replace(/\\"\s*\n/g, '"\n')
+                .replace(/,(\s*[}\]])/g, '$1');
+            return JSON.parse(sanitizedText);
+        } catch (secondParseErr) {
+            const err = new Error(`Failed to parse ${label} as JSON`);
+            err.cause = firstParseErr;
+            err.rawPreview = (rawText || '').substring(0, 500);
+            throw err;
+        }
+    }
+}
+
+module.exports = { audioUpload, withTimeout, parseStructuredJsonResponse };

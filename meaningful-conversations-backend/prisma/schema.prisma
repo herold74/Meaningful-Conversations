@@ -45,6 +45,7 @@ model User {
   personalityProfile        PersonalityProfile?
   sessionBehaviorLogs       SessionBehaviorLog[]
   transcriptEvaluations     TranscriptEvaluation[]
+  practiceEvaluations       PracticeEvaluation[]
 }
 
 model UpgradeCode {
@@ -277,4 +278,22 @@ model TranscriptEvaluation {
   @@index([userId])
   @@index([createdAt])
   @@map("transcript_evaluations")
+}
+
+model PracticeEvaluation {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  frameworkId     String
+  scenarioId      String
+  difficulty      String   @default("moderate")
+  focusNote       String?  @db.Text
+  evaluationData  String   @db.Text
+  language        String   @default("de") @map("lang")
+  selfRating      Int?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("practice_evaluations")
 }

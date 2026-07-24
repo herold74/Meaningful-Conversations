@@ -3,6 +3,19 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.2.0] - 2026-07-24
+
+Coach Practice mode for Client-tier users and user manual updates.
+
+### Added
+- **Coach Practice:** Human coach vs AI coachee with method catalog (GROW, Solution-Focused, MI + existing bot methods), difficulty levels, optional focus, self-rating, and structured evaluation (four dimensions + overall /10)
+- Practice history persistence (`PracticeEvaluation` Prisma model + migration)
+- Admin Session Simulator: Coach Practice Quick Test
+- User manual chapter for Coach Practice (DE/EN) and Tools section cross-references
+
+### Changed
+- Practice evaluation dimension scores aligned to 1–10 scale (Test Runner smoke test)
+
 ## [2.1.1] - 2026-07-24
 
 Readability and contrast improvements across themes (light, dark, seasonal).
@@ -66,6 +79,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.2.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.0
 [2.1.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.1
 [2.1.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.0
 [2.0.3]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.0.3

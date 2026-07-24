@@ -103,6 +103,8 @@
     - [x] Paywall/auth semantic tokens
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
+- [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
+- [x] **v2.2.0 release (2026-07-24):** Coach Practice mode (Client+), user manual chapter — committed; deploy + migration pending
 - [x] **v2.1.0 release (2026-07-24):** Documented on GitHub — CHANGELOG, RELEASE-NOTES-2.1.0, version bump, staging + Xcode sync
 - [x] **Production v2.1.0 (2026-07-24):** Deployed to https://mc-app.manualmode.at — Build 2, GitLab registry, parity with staging (Web/PWA); App Store native still 2.0.1 until submit
 - [x] **Brand-Driven Design System:**
@@ -119,6 +121,15 @@
 - [x] **Dark/Light Mode:** User preference with auto-detection
 - [x] **PWA:** Installable, offline-capable
 - [x] **Multi-language:** German and English (1,520 keys, perfect DE/EN parity)
+
+## Coach Practice (2026-07-24 — v2.2.0)
+- [x] **Coach Practice mode (Client+):** AI-as-coachee training with post-session evaluation
+    - [x] 12 curated frameworks (9 from existing bots + GROW, Solution-Focused, MI)
+    - [x] 8 coachee scenarios × 3 difficulty levels
+    - [x] Method explainers for practice-only frameworks in setup UI
+    - [x] Evaluation: method compliance, effectiveness, clarity, coachee satisfaction
+    - [x] Practice history persistence (`PracticeEvaluation` model)
+    - [ ] Deploy: run migration `20260724120000_add_practice_evaluations` on staging/production
 
 ## Security & Infrastructure (v2.0.1 — 2026-07-15)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API
