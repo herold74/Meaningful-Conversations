@@ -139,7 +139,7 @@ make deploy-alternative-staging
 
 ```bash
 # SSH into your server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Navigate to staging directory
 cd /opt/meaningful-conversations-staging
@@ -176,7 +176,7 @@ podman-compose -f podman-compose-staging.yml restart backend
 make deploy-alternative-production
 
 # On server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 cd /opt/meaningful-conversations-production
 podman exec meaningful-conversations-backend-production npx prisma migrate deploy
 ```
@@ -284,7 +284,7 @@ Gemini supports prompt caching which could reduce costs by 50-90%:
 
 1. **Check if migration ran**:
    ```bash
-   ssh root@46.224.37.130
+   ssh root@<YOUR_SERVER_IP>
    podman exec meaningful-conversations-backend-staging npx prisma migrate status
    ```
 

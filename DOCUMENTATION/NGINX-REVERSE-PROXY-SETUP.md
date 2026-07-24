@@ -23,7 +23,7 @@ Internet
 DNS: mc-beta.manualmode.at (Staging)
      mc-app.manualmode.at (Production)
     ↓
-46.224.37.130 (Host Server - nginx)
+<YOUR_SERVER_IP> (Host Server - nginx)
     ↓
 ┌──────────────────────────────────────────────────┐
 │ nginx (systemd service on host)                  │
@@ -65,7 +65,7 @@ All configuration files are located in `/etc/nginx/conf.d/` on the server.
 
 **Purpose:** Unified HTTPS access to staging environment
 
-**Access:** `https://mc-beta.manualmode.at` (also accessible via `https://46.224.37.130`)
+**Access:** `https://mc-beta.manualmode.at` (also accessible via `https://<YOUR_SERVER_IP>`)
 
 **Features:**
 - ✅ SSL/TLS certificate (Let's Encrypt recommended for production use)
@@ -93,7 +93,7 @@ https://mc-beta.manualmode.at
 
 **Purpose:** Unified access to production environment
 
-**Access:** `https://mc-app.manualmode.at` (also accessible via `http://46.224.37.130`)
+**Access:** `https://mc-app.manualmode.at` (also accessible via `http://<YOUR_SERVER_IP>`)
 
 **Features:**
 - ✅ HTTPS with SSL certificate (Let's Encrypt recommended)
@@ -166,7 +166,7 @@ If containers are restarted outside of the deployment script:
 
 ```bash
 # SSH into server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Restart staging pod
 cd /opt/meaningful-conversations-staging
@@ -201,7 +201,7 @@ Currently, staging uses **self-signed certificates**. For production, you should
 
 ```bash
 # SSH into server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Install certbot and nginx plugin
 dnf install certbot python3-certbot-nginx
@@ -220,7 +220,7 @@ certbot certonly --nginx -d mc-app.manualmode.at
 certbot certonly --nginx -d mc-beta.manualmode.at -d mc-app.manualmode.at
 ```
 
-**Note:** Make sure your DNS A records for both domains point to `46.224.37.130` before running certbot.
+**Note:** Make sure your DNS A records for both domains point to `<YOUR_SERVER_IP>` before running certbot.
 
 #### Step 3: Update nginx Configurations
 
@@ -297,7 +297,7 @@ certbot renew --dry-run
 - Production: `mc-app.manualmode.at` → HTTPS on port 443
 
 **DNS Configuration:**
-Both domains have A records pointing to `46.224.37.130`
+Both domains have A records pointing to `<YOUR_SERVER_IP>`
 
 **Frontend Configuration:**
 The `services/api.ts` file already includes these domains:
@@ -305,7 +305,7 @@ The `services/api.ts` file already includes these domains:
 const backendMap: { [key: string]: string } = {
     'mc-beta.manualmode.at': '',   // Staging: nginx proxies /api
     'mc-app.manualmode.at': '',    // Production: nginx proxies /api
-    '46.224.37.130': '',           // Fallback for IP access
+    '<YOUR_SERVER_IP>': '',           // Fallback for IP access
 };
 ```
 
@@ -321,7 +321,7 @@ The empty string means the frontend uses relative paths (`/api/*`), and nginx on
 |------|-------------|---------|--------|
 | 443 | Staging | Secure staging access | https://mc-beta.manualmode.at |
 | 443 | Production | Secure production access | https://mc-app.manualmode.at |
-| 80 | Both | HTTP redirect to HTTPS | http://46.224.37.130 |
+| 80 | Both | HTTP redirect to HTTPS | http://<YOUR_SERVER_IP> |
 
 **Note:** Only standard ports (80/443) are accessible from the internet due to hosting provider's external firewall. Internal pod ports (8080, 8081, 8082, 3307, 3308) are only accessible from within the server or between containers in the same pod.
 
@@ -356,7 +356,7 @@ firewall-cmd --list-all
 ### Check nginx Status
 
 ```bash
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Check if nginx is running
 systemctl status nginx
@@ -496,16 +496,16 @@ Test that nginx is properly routing requests:
 
 ```bash
 # Test frontend access
-curl -I http://46.224.37.130:8080
+curl -I http://<YOUR_SERVER_IP>:8080
 
 # Test API routing through nginx
-curl -I http://46.224.37.130:8080/api/health
+curl -I http://<YOUR_SERVER_IP>:8080/api/health
 
 # Test direct backend access
-curl -I http://46.224.37.130:8081/health
+curl -I http://<YOUR_SERVER_IP>:8081/health
 
 # Test HTTPS staging
-curl -I -k https://46.224.37.130
+curl -I -k https://<YOUR_SERVER_IP>
 ```
 
 ### View All nginx Configurations

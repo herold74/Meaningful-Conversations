@@ -73,7 +73,7 @@ If you're okay starting fresh:
 make stop-alternative
 
 # 2. Remove old data (optional - only if you don't need it)
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose down -v'
 
 # 3. Update configuration
@@ -89,11 +89,11 @@ If you need to preserve your data:
 
 ```bash
 # 1. Backup PostgreSQL data
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose exec -T postgres pg_dump -U postgres meaningful_conversations > /tmp/postgres-backup.sql'
 
 # Download backup
-scp root@46.224.37.130:/tmp/postgres-backup.sql ./
+scp root@<YOUR_SERVER_IP>:/tmp/postgres-backup.sql ./
 
 # 2. Convert PostgreSQL SQL to MySQL format
 # This requires manual conversion or using tools like pgloader
@@ -104,8 +104,8 @@ scp root@46.224.37.130:/tmp/postgres-backup.sql ./
 make deploy-alternative
 
 # 4. Import converted data
-scp converted-backup.sql root@46.224.37.130:/tmp/
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+scp converted-backup.sql root@<YOUR_SERVER_IP>:/tmp/
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose exec -T mariadb mysql -u root -p${DB_ROOT_PASSWORD} meaningful_conversations < /tmp/converted-backup.sql'
 ```
 
@@ -214,8 +214,8 @@ npx prisma migrate deploy
 
 ```bash
 # These still work but are more verbose
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && podman-compose ps'
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && podman-compose logs'
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && podman-compose ps'
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && podman-compose logs'
 ```
 
 ### New Make Commands (Recommended)
@@ -277,11 +277,11 @@ make db-shell-alternative
 # Should open MySQL shell
 
 # 4. Check frontend
-curl http://46.224.37.130
+curl http://<YOUR_SERVER_IP>
 # Should return HTML
 
 # 5. Check backend
-curl http://46.224.37.130:8080/health
+curl http://<YOUR_SERVER_IP>:8080/health
 # Should return {"status":"ok"}
 ```
 
@@ -293,13 +293,13 @@ curl http://46.224.37.130:8080/health
 
 ```bash
 # Check pod status
-ssh root@46.224.37.130 'podman pod ps -a'
+ssh root@<YOUR_SERVER_IP> 'podman pod ps -a'
 
 # Check pod logs
 make pod-logs-alternative
 
 # Remove and recreate
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose down && \
   podman pod rm -f meaningful-conversations-pod && \
   podman-compose up -d'
@@ -309,7 +309,7 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
 
 ```bash
 # Verify MariaDB is running
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose exec mariadb mysqladmin ping'
 
 # Check credentials
@@ -317,7 +317,7 @@ cat .env.staging | grep DB_
 cat .env.production | grep DB_
 
 # View MariaDB logs
-ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
+ssh root@<YOUR_SERVER_IP> 'cd /opt/meaningful-conversations && \
   podman-compose logs mariadb'
 ```
 
@@ -325,10 +325,10 @@ ssh root@46.224.37.130 'cd /opt/meaningful-conversations && \
 
 ```bash
 # Check what's using port 3306
-ssh root@46.224.37.130 'netstat -tulpn | grep 3306'
+ssh root@<YOUR_SERVER_IP> 'netstat -tulpn | grep 3306'
 
 # If MySQL is already installed, stop it
-ssh root@46.224.37.130 'systemctl stop mysqld'
+ssh root@<YOUR_SERVER_IP> 'systemctl stop mysqld'
 ```
 
 ---
@@ -354,7 +354,7 @@ ssh root@46.224.37.130 'systemctl stop mysqld'
 ### What Stayed the Same
 
 - ✅ Deployment process: Still `make deploy-alternative`
-- ✅ Server location: Still `46.224.37.130`
+- ✅ Server location: Still `<YOUR_SERVER_IP>`
 - ✅ Exposed ports: 80, 8080 (added 3306 optional)
 - ✅ Volume persistence: Data survives restarts
 - ✅ All existing Make commands still work

@@ -60,7 +60,7 @@ The server also needs access to pull images:
 
 ```bash
 # SSH to server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Login to registry
 podman login quay.myandi.de -u gherold
@@ -185,7 +185,7 @@ The deployment script automatically:
 **Or** manually login on server:
 
 ```bash
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 podman login quay.myandi.de -u gherold
 ```
 
@@ -350,7 +350,7 @@ podman login quay.myandi.de -u gherold
 
 ```bash
 # SSH to server
-ssh root@46.224.37.130
+ssh root@<YOUR_SERVER_IP>
 
 # Check if logged in
 cat ~/.config/containers/auth.json
@@ -427,7 +427,7 @@ nano .env.production  # Update REGISTRY_PASSWORD
 podman login quay.myandi.de -u gherold
 
 # Re-login on server
-ssh root@46.224.37.130 'podman login quay.myandi.de -u gherold'
+ssh root@<YOUR_SERVER_IP> 'podman login quay.myandi.de -u gherold'
 ```
 
 ### 4. Keep Registry Password Secure
@@ -441,7 +441,7 @@ git status  # Should show .env.staging and .env.production are ignored
 
 # Server stores password in .env
 # Make sure it's protected
-ssh root@46.224.37.130 'chmod 600 /opt/meaningful-conversations/.env'
+ssh root@<YOUR_SERVER_IP> 'chmod 600 /opt/meaningful-conversations/.env'
 ```
 
 ---
