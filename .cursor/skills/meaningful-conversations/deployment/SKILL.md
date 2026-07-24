@@ -53,7 +53,7 @@ npx cap sync ios
 ./deploy-manualmode.sh -e staging
 ```
 - Builds all 3 Docker images (backend, frontend, TTS)
-- Pushes to registry `quay.myandi.de/gherold`
+- Pushes to registry `regy.rhepds.com/gherold/meaningful-conversations` (see `DOCUMENTATION/GITLAB-REGISTRY-SETUP.md`)
 - Pulls on remote server, stops old containers, starts new ones
 - Copies `server-scripts/update-nginx-ips.sh` to `/usr/local/bin/` (and mirrors under `/opt/manualmode-staging` / `/opt/manualmode-production`), then updates nginx reverse proxy IPs
 - Runs health checks; **auto-rollback on failure**
@@ -277,7 +277,7 @@ Options:
 | Remote server | `root@$SERVER_HOST` (from `.env.server`) |
 | Staging dir | `/opt/manualmode-staging` |
 | Production dir | `/opt/manualmode-production` |
-| Registry | `quay.myandi.de/gherold` |
+| Registry | `regy.rhepds.com/gherold/meaningful-conversations` |
 | Container runtime | Podman + podman-compose |
 | Reverse proxy | Nginx |
 
