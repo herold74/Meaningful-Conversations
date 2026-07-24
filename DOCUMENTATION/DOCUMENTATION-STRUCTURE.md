@@ -28,6 +28,7 @@ Located in `/memory-bank/`:
 ## DOCUMENTATION/ Folder
 
 ### Essential Guides (Start Here!)
+- **CHANGELOG.md** - Version history and release notes index
 - **LOCAL-DEV-SETUP.md** - **⭐ Complete setup guide from scratch**
 - **TROUBLESHOOTING-INDEX.md** - **⭐ Quick reference for common issues** (includes **Security & npm audit**, e.g. accepted PM2 advisory → `memory-bank/systemPatterns.md` §8)
 - **DEPLOYMENT-CHECKLIST.md** - **⭐ MANDATORY deployment procedures (production/staging)**
@@ -53,8 +54,9 @@ Located in `/memory-bank/`:
 *Note: All server migration docs are marked as historical - the migration was completed in November 2024.*
 
 ### Registry & Images
-- **QUAY-REGISTRY-SETUP.md** - Container registry setup
-- **QUAY-QUICKSTART.md** - Quick registry commands
+- **GITLAB-REGISTRY-SETUP.md** - GitLab Container Registry (current)
+- **QUAY-REGISTRY-SETUP.md** - Legacy Quay registry (archived)
+- **QUAY-QUICKSTART.md** - Quick registry commands (legacy)
 
 ### Version & Release
 - **VERSION-MANAGEMENT.md** - Version update workflow
@@ -175,7 +177,7 @@ Located in `/memory-bank/`:
 - **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
 - **Container Engine:** Podman + podman-compose
 - **Containers:** Frontend, Backend (PM2 x2), TTS (Piper), MariaDB 11.2
-- **Registry:** quay.myandi.de/gherold
+- **Registry:** git.rhepds.com/gherold/meaningful-conversations
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 

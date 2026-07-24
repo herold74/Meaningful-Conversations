@@ -1,13 +1,42 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.0.1
+**Version:** 2.1.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, build **40**; v2.0.1 — https://mc-beta.manualmode.at — self-hosted coach avatars live in BotSelection (`/api/bots` → `/avatars/*.png`); WelcomeScreen orbit order by bg color. Registry pull fails; **frontend + backend streamed** when pull fails (Build **40** verified live).
-**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** (Staging Build **40**, 2026-07-24) bis nächster Prod-Deploy. — https://mc-app.manualmode.at
-**App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH
+**Staging:** v2.1.0 deploy pending — https://mc-beta.manualmode.at (was Build **42** / v2.0.1, 2026-07-24)
+**Production:** Deployed **2026-04-28**, Build **13**, v2.0.1 — **hinter Staging** bis nächster Prod-Deploy. — https://mc-app.manualmode.at
+**App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH (Xcode sync for 2.1.0 in progress)
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-24 — v2.1.0 release)
+
+### GitHub releases: v2.0.2 (Mistral), v2.0.3 (Registry), v2.1.0 (Visual Redesign)
+- **CHANGELOG.md**, **RELEASE-NOTES-2.1.0.md**; version **2.1.0**, BUILD_NUMBER **1**
+- Staging deploy + `cap sync ios` in progress
+
+## Recent Changes (2026-07-24 — GitLab Container Registry migration)
+
+### Registry moved Quay → GitLab (`regy.rhepds.com`)
+- **Bootstrap complete:** All three images pushed with tags `2.0.1` + `latest`:
+  - `meaningful-conversations-backend`, `-frontend`, `-tts`
+- **Registry host:** Push/pull use **`regy.rhepds.com`** (not `git.rhepds.com` — that host serves dependency proxy only). Web UI: https://git.rhepds.com/gherold/meaningful-conversations/container_registry
+- **Login:** `REGISTRY_LOGIN_USER=gherold@redhat.com` + GitLab PAT in `REGISTRY_PASSWORD`
+- **Scripts:** `scripts/registry-env.sh`, `scripts/bootstrap-gitlab-registry.sh`; deploy/compose use `REGISTRY_IMAGE_PREFIX`
+- **Staging deploy verified (build 42, 2026-07-24):** `./deploy-manualmode.sh -e staging -c app` — local push + server `podman login regy.rhepds.com` + pull all three images OK; health checks passed.
+- **Next:** Commit migration scripts/docs (if not yet on main).
+
+## Recent Changes (2026-07-24 — UI polish + Mistral resilience, `6663bba`)
+
+### Theming & UX (staging build 41, 2026-07-24)
+- **CTA gradients:** All schemas use lighter→darkest stop order; bottom-right amber overlay (`--brand-accent`) ties buttons to ambient glow.
+- **Context Choice:** Proposal 1 layout (open, frosted preview, gradient CTAs).
+- **Session Review:** Dashboard layout, collapsible Diff/Final Context, PSB empty state, integrated footer actions; new `ReviewSection.tsx`.
+- **Chat/auth polish:** Gradient user bubbles, frosted bot bubbles, shared `Button` gradient variant.
+
+### Mistral local dev (`aiProviderService.js`)
+- **Root cause:** Intermittent Mistral 503 + streaming path had no Google fallback (unlike `generateContent`).
+- **Fix:** Retry 503/429/502/504 (3× backoff); `streamContent` falls back to Google when region is `optimal`; live health ping; `MISTRAL_API_KEY` in `.env.example`.
 
 ## Recent Changes (2026-07-24 — Staging avatar fix, Build 40)
 
