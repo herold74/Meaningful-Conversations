@@ -1036,7 +1036,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   onClick={() => setSelectedRiemann(selectedRiemann?.id === profile.id ? null : profile)}
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                     selectedRiemann?.id === profile.id
-                      ? 'bg-accent-primary text-white'
+                      ? 'bg-accent-primary text-button-foreground-on-accent'
                       : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
                   }`}
                 >
@@ -1056,7 +1056,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   onClick={() => setSelectedSD(selectedSD?.id === profile.id ? null : profile)}
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                     selectedSD?.id === profile.id
-                      ? 'bg-accent-primary text-white'
+                      ? 'bg-accent-primary text-button-foreground-on-accent'
                       : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
                   }`}
                 >
@@ -1076,7 +1076,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   onClick={() => setSelectedOCEAN(selectedOCEAN?.id === profile.id ? null : profile)}
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                     selectedOCEAN?.id === profile.id
-                      ? 'bg-accent-primary text-white'
+                      ? 'bg-accent-primary text-button-foreground-on-accent'
                       : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
                   }`}
                 >
@@ -1111,7 +1111,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
             onClick={() => setCategoryFilter('all')}
             className={`px-3 py-1 rounded-full text-sm transition-colors ${
               categoryFilter === 'all'
-                ? 'bg-accent-primary text-white'
+                ? 'bg-accent-primary text-button-foreground-on-accent'
                 : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
             }`}
           >
@@ -1123,7 +1123,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               onClick={() => setCategoryFilter(cat)}
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 categoryFilter === cat
-                  ? 'bg-accent-primary text-white'
+                  ? 'bg-accent-primary text-button-foreground-on-accent'
                   : 'bg-background-tertiary text-content-secondary hover:bg-background-secondary'
               }`}
             >
@@ -1161,7 +1161,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       <button
         onClick={runTest}
         disabled={!selectedBot || !hasProfileSelection || !selectedScenario}
-        className="w-full py-3 px-6 bg-accent-primary text-white rounded-lg font-semibold
+        className="w-full py-3 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg font-semibold
                    disabled:opacity-50 disabled:cursor-not-allowed
                    hover:bg-accent-primary/90 transition-colors"
       >
@@ -1906,7 +1906,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         <button
           onClick={completeTest}
           disabled={!allManualChecked}
-          className="w-full py-3 px-6 bg-accent-primary text-white rounded-lg font-semibold
+          className="w-full py-3 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg font-semibold
                      disabled:opacity-50 disabled:cursor-not-allowed
                      hover:bg-accent-primary/90 transition-colors"
         >
@@ -2041,7 +2041,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           </button>
           <button
             onClick={onClose}
-            className="py-2 px-6 bg-accent-primary text-white rounded-lg
+            className="py-2 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg
                        hover:bg-accent-primary/90 transition-colors"
           >
             {t('test_runner_close')}

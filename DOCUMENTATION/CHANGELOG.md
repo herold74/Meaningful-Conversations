@@ -3,6 +3,20 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.1.1] - 2026-07-24
+
+Readability and contrast improvements across themes (light, dark, seasonal).
+
+### Added
+- Shared `ScoreBadge` component for evaluation score pills with theme-safe foreground/background colors
+- Semantic CSS utilities: `btn-accent-solid`, `btn-surface-outline`, `surface-elevated`
+
+### Changed
+- Teal accent buttons use `text-button-foreground-on-accent` instead of hardcoded white text
+- Improved contrast on OCEAN onboarding, Intent Picker, Landing Page, evaluation screens, and transcript flows
+- Welcome screen: alternating teal/amber avatar rings, thinner rings, more spacing below avatars
+- Dark mode `--content-subtle` bumped for better secondary text legibility
+
 ## [2.1.0] - 2026-07-24
 
 Visual redesign — design system, entry screens, chat, session review, and coach selection.
@@ -52,6 +66,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.1.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.1
 [2.1.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.0
 [2.0.3]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.0.3
 [2.0.2]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.0.2

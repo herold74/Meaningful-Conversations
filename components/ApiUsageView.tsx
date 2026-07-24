@@ -632,7 +632,7 @@ export const ApiUsageView: React.FC = () => {
                             </button>
                             <button
                                 onClick={confirmProviderSwitch}
-                                className="px-4 py-2 text-white bg-accent-primary rounded-lg hover:bg-accent-primary-hover"
+                                className="px-4 py-2 btn-accent-solid rounded-lg hover:bg-accent-primary-hover"
                             >
                                 Confirm Switch
                             </button>
@@ -651,7 +651,7 @@ export const ApiUsageView: React.FC = () => {
                             onClick={() => setTimeRange(range)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                                 timeRange === range
-                                    ? 'bg-accent-primary text-white'
+                                    ? 'bg-accent-primary text-button-foreground-on-accent'
                                     : 'bg-background-secondary text-content-primary hover:bg-background-tertiary'
                             }`}
                         >

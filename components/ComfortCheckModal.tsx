@@ -92,7 +92,7 @@ const ComfortCheckModal: React.FC<ComfortCheckModalProps> = ({
                 className={`
                   flex-1 py-3 rounded-lg border-2 transition-all font-bold
                   ${comfortScore === score
-                    ? 'bg-accent-primary text-white border-accent-primary'
+                    ? 'btn-accent-solid border-accent-primary'
                     : 'bg-background-secondary border-border-secondary hover:border-accent-primary'
                   }
                 `}

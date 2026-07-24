@@ -4,6 +4,7 @@ import { Compass, Target, MessageCircle, TrendingUp, type LucideIcon } from 'luc
 import { useLocalization } from '../context/LocalizationContext';
 import { getBfi2Items, calculateBfi2, type Big5Result } from '../utils/bfi2';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import Button from './shared/Button';
 
 interface OceanOnboardingProps {
   onComplete: (result: Big5Result) => void;
@@ -88,7 +89,7 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="mb-6"
         >
-          <div className="w-20 h-20 rounded-xl bg-accent-primary/10 flex items-center justify-center mx-auto">
+          <div className="w-20 h-20 rounded-xl bg-accent-primary/15 border border-accent-primary/25 flex items-center justify-center mx-auto">
             <Compass className="w-10 h-10 text-accent-primary" aria-hidden="true" />
           </div>
         </motion.div>
@@ -118,12 +119,12 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + i * 0.15, duration: 0.35 }}
-              className="flex items-start gap-3 bg-background-secondary dark:bg-background-secondary border border-border-secondary dark:border-border-primary rounded-xl px-4 py-3"
+              className="flex items-start gap-3 surface-elevated rounded-xl px-4 py-3"
             >
-              <div className="w-9 h-9 rounded-lg bg-accent-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-9 h-9 rounded-lg bg-accent-primary/15 border border-accent-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <b.Icon className="w-4 h-4 text-accent-primary" aria-hidden="true" />
               </div>
-              <p className="text-sm text-content-primary">{t(b.key)}</p>
+              <p className="text-sm text-content-primary leading-relaxed">{t(b.key)}</p>
             </motion.div>
           ))}
         </div>
@@ -134,21 +135,23 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
           transition={{ delay: 1.0, duration: 0.4 }}
           className="w-full space-y-3"
         >
-          <button
+          <Button
             onClick={() => setPhase('questions')}
-            className="w-full py-3.5 rounded-xl bg-accent-primary text-white font-semibold text-sm hover:bg-accent-primary/90 transition-colors shadow-md"
+            size="lg"
+            fullWidth
+            className="rounded-xl shadow-md"
           >
             {t('ocean_onboarding_start')}
-          </button>
+          </Button>
           <button
+            type="button"
             onClick={handleSkip}
-            className="w-full py-2 text-xs text-content-tertiary hover:text-content-secondary transition-colors underline underline-offset-2"
+            className="w-full py-2 text-sm text-content-secondary hover:text-content-primary transition-colors underline underline-offset-2"
           >
             {t('ocean_onboarding_skip')}
           </button>
         </motion.div>
 
-        {/* Skip confirmation toast (shared) */}
         <AnimatePresence>
           {showSkipHint && <SkipToast t={t} onCancel={() => setShowSkipHint(false)} onConfirm={confirmSkip} />}
         </AnimatePresence>
@@ -193,11 +196,11 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
 
       {/* Progress bar */}
       <div className="mb-6">
-        <div className="flex justify-between text-xs text-content-tertiary mb-1.5">
+        <div className="flex justify-between text-xs text-content-secondary mb-1.5">
           <span>{currentIndex + 1} / {total}</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-background-tertiary rounded-full overflow-hidden border border-border-primary/50">
           <motion.div
             className="h-full bg-accent-primary rounded-full"
             initial={false}
@@ -236,11 +239,12 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
                 return (
                   <button
                     key={value}
+                    type="button"
                     onClick={() => handleSelect(value)}
                     className={`w-full py-3 px-4 rounded-xl text-sm font-medium transition-all duration-150 border
                       ${isSelected
-                        ? 'bg-accent-primary text-white border-accent-primary shadow-md scale-[1.02]'
-                        : 'bg-background-secondary dark:bg-background-secondary text-content-primary border-border-secondary dark:border-border-primary hover:border-accent-primary/50 hover:bg-accent-primary/5 active:scale-[0.98]'
+                        ? 'btn-accent-solid border-accent-primary shadow-md scale-[1.02]'
+                        : 'surface-elevated text-content-primary hover:border-accent-primary/50 hover:bg-accent-primary/5 active:scale-[0.98]'
                       }`}
                   >
                     {t(`survey_bfi2_likert_${value}`)}
@@ -255,6 +259,7 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
       {/* Navigation footer */}
       <div className="mt-6 flex items-center justify-between">
         <button
+          type="button"
           onClick={goBack}
           disabled={currentIndex === 0}
           className={`flex items-center gap-1 text-sm font-medium transition-opacity
@@ -265,8 +270,9 @@ const OceanOnboarding: React.FC<OceanOnboardingProps> = ({ onComplete, onSkip, s
         </button>
 
         <button
+          type="button"
           onClick={handleSkip}
-          className="text-xs text-content-tertiary hover:text-content-secondary transition-colors underline underline-offset-2"
+          className="text-sm text-content-secondary hover:text-content-primary transition-colors underline underline-offset-2"
         >
           {t('ocean_onboarding_skip')}
         </button>
@@ -287,20 +293,22 @@ const SkipToast: React.FC<{ t: (k: string) => string; onCancel: () => void; onCo
     transition={{ duration: 0.25 }}
     className="fixed inset-x-4 bottom-6 z-50 max-w-md mx-auto"
   >
-    <div className="bg-background-secondary dark:bg-gray-800 border border-border-secondary dark:border-border-primary rounded-2xl shadow-xl p-5">
-      <p className="text-sm text-content-primary mb-4">
+    <div className="surface-elevated rounded-2xl shadow-xl p-5">
+      <p className="text-sm text-content-primary mb-4 leading-relaxed">
         {t('ocean_onboarding_skip_hint')}
       </p>
       <div className="flex gap-3">
         <button
+          type="button"
           onClick={onCancel}
-          className="flex-1 py-2.5 text-sm font-medium rounded-xl border border-border-secondary dark:border-border-primary text-content-primary hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="flex-1 py-2.5 text-sm font-medium rounded-xl btn-surface-outline transition-colors"
         >
           {t('ocean_onboarding_skip_cancel') || 'Abbrechen'}
         </button>
         <button
+          type="button"
           onClick={onConfirm}
-          className="flex-1 py-2.5 text-sm font-medium rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors"
+          className="flex-1 py-2.5 text-sm font-medium rounded-xl btn-accent-solid transition-colors"
         >
           {t('ocean_onboarding_skip_confirm') || t('ocean_onboarding_skip')}
         </button>

@@ -139,7 +139,7 @@ const TranscriptPreQuestions: React.FC<TranscriptPreQuestionsProps> = ({ onNext,
                                 onClick={() => setSatisfaction(value)}
                                 className={`flex-1 py-3 px-2 rounded-lg text-sm font-medium transition-all border ${
                                     satisfaction === value
-                                        ? 'bg-accent-primary text-white border-accent-primary shadow-md'
+                                        ? 'btn-accent-solid border-accent-primary shadow-md'
                                         : 'bg-background-primary text-content-secondary border-gray-300 dark:border-gray-600 hover:border-accent-primary/50'
                                 }`}
                             >

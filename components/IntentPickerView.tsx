@@ -64,20 +64,20 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
                 w-full h-full flex flex-col text-left rounded-card p-5 transition-all group
                 ${featured
                   ? 'action-card-featured shadow-card-elevated border border-transparent'
-                  : 'bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated'
+                  : 'surface-elevated shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated'
                 }
               `}
             >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${featured ? 'bg-white/20' : 'bg-accent-primary/10'}`}>
-                <intent.Icon className={`w-5 h-5 ${featured ? 'text-white' : 'text-accent-primary'}`} aria-hidden="true" />
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${featured ? 'bg-black/10 dark:bg-black/20' : 'bg-accent-primary/10'}`}>
+                <intent.Icon className={`w-5 h-5 ${featured ? 'text-inherit' : 'text-accent-primary'}`} aria-hidden="true" />
               </div>
-              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${featured ? 'text-white' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
+              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${featured ? 'text-inherit' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
                 {t(intent.titleKey)}
               </h3>
-              <p className={`text-sm leading-relaxed flex-1 ${featured ? 'text-white/90' : 'text-content-secondary'}`}>
+              <p className={`text-sm leading-relaxed flex-1 ${featured ? 'text-inherit opacity-90' : 'text-content-secondary'}`}>
                 {description}
               </p>
-              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${featured ? 'text-white' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
+              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${featured ? 'text-inherit' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
                 <span>{t('intent_card_cta')}</span>
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </div>
@@ -92,7 +92,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
           onClick={onSkipPermanently}
-          className="mt-8 text-xs text-content-subtle hover:text-content-secondary transition-colors"
+          className="mt-8 text-xs text-content-secondary hover:text-content-primary transition-colors"
         >
           {t('intent_skip_permanently')}
         </motion.button>

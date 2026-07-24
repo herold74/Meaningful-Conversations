@@ -1,4 +1,4 @@
-# Meaningful Conversations (v2.1.0)
+# Meaningful Conversations (v2.1.1)
 
 **Meaningful Conversations** is an AI-powered platform designed to support personal growth, structured thinking, and communication analysis. Unlike generic chat assistants, it offers three distinct, purpose-built use cases to address specific user needs:
 

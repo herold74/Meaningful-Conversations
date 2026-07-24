@@ -309,7 +309,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                 <div className="flex gap-3">
                     <button
                         onClick={applySpeakerNames}
-                        className="flex-1 py-3 rounded-lg font-semibold text-white bg-accent-primary hover:bg-accent-primary/90 shadow-md transition-all"
+                        className="flex-1 py-3 rounded-lg font-semibold btn-accent-solid hover:bg-accent-primary/90 shadow-md transition-all"
                     >
                         {t('te_input_audio_speaker_map_apply')}
                     </button>
@@ -436,7 +436,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                 <div className="space-y-3">
                     <button
                         onClick={handleDownloadSmoothed}
-                        className="w-full py-3 rounded-lg font-semibold text-white bg-accent-primary hover:bg-accent-primary/90 shadow-md hover:shadow-lg transition-all"
+                        className="w-full py-3 rounded-lg font-semibold btn-accent-solid hover:bg-accent-primary/90 shadow-md hover:shadow-lg transition-all"
                     >
                         {t('tr_smooth_download')}
                     </button>
@@ -474,7 +474,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                         onClick={() => { setAudioMode('record'); setAudioFile(null); }}
                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
                             audioMode === 'record'
-                                ? 'bg-accent-primary text-white shadow-md'
+                                ? 'bg-accent-primary text-button-foreground-on-accent shadow-md'
                                 : 'bg-background-primary text-content-secondary border border-gray-300 dark:border-gray-600 hover:border-accent-primary/50'
                         }`}
                     >
@@ -487,7 +487,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                         onClick={() => { setAudioMode('upload'); recorder.resetRecording(); }}
                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
                             audioMode === 'upload'
-                                ? 'bg-accent-primary text-white shadow-md'
+                                ? 'bg-accent-primary text-button-foreground-on-accent shadow-md'
                                 : 'bg-background-primary text-content-secondary border border-gray-300 dark:border-gray-600 hover:border-accent-primary/50'
                         }`}
                     >
