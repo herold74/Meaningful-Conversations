@@ -63,7 +63,7 @@ const TranscriptInput: React.FC<TranscriptInputProps> = ({ onSubmit, onBack, isL
             title={label}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === id
-                    ? 'bg-accent-primary text-white'
+                    ? 'btn-accent-solid'
                     : 'bg-background-primary text-content-secondary border border-gray-300 dark:border-gray-600 hover:border-accent-primary/50'
             }`}
         >

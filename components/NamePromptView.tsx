@@ -64,7 +64,7 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, saf
             autoCapitalize="words"
             autoCorrect="off"
             spellCheck={false}
-            className="w-full p-3 text-center text-lg bg-background-secondary border border-border-secondary rounded-xl text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
+            className="w-full p-3 text-center text-lg bg-background-tertiary border border-border-secondary rounded-xl text-content-primary placeholder:text-content-secondary focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
           />
           <Button type="submit" disabled={!name.trim()} size="lg" className="w-full">
             {t('intent_ask_name_continue')}
@@ -73,7 +73,7 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, saf
             <button
               type="button"
               onClick={onSkip}
-              className="mt-1 py-2 text-sm text-content-tertiary hover:text-content-secondary transition-colors w-full"
+              className="mt-1 py-2 text-sm text-content-secondary hover:text-content-primary transition-colors w-full"
             >
               {t('intent_ask_name_skip')}
             </button>

@@ -157,7 +157,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <button
                 type="button"
                 onClick={handleContextCard}
-                className="h-full flex flex-col text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
+                className="h-full flex flex-col text-left rounded-card p-5 surface-elevated shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
               >
                 <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4 shrink-0">
                   <FileTextIcon className="w-5 h-5 text-accent-primary" />
@@ -177,12 +177,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
                 onClick={onStartQuestionnaire}
                 className="h-full flex flex-col text-left rounded-card p-5 action-card-featured shadow-card-elevated border border-transparent transition-all"
               >
-                <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center mb-4 shrink-0">
-                  <MessageCircle className="w-5 h-5 text-white" aria-hidden="true" />
+                <div className="w-11 h-11 rounded-xl bg-black/10 dark:bg-black/20 flex items-center justify-center mb-4 shrink-0">
+                  <MessageCircle className="w-5 h-5 text-inherit" aria-hidden="true" />
                 </div>
-                <h2 className="text-base font-semibold leading-snug text-white mb-2 min-h-[2.75rem]">{t('landing_card_conversation_title')}</h2>
-                <p className="text-sm text-white/90 leading-relaxed flex-1">{t('landing_card_conversation_desc')}</p>
-                <div className="mt-auto pt-4 flex items-center gap-1 text-sm font-medium text-white shrink-0">
+                <h2 className="text-base font-semibold leading-snug text-inherit mb-2 min-h-[2.75rem]">{t('landing_card_conversation_title')}</h2>
+                <p className="text-sm text-inherit opacity-90 leading-relaxed flex-1">{t('landing_card_conversation_desc')}</p>
+                <div className="mt-auto pt-4 flex items-center gap-1 text-sm font-medium text-inherit shrink-0">
                   <span>{t('intent_card_cta')}</span>
                   <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 </div>
@@ -191,7 +191,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               <button
                 type="button"
                 onClick={onStartInterview}
-                className="h-full flex flex-col text-left rounded-card p-5 bg-background-secondary/90 backdrop-blur-sm border border-border-primary shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
+                className="h-full flex flex-col text-left rounded-card p-5 surface-elevated shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated transition-all group"
               >
                 <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center mb-4 shrink-0">
                   <Mic className="w-5 h-5 text-accent-primary" aria-hidden="true" />

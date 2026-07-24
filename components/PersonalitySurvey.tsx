@@ -458,7 +458,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
               className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
                 ${values[item.id] <= 0 
                   ? 'bg-background-tertiary text-content-subtle cursor-not-allowed' 
-                  : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
+                  : 'bg-accent-primary text-button-foreground-on-accent cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_remove')}
             >
               −
@@ -484,7 +484,7 @@ const ConstantSumBlock = ({ contextTitle, items, onComplete, onBack, initialValu
               className={`w-12 h-12 rounded-full border-none text-2xl font-bold flex items-center justify-center transition-all select-none
                 ${remaining <= 0 
                   ? 'bg-background-tertiary text-content-subtle cursor-not-allowed' 
-                  : 'bg-accent-primary text-white cursor-pointer hover:bg-accent-secondary'}`}
+                  : 'bg-accent-primary text-button-foreground-on-accent cursor-pointer hover:bg-accent-secondary'}`}
               aria-label={t('survey_points_add')}
             >
               +
@@ -903,7 +903,7 @@ const LensSelectionBlock = ({
                   onClick={() => onSelect(lens.id)}
                   className={`py-2 px-4 rounded-lg font-medium text-sm transition-colors
                     ${index === 0 
-                      ? 'bg-accent-primary text-white hover:bg-accent-primary/90' 
+                      ? 'bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary/90' 
                       : 'bg-background-tertiary text-content-primary hover:bg-border-primary'
                     }`}
                 >
@@ -1045,7 +1045,7 @@ const SDQuestionnaireBlock = ({
           >
             <span className={`w-9 h-9 flex items-center justify-center rounded-full text-base font-bold shrink-0
               ${answers[currentQuestion.id] === val
-                ? 'bg-accent-primary text-white'
+                ? 'bg-accent-primary text-button-foreground-on-accent'
                 : 'bg-background-tertiary text-content-secondary'
               }`}>
               {val}
@@ -1125,7 +1125,7 @@ const RankingBlock = ({ items, onComplete, t, initialOrder }: { items: any[], on
             <div 
               key={item.id} 
               onClick={() => moveToPool(item)}
-              className="p-2.5 mb-2 last:mb-0 bg-accent-primary text-white rounded cursor-pointer flex items-center hover:bg-accent-secondary transition-colors"
+              className="p-2.5 mb-2 last:mb-0 bg-accent-primary text-button-foreground-on-accent rounded cursor-pointer flex items-center hover:bg-accent-secondary transition-colors"
             >
               <span className="font-bold mr-2.5 bg-white/30 w-6 h-6 flex items-center justify-center rounded-full text-sm">{index + 1}</span>
               <div>
