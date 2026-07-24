@@ -170,3 +170,18 @@ Login → routeWithIntentPicker
 | `guestName` | string | Guest display name |
 | `profileHintDisabled` | `'true'` | Don't show profile hint |
 | `adminStartupPref` | `'admin'`, `'normal'` | Admin/Dev startup view |
+
+## Coach Practice (Client+ only)
+
+**Entry:** BotSelection → Client tools row → "Coach Practice" / "Coaching üben" (alongside Transcript Recording). Not an IntentPicker intent.
+
+**Flow:**
+1. `practiceSetup` — Pick framework (with explainers for practice-only methods: GROW, Solution-Focused, MI), scenario, difficulty, optional focus
+2. `practiceChat` — Human is coach; AI is coachee (`practice-coachee` bot id). No initial AI greeting — coach speaks first. Skips Life Context `/session/analyze`.
+3. End session → `practiceSelfRating` (optional 1–5) → evaluate via `/api/gemini/practice/evaluate`
+4. `practiceReview` — Four dimensions: method compliance, effectiveness, clarity, coachee satisfaction
+5. `practiceHistory` — Past evaluations (Client+)
+
+**Access:** `isClient || isAdmin || isDeveloper`
+
+**Backend:** `meaningful-conversations-backend/practice/` (frameworks, scenarios, coachee prompts); `GET /api/practice/catalog`, `POST /api/gemini/practice/send-message`, `POST /api/gemini/practice/evaluate`

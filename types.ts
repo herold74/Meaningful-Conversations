@@ -45,7 +45,12 @@ export type NavView =
     | 'namePrompt'
     | 'lcEditorFromLanding'
     | 'lcEditorFromContextChoice'
-    | 'profileHint';
+    | 'profileHint'
+    | 'practiceSetup'
+    | 'practiceChat'
+    | 'practiceSelfRating'
+    | 'practiceReview'
+    | 'practiceHistory';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
@@ -249,4 +254,93 @@ export interface TranscriptEvaluationSummary {
     userRating?: number | null;
     userFeedback?: string | null;
     contactOptIn?: boolean;
+}
+
+export type PracticeDifficulty = 'easy' | 'moderate' | 'challenging';
+
+export interface PracticeFrameworkStage {
+    id: string;
+    name: string;
+    description: string;
+}
+
+export interface PracticeFrameworkExplainer {
+    summary: string;
+    why: string;
+    goodCompliance: string;
+}
+
+export interface PracticeFramework {
+    id: string;
+    sourceBotId: string | null;
+    isPracticeOnly: boolean;
+    name: string;
+    shortDescription: string;
+    stages: PracticeFrameworkStage[];
+    complianceCriteria: string[];
+    explainer: PracticeFrameworkExplainer;
+}
+
+export interface PracticeScenario {
+    id: string;
+    coacheeName: string;
+    avatar: string;
+    concern: string;
+    emotionalTone: string;
+}
+
+export interface PracticeCatalog {
+    frameworks: PracticeFramework[];
+    scenarios: PracticeScenario[];
+    difficulties: { id: PracticeDifficulty; label: string }[];
+}
+
+export interface CoachPracticeConfig {
+    frameworkId: string;
+    frameworkName: string;
+    scenarioId: string;
+    scenarioName: string;
+    coacheeName: string;
+    coacheeAvatar: string;
+    difficulty: PracticeDifficulty;
+    difficultyLabel: string;
+    focusNote?: string;
+}
+
+export interface PracticeDimensionScore {
+    score: number;
+    evidence: string;
+    gaps: string;
+}
+
+export interface PracticeEvaluationResult {
+    summary: string;
+    methodCompliance: PracticeDimensionScore & { stagesCovered: string[] };
+    effectiveness: PracticeDimensionScore;
+    clarity: PracticeDimensionScore;
+    coacheeSatisfaction: PracticeDimensionScore;
+    strengths: string[];
+    developmentAreas: string[];
+    nextDrills: { action: string; rationale: string }[];
+    calibration: {
+        selfRating: number;
+        evidenceRating: number;
+        delta: string;
+        interpretation: string;
+    };
+    overallScore: number;
+    id?: string;
+}
+
+export interface PracticeEvaluationSummary {
+    id: string;
+    createdAt: string;
+    language: string;
+    frameworkId: string;
+    scenarioId: string;
+    difficulty: string;
+    focusNote?: string | null;
+    summary: string;
+    overallScore: number;
+    evaluationData: PracticeEvaluationResult;
 }

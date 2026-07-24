@@ -118,6 +118,7 @@ async function runMigrationsAndSeed() {
     } else {
         console.log('Development environment detected. Applying migrations...');
         runCommand('npx prisma migrate deploy');
+        runCommand('npx prisma generate');
     }
 
     // Seed the initial admin user if configured
@@ -291,6 +292,7 @@ async function startServer() {
         const optionalAuthForRateLimit = require('./middleware/optionalAuth.js');
         app.use('/api/gemini', optionalAuthForRateLimit, geminiLimiter, require('./routes/gemini.js'));
         app.use('/api/bots', require('./routes/bots.js'));
+        app.use('/api/practice', require('./routes/practice.js'));
         app.use('/api/feedback', require('./routes/feedback.js'));
         app.use('/api/admin', require('./routes/admin.js'));
         app.use('/api/api-usage', require('./routes/apiUsage.js'));

@@ -18,6 +18,7 @@ interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
+  onCoachPractice?: () => void;
   onUpgrade?: () => void;
   onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
   currentUser: User | null;
@@ -35,7 +36,15 @@ interface BotCardProps {
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
   isClientOnly?: boolean;
+  avatarIndex?: number;
 }
+
+const getAvatarRingClass = (index: number, isLocked: boolean): string => {
+  if (isLocked) return 'bg-border-primary/40';
+  return index % 2 === 0
+    ? 'bg-accent-primary'
+    : 'bg-amber-400 dark:bg-amber-500';
+};
 
 interface TopicSearchProps {
     bots: BotWithAvailability[];
@@ -184,7 +193,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                             <button
                                 type="button"
                                 onClick={() => onStartSessionWithPrompt(rec.botId, rec.examplePrompt)}
-                                className="inline-flex items-center gap-1 text-xs font-medium text-white bg-accent-primary hover:bg-accent-primary/90 px-3 py-1.5 rounded-md shadow-sm transition-colors"
+                                className="inline-flex items-center gap-1 text-xs font-medium btn-accent-solid hover:bg-accent-primary/90 px-3 py-1.5 rounded-md shadow-sm transition-colors"
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                                 {t('botSearch_start_session')}
@@ -281,7 +290,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     );
 };
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly, avatarIndex = 0 }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-stoic' || bot.id === 'chloe-cbt';
@@ -342,7 +351,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         )}
         
         <div className="relative flex-shrink-0">
-            <div className={`rounded-full p-0.5 ${isLocked ? 'bg-border-primary/40' : 'bg-gradient-to-br from-brand-light to-brand-dark'}`}>
+            <div className={`rounded-full p-0.5 ${getAvatarRingClass(avatarIndex, isLocked)}`}>
                 <img 
                     src={bot.avatar} 
                     alt={bot.name} 
@@ -391,7 +400,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -526,6 +535,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   
   const availableCoachingBots = coachingBots.filter(b => b.isAvailable);
   const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
+
+  const coachingAvatarOffset = availableKommunikationBots.length + lockedKommunikationBots.length;
+  const clientAvatarOffset = coachingAvatarOffset + availableCoachingBots.length + lockedCoachingBots.length;
   
   return (
     <div className="pt-4 pb-10">
@@ -572,7 +584,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Nobody Bot Card */}
-            {availableKommunikationBots.map((bot) => (
+            {availableKommunikationBots.map((bot, index) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -580,11 +592,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
+                avatarIndex={index}
               />
             ))}
             
             {/* Locked Kommunikation Bots */}
-            {lockedKommunikationBots.map((bot) => (
+            {lockedKommunikationBots.map((bot, index) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -593,6 +606,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
+                avatarIndex={availableKommunikationBots.length + index}
               />
             ))}
           </div>
@@ -660,6 +674,31 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               </div>
             );
           })()}
+
+          {/* Coach Practice — Client+ only */}
+          {(() => {
+            const isClientPlus = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+            if (!isClientPlus) return null;
+
+            return (
+              <div className="max-w-4xl mx-auto mt-3">
+                <div
+                  onClick={() => onCoachPractice?.()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCoachPractice?.(); } }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl"
+                >
+                  <GraduationCap className="w-5 h-5 text-accent-primary flex-shrink-0" aria-hidden="true" />
+                  <span className="text-base font-semibold text-content-primary">
+                    {t('practice_title')}
+                  </span>
+                  <span className="text-sm text-content-secondary hidden sm:inline">{t('practice_card_description')}</span>
+                  <span className="ml-auto text-content-secondary text-sm">→</span>
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
         {/* 2. Coaching Section — Silver */}
@@ -684,7 +723,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {availableCoachingBots.map((bot) => (
+            {availableCoachingBots.map((bot, index) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -692,6 +731,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
+                avatarIndex={coachingAvatarOffset + index}
               />
             ))}
             
@@ -704,7 +744,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               </div>
             )}
             
-            {lockedCoachingBots.map((bot) => (
+            {lockedCoachingBots.map((bot, index) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -713,6 +753,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
+                avatarIndex={coachingAvatarOffset + availableCoachingBots.length + index}
               />
             ))}
           </div>
@@ -756,7 +797,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             <>
               {/* Client-Only Bots */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {clientOnlyBots.map((bot) => (
+                {clientOnlyBots.map((bot, index) => (
                   <BotCard 
                     key={bot.id} 
                     bot={bot} 
@@ -765,6 +806,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={coachingMode}
                     isClientOnly={true}
+                    avatarIndex={clientAvatarOffset + index}
                   />
                 ))}
               </div>

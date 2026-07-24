@@ -139,7 +139,7 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
 | **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
 | **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, alle Features |
+| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, Coach-Übung, alle Features |
 
 **So upgraden Sie:**
 ${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
@@ -611,7 +611,15 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-### 5.2 Coach-Empfehlung (KI-gestützte Suche)
+### 5.2 Tools-Bereich (Premium & Klienten)
+
+Unterhalb der Coach-Liste finden Sie im Bereich **Tools** weitere Funktionen — abhängig von Ihrer Zugangsstufe:
+
+- **Transkript-Auswertung** (Premium+) — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${isNative ? 'Kapitel 7' : 'Kapitel 8'}.
+- **Audio-Transkription** (Klienten) — Live-Aufnahme oder Upload von Audiodateien mit automatischer Transkription. Ausführliche Anleitung: ${isNative ? 'Kapitel 8' : 'Kapitel 9'}.
+- **Coach-Übung** (Klienten) — Sie spielen den Coach, die KI den Klienten; strukturiertes Feedback zu Ihrer Methodenführung. Ausführliche Anleitung: ${isNative ? 'Kapitel 9' : 'Kapitel 10'}.
+
+### 5.3 Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
 
@@ -624,7 +632,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
-### 5.3 Die Chat-Oberfläche
+### 5.4 Die Chat-Oberfläche
 - **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
@@ -898,6 +906,61 @@ Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral k
 </details>
 `;
 
+const de_chapter10 = (isNative: boolean) => `
+---
+
+<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Kapitel 9' : 'Kapitel 10'}: Coach-Übung (Klienten-Feature)</summary>
+<div style="padding: 16px;">
+
+### Was ist Coach-Übung?
+
+Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie übernehmen die Rolle des Coaches, die KI spielt Ihren Klienten. Sie wählen eine Coaching-Methode, ein Szenario und einen Schwierigkeitsgrad — und führen danach ein Live-Gespräch. Am Ende erhalten Sie eine **strukturierte Auswertung** Ihrer Methodenführung mit konkreten Stärken, Entwicklungsfeldern und Übungsvorschlägen.
+
+### Wer kann es nutzen?
+
+Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm (Karte **Coach-Übung**).
+
+### Wie funktioniert es?
+
+**Schritt 1: Übung konfigurieren**
+- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. GROW, Lösungsorientiertes Coaching, Motivational Interviewing). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
+- **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
+- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält.
+- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in Clean Language bleiben“.
+
+**Schritt 2: Übungssitzung führen**
+- Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
+- Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
+- Dies ist **keine reguläre Coaching-Sitzung**: Es gibt keinen Lebenskontext-Analyseprozess am Ende, und Ihre Lebenskontext-Datei wird nicht aktualisiert.
+
+**Schritt 3: Sitzung beenden & Selbsteinschätzung**
+- Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
+- Optional bewerten Sie Ihre Leistung auf einer Skala von **1–10**, bevor die KI auswertet. Diese Selbsteinschätzung dient der Kalibrierung und kann übersprungen werden.
+
+**Schritt 4: Auswertung erhalten**
+Die KI analysiert das Transkript und bewertet Sie in vier Dimensionen (jeweils **1–10**):
+- **Methoden-Treue** — Wie konsequent haben Sie die gewählte Methode angewendet?
+- **Wirksamkeit** — Wie hilfreich war Ihr Coaching für den Klienten?
+- **Klarheit** — Wie klar und strukturiert waren Ihre Fragen und Interventionen?
+- **Klientenzufriedenheit** — Wie zufrieden wirkt der Klient am Ende?
+
+Dazu erhalten Sie eine **Gesamtbewertung (1–10)**, eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen.
+
+**Schritt 5: Verlauf ansehen**
+Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
+
+### Tipps für beste Ergebnisse
+
+- **Methode vorher lesen:** Nutzen Sie die Methodendetails, wenn Sie eine Methode zum ersten Mal üben.
+- **Klientenrolle ernst nehmen:** Stellen Sie offene Fragen und vermeiden Sie vorschnelle Lösungsvorschläge — der KI-Klient reagiert realistisch auf Ihren Stil.
+- **Schwierigkeit steigern:** Beginnen Sie mit „leicht“ und steigern Sie, wenn Sie sich sicher fühlen.
+- **Verlauf nutzen:** Vergleichen Sie Auswertungen über die Zeit, um Fortschritte sichtbar zu machen.
+
+</div>
+</details>
+`;
+
 const en_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
@@ -1025,7 +1088,7 @@ The app offers four access tiers with increasing functionality:
 | **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
 | **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
 | **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, all features |
+| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, Coach Practice, all features |
 
 **How to upgrade:**
 ${isNative ? `- Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
@@ -1466,7 +1529,15 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-### 5.2 Coach Recommendation (AI-Powered Search)
+### 5.2 Tools Area (Premium & Client)
+
+Below the coach list, the **Tools** section offers additional features depending on your access tier:
+
+- **Transcript Evaluation** (Premium+) — Analyze uploaded conversation transcripts. Full instructions: ${isNative ? 'Chapter 7' : 'Chapter 8'}.
+- **Audio Transcription** (Client) — Record live or upload audio files with automatic transcription. Full instructions: ${isNative ? 'Chapter 8' : 'Chapter 9'}.
+- **Coach Practice** (Client) — You play the coach and the AI plays the client; structured feedback on your coaching method. Full instructions: ${isNative ? 'Chapter 9' : 'Chapter 10'}.
+
+### 5.3 Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
 
@@ -1479,7 +1550,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
-### 5.3 The Chat Interface
+### 5.4 The Chat Interface
 - **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
 - **Text Mode (Default):**
   - Type your message in the text area at the bottom.
@@ -1753,6 +1824,61 @@ After transcription, you have the following options:
 </details>
 `;
 
+const en_chapter10 = (isNative: boolean) => `
+---
+
+<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Chapter 9' : 'Chapter 10'}: Coach Practice (Client Feature)</summary>
+<div style="padding: 16px;">
+
+### What is Coach Practice?
+
+Coach Practice is a **training mode for aspiring or experienced coaches**: you play the coach and the AI plays your client. You choose a coaching method, a scenario, and a difficulty level — then conduct a live conversation. At the end, you receive a **structured evaluation** of your method application with concrete strengths, development areas, and suggested drills.
+
+### Who Can Use It?
+
+This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen (**Coach Practice** card).
+
+### How Does It Work?
+
+**Step 1: Configure your practice**
+- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. GROW, Solution-Focused Coaching, Motivational Interviewing). For some methods, you can expand **method details** to review phases and typical questions.
+- **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
+- **Difficulty:** Controls how cooperative or challenging the client behaves.
+- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in Clean Language".
+
+**Step 2: Run the practice session**
+- You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
+- The interface matches the regular chat (text, voice input, optional TTS).
+- This is **not a regular coaching session**: there is no Life Context analysis at the end, and your Life Context file is not updated.
+
+**Step 3: End session & self-rating**
+- End the session as usual via **End Session**.
+- Optionally rate your performance on a **1–10** scale before the AI evaluates. This self-rating helps with calibration and can be skipped.
+
+**Step 4: Receive your evaluation**
+The AI analyzes the transcript and scores you on four dimensions (each **1–10**):
+- **Method compliance** — How consistently did you apply the chosen method?
+- **Effectiveness** — How helpful was your coaching for the client?
+- **Clarity** — How clear and structured were your questions and interventions?
+- **Coachee satisfaction** — How satisfied does the client appear at the end?
+
+You also receive an **overall score (1–10)**, a summary, covered method stages, strengths, development areas, and suggested drills.
+
+**Step 5: Review history**
+From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
+
+### Tips for Best Results
+
+- **Review the method first:** Use the method details when practicing a method for the first time.
+- **Stay in the coach role:** Ask open questions and avoid jumping to solutions — the AI client responds realistically to your style.
+- **Increase difficulty gradually:** Start with "easy" and raise the level as you gain confidence.
+- **Use history:** Compare evaluations over time to track your progress.
+
+</div>
+</details>
+`;
+
 const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const { t, language } = useLocalization();
 
@@ -1767,7 +1893,8 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
         const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser, native) : en_markdown(isRegistered, !!isPremiumUser, native);
         const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
         const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
-        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '');
+        const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
+        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch10 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9]);
     
     return (

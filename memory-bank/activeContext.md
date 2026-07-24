@@ -1,13 +1,26 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.1.0
+**Version:** 2.2.0 (committed, not yet deployed)
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-beta.manualmode.at (health OK; GitLab registry `regy.rhepds.com`)
-**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at — visual redesign + GitLab registry; parität mit Staging.
-**App Store:** LIVE v2.0.1 — "MyCoach AI" in AT/DE/CH (native bundle noch 2.0.1 bis Xcode-Submit 2.1.0)
+**Staging:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-beta.manualmode.at
+**Production:** Deployed **2026-07-24**, Build **2**, v2.1.0 — https://mc-app.manualmode.at
+**App Store:** LIVE v2.0.1 — native bundle pending submit (2.1.1 readability + 2.2.0 Coach Practice)
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-24 — v2.2.0 + v2.1.1 split)
+
+### v2.1.1 — Readability & contrast (patch)
+- `ScoreBadge`, semantic surface/button tokens, teal button contrast, OCEAN/Intent/evaluation screen fixes, WelcomeScreen avatar rings.
+
+### v2.2.0 — Coach Practice (minor)
+- **Feature:** Human coach practices curated methods against AI simulated coachee; post-session evaluation on method compliance, effectiveness, clarity, coachee satisfaction (all /10).
+- **Access:** Client / Admin / Developer — BotSelection Tools area.
+- **Backend:** `practice/*`, `GET /api/practice/catalog`, `POST /api/gemini/practice/send-message|evaluate`; migration `20260724120000_add_practice_evaluations`.
+- **Frontend:** Practice setup/chat/self-rating/review/history views; Admin Coach Practice Quick Test.
+- **Docs:** USER-ACCESS-MATRIX, UX-flow skill, UserGuideView chapter 10 (DE/EN).
+- **Deploy note:** Run Prisma migration on staging before first deploy of v2.2.0.
 
 ## Recent Changes (2026-07-24 — v2.1.0 release)
 

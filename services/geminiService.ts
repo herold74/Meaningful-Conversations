@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
@@ -282,4 +282,104 @@ export const generateContextFromInterview = async (
         console.error("Error formatting interview via backend:", error);
         return "There was an error generating the Life Context file from the interview. Please try again.";
     }
+};
+
+export const getPracticeCatalog = async (language: Language): Promise<PracticeCatalog> => {
+    return await apiFetch(`/practice/catalog?language=${language}`);
+};
+
+export const sendPracticeMessageStream = async (
+    config: CoachPracticeConfig,
+    history: Message[],
+    language: Language,
+    onChunk: (chunk: string) => void,
+): Promise<{ text: string; provider?: string | null }> => {
+    const session = getSession();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/gemini/practice/send-message`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            history,
+            language,
+            frameworkId: config.frameworkId,
+            scenarioId: config.scenarioId,
+            difficulty: config.difficulty,
+            focusNote: config.focusNote || '',
+            stream: true,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        const data = await response.json();
+        onChunk(data.text);
+        return { text: data.text, provider: data.provider ?? null };
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamedText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.chunk) {
+                        streamedText += data.chunk;
+                        onChunk(data.chunk);
+                    }
+                    if (data.done) {
+                        return { text: data.text || streamedText, provider: data.provider ?? null };
+                    }
+                } catch { /* ignore partial JSON */ }
+            }
+        }
+    }
+    return { text: streamedText, provider: null };
+};
+
+export const evaluatePracticeSession = async (
+    config: CoachPracticeConfig,
+    history: Message[],
+    language: Language,
+    selfRating?: number,
+): Promise<{ id: string | null; evaluation: PracticeEvaluationResult; durationMs: number; saveWarning?: string }> => {
+    return await apiFetch('/gemini/practice/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({
+            history,
+            frameworkId: config.frameworkId,
+            scenarioId: config.scenarioId,
+            difficulty: config.difficulty,
+            focusNote: config.focusNote || '',
+            selfRating,
+            language,
+        }),
+    });
+};
+
+export const getPracticeEvaluations = async (): Promise<PracticeEvaluationSummary[]> => {
+    return await apiFetch('/practice/evaluations');
+};
+
+export const deletePracticeEvaluation = async (id: string): Promise<void> => {
+    await apiFetch(`/practice/evaluations/${id}`, { method: 'DELETE' });
 };

@@ -9,7 +9,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary } from '../types';
 import type { UserIntent } from './IntentPickerView';
 import type { SurveyResult } from './PersonalitySurvey';
 import type { RefinementPreviewResult } from '../services/api';
@@ -43,6 +43,10 @@ import TranscriptPreQuestions from './TranscriptPreQuestions';
 import TranscriptInput from './TranscriptInput';
 import EvaluationReview from './EvaluationReview';
 import EvaluationHistory from './EvaluationHistory';
+import PracticeSetupView from './PracticeSetupView';
+import PracticeEvaluationReview from './PracticeEvaluationReview';
+import PracticeHistoryView from './PracticeHistoryView';
+import PracticeSelfRatingView from './PracticeSelfRatingView';
 import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
@@ -138,6 +142,16 @@ export interface AppViewRouterProps {
   setTeIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   tePrefillTranscript: string | null;
   setTePrefillTranscript: React.Dispatch<React.SetStateAction<string | null>>;
+
+  // Coach Practice
+  practiceConfig: CoachPracticeConfig | null;
+  setPracticeConfig: React.Dispatch<React.SetStateAction<CoachPracticeConfig | null>>;
+  practiceEvaluation: PracticeEvaluationResult | null;
+  setPracticeEvaluation: React.Dispatch<React.SetStateAction<PracticeEvaluationResult | null>>;
+  handleStartPractice: (config: CoachPracticeConfig) => void;
+  handlePracticeSelfRatingSubmit: (rating: number | undefined) => void;
+  handlePracticeSelfRatingSkip: () => void;
+  handlePracticeDone: () => void;
 
   // Refinement preview (DPFL test)
   refinementPreview: RefinementPreviewResult | null;
@@ -238,6 +252,14 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setTeIsLoading,
     tePrefillTranscript,
     setTePrefillTranscript,
+    practiceConfig,
+    setPracticeConfig,
+    practiceEvaluation,
+    setPracticeEvaluation,
+    handleStartPractice,
+    handlePracticeSelfRatingSubmit,
+    handlePracticeSelfRatingSkip,
+    handlePracticeDone,
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
@@ -652,6 +674,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onTranscriptRecord={() => {
             setView('transcriptRecord');
           }}
+          onCoachPractice={() => {
+            setPracticeConfig(null);
+            setPracticeEvaluation(null);
+            setView('practiceSetup');
+          }}
           onUpgrade={() => setMenuView('upgrade')}
           onStartSessionWithPrompt={handleStartSessionFromEval}
           currentUser={currentUser}
@@ -675,6 +702,72 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           encryptionKey={encryptionKey}
           isTestMode={isTestMode}
           onReferralSwitch={handleReferralSwitch}
+        />
+      );
+    case 'practiceChat':
+      return (
+        <ChatView
+          bot={selectedBot!}
+          lifeContext=""
+          chatHistory={chatHistory}
+          setChatHistory={setChatHistory}
+          onEndSession={handleEndSession}
+          onMessageSent={() => setUserMessageCount((c) => c + 1)}
+          currentUser={currentUser}
+          isNewSession={true}
+          encryptionKey={encryptionKey}
+          isTestMode={false}
+          coachPracticeConfig={practiceConfig}
+        />
+      );
+    case 'practiceSetup':
+      return (
+        <PracticeSetupView
+          onStart={handleStartPractice}
+          onBack={() => setView('botSelection')}
+          onHistory={() => setView('practiceHistory')}
+        />
+      );
+    case 'practiceSelfRating':
+      return practiceConfig ? (
+        <PracticeSelfRatingView
+          frameworkName={practiceConfig.frameworkName}
+          onSubmit={handlePracticeSelfRatingSubmit}
+          onSkip={handlePracticeSelfRatingSkip}
+        />
+      ) : null;
+    case 'practiceReview':
+      return practiceEvaluation && practiceConfig ? (
+        <PracticeEvaluationReview
+          evaluation={practiceEvaluation}
+          frameworkName={practiceConfig.frameworkName}
+          scenarioName={practiceConfig.scenarioName}
+          difficultyLabel={practiceConfig.difficultyLabel}
+          onDone={handlePracticeDone}
+          onHistory={() => setView('practiceHistory')}
+        />
+      ) : null;
+    case 'practiceHistory':
+      return (
+        <PracticeHistoryView
+          onBack={() => setView(practiceConfig ? 'practiceSetup' : 'botSelection')}
+          onViewEvaluation={(item: PracticeEvaluationSummary) => {
+            setPracticeEvaluation(item.evaluationData);
+            if (!practiceConfig) {
+              setPracticeConfig({
+                frameworkId: item.frameworkId,
+                frameworkName: item.frameworkId,
+                scenarioId: item.scenarioId,
+                scenarioName: item.summary,
+                coacheeName: '',
+                coacheeAvatar: '/avatars/max.png',
+                difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging') || 'moderate',
+                difficultyLabel: item.difficulty,
+                focusNote: item.focusNote || undefined,
+              });
+            }
+            setView('practiceReview');
+          }}
         />
       );
     case 'sessionReview':

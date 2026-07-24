@@ -67,6 +67,12 @@ const prisma = {
     update: jest.fn(),
     delete: jest.fn(),
   },
+  practiceEvaluation: {
+    findMany: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    findUnique: jest.fn(),
+  },
   userEvent: {
     create: jest.fn(),
     findMany: jest.fn(),
