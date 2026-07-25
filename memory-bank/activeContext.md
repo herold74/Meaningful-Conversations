@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.2.1
+**Version:** 2.3.0
 **Branch:** `main`
 **Staging:** Deployed **2026-07-24**, Build **2**, v2.2.1 — https://mc-beta.manualmode.at (health OK; Mistral SDK ^1.15.1)
 **Production:** v2.1.0 — https://mc-app.manualmode.at
@@ -9,21 +9,16 @@
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
-## Recent Changes (2026-07-25 — Coach Practice polish, `d52f5ab`)
+## Recent Changes (2026-07-25 — v2.3.0)
 
-### Coach Practice UX + progress (local, not yet deployed)
+### Coach Practice progress & polish (`d52f5ab`)
 - **Double welcome fix:** `bots.js` — Topic Identification / Next Steps no longer re-greet after check-in; practice empty chat shows coach-opens hint (`ChatView`, `PracticeSetupView`).
 - **5th evaluation dimension:** Coachee autonomy (`coacheeAutonomy`) in Gemini schema/prompts, review UI, TestRunner, UserGuide; overall score = avg of 5 dimensions.
 - **User progress dashboard:** `PracticeProgressView` — KPIs, level, sparkline, heatmap, radar, methods matrix, milestones, recent sessions; linked from setup/history/evaluation (“Dein Fortschritt”).
 - **Method filter:** Pill selector on progress view when >1 method practiced; all KPIs/charts/sessions recompute for selected framework.
 - **Admin analytics (GDPR aggregates):** `GET /api/admin/practice-stats`, `AdminPracticeAnalyticsView` (Catalog & Impact sub-tabs, k-anonymity &lt;5 suppression); Admin tab bar — no horizontal scroll, responsive label drop.
 - **GDPR export:** `routes/data.js` — practice evaluations + transcript evaluations in JSON/HTML export; `DataExportView` + UserGuide updated; tests extended.
-- **Deploy note:** Backend changes (prompts, export, admin stats, evaluation schema) need staging deploy; migration `20260724120000_add_practice_evaluations` if not yet applied. Committed `d52f5ab`, not yet deployed.
-
-## Recent Changes (2026-07-24 — v2.2.0 + v2.1.1 split)
-
-### v2.1.1 — Readability & contrast (patch)
-- `ScoreBadge`, semantic surface/button tokens, teal button contrast, OCEAN/Intent/evaluation screen fixes, WelcomeScreen avatar rings.
+- **Deploy note:** Staging deploy for v2.3.0; migration `20260724120000_add_practice_evaluations` if not yet applied on target env.
 
 ### v2.2.1 — Mistral API maintenance (patch)
 - Pin `@mistralai/mistralai` ^1.15.1; transcript evaluation uses `analysis` model context for Mistral mapping.
