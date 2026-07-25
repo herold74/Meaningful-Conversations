@@ -124,14 +124,19 @@
 - [x] **PWA:** Installable, offline-capable
 - [x] **Multi-language:** German and English (1,520 keys, perfect DE/EN parity)
 
-## Coach Practice (2026-07-24 — v2.2.0)
+## Coach Practice (2026-07-24 — v2.2.0; polish 2026-07-25)
 - [x] **Coach Practice mode (Client+):** AI-as-coachee training with post-session evaluation
     - [x] 12 curated frameworks (9 from existing bots + GROW, Solution-Focused, MI)
     - [x] 8 coachee scenarios × 3 difficulty levels
     - [x] Method explainers for practice-only frameworks in setup UI
-    - [x] Evaluation: method compliance, effectiveness, clarity, coachee satisfaction
+    - [x] Evaluation: method compliance, effectiveness, clarity, coachee autonomy, coachee satisfaction (5 dimensions)
     - [x] Practice history persistence (`PracticeEvaluation` model)
-    - [ ] Deploy: run migration `20260724120000_add_practice_evaluations` on staging/production
+    - [x] User progress dashboard (`PracticeProgressView`) with method filter
+    - [x] Admin GDPR-safe practice analytics (`AdminPracticeAnalyticsView`, k-anonymity)
+    - [x] GDPR data export includes practice sessions
+    - [x] Double-welcome fix (regular coaching + practice empty-chat intro)
+    - [ ] Deploy: run migration `20260724120000_add_practice_evaluations` on staging/production (if not yet applied)
+    - [ ] Staging deploy for backend prompt/export/admin-stats changes
 
 ## Security & Infrastructure (v2.0.1 — 2026-07-15)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API

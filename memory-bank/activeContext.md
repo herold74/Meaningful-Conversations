@@ -9,6 +9,17 @@
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
+## Recent Changes (2026-07-25 — Coach Practice polish, uncommitted)
+
+### Coach Practice UX + progress (local, not yet deployed)
+- **Double welcome fix:** `bots.js` — Topic Identification / Next Steps no longer re-greet after check-in; practice empty chat shows coach-opens hint (`ChatView`, `PracticeSetupView`).
+- **5th evaluation dimension:** Coachee autonomy (`coacheeAutonomy`) in Gemini schema/prompts, review UI, TestRunner, UserGuide; overall score = avg of 5 dimensions.
+- **User progress dashboard:** `PracticeProgressView` — KPIs, level, sparkline, heatmap, radar, methods matrix, milestones, recent sessions; linked from setup/history/evaluation (“Dein Fortschritt”).
+- **Method filter:** Pill selector on progress view when >1 method practiced; all KPIs/charts/sessions recompute for selected framework.
+- **Admin analytics (GDPR aggregates):** `GET /api/admin/practice-stats`, `AdminPracticeAnalyticsView` (Catalog & Impact sub-tabs, k-anonymity &lt;5 suppression); Admin tab bar — no horizontal scroll, responsive label drop.
+- **GDPR export:** `routes/data.js` — practice evaluations + transcript evaluations in JSON/HTML export; `DataExportView` + UserGuide updated; tests extended.
+- **Deploy note:** Backend changes (prompts, export, admin stats, evaluation schema) need staging deploy; migration `20260724120000_add_practice_evaluations` if not yet applied.
+
 ## Recent Changes (2026-07-24 — v2.2.0 + v2.1.1 split)
 
 ### v2.1.1 — Readability & contrast (patch)

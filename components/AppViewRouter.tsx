@@ -46,6 +46,7 @@ import EvaluationHistory from './EvaluationHistory';
 import PracticeSetupView from './PracticeSetupView';
 import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
+import PracticeProgressView from './PracticeProgressView';
 import PracticeSelfRatingView from './PracticeSelfRatingView';
 import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
@@ -726,6 +727,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onStart={handleStartPractice}
           onBack={() => setView('botSelection')}
           onHistory={() => setView('practiceHistory')}
+          onProgress={() => setView('practiceProgress')}
         />
       );
     case 'practiceSelfRating':
@@ -745,12 +747,14 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           difficultyLabel={practiceConfig.difficultyLabel}
           onDone={handlePracticeDone}
           onHistory={() => setView('practiceHistory')}
+          onProgress={() => setView('practiceProgress')}
         />
       ) : null;
     case 'practiceHistory':
       return (
         <PracticeHistoryView
           onBack={() => setView(practiceConfig ? 'practiceSetup' : 'botSelection')}
+          onProgress={() => setView('practiceProgress')}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation(item.evaluationData);
             if (!practiceConfig) {
@@ -768,6 +772,29 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             }
             setView('practiceReview');
           }}
+        />
+      );
+    case 'practiceProgress':
+      return (
+        <PracticeProgressView
+          onBack={() => setView('practiceSetup')}
+          onHistory={() => setView('practiceHistory')}
+          onViewEvaluation={(item: PracticeEvaluationSummary) => {
+            setPracticeEvaluation(item.evaluationData);
+            setPracticeConfig({
+              frameworkId: item.frameworkId,
+              frameworkName: item.frameworkId,
+              scenarioId: item.scenarioId,
+              scenarioName: item.summary,
+              coacheeName: '',
+              coacheeAvatar: '/avatars/max.png',
+              difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging') || 'moderate',
+              difficultyLabel: item.difficulty,
+              focusNote: item.focusNote || undefined,
+            });
+            setView('practiceReview');
+          }}
+          onStartPractice={handleStartPractice}
         />
       );
     case 'sessionReview':

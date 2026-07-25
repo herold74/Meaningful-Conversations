@@ -545,6 +545,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           && ev.methodCompliance?.score >= 1 && ev.methodCompliance?.score <= 10
           && ev.effectiveness?.score >= 1 && ev.effectiveness?.score <= 10
           && ev.clarity?.score >= 1 && ev.clarity?.score <= 10
+          && ev.coacheeAutonomy?.score != null && ev.coacheeAutonomy.score >= 1 && ev.coacheeAutonomy.score <= 10
           && ev.coacheeSatisfaction?.score >= 1 && ev.coacheeSatisfaction?.score <= 10;
 
         const autoCheckResults: TestRunResult['autoCheckResults'] = [
@@ -2161,6 +2162,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               <div>Method: {practiceEval.evaluation.methodCompliance.score}/10</div>
               <div>Effectiveness: {practiceEval.evaluation.effectiveness.score}/10</div>
               <div>Clarity: {practiceEval.evaluation.clarity.score}/10</div>
+              <div>Autonomy: {practiceEval.evaluation.coacheeAutonomy?.score ?? '—'}/10</div>
               <div>Satisfaction: {practiceEval.evaluation.coacheeSatisfaction.score}/10</div>
             </div>
             <p className="text-sm text-content-secondary">{practiceEval.evaluation.summary}</p>

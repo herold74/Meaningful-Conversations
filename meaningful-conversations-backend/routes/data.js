@@ -9,6 +9,15 @@ const { sanitizeUserForClient } = require('../utils/userHelpers.js');
 const router = express.Router();
 router.use(authMiddleware);
 
+function parseStoredJson(raw, fallback = null) {
+    if (!raw) return fallback;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return fallback;
+    }
+}
+
 // GET /api/data/user - Get the current user's data
 router.get('/user', async (req, res) => {
     try {
@@ -827,6 +836,32 @@ function generateHtmlExport(exportData, language = 'de') {
                     </p>
                 ` : ''}
             </div>` : ''}
+
+            <!-- Coach Practice (training sessions) -->
+            ${exportData.practiceEvaluations && exportData.practiceEvaluations.length > 0 ? `
+            <div class="section">
+                <h2>🎯 ${isGerman ? 'Coaching-Übungssessions' : 'Coach practice sessions'} (${exportData.practiceEvaluations.length})</h2>
+                <p style="margin-bottom: 15px; color: #666;">${isGerman ? 'Auswertungen Ihrer Übungssessions als Coach (keine vollständigen Chat-Transkripte gespeichert).' : 'Evaluations from your coach practice sessions (full chat transcripts are not stored).'}</p>
+                ${exportData.practiceEvaluations.map(pe => `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #16A34A; border-radius: 4px;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">${pe.frameworkId} · ${pe.scenarioId} · ${pe.difficulty}</div>
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">${formatDate(pe.createdAt)}${pe.overallScore != null ? ` · ${isGerman ? 'Gesamt' : 'Overall'}: ${pe.overallScore}/10` : ''}</div>
+                        ${pe.summary ? `<p style="margin: 0; line-height: 1.5;">${pe.summary}</p>` : ''}
+                    </div>
+                `).join('')}
+            </div>` : ''}
+
+            <!-- Transcript evaluations -->
+            ${exportData.transcriptEvaluations && exportData.transcriptEvaluations.length > 0 ? `
+            <div class="section">
+                <h2>📝 ${isGerman ? 'Transkript-Auswertungen' : 'Transcript evaluations'} (${exportData.transcriptEvaluations.length})</h2>
+                ${exportData.transcriptEvaluations.map(te => `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #16A34A; border-radius: 4px;">
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">${formatDate(te.createdAt)}${te.overallScore != null ? ` · ${te.overallScore}/10` : ''}</div>
+                        ${te.summary ? `<p style="margin: 0; line-height: 1.5;">${te.summary}</p>` : ''}
+                    </div>
+                `).join('')}
+            </div>` : ''}
         </div>
 
         <div class="footer">
@@ -955,6 +990,75 @@ const handleExport = async (req, res) => {
             },
         });
 
+        // Coach Practice session evaluations (GDPR Art. 20)
+        const practiceEvaluationRows = await prisma.practiceEvaluation.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                frameworkId: true,
+                scenarioId: true,
+                difficulty: true,
+                focusNote: true,
+                evaluationData: true,
+                language: true,
+                selfRating: true,
+                createdAt: true,
+            },
+        });
+
+        const practiceEvaluations = practiceEvaluationRows.map((row) => {
+            const evaluation = parseStoredJson(row.evaluationData, {});
+            return {
+                id: row.id,
+                frameworkId: row.frameworkId,
+                scenarioId: row.scenarioId,
+                difficulty: row.difficulty,
+                focusNote: row.focusNote || null,
+                language: row.language,
+                selfRating: row.selfRating,
+                createdAt: row.createdAt,
+                overallScore: evaluation.overallScore ?? null,
+                summary: evaluation.summary ?? null,
+                evaluation,
+            };
+        });
+
+        // Transcript coaching evaluations
+        const transcriptEvaluationRows = await prisma.transcriptEvaluation.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                preAnswers: true,
+                evaluationData: true,
+                language: true,
+                userRating: true,
+                userFeedback: true,
+                contactOptIn: true,
+                ratedAt: true,
+                createdAt: true,
+            },
+        });
+
+        const transcriptEvaluations = transcriptEvaluationRows.map((row) => {
+            const evaluation = parseStoredJson(row.evaluationData, {});
+            const preAnswers = parseStoredJson(row.preAnswers, null);
+            return {
+                id: row.id,
+                language: row.language,
+                preAnswers,
+                userRating: row.userRating,
+                userFeedback: row.userFeedback,
+                contactOptIn: row.contactOptIn,
+                ratedAt: row.ratedAt,
+                createdAt: row.createdAt,
+                overallScore: evaluation.overallScore ?? null,
+                summary: evaluation.summary ?? null,
+                evaluation,
+            };
+        });
+
         // Prepare export data
         const exportData = {
             exportDate: new Date().toISOString(),
@@ -1014,6 +1118,8 @@ const handleExport = async (req, res) => {
             } : null,
             sessionBehaviorLogs: sessionBehaviorLogs,
             userEvents: userEvents,
+            practiceEvaluations,
+            transcriptEvaluations,
         };
 
         // Return data in requested format
