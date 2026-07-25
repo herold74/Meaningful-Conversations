@@ -10,6 +10,7 @@ interface PracticeEvaluationReviewProps {
   difficultyLabel: string;
   onDone: () => void;
   onHistory: () => void;
+  onProgress: () => void;
 }
 
 const Section: React.FC<{ title: string; children: React.ReactNode; badge?: React.ReactNode }> = ({ title, children, badge }) => (
@@ -54,6 +55,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   difficultyLabel,
   onDone,
   onHistory,
+  onProgress,
 }) => {
   const { t, language } = useLocalization();
   const evidenceLabel = language === 'de' ? 'Belege:' : 'Evidence:';
@@ -94,6 +96,17 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         evidenceLabel={evidenceLabel}
         gapsLabel={gapsLabel}
       />
+      {evaluation.coacheeAutonomy && (
+        <div>
+          <DimensionSection
+            title={t('practice_dim_autonomy')}
+            data={evaluation.coacheeAutonomy}
+            evidenceLabel={evidenceLabel}
+            gapsLabel={gapsLabel}
+          />
+          <p className="text-xs text-content-secondary -mt-2 mb-4 px-1">{t('practice_dim_autonomy_hint')}</p>
+        </div>
+      )}
       <DimensionSection
         title={t('practice_dim_satisfaction')}
         data={evaluation.coacheeSatisfaction}
@@ -151,8 +164,15 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         </button>
         <button
           type="button"
-          onClick={onHistory}
+          onClick={onProgress}
           className="flex-1 py-3 rounded-lg btn-surface-outline font-semibold"
+        >
+          {t('practice_progress_link')}
+        </button>
+        <button
+          type="button"
+          onClick={onHistory}
+          className="flex-1 py-3 rounded-lg btn-surface-outline font-semibold sm:hidden"
         >
           {t('practice_history_link')}
         </button>

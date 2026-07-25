@@ -15,9 +15,10 @@ interface PracticeSetupViewProps {
   onStart: (config: CoachPracticeConfig) => void;
   onBack: () => void;
   onHistory: () => void;
+  onProgress: () => void;
 }
 
-const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({ onStart, onBack, onHistory }) => {
+const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({ onStart, onBack, onHistory, onProgress }) => {
   const { t, language } = useLocalization();
   const [catalog, setCatalog] = useState<PracticeCatalog | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,9 +88,14 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({ onStart, onBack, 
         <button onClick={onBack} className="text-sm text-content-secondary hover:text-content-primary">
           ← {t('practice_back')}
         </button>
-        <button onClick={onHistory} className="text-sm text-accent-primary hover:underline">
-          {t('practice_history_link')}
-        </button>
+        <div className="flex items-center gap-4 text-sm">
+          <button onClick={onProgress} className="text-accent-primary hover:underline font-medium">
+            {t('practice_progress_link')}
+          </button>
+          <button onClick={onHistory} className="text-accent-primary hover:underline">
+            {t('practice_history_link')}
+          </button>
+        </div>
       </div>
 
       <h1 className="text-2xl md:text-3xl font-bold text-content-primary mb-2">{t('practice_title')}</h1>
@@ -228,6 +234,11 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({ onStart, onBack, 
           className="w-full rounded-lg border border-border-primary bg-background-primary px-3 py-2 text-sm text-content-primary"
         />
       </section>
+
+      <div className="mb-6 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3">
+        <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
+        <p className="text-sm text-content-primary">{t('practice_start_callout')}</p>
+      </div>
 
       <button
         type="button"
