@@ -3,6 +3,25 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.3.0] - 2026-07-25
+
+Coach Practice progress, evaluation polish, admin analytics, and GDPR export extensions.
+
+### Added
+- **Practice progress dashboard:** KPIs, level, sparkline, activity heatmap, dimension radar, methods matrix, milestones, and recent sessions (“Dein Fortschritt”)
+- **Method filter** on progress view when multiple coaching methods have been practiced
+- **5th evaluation dimension:** Coachee autonomy (facilitate self-help vs. directing); overall score is now the average of five dimensions
+- **Admin practice analytics:** GDPR-safe aggregate stats (Catalog & Impact tabs, k-anonymity suppression for small cohorts)
+- **GDPR data export:** Practice evaluations and transcript evaluations included in JSON/HTML export
+
+### Changed
+- Admin tab bar: responsive label priority (no horizontal scroll)
+- Coach Practice empty chat and setup callouts clarify that the coach opens the session
+- User guide and Test Runner updated for five evaluation dimensions
+
+### Fixed
+- Double welcome in regular coaching when Topic Identification follows a Next Steps check-in
+
 ## [2.2.1] - 2026-07-24
 
 Mistral API maintenance release — SDK pin and transcript evaluation model context fix.
@@ -87,6 +106,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.3.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.0
 [2.2.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.1
 [2.2.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.0
 [2.1.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.1.1
