@@ -850,9 +850,18 @@ const practiceEvaluationSchema = {
         clarity: {
             type: 'OBJECT',
             properties: {
-                score: { type: 'INTEGER', description: 'Score from 1 to 10 — were questions and interventions clear, well-paced, and non-leading where required?' },
+                score: { type: 'INTEGER', description: 'Score from 1 to 10 — were questions and interventions clear, well-paced, and linguistically understandable?' },
                 evidence: { type: 'STRING', description: 'Examples of clear or unclear coaching interventions.' },
                 gaps: { type: 'STRING', description: 'What reduced clarity or pacing.' }
+            },
+            required: ['score', 'evidence', 'gaps']
+        },
+        coacheeAutonomy: {
+            type: 'OBJECT',
+            properties: {
+                score: { type: 'INTEGER', description: 'Score from 1 to 10 — did the coach facilitate the coachee\'s own thinking and solution-finding (high), or exert influence through advice, imposed vision, leading questions, or problem-definition (low)? The coach owns setting and method; the coachee owns content and solutions. High effectiveness does NOT justify low autonomy.' },
+                evidence: { type: 'STRING', description: 'Transcript quotes showing facilitative vs. directive coach behavior.' },
+                gaps: { type: 'STRING', description: 'Specific directive patterns: advice, leading questions, coach-imposed solutions, premature problem framing, judgment.' }
             },
             required: ['score', 'evidence', 'gaps']
         },
@@ -898,10 +907,10 @@ const practiceEvaluationSchema = {
         },
         overallScore: {
             type: 'INTEGER',
-            description: 'Overall score 1-10: round(average of methodCompliance, effectiveness, clarity, and coacheeSatisfaction scores). Example: 8,7,9,8 → 8/10.'
+            description: 'Overall score 1-10: round(average of methodCompliance, effectiveness, clarity, coacheeAutonomy, and coacheeSatisfaction scores). Example: 8,7,9,8,8 → 8/10.'
         }
     },
-    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore']
+    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore']
 };
 
 const practiceEvaluationPrompts = {
@@ -940,16 +949,17 @@ ${transcript}
 
 ## Evaluation Instructions
 
-Score these four dimensions (1-10 each) with specific transcript quotes as evidence:
+Score these five dimensions (1-10 each) with specific transcript quotes as evidence:
 
 1. **Method compliance:** Did the coach follow the framework stages and principles?
 2. **Effectiveness:** Did the session help the coachee move toward insight or actionable next steps?
-3. **Clarity:** Were questions clear, well-paced, and appropriately non-leading?
-4. **Coachee satisfaction:** Would the simulated coachee feel heard, safe, and willing to continue?
+3. **Clarity:** Were questions and interventions clear, well-paced, and easy to understand?
+4. **Coachee autonomy:** Did the coach facilitate the coachee's own thinking and solution-finding — holding setting and method only — without advice, imposed vision, leading questions, or defining the problem/solution for the coachee? Score LOW if the coach directed, advised, or "fixed"; score HIGH if the coachee generated insights, options, and commitments. **Do not inflate autonomy because the session felt effective or the coachee seemed satisfied with advice.**
+5. **Coachee satisfaction:** Would the simulated coachee feel heard, safe, and willing to continue?
 
 Also provide strengths, development areas, 2-4 nextDrills (concrete practice suggestions), and calibration (compare self-rating to evidence if provided).
 
-**Overall score (1-10):** Calculate as round(average of the four dimension scores). Example: 8,7,9,8 → 8/10.
+**Overall score (1-10):** Calculate as round(average of the five dimension scores). Example: 8,7,9,8,8 → 8/10.
 
 Write all output in English. Be constructive and specific — this is training, not punishment.`
     },
@@ -987,16 +997,17 @@ ${transcript}
 
 ## Bewertungsanweisungen
 
-Bewerte diese vier Dimensionen (je 1-10) mit konkreten Transkript-Zitaten:
+Bewerte diese fünf Dimensionen (je 1-10) mit konkreten Transkript-Zitaten:
 
 1. **Methodentreue:** Hat der Coach die Phasen und Prinzipien der Methode befolgt?
 2. **Wirksamkeit:** Hat die Session den Coachee Richtung Erkenntnis oder nächste Schritte bewegt?
-3. **Klarheit:** Waren Fragen klar, gut getaktet und angemessen nicht-führend?
-4. **Coachee-Zufriedenheit:** Würde der simulierte Coachee sich gehört, sicher fühlen und weitermachen wollen?
+3. **Klarheit:** Waren Fragen und Interventionen klar, gut getaktet und verständlich formuliert?
+4. **Coachee-Autonomie:** Hat der Coach die eigene Denk- und Lösungsarbeit des Coachees ermöglicht — Rahmen und Methode gehalten, ohne Ratschläge, eigene Vision, führende Fragen oder vorgegebene Problem-/Lösungsdefinition? Niedrig bewerten bei Direktivität, Beratung oder „Retten"; hoch bewerten, wenn der Coachee Erkenntnisse, Optionen und Commitments selbst formuliert. **Autonomie nicht deshalb aufwerten, weil die Session wirksam wirkte oder der Coachee mit Ratschlägen zufrieden schien.**
+5. **Coachee-Zufriedenheit:** Würde der simulierte Coachee sich gehört, sicher fühlen und weitermachen wollen?
 
 Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorschläge) und Kalibrierung (Selbsteinschätzung vs. Evidenz).
 
-**Gesamtscore (1-10):** Berechne als round(Durchschnitt der vier Dimensionen). Beispiel: 8,7,9,8 → 8/10.
+**Gesamtscore (1-10):** Berechne als round(Durchschnitt der fünf Dimensionen). Beispiel: 8,7,9,8,8 → 8/10.
 
 Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`
     }

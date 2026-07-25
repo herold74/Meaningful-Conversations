@@ -742,6 +742,18 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           </p>
         </div>
       )}
+
+      {/* Coach Practice: human opens the session */}
+      {coachPracticeConfig && chatHistory.length === 0 && (
+        <div className="px-4 py-3 bg-accent-primary/10 border-b border-accent-primary/30">
+          <p className="text-sm font-semibold text-content-primary text-center mb-1">
+            {t('practice_open_hint_title')}
+          </p>
+          <p className="text-sm text-content-secondary text-center">
+            {t('practice_open_hint_body', { coacheeName: coachPracticeConfig.coacheeName })}
+          </p>
+        </div>
+      )}
       
     {isVoiceMode ? (
         <main className="flex-1 flex flex-col items-center text-center bg-background-primary dark:bg-background-primary/50 overflow-hidden">
@@ -814,7 +826,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     <div ref={voiceTextRef} className="flex-1 min-h-0 overflow-y-auto w-full max-w-md px-4">
                         <div className="flex flex-col justify-end min-h-full">
                             <p className="text-lg text-content-secondary text-center whitespace-pre-line py-2">
-                                {input || (speech.isListening ? t('chat_voice_listening') : t('chat_tapToSpeak'))}
+                                {input || (speech.isListening
+                                  ? t('chat_voice_listening')
+                                  : coachPracticeConfig && chatHistory.length === 0
+                                    ? t('practice_open_hint_body', { coacheeName: coachPracticeConfig.coacheeName })
+                                    : t('chat_tapToSpeak'))}
                             </p>
                             {speech.isListening && !wakeLock.isSupported && (
                                 <p className="text-xs text-status-warning-foreground text-center mt-1">{t('chat_keep_screen_on')}</p>
@@ -852,6 +868,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     ) : (
       <>
         <main ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6" aria-live="polite" aria-relevant="additions">
+          {coachPracticeConfig && chatHistory.length === 0 && (
+            <div className="flex flex-col items-center text-center py-8 px-4">
+              <img
+                src={coachPracticeConfig.coacheeAvatar}
+                alt={coachPracticeConfig.coacheeName}
+                className="w-20 h-20 rounded-full mb-4 ring-2 ring-accent-primary/30 shadow-sm"
+              />
+              <p className="text-lg font-semibold text-content-primary mb-2">{coachPracticeConfig.coacheeName}</p>
+              <p className="text-sm text-content-secondary max-w-md">{coachPracticeConfig.scenarioName}</p>
+            </div>
+          )}
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
@@ -919,7 +946,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                   value={input}
                   onChange={(e) => { if (e.target.value.length <= 5000) setInput(e.target.value); }}
                   onKeyDown={handleKeyDown}
-                  placeholder={t('chat_placeholder')}
+                  placeholder={coachPracticeConfig ? t('practice_chat_placeholder') : t('chat_placeholder')}
                   disabled={isLoading}
                   maxLength={5000}
                   rows={1}

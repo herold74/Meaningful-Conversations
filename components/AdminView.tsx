@@ -33,6 +33,8 @@ import { ApiUsageView } from './ApiUsageView';
 import NewsletterPanel from './NewsletterPanel';
 import TestRunner from './TestRunner';
 import TranscriptRatingsView from './TranscriptRatingsView';
+import AdminPracticeAnalyticsView from './AdminPracticeAnalyticsView';
+import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface AdminViewProps {
     currentUser: User | null;
@@ -44,7 +46,7 @@ interface AdminViewProps {
     onTestRunnerOpened?: () => void;
 }
 
-type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage';
+type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage' | 'practice-analytics';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
 type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'profile' | 'loginCount' | 'xp' | 'lastLogin';
 
@@ -670,6 +672,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         feedback: { icon: StarIcon, key: 'admin_ratings_tab' },
         runner: { icon: ActivityIcon, key: 'admin_runner_tab' },
         'api-usage': { icon: DollarIcon, key: 'admin_api_usage_tab' },
+        'practice-analytics': { icon: ClipboardCheckIcon, key: 'admin_practice_analytics_tab' },
     };
 
     const sessionFeedback = useMemo(() => feedback.filter(item => item.rating !== null), [feedback]);
@@ -725,18 +728,38 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         });
     }, [sessionFeedback, selectedBotFilter, selectedProviderFilter]);
 
+    /**
+     * Tab label visibility: left → right priority (User Management keeps text longest).
+     * Right tabs lose text first as the viewport narrows; no horizontal scroll.
+     */
+    const tabLabelClass = (tab: AdminTab): string => {
+        const base = 'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs max-w-[5.5rem]';
+        switch (tab) {
+            case 'users':
+                return base; // last to become icon-only
+            case 'feedback':
+                return `${base} hidden min-[420px]:inline`;
+            case 'tickets':
+                return `${base} hidden sm:inline`;
+            case 'codes':
+                return `${base} hidden md:inline`;
+            case 'runner':
+                return `${base} hidden lg:inline`;
+            case 'practice-analytics':
+                return `${base} hidden lg:inline`;
+            case 'api-usage':
+                return `${base} hidden xl:inline`; // first to become icon-only
+            default:
+                return `${base} hidden md:inline`;
+        }
+    };
+
     const renderTabs = () => (
-        <div className="flex justify-around border-b border-gray-300 dark:border-gray-700">
-            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'api-usage'] as AdminTab[]).map(tab => {
+        <div className="border-b border-gray-300 dark:border-gray-700 w-full min-w-0">
+            <div className="flex w-full min-w-0">
+            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'api-usage'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
-                let textClass = 'whitespace-pre-line text-center leading-tight';
-                if (tab === 'runner' || tab === 'api-usage') {
-                    textClass += ' hidden lg:inline';
-                } else if (tab === 'tickets' || tab === 'feedback') {
-                    textClass += ' hidden md:inline';
-                } else {
-                    textClass += ' hidden sm:inline';
-                }
+                const textClass = tabLabelClass(tab);
 
                 const hasOpenTickets = tab === 'tickets' && tickets.some(tk => tk.status === 'OPEN');
 
@@ -744,18 +767,20 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-2 md:px-4 py-3 text-xs font-bold uppercase transition-colors focus:outline-none ${
+                        className={`flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 px-0.5 sm:px-1 py-2 sm:py-3 text-xs font-bold uppercase transition-colors focus:outline-none ${
                             activeTab === tab
-                                ? 'border-b-2 border-accent-primary text-content-primary'
+                                ? 'border-b-2 border-accent-primary text-content-primary -mb-px'
                                 : 'text-content-subtle hover:bg-background-tertiary'
                         }`}
                         aria-label={t(key)}
+                        title={t(key).replace('\n', ' ')}
                     >
                         <Icon className={`w-5 h-5 flex-shrink-0 ${hasOpenTickets ? 'text-red-500' : ''}`} />
-                        <span className={textClass}>{t(key)}</span>
+                        <span className={`${textClass} line-clamp-2 overflow-hidden w-full`}>{t(key)}</span>
                     </button>
                 )
             })}
+            </div>
         </div>
     );
     
@@ -1778,13 +1803,14 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             feedback: renderRatings(),
             runner: currentUser?.isDeveloper ? renderTestRunner() : <p className="text-content-secondary">{t('admin_developer_required') || 'Developer access required.'}</p>,
             'api-usage': <ApiUsageView />,
+            'practice-analytics': <AdminPracticeAnalyticsView />,
         };
 
-        return <div className="p-4">{views[activeTab]}</div>;
+        return <div className="p-2 sm:p-4 min-w-0 overflow-hidden">{views[activeTab]}</div>;
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg">
+        <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 mt-4 mb-10 animate-fadeIn rounded-lg shadow-lg min-w-0 overflow-x-hidden">
              <div className="text-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200 uppercase">{t('admin_title')}</h1>
                 <div className="mt-2 flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">

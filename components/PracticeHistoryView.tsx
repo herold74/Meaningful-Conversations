@@ -5,10 +5,11 @@ import * as geminiService from '../services/geminiService';
 
 interface PracticeHistoryViewProps {
   onBack: () => void;
+  onProgress: () => void;
   onViewEvaluation: (item: PracticeEvaluationSummary) => void;
 }
 
-const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onViewEvaluation }) => {
+const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onProgress, onViewEvaluation }) => {
   const { t } = useLocalization();
   const [evaluations, setEvaluations] = useState<PracticeEvaluationSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,12 @@ const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onVie
         ← {t('practice_back')}
       </button>
 
-      <h1 className="text-2xl font-bold text-content-primary mb-6">{t('practice_history_title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h1 className="text-2xl font-bold text-content-primary">{t('practice_history_title')}</h1>
+        <button onClick={onProgress} className="text-sm text-accent-primary hover:underline font-medium">
+          {t('practice_progress_link')}
+        </button>
+      </div>
 
       {loading && <p className="text-content-secondary">{t('practice_loading')}</p>}
 

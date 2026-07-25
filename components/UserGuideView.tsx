@@ -126,7 +126,7 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 
 - **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
 - **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
-- **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Sitzungsbewertungen, eingelöste Codes und Nutzungsstatistiken.
+- **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Feedbacks, eingelöste Codes, Coaching-Übungssessions, Transkript-Auswertungen und Nutzungsstatistiken.
 - **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
@@ -939,10 +939,11 @@ Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich
 - Optional bewerten Sie Ihre Leistung auf einer Skala von **1–10**, bevor die KI auswertet. Diese Selbsteinschätzung dient der Kalibrierung und kann übersprungen werden.
 
 **Schritt 4: Auswertung erhalten**
-Die KI analysiert das Transkript und bewertet Sie in vier Dimensionen (jeweils **1–10**):
+Die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils **1–10**):
 - **Methoden-Treue** — Wie konsequent haben Sie die gewählte Methode angewendet?
 - **Wirksamkeit** — Wie hilfreich war Ihr Coaching für den Klienten?
 - **Klarheit** — Wie klar und strukturiert waren Ihre Fragen und Interventionen?
+- **Coachee-Autonomie** — Haben Sie die eigene Denk- und Lösungsarbeit des Klienten ermöglicht (ohne Ratschläge, eigene Vision oder vorgegebene Lösungen)?
 - **Klientenzufriedenheit** — Wie zufrieden wirkt der Klient am Ende?
 
 Dazu erhalten Sie eine **Gesamtbewertung (1–10)**, eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen.
@@ -1075,7 +1076,7 @@ Via the menu (☰), you can access **Account Management** with the following opt
 
 - **Edit Profile:** Change your name and email address.
 - **Change Password:** Update your password. **Note:** Since your password generates the encryption key, your encrypted data (Life Context, Personality Profile) is automatically re-encrypted with the new key.
-- **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, session ratings, redeemed codes, and usage statistics.
+- **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, feedback, redeemed codes, coach practice sessions, transcript evaluations, and usage statistics.
 - **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
 - **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
 
@@ -1857,10 +1858,11 @@ This feature is available from the **Client access tier** and is located in the 
 - Optionally rate your performance on a **1–10** scale before the AI evaluates. This self-rating helps with calibration and can be skipped.
 
 **Step 4: Receive your evaluation**
-The AI analyzes the transcript and scores you on four dimensions (each **1–10**):
+The AI analyzes the transcript and scores you on five dimensions (each **1–10**):
 - **Method compliance** — How consistently did you apply the chosen method?
 - **Effectiveness** — How helpful was your coaching for the client?
 - **Clarity** — How clear and structured were your questions and interventions?
+- **Coachee autonomy** — Did you facilitate the client's own thinking and solution-finding (without advice, imposed vision, or prescribed solutions)?
 - **Coachee satisfaction** — How satisfied does the client appear at the end?
 
 You also receive an **overall score (1–10)**, a summary, covered method stages, strengths, development areas, and suggested drills.

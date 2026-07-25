@@ -16,6 +16,7 @@ const {
   getInterviewTemplate,
   transcriptEvaluationPrompts,
   botRecommendationPrompts,
+  practiceEvaluationPrompts,
 } = require('../geminiPrompts');
 
 beforeEach(() => {
@@ -286,6 +287,27 @@ describe('geminiPrompts', () => {
       expect(prompt).toContain('PRIMÄRE');
       expect(prompt).toContain('SEKUNDÄRE');
       expect(prompt).toContain('Coaching-Profile');
+    });
+  });
+
+  describe('practiceEvaluationPrompts', () => {
+    test('schema requires five dimensions including coacheeAutonomy', () => {
+      expect(practiceEvaluationPrompts.schema.required).toContain('coacheeAutonomy');
+      expect(practiceEvaluationPrompts.schema.required).toContain('coacheeSatisfaction');
+      expect(practiceEvaluationPrompts.schema.properties.coacheeAutonomy).toBeDefined();
+    });
+
+    test('de prompt mentions Coachee-Autonomie', () => {
+      const prompt = practiceEvaluationPrompts.de.prompt({
+        framework: { name: 'GROW', stages: 'Goal', complianceCriteria: 'Follow GROW', evaluatorRubric: 'Rubric' },
+        scenarioSummary: 'Test scenario',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Hello\nCoachee: Hi',
+        currentDate: '2026-07-25',
+      });
+      expect(prompt).toContain('Coachee-Autonomie');
+      expect(prompt).toContain('fünf Dimensionen');
     });
   });
 });

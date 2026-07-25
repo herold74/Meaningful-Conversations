@@ -99,6 +99,9 @@ const DataExportView: React.FC<DataExportViewProps> = ({ lifeContext = '', color
                         <li>{t('export_data_includes_context')}</li>
                         <li>{t('export_data_includes_feedback')}</li>
                         <li>{t('export_data_includes_codes')}</li>
+                        <li>{t('export_data_includes_practice')}</li>
+                        <li>{t('export_data_includes_transcript_eval')}</li>
+                        <li>{t('export_data_includes_personality')}</li>
                         <li>{t('export_data_includes_api')}</li>
                     </ul>
                 </div>
