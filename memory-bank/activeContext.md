@@ -3,9 +3,9 @@
 ## Current Status
 **Version:** 2.3.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-24**, Build **2**, v2.2.1 — https://mc-beta.manualmode.at (health OK; Mistral SDK ^1.15.1)
+**Staging:** Deployed **2026-07-25**, Build **2**, v2.3.0 — https://mc-beta.manualmode.at (health OK)
 **Production:** v2.1.0 — https://mc-app.manualmode.at
-**App Store:** Xcode synced **2.2.1 Build 2** — ready to Archive
+**App Store:** Xcode synced **2.3.0 Build 2** — ready to Archive
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
@@ -18,7 +18,7 @@
 - **Method filter:** Pill selector on progress view when >1 method practiced; all KPIs/charts/sessions recompute for selected framework.
 - **Admin analytics (GDPR aggregates):** `GET /api/admin/practice-stats`, `AdminPracticeAnalyticsView` (Catalog & Impact sub-tabs, k-anonymity &lt;5 suppression); Admin tab bar — no horizontal scroll, responsive label drop.
 - **GDPR export:** `routes/data.js` — practice evaluations + transcript evaluations in JSON/HTML export; `DataExportView` + UserGuide updated; tests extended.
-- **Deploy note:** Staging deploy for v2.3.0; migration `20260724120000_add_practice_evaluations` if not yet applied on target env.
+- **Deploy note:** Staging v2.3.0 Build 2 live **2026-07-25**; production still v2.1.0.
 
 ### v2.2.1 — Mistral API maintenance (patch)
 - Pin `@mistralai/mistralai` ^1.15.1; transcript evaluation uses `analysis` model context for Mistral mapping.
