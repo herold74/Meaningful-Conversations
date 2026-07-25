@@ -240,3 +240,73 @@ describe('PUT /api/data/user/profile', () => {
         expect(updateCall.data).not.toHaveProperty('lastName');
     });
 });
+
+describe('GET /api/data/export', () => {
+    const mockUser = {
+        id: 'test-user-id',
+        email: 'coach@example.com',
+        firstName: 'Test',
+        lastName: 'Coach',
+        newsletterConsent: false,
+        newsletterConsentDate: null,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+        lastLogin: null,
+        loginCount: 1,
+        status: 'ACTIVE',
+        isPremium: false,
+        isAdmin: false,
+        isDeveloper: false,
+        accessExpiresAt: null,
+        unlockedCoaches: null,
+        lifeContext: null,
+        gamificationState: null,
+        feedbacksByUser: [],
+        upgradeCodesUsedByUser: [],
+    };
+
+    it('includes coach practice and transcript evaluations in JSON export', async () => {
+        prisma.user.findUnique.mockResolvedValue(mockUser);
+        prisma.apiUsage.findMany.mockResolvedValue([]);
+        prisma.personalityProfile.findUnique.mockResolvedValue(null);
+        prisma.sessionBehaviorLog.findMany.mockResolvedValue([]);
+        prisma.userEvent.findMany.mockResolvedValue([]);
+        prisma.practiceEvaluation.findMany.mockResolvedValue([
+            {
+                id: 'pe-1',
+                frameworkId: 'grow',
+                scenarioId: 'career-decision',
+                difficulty: 'moderate',
+                focusNote: null,
+                evaluationData: JSON.stringify({ overallScore: 8, summary: 'Good contracting' }),
+                language: 'de',
+                selfRating: 7,
+                createdAt: new Date('2026-07-20'),
+            },
+        ]);
+        prisma.transcriptEvaluation.findMany.mockResolvedValue([
+            {
+                id: 'te-1',
+                preAnswers: JSON.stringify({ goal: 'Improve listening' }),
+                evaluationData: JSON.stringify({ overallScore: 7, summary: 'Transcript review' }),
+                language: 'de',
+                userRating: 8,
+                userFeedback: null,
+                contactOptIn: false,
+                ratedAt: null,
+                createdAt: new Date('2026-06-15'),
+            },
+        ]);
+
+        const res = await request(app)
+            .get('/api/data/export?format=json')
+            .set('Authorization', 'Bearer fake-token');
+
+        expect(res.status).toBe(200);
+        expect(res.body.practiceEvaluations).toHaveLength(1);
+        expect(res.body.practiceEvaluations[0].frameworkId).toBe('grow');
+        expect(res.body.practiceEvaluations[0].evaluation.overallScore).toBe(8);
+        expect(res.body.transcriptEvaluations).toHaveLength(1);
+        expect(res.body.transcriptEvaluations[0].preAnswers.goal).toBe('Improve listening');
+    });
+});

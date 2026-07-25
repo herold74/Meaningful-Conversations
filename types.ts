@@ -50,7 +50,8 @@ export type NavView =
     | 'practiceChat'
     | 'practiceSelfRating'
     | 'practiceReview'
-    | 'practiceHistory';
+    | 'practiceHistory'
+    | 'practiceProgress';
 
 export type CoachingMode = 'off' | 'dpc' | 'dpfl';
 
@@ -318,6 +319,7 @@ export interface PracticeEvaluationResult {
     methodCompliance: PracticeDimensionScore & { stagesCovered: string[] };
     effectiveness: PracticeDimensionScore;
     clarity: PracticeDimensionScore;
+    coacheeAutonomy?: PracticeDimensionScore;
     coacheeSatisfaction: PracticeDimensionScore;
     strengths: string[];
     developmentAreas: string[];

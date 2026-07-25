@@ -7,6 +7,7 @@ const { marked } = require('marked');
 const { sendNewsletterEmail } = require('../services/mailService.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const { getActivityStats } = require('../services/activityTracker.js');
+const { computePracticeAdminStats } = require('../services/practiceStatsService.js');
 const brand = require('../config/brand');
 
 // Configure marked for email-safe HTML
@@ -802,6 +803,36 @@ router.get('/transcript-ratings', async (req, res) => {
 // GET /api/admin/stats/activity
 router.get('/stats/activity', (req, res) => {
     res.json(getActivityStats());
+});
+
+// GET /api/admin/practice-stats?days=90&language=de
+// GDPR: aggregated Coach Practice metrics only (no userId, no transcript content).
+router.get('/practice-stats', async (req, res) => {
+    try {
+        const days = Math.min(Math.max(parseInt(req.query.days, 10) || 90, 7), 365);
+        const language = req.query.language === 'en' ? 'en' : 'de';
+        const end = new Date();
+        const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+
+        const rows = await prisma.practiceEvaluation.findMany({
+            where: { createdAt: { gte: start, lte: end } },
+            select: {
+                frameworkId: true,
+                scenarioId: true,
+                difficulty: true,
+                userId: true,
+                createdAt: true,
+                evaluationData: true,
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        const stats = computePracticeAdminStats(rows, { days, language });
+        res.json(stats);
+    } catch (error) {
+        console.error('[Admin] practice-stats error:', error);
+        res.status(500).json({ error: 'Failed to load practice statistics.' });
+    }
 });
 
 module.exports = router;
