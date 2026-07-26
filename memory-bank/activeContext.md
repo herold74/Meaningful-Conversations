@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.3.0
+**Version:** 2.3.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-25**, Build **2**, v2.3.0 — https://mc-beta.manualmode.at (health OK)
-**Production:** v2.1.0 — https://mc-app.manualmode.at
-**App Store:** Xcode synced **2.3.0 Build 2** — ready to Archive
+**Staging:** v2.3.0 Build 2 (2026-07-25) — pending v2.3.1 deploy
+**Production:** v2.1.0 — pending v2.3.1 deploy
+**App Store:** pending v2.3.1 Xcode sync
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
