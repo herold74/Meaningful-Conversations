@@ -104,9 +104,10 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Staging v2.3.0 (2026-07-25):** Build **2** — https://mc-beta.manualmode.at, health OK
-- [x] **Xcode sync v2.3.0 (2026-07-25):** `npm run build && npx cap sync ios`
-- [x] **Staging v2.2.1 (2026-07-24):** Build **2** — superseded by v2.3.0
+- [x] **Staging v2.3.1 (2026-07-26):** Build **2** — https://mc-beta.manualmode.at, health OK
+- [x] **Production v2.3.1 (2026-07-26):** Build **2** — https://mc-app.manualmode.at, health OK
+- [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
+- [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1
 - [x] **Xcode sync (2026-07-24):** `npm run build && npx cap sync ios` — MARKETING_VERSION 2.2.0, CURRENT_PROJECT_VERSION 2
 - [x] **v2.1.0 release (2026-07-24):** Documented on GitHub — CHANGELOG, RELEASE-NOTES-2.1.0, version bump, staging + Xcode sync
 - [x] **Production v2.1.0 (2026-07-24):** Deployed to https://mc-app.manualmode.at — Build 2, GitLab registry, parity with staging (Web/PWA); App Store native still 2.0.1 until submit
@@ -136,8 +137,8 @@
     - [x] Admin GDPR-safe practice analytics (`AdminPracticeAnalyticsView`, k-anonymity)
     - [x] GDPR data export includes practice sessions
     - [x] Double-welcome fix (regular coaching + practice empty-chat intro)
-    - [x] Staging deploy v2.3.0 (2026-07-25)
-    - [ ] Production deploy (still v2.1.0)
+    - [x] In-progress session resume via sessionStorage (v2.3.1)
+    - [x] Staging + production deploy v2.3.1 (2026-07-26)
 
 ## Security & Infrastructure (v2.0.1 — 2026-07-15)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API

@@ -3,11 +3,17 @@
 ## Current Status
 **Version:** 2.3.1
 **Branch:** `main`
-**Staging:** v2.3.0 Build 2 (2026-07-25) — pending v2.3.1 deploy
-**Production:** v2.1.0 — pending v2.3.1 deploy
-**App Store:** pending v2.3.1 Xcode sync
+**Staging:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-beta.manualmode.at (health OK)
+**Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
+**App Store:** Xcode synced **2.3.1 Build 2** — ready to Archive
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-26 — v2.3.1)
+
+### Coach Practice session resume (`9011000`)
+- **GDPR draft:** `sessionStorage` resume/discard for in-progress practice (`utils/practiceSessionDraft.ts`, `PracticeResumePrompt`)
+- Deployed staging + production Build **2**; GitHub release `v2.3.1`; Xcode synced.
 
 ## Recent Changes (2026-07-25 — v2.3.0)
 
