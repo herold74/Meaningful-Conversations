@@ -34,6 +34,14 @@ import BrandLoader from './components/shared/BrandLoader';
 import { getNextThemeInCycle, HAS_MULTIPLE_THEMES } from './config/themes';
 import { brand } from './config/brand';
 import { hexToRgb } from './utils/colorUtils';
+import PracticeResumePrompt from './components/PracticeResumePrompt';
+import {
+    botFromPracticeConfig,
+    clearPracticeSessionDraft,
+    loadPracticeSessionDraft,
+    savePracticeSessionDraft,
+    type PracticeSessionDraft,
+} from './utils/practiceSessionDraft';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -136,6 +144,7 @@ const App: React.FC = () => {
     const [practiceConfig, setPracticeConfig] = useState<CoachPracticeConfig | null>(null);
     const [practiceEvaluation, setPracticeEvaluation] = useState<PracticeEvaluationResult | null>(null);
     const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
+    const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
 
     const { isDarkMode, setIsDarkMode, colorTheme, setColorTheme, isAutoThemeEnabled, setIsAutoThemeEnabled } = useTheme();
 
@@ -160,7 +169,13 @@ const App: React.FC = () => {
     };
 
     const { loadProfileInfo, applyIntentLogic, routeWithIntentPicker, shouldShowProfileHint, routeWithProfileHint } = useAppRouting({ currentUser, lifeContext, completedLenses, setView, setHighlightSection, setPostOceanRoute, setHasPersonalityProfile, setCompletedLenses });
-    const { handleLoginSuccess, handleAccessExpired, handleLogout } = useAuthHandlers({ setAndProcessUser, setEncryptionKey, setLifeContext, setGamificationState, setView, setPaywallUserEmail, setAuthRedirectReason, setMenuView, routeWithIntentPicker, DEFAULT_GAMIFICATION_STATE });
+    const { handleLoginSuccess, handleAccessExpired, handleLogout: authLogout } = useAuthHandlers({ setAndProcessUser, setEncryptionKey, setLifeContext, setGamificationState, setView, setPaywallUserEmail, setAuthRedirectReason, setMenuView, routeWithIntentPicker, DEFAULT_GAMIFICATION_STATE });
+
+    const handleLogout = useCallback(() => {
+        clearPracticeSessionDraft();
+        setPracticeDraftPrompt(null);
+        authLogout();
+    }, [authLogout]);
 
     const toggleDarkMode = () => {
         // When user manually toggles, disable auto-theme
@@ -189,6 +204,24 @@ const App: React.FC = () => {
             setHasPersonalityProfile(false);
         }
     }, [currentUser, encryptionKey]);
+
+    // Offer resume for in-progress Coach Practice (sessionStorage — tab-scoped, GDPR-friendly).
+    useEffect(() => {
+        if (!currentUser?.id || practiceConfig) return;
+        const draft = loadPracticeSessionDraft(currentUser.id);
+        if (draft) setPracticeDraftPrompt(draft);
+    }, [currentUser?.id, practiceConfig]);
+
+    useEffect(() => {
+        if (!currentUser?.id || !practiceConfig || chatHistory.length === 0) return;
+        savePracticeSessionDraft({
+            userId: currentUser.id,
+            practiceConfig,
+            chatHistory,
+            userMessageCount,
+            baselineMessageCount,
+        });
+    }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount]);
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
@@ -755,6 +788,7 @@ const App: React.FC = () => {
         // --- Coach Practice mode ---
         if (practiceConfig && selectedBot.id === 'practice-coachee') {
             if (userMessageCount === 0) {
+                clearPracticeSessionDraft();
                 setPracticeConfig(null);
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -1149,23 +1183,35 @@ const App: React.FC = () => {
 
     const handleStartPractice = (config: CoachPracticeConfig) => {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
+        clearPracticeSessionDraft();
+        setPracticeDraftPrompt(null);
         setPracticeConfig(config);
         setPracticeEvaluation(null);
         setPracticeSelfRating(undefined);
-        setSelectedBot({
-            id: 'practice-coachee',
-            name: config.coacheeName,
-            description: config.scenarioName,
-            description_de: config.scenarioName,
-            avatar: config.coacheeAvatar,
-            style: config.frameworkName,
-            style_de: config.frameworkName,
-            accessTier: 'client',
-        });
+        setSelectedBot(botFromPracticeConfig(config));
         setUserMessageCount(0);
         setBaselineMessageCount(0);
         setChatHistory([]);
         setView('practiceChat');
+    };
+
+    const handleResumePracticeDraft = () => {
+        if (!practiceDraftPrompt) return;
+        const draft = practiceDraftPrompt;
+        setPracticeDraftPrompt(null);
+        setPracticeEvaluation(null);
+        setPracticeSelfRating(undefined);
+        setPracticeConfig(draft.practiceConfig);
+        setSelectedBot(botFromPracticeConfig(draft.practiceConfig));
+        setChatHistory(draft.chatHistory);
+        setUserMessageCount(draft.userMessageCount);
+        setBaselineMessageCount(draft.baselineMessageCount);
+        setView('practiceChat');
+    };
+
+    const handleDiscardPracticeDraft = () => {
+        clearPracticeSessionDraft();
+        setPracticeDraftPrompt(null);
     };
 
     const runPracticeEvaluation = async (selfRating?: number) => {
@@ -1180,6 +1226,8 @@ const App: React.FC = () => {
                 selfRating,
             );
             setPracticeEvaluation({ ...result.evaluation, id: result.id || undefined });
+            clearPracticeSessionDraft();
+            setPracticeDraftPrompt(null);
             if (result.saveWarning) {
                 console.warn('[Practice]', result.saveWarning);
             }
@@ -1205,6 +1253,8 @@ const App: React.FC = () => {
     };
 
     const handlePracticeDone = () => {
+        clearPracticeSessionDraft();
+        setPracticeDraftPrompt(null);
         setPracticeConfig(null);
         setPracticeEvaluation(null);
         setSelectedBot(null);
@@ -1608,6 +1658,13 @@ const App: React.FC = () => {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onDeleteSuccess={() => { setIsDeleteModalOpen(false); handleLogout(); }}
             />
+            {practiceDraftPrompt && currentUser && !practiceConfig && (
+                <PracticeResumePrompt
+                    draft={practiceDraftPrompt}
+                    onResume={handleResumePracticeDraft}
+                    onDiscard={handleDiscardPracticeDraft}
+                />
+            )}
         </div>
     );
 };

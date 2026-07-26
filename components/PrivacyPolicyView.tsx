@@ -223,6 +223,7 @@ Unsere Anwendung verwendet **localStorage** und **sessionStorage** Ihres Browser
 - **Authentifizierung:** Speicherung des Login-Tokens
 - **Spracheinstellung:** Ihre bevorzugte Sprache
 - **Gastmodus:** Temporäre Speicherung Ihrer Daten (nur lokal, nicht auf Server)
+- **Coach Practice (Entwurf):** Temporäre Speicherung einer laufenden Übungssession im **sessionStorage** (nur in diesem Browser-Tab, maximal 24 Stunden). Enthält Gesprächsverlauf und Session-Konfiguration. Wird beim Schließen des Tabs, beim Verwerfen, beim Logout oder nach erfolgreicher Auswertung gelöscht. **Keine Übertragung an den Server**, bis Sie die Auswertung freiwillig abschließen.
 
 Diese Daten werden **ausschließlich lokal** in Ihrem Browser gespeichert und nicht an unsere Server übertragen. Sie können diese Daten jederzeit in Ihren Browser-Einstellungen löschen.
 
@@ -491,6 +492,7 @@ Our application uses **localStorage** and **sessionStorage** of your browser for
 - **Authentication:** Storage of login token
 - **Language setting:** Your preferred language
 - **Guest mode:** Temporary storage of your data (local only, not on server)
+- **Coach Practice (draft):** Temporary storage of an in-progress practice session in **sessionStorage** (this browser tab only, max. 24 hours). Contains conversation history and session configuration. Deleted when you close the tab, discard the draft, log out, or complete the evaluation. **Not transmitted to the server** until you voluntarily finish the evaluation.
 
 This data is stored **exclusively locally** in your browser and is not transmitted to our servers. You can delete this data at any time in your browser settings.
 
