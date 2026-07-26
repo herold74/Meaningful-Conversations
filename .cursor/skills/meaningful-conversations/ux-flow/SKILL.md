@@ -179,8 +179,10 @@ Login → routeWithIntentPicker
 1. `practiceSetup` — Pick framework (with explainers for practice-only methods: GROW, Solution-Focused, MI), scenario, difficulty, optional focus
 2. `practiceChat` — Human is coach; AI is coachee (`practice-coachee` bot id). No initial AI greeting — coach speaks first. Skips Life Context `/session/analyze`.
 3. End session → `practiceSelfRating` (optional 1–5) → evaluate via `/api/gemini/practice/evaluate`
-4. `practiceReview` — Four dimensions: method compliance, effectiveness, clarity, coachee satisfaction
+4. `practiceReview` — Five dimensions incl. coachee autonomy
 5. `practiceHistory` — Past evaluations (Client+)
+
+**In-progress draft (GDPR):** After the first message, `utils/practiceSessionDraft.ts` saves config + `chatHistory` to **sessionStorage** (tab-scoped, max 24h, keyed by `userId`). On reload/login, `PracticeResumePrompt` offers resume or discard. Cleared on logout, discard, new practice start, or successful evaluation. Not sent to server until evaluate.
 
 **Access:** `isClient || isAdmin || isDeveloper`
 
