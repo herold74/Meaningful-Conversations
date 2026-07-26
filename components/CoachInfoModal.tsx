@@ -5,6 +5,7 @@ import { Bot } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { XIcon } from './icons/XIcon';
 import { useFocusTrap } from '../utils/useFocusTrap';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 interface CoachInfoModalProps {
   bot: Bot;
@@ -42,7 +43,7 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
                 <XIcon className="w-6 h-6" />
             </button>
         </div>
-        <img src={bot.avatar} alt={bot.name} className="w-24 h-24 rounded-full mx-auto -mt-6 mb-4 border-4 border-background-secondary dark:border-background-tertiary" />
+        <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-24 h-24 rounded-full mx-auto -mt-6 mb-4 border-4 border-background-secondary dark:border-background-tertiary" />
         <h2 id="coach-info-title" className="text-2xl font-bold text-content-primary">{bot.name}</h2>
         <div className="flex flex-wrap justify-center gap-2 my-3">
           {botStyle.split(', ').map(tag => (

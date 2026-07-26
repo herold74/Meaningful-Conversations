@@ -5,6 +5,7 @@ import { BOTS } from '../constants';
 import { useLocalization } from '../context/LocalizationContext';
 import { brand } from '../config/brand';
 import BrandLoader from './shared/BrandLoader';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const WelcomeScreen: React.FC = () => {
   const { t, language } = useLocalization();
@@ -52,7 +53,7 @@ const WelcomeScreen: React.FC = () => {
               transition={{ duration: 0.35, delay: 0.2 + index * 0.08, ease: 'easeOut' }}
             >
               <img
-                src={bot.avatar}
+                src={resolveAssetUrl(bot.avatar)}
                 alt={bot.name}
                 className="w-full h-full rounded-full border-2 border-background-secondary object-cover"
               />
