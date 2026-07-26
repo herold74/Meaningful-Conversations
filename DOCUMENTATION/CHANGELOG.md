@@ -3,6 +3,14 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.3.1] - 2026-07-26
+
+GDPR-compliant resume for in-progress Coach Practice sessions.
+
+### Added
+- **Practice session draft:** In-progress Coach Practice saved to `sessionStorage` (tab-scoped, max 24h) with resume/discard prompt after reload
+- Privacy policy updated (DE/EN) documenting local draft storage
+
 ## [2.3.0] - 2026-07-25
 
 Coach Practice progress, evaluation polish, admin analytics, and GDPR export extensions.
@@ -106,6 +114,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.3.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.1
 [2.3.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.0
 [2.2.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.1
 [2.2.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.0
