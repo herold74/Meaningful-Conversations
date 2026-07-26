@@ -10,6 +10,7 @@ import {
 import * as geminiService from '../services/geminiService';
 import { BOTS } from '../constants';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 interface PracticeSetupViewProps {
   onStart: (config: CoachPracticeConfig) => void;
@@ -189,7 +190,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({ onStart, onBack, 
               }`}
             >
               <div className="flex items-center gap-3 mb-2">
-                <img src={sc.avatar} alt="" className="w-10 h-10 rounded-full" />
+                <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                 <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
               </div>
               <p className="text-sm text-content-secondary line-clamp-3">{sc.concern}</p>

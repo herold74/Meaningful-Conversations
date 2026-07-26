@@ -25,6 +25,7 @@ import * as api from '../services/api';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { speechService } from '../services/capacitorSpeechService';
 import { isDesktopWeb } from '../utils/platformDetection';
+import { resolveAssetUrl } from '../utils/assetUrl';
 import { useWakeLock } from '../hooks/useWakeLock';
 import CoachInfoModal from './CoachInfoModal';
 import { useTts } from '../hooks/useTts';
@@ -620,7 +621,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-accent-primary rounded-lg p-1 -ml-1 transition-colors hover:bg-background-tertiary dark:hover:bg-background-tertiary/50"
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
-                <img src={bot.avatar} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0 ring-2 ring-accent-primary/30" />
+                <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0 ring-2 ring-accent-primary/30" />
                 <div className="min-w-0 flex flex-col">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                     {coachPracticeConfig && (
@@ -760,7 +761,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             {/* Top: Bot Avatar & Name — pinned */}
             <div className="shrink-0 flex flex-col items-center pt-6 pb-2">
                 <div className="animate-fadeIn">
-                    <img src={bot.avatar} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
+                    <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
                     <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
                 </div>
             </div>
@@ -871,7 +872,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           {coachPracticeConfig && chatHistory.length === 0 && (
             <div className="flex flex-col items-center text-center py-8 px-4">
               <img
-                src={coachPracticeConfig.coacheeAvatar}
+                src={resolveAssetUrl(coachPracticeConfig.coacheeAvatar)}
                 alt={coachPracticeConfig.coacheeName}
                 className="w-20 h-20 rounded-full mb-4 ring-2 ring-accent-primary/30 shadow-sm"
               />
@@ -881,7 +882,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           )}
           {chatHistory.map((message, index) => (
             <div key={message.id} className={`group flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {message.role === 'bot' && <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
+              {message.role === 'bot' && <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />}
               {message.role === 'user' ? (
                 <div className="max-w-md px-4 py-2.5 gradient-accent rounded-2xl rounded-br-md shadow-sm prose prose-sm prose-invert [&_*]:text-inherit">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
@@ -925,7 +926,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
           ))}
           {isLoading && (
               <div className="flex gap-3 justify-start animate-fadeIn">
-                  <img src={bot.avatar} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />
+                  <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-8 h-8 rounded-full self-start shadow-sm" />
                   <div className="max-w-md px-4 py-3 chat-bubble-bot rounded-2xl rounded-bl-md">
                       <BrandLoader size="sm" />
                   </div>

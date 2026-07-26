@@ -13,6 +13,7 @@ import BrandLoader from './shared/BrandLoader';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -353,7 +354,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
         <div className="relative flex-shrink-0">
             <div className={`rounded-full p-0.5 ${getAvatarRingClass(avatarIndex, isLocked)}`}>
                 <img 
-                    src={bot.avatar} 
+                    src={resolveAssetUrl(bot.avatar)} 
                     alt={bot.name} 
                     className={`w-20 h-20 rounded-full border-2 border-background-secondary ${isLocked ? 'filter grayscale opacity-80' : ''}`}
                 />

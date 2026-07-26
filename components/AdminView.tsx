@@ -8,6 +8,7 @@ import { apiFetch, loadPersonalityProfile } from '../services/api';
 import { useLocalization } from '../context/LocalizationContext';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import BrandLoader from './shared/BrandLoader';
+import { resolveAssetUrl } from '../utils/assetUrl';
 import { BOTS } from '../constants';
 import { CheckIcon } from './icons/CheckIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
@@ -1455,7 +1456,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     {ratingStats.botStats.map(stat => (
                         <div key={stat.id} onClick={() => setSelectedBotFilter(stat.id)} className={`p-4 bg-white dark:bg-gray-800/50 border-2 rounded-lg shadow-md transition-all duration-200 cursor-pointer hover:border-accent-primary ${selectedBotFilter === stat.id ? 'border-accent-primary' : 'border-gray-200 dark:border-gray-700/50'}`}>
                             <div className="flex items-center gap-4 mb-3">
-                                <img src={stat.avatar} alt={stat.name} className="w-12 h-12 rounded-full" />
+                                <img src={resolveAssetUrl(stat.avatar)} alt={stat.name} className="w-12 h-12 rounded-full" />
                                 <div>
                                     <h4 className="font-bold text-lg text-gray-800 dark:text-gray-200">{stat.name}</h4>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{t('admin_ratings_avg_rating')}: <span className="font-bold text-gray-700 dark:text-gray-300">{stat.average}</span> ({stat.count})</p>

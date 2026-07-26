@@ -35,6 +35,7 @@ import { getNextThemeInCycle, HAS_MULTIPLE_THEMES } from './config/themes';
 import { brand } from './config/brand';
 import { hexToRgb } from './utils/colorUtils';
 import PracticeResumePrompt from './components/PracticeResumePrompt';
+import { isNativeApp } from './utils/platformDetection';
 import {
     botFromPracticeConfig,
     clearPracticeSessionDraft,
@@ -313,9 +314,10 @@ const App: React.FC = () => {
     }, [t]);
 
 
-    // --- PWA Service Worker Registration ---
+    // --- PWA Service Worker Registration (web/PWA only — breaks local assets on Capacitor) ---
     useEffect(() => {
         const registerServiceWorker = () => {
+            if (isNativeApp()) return;
             if ('serviceWorker' in navigator) {
                 const swUrl = `${window.location.origin}/sw.js`;
                 navigator.serviceWorker.register(swUrl)
