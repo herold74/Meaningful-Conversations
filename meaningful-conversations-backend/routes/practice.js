@@ -3,6 +3,7 @@ const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const { getPublicCatalog } = require('../practice/frameworks.js');
 const { getPublicScenarios } = require('../practice/scenarios.js');
+const { resolvePublicAssetUrl } = require('../utils/publicAssetUrl.js');
 
 const router = express.Router();
 
@@ -29,7 +30,10 @@ router.get('/catalog', authMiddleware, async (req, res) => {
     const language = req.query.language === 'en' ? 'en' : 'de';
     res.json({
       frameworks: getPublicCatalog(language),
-      scenarios: getPublicScenarios(language),
+      scenarios: getPublicScenarios(language).map((scenario) => ({
+        ...scenario,
+        avatar: resolvePublicAssetUrl(scenario.avatar),
+      })),
       difficulties: [
         { id: 'easy', label: language === 'en' ? 'Easy' : 'Leicht' },
         { id: 'moderate', label: language === 'en' ? 'Moderate' : 'Mittel' },
