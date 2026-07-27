@@ -6,12 +6,13 @@ import { useLocalization } from '../context/LocalizationContext';
 import { brand } from '../config/brand';
 import BrandLoader from './shared/BrandLoader';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { getCoachSessionRing, getCoachSessionRingClass } from '../utils/coachSessionRing';
 
 const WelcomeScreen: React.FC = () => {
   const { t, language } = useLocalization();
   const appName = language === 'de' ? brand.appNameDe : brand.appName;
 
-  // Clock positions around the logo; avatar rings alternate teal (brand) / amber
+  // Clock positions around the logo; avatar rings encode session rhythm (clarify / develop / forward)
   const avatarSlots: { botId: string; style: React.CSSProperties }[] = [
     { botId: 'gloria-interview', style: { top: '-1.75rem', left: 'calc(50% - 1.75rem)' } },           // 12
     { botId: 'chloe-structured-reflection', style: { top: 'calc(25% - 1rem)', right: '-1.75rem' } },                    // 2
@@ -39,9 +40,7 @@ const WelcomeScreen: React.FC = () => {
         </div>
 
         {orbitBots.map(({ bot, style }, index) => {
-          const ringBg = index % 2 === 0
-            ? 'bg-accent-primary'
-            : 'bg-amber-400 dark:bg-amber-500';
+          const ringBg = getCoachSessionRingClass(getCoachSessionRing(bot.id), false);
 
           return (
             <motion.div

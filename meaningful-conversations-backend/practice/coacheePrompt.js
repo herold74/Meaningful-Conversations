@@ -1,6 +1,8 @@
 const { getFrameworkById } = require('./frameworks');
 const { getScenarioForPrompt } = require('./scenarios');
 const { getScopeBoundaryPrompt, isValidTheme } = require('./scopeBoundary');
+const { resolveFrameworkId } = require('./methodTaxonomy');
+const { getMentalFitnessCoacheeBlock, isMentalFitnessFramework } = require('./mentalFitnessCoacheeProfile');
 
 const LIVE_MODE_MODIFIER = {
   en: `SPEECH MODE (LIVE SESSION): Respond as if speaking aloud on a phone call — natural spoken language, occasional fillers ("um", "well"), shorter sentences (1-3), incomplete thoughts allowed. NOT polished written prose.`,
@@ -25,12 +27,17 @@ function buildCoacheeSystemPrompt({
   }
 
   const framework = getFrameworkById(frameworkId);
+  const canonicalFrameworkId = resolveFrameworkId(frameworkId);
   const lang = language === 'en' ? 'en' : 'de';
 
   const frameworkHint = framework
     ? (lang === 'de'
       ? `\nHINWEIS: Der Coach übt die Methode "${framework.name.de}". Du bist der Klient — lehre die Methode NICHT und spiele nicht den Coach.\n`
       : `\nNOTE: The coach is practicing "${framework.name.en}". You are the client — do NOT teach the method or play the coach.\n`)
+    : '';
+
+  const mentalFitnessBlock = isMentalFitnessFramework(canonicalFrameworkId)
+    ? getMentalFitnessCoacheeBlock(lang)
     : '';
 
   const focusBlock = scenario.focusNote
@@ -62,7 +69,7 @@ DEINE EMOTIONALE GRUNDSTIMMUNG: ${scenario.emotionalTone}
 
 (INNERER HINTERGRUND — nur enthüllen, wenn der Coach Vertrauen aufbaut):
 ${scenario.hiddenAgenda}
-${frameworkHint}${focusBlock}
+${frameworkHint}${mentalFitnessBlock}${focusBlock}
 ${scenario.difficultyModifier}${scopeBlock}${liveBlock}
 
 REGELN:
@@ -88,7 +95,7 @@ YOUR EMOTIONAL BASELINE: ${scenario.emotionalTone}
 
 (INNER BACKSTORY — reveal only if the coach builds trust):
 ${scenario.hiddenAgenda}
-${frameworkHint}${focusBlock}
+${frameworkHint}${mentalFitnessBlock}${focusBlock}
 ${scenario.difficultyModifier}${scopeBlock}${liveBlock}
 
 RULES:

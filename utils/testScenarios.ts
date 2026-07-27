@@ -51,7 +51,7 @@ export interface DynamicTestScenario {
   // Special test modes
   specialTestMode?: 'refinement_mock' | 'practice_eval';
 
-  /** Coach Practice smoke test config (when specialTestMode === 'practice_eval') */
+  /** Coach Practice automated test config (when specialTestMode === 'practice_eval') */
   practiceConfig?: {
     frameworkId: string;
     scenarioId: string;
@@ -242,6 +242,13 @@ export interface TestRunResult {
     evaluation: import('../types').PracticeEvaluationResult;
     durationMs: number;
     saveWarning?: string;
+  };
+
+  /** Practice Lab metadata (adaptive/scripted runs) */
+  practiceLabMeta?: {
+    labMode: 'adaptive' | 'scripted';
+    stagesUsed: string[];
+    scenarioId: string;
   };
 }
 
@@ -805,7 +812,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
   },
 
   // ============================================
-  // COACH PRACTICE — automated four-stage coaching smoke test
+  // COACH PRACTICE — automated four-stage coaching test (classic runner)
   // ============================================
   {
     id: 'practice_grow_career',

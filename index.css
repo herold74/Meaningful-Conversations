@@ -32,10 +32,34 @@ html {
   /* Bottom-right amber wash on CTAs — echoes body::before ambient glow */
   --gradient-accent-amber-opacity: 0.18;
   --gradient-accent-amber-start: 40%;
+
+  /* Bot Selection section pills — fixed hues (not seasonal accent-primary) */
+  --section-bronze: 158 96 40; /* #9E6028 — darker copper (light mode; distinct from gold) */
+  --section-bronze-bg: 240 225 208; /* muted tan — less yellow than gold bg */
+  --section-silver: 71 85 105; /* #475669 — Coaching */
+  --section-silver-bg: 219 226 239; /* #DBE2EF */
+  --section-silver-shine: 255 255 255;
+  --section-gold: 217 119 6; /* #D97706 — Client-exclusive */
+  --section-gold-bg: 255 251 235; /* #FFFBEB */
+  --section-gold-shine: 254 243 199; /* amber-100 highlight */
+
+  /* Coach avatar session rings (BotSelection, WelcomeScreen) */
+  --session-ring-clarify: var(--accent-primary);
+  --session-ring-develop: var(--brand-accent);
+  --session-ring-forward: 14 165 233; /* sky-500 — brand/winter/manualmode light */
 }
 
 html.dark {
   --gradient-accent-amber-opacity: 0.22;
+  --section-bronze: 217 149 72;
+  --section-bronze-bg: 45 32 22;
+  --section-silver: 148 163 184; /* slate-400 — readable on dark */
+  --section-silver-bg: 30 41 55;
+  --section-silver-shine: 255 255 255;
+  --section-gold: 251 191 36; /* amber-400 */
+  --section-gold-bg: 55 42 16;
+  --section-gold-shine: 252 211 77;
+  --session-ring-forward: 56 189 248; /* sky-400 — brand/winter/manualmode dark */
 }
 
 /* --- Summer Theme (Spring & Summer seasons) --- */
@@ -82,6 +106,8 @@ html[data-theme="summer"] {
   --featured-card-from: 22 163 74;
   --featured-card-via: 21 128 61;
   --featured-card-to: 20 83 45;
+
+  --session-ring-forward: 2 132 199; /* sky-600 */
 }
 
 .dark[data-theme="summer"] {
@@ -125,6 +151,8 @@ html[data-theme="summer"] {
   --featured-card-from: 34 197 94;
   --featured-card-via: 22 163 74;
   --featured-card-to: 21 128 61;
+
+  --session-ring-forward: 56 189 248; /* sky-400 */
 }
 
 /* --- Autumn Theme (seasonal orange/amber accents, consistent gray neutrals) --- */
@@ -173,6 +201,8 @@ html[data-theme="autumn"] {
 
   /* Already warm-hued — lighter amber overlay */
   --gradient-accent-amber-opacity: 0.12;
+
+  --session-ring-forward: 37 99 235; /* blue-600 */
 }
 
 .dark[data-theme="autumn"] {
@@ -215,6 +245,8 @@ html[data-theme="autumn"] {
   --featured-card-to: 194 65 12;
 
   --gradient-accent-amber-opacity: 0.15;
+
+  --session-ring-forward: 96 165 250; /* blue-400 */
 }
 
 /* --- Brand Theme (uses --brand-color-* from Vite plugin: W4F blue, manualmode teal, etc.) --- */
@@ -264,6 +296,8 @@ html[data-theme="manualmode"] {
   --featured-card-from: var(--brand-color-2);
   --featured-card-via: var(--brand-color-3);
   --featured-card-to: var(--brand-color-4);
+
+  --session-ring-forward: 14 165 233; /* sky-500 */
 }
 
 .dark[data-theme="brand"],
@@ -311,6 +345,8 @@ html[data-theme="manualmode"] {
   --featured-card-from: var(--brand-color-1);
   --featured-card-via: var(--brand-color-2);
   --featured-card-to: var(--brand-color-3);
+
+  --session-ring-forward: 56 189 248; /* sky-400 */
 }
 
 /* === END THEME DEFINITIONS === */
@@ -484,4 +520,94 @@ html.dark .chat-bubble-bot {
   background: rgb(var(--bg-tertiary) / 0.9);
   border-color: rgb(var(--border-primary));
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+/* Bot Selection section pills — bronze / silver / gold (fixed, subtle metallic sheen) */
+.bot-section-pill-bronze,
+.bot-section-pill-silver,
+.bot-section-pill-gold {
+  border-radius: 9999px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 1px 3px rgb(0 0 0 / 0.08);
+}
+html.dark .bot-section-pill-bronze,
+html.dark .bot-section-pill-silver,
+html.dark .bot-section-pill-gold {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 1px 4px rgb(0 0 0 / 0.35);
+}
+
+.bot-section-pill-bronze {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-bronze-bg)),
+    rgb(var(--section-bronze-bg) / 0.88) 40%,
+    rgb(var(--section-bronze) / 0.18) 100%
+  );
+  border: 1px solid rgb(var(--section-bronze) / 0.45);
+}
+html.dark .bot-section-pill-bronze {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-bronze) / 0.28),
+    rgb(var(--section-bronze-bg) / 0.92) 55%,
+    rgb(var(--section-bronze) / 0.12) 100%
+  );
+}
+
+.bot-section-pill-silver {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-silver-shine) / 0.55),
+    rgb(var(--section-silver-bg)) 35%,
+    rgb(var(--section-silver) / 0.22) 100%
+  );
+  border: 1px solid rgb(var(--section-silver) / 0.38);
+}
+html.dark .bot-section-pill-silver {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-silver-shine) / 0.12),
+    rgb(var(--section-silver-bg)) 40%,
+    rgb(var(--section-silver) / 0.2) 100%
+  );
+}
+
+.bot-section-pill-gold {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-gold-shine)),
+    rgb(var(--section-gold-bg)) 38%,
+    rgb(var(--section-gold) / 0.22) 100%
+  );
+  border: 1px solid rgb(var(--section-gold) / 0.42);
+}
+html.dark .bot-section-pill-gold {
+  background: linear-gradient(
+    165deg,
+    rgb(var(--section-gold-shine) / 0.25),
+    rgb(var(--section-gold-bg)) 45%,
+    rgb(var(--section-gold) / 0.18) 100%
+  );
+}
+
+.bot-section-tab-active {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--section-silver-shine) / 0.92),
+    rgb(var(--section-silver-bg) / 0.95)
+  );
+  border: 1px solid rgb(var(--section-silver) / 0.35);
+  box-shadow: 0 1px 2px rgb(var(--section-silver) / 0.15);
+  color: rgb(var(--section-silver));
+}
+html.dark .bot-section-tab-active {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--section-silver) / 0.22),
+    rgb(var(--section-silver-bg))
+  );
+  color: rgb(var(--section-silver));
 }
