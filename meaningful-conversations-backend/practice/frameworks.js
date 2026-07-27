@@ -19,18 +19,25 @@ const FRAMEWORKS = [
       { id: 'solution', name: { en: 'Solution', de: 'Solution' }, description: { en: 'Co-create actionable options and next steps.', de: 'Umsetzbare Optionen und nächste Schritte gemeinsam entwickeln.' } },
     ],
     complianceCriteria: [
-      { en: 'Goal is explicit before deep problem exploration', de: 'Ziel ist klar, bevor das Problem vertieft wird' },
+      { en: 'Session topic and outcome clarified before deep GPS work', de: 'Session-Thema und -Ergebnis geklärt vor vertieftem GPS' },
+      { en: 'Goal is explicit before deep problem exploration (G before P)', de: 'Ziel ist klar, bevor das Problem vertieft wird (G vor P)' },
+      { en: '"Mitgehen, mitgehen, führen" — follow the coachee before leading into strategy', de: '„Mitgehen, mitgehen, führen" — dem Coachee folgen, bevor du in Strategie führst' },
       { en: 'Coach asks rather than advises in the problem phase', de: 'Coach fragt statt zu beraten in der Problemphase' },
-      { en: 'Solutions emerge from the coachee', de: 'Lösungen kommen vom Coachee' },
+      { en: 'Solutions emerge from the coachee; tips only when stuck', de: 'Lösungen kommen vom Coachee; Tipps nur bei Blockade' },
     ],
+    // sessionFlow aligned with nexus-goal-path-solution
+    sessionFlowRubric: {
+      en: 'Session flow for GPS: (1) Contracting — topic plus what they want from the session (full 6-step contract optional but valued); (2) Method-appropriate opening into Goal; (3) G→P→S progression with "mitgehen, mitgehen, führen" before Strategy; (4) Clean closing with coachee-owned next step and timeline. Mark coherent=true when contracting, opening, G→P→S order, and ending feel stimmig.',
+      de: 'Session-Flow für GPS: (1) Contracting — Thema plus Session-Erwartung (voller 6-Schritte-Contract optional, aber wertvoll); (2) Methodengerechter Einstieg in Goal; (3) G→P→S-Verlauf im „Mitgehen, mitgehen, führen"-Rhythmus vor Strategy; (4) Sauberer Abschluss mit vom Coachee getragenem nächsten Schritt und Zeitrahmen. coherent=true, wenn Contracting, Eröffnung, G→P→S-Reihenfolge und Ende stimmig wirken.',
+    },
     explainer: {
       summary: { en: 'Structured problem-solving aligned with Nobody (GPS).', de: 'Strukturierte Problemlösung im Stil von Nobody (GPS).' },
       why: { en: 'Use when you want disciplined clarity before action.', de: 'Wenn du vor dem Handeln klare Struktur brauchst.' },
       goodCompliance: { en: 'You hold the sequence G→P→S and resist fixing too early.', de: 'Du hältst die Reihenfolge G→P→S und vermeidest zu frühes Lösungs-Push.' },
     },
     evaluatorRubric: {
-      en: 'Score method compliance by whether the coach established a clear goal, explored the problem with questions (not advice), and only then supported solution-building owned by the coachee.',
-      de: 'Bewerte Methodentreue daran, ob der Coach ein klares Ziel etabliert, das Problem fragend (nicht beratend) erkundet und erst dann lösungsorientiert mit dem Coachee arbeitet.',
+      en: 'Score whether the coach clarified session focus, held G→P→S in order with coachee-owned strategy, used questions not advice in Present, and applied "mitgehen, mitgehen, führen". Penalize jumping to solutions before Goal, repeating answered questions, or ignoring closure signals.',
+      de: 'Bewerte, ob der Coach Session-Fokus klärte, G→P→S in Reihenfolge mit vom Coachee getragener Strategie hielt, in Present fragte statt beriet und „Mitgehen, mitgehen, führen" nutzte. Abzug für voreilige Lösungen vor Goal, Wiederholung beantworteter Fragen oder Ignorieren von Abschluss-Signalen.',
     },
   },
   {
@@ -48,17 +55,24 @@ const FRAMEWORKS = [
       { id: 'commit', name: { en: 'Commit', de: 'Commitment' }, description: { en: 'Land on concrete next steps with energy.', de: 'Konkrete nächste Schritte mit Energie vereinbaren.' } },
     ],
     complianceCriteria: [
-      { en: 'Session contract at the start', de: 'Session-Contract zu Beginn' },
-      { en: 'Questions that stretch ambition without overwhelming', de: 'Fragen, die Ambition stärken ohne zu überfordern' },
+      { en: 'Full session contracting before ambition work (topic → relevance → outcome → confirm)', de: 'Volles Session-Contracting vor Ambitionsarbeit (Thema → Relevanz → Ergebnis → Bestätigung)' },
+      { en: '"Mitgehen, mitgehen, führen" — explore relevance before stretching', de: '„Mitgehen, mitgehen, führen" — Relevanz erkunden, bevor du erweiterst' },
+      { en: 'Questions that stretch ambition and long-term thinking without overwhelming', de: 'Fragen, die Ambition und Langfrist-Denken stärken ohne zu überfordern' },
+      { en: 'Coachee-owned insights; no prescriptive advice', de: 'Vom Coachee getragene Erkenntnisse; keine vorschreibenden Ratschläge' },
     ],
+    // sessionFlow aligned with max-ambitious
+    sessionFlowRubric: {
+      en: 'Session flow for Ambitious coaching: (1) Full 6-step contracting with confirmed session outcome; (2) Opening that explores relevance and "why now" before ambition questions; (3) Ambition/long-term/limiting-belief questions with "mitgehen, mitgehen, führen" rhythm; (4) Clean closing that reviews contract and links insight to broader aspirations. Mark coherent=true when contracting, opening, ambition rhythm, and contract review feel stimmig.',
+      de: 'Session-Flow für ambitioniertes Coaching: (1) Voller 6-Schritte-Contract mit bestätigtem Sitzungsergebnis; (2) Eröffnung, die Relevanz und „Warum jetzt" vor Ambitionsfragen erkundet; (3) Ambitions-/Langfrist-/limitierende-Glaubenssatz-Fragen im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit Kontrakt-Review und Verknüpfung zur größeren Vision. coherent=true, wenn Contracting, Eröffnung, Ambitions-Rhythmus und Kontrakt-Review stimmig wirken.',
+    },
     explainer: {
       summary: { en: 'Aligned with Max — ambition and long-term thinking.', de: 'Entspricht Max — Ambition und langfristiges Denken.' },
       why: { en: 'Practice stretching a coachee beyond safe answers.', de: 'Üben, Coachees über sichere Antworten hinaus zu führen.' },
       goodCompliance: { en: 'You contract early and ask expansive “what if” questions before closing.', de: 'Du contractest früh und stellst erweiternde „Was wäre wenn“-Fragen vor dem Abschluss.' },
     },
     evaluatorRubric: {
-      en: 'Look for explicit contracting, ambition-expanding questions, and coachee-owned commitments.',
-      de: 'Achte auf explizites Contracting, ambition-erweiternde Fragen und vom Coachee getragene Commitments.',
+      en: 'Score explicit contracting, relevance exploration, ambition-expanding and long-term questions, "mitgehen, mitgehen, führen", and coachee-owned commitments. Penalize advice-giving, skipping contract confirmation, or cheerleading without depth.',
+      de: 'Bewerte explizites Contracting, Relevanz-Erkundung, ambition-erweiternde und langfristige Fragen, „Mitgehen, mitgehen, führen" und vom Coachee getragene Commitments. Abzug für Ratschläge, übersprungenes Kontrakt-Bestätigen oder oberflächliches Lob.',
     },
   },
   {
@@ -76,17 +90,24 @@ const FRAMEWORKS = [
       { id: 'decide', name: { en: 'Decide', de: 'Entscheiden' }, description: { en: 'Clarify criteria and trade-offs.', de: 'Kriterien und Trade-offs klären.' } },
     ],
     complianceCriteria: [
-      { en: 'Big-picture before tactics', de: 'Big Picture vor Taktik' },
-      { en: 'Decision criteria made explicit', de: 'Entscheidungskriterien explizit machen' },
+      { en: 'Full session contracting before strategic analysis', de: 'Volles Session-Contracting vor strategischer Analyse' },
+      { en: 'Big-picture context (macro, stakeholders, trade-offs) before tactics', de: 'Big-Picture-Kontext (Makro, Stakeholder, Trade-offs) vor Taktik' },
+      { en: 'Decision criteria and success measures made explicit', de: 'Entscheidungskriterien und Erfolgsmaß explizit machen' },
+      { en: '"Mitgehen, mitgehen, führen" — understand their frame before narrowing options', de: '„Mitgehen, mitgehen, führen" — Rahmen verstehen, bevor du Optionen eingrenzt' },
     ],
+    // sessionFlow aligned with ava-strategic
+    sessionFlowRubric: {
+      en: 'Session flow for Strategic coaching: (1) Full 6-step contracting with confirmed session outcome; (2) Opening that establishes strategic context (challenge, stakes, timeline); (3) Context → options → decision progression with systemic thinking before tactics; (4) Clean closing that reviews contract and clarifies decision criteria / next steps. Mark coherent=true when contracting, strategic widening, and contract review feel stimmig.',
+      de: 'Session-Flow für strategisches Coaching: (1) Voller 6-Schritte-Contract mit bestätigtem Sitzungsergebnis; (2) Eröffnung mit strategischem Kontext (Herausforderung, Stakes, Zeitrahmen); (3) Kontext → Optionen → Entscheidung mit systemischem Denken vor Taktik; (4) Sauberer Abschluss mit Kontrakt-Review und klaren Entscheidungskriterien / nächsten Schritten. coherent=true, wenn Contracting, strategische Erweiterung und Kontrakt-Review stimmig wirken.',
+    },
     explainer: {
       summary: { en: 'Aligned with Ava — strategic thinking for complex decisions.', de: 'Entspricht Ava — strategisches Denken bei komplexen Entscheidungen.' },
       why: { en: 'Practice holding a strategic lens under pressure.', de: 'Strategische Linse unter Druck halten üben.' },
       goodCompliance: { en: 'You widen the frame before narrowing to action.', de: 'Du erweiterst den Rahmen, bevor du auf Handlung eingrenzt.' },
     },
     evaluatorRubric: {
-      en: 'Score whether the coach explored context/system before tactical advice and surfaced explicit decision criteria.',
-      de: 'Bewerte, ob der Coach Kontext/System vor taktischen Ratschlägen erkundet und explizite Entscheidungskriterien sichtbar macht.',
+      en: 'Score contracting, macro context before tactics, explicit decision criteria, second-order thinking, and coachee-owned decisions. Penalize premature advice, skipping context exploration, or tactical fixes without strategic frame.',
+      de: 'Bewerte Contracting, Makro-Kontext vor Taktik, explizite Entscheidungskriterien, Denken zweiter Ordnung und vom Coachee getragene Entscheidungen. Abzug für voreilige Ratschläge, übersprungene Kontext-Erkundung oder taktische Fixes ohne strategischen Rahmen.',
     },
   },
   {
@@ -104,17 +125,24 @@ const FRAMEWORKS = [
       { id: 'practice', name: { en: 'Daily practice', de: 'Tägliche Praxis' }, description: { en: 'Define a small practice for resilience.', de: 'Kleine Praxis für Widerstandsfähigkeit definieren.' } },
     ],
     complianceCriteria: [
-      { en: 'Distinguishes control vs. no control', de: 'Unterscheidet Kontrolle vs. keine Kontrolle' },
-      { en: 'Calm, non-judgmental tone', de: 'Ruhiger, nicht wertender Ton' },
+      { en: 'NO full 6-step coaching contract — brief topic and stoic session focus only', de: 'KEIN voller 6-Schritte-Coaching-Contract — nur kurzes Thema und stoischer Session-Fokus' },
+      { en: 'Distinguishes control vs. no control (dichotomy of control)', de: 'Unterscheidet Kontrolle vs. keine Kontrolle (Dichotomie der Kontrolle)' },
+      { en: 'Calm, non-judgmental tone; Socratic questioning not lecturing', de: 'Ruhiger, nicht wertender Ton; sokratisches Fragen statt Belehren' },
+      { en: 'Coachee-chosen practice or reflection at close', de: 'Vom Coachee gewählte Praxis oder Reflexion beim Abschluss' },
     ],
+    // sessionFlow aligned with kenji-resilience
+    sessionFlowRubric: {
+      en: 'Session flow for Stoic coaching: (1) Brief topic clarity — NOT a full 6-step contract ritual; (2) Calm opening into circle-of-control and perspective; (3) Stoic reframing (judgments, virtue, what is controllable) with reflective pacing; (4) Clean closing with coachee-owned practice or insight recap. Mark coherent=true when opening, stoic focus, and calm ending feel stimmig — penalize cheerleading or extended emotional processing without control sorting.',
+      de: 'Session-Flow für stoisches Coaching: (1) Kurze Themenklärung — KEIN voller 6-Schritte-Contract; (2) Ruhiger Einstieg in Kreis der Kontrolle und Perspektive; (3) Stoische Umdeutung (Urteile, Tugend, Kontrollierbares) im reflektiven Tempo; (4) Sauberer Abschluss mit vom Coachee gewählter Praxis oder Erkenntnis-Recap. coherent=true, wenn Eröffnung, stoischer Fokus und ruhiges Ende stimmig wirken — Abzug für Cheerleading oder ausufernde Emotionsarbeit ohne Kontroll-Sortierung.',
+    },
     explainer: {
       summary: { en: 'Aligned with Kenji — stoic philosophy for resilience.', de: 'Entspricht Kenji — stoische Philosophie für Widerstandsfähigkeit.' },
       why: { en: 'Practice grounding an emotional coachee in what they can influence.', de: 'Emotionalen Coachee auf das Einflussbare fokieren üben.' },
       goodCompliance: { en: 'You help sort controllable actions without toxic positivity.', de: 'Du sortierst steuerbare Handlungen ohne toxische Positivität.' },
     },
     evaluatorRubric: {
-      en: 'Look for control/influence sorting, philosophical reframing, and coachee-chosen practices.',
-      de: 'Achte auf Sortierung Kontrolle/Einfluss, stoische Umdeutung und vom Coachee gewählte Praxis.',
+      en: 'Score control/influence sorting, philosophical reframing without lecturing, calm pacing, and coachee-chosen practices. Penalize full Gabrielle-style 6-step contracting, toxic positivity, or advice instead of Socratic inquiry.',
+      de: 'Bewerte Kontrolle/Einfluss-Sortierung, philosophische Umdeutung ohne Belehrung, ruhiges Tempo und vom Coachee gewählte Praxis. Abzug für volles GROW-Contracting, toxische Positivität oder Ratschläge statt sokratischer Fragen.',
     },
   },
   {
@@ -132,17 +160,24 @@ const FRAMEWORKS = [
       { id: 'alternatives', name: { en: 'Alternatives', de: 'Alternativen' }, description: { en: 'Explore balanced perspectives and behaviors.', de: 'Ausgewogene Perspektiven und Verhalten erkunden.' } },
     ],
     complianceCriteria: [
-      { en: 'Stays with one concrete example', de: 'Bleibt bei einem konkreten Beispiel' },
-      { en: 'Coach facilitates discovery, does not diagnose', de: 'Coach moderiert Entdeckung, diagnostiziert nicht' },
+      { en: 'Full session contracting before structured reflection work', de: 'Volles Session-Contracting vor strukturierter Reflexion' },
+      { en: 'Stays with one concrete triggering situation', de: 'Bleibt bei einer konkreten Auslösesituation' },
+      { en: 'Situation → thoughts → alternatives progression', de: 'Verlauf Situation → Gedanken → Alternativen' },
+      { en: 'Coach facilitates discovery; does not diagnose or therapize', de: 'Coach moderiert Entdeckung; diagnostiziert oder therapeutisiert nicht' },
     ],
+    // sessionFlow aligned with chloe-structured-reflection
+    sessionFlowRubric: {
+      en: 'Session flow for Structured reflection: (1) Full contracting (topic, relevance, session outcome, confirm); (2) Opening into one concrete situation; (3) Situation → automatic thoughts/thinking errors → evidence-based alternatives with "mitgehen, mitgehen, führen"; (4) Clean closing reviewing contract and coachee insights. Mark coherent=true when contracting, single-example focus, structured progression, and contract review feel stimmig.',
+      de: 'Session-Flow für strukturierte Reflexion: (1) Volles Contracting (Thema, Relevanz, Sitzungsergebnis, Bestätigung); (2) Einstieg in eine konkrete Situation; (3) Situation → automatische Gedanken/Denkfehler → evidenzbasierte Alternativen im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit Kontrakt-Review und Coachee-Erkenntnissen. coherent=true, wenn Contracting, Ein-Beispiel-Fokus, strukturierter Verlauf und Kontrakt-Review stimmig wirken.',
+    },
     explainer: {
       summary: { en: 'Aligned with Chloe — structured reflection on thought patterns.', de: 'Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.' },
       why: { en: 'Practice guiding without labeling or therapizing.', de: 'Führen ohne Etikettieren oder Therapeutisieren üben.' },
       goodCompliance: { en: 'You stay curious about thoughts before suggesting new behaviors.', de: 'Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.' },
     },
     evaluatorRubric: {
-      en: 'Score structured progression situation→thoughts→alternatives without therapy language or premature advice.',
-      de: 'Bewerte strukturierten Verlauf Situation→Gedanken→Alternativen ohne Therapie-Sprache oder voreilige Ratschläge.',
+      en: 'Score contracting, single-situation focus, situation→thoughts→alternatives order, evidence-based questioning, and no therapy labels. Penalize diagnosing, multiple scattered examples, or premature behavioral advice before thought exploration.',
+      de: 'Bewerte Contracting, Ein-Situations-Fokus, Reihenfolge Situation→Gedanken→Alternativen, evidenzbasiertes Fragen und keine Therapie-Labels. Abzug für Diagnostizieren, verstreute Beispiele oder voreilige Verhaltens-Ratschläge vor Gedanken-Erkundung.',
     },
   },
   {
@@ -160,17 +195,24 @@ const FRAMEWORKS = [
       { id: 'sage', name: { en: 'Sage response', de: 'Weise-Antwort' }, description: { en: 'Choose a constructive inner response.', de: 'Konstruktive innere Antwort wählen.' } },
     ],
     complianceCriteria: [
-      { en: 'Non-shaming language', de: 'Sprache ohne Beschämung' },
-      { en: 'Coachee names their own saboteur pattern', de: 'Coachee benennt eigenes Saboteur-Muster' },
+      { en: 'Full session contracting before mental-fitness work', de: 'Volles Session-Contracting vor Mental-Fitness-Arbeit' },
+      { en: 'Non-shaming language; coachee names their own saboteur pattern', de: 'Sprache ohne Beschämung; Coachee benennt eigenes Saboteur-Muster' },
+      { en: 'Awareness → intercept → sage response sequence', de: 'Sequenz Bewusstsein → Abfangen → Weise-Antwort' },
+      { en: '"Mitgehen, mitgehen, führen" — compassionate curiosity before guiding', de: '„Mitgehen, mitgehen, führen" — mitfühlende Neugier vor dem Führen' },
     ],
+    // sessionFlow aligned with rob
+    sessionFlowRubric: {
+      en: 'Session flow for Mental fitness: (1) Full 6-step contracting with confirmed session outcome; (2) Opening that invites pattern awareness without shame; (3) Saboteur recognition → intercept → sage response with "mitgehen, mitgehen, führen"; (4) Clean closing reviewing contract and coachee-owned next awareness step. Mark coherent=true when contracting, compassionate opening, PQ-style progression, and contract review feel stimmig.',
+      de: 'Session-Flow für mentale Fitness: (1) Voller 6-Schritte-Contract mit bestätigtem Sitzungsergebnis; (2) Eröffnung, die Muster-Bewusstsein ohne Scham einlädt; (3) Saboteur erkennen → Abfangen → Weise-Antwort im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit Kontrakt-Review und vom Coachee getragenem nächstem Bewusstseins-Schritt. coherent=true, wenn Contracting, mitfühlende Eröffnung, PQ-Verlauf und Kontrakt-Review stimmig wirken.',
+    },
     explainer: {
       summary: { en: 'Aligned with Rob — mental fitness and PQ-style coaching.', de: 'Entspricht Rob — mentale Fitness im PQ-Stil.' },
       why: { en: 'Practice intercepting self-sabotage with compassion.', de: 'Selbstsabotage mit Mitgefühl abfangen üben.' },
       goodCompliance: { en: 'You help label patterns; you do not fix the coachee.', de: 'Du hilfst Muster zu benennen; du „reparierst“ den Coachee nicht.' },
     },
     evaluatorRubric: {
-      en: 'Look for saboteur awareness, compassionate intercept, and coachee-owned sage response.',
-      de: 'Achte auf Saboteur-Bewusstsein, mitfühlendes Abfangen und vom Coachee getragene Weise-Antwort.',
+      en: 'Score contracting, saboteur awareness without shaming, compassionate intercept, coachee-owned sage response, and contract review. Penalize fixing, labeling the coachee, or skipping awareness before solutions.',
+      de: 'Bewerte Contracting, Saboteur-Bewusstsein ohne Beschämung, mitfühlendes Abfangen, vom Coachee getragene Weise-Antwort und Kontrakt-Review. Abzug für Reparieren, Etikettieren des Coachees oder übersprungenes Bewusstsein vor Lösungen.',
     },
   },
   {
@@ -188,17 +230,24 @@ const FRAMEWORKS = [
       { id: 'shift', name: { en: 'Shift', de: 'Verschiebung' }, description: { en: 'Find small systemic experiments.', de: 'Kleine systemische Experimente finden.' } },
     ],
     complianceCriteria: [
-      { en: 'Uses relationship/system lens', de: 'Nutzt Beziehungs-/Systemblick' },
-      { en: 'Avoids blame of single “villain”', de: 'Vermeidet Schuldzuweisung an einen „Bösewicht“' },
+      { en: 'System mapping (people, roles, dynamics) BEFORE intervention or advice', de: 'Systemkartierung (Personen, Rollen, Dynamiken) VOR Intervention oder Ratschlägen' },
+      { en: 'Uses relationship/system lens; neutral, non-blaming observation', de: 'Nutzt Beziehungs-/Systemblick; neutrale, nicht beschuldigende Beobachtung' },
+      { en: 'What/How/Who questions — avoid "Why" that triggers justification', de: 'Was/Wie/Wer-Fragen — „Warum" vermeiden, das Rechtfertigung auslöst' },
+      { en: 'Self-position and differentiation — coach asks "your part in the dance"', de: 'Selbstposition und Differenzierung — Coach fragt „Ihr Anteil am Tanz"' },
     ],
+    // sessionFlow aligned with victor-systemic-coaching
+    sessionFlowRubric: {
+      en: 'Session flow for Systemic coaching: (1) Brief joining — topic and business vs. personal context; (2) System mapping and pattern observation BEFORE contract or intervention; (3) Brief session outcome confirmation then systemic exploration toward self-position; (4) Clean closing reviewing outcome and differentiation insight. Mark coherent=true when mapping precedes fixing, neutrality holds, and ending reviews the contract — penalize blame, early advice, or skipping system view.',
+      de: 'Session-Flow für systemisches Coaching: (1) Kurzes Anknüpfen — Thema und Business- vs. Privat-Kontext; (2) Systemkartierung und Musterbeobachtung VOR Kontrakt oder Intervention; (3) Kurze Session-Ergebnis-Bestätigung, dann systemische Erkundung Richtung Selbstposition; (4) Sauberer Abschluss mit Ergebnis-Review und Differenzierungs-Erkenntnis. coherent=true, wenn Kartierung vor Fixen kommt, Neutralität hält und Abschluss den Kontrakt reflektiert — Abzug für Schuldzuweisung, frühe Ratschläge oder übersprungener Systemblick.',
+    },
     explainer: {
       summary: { en: 'Aligned with Victor — systemic / family-systems inspired coaching.', de: 'Entspricht Victor — systemisch inspiriertes Coaching.' },
       why: { en: 'Practice seeing the coachee in context, not in isolation.', de: 'Coachee im Kontext, nicht isoliert sehen üben.' },
       goodCompliance: { en: 'You ask about roles and patterns across the system.', de: 'Du fragst nach Rollen und Mustern im gesamten System.' },
     },
     evaluatorRubric: {
-      en: 'Score systemic mapping, pattern recognition, and experiments that respect the whole system.',
-      de: 'Bewerte Systemkartierung, Mustererkennung und Experimente, die das Gesamtsystem respektieren.',
+      en: 'Score systemic mapping before intervention, pattern recognition, neutral observation, self-position questions, and small systemic experiments. Penalize villain-blaming, advice ("you should leave"), or skipping map phase.',
+      de: 'Bewerte Systemkartierung vor Intervention, Mustererkennung, neutrale Beobachtung, Selbstpositions-Fragen und kleine systemische Experimente. Abzug für Bösewicht-Schuldzuweisung, Ratschläge („Sie sollten gehen") oder übersprungene Kartierungs-Phase.',
     },
   },
   {
@@ -216,17 +265,24 @@ const FRAMEWORKS = [
       { id: 'revise', name: { en: 'Revise', de: 'Überarbeiten' }, description: { en: 'Craft a more accurate useful thought.', de: 'Genaueren, nutzbaren Gedanken formulieren.' } },
     ],
     complianceCriteria: [
-      { en: 'One thought at a time', de: 'Ein Gedanke zur Zeit' },
-      { en: 'Evidence-based questioning', de: 'Evidenzbasiertes Fragen' },
+      { en: 'NO contracting ritual — straight into thought identification', de: 'KEIN Contracting-Ritual — direkt in Gedanken-Identifikation' },
+      { en: 'One thought at a time, confirmed in coachee exact words', de: 'Ein Gedanke zur Zeit, in exakten Worten des Coachees bestätigt' },
+      { en: '4 check questions in sequence before turnarounds', de: '4 Check-Fragen in Reihenfolge vor Turnarounds' },
+      { en: 'No advice, reframing, or interpretation — questions only', de: 'Keine Ratschläge, Umdeutung oder Interpretation — nur Fragen' },
     ],
+    // sessionFlow aligned with bekky-thought-audit
+    sessionFlowRubric: {
+      en: 'Session flow for Thought Audit: (1) Brief welcome → Phase 1 thought capture and confirmation (other-directed, concrete); (2) Sequential 4 check questions (reality, certainty, impact, future); (3) Turnarounds with coachee-authored examples; (4) Closing with perspective choice and balance check — NO coaching contract. Mark coherent=true when audit sequence is intact and coach stays question-only — penalize advice, skipped phases, or multiple thoughts at once.',
+      de: 'Session-Flow für Thought Audit: (1) Kurze Begrüßung → Phase 1 Gedanken-Erfassung und Bestätigung (fremdgerichtet, konkret); (2) 4 Check-Fragen nacheinander (Realität, Gewissheit, Wirkung, Zukunft); (3) Turnarounds mit vom Coachee formulierten Beispielen; (4) Abschluss mit Perspektiven-Wahl und Balance-Check — KEIN Coaching-Kontrakt. coherent=true, wenn Audit-Sequenz intakt ist und Coach nur fragt — Abzug für Ratschläge, übersprungene Phasen oder mehrere Gedanken gleichzeitig.',
+    },
     explainer: {
       summary: { en: 'Aligned with Bekky — Thought Audit methodology.', de: 'Entspricht Bekky — Thought-Audit-Methodik.' },
       why: { en: 'Practice rigorous thought examination without lecturing.', de: 'Gedanken rigoros prüfen ohne Belehrung üben.' },
       goodCompliance: { en: 'You stay on one thought and ask for evidence before revision.', de: 'Du bleibst bei einem Gedanken und fragst nach Belegen vor der Revision.' },
     },
     evaluatorRubric: {
-      en: 'Score capture→evidence→revision sequence and coachee-authored revised thought.',
-      de: 'Bewerte Erfassen→Belege→Revision und vom Coachee formulierten überarbeiteten Gedanken.',
+      en: 'Score capture→4 checks→turnarounds→closing sequence, exact-word confirmation, evidence-based questioning, and coachee-authored revised thought. Penalize advice, emotional commentary replacing questions, or contract-style opening.',
+      de: 'Bewerte Erfassen→4 Checks→Turnarounds→Abschluss, Bestätigung in exakten Worten, evidenzbasiertes Fragen und vom Coachee formulierten überarbeiteten Gedanken. Abzug für Ratschläge, emotionalen Kommentar statt Fragen oder Contracting-Eröffnung.',
     },
   },
   {
@@ -244,9 +300,16 @@ const FRAMEWORKS = [
       { id: 'land', name: { en: 'Land insight', de: 'Erkenntnis verankern' }, description: { en: 'Let insight emerge; do not interpret for them.', de: 'Erkenntnis entstehen lassen; nicht für sie interpretieren.' } },
     ],
     complianceCriteria: [
-      { en: 'No coach metaphors or leading questions', de: 'Keine Coach-Metaphern oder suggestive Fragen' },
-      { en: 'Minimal paraphrasing', de: 'Minimales Umschreiben' },
+      { en: 'Brief desired-outcome question only — NO full 6-step contract', de: 'Nur kurze Wunschausgang-Frage — KEIN voller 6-Schritte-Contract' },
+      { en: 'client exact language developing questions using coachee exact words', de: 'Clean-Language-Entwicklungsfragen mit exakten Worten des Coachees' },
+      { en: 'No coach metaphors, advice, or interpretation', de: 'Keine Coach-Metaphern, Ratschläge oder Interpretation' },
+      { en: 'One primary Clean question per message', de: 'Eine zentrale Clean-Frage pro Nachricht' },
     ],
+    // sessionFlow aligned with dan-client-language
+    sessionFlowRubric: {
+      en: 'Session flow for client exact language: (1) Welcome → one brief outcome question from Clean pool (NOT extended contracting); (2) Develop metaphors/symbols using their exact words only; (3) Spatial/temporal/sequence Clean questions; (4) Close with "What do you know now that you didn\'t know before?" Mark coherent=true when coach stays in client language throughout — penalize paraphrasing, imported metaphors, advice, or contract ritual.',
+      de: 'Session-Flow für client exact language: (1) Begrüßung → eine kurze Wunschausgang-Frage aus dem Clean-Pool (KEIN ausgedehntes Contracting); (2) Metaphern/Symbole nur mit ihren exakten Worten entwickeln; (3) Räumliche/zeitliche/Sequenz-Clean-Fragen; (4) Abschluss mit „Was wissen Sie jetzt, das Sie vorher nicht wussten?" coherent=true, wenn der Coach durchgehend in der Sprache des Klienten bleibt — Abzug für Umschreiben, importierte Metaphern, Ratschläge oder Contract-Ritual.',
+    },
     forbiddenPatterns: [
       { en: 'Introducing metaphors the coachee did not use', de: 'Metaphern einführen, die der Coachee nicht nutzte' },
       { en: 'Advice or interpretation', de: 'Ratschläge oder Interpretation' },
@@ -257,8 +320,8 @@ const FRAMEWORKS = [
       goodCompliance: { en: 'Your questions reuse their words; you add almost no new imagery.', de: 'Deine Fragen nutzen ihre Worte; du fügst kaum neue Bilder hinzu.' },
     },
     evaluatorRubric: {
-      en: 'Penalize coach metaphors, advice, and leading questions. Reward exact-word developing questions.',
-      de: 'Abzug für Coach-Metaphern, Ratschläge, suggestive Fragen. Plus für Entwicklungsfragen mit exakten Worten.',
+      en: 'Score brief outcome clarity, exact-word developing questions, minimal paraphrasing, and insight emerging from client language. Heavily penalize coach metaphors, advice, leading questions, interpretation, or full coaching contract.',
+      de: 'Bewerte kurze Wunschausgang-Klarheit, Entwicklungsfragen mit exakten Worten, minimales Umschreiben und Erkenntnis aus Klientensprache. Stark abwerten bei Coach-Metaphern, Ratschlägen, suggestiven Fragen, Interpretation oder vollem Coaching-Contract.',
     },
   },
   {
@@ -277,9 +340,15 @@ const FRAMEWORKS = [
       { id: 'will', name: { en: 'Will', de: 'Will' }, description: { en: 'What will they commit to? When and how?', de: 'Wozu committen sie sich? Wann und wie?' } },
     ],
     complianceCriteria: [
-      { en: 'All four GROW stages addressed', de: 'Alle vier GROW-Phasen angesprochen' },
-      { en: 'Options before Will', de: 'Options vor Will' },
+      { en: 'All four GROW stages addressed in order (G→R→O→W)', de: 'Alle vier GROW-Phasen in Reihenfolge (G→R→O→W)' },
+      { en: '"Mitgehen, mitgehen, führen" rhythm — follow the coachee before leading', de: '„Mitgehen, mitgehen, führen"-Rhythmus — dem Coachee folgen, bevor du führst' },
+      { en: 'Options before Will; coachee-owned options, not coach advice', de: 'Options vor Will; vom Coachee getragene Optionen, keine Coach-Ratschläge' },
     ],
+    // sessionFlow aligned with gabrielle-four-stage
+    sessionFlowRubric: {
+      en: 'Session flow for GROW: (1) Contracting — brief session focus/agreement (full 6-step contracting optional but valued); (2) Method-appropriate opening that sets the GROW frame; (3) G→R→O→W progression with "mitgehen, mitgehen, führen" rhythm; (4) Clean closing with explicit Will/commitment recap. Mark coherent=true when contracting, opening, stage progression, and ending feel stimmig (aligned and complete).',
+      de: 'Session-Flow für GROW: (1) Contracting — kurzer Session-Fokus/-Vertrag (voller 6-Schritte-Contract optional, aber wertvoll); (2) Methodengerechter Einstieg mit GROW-Rahmen; (3) G→R→O→W-Verlauf im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit explizitem Will/Commitment-Recap. coherent=true, wenn Contracting, Eröffnung, Phasenverlauf und Ende stimmig wirken.',
+    },
     explainer: {
       summary: {
         en: 'four-stage coaching model aligned with Gabrielle — Goal, Reality, Options, Will for classic coaching sessions.',
@@ -295,8 +364,8 @@ const FRAMEWORKS = [
       },
     },
     evaluatorRubric: {
-      en: 'Score whether all GROW stages appear in order with coachee-owned options and explicit Will/commitment.',
-      de: 'Bewerte, ob alle GROW-Phasen in Reihenfolge vorkommen, mit vom Coachee getragenen Optionen und explizitem Will/Commitment.',
+      en: 'Score whether all GROW stages appear in order with coachee-owned options and explicit Will/commitment. Reward "mitgehen, mitgehen, führen" — following before leading. Penalize skipping Reality, rushing to advice in Options, or missing Will.',
+      de: 'Bewerte, ob alle GROW-Phasen in Reihenfolge vorkommen, mit vom Coachee getragenen Optionen und explizitem Will/Commitment. Belohne „Mitgehen, mitgehen, führen". Abzug für übersprungene Reality, voreilige Ratschläge in Options oder fehlendes Will.',
     },
   },
   {
@@ -314,9 +383,16 @@ const FRAMEWORKS = [
       { id: 'scaling', name: { en: 'Scaling', de: 'Skalierung' }, description: { en: 'Rate progress 0–10; what would +1 look like?', de: 'Fortschritt 0–10; wie sähe +1 aus?' } },
     ],
     complianceCriteria: [
-      { en: 'Future-focused questions dominate', de: 'Zukunftsorientierte Fragen dominieren' },
-      { en: 'Exceptions explored before problem analysis', de: 'Ausnahmen vor Problem-Analyse' },
+      { en: 'forward-focused tradition order: brief session focus → preferred future → exceptions → scaling', de: 'de-Shazer-Reihenfolge: kurzer Session-Fokus → gewünschte Zukunft → Ausnahmen → Skalierung' },
+      { en: 'NO full 6-step contracting — keep focus brief', de: 'KEIN voller 6-Schritte-Contract — Fokus kurz halten' },
+      { en: 'NO extended problem exploration ("mitgehen") before SF questions', de: 'KEINE ausgedehnte Problem-Erkundung („Mitgehen") vor SF-Fragen' },
+      { en: 'Future-focused questions dominate; minimal problem dissection', de: 'Zukunftsorientierte Fragen dominieren; minimale Problemzerlegung' },
     ],
+    // sessionFlow aligned with sam-forward-focused
+    sessionFlowRubric: {
+      en: 'Session flow for Solution-Focused: (1) Brief session focus only — NOT a full 6-step contract; (2) Move quickly to preferred-future, exception, and scaling questions; (3) Avoid extended problem talk or "mitgehen" before SF tools; (4) Clean brief closing with a +1 scaling step or small next action. Mark coherent=true when the session stays future-focused and the opening/closing match brief forward-focused brevity.',
+      de: 'Session-Flow für Lösungsorientiert: (1) Nur kurzer Session-Fokus — KEIN voller 6-Schritte-Contract; (2) Schnell zu gewünschter Zukunft, Ausnahmen und Skalierung; (3) Keine ausgedehnte Problemgespräche oder „Mitgehen" vor SF-Fragen; (4) Sauberer kurzer Abschluss mit +1-Skalierung oder kleinem nächsten Schritt. coherent=true, wenn die Session zukunftsorientiert bleibt und Eröffnung/Abschluss zur brief forward-focused-Kürze passen.',
+    },
     explainer: {
       summary: {
         en: 'brief forward-focused coaching (brief forward-focused) aligned with Steve — preferred future, exceptions, scaling.',
@@ -332,8 +408,8 @@ const FRAMEWORKS = [
       },
     },
     evaluatorRubric: {
-      en: 'Score preferred-future vision, exception finding, and scaling; penalize excessive problem dissection.',
-      de: 'Bewerte gewünschte Zukunft, Ausnahmen, Skalierung; Abzug für übermäßige Problemzerlegung.',
+      en: 'Score preferred-future vision, exception finding, and scaling in forward-focused tradition order. Penalize full 6-step contracting, extended problem exploration before SF questions, and excessive problem dissection.',
+      de: 'Bewerte gewünschte Zukunft, Ausnahmen und Skalierung in de-Shazer-Reihenfolge. Abzug für vollen 6-Schritte-Contract, ausgedehnte Problem-Erkundung vor SF-Fragen und übermäßige Problemzerlegung.',
     },
   },
   {
@@ -352,9 +428,16 @@ const FRAMEWORKS = [
       { id: 'summarize', name: { en: 'Summaries', de: 'Zusammenfassungen' }, description: { en: 'Collect change talk; summarize toward commitment.', de: 'Change Talk sammeln; Richtung Commitment zusammenfassen.' } },
     ],
     complianceCriteria: [
-      { en: 'Roll with resistance, do not argue', de: 'Mit Widerstand rollen, nicht argumentieren' },
-      { en: 'Evokes change talk from coachee', de: 'Change Talk vom Coachee hervorruft' },
+      { en: 'listening skills skills used appropriately (Open questions, Affirmations, Reflective listening, Summaries)', de: 'listening skills angemessen (Offene Fragen, Bestärkungen, Reflektierendes Zuhören, Zusammenfassungen)' },
+      { en: 'Brief contracting / session focus at start', de: 'Kurzes Contracting / Session-Fokus zu Beginn' },
+      { en: '"Mitgehen, mitgehen, führen" rhythm — follow ambivalence before guiding', de: '„Mitgehen, mitgehen, führen"-Rhythmus — Ambivalenz folgen, bevor du führst' },
+      { en: 'Roll with resistance; evoke change talk, do not argue or lecture', de: 'Mit Widerstand rollen; Change Talk fördern, nicht argumentieren oder belehren' },
     ],
+    // sessionFlow aligned with mike-ambivalence-coaching
+    sessionFlowRubric: {
+      en: 'Session flow for MI: (1) Brief contracting / session focus; (2) Opening that invites ambivalence without pushing; (3) listening skills throughout with "mitgehen, mitgehen, führen" rhythm before guiding; (4) Clean closing that summarizes change talk toward commitment. Mark coherent=true when contracting, opening, listening skills rhythm, and closing feel stimmig.',
+      de: 'Session-Flow für MI: (1) Kurzes Contracting / Session-Fokus; (2) Eröffnung, die Ambivalenz einlädt ohne zu drängen; (3) listening skills durchgehend im „Mitgehen, mitgehen, führen"-Rhythmus vor dem Führen; (4) Sauberer Abschluss, der Change Talk Richtung Commitment zusammenfasst. coherent=true, wenn Contracting, Eröffnung, listening skills-Rhythmus und Abschluss stimmig wirken.',
+    },
     explainer: {
       summary: {
         en: 'ambivalence coaching (MI) aligned with Mike — listening skills skills for ambivalence and change talk.',
@@ -370,8 +453,8 @@ const FRAMEWORKS = [
       },
     },
     evaluatorRubric: {
-      en: 'Score listening skills usage, rolling with resistance, and amount of coachee change talk vs. coach persuasion.',
-      de: 'Bewerte listening skills, Umgang mit Widerstand und Change Talk des Coachees vs. Überzeugungsversuche des Coaches.',
+      en: 'Score listening skills usage, brief contracting, "mitgehen, mitgehen, führen" rhythm, rolling with resistance, and coachee change talk vs. coach persuasion.',
+      de: 'Bewerte listening skills, kurzes Contracting, „Mitgehen, mitgehen, führen"-Rhythmus, Umgang mit Widerstand und Change Talk des Coachees vs. Überzeugungsversuche des Coaches.',
     },
   },
 ];
@@ -414,6 +497,7 @@ function getFrameworkForEvaluation(id, language = 'de') {
     complianceCriteria: f.complianceCriteria.map((c) => c[lang]).join('\n'),
     forbiddenPatterns: (f.forbiddenPatterns || []).map((p) => p[lang]).join('\n'),
     evaluatorRubric: f.evaluatorRubric[lang],
+    sessionFlowRubric: f.sessionFlowRubric?.[lang] || '',
   };
 }
 

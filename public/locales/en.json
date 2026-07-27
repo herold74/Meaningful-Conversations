@@ -2094,5 +2094,12 @@
   "practice_strengths_title": "Strengths",
   "practice_development_title": "Development areas",
   "practice_drills_title": "Suggested drills",
-  "practice_done": "Done"
+  "practice_done": "Done",
+  "practice_evaluates_coach_callout": "Practice evaluates you as the coach — how well you apply the selected method with the simulated coachee.",
+  "practice_source_bot_callout": "In normal chat, {{bot}} uses the same method from the coachee's side — useful for seeing the method in action before or after practice.",
+  "practice_review_scoring_hint": "Overall score prioritizes method compliance. A perfect 10/10 requires strong method application (≥9) and a coherent session flow (contracting, opening, closing).",
+  "practice_review_method_fit_title": "Method–scenario fit",
+  "practice_review_session_flow_title": "Session flow",
+  "practice_review_session_flow_coherent": "Coherent",
+  "practice_review_session_flow_incoherent": "Needs work"
 }

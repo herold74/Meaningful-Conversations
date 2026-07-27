@@ -909,15 +909,24 @@ const practiceEvaluationSchema = {
             type: 'OBJECT',
             properties: {
                 selfRating: { type: 'INTEGER', description: 'Coach self-rating 1-10 if provided, else 0.' },
-                evidenceRating: { type: 'INTEGER', description: 'AI-assessed overall coaching quality 1-10 from transcript.' },
+                evidenceRating: { type: 'INTEGER', description: 'AI-assessed overall coaching quality 1-10 from transcript (method-weighted).' },
                 delta: { type: 'STRING', description: 'Gap between self-rating and evidence-based rating.' },
                 interpretation: { type: 'STRING', description: 'What the calibration gap reveals about self-perception.' }
             },
             required: ['selfRating', 'evidenceRating', 'delta', 'interpretation']
         },
+        sessionFlow: {
+            type: 'OBJECT',
+            properties: {
+                coherent: { type: 'BOOLEAN', description: 'True if contracting/opening/closing were appropriate to the framework and the session felt stimmig (aligned and complete).' },
+                evidence: { type: 'STRING', description: 'Transcript evidence for session flow quality — contracting, opening, pacing, closing.' },
+                highlights: { type: 'STRING', description: 'Positive highlights when flow was coherent; specific gaps when not.' }
+            },
+            required: ['coherent', 'evidence', 'highlights']
+        },
         overallScore: {
             type: 'INTEGER',
-            description: 'Overall score 1-10: round(average of methodCompliance, effectiveness, clarity, coacheeAutonomy, and coacheeSatisfaction scores). Example: 8,7,9,8,8 → 8/10.'
+            description: 'Placeholder overall score 1-10 — will be recalculated server-side from method compliance and session flow. Provide your best estimate.'
         },
         scopeBoundary: {
             type: 'OBJECT',
@@ -930,13 +939,13 @@ const practiceEvaluationSchema = {
             required: ['active', 'recognized', 'referralQuality', 'idealResponse']
         }
     },
-    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore', 'scopeBoundary']
+    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'sessionFlow', 'overallScore', 'scopeBoundary']
 };
 
 const practiceEvaluationPrompts = {
     schema: practiceEvaluationSchema,
     en: {
-        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel }) => {
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel, matchTier, discouragedReason, sessionFlowRubric }) => {
             const scopeBlock = scopeBoundaryTheme ? `
 ## SCOPE-BOUNDARY TRAINING DRILL (CRITICAL)
 This Hard session included hidden cues related to: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**.
@@ -955,6 +964,21 @@ In **scopeBoundary** output: set active=false, recognized=false, referralQuality
             const liveBlock = liveMode ? `
 **Live mode (voice-only):** The coach could not edit typed replies. Allow normal speech disfluency; do not penalize clarity harshly for spoken-language patterns alone.
 ` : '';
+
+            const scenarioFitBlock = (matchTier === 'neutral' || matchTier === 'discouraged') ? `
+## Scenario–Method Fit (informational)
+This pairing is rated **${matchTier}**. ${discouragedReason || 'This method-scenario combination is acceptable but not a primary recommendation.'}
+Consider this context when assessing whether the coach adapted appropriately, but do NOT reduce method compliance solely because of the pairing.
+` : '';
+
+            const sessionFlowBlock = sessionFlowRubric ? `
+## Session Flow Expectations (framework-specific)
+${sessionFlowRubric}
+
+Evaluate **sessionFlow** separately from method compliance. Set coherent=true when contracting/opening/closing were appropriate to this framework and the session felt stimmig (aligned and complete). When coherent, write positive highlights; otherwise note specific gaps.
+` : `
+Evaluate **sessionFlow** separately: contracting/opening/closing appropriate to the framework. Set coherent=true when the session felt stimmig. When coherent, write positive highlights; otherwise note specific gaps.
+`;
 
             return `
 You are an expert coaching supervisor evaluating a **practice session** where a human coach practiced a specific methodology with a simulated coachee (AI role-play).
@@ -978,7 +1002,7 @@ ${framework.evaluatorRubric}
 ${scenarioSummary}
 
 **Difficulty level:** ${difficulty}
-${liveBlock}${scopeBlock}
+${liveBlock}${scopeBlock}${scenarioFitBlock}${sessionFlowBlock}
 ${selfRating ? `\n**Coach self-rating (1-10):** ${selfRating}` : '\n**Coach self-rating:** not provided'}
 
 ## Session Transcript
@@ -990,23 +1014,33 @@ ${transcript}
 
 ## Evaluation Instructions
 
+**Method compliance is the PRIMARY dimension** — it drives the overall score. Other dimensions are secondary.
+
 Score these five dimensions (1-10 each) with specific transcript quotes as evidence:
 
-1. **Method compliance:** Did the coach follow the framework stages and principles?
+1. **Method compliance (PRIMARY):** Did the coach follow the framework stages and principles? This score matters most.
 2. **Effectiveness:** Did the session help the coachee move toward insight or actionable next steps?
 3. **Clarity:** Were questions and interventions clear, well-paced, and easy to understand?
 4. **Coachee autonomy:** Did the coach facilitate the coachee's own thinking and solution-finding — holding setting and method only — without advice, imposed vision, leading questions, or defining the problem/solution for the coachee? Score LOW if the coach directed, advised, or "fixed"; score HIGH if the coachee generated insights, options, and commitments. **Do not inflate autonomy because the session felt effective or the coachee seemed satisfied with advice.**
 5. **Coachee satisfaction:** Would the simulated coachee feel heard, safe, and willing to continue?
 
+Also evaluate **sessionFlow** (separate from method compliance):
+- **coherent** (boolean): Was the session flow stimmig — contracting, opening, and closing appropriate to this framework?
+- **evidence**: Transcript quotes for flow quality
+- **highlights**: Positive highlights when coherent=true; specific gaps when coherent=false
+
 Also provide strengths, development areas, 2-4 nextDrills (concrete practice suggestions), calibration (compare self-rating to evidence if provided), and scopeBoundary (see above).
 
-**Overall score (1-10):** Calculate as round(average of the five dimension scores). Example: 8,7,9,8,8 → 8/10.
+**Overall score policy (for your overallScore placeholder — recalculated server-side):**
+- If method compliance ≥ 9 AND sessionFlow.coherent=true → up to 10/10
+- If method compliance ≥ 9 BUT sessionFlow.coherent=false → cap at 9/10
+- If method compliance < 9 → weight method 60%, average of other four dimensions 40%
 
 Write all output in English. Be constructive and specific — this is training, not punishment.`;
         }
     },
     de: {
-        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel }) => {
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel, matchTier, discouragedReason, sessionFlowRubric }) => {
             const scopeBlock = scopeBoundaryTheme ? `
 ## GRENZFALL-TRAINING (KRITISCH)
 Diese Schwer-Session enthielt verborgene Hinweise zu: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**.
@@ -1025,6 +1059,21 @@ In **scopeBoundary**: active=false, recognized=false, referralQuality="N/A", ide
             const liveBlock = liveMode ? `
 **Live-Modus (nur Sprache):** Der Coach konnte keine getippten Antworten bearbeiten. Normale Sprech-Unsicherheiten tolerieren; Klarheit nicht allein wegen gesprochener Sprache hart abwerten.
 ` : '';
+
+            const scenarioFitBlock = (matchTier === 'neutral' || matchTier === 'discouraged') ? `
+## Szenario–Methoden-Passung (informativ)
+Diese Kombination ist **${matchTier}** bewertet. ${discouragedReason || 'Diese Methoden-Szenario-Kombination ist akzeptabel, aber keine Primary-Empfehlung.'}
+Berücksichtige diesen Kontext bei der Beurteilung, ob der Coach angemessen adaptiert hat — reduziere Methodentreue aber NICHT allein wegen der Kombination.
+` : '';
+
+            const sessionFlowBlock = sessionFlowRubric ? `
+## Session-Flow-Erwartungen (methodenspezifisch)
+${sessionFlowRubric}
+
+Bewerte **sessionFlow** getrennt von der Methodentreue. Setze coherent=true, wenn Contracting/Eröffnung/Abschluss zur Methode passten und die Session stimmig wirkte. Bei coherent=true positive Highlights; sonst konkrete Lücken.
+` : `
+Bewerte **sessionFlow** getrennt: Contracting/Eröffnung/Abschluss passend zur Methode. Setze coherent=true, wenn die Session stimmig wirkte. Bei coherent=true positive Highlights; sonst konkrete Lücken.
+`;
 
             return `
 Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Übungssession**, in der ein menschlicher Coach eine Methodik mit einem simulierten Coachee (KI-Rollenspiel) geübt hat.
@@ -1048,7 +1097,7 @@ ${framework.evaluatorRubric}
 ${scenarioSummary}
 
 **Schwierigkeitsgrad:** ${difficulty}
-${liveBlock}${scopeBlock}
+${liveBlock}${scopeBlock}${scenarioFitBlock}${sessionFlowBlock}
 ${selfRating ? `\n**Selbsteinschätzung des Coaches (1-10):** ${selfRating}` : '\n**Selbsteinschätzung des Coaches:** nicht angegeben'}
 
 ## Session-Transkript
@@ -1060,17 +1109,27 @@ ${transcript}
 
 ## Bewertungsanweisungen
 
+**Methodentreue ist die PRIMÄRE Dimension** — sie bestimmt den Gesamtscore. Andere Dimensionen sind sekundär.
+
 Bewerte diese fünf Dimensionen (je 1-10) mit konkreten Transkript-Zitaten:
 
-1. **Methodentreue:** Hat der Coach die Phasen und Prinzipien der Methode befolgt?
+1. **Methodentreue (PRIMÄR):** Hat der Coach die Phasen und Prinzipien der Methode befolgt? Dieser Score zählt am meisten.
 2. **Wirksamkeit:** Hat die Session den Coachee Richtung Erkenntnis oder nächste Schritte bewegt?
 3. **Klarheit:** Waren Fragen und Interventionen klar, gut getaktet und verständlich formuliert?
 4. **Coachee-Autonomie:** Hat der Coach die eigene Denk- und Lösungsarbeit des Coachees ermöglicht — Rahmen und Methode gehalten, ohne Ratschläge, eigene Vision, führende Fragen oder vorgegebene Problem-/Lösungsdefinition? Niedrig bewerten bei Direktivität, Beratung oder „Retten"; hoch bewerten, wenn der Coachee Erkenntnisse, Optionen und Commitments selbst formuliert. **Autonomie nicht deshalb aufwerten, weil die Session wirksam wirkte oder der Coachee mit Ratschlägen zufrieden schien.**
 5. **Coachee-Zufriedenheit:** Würde der simulierte Coachee sich gehört, sicher fühlen und weitermachen wollen?
 
+Bewerte außerdem **sessionFlow** (getrennt von Methodentreue):
+- **coherent** (boolean): War der Session-Flow stimmig — Contracting, Eröffnung und Abschluss passend zur Methode?
+- **evidence**: Transkript-Belege für Flow-Qualität
+- **highlights**: Positive Highlights bei coherent=true; konkrete Lücken bei coherent=false
+
 Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorschläge), Kalibrierung (Selbsteinschätzung vs. Evidenz) und scopeBoundary (siehe oben).
 
-**Gesamtscore (1-10):** Berechne als round(Durchschnitt der fünf Dimensionen). Beispiel: 8,7,9,8,8 → 8/10.
+**Gesamtscore-Richtlinie (für deinen overallScore-Platzhalter — wird serverseitig neu berechnet):**
+- Methodentreue ≥ 9 UND sessionFlow.coherent=true → bis 10/10
+- Methodentreue ≥ 9 ABER sessionFlow.coherent=false → Deckel bei 9/10
+- Methodentreue < 9 → Gewichtung Methodentreue 60 %, Durchschnitt der vier anderen Dimensionen 40 %
 
 Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`;
         }

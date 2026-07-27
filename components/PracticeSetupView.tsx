@@ -560,6 +560,16 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
 
       <div className="mb-6 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3">
         <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
+        <div className="text-sm text-content-primary space-y-2">
+          <p>{t('practice_evaluates_coach_callout')}</p>
+          {selectedFramework && sourceBotName(selectedFramework) && (
+            <p>{t('practice_source_bot_callout', { bot: sourceBotName(selectedFramework)! })}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3">
+        <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
         <p className="text-sm text-content-primary">{t('practice_start_callout')}</p>
       </div>
 
