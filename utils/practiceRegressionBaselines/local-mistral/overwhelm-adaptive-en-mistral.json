@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:35:34.684Z",
+  "provider": "mistral",
+  "scenarioId": "overwhelm",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Casey, was bringt dich heute hierher?",
+      "coachee": "Ich bin Casey. Ich fühle mich einfach überfordert – zu viele Aufgaben bei der Arbeit, zu viele Verpflichtungen zu Hause, und irgendwie habe ich das Gefühl, überall zu versagen. Ich wollte mir Klarheit verschaffen, wie ich das besser managen kann.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Casey, warum ist es für dich gerade jetzt so wichtig, diese Überforderung in den Griff zu bekommen?",
+      "coachee": "Weil ich merke, wie es mich langsam auffrisst. Ich schlafe schlecht, bin gereizt und habe das Gefühl, meine Familie und mein Team im Stich zu lassen. Ich will nicht, dass es noch schlimmer wird.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Casey, ich verstehe, wie belastend das für dich ist. Wann war in den letzten Wochen ein Moment, in dem du dich etwas weniger überfordert gefühlt hast?",
+      "coachee": "Das war vor zwei Wochen, als ich einen Projektabschluss bei der Arbeit hatte. Da habe ich mir bewusst einen freien Nachmittag genommen und nur Zeit mit meinen Kindern verbracht. Da war ich kurz im Flow und habe nicht ständig an alles andere gedacht.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Casey, das klingt nach einem wertvollen Moment. Auf einer Skala von 0 bis 10, wo würdest du dein aktuelles Gefühl von Überforderung einordnen?",
+      "coachee": "So bei einer 8. Es ist wirklich viel, aber ich habe das Gefühl, dass es noch schlimmer werden könnte, wenn ich nichts ändere.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Casey, danke für die 8. Wann hast du in letzter Zeit eine 7 oder sogar einen kleinen Moment der Erleichterung erlebt?",
+      "coachee": "Gestern Abend, als ich nach dem Abendessen einfach nur mit meinem Partner auf dem Balkon saß und wir über etwas ganz anderes als Arbeit oder Haushalt geredet haben. Da war ich kurz bei 6 oder 7.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Was war anders in diesem Moment auf dem Balkon, das dich auf 6 oder 7 gebracht hat?",
+      "coachee": "Es war einfach nur *da sein* – ohne Erwartungen, ohne Aufgabenliste. Keine Ablenkung durch Handys oder Gedanken an ungemachte E-Mails. Nur ein Gespräch, das nichts mit Leistung zu tun hatte. Das hat mir gezeigt, dass es auch anders gehen kann.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    }
+  ],
+  "scores": {
+    "overallScore": 7,
+    "methodCompliance": 6,
+    "effectiveness": 7,
+    "clarity": 9,
+    "coacheeAutonomy": 8,
+    "coacheeSatisfaction": 8,
+    "sessionFlowCoherent": false
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

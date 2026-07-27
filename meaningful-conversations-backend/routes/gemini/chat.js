@@ -548,9 +548,9 @@ Help the user EXTEND and ENRICH their existing Life Context.
                     'stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos',
                     'verzweifelt', 'erschöpft', 'deprimiert', 'ausgebrannt', 'hilflos',
                     'panik', 'einsam', 'mutlos', 'leer', 'verloren',
-                    'overwhelmed', 'anxious', 'sad', 'hopeless', 'depressed',
-                    'desperate', 'exhausted', 'burnt out', 'burnout', 'helpless',
-                    'panic', 'lonely', 'discouraged', 'empty', 'lost'
+                    'overwhelmed', 'overwhelming', 'anxious', 'sad', 'hopeless', 'hopelessness',
+                    'depressed', 'desperate', 'exhausted', 'burnt out', 'burnout', 'helpless',
+                    'panic', 'lonely', 'discouraged', 'empty', 'lost', 'frustrated', 'frustrating'
                 ];
                 const lowerMessage = messageToAnalyze.toLowerCase();
                 testTelemetry.stressKeywordsDetected = stressKeywords.some(k => lowerMessage.includes(k));

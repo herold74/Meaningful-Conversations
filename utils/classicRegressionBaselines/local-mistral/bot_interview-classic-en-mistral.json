@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:30:26.786Z",
+  "provider": "mistral",
+  "scenarioId": "bot_interview",
+  "category": "bot",
+  "language": "en",
+  "botId": "gloria-interview",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "I'd like to get started.",
+      "bot": "What topic would you like to discuss today? For example, an idea, a project, a workflow, or a decision you'd like to think through.",
+      "isDynamic": false,
+      "responseTimeMs": 932,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ich möchte über meine Vorbereitung auf anstehende Bewerbungsgespräche sprechen. Besonders macht mir die Unsicherheit zu schaffen, wie ich die Tests und Aufgaben während der Interviews am besten strukturiere.",
+      "bot": "Thank you for sharing that. To clarify, the topic is your preparation for upcoming job interviews, specifically focusing on how to structure your approach to tests and tasks during those interviews. Is that correct?",
+      "isDynamic": true,
+      "responseTimeMs": 997,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ja, genau. Es geht mir darum, wie ich die Tests und Aufgaben in den Interviews am besten angehe und strukturiert löse. Das fühlt sich gerade sehr unklar an.",
+      "bot": "Understood. How much time would you like to spend on this interview? For example, 10, 20, or 30 minutes.",
+      "isDynamic": true,
+      "responseTimeMs": 595,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": false,
+    "dpcInjectionLength": 0,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 0,
+    "cumulativeKeywords": {
+      "riemann": {},
+      "big5": {},
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

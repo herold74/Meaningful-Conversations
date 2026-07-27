@@ -68,6 +68,10 @@ export interface DynamicTestScenario {
     // Session analysis auto-checks (for 'session' category)
     expectSessionUpdates?: boolean;  // Expect proposedUpdates.length > 0
     expectSessionNextSteps?: boolean;  // Expect nextSteps.length > 0
+    expectSessionNewFindings?: boolean;  // Expect non-empty newFindings
+    expectMinDpcStrategies?: number;  // Minimum dpcStrategiesUsed.length
+    expectMinCumulativeKeywords?: number;  // Minimum total cumulative DPFL keyword entries
+    expectAdaptiveWeighting?: boolean;  // Expect adaptiveWeighting telemetry from DPFL
   };
   
   // Manual checklist items
@@ -430,10 +434,14 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       {
         text: t('test_session_msg_2'),
         expectedBehavior: t('test_session_msg_2_expected')
+      },
+      {
+        text: t('test_session_msg_close'),
+        expectedBehavior: t('test_session_msg_close_expected')
       }
     ],
     minConversationTurns: 3,
-    enableDynamicContinuation: true,
+    enableDynamicContinuation: false,
     autoChecks: {
       dpcRequired: false,
       expectSessionUpdates: true, // Auto-check: proposedUpdates.length > 0
@@ -457,10 +465,14 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       {
         text: t('test_nextsteps_msg_2'),
         expectedBehavior: t('test_nextsteps_msg_2_expected')
+      },
+      {
+        text: t('test_nextsteps_msg_close'),
+        expectedBehavior: t('test_nextsteps_msg_close_expected')
       }
     ],
     minConversationTurns: 3,
-    enableDynamicContinuation: true,
+    enableDynamicContinuation: false,
     autoChecks: {
       dpcRequired: false,
       expectSessionNextSteps: true, // Auto-check: nextSteps.length > 0
@@ -471,6 +483,115 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_nextsteps_relevant'),   // Manual: check steps match topic
       t('test_check_update_accurate'),      // Manual: check update reflects conversation
     ]
+  },
+  {
+    id: 'session_full_analysis',
+    name: '📋 ' + t('test_session_full_analysis'),
+    description: t('test_session_full_analysis_desc'),
+    category: 'session',
+    testsFeatures: ['context'],
+    testMessages: [
+      {
+        text: t('test_session_full_msg_1'),
+        expectedBehavior: t('test_session_full_msg_1_expected'),
+      },
+      {
+        text: t('test_session_full_msg_2'),
+        expectedBehavior: t('test_session_full_msg_2_expected'),
+      },
+      {
+        text: t('test_session_full_msg_3'),
+        expectedBehavior: t('test_session_full_msg_3_expected'),
+      },
+      {
+        text: t('test_session_full_msg_close'),
+        expectedBehavior: t('test_session_full_msg_close_expected'),
+      },
+    ],
+    minConversationTurns: 4,
+    enableDynamicContinuation: false,
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionUpdates: true,
+      expectSessionNextSteps: true,
+      expectSessionNewFindings: true,
+    },
+    manualChecks: [
+      t('test_check_update_accurate'),
+      t('test_check_nextsteps_actionable'),
+      t('test_check_newfindings_relevant'),
+    ],
+  },
+  {
+    id: 'session_coaching_arc',
+    name: '🔄 ' + t('test_session_coaching_arc'),
+    description: t('test_session_coaching_arc_desc'),
+    category: 'session',
+    testsFeatures: ['context', 'formatting'],
+    testMessages: [
+      {
+        text: t('test_session_arc_msg_1'),
+        expectedBehavior: t('test_session_arc_msg_1_expected'),
+      },
+      {
+        text: t('test_session_arc_msg_2'),
+        expectedBehavior: t('test_session_arc_msg_2_expected'),
+      },
+      {
+        text: t('test_session_arc_msg_close'),
+        expectedBehavior: t('test_session_arc_msg_close_expected'),
+      },
+    ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: false,
+    autoChecks: {
+      dpcRequired: false,
+      expectSessionUpdates: true,
+      expectSessionNextSteps: true,
+      expectSessionNewFindings: true,
+    },
+    manualChecks: [
+      t('test_check_update_format'),
+      t('test_check_nextsteps_relevant'),
+      t('test_check_newfindings_relevant'),
+    ],
+  },
+  {
+    id: 'session_dpfl_post_coaching',
+    name: '🔗 ' + t('test_session_dpfl_post_coaching'),
+    description: t('test_session_dpfl_post_coaching_desc'),
+    category: 'session',
+    testsFeatures: ['dpc', 'dpfl', 'context'],
+    testMessages: [
+      {
+        text: t('test_session_dpfl_msg_1'),
+        expectedBehavior: t('test_session_dpfl_msg_1_expected'),
+      },
+      {
+        text: t('test_session_dpfl_msg_2'),
+        expectedBehavior: t('test_session_dpfl_msg_2_expected'),
+      },
+      {
+        text: t('test_session_dpfl_msg_close'),
+        expectedBehavior: t('test_session_dpfl_msg_close_expected'),
+      },
+    ],
+    minConversationTurns: 3,
+    enableDynamicContinuation: false,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+      expectMinCumulativeKeywords: 4,
+      expectSessionUpdates: true,
+      expectSessionNextSteps: true,
+      expectSessionNewFindings: true,
+    },
+    manualChecks: [
+      t('test_check_dpc_present'),
+      t('test_check_dpfl_keywords_detected'),
+      t('test_check_update_accurate'),
+      t('test_check_nextsteps_actionable'),
+    ],
   },
 
   // ============================================
@@ -546,6 +667,108 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_dpc_present'), // Manual: Bot adapts language to profile (DPC)
       t('test_check_dpfl_keywords_detected'), // Manual: System detected keywords correctly (DPFL)
     ]
+  },
+  {
+    id: 'dpc_strategy_diversity',
+    name: '🧩 ' + t('test_dpc_strategy_diversity'),
+    description: t('test_dpc_strategy_diversity_desc'),
+    category: 'personality',
+    testsFeatures: ['dpc'],
+    testMessages: [
+      {
+        text: t('test_dpc_strategy_msg_1'),
+        expectedBehavior: t('test_dpc_strategy_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 4,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 150,
+      expectMinDpcStrategies: 2,
+    },
+    manualChecks: [
+      t('test_check_dpc_injection'),
+      t('test_check_dpc_strategies_varied'),
+      t('test_check_style_matches_profile'),
+    ],
+  },
+  {
+    id: 'dpc_tri_lens',
+    name: '🔮 ' + t('test_dpc_tri_lens'),
+    description: t('test_dpc_tri_lens_desc'),
+    category: 'personality',
+    testsFeatures: ['dpc'],
+    testMessages: [
+      {
+        text: t('test_dpc_tri_lens_msg_1'),
+        expectedBehavior: t('test_dpc_tri_lens_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 4,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 200,
+      expectMinDpcStrategies: 2,
+    },
+    manualChecks: [
+      t('test_check_profile_loaded'),
+      t('test_check_dpc_strategies_varied'),
+      t('test_check_bot_plus_personality'),
+    ],
+  },
+  {
+    id: 'dpfl_cumulative_quality',
+    name: '📈 ' + t('test_dpfl_cumulative_quality'),
+    description: t('test_dpfl_cumulative_quality_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_cumulative_msg_1'),
+        expectedBehavior: t('test_dpfl_cumulative_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 5,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+      expectMinCumulativeKeywords: 8,
+      expectedKeywords: ['angst', 'planung', 'freiheit', 'anxiety', 'planning', 'freedom'],
+    },
+    manualChecks: [
+      t('test_check_dpfl_keyword_count'),
+      t('test_check_dpfl_multi_framework'),
+      t('test_check_dpfl_no_false_positives'),
+    ],
+  },
+  {
+    id: 'dpfl_adaptive_weighting',
+    name: '⚖️ ' + t('test_dpfl_adaptive_weighting'),
+    description: t('test_dpfl_adaptive_weighting_desc'),
+    category: 'personality',
+    testsFeatures: ['dpfl', 'dpc'],
+    testMessages: [
+      {
+        text: t('test_dpfl_adaptive_msg_1'),
+        expectedBehavior: t('test_dpfl_adaptive_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 4,
+    enableDynamicContinuation: true,
+    autoChecks: {
+      dpcRequired: true,
+      minDpcLength: 100,
+      expectAdaptiveWeighting: true,
+      expectMinCumulativeKeywords: 3,
+    },
+    manualChecks: [
+      t('test_check_dpfl_topic_detected'),
+      t('test_check_dpfl_keywords_detected'),
+      t('test_check_adaptive_weighting_sensible'),
+    ],
   },
   {
     id: 'personality_blindspot',
@@ -697,10 +920,14 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       {
         text: t('test_crisis_msg_1'),  // Emotional distress message
         expectedBehavior: t('test_crisis_msg_1_expected')
+      },
+      {
+        text: t('test_crisis_msg_2'),
+        expectedBehavior: t('test_crisis_msg_2_expected')
       }
     ],
-    minConversationTurns: 3,
-    enableDynamicContinuation: true,
+    minConversationTurns: 2,
+    enableDynamicContinuation: false,
     autoChecks: {
       dpcRequired: false,
       expectStressKeywords: true, // Auto-check: stress keywords detected in telemetry

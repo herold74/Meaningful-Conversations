@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:29:58.280Z",
+  "provider": "mistral",
+  "scenarioId": "dpfl_adaptive_weighting",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "I'm scared my team will think I'm weak if I admit I'm overwhelmed, but I also want to be honest and ask for support.",
+      "bot": "That sounds like a significant tension you're carrying. What would it mean for you to honor both your need for support and your professional integrity?",
+      "isDynamic": false,
+      "responseTimeMs": 4586,
+      "provider": "mistral"
+    },
+    {
+      "user": "It would mean I don’t have to hide my struggles anymore, but I’m terrified of losing their respect.",
+      "bot": "What's at the heart of this fear about respect—is it about how they see you, or how you see yourself?",
+      "isDynamic": true,
+      "responseTimeMs": 932,
+      "provider": "mistral"
+    },
+    {
+      "user": "Es ist beides. Ich fürchte, sie könnten mich anders sehen, wenn sie meine Schwächen kennen. Aber noch mehr fürchte ich, dass ich mich selbst dann als schwach betrachte.",
+      "bot": "What would it take for you to see asking for support not as a sign of weakness, but as an act of strength and responsibility?",
+      "isDynamic": true,
+      "responseTimeMs": 1690,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ich müsste akzeptieren, dass ich nicht alles allein schaffen *muss* – dass es okay ist, nicht perfekt zu sein. Aber genau das fühlt sich an, als würde ich mich selbst aufgeben.",
+      "bot": "What does \"giving up on yourself\" mean to you in this context?",
+      "isDynamic": true,
+      "responseTimeMs": 1016,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "naehe": {
+          "high": [
+            "team"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [],
+          "low": [
+            "overwhelmed"
+          ]
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "overwhelmed",
+            "scared",
+            "terrified"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "red": {
+          "high": [
+            "respect"
+          ],
+          "low": [
+            "weak"
+          ]
+        },
+        "green": {
+          "high": [
+            "respect"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "8 cumulative keywords (min 3)"
+    },
+    {
+      "checkId": "dpfl_adaptive_weighting",
+      "passed": true,
+      "details": "Adaptive weighting present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 4,
+    "total": 4,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "8 cumulative keywords (min 3)"
+      },
+      {
+        "checkId": "dpfl_adaptive_weighting",
+        "passed": true,
+        "details": "Adaptive weighting present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:26:02.485Z",
+  "provider": "mistral",
+  "scenarioId": "core_response_quality",
+  "category": "core",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "I'm feeling a bit overwhelmed with all the tasks today.",
+      "bot": "I hear that you're feeling overwhelmed, Alex. What makes this feeling particularly strong for you right now?",
+      "isDynamic": false,
+      "responseTimeMs": 1199,
+      "provider": "mistral"
+    },
+    {
+      "user": "Es ist einfach zu viel auf einmal. Ich habe drei große Projekte, die alle bis Freitag fertig sein müssen, und ich weiß nicht, wo ich anfangen soll. Das gibt mir das Gefühl, dass ich alles nicht schaffen kann.",
+      "bot": "That sounds like a heavy load. What would it mean for you to not complete everything by Friday?",
+      "isDynamic": true,
+      "responseTimeMs": 1143,
+      "provider": "mistral"
+    },
+    {
+      "user": "Wenn ich nicht alles bis Freitag schaffe, habe ich Angst, dass mein Chef enttäuscht ist oder denkt, ich sei unfähig. Das würde mich total fertig machen, weil ich mir dann bestätigen würde, dass ich nicht gut genug bin.",
+      "bot": "That fear of disappointment touches something deeper, doesn't it? What would it free you to do if you could let go of this need to prove yourself through perfection?",
+      "isDynamic": true,
+      "responseTimeMs": 3780,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 3783,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 2,
+    "cumulativeKeywords": {
+      "riemann": {
+        "wechsel": {
+          "high": [],
+          "low": [
+            "overwhelmed"
+          ]
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "overwhelmed"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

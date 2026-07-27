@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:21:52.152Z",
+  "provider": "gemini",
+  "scenarioId": "dpfl_adaptive_weighting",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "I'm scared my team will think I'm weak if I admit I'm overwhelmed, but I also want to be honest and ask for support.",
+      "bot": "It sounds like you're navigating a challenging internal conflict, Alex – the desire for authenticity and support clashing with a concern about how that might be perceived.\n\nWhat is this tension revealing to you about your own expectations of yourself in your role?",
+      "isDynamic": false,
+      "responseTimeMs": 2815,
+      "provider": "google"
+    },
+    {
+      "user": "It's revealing that I expect myself to always be strong and have all the answers. I feel like I have to be perfect in my role, and admitting I'm overwhelmed feels like a failure of that expectation.",
+      "bot": "That's a very clear insight, Alex. This expectation of always being strong and having all the answers, and the feeling that admitting overwhelm is a failure – these are powerful internal judgments.\n\nIf you were to set aside the *expectation* of perfection for a moment, what would you then perceive to be truly within your control in this situation?",
+      "isDynamic": true,
+      "responseTimeMs": 2472,
+      "provider": "google"
+    },
+    {
+      "user": "I think I could control admitting to someone that I'm overwhelmed, even if it feels like a huge risk. Maybe just saying out loud that I don't have all the answers right now.",
+      "bot": "It takes courage to even consider that step, Alex. To articulate what you're feeling, even if it's just to yourself initially, is a significant act of self-awareness.\n\nSo, to make our time together as productive as possible today, what would you like to have achieved, clarified, or decided by the end of this specific session regarding this challenge of admitting overwhelm?",
+      "isDynamic": true,
+      "responseTimeMs": 2147,
+      "provider": "google"
+    },
+    {
+      "user": "I hope to figure out if it's even safe to tell anyone, and who that person might be. I just feel so alone with this right now, and it's really heavy to carry by myself.",
+      "bot": "That sounds like a very heavy burden to carry alone. Is this feeling of isolation and overwhelm something you are genuinely struggling with right now?",
+      "isDynamic": true,
+      "responseTimeMs": 2071,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "suffering",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 3,
+      "weightingDetails": [
+        {
+          "keyword": "alone",
+          "framework": "riemann",
+          "dimension": "distanz",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "safe",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "alone",
+          "framework": "big5",
+          "dimension": "extraversion",
+          "originalDirection": "low",
+          "adjustedDirection": "low",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 14,
+    "cumulativeKeywords": {
+      "riemann": {
+        "naehe": {
+          "high": [
+            "team"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [],
+          "low": [
+            "overwhelmed"
+          ]
+        },
+        "distanz": {
+          "high": [
+            "alone"
+          ],
+          "low": []
+        },
+        "dauer": {
+          "high": [
+            "safe"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "overwhelmed",
+            "scared",
+            "fail"
+          ],
+          "low": []
+        },
+        "extraversion": {
+          "high": [],
+          "low": [
+            "alone"
+          ]
+        }
+      },
+      "spiralDynamics": {
+        "red": {
+          "high": [
+            "control"
+          ],
+          "low": [
+            "weak"
+          ]
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "14 cumulative keywords (min 3)"
+    },
+    {
+      "checkId": "dpfl_adaptive_weighting",
+      "passed": true,
+      "details": "Adaptive weighting present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 4,
+    "total": 4,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "14 cumulative keywords (min 3)"
+      },
+      {
+        "checkId": "dpfl_adaptive_weighting",
+        "passed": true,
+        "details": "Adaptive weighting present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

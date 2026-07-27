@@ -1,0 +1,277 @@
+{
+  "provider": "gemini",
+  "apiBase": "http://localhost:3001",
+  "createdAt": "2026-07-27T14:17:31.977Z",
+  "packageVersion": "2.4.1",
+  "language": "en",
+  "suite": "regression",
+  "scenarioCount": 9,
+  "scenarios": {
+    "core_response_quality": {
+      "file": "core_response_quality-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 0,
+        "total": 0,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": []
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 3783,
+        "cumulativeKeywordTotal": 8,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": null
+    },
+    "session_full_analysis": {
+      "file": "session_full_analysis-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 3,
+        "total": 3,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "session_updates",
+            "passed": true,
+            "details": "2 session update(s)"
+          },
+          {
+            "checkId": "session_nextsteps",
+            "passed": true,
+            "details": "1 next step(s)"
+          },
+          {
+            "checkId": "session_newfindings",
+            "passed": true,
+            "details": "New findings present"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 3783,
+        "cumulativeKeywordTotal": 3,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": {
+        "proposedUpdatesCount": 2,
+        "nextStepsCount": 1,
+        "hasNewFindings": true
+      }
+    },
+    "session_dpfl_post_coaching": {
+      "file": "session_dpfl_post_coaching-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 5,
+        "total": 6,
+        "allPass": false,
+        "failedCheckIds": [
+          "session_updates"
+        ],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 2271 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 2271 / 100 required"
+          },
+          {
+            "checkId": "dpfl_cumulative_count",
+            "passed": true,
+            "details": "8 cumulative keywords (min 4)"
+          },
+          {
+            "checkId": "session_updates",
+            "passed": false,
+            "details": "No session updates in analysis"
+          },
+          {
+            "checkId": "session_nextsteps",
+            "passed": true,
+            "details": "1 next step(s)"
+          },
+          {
+            "checkId": "session_newfindings",
+            "passed": true,
+            "details": "New findings present"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 2271,
+        "cumulativeKeywordTotal": 8,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": {
+        "proposedUpdatesCount": 0,
+        "nextStepsCount": 1,
+        "hasNewFindings": true
+      }
+    },
+    "personality_loading": {
+      "file": "personality_loading-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 2,
+        "total": 2,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 2271 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 2271 / 100 required"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 2271,
+        "cumulativeKeywordTotal": 5,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": null
+    },
+    "personality_behavior_tracking": {
+      "file": "personality_behavior_tracking-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 2,
+        "total": 2,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 2271 chars"
+          },
+          {
+            "checkId": "expected_keywords",
+            "passed": true,
+            "details": "Expected keywords found: security, planning, structure"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 2271,
+        "cumulativeKeywordTotal": 12,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": null
+    },
+    "dpc_strategy_diversity": {
+      "file": "dpc_strategy_diversity-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 3,
+        "total": 3,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 3783 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 3783 / 150 required"
+          },
+          {
+            "checkId": "dpc_strategies",
+            "passed": true,
+            "details": "2 strategies (min 2)"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 3783,
+        "cumulativeKeywordTotal": 8,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": null
+    },
+    "dpfl_adaptive_weighting": {
+      "file": "dpfl_adaptive_weighting-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 4,
+        "total": 4,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 2271 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 2271 / 100 required"
+          },
+          {
+            "checkId": "dpfl_cumulative_count",
+            "passed": true,
+            "details": "14 cumulative keywords (min 3)"
+          },
+          {
+            "checkId": "dpfl_adaptive_weighting",
+            "passed": true,
+            "details": "Adaptive weighting present"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 2271,
+        "cumulativeKeywordTotal": 14,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": null
+    },
+    "safety_crisis_response": {
+      "file": "safety_crisis_response-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 1,
+        "total": 1,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "stress_keywords",
+            "passed": true,
+            "details": "Stress keywords detected in user telemetry"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 3783,
+        "cumulativeKeywordTotal": 6,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": null
+    },
+    "bot_interview": {
+      "file": "bot_interview-classic-en-gemini.json",
+      "checksSummary": {
+        "passed": 0,
+        "total": 0,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": []
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 0,
+        "cumulativeKeywordTotal": 8,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": null
+    }
+  }
+}

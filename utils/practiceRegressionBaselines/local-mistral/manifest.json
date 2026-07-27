@@ -1,0 +1,47 @@
+{
+  "provider": "mistral",
+  "apiBase": "http://localhost:3001",
+  "createdAt": "2026-07-27T14:30:27.086Z",
+  "packageVersion": "2.4.1",
+  "language": "en",
+  "labMode": "adaptive",
+  "difficulty": "easy",
+  "scenarios": {
+    "motivation-dip": {
+      "file": "motivation-dip-adaptive-en-mistral.json",
+      "scores": {
+        "overallScore": 8,
+        "methodCompliance": 8,
+        "effectiveness": 9,
+        "clarity": 9,
+        "coacheeAutonomy": 9,
+        "coacheeSatisfaction": 8,
+        "sessionFlowCoherent": true
+      }
+    },
+    "relationship-boundary": {
+      "file": "relationship-boundary-adaptive-en-mistral.json",
+      "scores": {
+        "overallScore": 7,
+        "methodCompliance": 6,
+        "effectiveness": 8,
+        "clarity": 9,
+        "coacheeAutonomy": 9,
+        "coacheeSatisfaction": 8,
+        "sessionFlowCoherent": false
+      }
+    },
+    "overwhelm": {
+      "file": "overwhelm-adaptive-en-mistral.json",
+      "scores": {
+        "overallScore": 7,
+        "methodCompliance": 6,
+        "effectiveness": 7,
+        "clarity": 9,
+        "coacheeAutonomy": 8,
+        "coacheeSatisfaction": 8,
+        "sessionFlowCoherent": false
+      }
+    }
+  }
+}

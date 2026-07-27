@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:34:23.234Z",
+  "provider": "mistral",
+  "scenarioId": "relationship-boundary",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Was bringt dich heute hierher, Taylor?",
+      "coachee": "Ich bin Taylor. Ein Freund schreibt mir oft spätabends mit schweren emotionalen Themen, und ich weiß nicht, wie ich Grenzen setzen kann, ohne mich schuldig zu fühlen.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Warum ist dieses Thema gerade jetzt so wichtig für dich?",
+      "coachee": "Weil es mich in letzter Zeit richtig überfordert. Ich schlafe schlecht, weil ich mir Gedanken mache, wie ich reagiere – und gleichzeitig habe ich Angst, ihn zu verletzen, wenn ich sage, dass ich nicht immer da sein kann.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Gibt es Momente, in denen es dir gelungen ist, eine Grenze zu setzen – auch wenn es nur klein war?",
+      "coachee": "Ja, einmal habe ich gesagt, dass ich nicht sofort antworten kann, weil ich schlief. Das war schon schwer, aber er hat es akzeptiert. Aber danach hatte ich trotzdem ein schlechtes Gewissen.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Auf einer Skala von 0–10, wo würdest du dich gerade sehen, wenn 10 bedeutet, dass du klar und ohne schlechtes Gewissen Grenzen setzen kannst?",
+      "coachee": "Vielleicht bei einer 3. Ich schaffe es manchmal, aber das schlechte Gewissen holt mich schnell wieder ein.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Was wäre ein kleiner, realistischer Schritt, der dich von der 3 auf eine 4 bringen würde?",
+      "coachee": "Dass ich mir vor dem Schlafen gehe eine feste Zeit setze, ab der ich das Handy weglege – und das auch kommuniziere. Einfach mal ausprobieren, ohne gleich perfekt sein zu müssen.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Das klingt nach einem machbaren und klaren Schritt. Was genau würdest du dieser Woche tun, um das umzusetzen?",
+      "coachee": "Ich würde meinem Freund heute Abend schreiben: \"Hey, ich merke, dass ich abends oft zu spät reagieren muss, weil ich schlafe. Ab 22 Uhr bin ich nicht mehr online – wenn es dringend ist, ruf mich an, sonst schreibe ich dir am nächsten Tag.\" Und dann das Handy wirklich weglegen.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    }
+  ],
+  "scores": {
+    "overallScore": 7,
+    "methodCompliance": 6,
+    "effectiveness": 8,
+    "clarity": 9,
+    "coacheeAutonomy": 9,
+    "coacheeSatisfaction": 8,
+    "sessionFlowCoherent": false
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

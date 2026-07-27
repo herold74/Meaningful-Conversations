@@ -80,6 +80,16 @@ Thumbs.db
 coverage/
 .nyc_output/
 
+# Regression test runs (reference baselines in local-* remain committed)
+utils/practiceRegressionBaselines/runs/*
+!utils/practiceRegressionBaselines/runs/.gitkeep
+!utils/practiceRegressionBaselines/runs/index.json
+utils/classicRegressionBaselines/runs/*
+!utils/classicRegressionBaselines/runs/.gitkeep
+!utils/classicRegressionBaselines/runs/index.json
+utils/*/local-*/compare-offline*.json
+utils/*/local-*/compare-report*.json
+
 # Prisma
 meaningful-conversations-backend/prisma/*.db
 meaningful-conversations-backend/prisma/*.db-journal

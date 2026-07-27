@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:28:24.917Z",
+  "provider": "mistral",
+  "scenarioId": "session_dpfl_post_coaching",
+  "category": "session",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "I value stability and careful planning, but I also crave more freedom and change in my career.",
+      "bot": "This tension between stability and freedom is a rich space for reflection.\n\nWhat makes this particular struggle feel urgent for you right now?",
+      "isDynamic": false,
+      "responseTimeMs": 1713,
+      "provider": "mistral"
+    },
+    {
+      "user": "I decided to talk to my mentor this week about a small experiment at work.",
+      "bot": "That sounds like a concrete step toward the change you're seeking.\n\nWhat would you like to have achieved or clarified by the end of our session today regarding this conversation with your mentor?",
+      "isDynamic": false,
+      "responseTimeMs": 2497,
+      "provider": "mistral"
+    },
+    {
+      "user": "I'll meet my mentor on Friday and block one hour to outline a small pilot project.",
+      "bot": "So the goal for our session is to prepare for that Friday meeting by outlining a small pilot project.\n\nIs that correct?",
+      "isDynamic": false,
+      "responseTimeMs": 5432,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "distanz": {
+          "high": [
+            "freedom"
+          ],
+          "low": []
+        },
+        "dauer": {
+          "high": [
+            "stability",
+            "planning"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [
+            "change",
+            "crave",
+            "experiment"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "conscientiousness": {
+          "high": [
+            "careful"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "orange": {
+          "high": [
+            "career"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 1,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "8 cumulative keywords (min 4)"
+    },
+    {
+      "checkId": "session_updates",
+      "passed": true,
+      "details": "1 session update(s)"
+    },
+    {
+      "checkId": "session_nextsteps",
+      "passed": true,
+      "details": "1 next step(s)"
+    },
+    {
+      "checkId": "session_newfindings",
+      "passed": true,
+      "details": "New findings present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 6,
+    "total": 6,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "8 cumulative keywords (min 4)"
+      },
+      {
+        "checkId": "session_updates",
+        "passed": true,
+        "details": "1 session update(s)"
+      },
+      {
+        "checkId": "session_nextsteps",
+        "passed": true,
+        "details": "1 next step(s)"
+      },
+      {
+        "checkId": "session_newfindings",
+        "passed": true,
+        "details": "New findings present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}
