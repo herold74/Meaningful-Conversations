@@ -267,8 +267,10 @@ export type ScopeBoundaryTheme =
     | 'acute-distress';
 
 export interface PracticeUnlocks {
-    hard: boolean;
-    liveMode: boolean;
+    /** Framework+scenario pairs where a Challenging session was completed (unlocks Hard + Live). */
+    hardUnlockedPairs: PracticeDefaultPair[];
+    /** Admin/developer: Hard/Live always available for any pair. */
+    privileged?: boolean;
 }
 
 export type PracticeMatchTier = 'primary' | 'alternative' | 'neutral' | 'discouraged';

@@ -33,6 +33,10 @@ git log -p --all -S 'forward-focused tradition' | head
 
 Repeat migration + deploy after staging sign-off.
 
-## 4. Remove legacy aliases (optional v2.5.0)
+## 4. Remove legacy aliases (when obsolete)
 
-After all DB rows and clients use canonical IDs, remove `LEGACY_*_ALIASES` from `practice/methodTaxonomy.js`.
+**Vermerk:** Aliases are **temporary** — remove when App Store ≥2.4.x, production migrated, and DB has no legacy IDs. Full criteria and checklist:
+
+→ **`DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md`**
+
+Then remove `LEGACY_*_ALIASES` from `practice/methodTaxonomy.js` (target e.g. v2.5.0).

@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../../middleware/auth.js');
 const prisma = require('../../prismaClient.js');
 const { requireClientPlus, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
+const { isHardUnlockedForPair } = require('../../practice/practiceUnlocks.js');
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
@@ -41,16 +42,31 @@ async function validatePracticeSessionParams(userId, user, {
   difficulty,
   liveMode,
   scopeBoundaryTheme,
+  frameworkId,
   scenarioId,
 }) {
   const diff = VALID_DIFFICULTIES.includes(difficulty) ? difficulty : 'moderate';
   const unlocks = await getPracticeUnlocks(userId, user);
+  const pairUnlocked = isHardUnlockedForPair(
+    unlocks.hardUnlockedPairs,
+    frameworkId,
+    scenarioId,
+    unlocks.privileged,
+  );
 
-  if (diff === 'hard' && !unlocks.hard) {
-    return { ok: false, status: 403, error: 'Complete a Challenging practice session to unlock Hard difficulty.' };
+  if (diff === 'hard' && !pairUnlocked) {
+    return {
+      ok: false,
+      status: 403,
+      error: 'Complete a Challenging session with this method and scenario to unlock Hard difficulty.',
+    };
   }
-  if (liveMode && !unlocks.liveMode) {
-    return { ok: false, status: 403, error: 'Complete a Challenging practice session to unlock Live mode.' };
+  if (liveMode && !pairUnlocked) {
+    return {
+      ok: false,
+      status: 403,
+      error: 'Complete a Challenging session with this method and scenario to unlock Live mode.',
+    };
   }
 
   const resolvedTheme =
@@ -93,6 +109,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       difficulty,
       liveMode,
       scopeBoundaryTheme,
+      frameworkId: resolvedFrameworkId,
       scenarioId,
     });
     if (!sessionParams.ok) {
@@ -253,6 +270,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       difficulty,
       liveMode,
       scopeBoundaryTheme,
+      frameworkId: resolvedFrameworkId,
       scenarioId,
     });
     if (!sessionParams.ok) {

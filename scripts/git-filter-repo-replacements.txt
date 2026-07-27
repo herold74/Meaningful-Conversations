@@ -1,37 +1,38 @@
-***REMOVED***
-***REMOVED***
-***REMOVED***
+# git filter-repo --replace-text (run AFTER legal review, BEFORE force push)
+# Order: longest / most specific strings first where possible.
+# NOTE: After filter-repo, restore LEGACY_* maps in practice/methodTaxonomy.js manually —
+# do not rely on this file to rewrite alias keys (filter-repo would corrupt the map).
 
-sam-forward-focused==>sam-forward-focused
-gabrielle-four-stage==>gabrielle-four-stage
-mike-ambivalence-coaching==>mike-ambivalence-coaching
-dan-client-language==>dan-client-language
-chloe-structured-reflection==>chloe-structured-reflection
-kenji-resilience==>kenji-resilience
-nexus-goal-path-solution==>nexus-goal-path-solution
-victor-systemic-coaching==>victor-systemic-coaching
-ambivalence-coaching==>ambivalence-coaching
-forward-focused-coaching==>forward-focused-coaching
-client-exact-language==>client-exact-language
-forward-focused coaching tradition==>forward-focused coaching tradition
-brief forward-focused coaching==>brief forward-focused coaching
-forward-focused tradition==>forward-focused tradition
-ambivalence coaching approach==>ambivalence coaching approach
-ambivalence coaching==>ambivalence coaching
-brief forward-focused coaching==>brief forward-focused coaching
-client exact language==>client exact language
-four-stage coaching model==>four-stage coaching model
-Vier-Phasen-Coaching-Modell==>Vier-Phasen-Coaching-Modell
-four-stage coaching==>four-stage coaching
-Vier-Phasen-Coaching==>Vier-Phasen-Coaching
-listening skills==>listening skills
-brief forward-focused==>brief forward-focused
-/public/avatars/sam.png==>/public/avatars/sam.png
-avatars/sam.png==>avatars/sam.png
-You are Sam,==>You are Sam,
-Sie sind Sam,==>Sie sind Sam,
-name: 'Sam'==>name: 'Sam'
-newCoaches.sam==>newCoaches.sam
-samMethodEN==>samMethodEN
-samMethodDE==>samMethodDE
-    sam:==>    sam:
+steve-solution-focused==>sam-forward-focused
+gabrielle-grow==>gabrielle-four-stage
+mike-motivational-interviewing==>mike-ambivalence-coaching
+dan-clean-language==>dan-client-language
+chloe-cbt==>chloe-structured-reflection
+kenji-stoic==>kenji-resilience
+nexus-gps==>nexus-goal-path-solution
+victor-bowen==>victor-systemic-coaching
+motivational-interviewing==>ambivalence-coaching
+solution-focused==>forward-focused-coaching
+clean-language==>client-exact-language
+Steve de Shazer==>forward-focused coaching tradition
+Insoo Kim Berg==>brief forward-focused coaching
+de Shazer==>forward-focused tradition
+Miller & Rollnick==>ambivalence coaching approach
+Motivational Interviewing==>ambivalence coaching
+Solution-Focused Brief Coaching==>brief forward-focused coaching
+Clean Language==>client exact language
+GROW model==>four-stage coaching model
+GROW-Modell==>Vier-Phasen-Coaching-Modell
+GROW coaching==>four-stage coaching
+GROW-Coaching==>Vier-Phasen-Coaching
+OARS==>listening skills
+SFBT==>brief forward-focused
+/public/avatars/steve.png==>/public/avatars/sam.png
+avatars/steve.png==>avatars/sam.png
+You are Steve,==>You are Sam,
+Sie sind Steve,==>Sie sind Sam,
+name: 'Steve'==>name: 'Sam'
+newCoaches.steve==>newCoaches.sam
+steveMethodEN==>samMethodEN
+steveMethodDE==>samMethodDE
+    steve:==>    sam:

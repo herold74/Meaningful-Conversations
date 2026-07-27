@@ -23,16 +23,10 @@ async function requireClientPlus(userId) {
   return { ok: true, user };
 }
 
+const { isHardUnlockedForPair, getPracticeUnlocks: buildPracticeUnlocks } = require('../practice/practiceUnlocks.js');
+
 async function getPracticeUnlocks(userId, user) {
-  const isPrivileged = user.isAdmin || user.isDeveloper;
-  if (isPrivileged) {
-    return { hard: true, liveMode: true };
-  }
-  const challengingCount = await prisma.practiceEvaluation.count({
-    where: { userId, difficulty: 'challenging' },
-  });
-  const unlocked = challengingCount >= 1;
-  return { hard: unlocked, liveMode: unlocked };
+  return buildPracticeUnlocks(prisma, userId, user);
 }
 
 function resolveScopeBoundaryTheme(difficulty, scenarioId, clientTheme) {
@@ -69,7 +63,7 @@ router.get('/catalog', authMiddleware, async (req, res) => {
         { id: 'easy', label: language === 'en' ? 'Easy' : 'Leicht' },
         { id: 'moderate', label: language === 'en' ? 'Moderate' : 'Mittel' },
         { id: 'challenging', label: language === 'en' ? 'Challenging' : 'Herausfordernd' },
-        { id: 'hard', label: language === 'en' ? 'Hard' : 'Schwer', locked: !unlocks.hard },
+        { id: 'hard', label: language === 'en' ? 'Hard' : 'Schwer' },
       ],
       unlocks,
     });
