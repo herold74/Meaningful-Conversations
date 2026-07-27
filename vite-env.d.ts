@@ -30,6 +30,8 @@ interface ImportMetaEnv {
   readonly VITE_BRAND_LOADER?: string;
   readonly VITE_BRAND_SINGLE_THEME?: string;
   readonly VITE_BRAND_SERVER_IP?: string;
+  /** Capacitor/iOS default API target when no ?backend= URL param: staging | production (default production) */
+  readonly VITE_CAPACITOR_BACKEND?: string;
 }
 
 interface ImportMeta {
