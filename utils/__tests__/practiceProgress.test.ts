@@ -67,6 +67,8 @@ describe('practiceProgress', () => {
     expect(stats.milestones.find((m) => m.id === 'first_session')?.achieved).toBe(true);
     expect(stats.milestones.find((m) => m.id === 'score_eight')?.achieved).toBe(true);
     expect(stats.milestones.find((m) => m.id === 'challenging_done')?.achieved).toBe(true);
+    expect(stats.milestones.find((m) => m.id === 'hard_done')?.achieved).toBe(false);
+    expect(stats.milestones.find((m) => m.id === 'live_overlay_done')?.achieved).toBe(false);
     expect(stats.recurringDevelopmentAreas[0].count).toBe(4);
     expect(stats.nextDrill?.action).toBe('Practice opening');
   });

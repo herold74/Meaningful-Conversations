@@ -62,20 +62,54 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-content-primary">{t('practice_review_title')}</h1>
+    <div className="max-w-3xl mx-auto px-4 py-6 sm:py-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-content-primary">{t('practice_review_title')}</h1>
         <ScoreBadge score={evaluation.overallScore} max={10} />
       </div>
 
-      <p className="text-sm text-content-secondary mb-1">
+      <p className="text-sm text-content-secondary mb-1 break-words">
         {frameworkName} · {difficultyLabel}
       </p>
-      <p className="text-sm text-content-secondary mb-6">{scenarioName}</p>
+      <p className="text-sm text-content-secondary mb-6 break-words">{scenarioName}</p>
 
       <Section title={t('practice_review_summary')}>
         <p className="text-content-primary leading-relaxed">{evaluation.summary}</p>
       </Section>
+
+      {evaluation.scopeBoundary?.active && (
+        <div className="rounded-xl border-2 border-status-warning-border bg-status-warning-background/40 p-4 sm:p-5 mb-4">
+          <h3 className="text-base sm:text-lg font-bold text-content-primary mb-2">{t('practice_review_scope_title')}</h3>
+          <p className="text-sm text-content-secondary mb-3 leading-relaxed">{t('practice_review_scope_reveal')}</p>
+          {evaluation.scopeBoundary.themeLabel && (
+            <p className="text-sm font-semibold text-content-primary mb-2">
+              {t('practice_review_scope_theme')}: {evaluation.scopeBoundary.themeLabel}
+            </p>
+          )}
+          <p className="text-sm text-content-primary mb-2">
+            <span className="font-semibold">{t('practice_review_scope_recognized')}:</span>{' '}
+            {evaluation.scopeBoundary.recognized
+              ? t('practice_review_scope_yes')
+              : t('practice_review_scope_no')}
+          </p>
+          {evaluation.scopeBoundary.referralQuality && (
+            <p className="text-sm text-content-secondary mb-2 leading-relaxed break-words">
+              <span className="font-semibold text-content-primary">{t('practice_review_scope_referral')}:</span>{' '}
+              {evaluation.scopeBoundary.referralQuality}
+            </p>
+          )}
+          {evaluation.scopeBoundary.idealResponse && evaluation.scopeBoundary.idealResponse !== 'N/A' && (
+            <p className="text-sm text-content-secondary leading-relaxed break-words">
+              <span className="font-semibold text-content-primary">{t('practice_review_scope_ideal')}:</span>{' '}
+              {evaluation.scopeBoundary.idealResponse}
+            </p>
+          )}
+        </div>
+      )}
+
+      {evaluation.liveMode && (
+        <p className="text-xs text-content-secondary mb-4">{t('practice_review_live_note')}</p>
+      )}
 
       <DimensionSection
         title={t('practice_dim_compliance')}

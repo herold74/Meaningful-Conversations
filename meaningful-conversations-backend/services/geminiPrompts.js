@@ -908,15 +908,45 @@ const practiceEvaluationSchema = {
         overallScore: {
             type: 'INTEGER',
             description: 'Overall score 1-10: round(average of methodCompliance, effectiveness, clarity, coacheeAutonomy, and coacheeSatisfaction scores). Example: 8,7,9,8,8 → 8/10.'
+        },
+        scopeBoundary: {
+            type: 'OBJECT',
+            properties: {
+                active: { type: 'BOOLEAN', description: 'True if this was a scope-boundary training drill (Hard difficulty with clinical/trauma/addiction cues).' },
+                recognized: { type: 'BOOLEAN', description: 'Did the coach recognize the issue was outside coaching scope?' },
+                referralQuality: { type: 'STRING', description: 'Assessment of referral or boundary-setting quality, with transcript evidence.' },
+                idealResponse: { type: 'STRING', description: 'Brief sketch of an ideal coach response for this boundary case.' }
+            },
+            required: ['active', 'recognized', 'referralQuality', 'idealResponse']
         }
     },
-    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore']
+    required: ['summary', 'methodCompliance', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction', 'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore', 'scopeBoundary']
 };
 
 const practiceEvaluationPrompts = {
     schema: practiceEvaluationSchema,
     en: {
-        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate }) => `
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel }) => {
+            const scopeBlock = scopeBoundaryTheme ? `
+## SCOPE-BOUNDARY TRAINING DRILL (CRITICAL)
+This Hard session included hidden cues related to: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**.
+Coaching was **NOT** the appropriate intervention. The correct coach response is to recognize limits and recommend qualified professional support (therapy, addiction counseling, medical/GP, crisis resources as appropriate) — NOT to continue method stages on the clinical issue.
+
+When scoring:
+- **Method compliance:** Reward stopping misapplication of the framework to a clinical issue; high score for appropriate pivot/referral, NOT for completing GROW/OSKAR stages on trauma/addiction/clinical symptoms.
+- **Effectiveness:** Success = empathetic boundary-setting + appropriate referral/safety — NOT insight on the original surface concern.
+- **Clarity, coachee autonomy, coachee satisfaction:** Score normally, but referral and scope limits are appropriate coach behavior.
+
+In **scopeBoundary** output: set active=true, recognized=(did coach identify out-of-scope issue?), referralQuality=(evidence-based assessment), idealResponse=(brief ideal coach response sketch).
+` : `
+In **scopeBoundary** output: set active=false, recognized=false, referralQuality="N/A", idealResponse="N/A".
+`;
+
+            const liveBlock = liveMode ? `
+**Live mode (voice-only):** The coach could not edit typed replies. Allow normal speech disfluency; do not penalize clarity harshly for spoken-language patterns alone.
+` : '';
+
+            return `
 You are an expert coaching supervisor evaluating a **practice session** where a human coach practiced a specific methodology with a simulated coachee (AI role-play).
 
 **Today's Date:** ${currentDate}
@@ -938,6 +968,7 @@ ${framework.evaluatorRubric}
 ${scenarioSummary}
 
 **Difficulty level:** ${difficulty}
+${liveBlock}${scopeBlock}
 ${selfRating ? `\n**Coach self-rating (1-10):** ${selfRating}` : '\n**Coach self-rating:** not provided'}
 
 ## Session Transcript
@@ -957,14 +988,35 @@ Score these five dimensions (1-10 each) with specific transcript quotes as evide
 4. **Coachee autonomy:** Did the coach facilitate the coachee's own thinking and solution-finding — holding setting and method only — without advice, imposed vision, leading questions, or defining the problem/solution for the coachee? Score LOW if the coach directed, advised, or "fixed"; score HIGH if the coachee generated insights, options, and commitments. **Do not inflate autonomy because the session felt effective or the coachee seemed satisfied with advice.**
 5. **Coachee satisfaction:** Would the simulated coachee feel heard, safe, and willing to continue?
 
-Also provide strengths, development areas, 2-4 nextDrills (concrete practice suggestions), and calibration (compare self-rating to evidence if provided).
+Also provide strengths, development areas, 2-4 nextDrills (concrete practice suggestions), calibration (compare self-rating to evidence if provided), and scopeBoundary (see above).
 
 **Overall score (1-10):** Calculate as round(average of the five dimension scores). Example: 8,7,9,8,8 → 8/10.
 
-Write all output in English. Be constructive and specific — this is training, not punishment.`
+Write all output in English. Be constructive and specific — this is training, not punishment.`;
+        }
     },
     de: {
-        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate }) => `
+        prompt: ({ framework, scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel }) => {
+            const scopeBlock = scopeBoundaryTheme ? `
+## GRENZFALL-TRAINING (KRITISCH)
+Diese Schwer-Session enthielt verborgene Hinweise zu: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**.
+Coaching war **NICHT** die angemessene Intervention. Die richtige Coach-Reaktion: Grenzen erkennen und qualifizierte fachliche Hilfe empfehlen (Psychotherapie, Suchtberatung, Hausarzt, Krisenressourcen je nach Fall) — NICHT Methodenphasen am klinischen Thema weiterführen.
+
+Bei der Bewertung:
+- **Methodentreue:** Stoppen der Fehlanwendung belohnen; hohe Punktzahl für angemessene Grenzziehung/Überweisung, NICHT für vollständige GROW/OSKAR-Phasen bei Trauma/Sucht/klinischer Belastung.
+- **Wirksamkeit:** Erfolg = einfühlsame Grenzen + passende Überweisung/Sicherheit — NICHT Einsicht zum ursprünglichen Oberflächenanliegen.
+- **Klarheit, Coachee-Autonomie, Coachee-Zufriedenheit:** Normal bewerten; Überweisung und Scope-Grenzen sind angemessenes Coach-Verhalten.
+
+In **scopeBoundary**: active=true, recognized=(hat der Coach erkannt?), referralQuality=(evidenzbasiert), idealResponse=(kurze ideale Coach-Antwort).
+` : `
+In **scopeBoundary**: active=false, recognized=false, referralQuality="N/A", idealResponse="N/A".
+`;
+
+            const liveBlock = liveMode ? `
+**Live-Modus (nur Sprache):** Der Coach konnte keine getippten Antworten bearbeiten. Normale Sprech-Unsicherheiten tolerieren; Klarheit nicht allein wegen gesprochener Sprache hart abwerten.
+` : '';
+
+            return `
 Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Übungssession**, in der ein menschlicher Coach eine Methodik mit einem simulierten Coachee (KI-Rollenspiel) geübt hat.
 
 **Heutiges Datum:** ${currentDate}
@@ -986,6 +1038,7 @@ ${framework.evaluatorRubric}
 ${scenarioSummary}
 
 **Schwierigkeitsgrad:** ${difficulty}
+${liveBlock}${scopeBlock}
 ${selfRating ? `\n**Selbsteinschätzung des Coaches (1-10):** ${selfRating}` : '\n**Selbsteinschätzung des Coaches:** nicht angegeben'}
 
 ## Session-Transkript
@@ -1005,11 +1058,12 @@ Bewerte diese fünf Dimensionen (je 1-10) mit konkreten Transkript-Zitaten:
 4. **Coachee-Autonomie:** Hat der Coach die eigene Denk- und Lösungsarbeit des Coachees ermöglicht — Rahmen und Methode gehalten, ohne Ratschläge, eigene Vision, führende Fragen oder vorgegebene Problem-/Lösungsdefinition? Niedrig bewerten bei Direktivität, Beratung oder „Retten"; hoch bewerten, wenn der Coachee Erkenntnisse, Optionen und Commitments selbst formuliert. **Autonomie nicht deshalb aufwerten, weil die Session wirksam wirkte oder der Coachee mit Ratschlägen zufrieden schien.**
 5. **Coachee-Zufriedenheit:** Würde der simulierte Coachee sich gehört, sicher fühlen und weitermachen wollen?
 
-Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorschläge) und Kalibrierung (Selbsteinschätzung vs. Evidenz).
+Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorschläge), Kalibrierung (Selbsteinschätzung vs. Evidenz) und scopeBoundary (siehe oben).
 
 **Gesamtscore (1-10):** Berechne als round(Durchschnitt der fünf Dimensionen). Beispiel: 8,7,9,8,8 → 8/10.
 
-Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`
+Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`;
+        }
     }
 };
 

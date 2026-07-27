@@ -154,6 +154,8 @@ export const computePracticeProgress = (
 
   const uniqueFrameworks = frameworkMap.size;
   const hasChallenging = sorted.some((e) => e.difficulty === 'challenging');
+  const hasHard = sorted.some((e) => e.difficulty === 'hard');
+  const hasLiveOverlay = sorted.some((e) => e.evaluationData.liveMode === true);
   const hasHighScore = sorted.some((e) => e.overallScore >= 8);
 
   const milestones: PracticeMilestone[] = [
@@ -162,6 +164,8 @@ export const computePracticeProgress = (
     { id: 'three_frameworks', achieved: uniqueFrameworks >= 3 },
     { id: 'score_eight', achieved: hasHighScore },
     { id: 'challenging_done', achieved: hasChallenging },
+    { id: 'hard_done', achieved: hasHard },
+    { id: 'live_overlay_done', achieved: hasLiveOverlay },
   ];
 
   const activityDates = [...new Set(sorted.map((e) => e.createdAt.slice(0, 10)))];
@@ -236,6 +240,8 @@ export const buildRecommendedPracticeConfig = (
     difficulty,
     difficultyLabel,
     focusNote,
+    liveMode: false,
+    scopeBoundaryTheme: null,
   };
 };
 

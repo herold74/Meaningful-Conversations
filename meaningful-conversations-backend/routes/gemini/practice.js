@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth.js');
 const prisma = require('../../prismaClient.js');
-const { requireClientPlus } = require('../practice.js');
+const { requireClientPlus, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
+const { getThemeLabel } = require('../../practice/scopeBoundary.js');
 const { practiceEvaluationPrompts } = require('../../services/geminiPrompts.js');
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
@@ -33,6 +34,28 @@ function buildTranscriptFromHistory(history, language) {
     .join('\n\n');
 }
 
+async function validatePracticeSessionParams(userId, user, {
+  difficulty,
+  liveMode,
+  scopeBoundaryTheme,
+  scenarioId,
+}) {
+  const diff = VALID_DIFFICULTIES.includes(difficulty) ? difficulty : 'moderate';
+  const unlocks = await getPracticeUnlocks(userId, user);
+
+  if (diff === 'hard' && !unlocks.hard) {
+    return { ok: false, status: 403, error: 'Complete a Challenging practice session to unlock Hard difficulty.' };
+  }
+  if (liveMode && !unlocks.liveMode) {
+    return { ok: false, status: 403, error: 'Complete a Challenging practice session to unlock Live mode.' };
+  }
+
+  const resolvedTheme =
+    diff === 'hard' ? resolveScopeBoundaryTheme(diff, scenarioId, scopeBoundaryTheme) : null;
+
+  return { ok: true, difficulty: diff, liveMode: !!liveMode, scopeBoundaryTheme: resolvedTheme };
+}
+
 // POST /api/gemini/practice/send-message
 router.post('/practice/send-message', authMiddleware, async (req, res) => {
   const startTime = Date.now();
@@ -45,6 +68,8 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     difficulty = 'moderate',
     focusNote = '',
     stream = false,
+    liveMode = false,
+    scopeBoundaryTheme = null,
   } = req.body;
 
   try {
@@ -58,6 +83,16 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     }
     if (!getFrameworkById(frameworkId) || !getScenarioById(scenarioId)) {
       return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
+    }
+
+    const sessionParams = await validatePracticeSessionParams(userId, access.user, {
+      difficulty,
+      liveMode,
+      scopeBoundaryTheme,
+      scenarioId,
+    });
+    if (!sessionParams.ok) {
+      return res.status(sessionParams.status).json({ error: sessionParams.error });
     }
 
     const lastCoachMsg = history?.[history.length - 1];
@@ -74,9 +109,11 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     const systemInstruction = buildCoacheeSystemPrompt({
       frameworkId,
       scenarioId,
-      difficulty,
+      difficulty: sessionParams.difficulty,
       language,
       focusNote,
+      scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
+      liveMode: sessionParams.liveMode,
     });
 
     const geminiHistory = formatHistoryForGemini(history.slice(0, -1));
@@ -192,6 +229,8 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     focusNote = '',
     selfRating,
     language = 'de',
+    liveMode = false,
+    scopeBoundaryTheme = null,
   } = req.body;
 
   try {
@@ -202,6 +241,16 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
 
     if (!history || !frameworkId || !scenarioId) {
       return res.status(400).json({ error: 'history, frameworkId, and scenarioId are required.' });
+    }
+
+    const sessionParams = await validatePracticeSessionParams(userId, access.user, {
+      difficulty,
+      liveMode,
+      scopeBoundaryTheme,
+      scenarioId,
+    });
+    if (!sessionParams.ok) {
+      return res.status(sessionParams.status).json({ error: sessionParams.error });
     }
 
     const framework = getFrameworkForEvaluation(frameworkId, language);
@@ -234,10 +283,15 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     const prompt = promptFn({
       framework,
       scenarioSummary,
-      difficulty,
+      difficulty: sessionParams.difficulty,
       selfRating: selfRating || null,
       transcript,
       currentDate,
+      liveMode: sessionParams.liveMode,
+      scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
+      scopeBoundaryThemeLabel: sessionParams.scopeBoundaryTheme
+        ? getThemeLabel(sessionParams.scopeBoundaryTheme, lang)
+        : null,
     });
 
     const modelName = 'gemini-2.5-pro';
@@ -269,6 +323,18 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Failed to parse evaluation response.' });
     }
 
+    if (sessionParams.scopeBoundaryTheme) {
+      evaluationResult.scopeBoundary = {
+        active: true,
+        theme: sessionParams.scopeBoundaryTheme,
+        themeLabel: getThemeLabel(sessionParams.scopeBoundaryTheme, lang),
+        ...(evaluationResult.scopeBoundary || {}),
+      };
+    } else {
+      evaluationResult.scopeBoundary = evaluationResult.scopeBoundary || { active: false };
+    }
+    evaluationResult.liveMode = sessionParams.liveMode;
+
     let saved;
     try {
       if (!prisma.practiceEvaluation?.create) {
@@ -286,9 +352,12 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
           userId,
           frameworkId,
           scenarioId,
-          difficulty,
+          difficulty: sessionParams.difficulty,
           focusNote: focusNote || null,
-          evaluationData: JSON.stringify(evaluationResult),
+          evaluationData: JSON.stringify({
+            ...evaluationResult,
+            liveMode: sessionParams.liveMode,
+          }),
           language: lang,
           selfRating: selfRating ?? null,
         },

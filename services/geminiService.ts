@@ -311,6 +311,8 @@ export const sendPracticeMessageStream = async (
             scenarioId: config.scenarioId,
             difficulty: config.difficulty,
             focusNote: config.focusNote || '',
+            liveMode: config.liveMode || false,
+            scopeBoundaryTheme: config.scopeBoundaryTheme ?? null,
             stream: true,
         }),
     });
@@ -370,6 +372,8 @@ export const evaluatePracticeSession = async (
             scenarioId: config.scenarioId,
             difficulty: config.difficulty,
             focusNote: config.focusNote || '',
+            liveMode: config.liveMode || false,
+            scopeBoundaryTheme: config.scopeBoundaryTheme ?? null,
             selfRating,
             language,
         }),

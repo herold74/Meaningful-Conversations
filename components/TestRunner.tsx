@@ -490,6 +490,8 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         coacheeAvatar: '🧑‍💼',
         difficulty: pc.difficulty as PracticeDifficulty,
         difficultyLabel: pc.difficulty,
+        liveMode: false,
+        scopeBoundaryTheme: null,
       };
 
       const responses: TestRunResult['responses'] = [];

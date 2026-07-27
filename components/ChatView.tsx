@@ -85,20 +85,29 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const footerRef = useRef<HTMLElement>(null);
   const voiceTextRef = useRef<HTMLDivElement>(null);
   const initialFetchInitiated = useRef<boolean>(false);
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(() => coachPracticeConfig?.liveMode === true);
+  const practiceLiveMode = coachPracticeConfig?.liveMode === true;
+  const showVoiceUi = practiceLiveMode || isVoiceMode;
 
   const isIOS = useMemo(() => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
 
-  const tts = useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t });
+  const tts = useTts({ bot, language, currentUser, chatHistory, isVoiceMode: showVoiceUi, isNewSession, t });
   const meditation = useMeditation({
     speak: tts.speak,
-    setIsVoiceMode,
+    setIsVoiceMode: practiceLiveMode ? () => {} : setIsVoiceMode,
     gongAudioRef: tts.gongAudioRef,
     t,
   });
+
+  useEffect(() => {
+    if (practiceLiveMode) {
+      setIsVoiceMode(true);
+      tts.setIsTtsEnabled(true);
+    }
+  }, [practiceLiveMode, tts]);
 
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -625,8 +634,9 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 <div className="min-w-0 flex flex-col">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                     {coachPracticeConfig && (
-                      <p className="text-xs text-content-secondary truncate">
+                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
                         {t('practice_chat_you_are_coach')} · {coachPracticeConfig.frameworkName} · {coachPracticeConfig.difficultyLabel}
+                        {practiceLiveMode && ` · ${t('practice_live_badge')}`}
                       </p>
                     )}
                 </div>
@@ -635,6 +645,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
 
         {/* Right: Controls */}
         <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
+            {!practiceLiveMode && (
             <button 
                 onClick={() => {
                     // iOS Audio Session Unlock: When entering voice mode, unlock audio session
@@ -665,8 +676,9 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             >
                 {isVoiceMode ? <ChatBubbleIcon className="w-5 h-5 sm:w-6 sm:h-6"/> : <SoundWaveIcon className="w-5 h-5 sm:w-6 sm:h-6"/>}
             </button>
+            )}
 
-            {!isVoiceMode && (
+            {!showVoiceUi && (
                 <div className="flex items-center justify-end gap-2 border-l border-border-primary pl-2 sm:pl-2 md:pl-4">
                     {/* DEBUG: Show states */}
                     {/* <span className="text-[8px] text-red-500">{isLoadingAudio ? 'L' : '-'}{isTtsEnabled ? 'T' : '-'}</span> */}
@@ -744,25 +756,41 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         </div>
       )}
 
+      {practiceLiveMode && (
+        <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-status-warning-background border-b border-status-warning-border/40">
+          <p className="text-xs sm:text-sm text-status-warning-foreground text-center font-medium leading-snug">
+            {t('practice_live_session_banner')}
+          </p>
+        </div>
+      )}
+
       {/* Coach Practice: human opens the session */}
-      {coachPracticeConfig && chatHistory.length === 0 && (
-        <div className="px-4 py-3 bg-accent-primary/10 border-b border-accent-primary/30">
+      {coachPracticeConfig && chatHistory.length === 0 && practiceLiveMode && (
+        <div className="px-3 sm:px-4 py-2 bg-accent-primary/10 border-b border-accent-primary/30">
+          <p className="text-xs sm:text-sm text-content-secondary text-center leading-snug">
+            {t('practice_open_hint_body', { coacheeName: coachPracticeConfig.coacheeName })}
+          </p>
+        </div>
+      )}
+
+      {coachPracticeConfig && chatHistory.length === 0 && !practiceLiveMode && (
+        <div className="px-3 sm:px-4 py-2 sm:py-3 bg-accent-primary/10 border-b border-accent-primary/30">
           <p className="text-sm font-semibold text-content-primary text-center mb-1">
             {t('practice_open_hint_title')}
           </p>
-          <p className="text-sm text-content-secondary text-center">
+          <p className="text-xs sm:text-sm text-content-secondary text-center leading-snug">
             {t('practice_open_hint_body', { coacheeName: coachPracticeConfig.coacheeName })}
           </p>
         </div>
       )}
       
-    {isVoiceMode ? (
+    {showVoiceUi ? (
         <main className="flex-1 flex flex-col items-center text-center bg-background-primary dark:bg-background-primary/50 overflow-hidden">
             {/* Top: Bot Avatar & Name — pinned */}
-            <div className="shrink-0 flex flex-col items-center pt-6 pb-2">
+            <div className="shrink-0 flex flex-col items-center pt-4 sm:pt-6 pb-2">
                 <div className="animate-fadeIn">
-                    <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
-                    <h1 className="text-3xl font-bold text-content-primary">{bot.name}</h1>
+                    <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto mb-3 sm:mb-4 shadow-lg border-4 border-background-secondary dark:border-border-primary" />
+                    <h1 className="text-2xl sm:text-3xl font-bold text-content-primary">{bot.name}</h1>
                 </div>
             </div>
 
@@ -814,7 +842,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         <button
                             onClick={speech.handleVoiceInteraction}
                             disabled={isLoading}
-                            className={`w-28 h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
+                            className={`w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
                                 speech.isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
                             } ${isLoading ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : ''}`}
                             aria-label={speech.isListening ? t('chat_voice_stop_and_send') : t('chat_voice_start_recording')}

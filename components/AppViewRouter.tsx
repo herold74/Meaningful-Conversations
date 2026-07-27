@@ -724,6 +724,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'practiceSetup':
       return (
         <PracticeSetupView
+          currentUser={currentUser}
           onStart={handleStartPractice}
           onBack={() => setView('botSelection')}
           onHistory={() => setView('practiceHistory')}
@@ -765,9 +766,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 scenarioName: item.summary,
                 coacheeName: '',
                 coacheeAvatar: '/avatars/max.png',
-                difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging') || 'moderate',
+                difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging' | 'hard') || 'moderate',
                 difficultyLabel: item.difficulty,
                 focusNote: item.focusNote || undefined,
+                liveMode: item.evaluationData.liveMode === true,
+                scopeBoundaryTheme: null,
               });
             }
             setView('practiceReview');
@@ -788,9 +791,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
               scenarioName: item.summary,
               coacheeName: '',
               coacheeAvatar: '/avatars/max.png',
-              difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging') || 'moderate',
+              difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging' | 'hard') || 'moderate',
               difficultyLabel: item.difficulty,
               focusNote: item.focusNote || undefined,
+              liveMode: item.evaluationData.liveMode === true,
+              scopeBoundaryTheme: null,
             });
             setView('practiceReview');
           }}
