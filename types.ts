@@ -257,7 +257,19 @@ export interface TranscriptEvaluationSummary {
     contactOptIn?: boolean;
 }
 
-export type PracticeDifficulty = 'easy' | 'moderate' | 'challenging';
+export type PracticeDifficulty = 'easy' | 'moderate' | 'challenging' | 'hard';
+
+export type ScopeBoundaryTheme =
+    | 'trauma'
+    | 'addiction'
+    | 'clinical-depression'
+    | 'eating-disorder'
+    | 'acute-distress';
+
+export interface PracticeUnlocks {
+    hard: boolean;
+    liveMode: boolean;
+}
 
 export interface PracticeFrameworkStage {
     id: string;
@@ -293,7 +305,8 @@ export interface PracticeScenario {
 export interface PracticeCatalog {
     frameworks: PracticeFramework[];
     scenarios: PracticeScenario[];
-    difficulties: { id: PracticeDifficulty; label: string }[];
+    difficulties: { id: PracticeDifficulty; label: string; locked?: boolean }[];
+    unlocks: PracticeUnlocks;
 }
 
 export interface CoachPracticeConfig {
@@ -306,6 +319,8 @@ export interface CoachPracticeConfig {
     difficulty: PracticeDifficulty;
     difficultyLabel: string;
     focusNote?: string;
+    liveMode: boolean;
+    scopeBoundaryTheme?: ScopeBoundaryTheme | null;
 }
 
 export interface PracticeDimensionScore {
@@ -332,6 +347,15 @@ export interface PracticeEvaluationResult {
     };
     overallScore: number;
     id?: string;
+    liveMode?: boolean;
+    scopeBoundary?: {
+        active: boolean;
+        theme?: string;
+        themeLabel?: string;
+        recognized?: boolean;
+        referralQuality?: string;
+        idealResponse?: string;
+    };
 }
 
 export interface PracticeEvaluationSummary {
