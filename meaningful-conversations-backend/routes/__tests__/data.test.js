@@ -274,7 +274,7 @@ describe('GET /api/data/export', () => {
         prisma.practiceEvaluation.findMany.mockResolvedValue([
             {
                 id: 'pe-1',
-                frameworkId: 'grow',
+                frameworkId: 'four-stage-coaching',
                 scenarioId: 'career-decision',
                 difficulty: 'moderate',
                 focusNote: null,
@@ -304,7 +304,7 @@ describe('GET /api/data/export', () => {
 
         expect(res.status).toBe(200);
         expect(res.body.practiceEvaluations).toHaveLength(1);
-        expect(res.body.practiceEvaluations[0].frameworkId).toBe('grow');
+        expect(res.body.practiceEvaluations[0].frameworkId).toBe('four-stage-coaching');
         expect(res.body.practiceEvaluations[0].evaluation.overallScore).toBe(8);
         expect(res.body.transcriptEvaluations).toHaveLength(1);
         expect(res.body.transcriptEvaluations[0].preAnswers.goal).toBe('Improve listening');

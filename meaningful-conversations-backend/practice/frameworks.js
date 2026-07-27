@@ -411,8 +411,8 @@ const FRAMEWORKS = [
       },
     },
     evaluatorRubric: {
-      en: 'Score preferred-future vision, exception finding, and scaling in forward-focused tradition order. Penalize full 6-step contracting, extended problem exploration before SF questions, and excessive problem dissection.',
-      de: 'Bewerte gewünschte Zukunft, Ausnahmen und Skalierung in forward-focused-Reihenfolge. Abzug für vollen 6-Schritte-Contract, ausgedehnte Problem-Erkundung vor SF-Fragen und übermäßige Problemzerlegung.',
+      en: 'Score preferred-future vision, exception finding, and scaling in forward-focused tradition order. Penalize full 6-step contracting, extended problem exploration before forward-focused questions, and excessive problem dissection.',
+      de: 'Bewerte gewünschte Zukunft, Ausnahmen und Skalierung in forward-focused-Reihenfolge. Abzug für vollen 6-Schritte-Contract, ausgedehnte Problem-Erkundung vor zukunftsorientierten Fragen und übermäßige Problemzerlegung.',
     },
   },
   {
@@ -421,30 +421,30 @@ const FRAMEWORKS = [
     isPracticeOnly: false,
     name: { en: 'Ambivalence coaching', de: 'Ambivalenz-Coaching' },
     shortDescription: {
-      en: 'listening skills skills: Open questions, Affirmations, Reflective listening, Summaries — evoking change talk.',
-      de: 'listening skills: Offene Fragen, Bestärkungen, Reflektierendes Zuhören, Zusammenfassungen — Change Talk fördern.',
+      en: 'Open questions, affirmations, reflective listening, and summaries — evoking the client\'s own reasons for change.',
+      de: 'Offene Fragen, Bestärkungen, reflektierendes Zuhören und Zusammenfassungen — eigene Veränderungsgründe des Klienten fördern.',
     },
     stages: [
       { id: 'open', name: { en: 'Open questions', de: 'Offene Fragen' }, description: { en: 'Explore ambivalence without pushing.', de: 'Ambivalenz erkunden ohne Druck.' } },
       { id: 'affirm', name: { en: 'Affirmations', de: 'Bestärkungen' }, description: { en: 'Acknowledge strengths and effort authentically.', de: 'Stärken und Einsatz authentisch anerkennen.' } },
       { id: 'reflect', name: { en: 'Reflective listening', de: 'Reflektierendes Zuhören' }, description: { en: 'Reflect meaning and feeling accurately.', de: 'Bedeutung und Gefühl treffend spiegeln.' } },
-      { id: 'summarize', name: { en: 'Summaries', de: 'Zusammenfassungen' }, description: { en: 'Collect change talk; summarize toward commitment.', de: 'Change Talk sammeln; Richtung Commitment zusammenfassen.' } },
+      { id: 'summarize', name: { en: 'Summaries', de: 'Zusammenfassungen' }, description: { en: 'Collect the client\'s reasons for change; summarize toward commitment.', de: 'Veränderungsgründe sammeln; Richtung Commitment zusammenfassen.' } },
     ],
     complianceCriteria: [
-      { en: 'listening skills skills used appropriately (Open questions, Affirmations, Reflective listening, Summaries)', de: 'listening skills angemessen (Offene Fragen, Bestärkungen, Reflektierendes Zuhören, Zusammenfassungen)' },
+      { en: 'Core listening skills used appropriately (open questions, affirmations, reflective listening, summaries)', de: 'Kern-Zuhörkompetenzen angemessen (offene Fragen, Bestärkungen, reflektierendes Zuhören, Zusammenfassungen)' },
       { en: 'Brief contracting / session focus at start', de: 'Kurzes Contracting / Session-Fokus zu Beginn' },
       { en: '"Mitgehen, mitgehen, führen" rhythm — follow ambivalence before guiding', de: '„Mitgehen, mitgehen, führen"-Rhythmus — Ambivalenz folgen, bevor du führst' },
-      { en: 'Roll with resistance; evoke change talk, do not argue or lecture', de: 'Mit Widerstand rollen; Change Talk fördern, nicht argumentieren oder belehren' },
+      { en: 'Roll with resistance; evoke the client\'s own reasons for change, do not argue or lecture', de: 'Mit Widerstand rollen; eigene Veränderungsgründe fördern, nicht argumentieren oder belehren' },
     ],
     // sessionFlow aligned with mike-ambivalence-coaching
     sessionFlowRubric: {
-      en: 'Session flow for MI: (1) Brief contracting / session focus; (2) Opening that invites ambivalence without pushing; (3) listening skills throughout with "mitgehen, mitgehen, führen" rhythm before guiding; (4) Clean closing that summarizes change talk toward commitment. Mark coherent=true when contracting, opening, listening skills rhythm, and closing feel stimmig.',
-      de: 'Session-Flow für MI: (1) Kurzes Contracting / Session-Fokus; (2) Eröffnung, die Ambivalenz einlädt ohne zu drängen; (3) listening skills durchgehend im „Mitgehen, mitgehen, führen"-Rhythmus vor dem Führen; (4) Sauberer Abschluss, der Change Talk Richtung Commitment zusammenfasst. coherent=true, wenn Contracting, Eröffnung, listening skills-Rhythmus und Abschluss stimmig wirken.',
+      en: 'Session flow for ambivalence coaching: (1) Brief contracting / session focus; (2) Opening that invites ambivalence without pushing; (3) listening skills throughout with "mitgehen, mitgehen, führen" rhythm before guiding; (4) Clean closing that summarizes the client\'s reasons for change toward commitment. Mark coherent=true when contracting, opening, listening rhythm, and closing feel stimmig.',
+      de: 'Session-Flow für Ambivalenz-Coaching: (1) Kurzes Contracting / Session-Fokus; (2) Eröffnung, die Ambivalenz einlädt ohne zu drängen; (3) Zuhörkompetenzen durchgehend im „Mitgehen, mitgehen, führen"-Rhythmus vor dem Führen; (4) Sauberer Abschluss, der Veränderungsgründe Richtung Commitment zusammenfasst. coherent=true, wenn Contracting, Eröffnung, Zuhörrhythmus und Abschluss stimmig wirken.',
     },
     explainer: {
       summary: {
-        en: 'Ambivalence coaching (MI) aligned with Mike — listening skills skills for ambivalence and change talk.',
-        de: 'Ambivalence coaching (MI) im Stil von Mike — listening skills bei Ambivalenz und Change Talk.',
+        en: 'Ambivalence coaching aligned with Mike — listening skills for ambivalence and the client\'s own motivation.',
+        de: 'Ambivalenz-Coaching im Stil von Mike — Zuhörkompetenzen bei Ambivalenz und eigener Motivation.',
       },
       why: {
         en: 'Essential when the coachee says “part of me wants to, part of me doesn’t”.',
@@ -456,8 +456,8 @@ const FRAMEWORKS = [
       },
     },
     evaluatorRubric: {
-      en: 'Score listening skills usage, brief contracting, "mitgehen, mitgehen, führen" rhythm, rolling with resistance, and coachee change talk vs. coach persuasion.',
-      de: 'Bewerte listening skills, kurzes Contracting, „Mitgehen, mitgehen, führen"-Rhythmus, Umgang mit Widerstand und Change Talk des Coachees vs. Überzeugungsversuche des Coaches.',
+      en: 'Score listening skills usage, brief contracting, "mitgehen, mitgehen, führen" rhythm, rolling with resistance, and the client\'s own reasons for change vs. coach persuasion.',
+      de: 'Bewerte Zuhörkompetenzen, kurzes Contracting, „Mitgehen, mitgehen, führen"-Rhythmus, Umgang mit Widerstand und eigene Veränderungsgründe des Coachees vs. Überzeugungsversuche des Coaches.',
     },
   },
 ];

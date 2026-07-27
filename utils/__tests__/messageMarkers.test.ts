@@ -45,7 +45,7 @@ describe('messageMarkers', () => {
 
   it('stripReferralAndAuditMarkers strips leaked inter-coach stage directions before referral', () => {
     const raw =
-      'Ich verbinde Sie jetzt zu Dan.\n\n---\n[Dan übernimmt ab hier mit client exact language] Dan: "Und wenn Sie X sagen?"\n(Dan wartet auf Ihre Antwort.)\n[REFERRAL:rob,dan-client-language]';
+      'Ich verbinde Sie jetzt zu Dan.\n\n---\n[Dan übernimmt ab hier mit Klientensprache] Dan: "Und wenn Sie X sagen?"\n(Dan wartet auf Ihre Antwort.)\n[REFERRAL:rob,dan-client-language]';
     const r = stripReferralAndAuditMarkers(raw);
     expect(r.displayText.trim()).toBe('Ich verbinde Sie jetzt zu Dan.');
     expect(r.referralBotIds).toEqual(['rob', 'dan-client-language']);

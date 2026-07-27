@@ -1,21 +1,14 @@
 #!/usr/bin/env node
 /**
  * One-off migration: legacy frameworkId + unlockedCoaches bot IDs → neutral taxonomy.
- * Run on staging before deploy 2.4.0: node scripts/migrate-method-ids.js
- *
- * Requires DATABASE_URL (loads meaningful-conversations-backend prisma).
+ * Run inside backend container: node scripts/migrate-method-ids.js
  */
-const path = require('path');
-
-process.chdir(path.join(__dirname, '../meaningful-conversations-backend'));
-
-const backendRoot = path.join(__dirname, '../meaningful-conversations-backend');
 const { PrismaClient } = require('@prisma/client');
 const {
   LEGACY_FRAMEWORK_ALIASES,
   LEGACY_BOT_ALIASES,
   normalizeUnlockedCoaches,
-} = require(path.join(backendRoot, 'practice/methodTaxonomy.js'));
+} = require('../practice/methodTaxonomy.js');
 
 const prisma = new PrismaClient();
 
