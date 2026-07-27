@@ -11,6 +11,9 @@
 
 ## Recent Changes (2026-07-27 — Release v2.3.6: practice evaluation rubrics)
 
+### Custom coach avatars
+- **Steve** + **Mike:** distinct portraits (`c58bcad`). **Gabrielle:** own portrait replacing Ava duplicate (`bbdc9874`, committed separately).
+
 ### Method-first evaluation — all 12 frameworks *(committed v2.3.6)*
 - **Scoring:** `computePracticeOverallScore` + `buildScenarioMethodFit` extracted to `practice/evaluationScoring.js`; 10/10 only when method ≥9 **and** `sessionFlow.coherent`.
 - **Rubrics:** All 12 methods in `frameworks.js` now have `sessionFlowRubric` + enriched compliance/evaluator rubrics aligned with bot prompts (Type A: GPS, Ambitious, Strategic, Structured Reflection, Mental Fitness, GROW, MI; Type B: brief forward-focused; Type C: Stoic, Systemic, Thought Audit, client exact language).
@@ -33,7 +36,7 @@
 - **Gabrielle** (`gabrielle-four-stage`, guest): GROW — **Coaching**, before Max.
 - **Mike** (`mike-ambivalence-coaching`, registered): MI / listening skills — **Coaching**, after Chloe.
 - Backend prompts in `bots/newCoaches.js` + shared `bots/coachingPromptBlocks.js` (full contracting/ending/boundaries like Max); `practice/frameworks.js` linked.
-- Bot catalog in transcript evaluation updated; placeholder avatars (`steve.png`, `gabrielle.png`, `mike.png`).
+- Bot catalog in transcript evaluation updated; custom avatars for Gabrielle, Steve, Mike (Gabrielle was Ava duplicate until replaced).
 
 ## Recent Changes (2026-07-27 — Coach Practice method–scenario mapping)
 
@@ -44,8 +47,6 @@
 - **Setup UX:** `PracticeSetupView` — two collapsed accordions (“from scenario” / “from method”), tier badges, match summary, **discouraged-pair confirmation modal** before start.
 - **Progress:** `buildRecommendedPracticeConfig` falls back to `defaultPair` when no prior sessions.
 - **Tests:** `methodScenarioMap.test.js` (6), `practiceProgress.test.ts` (4) — passing.
-- **Next (product, not implemented):** Custom avatar art for Steve, Gabrielle, Mike (currently placeholder copies)
-
 ## Recent Changes (2026-07-27 — Coach Practice Hard + Live overlay, `54dc6d3`)
 
 ### Hard difficulty + Live overlay + scope-boundary training *(committed; not yet deployed)*
