@@ -4,8 +4,11 @@ const prisma = require('../prismaClient.js');
 const { getPublicCatalog } = require('../practice/frameworks.js');
 const { getPublicScenarios } = require('../practice/scenarios.js');
 const { resolvePublicAssetUrl } = require('../utils/publicAssetUrl.js');
+const { rollScopeBoundaryTheme, isValidTheme } = require('../practice/scopeBoundary.js');
 
 const router = express.Router();
+
+const VALID_DIFFICULTIES = ['easy', 'moderate', 'challenging', 'hard'];
 
 async function requireClientPlus(userId) {
   const user = await prisma.user.findUnique({
@@ -19,6 +22,26 @@ async function requireClientPlus(userId) {
   return { ok: true, user };
 }
 
+async function getPracticeUnlocks(userId, user) {
+  const isPrivileged = user.isAdmin || user.isDeveloper;
+  if (isPrivileged) {
+    return { hard: true, liveMode: true };
+  }
+  const challengingCount = await prisma.practiceEvaluation.count({
+    where: { userId, difficulty: 'challenging' },
+  });
+  const unlocked = challengingCount >= 1;
+  return { hard: unlocked, liveMode: unlocked };
+}
+
+function resolveScopeBoundaryTheme(difficulty, scenarioId, clientTheme) {
+  if (difficulty !== 'hard') return null;
+  // Client rolled at session start and sends null or a theme — do not re-roll on null.
+  if (clientTheme === undefined) return rollScopeBoundaryTheme(scenarioId);
+  if (!clientTheme || !isValidTheme(clientTheme)) return null;
+  return clientTheme;
+}
+
 // GET /api/practice/catalog?language=de
 router.get('/catalog', authMiddleware, async (req, res) => {
   try {
@@ -28,6 +51,8 @@ router.get('/catalog', authMiddleware, async (req, res) => {
     }
 
     const language = req.query.language === 'en' ? 'en' : 'de';
+    const unlocks = await getPracticeUnlocks(req.userId, access.user);
+
     res.json({
       frameworks: getPublicCatalog(language),
       scenarios: getPublicScenarios(language).map((scenario) => ({
@@ -38,7 +63,9 @@ router.get('/catalog', authMiddleware, async (req, res) => {
         { id: 'easy', label: language === 'en' ? 'Easy' : 'Leicht' },
         { id: 'moderate', label: language === 'en' ? 'Moderate' : 'Mittel' },
         { id: 'challenging', label: language === 'en' ? 'Challenging' : 'Herausfordernd' },
+        { id: 'hard', label: language === 'en' ? 'Hard' : 'Schwer', locked: !unlocks.hard },
       ],
+      unlocks,
     });
   } catch (error) {
     console.error('[Practice] catalog error:', error);
@@ -104,3 +131,6 @@ router.delete('/evaluations/:id', authMiddleware, async (req, res) => {
 
 module.exports = router;
 module.exports.requireClientPlus = requireClientPlus;
+module.exports.getPracticeUnlocks = getPracticeUnlocks;
+module.exports.resolveScopeBoundaryTheme = resolveScopeBoundaryTheme;
+module.exports.VALID_DIFFICULTIES = VALID_DIFFICULTIES;

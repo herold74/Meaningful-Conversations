@@ -734,7 +734,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
      * Right tabs lose text first as the viewport narrows; no horizontal scroll.
      */
     const tabLabelClass = (tab: AdminTab): string => {
-        const base = 'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs max-w-[5.5rem]';
+        const base = 'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs max-w-full';
         switch (tab) {
             case 'users':
                 return base; // last to become icon-only

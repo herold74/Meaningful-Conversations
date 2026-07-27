@@ -9,6 +9,24 @@
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
+## Recent Changes (2026-07-27 — Coach Practice Hard + Live overlay)
+
+### Hard difficulty + Live overlay + scope-boundary training *(local, not yet committed/deployed)*
+- **Hard** (`Schwer`): unlocked after 1 **Challenging** evaluation; very resistant coachee; **33%** hidden scope-boundary drill (trauma, addiction, clinical distress, eating disorder, acute crisis cues).
+- **Live overlay** (checkbox, not a 5th difficulty): voice-only on any unlocked difficulty; **no switch back to text** during session; same unlock gate as Hard (1 Challenging complete; Admin/Developer bypass).
+- **Post-session reveal:** `PracticeEvaluationReview` shows scope-boundary theme + recognition/referral feedback when drill was active.
+- **Backend:** `practice/scopeBoundary.js`, `coacheePrompt.js` (live speech + boundary blocks), catalog `unlocks` + Hard in `/api/practice/catalog`, session validation in `gemini/practice.js`, evaluation rubric branch in `geminiPrompts.js`.
+- **Frontend:** `PracticeSetupView` (Hard pill + Live toggle), `ChatView` live lock, `utils/practiceScopeBoundary.ts` (roll once at session start), progress milestones `hard_done` / `live_overlay_done`.
+- **Scenario copy (DE):** All 8 coachee `concern` / `hiddenAgenda` strings in `scenarios.js` rewritten to fluent German (no telegram-style fragments); e.g. Taylor boundary scenario.
+
+## Recent Changes (2026-07-26 — backend avatar URLs, `d325e73`)
+
+### Backend absolute avatar URLs (App Store 2.0.1 fix without app update)
+- **`utils/publicAssetUrl.js`:** Prefix relative `/avatars/...` with `FRONTEND_URL` in API responses.
+- **`GET /api/bots`** and **`GET /api/practice/catalog`:** Return `https://mc-app.manualmode.at/avatars/...` (prod) / `mc-beta` (staging).
+- **Deployed:** Backend-only v2.3.1 to staging + production (same version, no bump).
+- **Frontend `resolveAssetUrl`** (commit `8dbe708`) still useful for next IPA; backend fix helps all existing native clients immediately.
+
 ## Recent Changes (2026-07-26 — v2.3.1)
 
 ### Coach Practice session resume (`9011000`)

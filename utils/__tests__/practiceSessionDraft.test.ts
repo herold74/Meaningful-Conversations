@@ -30,6 +30,8 @@ const config: CoachPracticeConfig = {
   coacheeAvatar: '/avatars/alex.png',
   difficulty: 'moderate',
   difficultyLabel: 'Moderate',
+  liveMode: false,
+  scopeBoundaryTheme: null,
 };
 
 const history: Message[] = [
