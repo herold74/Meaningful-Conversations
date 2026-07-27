@@ -299,7 +299,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     // DPFL requires full coaching sessions which Nobody doesn't conduct
     // Gloria Interview has no coaching integration at all - never show badge
     const isNonCoachingBot = bot.id === 'gloria-interview';
-    const effectiveCoachingMode = isNonCoachingBot ? undefined : (bot.id === 'nexus-goal-path-solution' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+    const effectiveCoachingMode = isNonCoachingBot ? undefined : ((bot.id === 'nexus-goal-path-solution' || bot.id === 'sam-forward-focused') && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
     // Show coaching mode badge for all bots if profile exists and mode is active
     const showCoachingBadge = hasPersonalityProfile && effectiveCoachingMode && effectiveCoachingMode !== 'off' && !isLocked;
     
@@ -523,8 +523,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const unlockMessage = getUnlockMessage();
   
   // Kategorisierung nach Themen
-  const kommunikationBotIds = ['nexus-goal-path-solution', 'gloria-interview']; // Nobody + Gloria Interview
-  const coachingBotIds = ['max-ambitious', 'ava-strategic', 'kenji-resilience', 'chloe-structured-reflection'];
+  const kommunikationBotIds = ['nexus-goal-path-solution', 'sam-forward-focused', 'gloria-interview'];
+  const coachingBotIds = ['gabrielle-four-stage', 'max-ambitious', 'ava-strategic', 'kenji-resilience', 'chloe-structured-reflection', 'mike-ambivalence-coaching'];
   const clientOnlyBotIds = ['rob', 'victor-systemic-coaching', 'bekky-thought-audit', 'dan-client-language'];
   
   const kommunikationBots = bots.filter(b => kommunikationBotIds.includes(b.id));

@@ -32,13 +32,16 @@ This document outlines the different user types within the Meaningful Conversati
 | Gamification (XP, Levels) | ✅ (Local) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Management & Kommunikation** | | | | | | |
 | **Nobody** (GPS, Problemlösung) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Steve** (Lösungsorientiert, brief forward-focused) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria Interview** (Strukturierte Interviews) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria** (Onboarding) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Coaching Bots** | | | | | | |
+| **Gabrielle** (GROW) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Max** (Ambitioniert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Ava** (Strategisch) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Kenji** (Stoisch) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Chloe** (Strukturierte Reflexion) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Mike** (ambivalence coaching) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Exklusiv für Klienten** | | | | | | |
 | **Rob** (Mentale Fitness) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | **Victor** (Systemisch) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
@@ -77,8 +80,8 @@ Die App gruppiert Bots in drei Sektionen mit visuellem Farbschema:
 
 | Sektion | Farbschema | Bots | Besonderheit |
 | :--- | :--- | :--- | :--- |
-| **Management & Kommunikation** | Bronze | Nobody, Gloria Interview | Kein Coaching — GPS-Ansatz, Problemlösung, Kommunikationsanalyse, strukturierte Interviews |
-| **Coaching** | Silver | Max, Ava (Guest), Kenji, Chloe (Premium) | Persönlichkeitsentwicklung und Zielerreichung |
+| **Management & Kommunikation** | Bronze | Nobody, Steve, Gloria Interview | Kein klassisches Coaching — GPS, lösungsorientiert (brief forward-focused), strukturierte Interviews |
+| **Coaching** | Silver | Gabrielle, Max, Ava (Guest), Kenji, Chloe (Premium), Mike (Registered) | Persönlichkeitsentwicklung, GROW, MI, Zielerreichung |
 | **Exklusiv für Klienten** | Gold | Rob, Victor | Nur mit manualmode.at Coaching-Beziehung |
 
 Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten Kontakt automatisch zugewiesen wird.
