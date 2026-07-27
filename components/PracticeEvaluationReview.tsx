@@ -111,6 +111,45 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         <p className="text-xs text-content-secondary mb-4">{t('practice_review_live_note')}</p>
       )}
 
+      <p className="text-xs text-content-secondary mb-4">{t('practice_review_scoring_hint')}</p>
+
+      {evaluation.scenarioMethodFit && (
+        <div className="rounded-xl border border-border-primary bg-background-secondary/50 p-4 mb-4">
+          <h3 className="text-sm font-semibold text-content-primary mb-1">{t('practice_review_method_fit_title')}</h3>
+          <p className="text-sm text-content-secondary">{evaluation.scenarioMethodFit.note}</p>
+        </div>
+      )}
+
+      {evaluation.sessionFlow && (
+        <div className={`rounded-xl border p-4 sm:p-5 mb-4 ${
+          evaluation.sessionFlow.coherent
+            ? 'border-status-success-border bg-status-success-background/30'
+            : 'border-border-primary bg-background-secondary/50'
+        }`}>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <h3 className="text-base sm:text-lg font-bold text-content-primary">{t('practice_review_session_flow_title')}</h3>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              evaluation.sessionFlow.coherent
+                ? 'bg-status-success-background text-status-success-foreground'
+                : 'bg-background-secondary text-content-secondary'
+            }`}>
+              {evaluation.sessionFlow.coherent
+                ? t('practice_review_session_flow_coherent')
+                : t('practice_review_session_flow_incoherent')}
+            </span>
+          </div>
+          {evaluation.sessionFlow.coherent && evaluation.sessionFlow.highlights && (
+            <p className="text-sm text-content-primary mb-2 leading-relaxed">{evaluation.sessionFlow.highlights}</p>
+          )}
+          {!evaluation.sessionFlow.coherent && evaluation.sessionFlow.highlights && (
+            <p className="text-sm text-content-secondary mb-2 leading-relaxed">{evaluation.sessionFlow.highlights}</p>
+          )}
+          <p className="text-sm text-content-secondary leading-relaxed break-words">
+            <span className="font-semibold text-content-primary">{evidenceLabel}</span> {evaluation.sessionFlow.evidence}
+          </p>
+        </div>
+      )}
+
       <DimensionSection
         title={t('practice_dim_compliance')}
         data={evaluation.methodCompliance}

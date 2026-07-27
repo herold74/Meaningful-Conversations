@@ -347,6 +347,15 @@ export interface PracticeEvaluationResult {
     clarity: PracticeDimensionScore;
     coacheeAutonomy?: PracticeDimensionScore;
     coacheeSatisfaction: PracticeDimensionScore;
+    sessionFlow?: {
+        coherent: boolean;
+        evidence: string;
+        highlights: string;
+    };
+    scenarioMethodFit?: {
+        tier: PracticeMatchTier;
+        note: string;
+    };
     strengths: string[];
     developmentAreas: string[];
     nextDrills: { action: string; rationale: string }[];

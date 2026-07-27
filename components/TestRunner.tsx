@@ -2166,7 +2166,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               <div>Clarity: {practiceEval.evaluation.clarity.score}/10</div>
               <div>Autonomy: {practiceEval.evaluation.coacheeAutonomy?.score ?? '—'}/10</div>
               <div>Satisfaction: {practiceEval.evaluation.coacheeSatisfaction.score}/10</div>
+              <div>Session flow: {practiceEval.evaluation.sessionFlow?.coherent ? 'coherent' : 'not coherent'}</div>
             </div>
+            {practiceEval.evaluation.sessionFlow?.evidence && (
+              <p className="text-xs text-content-secondary">{practiceEval.evaluation.sessionFlow.evidence}</p>
+            )}
             <p className="text-sm text-content-secondary">{practiceEval.evaluation.summary}</p>
             {practiceEval.id ? (
               <p className="text-xs text-green-600 dark:text-green-400">✓ {t('test_runner_practice_saved')}</p>
