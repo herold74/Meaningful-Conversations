@@ -12,14 +12,14 @@ const {
 describe('methodScenarioMap', () => {
   test('defaultPair exists and is a primary match', () => {
     const pair = getDefaultPair();
-    expect(pair).toEqual({ frameworkId: 'grow', scenarioId: 'career-decision' });
+    expect(pair).toEqual({ frameworkId: 'four-stage-coaching', scenarioId: 'career-decision' });
     expect(getMatchTier(pair.scenarioId, pair.frameworkId)).toBe('primary');
   });
 
   test('known discouraged pairs return discouraged', () => {
     expect(getMatchTier('career-decision', 'client-exact-language')).toBe('discouraged');
-    expect(getMatchTier('stuck-metaphor', 'strategic')).toBe('discouraged');
-    expect(getMatchTier('feedback-anxiety', 'ambitious')).toBe('discouraged');
+    expect(getMatchTier('stuck-metaphor', 'strategic-coaching')).toBe('discouraged');
+    expect(getMatchTier('feedback-anxiety', 'ambitious-coaching')).toBe('discouraged');
   });
 
   test('client-exact-language + stuck-metaphor is primary', () => {
@@ -27,12 +27,12 @@ describe('methodScenarioMap', () => {
   });
 
   test('enrichCatalog adds match maps and defaultPair', () => {
-    const frameworks = [{ id: 'grow', name: 'GROW' }, { id: 'client-exact-language', name: 'client exact language' }];
+    const frameworks = [{ id: 'four-stage-coaching', name: 'Four-stage coaching' }, { id: 'client-exact-language', name: 'Client exact language' }];
     const scenarios = [{ id: 'career-decision', concern: 'Career' }, { id: 'stuck-metaphor', concern: 'Fog' }];
     const enriched = enrichCatalog(frameworks, scenarios, 'en');
 
-    expect(enriched.defaultPair).toEqual({ frameworkId: 'grow', scenarioId: 'career-decision' });
-    expect(enriched.scenarios[0].frameworkMatches.grow).toBe('primary');
+    expect(enriched.defaultPair).toEqual({ frameworkId: 'four-stage-coaching', scenarioId: 'career-decision' });
+    expect(enriched.scenarios[0].frameworkMatches['four-stage-coaching']).toBe('primary');
     expect(enriched.scenarios[0].frameworkMatches['client-exact-language']).toBe('discouraged');
     expect(enriched.scenarios[1].frameworkMatches['client-exact-language']).toBe('primary');
     expect(enriched.frameworks[0].scenarioMatches['career-decision']).toBe('primary');

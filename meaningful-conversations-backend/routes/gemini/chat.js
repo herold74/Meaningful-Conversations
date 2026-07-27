@@ -3,6 +3,7 @@ const router = express.Router();
 const optionalAuthMiddleware = require('../../middleware/optionalAuth.js');
 const prisma = require('../../prismaClient.js');
 const { BOTS } = require('../../constants.js');
+const { resolveBotId } = require('../../practice/methodTaxonomy.js');
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const dynamicPromptController = require('../../services/dynamicPromptController.js');
@@ -41,7 +42,8 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         }
     }
 
-    const bot = BOTS.find(b => b.id === botId);
+    const resolvedBotId = resolveBotId(botId);
+    const bot = BOTS.find(b => b.id === resolvedBotId);
     if (!bot) {
         return res.status(404).json({ error: 'Bot not found' });
     }
@@ -66,14 +68,14 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             } else if (bot.accessTier === 'premium') {
                 // Premium users and clients get access to all premium bots.
                 // Others need to have it explicitly unlocked.
-                const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+                const unlockedCoaches = (user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : []).map(resolveBotId);
                 if (user.isPremium || user.isClient || unlockedCoaches.includes(bot.id)) {
                     hasAccess = true;
                 }
             } else if (bot.accessTier === 'client') {
                 // Client-only bots (e.g. Rob, Victor) require isClient flag.
                 // Also allow if individually unlocked via unlockedCoaches.
-                const unlockedCoaches = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
+                const unlockedCoaches = (user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : []).map(resolveBotId);
                 if (user.isClient || unlockedCoaches.includes(bot.id)) {
                     hasAccess = true;
                 }

@@ -57,11 +57,11 @@ describe('computePracticeOverallScore', () => {
 
 describe('buildScenarioMethodFit', () => {
   test('returns null for primary tier pair', () => {
-    expect(buildScenarioMethodFit('career-decision', 'grow', 'en')).toBeNull();
+    expect(buildScenarioMethodFit('career-decision', 'four-stage-coaching', 'en')).toBeNull();
   });
 
   test('returns neutral note for neutral tier pair', () => {
-    const fit = buildScenarioMethodFit('career-decision', 'mental-fitness', 'en');
+    const fit = buildScenarioMethodFit('career-decision', 'mental-fitness-coaching', 'en');
     expect(fit).toEqual(expect.objectContaining({
       tier: 'neutral',
       note: expect.stringContaining('acceptable'),

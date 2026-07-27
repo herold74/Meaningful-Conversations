@@ -19,6 +19,9 @@ Der Anwender handelt während und außerhalb der Coaching-Einheiten in jeder Pha
 ## Keine Erfolgsgewähr und Haftung für Inhalte
 Die Anwendung und die KI-Coaches dienen als Werkzeug zur Prozessbegleitung und Information. Der Anbieter garantiert nicht die subjektive Wirksamkeit oder den Erfolg der bereitgestellten Ratschläge oder Erkenntnisse. Die gesetzliche Gewährleistung für die **Funktionalität der Anwendung** (wie im Handbuch beschrieben) bleibt hiervon unberührt.
 
+
+## Keine Verbindung zu Drittanbietern
+Die Coaching-Methoden in dieser Anwendung sind **generische, beschreibende Bezeichnungen** für didaktische Übungszwecke. Sie stehen in **keiner Verbindung** zu und werden **nicht unterstützt oder zertifiziert** durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.
 ## Haftungsbeschränkung (Schadenersatz)
 (1) Die Haftung des Anbieters für Schäden ist auf Vorsatz oder grobe Fahrlässigkeit beschränkt.   
 (2) Die Haftung für **Personenschäden** (Verletzung des Lebens, des Körpers oder der Gesundheit), die auf leichter Fahrlässigkeit beruhen, wird durch diese AGB **nicht** ausgeschlossen oder beschränkt.   
@@ -38,6 +41,9 @@ The user acts **on their own responsibility** during and outside of coaching ses
 ## No Guarantee of Success and Liability for Content
 The application and the AI coaches serve as a tool for process support and information. The provider does not guarantee the subjective effectiveness or success of the advice or insights provided. The statutory warranty for the **functionality of the application** (as described in the manual) remains unaffected.
 
+
+## No affiliation with third parties
+The coaching methods in this application are **generic descriptive labels** for educational practice purposes. They are **not affiliated with, endorsed by, or certified by** any owners of trademarks, registered method names, or copyrighted coaching approaches.
 ## Limitation of Liability (Damages)
 (1) The provider's liability for damages is limited to intent or gross negligence.  
 (2) Liability for **personal injury** (injury to life, body, or health) based on slight negligence is **not** excluded or limited by these terms and conditions.  

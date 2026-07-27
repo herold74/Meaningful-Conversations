@@ -23,7 +23,7 @@ beforeAll(() => {
 
 const config: CoachPracticeConfig = {
   frameworkId: 'grow',
-  frameworkName: 'GROW',
+  frameworkName: 'Four-stage coaching',
   scenarioId: 'career-decision',
   scenarioName: 'Career decision',
   coacheeName: 'Alex',

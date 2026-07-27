@@ -7,6 +7,7 @@ const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
 const { getMatchTier, getDiscouragedReason } = require('../../practice/methodScenarioMap.js');
+const { resolveFrameworkId } = require('../../practice/methodTaxonomy.js');
 const { getThemeLabel } = require('../../practice/scopeBoundary.js');
 const { computePracticeOverallScore, buildScenarioMethodFit } = require('../../practice/evaluationScoring.js');
 const { practiceEvaluationPrompts } = require('../../services/geminiPrompts.js');
@@ -80,10 +81,11 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       return res.status(access.status).json({ error: access.error });
     }
 
-    if (!frameworkId || !scenarioId) {
+    const resolvedFrameworkId = resolveFrameworkId(frameworkId);
+    if (!resolvedFrameworkId || !scenarioId) {
       return res.status(400).json({ error: 'frameworkId and scenarioId are required.' });
     }
-    if (!getFrameworkById(frameworkId) || !getScenarioById(scenarioId)) {
+    if (!getFrameworkById(resolvedFrameworkId) || !getScenarioById(scenarioId)) {
       return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
     }
 
@@ -109,7 +111,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     }
 
     const systemInstruction = buildCoacheeSystemPrompt({
-      frameworkId,
+      frameworkId: resolvedFrameworkId,
       scenarioId,
       difficulty: sessionParams.difficulty,
       language,
@@ -245,6 +247,8 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'history, frameworkId, and scenarioId are required.' });
     }
 
+    const resolvedFrameworkId = resolveFrameworkId(frameworkId);
+
     const sessionParams = await validatePracticeSessionParams(userId, access.user, {
       difficulty,
       liveMode,
@@ -255,7 +259,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(sessionParams.status).json({ error: sessionParams.error });
     }
 
-    const framework = getFrameworkForEvaluation(frameworkId, language);
+    const framework = getFrameworkForEvaluation(resolvedFrameworkId, language);
     const scenario = getScenarioById(scenarioId);
     if (!framework || !scenario) {
       return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
@@ -281,8 +285,8 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       : `Coachee: ${scenario.coacheeName.en}\nConcern: ${scenario.concern.en}\nTone: ${scenario.emotionalTone.en}${focusNote ? `\nCoach focus: ${focusNote}` : ''}`;
 
     const currentDate = new Date().toISOString().split('T')[0];
-    const matchTier = getMatchTier(scenarioId, frameworkId);
-    const discouragedReason = getDiscouragedReason(scenarioId, frameworkId, lang);
+    const matchTier = getMatchTier(scenarioId, resolvedFrameworkId);
+    const discouragedReason = getDiscouragedReason(scenarioId, resolvedFrameworkId, lang);
     const promptFn = practiceEvaluationPrompts[lang]?.prompt || practiceEvaluationPrompts.en.prompt;
     const prompt = promptFn({
       framework,
@@ -342,7 +346,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     }
     evaluationResult.liveMode = sessionParams.liveMode;
 
-    const scenarioMethodFit = buildScenarioMethodFit(scenarioId, frameworkId, lang);
+    const scenarioMethodFit = buildScenarioMethodFit(scenarioId, resolvedFrameworkId, lang);
     if (scenarioMethodFit) {
       evaluationResult.scenarioMethodFit = scenarioMethodFit;
     }
@@ -366,7 +370,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       saved = await prisma.practiceEvaluation.create({
         data: {
           userId,
-          frameworkId,
+          frameworkId: resolvedFrameworkId,
           scenarioId,
           difficulty: sessionParams.difficulty,
           focusNote: focusNote || null,

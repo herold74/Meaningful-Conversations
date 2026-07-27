@@ -233,7 +233,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           onClick={applyRecommendedStart}
           className="mb-6 text-sm font-medium text-accent-primary hover:underline"
         >
-          {t('practice_recommended_start')} (GROW · {catalog.scenarios.find((s) => s.id === catalog.defaultPair?.scenarioId)?.coacheeName ?? 'Alex'})
+          {t('practice_recommended_start')} (Four-stage · {catalog.scenarios.find((s) => s.id === catalog.defaultPair?.scenarioId)?.coacheeName ?? 'Alex'})
         </button>
       )}
 
