@@ -271,6 +271,13 @@ export interface PracticeUnlocks {
     liveMode: boolean;
 }
 
+export type PracticeMatchTier = 'primary' | 'alternative' | 'neutral' | 'discouraged';
+
+export interface PracticeDefaultPair {
+    frameworkId: string;
+    scenarioId: string;
+}
+
 export interface PracticeFrameworkStage {
     id: string;
     name: string;
@@ -292,6 +299,7 @@ export interface PracticeFramework {
     stages: PracticeFrameworkStage[];
     complianceCriteria: string[];
     explainer: PracticeFrameworkExplainer;
+    scenarioMatches?: Record<string, PracticeMatchTier>;
 }
 
 export interface PracticeScenario {
@@ -300,11 +308,14 @@ export interface PracticeScenario {
     avatar: string;
     concern: string;
     emotionalTone: string;
+    frameworkMatches?: Record<string, PracticeMatchTier>;
+    discouragedReasons?: Record<string, string>;
 }
 
 export interface PracticeCatalog {
     frameworks: PracticeFramework[];
     scenarios: PracticeScenario[];
+    defaultPair?: PracticeDefaultPair;
     difficulties: { id: PracticeDifficulty; label: string; locked?: boolean }[];
     unlocks: PracticeUnlocks;
 }

@@ -115,6 +115,62 @@ const SCENARIOS = [
       de: 'Nutzt die Arbeit, um schwierige Gespräche zuhause zu vermeiden.',
     },
   },
+  {
+    id: 'career-plateau',
+    coacheeName: { en: 'Chris', de: 'Chris' },
+    avatar: '/avatars/max.png',
+    concern: {
+      en: 'Has been in the same role for years, performs well, but feels invisible and wonders if ambition still matters.',
+      de: 'Ist seit Jahren in derselben Rolle, leistet gute Arbeit, fühlt sich aber unsichtbar und fragt sich, ob Ambition noch zählt.',
+    },
+    emotionalTone: { en: 'restless, quietly frustrated', de: 'unruhig, leise frustriert' },
+    hiddenAgenda: {
+      en: 'Secretly compares themselves to peers who were promoted and feels ashamed of wanting more.',
+      de: 'Vergleicht sich heimlich mit beförderten Peers und schämt sich, mehr zu wollen.',
+    },
+  },
+  {
+    id: 'strategic-pivot',
+    coacheeName: { en: 'Priya', de: 'Priya' },
+    avatar: '/avatars/ava.png',
+    concern: {
+      en: 'Their industry is shifting fast; they must decide whether to pivot skills, change employers, or double down on the current path.',
+      de: 'Die Branche verändert sich schnell; sie müssen entscheiden, ob sie Fähigkeiten neu ausrichten, den Arbeitgeber wechseln oder am bisherigen Weg festhalten.',
+    },
+    emotionalTone: { en: 'analytical but anxious', de: 'analytisch, aber ängstlich' },
+    hiddenAgenda: {
+      en: 'Already leaning toward one option but wants the coach to validate it without doing the hard trade-off work.',
+      de: 'Neigen bereits zu einer Option, wollen aber vom Coach Bestätigung, ohne die harte Abwägung selbst zu leisten.',
+    },
+  },
+  {
+    id: 'feedback-anxiety',
+    coacheeName: { en: 'Jamie', de: 'Jamie' },
+    avatar: '/avatars/bekky.png',
+    concern: {
+      en: 'Dreads upcoming performance feedback, replays past criticism, and avoids asking for clarity from their manager.',
+      de: 'Fürchtet anstehendes Performance-Feedback, grübelt über frühere Kritik nach und vermeidet, beim Manager nachzufragen.',
+    },
+    emotionalTone: { en: 'self-critical, guarded', de: 'selbstkritisch, verschlossen' },
+    hiddenAgenda: {
+      en: 'Interprets any constructive note as proof they do not belong in the role.',
+      de: 'Deutet jede konstruktive Rückmeldung als Beweis, nicht zur Rolle zu passen.',
+    },
+  },
+  {
+    id: 'stuck-metaphor',
+    coacheeName: { en: 'Robin', de: 'Robin' },
+    avatar: '/avatars/dan.png',
+    concern: {
+      en: 'Feels like walking through fog at work — stuck in mud, can’t see the path ahead, and keeps circling the same worries without naming a concrete problem.',
+      de: 'Fühlt sich bei der Arbeit an wie im Nebel — im Matsch fest, sieht keinen Weg voraus und kreist immer wieder um dieselben Sorgen, ohne ein konkretes Problem zu benennen.',
+    },
+    emotionalTone: { en: 'vague, metaphorical, weary', de: 'vage, bildhaft, müde' },
+    hiddenAgenda: {
+      en: 'Knows something must change but resists pinning it down because naming it makes it real.',
+      de: 'Weiß, dass sich etwas ändern muss, wehrt sich aber dagegen, es zu benennen — Benennen macht es real.',
+    },
+  },
 ];
 
 const DIFFICULTY_MODIFIERS = {

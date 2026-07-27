@@ -34,7 +34,7 @@ const makeEval = (overrides: Partial<PracticeEvaluationSummary> = {}): PracticeE
 });
 
 const catalog: PracticeCatalog = {
-  frameworks: [{ id: 'grow', name: 'GROW', sourceBotId: null, practiceOnly: false, stages: [], explainer: { why: '', good: '' } }],
+  frameworks: [{ id: 'grow', name: 'GROW', sourceBotId: null, isPracticeOnly: false, shortDescription: '', stages: [], complianceCriteria: [], explainer: { summary: '', why: '', goodCompliance: '' } }],
   scenarios: [{
     id: 'career-decision',
     coacheeName: 'Alex',
@@ -42,9 +42,11 @@ const catalog: PracticeCatalog = {
     emotionalTone: 'Uncertain',
     avatar: '/avatars/alex.png',
   }],
+  defaultPair: { frameworkId: 'grow', scenarioId: 'career-decision' },
   difficulties: [
     { id: 'moderate', label: 'Moderate' },
   ],
+  unlocks: { hard: false, liveMode: false },
 };
 
 describe('practiceProgress', () => {
@@ -80,5 +82,13 @@ describe('practiceProgress', () => {
     expect(config?.scenarioId).toBe('career-decision');
     expect(config?.focusNote).toBe('Practice opening');
     expect(config?.coacheeName).toBe('Alex');
+  });
+
+  test('buildRecommendedPracticeConfig falls back to defaultPair when no sessions', () => {
+    const stats = computePracticeProgress([]);
+    const config = buildRecommendedPracticeConfig(stats, catalog);
+    expect(config?.frameworkId).toBe('grow');
+    expect(config?.scenarioId).toBe('career-decision');
+    expect(config?.focusNote).toBeUndefined();
   });
 });

@@ -263,8 +263,8 @@ const FRAMEWORKS = [
   },
   {
     id: 'grow',
-    sourceBotId: null,
-    isPracticeOnly: true,
+    sourceBotId: 'gabrielle-four-stage',
+    isPracticeOnly: false,
     name: { en: 'GROW', de: 'GROW' },
     shortDescription: {
       en: 'Goal → Reality → Options → Will: a classic coaching structure for clarity and commitment.',
@@ -282,8 +282,8 @@ const FRAMEWORKS = [
     ],
     explainer: {
       summary: {
-        en: 'GROW is a widely used coaching model: Goal, Reality, Options, Will. It is not an AI coach in this app — you practice applying the structure yourself while the AI plays your client.',
-        de: 'GROW ist ein weit verbreitetes Coaching-Modell: Goal, Reality, Options, Will. Es gibt keinen GROW-AI-Coach in der App — du übst die Struktur selbst, während die KI deinen Klienten spielt.',
+        en: 'four-stage coaching model aligned with Gabrielle — Goal, Reality, Options, Will for classic coaching sessions.',
+        de: 'Vier-Phasen-Coaching-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.',
       },
       why: {
         en: 'Ideal for general coaching sessions where you need clear progression from topic to commitment.',
@@ -301,8 +301,8 @@ const FRAMEWORKS = [
   },
   {
     id: 'forward-focused-coaching',
-    sourceBotId: null,
-    isPracticeOnly: true,
+    sourceBotId: 'sam-forward-focused',
+    isPracticeOnly: false,
     name: { en: 'Solution-Focused', de: 'Lösungsorientiert' },
     shortDescription: {
       en: 'Focus on preferred future, exceptions to the problem, and scaling progress.',
@@ -319,8 +319,8 @@ const FRAMEWORKS = [
     ],
     explainer: {
       summary: {
-        en: 'brief forward-focused coaching (brief forward-focused) emphasizes what works rather than root-cause analysis. Not available as an AI coach here — practice the method with a simulated client.',
-        de: 'Lösungsorientiertes Kurzcoaching (brief forward-focused) betont, was funktioniert, statt Ursachenanalyse. Kein AI-Coach in der App — übe die Methode mit simuliertem Klienten.',
+        en: 'brief forward-focused coaching (brief forward-focused) aligned with Steve — preferred future, exceptions, scaling.',
+        de: 'Lösungsorientiertes Kurzcoaching (brief forward-focused) im Stil von Steve — gewünschte Zukunft, Ausnahmen, Skalierung.',
       },
       why: {
         en: 'Use when the coachee is stuck in problem talk and needs a forward lens.',
@@ -338,8 +338,8 @@ const FRAMEWORKS = [
   },
   {
     id: 'ambivalence-coaching',
-    sourceBotId: null,
-    isPracticeOnly: true,
+    sourceBotId: 'mike-ambivalence-coaching',
+    isPracticeOnly: false,
     name: { en: 'ambivalence coaching', de: 'ambivalence coaching' },
     shortDescription: {
       en: 'listening skills skills: Open questions, Affirmations, Reflective listening, Summaries — evoking change talk.',
@@ -357,8 +357,8 @@ const FRAMEWORKS = [
     ],
     explainer: {
       summary: {
-        en: 'ambivalence coaching (MI) is an evidence-informed method for ambivalence and behavior change. There is no MI AI coach in the app — you practice listening skills with a simulated ambivalent client.',
-        de: 'ambivalence coaching (MI) ist eine evidenzinformierte Methode bei Ambivalenz und Veränderung. Kein MI-AI-Coach in der App — übe listening skills mit einem simuliert ambivalenten Klienten.',
+        en: 'ambivalence coaching (MI) aligned with Mike — listening skills skills for ambivalence and change talk.',
+        de: 'ambivalence coaching (MI) im Stil von Mike — listening skills bei Ambivalenz und Change Talk.',
       },
       why: {
         en: 'Essential when the coachee says “part of me wants to, part of me doesn’t”.',
