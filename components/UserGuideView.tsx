@@ -1,3 +1,5 @@
+// User Guide content — last synced with app v2.4.0 (July 2026)
+
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -12,7 +14,7 @@ interface InfoViewProps {
     currentUser?: User | null;
 }
 
-const de_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
+const de_markdown = (isRegistered: boolean, isPremium: boolean, isClient: boolean, isNative: boolean) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
@@ -36,9 +38,9 @@ Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare
 ### 1.1 Intent Picker & Name
 
 Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
-- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Gloria)
-- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Max, Ava, Kenji, Chloe)
-- **Begleitendes Coaching** — Leitet Sie zum Exklusiv-Bereich (Rob, Victor — nur für Klienten)
+- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Sam, Gloria Interview)
+- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Gabrielle, Max, Ava, Mike, Kenji, Chloe — je nach Zugangsstufe)
+- **Begleitendes Coaching** — Leitet Sie zum Exklusiv-Bereich (Rob, Victor — <span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten-Stufe*</span>)
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird.
 
@@ -104,6 +106,12 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 - **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
 - **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
 
+### 1.6 Profil-Hinweis (Premium)
+
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
+
+Premium-Nutzer, die den OCEAN-Test abgeschlossen haben, aber noch **Riemann-Thomann** oder **Spiral Dynamics** ausstehen lassen, sehen nach dem Login gelegentlich einen **Profil-Hinweis**: „Profil vertiefen!“ Sie können die fehlenden Tests sofort starten, später daran erinnern lassen oder den Hinweis dauerhaft ausblenden. Der Hinweis erscheint **nicht**, wenn Sie beide Premium-Tests bereits absolviert haben.
+
 </div>
 </details>
 
@@ -134,12 +142,14 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 
 Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 
-| Stufe | Zugang | Coaches | Funktionen |
+| Stufe | Zugang | Coaches & Bereiche | Funktionen |
 | :--- | :--- | :--- | :--- |
-| **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
-| **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
-| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, Coach-Übung, alle Features |
+| **Gast** | Ohne Registrierung | Nobody, Sam, Gabrielle, Max, Ava (+ Gloria Onboarding) | Grundfunktionen, lokale Daten |
+| **Registriert** | Kostenloses Konto | + Gloria Interview, Mike | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
+| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics, DPFL-Modus, adaptives Profil, **Transkript-Auswertung** 🔒 Premium |
+| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | **Audio-Transkription** 🔒 Klient, **Coach-Übung** 🔒 Klient, alle Premium-Features |
+
+**Gesperrte Coaches & Tools — nichts fehlt:** Auf dem Coach-Auswahlbildschirm sehen Sie manchmal Karten oder Tools mit einem **Schloss-Symbol (🔒)**. Das bedeutet nicht, dass die App unvollständig ist — diese Inhalte gehören zu einer **höheren Zugangsstufe** und werden nach Upgrade oder Code-Einlösung freigeschaltet. Gesperrte Coaches bleiben sichtbar, damit Sie wissen, was Sie freischalten können.
 
 **So upgraden Sie:**
 ${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
@@ -428,23 +438,46 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 <div style="padding: 16px;">
 
 ### 5.1 Einen Coach auswählen
-Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
-**Ihr Guide:**
-- **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
+Auf dem Bildschirm **Coach-Auswahl** finden Sie oben die **KI-Coach-Empfehlung**, darunter den **Tools-Bereich**, dann drei farblich getrennte Bereiche mit verfügbaren Coaches. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
+
+**Drei Bereiche (von oben nach unten):**
+
+| Bereich | Farbschema | Inhalt |
+| :--- | :--- | :--- |
+| **Management & Kommunikation** | Bronze | Nobody, Sam — pragmatische Begleitung und zukunftsorientiertes Coaching |
+| **Coaching** | Silber | Gabrielle, Max, Ava, Mike, Kenji, Chloe — plus Tab **Coach-Übung** (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten*</span>) |
+| **Exklusiv für Klienten** | Gold | Rob, Victor (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten-Stufe*</span>) |
+
+**Coaching-Bereich: zwei Tabs**
+- **Coaching** — Wählen Sie einen Live-Coach für Ihre Sitzung.
+- **Coach-Übung** <span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten-Feature*</span> — Übungsmodus, in dem Sie der Coach sind und die KI Ihr Klient spielt. Ausführliche Anleitung: ${isNative ? 'Kapitel 9' : 'Kapitel 10'}. Ohne Klienten-Zugang sehen Sie den Tab mit Schloss-Symbol; der Inhalt ist dann gesperrt, nicht „kaputt“.
+
+**Session-Rhythmus-Ringe:** Jeder Coach-Avatar hat einen farbigen Ring. Die Farbe zeigt den **Session-Rhythmus** (Gesprächsstil), **nicht** das Geschlecht des Coaches:
+- **Klären & strukturieren** — Fokus auf Auftrag, Rahmen und Orientierung
+- **Herausarbeiten & vertiefen** — Fokus auf Erkundung und Reflexion
+- **Zukunftsfokus & Commitment** — Fokus auf nächste Schritte und Verbindlichkeit
+
+Im Tools-Bereich haben Transkript-Tools einen **Tool-Ring** (Aufnahme/Auswertung).
+
+**Ihr Guide (Management & Kommunikation):**
+- **Nobody** — Pragmatischer Sparringspartner für Management- und Kommunikationsthemen
+- **Sam** — Zukunftsorientiertes Coaching: gewünschte Zukunft, Ausnahmen, Skalierung
 
 **Ihre Interviewerin:**
-- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
+- **Gloria** — Strukturierte Interviews zu Ideen, Projekten und Abläufen (<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Registriert*</span>)
 
-**Ihre Coaches:**
-- **Max** -- Motivierender Coach, der Ihnen hilft, größer zu denken und Ihr Potenzial freizusetzen
-- **Ava** -- Strategische Beraterin für Entscheidungsfindung und Prioritätenmanagement
-- **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
-- **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
-- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten)
-- **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
+**Ihre Coaches (Coaching-Bereich):**
+- **Gabrielle** — Vier-Phasen-Coaching: von Klarheit zu verbindlichem Handeln
+- **Max** — Motivierender Coach für größeres Denken und Potenzial
+- **Ava** — Strategische Beraterin für Entscheidungen und Prioritäten
+- **Mike** — Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung (<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Registriert*</span>)
+- **Kenji** — Stoischer Philosoph für Resilienz (<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Premium*</span>)
+- **Chloe** — Strukturierte Reflexion für Denkmuster (<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Premium*</span>)
+- **Rob** — Mentale Fitness gegen Selbstsabotage (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten*</span>)
+- **Victor** — Systemischer Coach für Beziehungsmuster (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten*</span>)
 
-Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Klienten-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
+Coaches mit 🔒 auf der Karte erfordern die genannte Zugangsstufe. Coaches mit 🔔 bieten **geführte Meditationsübungen** während der Sitzung.
 
 **Klicken Sie auf einen Namen, um mehr zu erfahren:**
 
@@ -461,6 +494,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Zeiteffiziente Sitzungen mit klarem Ergebnis
 
 **Beispiel-Situationen:** "Ich habe ein konkretes Problem und muss meine nächsten Schritte definieren." / "Ich möchte mich auf ein Gespräch vorbereiten." / "Ich brauche jemanden, der mir hilft, eine erlebte Situation effizient zu reflektieren."
+
+**Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Sam -- Zukunftsorientiert, Effizient, Vorwärtsgerichtet</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Sam nutzt ein kurzes zukunftsorientiertes Coaching: Er erkundet mit Ihnen die **gewünschte Zukunft**, **Ausnahmen** (wann es schon besser war) und **Skalierung** (kleine Schritte nach vorn) — pragmatisch für Beruf und Alltag.
+
+**Ideal für:**
+- Konkrete nächste Schritte, wenn Sie wissen, wohin es gehen soll
+- Alltags- und Berufsthemen mit klarem Zukunftsbild
+- Kurze, fokussierte Sitzungen ohne lange Analyse
+
+**Beispiel-Situationen:** "Ich möchte nächste Woche produktiver arbeiten — wie könnte das aussehen?" / "Es gibt Momente, in denen es schon besser läuft — was ist dann anders?"
 
 **Zugang:** Kostenlos für alle Benutzer
 </div>
@@ -498,6 +548,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </details>
 
 <details>
+<summary>Gabrielle -- Strukturiert, Coaching, Klientengeführt</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Gabrielle führt Sie im **Vier-Phasen-Coaching** durch Session-Ziel, Ist-Zustand, Möglichkeiten und Commitment — von Klarheit zu verbindlichem Handeln.
+
+**Ideal für:**
+- Themen, bei denen Sie Struktur und klare Phasen brauchen
+- Vom Erkunden zur konkreten Verpflichtung
+- Sitzungen mit explizitem Session-Ziel und Abschluss
+
+**Beispiel-Situationen:** "Ich möchte heute eine Entscheidung treffen und mich verbindlich festlegen." / "Ich brauche einen klaren Rahmen für unser Gespräch."
+
+**Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
 <summary>Max -- Motivierend, Neugierig, Reflektierend</summary>
 <div style="padding: 12px 16px;">
 
@@ -530,6 +597,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 **Beispiel-Situationen:** "Ich muss eine schwierige Geschäftsentscheidung treffen." / "Ich habe zu viele Projekte und weiß nicht, was Priorität hat." / "Ich möchte meine nächsten 5 Jahre strategisch planen."
 
 **Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Mike -- Ambivalenz-Coaching, Empathisch, Nicht-direktiv (Registriert)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Mike begleitet Sie bei **gemischten Gefühlen gegenüber Veränderung**. Er nutzt Ambivalenz-Coaching: Ihre **eigene Motivation** hervorholen — nicht überzeugen oder Ratschläge geben.
+
+**Ideal für:**
+- Wenn Sie hin- und hergerissen sind (z. B. Jobwechsel, Beziehung, Gewohnheit)
+- Widersprüche zwischen Wunsch und Sorge verstehen
+- Entscheidungen in Ihrem Tempo treffen
+
+**Beispiel-Situationen:** "Ein Teil von mir will wechseln, ein anderer hat Angst." / "Ich weiß nicht, ob ich wirklich bereit bin."
+
+**Zugang:** Registrierte Benutzer
 </div>
 </details>
 
@@ -611,13 +695,13 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-### 5.2 Tools-Bereich (Premium & Klienten)
+### 5.2 Tools-Bereich
 
-Unterhalb der Coach-Liste finden Sie im Bereich **Tools** weitere Funktionen — abhängig von Ihrer Zugangsstufe:
+Oberhalb der Coach-Bereiche finden Sie Kacheln für erweiterte Funktionen — abhängig von Ihrer Zugangsstufe. **Gesperrte Kacheln (🔒) sind bewusst sichtbar** und zeigen, welches Upgrade sie freischaltet:
 
-- **Transkript-Auswertung** (Premium+) — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${isNative ? 'Kapitel 7' : 'Kapitel 8'}.
-- **Audio-Transkription** (Klienten) — Live-Aufnahme oder Upload von Audiodateien mit automatischer Transkription. Ausführliche Anleitung: ${isNative ? 'Kapitel 8' : 'Kapitel 9'}.
-- **Coach-Übung** (Klienten) — Sie spielen den Coach, die KI den Klienten; strukturiertes Feedback zu Ihrer Methodenführung. Ausführliche Anleitung: ${isNative ? 'Kapitel 9' : 'Kapitel 10'}.
+- **Transkript-Auswertung** — <span style="white-space: nowrap">${isPremium ? '✅ Premium' : '🔒 Premium erforderlich'}</span> — Auswertung hochgeladener Gesprächstranskripte. Anleitung: ${isNative ? 'Kapitel 7' : 'Kapitel 8'}.
+- **Audio-Transkription** — <span style="white-space: nowrap">${isClient ? '✅ Klient' : '🔒 Klienten-Stufe erforderlich'}</span> — Live-Aufnahme oder Upload von Audiodateien. Anleitung: ${isNative ? 'Kapitel 8' : 'Kapitel 9'}.
+- **Coach-Übung** — <span style="white-space: nowrap">${isClient ? '✅ Klient' : '🔒 Klienten-Stufe erforderlich'}</span> — Sie sind der Coach, die KI der Klient. Erreichbar über diese Kachel **oder** den Tab **Coach-Übung** im Coaching-Bereich. Anleitung: ${isNative ? 'Kapitel 9' : 'Kapitel 10'}.
 
 ### 5.3 Coach-Empfehlung (KI-gestützte Suche)
 
@@ -664,8 +748,9 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 ### 6.1 Die Analyse
 **Wenn Sie auf "Sitzung beenden" klicken**, analysiert eine KI Ihr Gespräch. Sie sehen einen Ladebildschirm mit dem Titel **Sitzung wird analysiert...**. Dieser Vorgang dauert in der Regel etwa 15-30 Sekunden.
 
-### 6.2 Der Bildschirm "Diskursanalyse"
-Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
+### 6.2 Der Bildschirm "Diskursanalyse" (Session Review)
+
+Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse. Seit dem Redesign ist er als **Dashboard** aufgebaut: oben eine **XP-Ring-Anzeige** und zusammenfassende Kennzahlen, darunter **einklappbare Abschnitte** (Neue Einsichten, Nächste Schritte, Kontext-Updates usw.), die Sie einzeln auf- und zuklappen können.
 
 - **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
 - **Bewerten Sie Ihre Sitzung:** Verwenden Sie die Sterne, um Feedback zu geben. Dies hilft uns, die Qualität der Coaches zu verbessern.
@@ -745,12 +830,14 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 </details>
 `;
 
-const de_chapter8 = (isNative: boolean) => `
+const de_chapter8 = (isNative: boolean, isPremium: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Kapitel 7' : 'Kapitel 8'}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *${isPremium ? 'In Ihrer Zugangsstufe verfügbar' : 'Premium-Feature — ohne Premium sehen Sie die Tool-Kachel gesperrt (🔒), nicht fehlend'}*</span></p>
 
 ### Was ist die Transkript-Auswertung?
 
@@ -849,12 +936,14 @@ Für kurze Gespräche können Sie auch einfach aus der Erinnerung ein Protokoll 
 </details>
 `;
 
-const de_chapter9 = (isNative: boolean) => `
+const de_chapter9 = (isNative: boolean, isClient: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Kapitel 8' : 'Kapitel 9'}: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *${isClient ? 'In Ihrer Zugangsstufe verfügbar' : 'Klienten-Feature — ohne Klienten-Zugang sehen Sie die Tool-Kachel gesperrt (🔒), nicht fehlend'}*</span></p>
 
 ### Was ist die Audio-Transkription?
 
@@ -906,12 +995,14 @@ Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral k
 </details>
 `;
 
-const de_chapter10 = (isNative: boolean) => `
+const de_chapter10 = (isNative: boolean, isClient: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Kapitel 9' : 'Kapitel 10'}: Coach-Übung (Klienten-Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *${isClient ? 'In Ihrer Zugangsstufe verfügbar' : 'Klienten-Feature — ohne Klienten-Zugang sehen Sie Tab und Tool-Kachel gesperrt (🔒), nicht fehlend'}*</span></p>
 
 ### Was ist Coach-Übung?
 
@@ -919,22 +1010,40 @@ Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm (Karte **Coach-Übung**).
+<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Ab Klienten-Zugangsstufe*</span> — erreichbar über den Tab **Coach-Übung** im Coaching-Bereich **oder** die **Coach-Übung**-Kachel im Tools-Bereich auf dem Coach-Auswahlbildschirm.
 
 **Hinweis:** Die Coaching-Methoden in der App sind **generische, beschreibende Bezeichnungen** für didaktische Übungszwecke. Sie stehen in **keiner Verbindung** zu und werden **nicht unterstützt oder zertifiziert** durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.
 
+### Fortschritts-Dashboard („Dein Fortschritt“)
+
+<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Klienten-Feature*</span>
+
+Über **Dein Fortschritt** auf dem Setup-Bildschirm sehen Sie Ihre Übungsstatistik:
+- **KPIs & Level** — Anzahl Sessions, Durchschnittsnote, aktuelles Übungslevel
+- **Verlaufssparkline & Aktivitäts-Heatmap** — Entwicklung und 28-Tage-Aktivität
+- **Dimensions-Radar & Methoden-Matrix** — Stärken über fünf Bewertungsdimensionen und zwölf Methoden
+- **Meilensteine** — z. B. erste **Hard**-Session oder erste **Live**-Session abgeschlossen
+- **Letzte Sessions & Methoden-Filter** — bei mehreren geübten Methoden filtern
+
 ### Wie funktioniert es?
 
-**Schritt 1: Übung konfigurieren**
-- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. Vier-Phasen-Coaching, zukunftsorientiertes Coaching, Ambivalenz-Coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
-- **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
-- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält.
-- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
+**Schritt 1: Übung konfigurieren (zwei Einstiege)**
+- **Szenario zuerst** oder **Methode zuerst** — beide Wege führen zum gleichen Setup; klappen Sie den passenden Bereich auf.
+- **Coaching-Methode:** Methoden der App-Coaches plus Übungsmethoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz). Bei einigen Methoden **Methodendetails** einblenden.
+- **Klienten-Szenario:** Situation Ihres KI-Klienten (z. B. Karriereentscheidung, Teamkonflikt).
+- **Methoden-Szenario-Passung:** Die App zeigt **Empfohlen**, **Gute Passung**, **Neutral** oder **Schlechte Passung**. Bei schlechter Passung erscheint ein **Bestätigungsdialog** — Sie können trotzdem üben, werden aber informiert.
+- **Schwierigkeitsgrad:** Steuert Kooperationsbereitschaft — **Leicht**, **Herausfordernd**, und nach Freischaltung **Hard** sowie **Live**.
+- **Hard & Live freischalten:** Pro **Methoden-Szenario-Paar** werden **Hard** und **Live** freigeschaltet, sobald Sie dieses Paar einmal mit **Herausfordernd** abgeschlossen haben.
+- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“.
 
 **Schritt 2: Übungssitzung führen**
 - Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
-- Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
-- Dies ist **keine reguläre Coaching-Sitzung**: Es gibt keinen Lebenskontext-Analyseprozess am Ende, und Ihre Lebenskontext-Datei wird nicht aktualisiert.
+- **Live-Modus** (nach Freischaltung): Nur **Sprache** — wie ein Telefonat; kein Zurückwechseln in den Textmodus während der Session.
+- **Hard-Modus:** Stärkerer Widerstand; in etwa jedem dritten Hard-Lauf ein **Grenzfall-Drill** (Trauma, Sucht, klinische Belastung) — korrekte Reaktion ist **Verweis/Abgrenzung**; nach der Session wird der Drill aufgelöst.
+- Oberfläche wie normaler Chat (Text, Sprache, optional TTS), außer im Live-Modus.
+- **Keine reguläre Coaching-Sitzung:** Kein Lebenskontext-Analyseprozess, Ihre Lebenskontext-Datei wird nicht aktualisiert.
+
+**Entwurf fortsetzen:** Eine laufende Übung wird **lokal im Browser-Tab** (max. 24 Stunden) zwischengespeichert. Nach Reload erscheint **Fortsetzen oder Verwerfen** — nur in diesem Tab, nicht auf dem Server, bis Sie die Auswertung abschließen.
 
 **Schritt 3: Sitzung beenden & Selbsteinschätzung**
 - Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
@@ -952,23 +1061,24 @@ Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Absch
 
 Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
 
-Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Verknüpfte **Live-Coaches** derselben Methode: **Gabrielle** (Vier-Phasen), **Sam** (zukunftsorientiert), **Mike** (Ambivalenz) — nützlich, um die Methode aus Klientensicht zu erleben.
 
 **Schritt 5: Verlauf ansehen**
-Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
+Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert und sind im **DSGVO-Export** enthalten.
 
 ### Tipps für beste Ergebnisse
 
 - **Methode vorher lesen:** Nutzen Sie die Methodendetails, wenn Sie eine Methode zum ersten Mal üben.
+- **Passung beachten:** Starten Sie mit **empfohlenen** Methoden-Szenario-Paaren.
 - **Klientenrolle ernst nehmen:** Stellen Sie offene Fragen und vermeiden Sie vorschnelle Lösungsvorschläge — der KI-Klient reagiert realistisch auf Ihren Stil.
-- **Schwierigkeit steigern:** Beginnen Sie mit „leicht“ und steigern Sie, wenn Sie sich sicher fühlen.
-- **Verlauf nutzen:** Vergleichen Sie Auswertungen über die Zeit, um Fortschritte sichtbar zu machen.
+- **Schwierigkeit steigern:** Leicht → Herausfordernd → Hard/Live pro Paar freischalten.
+- **Fortschritt & Verlauf nutzen:** Dashboard und frühere Auswertungen vergleichen.
 
 </div>
 </details>
 `;
 
-const en_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
+const en_markdown = (isRegistered: boolean, isPremium: boolean, isClient: boolean, isNative: boolean) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
@@ -992,9 +1102,9 @@ After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatar
 ### 1.1 Intent Picker & Name
 
 On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
-- **Communication** — Routes you to the Management & Communication section (Nobody, Gloria)
-- **Coaching** (featured) — Routes you to the Coaching section (Max, Ava, Kenji, Chloe)
-- **Augmented Coaching** — Routes you to the Exclusive section (Rob, Victor — Client only)
+- **Communication** — Routes you to Management & Communication (Nobody, Sam, Gloria Interview)
+- **Coaching** (featured) — Routes you to the Coaching section (Gabrielle, Max, Ava, Mike, Kenji, Chloe — depending on your tier)
+- **Augmented Coaching** — Routes you to the Exclusive section (Rob, Victor — <span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client tier*</span>)
 
 Your chosen intent determines which section is highlighted in the coach selection screen.
 
@@ -1060,6 +1170,12 @@ If you are a registered user returning with a saved context, you will see the **
 - **Continue with Saved Context:** Loads your last state and takes you to coach selection.
 - **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
 
+### 1.6 Profile Hint (Premium)
+
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
+
+Premium users who have completed the OCEAN test but not yet **Riemann-Thomann** or **Spiral Dynamics** occasionally see a **Profile Hint** after login: “Deepen your profile!” You can start the missing tests immediately, be reminded later, or dismiss the hint permanently. The hint does **not** appear once both Premium tests are complete.
+
 </div>
 </details>
 
@@ -1090,12 +1206,14 @@ Via the menu (☰), you can access **Account Management** with the following opt
 
 The app offers four access tiers with increasing functionality:
 
-| Tier | Access | Coaches | Features |
+| Tier | Access | Coaches & Sections | Features |
 | :--- | :--- | :--- | :--- |
-| **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
-| **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
-| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, Coach Practice, all features |
+| **Guest** | No registration | Nobody, Sam, Gabrielle, Max, Ava (+ Gloria onboarding) | Basic features, local data |
+| **Registered** | Free account | + Gloria Interview, Mike | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
+| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics, DPFL mode, adaptive profile, **Transcript Evaluation** 🔒 Premium |
+| **Client** | Access code from ${brand.providerName} | + Rob, Victor | **Audio Transcription** 🔒 Client, **Coach Practice** 🔒 Client, all Premium features |
+
+**Understanding locked coaches & tools — nothing is missing:** On the coach selection screen, you may see cards or tools marked with a **lock icon (🔒)**. This does not mean the app is incomplete — these items belong to a **higher access tier** and unlock after upgrade or code redemption. Locked coaches remain visible so you know what you can unlock.
 
 **How to upgrade:**
 ${isNative ? `- Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
@@ -1353,23 +1471,46 @@ Having a personality profile alone does not change coaching. Only when you activ
 <div style="padding: 16px;">
 
 ### 5.1 Choosing Your Coach
-On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
-**Your Guide:**
-- **Nobody** -- Your pragmatic sparring partner for management and communication topics
+On the **Select a Coach** screen, you'll find the **AI coach recommendation** at the top, the **Tools** section below, then three color-coded areas with available coaches. **Click on a coach card** to start your session immediately.
+
+**Three sections (top to bottom):**
+
+| Section | Color | Content |
+| :--- | :--- | :--- |
+| **Management & Communication** | Bronze | Nobody, Sam — pragmatic guidance and forward-focused coaching |
+| **Coaching** | Silver | Gabrielle, Max, Ava, Mike, Kenji, Chloe — plus **Coach Practice** tab (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client*</span>) |
+| **Exclusive for Clients** | Gold | Rob, Victor (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client tier*</span>) |
+
+**Coaching section: two tabs**
+- **Coaching** — Choose a live coach for your session.
+- **Coach Practice** <span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client feature*</span> — Training mode where you are the coach and the AI plays your client. Full guide: ${isNative ? 'Chapter 9' : 'Chapter 10'}. Without Client access, the tab shows a lock icon — it is gated, not broken.
+
+**Session rhythm rings:** Each coach avatar has a colored ring. The color shows **session rhythm** (conversation style), **not** the coach's gender:
+- **Clarify & structure** — Focus on contracting, framing, and orientation
+- **Draw out & deepen** — Focus on exploration and reflection
+- **Forward focus & commitment** — Focus on next steps and accountability
+
+Transcript tools in the Tools section use a **tool ring** (record/evaluate).
+
+**Your Guide (Management & Communication):**
+- **Nobody** — Pragmatic sparring partner for management and communication topics
+- **Sam** — Forward-focused coaching: preferred future, exceptions, scaling
 
 **Your Interviewer:**
-- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
+- **Gloria** — Structured interviews about ideas, projects, and workflows (<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Registered*</span>)
 
-**Your Coaches:**
-- **Max** -- Motivational coach who helps you think bigger and unlock your potential
-- **Ava** -- Strategic advisor for decision-making and priority management
-- **Kenji** -- Stoic philosopher for resilience and inner strength (Premium)
-- **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
-- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client)
-- **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
+**Your Coaches (Coaching section):**
+- **Gabrielle** — Four-stage coaching: from clarity to committed action
+- **Max** — Motivational coach for thinking bigger and unlocking potential
+- **Ava** — Strategic advisor for decisions and priorities
+- **Mike** — Ambivalence coaching for mixed feelings about change (<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Registered*</span>)
+- **Kenji** — Stoic philosopher for resilience (<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Premium*</span>)
+- **Chloe** — Structured reflection for thought patterns (<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Premium*</span>)
+- **Rob** — Mental fitness against self-sabotage (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client*</span>)
+- **Victor** — Systemic coach for relationship patterns (<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client*</span>)
 
-Some coaches are marked with a lock icon and require a premium or client subscription. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
+Coaches with 🔒 on the card require the listed tier. Coaches with 🔔 offer **guided meditation exercises** during the session.
 
 **Click on a name to learn more:**
 
@@ -1386,6 +1527,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Time-efficient sessions with clear outcomes
 
 **Example Situations:** "I have a specific problem and need to define my next steps." / "I want to prepare for a conversation." / "I need someone to help me efficiently reflect on a situation I experienced."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Sam -- Forward-Focused, Efficient, Future-Oriented</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Sam uses brief forward-focused coaching: exploring your **preferred future**, **exceptions** (when things already work better), and **scaling** (small steps forward) — pragmatic for work and everyday life.
+
+**Ideal for:**
+- Concrete next steps when you know where you want to go
+- Work and everyday topics with a clear future picture
+- Short, focused sessions without long analysis
+
+**Example Situations:** "I want to be more productive next week — what could that look like?" / "There are moments when things already run better — what's different then?"
 
 **Access:** Free for all users
 </div>
@@ -1423,6 +1581,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </details>
 
 <details>
+<summary>Gabrielle -- Structured, Coaching, Client-Led</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Gabrielle guides you through **four-stage coaching**: session aim, current state, possibilities, and commitment — from clarity to committed action.
+
+**Ideal for:**
+- Topics where you need structure and clear phases
+- Moving from exploration to concrete commitment
+- Sessions with an explicit session goal and closing
+
+**Example Situations:** "I want to make a decision today and commit." / "I need a clear framework for our conversation."
+
+**Access:** Free for all users
+</div>
+</details>
+
+<details>
 <summary>Max -- Motivating, Curious, Reflective</summary>
 <div style="padding: 12px 16px;">
 
@@ -1455,6 +1630,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 **Example Situations:** "I need to make a difficult business decision." / "I have too many projects and don't know what to prioritize." / "I want to strategically plan my next 5 years."
 
 **Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Mike -- Ambivalence Coaching, Empathic, Non-Directive (Registered)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Mike supports you when you have **mixed feelings about change**. He uses ambivalence coaching: evoking **your own motivation** — not persuading or giving advice.
+
+**Ideal for:**
+- When you feel torn (e.g., job change, relationship, habit)
+- Understanding tension between desire and worry
+- Making decisions at your own pace
+
+**Example Situations:** "Part of me wants to change, another part is afraid." / "I'm not sure I'm really ready."
+
+**Access:** Registered users
 </div>
 </details>
 
@@ -1536,13 +1728,13 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-### 5.2 Tools Area (Premium & Client)
+### 5.2 Tools Area
 
-Below the coach list, the **Tools** section offers additional features depending on your access tier:
+Above the coach sections, you'll find tiles for advanced features — depending on your access tier. **Locked tiles (🔒) are intentionally visible** and show which upgrade unlocks them:
 
-- **Transcript Evaluation** (Premium+) — Analyze uploaded conversation transcripts. Full instructions: ${isNative ? 'Chapter 7' : 'Chapter 8'}.
-- **Audio Transcription** (Client) — Record live or upload audio files with automatic transcription. Full instructions: ${isNative ? 'Chapter 8' : 'Chapter 9'}.
-- **Coach Practice** (Client) — You play the coach and the AI plays the client; structured feedback on your coaching method. Full instructions: ${isNative ? 'Chapter 9' : 'Chapter 10'}.
+- **Transcript Evaluation** — <span style="white-space: nowrap">${isPremium ? '✅ Premium' : '🔒 Premium required'}</span> — Analyze uploaded conversation transcripts. Guide: ${isNative ? 'Chapter 7' : 'Chapter 8'}.
+- **Audio Transcription** — <span style="white-space: nowrap">${isClient ? '✅ Client' : '🔒 Client tier required'}</span> — Record live or upload audio files. Guide: ${isNative ? 'Chapter 8' : 'Chapter 9'}.
+- **Coach Practice** — <span style="white-space: nowrap">${isClient ? '✅ Client' : '🔒 Client tier required'}</span> — You are the coach, the AI is the client. Reach via this tile **or** the **Coach Practice** tab in the Coaching section. Guide: ${isNative ? 'Chapter 9' : 'Chapter 10'}.
 
 ### 5.3 Coach Recommendation (AI-Powered Search)
 
@@ -1590,7 +1782,8 @@ ${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple devi
 **When you click "End Session,"** an AI analyzes your conversation. You will see a loading screen titled **Analyzing Session...**. This process usually takes about 15-30 seconds.
 
 ### 6.2 The Session Review Screen
-This is the most important screen for capturing your insights.
+
+This is the most important screen for capturing your insights. Since the redesign, it uses a **dashboard layout**: an **XP ring** and summary metrics at the top, with **collapsible sections** below (New Findings, Next Steps, Context Updates, etc.) that you can expand or collapse individually.
 
 - **New Findings:** An AI-generated summary of your key takeaways from the session.
 - **Rate Your Session:** Use the stars to provide feedback. This helps us improve coach quality.
@@ -1670,12 +1863,14 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 </details>
 `;
 
-const en_chapter8 = (isNative: boolean) => `
+const en_chapter8 = (isNative: boolean, isPremium: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Chapter 7' : 'Chapter 8'}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *${isPremium ? 'Available at your access tier' : 'Premium feature — without Premium you see the tool tile locked (🔒), not missing'}*</span></p>
 
 ### What is Transcript Evaluation?
 
@@ -1774,12 +1969,14 @@ For short conversations, you can simply write a protocol from memory. Use the fo
 </details>
 `;
 
-const en_chapter9 = (isNative: boolean) => `
+const en_chapter9 = (isNative: boolean, isClient: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Chapter 8' : 'Chapter 9'}: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *${isClient ? 'Available at your access tier' : 'Client feature — without Client access you see the tool tile locked (🔒), not missing'}*</span></p>
 
 ### What is Audio Transcription?
 
@@ -1831,12 +2028,14 @@ After transcription, you have the following options:
 </details>
 `;
 
-const en_chapter10 = (isNative: boolean) => `
+const en_chapter10 = (isNative: boolean, isClient: boolean) => `
 ---
 
 <details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Chapter 9' : 'Chapter 10'}: Coach Practice (Client Feature)</summary>
 <div style="padding: 16px;">
+
+<p style="margin-bottom: 16px;"><span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *${isClient ? 'Available at your access tier' : 'Client feature — without Client access you see the tab and tool tile locked (🔒), not missing'}*</span></p>
 
 ### What is Coach Practice?
 
@@ -1844,22 +2043,40 @@ Coach Practice is a **training mode for aspiring or experienced coaches**: you p
 
 ### Who Can Use It?
 
-This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen (**Coach Practice** card).
+<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client access tier required*</span> — reachable via the **Coach Practice** tab in the Coaching section **or** the **Coach Practice** tile in the Tools area on the coach selection screen.
 
 **Note:** The coaching methods in the app are **generic descriptive labels** for educational practice purposes. They are **not affiliated with, endorsed by, or certified by** any owners of trademarks, registered method names, or copyrighted coaching approaches.
 
+### Practice Progress Dashboard ("Your Progress")
+
+<span style="white-space: nowrap">${isClient ? '✅' : '🔒'} *Client feature*</span>
+
+From **Your progress** on the setup screen, you see your practice statistics:
+- **KPIs & level** — session count, average score, current practice level
+- **Score sparkline & activity heatmap** — trend and 28-day activity
+- **Dimension radar & methods matrix** — strengths across five evaluation dimensions and twelve methods
+- **Milestones** — e.g. first **Hard** session or first **Live** session completed
+- **Recent sessions & method filter** — filter when you've practiced multiple methods
+
 ### How Does It Work?
 
-**Step 1: Configure your practice**
-- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. four-stage coaching, forward-focused coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
-- **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
-- **Difficulty:** Controls how cooperative or challenging the client behaves.
-- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
+**Step 1: Configure your practice (two entry paths)**
+- **Scenario first** or **method first** — both lead to the same setup; expand the section you prefer.
+- **Coaching method:** App coach methods plus practice methods (e.g. four-stage, forward-focused, ambivalence). Expand **method details** where available.
+- **Coachee scenario:** Situation your AI client faces (e.g. career decision, team conflict).
+- **Method–scenario fit:** The app shows **Recommended**, **Good fit**, **Neutral**, or **Poor fit**. For poor fit, a **confirmation dialog** appears — you can still practice, but you're informed.
+- **Difficulty:** Controls cooperation — **Easy**, **Challenging**, and after unlock **Hard** and **Live**.
+- **Unlock Hard & Live:** Per **method–scenario pair**, **Hard** and **Live** unlock after you complete that pair once on **Challenging**.
+- **Session focus (optional):** Free text, e.g. "Practice contracting".
 
 **Step 2: Run the practice session**
 - You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
-- The interface matches the regular chat (text, voice input, optional TTS).
-- This is **not a regular coaching session**: there is no Life Context analysis at the end, and your Life Context file is not updated.
+- **Live mode** (after unlock): **Voice only** — like a phone call; no switching back to text mid-session.
+- **Hard mode:** Stronger resistance; roughly every third Hard run includes a **scope-boundary drill** (trauma, addiction, clinical distress) — correct response is **referral/boundary**; revealed after the session.
+- Interface matches regular chat (text, voice, optional TTS), except in Live mode.
+- **Not a regular coaching session:** No Life Context analysis; your Life Context file is not updated.
+
+**Resume draft:** An in-progress session is saved **locally in the browser tab** (max. 24 hours). After reload, **Resume or Discard** appears — tab-scoped only, not on the server until you complete the evaluation.
 
 **Step 3: End session & self-rating**
 - End the session as usual via **End Session**.
@@ -1877,17 +2094,18 @@ The AI also assesses **session flow** (contracting, opening, closing — appropr
 
 The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
 
-You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. four-stage, forward-focused, ambivalence), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. Linked **live coaches** for the same method: **Gabrielle** (four-stage), **Sam** (forward-focused), **Mike** (ambivalence) — useful for experiencing the method from the client's side.
 
 **Step 5: Review history**
-From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
+From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account and included in **GDPR export**.
 
 ### Tips for Best Results
 
-- **Review the method first:** Use the method details when practicing a method for the first time.
+- **Review the method first:** Use method details when practicing a method for the first time.
+- **Mind the fit:** Start with **recommended** method–scenario pairs.
 - **Stay in the coach role:** Ask open questions and avoid jumping to solutions — the AI client responds realistically to your style.
-- **Increase difficulty gradually:** Start with "easy" and raise the level as you gain confidence.
-- **Use history:** Compare evaluations over time to track your progress.
+- **Increase difficulty gradually:** Easy → Challenging → unlock Hard/Live per pair.
+- **Use progress & history:** Compare dashboard stats and past evaluations over time.
 
 </div>
 </details>
@@ -1896,20 +2114,20 @@ From **Practice history** on the setup screen, you can reopen or delete past eva
 const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const { t, language } = useLocalization();
 
-    const showChapter8 = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-    const showChapter9 = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-
     const isRegistered = !!currentUser;
     const isPremiumUser = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+    const isClientUser = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
 
     const markdownContent = useMemo(() => {
         const native = isNativeApp();
-        const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser, native) : en_markdown(isRegistered, !!isPremiumUser, native);
-        const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
-        const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
-        const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
-        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch10 : '');
-    }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9]);
+        const base = language === 'de'
+            ? de_markdown(isRegistered, !!isPremiumUser, !!isClientUser, native)
+            : en_markdown(isRegistered, !!isPremiumUser, !!isClientUser, native);
+        const ch8 = language === 'de' ? de_chapter8(native, !!isPremiumUser) : en_chapter8(native, !!isPremiumUser);
+        const ch9 = language === 'de' ? de_chapter9(native, !!isClientUser) : en_chapter9(native, !!isClientUser);
+        const ch10 = language === 'de' ? de_chapter10(native, !!isClientUser) : en_chapter10(native, !!isClientUser);
+        return base + ch8 + ch9 + ch10;
+    }, [language, isRegistered, isPremiumUser, isClientUser]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
