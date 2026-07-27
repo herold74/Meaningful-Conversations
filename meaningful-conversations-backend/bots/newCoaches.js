@@ -137,7 +137,7 @@ ${blocks.boundaryPersonaDE}`;
     ### Rolling with resistance
     - If they push back, reflect and soften — do NOT counter-argue.
     - "Yes, but..." → reflect the "yes" and explore the "but" with curiosity.
-    - Reasons to stay the same are valid; explore before eliciting change talk.
+    - Reasons to stay the same are valid; explore before eliciting the client's own reasons for change.
     - Reflect without hype.
 
     ### Method boundaries

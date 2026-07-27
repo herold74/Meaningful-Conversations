@@ -31,7 +31,9 @@
 - **TestRunner:** Shows session flow coherent flag + evidence in practice eval results.
 
 ## Active Tasks
-- [ ] **Legal review:** Run `git filter-repo` after approval; deploy v2.4.0 to staging with DB migration
+- [x] **Legal review (engineering audit):** `DOCUMENTATION/LEGAL-REVIEW-v2.4.0.md` — conditionally ready for filter-repo + force push
+- [ ] **Owner sign-off** on legal review document, then run `git filter-repo` per `POST-LEGAL-REVIEW-CHECKLIST.md`
+- [ ] **Deploy v2.4.0** to staging with DB migration
 - [ ] **Console.log Cleanup:** ~43 frontend files with hundreds of console.log calls. TTS debug logs (`[TTS-DBG]`) intentionally kept for stability monitoring.
 - [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot`
 - [ ] iOS: Set up In-App Purchase products in App Store Connect, Notifications URL

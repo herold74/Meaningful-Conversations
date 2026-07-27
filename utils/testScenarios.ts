@@ -805,7 +805,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
   },
 
   // ============================================
-  // COACH PRACTICE — automated GROW smoke test
+  // COACH PRACTICE — automated four-stage coaching smoke test
   // ============================================
   {
     id: 'practice_grow_career',
@@ -835,7 +835,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: false,
     specialTestMode: 'practice_eval',
     practiceConfig: {
-      frameworkId: 'grow',
+      frameworkId: 'four-stage-coaching',
       scenarioId: 'career-decision',
       difficulty: 'moderate',
       selfRating: 7,
