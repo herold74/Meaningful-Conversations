@@ -68,6 +68,7 @@ npx cap sync ios
 - Syncs `update-nginx-ips.sh` from the repo to the server (same as staging deploy) before refreshing nginx
 - **"Build once, deploy everywhere"** — production runs the exact same images tested on staging
 - **NEVER deploy to production without explicit user approval** — production deployments kick active users out of their sessions. The user must time maintenance windows, especially now that the app is live in the App Store.
+- **🚨 App Store gate (2.4.x+):** Do **not** deploy backend/frontend **2.4.x or higher** to production until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead. iOS Capacitor builds bundle frontend assets and talk to production API — a server-only 2.4.x deploy while Store users still run older iOS breaks renamed bot IDs and Coach Practice API shapes.
 - **ALWAYS deploy to staging first** and verify
 - **When user says "deploy", default to staging only.** Only include production if user explicitly says "production" or "all environments".
 - URL: https://mc-app.manualmode.at

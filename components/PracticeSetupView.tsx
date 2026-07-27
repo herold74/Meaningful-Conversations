@@ -82,6 +82,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const [scenarioSectionOpen, setScenarioSectionOpen] = useState(false);
   const [methodSectionOpen, setMethodSectionOpen] = useState(false);
   const [showDiscouragedModal, setShowDiscouragedModal] = useState(false);
+  const [subtitleInfoOpen, setSubtitleInfoOpen] = useState(false);
 
   const isPrivileged = !!(currentUser?.isAdmin || currentUser?.isDeveloper);
 
@@ -98,9 +99,17 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       .finally(() => setLoading(false));
   }, [language, t]);
 
-  const unlocks = catalog?.unlocks ?? { hard: isPrivileged, liveMode: isPrivileged };
-  const hardUnlocked = isPrivileged || unlocks.hard;
-  const liveUnlocked = isPrivileged || unlocks.liveMode;
+  const unlocks = catalog?.unlocks ?? { hardUnlockedPairs: [], privileged: isPrivileged };
+
+  const pairHardUnlocked = useMemo(() => {
+    if (isPrivileged || unlocks.privileged) return true;
+    return unlocks.hardUnlockedPairs.some(
+      (p) => p.frameworkId === frameworkId && p.scenarioId === scenarioId,
+    );
+  }, [isPrivileged, unlocks, frameworkId, scenarioId]);
+
+  const hardUnlocked = pairHardUnlocked;
+  const liveUnlocked = pairHardUnlocked;
 
   useEffect(() => {
     if (!hardUnlocked && difficulty === 'hard') {
@@ -225,7 +234,37 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       </div>
 
       <h1 className="text-2xl md:text-3xl font-bold text-content-primary mb-2">{t('practice_title')}</h1>
-      <p className="text-content-secondary mb-4">{t('practice_subtitle')}</p>
+      <div className="mb-4">
+        <div className="flex items-start gap-2">
+          <p className="text-content-secondary flex-1 min-w-0">{t('practice_subtitle')}</p>
+          <button
+            type="button"
+            onClick={() => setSubtitleInfoOpen((open) => !open)}
+            aria-expanded={subtitleInfoOpen}
+            aria-controls="practice-subtitle-info"
+            aria-label={t('practice_subtitle_info_label')}
+            className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors rounded-md px-1.5 py-1 -mt-0.5"
+          >
+            <Info className="w-4 h-4" aria-hidden />
+            <span className="hidden sm:inline">{t('practice_subtitle_info_label')}</span>
+          </button>
+        </div>
+        {subtitleInfoOpen && (
+          <div
+            id="practice-subtitle-info"
+            className="mt-3 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3"
+          >
+            <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
+            <div className="text-sm text-content-primary space-y-2 min-w-0">
+              <p className="font-semibold text-content-primary">{t('practice_subtitle_info_label')}</p>
+              <p>{t('practice_evaluates_coach_callout')}</p>
+              {selectedFramework && sourceBotName(selectedFramework) && (
+                <p>{t('practice_source_bot_callout', { bot: sourceBotName(selectedFramework)! })}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {catalog.defaultPair && (
         <button
@@ -557,16 +596,6 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           className="w-full rounded-lg border border-border-primary bg-background-primary px-3 py-2 text-sm text-content-primary"
         />
       </section>
-
-      <div className="mb-6 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3">
-        <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
-        <div className="text-sm text-content-primary space-y-2">
-          <p>{t('practice_evaluates_coach_callout')}</p>
-          {selectedFramework && sourceBotName(selectedFramework) && (
-            <p>{t('practice_source_bot_callout', { bot: sourceBotName(selectedFramework)! })}</p>
-          )}
-        </div>
-      </div>
 
       <div className="mb-6 rounded-xl border border-accent-primary/30 bg-accent-primary/10 p-4 flex gap-3">
         <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />

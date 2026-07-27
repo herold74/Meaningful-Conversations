@@ -81,10 +81,10 @@ git log -p --all -S 'sam-forward-focused' | head
 
 ## Pre-deploy checklist
 
-1. Commit post-review fixes
-2. `git filter-repo` + force push (after owner sign-off on this document)
-3. Staging: `node scripts/migrate-method-ids.js`
-4. Deploy v2.4.0; smoke Bot Selection + Coach Practice
+1. ~~Commit post-review fixes~~ ✅ `71520bc` / `f6a15c3` (post filter-repo)
+2. ~~`git filter-repo` + force push~~ ✅ 2026-07-27
+3. ~~Staging: `node scripts/migrate-method-ids.js`~~ ✅ 2 rows migrated
+4. ~~Deploy v2.4.0; smoke Bot Selection + Coach Practice~~ ✅ Build 3 on staging
 
 ---
 
