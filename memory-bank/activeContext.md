@@ -3,13 +3,23 @@
 ## Current Status
 **Version:** 2.4.2
 **Branch:** `main`
-**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.1 — https://mc-beta.manualmode.at (health OK) — **v2.4.2 not deployed yet**
+**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.2 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.2 Build 1** — Archive pending release
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.2 Build 2** — **`npm run sync:ios-staging`** (Capacitor → `mc-beta.manualmode.at`); Xcode for Run/Archive. Revert API target: `npm run build && npx cap sync ios`.
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead. Rationale: iOS bundles old bot IDs; backend 2.4.0 without matching app risks 404 on renamed coaches.
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-27 — iOS staging target + staging deploy v2.4.2)
+
+### iOS → Staging API
+- **`npm run sync:ios-staging`** — `VITE_CAPACITOR_BACKEND=staging` → Capacitor calls `mc-beta.manualmode.at`
+- **`services/api.ts`**, `brands/ios-staging.env`, deployment skill updated
+- Revert before App Store: `npm run build && npx cap sync ios`
+
+### Staging deploy v2.4.2 Build 2
+- `./deploy-manualmode.sh -e staging -c app` — health OK; 14 bots incl. Sam, Victor, Dan
 
 ## Recent Changes (2026-07-27 — Release v2.4.2: headless regression harness)
 

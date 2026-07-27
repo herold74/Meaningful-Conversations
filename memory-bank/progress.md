@@ -104,7 +104,9 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Staging v2.3.1 (2026-07-26):** Build **2** — https://mc-beta.manualmode.at, health OK
+- [x] **Staging v2.4.2 (2026-07-27):** Build **2** — https://mc-beta.manualmode.at, health OK (14 bots, Sam/Victor/Dan)
+- [x] **iOS staging API target (2026-07-27):** `npm run sync:ios-staging` → `mc-beta.manualmode.at`
+- [x] **Staging v2.3.1 (2026-07-26):** Build **2** — superseded by v2.4.2
 - [x] **Production v2.3.1 (2026-07-26):** Build **2** — https://mc-app.manualmode.at, health OK
 - [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
 - [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1

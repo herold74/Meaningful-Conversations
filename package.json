@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:ios-staging": "VITE_CAPACITOR_BACKEND=staging npm run build",
+    "sync:ios-staging": "npm run build:ios-staging && npx cap sync ios",
     "start": "node server.js",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -44,6 +46,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "jest": "^30.2.0",
+    "playwright": "^1.62.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "ts-jest": "^29.4.5",

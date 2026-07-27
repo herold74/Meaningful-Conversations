@@ -160,7 +160,19 @@ When updating both frontend and backend:
 
 ### iOS Backend Target
 
-The iOS app defaults to the **production** backend (`mc-app.manualmode.at`). For testing against staging, append `?backend=staging` to the app URL (only works in development builds). See `services/api.ts` → `getApiBaseUrl()`.
+The iOS app defaults to the **production** backend (`mc-app.manualmode.at`) when built with `npm run build`. Staging uses the **same hostname pattern** via `VITE_BRAND_DOMAIN_STAGING` (`mc-beta.manualmode.at`) — not a separate DB concept in the app; the staging API server uses its own MariaDB (`meaningful_conversations_staging`).
+
+**Staging Xcode build (recommended):**
+```bash
+npm run sync:ios-staging
+# then open ios/App/App.xcodeproj → scheme App → Run or Archive
+```
+
+This sets `VITE_CAPACITOR_BACKEND=staging` at build time. See `services/api.ts` → `getApiBaseUrl()` and `brands/ios-staging.env`.
+
+**Revert to production API:** `npm run build && npx cap sync ios` (do not set `VITE_CAPACITOR_BACKEND`).
+
+**Legacy:** `?backend=staging` URL param still overrides at runtime when present (unreliable in native WebView).
 
 ## CI/CD: GitHub Actions
 

@@ -39,11 +39,21 @@ export const getApiBaseUrl = (): string => {
                         (typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor.isNativePlatform?.());
     
     if (isCapacitor) {
-        // Allow override via URL param even in Capacitor
+        // URL param overrides build-time default (rare in native; mainly for debugging)
         if (backendParam === 'staging') {
             return `https://${brand.domainStaging}`;
         }
-        // Default to production for App Store release
+        if (backendParam === 'production') {
+            return `https://${brand.domainProduction}`;
+        }
+
+        // Build-time default: VITE_CAPACITOR_BACKEND=staging for Xcode testing builds
+        const capacitorBackend = (import.meta.env.VITE_CAPACITOR_BACKEND || 'production').toLowerCase();
+        if (capacitorBackend === 'staging') {
+            console.log('[API] Capacitor detected, using staging backend');
+            return `https://${brand.domainStaging}`;
+        }
+
         console.log('[API] Capacitor detected, using production backend');
         return `https://${brand.domainProduction}`;
     }
