@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:19:28.466Z",
+  "provider": "gemini",
+  "scenarioId": "session_dpfl_post_coaching",
+  "category": "session",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "I value stability and careful planning, but I also crave more freedom and change in my career.",
+      "bot": "It sounds like you're navigating a significant internal dynamic, Alex, between the comfort of what is known and the pull of new possibilities.\n\nWhat does this tension, between stability and a desire for change, reveal to you about what truly matters in your work right now?",
+      "isDynamic": false,
+      "responseTimeMs": 3973,
+      "provider": "google"
+    },
+    {
+      "user": "I decided to talk to my mentor this week about a small experiment at work.",
+      "bot": "That's a concrete step, Alex, moving towards that desire for change you mentioned.\n\nHow did that conversation with your mentor go?",
+      "isDynamic": false,
+      "responseTimeMs": 2852,
+      "provider": "google"
+    },
+    {
+      "user": "I'll meet my mentor on Friday and block one hour to outline a small pilot project.",
+      "bot": "It sounds like you're preparing deliberately for that conversation, which is a wise approach. Taking the time to outline your thoughts beforehand can bring much clarity.\n\nConsidering this meeting about a pilot project, what would you most like to achieve or gain clarity on during our time together today?",
+      "isDynamic": false,
+      "responseTimeMs": 3180,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "distanz": {
+          "high": [
+            "freedom"
+          ],
+          "low": []
+        },
+        "dauer": {
+          "high": [
+            "stability",
+            "planning"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [
+            "change",
+            "crave",
+            "experiment"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "conscientiousness": {
+          "high": [
+            "careful"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "orange": {
+          "high": [
+            "career"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 0,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "8 cumulative keywords (min 4)"
+    },
+    {
+      "checkId": "session_updates",
+      "passed": false,
+      "details": "No session updates in analysis"
+    },
+    {
+      "checkId": "session_nextsteps",
+      "passed": true,
+      "details": "1 next step(s)"
+    },
+    {
+      "checkId": "session_newfindings",
+      "passed": true,
+      "details": "New findings present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 5,
+    "total": 6,
+    "allPass": false,
+    "failedCheckIds": [
+      "session_updates"
+    ],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "8 cumulative keywords (min 4)"
+      },
+      {
+        "checkId": "session_updates",
+        "passed": false,
+        "details": "No session updates in analysis"
+      },
+      {
+        "checkId": "session_nextsteps",
+        "passed": true,
+        "details": "1 next step(s)"
+      },
+      {
+        "checkId": "session_newfindings",
+        "passed": true,
+        "details": "New findings present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

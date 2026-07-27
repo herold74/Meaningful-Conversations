@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:27:42.922Z",
+  "provider": "mistral",
+  "scenarioId": "session_full_analysis",
+  "category": "session",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "This week I realized my evening routine is sabotaging my sleep. I want to stop checking email after 8pm.",
+      "bot": "I hear the tension between your intention and the habit. What would it mean for you to reclaim those evening hours for true rest?",
+      "isDynamic": false,
+      "responseTimeMs": 7726,
+      "provider": "mistral"
+    },
+    {
+      "user": "I tried it twice already and feel more rested.",
+      "bot": "So that's our topic. To make our time together as productive as possible, what would you like to have achieved, clarified, or decided by the end of this specific session?",
+      "isDynamic": false,
+      "responseTimeMs": 1214,
+      "provider": "mistral"
+    },
+    {
+      "user": "My partner noticed I'm less irritable in the morning too.",
+      "bot": "That's a meaningful change. So, what would you like to have achieved, clarified, or decided by the end of our session today?",
+      "isDynamic": false,
+      "responseTimeMs": 2717,
+      "provider": "mistral"
+    },
+    {
+      "user": "I'm committing to no work email after 8pm and putting my phone in the kitchen each evening, starting tonight.",
+      "bot": "So the goal for our session today is to solidify your commitment to this new boundary with a clear plan. Is that correct?",
+      "isDynamic": false,
+      "responseTimeMs": 1670,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 3783,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 3,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "routine"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "openness": {
+          "high": [],
+          "low": [
+            "routine"
+          ]
+        }
+      },
+      "spiralDynamics": {
+        "beige": {
+          "high": [
+            "sleep"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 3,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "session_updates",
+      "passed": true,
+      "details": "3 session update(s)"
+    },
+    {
+      "checkId": "session_nextsteps",
+      "passed": true,
+      "details": "1 next step(s)"
+    },
+    {
+      "checkId": "session_newfindings",
+      "passed": true,
+      "details": "New findings present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 3,
+    "total": 3,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "session_updates",
+        "passed": true,
+        "details": "3 session update(s)"
+      },
+      {
+        "checkId": "session_nextsteps",
+        "passed": true,
+        "details": "1 next step(s)"
+      },
+      {
+        "checkId": "session_newfindings",
+        "passed": true,
+        "details": "New findings present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

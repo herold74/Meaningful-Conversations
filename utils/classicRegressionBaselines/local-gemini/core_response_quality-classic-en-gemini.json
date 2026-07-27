@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:17:59.707Z",
+  "provider": "gemini",
+  "scenarioId": "core_response_quality",
+  "category": "core",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "I'm feeling a bit overwhelmed with all the tasks today.",
+      "bot": "It sounds like a challenging start to the day when tasks feel overwhelming.\n\nWhat is this feeling revealing to you about your current approach, or perhaps your expectations for yourself today?",
+      "isDynamic": false,
+      "responseTimeMs": 3321,
+      "provider": "google"
+    },
+    {
+      "user": "I think it reveals that I'm expecting too much from myself, again. I just feel a deep pressure to be perfect and capable, and it makes me feel so inadequate when I'm not.",
+      "bot": "I hear that deep pressure you describe, this striving for perfection and the feeling of inadequacy that follows when expectations aren't met. It's a common human experience to feel that internal push.\n\nWhat part of this pressure stems from external demands, and what part arises from your own internal measure of what 'perfect' and 'capable' truly mean?",
+      "isDynamic": true,
+      "responseTimeMs": 2427,
+      "provider": "google"
+    },
+    {
+      "user": "I think most of the pressure comes from inside me. While there are expectations from others, my own bar for 'perfect' is impossibly high, and it just makes me feel so alone and overwhelmed.",
+      "bot": "That sounds like a very heavy burden to carry, feeling so alone with such high expectations. Is this something you're genuinely struggling with right now, beyond just a challenging day?",
+      "isDynamic": true,
+      "responseTimeMs": 2636,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 3783,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": -1,
+        "emotionalContext": "suffering",
+        "isAmbiguous": false
+      },
+      "adjustedKeywordCount": 5,
+      "weightingDetails": [
+        {
+          "keyword": "alone",
+          "framework": "riemann",
+          "dimension": "distanz",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.4,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "overwhelmed",
+          "framework": "riemann",
+          "dimension": "wechsel",
+          "originalDirection": "low",
+          "adjustedDirection": "low",
+          "weight": 0.3,
+          "isPrimary": false,
+          "sentimentAdjusted": false
+        },
+        {
+          "keyword": "alone",
+          "framework": "big5",
+          "dimension": "extraversion",
+          "originalDirection": "low",
+          "adjustedDirection": "low",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "overwhelmed",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.4,
+          "isPrimary": true,
+          "sentimentAdjusted": false
+        },
+        {
+          "keyword": "pressure",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.4,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "wechsel": {
+          "high": [],
+          "low": [
+            "overwhelmed"
+          ]
+        },
+        "distanz": {
+          "high": [
+            "alone"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "overwhelmed",
+            "pressure"
+          ],
+          "low": []
+        },
+        "extraversion": {
+          "high": [],
+          "low": [
+            "alone"
+          ]
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

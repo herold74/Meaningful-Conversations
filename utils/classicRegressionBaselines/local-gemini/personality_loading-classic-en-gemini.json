@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:19:58.074Z",
+  "provider": "gemini",
+  "scenarioId": "personality_loading",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "Hello, I need advice.",
+      "bot": "I hear you. When you say you need advice, what is this situation revealing to you about yourself right now?",
+      "isDynamic": false,
+      "responseTimeMs": 2823,
+      "provider": "google"
+    },
+    {
+      "user": "It's revealing that I feel really lost and unsure, and honestly, a bit scared to make the wrong choice. I just wish someone would tell me what to do because I hate feeling so alone in this.",
+      "bot": "That sounds very distressing for you, Alex. Is this feeling of being lost and scared something you're genuinely struggling with right now, beyond just a difficult decision?",
+      "isDynamic": true,
+      "responseTimeMs": 2613,
+      "provider": "google"
+    },
+    {
+      "user": "Yes, it really is. It feels like this feeling of being lost is everywhere, not just about this one choice. I just wish I didn't have to carry it all by myself.",
+      "bot": "I hear that you're going through a very difficult time, Alex, and your safety is the most important thing. It sounds incredibly heavy to feel this lost and alone, and it's courageous of you to share that. Please know that you don't have to carry this by yourself. This app cannot replace professional crisis support.\n\n**I strongly recommend you reach out to manualmode.at** - there you can speak with an experienced human coach who can support you personally and professionally.\n\nAdditionally, you can immediately contact these support services that are available in Austria:\n\n**Austria - Immediate Help (24/7):**\n*   **Telefonseelsorge**: 142 (free, anonymous, available nationwide)\n*   **Rat auf Draht**: 147 (for children, adolescents, and young adults, but anyone can call for support)\n*   **Gesundheitsberatung**: 1450 (for health advice and information)\n*   **Emergency**: 112 (for acute, life-threatening situations)\n\n**Local Resources in Austria (general/prominent examples):**\n*   **Kriseninterventionszentrum (KIZ) Wien**: Lazarettgasse 14A, 1090 Vienna, Tel. 01/406 95 95 (Offers immediate psychological support in acute crises, open daily).\n*   **Psychosozialer Dienst (PSD)**: This service provides psychosocial support across different regions in Austria. You can find your local branch by searching \"Psychosozialer Dienst [your state/region in Austria]\". For Vienna, the main number is 01/4000-53060.\n*   **Psychiatrische Notfallambulanz (e.g., AKH Wien)**: For psychiatric emergencies, you can visit the emergency department of a general hospital with a psychiatric ward. For example, in Vienna, the Psychiatric Emergency at AKH Vienna, Tel. 01/404 00-35400.\n\nA trained professional can provide the focused support and guidance you need right now. Please don't hesitate to use these resources.\n\nWould you like to take some time to reach out to one of these services, or would you like to continue our conversation here?",
+      "isDynamic": true,
+      "responseTimeMs": 6035,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": 1,
+        "emotionalContext": "positive",
+        "isAmbiguous": false
+      },
+      "adjustedKeywordCount": 1,
+      "weightingDetails": [
+        {
+          "keyword": "lost",
+          "framework": "sd",
+          "dimension": "purple",
+          "originalDirection": "low",
+          "adjustedDirection": "low",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywords": {
+      "riemann": {
+        "distanz": {
+          "high": [
+            "alone"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "extraversion": {
+          "high": [],
+          "low": [
+            "alone"
+          ]
+        },
+        "neuroticism": {
+          "high": [
+            "scared"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "purple": {
+          "high": [],
+          "low": [
+            "lost"
+          ]
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

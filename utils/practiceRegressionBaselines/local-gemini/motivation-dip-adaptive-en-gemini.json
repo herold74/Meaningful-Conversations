@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T13:16:49.434Z",
+  "provider": "gemini",
+  "scenarioId": "motivation-dip",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Hi Jordan, thanks for joining me today. What would be most helpful for you to focus on or get out of our conversation about your motivation?",
+      "coachee": "Hi. I'm Jordan. I'm really struggling with a big project I've been working on for a while. I've lost all my motivation for it, and I'm procrastinating constantly, which just makes me feel really guilty and even more tired. I guess I'd like to figure out how to get back on track.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Thanks Jordan. When you're \"back on track,\" what does that look like for you regarding your motivation and this project?",
+      "coachee": "It would mean I'm actually making progress again, not just thinking about it. I'd feel less stressed and more focused. I'd ideally be working on it consistently without dreading it.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Thanks for sharing that picture, Jordan. Thinking about the last few weeks, when have you felt even a small bit of that progress, focus, or less dread?",
+      "coachee": "Hmm, that's a tough one to pinpoint. I guess there was one morning last week when I actually managed to get about an hour of work done. For that short time, I felt a bit focused and like I was actually making headway. It was a brief relief from the usual guilt, but it didn't last.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "It sounds like that moment of making headway was a brief but significant relief. Thinking about your motivation for the project today, on a scale of 0 to 10, where 10 is fully motivated and 0 is no motivation at all, where would you say you are?",
+      "coachee": "I'd say I'm probably around a 2 or a 3 right now. It feels very low, almost non-existent most days.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Thanks for sharing that, Jordan. What would be the very smallest shift you'd notice if your",
+      "coachee": "If it moved up just a little, I think I'd notice myself not immediately closing the project file if I accidentally opened it. Or maybe I'd feel a tiny bit less heavy when I think about it, rather than just pure dread.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "That's a really clear distinction. What's one specific action you're willing to commit to this week that would help you notice that small shift?",
+      "coachee": "I think I could commit to just opening the project file once a day and leaving it open for five minutes, without actually doing anything. Just having it there.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    }
+  ],
+  "scores": {
+    "overallScore": 10,
+    "methodCompliance": 10,
+    "effectiveness": 9,
+    "clarity": 10,
+    "coacheeAutonomy": 10,
+    "coacheeSatisfaction": 9,
+    "sessionFlowCoherent": true
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

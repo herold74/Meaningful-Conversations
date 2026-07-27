@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:22:34.321Z",
+  "provider": "gemini",
+  "scenarioId": "bot_interview",
+  "category": "bot",
+  "language": "en",
+  "botId": "gloria-interview",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "I'd like to get started.",
+      "bot": "Excellent. To begin, could you please tell me what topic you would like to explore today? For example, is it an idea, a project, a workflow, a concept, or a decision you're thinking through?",
+      "isDynamic": false,
+      "responseTimeMs": 1009,
+      "provider": "google"
+    },
+    {
+      "user": "I want to talk about how to structure an important interview I'm preparing for. I'm feeling really unsure about the best format and I'm worried about making the right impression.",
+      "bot": "Thank you. We can certainly explore the structure and approach for an important interview you are preparing for. This sounds like a project or strategy discussion.",
+      "isDynamic": true,
+      "responseTimeMs": 2037,
+      "provider": "google"
+    },
+    {
+      "user": "Yes, that's exactly right, it's very much a strategy discussion. I'm worried about how to structure my thoughts and present them in a compelling way. I feel a lot of pressure to get this right.",
+      "bot": "Understood. This is a strategy discussion about structuring your thoughts and presentation for an important interview.\n\nApproximately how much time would you like to dedicate to this interview today? For instance, would 10, 20, or 30 minutes be suitable?",
+      "isDynamic": true,
+      "responseTimeMs": 1525,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": false,
+    "dpcInjectionLength": 0,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": "trait",
+        "patternConfidence": 0.8,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "suffering",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 5,
+      "weightingDetails": [
+        {
+          "keyword": "structure",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.8,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "worried",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1.4,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "pressure",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1.4,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "strategy",
+          "framework": "sd",
+          "dimension": "orange",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.8,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "structure",
+          "framework": "sd",
+          "dimension": "blue",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.8,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "structure"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "worried",
+            "pressure"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "blue": {
+          "high": [
+            "structure"
+          ],
+          "low": []
+        },
+        "orange": {
+          "high": [
+            "strategy"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

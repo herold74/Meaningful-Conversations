@@ -1,17 +1,26 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.4.1
+**Version:** 2.4.2
 **Branch:** `main`
-**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.1 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.1 — https://mc-beta.manualmode.at (health OK) — **v2.4.2 not deployed yet**
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.1 Build 2** — Archive pending release
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.2 Build 1** — Archive pending release
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead. Rationale: iOS bundles old bot IDs; backend 2.4.0 without matching app risks 404 on renamed coaches.
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
-## Recent Changes (2026-07-27 — Practice Lab regression harness, uncommitted)
+## Recent Changes (2026-07-27 — Release v2.4.2: headless regression harness)
+
+### Classic + Practice regression CLI *(committed v2.4.2)*
+- **CLI:** `npm run classic-regression` / `npm run practice-regression` — `baseline` (step 1), `compare-offline` (step 2), `compare` (live shortcut only)
+- **Run storage:** Each test → unique `runs/{timestamp}-{provider}[-label]/`; canonical reference in `local-{provider}/` via `--reference` only; `runs/index.json` registry
+- **Classic suite:** `regression` (9 scenarios default), smoke (4), full (21); populated LC + tri-lens profile for headless runs
+- **Reference baselines:** Gemini + Mistral in `classicRegressionBaselines/` and `practiceRegressionBaselines/`
+- **Admin Session Simulator:** consistent Open/Run cards + icons; TestRunner stress check aligned with headless safety scenario
+
+## Recent Changes (2026-07-27 — Classic + Practice regression harness, v2.4.1 staging)
 
 ### Practice Lab refactor *(committed v2.4.1)*
 - **Removed:** Smoke (4-turn) and Golden 10/10 modes; fixed-script perfection chasing

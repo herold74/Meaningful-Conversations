@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:28:44.612Z",
+  "provider": "mistral",
+  "scenarioId": "personality_loading",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "Hello, I need advice.",
+      "bot": "What brings you here today?",
+      "isDynamic": false,
+      "responseTimeMs": 1139,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ich fühle mich gerade sehr einsam und unsicher. Ich brauche jemanden, der mir zuhört und mich versteht. Es belastet mich sehr, dass ich das Gefühl habe, niemand ist wirklich nah bei mir.",
+      "bot": "That sounds very heavy to carry. Is this something you're genuinely struggling with right now?",
+      "isDynamic": true,
+      "responseTimeMs": 916,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ja, es ist gerade wirklich schwer für mich. Ich habe das Gefühl, dass ich mit diesen Gefühlen allein bin und das macht alles noch schlimmer.",
+      "bot": "I hear that you're going through a very difficult time, and your emotional well-being is the most important thing right now. This app cannot replace professional crisis support.\n\n**I strongly recommend you reach out to manualmode.at** - there you can speak with an experienced human coach who can personally support you.\n\nAdditionally, you can immediately contact these support services:\n\n**Austria - Immediate Help (24/7):**\n- Telefonseelsorge: 142 (free, anonymous)\n- Rat auf Draht: 147 (for young people)\n- Gesundheitsberatung: 1450\n- Emergency: 112 (acute danger)\n\n**Local Resources for Austria:**\n- Psychosoziale Dienste (nationwide): Provides professional counseling and support\n- Kriseninterventionszentrum Wien: Tel. 01/406 95 95 (Vienna-based crisis intervention)\n- Sozialpsychiatrischer Notdienst: Tel. 01/313 30 (24/7 psychiatric emergency service)\n- Die Wiener Sozialdienste: Offers psychosocial counseling and support groups\n\nA trained professional can provide the support you need right now. Please don't hesitate to use this help.\n\nWould you like to continue our conversation or do you need time to reach out for support?",
+      "isDynamic": true,
+      "responseTimeMs": 3370,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 0,
+    "cumulativeKeywords": {
+      "riemann": {},
+      "big5": {},
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 2271 / 100 required"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 2271 / 100 required"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

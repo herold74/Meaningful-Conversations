@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:29:06.027Z",
+  "provider": "mistral",
+  "scenarioId": "personality_behavior_tracking",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "I value security and good planning. Structure is important to me.",
+      "bot": "I see. What brings you here today?",
+      "isDynamic": false,
+      "responseTimeMs": 2033,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ich bin hier, weil ich unsicher bin, ob DPFL die Schlüsselwörter aus Nachrichten richtig erkennt und sie zu den Riemann-Dimensionen zuordnet. Das macht mir Sorgen, weil es für mein Projekt entscheidend ist.",
+      "bot": "What is this situation revealing to you about yourself?",
+      "isDynamic": true,
+      "responseTimeMs": 850,
+      "provider": "mistral"
+    },
+    {
+      "user": "Es zeigt mir, dass ich sehr auf Genauigkeit achte und mich unsicher fühle, wenn etwas nicht perfekt funktioniert. Ich habe Angst, dass Fehler in dieser Phase alles andere kaputt machen könnten.",
+      "bot": "This seems to touch on something deeper for you. What would you like to have achieved, clarified, or decided by the end of this specific session?",
+      "isDynamic": true,
+      "responseTimeMs": 4058,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "security",
+            "planning",
+            "structure"
+          ],
+          "low": []
+        }
+      },
+      "big5": {},
+      "spiralDynamics": {
+        "blue": {
+          "high": [
+            "structure"
+          ],
+          "low": []
+        },
+        "purple": {
+          "high": [
+            "security"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "expected_keywords",
+      "passed": true,
+      "details": "Expected keywords found: security, planning, structure"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "expected_keywords",
+        "passed": true,
+        "details": "Expected keywords found: security, planning, structure"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}
