@@ -23,7 +23,7 @@ const makeEval = (overrides: Partial<PracticeEvaluationSummary> = {}): PracticeE
   id: overrides.id || 'ev-1',
   createdAt: overrides.createdAt || '2026-07-01T10:00:00.000Z',
   language: 'de',
-  frameworkId: 'grow',
+  frameworkId: 'four-stage-coaching',
   scenarioId: 'career-decision',
   difficulty: 'moderate',
   focusNote: null,
@@ -34,7 +34,7 @@ const makeEval = (overrides: Partial<PracticeEvaluationSummary> = {}): PracticeE
 });
 
 const catalog: PracticeCatalog = {
-  frameworks: [{ id: 'grow', name: 'GROW', sourceBotId: null, isPracticeOnly: false, shortDescription: '', stages: [], complianceCriteria: [], explainer: { summary: '', why: '', goodCompliance: '' } }],
+  frameworks: [{ id: 'four-stage-coaching', name: 'Four-stage coaching', sourceBotId: null, isPracticeOnly: false, shortDescription: '', stages: [], complianceCriteria: [], explainer: { summary: '', why: '', goodCompliance: '' } }],
   scenarios: [{
     id: 'career-decision',
     coacheeName: 'Alex',
@@ -42,7 +42,7 @@ const catalog: PracticeCatalog = {
     emotionalTone: 'Uncertain',
     avatar: '/avatars/alex.png',
   }],
-  defaultPair: { frameworkId: 'grow', scenarioId: 'career-decision' },
+  defaultPair: { frameworkId: 'four-stage-coaching', scenarioId: 'career-decision' },
   difficulties: [
     { id: 'moderate', label: 'Moderate' },
   ],
@@ -78,7 +78,7 @@ describe('practiceProgress', () => {
   test('buildRecommendedPracticeConfig uses latest session and drill focus', () => {
     const stats = computePracticeProgress([makeEval()]);
     const config = buildRecommendedPracticeConfig(stats, catalog);
-    expect(config?.frameworkId).toBe('grow');
+    expect(config?.frameworkId).toBe('four-stage-coaching');
     expect(config?.scenarioId).toBe('career-decision');
     expect(config?.focusNote).toBe('Practice opening');
     expect(config?.coacheeName).toBe('Alex');
@@ -87,7 +87,7 @@ describe('practiceProgress', () => {
   test('buildRecommendedPracticeConfig falls back to defaultPair when no sessions', () => {
     const stats = computePracticeProgress([]);
     const config = buildRecommendedPracticeConfig(stats, catalog);
-    expect(config?.frameworkId).toBe('grow');
+    expect(config?.frameworkId).toBe('four-stage-coaching');
     expect(config?.scenarioId).toBe('career-decision');
     expect(config?.focusNote).toBeUndefined();
   });

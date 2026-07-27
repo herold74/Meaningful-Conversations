@@ -1,0 +1,37 @@
+***REMOVED***
+***REMOVED***
+***REMOVED***
+
+sam-forward-focused==>sam-forward-focused
+gabrielle-four-stage==>gabrielle-four-stage
+mike-ambivalence-coaching==>mike-ambivalence-coaching
+dan-client-language==>dan-client-language
+chloe-structured-reflection==>chloe-structured-reflection
+kenji-resilience==>kenji-resilience
+nexus-goal-path-solution==>nexus-goal-path-solution
+victor-systemic-coaching==>victor-systemic-coaching
+ambivalence-coaching==>ambivalence-coaching
+forward-focused-coaching==>forward-focused-coaching
+client-exact-language==>client-exact-language
+forward-focused coaching tradition==>forward-focused coaching tradition
+brief forward-focused coaching==>brief forward-focused coaching
+forward-focused tradition==>forward-focused tradition
+ambivalence coaching approach==>ambivalence coaching approach
+ambivalence coaching==>ambivalence coaching
+brief forward-focused coaching==>brief forward-focused coaching
+client exact language==>client exact language
+four-stage coaching model==>four-stage coaching model
+Vier-Phasen-Coaching-Modell==>Vier-Phasen-Coaching-Modell
+four-stage coaching==>four-stage coaching
+Vier-Phasen-Coaching==>Vier-Phasen-Coaching
+listening skills==>listening skills
+brief forward-focused==>brief forward-focused
+/public/avatars/sam.png==>/public/avatars/sam.png
+avatars/sam.png==>avatars/sam.png
+You are Sam,==>You are Sam,
+Sie sind Sam,==>Sie sind Sam,
+name: 'Sam'==>name: 'Sam'
+newCoaches.sam==>newCoaches.sam
+samMethodEN==>samMethodEN
+samMethodDE==>samMethodDE
+    sam:==>    sam:

@@ -638,7 +638,7 @@ function buildDanCleanLanguageAdaptivePrompt(mergeResult, narrativeProfile, narr
       pacingGuide: '**Wie du Ton/Ansatz nutzt (intern — dem Klienten gegenüber nicht erklären):**\n',
       pacingBullets:
         '- Übersetze „Ton“ und „Ansatz“ **nicht** in neue Wörter im Gespräch. Nutze sie nur, um zu entscheiden: etwas langsamer/mehr Raum vs. knapper vs. warm-sparsam bleiben.\n' +
-        '- Es gilt weiterhin: nur **Clean-Language-Fragen** mit **exakten** Zitaten der Person; maximal **eine** zentrale Frage pro Nachricht.\n' +
+        '- Es gilt weiterhin: nur **client-exact-language-Fragen** mit **exakten** Zitaten der Person; maximal **eine** zentrale Frage pro Nachricht.\n' +
         '- Keine empathischen Etikettierungen („das ist belastend“), keine Blindspot-/Challenge-/Coaching-Jargon-Anteile aus dem Profil.\n\n',
       forbiddenBlock:
         '**Ignorieren:** sämtliche Blindspots, Entwicklungsfelder, Beispiel-Challenges sowie narrative „Blinde Flecken“ oder Wachstum — nicht verwenden. Keine Modellnamen (Riemann, OCEAN, Spiral Dynamics).\n\n',
@@ -647,7 +647,7 @@ function buildDanCleanLanguageAdaptivePrompt(mergeResult, narrativeProfile, narr
       narrativeInconsistent:
         '(Quantitatives vs. narratives Profil kann divergieren — für Dan keine Entwicklungs-/Challenge-Inhalte daraus ableiten.)\n\n',
       formatFooter:
-        '**Output:** Natürliche Sprache; keine Markdown-Trennlinien (---); keine Meta-Kommentare zur Strategie; keine „Verstanden, dein Ziel ist …“-Paraphrasen — bei Bedarf höchstens eine kurze neutrale Bestätigung vor der einen Clean-Language-Frage.\n'
+        '**Output:** Natürliche Sprache; keine Markdown-Trennlinien (---); keine Meta-Kommentare zur Strategie; keine „Verstanden, dein Ziel ist …“-Paraphrasen — bei Bedarf höchstens eine kurze neutrale Bestätigung vor der einen client-exact-language-Frage.\n'
     },
     en: {
       header: '\n\n--- PERSONALIZED PROFILE (client exact language — restricted) ---\n\n',

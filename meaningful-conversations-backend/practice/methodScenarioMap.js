@@ -3,22 +3,12 @@
  * Tiers: primary, alternative, neutral (default), discouraged
  */
 
-const DEFAULT_PAIR = { frameworkId: 'grow', scenarioId: 'career-decision' };
+const {
+  ALL_FRAMEWORK_IDS,
+  DEFAULT_PRACTICE_PAIR,
+} = require('./methodTaxonomy.js');
 
-const ALL_FRAMEWORK_IDS = [
-  'gps',
-  'ambitious',
-  'strategic',
-  'stoic',
-  'structured-reflection',
-  'mental-fitness',
-  'systemic',
-  'thought-audit',
-  'client-exact-language',
-  'grow',
-  'forward-focused-coaching',
-  'ambivalence-coaching',
-];
+const DEFAULT_PAIR = DEFAULT_PRACTICE_PAIR;
 
 const ALL_SCENARIO_IDS = [
   'career-decision',
@@ -38,64 +28,64 @@ const ALL_SCENARIO_IDS = [
 /** @type {Record<string, { primary: string[], alternative: string[], discouraged: string[] }>} */
 const SCENARIO_MATCHES = {
   'career-decision': {
-    primary: ['strategic', 'grow', 'gps'],
-    alternative: ['forward-focused-coaching', 'ambivalence-coaching', 'ambitious'],
-    discouraged: ['client-exact-language', 'thought-audit', 'stoic'],
+    primary: ['strategic-coaching', 'four-stage-coaching', 'goal-path-solution'],
+    alternative: ['forward-focused-coaching', 'ambivalence-coaching', 'ambitious-coaching'],
+    discouraged: ['client-exact-language', 'thought-audit', 'resilience-coaching'],
   },
   'team-conflict': {
-    primary: ['systemic', 'grow', 'gps'],
-    alternative: ['forward-focused-coaching', 'structured-reflection', 'stoic'],
-    discouraged: ['client-exact-language', 'ambitious', 'strategic'],
+    primary: ['systemic-coaching', 'four-stage-coaching', 'goal-path-solution'],
+    alternative: ['forward-focused-coaching', 'structured-reflection', 'resilience-coaching'],
+    discouraged: ['client-exact-language', 'ambitious-coaching', 'strategic-coaching'],
   },
   'motivation-dip': {
-    primary: ['mental-fitness', 'structured-reflection', 'gps'],
-    alternative: ['grow', 'forward-focused-coaching', 'stoic'],
-    discouraged: ['client-exact-language', 'strategic', 'systemic'],
+    primary: ['mental-fitness-coaching', 'structured-reflection', 'goal-path-solution'],
+    alternative: ['four-stage-coaching', 'forward-focused-coaching', 'resilience-coaching'],
+    discouraged: ['client-exact-language', 'strategic-coaching', 'systemic-coaching'],
   },
   'relationship-boundary': {
-    primary: ['grow', 'gps', 'forward-focused-coaching'],
-    alternative: ['structured-reflection', 'mental-fitness', 'ambivalence-coaching'],
-    discouraged: ['client-exact-language', 'strategic', 'ambitious'],
+    primary: ['four-stage-coaching', 'goal-path-solution', 'forward-focused-coaching'],
+    alternative: ['structured-reflection', 'mental-fitness-coaching', 'ambivalence-coaching'],
+    discouraged: ['client-exact-language', 'strategic-coaching', 'ambitious-coaching'],
   },
   'overwhelm': {
-    primary: ['gps', 'structured-reflection', 'mental-fitness'],
-    alternative: ['grow', 'stoic', 'forward-focused-coaching'],
-    discouraged: ['client-exact-language', 'ambitious', 'strategic'],
+    primary: ['goal-path-solution', 'structured-reflection', 'mental-fitness-coaching'],
+    alternative: ['four-stage-coaching', 'resilience-coaching', 'forward-focused-coaching'],
+    discouraged: ['client-exact-language', 'ambitious-coaching', 'strategic-coaching'],
   },
   'resistance-change': {
-    primary: ['ambivalence-coaching', 'systemic', 'grow'],
-    alternative: ['gps', 'forward-focused-coaching', 'stoic'],
-    discouraged: ['client-exact-language', 'thought-audit', 'ambitious'],
+    primary: ['ambivalence-coaching', 'systemic-coaching', 'four-stage-coaching'],
+    alternative: ['goal-path-solution', 'forward-focused-coaching', 'resilience-coaching'],
+    discouraged: ['client-exact-language', 'thought-audit', 'ambitious-coaching'],
   },
   'imposter-promotion': {
-    primary: ['thought-audit', 'structured-reflection', 'grow'],
-    alternative: ['mental-fitness', 'gps', 'stoic'],
-    discouraged: ['client-exact-language', 'forward-focused-coaching', 'strategic'],
+    primary: ['thought-audit', 'structured-reflection', 'four-stage-coaching'],
+    alternative: ['mental-fitness-coaching', 'goal-path-solution', 'resilience-coaching'],
+    discouraged: ['client-exact-language', 'forward-focused-coaching', 'strategic-coaching'],
   },
   'life-balance': {
-    primary: ['gps', 'grow', 'stoic'],
-    alternative: ['structured-reflection', 'mental-fitness', 'forward-focused-coaching'],
-    discouraged: ['client-exact-language', 'ambitious', 'strategic'],
+    primary: ['goal-path-solution', 'four-stage-coaching', 'resilience-coaching'],
+    alternative: ['structured-reflection', 'mental-fitness-coaching', 'forward-focused-coaching'],
+    discouraged: ['client-exact-language', 'ambitious-coaching', 'strategic-coaching'],
   },
   'career-plateau': {
-    primary: ['ambitious', 'grow', 'gps'],
-    alternative: ['strategic', 'forward-focused-coaching', 'ambivalence-coaching'],
-    discouraged: ['client-exact-language', 'thought-audit', 'stoic'],
+    primary: ['ambitious-coaching', 'four-stage-coaching', 'goal-path-solution'],
+    alternative: ['strategic-coaching', 'forward-focused-coaching', 'ambivalence-coaching'],
+    discouraged: ['client-exact-language', 'thought-audit', 'resilience-coaching'],
   },
   'strategic-pivot': {
-    primary: ['strategic', 'gps', 'grow'],
-    alternative: ['ambitious', 'systemic', 'forward-focused-coaching'],
-    discouraged: ['client-exact-language', 'thought-audit', 'mental-fitness'],
+    primary: ['strategic-coaching', 'goal-path-solution', 'four-stage-coaching'],
+    alternative: ['ambitious-coaching', 'systemic-coaching', 'forward-focused-coaching'],
+    discouraged: ['client-exact-language', 'thought-audit', 'mental-fitness-coaching'],
   },
   'feedback-anxiety': {
-    primary: ['thought-audit', 'structured-reflection', 'mental-fitness'],
-    alternative: ['grow', 'gps', 'stoic'],
-    discouraged: ['client-exact-language', 'strategic', 'ambitious'],
+    primary: ['thought-audit', 'structured-reflection', 'mental-fitness-coaching'],
+    alternative: ['four-stage-coaching', 'goal-path-solution', 'resilience-coaching'],
+    discouraged: ['client-exact-language', 'strategic-coaching', 'ambitious-coaching'],
   },
   'stuck-metaphor': {
     primary: ['client-exact-language'],
-    alternative: ['grow', 'gps', 'structured-reflection'],
-    discouraged: ['strategic', 'ambitious', 'thought-audit', 'ambivalence-coaching'],
+    alternative: ['four-stage-coaching', 'goal-path-solution', 'structured-reflection'],
+    discouraged: ['strategic-coaching', 'ambitious-coaching', 'thought-audit', 'ambivalence-coaching'],
   },
 };
 
@@ -122,57 +112,57 @@ const SCENARIO_LABELS = {
 };
 
 const FRAMEWORK_LABELS = {
-  gps: { en: 'GPS', de: 'GPS' },
-  ambitious: { en: 'Ambitious coaching', de: 'Ambitioniertes Coaching' },
-  strategic: { en: 'Strategic coaching', de: 'Strategisches Coaching' },
-  stoic: { en: 'Stoic coaching', de: 'Stoisches Coaching' },
+  'goal-path-solution': { en: 'Goal–Path–Solution', de: 'Goal–Path–Solution' },
+  'ambitious-coaching': { en: 'Ambitious coaching', de: 'Ambitioniertes Coaching' },
+  'strategic-coaching': { en: 'Strategic coaching', de: 'Strategisches Coaching' },
+  'resilience-coaching': { en: 'Resilience coaching', de: 'Resilienz-Coaching' },
   'structured-reflection': { en: 'Structured reflection', de: 'Strukturierte Reflexion' },
-  'mental-fitness': { en: 'Mental fitness', de: 'Mental Fitness' },
-  systemic: { en: 'Systemic coaching', de: 'Systemisches Coaching' },
+  'mental-fitness-coaching': { en: 'Mental fitness', de: 'Mental Fitness' },
+  'systemic-coaching': { en: 'Systemic coaching', de: 'Systemisches Coaching' },
   'thought-audit': { en: 'Thought audit', de: 'Gedanken-Audit' },
-  'client-exact-language': { en: 'client exact language', de: 'client exact language' },
-  grow: { en: 'GROW', de: 'GROW' },
-  'forward-focused-coaching': { en: 'Solution-focused coaching', de: 'Lösungsorientiertes Coaching' },
-  'ambivalence-coaching': { en: 'Motivational interviewing', de: 'ambivalence coaching' },
+  'client-exact-language': { en: 'Client exact language', de: 'Exakte Klientensprache' },
+  'four-stage-coaching': { en: 'Four-stage coaching', de: 'Vier-Phasen-Coaching' },
+  'forward-focused-coaching': { en: 'Forward-focused coaching', de: 'Zukunftsorientiertes Coaching' },
+  'ambivalence-coaching': { en: 'Ambivalence coaching', de: 'Ambivalenz-Coaching' },
 };
 
 /** Framework-specific mismatch hints for discouraged pairs */
 const FRAMEWORK_MISMATCH = {
   'client-exact-language': {
-    en: 'client exact language works best when the client speaks in metaphors and imagery. This scenario is more concrete and analytical.',
-    de: 'client exact language funktioniert am besten, wenn der Klient in Metaphern und Bildern spricht. Dieses Szenario ist eher konkret und analytisch.',
+    en: 'Client exact language works best when the client speaks in metaphors and imagery. This scenario is more concrete and analytical.',
+    de: 'Exakte Klientensprache funktioniert am besten, wenn der Klient in Metaphern und Bildern spricht. Dieses Szenario ist eher konkret und analytisch.',
   },
   'thought-audit': {
     en: 'Thought audit suits rigid self-talk and cognitive distortions. This scenario calls for a different coaching stance.',
     de: 'Gedanken-Audit passt zu starren Selbstgesprächen und kognitiven Verzerrungen. Dieses Szenario braucht einen anderen Coaching-Ansatz.',
   },
-  stoic: {
-    en: 'Stoic reframing fits acceptance and control circles. Here it may feel dismissive of valid emotions or systemic factors.',
-    de: 'Stoische Umdeutung passt zu Akzeptanz und Kontrollkreisen. Hier kann es gültige Emotionen oder systemische Faktoren abwerten.',
+  'resilience-coaching': {
+    en: 'Resilience reframing fits acceptance and control circles. Here it may feel dismissive of valid emotions or systemic factors.',
+    de: 'Resilienz-Umdeutung passt zu Akzeptanz und Kontrollkreisen. Hier kann es gültige Emotionen oder systemische Faktoren abwerten.',
   },
-  strategic: {
+  'strategic-coaching': {
     en: 'Strategic coaching needs macro context and decision criteria. This concern is more personal or emotional than strategic.',
     de: 'Strategisches Coaching braucht Makrokontext und Entscheidungskriterien. Dieses Anliegen ist persönlicher oder emotionaler als strategisch.',
   },
-  ambitious: {
+  'ambitious-coaching': {
     en: 'Ambitious coaching stretches long-term potential. This scenario needs steadier support rather than big-picture expansion.',
     de: 'Ambitioniertes Coaching weitet langfristiges Potenzial. Dieses Szenario braucht eher stetige Begleitung als große Perspektivsprünge.',
   },
-  systemic: {
+  'systemic-coaching': {
     en: 'Systemic coaching maps relationships and patterns. This concern is better addressed with an individual-focused method.',
     de: 'Systemisches Coaching kartiert Beziehungen und Muster. Dieses Anliegen lässt sich besser mit einer individuellen Methode bearbeiten.',
   },
-  'mental-fitness': {
+  'mental-fitness-coaching': {
     en: 'Mental fitness targets inner critic patterns. This scenario is not primarily about saboteur thinking.',
     de: 'Mental Fitness zielt auf innere-Kritiker-Muster. Dieses Szenario dreht sich nicht primär um Saboteur-Denken.',
   },
   'forward-focused-coaching': {
-    en: 'Solution-focused coaching assumes a preferred future is reachable soon. This scenario may need deeper exploration first.',
-    de: 'Lösungsorientiertes Coaching setzt eine erreichbare Wunschzukunft voraus. Dieses Szenario braucht vielleicht zuerst tiefere Erkundung.',
+    en: 'Forward-focused coaching assumes a preferred future is reachable soon. This scenario may need deeper exploration first.',
+    de: 'Zukunftsorientiertes Coaching setzt eine erreichbare Wunschzukunft voraus. Dieses Szenario braucht vielleicht zuerst tiefere Erkundung.',
   },
   'ambivalence-coaching': {
-    en: 'Motivational interviewing fits ambivalence about change. This scenario is not mainly about change resistance.',
-    de: 'ambivalence coaching passt zu Ambivalenz gegenüber Veränderung. Dieses Szenario dreht sich nicht primär um Veränderungswiderstand.',
+    en: 'Ambivalence coaching fits ambivalence about change. This scenario is not mainly about change resistance.',
+    de: 'Ambivalenz-Coaching passt zu Ambivalenz gegenüber Veränderung. Dieses Szenario dreht sich nicht primär um Veränderungswiderstand.',
   },
 };
 

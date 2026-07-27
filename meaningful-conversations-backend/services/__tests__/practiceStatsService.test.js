@@ -5,7 +5,7 @@
 const { computePracticeAdminStats, K_ANONYMITY } = require('../practiceStatsService');
 
 const makeRow = (overrides = {}) => ({
-  frameworkId: 'grow',
+  frameworkId: 'four-stage-coaching',
   scenarioId: 'career-decision',
   difficulty: 'moderate',
   userId: 'user-1',
@@ -26,11 +26,11 @@ describe('practiceStatsService', () => {
   test('aggregates framework and scenario counts', () => {
     const stats = computePracticeAdminStats([
       makeRow(),
-      makeRow({ userId: 'user-2', frameworkId: 'grow', scenarioId: 'team-conflict' }),
+      makeRow({ userId: 'user-2', frameworkId: 'four-stage-coaching', scenarioId: 'team-conflict' }),
     ], { days: 90, language: 'en' });
 
     expect(stats.totals.completedSessions).toBe(2);
-    const grow = stats.byFramework.find((f) => f.id === 'grow');
+    const grow = stats.byFramework.find((f) => f.id === 'four-stage-coaching');
     expect(grow?.displayCount).toBe(`<${K_ANONYMITY}`);
     expect(stats.underusedScenarios.length).toBeGreaterThan(0);
   });
@@ -49,7 +49,7 @@ describe('practiceStatsService', () => {
 
   test('suppresses small matrix cells', () => {
     const stats = computePracticeAdminStats([makeRow()], { days: 90 });
-    const cell = stats.matrix.find((m) => m.frameworkId === 'grow' && m.scenarioId === 'career-decision');
+    const cell = stats.matrix.find((m) => m.frameworkId === 'four-stage-coaching' && m.scenarioId === 'career-decision');
     expect(cell?.suppressed).toBe(true);
     expect(cell?.displayCount).toBe(`<${K_ANONYMITY}`);
     expect(cell?.avgScore).toBeNull();
