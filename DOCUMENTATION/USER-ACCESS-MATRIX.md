@@ -31,17 +31,17 @@ This document outlines the different user types within the Meaningful Conversati
 | Calendar Export (.ics) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Gamification (XP, Levels) | ✅ (Local) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Management & Kommunikation** | | | | | | |
-| **Nobody** (GPS, Problemlösung) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Steve** (Lösungsorientiert, brief forward-focused) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Nobody** (Ziel–Weg–Lösung) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Sam** (Zukunftsorientiert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria Interview** (Strukturierte Interviews) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria** (Onboarding) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Coaching Bots** | | | | | | |
-| **Gabrielle** (GROW) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Gabrielle** (Vier-Phasen-Coaching) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Max** (Ambitioniert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Ava** (Strategisch) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Kenji** (Stoisch) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Chloe** (Strukturierte Reflexion) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Mike** (ambivalence coaching) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Mike** (Ambivalenz-Coaching) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Exklusiv für Klienten** | | | | | | |
 | **Rob** (Mentale Fitness) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | **Victor** (Systemisch) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
@@ -80,8 +80,8 @@ Die App gruppiert Bots in drei Sektionen mit visuellem Farbschema:
 
 | Sektion | Farbschema | Bots | Besonderheit |
 | :--- | :--- | :--- | :--- |
-| **Management & Kommunikation** | Bronze | Nobody, Steve, Gloria Interview | Kein klassisches Coaching — GPS, lösungsorientiert (brief forward-focused), strukturierte Interviews |
-| **Coaching** | Silver | Gabrielle, Max, Ava (Guest), Kenji, Chloe (Premium), Mike (Registered) | Persönlichkeitsentwicklung, GROW, MI, Zielerreichung |
+| **Management & Kommunikation** | Bronze | Nobody, Sam, Gloria Interview | Kein klassisches Coaching — Ziel–Weg–Lösung, zukunftsorientiert, strukturierte Interviews |
+| **Coaching** | Silver | Gabrielle, Max, Ava (Guest), Kenji, Chloe (Premium), Mike (Registered) | Persönlichkeitsentwicklung, Vier-Phasen-Coaching, Ambivalenz-Coaching, Zielerreichung |
 | **Exklusiv für Klienten** | Gold | Rob, Victor | Nur mit manualmode.at Coaching-Beziehung |
 
 Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten Kontakt automatisch zugewiesen wird.

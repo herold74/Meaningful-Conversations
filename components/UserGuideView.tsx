@@ -1374,7 +1374,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 **Click on a name to learn more:**
 
 <details>
-<summary>Nobody -- Efficient, Adaptive, Solution-Focused</summary>
+<summary>Nobody -- Efficient, Adaptive, Forward-Focused</summary>
 <div style="padding: 12px 16px;">
 
 **Core Idea:** Nobody is not a coach in the classical sense -- he is your pragmatic sparring partner for management and communication topics. He uses the GPS approach (Goal-Problem-Solution) and adapts his style situationally: from targeted questions to concrete tips when you are stuck.

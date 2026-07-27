@@ -22,7 +22,7 @@ beforeAll(() => {
 });
 
 const config: CoachPracticeConfig = {
-  frameworkId: 'grow',
+  frameworkId: 'four-stage-coaching',
   frameworkName: 'Four-stage coaching',
   scenarioId: 'career-decision',
   scenarioName: 'Career decision',
@@ -55,7 +55,7 @@ describe('practiceSessionDraft', () => {
 
     const loaded = loadPracticeSessionDraft('user-1');
     expect(loaded).not.toBeNull();
-    expect(loaded?.practiceConfig.frameworkId).toBe('grow');
+    expect(loaded?.practiceConfig.frameworkId).toBe('four-stage-coaching');
     expect(loaded?.chatHistory).toHaveLength(2);
     expect(sessionStorage.getItem(PRACTICE_DRAFT_STORAGE_KEY)).toBeTruthy();
   });

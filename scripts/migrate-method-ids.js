@@ -9,12 +9,13 @@ const path = require('path');
 
 process.chdir(path.join(__dirname, '../meaningful-conversations-backend'));
 
+const backendRoot = path.join(__dirname, '../meaningful-conversations-backend');
 const { PrismaClient } = require('@prisma/client');
 const {
   LEGACY_FRAMEWORK_ALIASES,
   LEGACY_BOT_ALIASES,
   normalizeUnlockedCoaches,
-} = require('./practice/methodTaxonomy.js');
+} = require(path.join(backendRoot, 'practice/methodTaxonomy.js'));
 
 const prisma = new PrismaClient();
 

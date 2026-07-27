@@ -27,8 +27,8 @@ export const BOTS: Bot[] = [
         description: 'An efficient manager who helps you find your own solutions - with tips when you need them.',
         description_de: 'Ein effizienter Manager, der Ihnen hilft, eigene Lösungen zu finden - mit Tipps, wenn Sie sie brauchen.',
         avatar: '/avatars/nobody.png',
-        style: 'Efficient, Adaptive, Solution-Focused',
-        style_de: 'Effizient, Anpassungsfähig, Lösungsorientiert',
+        style: 'Efficient, Adaptive, Forward-Focused',
+        style_de: 'Effizient, Anpassungsfähig, Zukunftsorientiert',
         accessTier: 'guest',
     },
     {
