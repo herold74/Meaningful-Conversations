@@ -75,6 +75,23 @@ module.exports = {
           },
         },
         'button-foreground-on-accent': 'rgb(var(--button-foreground-on-accent) / <alpha-value>)',
+        'session-ring': {
+          clarify: 'rgb(var(--session-ring-clarify) / <alpha-value>)',
+          develop: 'rgb(var(--session-ring-develop) / <alpha-value>)',
+          forward: 'rgb(var(--session-ring-forward) / <alpha-value>)',
+        },
+        'section-bronze': {
+          DEFAULT: 'rgb(var(--section-bronze) / <alpha-value>)',
+          bg: 'rgb(var(--section-bronze-bg) / <alpha-value>)',
+        },
+        'section-silver': {
+          DEFAULT: 'rgb(var(--section-silver) / <alpha-value>)',
+          bg: 'rgb(var(--section-silver-bg) / <alpha-value>)',
+        },
+        'section-gold': {
+          DEFAULT: 'rgb(var(--section-gold) / <alpha-value>)',
+          bg: 'rgb(var(--section-gold-bg) / <alpha-value>)',
+        },
       },
       borderRadius: {
         'card': '1rem',      /* 16px - modern card radius */

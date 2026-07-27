@@ -291,7 +291,11 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [showMismatchWarning, setShowMismatchWarning] = useState(false);
     const [pendingScenario, setPendingScenario] = useState<TestScenario | null>(null);
     const [showDynamicTestRunner, setShowDynamicTestRunner] = useState(false);
-    const [dynamicRunnerOptions, setDynamicRunnerOptions] = useState<{ initialScenarioId?: string; autoStart?: boolean }>({});
+    const [dynamicRunnerOptions, setDynamicRunnerOptions] = useState<{
+        initialScenarioId?: string;
+        autoStart?: boolean;
+        initialRunnerMode?: 'classic' | 'practice_lab';
+    }>({});
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
     useModalOpen(showMismatchWarning);
 
@@ -1652,8 +1656,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 <button
                                     onClick={() => {
                                         setDynamicRunnerOptions({
-                                            initialScenarioId: 'practice_grow_career',
-                                            autoStart: true,
+                                            initialRunnerMode: 'practice_lab',
                                         });
                                         setShowDynamicTestRunner(true);
                                     }}
@@ -1787,6 +1790,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         encryptionKey={encryptionKey}
                         initialScenarioId={dynamicRunnerOptions.initialScenarioId}
                         autoStart={dynamicRunnerOptions.autoStart}
+                        initialRunnerMode={dynamicRunnerOptions.initialRunnerMode}
                     />
                 )}
             </div>

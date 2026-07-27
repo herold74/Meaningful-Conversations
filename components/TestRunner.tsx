@@ -30,6 +30,21 @@ import { XIcon } from './icons/XIcon';
 import BrandLoader from './shared/BrandLoader';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import ProfileRefinementModal from './ProfileRefinementModal';
+import {
+  getSamStageGoals,
+  getPracticeLabModeLabelKey,
+  PracticeLabMode,
+  SAM_PRACTICE_SCENARIOS,
+  SAM_STAGE_COMPLETE_TURNS,
+} from '../utils/practiceLabScripts';
+import { runPracticeTestSession } from '../utils/runPracticeTestSession';
+import {
+  buildRegressionSnapshot,
+  compareToBaseline,
+  parseRegressionSnapshot,
+  PracticeRegressionSnapshot,
+  RegressionCompareResult,
+} from '../utils/practiceRegression';
 
 // ============================================
 // MOCK SESSION DATA FOR REFINEMENT TESTING
@@ -169,19 +184,25 @@ const MOCK_SD_SESSIONS = [
   }
 ];
 
+type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
+type RunnerMode = 'classic' | 'practice_lab';
+
 interface TestRunnerProps {
   onClose: () => void;
   userProfile?: any; // User's actual personality profile (encrypted from DB)
   encryptionKey: CryptoKey | null; // Encryption key to decrypt the profile
-  /** Pre-select a scenario when opening (e.g. practice smoke test from admin) */
+  /** Pre-select a scenario when opening (e.g. Practice Lab from admin) */
   initialScenarioId?: string;
   /** Start the selected scenario immediately on open */
   autoStart?: boolean;
+  /** Open directly on Practice Lab or classic scenarios tab */
+  initialRunnerMode?: RunnerMode;
 }
 
-type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
+const PRACTICE_LAB_MODES: PracticeLabMode[] = ['adaptive', 'scripted'];
+const PRACTICE_LAB_DIFFICULTIES: PracticeDifficulty[] = ['easy', 'moderate', 'challenging'];
 
-const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey, initialScenarioId, autoStart }) => {
+const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptionKey, initialScenarioId, autoStart, initialRunnerMode }) => {
   const { t, language } = useLocalization();
   useModalOpen();
   
@@ -189,9 +210,16 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const [decryptedProfile, setDecryptedProfile] = useState<any>(null);
   
   // Setup state
+  const [runnerMode, setRunnerMode] = useState<RunnerMode>(initialRunnerMode ?? 'classic');
   const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<DynamicTestScenario | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<TestCategory | 'all'>('all');
+  const [practiceLabScenarioId, setPracticeLabScenarioId] = useState(SAM_PRACTICE_SCENARIOS[0].id);
+  const [practiceLabMode, setPracticeLabMode] = useState<PracticeLabMode>('adaptive');
+  const [practiceDifficulty, setPracticeDifficulty] = useState<PracticeDifficulty>('easy');
+  const [practiceLabTotalTurns, setPracticeLabTotalTurns] = useState(SAM_STAGE_COMPLETE_TURNS);
+  const [practiceRegressionBaseline, setPracticeRegressionBaseline] = useState<PracticeRegressionSnapshot | null>(null);
+  const [regressionCompareResult, setRegressionCompareResult] = useState<RegressionCompareResult | null>(null);
   
   // Multi-select profile state
   const [selectedRiemann, setSelectedRiemann] = useState<RiemannProfileBlock | null>(null);
@@ -217,6 +245,12 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   // Refinement mock test state
   const [refinementPreview, setRefinementPreview] = useState<RefinementPreviewResult | null>(null);
   const [showRefinementModal, setShowRefinementModal] = useState(false);
+
+  /** One-shot auto-start from Admin "Run Practice"; must be cleared on manual runs / New Test */
+  const autoStartPending = useRef(!!autoStart);
+  const cancelAutoStart = useCallback(() => {
+    autoStartPending.current = false;
+  }, []);
   
   // Decrypt user profile when available
   useEffect(() => {
@@ -251,7 +285,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const interviewBot = BOTS.find(b => b.id === 'gloria-life-context') || null;
   const categories: TestCategory[] = ['core', 'session', 'personality', 'safety', 'bot', 'practice'];
   
-  const isPracticeScenario = selectedScenario?.specialTestMode === 'practice_eval';
+  const isPracticeScenario = selectedScenario?.specialTestMode === 'practice_eval' || runnerMode === 'practice_lab';
   
   const filteredScenarios = categoryFilter === 'all' 
     ? scenarios 
@@ -470,6 +504,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   // Run the full test scenario
   const runTest = useCallback(async () => {
+    cancelAutoStart();
     if (!selectedScenario) return;
     const isPractice = selectedScenario.specialTestMode === 'practice_eval';
     if (!isPractice && (!selectedBot || !hasProfileSelection)) return;
@@ -1040,9 +1075,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     } finally {
       setIsRunning(false);
     }
-  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, generateFollowUpMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t, language]);
-
-  const autoStartPending = useRef(!!autoStart);
+  }, [selectedBot, hasProfileSelection, selectedScenario, getTestProfile, runTestMessage, generateFollowUpMessage, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, t, language, cancelAutoStart]);
 
   useEffect(() => {
     if (!initialScenarioId) return;
@@ -1057,10 +1090,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   useEffect(() => {
     if (!autoStartPending.current || !selectedScenario || phase !== 'setup' || isRunning) return;
+    if (runnerMode === 'practice_lab') return;
     if (initialScenarioId && selectedScenario.id !== initialScenarioId) return;
     autoStartPending.current = false;
     void runTest();
-  }, [selectedScenario, initialScenarioId, phase, isRunning, runTest]);
+  }, [selectedScenario, initialScenarioId, phase, isRunning, runTest, runnerMode]);
 
   // Update manual check
   const handleManualCheck = (checkId: string, passed: boolean) => {
@@ -1086,9 +1120,238 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     setPhase('complete');
   };
 
+  const runPracticeLab = useCallback(async () => {
+    cancelAutoStart();
+    setPhase('running');
+    setIsRunning(true);
+    setError(null);
+    setCurrentMessageIndex(0);
+    setRegressionCompareResult(null);
+    setTestResult(null);
+    setPracticeLabTotalTurns(SAM_STAGE_COMPLETE_TURNS);
+
+    try {
+      const result = await runPracticeTestSession({
+        scenarioId: practiceLabScenarioId,
+        labMode: practiceLabMode,
+        difficulty: practiceDifficulty,
+        language,
+        baseline: practiceRegressionBaseline,
+        onTurn: (index) => setCurrentMessageIndex(index),
+      });
+
+      if (practiceRegressionBaseline) {
+        setRegressionCompareResult(compareToBaseline(practiceRegressionBaseline, result));
+      }
+
+      setTestResult(result);
+      setPhase('complete');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Practice lab failed');
+      setPhase('setup');
+    } finally {
+      setIsRunning(false);
+    }
+  }, [language, practiceDifficulty, practiceLabScenarioId, practiceLabMode, practiceRegressionBaseline, cancelAutoStart]);
+
+  const handleBaselineFileLoad = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const snapshot = parseRegressionSnapshot(reader.result as string);
+        setPracticeRegressionBaseline(snapshot);
+        setRegressionCompareResult(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Invalid baseline file');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }, []);
+
+  const exportRegressionSnapshot = useCallback(async () => {
+    if (!testResult) return;
+    const snapshot = buildRegressionSnapshot(
+      practiceLabScenarioId,
+      practiceLabMode,
+      language,
+      practiceDifficulty,
+      testResult,
+      testResult.practiceLabMeta?.stagesUsed,
+    );
+    if (!snapshot) return;
+    const jsonContent = JSON.stringify(snapshot, null, 2);
+    const filename = `practice-regression-${practiceLabScenarioId}-${practiceLabMode}-${new Date().toISOString().slice(0, 10)}.json`;
+    await downloadTextFile(jsonContent, filename, 'application/json');
+  }, [testResult, practiceLabScenarioId, practiceLabMode, language, practiceDifficulty]);
+
+  // Render setup phase
+  const renderPracticeLabSetup = () => (
+    <div className="space-y-5">
+      <div className="p-4 bg-session-ring-forward/10 border border-session-ring-forward/30 rounded-lg">
+        <div className="font-semibold text-content-primary">{t('practice_lab_title')}</div>
+        <p className="text-sm text-content-secondary mt-1">{t('practice_lab_sam_desc')}</p>
+        <p className="text-xs text-content-subtle mt-2">{t('test_runner_practice_no_profile')}</p>
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-2 text-content-primary">{t('practice_lab_scenario_label')}</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {SAM_PRACTICE_SCENARIOS.map((scenario) => (
+            <button
+              key={scenario.id}
+              type="button"
+              onClick={() => setPracticeLabScenarioId(scenario.id)}
+              className={`p-3 rounded-lg border text-left text-sm transition-colors ${
+                practiceLabScenarioId === scenario.id
+                  ? 'border-accent-primary bg-accent-primary/10'
+                  : 'border-border-secondary hover:border-accent-primary/50'
+              }`}
+            >
+              {t(scenario.labelKey)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-2 text-content-primary">{t('practice_lab_mode_label')}</h4>
+        <div className="flex flex-wrap gap-2">
+          {PRACTICE_LAB_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setPracticeLabMode(mode)}
+              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                practiceLabMode === mode
+                  ? 'border-accent-primary bg-accent-primary/10 text-content-primary'
+                  : 'border-border-secondary text-content-secondary hover:border-accent-primary/50'
+              }`}
+            >
+              {t(getPracticeLabModeLabelKey(mode))}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-content-subtle mt-2">
+          {practiceLabMode === 'adaptive'
+            ? t('practice_lab_mode_adaptive_hint')
+            : t('practice_lab_mode_scripted_hint')}
+        </p>
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-2 text-content-primary">{t('practice_lab_regression_label')}</h4>
+        <div className="flex flex-wrap gap-2 items-center">
+          <label className="px-3 py-2 rounded-lg border border-border-secondary text-sm cursor-pointer hover:border-accent-primary/50">
+            {t('practice_lab_load_baseline')}
+            <input type="file" accept="application/json,.json" className="hidden" onChange={handleBaselineFileLoad} />
+          </label>
+          {practiceRegressionBaseline && (
+            <button
+              type="button"
+              onClick={() => {
+                setPracticeRegressionBaseline(null);
+                setRegressionCompareResult(null);
+              }}
+              className="px-3 py-2 rounded-lg border border-border-secondary text-sm text-content-secondary hover:border-red-400/50"
+            >
+              {t('practice_lab_clear_baseline')}
+            </button>
+          )}
+        </div>
+        {practiceRegressionBaseline && (
+          <p className="text-xs text-content-subtle mt-2">
+            {t('practice_lab_baseline_loaded', { scenario: practiceRegressionBaseline.scenarioId })}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-2 text-content-primary">{t('practice_difficulty_label')}</h4>
+        <div className="flex flex-wrap gap-2">
+          {PRACTICE_LAB_DIFFICULTIES.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setPracticeDifficulty(d)}
+              className={`px-3 py-1.5 rounded-full text-sm capitalize transition-colors ${
+                practiceDifficulty === d
+                  ? 'bg-accent-primary text-button-foreground-on-accent'
+                  : 'bg-background-tertiary text-content-secondary'
+              }`}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <details className="text-xs border border-border-secondary rounded-lg p-3">
+        <summary className="cursor-pointer font-medium text-content-primary">{t('practice_lab_stage_preview')}</summary>
+        <ol className="mt-2 space-y-2 list-decimal list-inside text-content-secondary">
+          {getSamStageGoals(practiceLabScenarioId).map((goal, i) => (
+            <li key={i}>
+              <span className="text-content-subtle uppercase text-[0.65rem]">{goal.stage}</span>
+              <div className="text-content-primary mt-0.5">
+                {practiceLabMode === 'scripted'
+                  ? (language === 'de' ? goal.scriptedDe : goal.scriptedEn)
+                  : (language === 'de' ? goal.goalDe : goal.goalEn)}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </details>
+
+      <button
+        type="button"
+        onClick={() => runPracticeLab()}
+        disabled={isRunning}
+        className="w-full py-3 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg font-semibold
+                   disabled:opacity-50 hover:bg-accent-primary/90 transition-colors"
+      >
+        🚀 {t('practice_lab_run_single')}
+      </button>
+    </div>
+  );
+
   // Render setup phase
   const renderSetup = () => (
     <div className="space-y-6">
+      <div className="flex gap-2 p-1 bg-background-tertiary rounded-lg">
+        <button
+          type="button"
+          onClick={() => {
+            cancelAutoStart();
+            setRunnerMode('classic');
+          }}
+          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            runnerMode === 'classic'
+              ? 'bg-background-secondary text-content-primary shadow-sm'
+              : 'text-content-secondary hover:text-content-primary'
+          }`}
+        >
+          {t('test_runner_mode_classic')}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            cancelAutoStart();
+            setRunnerMode('practice_lab');
+          }}
+          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            runnerMode === 'practice_lab'
+              ? 'bg-background-secondary text-content-primary shadow-sm'
+              : 'text-content-secondary hover:text-content-primary'
+          }`}
+        >
+          {t('practice_lab_title')}
+        </button>
+      </div>
+
+      {runnerMode === 'practice_lab' ? renderPracticeLabSetup() : (
+        <>
       {/* Bot Selection */}
       {!isPracticeScenario && (
       <div>
@@ -1315,11 +1578,39 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       >
         🚀 {t('test_runner_start')}
       </button>
+        </>
+      )}
     </div>
   );
 
   // Render running phase
   const renderRunning = () => {
+    if (runnerMode === 'practice_lab') {
+      const stageGoals = getSamStageGoals(practiceLabScenarioId);
+      const currentGoal = stageGoals[currentMessageIndex];
+      const previewText = currentGoal
+        ? (practiceLabMode === 'scripted'
+          ? (language === 'de' ? currentGoal.scriptedDe : currentGoal.scriptedEn)
+          : (language === 'de' ? currentGoal.goalDe : currentGoal.goalEn))
+        : '…';
+      return (
+        <div className="text-center py-12">
+          <BrandLoader size="md" />
+          <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
+          <p className="text-content-secondary mt-2">
+            {t('test_runner_message_progress', { current: currentMessageIndex + 1, total: practiceLabTotalTurns })}
+          </p>
+          <p className="text-sm text-content-secondary mt-4 italic max-w-md mx-auto">
+            {currentGoal && (
+              <span className="block text-content-subtle uppercase text-[0.65rem] mb-1">{currentGoal.stage}</span>
+            )}
+            {practiceLabMode === 'adaptive' ? t('practice_lab_generating_coach') : `"${previewText}"`}
+          </p>
+          <p className="text-xs text-content-subtle mt-2">{t('practice_lab_sam_desc')}</p>
+        </div>
+      );
+    }
+
     const minTurns = selectedScenario?.minConversationTurns ?? selectedScenario?.testMessages.length ?? 0;
     const predefinedCount = selectedScenario?.testMessages.length ?? 0;
     const isDynamicPhase = currentMessageIndex >= predefinedCount;
@@ -2066,15 +2357,20 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   // Export test result as JSON
   const exportTestResult = useCallback(async () => {
-    if (!testResult || !selectedScenario) return;
+    if (!testResult) return;
+    if (runnerMode === 'classic' && !selectedScenario) return;
 
     const exportData: any = {
       exportVersion: '1.0',
       exportedAt: new Date().toISOString(),
-      scenario: {
+      scenario: selectedScenario ? {
         id: selectedScenario.id,
         name: selectedScenario.name,
         category: selectedScenario.category,
+      } : {
+        id: testResult.scenarioId,
+        name: `Sam Practice Lab · ${practiceLabScenarioId}`,
+        category: 'practice_lab',
       },
       bot: selectedBot ? {
         id: selectedBot.id,
@@ -2090,7 +2386,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         ...testResult,
         manualCheckResults: Object.entries(manualCheckResults).map(([checkId, passed]) => ({
           checkId,
-          checkText: selectedScenario.manualChecks[parseInt(checkId.replace('manual_', ''))],
+          checkText: selectedScenario?.manualChecks[parseInt(checkId.replace('manual_', ''))] ?? checkId,
           passed,
           notes: manualNotes[checkId] || null,
         })),
@@ -2119,18 +2415,19 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
     const jsonContent = JSON.stringify(exportData, null, 2);
     const botSlug = selectedBot?.id || testResult.botId;
-    const filename = `test-${selectedScenario.id}-${botSlug}-${new Date().toISOString().slice(0, 10)}.json`;
+    const filename = `test-${selectedScenario?.id ?? testResult.scenarioId}-${botSlug}-${new Date().toISOString().slice(0, 10)}.json`;
     await downloadTextFile(jsonContent, filename, 'application/json');
-  }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult]);
+  }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult, runnerMode, practiceLabScenarioId, practiceLabMode]);
 
   // Render complete phase
   const renderComplete = () => {
-    if (!testResult || !selectedScenario) return null;
+    if (!testResult) return null;
+    if (runnerMode === 'classic' && !selectedScenario) return null;
 
     const autoPassCount = testResult.autoCheckResults.filter(r => r.passed).length;
     const autoTotalCount = testResult.autoCheckResults.length;
     const manualPassCount = Object.values(manualCheckResults).filter(v => v === true).length;
-    const manualTotalCount = selectedScenario.manualChecks.length;
+    const manualTotalCount = selectedScenario?.manualChecks.length ?? 0;
     const totalPassed = autoPassCount + manualPassCount;
     const totalChecks = autoTotalCount + manualTotalCount;
     const passRate = totalChecks > 0 ? Math.round((totalPassed / totalChecks) * 100) : 100;
@@ -2153,13 +2450,48 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         </p>
         )}
 
+        {regressionCompareResult && (
+          <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-lg mx-auto">
+            <h4 className="font-semibold text-content-primary mb-3">{t('practice_lab_regression_results')}</h4>
+            <p className={`text-sm font-medium mb-2 ${regressionCompareResult.ok ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
+              {regressionCompareResult.summary}
+            </p>
+            <div className="space-y-1 text-xs text-content-secondary">
+              {regressionCompareResult.deltas.map((d) => (
+                <div key={d.field} className={`flex justify-between gap-2 ${d.flagged ? 'text-amber-600 dark:text-amber-400 font-medium' : ''}`}>
+                  <span>{d.field}</span>
+                  <span>
+                    {String(d.baseline)} → {String(d.current)}
+                    {d.delta != null ? ` (${d.delta > 0 ? '+' : ''}${d.delta})` : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {practiceEval && (
           <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-lg mx-auto space-y-3">
             <h4 className="font-semibold text-content-primary">🎯 {t('test_runner_practice_eval_title')}</h4>
+            {runnerMode === 'practice_lab' && (
+              <p className="text-xs text-content-secondary">
+                Sam · {t(getPracticeLabModeLabelKey(practiceLabMode))} · {practiceLabScenarioId}
+              </p>
+            )}
             <div className="text-sm">
               <span className="text-content-secondary">{t('test_runner_practice_overall')}:</span>{' '}
-              <span className="font-bold text-accent-primary text-lg">{practiceEval.evaluation.overallScore}/10</span>
+              <span className="font-bold text-lg text-accent-primary">
+                {practiceEval.evaluation.overallScore}/10
+              </span>
             </div>
+            {testResult.autoCheckResults.filter((c) => c.checkId.startsWith('practice_')).map((check) => (
+              <p
+                key={check.checkId}
+                className={`text-sm font-medium ${check.passed ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}
+              >
+                {check.checkId}: {check.details}
+              </p>
+            ))}
             <div className="grid grid-cols-2 gap-2 text-xs text-content-primary">
               <div>Method: {practiceEval.evaluation.methodCompliance.score}/10</div>
               <div>Effectiveness: {practiceEval.evaluation.effectiveness.score}/10</div>
@@ -2199,7 +2531,11 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                 <div>{t('test_runner_result_profile')}: <span className="font-medium">{getProfileDisplayName()}</span></div>
               </>
             )}
-            <div>{t('test_runner_result_scenario')}: <span className="font-medium">{selectedScenario.name}</span></div>
+            <div>{t('test_runner_result_scenario')}: <span className="font-medium">
+              {runnerMode === 'practice_lab'
+                ? `Sam · ${practiceLabScenarioId} · ${t(getPracticeLabModeLabelKey(practiceLabMode))}`
+                : selectedScenario?.name}
+            </span></div>
             <div>{t('test_runner_result_auto')}: <span className="font-medium">{autoPassCount}/{autoTotalCount}</span></div>
             {manualTotalCount > 0 && (
               <div>{t('test_runner_result_manual')}: <span className="font-medium">{manualPassCount}/{manualTotalCount}</span></div>
@@ -2208,6 +2544,15 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         </div>
 
         <div className="mt-6 flex gap-3 justify-center flex-wrap">
+          {runnerMode === 'practice_lab' && (
+            <button
+              onClick={exportRegressionSnapshot}
+              className="py-2 px-6 bg-teal-700 text-white rounded-lg
+                         hover:bg-teal-800 transition-colors flex items-center gap-2"
+            >
+              📊 {t('practice_lab_export_regression')}
+            </button>
+          )}
           <button
             onClick={exportTestResult}
             className="py-2 px-6 bg-green-600 text-white rounded-lg
@@ -2217,6 +2562,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           </button>
           <button
             onClick={() => {
+              cancelAutoStart();
               setPhase('setup');
               setTestResult(null);
               setManualCheckResults({});
@@ -2224,6 +2570,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
               setCurrentMessageIndex(0);
               setError(null);
               setSessionAnalysisResult(null);
+              setRegressionCompareResult(null);
               // Reset profile selections
               setSelectedRiemann(null);
               setSelectedSD(null);
