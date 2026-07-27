@@ -157,6 +157,146 @@ Your response as coachee (answer the coach's question directly):`;
     }
 });
 
+// POST /api/gemini/test/practice-coach-turn - Generate one adaptive coach turn for Practice Lab
+router.post('/test/practice-coach-turn', optionalAuthMiddleware, async (req, res) => {
+    const userId = req.userId;
+
+    if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.isDeveloper) {
+        return res.status(403).json({ error: 'Developer access required' });
+    }
+
+    const {
+        frameworkId,
+        scenarioId,
+        history = [],
+        stage,
+        stageGoal,
+        language = 'de',
+        turnIndex = 0,
+        totalTurns = 6,
+    } = req.body;
+
+    if (!frameworkId || !scenarioId || !stage || !stageGoal) {
+        return res.status(400).json({ error: 'frameworkId, scenarioId, stage, and stageGoal are required' });
+    }
+
+    const { getFrameworkById } = require('../../practice/frameworks.js');
+    const { getScenarioById } = require('../../practice/scenarios.js');
+    const { resolveFrameworkId } = require('../../practice/methodTaxonomy.js');
+
+    const resolvedFrameworkId = resolveFrameworkId(frameworkId);
+    const framework = getFrameworkById(resolvedFrameworkId);
+    const scenario = getScenarioById(scenarioId);
+    if (!framework || !scenario) {
+        return res.status(400).json({ error: 'Invalid frameworkId or scenarioId' });
+    }
+
+    const lang = language === 'en' ? 'en' : 'de';
+    const startTime = Date.now();
+
+    const lastCoacheeMsg = [...history].reverse().find((m) => m.role === 'bot');
+    const lastCoachMsg = [...history].reverse().find((m) => m.role === 'user');
+    const coacheeText = lastCoacheeMsg?.text || '';
+    const coachText = lastCoachMsg?.text || '';
+
+    const scenarioContext = lang === 'de'
+        ? `Coachee: ${scenario.coacheeName.de}\nAnliegen: ${scenario.concern.de}\nStimmung: ${scenario.emotionalTone.de}`
+        : `Coachee: ${scenario.coacheeName.en}\nConcern: ${scenario.concern.en}\nTone: ${scenario.emotionalTone.en}`;
+
+    const frameworkName = framework.name?.[lang] || framework.name?.en || resolvedFrameworkId;
+
+    try {
+        const systemPrompt = lang === 'de'
+            ? `Du bist Sam, ein Coach mit der Methode „${frameworkName}" (kurzes zukunftsorientiertes Coaching).
+
+WICHTIG: Du bist der COACH, nicht der Coachee.
+
+${scenarioContext}
+
+REGELN:
+1. Schreibe genau EINE Coach-Nachricht (1–3 kurze Sätze, eine Frage oder kurze Bestätigung + Frage).
+2. Bleibe bei der aktuellen Phasen-Zielsetzung — kein Phasen-Sprung.
+3. Beziehe dich auf die letzte Coachee-Antwort, wenn vorhanden.
+4. Kein ausführliches Problemgespräch, keine Ratschläge, kein 6-Schritte-Contracting.
+5. Zukunftsorientiert: gewünschte Zukunft, Ausnahmen, Skalierung — je nach Phase.
+6. Keine Meta-Kommentare über Tests oder KI.`
+            : `You are Sam, a coach using "${frameworkName}" (brief forward-focused coaching).
+
+IMPORTANT: You are the COACH, not the coachee.
+
+${scenarioContext}
+
+RULES:
+1. Write exactly ONE coach message (1–3 short sentences, one question or brief acknowledgment + question).
+2. Stay on the current stage goal — do not skip ahead.
+3. Reference the coachee's last reply when present.
+4. No extended problem talk, no advice-giving, no full 6-step contracting.
+5. Forward-focused: preferred future, exceptions, scaling — as appropriate for the stage.
+6. No meta-commentary about tests or AI.`;
+
+        const userPrompt = lang === 'de'
+            ? `Turn ${turnIndex + 1} von ${totalTurns}
+Aktuelle Phase: ${stage}
+Phasen-Ziel: ${stageGoal}
+${coachText ? `\nDeine letzte Coach-Nachricht:\n"${coachText}"\n` : ''}${coacheeText ? `Letzte Coachee-Antwort:\n"${coacheeText}"\n` : 'Noch keine Coachee-Antwort — eröffne die Session.\n'}
+Deine nächste Coach-Nachricht (nur der Text, keine Anführungszeichen):`
+            : `Turn ${turnIndex + 1} of ${totalTurns}
+Current stage: ${stage}
+Stage goal: ${stageGoal}
+${coachText ? `\nYour last coach message:\n"${coachText}"\n` : ''}${coacheeText ? `Coachee's last reply:\n"${coacheeText}"\n` : 'No coachee reply yet — open the session.\n'}
+Your next coach message (text only, no quotation marks):`;
+
+        const result = await aiProviderService.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: userPrompt,
+            config: {
+                systemInstruction: systemPrompt,
+                maxOutputTokens: 500,
+                temperature: 0.7,
+            },
+            context: 'chat',
+        });
+
+        const generatedText = (result.text || '').trim();
+        const durationMs = Date.now() - startTime;
+
+        await trackApiUsage({
+            userId,
+            model: result.model || 'gemini-2.5-flash',
+            endpoint: '/api/gemini/test/practice-coach-turn',
+            botId: 'test-coach-simulator',
+            inputTokens: result.usage?.inputTokens || 0,
+            outputTokens: result.usage?.outputTokens || 0,
+            durationMs,
+            success: true,
+        });
+
+        res.json({ text: generatedText, durationMs });
+    } catch (error) {
+        console.error('Practice coach turn error:', error);
+        const durationMs = Date.now() - startTime;
+
+        await trackApiUsage({
+            userId,
+            model: 'gemini-2.5-flash',
+            endpoint: '/api/gemini/test/practice-coach-turn',
+            botId: 'test-coach-simulator',
+            inputTokens: 0,
+            outputTokens: 0,
+            durationMs,
+            success: false,
+            errorMessage: error.message,
+        });
+
+        res.status(500).json({ error: 'Failed to generate coach turn' });
+    }
+});
+
 // POST /api/gemini/test/analyze-keywords - Diagnostic endpoint for keyword analysis
 // Runs all three analyzers (Riemann, Big5, SD) + adaptive weighting on provided messages
 router.post('/test/analyze-keywords', optionalAuthMiddleware, async (req, res) => {

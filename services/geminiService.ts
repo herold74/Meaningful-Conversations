@@ -380,6 +380,41 @@ export const evaluatePracticeSession = async (
     });
 };
 
+export interface PracticeCoachTurnRequest {
+    frameworkId: string;
+    scenarioId: string;
+    history: Message[];
+    stage: string;
+    stageGoal: string;
+    language: Language;
+    turnIndex: number;
+    totalTurns: number;
+}
+
+export const generatePracticeCoachTurn = async (
+    request: PracticeCoachTurnRequest,
+): Promise<{ text: string; durationMs?: number }> => {
+    const session = getSession();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/gemini/test/practice-coach-turn`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+};
+
 export const getPracticeEvaluations = async (): Promise<PracticeEvaluationSummary[]> => {
     return await apiFetch('/practice/evaluations');
 };

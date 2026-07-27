@@ -11,6 +11,15 @@
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
+## Recent Changes (2026-07-27 — Practice Lab regression harness, uncommitted)
+
+### Practice Lab refactor *(local, not committed)*
+- **Removed:** Smoke (4-turn) and Golden 10/10 modes; fixed-script perfection chasing
+- **Single cycle:** 6-turn stage-complete forward-focused path (Sam)
+- **Adaptive coach (default):** `POST /api/gemini/test/practice-coach-turn` (developer-only); scripted fallback on API error
+- **Regression:** `utils/practiceRegression.ts` — export snapshot JSON, compare vs baseline (flags method/overall Δ > 2); UI in TestRunner
+- **Tests:** `practiceLabScripts.test.ts`, `practiceRegression.test.ts` (7 pass)
+
 ## Recent Changes (2026-07-27 — Release v2.4.0: neutral method taxonomy)
 
 ### Trademark-neutral rename *(committed v2.4.0)*

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -14,6 +14,13 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import TranscriptMicAvatar from './icons/TranscriptMicAvatar';
+import {
+  getCoachSessionRing,
+  getCoachSessionRingClass,
+  COACH_SESSION_RING_I18N,
+  CoachSessionRing,
+} from '../utils/coachSessionRing';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -37,14 +44,27 @@ interface BotCardProps {
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
   isClientOnly?: boolean;
-  avatarIndex?: number;
 }
 
-const getAvatarRingClass = (index: number, isLocked: boolean): string => {
-  if (isLocked) return 'bg-border-primary/40';
-  return index % 2 === 0
-    ? 'bg-accent-primary'
-    : 'bg-amber-400 dark:bg-amber-500';
+const CoachRingLegend: React.FC = () => {
+  const { t } = useLocalization();
+  const items: { variant: CoachSessionRing; dotClass: string }[] = [
+    { variant: 'clarify', dotClass: getCoachSessionRingClass('clarify', false) },
+    { variant: 'develop', dotClass: getCoachSessionRingClass('develop', false) },
+    { variant: 'forward', dotClass: getCoachSessionRingClass('forward', false) },
+  ];
+  return (
+    <p className="max-w-4xl mx-auto mt-4 text-[0.6875rem] text-content-subtle text-center leading-relaxed px-2">
+      {t('coach_ring_legend')}{' '}
+      {items.map(({ variant, dotClass }, i) => (
+        <span key={variant} className="inline-flex items-center gap-1 mx-1">
+          {i > 0 && <span className="text-content-subtle/50">·</span>}
+          <span className={`inline-block w-2 h-2 rounded-full ${dotClass}`} aria-hidden />
+          <span>{t(COACH_SESSION_RING_I18N[variant])}</span>
+        </span>
+      ))}
+    </p>
+  );
 };
 
 interface TopicSearchProps {
@@ -291,9 +311,163 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     );
 };
 
-const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly, avatarIndex = 0 }) => {
+interface TranscriptToolsTileProps {
+  isPremiumPlus: boolean;
+  isClientPlus: boolean;
+  onTranscriptEval?: () => void;
+  onTranscriptRecord?: () => void;
+  onUpgrade?: () => void;
+}
+
+const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
+  isPremiumPlus,
+  isClientPlus,
+  onTranscriptEval,
+  onTranscriptRecord,
+  onUpgrade,
+}) => {
+  const { t } = useLocalization();
+  const evalLocked = !isPremiumPlus;
+  const recordLocked = !isClientPlus;
+
+  const handleEval = () => {
+    if (evalLocked) onUpgrade?.();
+    else onTranscriptEval?.();
+  };
+
+  const handleRecord = () => {
+    if (recordLocked) onUpgrade?.();
+    else onTranscriptRecord?.();
+  };
+
+  return (
+    <motion.div
+      className="flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border border-border-primary rounded-card shadow-card"
+      title={t(COACH_SESSION_RING_I18N.tool)}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}>
+        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
+          <TranscriptMicAvatar className="w-[4.75rem] h-[4.75rem]" />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between">
+        <div>
+          <h3 className="text-xl font-semibold text-content-primary tracking-tight">
+            {t('botSelection_transcript_tile_title')}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('botSelection_transcript_tile_desc')}
+          </p>
+        </div>
+
+        <div className="mt-4 w-full">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleEval}
+              className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border ${
+                evalLocked
+                  ? 'border-border-primary bg-background-primary/40 text-content-secondary opacity-70 cursor-pointer'
+                  : 'border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-button-foreground-on-accent'
+              }`}
+            >
+              {evalLocked ? <LockIcon className="w-4 h-4 shrink-0" /> : <ClipboardList className="w-4 h-4 shrink-0" aria-hidden />}
+              <span className="truncate">{t('botSelection_transcript_eval_action')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleRecord}
+              className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border ${
+                recordLocked
+                  ? 'border-border-primary bg-background-primary/40 text-content-secondary opacity-70 cursor-pointer'
+                  : 'border-border-primary bg-background-primary hover:border-accent-primary text-content-primary hover:text-accent-primary'
+              }`}
+            >
+              {recordLocked ? <LockIcon className="w-4 h-4 shrink-0" /> : <Mic className="w-4 h-4 shrink-0" aria-hidden />}
+              <span className="truncate">{t('botSelection_transcript_record_action')}</span>
+            </button>
+          </div>
+          {(evalLocked || recordLocked) && (
+            <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
+              {evalLocked && t('te_premium_required')}
+              {evalLocked && recordLocked && ' · '}
+              {recordLocked && t('botSelection_client_required')}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+interface CoachPracticeHeroProps {
+  isClientPlus: boolean;
+  onCoachPractice?: () => void;
+  onUpgrade?: () => void;
+}
+
+const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
+  isClientPlus,
+  onCoachPractice,
+  onUpgrade,
+}) => {
+  const { t } = useLocalization();
+  const locked = !isClientPlus;
+
+  return (
+    <div className="max-w-md mx-auto">
+      <motion.div
+        role="button"
+        tabIndex={0}
+        onClick={() => (locked ? onUpgrade?.() : onCoachPractice?.())}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            locked ? onUpgrade?.() : onCoachPractice?.();
+          }
+        }}
+        className={`relative flex flex-col items-center text-center p-8 rounded-card border shadow-card transition-all duration-200 ${
+          locked
+            ? 'border-border-primary bg-background-secondary opacity-75 cursor-pointer'
+            : 'border-accent-primary/40 bg-background-secondary hover:shadow-card-hover cursor-pointer hover:border-accent-primary'
+        }`}
+        whileHover={locked ? undefined : { y: -3 }}
+      >
+        {locked && (
+          <div className="absolute top-4 right-4">
+            <LockIcon className="w-5 h-5 text-content-secondary" />
+          </div>
+        )}
+        <div className="rounded-full p-3 bg-accent-primary/10 mb-4">
+          <GraduationCap className="w-10 h-10 text-accent-primary" aria-hidden />
+        </div>
+        <h3 className="text-xl font-semibold text-content-primary">{t('practice_title')}</h3>
+        <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+          {t('practice_card_description')}
+        </p>
+        <span
+          className={`mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold ${
+            locked
+              ? 'bg-background-tertiary text-content-secondary'
+              : 'bg-accent-primary text-button-foreground-on-accent'
+          }`}
+        >
+          {locked ? t('botSelection_client_required') : t('botSelection_practice_start')}
+          {!locked && <span aria-hidden>→</span>}
+        </span>
+      </motion.div>
+    </div>
+  );
+};
+
+const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, hasPersonalityProfile, coachingMode, isClientOnly }) => {
     const { t } = useLocalization();
     const isLocked = !bot.isAvailable;
+    const sessionRing = getCoachSessionRing(bot.id);
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-resilience' || bot.id === 'chloe-structured-reflection';
     // Nobody (nexus-goal-path-solution) doesn't support DPFL - show DPC instead
     // DPFL requires full coaching sessions which Nobody doesn't conduct
@@ -351,8 +525,11 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
           </div>
         )}
         
-        <div className="relative flex-shrink-0">
-            <div className={`rounded-full p-0.5 ${getAvatarRingClass(avatarIndex, isLocked)}`}>
+        <div
+          className="relative flex-shrink-0"
+          title={!isLocked ? t(COACH_SESSION_RING_I18N[sessionRing]) : undefined}
+        >
+            <div className={`rounded-full p-0.5 ${getCoachSessionRingClass(sessionRing, isLocked)}`}>
                 <img 
                     src={resolveAssetUrl(bot.avatar)} 
                     alt={bot.name} 
@@ -405,10 +582,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const { t, language } = useLocalization();
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const [activeHighlight, setActiveHighlight] = useState<'management' | 'topicSearch' | null>(null);
-  const isPrivilegedUser = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-  const [clientSectionOpen, setClientSectionOpen] = useState(!!isPrivilegedUser);
+  const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>('coaches');
+  const isClientPlus = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
+  const isPremiumPlus = !!(currentUser?.isPremium || isClientPlus);
+  const [clientSectionOpen, setClientSectionOpen] = useState(!!currentUser?.isClient);
   const managementRef = useRef<HTMLDivElement>(null);
   const topicSearchRef = useRef<HTMLDivElement>(null);
   const coachingRef = useRef<HTMLDivElement>(null);
@@ -434,15 +612,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
     return () => clearTimeout(timer);
   }, [highlightSection, isLoading, onHighlightDone, currentUser]);
 
-  // Track window width for responsive Transcript Evaluation card
   useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    setClientSectionOpen(!!currentUser?.isClient);
+  }, [currentUser?.isClient]);
 
   useEffect(() => {
     const fetchAndSetBots = async () => {
@@ -536,9 +708,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   
   const availableCoachingBots = coachingBots.filter(b => b.isAvailable);
   const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
-
-  const coachingAvatarOffset = availableKommunikationBots.length + lockedKommunikationBots.length;
-  const clientAvatarOffset = coachingAvatarOffset + availableCoachingBots.length + lockedCoachingBots.length;
   
   return (
     <div className="pt-4 pb-10">
@@ -565,27 +734,27 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         {/* 1. Kommunikation Section — Bronze */}
         <section className="w-full max-w-6xl mx-auto">
           {/* Section Divider */}
-          <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
+          <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-section-bronze/70 shadow-xl shadow-section-bronze/20 bg-section-bronze/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 dark:bg-accent-primary/15 border border-accent-primary/40 dark:border-accent-primary/40">
-                <MessageCircle className="w-5 h-5 text-accent-primary" aria-hidden="true" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-bronze/50 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 bot-section-pill-bronze">
+                <MessageCircle className="w-5 h-5 text-section-bronze shrink-0" aria-hidden="true" />
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold text-accent-primary">
+                  <div className="text-[0.9375rem] font-semibold text-section-bronze">
                     {t('botSelection_section_kommunikation')}
                   </div>
-                  <div className="text-xs text-accent-primary/80">
+                  <div className="text-xs text-section-bronze/80">
                     {t('botSelection_section_kommunikation_desc')}
                   </div>
                 </div>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-bronze/50 to-transparent"></div>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Nobody Bot Card */}
-            {availableKommunikationBots.map((bot, index) => (
+            {availableKommunikationBots.map((bot) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -593,12 +762,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
-                avatarIndex={index}
               />
             ))}
             
             {/* Locked Kommunikation Bots */}
-            {lockedKommunikationBots.map((bot, index) => (
+            {lockedKommunikationBots.map((bot) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -607,124 +775,71 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
-                avatarIndex={availableKommunikationBots.length + index}
               />
             ))}
+
+            <TranscriptToolsTile
+              isPremiumPlus={isPremiumPlus}
+              isClientPlus={isClientPlus}
+              onTranscriptEval={onTranscriptEval}
+              onTranscriptRecord={onTranscriptRecord}
+              onUpgrade={onUpgrade}
+            />
           </div>
-
-          {/* Transcript Evaluation — slim inline option */}
-          {(() => {
-            const isPremiumPlus = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-            const locked = !isPremiumPlus;
-            const lockReason = !isPremiumPlus ? t('te_premium_required') : '';
-
-            return (
-              <div className="max-w-4xl mx-auto mt-4">
-                <div
-                  onClick={() => locked ? onUpgrade?.() : onTranscriptEval?.()}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); locked ? onUpgrade?.() : onTranscriptEval?.(); } }}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg border transition-all
-                    ${locked
-                      ? `${onUpgrade ? 'cursor-pointer' : 'cursor-not-allowed'} opacity-50 border-border-primary bg-background-primary/30 dark:bg-background-primary/20`
-                      : 'cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl'
-                    }
-                  `}
-                >
-                  <span className="text-xl flex-shrink-0">{locked ? '🔒' : '📋'}</span>
-                  <span className={`text-base font-semibold ${locked ? 'text-content-secondary' : 'text-content-primary'}`}>
-                    {t('te_title')}
-                  </span>
-                  <span className="text-sm text-content-secondary hidden sm:inline">{t('te_description')}</span>
-                  {locked && lockReason && (
-                    <span className="text-xs text-status-warning-foreground ml-auto font-semibold whitespace-nowrap">
-                      {lockReason}
-                    </span>
-                  )}
-                  {!locked && (
-                    <span className="ml-auto text-content-secondary text-sm">→</span>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Transcript Recording — Client+ only */}
-          {(() => {
-            const isClientPlus = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-            if (!isClientPlus) return null;
-
-            return (
-              <div className="max-w-4xl mx-auto mt-3">
-                <div
-                  onClick={() => onTranscriptRecord?.()}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTranscriptRecord?.(); } }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl"
-                >
-                  <span className="text-xl flex-shrink-0">🎙️</span>
-                  <span className="text-base font-semibold text-content-primary">
-                    {t('tr_title')}
-                  </span>
-                  <span className="text-sm text-content-secondary hidden sm:inline">{t('tr_short_description')}</span>
-                  <span className="ml-auto text-content-secondary text-sm">→</span>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Coach Practice — Client+ only */}
-          {(() => {
-            const isClientPlus = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-            if (!isClientPlus) return null;
-
-            return (
-              <div className="max-w-4xl mx-auto mt-3">
-                <div
-                  onClick={() => onCoachPractice?.()}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCoachPractice?.(); } }}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all cursor-pointer border-border-primary hover:border-accent-primary bg-background-secondary/50 dark:bg-transparent hover:bg-background-secondary dark:hover:bg-background-secondary/10 shadow-md hover:shadow-xl"
-                >
-                  <GraduationCap className="w-5 h-5 text-accent-primary flex-shrink-0" aria-hidden="true" />
-                  <span className="text-base font-semibold text-content-primary">
-                    {t('practice_title')}
-                  </span>
-                  <span className="text-sm text-content-secondary hidden sm:inline">{t('practice_card_description')}</span>
-                  <span className="ml-auto text-content-secondary text-sm">→</span>
-                </div>
-              </div>
-            );
-          })()}
+          <CoachRingLegend />
         </section>
 
-        {/* 2. Coaching Section — Silver */}
+        {/* 2. Coaching Section — Silver toggle: Coaches | Coach Practice */}
         <section className="w-full max-w-6xl mx-auto">
-          {/* Section Divider */}
-          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${!currentUser && activeHighlight === 'topicSearch' ? 'ring-4 ring-accent-primary/70 shadow-xl shadow-accent-primary/20 bg-accent-primary/5 animate-pulse' : ''}`}>
+          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${!currentUser && activeHighlight === 'topicSearch' ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background-tertiary border border-border-primary">
-                <Target className="w-5 h-5 text-content-secondary" aria-hidden="true" />
-                <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold text-content-primary">
-                    {t('botSelection_section_coaching')}
-                  </div>
-                  <div className="text-xs text-content-secondary">
-                    {t('botSelection_section_coaching_desc')}
-                  </div>
-                </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
+              <div
+                className="inline-flex bot-section-pill-silver p-1"
+                role="tablist"
+                aria-label={t('botSelection_section_coaching')}
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={coachingView === 'coaches'}
+                  onClick={() => setCoachingView('coaches')}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                    coachingView === 'coaches'
+                      ? 'bot-section-tab-active'
+                      : 'text-section-silver/75 hover:text-section-silver'
+                  }`}
+                >
+                  <Target className="w-4 h-4 shrink-0" aria-hidden />
+                  <span>{t('botSelection_tab_coaching')}</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={coachingView === 'practice'}
+                  onClick={() => setCoachingView('practice')}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                    coachingView === 'practice'
+                      ? 'bot-section-tab-active'
+                      : 'text-section-silver/75 hover:text-section-silver'
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4 shrink-0" aria-hidden />
+                  <span>{t('botSelection_tab_practice')}</span>
+                </button>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
             </div>
+            <p className="text-xs text-section-silver/80 text-center mt-3 max-w-lg mx-auto">
+              {coachingView === 'coaches'
+                ? t('botSelection_section_coaching_desc')
+                : t('practice_card_description')}
+            </p>
           </div>
-          
+
+          {coachingView === 'coaches' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {availableCoachingBots.map((bot, index) => (
+            {availableCoachingBots.map((bot) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -732,7 +847,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
-                avatarIndex={coachingAvatarOffset + index}
               />
             ))}
             
@@ -745,7 +859,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               </div>
             )}
             
-            {lockedCoachingBots.map((bot, index) => (
+            {lockedCoachingBots.map((bot) => (
               <BotCard 
                 key={bot.id} 
                 bot={bot} 
@@ -754,10 +868,16 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 language={language}
                 hasPersonalityProfile={hasPersonalityProfile}
                 coachingMode={coachingMode}
-                avatarIndex={coachingAvatarOffset + availableCoachingBots.length + index}
               />
             ))}
           </div>
+          ) : (
+            <CoachPracticeHero
+              isClientPlus={isClientPlus}
+              onCoachPractice={onCoachPractice}
+              onUpgrade={onUpgrade}
+            />
+          )}
         </section>
 
         {/* 3. Exklusiv für Klienten Section */}
@@ -772,25 +892,25 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setClientSectionOpen(prev => !prev); } }}
               aria-expanded={clientSectionOpen}
             >
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30">
-                <GraduationCap className="w-5 h-5 text-brand-accent" aria-hidden="true" />
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-gold/50 to-transparent"></div>
+              <div className="flex items-center gap-2 px-4 py-2 bot-section-pill-gold">
+                <GraduationCap className="w-5 h-5 text-section-gold shrink-0" aria-hidden="true" />
                 <div className="text-center">
-                  <div className="text-[0.9375rem] font-semibold text-brand-accent">
+                  <div className="text-[0.9375rem] font-semibold text-section-gold">
                     {t('botSelection_section_client', { providerName: brand.providerName })}
                   </div>
-                  <div className="text-xs text-content-secondary">
+                  <div className="text-xs text-section-gold/80">
                     {t('botSelection_section_client_desc')}
                   </div>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-brand-accent transition-transform duration-200 ${clientSectionOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-section-gold shrink-0 transition-transform duration-200 ${clientSectionOpen ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border-primary to-transparent"></div>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-gold/50 to-transparent"></div>
             </div>
           </div>
 
@@ -798,7 +918,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             <>
               {/* Client-Only Bots */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                {clientOnlyBots.map((bot, index) => (
+                {clientOnlyBots.map((bot) => (
                   <BotCard 
                     key={bot.id} 
                     bot={bot} 
@@ -807,7 +927,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                     hasPersonalityProfile={hasPersonalityProfile}
                     coachingMode={coachingMode}
                     isClientOnly={true}
-                    avatarIndex={clientAvatarOffset + index}
                   />
                 ))}
               </div>
@@ -815,7 +934,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               {/* Client contact info for non-clients */}
               {!currentUser?.isClient && (
                 <div className="max-w-4xl mx-auto mt-6">
-                  <p className="text-sm text-amber-700 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-center rounded-lg">
+                  <p className="text-sm text-section-gold p-3 bg-section-gold-bg dark:bg-section-gold/10 border border-section-gold/30 text-center rounded-lg">
                     {t('botSelection_clientContactMessage')}
                   </p>
                 </div>
