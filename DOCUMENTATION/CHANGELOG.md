@@ -3,6 +3,20 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.4.0] - 2026-07-27
+
+Trademark-neutral method taxonomy, Sam coach rename, and alias resolution for legacy IDs.
+
+### Changed
+- **Neutral method IDs:** All 12 practice frameworks and linked bot IDs renamed to generic descriptors (e.g. four-stage-coaching, forward-focused-coaching, ambivalence-coaching)
+- **Sam coach:** Steve renamed to Sam (`sam-forward-focused`); avatar `/avatars/sam.png`; prompts rewritten without brief forward-focused/GROW/MI/listening skills/client exact language trademarks
+- **Legacy aliases:** `methodTaxonomy.js` resolves old IDs until DB migration; wired in frameworks, chat access, and practice routes
+- **User-facing copy:** Locales, User Guide, Disclaimer — non-affiliation paragraph added
+- **Migration script:** `scripts/migrate-method-ids.js` for staging/production DB
+
+### Added
+- `scripts/git-filter-repo-replacements.txt` (for post-legal-review history scrub — not yet run)
+
 ## [2.3.5] - 2026-07-27
 
 Coach Practice method–scenario mapping, three new AI coaches, and brief forward-focused-faithful Steve prompts.

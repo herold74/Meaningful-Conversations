@@ -301,7 +301,7 @@ describe('geminiPrompts', () => {
 
     test('de prompt mentions Coachee-Autonomie and Methodentreue as primary', () => {
       const prompt = practiceEvaluationPrompts.de.prompt({
-        framework: { name: 'GROW', stages: 'Goal', complianceCriteria: 'Follow GROW', evaluatorRubric: 'Rubric', sessionFlowRubric: 'Flow rubric' },
+        framework: { name: 'Four-stage coaching', stages: 'Session aim', complianceCriteria: 'Follow four-stage sequence', evaluatorRubric: 'Rubric', sessionFlowRubric: 'Flow rubric' },
         scenarioSummary: 'Test scenario',
         difficulty: 'moderate',
         selfRating: null,
@@ -317,13 +317,13 @@ describe('geminiPrompts', () => {
       expect(prompt).toContain('Contracting + opening + closing');
     });
 
-    test('Type A (GROW) prompt includes sessionFlowRubric from framework', () => {
-      const rubric = 'Full 6-step contracting with G→R→O→W progression';
+    test('Type A (four-stage) prompt includes sessionFlowRubric from framework', () => {
+      const rubric = 'Full 6-step contracting with session aim → current state → possibilities → commitment progression';
       const prompt = practiceEvaluationPrompts.en.prompt({
         framework: {
-          name: 'GROW',
-          stages: 'Goal',
-          complianceCriteria: 'Follow GROW',
+          name: 'Four-stage coaching',
+          stages: 'Session aim',
+          complianceCriteria: 'Follow four-stage sequence',
           evaluatorRubric: 'Rubric',
           sessionFlowRubric: rubric,
         },
@@ -342,10 +342,10 @@ describe('geminiPrompts', () => {
     });
 
     test('Type C (client exact language) prompt includes method-specific sessionFlowRubric', () => {
-      const rubric = 'Welcome → one brief outcome question from Clean pool (NOT extended contracting)';
+      const rubric = 'Welcome → one brief outcome question (NOT extended contracting)';
       const prompt = practiceEvaluationPrompts.en.prompt({
         framework: {
-          name: 'client exact language',
+          name: 'Client exact language',
           stages: 'Listen',
           complianceCriteria: 'Exact words only',
           evaluatorRubric: 'Rubric',
@@ -361,8 +361,16 @@ describe('geminiPrompts', () => {
         sessionFlowRubric: rubric,
       });
       expect(prompt).toContain('sessionFlow');
-      expect(prompt).toContain('Clean pool');
       expect(prompt).toContain('NOT extended contracting');
+    });
+
+    test('Resilience (Kenji) rubric requires full contracting, not brief-only flow', () => {
+      const { getFrameworkForEvaluation } = require('../../practice/frameworks.js');
+      const fw = getFrameworkForEvaluation('resilience-coaching', 'en');
+      expect(fw.sessionFlowRubric).toContain('Full 6-step contracting');
+      expect(fw.sessionFlowRubric).not.toMatch(/NOT a full 6-step contract/i);
+      expect(fw.complianceCriteria).toContain('Full session contracting');
+      expect(fw.evaluatorRubric).not.toMatch(/Penalize full.*contracting/i);
     });
   });
 });

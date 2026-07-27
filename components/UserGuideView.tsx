@@ -921,13 +921,15 @@ Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie
 
 Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm (Karte **Coach-Übung**).
 
+**Hinweis:** Die Coaching-Methoden in der App sind **generische, beschreibende Bezeichnungen** für didaktische Übungszwecke. Sie stehen in **keiner Verbindung** zu und werden **nicht unterstützt oder zertifiziert** durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.
+
 ### Wie funktioniert es?
 
 **Schritt 1: Übung konfigurieren**
-- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. GROW, Lösungsorientiertes Coaching, ambivalence coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
+- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. Vier-Phasen-Coaching, zukunftsorientiertes Coaching, Ambivalenz-Coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
 - **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
 - **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält.
-- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in client exact language bleiben“.
+- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
 
 **Schritt 2: Übungssitzung führen**
 - Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
@@ -950,7 +952,7 @@ Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Absch
 
 Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
 
-Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. GROW, Lösungsorientiert, MI) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
 
 **Schritt 5: Verlauf ansehen**
 Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
@@ -1844,10 +1846,12 @@ Coach Practice is a **training mode for aspiring or experienced coaches**: you p
 
 This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen (**Coach Practice** card).
 
+**Note:** The coaching methods in the app are **generic descriptive labels** for educational practice purposes. They are **not affiliated with, endorsed by, or certified by** any owners of trademarks, registered method names, or copyrighted coaching approaches.
+
 ### How Does It Work?
 
 **Step 1: Configure your practice**
-- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. GROW, Solution-Focused Coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
+- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. four-stage coaching, forward-focused coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
 - **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
 - **Difficulty:** Controls how cooperative or challenging the client behaves.
 - **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
@@ -1873,7 +1877,7 @@ The AI also assesses **session flow** (contracting, opening, closing — appropr
 
 The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
 
-You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. GROW, Solution-Focused, MI), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. four-stage, forward-focused, ambivalence), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
 
 **Step 5: Review history**
 From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
