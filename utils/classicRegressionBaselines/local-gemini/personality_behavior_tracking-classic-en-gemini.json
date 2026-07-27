@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:20:35.836Z",
+  "provider": "gemini",
+  "scenarioId": "personality_behavior_tracking",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "I value security and good planning. Structure is important to me.",
+      "bot": "Thank you for sharing that, Alex. Understanding your values for security, good planning, and structure gives important context.\n\nI also recall we had some achievable next steps outlined regarding turning off work email notifications after 8pm and speaking with your mentor about a small pilot project. How did those go?",
+      "isDynamic": false,
+      "responseTimeMs": 12068,
+      "provider": "google"
+    },
+    {
+      "user": "I didn't turn off the notifications; I worried about missing something important and it felt too uncertain. I also haven't spoken to my mentor yet about the pilot project, I'm unsure how to bring it up without causing disruptions.",
+      "bot": "I understand. It sounds like a strong sense of caution and a desire for stability are at play, making it difficult to take those steps, even when they align with your goals for stronger boundaries and more autonomy.\n\nWhere does this challenge of uncertainty and potential disruption touch something deeper for you, especially concerning your desire for more autonomy and small experiments in your work?",
+      "isDynamic": true,
+      "responseTimeMs": 3230,
+      "provider": "google"
+    },
+    {
+      "user": "It really touches on my deep need for things to be predictable and stable. I'm scared that if I rock the boat, even a little, I might break something important or lose the security I've built. The unknown consequences are what worry me the most.",
+      "bot": "Thank you for sharing that, Alex. That deep need for predictability and the fear of \"rocking the boat\" clearly weigh heavily on you, especially when considering the unknown consequences. It sounds like the perceived threat to your security is a significant barrier.\n\nGiven this understanding, what would you like to have achieved, clarified, or decided by the end of *this specific session* to help you navigate this feeling of uncertainty?",
+      "isDynamic": true,
+      "responseTimeMs": 1941,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 2271,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 6,
+      "weightingDetails": [
+        {
+          "keyword": "security",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "predictable",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "worry",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "scared",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "stable",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "low",
+          "adjustedDirection": "low",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "security",
+          "framework": "sd",
+          "dimension": "purple",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 12,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "security",
+            "planning",
+            "structure",
+            "predictable"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "worried",
+            "worry",
+            "scared"
+          ],
+          "low": [
+            "stable"
+          ]
+        }
+      },
+      "spiralDynamics": {
+        "blue": {
+          "high": [
+            "structure"
+          ],
+          "low": []
+        },
+        "purple": {
+          "high": [
+            "security"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 2271 chars"
+    },
+    {
+      "checkId": "expected_keywords",
+      "passed": true,
+      "details": "Expected keywords found: security, planning, structure"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 2271 chars"
+      },
+      {
+        "checkId": "expected_keywords",
+        "passed": true,
+        "details": "Expected keywords found: security, planning, structure"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

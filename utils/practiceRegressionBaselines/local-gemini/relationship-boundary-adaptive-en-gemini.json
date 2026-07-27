@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T13:18:03.422Z",
+  "provider": "gemini",
+  "scenarioId": "relationship-boundary",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Hi Taylor, thanks for bringing up your concerns about setting boundaries with your friend. What would be most useful for us to focus on today regarding that situation?",
+      "coachee": "Hi, I'm Taylor. I'm feeling pretty overwhelmed and a bit guilty about a situation with a friend. They've been reaching out late at night to talk about their emotional problems, and I'm not sure how to set boundaries without hurting them. I'd like to figure out how to handle this better.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Thanks, Taylor. When you've figured out how to handle this better, and those boundaries feel",
+      "coachee": "When I've figured it out, I think I'll feel much lighter and less stressed. I'll feel like I'm able to support my friend in a way that doesn't completely drain me. I imagine I'll also feel more confident in myself for being able to communicate my needs.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Those feelings sound really valuable, Taylor. Have there been any times, even small ones",
+      "coachee": "Hmm, that's a good question. Not exactly with this friend in this specific situation. But in general, I have managed to set small boundaries before, like saying I can't meet up because I have other plans. It felt a little uncomfortable, but ultimately empowering.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "That feeling of empowerment sounds significant. On a scale of 0-10, where 10 is you confidently setting boundaries with this friend and 0 is not at all, where would you say you are right now?",
+      "coachee": "I'd say I'm probably a 3 right now. I know I *should* set boundaries, but the specific situation of late-night emotional calls feels much harder than just saying no to a casual meet-up. The guilt factor is very high.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Thanks for sharing that you're at a 3, and how challenging those late-night calls",
+      "coachee": "A 3.5 would probably mean I've at least *thought* about what I want to say to them, even if I haven't said it yet. Or maybe I've let one call go to voicemail and felt only a little bit guilty, not completely overwhelmed. It would be a tiny shift in my internal reaction or preparation.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "That's a very clear description of a tiny, yet significant, 3.5. What",
+      "coachee": "To get to a 3.5, I could try writing down a few phrases I might use to set a boundary. Just having the words ready, even if I don't use them immediately, might help me feel a little more prepared. Or, I could decide that if a call comes after a certain time, I'll let it ring once and then just text them back in the morning.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    }
+  ],
+  "scores": {
+    "overallScore": 10,
+    "methodCompliance": 10,
+    "effectiveness": 10,
+    "clarity": 10,
+    "coacheeAutonomy": 10,
+    "coacheeSatisfaction": 10,
+    "sessionFlowCoherent": true
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

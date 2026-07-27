@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:33:04.696Z",
+  "provider": "mistral",
+  "scenarioId": "motivation-dip",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Jordan, was möchtest du heute in dieser Sitzung zu deiner Motivation und dem Projekt erreichen?",
+      "coachee": "Ich bin Jordan. Ich fühle mich gerade total blockiert mit meinem Projekt – ich schiebe alles vor mir her und mache mir Vorwürfe, dass ich nicht weiterkomme. Ich würde heute gerne verstehen, warum ich so feststecke und wie ich wieder in die Gänge komme.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Jordan, wenn du dich morgen früh aufwachst und die Motivation für dein Projekt ist wie ein fester Grund unter deinen Füßen – was wäre dann anders?",
+      "coachee": "Dann würde ich nicht stundenlang am Handy hängen, sondern direkt anfangen. Ich würde mich nicht mehr so schuldig fühlen, wenn ich mal eine Pause mache. Und ich hätte das Gefühl, dass ich wirklich etwas schaffe, statt nur Zeit zu verschwenden.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Jordan, du hast grade schon ein klares Bild davon, wie es sein könnte. Wann in den letzten Wochen hast du auch nur ansatzweise so einen Moment erlebt – wo du direkt losgelegt hast oder dich nicht schuldig gefühlt hast?",
+      "coachee": "Ehrlich gesagt, kann ich mich nicht an einen solchen Moment erinnern. Es war eher durchgehend so, dass ich mich zwingen musste oder mich danach schlecht gefühlt habe. Vielleicht vor vier Wochen, als ich noch ein bisschen Schwung hatte – aber das ist lange her.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Okay, Jordan. Wenn wir jetzt eine Skala von 0 bis 10 nehmen – wobei 0 bedeutet, keine Motivation und 10 bedeutet, volle Motivation – wo würdest du dich gerade einordnen?",
+      "coachee": "Ich würde mich bei einer 2 oder 3 einordnen. Es ist nicht komplett Null, aber fast. Ich schaffe es manchmal, kleine Dinge zu tun, aber ohne echten Antrieb.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Okay, Jordan. Also eine 2 oder 3 – und trotzdem schaffst du kleine Schritte. Was wäre ein kleiner Schritt, der dich von der 3 auf eine 4 bringen würde?",
+      "coachee": "Vielleicht, wenn ich mir einfach eine winzige Aufgabe vornehme – so etwas wie \"nur eine Stunde konzentriert arbeiten\" – und das dann auch wirklich durchziehe, ohne mich abzulenken. Das würde mir das Gefühl geben, dass ich noch etwas kann.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    },
+    {
+      "coach": "Das klingt nach einem guten, machbaren Schritt. Wann in dieser Woche wirst du diese eine Stunde einplanen?",
+      "coachee": "Ich könnte das morgen Vormittag versuchen. Da habe ich keine anderen Termine und bin meistens noch etwas frischer. Aber ich bin mir nicht sicher, ob ich das wirklich durchziehe.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "mistral-medium-latest"
+    }
+  ],
+  "scores": {
+    "overallScore": 8,
+    "methodCompliance": 8,
+    "effectiveness": 9,
+    "clarity": 9,
+    "coacheeAutonomy": 9,
+    "coacheeSatisfaction": 8,
+    "sessionFlowCoherent": true
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

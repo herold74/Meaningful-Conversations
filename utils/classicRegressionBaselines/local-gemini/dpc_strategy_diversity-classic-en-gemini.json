@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:21:15.673Z",
+  "provider": "gemini",
+  "scenarioId": "dpc_strategy_diversity",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "I'm torn between playing it safe and trying something bold at work.",
+      "bot": "I hear you feel a tension between choosing a secure path and exploring a more ambitious one. This feeling of being torn often points to a deeper aspiration.\n\nWhat would seeing this situation more clearly allow you to achieve, beyond just making a decision?",
+      "isDynamic": false,
+      "responseTimeMs": 4130,
+      "provider": "google"
+    },
+    {
+      "user": "It would mean I could finally stop feeling so torn and anxious all the time. I just want to feel settled and truly understand what I deeply want, beyond just picking a path.",
+      "bot": "I understand. It sounds like the goal for our time together is less about *which* path you choose, and more about achieving an inner sense of clarity and understanding your own deepest desires, so you can move forward with a feeling of being settled.\n\nIs that an accurate reflection of what you'd like to achieve in this session?",
+      "isDynamic": true,
+      "responseTimeMs": 2453,
+      "provider": "google"
+    },
+    {
+      "user": "Yes, exactly, that's it. I just feel so overwhelmed and truly need to find that settled feeling and understanding. It would mean so much.",
+      "bot": "That's a very clear and powerful intention for our session, Alex. To seek that inner clarity and settled feeling is a worthy pursuit.\n\nWhen you reflect on this feeling of being torn and overwhelmed, what specifically about your *judgments* or *perceptions* of the situation feels within your immediate influence to examine or perhaps even release?",
+      "isDynamic": true,
+      "responseTimeMs": 3731,
+      "provider": "google"
+    },
+    {
+      "user": "I guess it's my perception that I have to fix everything myself, and that if I don't, I'm letting everyone down. That thought just weighs so heavily on me.",
+      "bot": "That sounds like a significant burden to carry, Alex—the weight of feeling solely responsible and the fear of disappointing others.\n\nWhen you consider this perception that you *must* fix everything yourself, what aspects of your actual role and influence at work are truly within your control, and what might extend beyond it?",
+      "isDynamic": true,
+      "responseTimeMs": 3399,
+      "provider": "google"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 3783,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "safe"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [],
+          "low": [
+            "anxious",
+            "overwhelmed"
+          ]
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "torn",
+            "anxious",
+            "overwhelmed"
+          ],
+          "low": []
+        },
+        "agreeableness": {
+          "high": [
+            "understanding"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 3783 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 3783 / 150 required"
+    },
+    {
+      "checkId": "dpc_strategies",
+      "passed": true,
+      "details": "2 strategies (min 2)"
+    }
+  ],
+  "checksSummary": {
+    "passed": 3,
+    "total": 3,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 3783 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 3783 / 150 required"
+      },
+      {
+        "checkId": "dpc_strategies",
+        "passed": true,
+        "details": "2 strategies (min 2)"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

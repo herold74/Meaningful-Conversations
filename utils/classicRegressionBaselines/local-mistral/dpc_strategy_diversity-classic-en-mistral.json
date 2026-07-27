@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T14:29:30.692Z",
+  "provider": "mistral",
+  "scenarioId": "dpc_strategy_diversity",
+  "category": "personality",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "I'm torn between playing it safe and trying something bold at work.",
+      "bot": "This tension between safety and boldness is a rich space to explore. What would letting go of this tension free you to do?",
+      "isDynamic": false,
+      "responseTimeMs": 1653,
+      "provider": "mistral"
+    },
+    {
+      "user": "It would free me to finally speak up in meetings with my own ideas, instead of just agreeing with others. But the thought of being judged still makes my stomach twist.",
+      "bot": "What would you like to have achieved, clarified, or decided by the end of our session today?",
+      "isDynamic": true,
+      "responseTimeMs": 1010,
+      "provider": "mistral"
+    },
+    {
+      "user": "I want to leave today knowing exactly one small, safe step I can take next week to share an idea in a meeting without feeling like I’m going to be torn apart.",
+      "bot": "So the goal for our session today is to identify one concrete, low-risk way for you to share an idea in a meeting next week. Is that correct?",
+      "isDynamic": true,
+      "responseTimeMs": 1680,
+      "provider": "mistral"
+    },
+    {
+      "user": "Ja, das ist genau richtig. Das würde mir wirklich helfen, mich sicherer zu fühlen.",
+      "bot": "What is within your control when it comes to how your idea is received in that meeting?",
+      "isDynamic": true,
+      "responseTimeMs": 1346,
+      "provider": "mistral"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 3783,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "safe"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "torn",
+            "judged"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 3783 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 3783 / 150 required"
+    },
+    {
+      "checkId": "dpc_strategies",
+      "passed": true,
+      "details": "2 strategies (min 2)"
+    }
+  ],
+  "checksSummary": {
+    "passed": 3,
+    "total": 3,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 3783 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 3783 / 150 required"
+      },
+      {
+        "checkId": "dpc_strategies",
+        "passed": true,
+        "details": "2 strategies (min 2)"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001",
+    "suite": "regression"
+  }
+}

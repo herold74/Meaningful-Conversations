@@ -246,6 +246,44 @@ const FeedbackTableRow: React.FC<{ item: Feedback }> = ({ item }) => {
     );
 };
 
+/** Consistent card layout for Session Simulator tools */
+const SimulatorToolCard: React.FC<{
+    icon: string;
+    title: string;
+    description: string;
+    note?: string;
+    actionLabel?: string;
+    onAction?: () => void;
+    children?: React.ReactNode;
+}> = ({ icon, title, description, note, actionLabel, onAction, children }) => (
+    <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                    <span aria-hidden="true">{icon}</span>
+                    {title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{description}</p>
+                {note && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-2">{note}</p>
+                )}
+            </div>
+            {actionLabel && onAction && (
+                <div className="w-full lg:w-auto lg:shrink-0">
+                    <button
+                        type="button"
+                        onClick={onAction}
+                        className="w-full lg:w-auto px-4 py-2.5 text-sm font-semibold text-center text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover rounded-lg shadow-sm transition-colors"
+                    >
+                        {actionLabel}
+                    </button>
+                </div>
+            )}
+        </div>
+        {children && <div className="mt-4 space-y-4">{children}</div>}
+    </div>
+);
+
 const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRunTestSession, onTestComfortCheck, lifeContext, shouldOpenTestRunner, onTestRunnerOpened }) => {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<AdminTab>('users');
@@ -1586,104 +1624,52 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         
         return (
             <div className="space-y-4">
-                {/* New Dynamic Test Runner Section - MOVED TO TOP */}
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-lg text-purple-800 dark:text-purple-200 flex items-center gap-2">
-                                🧪 {t('admin_dynamic_runner_title')}
-                            </h3>
-                            <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
-                                {t('admin_dynamic_runner_desc')}
-                            </p>
-                        </div>
-                        <div className="flex justify-end shrink-0">
-                            <button
-                                onClick={() => {
-                                    setDynamicRunnerOptions({});
-                                    setShowDynamicTestRunner(true);
-                                }}
-                                className="w-40 px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-colors"
-                            >
-                                🚀 {t('admin_dynamic_runner_start')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                {/* Comfort Check Quick Test Section */}
+                <SimulatorToolCard
+                    icon="🧪"
+                    title={t('admin_dynamic_runner_title')}
+                    description={t('admin_dynamic_runner_desc')}
+                    actionLabel={t('admin_simulator_open')}
+                    onAction={() => {
+                        setDynamicRunnerOptions({});
+                        setShowDynamicTestRunner(true);
+                    }}
+                />
+
                 {onTestComfortCheck && (
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
-                        <div className="space-y-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
-                                        {t('admin_comfort_test_title')}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                        {t('admin_comfort_test_desc')}
-                                    </p>
-                                </div>
-                                <div className="flex justify-end shrink-0">
-                                    <button
-                                        onClick={() => onTestComfortCheck(true)}
-                                        className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
-                                    >
-                                        Comfort Check
-                                    </button>
-                                </div>
-                            </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-                                {t('admin_comfort_test_note')}
-                            </p>
-                        </div>
-                    </div>
+                    <SimulatorToolCard
+                        icon="💬"
+                        title={t('admin_comfort_test_title')}
+                        description={t('admin_comfort_test_desc')}
+                        note={t('admin_comfort_test_note')}
+                        actionLabel={t('admin_simulator_open')}
+                        onAction={() => onTestComfortCheck(true)}
+                    />
                 )}
 
-                {/* Coach Practice Quick Test */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md">
-                    <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">
-                                    🎯 {t('admin_practice_test_title')}
-                                </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {t('admin_practice_test_desc')}
-                                </p>
-                            </div>
-                            <div className="flex justify-end shrink-0">
-                                <button
-                                    onClick={() => {
-                                        setDynamicRunnerOptions({
-                                            initialRunnerMode: 'practice_lab',
-                                        });
-                                        setShowDynamicTestRunner(true);
-                                    }}
-                                    className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover rounded-lg shadow-sm whitespace-nowrap"
-                                >
-                                    {t('admin_practice_test_run')}
-                                </button>
-                            </div>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-                            {t('admin_practice_test_note')}
-                        </p>
-                    </div>
-                </div>
-                
-                {/* Legacy Test Runner Section */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 space-y-4 rounded-lg shadow-md">
-                    <h3 className="font-bold text-lg text-gray-800 dark:text-gray-200">{t('admin_runner_title')} {t('admin_runner_static')}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('admin_runner_desc')}</p>
-                    
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <SimulatorToolCard
+                    icon="🎯"
+                    title={t('admin_practice_test_title')}
+                    description={t('admin_practice_test_desc')}
+                    note={t('admin_practice_test_note')}
+                    actionLabel={t('admin_simulator_open')}
+                    onAction={() => {
+                        setDynamicRunnerOptions({ initialRunnerMode: 'practice_lab' });
+                        setShowDynamicTestRunner(true);
+                    }}
+                />
+
+                <SimulatorToolCard
+                    icon="📋"
+                    title={`${t('admin_runner_title')} ${t('admin_runner_static')}`}
+                    description={t('admin_runner_desc')}
+                >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                         <div className="flex-1 min-w-0">
                             <label htmlFor="scenario-select" className="sr-only">{t('admin_runner_select_scenario')}</label>
-                            <select 
-                                id="scenario-select" 
-                                value={selectedScenarioId} 
-                                onChange={e => setSelectedScenarioId(e.target.value)} 
+                            <select
+                                id="scenario-select"
+                                value={selectedScenarioId}
+                                onChange={e => setSelectedScenarioId(e.target.value)}
                                 className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-primary"
                             >
                                 {testScenarios.map(scenario => (
@@ -1691,17 +1677,18 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                                 ))}
                             </select>
                         </div>
-                        <div className="flex justify-end shrink-0">
+                        <div className="w-full sm:w-auto sm:shrink-0">
                             <button
+                                type="button"
                                 onClick={handleRunClick}
-                                className="w-40 px-5 py-2.5 text-sm font-semibold text-button-foreground-on-accent bg-accent-primary uppercase hover:bg-accent-primary-hover flex items-center justify-center rounded-lg shadow-sm"
+                                disabled={!selectedScenario}
+                                className="w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-center text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors"
                             >
                                 {t('admin_runner_run')}
                             </button>
                         </div>
                     </div>
-                    
-                    {/* Info box for DPC/DPFL tests */}
+
                     {isDpcOrDpflTest && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
                             <p className="text-sm font-bold text-blue-700 dark:text-blue-400 flex items-center gap-2">
@@ -1712,8 +1699,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                             </div>
                         </div>
                     )}
-                    
-                    {/* Scenario description */}
+
                     {selectedScenario && (
                         <div className="p-3 bg-gray-100 dark:bg-gray-800/50 rounded border border-gray-200 dark:border-gray-700">
                             <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -1721,7 +1707,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                             </p>
                         </div>
                     )}
-                </div>
+                </SimulatorToolCard>
                 
                 {/* Profile Mismatch Warning Modal */}
                 {showMismatchWarning && createPortal(

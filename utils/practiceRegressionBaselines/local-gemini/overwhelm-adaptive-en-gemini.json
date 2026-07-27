@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "exportedAt": "2026-07-27T13:19:16.002Z",
+  "provider": "gemini",
+  "scenarioId": "overwhelm",
+  "labMode": "adaptive",
+  "language": "en",
+  "difficulty": "easy",
+  "transcript": [
+    {
+      "coach": "Casey, I hear you're feeling overwhelmed by many priorities. What would be most helpful for us to focus on today, even just a small step forward?",
+      "coachee": "Hi, I'm Casey. Yes, that's exactly it. I just feel completely overwhelmed by everything I have on my plate both at work and at home. I'm struggling to keep up, and it feels like I'm failing in every area right now. I'd really like to find a way to feel less scattered and more in control.",
+      "stage": "session-focus",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Casey, I hear you want to feel less scattered and more in control. When you",
+      "coachee": "Yes, exactly. Less scattered, more in control. That would be a huge relief.",
+      "stage": "preferred-future",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "It sounds like feeling less scattered and more in control would bring significant relief. When recently have you felt a little more on top of things, even just for a moment?",
+      "coachee": "Hmm, that's a good question. It's hard to remember feeling truly on top of things lately.\n\nBut actually, yesterday morning, before all the emails started piling up, I spent an hour just focused on one complex task for work. I got it done, and it felt like a small win, even if only for a moment.",
+      "stage": "exceptions",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "That focused moment and small win yesterday sound significant. Considering your current level of overwhelm, on a scale of 0 to 10, where 10 is completely overwhelmed and 0 is feeling fully in control, where would you say you are right now?",
+      "coachee": "I'd say I'm probably at an 8 right now. It feels pretty high. There are just so many demands pulling me in different directions.",
+      "stage": "scaling",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "An 8 is certainly a high level of overwhelm. What's just one tiny step",
+      "coachee": "One tiny step... I think just identifying the top 3 most urgent tasks for tomorrow, both at work and home, would help. Not even doing them, just knowing what they are. That might help me feel slightly less scattered.",
+      "stage": "scaling-plus-one",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    },
+    {
+      "coach": "Identifying those top 3 tasks for tomorrow sounds like a very clear and helpful first step. How might",
+      "coachee": "It would give me a little bit of clarity, I think. Right now, everything feels equally important and urgent. If I could just name the absolute top priorities, it might help me feel slightly less scattered and more focused on what matters most.",
+      "stage": "close",
+      "coachProvider": "adaptive-coach",
+      "coacheeProvider": "gemini-2.5-flash"
+    }
+  ],
+  "scores": {
+    "overallScore": 6,
+    "methodCompliance": 4,
+    "effectiveness": 7,
+    "clarity": 10,
+    "coacheeAutonomy": 10,
+    "coacheeSatisfaction": 9,
+    "sessionFlowCoherent": true
+  },
+  "meta": {
+    "apiBase": "http://localhost:3001"
+  }
+}

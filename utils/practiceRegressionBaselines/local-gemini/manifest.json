@@ -1,0 +1,47 @@
+{
+  "provider": "gemini",
+  "apiBase": "http://localhost:3001",
+  "createdAt": "2026-07-27T13:15:38.170Z",
+  "packageVersion": "2.4.1",
+  "language": "en",
+  "labMode": "adaptive",
+  "difficulty": "easy",
+  "scenarios": {
+    "motivation-dip": {
+      "file": "motivation-dip-adaptive-en-gemini.json",
+      "scores": {
+        "overallScore": 10,
+        "methodCompliance": 10,
+        "effectiveness": 9,
+        "clarity": 10,
+        "coacheeAutonomy": 10,
+        "coacheeSatisfaction": 9,
+        "sessionFlowCoherent": true
+      }
+    },
+    "relationship-boundary": {
+      "file": "relationship-boundary-adaptive-en-gemini.json",
+      "scores": {
+        "overallScore": 10,
+        "methodCompliance": 10,
+        "effectiveness": 10,
+        "clarity": 10,
+        "coacheeAutonomy": 10,
+        "coacheeSatisfaction": 10,
+        "sessionFlowCoherent": true
+      }
+    },
+    "overwhelm": {
+      "file": "overwhelm-adaptive-en-gemini.json",
+      "scores": {
+        "overallScore": 6,
+        "methodCompliance": 4,
+        "effectiveness": 7,
+        "clarity": 10,
+        "coacheeAutonomy": 10,
+        "coacheeSatisfaction": 9,
+        "sessionFlowCoherent": true
+      }
+    }
+  }
+}

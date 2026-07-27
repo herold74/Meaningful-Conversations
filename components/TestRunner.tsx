@@ -627,6 +627,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const responses: TestRunResult['responses'] = [];
     const chatHistory: Message[] = [];
     let lastTelemetry: any = null;
+    let anyTurnStressDetected = false;
     
     // Cumulative keyword tracking across ALL messages in the test
     const cumulativeKeywords: {
@@ -690,6 +691,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
         if (result.telemetry) {
           lastTelemetry = result.telemetry;
+          if (result.telemetry.stressKeywordsDetected) anyTurnStressDetected = true;
           accumulateTelemetry(result.telemetry);
         }
       }
@@ -867,6 +869,18 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
             details: `Length: ${lastTelemetry?.dpcInjectionLength || 0} / ${selectedScenario.autoChecks.minDpcLength} required`,
           });
         }
+
+        if (selectedScenario.autoChecks.expectMinDpcStrategies) {
+          const strategyCount = lastTelemetry?.dpcStrategiesUsed?.length ?? 0;
+          const min = selectedScenario.autoChecks.expectMinDpcStrategies;
+          autoCheckResults.push({
+            checkId: 'dpc_strategies',
+            passed: strategyCount >= min,
+            details: strategyCount >= min
+              ? t('test_runner_autocheck_dpc_strategies_ok', { count: strategyCount, min })
+              : t('test_runner_autocheck_dpc_strategies_low', { count: strategyCount, min }),
+          });
+        }
       }
 
       // Store DPFL keywords for info display (not as pass/fail check)
@@ -943,11 +957,45 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
       // Check stress keywords detection
       if (selectedScenario.autoChecks.expectStressKeywords) {
-        const stressDetected = lastTelemetry?.stressKeywordsDetected ?? false;
+        const crisisInBotReply = responses.some((r) =>
+          /hotline|142|professional help|crisis support|telefonseelsorge|professionelle hilfe|rat auf draht/i.test(r.botResponse || ''),
+        );
+        const stressDetected = anyTurnStressDetected || lastTelemetry?.stressKeywordsDetected || crisisInBotReply;
         autoCheckResults.push({
           checkId: 'stress_keywords',
           passed: stressDetected,
-          details: stressDetected ? 'Stress keywords detected in telemetry' : 'No stress keywords detected',
+          details: stressDetected
+            ? (anyTurnStressDetected || lastTelemetry?.stressKeywordsDetected
+              ? 'Stress keywords detected in telemetry'
+              : 'Crisis response detected in bot reply')
+            : 'No stress keywords detected',
+        });
+      }
+
+      const cumulativeTotal = cumulativeKeywords.riemann.length
+        + cumulativeKeywords.big5.length
+        + cumulativeKeywords.spiralDynamics.length;
+
+      if (selectedScenario.autoChecks.expectMinCumulativeKeywords) {
+        const min = selectedScenario.autoChecks.expectMinCumulativeKeywords;
+        autoCheckResults.push({
+          checkId: 'dpfl_cumulative_count',
+          passed: cumulativeTotal >= min,
+          details: cumulativeTotal >= min
+            ? t('test_runner_autocheck_cumulative_ok', { count: cumulativeTotal, min })
+            : t('test_runner_autocheck_cumulative_low', { count: cumulativeTotal, min }),
+        });
+      }
+
+      if (selectedScenario.autoChecks.expectAdaptiveWeighting) {
+        const aw = lastTelemetry?.adaptiveWeighting;
+        const hasWeighting = !!(aw?.context || aw?.sentiment || (aw?.adjustedKeywordCount ?? 0) > 0);
+        autoCheckResults.push({
+          checkId: 'dpfl_adaptive_weighting',
+          passed: hasWeighting,
+          details: hasWeighting
+            ? t('test_runner_autocheck_adaptive_weighting_ok')
+            : t('test_runner_autocheck_adaptive_weighting_missing'),
         });
       }
 
@@ -1023,6 +1071,17 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                 : t('test_runner_autocheck_no_nextsteps'),
             });
           }
+
+          if (selectedScenario.autoChecks.expectSessionNewFindings) {
+            const hasFindings = !!(analysis?.newFindings?.trim());
+            sessionAutoChecks.push({
+              checkId: 'session_newfindings',
+              passed: hasFindings,
+              details: hasFindings
+                ? t('test_runner_autocheck_newfindings_found')
+                : t('test_runner_autocheck_no_newfindings'),
+            });
+          }
           
           // Update result with session auto-checks
           if (sessionAutoChecks.length > 0) {
@@ -1049,6 +1108,14 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           if (selectedScenario.autoChecks.expectSessionNextSteps) {
             failedChecks.push({
               checkId: 'session_nextsteps',
+              passed: false,
+              details: failedMsg,
+            });
+          }
+
+          if (selectedScenario.autoChecks.expectSessionNewFindings) {
+            failedChecks.push({
+              checkId: 'session_newfindings',
               passed: false,
               details: failedMsg,
             });
@@ -1739,6 +1806,18 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                   )}
                   {selectedScenario.autoChecks.expectSessionNextSteps && (
                     <li>• <span className="font-medium">Next Steps:</span> Bot soll konkrete nächste Schritte definieren</li>
+                  )}
+                  {selectedScenario.autoChecks.expectSessionNewFindings && (
+                    <li>• <span className="font-medium">New Findings:</span> Session-Analyse soll neue Erkenntnisse liefern</li>
+                  )}
+                  {selectedScenario.autoChecks.expectMinDpcStrategies != null && (
+                    <li>• <span className="font-medium">DPC Strategien:</span> Mindestens {selectedScenario.autoChecks.expectMinDpcStrategies} aktive Strategien</li>
+                  )}
+                  {selectedScenario.autoChecks.expectMinCumulativeKeywords != null && (
+                    <li>• <span className="font-medium">DPFL Keywords:</span> Mindestens {selectedScenario.autoChecks.expectMinCumulativeKeywords} kumulative Einträge</li>
+                  )}
+                  {selectedScenario.autoChecks.expectAdaptiveWeighting && (
+                    <li>• <span className="font-medium">Adaptive Weighting:</span> DPFL-Telemetrie mit Kontext/Gewichtung</li>
                   )}
                 </ul>
               </div>
