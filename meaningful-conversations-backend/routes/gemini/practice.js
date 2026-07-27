@@ -6,7 +6,9 @@ const { requireClientPlus, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPra
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
+const { getMatchTier, getDiscouragedReason } = require('../../practice/methodScenarioMap.js');
 const { getThemeLabel } = require('../../practice/scopeBoundary.js');
+const { computePracticeOverallScore, buildScenarioMethodFit } = require('../../practice/evaluationScoring.js');
 const { practiceEvaluationPrompts } = require('../../services/geminiPrompts.js');
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
@@ -279,6 +281,8 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       : `Coachee: ${scenario.coacheeName.en}\nConcern: ${scenario.concern.en}\nTone: ${scenario.emotionalTone.en}${focusNote ? `\nCoach focus: ${focusNote}` : ''}`;
 
     const currentDate = new Date().toISOString().split('T')[0];
+    const matchTier = getMatchTier(scenarioId, frameworkId);
+    const discouragedReason = getDiscouragedReason(scenarioId, frameworkId, lang);
     const promptFn = practiceEvaluationPrompts[lang]?.prompt || practiceEvaluationPrompts.en.prompt;
     const prompt = promptFn({
       framework,
@@ -292,6 +296,9 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       scopeBoundaryThemeLabel: sessionParams.scopeBoundaryTheme
         ? getThemeLabel(sessionParams.scopeBoundaryTheme, lang)
         : null,
+      matchTier,
+      discouragedReason,
+      sessionFlowRubric: framework.sessionFlowRubric || '',
     });
 
     const modelName = 'gemini-2.5-pro';
@@ -334,6 +341,15 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       evaluationResult.scopeBoundary = evaluationResult.scopeBoundary || { active: false };
     }
     evaluationResult.liveMode = sessionParams.liveMode;
+
+    const scenarioMethodFit = buildScenarioMethodFit(scenarioId, frameworkId, lang);
+    if (scenarioMethodFit) {
+      evaluationResult.scenarioMethodFit = scenarioMethodFit;
+    }
+    evaluationResult.overallScore = computePracticeOverallScore(evaluationResult);
+    if (evaluationResult.calibration) {
+      evaluationResult.calibration.evidenceRating = evaluationResult.overallScore;
+    }
 
     let saved;
     try {

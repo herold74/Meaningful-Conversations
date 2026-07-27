@@ -946,7 +946,11 @@ Die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils 
 - **Coachee-Autonomie** — Haben Sie die eigene Denk- und Lösungsarbeit des Klienten ermöglicht (ohne Ratschläge, eigene Vision oder vorgegebene Lösungen)?
 - **Klientenzufriedenheit** — Wie zufrieden wirkt der Klient am Ende?
 
-Dazu erhalten Sie eine **Gesamtbewertung (1–10)**, eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen.
+Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Abschluss — passend zur Methode): War der Gesamtablauf stimmig, wird das positiv hervorgehoben.
+
+Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
+
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. GROW, Lösungsorientiert, MI) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
 
 **Schritt 5: Verlauf ansehen**
 Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
@@ -1865,7 +1869,11 @@ The AI analyzes the transcript and scores you on five dimensions (each **1–10*
 - **Coachee autonomy** — Did you facilitate the client's own thinking and solution-finding (without advice, imposed vision, or prescribed solutions)?
 - **Coachee satisfaction** — How satisfied does the client appear at the end?
 
-You also receive an **overall score (1–10)**, a summary, covered method stages, strengths, development areas, and suggested drills.
+The AI also assesses **session flow** (contracting, opening, closing — appropriate to the method). When the overall flow was coherent, this is highlighted positively.
+
+The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
+
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. GROW, Solution-Focused, MI), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
 
 **Step 5: Review history**
 From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.

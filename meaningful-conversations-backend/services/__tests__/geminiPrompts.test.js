@@ -291,23 +291,78 @@ describe('geminiPrompts', () => {
   });
 
   describe('practiceEvaluationPrompts', () => {
-    test('schema requires five dimensions including coacheeAutonomy', () => {
+    test('schema requires five dimensions including coacheeAutonomy and sessionFlow', () => {
       expect(practiceEvaluationPrompts.schema.required).toContain('coacheeAutonomy');
       expect(practiceEvaluationPrompts.schema.required).toContain('coacheeSatisfaction');
+      expect(practiceEvaluationPrompts.schema.required).toContain('sessionFlow');
       expect(practiceEvaluationPrompts.schema.properties.coacheeAutonomy).toBeDefined();
+      expect(practiceEvaluationPrompts.schema.properties.sessionFlow).toBeDefined();
     });
 
-    test('de prompt mentions Coachee-Autonomie', () => {
+    test('de prompt mentions Coachee-Autonomie and Methodentreue as primary', () => {
       const prompt = practiceEvaluationPrompts.de.prompt({
-        framework: { name: 'GROW', stages: 'Goal', complianceCriteria: 'Follow GROW', evaluatorRubric: 'Rubric' },
+        framework: { name: 'GROW', stages: 'Goal', complianceCriteria: 'Follow GROW', evaluatorRubric: 'Rubric', sessionFlowRubric: 'Flow rubric' },
         scenarioSummary: 'Test scenario',
         difficulty: 'moderate',
         selfRating: null,
         transcript: 'Coach: Hello\nCoachee: Hi',
         currentDate: '2026-07-25',
+        matchTier: 'neutral',
+        discouragedReason: '',
+        sessionFlowRubric: 'Contracting + opening + closing',
       });
       expect(prompt).toContain('Coachee-Autonomie');
-      expect(prompt).toContain('fünf Dimensionen');
+      expect(prompt).toContain('PRIMÄR');
+      expect(prompt).toContain('sessionFlow');
+      expect(prompt).toContain('Contracting + opening + closing');
+    });
+
+    test('Type A (GROW) prompt includes sessionFlowRubric from framework', () => {
+      const rubric = 'Full 6-step contracting with G→R→O→W progression';
+      const prompt = practiceEvaluationPrompts.en.prompt({
+        framework: {
+          name: 'GROW',
+          stages: 'Goal',
+          complianceCriteria: 'Follow GROW',
+          evaluatorRubric: 'Rubric',
+          sessionFlowRubric: rubric,
+        },
+        scenarioSummary: 'Test',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Hi\nCoachee: Hello',
+        currentDate: '2026-07-27',
+        matchTier: 'primary',
+        discouragedReason: '',
+        sessionFlowRubric: rubric,
+      });
+      expect(prompt).toContain('sessionFlow');
+      expect(prompt).toContain(rubric);
+      expect(prompt).toContain('6-step contracting');
+    });
+
+    test('Type C (client exact language) prompt includes method-specific sessionFlowRubric', () => {
+      const rubric = 'Welcome → one brief outcome question from Clean pool (NOT extended contracting)';
+      const prompt = practiceEvaluationPrompts.en.prompt({
+        framework: {
+          name: 'client exact language',
+          stages: 'Listen',
+          complianceCriteria: 'Exact words only',
+          evaluatorRubric: 'Rubric',
+          sessionFlowRubric: rubric,
+        },
+        scenarioSummary: 'Test',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: And what kind of stuck is that stuck?\nCoachee: Heavy.',
+        currentDate: '2026-07-27',
+        matchTier: 'primary',
+        discouragedReason: '',
+        sessionFlowRubric: rubric,
+      });
+      expect(prompt).toContain('sessionFlow');
+      expect(prompt).toContain('Clean pool');
+      expect(prompt).toContain('NOT extended contracting');
     });
   });
 });

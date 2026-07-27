@@ -1,13 +1,30 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.3.5
+**Version:** 2.3.6
 **Branch:** `main`
 **Staging:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
 **App Store:** Xcode synced **2.3.1 Build 2** — ready to Archive
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+
+## Recent Changes (2026-07-27 — Release v2.3.6: practice evaluation rubrics)
+
+### Method-first evaluation — all 12 frameworks *(committed v2.3.6)*
+- **Scoring:** `computePracticeOverallScore` + `buildScenarioMethodFit` extracted to `practice/evaluationScoring.js`; 10/10 only when method ≥9 **and** `sessionFlow.coherent`.
+- **Rubrics:** All 12 methods in `frameworks.js` now have `sessionFlowRubric` + enriched compliance/evaluator rubrics aligned with bot prompts (Type A: GPS, Ambitious, Strategic, Structured Reflection, Mental Fitness, GROW, MI; Type B: brief forward-focused; Type C: Stoic, Systemic, Thought Audit, client exact language).
+- **Tests:** `evaluationScoring.test.js` (8 cases), `geminiPrompts.test.js` Type A/C prompt snapshots; backend **631 tests pass**.
+- **TestRunner:** Shows session flow coherent flag + evidence in practice eval results.
+
+## Recent Changes (2026-07-27 — Coach Practice evaluation sync A+B+C)
+
+### Method-first evaluation + session flow *(local, not committed)*
+- **Scoring:** `methodCompliance` primary; **10/10** only when method ≥9 **and** `sessionFlow.coherent`; else cap **9/10** at optimal method — enforced server-side in `computePracticeOverallScore()` (`routes/gemini/practice.js`).
+- **New fields:** `sessionFlow` (coherent, evidence, highlights), `scenarioMethodFit` (neutral/discouraged tier note) in schema, types, `PracticeEvaluationReview`.
+- **Rubrics:** GROW, brief forward-focused, MI in `frameworks.js` — `sessionFlowRubric` + compliance criteria aligned with Gabrielle/Steve/Mike bot prompts (contracting vs brief brief forward-focused focus, mitgehen, forward-focused tradition order).
+- **UX:** Setup callout — practice evaluates coach; linked bot shows same method from coachee side. i18n DE/EN.
+- **Tests:** `geminiPrompts.test.js` updated (22 pass).
 
 ## Recent Changes (2026-07-27 — Steve, Gabrielle, Mike AI coaches)
 
@@ -57,7 +74,7 @@
 
 ### Coach Practice progress & polish (`d52f5ab`)
 - **Double welcome fix:** `bots.js` — Topic Identification / Next Steps no longer re-greet after check-in; practice empty chat shows coach-opens hint (`ChatView`, `PracticeSetupView`).
-- **5th evaluation dimension:** Coachee autonomy (`coacheeAutonomy`) in Gemini schema/prompts, review UI, TestRunner, UserGuide; overall score = avg of 5 dimensions.
+- **5th evaluation dimension:** Coachee autonomy (`coacheeAutonomy`) in Gemini schema/prompts, review UI, TestRunner, UserGuide; overall score was avg of 5 dimensions (superseded 2026-07-27 by method-first + session-flow cap).
 - **User progress dashboard:** `PracticeProgressView` — KPIs, level, sparkline, heatmap, radar, methods matrix, milestones, recent sessions; linked from setup/history/evaluation (“Dein Fortschritt”).
 - **Method filter:** Pill selector on progress view when >1 method practiced; all KPIs/charts/sessions recompute for selected framework.
 - **Admin analytics (GDPR aggregates):** `GET /api/admin/practice-stats`, `AdminPracticeAnalyticsView` (Catalog & Impact sub-tabs, k-anonymity &lt;5 suppression); Admin tab bar — no horizontal scroll, responsive label drop.
