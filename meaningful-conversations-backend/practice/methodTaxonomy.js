@@ -1,34 +1,36 @@
 /**
  * Neutral method & bot identifiers — single source of truth.
- * Legacy IDs resolve via aliases until DB migration completes (remove aliases in 2.5.0).
+ *
+ * TEMPORARY: LEGACY_*_ALIASES are a runtime compatibility shim for clients/DB still
+ * using pre-2.4.0 IDs. Remove when no longer needed — see
+ * DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md (criteria + checklist).
  */
 
 /** @type {Record<string, string>} legacy frameworkId → canonical */
 const LEGACY_FRAMEWORK_ALIASES = {
   gps: 'goal-path-solution',
   grow: 'four-stage-coaching',
-  'forward-focused-coaching': 'forward-focused-coaching',
-  'ambivalence-coaching': 'ambivalence-coaching',
-  'client-exact-language': 'client-exact-language',
   stoic: 'resilience-coaching',
-  ambitious: 'ambitious-coaching',
-  strategic: 'strategic-coaching',
-  'structured-reflection': 'structured-reflection',
+  cbt: 'structured-reflection',
+  bowen: 'systemic-coaching',
+  'solution-focused': 'forward-focused-coaching',
+  sfb: 'forward-focused-coaching',
+  'motivational-interviewing': 'ambivalence-coaching',
+  mi: 'ambivalence-coaching',
+  'clean-language': 'client-exact-language',
   'mental-fitness': 'mental-fitness-coaching',
-  systemic: 'systemic-coaching',
-  'thought-audit': 'thought-audit',
 };
 
 /** @type {Record<string, string>} legacy botId → canonical */
 const LEGACY_BOT_ALIASES = {
-  'nexus-goal-path-solution': 'nexus-goal-path-solution',
-  'sam-forward-focused': 'sam-forward-focused',
-  'gabrielle-four-stage': 'gabrielle-four-stage',
-  'kenji-resilience': 'kenji-resilience',
-  'chloe-structured-reflection': 'chloe-structured-reflection',
-  'mike-ambivalence-coaching': 'mike-ambivalence-coaching',
-  'dan-client-language': 'dan-client-language',
-  'victor-systemic-coaching': 'victor-systemic-coaching',
+  'nexus-gps': 'nexus-goal-path-solution',
+  'steve-solution-focused': 'sam-forward-focused',
+  'gabrielle-grow': 'gabrielle-four-stage',
+  'mike-motivational-interviewing': 'mike-ambivalence-coaching',
+  'dan-clean-language': 'dan-client-language',
+  'chloe-cbt': 'chloe-structured-reflection',
+  'kenji-stoic': 'kenji-resilience',
+  'victor-bowen': 'victor-systemic-coaching',
 };
 
 const ALL_FRAMEWORK_IDS = [
