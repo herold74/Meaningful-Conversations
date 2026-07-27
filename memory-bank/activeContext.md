@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.4.0
+**Version:** 2.4.1
 **Branch:** `main`
-**Staging:** Deployed **2026-07-27**, Build **3**, v2.4.0 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.1 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.0 Build 3** — Archive pending release
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.1 Build 2** — Archive pending release
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead. Rationale: iOS bundles old bot IDs; backend 2.4.0 without matching app risks 404 on renamed coaches.
 
@@ -13,7 +13,7 @@
 
 ## Recent Changes (2026-07-27 — Practice Lab regression harness, uncommitted)
 
-### Practice Lab refactor *(local, not committed)*
+### Practice Lab refactor *(committed v2.4.1)*
 - **Removed:** Smoke (4-turn) and Golden 10/10 modes; fixed-script perfection chasing
 - **Single cycle:** 6-turn stage-complete forward-focused path (Sam)
 - **Adaptive coach (default):** `POST /api/gemini/test/practice-coach-turn` (developer-only); scripted fallback on API error
