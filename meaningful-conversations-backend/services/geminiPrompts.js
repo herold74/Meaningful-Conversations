@@ -695,22 +695,32 @@ Stelle deine Bewertung als JSON-Objekt bereit.`
 };
 
 const BOT_CATALOG_EN = `- Nobody (nexus-goal-path-solution, guest): Pragmatic management advisor and communication strategist, GPS method. For: management and communication topics, concrete problem-solving, next steps, conversation preparation.
+- Steve (sam-forward-focused, guest): brief forward-focused coaching (forward-focused tradition) — preferred future, exceptions, scaling. For: work and everyday challenges when problem-talk is stuck; forward-looking management advisory.
+- Gloria (gloria-interview, registered): Structured professional interviewer – no advice, pure questioning. For: working through life context section by section, identifying gaps and empty fields, checking consistency and overlaps across life areas, articulating ideas and projects.
+- Gabrielle (gabrielle-four-stage, guest): four-stage coaching model (Goal, Reality, Options, Will). For: classic coaching from clarity to committed action, personal and professional goals.
 - Max (max-ambitious, guest): Inspiring, questioning, reflective. For: potential, motivation, new perspectives, confidence.
 - Ava (ava-strategic, guest): Strategic, decisive, organized. For: prioritization, planning, complex decisions, organizational topics.
-- Gloria (gloria-interview, registered): Structured professional interviewer – no advice, pure questioning. For: working through life context section by section, identifying gaps and empty fields, checking consistency and overlaps across life areas, articulating ideas and projects.
 - Kenji (kenji-resilience, premium): Stoic, composed, wise. For: stress, perspective shifts, inner calm, philosophical reflection.
 - Chloe (chloe-structured-reflection, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
+- Mike (mike-ambivalence-coaching, registered): ambivalence coaching (listening skills). For: ambivalence, change resistance, evoking own motivation — not persuasion or therapy.
 - Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
-- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.`;
+- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.
+- Bekky (bekky-thought-audit, client): Structured thought audit. For: stressful beliefs, cognitive clarity, agency at work and in life.
+- Dan (dan-client-language, client): client exact language. For: exploring inner beliefs through the client's own metaphors without coach interpretation.`;
 
 const BOT_CATALOG_DE = `- Nobody (nexus-goal-path-solution, guest): Pragmatischer Management-Berater und Kommunikationsstratege, GPS-Methode. Für: Management- und Kommunikationsthemen, konkrete Problemlösung, nächste Schritte, Gesprächsvorbereitung.
+- Steve (sam-forward-focused, guest): Lösungsorientiertes Kurzcoaching (forward-focused tradition) — gewünschte Zukunft, Ausnahmen, Skalierung. Für: berufliche und alltägliche Herausforderungen, wenn Problemgespräch feststeckt.
+- Gloria (gloria-interview, registered): Strukturierte professionelle Interviewerin – keine Beratung, reine Fragetechnik. Für: Lebenskontext Abschnitt für Abschnitt durcharbeiten, Lücken und leere Felder identifizieren, Konsistenz und Überschneidungen zwischen Lebensbereichen prüfen, Ideen und Projekte artikulieren.
+- Gabrielle (gabrielle-four-stage, guest): Vier-Phasen-Coaching (Goal, Reality, Options, Will). Für: klassisches Coaching von Klarheit zu verbindlichem Handeln.
 - Max (max-ambitious, guest): Inspirierend, hinterfragend, reflektierend. Für: Potenzial, Motivation, neue Perspektiven, Selbstvertrauen.
 - Ava (ava-strategic, guest): Strategisch, entschlossen, organisiert. Für: Priorisierung, Planung, komplexe Entscheidungen, organisatorische Themen.
-- Gloria (gloria-interview, registered): Strukturierte professionelle Interviewerin – keine Beratung, reine Fragetechnik. Für: Lebenskontext Abschnitt für Abschnitt durcharbeiten, Lücken und leere Felder identifizieren, Konsistenz und Überschneidungen zwischen Lebensbereichen prüfen, Ideen und Projekte artikulieren.
 - Kenji (kenji-resilience, premium): Stoisch, gelassen, weise. Für: Stress, Perspektivwechsel, innere Ruhe, philosophische Reflexion.
 - Chloe (chloe-structured-reflection, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
+- Mike (mike-ambivalence-coaching, registered): ambivalence coaching (listening skills). Für: Ambivalenz, Veränderungswiderstand, eigene Motivation evozieren — keine Überredung oder Therapie.
 - Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotagemuster, emotionale Resilienz, innere Blockaden.
-- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.`;
+- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.
+- Bekky (bekky-thought-audit, client): Strukturiertes Gedanken-Audit. Für: belastende Überzeugungen, kognitive Klarheit, Handlungsfähigkeit.
+- Dan (dan-client-language, client): client exact language. Für: innere Überzeugungen durch eigene Metaphern erkunden, ohne Coach-Interpretation.`;
 
 const botRecommendationPrompts = {
     schema: {

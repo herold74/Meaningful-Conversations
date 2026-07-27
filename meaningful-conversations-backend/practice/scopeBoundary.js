@@ -9,27 +9,27 @@ const THEMES = {
   trauma: {
     id: 'trauma',
     label: { en: 'Trauma-related distress', de: 'Traumabezogene Belastung' },
-    scenarioHints: ['motivation-dip', 'team-conflict', 'overwhelm', 'life-balance'],
+    scenarioHints: ['motivation-dip', 'team-conflict', 'overwhelm', 'life-balance', 'feedback-anxiety'],
   },
   addiction: {
     id: 'addiction',
     label: { en: 'Substance use / addiction', de: 'Substanzgebrauch / Sucht' },
-    scenarioHints: ['motivation-dip', 'life-balance', 'overwhelm', 'career-decision'],
+    scenarioHints: ['motivation-dip', 'life-balance', 'overwhelm', 'career-decision', 'career-plateau'],
   },
   'clinical-depression': {
     id: 'clinical-depression',
     label: { en: 'Clinical depression indicators', de: 'Hinweise auf klinische Depression' },
-    scenarioHints: ['motivation-dip', 'life-balance', 'overwhelm'],
+    scenarioHints: ['motivation-dip', 'life-balance', 'overwhelm', 'feedback-anxiety', 'career-plateau'],
   },
   'eating-disorder': {
     id: 'eating-disorder',
     label: { en: 'Disordered eating patterns', de: 'Gestörtes Essverhalten' },
-    scenarioHints: ['overwhelm', 'relationship-boundary', 'motivation-dip'],
+    scenarioHints: ['overwhelm', 'relationship-boundary', 'motivation-dip', 'feedback-anxiety'],
   },
   'acute-distress': {
     id: 'acute-distress',
     label: { en: 'Acute crisis indicators', de: 'Akute Krisenindikatoren' },
-    scenarioHints: ['motivation-dip', 'overwhelm', 'life-balance'],
+    scenarioHints: ['motivation-dip', 'overwhelm', 'life-balance', 'feedback-anxiety', 'stuck-metaphor'],
   },
 };
 

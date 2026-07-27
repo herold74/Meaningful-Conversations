@@ -102,11 +102,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       case 'gloria-interview':
       case 'ava-strategic':
       case 'chloe-structured-reflection':
+      case 'gabrielle-four-stage':
         return 'female';
       case 'max-ambitious':
       case 'rob':
       case 'kenji-resilience':
       case 'nexus-goal-path-solution':
+      case 'sam-forward-focused':
+      case 'mike-ambivalence-coaching':
       default:
         return 'male';
     }
@@ -153,10 +156,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       const getBestServerVoice = (botId: string, lang: string): string | null => {
         let gender: 'male' | 'female' = 'female';
         if (lang === 'en') {
-          const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution'];
+          const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'sam-forward-focused', 'mike-ambivalence-coaching'];
           gender = maleBotsEN.includes(botId) ? 'male' : 'female';
         } else if (lang === 'de') {
-          const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection'];
+          const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection', 'gabrielle-four-stage'];
           gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
         }
         if (lang === 'de') {
@@ -1279,10 +1282,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             let gender: 'male' | 'female' = 'female';
 
             if (lang === 'en') {
-              const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'victor-systemic-coaching'];
+              const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'victor-systemic-coaching', 'sam-forward-focused', 'mike-ambivalence-coaching'];
               gender = maleBotsEN.includes(botId) ? 'male' : 'female';
             } else if (lang === 'de') {
-              const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection'];
+              const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection', 'gabrielle-four-stage'];
               gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
             }
 

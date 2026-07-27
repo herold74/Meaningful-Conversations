@@ -3,6 +3,20 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.3.5] - 2026-07-27
+
+Coach Practice method–scenario mapping, three new AI coaches, and brief forward-focused-faithful Steve prompts.
+
+### Added
+- **Method–scenario matrix:** 12×12 tiers, dual collapsed setup entry, discouraged-pair confirmation, 4 new practice scenarios
+- **AI coaches:** Steve (brief forward-focused, guest), Gabrielle (GROW, guest), Mike (MI, registered) with shared coaching session structure
+- **Mitgehen, mitgehen, führen** rhythm in Gabrielle and Mike prompts; Steve uses brief forward-focused tradition session focus (not 6-step contract)
+
+### Changed
+- Practice-only GROW, Solution-Focused, and MI linked to live coaches in catalog and Bot Selection
+- Transcript evaluation bot catalog updated (incl. Bekky/Dan)
+- USER-ACCESS-MATRIX documents new coaches and tiers
+
 ## [2.3.1] - 2026-07-26
 
 GDPR-compliant resume for in-progress Coach Practice sessions.
@@ -114,6 +128,7 @@ Mistral chat resilience for local dev and EU-region deployments.
 
 ---
 
+[2.3.5]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.5
 [2.3.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.1
 [2.3.0]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.3.0
 [2.2.1]: https://github.com/herold74/Meaningful-Conversations/releases/tag/v2.2.1

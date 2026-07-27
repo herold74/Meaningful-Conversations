@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.3.1
+**Version:** 2.3.5
 **Branch:** `main`
 **Staging:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
@@ -9,9 +9,29 @@
 
 **Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
 
-## Recent Changes (2026-07-27 — Coach Practice Hard + Live overlay)
+## Recent Changes (2026-07-27 — Steve, Gabrielle, Mike AI coaches)
 
-### Hard difficulty + Live overlay + scope-boundary training *(local, not yet committed/deployed)*
+### Practice-only methods → full AI coaches *(local, not committed)*
+- **Steve** (`sam-forward-focused`, guest): brief forward-focused / forward-focused tradition — brief session focus (not 6-step contract), then miracle/exceptions/scaling; Management section after Nobody.
+- **Gabrielle** (`gabrielle-four-stage`, guest): GROW — **Coaching**, before Max.
+- **Mike** (`mike-ambivalence-coaching`, registered): MI / listening skills — **Coaching**, after Chloe.
+- Backend prompts in `bots/newCoaches.js` + shared `bots/coachingPromptBlocks.js` (full contracting/ending/boundaries like Max); `practice/frameworks.js` linked.
+- Bot catalog in transcript evaluation updated; placeholder avatars (`steve.png`, `gabrielle.png`, `mike.png`).
+
+## Recent Changes (2026-07-27 — Coach Practice method–scenario mapping)
+
+### Method–scenario matrix + dual entry UX *(local, not yet committed/deployed)*
+- **12 scenarios** (4 new): `career-plateau`, `strategic-pivot`, `feedback-anxiety`, `stuck-metaphor` in `practice/scenarios.js`.
+- **Matrix:** `practice/methodScenarioMap.js` — primary / alternative / neutral / discouraged tiers for all 12 frameworks × 12 scenarios; `defaultPair`: GROW + `career-decision`.
+- **Catalog API:** `/api/practice/catalog` returns `frameworkMatches` / `scenarioMatches` per entity + `defaultPair` via `enrichCatalog()`.
+- **Setup UX:** `PracticeSetupView` — two collapsed accordions (“from scenario” / “from method”), tier badges, match summary, **discouraged-pair confirmation modal** before start.
+- **Progress:** `buildRecommendedPracticeConfig` falls back to `defaultPair` when no prior sessions.
+- **Tests:** `methodScenarioMap.test.js` (6), `practiceProgress.test.ts` (4) — passing.
+- **Next (product, not implemented):** Custom avatar art for Steve, Gabrielle, Mike (currently placeholder copies)
+
+## Recent Changes (2026-07-27 — Coach Practice Hard + Live overlay, `54dc6d3`)
+
+### Hard difficulty + Live overlay + scope-boundary training *(committed; not yet deployed)*
 - **Hard** (`Schwer`): unlocked after 1 **Challenging** evaluation; very resistant coachee; **33%** hidden scope-boundary drill (trauma, addiction, clinical distress, eating disorder, acute crisis cues).
 - **Live overlay** (checkbox, not a 5th difficulty): voice-only on any unlocked difficulty; **no switch back to text** during session; same unlock gate as Hard (1 Challenging complete; Admin/Developer bypass).
 - **Post-session reveal:** `PracticeEvaluationReview` shows scope-boundary theme + recognition/referral feedback when drill was active.

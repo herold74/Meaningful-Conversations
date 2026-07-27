@@ -216,15 +216,16 @@ export const buildRecommendedPracticeConfig = (
   catalog: PracticeCatalog,
 ): CoachPracticeConfig | null => {
   const latest = stats.latestEvaluation;
-  if (!latest) return null;
 
-  const framework =
-    catalog.frameworks.find((f) => f.id === latest.frameworkId) || catalog.frameworks[0];
-  const scenario =
-    catalog.scenarios.find((s) => s.id === latest.scenarioId) || catalog.scenarios[0];
+  const defaultPair = catalog.defaultPair;
+  const frameworkId = latest?.frameworkId ?? defaultPair?.frameworkId;
+  const scenarioId = latest?.scenarioId ?? defaultPair?.scenarioId;
+
+  const framework = catalog.frameworks.find((f) => f.id === frameworkId) || catalog.frameworks[0];
+  const scenario = catalog.scenarios.find((s) => s.id === scenarioId) || catalog.scenarios[0];
   if (!framework || !scenario) return null;
 
-  const difficulty = (latest.difficulty as PracticeDifficulty) || 'moderate';
+  const difficulty = (latest?.difficulty as PracticeDifficulty) || 'moderate';
   const difficultyLabel =
     catalog.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
 

@@ -125,10 +125,12 @@
 - [x] **PWA:** Installable, offline-capable
 - [x] **Multi-language:** German and English (1,520 keys, perfect DE/EN parity)
 
-## Coach Practice (2026-07-24 — v2.2.0; polish 2026-07-25)
+## Coach Practice (2026-07-24 — v2.2.0; polish 2026-07-25; matrix 2026-07-27)
 - [x] **Coach Practice mode (Client+):** AI-as-coachee training with post-session evaluation
     - [x] 12 curated frameworks (9 from existing bots + GROW, Solution-Focused, MI)
-    - [x] 8 coachee scenarios × 3 difficulty levels
+    - [x] **12 coachee scenarios** (8 original + 4 method-gap scenarios) × 4 difficulty levels + Live overlay
+    - [x] **Method–scenario matrix:** tier badges, dual collapsed entry (scenario-first / method-first), discouraged-pair confirm dialog
+    - [x] **Hard + scope-boundary drill** (33%, post-session reveal) — committed `54dc6d3`, not deployed
     - [x] Method explainers for practice-only frameworks in setup UI
     - [x] Evaluation: method compliance, effectiveness, clarity, coachee autonomy, coachee satisfaction (5 dimensions)
     - [x] Practice history persistence (`PracticeEvaluation` model)
@@ -138,6 +140,9 @@
     - [x] Double-welcome fix (regular coaching + practice empty-chat intro)
     - [x] In-progress session resume via sessionStorage (v2.3.1)
     - [x] Staging + production deploy v2.3.1 (2026-07-26)
+    - [x] **Full AI coaches:** Steve (brief forward-focused, guest, Management), Gabrielle (GROW, guest), Mike (MI, registered) — local uncommitted
+    - [ ] Commit + deploy method–scenario mapping + Hard/Live bundle (local uncommitted mapping changes)
+    - [ ] Custom avatar art for Steve, Gabrielle, Mike (placeholders in use)
 
 ## Security & Infrastructure (v2.0.1 — 2026-07-15)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API

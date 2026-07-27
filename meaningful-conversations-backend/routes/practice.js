@@ -3,6 +3,7 @@ const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const { getPublicCatalog } = require('../practice/frameworks.js');
 const { getPublicScenarios } = require('../practice/scenarios.js');
+const { enrichCatalog } = require('../practice/methodScenarioMap.js');
 const { resolvePublicAssetUrl } = require('../utils/publicAssetUrl.js');
 const { rollScopeBoundaryTheme, isValidTheme } = require('../practice/scopeBoundary.js');
 
@@ -53,12 +54,17 @@ router.get('/catalog', authMiddleware, async (req, res) => {
     const language = req.query.language === 'en' ? 'en' : 'de';
     const unlocks = await getPracticeUnlocks(req.userId, access.user);
 
+    const frameworks = getPublicCatalog(language);
+    const scenarios = getPublicScenarios(language).map((scenario) => ({
+      ...scenario,
+      avatar: resolvePublicAssetUrl(scenario.avatar),
+    }));
+    const enriched = enrichCatalog(frameworks, scenarios, language);
+
     res.json({
-      frameworks: getPublicCatalog(language),
-      scenarios: getPublicScenarios(language).map((scenario) => ({
-        ...scenario,
-        avatar: resolvePublicAssetUrl(scenario.avatar),
-      })),
+      frameworks: enriched.frameworks,
+      scenarios: enriched.scenarios,
+      defaultPair: enriched.defaultPair,
       difficulties: [
         { id: 'easy', label: language === 'en' ? 'Easy' : 'Leicht' },
         { id: 'moderate', label: language === 'en' ? 'Moderate' : 'Mittel' },
