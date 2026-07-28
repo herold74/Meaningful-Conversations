@@ -2,7 +2,7 @@
  * Unit tests for services/aiProviderService.js
  *
  * Scope:
- *   - Module loading without crash (catches CJS/ESM breakage on SDK upgrade)
+ *   - Module loading without crash (CJS backend + ESM Mistral via dynamic import)
  *   - Public API surface is intact
  *   - generateContent() with Google: response contract → { text, usage, model, provider }
  *   - generateContent() with Mistral: format conversion + response contract + meta-commentary
@@ -13,18 +13,14 @@
  *   - Error propagation: SDK errors throw correctly
  *
  * Strategy:
- *   - Mistral: mocked via jest.mock() — synchronous require(), fully interceptable.
- *   - Google: injected via _setGoogleClientForTesting() test seam — avoids the
- *     Jest CJS → dynamic import() interception limitation.
+ *   - Both Google and Mistral clients are injected via test seams
+ *     (_setGoogleClientForTesting / _setMistralClientForTesting) so dynamic
+ *     ESM imports are never attempted under Jest CJS.
  *   - No jest.resetModules() — keeps prisma mock binding stable across tests.
  */
 
 jest.mock('../../prismaClient.js');
-jest.mock('@mistralai/mistralai', () => ({
-  Mistral: jest.fn(() => mockMistralClientImpl),
-}));
 
-// Shared mock implementations — defined before any jest.mock factory references them
 const mockGoogleGenerateContent = jest.fn();
 const mockGoogleClient = { models: { generateContent: mockGoogleGenerateContent } };
 
@@ -65,20 +61,19 @@ beforeAll(() => {
 beforeEach(() => {
   jest.clearAllMocks();
   service._resetClientsForTesting();
-  // Inject mock Google client so dynamic import() is never attempted
+  // Inject mocks so dynamic ESM imports are never attempted under Jest
   service._setGoogleClientForTesting(mockGoogleClient);
-  // Default Mistral mock is wired by jest.mock() factory above
+  service._setMistralClientForTesting(mockMistralClientImpl);
   mockProviderDb('google');
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. MODULE LOADING
-//    This test group is the primary guard against Session 3's CJS/ESM risk:
-//    if @mistralai/mistralai v2 goes ESM-only and breaks require(), this
-//    require() here throws before any test can run.
+//    Top-level require('@mistralai/mistralai') was removed for v2 (ESM-only).
+//    Module load must succeed under CJS; clients init via await import() at runtime.
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('module loading', () => {
-  test('loads without throwing (catches CJS require() breakage on Mistral upgrade)', () => {
+  test('loads without throwing (no top-level Mistral require)', () => {
     expect(service).toBeDefined();
   });
 
@@ -156,18 +151,15 @@ describe('generateContent() — Google provider', () => {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. MISTRAL PROVIDER — response contract + format conversion
-//    After @mistralai/mistralai 1→2 upgrade (ESM-only), these tests catch:
-//    - require() breakage (see module loading test above)
+//    After @mistralai/mistralai 1→2 upgrade (ESM-only + dynamic import), these catch:
 //    - client.chat.complete() parameter shape change
-//    - response.choices[0].message.content rename
+//    - response.choices[0].message.content rename / ContentChunk[] shape
 //    - response.usage field rename (promptTokens, completionTokens, totalTokens)
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('generateContent() — Mistral provider', () => {
   beforeEach(() => {
     mockMistralChatComplete.mockResolvedValue(MISTRAL_RESPONSE);
     mockProviderDb('mistral');
-    // Inject fresh Mistral client (reset in outer beforeEach wipes it)
-    service._setMistralClientForTesting(mockMistralClientImpl);
   });
 
   test('returns text from choices[0].message.content', async () => {
@@ -222,7 +214,6 @@ describe('Google → Mistral format conversion', () => {
   beforeEach(() => {
     mockMistralChatComplete.mockResolvedValue(MISTRAL_RESPONSE);
     mockProviderDb('mistral');
-    service._setMistralClientForTesting(mockMistralClientImpl);
   });
 
   test('string contents → user message in messages array', async () => {
@@ -279,13 +270,13 @@ describe('Google → Mistral format conversion', () => {
     expect(users[1].content).toBe('Second');
   });
 
-  test('JSON mode: config.responseMimeType activates Mistral json_object format', async () => {
+  test('JSON mode: config.responseMimeType activates Mistral responseFormat json_object', async () => {
     await service.generateContent({
       contents: 'hi',
       config: { responseMimeType: 'application/json', skipMistralBehaviorRules: true },
     });
-    const { response_format } = mockMistralChatComplete.mock.calls[0][0];
-    expect(response_format).toEqual({ type: 'json_object' });
+    const { responseFormat } = mockMistralChatComplete.mock.calls[0][0];
+    expect(responseFormat).toEqual({ type: 'json_object' });
   });
 });
 
@@ -300,7 +291,6 @@ describe('Mistral meta-commentary stripping', () => {
 
   beforeEach(() => {
     mockProviderDb('mistral');
-    service._setMistralClientForTesting(mockMistralClientImpl);
   });
 
   test('strips trailing "Hinweis:" paragraph (DE)', async () => {
@@ -360,7 +350,6 @@ describe('generateContent() — region preference routing', () => {
   beforeEach(() => {
     mockGoogleGenerateContent.mockResolvedValue(GOOGLE_RESPONSE);
     mockMistralChatComplete.mockResolvedValue(MISTRAL_RESPONSE);
-    service._setMistralClientForTesting(mockMistralClientImpl);
   });
 
   test('userRegionPreference "eu" forces Mistral even when DB says google', async () => {
@@ -395,7 +384,6 @@ describe('generateContent() — region preference routing', () => {
 
   test('userRegionPreference "optimal" uses the DB-configured provider (mistral)', async () => {
     mockProviderDb('mistral');
-    service._setMistralClientForTesting(mockMistralClientImpl);
     const r = await service.generateContent({
       contents: 'hi',
       config: { skipMistralBehaviorRules: true },
@@ -441,6 +429,19 @@ describe('checkProvidersHealth()', () => {
     const h = await service.checkProvidersHealth();
     expect(h.google.available).toBe(false);
     expect(typeof h.google.error).toBe('string');
+  });
+
+  test('normalizes ContentChunk[] assistant content to string', async () => {
+    mockProviderDb('mistral');
+    mockMistralChatComplete.mockResolvedValue({
+      choices: [{ message: { content: [{ type: 'text', text: 'Chunked hello' }] } }],
+      usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
+    });
+    const r = await service.generateContent({
+      contents: 'hi',
+      config: { skipMistralBehaviorRules: true },
+    });
+    expect(r.text).toBe('Chunked hello');
   });
 });
 

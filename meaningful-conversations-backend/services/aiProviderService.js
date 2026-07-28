@@ -1,12 +1,11 @@
 const prisma = require('../prismaClient.js');
-const { Mistral } = require('@mistralai/mistralai');
 
 // Lazy-loaded clients
 let googleAI = null;
 let mistralAI = null;
 
-// Test seam: allows unit tests to inject a mock client without needing to
-// intercept the @google/genai dynamic import (which Jest CJS cannot mock).
+// Test seam: allows unit tests to inject mock clients without intercepting
+// dynamic ESM imports (Jest CJS cannot mock await import() reliably).
 function _setGoogleClientForTesting(client) { googleAI = client; }
 function _setMistralClientForTesting(client) { mistralAI = client; }
 function _resetClientsForTesting() { googleAI = null; mistralAI = null; cachedProvider = null; cachedModelMapping = null; }
@@ -71,14 +70,35 @@ async function getGoogleClient() {
 }
 
 /**
- * Initialize Mistral AI client (lazy loading)
+ * Initialize Mistral AI client (lazy loading).
+ * Uses dynamic import — @mistralai/mistralai v2 is ESM-only (CJS require() breaks).
  */
-function getMistralClient() {
+async function getMistralClient() {
   if (!mistralAI) {
+    const { Mistral } = await import('@mistralai/mistralai');
     mistralAI = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
     console.log('✓ Mistral AI client initialized');
   }
   return mistralAI;
+}
+
+/**
+ * Normalize Mistral message content to a string.
+ * v2 may return string | ContentChunk[] for assistant content.
+ */
+function normalizeMistralContent(content) {
+  if (content == null) return '';
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((chunk) => {
+        if (typeof chunk === 'string') return chunk;
+        if (chunk && typeof chunk.text === 'string') return chunk.text;
+        return '';
+      })
+      .join('');
+  }
+  return String(content);
 }
 
 /**
@@ -300,7 +320,7 @@ async function generateWithGoogle({ model, contents, config, context = 'chat' })
  * Enhanced with detailed error logging for debugging
  */
 async function generateWithMistral({ model, contents, config, context = 'chat', language = 'de' }) {
-  const client = getMistralClient();
+  const client = await getMistralClient();
   
   // Get the configured model for this context
   const mistralModel = await getModelForContext('mistral', context);
@@ -310,7 +330,7 @@ async function generateWithMistral({ model, contents, config, context = 'chat', 
   // Convert Google format to Mistral format
   const messages = convertToMistralFormat(contents, config, language);
   
-  // Build Mistral config
+  // Build Mistral config (v2 typed request uses camelCase; outbound maps to snake_case)
   const mistralConfig = {
     model: mistralModel,
     messages,
@@ -321,7 +341,7 @@ async function generateWithMistral({ model, contents, config, context = 'chat', 
   // ADD-ON: Handle JSON mode for structured outputs (Google Gemini compatibility)
   // This adds Mistral support for responseMimeType and responseSchema from Google API
   if (config.responseMimeType === 'application/json' || config.responseSchema) {
-    mistralConfig.response_format = { type: "json_object" };
+    mistralConfig.responseFormat = { type: "json_object" };
     
     if (config.responseSchema) {
       const schemaInstruction = `\n\n## CRITICAL: JSON Response Format
@@ -371,7 +391,7 @@ ${JSON.stringify(config.responseSchema, null, 2)}`;
     );
     
     const choice = response.choices[0];
-    let responseText = choice.message.content;
+    let responseText = normalizeMistralContent(choice.message.content);
 
     // Strip meta-commentary that Mistral models sometimes generate
     // (coaching strategy leaking into user-facing output)
@@ -567,7 +587,7 @@ Do NOT jump into coaching, advice, metaphors, or techniques before completing co
 async function* streamWithMistral({ model, contents, config, context = 'chat', language = 'de' }) {
   console.log(`🤖 Streaming with Mistral (context: ${context})`);
 
-  const client = getMistralClient();
+  const client = await getMistralClient();
   const mistralModel = await getModelForContext('mistral', context);
 
   console.log(`  → Streaming Mistral model: ${mistralModel} (requested: ${model}, context: ${context})`);
@@ -726,7 +746,7 @@ async function checkProvidersHealth() {
     if (!process.env.MISTRAL_API_KEY) {
       results.mistral.error = 'API key not configured';
     } else {
-      const client = getMistralClient();
+      const client = await getMistralClient();
       await withMistralRetry(
         () => client.chat.complete({
           model: 'mistral-small-latest',
