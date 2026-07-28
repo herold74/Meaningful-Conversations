@@ -8,7 +8,7 @@ This document outlines the different user types within the Meaningful Conversati
 
 1.  **Guest (Gast)**: Unregistered users who can try out the application with limited features. Data is stored locally in the browser.
 2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Annual/Monthly, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026. Legacy Lifetime buyers (`accessExpiresAt = null`) are supported permanently.
-3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
+3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe, Mike), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
 4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor), Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
 5.  **Admin**: Administrators with access to the backend management panel.
 6.  **Developer**: Technical staff with access to debugging tools and the Test Runner.
@@ -32,16 +32,16 @@ This document outlines the different user types within the Meaningful Conversati
 | Gamification (XP, Levels) | ✅ (Local) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Management & Kommunikation** | | | | | | |
 | **Nobody** (Ziel–Weg–Lösung) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Sam** (Zukunftsorientiert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Sam** (Zukunftsorientiert) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria Interview** (Strukturierte Interviews) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Gloria** (Onboarding) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Coaching Bots** | | | | | | |
-| **Gabrielle** (Vier-Phasen-Coaching) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Gabrielle** (Vier-Phasen-Coaching) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Max** (Ambitioniert) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Ava** (Strategisch) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **Kenji** (Stoisch) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Chloe** (Strukturierte Reflexion) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Mike** (Ambivalenz-Coaching) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Mike** (Ambivalenz-Coaching) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Exklusiv für Klienten** | | | | | | |
 | **Rob** (Mentale Fitness) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | **Victor** (Systemisch) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
@@ -80,8 +80,8 @@ Die App gruppiert Bots in drei Sektionen mit visuellem Farbschema:
 
 | Sektion | Farbschema | Bots | Besonderheit |
 | :--- | :--- | :--- | :--- |
-| **Management & Kommunikation** | Bronze | Nobody, Sam, Gloria Interview | Kein klassisches Coaching — Ziel–Weg–Lösung, zukunftsorientiert, strukturierte Interviews |
-| **Coaching** | Silver | Gabrielle, Max, Ava (Guest), Kenji, Chloe (Premium), Mike (Registered) | Persönlichkeitsentwicklung, Vier-Phasen-Coaching, Ambivalenz-Coaching, Zielerreichung |
+| **Management & Kommunikation** | Bronze | Nobody (Guest), Sam (Registered), Gloria Interview | Kein klassisches Coaching — Ziel–Weg–Lösung, zukunftsorientiert, strukturierte Interviews |
+| **Coaching** | Silver | Gabrielle (Registered), Max, Ava (Guest), Kenji, Chloe, Mike (Premium) | Persönlichkeitsentwicklung, Vier-Phasen-Coaching, Ambivalenz-Coaching, Zielerreichung |
 | **Exklusiv für Klienten** | Gold | Rob, Victor | Nur mit manualmode.at Coaching-Beziehung |
 
 Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten Kontakt automatisch zugewiesen wird.
@@ -138,14 +138,14 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 | :--- | :--- | :--- |
 | **Guest** (kostenlos) | 4 Bots (Nobody, Gloria, Max, Ava), Chat, Voice, Life Context (lokal), Kalenderexport | Daten gehen bei Browser-Reset verloren; kein TTS, kein Profil, kein DPC, kein Gloria Interview |
 | **Registered** (3,90 €/Monat) | + Gloria Interview, Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature, DPC, PDF-Export, Gamification | Kein Riemann/SD-Profil, kein DPFL, kein Kenji/Chloe |
-| **Premium** (9,90 €/Monat) | + Riemann-Thomann, Spiral Dynamics, DPFL, Comfort Check, Kenji, Chloe, Transcript Evaluation mit PDF & Bot-Empfehlungen | Kein Rob/Victor, kein PEP |
+| **Premium** (9,90 €/Monat) | + Riemann-Thomann, Spiral Dynamics, DPFL, Comfort Check, Kenji, Chloe, Mike, Transcript Evaluation mit PDF & Bot-Empfehlungen | Kein Rob/Victor, kein PEP |
 | **Client** (durch Coach) | + Rob, Victor, PEP Lösungsblockaden | — Vollzugang — |
 
 ### Grundprinzipien
 
 1. **Guest ist kostenlos** — Zum Ausprobieren mit 4 Bots, Chat und Voice. Daten nur lokal → natürlicher Anreiz zur Registrierung.
 2. **Registered (3,90 €/Monat) hat echten Wert** — Cloud-Sync, Server-TTS, OCEAN-Profil, Narrative Signature und DPC. Das ist eine produktiv nutzbare App, kein Teaser. Der Preis deckt Infrastrukturkosten (TTS, Cloud-Storage, Sync) und liegt unter der "Kaffee-pro-Woche"-Schwelle.
-3. **Premium (9,90 €/Monat) lohnt sich für Vertiefer** — Wer über Wochen mit der App arbeitet und tiefer gehen will, bekommt mit Riemann, Spiral Dynamics, DPFL und Transcript Evaluation ein umfassendes System plus zwei spezialisierte Coaches (Kenji, Chloe).
+3. **Premium (9,90 €/Monat) lohnt sich für Vertiefer** — Wer über Wochen mit der App arbeitet und tiefer gehen will, bekommt mit Riemann, Spiral Dynamics, DPFL und Transcript Evaluation ein umfassendes System plus spezialisierte Premium-Coaches (Kenji, Chloe, Mike).
 4. **Client ist kein Produkt** — Der Client-Zugang ergänzt eine reale Coaching-Beziehung. Er wird nicht verkauft, sondern vom Coach freigeschaltet.
 
 ### Empfohlene Preisstruktur
@@ -156,7 +156,7 @@ Die Upgrade-Codes lösen in der App dasselbe aus wie Standard-Premium-Pässe. De
 | **Registered Monatsabo** | 3,90 €/Monat | Alle Nutzer | Cloud-Sync, TTS, OCEAN, Signature, DPC, PDF |
 | **Registered Jahresabo** | 14,90 €/Jahr | Sparfüchse | Wie Monatsabo, 1 Jahr (≈ 4 Monate Preisvorteil) |
 | | | **Premium** | |
-| **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation (PDF & Bot-Empfehlungen) |
+| **Premium 1-Monats-Pass** | 9,90 € | Neugierige / Testphase | Kenji, Chloe, Mike, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation (PDF & Bot-Empfehlungen) |
 | **Premium 3-Monats-Pass** | 24,90 € | Regelmäßige Nutzer | Wie 1M; ~17% Ersparnis; genug Zeit für DPFL-Lerneffekt |
 | **Premium 1-Jahres-Pass** | 79,90 € | Power-User | Wie 1M; ~33% Ersparnis; stärkste Bindung |
 | **Einzelner Bot-Unlock** | 3,90 € | Gezieltes Interesse | Kenji ODER Chloe permanent (ohne restlichen Premium-Umfang) |
@@ -197,7 +197,7 @@ Guest (kostenlos, sofort nutzbar)
   → Trigger: "Daten nur im Browser" + kein TTS + kein Profil
   ↓
 9-Tage Premium-Trial (kostenlos nach Registrierung)
-  → Erlebt: ALLES was Premium bietet — Kenji, Chloe, Riemann, SD, DPFL, etc.
+  → Erlebt: ALLES was Premium bietet — Kenji, Chloe, Mike, Riemann, SD, DPFL, etc.
   → Nach 9 Tagen: Paywall mit vollem Produktkatalog
   → Daten-Download (Life Context, Profil) auch nach Ablauf möglich
   ↓
@@ -206,7 +206,7 @@ Registered (3,90 €/Monat oder 14,90 €/Jahr)
   → Trigger: Riemann/SD gesperrt, DPFL gesperrt, Kenji/Chloe gesperrt
   ↓
 Premium (9,90 €/Monat oder Pass)
-  → Erlebt: Kenji, Chloe, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation mit PDF & Bot-Empfehlungen
+  → Erlebt: Kenji, Chloe, Mike, Riemann, SD, DPFL, Comfort Check, Transcript Evaluation mit PDF & Bot-Empfehlungen
   → Trigger: Rob/Victor gesperrt, PEP gesperrt
   ↓
 Client (durch Coach vergeben, nicht käuflich)
