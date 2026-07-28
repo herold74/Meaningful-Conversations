@@ -104,6 +104,7 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
+- [x] **Staging v2.4.3 (2026-07-28):** Build **6** — Google GenAI SDK 2.13.0 + Mistral SDK 2.5.0; Gemini regression vs baseline OK (forced US region)
 - [x] **Staging v2.4.3 (2026-07-28):** Build **5** — Mistral SDK v2.5.0 (ESM dynamic import); https://mc-beta.manualmode.at, health OK
 - [x] **Staging v2.4.3 (2026-07-28):** Build **3** — https://mc-beta.manualmode.at, health OK (coaching close signals, Gabrielle advice consent)
 - [x] **Staging v2.4.2 (2026-07-27):** Build **2** — https://mc-beta.manualmode.at, health OK (14 bots, Sam/Victor/Dan)
