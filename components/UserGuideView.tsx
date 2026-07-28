@@ -12,7 +12,70 @@ interface InfoViewProps {
     currentUser?: User | null;
 }
 
-const de_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
+/** Coaching chapter index — shifts when install (web) and/or profile (registered) chapters are present. */
+const coachingChapterNum = (isNative: boolean, isRegistered: boolean): number =>
+    (isNative ? 3 : 4) + (isRegistered ? 1 : 0);
+
+const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
+
+const deChapterLabel = (num: number) => `Kapitel ${num}`;
+const enChapterLabel = (num: number) => `Chapter ${num}`;
+
+const deToolsSection = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showChapter8: boolean,
+    showChapter9: boolean,
+): string => {
+    if (!showChapter8 && !showChapter9) return '';
+    const base = coachingChapterNum(isNative, isRegistered);
+    const lines: string[] = [];
+    if (showChapter8) {
+        lines.push(`- **Transkript-Auswertung** (Premium+) — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.`);
+    }
+    if (showChapter9) {
+        lines.push(`- **Audio-Transkription** (Klienten) — Live-Aufnahme oder Upload von Audiodateien mit automatischer Transkription. Ausführliche Anleitung: ${deChapterLabel(base + 4)}.`);
+        lines.push(`- **Coach-Übung** (Klienten) — Sie spielen den Coach, die KI den Klienten; strukturiertes Feedback zu Ihrer Methodenführung. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.`);
+    }
+    return `### 5.2 Tools-Bereich (Premium & Klienten)
+
+Unterhalb der Coach-Liste finden Sie im Bereich **Tools** weitere Funktionen — abhängig von Ihrer Zugangsstufe:
+
+${lines.join('\n')}
+`;
+};
+
+const enToolsSection = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showChapter8: boolean,
+    showChapter9: boolean,
+): string => {
+    if (!showChapter8 && !showChapter9) return '';
+    const base = coachingChapterNum(isNative, isRegistered);
+    const lines: string[] = [];
+    if (showChapter8) {
+        lines.push(`- **Transcript Evaluation** (Premium+) — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.`);
+    }
+    if (showChapter9) {
+        lines.push(`- **Audio Transcription** (Client) — Record live or upload audio files with automatic transcription. Full instructions: ${enChapterLabel(base + 4)}.`);
+        lines.push(`- **Coach Practice** (Client) — You play the coach and the AI plays the client; structured feedback on your coaching method. Full instructions: ${enChapterLabel(base + 5)}.`);
+    }
+    return `### 5.2 Tools Area (Premium & Client)
+
+Below the coach list, the **Tools** section offers additional features depending on your access tier:
+
+${lines.join('\n')}
+`;
+};
+
+const de_markdown = (
+    isRegistered: boolean,
+    isPremium: boolean,
+    isNative: boolean,
+    showChapter8: boolean,
+    showChapter9: boolean,
+) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
@@ -211,8 +274,8 @@ Nach größeren Updates kann eine zwischengespeicherte Version die App kurz bloc
 
 ---
 
-`}<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${isNative ? 'Kapitel 3' : 'Kapitel 4'}: Persönlichkeitsprofil</summary>
+`}${isRegistered ? `<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${deChapterLabel(profileChapterNum(isNative))}: Persönlichkeitsprofil</summary>
 <div style="padding: 16px;">
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
@@ -423,8 +486,8 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${isNative ? 'Kapitel 4' : 'Kapitel 5'}: Die Coaching-Sitzung</summary>
+` : ''}<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${deChapterLabel(coachingChapterNum(isNative, isRegistered))}: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Einen Coach auswählen
@@ -611,14 +674,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-### 5.2 Tools-Bereich (Premium & Klienten)
-
-Unterhalb der Coach-Liste finden Sie im Bereich **Tools** weitere Funktionen — abhängig von Ihrer Zugangsstufe:
-
-- **Transkript-Auswertung** (Premium+) — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${isNative ? 'Kapitel 7' : 'Kapitel 8'}.
-- **Audio-Transkription** (Klienten) — Live-Aufnahme oder Upload von Audiodateien mit automatischer Transkription. Ausführliche Anleitung: ${isNative ? 'Kapitel 8' : 'Kapitel 9'}.
-- **Coach-Übung** (Klienten) — Sie spielen den Coach, die KI den Klienten; strukturiertes Feedback zu Ihrer Methodenführung. Ausführliche Anleitung: ${isNative ? 'Kapitel 9' : 'Kapitel 10'}.
-
+${deToolsSection(isNative, isRegistered, showChapter8, showChapter9)}
 ### 5.3 Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
@@ -658,7 +714,7 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${isNative ? 'Kapitel 5' : 'Kapitel 6'}: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
 ### 6.1 Die Analyse
@@ -690,23 +746,23 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Coach wechseln:** Speichert die Änderungen und bringt Sie zurück zum Coach-Auswahlbildschirm.
   - **(Nur für registrierte Benutzer) "Textänderungen nicht speichern...":** Wenn Sie dieses Kästchen ankreuzen, wird Ihr Gamification-Fortschritt gespeichert, aber die Textänderungen an Ihrem Lebenskontext werden verworfen.
 
-### 6.3 Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
+${isPremium ? `### 6.3 Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
 
-Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe Kapitel 4), erscheinen nach der Sitzung zwei zusätzliche Schritte:
+Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(profileChapterNum(isNative))}), erscheinen nach der Sitzung zwei zusätzliche Schritte:
 
 - **Authentizitäts-Check (Comfort Check):** Sie werden gefragt, wie authentisch Sie sich während der Sitzung verhalten haben (Skala 1-5). Nur Sitzungen mit einer Bewertung von 3 oder höher werden für die Profilverfeinerung verwendet. Dies stellt sicher, dass Ihr Profil nur auf Basis authentischer Interaktionen angepasst wird.
 - **Profilverfeinerung:** Ab der **zweiten authentischen Sitzung** erscheint ein Vorschlag zur Anpassung Ihres Persönlichkeitsprofils. Sie sehen:
   - Eine Analyse der Schlüsselwörter, die zu den Vorschlägen geführt haben
   - Aktuelle vs. vorgeschlagene Werte für Ihre Persönlichkeitsdimensionen
   - Sie können die Vorschläge **annehmen** oder **ablehnen** -- Sie behalten stets die volle Kontrolle
-
+` : ''}
 </div>
 </details>
 
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${isNative ? 'Kapitel 6' : 'Kapitel 7'}: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
@@ -749,7 +805,7 @@ const de_chapter8 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Kapitel 7' : 'Kapitel 8'}: Transkript-Auswertung (Premium-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -806,7 +862,7 @@ Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungs
 
 ### Persönlichkeitsprofile & Personalisierung
 
-**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe Kapitel 4), nutzt die KI dieses automatisch bei der Auswertung. Aktivieren Sie dazu vor dem Upload die Option **"Persönlichkeitsprofil einbeziehen"** im Reflexionsfragebogen. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. Die Auswertung zeigt Ihnen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
+**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe ${deChapterLabel(profileChapterNum(isNative))}), nutzt die KI dieses automatisch bei der Auswertung. Aktivieren Sie dazu vor dem Upload die Option **"Persönlichkeitsprofil einbeziehen"** im Reflexionsfragebogen. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. Die Auswertung zeigt Ihnen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
 
 ### Zusätzliche Funktionen
 
@@ -853,7 +909,7 @@ const de_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Kapitel 8' : 'Kapitel 9'}: Audio-Transkription (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${deChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Audio-Transkription?
@@ -883,7 +939,7 @@ Nach der Aufnahme bzw. dem Upload wird die Audiodatei automatisch transkribiert.
 Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
 - **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
-- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${isNative ? 'Kapitel 7' : 'Kapitel 8'}) ein, um eine strukturierte Analyse zu erhalten.
+- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(coachingChapterNum(isNative, true) + 3)}) ein, um eine strukturierte Analyse zu erhalten.
 
 ### KI-Anbieter-Hinweis
 
@@ -910,7 +966,7 @@ const de_chapter10 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Kapitel 9' : 'Kapitel 10'}: Coach-Übung (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist Coach-Übung?
@@ -968,7 +1024,13 @@ Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Ent
 </details>
 `;
 
-const en_markdown = (isRegistered: boolean, isPremium: boolean, isNative: boolean) => `<details>
+const en_markdown = (
+    isRegistered: boolean,
+    isPremium: boolean,
+    isNative: boolean,
+    showChapter8: boolean,
+    showChapter9: boolean,
+) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
@@ -1167,8 +1229,8 @@ After major updates, a cached version can briefly block the app (e.g. a **blank 
 
 ---
 
-`}<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${isNative ? 'Chapter 3' : 'Chapter 4'}: Personality Profile</summary>
+`}${isRegistered ? `<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">👩🏻‍🎨 ${enChapterLabel(profileChapterNum(isNative))}: Personality Profile</summary>
 <div style="padding: 16px;">
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
@@ -1348,8 +1410,8 @@ Having a personality profile alone does not change coaching. Only when you activ
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${isNative ? 'Chapter 4' : 'Chapter 5'}: The Coaching Session</summary>
+` : ''}<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${enChapterLabel(coachingChapterNum(isNative, isRegistered))}: The Coaching Session</summary>
 <div style="padding: 16px;">
 
 ### 5.1 Choosing Your Coach
@@ -1536,14 +1598,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-### 5.2 Tools Area (Premium & Client)
-
-Below the coach list, the **Tools** section offers additional features depending on your access tier:
-
-- **Transcript Evaluation** (Premium+) — Analyze uploaded conversation transcripts. Full instructions: ${isNative ? 'Chapter 7' : 'Chapter 8'}.
-- **Audio Transcription** (Client) — Record live or upload audio files with automatic transcription. Full instructions: ${isNative ? 'Chapter 8' : 'Chapter 9'}.
-- **Coach Practice** (Client) — You play the coach and the AI plays the client; structured feedback on your coaching method. Full instructions: ${isNative ? 'Chapter 9' : 'Chapter 10'}.
-
+${enToolsSection(isNative, isRegistered, showChapter8, showChapter9)}
 ### 5.3 Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
@@ -1583,7 +1638,7 @@ ${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple devi
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${isNative ? 'Chapter 5' : 'Chapter 6'}: After the Session - The Review Process</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
 ### 6.1 The Analysis
@@ -1615,23 +1670,23 @@ This is the most important screen for capturing your insights.
   - **Switch Coach:** Saves the changes and takes you back to the coach selection screen.
   - **(Registered Users Only) "Don't save text changes...":** If you check this box, your gamification progress will be saved, but the text changes to your Life Context will be discarded.
 
-### 6.3 Authenticity Check & Profile Refinement (DPFL Mode)
+${isPremium ? `### 6.3 Authenticity Check & Profile Refinement (DPFL Mode)
 
-If you have the **DPFL coaching mode** activated (see Chapter 4), two additional steps appear after the session:
+If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileChapterNum(isNative))}), two additional steps appear after the session:
 
 - **Authenticity Check (Comfort Check):** You'll be asked how authentic you felt during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
 - **Profile Refinement:** Starting from the **second authentic session**, you'll see a suggestion to adjust your personality profile. You'll see:
   - An analysis of the keywords that led to the suggestions
   - Current vs. suggested values for your personality dimensions
   - You can **accept** or **reject** the suggestions -- you always keep full control
-
+` : ''}
 </div>
 </details>
 
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${isNative ? 'Chapter 6' : 'Chapter 7'}: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
@@ -1674,7 +1729,7 @@ const en_chapter8 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${isNative ? 'Chapter 7' : 'Chapter 8'}: Transcript Evaluation (Premium Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1731,7 +1786,7 @@ The recommendations also appear in the **PDF export**, so you can document your 
 
 ### Personality Profiles & Personalization
 
-**If you have a Personality Profile** (see Chapter 4), the AI will automatically use it during the evaluation. To enable this, activate the **"Include Personality Profile"** option in the reflection questionnaire before uploading. You will then receive **personality-based insights** tailored to your communication style and personality traits. The evaluation shows how your typical patterns appeared in this conversation—and where you can target improvements.
+**If you have a Personality Profile** (see ${enChapterLabel(profileChapterNum(isNative))}), the AI will automatically use it during the evaluation. To enable this, activate the **"Include Personality Profile"** option in the reflection questionnaire before uploading. You will then receive **personality-based insights** tailored to your communication style and personality traits. The evaluation shows how your typical patterns appeared in this conversation—and where you can target improvements.
 
 ### Additional Features
 
@@ -1778,7 +1833,7 @@ const en_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${isNative ? 'Chapter 8' : 'Chapter 9'}: Audio Transcription (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${enChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Audio Transcription?
@@ -1808,7 +1863,7 @@ After recording or uploading, the audio file is automatically transcribed. Depen
 After transcription, you have the following options:
 - **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
 - **Download Transcript:** Save the raw or smoothed transcript as a text file.
-- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${isNative ? 'Chapter 7' : 'Chapter 8'}) for a structured analysis.
+- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(coachingChapterNum(isNative, true) + 3)}) for a structured analysis.
 
 ### AI Provider Note
 
@@ -1835,7 +1890,7 @@ const en_chapter10 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${isNative ? 'Chapter 9' : 'Chapter 10'}: Coach Practice (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Coach Practice?
@@ -1904,7 +1959,9 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
 
     const markdownContent = useMemo(() => {
         const native = isNativeApp();
-        const base = language === 'de' ? de_markdown(isRegistered, !!isPremiumUser, native) : en_markdown(isRegistered, !!isPremiumUser, native);
+        const base = language === 'de'
+            ? de_markdown(isRegistered, !!isPremiumUser, native, !!showChapter8, !!showChapter9)
+            : en_markdown(isRegistered, !!isPremiumUser, native, !!showChapter8, !!showChapter9);
         const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
         const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
         const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
