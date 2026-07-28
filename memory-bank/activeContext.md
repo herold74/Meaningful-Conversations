@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.4.3
 **Branch:** `main`
-**Staging:** Deployed **2026-07-28**, Build **3**, v2.4.3 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deployed **2026-07-28**, Build **4**, v2.4.3 — https://mc-beta.manualmode.at (health OK; frontend 200, API ok)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 3** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 4** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
+
+## Recent Changes (2026-07-28 — Staging deploy Build 4 + coach tier commit)
+
+- **Commit `b9b25d6`:** Sam/Gabrielle → registered, Mike → premium; Bekky `[AUDIT_TASK]` docs (matrix, infographic HTML/PDF, User Guide, locales); backend catalog alignment
+- **Commit `2b92ec8`:** chore build 4 sync (deploy script)
+- **Staging:** `./deploy-manualmode.sh -e staging -c app` — success; Podman machine restart required once
+- **Xcode:** `npm run sync:ios-staging` — OK (staging API target)
 
 ## Recent Changes (2026-07-28 — Coach access tier realignment)
 
