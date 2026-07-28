@@ -1,15 +1,20 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.4.2
+**Version:** 2.4.3
 **Branch:** `main`
-**Staging:** Deployed **2026-07-27**, Build **2**, v2.4.2 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deploy pending — v2.4.3 Build 1
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.2 Build 2** — **`npm run sync:ios-staging`** (Capacitor → `mc-beta.manualmode.at`); Xcode for Run/Archive. Revert API target: `npm run build && npx cap sync ios`.
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 1** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
 
-**Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead. Rationale: iOS bundles old bot IDs; backend 2.4.0 without matching app risks 404 on renamed coaches.
+**Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
 
-**Memory Bank:** The assistant updates these files **proactively** after substantive work, commits, deploys, or server verification — no separate "please update memory bank" request needed (see `systemPatterns.md` #21).
+## Recent Changes (2026-07-28 — Release v2.4.3: coaching session close + Gabrielle advice consent)
+
+### Classic coach prompt guardrails
+- **Sam:** forward-focused closing signals + proactive SF close after +1 step
+- **Gabrielle/Mike:** shared closing signals + method-specific session close; Gabrielle tip fallback **requires client permission** before offering advice
+- **Max/Ava:** refactored to shared `coachingClosingSignals` + method-specific close blocks (parity with new coaches)
 
 ## Recent Changes (2026-07-27 — iOS staging target + staging deploy v2.4.2)
 
