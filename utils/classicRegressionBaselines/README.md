@@ -111,13 +111,15 @@ Cross-provider live compare requires `--allow-cross-provider` (exploratory only)
 
 ## What gets captured
 
-Each snapshot includes transcript, auto-check results, telemetry summary, and session analysis counts (for `session_*` scenarios).
+Each snapshot includes transcript (with per-turn `provider` / `model`), dominant `model`, `liveProvider`, auto-check results, telemetry summary, and session analysis counts (for `session_*` scenarios). Manifests include an `environment` fingerprint (`apiBase`, package version, model mapping, forced region).
 
-Offline compare reports auto-check pass/fail changes, telemetry deltas, and session analysis differences.
+**Provider forcing:** `--provider gemini` sets AI region `us` (live `google`); `--provider mistral` sets `eu` (live `mistral`). Mismatched turns abort the run. Region is restored afterward (`MC_RESTORE_AI_REGION`, default `optimal`).
+
+Offline compare classifies **STRUCTURAL** vs **FLAKE** (`session_updates`, retested once during capture) vs telemetry **NOISE**, and prints transcript samples.
 
 ## Auth & rate limits
 
-Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Turn delay: `CLASSIC_REGRESSION_TURN_DELAY_MS=3000`.
+Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Staging: set `MC_DEV_EMAIL` / `MC_DEV_PASSWORD`. Turn delay: `CLASSIC_REGRESSION_TURN_DELAY_MS=3000`.
 
 **Do not run two baseline captures in parallel.**
 

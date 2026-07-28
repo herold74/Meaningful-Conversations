@@ -1,6 +1,6 @@
 {
   "name": "meaningful-conversations-backend",
-  "version": "2.4.3",
+  "version": "2.5.0",
   "description": "Backend server for the Meaningful Conversations application.",
   "main": "server.js",
   "scripts": {
