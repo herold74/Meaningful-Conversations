@@ -97,6 +97,7 @@ export async function sendTestMessage(apiBase, token, { botId, message, history,
     telemetry: data.testTelemetry,
     llmMetadata: data.llmMetadata,
     provider: data.llmMetadata?.provider ?? data.provider ?? null,
+    model: data.llmMetadata?.model ?? null,
   };
 }
 
@@ -207,6 +208,7 @@ export async function runClassicScenario(apiBase, token, scenarioDef, { language
       responseTimeMs: Date.now() - start,
       isDynamic: !!isDynamic,
       provider: result.provider,
+      model: result.model,
     });
 
     if (result.telemetry) {
@@ -215,7 +217,8 @@ export async function runClassicScenario(apiBase, token, scenarioDef, { language
       accumulateTelemetry(cumulativeKeywords, result.telemetry);
     }
 
-    onProgress?.(`  Turn ${turnIndex + 1}: ok${result.provider ? ` [${result.provider}]` : ''}`);
+    const tag = [result.provider, result.model].filter(Boolean).join('/');
+    onProgress?.(`  Turn ${turnIndex + 1}: ok${tag ? ` [${tag}]` : ''}`);
   };
 
   for (let i = 0; i < messages.length; i++) {

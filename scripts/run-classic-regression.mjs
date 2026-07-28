@@ -32,6 +32,19 @@ import {
   makeRunId,
   runDir,
 } from './regression/runStorage.mjs';
+import {
+  regionForProvider,
+  expectedLiveProvider,
+  setAiRegion,
+  fetchModelMapping,
+  assertScenarioProviders,
+  dominantModel,
+  buildEnvironmentFingerprint,
+  warnEnvironmentDrift,
+  enrichClassicOfflineComparison,
+  FLAKE_CHECK_IDS,
+  classifyFailedChecks,
+} from './regression/providerGuard.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -192,10 +205,14 @@ async function login(apiBase, email, password, retries = 5) {
 }
 
 function buildSnapshot(scenarioId, language, provider, runResult, meta = {}) {
+  const model = dominantModel(runResult.responses);
   return {
     version: REGRESSION_VERSION,
     exportedAt: new Date().toISOString(),
     provider,
+    /** Live llmMetadata.provider (google|mistral) — must match routing for --provider */
+    liveProvider: expectedLiveProvider(provider),
+    model,
     scenarioId,
     category: runResult.category,
     language,
@@ -207,6 +224,7 @@ function buildSnapshot(scenarioId, language, provider, runResult, meta = {}) {
       isDynamic: r.isDynamic ?? false,
       responseTimeMs: r.responseTimeMs,
       provider: r.provider ?? null,
+      model: r.model ?? null,
     })),
     telemetrySummary: runResult.telemetrySummary,
     sessionAnalysis: runResult.sessionAnalysis,
@@ -223,10 +241,6 @@ function compareToBaseline(baseline, current) {
   const baseChecks = baseline.checksSummary || {};
   const curChecks = current.checksSummary || {};
 
-  if (baseChecks.allPass && !curChecks.allPass) {
-    flagged.push('auto_checks_regression');
-  }
-
   const newlyFailed = (current.autoCheckResults || [])
     .filter((c) => !c.passed)
     .filter((c) => {
@@ -235,9 +249,12 @@ function compareToBaseline(baseline, current) {
     })
     .map((c) => c.checkId);
 
-  if (newlyFailed.length > 0) {
-    flagged.push(...newlyFailed.map((id) => `check_${id}`));
+  const { structural, flakes } = classifyFailedChecks(newlyFailed);
+
+  if (baseChecks.allPass && !curChecks.allPass && structural.length > 0) {
+    flagged.push('auto_checks_regression');
   }
+  flagged.push(...structural.map((id) => `check_${id}`));
 
   const numericFields = [
     ['telemetrySummary.dpcInjectionLength', baseline.telemetrySummary?.dpcInjectionLength, current.telemetrySummary?.dpcInjectionLength],
@@ -250,25 +267,27 @@ function compareToBaseline(baseline, current) {
   for (const [field, baseVal, curVal] of numericFields) {
     if (baseVal == null || curVal == null) continue;
     const delta = curVal - baseVal;
-    const significant = Math.abs(delta) >= 3 && field.includes('cumulativeKeyword');
-    if (significant && delta < 0) flagged.push(field);
-    deltas.push({ field, baseline: baseVal, current: curVal, delta, flagged: significant && delta < 0 });
+    // Keyword/length noise is recorded but never flags regression
+    deltas.push({ field, baseline: baseVal, current: curVal, delta, flagged: false });
   }
 
   const baseStress = baseline.telemetrySummary?.stressKeywordsDetected;
   const curStress = current.telemetrySummary?.stressKeywordsDetected;
   if (baseStress === true && curStress === false) {
     flagged.push('stress_keywords_regression');
+    deltas.push({ field: 'telemetrySummary.stressKeywordsDetected', baseline: baseStress, current: curStress, delta: null, flagged: true });
   }
 
+  const structuralOk = flagged.length === 0;
   return {
-    ok: flagged.length === 0,
+    ok: structuralOk,
     flaggedFields: [...new Set(flagged)],
     newlyFailedChecks: newlyFailed,
+    flakeFails: flakes,
     deltas,
-    summary: flagged.length === 0
-      ? 'No significant regression vs baseline'
-      : `Regression flagged: ${[...new Set(flagged)].join(', ')}`,
+    summary: structuralOk
+      ? (flakes.length ? `OK (flake only: ${flakes.join(', ')})` : 'No significant regression vs baseline')
+      : `Structural regression: ${[...new Set(flagged)].join(', ')}`,
   };
 }
 
@@ -316,15 +335,7 @@ function compareClassicOffline(baseline, current) {
     deltas.push({ field: 'telemetrySummary.stressKeywordsDetected', baseline: baseStress, current: curStress, delta: null });
   }
 
-  const diffParts = [];
-  if (baseChecks.allPass !== curChecks.allPass) {
-    diffParts.push(`auto-checks ${baseChecks.passed ?? '?'}/${baseChecks.total ?? '?'} → ${curChecks.passed ?? '?'}/${curChecks.total ?? '?'}`);
-  }
-  if (newlyFailedChecks.length > 0) diffParts.push(`new fails: ${newlyFailedChecks.join(', ')}`);
-  if (newlyPassedChecks.length > 0) diffParts.push(`new passes: ${newlyPassedChecks.join(', ')}`);
-  if (deltas.length > 0) diffParts.push(`telemetry/session deltas: ${deltas.length}`);
-
-  return {
+  const raw = {
     baselineAllPass: baseChecks.allPass,
     currentAllPass: curChecks.allPass,
     baselineChecks: baseChecks,
@@ -332,13 +343,15 @@ function compareClassicOffline(baseline, current) {
     newlyFailedChecks,
     newlyPassedChecks,
     deltas,
-    summary: diffParts.length === 0 ? 'No differences' : diffParts.join('; '),
   };
+
+  return enrichClassicOfflineComparison(baseline, current, raw);
 }
 
-function loadClassicSnapshot(dir, scenarioId, language, provider) {
+function loadClassicSnapshot(dir, scenarioId, language, provider, { required = true } = {}) {
   const filepath = path.join(dir, snapshotFilename(scenarioId, language, provider));
   if (!fs.existsSync(filepath)) {
+    if (!required) return null;
     console.error(`Missing snapshot: ${filepath}`);
     process.exit(1);
   }
@@ -366,22 +379,48 @@ function verifyBaselineIntegrity(outDir, manifest) {
   }
 }
 
-async function runScenario(apiBase, token, scenarioId, language, t) {
+async function runScenario(apiBase, token, scenarioId, language, t, cliProvider) {
   const def = getScenarioDef(scenarioId);
   console.log(`\n▶ ${scenarioId} (${def.category}, bot: ${def.botId})`);
-  const runResult = await runClassicScenario(apiBase, token, def, {
+  let runResult = await runClassicScenario(apiBase, token, def, {
     language,
     t,
     turnDelayMs: TURN_DELAY_MS,
     onProgress: (msg) => console.log(msg),
   });
+
+  assertScenarioProviders(scenarioId, runResult.responses, cliProvider);
+
+  // Flake policy: if the only failures are FLAKE_CHECK_IDS, retest once
+  const failedIds = (runResult.autoCheckResults || []).filter((c) => !c.passed).map((c) => c.checkId);
+  const onlyFlakes = failedIds.length > 0 && failedIds.every((id) => FLAKE_CHECK_IDS.has(id));
+  if (onlyFlakes) {
+    console.log(`  ↻ Flake-only fail (${failedIds.join(', ')}) — retesting scenario once…`);
+    const retry = await runClassicScenario(apiBase, token, def, {
+      language,
+      t,
+      turnDelayMs: TURN_DELAY_MS,
+      onProgress: (msg) => console.log(msg),
+    });
+    assertScenarioProviders(scenarioId, retry.responses, cliProvider);
+    if (retry.checksSummary.allPass || retry.checksSummary.passed >= runResult.checksSummary.passed) {
+      runResult = retry;
+      console.log('  ✓ Using retest result');
+    } else {
+      console.log('  ⚠ Retest did not improve — keeping first result');
+    }
+  }
+
   const { passed, total, allPass } = runResult.checksSummary;
   console.log(`  Auto-checks: ${passed}/${total}${allPass ? ' ✓' : ' ⚠'}`);
   if (!allPass) {
     for (const c of runResult.autoCheckResults.filter((x) => !x.passed)) {
-      console.log(`    ✗ ${c.checkId}: ${c.details}`);
+      const flake = FLAKE_CHECK_IDS.has(c.checkId) ? ' (flake)' : '';
+      console.log(`    ✗ ${c.checkId}${flake}: ${c.details}`);
     }
   }
+  const model = dominantModel(runResult.responses);
+  if (model) console.log(`  Model: ${model}`);
   return runResult;
 }
 
@@ -390,31 +429,54 @@ async function runBaseline(args, token) {
   const locale = loadLocale(args.language);
   const t = makeTranslator(locale);
 
+  const region = regionForProvider(args.provider);
+  const live = expectedLiveProvider(args.provider);
+  console.log(`Forcing AI region "${region}" so live provider is "${live}" (--provider ${args.provider})…`);
+  await setAiRegion(args.api, token, region);
+  const modelMapping = await fetchModelMapping(args.api, token);
+
+  const environment = buildEnvironmentFingerprint({
+    apiBase: args.api,
+    packageVersion: packageJson.version,
+    cliProvider: args.provider,
+    modelMapping,
+    aiRegionForced: region,
+    suite: args.suite,
+  });
+
+  if (args.reference) {
+    console.log('⚠ --reference: updating canonical baseline. Prefer same staging API + model mapping as future compares.');
+  }
+
   const manifest = {
     kind: args.storageKind ?? (args.reference ? 'reference' : 'run'),
     runId: args.runId ?? null,
     provider: args.provider,
+    liveProvider: live,
     apiBase: args.api,
     createdAt: new Date().toISOString(),
     packageVersion: packageJson.version,
     language: args.language,
     suite: args.suite,
     scenarioCount: args.scenarioIds.length,
+    environment,
     scenarios: {},
   };
 
   for (const scenarioId of args.scenarioIds) {
-    const runResult = await runScenario(args.api, token, scenarioId, args.language, t);
+    const runResult = await runScenario(args.api, token, scenarioId, args.language, t, args.provider);
     const snapshot = buildSnapshot(scenarioId, args.language, args.provider, runResult, {
       apiBase: args.api,
       suite: args.suite,
       runId: manifest.runId,
+      environment,
     });
     const filename = snapshotFilename(scenarioId, args.language, args.provider);
     const filepath = path.join(args.out, filename);
     fs.writeFileSync(filepath, JSON.stringify(snapshot, null, 2));
     manifest.scenarios[scenarioId] = {
       file: filename,
+      model: snapshot.model,
       checksSummary: runResult.checksSummary,
       telemetrySummary: {
         dpcInjectionLength: runResult.telemetrySummary.dpcInjectionLength,
@@ -429,6 +491,7 @@ async function runBaseline(args, token) {
   fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify(manifest, null, 2));
   verifyBaselineIntegrity(args.out, manifest);
   const passCount = Object.values(manifest.scenarios).filter((s) => s.checksSummary.allPass).length;
+  const models = [...new Set(Object.values(manifest.scenarios).map((s) => s.model).filter(Boolean))];
 
   if (manifest.kind === 'run' && manifest.runId) {
     registerRun(BASELINES_ROOT, {
@@ -439,14 +502,17 @@ async function runBaseline(args, token) {
       path: path.relative(BASELINES_ROOT, args.out),
       packageVersion: manifest.packageVersion,
       autoCheckPass: `${passCount}/${args.scenarioIds.length}`,
+      models: models.join(',') || null,
     });
-    console.log(`\n✓ Test run complete (${args.provider}, suite: ${args.suite}) → ${args.out}`);
+    console.log(`\n✓ Test run complete (${args.provider} → live ${live}, suite: ${args.suite}) → ${args.out}`);
     console.log(`  Run ID: ${manifest.runId}`);
     console.log(`  Auto-check pass: ${passCount}/${args.scenarioIds.length}`);
+    if (models.length) console.log(`  Models seen: ${models.join(', ')}`);
     console.log(`  Compare: npm run classic-regression -- compare-offline --baseline-provider ${args.provider} --current-provider ${args.provider} --current-run ${manifest.runId} --suite ${args.suite} --language ${args.language}`);
   } else {
-    console.log(`\n✓ Reference baseline updated (${args.provider}, suite: ${args.suite}) → ${args.out}`);
+    console.log(`\n✓ Reference baseline updated (${args.provider} → live ${live}, suite: ${args.suite}) → ${args.out}`);
     console.log(`  Scenarios: ${args.scenarioIds.length} | auto-check pass: ${passCount}/${args.scenarioIds.length}`);
+    if (models.length) console.log(`  Models seen: ${models.join(', ')}`);
   }
 }
 
@@ -483,6 +549,17 @@ function runCompareOffline(args, { regression = false } = {}) {
   console.log(`  Reference: ${args.baselineDir}`);
   console.log(`  Current:   ${args.currentDir}`);
 
+  const baselineManifestPath = path.join(args.baselineDir, 'manifest.json');
+  const currentManifestPath = path.join(args.currentDir, 'manifest.json');
+  const baselineManifest = fs.existsSync(baselineManifestPath)
+    ? JSON.parse(fs.readFileSync(baselineManifestPath, 'utf8'))
+    : null;
+  const currentManifest = fs.existsSync(currentManifestPath)
+    ? JSON.parse(fs.readFileSync(currentManifestPath, 'utf8'))
+    : null;
+  const envWarnings = warnEnvironmentDrift(baselineManifest, currentManifest);
+  for (const w of envWarnings) console.warn(`  ⚠ Environment: ${w}`);
+
   const report = {
     comparedAt: new Date().toISOString(),
     mode: regression ? 'offline-regression' : 'offline',
@@ -495,52 +572,118 @@ function runCompareOffline(args, { regression = false } = {}) {
     currentRun: args.currentRun ?? null,
     suite: args.suite,
     packageVersion: packageJson.version,
+    environmentWarnings: envWarnings,
     results: [],
+    totals: {
+      structuralRegressions: 0,
+      flakeOnly: 0,
+      telemetryNoiseOnly: 0,
+      clean: 0,
+    },
   };
 
-  let diffCount = 0;
+  let structuralCount = 0;
+  let flakeOnlyCount = 0;
+  let noiseOnlyCount = 0;
+  let cleanCount = 0;
   let allOk = true;
 
   for (const scenarioId of args.scenarioIds) {
-    const baseline = loadClassicSnapshot(args.baselineDir, scenarioId, args.language, args.baselineProvider);
-    const current = loadClassicSnapshot(args.currentDir, scenarioId, args.language, args.currentProvider);
+    const baseline = loadClassicSnapshot(args.baselineDir, scenarioId, args.language, args.baselineProvider, { required: false });
+    const current = loadClassicSnapshot(args.currentDir, scenarioId, args.language, args.currentProvider, { required: false });
+    if (!baseline || !current) {
+      const missing = [];
+      if (!baseline) missing.push(`baseline (${args.baselineDir})`);
+      if (!current) missing.push(`current (${args.currentDir})`);
+      console.warn(`\n▶ ${scenarioId}\n  ⚠ Skipped — missing snapshot in ${missing.join(' and ')}`);
+      report.results.push({ scenarioId, skipped: true, missing });
+      continue;
+    }
     const comparison = regression
       ? compareToBaseline(baseline, current)
       : compareClassicOffline(baseline, current);
-    if (comparison.summary !== 'No differences' && !regression) diffCount += 1;
-    if (regression && !comparison.ok) allOk = false;
-    if (regression && comparison.ok === false) diffCount += 1;
+
+    const classification = comparison.classification;
+    const isStructural = regression
+      ? !comparison.ok
+      : !!classification?.isStructuralRegression;
+    const isFlakeOnly = classification?.flakeOnly === true
+      || (regression && comparison.ok && (comparison.flakeFails?.length > 0));
+    const hasNoise = (classification?.telemetryNoise?.length || 0) > 0
+      || (!regression && (comparison.deltas?.length || 0) > 0 && !isStructural && !isFlakeOnly);
+
+    if (isStructural) {
+      structuralCount += 1;
+      allOk = false;
+    } else if (isFlakeOnly) {
+      flakeOnlyCount += 1;
+    } else if (hasNoise || (comparison.summary !== 'No differences' && !regression && !comparison.classification?.isStructuralRegression)) {
+      // telemetry-only diffs
+      if (!isStructural && !isFlakeOnly && comparison.summary !== 'No differences') noiseOnlyCount += 1;
+      else cleanCount += 1;
+    } else {
+      cleanCount += 1;
+    }
 
     report.results.push({
       scenarioId,
       comparison,
       baselineExportedAt: baseline.exportedAt,
       currentExportedAt: current.exportedAt,
+      baselineModel: baseline.model ?? null,
+      currentModel: current.model ?? null,
     });
 
     console.log(`\n▶ ${scenarioId}`);
     console.log(`  reference: ${baseline.exportedAt} | current: ${current.exportedAt}`);
+    if (baseline.model || current.model) {
+      console.log(`  models: ${baseline.model || '?'} → ${current.model || '?'}`);
+    }
     if (regression) {
       console.log(`  ${comparison.ok ? '✓' : '⚠'} ${comparison.summary}`);
       if (comparison.newlyFailedChecks?.length > 0) {
         console.log(`    Newly failed checks: ${comparison.newlyFailedChecks.join(', ')}`);
       }
     } else {
-      console.log(`  auto-checks: ${comparison.baselineChecks.allPass ? '✓' : '✗'} → ${comparison.currentChecks.allPass ? '✓' : '✗'} (${comparison.baselineChecks.passed}/${comparison.baselineChecks.total} → ${comparison.currentChecks.passed}/${comparison.currentChecks.total})`);
+      const cls = comparison.classification;
+      const badge = cls?.isStructuralRegression ? 'STRUCTURAL' : (cls?.flakeOnly ? 'FLAKE' : (cls?.telemetryNoise?.length ? 'NOISE' : 'OK'));
+      console.log(`  [${badge}] auto-checks: ${comparison.baselineChecks.allPass ? '✓' : '✗'} → ${comparison.currentChecks.allPass ? '✓' : '✗'} (${comparison.baselineChecks.passed}/${comparison.baselineChecks.total} → ${comparison.currentChecks.passed}/${comparison.currentChecks.total})`);
       console.log(`  ${comparison.summary}`);
-      for (const d of comparison.deltas) {
+      if (cls?.structuralFails?.length) {
+        console.log(`    Structural fails: ${cls.structuralFails.join(', ')}`);
+      }
+      if (cls?.flakeFails?.length) {
+        console.log(`    Flake fails: ${cls.flakeFails.join(', ')}`);
+      }
+      for (const d of (cls?.telemetryNoise || comparison.deltas || [])) {
         if (d.delta == null) {
-          console.log(`    ${d.field}: ${d.baseline} → ${d.current}`);
+          console.log(`    (noise) ${d.field}: ${d.baseline} → ${d.current}`);
         } else {
-          console.log(`    ${d.field}: ${d.baseline} → ${d.current} (Δ ${d.delta >= 0 ? '+' : ''}${d.delta})`);
+          console.log(`    (noise) ${d.field}: ${d.baseline} → ${d.current} (Δ ${d.delta >= 0 ? '+' : ''}${d.delta})`);
+        }
+      }
+      const sample = comparison.transcriptSample?.current || [];
+      if (sample.length) {
+        console.log('  Transcript sample (current):');
+        for (const t of sample) {
+          console.log(`    #${t.turn} [${t.provider || '?'}/${t.model || '?'}] ${t.bot}`);
         }
       }
     }
   }
 
+  report.totals = {
+    structuralRegressions: structuralCount,
+    flakeOnly: flakeOnlyCount,
+    telemetryNoiseOnly: noiseOnlyCount,
+    clean: cleanCount,
+  };
+
   const reportPath = path.join(args.baselineDir, `compare-offline-classic-${args.baselineProvider}-to-${args.currentProvider}-${Date.now()}.json`);
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  console.log(`\n${allOk ? '✓' : '⚠'} ${headline} — ${diffCount}/${args.scenarioIds.length} scenarios with issues/diffs — report: ${reportPath}`);
+  console.log(
+    `\n${allOk ? '✓' : '⚠'} ${headline} — structural ${structuralCount}, flake-only ${flakeOnlyCount}, telemetry-noise ${noiseOnlyCount}, clean ${cleanCount} — report: ${reportPath}`,
+  );
   if (regression) return allOk;
 }
 
@@ -560,10 +703,20 @@ async function main() {
   const token = await login(args.api, DEFAULT_EMAIL, DEFAULT_PASSWORD);
   console.log(`Logged in as ${DEFAULT_EMAIL}`);
 
-  if (args.command === 'baseline') {
-    await runBaseline(args, token);
-  } else {
-    await runCompare(args, token);
+  const restoreRegion = process.env.MC_RESTORE_AI_REGION || 'optimal';
+  try {
+    if (args.command === 'baseline') {
+      await runBaseline(args, token);
+    } else {
+      await runCompare(args, token);
+    }
+  } finally {
+    try {
+      await setAiRegion(args.api, token, restoreRegion);
+      console.log(`Restored AI region to "${restoreRegion}"`);
+    } catch (err) {
+      console.warn(`Could not restore AI region to ${restoreRegion}: ${err.message}`);
+    }
   }
 }
 

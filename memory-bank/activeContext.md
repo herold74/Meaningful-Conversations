@@ -1,13 +1,25 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.4.3
+**Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-28**, Build **6**, v2.4.3 — https://mc-beta.manualmode.at (health OK; `@google/genai` **2.13.0**, `@mistralai/mistralai` **2.5.0**; Mistral chat=medium)
+**Staging:** Deploying **2026-07-28/29**, Build **1**, v2.5.0 — https://mc-beta.manualmode.at
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 6** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo targeting **2.5.0** — sync with `npm run sync:ios-staging` for beta / `npm run build && npx cap sync ios` for Store path
 
-**Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
+**Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
+
+## Recent Changes (2026-07-28/29 — Release v2.5.0)
+
+- **Admin tabs:** Icon-only on phone/narrow portrait (no truncated “Benutz/Verwal”); `aria-label`/`title` keep full names
+- **Practice region routing:** `send-message` + `practice-coach-turn` pass `userRegionPreference`; adaptive coach `maxOutputTokens` 1000 (Gemini 2.5 thinking)
+- **Regression harness:** `scripts/regression/providerGuard.mjs` — region force, asserts, fingerprints, STRUCTURAL/FLAKE/NOISE, transcript samples
+- **Skill:** `llm-upgrade` — MC_DEV_* auth, Practice score variance, token truncation note
+- **SDK already on staging from 2.4.3 builds:** `@google/genai` 2.13.0, `@mistralai/mistralai` 2.5.0
+
+## Recent Changes (2026-07-28 — Skill: LLM upgrade + test sequence)
+
+- **`.cursor/skills/meaningful-conversations/llm-upgrade/SKILL.md`** — Upgrade workflow for `@google/genai` / `@mistralai/mistralai`, staging regression (classic + practice), provider-forcing pitfall (`aiRegionPreference`), model mapping, Go/No-Go criteria; indexed in `DOCUMENTATION-STRUCTURE.md`
 
 ## Recent Changes (2026-07-28 — Tier 3 Session 2: Google GenAI 1→2)
 
