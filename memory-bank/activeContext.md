@@ -9,6 +9,10 @@
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
 
+## Recent Changes (2026-07-28 — Coach behavior matrix documentation)
+
+- **`DOCUMENTATION/COACH-BEHAVIOR-MATRIX.md`** — Vollständige Verhaltensmatrix aller 14 Bot-Personas (12 Coaches + 2 Gloria-Interviewer): Contracting, Rhythmus, Methodik-Phasen, Abschluss, Ratschläge, Grenzen, Krisenprotokoll, Practice-Lab-Mapping; indexiert in `DOCUMENTATION-STRUCTURE.md`
+
 ## Recent Changes (2026-07-28 — Release v2.4.3: coaching session close + Gabrielle advice consent)
 
 ### Classic coach prompt guardrails
