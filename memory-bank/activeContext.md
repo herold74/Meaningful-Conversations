@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.4.3
 **Branch:** `main`
-**Staging:** Deploy pending — v2.4.3 Build 1
+**Staging:** Deployed **2026-07-28**, Build **3**, v2.4.3 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 1** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 3** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
+
+## Recent Changes (2026-07-28 — Coach access tier realignment)
+
+- **Sam** (`sam-forward-focused`): `guest` → **registered**
+- **Gabrielle** (`gabrielle-four-stage`): `guest` → **registered**
+- **Mike** (`mike-ambivalence-coaching`): `registered` → **premium**
+- Updated: `constants.ts`, `bots/newCoaches.js`, `geminiPrompts.js` BOT_CATALOG, User Guide, COACH-BEHAVIOR-MATRIX, USER-ACCESS-MATRIX, paywall i18n
 
 ## Recent Changes (2026-07-28 — Coach behavior matrix documentation)
 
