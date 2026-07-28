@@ -116,10 +116,14 @@ Cross-provider live compare still requires `--allow-cross-provider` (exploratory
 
 ## Auth
 
-Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Override with `MC_DEV_EMAIL` and `MC_DEV_PASSWORD`.
+Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Override with `MC_DEV_EMAIL` and `MC_DEV_PASSWORD`. Staging: use a real developer account + `INITIAL_ADMIN_PASSWORD` from `.env.staging` (not the local seed password).
 
 **Do not run two baseline captures in parallel** — concurrent writes can desync snapshots from `manifest.json`.
 
+## Provider forcing & compare
+
+`--provider gemini|mistral` auto-forces AI region (`us` / `eu`), asserts coachee model IDs match, stores `liveProvider` / `model` / `environment` on manifests, then restores region (`MC_RESTORE_AI_REGION`, default `optimal`). Offline compare warns on environment drift and includes transcript samples.
+
 ## manifest.json fields
 
-`kind` (`run` | `reference`), `runId`, `provider`, `apiBase`, `createdAt`, `packageVersion`, plus per-scenario score summaries.
+`kind` (`run` | `reference`), `runId`, `provider`, `liveProvider`, `apiBase`, `createdAt`, `packageVersion`, `environment`, plus per-scenario score/model summaries.

@@ -772,14 +772,17 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, [sessionFeedback, selectedBotFilter, selectedProviderFilter]);
 
     /**
-     * Tab label visibility: left → right priority (User Management keeps text longest).
+     * Tab label visibility: icon-only on narrow/phone portrait; labels appear from sm/md up.
+     * Priority left → right (User Management keeps text longest once labels are allowed).
      * Right tabs lose text first as the viewport narrows; no horizontal scroll.
+     * `aria-label` + `title` always carry the full name for accessibility.
      */
     const tabLabelClass = (tab: AdminTab): string => {
         const base = 'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs max-w-full';
         switch (tab) {
             case 'users':
-                return base; // last to become icon-only
+                // Was always visible — caused "Benutz/Verwal" truncation on phones
+                return `${base} hidden sm:inline`;
             case 'feedback':
                 return `${base} hidden min-[420px]:inline`;
             case 'tickets':
@@ -791,7 +794,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             case 'practice-analytics':
                 return `${base} hidden lg:inline`;
             case 'api-usage':
-                return `${base} hidden xl:inline`; // first to become icon-only
+                return `${base} hidden xl:inline`;
             default:
                 return `${base} hidden md:inline`;
         }

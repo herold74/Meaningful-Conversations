@@ -251,15 +251,18 @@ Stage goal: ${stageGoal}
 ${coachText ? `\nYour last coach message:\n"${coachText}"\n` : ''}${coacheeText ? `Coachee's last reply:\n"${coacheeText}"\n` : 'No coachee reply yet — open the session.\n'}
 Your next coach message (text only, no quotation marks):`;
 
+        const userRegionPreference = user.aiRegionPreference || 'optimal';
         const result = await aiProviderService.generateContent({
             model: 'gemini-2.5-flash',
             contents: userPrompt,
             config: {
                 systemInstruction: systemPrompt,
-                maxOutputTokens: 500,
+                maxOutputTokens: 1000, // Gemini 2.5 thinking tokens share this budget; 500 truncated mid-sentence
                 temperature: 0.7,
             },
             context: 'chat',
+            userRegionPreference,
+            language: lang,
         });
 
         const generatedText = (result.text || '').trim();

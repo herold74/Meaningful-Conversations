@@ -3,6 +3,24 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.5.0] - 2026-07-28
+
+AI SDK majors on staging, Practice region routing, regression harness hardening, Admin mobile polish.
+
+### Added
+- **LLM upgrade skill** (`mc-llm-upgrade`): staging classic/practice QA sequence, provider forcing, score interpretation
+- **Regression provider guard:** auto region force (`us`/`eu`), live-provider asserts, model IDs, environment fingerprints, STRUCTURAL/FLAKE/NOISE compare classification, transcript samples
+
+### Changed
+- **`@google/genai` ^2.13.0** and **`@mistralai/mistralai` ^2.5.0** (ESM dynamic import; Mistral `responseFormat` + content normalization)
+- **Practice send-message / practice-coach-turn:** pass `userRegionPreference` (same as chat) so Gemini regression works with staging `AI_PROVIDER=mistral`
+- **Adaptive coach `maxOutputTokens`:** 500 → **1000** (Gemini 2.5 thinking shared the budget and truncated mid-sentence)
+- **Admin tab bar:** icon-only on small/phone portrait (no more truncated “Benutz/Verwal”); labels from `sm`+ with priority
+
+### Fixed
+- Practice Gemini regression falsely using Mistral coachee when region was forced to US
+- Truncated adaptive-coach lines causing Practice score collapses (esp. `relationship-boundary`)
+
 ## [2.4.0] - 2026-07-27
 
 Trademark-neutral method taxonomy, Sam coach rename, and alias resolution for legacy IDs.

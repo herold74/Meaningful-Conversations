@@ -127,6 +127,12 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       return res.status(429).json({ error: 'Daily usage limit reached. Please try again tomorrow.', errorCode: 'DAILY_COST_CAP' });
     }
 
+    const regionUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { aiRegionPreference: true },
+    });
+    const userRegionPreference = regionUser?.aiRegionPreference || 'optimal';
+
     const systemInstruction = buildCoacheeSystemPrompt({
       frameworkId: resolvedFrameworkId,
       scenarioId,
@@ -151,6 +157,8 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
         temperature: 0.85,
       },
       context: 'chat',
+      userRegionPreference,
+      language,
     };
 
     if (stream) {
@@ -171,6 +179,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
           temperature: 0.85,
         },
         context: 'chat',
+        userRegionPreference,
         language,
       });
 

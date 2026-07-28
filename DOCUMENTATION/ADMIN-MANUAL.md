@@ -33,13 +33,16 @@ This document is for administrators only and provides detailed instructions for 
 3. Select **"Admin Panel"** (only visible to admins)
 
 ### Admin Panel Overview
-The Admin Panel has several tabs, now with a **fully responsive design** optimized for mobile devices:
+The Admin Panel has several tabs with a **responsive** layout (no horizontal scroll):
 - **Users** - User management and statistics
 - **Codes** - Upgrade code generation and tracking
 - **Tickets** - Support ticket management
 - **Feedback** - Session ratings and message reports
-- **Runner** - Test scenarios for QA testing (Comprehensive Test Suite)
-- **API Usage** - AI API cost monitoring
+- **Runner** - Test scenarios for QA testing (developers)
+- **Practice Analytics** - Aggregate Coach Practice stats
+- **API Usage** - AI provider switching and cost monitoring
+
+**Mobile / narrow portrait:** Tab **labels are hidden** — only icons show (full name via long-press / tooltip `title` and `aria-label`). Labels reappear from ~`sm`/`md` breakpoints upward, with User Management keeping text longest. This avoids truncated labels such as “Benutz/Verwal”.
 
 ---
 

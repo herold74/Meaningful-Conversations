@@ -30,6 +30,15 @@ import {
   makeRunId,
   runDir,
 } from './regression/runStorage.mjs';
+import {
+  regionForProvider,
+  expectedLiveProvider,
+  setAiRegion,
+  fetchModelMapping,
+  buildEnvironmentFingerprint,
+  warnEnvironmentDrift,
+  practiceTranscriptSample,
+} from './regression/providerGuard.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -218,7 +227,36 @@ async function practiceSendMessage(apiBase, token, config, history, language) {
     scopeBoundaryTheme: null,
     stream: false,
   });
-  return { text: data.text, provider: data.provider ?? null };
+  // Backend currently returns model id in `provider` field for practice send-message
+  const model = data.model || data.provider || null;
+  const providerHint = typeof model === 'string' && model.includes('mistral')
+    ? 'mistral'
+    : (typeof model === 'string' && model.includes('gemini') ? 'google' : null);
+  return { text: data.text, provider: providerHint, model };
+}
+
+function assertPracticeLiveRouting(scenarioId, responses, cliProvider) {
+  const expected = expectedLiveProvider(cliProvider);
+  const bad = [];
+  for (const r of responses || []) {
+    const model = (r.coacheeModel || r.coacheeProvider || '').toLowerCase();
+    if (!model) {
+      bad.push('(missing coachee model)');
+      continue;
+    }
+    if (expected === 'google' && !model.includes('gemini') && !model.includes('google')) {
+      bad.push(model);
+    }
+    if (expected === 'mistral' && !model.includes('mistral')) {
+      bad.push(model);
+    }
+  }
+  if (bad.length) {
+    throw new Error(
+      `${scenarioId}: expected coachee on ${expected} (--provider ${cliProvider}), `
+      + `got models: ${[...new Set(bad)].join(', ')}. Region force may have failed.`,
+    );
+  }
 }
 
 async function generateCoachTurn(apiBase, token, params) {
@@ -255,10 +293,14 @@ function extractScores(evalResult) {
 }
 
 function buildSnapshot(scenarioId, language, difficulty, labMode, provider, responses, stages, scores, meta = {}) {
+  const coacheeModels = responses.map((r) => r.coacheeModel).filter(Boolean);
+  const model = coacheeModels[0] || null;
   return {
     version: REGRESSION_VERSION,
     exportedAt: new Date().toISOString(),
     provider,
+    liveProvider: expectedLiveProvider(provider),
+    model,
     scenarioId,
     labMode,
     language,
@@ -269,6 +311,7 @@ function buildSnapshot(scenarioId, language, difficulty, labMode, provider, resp
       stage: stages[i],
       coachProvider: r.coachProvider ?? null,
       coacheeProvider: r.coacheeProvider ?? null,
+      coacheeModel: r.coacheeModel ?? null,
     })),
     scores,
     meta,
@@ -386,7 +429,7 @@ async function runSession(apiBase, token, scenarioId, language, labMode = 'adapt
 
     process.stdout.write(`  Turn ${i + 1}/${SAM_STAGE_COMPLETE_TURNS} (${stage})… `);
     const coachee = await practiceSendMessage(apiBase, token, practiceConfig, chatHistory, language);
-    console.log(`coachee ok${coachee.provider ? ` [${coachee.provider}]` : ''}`);
+    console.log(`coachee ok${coachee.model ? ` [${coachee.provider || '?'}/${coachee.model}]` : ''}`);
 
     chatHistory.push({
       id: `practice-coachee-${i}`,
@@ -400,6 +443,7 @@ async function runSession(apiBase, token, scenarioId, language, labMode = 'adapt
       botResponse: coachee.text,
       coachProvider,
       coacheeProvider: coachee.provider,
+      coacheeModel: coachee.model,
     });
 
     if (i < SAM_STAGE_COMPLETE_TURNS - 1) await pauseBetweenTurns();
@@ -439,32 +483,56 @@ function verifyBaselineIntegrity(outDir, manifest) {
 
 async function runBaseline(args, token) {
   fs.mkdirSync(args.out, { recursive: true });
+
+  const region = regionForProvider(args.provider);
+  const live = expectedLiveProvider(args.provider);
+  console.log(`Forcing AI region "${region}" so live provider is "${live}" (--provider ${args.provider})…`);
+  await setAiRegion(args.api, token, region);
+  const modelMapping = await fetchModelMapping(args.api, token);
+
+  const environment = buildEnvironmentFingerprint({
+    apiBase: args.api,
+    packageVersion: packageJson.version,
+    cliProvider: args.provider,
+    modelMapping,
+    aiRegionForced: region,
+    suite: 'practice',
+  });
+
+  if (args.reference) {
+    console.log('⚠ --reference: updating canonical baseline. Prefer same staging API + model mapping as future compares.');
+  }
+
   const manifest = {
     kind: args.storageKind ?? (args.reference ? 'reference' : 'run'),
     runId: args.runId ?? null,
     provider: args.provider,
+    liveProvider: live,
     apiBase: args.api,
     createdAt: new Date().toISOString(),
     packageVersion: packageJson.version,
     language: args.language,
     labMode: 'adaptive',
     difficulty: 'easy',
+    environment,
     scenarios: {},
   };
 
   for (const scenarioId of (args.scenarios ?? SCENARIO_IDS)) {
-    console.log(`\n▶ Baseline: ${scenarioId} [${args.provider}]`);
+    console.log(`\n▶ Baseline: ${scenarioId} [${args.provider} → ${live}]`);
     const { responses, stages, scores } = await runSession(args.api, token, scenarioId, args.language);
+    assertPracticeLiveRouting(scenarioId, responses, args.provider);
     const snapshot = buildSnapshot(scenarioId, args.language, 'easy', 'adaptive', args.provider, responses, stages, scores, {
       apiBase: args.api,
       runId: manifest.runId,
+      environment,
     });
     const filename = snapshotFilename(scenarioId, args.language, args.provider);
     const filepath = path.join(args.out, filename);
     fs.writeFileSync(filepath, JSON.stringify(snapshot, null, 2));
-    manifest.scenarios[scenarioId] = { file: filename, scores };
+    manifest.scenarios[scenarioId] = { file: filename, scores, model: snapshot.model };
     console.log(`  Saved ${filepath}`);
-    console.log(`  Scores: method ${scores.methodCompliance}, overall ${scores.overallScore}, flow ${scores.sessionFlowCoherent}`);
+    console.log(`  Scores: method ${scores.methodCompliance}, overall ${scores.overallScore}, flow ${scores.sessionFlowCoherent}${snapshot.model ? `, model ${snapshot.model}` : ''}`);
   }
 
   fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify(manifest, null, 2));
@@ -478,11 +546,11 @@ async function runBaseline(args, token) {
       path: path.relative(BASELINES_ROOT, args.out),
       packageVersion: manifest.packageVersion,
     });
-    console.log(`\n✓ Test run complete → ${args.out}`);
+    console.log(`\n✓ Test run complete (${args.provider} → live ${live}) → ${args.out}`);
     console.log(`  Run ID: ${manifest.runId}`);
     console.log(`  Compare: npm run practice-regression -- compare-offline --baseline-provider ${args.provider} --current-provider ${args.provider} --current-run ${manifest.runId} --language ${args.language}`);
   } else {
-    console.log(`\n✓ Reference baseline updated (${args.provider}) → ${args.out}`);
+    console.log(`\n✓ Reference baseline updated (${args.provider} → live ${live}) → ${args.out}`);
   }
 }
 
@@ -512,12 +580,29 @@ async function runCompare(args, token) {
   process.exit(allOk ? 0 : 1);
 }
 
+function loadManifestSafe(dir) {
+  const p = path.join(dir, 'manifest.json');
+  if (!fs.existsSync(p)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function runCompareOffline(args, { regression = false } = {}) {
   const headline = `Offline: ${args.baselineProvider} → ${args.currentProvider}`;
   console.log(headline);
   console.log(`Mode: saved result diff (no API)`);
   console.log(`  Reference: ${args.baselineDir}`);
   console.log(`  Current:   ${args.currentDir}`);
+
+  const baselineManifest = loadManifestSafe(args.baselineDir);
+  const currentManifest = loadManifestSafe(args.currentDir);
+  const envWarnings = warnEnvironmentDrift(baselineManifest, currentManifest);
+  for (const w of envWarnings) {
+    console.warn(`  ⚠ Environment: ${w}`);
+  }
 
   const report = {
     comparedAt: new Date().toISOString(),
@@ -530,6 +615,7 @@ function runCompareOffline(args, { regression = false } = {}) {
     currentDir: args.currentDir,
     currentRun: args.currentRun ?? null,
     packageVersion: packageJson.version,
+    environmentWarnings: envWarnings,
     results: [],
   };
   let allOk = true;
@@ -539,16 +625,31 @@ function runCompareOffline(args, { regression = false } = {}) {
     const current = loadSnapshot(args.currentDir, scenarioId, args.language, args.currentProvider);
     const comparison = compareToBaseline(baseline, current.scores, { exploratory: !regression });
     if (regression && !comparison.ok) allOk = false;
+    const enriched = {
+      ...comparison,
+      models: {
+        baseline: baseline.model ?? null,
+        current: current.model ?? null,
+      },
+      transcriptSample: {
+        baseline: practiceTranscriptSample(baseline),
+        current: practiceTranscriptSample(current),
+      },
+    };
     report.results.push({
       scenarioId,
-      comparison,
+      comparison: enriched,
       baselineScores: baseline.scores,
       currentScores: current.scores,
       baselineExportedAt: baseline.exportedAt,
       currentExportedAt: current.exportedAt,
+      models: enriched.models,
     });
     console.log(`\n▶ ${scenarioId}`);
     console.log(`  reference: ${baseline.exportedAt} | current: ${current.exportedAt}`);
+    if (enriched.models.baseline || enriched.models.current) {
+      console.log(`  models: ${enriched.models.baseline || '?'} → ${enriched.models.current || '?'}`);
+    }
     const marker = regression ? (comparison.ok ? '✓' : '⚠') : '·';
     console.log(`  ${marker} ${comparison.summary}`);
     for (const d of comparison.deltas) {
@@ -559,6 +660,10 @@ function runCompareOffline(args, { regression = false } = {}) {
       } else if (d.delta !== 0 || d.flagged) {
         console.log(`    ${d.field}: ${d.baseline} → ${d.current} (Δ ${d.delta >= 0 ? '+' : ''}${d.delta})${d.flagged ? ' ⚠' : ''}`);
       }
+    }
+    const sample = enriched.transcriptSample.current?.[0];
+    if (sample?.coachee) {
+      console.log(`  sample coachee: ${sample.coachee.slice(0, 120)}${sample.coachee.length > 120 ? '…' : ''}`);
     }
   }
 
@@ -582,10 +687,20 @@ async function main() {
   const token = await login(args.api, DEFAULT_EMAIL, DEFAULT_PASSWORD);
   console.log(`Logged in as ${DEFAULT_EMAIL}`);
 
-  if (args.command === 'baseline') {
-    await runBaseline(args, token);
-  } else {
-    await runCompare(args, token);
+  const restoreRegion = process.env.MC_RESTORE_AI_REGION || 'optimal';
+  try {
+    if (args.command === 'baseline') {
+      await runBaseline(args, token);
+    } else {
+      await runCompare(args, token);
+    }
+  } finally {
+    try {
+      await setAiRegion(args.api, token, restoreRegion);
+      console.log(`Restored AI region to "${restoreRegion}"`);
+    } catch (err) {
+      console.warn(`Could not restore AI region to ${restoreRegion}: ${err.message}`);
+    }
   }
 }
 
