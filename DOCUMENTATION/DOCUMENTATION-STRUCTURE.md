@@ -62,6 +62,7 @@ Located in `/memory-bank/`:
 - **VERSION-MANAGEMENT.md** - Version update workflow
 
 ### Features
+- **COACH-BEHAVIOR-MATRIX.md** - **⭐ Complete behavior matrix of all coaches (contracting, rhythm, closing, advice policy, boundaries)**
 - **TTS-FINAL-STATUS.md** - Text-to-Speech implementation (current)
 - **TTS-HYBRID-README.md** - Hybrid TTS architecture (⚠️ see TTS-FINAL-STATUS for latest)
 - **TTS-LOCAL-DEVELOPMENT.md** - Local TTS setup
@@ -151,9 +152,10 @@ Located in `/memory-bank/`:
 
 ### Understanding Features
 1. memory-bank/progress.md (feature list)
-2. TTS-FINAL-STATUS.md (voice features)
-3. PERSONALITY-PROFILE-IMPLEMENTATION.md (personality system)
-4. TRANSCRIPT-EVALUATION-USER-GUIDE.md (transcript analysis for clients)
+2. **COACH-BEHAVIOR-MATRIX.md** (all coach personas and prompt behavior)
+3. TTS-FINAL-STATUS.md (voice features)
+4. PERSONALITY-PROFILE-IMPLEMENTATION.md (personality system)
+5. TRANSCRIPT-EVALUATION-USER-GUIDE.md (transcript analysis for clients)
 
 ### Debugging/Maintaining
 1. **TROUBLESHOOTING-INDEX.md** (quick reference for common issues)
