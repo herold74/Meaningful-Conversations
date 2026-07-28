@@ -3,11 +3,19 @@
 ## Current Status
 **Version:** 2.4.3
 **Branch:** `main`
-**Staging:** Deployed **2026-07-28**, Build **4**, v2.4.3 — https://mc-beta.manualmode.at (health OK; frontend 200, API ok)
+**Staging:** Deployed **2026-07-28**, Build **5**, v2.4.3 — https://mc-beta.manualmode.at (health OK; frontend 200, API ok; Mistral SDK **2.5.0** verified in container)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 4** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 5** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
+
+## Recent Changes (2026-07-28 — Tier 3 Session 3: Mistral SDK 1→2)
+
+- **Commit `e7f7899`:** `@mistralai/mistralai` **^1.15.1 → ^2.5.0** (ESM-only)
+- **`aiProviderService.js`:** `getMistralClient()` now `async` + `await import()` (same pattern as Google); `response_format` → `responseFormat`; `normalizeMistralContent()` for `string | ContentChunk[]`
+- **Tests:** 661 backend tests pass; ContentChunk normalization covered
+- **Staging:** Build **5** deployed (`61fdbc0` build sync); container reports installed **2.5.0**, ESM import OK
+- **Next (manual):** Quality checkpoint vs baseline — Dynamischer Test Runner + Coach-Übung with **Mistral/EU** only
 
 ## Recent Changes (2026-07-28 — Staging deploy Build 4 + coach tier commit)
 
