@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.4.3
 **Branch:** `main`
-**Staging:** Deployed **2026-07-28**, Build **5**, v2.4.3 — https://mc-beta.manualmode.at (health OK; frontend 200, API ok; Mistral SDK **2.5.0** verified in container)
+**Staging:** Deployed **2026-07-28**, Build **6**, v2.4.3 — https://mc-beta.manualmode.at (health OK; `@google/genai` **2.13.0**, `@mistralai/mistralai` **2.5.0**; Mistral chat=medium)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 5** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
+**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo/Xcode **2.4.3 Build 6** — **`npm run sync:ios-staging`** → `mc-beta.manualmode.at`
 
 **Production deploy gate (2026-07-27):** **No production deploy of 2.4.x** until **iOS 2.4.x+ is live in the App Store**. Staging may run ahead.
+
+## Recent Changes (2026-07-28 — Tier 3 Session 2: Google GenAI 1→2)
+
+- **Commit `94a9ca3`:** `@google/genai` **^1.20.0 → ^2.13.0** (Interactions-only breaking changes; `generateContent` unaffected)
+- **Staging:** Build **6** — GenAI **2.13.0** installed; Mistral chat reset to **medium** (analysis medium)
+- **Quality checkpoint (real Google):** Classic run `…genai-v2-google` — **29/29 turns `provider=google`**; auto-checks match baseline pattern (8/9; same `session_updates` flake). Practice: overall **10/10/10** vs baseline 10/10/6 — no regression
+- **Note:** `--provider gemini` alone does **not** force Google when staging `AI_PROVIDER=mistral` + user `optimal`; must set user `aiRegionPreference=us` for Gemini regression
 
 ## Recent Changes (2026-07-28 — Tier 3 Session 3: Mistral SDK 1→2)
 
@@ -15,7 +22,10 @@
 - **`aiProviderService.js`:** `getMistralClient()` now `async` + `await import()` (same pattern as Google); `response_format` → `responseFormat`; `normalizeMistralContent()` for `string | ContentChunk[]`
 - **Tests:** 661 backend tests pass; ContentChunk normalization covered
 - **Staging:** Build **5** deployed (`61fdbc0` build sync); container reports installed **2.5.0**, ESM import OK
-- **Next (manual):** Quality checkpoint vs baseline — Dynamischer Test Runner + Coach-Übung with **Mistral/EU** only
+- **Quality checkpoint (2026-07-28, staging, Mistral):** Headless classic + practice regression vs `local-mistral` reference
+  - Classic run `2026-07-28T19-03-49-mistral-mistral-v2-post`: **8/9** auto-checks; only flake: `session_dpfl_post_coaching` missing `session_updates` (analysis variance, not SDK error)
+  - Practice run `2026-07-28T19-07-10-mistral-mistral-v2-post`: all 3 scenarios completed; scores **equal or better** vs baseline (overall 9/9/9; method Δ within/above noise)
+  - **Verdict:** Mistral v2 OK for staging — no structural SDK regression
 
 ## Recent Changes (2026-07-28 — Staging deploy Build 4 + coach tier commit)
 
