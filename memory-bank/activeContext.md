@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deploying **2026-07-28/29**, Build **1**, v2.5.0 — https://mc-beta.manualmode.at
+**Staging:** Deployed **2026-07-29**, Build **2**, v2.5.0 — https://mc-beta.manualmode.at (health OK; TTS retagged 2.5.0)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
 **App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo targeting **2.5.0** — sync with `npm run sync:ios-staging` for beta / `npm run build && npx cap sync ios` for Store path
 
