@@ -99,8 +99,8 @@ Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare
 ### 1.1 Intent Picker & Name
 
 Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
-- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Gloria)
-- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Max, Ava, Kenji, Chloe)
+- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Sam, Gloria)
+- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Max, Ava, Gabrielle, Kenji, Chloe, Mike)
 - **Begleitendes Coaching** — Leitet Sie zum Exklusiv-Bereich (Rob, Victor — nur für Klienten)
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird.
@@ -200,8 +200,8 @@ Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
 | Stufe | Zugang | Coaches | Funktionen |
 | :--- | :--- | :--- | :--- |
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
-| **Registriert** | Kostenloses Konto | + Gloria | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
-| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
+| **Registriert** | Kostenloses Konto | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
+| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
 | **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, Coach-Übung, alle Features |
 
 **So upgraden Sie:**
@@ -495,15 +495,18 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. 
 
 **Ihr Guide:**
 - **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
+- **Sam** -- Kurzes zukunftsorientiertes Coaching für Beruf und Alltag (Registriert)
 
 **Ihre Interviewerin:**
 - **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
 
 **Ihre Coaches:**
+- **Gabrielle** -- Vier-Phasen-Coaching von Klarheit zu verbindlichem Handeln (Registriert)
 - **Max** -- Motivierender Coach, der Ihnen hilft, größer zu denken und Ihr Potenzial freizusetzen
 - **Ava** -- Strategische Beraterin für Entscheidungsfindung und Prioritätenmanagement
 - **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
 - **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
+- **Mike** -- Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung (Premium)
 - **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten)
 - **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
 
@@ -526,6 +529,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 **Beispiel-Situationen:** "Ich habe ein konkretes Problem und muss meine nächsten Schritte definieren." / "Ich möchte mich auf ein Gespräch vorbereiten." / "Ich brauche jemanden, der mir hilft, eine erlebte Situation effizient zu reflektieren."
 
 **Zugang:** Kostenlos für alle Benutzer
+</div>
+</details>
+
+<details>
+<summary>Sam -- Zukunftsorientiert, Effizient, Vorwärtsgerichtet (Registriert)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Sam nutzt kurzes zukunftsorientiertes Coaching — gewünschte Zukunft, Ausnahmen und Skalierung — für berufliche und alltägliche Herausforderungen, wenn Problemgespräch feststeckt.
+
+**Ideal für:**
+- Berufliche und alltägliche Themen mit Fokus auf die gewünschte Zukunft
+- Situationen, in denen klassisches Problemanalysieren nicht weiterhilft
+- Effiziente Sitzungen mit klarem nächsten Schritt
+
+**Beispiel-Situationen:** "Ich hänge in der Problemanalyse fest und brauche einen Blick nach vorne." / "Was wäre anders, wenn das Thema gelöst wäre?" / "Ich möchte einen kleinen konkreten Schritt finden."
+
+**Zugang:** Registrierte Benutzer
 </div>
 </details>
 
@@ -555,6 +575,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Abläufe und Workflows beschreiben und hinterfragen
 
 **Beispiel-Situationen:** "Ich möchte meine App-Idee aus Investorensicht durchleuchten." / "Interviewe mich zu meinem Projektkonzept für eine Präsentation." / "Ich möchte einen Workflow beschreiben und dabei Schwachstellen aufdecken."
+
+**Zugang:** Registrierte Benutzer
+</div>
+</details>
+
+<details>
+<summary>Gabrielle -- Strukturiert, Coaching, Klientengeführt (Registriert)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Gabrielle begleitet Sie im Vier-Phasen-Coaching — Session-Ziel, Ist-Zustand, Möglichkeiten, Commitment — von Klarheit zu verbindlichem Handeln.
+
+**Ideal für:**
+- Klassisches Coaching zu persönlichen und beruflichen Zielen
+- Strukturierte Sitzungen mit klarem Session-Ziel und Commitment
+- Themen, bei denen Sie eigene Lösungen entwickeln möchten
+
+**Beispiel-Situationen:** "Ich möchte ein konkretes Ziel für diese Sitzung definieren." / "Ich sehe viele Optionen, brauche aber Klarheit für den nächsten Schritt." / "Ich will mich zu einer Handlung verbindlich entscheiden."
 
 **Zugang:** Registrierte Benutzer
 </div>
@@ -631,6 +668,23 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 **Besonderes Feature:** Chloe bietet **geführte Meditationsübungen** an (🔔), die speziell auf achtsame Selbstreflexion ausgerichtet sind.
 
 **Beispiel-Situationen:** "Ich denke immer das Schlimmste und möchte das ändern." / "Ich möchte verstehen, warum ich in bestimmten Situationen immer gleich reagiere." / "Ich brauche einen strukturierten Ansatz für meine Herausforderung."
+
+**Zugang:** Premium-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Mike -- Ambivalenz-Coaching, Empathisch, Nicht-direktiv (Premium)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Mike arbeitet mit Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung — er evoziert Ihre eigene Motivation, statt zu überzeugen.
+
+**Ideal für:**
+- Gemischte Gefühle gegenüber einer Veränderung
+- Eigene Motivation und Change Talk hervorholen
+- Kooperatives, nicht-direktives Coaching bei Widerstand
+
+**Beispiel-Situationen:** "Ich möchte etwas ändern, bin mir aber unsicher." / "Ein Teil von mir will loslegen, ein anderer zögert." / "Ich brauche jemanden, der meine Ambivalenz annimmt, statt mich zu überreden."
 
 **Zugang:** Premium-Benutzer
 </div>
@@ -1054,8 +1108,8 @@ After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatar
 ### 1.1 Intent Picker & Name
 
 On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
-- **Communication** — Routes you to the Management & Communication section (Nobody, Gloria)
-- **Coaching** (featured) — Routes you to the Coaching section (Max, Ava, Kenji, Chloe)
+- **Communication** — Routes you to the Management & Communication section (Nobody, Sam, Gloria)
+- **Coaching** (featured) — Routes you to the Coaching section (Max, Ava, Gabrielle, Kenji, Chloe, Mike)
 - **Augmented Coaching** — Routes you to the Exclusive section (Rob, Victor — Client only)
 
 Your chosen intent determines which section is highlighted in the coach selection screen.
@@ -1155,8 +1209,8 @@ The app offers four access tiers with increasing functionality:
 | Tier | Access | Coaches | Features |
 | :--- | :--- | :--- | :--- |
 | **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
-| **Registered** | Free account | + Gloria | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
-| **Premium** | Paid upgrade | + Kenji, Chloe | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
+| **Registered** | Free account | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
+| **Premium** | Paid upgrade | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
 | **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, Coach Practice, all features |
 
 **How to upgrade:**
@@ -1419,15 +1473,18 @@ On the **Select a Coach** screen, you'll see a list of available coaches. Each c
 
 **Your Guide:**
 - **Nobody** -- Your pragmatic sparring partner for management and communication topics
+- **Sam** -- Brief forward-focused coaching for work and everyday challenges (Registered)
 
 **Your Interviewer:**
 - **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
 
 **Your Coaches:**
+- **Gabrielle** -- Four-stage coaching from clarity to committed action (Registered)
 - **Max** -- Motivational coach who helps you think bigger and unlock your potential
 - **Ava** -- Strategic advisor for decision-making and priority management
 - **Kenji** -- Stoic philosopher for resilience and inner strength (Premium)
 - **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
+- **Mike** -- Ambivalence coaching for mixed feelings about change (Premium)
 - **Rob** -- Mental fitness and mindfulness against self-sabotage (Client)
 - **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
 
@@ -1450,6 +1507,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 **Example Situations:** "I have a specific problem and need to define my next steps." / "I want to prepare for a conversation." / "I need someone to help me efficiently reflect on a situation I experienced."
 
 **Access:** Free for all users
+</div>
+</details>
+
+<details>
+<summary>Sam -- Forward-Focused, Efficient, Future-Oriented (Registered)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Sam uses brief forward-focused coaching — preferred future, exceptions, and scaling — for work and everyday challenges when problem-talk is stuck.
+
+**Ideal for:**
+- Work and everyday topics with a focus on the preferred future
+- Situations where classic problem analysis no longer helps
+- Efficient sessions with a clear next step
+
+**Example Situations:** "I'm stuck in problem analysis and need a forward-looking perspective." / "What would be different if this were resolved?" / "I want to find one small concrete step."
+
+**Access:** Registered users
 </div>
 </details>
 
@@ -1479,6 +1553,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Describing and questioning workflows and processes
 
 **Example Situations:** "I want to examine my app idea from an investor's perspective." / "Interview me about my project concept for a presentation." / "I want to describe a workflow and uncover weak points."
+
+**Access:** Registered users
+</div>
+</details>
+
+<details>
+<summary>Gabrielle -- Structured, Coaching, Client-Led (Registered)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Gabrielle guides you through four-stage coaching — session aim, current state, possibilities, commitment — from clarity to committed action.
+
+**Ideal for:**
+- Classic coaching on personal and professional goals
+- Structured sessions with a clear session aim and commitment
+- Topics where you want to develop your own solutions
+
+**Example Situations:** "I want to define a concrete goal for this session." / "I see many options but need clarity for my next step." / "I want to make a committed decision about an action."
 
 **Access:** Registered users
 </div>
@@ -1555,6 +1646,23 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 **Special Feature:** Chloe offers **guided meditation exercises** (🔔), specifically designed for mindful self-reflection.
 
 **Example Situations:** "I always assume the worst and want to change that." / "I want to understand why I always react the same way in certain situations." / "I need a structured approach for my challenge."
+
+**Access:** Premium users
+</div>
+</details>
+
+<details>
+<summary>Mike -- Ambivalence Coaching, Empathic, Non-Directive (Premium)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Mike uses ambivalence coaching for mixed feelings about change — evoking your own motivation rather than persuading you.
+
+**Ideal for:**
+- Mixed feelings about making a change
+- Evoking your own motivation and change talk
+- Collaborative, non-directive coaching when you feel resistance
+
+**Example Situations:** "I want to change something but I'm unsure." / "Part of me wants to start, another part hesitates." / "I need someone who accepts my ambivalence instead of pushing me."
 
 **Access:** Premium users
 </div>
