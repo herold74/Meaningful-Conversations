@@ -63,6 +63,7 @@ Located in `/memory-bank/`:
 
 ### Features
 - **COACH-BEHAVIOR-MATRIX.md** - **⭐ Complete behavior matrix of all coaches (contracting, rhythm, closing, advice policy, boundaries)**
+- **coach-behavior-matrix-infographic.html** - **Printable infographic** (A4 landscape) summarizing all 14 personas and comparison matrix; open in browser → Print → Save as PDF (landscape, background graphics on). Optional pre-generated copy: **coach-behavior-matrix-infographic.pdf** (same folder, if present).
 - **TTS-FINAL-STATUS.md** - Text-to-Speech implementation (current)
 - **TTS-HYBRID-README.md** - Hybrid TTS architecture (⚠️ see TTS-FINAL-STATUS for latest)
 - **TTS-LOCAL-DEVELOPMENT.md** - Local TTS setup

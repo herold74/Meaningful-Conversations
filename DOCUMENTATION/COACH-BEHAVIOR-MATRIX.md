@@ -14,13 +14,13 @@ Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in 
 | `gloria-life-context` | Gloria | `/avatars/gloria.png` | Interviewer (kein Coach) | — | guest |
 | `gloria-interview` | Gloria | `/avatars/gloria.png` | Interviewer (kein Coach) | — | registered |
 | `nexus-goal-path-solution` | Nobody | `/avatars/nobody.png` | Coach / Sparringspartner | `goal-path-solution` | guest |
-| `sam-forward-focused` | Sam | `/avatars/sam.png` | Coach | `forward-focused-coaching` | guest |
-| `gabrielle-four-stage` | Gabrielle | `/avatars/gabrielle.png` | Coach | `four-stage-coaching` | guest |
+| `sam-forward-focused` | Sam | `/avatars/sam.png` | Coach | `forward-focused-coaching` | registered |
+| `gabrielle-four-stage` | Gabrielle | `/avatars/gabrielle.png` | Coach | `four-stage-coaching` | registered |
 | `max-ambitious` | Max | `/avatars/max.png` | Coach | `ambitious-coaching` | guest |
 | `ava-strategic` | Ava | `/avatars/ava.png` | Coach | `strategic-coaching` | guest |
 | `kenji-resilience` | Kenji | `/avatars/kenji.png` | Coach | `resilience-coaching` | premium |
 | `chloe-structured-reflection` | Chloe | `/avatars/chloe.png` | Coach | `structured-reflection` | premium |
-| `mike-ambivalence-coaching` | Mike | `/avatars/mike.png` | Coach | `ambivalence-coaching` | registered |
+| `mike-ambivalence-coaching` | Mike | `/avatars/mike.png` | Coach | `ambivalence-coaching` | premium |
 | `rob` | Rob | `/avatars/rob.png` | Coach | `mental-fitness-coaching` | client |
 | `victor-systemic-coaching` | Victor | `/avatars/victor.png` | Coach | `systemic-coaching` | client |
 | `bekky-thought-audit` | Bekky | `/avatars/bekky.png` | Coach / Audit-Tool | `thought-audit` | client |
@@ -99,7 +99,7 @@ Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in 
 | Mike | Ja | Ja | Recap Change Talk + optionaler Schritt |
 | Rob | Ja (eigenes Protokoll) | Ja | Bewusstseins-/Praxis-Schritt |
 | Victor | Ja (eigenes Protokoll) | Ja (Phase 5) | Differenzierungs-Erkenntnis |
-| Bekky | Gleichgewichtsfrage | **Nein** | Perspektiven-Wahl + optional `AUDIT_TASK` |
+| Bekky | Gleichgewichtsfrage | **Nein** | Perspektiven-Wahl; optional **Realisierbarer nächster Schritt** via `[AUDIT_TASK]` (Abschnitt *Strukturierte Chat-Marker*) |
 | Dan | Kurz | **Nein** (nur Wunschausgang) | „Was wissen Sie jetzt …?" |
 
 **Shared Abschluss-Regeln** (`sessionEnding`): Nach Schluss **keine** weiteren Fragen, **keine** neuen Themen, **keine** Verlängerung.
@@ -175,10 +175,22 @@ Gilt für Gloria, alle Coaches und Interviewer gleichermaßen.
 | Mike | Ambivalenz; OARS; Widerstand reflektieren, nicht widerlegen |
 | Rob | PQ-Style Saboteur/Sage; client-only Tier |
 | Victor | Business vs. Privat Branching; Genogramm; „Ihr Anteil am Tanz" |
-| Bekky | Thought Audit; `[REFERRAL:…]` / `[AUDIT_TASK]`; fremdgerichtete Gedanken |
+| Bekky | Thought Audit; `[REFERRAL:…]`-Handoff; `[AUDIT_TASK]` → Session Review; fremdgerichtete Gedanken |
 | Dan | Client exact language; keine importierten Metaphern; `[REFERRAL:bekky-thought-audit]` |
 | Gloria (LC) | Life-Context-Interview; einmalig; keine Folgesitzung |
 | Gloria (Interview) | Strukturiertes Projekt-/Ideen-Interview |
+
+---
+
+## Strukturierte Chat-Marker (Bekky & Dan)
+
+| Marker | Wer | Wann | Frontend-Wirkung |
+|--------|-----|------|------------------|
+| `[REFERRAL:bot-id,…]` | Bekky, Dan, Victor | Handoff an anderen Coach | Block am Ende der Nachricht wird entfernt; UI zeigt Wechsel-Buttons (`ChatView`) |
+| `[AUDIT_TASK]…[/AUDIT_TASK]` | **Nur Bekky** | Klient will Perspektive als nächsten Schritt | Block wird entfernt; Inhalt → Session Review „Realisierbare nächste Schritte“ |
+| `[MEDITATION:X]…[MEDITATION_END]` | Kenji, Chloe | Geführte Übung | Meditation-Player statt Rohtext |
+
+Parsing-Reihenfolge: Meditation → Referral → Audit-Task (`utils/messageMarkers.ts`).
 
 ---
 
@@ -248,7 +260,7 @@ Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizi
 
 ### Mike (`mike-ambivalence-coaching`)
 
-- **Rolle:** Ambivalenz und Veränderungswünsche (registered)
+- **Rolle:** Ambivalenz und Veränderungswünsche (premium)
 - **Haltung:** Partnerschaft, Akzeptanz, Mitgefühl, Evokation
 - **Widerstand:** Reflektieren, nicht argumentieren
 - **Grenzen:** Keine klinische Sucht-/Psychopathologie-Behandlung
@@ -272,7 +284,8 @@ Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizi
 - **Contracting:** **Keins** — direkt Phase 1
 - **Format:** Fremdgerichtete, konkrete Gedanken (nicht globale Selbstlabels)
 - **Routing:** `[REFERRAL:rob,dan-client-language]` oder `[REFERRAL:victor-systemic-coaching,dan-client-language]`
-- **Abschluss:** Gleichgewichtsfrage; optional Life-Context-Task via `[AUDIT_TASK]`
+- **Abschluss:** Gleichgewichtsfrage nach Phase 4 (Perspektiven-Wahl, Zeitanker, optional nächster Schritt)
+- **`[AUDIT_TASK]`-Marker:** Strukturierter Block in Bekkys Chat-Antwort (wird **nicht** im Chat-Bubble angezeigt). Nur wenn der Klient ausdrücklich zustimmt, den gewählten Perspektivwechsel als umsetzbaren Schritt festzuhalten. Format: `[AUDIT_TASK]` … `[/AUDIT_TASK]` mit **einer** Bullet-Zeile (Perspektive + verankerte Situation). Frontend (`messageMarkers.ts`) parst und entfernt den Block; Payload landet in `Message.auditTaskPayload`. Beim Sitzungsende merged `App.tsx` diese Zeile in **Realisierbare nächste Schritte** der Session Review (Deadline „flexibel“). **Kein** direkter Schreibzugriff auf Life Context — Bestätigung erfolgt wie bei anderen Coaches in der Review.
 
 ### Dan (`dan-client-language`)
 

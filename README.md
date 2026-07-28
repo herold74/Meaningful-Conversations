@@ -55,9 +55,12 @@ This project supports full white-label rebranding via environment variables — 
 | **Nobody** | GPS framework, efficient problem-solving | Guest |
 | **Max** | Ambitious, goal-oriented | Guest |
 | **Ava** | Strategic thinking & decision management | Guest |
+| **Sam** | Brief forward-focused coaching | Registered |
 | **Gloria Interview** | Structured interviewing with transcript export | Registered |
+| **Gabrielle** | Four-stage coaching (clarity to commitment) | Registered |
 | **Kenji** | Stoic philosophy & resilience | Premium |
 | **Chloe** | Structured Reflection & Reframing | Premium |
+| **Mike** | Ambivalence coaching for change readiness | Premium |
 | **Rob** | Mental Fitness (PQ/Shirzad Chamine) | Client only |
 | **Victor** | Systemic & analytical coaching | Client only |
 

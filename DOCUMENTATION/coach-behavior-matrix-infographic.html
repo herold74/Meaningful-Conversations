@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coach-Verhaltensmatrix — Meaningful Conversations</title>
+  <style>
+    :root {
+      --primary-teal: #1B7272;
+      --dark-teal: #165a5a;
+      --light-teal: #5BBFBF;
+      --accent-orange: #F59E0B;
+      --bg: #f8fafb;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --border: #d1d5db;
+
+      /* Contracting */
+      --c-kurz: #5BBFBF;
+      --c-voll: #1B7272;
+      --c-kein: #F59E0B;
+      --c-spaet: #165a5a;
+
+      /* Advice */
+      --a-keine: #1B7272;
+      --a-einwilligung: #F59E0B;
+      --a-blockade: #5BBFBF;
+      --a-verboten: #b45309;
+      --a-sokratisch: #165a5a;
+
+      /* Close */
+      --close-yes: #1B7272;
+      --close-no: #9ca3af;
+      --close-partial: #5BBFBF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 10pt;
+      line-height: 1.35;
+      color: var(--text);
+      background: var(--bg);
+      padding: 12mm;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 3px solid var(--primary-teal);
+      padding-bottom: 6mm;
+      margin-bottom: 6mm;
+    }
+
+    .page-header h1 {
+      font-size: 20pt;
+      font-weight: 700;
+      color: var(--dark-teal);
+      letter-spacing: -0.02em;
+    }
+
+    .page-header .subtitle {
+      font-size: 10pt;
+      color: var(--text-muted);
+      margin-top: 2mm;
+    }
+
+    .brand-mark {
+      text-align: right;
+      font-size: 9pt;
+      color: var(--primary-teal);
+      font-weight: 600;
+    }
+
+    h2 {
+      font-size: 12pt;
+      color: var(--dark-teal);
+      margin: 5mm 0 3mm;
+      padding-left: 3mm;
+      border-left: 4px solid var(--accent-orange);
+    }
+
+    h3 {
+      font-size: 10pt;
+      color: var(--text-muted);
+      margin-bottom: 2mm;
+      font-weight: 600;
+    }
+
+    .section { margin-bottom: 5mm; }
+
+    /* ── Section 1: Persona cards ── */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2.5mm;
+    }
+
+    .persona-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      min-height: 28mm;
+      break-inside: avoid;
+    }
+
+    .persona-card.interviewer {
+      border-color: var(--accent-orange);
+      background: #fffbeb;
+    }
+
+    .avatar {
+      width: 9mm;
+      height: 9mm;
+      border-radius: 50%;
+      background: var(--primary-teal);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 9pt;
+      margin-bottom: 1.5mm;
+      flex-shrink: 0;
+    }
+
+    .persona-card.interviewer .avatar { background: var(--accent-orange); }
+    .persona-card.premium .avatar { background: var(--dark-teal); }
+    .persona-card.client .avatar { background: #374151; }
+
+    .persona-name {
+      font-weight: 700;
+      font-size: 9pt;
+      color: var(--dark-teal);
+      line-height: 1.2;
+    }
+
+    .persona-id {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin: 0.5mm 0;
+    }
+
+    .persona-framework {
+      font-size: 7pt;
+      color: var(--primary-teal);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .persona-type {
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      margin-top: auto;
+      padding-top: 1mm;
+    }
+
+    .tier-badge {
+      display: inline-block;
+      font-size: 6pt;
+      padding: 0.3mm 1.5mm;
+      border-radius: 2px;
+      background: #e5e7eb;
+      color: #374151;
+      margin-top: 0.5mm;
+    }
+
+    .tier-badge.guest { background: #d1fae5; color: #065f46; }
+    .tier-badge.registered { background: #dbeafe; color: #1e40af; }
+    .tier-badge.premium { background: #ede9fe; color: #5b21b6; }
+    .tier-badge.client { background: #fef3c7; color: #92400e; }
+
+    /* ── Section 2: Matrix table ── */
+    .matrix-wrap {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+    }
+
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+    }
+
+    table.matrix th {
+      background: var(--dark-teal);
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 2mm 2mm;
+      font-size: 8pt;
+      vertical-align: bottom;
+    }
+
+    table.matrix th:first-child { width: 11%; }
+    table.matrix td {
+      padding: 1.8mm 2mm;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    table.matrix tr:nth-child(even) td { background: #f9fafb; }
+    table.matrix tr:last-child td { border-bottom: none; }
+
+    .coach-cell {
+      font-weight: 700;
+      color: var(--dark-teal);
+      white-space: nowrap;
+    }
+
+    .coach-cell code {
+      display: block;
+      font-family: ui-monospace, monospace;
+      font-size: 6pt;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.5mm 1.5mm;
+      border-radius: 3px;
+      font-size: 7pt;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #fff;
+      margin: 0.3mm 0;
+    }
+
+    .tag-kurz { background: var(--c-kurz); color: #0f3d3d; }
+    .tag-voll { background: var(--c-voll); }
+    .tag-kein { background: var(--c-kein); color: #451a03; }
+    .tag-spaet { background: var(--c-spaet); border: 1px solid var(--light-teal); }
+
+    .tag-adv-keine { background: var(--a-keine); }
+    .tag-adv-einwilligung { background: var(--a-einwilligung); color: #451a03; }
+    .tag-adv-blockade { background: var(--a-blockade); color: #0f3d3d; }
+    .tag-adv-verboten { background: var(--a-verboten); }
+    .tag-adv-sokratisch { background: var(--a-sokratisch); }
+
+    .cell-detail {
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      margin-top: 0.5mm;
+      line-height: 1.25;
+    }
+
+    .close-icons {
+      display: flex;
+      gap: 2mm;
+      flex-wrap: wrap;
+      font-size: 7pt;
+    }
+
+    .close-item {
+      display: flex;
+      align-items: center;
+      gap: 1mm;
+    }
+
+    .dot {
+      width: 3mm;
+      height: 3mm;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-yes { background: var(--close-yes); }
+    .dot-no { background: var(--close-no); }
+    .dot-partial { background: var(--close-partial); }
+
+    /* ── Section 3: Legend ── */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+    }
+
+    .legend-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3mm;
+      break-inside: avoid;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2mm;
+      margin-top: 2mm;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 1.5mm;
+      font-size: 8pt;
+    }
+
+    .legend-note {
+      font-size: 8pt;
+      color: var(--text-muted);
+      margin-top: 2mm;
+      line-height: 1.4;
+    }
+
+    .footer {
+      margin-top: 5mm;
+      padding-top: 3mm;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 8pt;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: var(--primary-teal);
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+
+    .page-break { page-break-before: always; }
+
+    /* ── Print ── */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 9pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .persona-card,
+      .matrix-wrap,
+      .legend-box,
+      .tag,
+      .avatar,
+      table.matrix th,
+      .dot {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .section { break-inside: avoid; }
+
+      table.matrix { font-size: 7.5pt; }
+      table.matrix tr { break-inside: avoid; }
+
+      .no-print { display: none; }
+    }
+
+    @media screen {
+      .print-hint {
+        background: #ecfdf5;
+        border: 1px solid var(--light-teal);
+        border-radius: 4px;
+        padding: 3mm 4mm;
+        margin-bottom: 5mm;
+        font-size: 9pt;
+        color: var(--dark-teal);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="print-hint no-print">
+    <strong>Drucken:</strong> Datei im Browser öffnen → <kbd>Strg/Cmd + P</kbd> → Ziel „Als PDF speichern“ oder Drucker → <strong>Querformat (Landscape)</strong>, Ränder „Standard“, Hintergrundgrafiken aktivieren.
+  </p>
+
+  <!-- PAGE 1 -->
+  <header class="page-header">
+    <div>
+      <h1>Coach-Verhaltensmatrix</h1>
+      <p class="subtitle">Implementiertes Verhalten aller KI-Personas — abgeleitet aus System-Prompts</p>
+    </div>
+    <div class="brand-mark">Meaningful Conversations</div>
+  </header>
+
+  <section class="section">
+    <h2>1 · Übersicht — 14 Personas</h2>
+    <div class="persona-grid">
+
+      <article class="persona-card interviewer">
+        <div class="avatar">GL</div>
+        <div class="persona-name">Gloria</div>
+        <div class="persona-id">gloria-life-context</div>
+        <div class="persona-framework">—</div>
+        <div class="persona-type">Interviewer · Life Context</div>
+        <span class="tier-badge guest">guest</span>
+      </article>
+
+      <article class="persona-card interviewer">
+        <div class="avatar">GL</div>
+        <div class="persona-name">Gloria</div>
+        <div class="persona-id">gloria-interview</div>
+        <div class="persona-framework">—</div>
+        <div class="persona-type">Interviewer · Projekt/Ideen</div>
+        <span class="tier-badge registered">registered</span>
+      </article>
+
+      <article class="persona-card">
+        <div class="avatar">NB</div>
+        <div class="persona-name">Nobody</div>
+        <div class="persona-id">nexus-goal-path-solution</div>
+        <div class="persona-framework">goal-path-solution</div>
+        <div class="persona-type">Coach / Sparringspartner</div>
+        <span class="tier-badge guest">guest</span>
+      </article>
+
+      <article class="persona-card registered">
+        <div class="avatar">SA</div>
+        <div class="persona-name">Sam</div>
+        <div class="persona-id">sam-forward-focused</div>
+        <div class="persona-framework">forward-focused-coaching</div>
+        <div class="persona-type">Coach</div>
+        <span class="tier-badge registered">registered</span>
+      </article>
+
+      <article class="persona-card registered">
+        <div class="avatar">GA</div>
+        <div class="persona-name">Gabrielle</div>
+        <div class="persona-id">gabrielle-four-stage</div>
+        <div class="persona-framework">four-stage-coaching</div>
+        <div class="persona-type">Coach</div>
+        <span class="tier-badge registered">registered</span>
+      </article>
+
+      <article class="persona-card">
+        <div class="avatar">MX</div>
+        <div class="persona-name">Max</div>
+        <div class="persona-id">max-ambitious</div>
+        <div class="persona-framework">ambitious-coaching</div>
+        <div class="persona-type">Coach</div>
+        <span class="tier-badge guest">guest</span>
+      </article>
+
+      <article class="persona-card">
+        <div class="avatar">AV</div>
+        <div class="persona-name">Ava</div>
+        <div class="persona-id">ava-strategic</div>
+        <div class="persona-framework">strategic-coaching</div>
+        <div class="persona-type">Coach</div>
+        <span class="tier-badge guest">guest</span>
+      </article>
+
+      <article class="persona-card premium">
+        <div class="avatar">KE</div>
+        <div class="persona-name">Kenji</div>
+        <div class="persona-id">kenji-resilience</div>
+        <div class="persona-framework">resilience-coaching</div>
+        <div class="persona-type">Coach · Stoizismus</div>
+        <span class="tier-badge premium">premium</span>
+      </article>
+
+      <article class="persona-card premium">
+        <div class="avatar">CH</div>
+        <div class="persona-name">Chloe</div>
+        <div class="persona-id">chloe-structured-reflection</div>
+        <div class="persona-framework">structured-reflection</div>
+        <div class="persona-type">Coach · Reflexion</div>
+        <span class="tier-badge premium">premium</span>
+      </article>
+
+      <article class="persona-card premium">
+        <div class="avatar">MI</div>
+        <div class="persona-name">Mike</div>
+        <div class="persona-id">mike-ambivalence-coaching</div>
+        <div class="persona-framework">ambivalence-coaching</div>
+        <div class="persona-type">Coach · Ambivalenz</div>
+        <span class="tier-badge premium">premium</span>
+      </article>
+
+      <article class="persona-card client">
+        <div class="avatar">RO</div>
+        <div class="persona-name">Rob</div>
+        <div class="persona-id">rob</div>
+        <div class="persona-framework">mental-fitness-coaching</div>
+        <div class="persona-type">Coach · Mental Fitness</div>
+        <span class="tier-badge client">client</span>
+      </article>
+
+      <article class="persona-card client">
+        <div class="avatar">VI</div>
+        <div class="persona-name">Victor</div>
+        <div class="persona-id">victor-systemic-coaching</div>
+        <div class="persona-framework">systemic-coaching</div>
+        <div class="persona-type">Coach · Systemisch</div>
+        <span class="tier-badge client">client</span>
+      </article>
+
+      <article class="persona-card client">
+        <div class="avatar">BE</div>
+        <div class="persona-name">Bekky</div>
+        <div class="persona-id">bekky-thought-audit</div>
+        <div class="persona-framework">thought-audit</div>
+        <div class="persona-type">Audit-Tool</div>
+        <span class="tier-badge client">client</span>
+      </article>
+
+      <article class="persona-card client">
+        <div class="avatar">DA</div>
+        <div class="persona-name">Dan</div>
+        <div class="persona-id">dan-client-language</div>
+        <div class="persona-framework">client-exact-language</div>
+        <div class="persona-type">Coach · Clean Language</div>
+        <span class="tier-badge client">client</span>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <div class="page-break"></div>
+
+  <section class="section">
+    <h2>2 · Vergleichsmatrix — Kern-Dimensionen</h2>
+    <p class="legend-note" style="margin-bottom: 3mm;">12 Coaches (+ Gloria ausgeschlossen). Farbcodierung siehe Legende (Abschnitt 3).</p>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Contracting</th>
+            <th>Session-Rhythmus</th>
+            <th>Sitzungsabschluss</th>
+            <th>Ratschläge / Tipps</th>
+            <th>Grenzen &amp; Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="coach-cell">Nobody<code>nexus-goal-path-solution</code></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">Thema → Erwartung → GPS; kein 6-Schritte-Ritual</div></td>
+            <td><strong>Mitgehen → Mitgehen → Führen</strong><div class="cell-detail">GPS; Pull/Push adaptiv; G vor P vor S</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-partial"></span>Kontrakt implizit</span><span class="close-item"><span class="dot dot-yes"></span>Nächster Schritt</span></div></td>
+            <td><span class="tag tag-adv-blockade">Bei Blockade</span><div class="cell-detail">Fragen first; nach 2–3 Versuchen max. 1 Tipp als Möglichkeit</div></td>
+            <td>Standard <code>boundaryPersona</code>; kein Psychotherapie-Ersatz</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Sam<code>sam-forward-focused</code></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">Begrüßung → Spiegelung → 1 Zukunftsfrage; kein 6-Schritte</div></td>
+            <td><strong>Kein Mitgehen-Ritual</strong><div class="cell-detail">Direkt zukunftsorientierte Fragen nach Session-Fokus</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>+1-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Keine</span><div class="cell-detail">Erst nach mehreren SF-Fragen, wenn „völlig stecken"</div></td>
+            <td>Standard; profileAware (DPFL)</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Gabrielle<code>gabrielle-four-stage</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Thema → Relevanz → Ergebnis → Bestätigung → Übergang → Review</div></td>
+            <td><strong>Mitgehen, mitgehen, führen</strong><div class="cell-detail">Ziel/Ist begleiten; Möglichkeiten/Commitment führen</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-einwilligung">Mit Einwilligung</span><div class="cell-detail">Keine Tipps in Möglichkeiten; 2–3 Winkel, dann Permission, max. 1 Perspektive</div></td>
+            <td>Standard; profileAware (DPFL)</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Max<code>max-ambitious</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><strong>Mitgehen vor Ambition</strong><div class="cell-detail">Relevanz / „Warum jetzt" vor Stretch-Fragen</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Keine direkten</span><div class="cell-detail">Ambition, Langfrist, 10x — inspirierend ohne Cheerleading</div></td>
+            <td>Standard</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Ava<code>ava-strategic</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><strong>Mitgehen vor Strategie</strong><div class="cell-detail">Big Picture vor Taktik; Makro, Wettbewerb, Second-Order</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Fragen first</span><div class="cell-detail">Keine voreilige Beratung</div></td>
+            <td>Standard</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Kenji<code>kenji-resilience</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Stoische Arbeit erst nach bestätigtem Kontrakt</div></td>
+            <td><strong>Ruhiges Mitgehen</strong><div class="cell-detail">Sokratisch; Kontroll-Sortierung vor Umdeutung</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Schritt 6</span><span class="close-item"><span class="dot dot-yes"></span>Kontinuität</span></div></td>
+            <td><span class="tag tag-adv-sokratisch">Sokratisch</span><div class="cell-detail">Kein Belehren; [MEDITATION:X] Marker</div></td>
+            <td>Eigener Boundary-Text; gleiche Intention</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Chloe<code>chloe-structured-reflection</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">7 Schritte inkl. Emotions-/Relevanz; Methodik nach Kontrakt</div></td>
+            <td><strong>Mitgehen, mitgehen, führen</strong><div class="cell-detail">Situation → Gedanken → Alternativen</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Schritt 7</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Erkundung</span><div class="cell-detail">Keine KVT/Therapie-Labels</div></td>
+            <td>Eigener Boundary-Text; keine Therapie-Labels</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Mike<code>mike-ambivalence-coaching</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><strong>Mitgehen, mitgehen, führen</strong><div class="cell-detail">Ambivalenz begleiten; nie überzeugen vor Begleitung</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Change-Talk-Recap</span></div></td>
+            <td><span class="tag tag-adv-sokratisch">Evokation</span><div class="cell-detail">Keine Expertisen-Falle; OARS; Widerstand reflektieren</div></td>
+            <td>Standard; keine klinische Sucht-/Psychopathologie; profileAware</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Rob<code>rob</code></td>
+            <td><span class="tag tag-voll">6-Schritte voll</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><strong>Mitgehen, mitgehen, führen</strong><div class="cell-detail">Mitfühlende Neugier vor Saboteur-/Sage-Arbeit</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Ja</span><span class="close-item"><span class="dot dot-yes"></span>Praxis-Schritt</span></div></td>
+            <td><span class="tag tag-adv-keine">Klient benennt</span><div class="cell-detail">PQ-Style; nicht „reparieren"</div></td>
+            <td>Eigener Boundary-Text; client-only Tier</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Victor<code>victor-systemic-coaching</code></td>
+            <td><span class="tag tag-spaet">6-Schritte, spät</span><div class="cell-detail">Phase 1–3 Systemkartierung, dann Kontrakt (Phase 4)</div></td>
+            <td><strong>Beobachten vor Intervention</strong><div class="cell-detail">Kartierung vor Kontrakt und Ratschlägen; kein „Warum"</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Phase 5</span><span class="close-item"><span class="dot dot-yes"></span>Differenzierung</span></div></td>
+            <td><span class="tag tag-adv-verboten">Strikt keine</span><div class="cell-detail">Kein „kündigen"-Rat; detrianguliert</div></td>
+            <td>+ kein Therapeut; expliziter Disclaimer; menschliche Tiefe betonen</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Bekky<code>bekky-thought-audit</code></td>
+            <td><span class="tag tag-kein">Kein Contracting</span><div class="cell-detail">Direkter Einstieg Phase 1: Gedanken-Identifikation</div></td>
+            <td><strong>Sequenziell strikt</strong><div class="cell-detail">Phase 1→2→3→4; kein klassischer Coaching-Rhythmus</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-yes"></span>Gleichgewichtsfrage</span><span class="close-item"><span class="dot dot-no"></span>Kein Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Nächster Schritt (AUDIT_TASK)</span></div><div class="cell-detail">Marker nur bei klarem Ja → Session Review; unsichtbar im Chat</div></td>
+            <td><span class="tag tag-adv-verboten">Strikt verboten</span><div class="cell-detail">Max. 1 Modell-Beispiel als Gerüst in Turnarounds</div></td>
+            <td>Kein Audit ohne Anker; Verweis Rob/Dan bzw. Victor/Dan; [REFERRAL:…]-Buttons</td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Dan<code>dan-client-language</code></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">Eine Wunschausgang-Frage aus Variantenpool</div></td>
+            <td><strong>Clean-Folgen</strong><div class="cell-detail">Entwicklungsfragen in exakter Klientensprache</div></td>
+            <td><div class="close-icons"><span class="close-item"><span class="dot dot-partial"></span>Kurz</span><span class="close-item"><span class="dot dot-no"></span>Kein Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>„Was wissen Sie …?"</span></div></td>
+            <td><span class="tag tag-adv-verboten">Strikt verboten</span><div class="cell-detail">Keine Metaphern, Interpretation, Ratschläge</div></td>
+            <td>Keine Interpretation; DPC nur Pacing/Höflichkeit; [REFERRAL:bekky-thought-audit]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <div class="page-break"></div>
+
+  <section class="section">
+    <h2>3 · Legende &amp; Querschnitt</h2>
+    <div class="legend-grid">
+
+      <div class="legend-box">
+        <h3>Contracting-Stil</h3>
+        <div class="legend-items">
+          <span class="legend-item"><span class="tag tag-kurz">Kurz</span> Informell / 1 Frage — Nobody, Sam, Dan</span>
+          <span class="legend-item"><span class="tag tag-voll">6-Schritte voll</span> Shared Block — Gabrielle, Max, Ava, Kenji, Chloe, Mike, Rob</span>
+          <span class="legend-item"><span class="tag tag-spaet">6-Schritte, spät</span> Erst Kartierung — Victor</span>
+          <span class="legend-item"><span class="tag tag-kein">Kein Contracting</span> Direkter Tool-Einstieg — Bekky</span>
+        </div>
+        <p class="legend-note">6-Schritte: (1) Thema, (2) Relevanz, (3) Sitzungsergebnis, (4) Bestätigung, (5) Übergang, (6) Abschluss-Review</p>
+      </div>
+
+      <div class="legend-box">
+        <h3>Ratschläge / Tipps</h3>
+        <div class="legend-items">
+          <span class="legend-item"><span class="tag tag-adv-keine">Keine / Fragen first</span> Standard bei Max, Ava, Rob, Chloe</span>
+          <span class="legend-item"><span class="tag tag-adv-einwilligung">Mit Einwilligung</span> Gabrielle — Permission nie überspringen</span>
+          <span class="legend-item"><span class="tag tag-adv-blockade">Bei Blockade</span> Nobody, Sam — max. 1 Tipp als Möglichkeit</span>
+          <span class="legend-item"><span class="tag tag-adv-sokratisch">Sokratisch / Evokation</span> Kenji, Mike</span>
+          <span class="legend-item"><span class="tag tag-adv-verboten">Strikt verboten</span> Victor, Bekky, Dan</span>
+        </div>
+      </div>
+
+      <div class="legend-box">
+        <h3>Sitzungsabschluss — Symbole</h3>
+        <div class="legend-items">
+          <span class="legend-item"><span class="dot dot-yes"></span> Ja / aktiv / proaktiv</span>
+          <span class="legend-item"><span class="dot dot-partial"></span> Teilweise / implizit / kurz</span>
+          <span class="legend-item"><span class="dot dot-no"></span> Nein / nicht zutreffend</span>
+        </div>
+        <p class="legend-note">Shared <code>sessionEnding</code>: Nach Schluss keine weiteren Fragen, keine neuen Themen, keine Verlängerung.</p>
+      </div>
+
+      <div class="legend-box">
+        <h3>Access Tier &amp; Typen</h3>
+        <div class="legend-items">
+          <span class="legend-item"><span class="tier-badge guest">guest</span> Öffentlich zugänglich</span>
+          <span class="legend-item"><span class="tier-badge registered">registered</span> Registrierte Nutzer</span>
+          <span class="legend-item"><span class="tier-badge premium">premium</span> Premium-Abo</span>
+          <span class="legend-item"><span class="tier-badge client">client</span> Client-only (Organisation)</span>
+        </div>
+        <p class="legend-note">Gloria (orange Rahmen): Interviewer, kein Coaching. Practice Lab: 12 Framework-IDs 1:1 an <code>sourceBotId</code> gekoppelt.</p>
+      </div>
+
+      <div class="legend-box">
+        <h3>Pacing (Fragen pro Nachricht)</h3>
+        <p class="legend-note"><strong>Max. 1:</strong> Nobody, Sam, Gabrielle, Mike, Max, Rob, Bekky, Dan, Gloria<br>
+        <strong>Max. 1–2:</strong> Ava, Kenji, Chloe, Victor</p>
+      </div>
+
+      <div class="legend-box">
+        <h3>Krisenbehandlung (alle Personas)</h3>
+        <p class="legend-note">Shared <code>crisisText.js</code>: (1) Verify — empathische Klärungsfrage, (2) Region — Land/Bundesland, (3) Activate — regionalisierte Krisenressourcen.</p>
+      </div>
+
+      <div class="legend-box">
+        <h3>Strukturierte Marker (Bekky / Dan)</h3>
+        <div class="legend-items">
+          <span class="legend-item"><code>[REFERRAL:…]</code> Handoff-Button zu anderem Coach (Ende der Nachricht, unsichtbar im Text)</span>
+          <span class="legend-item"><code>[AUDIT_TASK]…[/AUDIT_TASK]</code> <strong>nur Bekky:</strong> Eine Bullet-Zeile mit gewählter Perspektive → wird aus dem Chat entfernt und in Session Review als „Realisierbarer nächster Schritt“ vorgeschlagen (Deadline flexibel)</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Meaningful Conversations · Coach-Verhaltensmatrix · v2.4.3 · Stand 2026-07-28</span>
+    <span>Vollständige Matrix: <a href="COACH-BEHAVIOR-MATRIX.md">COACH-BEHAVIOR-MATRIX.md</a></span>
+  </footer>
+
+</body>
+</html>

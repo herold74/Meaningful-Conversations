@@ -39,7 +39,7 @@ export const BOTS: Bot[] = [
         avatar: '/avatars/sam.png',
         style: 'Forward-Focused, Efficient, Future-Oriented',
         style_de: 'Zukunftsorientiert, Effizient, Vorwärtsgerichtet',
-        accessTier: 'guest',
+        accessTier: 'registered',
     },
     {
         id: 'gabrielle-four-stage',
@@ -49,7 +49,7 @@ export const BOTS: Bot[] = [
         avatar: '/avatars/gabrielle.png',
         style: 'Structured, Coaching, Client-Led',
         style_de: 'Strukturiert, Coaching, Klientengeführt',
-        accessTier: 'guest',
+        accessTier: 'registered',
     },
     {
         id: 'max-ambitious',
@@ -100,7 +100,7 @@ export const BOTS: Bot[] = [
         avatar: '/avatars/mike.png',
         style: 'Ambivalence Coaching, Empathic, Non-Directive',
         style_de: 'Ambivalenz-Coaching, Empathisch, Nicht-direktiv',
-        accessTier: 'registered',
+        accessTier: 'premium',
     },
     {
         id: 'rob',

@@ -223,7 +223,7 @@ ${blocks.boundaryPersonaDE}`;
       avatar: '/avatars/sam.png',
       style: 'Forward-Focused, Efficient, Future-Oriented',
       style_de: 'Zukunftsorientiert, Effizient, Vorwärtsgerichtet',
-      accessTier: 'guest',
+      accessTier: 'registered',
       systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
 ${CRISIS_RESPONSE_EN}
 
@@ -265,7 +265,7 @@ ${sharedTailDE}`,
       avatar: '/avatars/gabrielle.png',
       style: 'Structured, Coaching, Client-Led',
       style_de: 'Strukturiert, Coaching, Klientengeführt',
-      accessTier: 'guest',
+      accessTier: 'registered',
       systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
 ${CRISIS_RESPONSE_EN}
 
@@ -307,7 +307,7 @@ ${sharedTailDE}`,
       avatar: '/avatars/mike.png',
       style: 'Ambivalence Coaching, Empathic, Non-Directive',
       style_de: 'Ambivalenz-Coaching, Empathisch, Nicht-direktiv',
-      accessTier: 'registered',
+      accessTier: 'premium',
       systemPrompt: `IMPORTANT RULE: Your entire response MUST be in English.
 ${CRISIS_RESPONSE_EN}
 
