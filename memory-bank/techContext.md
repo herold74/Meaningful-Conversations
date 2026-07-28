@@ -71,7 +71,7 @@
 - **Framework:** Express
 - **ORM:** Prisma
 - **Database:** MariaDB 11.2
-- **AI:** Google Generative AI SDK (`@google/genai` 1.x), Mistral AI SDK (`@mistralai/mistralai` **2.x ESM** — loaded via `await import()` in CJS backend)
+- **AI:** Google Generative AI SDK (`@google/genai` **2.x**), Mistral AI SDK (`@mistralai/mistralai` **2.x ESM** — loaded via `await import()` in CJS backend)
 - **Auth:** `jsonwebtoken`, `bcrypt`
 - **Email:** `node-mailjet`
 
