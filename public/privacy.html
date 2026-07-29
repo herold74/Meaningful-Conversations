@@ -60,6 +60,7 @@
 <li>API-Nutzungsdaten (Anzahl API-Aufrufe, verwendete Modelle, Zeitstempel)</li>
 <li>Feedback (optional und nur wenn vom Nutzer eingereicht)</li>
 <li>Audiodaten (temporär, bei Nutzung der Audio-Transkription — werden nach der Transkription sofort verworfen)</li>
+<li>Kauf- und Abonnementdaten (Produkt, Betrag, Plattform, Transaktionsstatus)</li>
 </ul>
 
 <h2>3. Zweck der Verarbeitung</h2>
@@ -113,13 +114,29 @@
 <li><strong>Standort:</strong> Deutschland (EU)</li>
 </ul>
 
+<h3>5.4 Zahlungsabwicklung</h3>
+<h4>PayPal (Web)</h4>
+<ul>
+<li><strong>Zweck:</strong> Einmalige Käufe und Zugangscodes auf der Website</li>
+<li><strong>Daten:</strong> E-Mail, Name (optional), Transaktions-IDs, Produkt, Betrag</li>
+</ul>
+<h4>Apple App Store &amp; RevenueCat (iOS)</h4>
+<ul>
+<li><strong>Zweck:</strong> Abonnements und In-App-Käufe in der iOS-App</li>
+<li><strong>Daten:</strong> Pseudonymisierte interne Nutzer-ID, Produkt- und Transaktions-IDs, Abonnementstatus</li>
+<li>Apple ist eigenständiger Verantwortlicher für den Store-Kauf; RevenueCat unterstützt uns als Auftragsverarbeiter (SCCs)</li>
+</ul>
+
+<h3>5.5 DiceBear (Avatare)</h3>
+<p>Profil-Avatare werden über DiceBear (Deutschland/EU) generiert; Seed aus Ihrer E-Mail, keine Klartext-E-Mail an den CDN.</p>
+
 <h2>6. Datensicherheit</h2>
 <ul>
 <li><strong>Ende-zu-Ende-Verschlüsselung (E2EE):</strong> Ihr Lebenskontext und Persönlichkeitsprofil werden auf Ihrem Gerät verschlüsselt. Nur Sie können die Daten entschlüsseln.</li>
 <li><strong>Passwort-Hashing:</strong> Passwörter werden mit bcrypt gehashed.</li>
 <li><strong>HTTPS/TLS:</strong> Alle Datenübertragungen sind verschlüsselt.</li>
 </ul>
-<p><strong>WICHTIG:</strong> Wir können Ihr Passwort NICHT wiederherstellen. Bei Verlust gehen verschlüsselte Daten unwiederbringlich verloren.</p>
+<p><strong>WICHTIG:</strong> Wir können Ihr Passwort NICHT wiederherstellen. Bei Verlust gehen verschlüsselte Daten unwiederbringlich verloren. Bei Passwort-Reset werden Lebenskontext und Persönlichkeitsprofil vollständig gelöscht.</p>
 
 <h2>7. Speicherdauer</h2>
 <ul>
@@ -131,6 +148,8 @@
 <li><strong>Passwort-Reset-Token:</strong> 1 Stunde</li>
 <li><strong>Server-Logs:</strong> 7 Tage</li>
 <li><strong>Audiodaten (Transkription):</strong> Werden sofort nach der Transkription verworfen — keine dauerhafte Speicherung</li>
+<li><strong>Gast-Fingerprint:</strong> 7 Tage</li>
+<li><strong>Kaufbelege:</strong> Gesetzliche Aufbewahrungsfrist; bei Kontolöschung Anonymisierung personenbezogener Felder</li>
 </ul>
 
 <h2>8. Ihre Rechte</h2>
@@ -145,20 +164,26 @@
 </ul>
 
 <h2>9. Cookies und lokale Speicherung</h2>
-<p>Die App verwendet <strong>localStorage</strong> und <strong>sessionStorage</strong> für technisch notwendige Funktionen (Login-Token, Spracheinstellung, Gastmodus-Daten). Diese Daten werden ausschließlich lokal in Ihrem Browser gespeichert.</p>
+<p>Die App verwendet <strong>localStorage</strong> und <strong>sessionStorage</strong> für technisch notwendige Funktionen:</p>
+<ul>
+<li>Login-Token und Spracheinstellung</li>
+<li>Optional: gemerkte E-Mail-Adresse für schnelleren Login</li>
+<li>Gastmodus: Lebenskontext und Chat nur lokal</li>
+<li><strong>Coach Practice (Entwurf):</strong> Laufende Übungssession im <strong>sessionStorage</strong> (nur dieser Tab, max. 24 Stunden). Enthält Gesprächsverlauf und Konfiguration. Wird beim Tab-Schließen, Verwerfen, Logout oder nach Auswertung gelöscht. <strong>Keine Server-Übertragung</strong> bis zur freiwilligen Auswertung.</li>
+</ul>
 <p><strong>Wir verwenden KEINE Tracking-Cookies, keine Marketing-Cookies und keine Analyse-Tools von Drittanbietern.</strong></p>
 
 <h2>10. Gastmodus</h2>
-<p>Im Gastmodus werden Ihre Daten <strong>ausschließlich lokal</strong> in Ihrem Browser verarbeitet. Es erfolgt keine Speicherung auf unseren Servern. Um Missbrauch zu verhindern, nutzen wir ein wöchentliches Nachrichtenlimit mit einem Browser-Fingerprint (gespeichert für maximal 7 Tage, nicht mit anderen Daten verknüpft).</p>
+<p>Im Gastmodus werden <strong>Gesprächsinhalte und Lebenskontext ausschließlich lokal</strong> verarbeitet — keine Chat-Inhalte und kein Lebenskontext auf unseren Servern. Zur Missbrauchsprävention: wöchentliches Nachrichtenlimit (50) mit Browser-Fingerprint in <code>GuestUsage</code> (max. 7 Tage, nicht mit Account verknüpft). Zusätzlich anonyme API-Nutzungsmetadaten zur Kostenkontrolle.</p>
 
 <h2>11. Kontolöschung</h2>
-<p>Sie können Ihren Account jederzeit in der App vollständig löschen. Bei Löschung werden alle personenbezogenen Daten unwiderruflich entfernt.</p>
+<p>Sie können Ihren Account jederzeit in der App vollständig löschen. Entfernt werden u.a. Account-Daten, E2EE-Daten, Feedbacks, Practice-/Transkript-Auswertungen und Support-Tickets zu Ihrer E-Mail. Kaufbelege werden anonymisiert (Produkt/Betrag/Status ohne Personenbezug können aus buchhalterischen Gründen verbleiben).</p>
 
 <h2>12. Änderungen</h2>
 <p>Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets den aktuellen rechtlichen Anforderungen entspricht.</p>
 
 <hr>
-<p><strong>Stand:</strong> März 2026</p>
+<p><strong>Stand:</strong> Juli 2026</p>
         </div>
 
         <div id="content-en" style="display:none">
@@ -181,6 +206,7 @@
 <li>API usage data (number of API calls, models used, timestamps)</li>
 <li>Feedback (optional, only if submitted by user)</li>
 <li>Audio data (temporary, when using Audio Transcription — discarded immediately after transcription)</li>
+<li>Purchase and subscription data (product, amount, platform, transaction status)</li>
 </ul>
 
 <h2>3. Purpose of Processing</h2>
@@ -214,13 +240,20 @@
 <h3>5.3 Hetzner Online GmbH (Data Processor)</h3>
 <p>Server hosting — Germany (EU).</p>
 
+<h3>5.4 Payment processing</h3>
+<p><strong>PayPal (web):</strong> One-time purchases and access codes — email, optional name, transaction IDs, product, amount.</p>
+<p><strong>Apple App Store &amp; RevenueCat (iOS):</strong> Subscriptions and in-app purchases — pseudonymised internal user ID, product/transaction IDs, subscription status. Apple is controller for the store purchase; RevenueCat is our processor (SCCs).</p>
+
+<h3>5.5 DiceBear (avatars)</h3>
+<p>Profile avatars via DiceBear (Germany/EU); seed from email, no plaintext email to CDN.</p>
+
 <h2>6. Data Security</h2>
 <ul>
 <li><strong>End-to-End Encryption (E2EE):</strong> Your Life Context and personality profile are encrypted on your device. Only you can decrypt them.</li>
 <li><strong>Password Hashing:</strong> bcrypt with salting.</li>
 <li><strong>HTTPS/TLS:</strong> All transmissions are encrypted.</li>
 </ul>
-<p><strong>IMPORTANT:</strong> We CANNOT recover your password. If lost, your encrypted data is irretrievably gone.</p>
+<p><strong>IMPORTANT:</strong> We CANNOT recover your password. If lost, encrypted data is irretrievably gone. On password reset, Life Context and personality profile are fully deleted.</p>
 
 <h2>7. Storage Duration</h2>
 <ul>
@@ -231,6 +264,8 @@
 <li><strong>Password reset tokens:</strong> 1 hour</li>
 <li><strong>Server logs:</strong> 7 days</li>
 <li><strong>Audio data (transcription):</strong> Discarded immediately after transcription — no permanent storage</li>
+<li><strong>Guest fingerprint:</strong> 7 days</li>
+<li><strong>Purchase records:</strong> Statutory retention; personal fields anonymised on account deletion</li>
 </ul>
 
 <h2>8. Your Rights (GDPR)</h2>
@@ -244,20 +279,26 @@
 </ul>
 
 <h2>9. Cookies and Local Storage</h2>
-<p>The app uses <strong>localStorage</strong> and <strong>sessionStorage</strong> for essential functions (login token, language, guest data). Data is stored exclusively locally in your browser.</p>
+<p>The app uses <strong>localStorage</strong> and <strong>sessionStorage</strong> for essential functions:</p>
+<ul>
+<li>Login token and language preference</li>
+<li>Optional: remembered email for faster login</li>
+<li>Guest mode: Life Context and chat data local only</li>
+<li><strong>Coach Practice (draft):</strong> In-progress session in <strong>sessionStorage</strong> (this tab only, max 24h). Deleted on tab close, discard, logout, or after evaluation. <strong>Not sent to server</strong> until you complete the evaluation.</li>
+</ul>
 <p><strong>We do NOT use tracking cookies, marketing cookies, or third-party analytics tools.</strong></p>
 
 <h2>10. Guest Mode</h2>
-<p>In guest mode, all data is processed <strong>exclusively locally</strong> in your browser. No server storage occurs. To prevent abuse, a weekly message limit with a browser fingerprint is used (stored for max 7 days, not linked to other data).</p>
+<p>In guest mode, <strong>conversation content and Life Context are processed locally only</strong> — no chat content or Life Context on our servers. Abuse prevention: weekly message limit (50) with browser fingerprint in <code>GuestUsage</code> (max 7 days, not linked to an account). Anonymous API usage metadata for cost control.</p>
 
 <h2>11. Account Deletion</h2>
-<p>You can permanently delete your account at any time in the app. All personal data will be irretrievably removed.</p>
+<p>You can permanently delete your account in the app. This removes account data, E2EE data, feedback, practice/transcript evaluations, and support tickets linked to your email. Purchase records are anonymised (product/amount/status may remain without personal reference for accounting).</p>
 
 <h2>12. Changes</h2>
 <p>We reserve the right to update this privacy policy to comply with current legal requirements.</p>
 
 <hr>
-<p><strong>Last updated:</strong> March 2026</p>
+<p><strong>Last updated:</strong> July 2026</p>
         </div>
     </div>
     <div class="footer">

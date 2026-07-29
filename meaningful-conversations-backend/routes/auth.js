@@ -332,6 +332,8 @@ router.post('/reset-password', resetPasswordLimiter, async (req, res) => {
                 updatedAt: new Date(),
             },
         });
+        const { clearPersonalityProfileOnPasswordReset } = require('../services/gdprAccountCleanup.js');
+        await clearPersonalityProfileOnPasswordReset(user.id);
         await invalidateTokensForUser(user.id);
         res.status(200).json({ message: 'Password has been reset successfully.' });
     } catch (error) {

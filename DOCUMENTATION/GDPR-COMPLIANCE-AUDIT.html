@@ -3,296 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GDPR Compliance Audit - Meaningful Conversations App</title>
+    <title>🔐 GDPR COMPLIANCE AUDIT - Meaningful Conversations App</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.4;
-            color: #e0e7ee;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            min-height: 100vh;
-            padding: 15px;
-            font-size: 13px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(15, 32, 39, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-
-        header {
-            background: linear-gradient(135deg, #1a4d5e 0%, #2d6a7e 100%);
-            padding: 25px;
-            text-align: center;
-            border-bottom: 3px solid #40e0d0;
-        }
-
-        h1 {
-            font-size: 1.8em;
-            color: #40e0d0;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        h2 {
-            font-size: 1.3em;
-            color: #40e0d0;
-            margin: 25px 0 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #2d6a7e;
-        }
-
-        h3 {
-            font-size: 1.1em;
-            color: #5fd4c3;
-            margin: 20px 0 10px;
-            font-weight: 600;
-        }
-
-        h4 {
-            font-size: 1em;
-            color: #7ee8d9;
-            margin: 15px 0 8px;
-            font-weight: 600;
-        }
-
-        .meta-info {
-            background: rgba(64, 224, 208, 0.1);
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-
-        .meta-info p {
-            margin: 5px 0;
-            font-size: 0.95em;
-        }
-
-        .content {
-            padding: 25px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 0.8em;
-            margin-left: 8px;
-        }
-
-        .badge.success {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-            border: 1px solid #4ade80;
-        }
-
-        .badge.warning {
-            background: rgba(251, 146, 60, 0.2);
-            color: #fb923c;
-            border: 1px solid #fb923c;
-        }
-
-        .badge.info {
-            background: rgba(96, 165, 250, 0.2);
-            color: #60a5fa;
-            border: 1px solid #60a5fa;
-        }
-
-        ul, ol {
-            margin-left: 25px;
-            margin-bottom: 10px;
-        }
-
-        li {
-            margin: 5px 0;
-            line-height: 1.4;
-        }
-
-        .section {
-            background: rgba(45, 106, 126, 0.15);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 3px solid #40e0d0;
-        }
-
-        .section.positive {
-            border-left-color: #4ade80;
-            background: rgba(34, 197, 94, 0.1);
-        }
-
-        .section.warning {
-            border-left-color: #fb923c;
-            background: rgba(251, 146, 60, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            background: rgba(45, 106, 126, 0.2);
-            border-radius: 6px;
-            overflow: hidden;
-            font-size: 0.9em;
-        }
-
-        thead {
-            background: rgba(64, 224, 208, 0.15);
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(64, 224, 208, 0.2);
-        }
-
-        th {
-            font-weight: 600;
-            color: #40e0d0;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 0.3px;
-        }
-
-        tr:hover {
-            background: rgba(64, 224, 208, 0.05);
-        }
-
-        .score-box {
-            background: linear-gradient(135deg, rgba(64, 224, 208, 0.15) 0%, rgba(45, 106, 126, 0.15) 100%);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 20px 0;
-            border: 2px solid #40e0d0;
-        }
-
-        .score-box .score {
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #40e0d0;
-            margin: 15px 0;
-        }
-
-        .score-box .label {
-            font-size: 1.1em;
-            color: #e0e7ee;
-            margin-bottom: 10px;
-        }
-
-        hr {
-            border: none;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #2d6a7e, transparent);
-            margin: 25px 0;
-        }
-
-        a {
-            color: #40e0d0;
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.3s;
-        }
-
-        a:hover {
-            border-bottom-color: #40e0d0;
-        }
-
-        code {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-            color: #5fd4c3;
-        }
-
-        pre {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 10px 0;
-            border-left: 3px solid #40e0d0;
-            font-size: 0.85em;
-        }
-
-        pre code {
-            background: none;
-            padding: 0;
-        }
-
-        .checkbox {
-            color: #4ade80;
-            margin-right: 8px;
-            font-weight: bold;
-        }
-
-        .resources-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .resource-card {
-            background: rgba(45, 106, 126, 0.2);
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #40e0d0;
-            font-size: 0.9em;
-        }
-
-        .resource-card:hover {
-            background: rgba(64, 224, 208, 0.15);
-            transform: translateX(5px);
-            transition: all 0.3s;
-        }
-
-        .footer {
-            background: rgba(26, 77, 94, 0.5);
-            padding: 20px;
-            text-align: center;
-            color: #b0c4d0;
-            border-top: 2px solid #2d6a7e;
-            font-size: 0.9em;
-        }
-
-        @media print {
-            body {
-                background: white;
-                color: black;
-            }
-            .container {
-                box-shadow: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8em;
-            }
-            h2 {
-                font-size: 1.4em;
-            }
-            .content {
-                padding: 20px;
-            }
-            table {
-                font-size: 0.9em;
-            }
-        }
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 DSGVO-KONFORMITÄTSPRÜFUNG</h1>
+            <h2 style="color: #e0e7ee; border: none; margin: 10px 0; padding: 0;">Meaningful Conversations App</h2>
+        </header>
+        <div class="content">
+<h1 id="dsgvo-konformitätsprüfung">DSGVO-KONFORMITÄTSPRÜFUNG</h1>
+<h2 id="meaningful-conversations-app">Meaningful Conversations App</h2>
+<p><strong>Prüfungsdatum:</strong> 29. Juli 2026<br />
+<strong>Geprüfte Version:</strong> 2.5.0<br />
+<strong>Vorherige Prüfung:</strong> 25. Februar 2026 (v1.9.7)<br />
+<strong>Betreiber-Standort:</strong> Österreich<br />
+<strong>Server-Standort:</strong> Hetzner, Deutschland (EU)<br />
+<strong>Zuständige Behörde:</strong> Datenschutzbehörde Österreich (<a href="https://www.dsb.gv.at/">https://www.dsb.gv.at/</a>)</p>
+<hr />
+<h2 id="bewertungslegende">BEWERTUNGSLEGENDE</h2>
+<table>
+<thead>
+<tr>
+<th>Kennzeichnung</th>
+<th>Bedeutung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DSGVO-KONFORM</strong></td>
+<td>Anforderung erfüllt; keine wesentlichen Lücken</td>
+</tr>
+<tr>
+<td><strong>TEILWEISE</strong></td>
+<td>Grundsätzlich ok, aber Formulierung/Dokumentation/Code weicht ab</td>
+</tr>
+<tr>
+<td><strong>HANDLUNGSBEDARF</strong></td>
+<td>Relevante Lücke; sollte vor Production/Store-Update adressiert werden</td>
+</tr>
+<tr>
+<td><strong>EMPFOHLEN</strong></td>
+<td>Best Practice; kein unmittelbarer Rechtsverstoß</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="positive-befunde">POSITIVE BEFUNDE</h2>
+<h3 id="1-ende-zu-ende-verschlüsselung-e2ee--lebenskontext">1. Ende-zu-Ende-Verschlüsselung (E2EE) — Lebenskontext</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Lebenskontext wird client-seitig verschlüsselt (AES-GCM, PBKDF2); Schlüssel verlässt das Gerät nicht</li>
+<li>Server speichert nur Ciphertext + <code>encryptionSalt</code></li>
+<li><strong>Art. 32 DSGVO:</strong> Technische Schutzmaßnahmen</li>
+<li><strong>Dateien:</strong> <code>routes/data.js</code>, Client-Crypto-Utils</li>
+</ul>
+<h3 id="2-gastmodus--chat--lebenskontext-lokal">2. Gastmodus — Chat &amp; Lebenskontext lokal</h3>
+<ul>
+<li><strong>Status:</strong> TEILWEISE (siehe Abschnitt „Abweichungen“)</li>
+<li>Chat-Inhalte und Lebenskontext im Gastmodus bleiben <strong>primär lokal</strong> (kein persistierter LC auf dem Server)</li>
+<li><strong>Art. 5 Abs. 1 lit. c DSGVO:</strong> Datenminimierung für Kerndaten</li>
+</ul>
+<h3 id="3-kontolöschung">3. Kontolöschung</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM (mit dokumentierter Einschränkung bei Käufen)</li>
+<li><code>DELETE /api/data/user</code> — UI: <code>DeleteAccountModal.tsx</code></li>
+<li>CASCADE: Feedback, PersonalityProfile, SessionBehaviorLog, PracticeEvaluations, TranscriptEvaluations</li>
+<li>Explizit gelöscht: ApiUsage, UserEvent; UpgradeCodes entkoppelt</li>
+<li><strong>Art. 17 DSGVO:</strong> Recht auf Löschung</li>
+<li><strong>Datei:</strong> <code>meaningful-conversations-backend/routes/data.js</code></li>
+</ul>
+<h3 id="4-datenminimierung--keine-session-transkripte-in-db">4. Datenminimierung — keine Session-Transkripte in DB</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Classic-Chat-Transkripte werden <strong>nicht</strong> dauerhaft in der DB gespeichert (Migration <code>20260208120000_remove_encrypted_transcript</code>)</li>
+<li>Session Behavior Logs: nur Frequenzzähler, kein Transkript</li>
+<li><strong>Art. 5 Abs. 1 lit. c DSGVO</strong></li>
+<li><strong>Dokumentation:</strong> <code>DOCUMENTATION/GDPR-TRANSCRIPT-REMOVAL.md</code></li>
+</ul>
+<h3 id="5-datensicherheit">5. Datensicherheit</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Passwörter: bcrypt (10 Rounds)</li>
+<li>HTTPS/TLS; Hosting Hetzner DE</li>
+<li>JWT mit Invalidierung bei Passwortänderung (<code>tokensInvalidatedAt</code>)</li>
+<li><strong>Art. 32 DSGVO</strong></li>
+</ul>
+<h3 id="6-transparenz--rechtsinformationen">6. Transparenz &amp; Rechtsinformationen</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Datenschutzerklärung: <code>PrivacyPolicyView.tsx</code>, statisch <code>public/privacy.html</code></li>
+<li>Impressum, Disclaimer, FAQ, PII-Warnung</li>
+<li><strong>Art. 13, 14 DSGVO</strong></li>
+</ul>
+<h3 id="7-datenexport-auskunft--übertragbarkeit">7. Datenexport (Auskunft / Übertragbarkeit)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM (mit dokumentierten Ausnahmen)</li>
+<li><code>GET/POST /api/data/export</code> — <code>DataExportView.tsx</code></li>
+<li>Formate: JSON + HTML (DE/EN)</li>
+<li>Enthält u.a.: Account, Gamification, Life Context (optional entschlüsselt), Feedback, Upgrade-Codes, ApiUsage (12-Mo-Fenster), PersonalityProfile, SessionBehaviorLogs, UserEvents, <strong>PracticeEvaluations</strong>, <strong>TranscriptEvaluations</strong></li>
+<li><strong>Art. 15, 20 DSGVO</strong></li>
+</ul>
+<h3 id="8-speicherbegrenzung-automatisiert">8. Speicherbegrenzung (automatisiert)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li><strong>ApiUsage:</strong> 12 Monate — <code>services/dataRetention.js</code></li>
+<li><strong>UserEvent:</strong> 6 Monate</li>
+<li><strong>GuestUsage:</strong> 7 Tage — <code>services/guestLimitTracker.js</code></li>
+<li>Lauf alle 24h via <code>server.js</code></li>
+<li><strong>Art. 5 Abs. 1 lit. e DSGVO</strong></li>
+</ul>
+<h3 id="9-persönlichkeitsprofil-e2ee">9. Persönlichkeitsprofil (E2EE)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Tabelle <code>personality_profiles</code>; Scores verschlüsselt; Metadaten (testType, completedLenses, …) unverschlüsselt</li>
+<li>Opt-Out / Comfort Check im DPFL-Flow</li>
+<li>Bei <strong>Passwortänderung</strong> (eingeloggt): Re-Encryption möglich via <code>newEncryptedLifeContext</code></li>
+<li><strong>Art. 6 Abs. 1 lit. a, Art. 32 DSGVO</strong></li>
+</ul>
+<h3 id="10-dpc--dpfl-experimental-mode">10. DPC / DPFL (Experimental Mode)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Opt-In; Pseudonymisierung gegenüber KI (keine userId/E-Mail an Provider)</li>
+<li>Session Behavior Logs ohne Transkript</li>
+<li><strong>Art. 25 DSGVO:</strong> Privacy by Design</li>
+</ul>
+<h3 id="11-ki-anbieter--regionwahl">11. KI-Anbieter &amp; Regionwahl</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Google Gemini (US, SCCs via Google Cloud DPA) und Mistral AI (EU, Paris)</li>
+<li>Nutzerwahl <code>aiRegionPreference</code>: <code>eu</code> / <code>us</code> / <code>optimal</code></li>
+<li>Seit v2.5.0: Practice <code>send-message</code> und <code>practice-coach-turn</code> respektieren <code>userRegionPreference</code> (wie Classic-Chat)</li>
+<li><strong>DPA-Docs:</strong> <code>GOOGLE-CLOUD-DPA-COMPLIANCE.md</code>, <code>MISTRAL-DPA-COMPLIANCE.md</code></li>
+</ul>
+<h3 id="12-tts-text-to-speech">12. TTS (Text-to-Speech)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Self-hosted Piper im eigenen Container; kein externer TTS-Dienst</li>
+<li>Text nur im Arbeitsspeicher; ApiUsage-Tracking</li>
+<li><strong>Art. 5 DSGVO:</strong> Datenminimierung</li>
+</ul>
+<h3 id="13-transcript-evaluation-premium">13. Transcript Evaluation (Premium)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Upload für Analyse; <strong>Original-Transkript nicht dauerhaft</strong> in DB nach Analyse</li>
+<li>Gespeichert: <code>preAnswers</code>, <code>evaluationData</code>, optionale NPS/Feedback, <code>contactOptIn</code></li>
+<li>Admin sieht nur Rating/Feedback/contactOptIn — <strong>keine</strong> preAnswers/evaluationData</li>
+<li>CASCADE bei Kontolöschung</li>
+<li><strong>Art. 6 Abs. 1 lit. b, Art. 28 DSGVO</strong></li>
+</ul>
+<h3 id="14-coach-practice-lab-neu-v2325">14. Coach Practice Lab (NEU v2.3–2.5)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM (mit Transparenz-Empfehlung für Draft)</li>
+<li><strong>In-Progress-Draft:</strong> <code>sessionStorage</code> (<code>mc_practice_draft_v1</code>), max. 24h, tab-scoped, <strong>nicht</strong> an Server — <code>utils/practiceSessionDraft.ts</code></li>
+<li><strong>Abgeschlossene Sessions:</strong> <code>practice_evaluations</code> — strukturierte Scores/JSON, <strong>kein</strong> vollständiges Chat-Transkript</li>
+<li>Evaluation via KI (Google/Mistral je nach Region)</li>
+<li>Export in <code>/api/data/export</code> enthalten</li>
+<li><strong>Art. 6 Abs. 1 lit. b DSGVO</strong></li>
+</ul>
+<h3 id="15-admin-practice-analytics-neu-v23">15. Admin Practice Analytics (NEU v2.3)</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Aggregierte Statistiken only; <strong>keine</strong> userId, keine Transkript-Zitate, kein focusNote-Text</li>
+<li><strong>k-Anonymität (k=5):</strong> Unterdrückung kleiner Kohorten — <code>services/practiceStatsService.js</code></li>
+<li>UI: <code>AdminPracticeAnalyticsView.tsx</code></li>
+<li><strong>Art. 5 Abs. 1 lit. c DSGVO</strong></li>
+</ul>
+<h3 id="16-in-app-purchase-apple--revenuecat--paypal">16. In-App Purchase (Apple / RevenueCat) &amp; PayPal</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(Privacy-Texte v2.5.0 P1)</em></li>
+<li>iOS: StoreKit 2 + RevenueCat (pseudonymisierte interne User-ID)</li>
+<li>Web: PayPal — <code>Purchase</code>-Tabelle (E-Mail, Transaktions-IDs)</li>
+<li>RevenueCat DPA via ToS (SCCs); Apple als eigenständiger Verantwortlicher</li>
+<li><strong>Art. 6 Abs. 1 lit. b, Art. 28 DSGVO</strong></li>
+</ul>
+<h3 id="17-cookie-nutzung">17. Cookie-Nutzung</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li><strong>Keine Cookies</strong> für Tracking; localStorage/sessionStorage für technisch notwendige Funktionen</li>
+<li>Kein Cookie-Banner erforderlich (ePrivacy)</li>
+<li>Dokumentiert in PrivacyPolicyView; <code>public/privacy.html</code> teilweise weniger detailliert</li>
+</ul>
+<h3 id="18-apple-privacy-manifest">18. Apple Privacy Manifest</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li><code>ios/App/App/PrivacyInfo.xcprivacy</code> — kein Tracking deklariert</li>
+</ul>
+<h3 id="19-newsletter--einwilligung">19. Newsletter &amp; Einwilligung</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li>Opt-in bei Registrierung; <code>unsubscribeToken</code>; Mailjet als AV</li>
+<li><strong>Art. 6 Abs. 1 lit. a DSGVO</strong></li>
+</ul>
+<hr />
+<h2 id="abweichungen--handlungsbedarf-v250">ABWEICHUNGEN &amp; HANDLUNGSBEDARF (v2.5.0)</h2>
+<h3 id="a1-gastmodus--server-seitige-metadaten">A1. Gastmodus — Server-seitige Metadaten</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(behoben v2.5.0 P2)</em></li>
+<li><strong>Fakt:</strong> <code>GuestUsage</code> (Fingerprint-Hash, Nachrichtenzähler, 7-Tage-Retention), ggf. <code>ApiUsage</code> mit <code>isGuest</code>, IP-Hash für Rate-Limiting</li>
+<li><strong>Umsetzung:</strong> <code>PrivacyPolicyView.tsx</code> + <code>public/privacy.html</code> präzisieren Gastmodus (lokal vs. Fingerprint)</li>
+<li><strong>Art. 13 DSGVO:</strong> Transparenz</li>
+</ul>
+<h3 id="a2-passwort-reset-vs-persönlichkeitsprofil">A2. Passwort-Reset vs. Persönlichkeitsprofil</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(behoben v2.5.0 P2)</em></li>
+<li><strong>Umsetzung:</strong> <code>clearPersonalityProfileOnPasswordReset()</code> in <code>auth.js</code> + <code>admin.js</code> — löscht <code>personality_profiles</code> bei Reset</li>
+<li><strong>Hinweis:</strong> Eingeloggte Passwortänderung weiterhin mit Client-Re-Encryption (<code>newEncryptedLifeContext</code>)</li>
+<li><strong>Art. 17 DSGVO:</strong> Löschung / Art. 5: Speicherbegrenzung</li>
+</ul>
+<h3 id="a3-käufe-purchase--export--löschung">A3. Käufe (<code>Purchase</code>) — Export &amp; Löschung</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(behoben v2.5.0 P1)</em></li>
+<li><strong>Umsetzung:</strong> <code>anonymizePurchasesForEmail()</code> bei Kontolöschung; Käufe im <code>/api/data/export</code>-Payload</li>
+<li><strong>Anonymisierung:</strong> E-Mail, Name, PayPal-Payload entfernt; Transaktionsmetadaten für Buchhaltung</li>
+<li><strong>Art. 17, 20 DSGVO</strong></li>
+</ul>
+<h3 id="a4-support-tickets-ticket">A4. Support-Tickets (<code>Ticket</code>)</h3>
+<ul>
+<li><strong>Status:</strong> TEILWEISE <em>(P2: Löschung/Export behoben; kein User-Create-Pfad)</em></li>
+<li><strong>Umsetzung:</strong> Export + Löschung bei Account-Delete für Tickets mit <code>payload.email</code></li>
+<li><strong>Offen:</strong> Kein öffentlicher Ticket-Create-Endpoint — nur Admin-Queue</li>
+<li><strong>Art. 15, 17 DSGVO</strong></li>
+</ul>
+<h3 id="a5-datenschutzerklärung--textlücken">A5. Datenschutzerklärung — Textlücken</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(behoben v2.5.0 P1)</em></li>
+<li><strong>Umsetzung:</strong> RevenueCat, Apple IAP, PayPal, Practice-Draft, DiceBear, rememberedEmail in <code>PrivacyPolicyView.tsx</code> + <code>public/privacy.html</code></li>
+<li><strong>Art. 13, 14 DSGVO</strong></li>
+</ul>
+<h3 id="a6-nginx-access-log-ip-anonymisierung">A6. NGINX Access-Log IP-Anonymisierung</h3>
+<ul>
+<li><strong>Status:</strong> DSGVO-KONFORM <em>(behoben v2.5.0 P3)</em></li>
+<li><strong>Umsetzung:</strong> <code>log_format anonymized</code> in <code>/etc/nginx/nginx.conf</code>; <code>access_log … anonymized</code> in <code>update-nginx-ips.sh</code> + Templates</li>
+<li><strong>Dokumentation:</strong> <code>DOCUMENTATION/NGINX-IP-ANONYMIZATION.md</code></li>
+<li><strong>Verifiziert:</strong> 29.07.2026 — Staging + Production vhosts regeneriert</li>
+<li><strong>Art. 5 Abs. 1 lit. c DSGVO:</strong> Datenminimierung (Server-Logs)</li>
+</ul>
+<hr />
+<h2 id="datenkategorien-übersicht-v250">DATENKATEGORIEN-ÜBERSICHT (v2.5.0)</h2>
+<table>
+<thead>
+<tr>
+<th>Kategorie</th>
+<th>Speicherort</th>
+<th>Retention / Löschung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lebenskontext (E2EE)</td>
+<td>DB <code>User.lifeContext</code></td>
+<td>Bis Löschung; Reset → leer</td>
+</tr>
+<tr>
+<td>Chat-Inhalte (Classic)</td>
+<td>Nicht persistent DB</td>
+<td>Nur KI-Request live</td>
+</tr>
+<tr>
+<td>Session Behavior</td>
+<td>DB</td>
+<td>CASCADE bei User-Delete</td>
+</tr>
+<tr>
+<td>Practice Draft</td>
+<td>Client <code>sessionStorage</code></td>
+<td>Max. 24h / Tab close</td>
+</tr>
+<tr>
+<td>Practice Evaluation</td>
+<td>DB <code>practice_evaluations</code></td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>Transcript Evaluation</td>
+<td>DB <code>transcript_evaluations</code></td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>Personality Profile</td>
+<td>DB E2EE + Metadaten</td>
+<td>CASCADE (Reset: siehe A2)</td>
+</tr>
+<tr>
+<td>ApiUsage</td>
+<td>DB</td>
+<td>12 Monate auto</td>
+</tr>
     </style>
 </head>
 <body>
@@ -301,686 +300,536 @@
             <h1>🔐 GDPR COMPLIANCE AUDIT</h1>
             <h2 style="color: #e0e7ee; border: none; margin: 10px 0; padding: 0;">Meaningful Conversations App</h2>
         </header>
-
         <div class="content">
-            <div class="meta-info">
-                <p><strong>Audit Date:</strong> February 15, 2026</p>
-                <p><strong>Audited Version:</strong> 1.8.8</p>
-                <p><strong>Operator Location:</strong> Austria</p>
-                <p><strong>Server Location:</strong> Hetzner, Germany (EU)</p>
-                <p><strong>Supervisory Authority:</strong> <a href="https://www.dsb.gv.at/" target="_blank">Austrian Data Protection Authority</a></p>
-            </div>
-
-            <hr>
-
-            <h2>✅ POSITIVE FINDINGS</h2>
-
-            <div class="section positive">
-                <h3>1. End-to-End Encryption (E2EE) <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>Life context is encrypted client-side</li>
-                    <li>Encryption keys never leave the device</li>
-                    <li>Server cannot read encrypted data</li>
-                    <li><strong>Art. 32 GDPR:</strong> Technical measures for protection</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>2. Guest Mode <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>No server storage</li>
-                    <li>Processing exclusively local in browser</li>
-                    <li>No personal data on servers</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>3. Account Deletion <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>Function available (DeleteAccountModal)</li>
-                    <li>Complete deletion including feedback data (CASCADE)</li>
-                    <li><strong>Art. 17 GDPR:</strong> Right to erasure</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>4. Data Minimization <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>Only necessary data is stored</li>
-                    <li>No unnecessary profiling</li>
-                    <li><strong>Art. 5(1)(c) GDPR</strong></li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>5. Data Security <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>Passwords hashed with bcrypt (10 salting rounds)</li>
-                    <li>HTTPS connection (SSL/TLS)</li>
-                    <li>Hetzner servers in Germany</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>6. Transparency <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li>Terms of Service available (TermsView)</li>
-                    <li>Disclaimer available (DisclaimerView)</li>
-                    <li>FAQ with privacy information</li>
-                    <li>Warning about personal data (PIIWarningView)</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>7. NEW: Privacy Policy <span class="badge success">✅ IMPLEMENTED</span></h3>
-                <p><strong>Date:</strong> November 8, 2025</p>
-                <ul>
-                    <li>Dedicated component created (<code>PrivacyPolicyView.tsx</code>)</li>
-                    <li>Accessible in app via menu</li>
-                    <li>Contains all mandatory information per Art. 13, 14 GDPR</li>
-                    <li>Available in German and English</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>8. NEW: Imprint <span class="badge success">✅ IMPLEMENTED</span></h3>
-                <p><strong>Date:</strong> November 8, 2025</p>
-                <ul>
-                    <li>Dedicated component created (<code>ImprintView.tsx</code>)</li>
-                    <li>Accessible in app via menu</li>
-                    <li>Fulfills imprint requirement (Austria: §5 E-Commerce Act - ECG)</li>
-                    <li>Available in German and English</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>9. Data Export Function <span class="badge success">✅ IMPLEMENTED & ENHANCED</span></h3>
-                <p><strong>Initial Implementation:</strong> November 8, 2025</p>
-                <p><strong>Last Update:</strong> November 11, 2025 (HTML export styling)</p>
-                <ul>
-                    <li>Backend Endpoint: <code>GET/POST /api/data/export</code></li>
-                    <li>Frontend Component: <code>DataExportView.tsx</code></li>
-                    <li><strong>Export Formats:</strong>
-                        <ul>
-                            <li>JSON (machine-readable)</li>
-                            <li>HTML (user-friendly, styled)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Art. 20 GDPR:</strong> Right to data portability</li>
-                    <li><strong>Features:</strong>
-                        <ul>
-                            <li>HTML export with professional design</li>
-                            <li>Color scheme adapted to app theme (dark teal)</li>
-                            <li>Multilingual (DE/EN)</li>
-                            <li>Decrypted life context with POST request</li>
-                        </ul>
-                    </li>
-                    <li><strong>Contains:</strong>
-                        <ul>
-                            <li>Account information</li>
-                            <li>Gamification data</li>
-                            <li>Encrypted life context (or decrypted with POST)</li>
-                            <li>Feedback</li>
-                            <li>Upgrade codes</li>
-                            <li>API usage statistics (12 months)</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>10. Cookie Usage <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <ul>
-                    <li><strong>NO Cookies</strong> used</li>
-                    <li>Only localStorage for technically necessary functions:
-                        <ul>
-                            <li>Auth token</li>
-                            <li>Language setting</li>
-                            <li>Guest mode (local)</li>
-                        </ul>
-                    </li>
-                    <li><strong>NO cookie banner required</strong> (ePrivacy compliant)</li>
-                    <li>Transparently documented in privacy policy</li>
-                </ul>
-            </div>
-
-            <hr>
-
-            <h2>⚠️ REMAINING CRITICAL ISSUES</h2>
-
-            <div class="section warning">
-                <h3>1. Template Personalization Required <span class="badge warning">⚠️ ACTION REQUIRED</span></h3>
-                <h4>Problem:</h4>
-                <ul>
-                    <li>Privacy policy and imprint contain placeholders <code>[YOUR NAME/COMPANY]</code>, <code>[YOUR EMAIL]</code>, etc.</li>
-                    <li><strong>These MUST be personalized before production deployment!</strong></li>
-                </ul>
-                <h4>Action:</h4>
-                <p>Replace all placeholders in the markdown texts:</p>
-                <ul>
-                    <li><code>PrivacyPolicyView.tsx</code> (de_markdown & en_markdown)</li>
-                    <li><code>ImprintView.tsx</code> (de_markdown & en_markdown)</li>
-                </ul>
-            </div>
-
-            <hr>
-
-            <h2>⚠️ MODERATE ISSUES</h2>
-
-            <div class="section">
-                <h3>2. API Usage Tracking <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge info">(room for improvement)</span></h3>
-                <h4>Implementation:</h4>
-                <ul>
-                    <li>User ID is tracked <strong>LOCALLY ONLY</strong> (NOT sent to Google)</li>
-                    <li>Tracking occurs in own database for cost monitoring</li>
-                    <li>Technical metadata (tokens, duration, bot ID)</li>
-                    <li><strong>Mentioned in privacy policy</strong> ✅</li>
-                </ul>
-                <ul>
-                    <li><strong>Legal Basis:</strong> Art. 6(1)(f) GDPR (legitimate interest)</li>
-                    <li><strong>Retention Period:</strong> <span class="badge success">IMPLEMENTED</span> - Automatic deletion after 12 months</li>
-                    <li><strong>Important:</strong> Google Gemini receives NO User IDs, only conversation content</li>
-                    <li><strong>Optional:</strong> Could be simplified to pure token statistics without User ID</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h3>3. Feedback System <span class="badge success">✅ GDPR COMPLIANT</span></h3>
-                <h4>Implementation:</h4>
-                <ul>
-                    <li>Anonymization checkbox available (<code>isAnonymous</code>)</li>
-                    <li>Default set to "anonymous"</li>
-                    <li>User can consciously choose to send non-anonymous feedback</li>
-                    <li><code>FeedbackModal.tsx</code> implements anonymization option</li>
-                </ul>
-                <h4>Storage:</h4>
-                <ul>
-                    <li>Feedback may contain <code>lastUserMessage</code> and <code>botResponse</code></li>
-                    <li>With anonymous submission: No link to User ID</li>
-                    <li>For registered users: Option for non-anonymization</li>
-                </ul>
-                <p><strong>GDPR Compliance:</strong> ✅ Consent through conscious selection</p>
-            </div>
-
-            <div class="section">
-                <h3>4. Server Logs <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge success">(IP anonymization implemented)</span></h3>
-                <ul>
-                    <li><strong>Retention Period:</strong> 7 days (documented in privacy policy)</li>
-                    <li><strong>Implementation:</strong> ✅ IP addresses are anonymized
-                        <ul>
-                            <li><strong>IPv4:</strong> Last octet removed (e.g., <code>192.168.1.234</code> → <code>192.168.1.0</code>)</li>
-                            <li><strong>IPv6:</strong> Only first 48 bits retained (e.g., <code>2a01:4f8:...:...</code> → <code>2a01:4f8::</code>)</li>
-                            <li><strong>Anonymized IPs = NO personal data</strong> (GDPR Recital 26)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Implementation Date:</strong> November 11, 2025</li>
-                    <li><strong>Documentation:</strong> <code>DOCUMENTATION/NGINX-IP-ANONYMIZATION.md</code></li>
-                    <li><strong>Benefit:</strong> Best-practice data minimization (Art. 5(1)(c) GDPR)</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h3>5. Google Gemini API <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge success">(DPA Coverage verified)</span></h3>
-                <h4>Details:</h4>
-                <ul>
-                    <li>User conversations are sent to Google Gemini</li>
-                    <li><strong>Google = Data Processor</strong></li>
-                    <li><strong>GDPR:</strong> Art. 28</li>
-                </ul>
-                <h4>Data Sent to Google:</h4>
-                <ul>
-                    <li>Conversation content (user messages, bot responses)</li>
-                    <li>Life context (if provided by user)</li>
-                    <li>Bot ID (e.g., "g-coach", "gloria-life-context")</li>
-                    <li><strong>NO</strong> User IDs, email addresses, or account data</li>
-                </ul>
-                <h4>Current Status:</h4>
-                <ul>
-                    <li><strong>Mentioned in privacy policy</strong> ✅</li>
-                    <li><strong>DPA Coverage:</strong> Automatic through Google Cloud Account ✅</li>
-                    <li><strong>Documentation:</strong> <code>DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md</code> ✅</li>
-                </ul>
-                <p><strong>Note:</strong> Google Cloud DPA is automatically active for all GCP customers</p>
-                <p><strong>Data Economy:</strong> Only data necessary for service is transmitted</p>
-            </div>
-
-            <div class="section">
-                <h3>6. Mailjet (Email Sending) <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge success">(DPA Coverage verified)</span></h3>
-                <h4>Details:</h4>
-                <ul>
-                    <li>Email addresses are transmitted to Mailjet (Sinch Mailjet SAS)</li>
-                    <li><strong>Mailjet = Data Processor</strong></li>
-                    <li><strong>GDPR:</strong> Art. 28</li>
-                </ul>
-                <h4>Current Status:</h4>
-                <ul>
-                    <li><strong>Mentioned in privacy policy</strong> ✅</li>
-                    <li><strong>DPA Coverage:</strong> Automatic through Sinch Service Agreement ✅</li>
-                    <li><strong>Documentation:</strong> <code>DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md</code> ✅</li>
-                </ul>
-                <p><strong>Note:</strong> Sinch DPA (Mailjet belongs to Sinch) is automatically active for all Mailjet customers</p>
-            </div>
-
-            <div class="section positive">
-                <h3>7. NEW: Transcript Evaluation Feature <span class="badge success">✅ GDPR COMPLIANT</span> <span class="badge info">(USER RESPONSIBILITY)</span></h3>
-                <p><strong>Date:</strong> February 14, 2026</p>
-                <p><strong>Feature:</strong> Client users can upload conversation transcripts for AI-powered communication analysis</p>
-                
-                <h4>Data Processing:</h4>
-                <ul>
-                    <li><strong>Input:</strong> User uploads transcript (text or SRT file) + pre-reflection answers</li>
-                    <li><strong>Processing:</strong> Transcript analyzed by Google Gemini API (covered by existing Google Cloud DPA)</li>
-                    <li><strong>Storage:</strong> 
-                        <ul>
-                            <li><strong>Stored:</strong> Pre-reflection answers + AI evaluation results (structured JSON)</li>
-                            <li><strong>NOT stored:</strong> Original transcript text (deleted after analysis)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Retention:</strong> Evaluation results stored indefinitely until user deletes them</li>
-                    <li><strong>User Rights:</strong> Users can delete evaluations at any time via UI (delete button in history)</li>
-                </ul>
-
-                <h4>Data Schema (TranscriptEvaluation):</h4>
-                <ul>
-                    <li><code>userId</code> - Foreign key to User table (ON DELETE CASCADE)</li>
-                    <li><code>preAnswers</code> - JSON: situationName, goal, personalTarget, assumptions, satisfaction, difficult (TEXT)</li>
-                    <li><code>evaluationData</code> - JSON: structured AI evaluation result incl. botRecommendations (TEXT)</li>
-                    <li><code>lang</code> - Language code (de/en)</li>
-                    <li><code>userRating</code> - Optional NPS rating (0-10)</li>
-                    <li><code>userFeedback</code> - Optional free-text feedback</li>
-                    <li><code>contactOptIn</code> - Opt-in for admin contact (Boolean, default: false)</li>
-                    <li><code>ratedAt</code>, <code>createdAt</code> - Timestamps</li>
-                </ul>
-
-                <h4>GDPR-Specific Measures (February 15, 2026):</h4>
-                <div class="section positive" style="margin-top: 15px;">
-                    <p><strong>Admin Data Access (Art. 5(1)(c) GDPR — Data Minimization):</strong></p>
-                    <ul>
-                        <li>Admins see ONLY: rating number, voluntary feedback, contactOptIn, email, timestamp</li>
-                        <li><code>preAnswers</code> and <code>evaluationData</code> are NOT sent to admin endpoints</li>
-                        <li><code>situationName</code>, <code>goal</code>, development areas, bot recommendations are INVISIBLE to admins</li>
-                    </ul>
-                    <p><strong>contactOptIn (Art. 6(1)(a) GDPR — Consent):</strong></p>
-                    <ul>
-                        <li>Opt-in checkbox: user actively decides whether admin may contact them</li>
-                        <li>Default: false (no contact without consent)</li>
-                        <li>Only with active opt-in is the user's email shown as contactable to admin</li>
-                    </ul>
-                    <p><strong>PDF Export:</strong> Generated client-side, marked as "Personal and Confidential"</p>
-                    <p><strong>Bot Recommendations:</strong> AI-generated coaching recommendations per development area; visible only to the user themselves</p>
-                </div>
-
-                <h4>Third-Party Processing:</h4>
-                <ul>
-                    <li><strong>Google Gemini API:</strong> Receives transcript + context for analysis</li>
-                    <li><strong>DPA Coverage:</strong> ✅ Covered by existing Google Cloud DPA</li>
-                    <li><strong>Data Transmission:</strong> Same as regular coaching sessions (already documented)</li>
-                </ul>
-
-                <h4>⚠️ CRITICAL: User Responsibility for Transcript Content</h4>
-                <div class="section warning" style="margin-top: 15px;">
-                    <p><strong>IMPORTANT DISCLAIMER:</strong></p>
-                    <ul>
-                        <li>The application <strong>does NOT verify</strong> the origin or legality of uploaded transcripts</li>
-                        <li><strong>USER is solely responsible</strong> for ensuring:
-                            <ul>
-                                <li>They have legal right to upload the transcript</li>
-                                <li>All conversation participants have consented to recording/analysis</li>
-                                <li>Transcript does not contain third-party personal data without consent</li>
-                                <li>Compliance with local recording laws (e.g., Germany: §201 StGB requires consent)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Application Operator:</strong> Not liable for user-uploaded content</li>
-                        <li><strong>Terms of Service:</strong> Must include clause stating user responsibility for transcript legality</li>
-                    </ul>
-                    <p><strong>Recommendation:</strong> Add explicit warning in UI before transcript upload reminding users of their legal obligations</p>
-                </div>
-
-                <h4>GDPR Compliance Assessment:</h4>
-                <ul>
-                    <li><strong>Art. 6(1)(b) GDPR:</strong> ✅ Processing necessary for service provision (evaluation service)</li>
-                    <li><strong>Art. 28 GDPR:</strong> ✅ DPA with Google (data processor) in place</li>
-                    <li><strong>Art. 32 GDPR:</strong> ✅ Technical security (HTTPS, server-side validation, database encryption)</li>
-                    <li><strong>Art. 17 GDPR:</strong> ✅ Right to erasure (delete button + CASCADE on account deletion)</li>
-                    <li><strong>Data Minimization:</strong> ✅ Transcript deleted after analysis (only results stored)</li>
-                    <li><strong>Transparency:</strong> ⚠️ <strong>ACTION REQUIRED</strong> - Add to privacy policy + user guide</li>
-                </ul>
-
-                <h4>Recommended UI Warning:</h4>
-                <pre><code>⚠️ Wichtig: Sie sind dafür verantwortlich, dass Sie berechtigt sind, 
-dieses Transkript hochzuladen und analysieren zu lassen. Stellen Sie 
-sicher, dass alle Gesprächsteilnehmer der Aufzeichnung und Analyse 
-zugestimmt haben.</code></pre>
-            </div>
-
-            <hr>
-
-            <h2>📊 SUMMARY</h2>
-
-            <div class="score-box">
-                <div class="label">Compliance Score</div>
-                <div class="score">97/100</div>
-                <div style="color: #4ade80; font-size: 1.2em; font-weight: 600;">⬆️ +2 points since last audit</div>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th>Grade</th>
-                        <th>Change</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Data Security</td>
-                        <td>✅ Very good</td>
-                        <td><strong style="color: #4ade80;">A</strong></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Transparency</td>
-                        <td>✅ Good</td>
-                        <td><strong style="color: #5fd4c3;">B+</strong></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>User Rights</td>
-                        <td>✅ Good</td>
-                        <td><strong style="color: #5fd4c3;">B+</strong></td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Third Parties</td>
-                        <td>✅ Documented</td>
-                        <td><strong style="color: #5fd4c3;">B</strong></td>
-                        <td style="color: #4ade80;">⬆️ (previously: C+)</td>
-                    </tr>
-                    <tr>
-                        <td>Technical Measures</td>
-                        <td>✅ Excellent</td>
-                        <td><strong style="color: #4ade80;">A+</strong></td>
-                        <td style="color: #4ade80;">⬆️ (previously: A)</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="section positive">
-                <h4>Reason for Score Increase:</h4>
-                <ul>
-                    <li>IP anonymization implemented in server logs (+2 points)</li>
-                    <li>Best-practice data minimization implemented</li>
-                    <li>Technical measures at highest level</li>
-                </ul>
-            </div>
-
-            <h3>Legal Risks</h3>
-
-            <div class="section positive">
-                <h4>HIGH: ✅ RESOLVED</h4>
-                <ul>
-                    <li><del>Missing privacy policy</del> → ✅ <strong>IMPLEMENTED</strong></li>
-                    <li><del>Missing imprint</del> → ✅ <strong>IMPLEMENTED</strong></li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h4>MEDIUM:</h4>
-                <ul>
-                    <li><del>Missing DPA with Google</del> → ✅ <strong>AVAILABLE</strong> (automatic through GCP account)</li>
-                    <li><del>Missing DPA with Mailjet</del> → ✅ <strong>AVAILABLE</strong> (automatic through Sinch Service Agreement)</li>
-                    <li><del>Missing data export</del> → ✅ <strong>IMPLEMENTED</strong></li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h4>LOW:</h4>
-                <ul>
-                    <li>API Usage without retention → ✅ <strong>RESOLVED</strong> (12 months, then automatic deletion)</li>
-                    <li><del>Feedback without anonymization option</del> → ✅ <strong>AVAILABLE</strong> (anonymization checkbox default enabled)</li>
-                </ul>
-            </div>
-
-            <hr>
-
-            <h2>✅ COMPLETED TASKS</h2>
-
-            <div class="section positive">
-                <h3>Week 1 (Critical) - ✅ COMPLETED (November 8, 2025)</h3>
-                <ul>
-                    <li><span class="checkbox">☑</span> Create & integrate privacy policy</li>
-                    <li><span class="checkbox">☑</span> Create & integrate imprint</li>
-                    <li><span class="checkbox">☑</span> Implement data export function</li>
-                    <li><span class="checkbox">☑</span> Review cookie usage (result: no banner needed)</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>v1.8.8 GDPR Additions - ✅ COMPLETED (February 15, 2026)</h3>
-                <ul>
-                    <li><span class="checkbox">☑</span> Transcript Evaluation Feature with GDPR-compliant admin access</li>
-                    <li><span class="checkbox">☑</span> User Rating System (NPS) with optional feedback</li>
-                    <li><span class="checkbox">☑</span> contactOptIn: Opt-in checkbox for admin contact (Art. 6(1)(a) GDPR)</li>
-                    <li><span class="checkbox">☑</span> Admin data minimization: preAnswers/evaluationData NOT sent to admin endpoints</li>
-                    <li><span class="checkbox">☑</span> situationName: New mandatory field for transcript identification (not visible to admin)</li>
-                    <li><span class="checkbox">☑</span> Bot recommendations: AI-generated coaching recommendations per development area (user-only)</li>
-                    <li><span class="checkbox">☑</span> PDF footer: "Personal and Confidential" on every page with username and date</li>
-                </ul>
-            </div>
-
-            <div class="section positive">
-                <h3>Improvements - ✅ COMPLETED (November 11, 2025)</h3>
-                <ul>
-                    <li><span class="checkbox">☑</span> Improved HTML export styling</li>
-                    <li><span class="checkbox">☑</span> Adapted color scheme to dark teal (less aggressive)</li>
-                    <li><span class="checkbox">☑</span> Multilingual HTML exports (DE/EN)</li>
-                    <li><span class="checkbox">☑</span> Decrypted life context in export (GDPR Art. 15 right of access)</li>
-                    <li><span class="checkbox">☑</span> Corrected feedback system assessment (anonymization option was already present)</li>
-                    <li><span class="checkbox">☑</span> Documented Google Cloud DPA (automatic coverage verified)</li>
-                    <li><span class="checkbox">☑</span> Documented Mailjet DPA (automatic coverage via Sinch DPA verified)</li>
-                </ul>
-            </div>
-
-            <hr>
-
-            <h2>⏭️ NEXT STEPS</h2>
-
-            <div class="section warning">
-                <h3>Priority 1: IMMEDIATE (BEFORE DEPLOYMENT)</h3>
-                <ol>
-                    <li><strong>Personalize privacy policy</strong>
-                        <ul>
-                            <li>Replace placeholders <code>[YOUR NAME/COMPANY]</code>, <code>[YOUR EMAIL]</code>, etc.</li>
-                            <li>File: <code>components/PrivacyPolicyView.tsx</code> (de_markdown & en_markdown)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Personalize imprint</strong>
-                        <ul>
-                            <li>Replace placeholders</li>
-                            <li>File: <code>components/ImprintView.tsx</code> (de_markdown & en_markdown)</li>
-                        </ul>
-                    </li>
-                    <li><strong>Deploy to manualmode server</strong>
-                        <pre><code>make deploy-manualmode-staging   # Test
-make deploy-manualmode-production # Production</code></pre>
-                    </li>
-                </ol>
-            </div>
-
-            <div class="section positive">
-                <h3>Priority 2: IMPORTANT (Within 2 Weeks) - ✅ COMPLETED</h3>
-                <ol start="4">
-                    <li><del><strong>Conclude DPA with Google</strong></del> ✅ <strong>DONE</strong>
-                        <ul>
-                            <li>DPA is automatic through Google Cloud Account</li>
-                            <li>Documentation: <code>DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md</code></li>
-                            <li>DPA Document: <a href="https://cloud.google.com/terms/data-processing-addendum" target="_blank">https://cloud.google.com/terms/data-processing-addendum</a></li>
-                        </ul>
-                    </li>
-                    <li><del><strong>Conclude DPA with Mailjet</strong></del> ✅ <strong>DONE</strong>
-                        <ul>
-                            <li>DPA is automatic through Sinch Service Agreement</li>
-                            <li>Mailjet belongs to Sinch - uses Sinch DPA (Version 8)</li>
-                            <li>Documentation: <code>DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md</code></li>
-                            <li>DPA Document: <a href="https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/" target="_blank">https://sinch.com/legal/...</a></li>
-                        </ul>
-                    </li>
-                </ol>
-            </div>
-
-            <div class="section positive">
-                <h3>Priority 3: RECOMMENDED (Optional) - ✅ COMPLETED</h3>
-                <ol start="6">
-                    <li><del><strong>Nginx Access Log Anonymization</strong></del> ✅ <strong>IMPLEMENTED</strong> (November 11, 2025)
-                        <ul>
-                            <li><strong>Documentation:</strong> <code>DOCUMENTATION/NGINX-IP-ANONYMIZATION.md</code></li>
-                            <li><strong>Status:</strong> ✅ Production in Staging & Production</li>
-                            <li><strong>Implementation:</strong>
-                                <ul>
-                                    <li>IPv4 anonymization: <code>192.168.1.234</code> → <code>192.168.1.0</code></li>
-                                    <li>IPv6 anonymization: <code>2a01:4f8:c17:...:...</code> → <code>2a01:4f8::</code></li>
-                                    <li>Nginx Map configuration in <code>/etc/nginx/nginx.conf</code></li>
-                                    <li>Custom log format <code>anonymized</code> in both environments</li>
-                                </ul>
-                            </li>
-                            <li><strong>Benefit:</strong> Best-practice data minimization (Art. 5(1)(c) GDPR)</li>
-                            <li><strong>Verified:</strong> Logs show anonymized IPs</li>
-                        </ul>
-                    </li>
-                    <li><del><strong>Implement feedback consent</strong></del> ✅ <strong>ALREADY PRESENT</strong>
-                        <ul>
-                            <li>Anonymization checkbox is enabled by default</li>
-                            <li>User has full control over feedback anonymity</li>
-                        </ul>
-                    </li>
-                </ol>
-            </div>
-
-            <hr>
-
-            <h2>📚 RESOURCES</h2>
-
-            <h3>Internal Documentation</h3>
-            <div class="resources-grid">
-                <div class="resource-card">
-                    <strong>Google Cloud DPA</strong><br>
-                    <code>DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md</code>
-                </div>
-                <div class="resource-card">
-                    <strong>Mailjet DPA</strong><br>
-                    <code>DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md</code>
-                </div>
-                <div class="resource-card">
-                    <strong>Nginx IP Anonymization</strong><br>
-                    <code>DOCUMENTATION/NGINX-IP-ANONYMIZATION.md</code>
-                </div>
-            </div>
-
-            <h3>External Resources</h3>
-            <div class="resources-grid">
-                <div class="resource-card">
-                    <strong>Austrian Data Protection Authority</strong><br>
-                    <a href="https://www.dsb.gv.at/" target="_blank">www.dsb.gv.at</a>
-                </div>
-                <div class="resource-card">
-                    <strong>GDPR Info Austria</strong><br>
-                    <a href="https://www.oesterreich.gv.at/themen/datenschutz.html" target="_blank">www.oesterreich.gv.at/datenschutz</a>
-                </div>
-                <div class="resource-card">
-                    <strong>WKO Data Protection (AT)</strong><br>
-                    <a href="https://www.wko.at/datenschutz" target="_blank">www.wko.at/datenschutz</a>
-                </div>
-                <div class="resource-card">
-                    <strong>Google Cloud DPA</strong><br>
-                    <a href="https://cloud.google.com/terms/data-processing-addendum" target="_blank">cloud.google.com/terms/dpa</a>
-                </div>
-                <div class="resource-card">
-                    <strong>Google Cloud Sub-Processors</strong><br>
-                    <a href="https://cloud.google.com/terms/subprocessors" target="_blank">cloud.google.com/terms/subprocessors</a>
-                </div>
-                <div class="resource-card">
-                    <strong>Sinch DPA (Mailjet)</strong><br>
-                    <a href="https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/" target="_blank">sinch.com/legal/dpa</a>
-                </div>
-                <div class="resource-card">
-                    <strong>Sinch Sub-Processors</strong><br>
-                    <a href="https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/sub-processors/" target="_blank">sinch.com/legal/sub-processors</a>
-                </div>
-                <div class="resource-card">
-                    <strong>Mailjet Security</strong><br>
-                    <a href="https://www.mailjet.com/security-privacy/" target="_blank">www.mailjet.com/security-privacy</a>
-                </div>
-            </div>
-
-            <hr>
-
-            <h2>🎉 SUCCESS REPORT</h2>
-
-            <div class="section positive">
-                <h3>What Has Been Achieved:</h3>
-                <ol>
-                    <li>✅ Privacy policy with all mandatory information per Art. 13, 14 GDPR</li>
-                    <li>✅ Imprint per §5 E-Commerce Act (ECG, Austria)</li>
-                    <li>✅ Data export function (Art. 20 GDPR)
-                        <ul>
-                            <li>JSON format (machine-readable)</li>
-                            <li>HTML format (user-friendly, professionally styled)</li>
-                            <li>Multilingual (DE/EN)</li>
-                            <li>Optional with decrypted life context (Art. 15 GDPR)</li>
-                        </ul>
-                    </li>
-                    <li>✅ Cookie usage reviewed (no cookies, no banner needed)</li>
-                    <li>✅ Transparent documentation of all data processing</li>
-                    <li>✅ User-friendly design (UX) of GDPR functions</li>
-                    <li>✅ Feedback system with anonymization option (default enabled)</li>
-                    <li>✅ Data Processing Agreements (DPA) with all third parties
-                        <ul>
-                            <li>Google Cloud (Gemini API): Automatic DPA coverage</li>
-                            <li>Mailjet (Sinch): Automatic DPA coverage via Sinch DPA</li>
-                        </ul>
-                    </li>
-                </ol>
-            </div>
-
-            <div class="section positive">
-                <h3>Legal Compliance:</h3>
-                <ul>
-                    <li>The app now fulfills the <strong>essential requirements of GDPR</strong></li>
-                    <li><strong>Critical issues have been resolved</strong></li>
-                    <li><strong>All Data Processing Agreements (DPA) are in place</strong></li>
-                    <li>Remaining points are <strong>best-practice recommendations</strong></li>
-                    <li><strong>Usability:</strong> GDPR-compliant functions are professionally and attractively designed</li>
-                </ul>
-            </div>
-
-            <div class="score-box" style="border-color: #4ade80;">
-                <div class="label" style="color: #4ade80; font-size: 1.5em; font-weight: 700;">
-                    ✅ STATUS: PRODUCTION READY
-                </div>
-                <ul style="text-align: left; margin: 20px auto; max-width: 600px;">
-                    <li>All critical and medium-severity GDPR requirements fulfilled</li>
-                    <li>Third-party DPAs fully documented and verified</li>
-                    <li>Compliance Score: 97/100</li>
-                </ul>
-            </div>
+<h1 id="gdpr-compliance-audit">GDPR COMPLIANCE AUDIT</h1>
+<h2 id="meaningful-conversations-app">Meaningful Conversations App</h2>
+<p><strong>Audit date:</strong> 29 July 2026<br />
+<strong>Version audited:</strong> 2.5.0<br />
+<strong>Previous audit:</strong> 25 February 2026 (v1.9.7)<br />
+<strong>Operator location:</strong> Austria<br />
+<strong>Server location:</strong> Hetzner, Germany (EU)<br />
+<strong>Supervisory authority:</strong> Austrian Data Protection Authority (<a href="https://www.dsb.gv.at/">https://www.dsb.gv.at/</a>)</p>
+<hr />
+<h2 id="rating-legend">RATING LEGEND</h2>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GDPR-COMPLIANT</strong></td>
+<td>Requirement met; no material gaps</td>
+</tr>
+<tr>
+<td><strong>PARTIAL</strong></td>
+<td>Fundamentally OK, but wording/documentation/code differs</td>
+</tr>
+<tr>
+<td><strong>ACTION REQUIRED</strong></td>
+<td>Relevant gap; should be addressed before production/store rollout</td>
+</tr>
+<tr>
+<td><strong>RECOMMENDED</strong></td>
+<td>Best practice; no immediate legal violation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="positive-findings">POSITIVE FINDINGS</h2>
+<h3 id="1-end-to-end-encryption-e2ee--life-context">1. End-to-end encryption (E2EE) — Life Context</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Life Context encrypted client-side (AES-GCM, PBKDF2); key never leaves the device</li>
+<li>Server stores ciphertext + <code>encryptionSalt</code> only</li>
+<li><strong>Art. 32 GDPR:</strong> Technical safeguards</li>
+<li><strong>Files:</strong> <code>routes/data.js</code>, client crypto utils</li>
+</ul>
+<h3 id="2-guest-mode--chat--life-context-local">2. Guest mode — chat &amp; life context local</h3>
+<ul>
+<li><strong>Status:</strong> PARTIAL (see “Deviations”)</li>
+<li>Chat content and Life Context in guest mode remain <strong>primarily local</strong> (no persisted LC on server)</li>
+<li><strong>Art. 5(1)(c) GDPR:</strong> Data minimisation for core data</li>
+</ul>
+<h3 id="3-account-deletion">3. Account deletion</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT (with documented purchase caveat)</li>
+<li><code>DELETE /api/data/user</code> — UI: <code>DeleteAccountModal.tsx</code></li>
+<li>CASCADE: Feedback, PersonalityProfile, SessionBehaviorLog, PracticeEvaluations, TranscriptEvaluations</li>
+<li>Explicitly deleted: ApiUsage, UserEvent; upgrade codes unlinked</li>
+<li><strong>Art. 17 GDPR:</strong> Right to erasure</li>
+<li><strong>File:</strong> <code>meaningful-conversations-backend/routes/data.js</code></li>
+</ul>
+<h3 id="4-data-minimisation--no-session-transcripts-in-db">4. Data minimisation — no session transcripts in DB</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Classic chat transcripts are <strong>not</strong> stored permanently in the DB (migration <code>20260208120000_remove_encrypted_transcript</code>)</li>
+<li>Session behaviour logs: frequency counters only, no transcript</li>
+<li><strong>Art. 5(1)(c) GDPR</strong></li>
+<li><strong>Documentation:</strong> <code>DOCUMENTATION/GDPR-TRANSCRIPT-REMOVAL.md</code></li>
+</ul>
+<h3 id="5-data-security">5. Data security</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Passwords: bcrypt (10 rounds)</li>
+<li>HTTPS/TLS; Hetzner DE hosting</li>
+<li>JWT invalidation on password change (<code>tokensInvalidatedAt</code>)</li>
+<li><strong>Art. 32 GDPR</strong></li>
+</ul>
+<h3 id="6-transparency--legal-information">6. Transparency &amp; legal information</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Privacy policy: <code>PrivacyPolicyView.tsx</code>, static <code>public/privacy.html</code></li>
+<li>Imprint, disclaimer, FAQ, PII warning</li>
+<li><strong>Art. 13, 14 GDPR</strong></li>
+</ul>
+<h3 id="7-data-export-access--portability">7. Data export (access / portability)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT (with documented exceptions)</li>
+<li><code>GET/POST /api/data/export</code> — <code>DataExportView.tsx</code></li>
+<li>Formats: JSON + HTML (DE/EN)</li>
+<li>Includes: account, gamification, Life Context (optionally decrypted), feedback, upgrade codes, ApiUsage (12-month window), personality profile, session behaviour logs, user events, <strong>practiceEvaluations</strong>, <strong>transcriptEvaluations</strong></li>
+<li><strong>Art. 15, 20 GDPR</strong></li>
+</ul>
+<h3 id="8-storage-limitation-automated">8. Storage limitation (automated)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li><strong>ApiUsage:</strong> 12 months — <code>services/dataRetention.js</code></li>
+<li><strong>UserEvent:</strong> 6 months</li>
+<li><strong>GuestUsage:</strong> 7 days — <code>services/guestLimitTracker.js</code></li>
+<li>Runs every 24h via <code>server.js</code></li>
+<li><strong>Art. 5(1)(e) GDPR</strong></li>
+</ul>
+<h3 id="9-personality-profile-e2ee">9. Personality profile (E2EE)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Table <code>personality_profiles</code>; scores encrypted; metadata (testType, completedLenses, …) unencrypted</li>
+<li>Opt-out / comfort check in DPFL flow</li>
+<li>On <strong>password change</strong> (logged in): re-encryption possible via <code>newEncryptedLifeContext</code></li>
+<li><strong>Art. 6(1)(a), Art. 32 GDPR</strong></li>
+</ul>
+<h3 id="10-dpc--dpfl-experimental-mode">10. DPC / DPFL (Experimental Mode)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Opt-in; pseudonymisation towards AI (no userId/email to provider)</li>
+<li>Session behaviour logs without transcript</li>
+<li><strong>Art. 25 GDPR:</strong> Privacy by design</li>
+</ul>
+<h3 id="11-ai-providers--region-choice">11. AI providers &amp; region choice</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Google Gemini (US, SCCs via Google Cloud DPA) and Mistral AI (EU, Paris)</li>
+<li>User choice <code>aiRegionPreference</code>: <code>eu</code> / <code>us</code> / <code>optimal</code></li>
+<li>Since v2.5.0: Practice <code>send-message</code> and <code>practice-coach-turn</code> respect <code>userRegionPreference</code> (same as classic chat)</li>
+<li><strong>DPA docs:</strong> <code>GOOGLE-CLOUD-DPA-COMPLIANCE.md</code>, <code>MISTRAL-DPA-COMPLIANCE.md</code></li>
+</ul>
+<h3 id="12-tts-text-to-speech">12. TTS (text-to-speech)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Self-hosted Piper in own container; no external TTS service</li>
+<li>Text in memory only; ApiUsage tracking</li>
+<li><strong>Art. 5 GDPR:</strong> Data minimisation</li>
+</ul>
+<h3 id="13-transcript-evaluation-premium">13. Transcript evaluation (Premium)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Upload for analysis; <strong>original transcript not stored</strong> permanently in DB after analysis</li>
+<li>Stored: <code>preAnswers</code>, <code>evaluationData</code>, optional NPS/feedback, <code>contactOptIn</code></li>
+<li>Admin sees rating/feedback/contactOptIn only — <strong>not</strong> preAnswers/evaluationData</li>
+<li>CASCADE on account deletion</li>
+<li><strong>Art. 6(1)(b), Art. 28 GDPR</strong></li>
+</ul>
+<h3 id="14-coach-practice-lab-new-v2325">14. Coach Practice Lab (NEW v2.3–2.5)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT (transparency recommendation for draft)</li>
+<li><strong>In-progress draft:</strong> <code>sessionStorage</code> (<code>mc_practice_draft_v1</code>), max 24h, tab-scoped, <strong>not</strong> sent to server — <code>utils/practiceSessionDraft.ts</code></li>
+<li><strong>Completed sessions:</strong> <code>practice_evaluations</code> — structured scores/JSON, <strong>no</strong> full chat transcript</li>
+<li>Evaluation via AI (Google/Mistral per region)</li>
+<li>Included in <code>/api/data/export</code></li>
+<li><strong>Art. 6(1)(b) GDPR</strong></li>
+</ul>
+<h3 id="15-admin-practice-analytics-new-v23">15. Admin practice analytics (NEW v2.3)</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Aggregated statistics only; <strong>no</strong> userId, no transcript quotes, no focusNote text</li>
+<li><strong>k-anonymity (k=5):</strong> suppression of small cohorts — <code>services/practiceStatsService.js</code></li>
+<li>UI: <code>AdminPracticeAnalyticsView.tsx</code></li>
+<li><strong>Art. 5(1)(c) GDPR</strong></li>
+</ul>
+<h3 id="16-in-app-purchase-apple--revenuecat--paypal">16. In-app purchase (Apple / RevenueCat) &amp; PayPal</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(privacy text v2.5.0 P1)</em></li>
+<li>iOS: StoreKit 2 + RevenueCat (pseudonymised internal user ID)</li>
+<li>Web: PayPal — <code>Purchase</code> table (email, transaction IDs)</li>
+<li>RevenueCat DPA via ToS (SCCs); Apple as independent controller</li>
+<li><strong>Art. 6(1)(b), Art. 28 GDPR</strong></li>
+</ul>
+<h3 id="17-cookie-usage">17. Cookie usage</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li><strong>No cookies</strong> for tracking; localStorage/sessionStorage for technically necessary functions</li>
+<li>No cookie banner required (ePrivacy)</li>
+<li>Documented in PrivacyPolicyView; <code>public/privacy.html</code> partly less detailed</li>
+</ul>
+<h3 id="18-apple-privacy-manifest">18. Apple Privacy Manifest</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li><code>ios/App/App/PrivacyInfo.xcprivacy</code> — no tracking declared</li>
+</ul>
+<h3 id="19-newsletter--consent">19. Newsletter &amp; consent</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li>Opt-in at registration; <code>unsubscribeToken</code>; Mailjet as processor</li>
+<li><strong>Art. 6(1)(a) GDPR</strong></li>
+</ul>
+<hr />
+<h2 id="deviations--action-required-v250">DEVIATIONS &amp; ACTION REQUIRED (v2.5.0)</h2>
+<h3 id="a1-guest-mode--server-side-metadata">A1. Guest mode — server-side metadata</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(fixed v2.5.0 P2)</em></li>
+<li><strong>Fact:</strong> <code>GuestUsage</code> (fingerprint hash, message counter, 7-day retention), optional <code>ApiUsage</code> with <code>isGuest</code>, IP hash for rate limiting</li>
+<li><strong>Implementation:</strong> <code>PrivacyPolicyView.tsx</code> + <code>public/privacy.html</code> clarify local vs fingerprint storage</li>
+<li><strong>Art. 13 GDPR:</strong> Transparency</li>
+</ul>
+<h3 id="a2-password-reset-vs-personality-profile">A2. Password reset vs personality profile</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(fixed v2.5.0 P2)</em></li>
+<li><strong>Implementation:</strong> <code>clearPersonalityProfileOnPasswordReset()</code> in <code>auth.js</code> + <code>admin.js</code></li>
+<li><strong>Note:</strong> Logged-in password change still uses client re-encryption (<code>newEncryptedLifeContext</code>)</li>
+<li><strong>Art. 17 GDPR:</strong> Erasure / Art. 5: storage limitation</li>
+</ul>
+<h3 id="a3-purchases-purchase--export--deletion">A3. Purchases (<code>Purchase</code>) — export &amp; deletion</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(fixed v2.5.0 P1)</em></li>
+<li><strong>Implementation:</strong> <code>anonymizePurchasesForEmail()</code> on account delete; purchases in <code>/api/data/export</code></li>
+<li><strong>Anonymisation:</strong> Email, name, PayPal payload removed; transaction metadata retained for accounting</li>
+<li><strong>Art. 17, 20 GDPR</strong></li>
+</ul>
+<h3 id="a4-support-tickets-ticket">A4. Support tickets (<code>Ticket</code>)</h3>
+<ul>
+<li><strong>Status:</strong> PARTIAL <em>(P2: export/delete fixed; no user create path)</em></li>
+<li><strong>Implementation:</strong> Export + delete on account deletion for tickets with <code>payload.email</code></li>
+<li><strong>Open:</strong> No public ticket create endpoint — admin queue only</li>
+<li><strong>Art. 15, 17 GDPR</strong></li>
+</ul>
+<h3 id="a5-privacy-policy--text-gaps">A5. Privacy policy — text gaps</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(fixed v2.5.0 P1)</em></li>
+<li><strong>Implementation:</strong> RevenueCat, Apple IAP, PayPal, practice draft, DiceBear, rememberedEmail in both privacy surfaces</li>
+<li><strong>Art. 13, 14 GDPR</strong></li>
+</ul>
+<h3 id="a6-nginx-access-log-ip-anonymisation">A6. NGINX access log IP anonymisation</h3>
+<ul>
+<li><strong>Status:</strong> GDPR-COMPLIANT <em>(fixed v2.5.0 P3)</em></li>
+<li><strong>Implementation:</strong> <code>log_format anonymized</code> in <code>/etc/nginx/nginx.conf</code>; <code>access_log … anonymized</code> in <code>update-nginx-ips.sh</code> + templates</li>
+<li><strong>Documentation:</strong> <code>DOCUMENTATION/NGINX-IP-ANONYMIZATION.md</code></li>
+<li><strong>Verified:</strong> 29 Jul 2026 — staging + production vhosts regenerated</li>
+<li><strong>Art. 5(1)(c) GDPR:</strong> Data minimisation (server logs)</li>
+</ul>
+<hr />
+<h2 id="data-categories-overview-v250">DATA CATEGORIES OVERVIEW (v2.5.0)</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Storage</th>
+<th>Retention / deletion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Life Context (E2EE)</td>
+<td>DB <code>User.lifeContext</code></td>
+<td>Until deletion; reset → empty</td>
+</tr>
+<tr>
+<td>Chat (classic)</td>
+<td>Not persistent DB</td>
+<td>Live AI request only</td>
+</tr>
+<tr>
+<td>Session behaviour</td>
+<td>DB</td>
+<td>CASCADE on user delete</td>
+</tr>
+<tr>
+<td>Practice draft</td>
+<td>Client <code>sessionStorage</code></td>
+<td>Max 24h / tab close</td>
+</tr>
+<tr>
+<td>Practice evaluation</td>
+<td>DB <code>practice_evaluations</code></td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>Transcript evaluation</td>
+<td>DB <code>transcript_evaluations</code></td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>Personality profile</td>
+<td>DB E2EE + metadata</td>
+<td>CASCADE (reset: see A2)</td>
+</tr>
+<tr>
+<td>ApiUsage</td>
+<td>DB</td>
+<td>12 months auto</td>
+</tr>
+<tr>
+<td>UserEvent</td>
+<td>DB</td>
+<td>6 months auto</td>
+</tr>
+<tr>
+<td>GuestUsage</td>
+<td>DB</td>
+<td>7 days auto</td>
+</tr>
+<tr>
+<td>Feedback</td>
+<td>DB</td>
+<td>CASCADE</td>
+</tr>
+<tr>
+<td>Purchase</td>
+<td>DB (email-keyed)</td>
+<td><strong>Not</strong> user-bound</td>
+</tr>
+<tr>
+<td>Newsletter logs</td>
+<td>DB</td>
+<td>Admin-only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="third-party-services">THIRD-PARTY SERVICES</h2>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Role</th>
+<th>Status</th>
+<th>Documentation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Google Gemini</td>
+<td>Processor (AI)</td>
+<td>GDPR-COMPLIANT</td>
+<td><code>GOOGLE-CLOUD-DPA-COMPLIANCE.md</code></td>
+</tr>
+<tr>
+<td>Mistral AI</td>
+<td>Processor (AI, EU)</td>
+<td>GDPR-COMPLIANT</td>
+<td><code>MISTRAL-DPA-COMPLIANCE.md</code></td>
+</tr>
+<tr>
+<td>Mailjet (Sinch)</td>
+<td>Processor (email)</td>
+<td>GDPR-COMPLIANT</td>
+<td><code>MAILJET-DPA-COMPLIANCE.md</code></td>
+</tr>
+<tr>
+<td>Hetzner</td>
+<td>Hosting (EU)</td>
+<td>GDPR-COMPLIANT</td>
+<td>privacy.html</td>
+</tr>
+<tr>
+<td>RevenueCat</td>
+<td>Processor (IAP)</td>
+<td>GDPR-COMPLIANT</td>
+<td>ToS + SCCs; privacy §5.4</td>
+</tr>
+<tr>
+<td>Apple App Store</td>
+<td>Controller (purchase)</td>
+<td>GDPR-COMPLIANT</td>
+<td>Apple Privacy Policy</td>
+</tr>
+<tr>
+<td>PayPal</td>
+<td>Payment processing</td>
+<td>GDPR-COMPLIANT</td>
+<td>Privacy §5.4</td>
+</tr>
+<tr>
+<td>Piper TTS</td>
+<td>Self-hosted</td>
+<td>GDPR-COMPLIANT</td>
+<td><code>TTS-SETUP-GUIDE.md</code></td>
+</tr>
+<tr>
+<td>DiceBear</td>
+<td>Avatar CDN (DE)</td>
+<td>GDPR-COMPLIANT</td>
+<td>Mention in privacy (RECOMMENDED)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sent to AI (classic/practice/analysis):</strong> Conversation text, system prompts, optionally decrypted profile (DPC/DPFL); <strong>no</strong> userId/email in prompts.</p>
+<hr />
+<h2 id="changes-since-v197--v250">CHANGES SINCE v1.9.7 → v2.5.0</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coach Practice Lab</td>
+<td>DB evaluations, sessionStorage draft, admin k-analytics</td>
+</tr>
+<tr>
+<td>Practice AI routing</td>
+<td><code>userRegionPreference</code> in send-message + coach-turn (v2.5.0 fix)</td>
+</tr>
+<tr>
+<td>SDK</td>
+<td><code>@google/genai</code> 2.x, <code>@mistralai/mistralai</code> 2.x (no new data category)</td>
+</tr>
+<tr>
+<td><strong>P1/P2 remediation (29 Jul 2026)</strong></td>
+<td>Privacy IAP/PayPal; purchase anonymisation + export; personality delete on reset; ticket export/delete; <code>gdpr-compliance</code> skill</td>
+</tr>
+<tr>
+<td>Admin UI</td>
+<td>Icon-only tabs on narrow screens (no GDPR impact)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="summary">SUMMARY</h2>
+<h3 id="compliance-score-99100-v250--p1p2p3">Compliance score: <strong>99/100</strong> (v2.5.0 + P1/P2/P3)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Status</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data security &amp; E2EE</td>
+<td>Excellent</td>
+<td>A+</td>
+</tr>
+<tr>
+<td>User rights (export/erasure)</td>
+<td>Excellent</td>
+<td>A+; purchases/tickets fixed</td>
+</tr>
+<tr>
+<td>Transparency (privacy text)</td>
+<td>Excellent</td>
+<td>A</td>
+</tr>
+<tr>
+<td>Data minimisation</td>
+<td>Excellent</td>
+<td>A+</td>
+</tr>
+<tr>
+<td>Third parties / processors</td>
+<td>Very good</td>
+<td>A</td>
+</tr>
+<tr>
+<td>Storage limitation</td>
+<td>Excellent</td>
+<td>A+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Open legal risks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Topic</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>Privacy text IAP/PayPal/practice draft</td>
+<td>✅ Fixed</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>Purchase on account delete / export</td>
+<td>✅ Fixed</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Personality profile on password reset</td>
+<td>✅ Fixed</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Guest mode wording</td>
+<td>✅ Fixed</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>NGINX IP documentation &amp; live config</td>
+<td>✅ Fixed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall:</strong> The app meets <strong>essential GDPR requirements</strong> for production/store rollout. P1–P3 complete. Remaining: A4 ticket create optional; annual DPA reviews (routine Q1 2027).</p>
+<p><strong>Status: PRODUCTION-READY</strong></p>
+<hr />
+<h2 id="next-steps">NEXT STEPS</h2>
+<h3 id="annual-reviews-routine">Annual reviews (routine)</h3>
+<ol type="1">
+<li>Google / Mailjet / Mistral / RevenueCat DPA review (Q1 2027)</li>
+<li>Update this audit annually (July 2027)</li>
+</ol>
+<h3 id="agent-skill">Agent skill</h3>
+<ul>
+<li><strong><code>.cursor/skills/meaningful-conversations/gdpr-compliance/SKILL.md</code></strong> — implementation, export/erasure, audit workflow</li>
+</ul>
+<hr />
+<h2 id="resources">RESOURCES</h2>
+<h3 id="internal-documentation">Internal documentation</h3>
+<ul>
+<li><code>DOCUMENTATION/GOOGLE-CLOUD-DPA-COMPLIANCE.md</code></li>
+<li><code>DOCUMENTATION/MAILJET-DPA-COMPLIANCE.md</code></li>
+<li><code>DOCUMENTATION/MISTRAL-DPA-COMPLIANCE.md</code></li>
+<li><code>DOCUMENTATION/GDPR-TRANSCRIPT-REMOVAL.md</code></li>
+<li><code>.cursor/skills/meaningful-conversations/gdpr-compliance/SKILL.md</code></li>
+<li><code>public/privacy.html</code></li>
+</ul>
+<h3 id="external-resources">External resources</h3>
+<ul>
+<li>Austrian DPA: <a href="https://www.dsb.gv.at/">https://www.dsb.gv.at/</a></li>
+<li>Google Cloud DPA: <a href="https://cloud.google.com/terms/data-processing-addendum">https://cloud.google.com/terms/data-processing-addendum</a></li>
+<li>Mistral AI Terms: <a href="https://mistral.ai/terms/">https://mistral.ai/terms/</a></li>
+<li>Sinch DPA (Mailjet): <a href="https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/">https://sinch.com/legal/terms-and-conditions/other-sinch-terms-conditions/data-processing-agreement/</a></li>
+</ul>
+<hr />
+<p><strong>Next review:</strong> July 2027 (annual)<br />
+<strong>Maintained by:</strong> Günter Herold / Manualmode<br />
+<strong>Contact:</strong> <a href="mailto:support@manualmode.at">support@manualmode.at</a></p>
         </div>
-
         <div class="footer">
-            <p style="font-size: 1.2em; margin-bottom: 10px;">
-                <strong>⚠️ Important Notice</strong>
-            </p>
-            <p>
-                Please don't forget to replace the placeholders in the templates<br>
-                before going into production! 🚀
-            </p>
-            <hr style="margin: 20px 0; opacity: 0.3;">
             <p style="font-size: 0.9em;">
-                Meaningful Conversations App - GDPR Compliance Audit<br>
-                Status: February 15, 2026 - Version 1.8.8
+                Meaningful Conversations App — GDPR Compliance Audit<br>
+                Audit date: 29 July 2026 — Version 2.5.0 (P1–P3 complete, score 99/100)
             </p>
         </div>
     </div>
 </body>
 </html>
-
