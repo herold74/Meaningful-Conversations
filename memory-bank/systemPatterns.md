@@ -190,6 +190,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Keeps handoff context and guides accurate without adding a standing doc-review obligation. Trust is explicit so assistants default to updating what matters after substantive work.
 - **Implementation:** After meaningful sessions (especially commits), the assistant updates `activeContext.md`, `progress.md`, and related docs/skills per `.cursor/rules/memory-bank.mdc` without waiting for a separate "please update docs" request. **Also:** after **server verification** (SSH, staging vs production digests, deploy outcomes) or any chat that fixes **material project facts**, the assistant refreshes the Memory Bank **in the same session** — the owner should not need to prompt for routine bank updates.
 
+### 24. Git commit + push in one step (2026-07-29)
+- **Decision:** When the user asks to commit (or approves committing), the assistant **always pushes** in the same workflow — no separate „Soll ich pushen?“ step.
+- **Opt-out:** User says „commit only“, „nur committen“, „don't push“, or „nicht pushen“.
+- **Implementation:** `.cursor/rules/git-workflow.mdc` (local Cursor rule); Git Safety Protocol still applies (no force-push to main, no secrets, amend rules).
+
 ### 22. Entry-screen 3-card selection hubs (2026-07-24)
 - **Decision:** LandingPage and IntentPickerView use a shared visual pattern — three action cards in a responsive grid, with the primary path on a `.action-card-featured` dark-teal gradient tile (white text).
 - **Reasoning:** Mockup-aligned entry UX; clearer choice architecture than upload-first or stacked list layouts.
