@@ -153,6 +153,8 @@ export interface AppViewRouterProps {
   handlePracticeSelfRatingSubmit: (rating: number | undefined) => void;
   handlePracticeSelfRatingSkip: () => void;
   handlePracticeDone: () => void;
+  navigateToPracticeHistory: () => void;
+  handlePracticeHistoryBack: () => void;
 
   // Refinement preview (DPFL test)
   refinementPreview: RefinementPreviewResult | null;
@@ -261,6 +263,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handlePracticeSelfRatingSubmit,
     handlePracticeSelfRatingSkip,
     handlePracticeDone,
+    navigateToPracticeHistory,
+    handlePracticeHistoryBack,
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
@@ -727,7 +731,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           currentUser={currentUser}
           onStart={handleStartPractice}
           onBack={() => setView('botSelection')}
-          onHistory={() => setView('practiceHistory')}
+          onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
         />
       );
@@ -747,14 +751,14 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           scenarioName={practiceConfig.scenarioName}
           difficultyLabel={practiceConfig.difficultyLabel}
           onDone={handlePracticeDone}
-          onHistory={() => setView('practiceHistory')}
+          onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
         />
       ) : null;
     case 'practiceHistory':
       return (
         <PracticeHistoryView
-          onBack={() => setView(practiceConfig ? 'practiceSetup' : 'botSelection')}
+          onBack={handlePracticeHistoryBack}
           onProgress={() => setView('practiceProgress')}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation(item.evaluationData);
@@ -781,7 +785,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return (
         <PracticeProgressView
           onBack={() => setView('practiceSetup')}
-          onHistory={() => setView('practiceHistory')}
+          onHistory={navigateToPracticeHistory}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation(item.evaluationData);
             setPracticeConfig({
