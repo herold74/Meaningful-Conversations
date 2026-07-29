@@ -53,6 +53,7 @@ npx cap sync ios
 ```bash
 ./deploy-manualmode.sh -e staging
 ```
+- **macOS:** Preflights local Podman VM via `scripts/ensure-local-podman.sh` before building (see [macOS Podman VM](#-macos-podman-vm-before-local-builds-critical--2026-07-29))
 - Builds all 3 Docker images (backend, frontend, TTS)
 - Pushes to registry `regy.rhepds.com/gherold/meaningful-conversations` (see `DOCUMENTATION/GITLAB-REGISTRY-SETUP.md`)
 - Pulls on remote server, stops old containers, starts new ones
@@ -333,6 +334,26 @@ ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx 
 4. If rollback also fails: SSH in and check logs manually
 
 ## Known Pitfalls & Lessons Learned
+
+### 🚨 macOS Podman VM before local builds (CRITICAL — 2026-07-29)
+
+**Problem:** On macOS, `./deploy-manualmode.sh` builds images in a **Podman machine VM**. The VM often shows `running` while the socket on `127.0.0.1:63947` refuses connections — especially after sleep, a crash mid-build (`unexpected EOF` during `npm install`), or starting the machine in a different terminal than the deploy.
+
+**Symptoms:**
+- `Cannot connect to Podman … connection refused`
+- Frontend/backend build fails immediately or mid-layer
+- Manual `podman machine start` in one shell, deploy in another → still fails
+
+**Automatic fix:** `deploy-manualmode.sh` sources `scripts/ensure-local-podman.sh` before the build phase (skipped for production pull-only deploys and `--skip-build`). It starts the machine, waits up to ~30s for `podman info`, restarts once if needed.
+
+**Manual preflight:**
+```bash
+./scripts/ensure-local-podman.sh && ./deploy-manualmode.sh -e staging -c frontend
+```
+
+**Do not confuse with server Podman:** SSH deploy steps use Linux Podman on `$SERVER_HOST` — separate from the local macOS VM.
+
+**Reference:** [PODMAN-GUIDE.md](../../DOCUMENTATION/PODMAN-GUIDE.md#macos-podman-vm--before-local-deploy-builds-critical)
 
 ### 🚨 Staging registry pull fails silently (CRITICAL — 2026-07-23)
 

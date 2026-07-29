@@ -153,6 +153,41 @@ podman machine list
 podman machine ssh
 ```
 
+### macOS Podman VM — before local deploy builds (CRITICAL)
+
+**Context:** `./deploy-manualmode.sh` builds images **locally on your Mac**, then pushes to the registry. That uses the **Podman machine VM**, not the Linux server Podman.
+
+**Symptoms:**
+- `Cannot connect to Podman … dial tcp 127.0.0.1:63947: connect: connection refused`
+- `Error: server probably quit: unexpected EOF` during `podman build` (often mid-`npm install`)
+- `podman machine list` shows **running**, but `podman ps` fails in another terminal
+
+**Cause:** The Apple HV VM may be stopped, still starting, or crashed while the CLI connection cache is stale. Starting the machine in one shell and deploying from another can fail if the socket is not ready yet.
+
+**Automatic fix (preferred):** `deploy-manualmode.sh` runs `scripts/ensure-local-podman.sh` before any local build — start machine, wait for `podman info`, restart once if needed.
+
+**Manual preflight:**
+```bash
+./scripts/ensure-local-podman.sh
+# or same shell session:
+podman machine start
+for i in 1 2 3 4 5 6 7 8 9 10; do podman ps >/dev/null 2>&1 && break; sleep 3; done
+podman ps
+./deploy-manualmode.sh -e staging -c frontend
+```
+
+**If still failing:**
+```bash
+podman machine stop
+sleep 2
+podman machine start
+./scripts/ensure-local-podman.sh
+```
+
+**Nuclear reset (last resort):** see [Podman Machine Won't Start](#podman-machine-wont-start-macos) below.
+
+**Note:** Remote deploy steps (`ssh root@… podman-compose …`) use **Linux Podman on the server** — unrelated to the macOS VM issues above.
+
 ### Rootless Containers
 
 Podman runs rootless by default:
@@ -282,6 +317,14 @@ podman machine rm
 podman machine init
 podman machine start
 ```
+
+### Podman connection refused during local deploy (macOS)
+
+**Symptom:** `connection refused` on `127.0.0.1:63947` or build aborts with `unexpected EOF`.
+
+**Fix:** Run `./scripts/ensure-local-podman.sh` or let `deploy-manualmode.sh` preflight handle it. Do **not** rely on `podman machine list` alone — wait until `podman info` succeeds.
+
+See [macOS Podman VM — before local deploy builds](#macos-podman-vm--before-local-deploy-builds-critical) above.
 
 ### Port Already in Use
 

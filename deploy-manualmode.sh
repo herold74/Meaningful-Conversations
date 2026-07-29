@@ -23,6 +23,8 @@ REMOTE_DIR="/opt/manualmode"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=scripts/registry-env.sh
 source "$SCRIPT_DIR/scripts/registry-env.sh"
+# shellcheck source=scripts/ensure-local-podman.sh
+source "$SCRIPT_DIR/scripts/ensure-local-podman.sh"
 
 # Will be set after parsing arguments
 ENV_FILE=""
@@ -188,6 +190,16 @@ echo ""
 # ============================================================================
 # BUILD PHASE
 # ============================================================================
+
+if [[ "$SKIP_BUILD" == false && "$DRY_RUN" == false ]]; then
+    echo -e "${BLUE}Checking local Podman (macOS VM)...${NC}"
+    if ! ensure_local_podman; then
+        echo -e "${RED}✗ Local Podman not ready — cannot build images${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Local Podman ready${NC}"
+    echo ""
+fi
 
 if [[ "$SKIP_BUILD" == false ]]; then
     if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
