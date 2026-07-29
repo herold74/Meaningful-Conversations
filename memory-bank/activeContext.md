@@ -9,6 +9,11 @@
 
 **Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
 
+## Recent Changes (2026-07-29 — Git commit+push workflow)
+
+- **Convention:** „Commit“ = commit **and** push (opt-out: „nur committen“)
+- **Rule:** `.cursor/rules/git-workflow.mdc`; `systemPatterns.md` Decision #24
+
 ## Recent Changes (2026-07-29 — macOS Podman deploy preflight)
 
 - **`scripts/ensure-local-podman.sh`** — start/wait/restart Podman machine before local builds
