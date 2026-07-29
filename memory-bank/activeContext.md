@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-29**, Build **3**, v2.5.0 — https://mc-beta.manualmode.at (health OK; GDPR P1–P3)
+**Staging:** Deployed **2026-07-29**, Build **5**, v2.5.0 — https://mc-beta.manualmode.at (health OK; admin tabs icon-only below lg)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
 **App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo targeting **2.5.0** — sync with `npm run sync:ios-staging` for beta / `npm run build && npx cap sync ios` for Store path
 
 **Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
+
+## Recent Changes (2026-07-29 — Admin tab labels + Build 5)
+
+- **Commit `3b42341`:** Admin tabs — labels hidden below `lg`, no truncation; practice analytics sub-tabs scroll
+- **Commit `1350e4d`:** chore build 5 sync (frontend-only deploy)
+- **Staging:** v2.5.0 Build **5** — frontend deploy; health OK
+- **Xcode:** `npm run sync:ios-staging` — OK
 
 ## Recent Changes (2026-07-29 — GDPR deploy Build 3 + iOS sync)
 
