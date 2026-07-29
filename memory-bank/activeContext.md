@@ -3,11 +3,18 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-29**, Build **2**, v2.5.0 — https://mc-beta.manualmode.at (health OK; TTS retagged 2.5.0)
+**Staging:** Deployed **2026-07-29**, Build **3**, v2.5.0 — https://mc-beta.manualmode.at (health OK; GDPR P1–P3)
 **Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
 **App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo targeting **2.5.0** — sync with `npm run sync:ios-staging` for beta / `npm run build && npx cap sync ios` for Store path
 
 **Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
+
+## Recent Changes (2026-07-29 — GDPR deploy Build 3 + iOS sync)
+
+- **Commit `69c5a24`:** GDPR P1–P3 (export/delete, privacy texts, nginx anonymized logs, audits, skill)
+- **Commit `c86f30f`:** chore build 3 sync (deploy script)
+- **Staging:** v2.5.0 Build **3** — frontend/backend/TTS OK; nginx reload
+- **Xcode:** `npm run sync:ios-staging` — OK (mc-beta API)
 
 ## Recent Changes (2026-07-29 — DSGVO P3 NGINX logs)
 
