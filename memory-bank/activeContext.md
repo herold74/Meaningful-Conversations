@@ -9,6 +9,12 @@
 
 **Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
 
+## Recent Changes (2026-07-29 — macOS Podman deploy preflight)
+
+- **`scripts/ensure-local-podman.sh`** — start/wait/restart Podman machine before local builds
+- **`deploy-manualmode.sh`** — calls preflight automatically (skipped for production / `--skip-build`)
+- **Docs:** deployment skill, `PODMAN-GUIDE.md`, `TROUBLESHOOTING-INDEX.md`
+
 ## Recent Changes (2026-07-29 — Practice history back + Build 6)
 
 - **Commit `06bf50a`:** Practice history back — returns to setup/review/progress, not bot selection
