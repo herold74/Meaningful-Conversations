@@ -249,7 +249,7 @@ const AdminPracticeAnalyticsView: React.FC = () => {
               key={tab}
               type="button"
               onClick={() => setSubTab(tab)}
-              className={`shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border transition-colors max-w-[12rem] sm:max-w-none truncate ${
+              className={`shrink-0 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border transition-colors whitespace-nowrap ${
                 subTab === tab
                   ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
                   : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
