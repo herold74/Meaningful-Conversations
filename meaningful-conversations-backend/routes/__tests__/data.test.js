@@ -297,6 +297,8 @@ describe('GET /api/data/export', () => {
                 createdAt: new Date('2026-06-15'),
             },
         ]);
+        prisma.purchase.findMany.mockResolvedValue([]);
+        prisma.ticket.findMany.mockResolvedValue([]);
 
         const res = await request(app)
             .get('/api/data/export?format=json')
@@ -308,5 +310,64 @@ describe('GET /api/data/export', () => {
         expect(res.body.practiceEvaluations[0].evaluation.overallScore).toBe(8);
         expect(res.body.transcriptEvaluations).toHaveLength(1);
         expect(res.body.transcriptEvaluations[0].preAnswers.goal).toBe('Improve listening');
+    });
+
+    it('includes purchases in JSON export', async () => {
+        prisma.user.findUnique.mockResolvedValue(mockUser);
+        prisma.apiUsage.findMany.mockResolvedValue([]);
+        prisma.personalityProfile.findUnique.mockResolvedValue(null);
+        prisma.sessionBehaviorLog.findMany.mockResolvedValue([]);
+        prisma.userEvent.findMany.mockResolvedValue([]);
+        prisma.practiceEvaluation.findMany.mockResolvedValue([]);
+        prisma.transcriptEvaluation.findMany.mockResolvedValue([]);
+        prisma.purchase.findMany.mockResolvedValue([
+            {
+                id: 'p-1',
+                productId: 'mc.premium.monthly',
+                amount: '9.99',
+                currency: 'EUR',
+                platform: 'ios',
+                status: 'COMPLETED',
+                subscriptionStatus: 'active',
+                renewsAt: null,
+                invoiceNumber: null,
+                createdAt: new Date('2026-07-01'),
+            },
+        ]);
+        prisma.ticket.findMany.mockResolvedValue([]);
+
+        const res = await request(app)
+            .get('/api/data/export?format=json')
+            .set('Authorization', 'Bearer fake-token');
+
+        expect(res.status).toBe(200);
+        expect(res.body.purchases).toHaveLength(1);
+        expect(res.body.purchases[0].productId).toBe('mc.premium.monthly');
+    });
+});
+
+describe('DELETE /api/data/user', () => {
+    it('anonymizes purchases and deletes tickets before user delete', async () => {
+        prisma.user.findUnique.mockResolvedValue({ email: 'coach@example.com' });
+        prisma.purchase.updateMany.mockResolvedValue({ count: 1 });
+        prisma.ticket.findMany.mockResolvedValue([
+            { id: 't1', payload: { email: 'coach@example.com' } },
+        ]);
+        prisma.ticket.deleteMany.mockResolvedValue({ count: 1 });
+        prisma.apiUsage.deleteMany.mockResolvedValue({ count: 0 });
+        prisma.userEvent.deleteMany.mockResolvedValue({ count: 0 });
+        prisma.upgradeCode.updateMany.mockResolvedValue({ count: 0 });
+        prisma.user.delete.mockResolvedValue({});
+
+        const res = await request(app)
+            .delete('/api/data/user')
+            .set('Authorization', 'Bearer fake-token');
+
+        expect(res.status).toBe(204);
+        expect(prisma.purchase.updateMany).toHaveBeenCalled();
+        expect(prisma.ticket.deleteMany).toHaveBeenCalledWith({
+            where: { id: { in: ['t1'] } },
+        });
+        expect(prisma.user.delete).toHaveBeenCalled();
     });
 });

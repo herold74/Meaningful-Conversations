@@ -9,6 +9,28 @@
 
 **Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
 
+## Recent Changes (2026-07-29 — DSGVO P3 NGINX logs)
+
+- **`server-scripts/update-nginx-ips.sh`** — `access_log … anonymized` for staging + production (was drift vs templates)
+- **Server verified:** both vhosts regenerated; nginx reload OK
+- **Audit:** Score **99/100**; P3 closed
+
+## Recent Changes (2026-07-29 — DSGVO P1/P2 remediation + skill)
+
+- **Privacy:** `PrivacyPolicyView.tsx` + `public/privacy.html` — PayPal, RevenueCat/Apple IAP, Practice draft, DiceBear, guest fingerprint, password-reset E2EE note
+- **Backend:** `services/gdprAccountCleanup.js` — purchase anonymisation on delete, ticket delete/export, personality delete on password reset
+- **Export:** `/api/data/export` includes `purchases` + `supportTickets`
+- **Skill:** `.cursor/skills/meaningful-conversations/gdpr-compliance/SKILL.md`
+- **Audit:** Score **98/100**; P1/P2 closed; P3 NGINX doc remains
+
+## Recent Changes (2026-07-29 — DSGVO/GDPR audit v2.5.0)
+
+- **`DOCUMENTATION/DSGVO-COMPLIANCE-AUDIT.md/html`** — Full rewrite for app **v2.5.0** (Practice Lab, k-analytics, retention, export gaps)
+- **`DOCUMENTATION/GDPR-COMPLIANCE-AUDIT.md`** — New EN parity (was HTML-only v1.8.8)
+- **`DOCUMENTATION/GDPR-COMPLIANCE-AUDIT.html`** — Synced to v2.5.0
+- **Score 94/100** — Open P1: privacy text IAP/PayPal, Purchase delete/export; P2: password-reset personality ciphertext, guest-mode wording
+- **Docs-only** — no `privacy.html` / `PrivacyPolicyView` changes in this step
+
 ## Recent Changes (2026-07-28/29 — Release v2.5.0)
 
 - **Admin tabs:** Icon-only on phone/narrow portrait (no truncated “Benutz/Verwal”); `aria-label`/`title` keep full names

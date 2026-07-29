@@ -46,6 +46,8 @@ server {
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
     
+    access_log /var/log/nginx/staging-access.log anonymized;
+    
     client_max_body_size 30m;
     
     location /api/ {
@@ -119,6 +121,8 @@ server {
     
     ssl_certificate /etc/letsencrypt/live/mc-app.manualmode.at/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mc-app.manualmode.at/privkey.pem;
+    
+    access_log /var/log/nginx/production-access.log anonymized;
     
     client_max_body_size 30m;
     

@@ -5,6 +5,11 @@ const prisma = require('../prismaClient.js');
 const bcrypt = require('bcryptjs');
 const brand = require('../config/brand');
 const { sanitizeUserForClient } = require('../utils/userHelpers.js');
+const {
+    anonymizePurchasesForEmail,
+    deleteTicketsForEmail,
+    findTicketsForEmail,
+} = require('../services/gdprAccountCleanup.js');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -862,6 +867,34 @@ function generateHtmlExport(exportData, language = 'de') {
                     </div>
                 `).join('')}
             </div>` : ''}
+
+            <!-- Purchases -->
+            ${exportData.purchases && exportData.purchases.length > 0 ? `
+            <div class="section">
+                <h2>💳 ${isGerman ? 'Käufe & Abonnements' : 'Purchases & subscriptions'} (${exportData.purchases.length})</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>${isGerman ? 'Datum' : 'Date'}</th>
+                            <th>${isGerman ? 'Produkt' : 'Product'}</th>
+                            <th>${isGerman ? 'Plattform' : 'Platform'}</th>
+                            <th>${isGerman ? 'Betrag' : 'Amount'}</th>
+                            <th>${isGerman ? 'Status' : 'Status'}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${exportData.purchases.map(p => `
+                            <tr>
+                                <td>${formatDate(p.createdAt)}</td>
+                                <td>${p.productId}</td>
+                                <td>${p.platform}</td>
+                                <td>${p.amount} ${p.currency}</td>
+                                <td>${p.subscriptionStatus || p.status}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>` : ''}
         </div>
 
         <div class="footer">
@@ -1059,6 +1092,37 @@ const handleExport = async (req, res) => {
             };
         });
 
+        const purchaseRows = await prisma.purchase.findMany({
+            where: { customerEmail: user.email },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                productId: true,
+                amount: true,
+                currency: true,
+                platform: true,
+                status: true,
+                subscriptionStatus: true,
+                renewsAt: true,
+                invoiceNumber: true,
+                createdAt: true,
+            },
+        });
+
+        const purchases = purchaseRows.map((row) => ({
+            ...row,
+            amount: row.amount != null ? String(row.amount) : null,
+        }));
+
+        const supportTicketRows = await findTicketsForEmail(user.email);
+        const supportTickets = supportTicketRows.map((row) => ({
+            id: row.id,
+            type: row.type,
+            status: row.status,
+            payload: row.payload,
+            createdAt: row.createdAt,
+        }));
+
         // Prepare export data
         const exportData = {
             exportDate: new Date().toISOString(),
@@ -1120,6 +1184,8 @@ const handleExport = async (req, res) => {
             userEvents: userEvents,
             practiceEvaluations,
             transcriptEvaluations,
+            purchases,
+            supportTickets,
         };
 
         // Return data in requested format
@@ -1189,6 +1255,17 @@ router.put('/user/password', async (req, res) => {
 // DELETE /api/data/user - Delete user account (GDPR Art. 17 - Recht auf Löschung)
 router.delete('/user', async (req, res) => {
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.userId },
+            select: { email: true },
+        });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        await anonymizePurchasesForEmail(user.email, req.userId);
+        await deleteTicketsForEmail(user.email);
+
         // Delete non-cascaded user data first (no FK constraints on these tables)
         await prisma.apiUsage.deleteMany({ where: { userId: req.userId } });
         await prisma.userEvent.deleteMany({ where: { userId: req.userId } });

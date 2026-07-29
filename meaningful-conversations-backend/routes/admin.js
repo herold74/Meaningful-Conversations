@@ -211,6 +211,8 @@ router.post('/users/:id/reset-password', async (req, res) => {
                 passwordResetTokenExpires: null,
             },
         });
+        const { clearPersonalityProfileOnPasswordReset } = require('../services/gdprAccountCleanup.js');
+        await clearPersonalityProfileOnPasswordReset(id);
 
         res.json({ newPassword });
     } catch (error) {

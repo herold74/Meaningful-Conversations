@@ -35,6 +35,7 @@ Website: www.manualmode.at
 - Technische Zugriffsdaten (IP-Adresse, Browser-Typ, Zugriffszeitpunkt)
 - API-Nutzungsdaten (Anzahl API-Aufrufe, verwendete Modelle, Zeitstempel)
 - Feedback (optional und nur wenn vom Nutzer eingereicht)
+- Kauf- und Abonnementdaten (Produkt, Betrag, Plattform, Transaktionsstatus — bei PayPal-Webkäufen oder Apple In-App-Käufen)
 
 ## 3. Zweck der Verarbeitung
 
@@ -51,6 +52,7 @@ Die Verarbeitung der Daten erfolgt zu folgenden Zwecken:
 - **Fortschrittstracking:** Speicherung von Gamification-Daten (XP, Level, Achievements)
 - **Kostenkontrolle:** Überwachung der API-Nutzung zur Kostenkontrolle
 - **Service-Verbesserung:** Analyse von Feedback zur Verbesserung unseres Angebots
+- **Zahlungsabwicklung:** Bereitstellung von Premium-Zugang, Coach-Freischaltungen und Abonnements (Web via PayPal, iOS via Apple App Store)
 
 ## 4. Rechtsgrundlage der Verarbeitung
 
@@ -134,6 +136,25 @@ Zur Verbesserung der Antwortgeschwindigkeit nutzen wir die Caching-Funktion der 
 - **Standort:** Deutschland (EU)
 - **Rechtsgrundlage:** Art. 28 DSGVO (Auftragsverarbeitungsvertrag)
 
+### 5.4 Zahlungsabwicklung
+
+#### PayPal (Web-Zahlungen)
+- **Zweck:** Einmalige Käufe und Zugangscodes auf der Website
+- **Verarbeitete Daten:** E-Mail-Adresse, Name (falls angegeben), Transaktions-IDs, Produkt und Betrag
+- **Standort:** PayPal (EU/US je nach Dienst; Standardvertragsklauseln)
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung)
+
+#### Apple App Store & RevenueCat (iOS In-App-Käufe)
+- **Zweck:** Abonnements und In-App-Käufe in der nativen iOS-App
+- **Verarbeitete Daten:** Pseudonymisierte interne Nutzer-ID (keine Klartext-E-Mail an RevenueCat), Produkt-IDs, Transaktions-IDs, Abonnementstatus
+- **Apple** ist eigenständiger Verantwortlicher für den App-Store-Kaufprozess; **RevenueCat** unterstützt uns als Auftragsverarbeiter bei der Entitlement-Verwaltung (SCCs in RevenueCat-ToS)
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), Art. 28 DSGVO (RevenueCat)
+
+### 5.5 DiceBear (Avatar-Dienst)
+- **Zweck:** Generierung von Profil-Avataren (Seed aus Ihrer E-Mail, keine Klartext-E-Mail an den CDN)
+- **Standort:** Deutschland (EU)
+- **Rechtsgrundlage:** Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einheitlicher UI)
+
 ## 6. Datensicherheit
 
 Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Daten gegen zufällige oder vorsätzliche Manipulationen, Verlust, Zerstörung oder den Zugriff unberechtigter Personen zu schützen:
@@ -145,6 +166,8 @@ Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Da
 
 **WICHTIG:** Aufgrund der Ende-zu-Ende-Verschlüsselung können wir Ihr Passwort NICHT wiederherstellen. Bei Verlust Ihres Passworts gehen Ihre verschlüsselten Daten (Lebenskontext und Persönlichkeitsprofil) unwiederbringlich verloren.
 
+**Passwort-Reset:** Wenn Sie Ihr Passwort per E-Mail zurücksetzen (oder ein Administrator Ihr Passwort zurücksetzt), werden Ihr Lebenskontext und Ihr Persönlichkeitsprofil **vollständig gelöscht**, da sie ohne Ihr altes Passwort nicht mehr entschlüsselt werden können.
+
 ## 7. Speicherdauer
 
 - **Account-Daten:** Bis zur Löschung Ihres Accounts durch Sie selbst
@@ -155,6 +178,8 @@ Wir setzen technische und organisatorische Sicherheitsmaßnahmen ein, um Ihre Da
 - **E-Mail-Verifizierungstoken:** 24 Stunden
 - **Passwort-Reset-Token:** 1 Stunde
 - **Server-Logs:** 7 Tage
+- **Gast-Fingerprint (GuestUsage):** 7 Tage
+- **Kaufbelege:** Bis zur gesetzlichen Aufbewahrungsfrist; bei Kontolöschung werden personenbezogene Felder (E-Mail, Name, PayPal-Rohdaten) anonymisiert
 
 ## 8. Ihre Rechte
 
@@ -202,6 +227,9 @@ Sie haben das Recht, Ihre Daten in einem maschinenlesbaren Format zu erhalten.
 - Ihre eingereichten Feedbacks
 - Von Ihnen eingelöste Upgrade-Codes
 - API-Nutzungsstatistiken (letzte 12 Monate)
+- Coach-Practice-Auswertungen und Transkript-Auswertungen (falls vorhanden)
+- Käufe und Abonnements (Produkt, Betrag, Plattform, Status)
+- Support-Anfragen (falls über Ihre E-Mail zugeordnet)
 
 Sie können Ihre **Lebenskontext-Datei** und Ihr **Persönlichkeitsprofil als PDF** auch jederzeit direkt in der App herunterladen.
 
@@ -222,7 +250,8 @@ Unsere Anwendung verwendet **localStorage** und **sessionStorage** Ihres Browser
 
 - **Authentifizierung:** Speicherung des Login-Tokens
 - **Spracheinstellung:** Ihre bevorzugte Sprache
-- **Gastmodus:** Temporäre Speicherung Ihrer Daten (nur lokal, nicht auf Server)
+- **Merken der E-Mail (optional):** Lokale Speicherung Ihrer E-Mail für schnelleren Login auf dem Gerät (nur wenn Sie „E-Mail merken“ aktivieren)
+- **Gastmodus:** Temporäre Speicherung Ihrer Lebenskontext-Datei und Chat-Daten (nur lokal, nicht auf Server)
 - **Coach Practice (Entwurf):** Temporäre Speicherung einer laufenden Übungssession im **sessionStorage** (nur in diesem Browser-Tab, maximal 24 Stunden). Enthält Gesprächsverlauf und Session-Konfiguration. Wird beim Schließen des Tabs, beim Verwerfen, beim Logout oder nach erfolgreicher Auswertung gelöscht. **Keine Übertragung an den Server**, bis Sie die Auswertung freiwillig abschließen.
 
 Diese Daten werden **ausschließlich lokal** in Ihrem Browser gespeichert und nicht an unsere Server übertragen. Sie können diese Daten jederzeit in Ihren Browser-Einstellungen löschen.
@@ -231,9 +260,9 @@ Diese Daten werden **ausschließlich lokal** in Ihrem Browser gespeichert und ni
 
 ## 10. Gastmodus
 
-Im Gastmodus werden Ihre Daten **ausschließlich lokal** in Ihrem Browser verarbeitet. Es erfolgt keine Speicherung auf unseren Servern. Sie sind selbst für das Sichern Ihrer Lebenskontext-Datei verantwortlich.
+Im Gastmodus werden **Gesprächsinhalte und Ihr Lebenskontext ausschließlich lokal** in Ihrem Browser verarbeitet — es werden **keine Chat-Inhalte und kein Lebenskontext** auf unseren Servern gespeichert. Sie sind selbst für das Sichern Ihrer Lebenskontext-Datei verantwortlich.
 
-Im Gastmodus werden folgende Daten NICHT gespeichert:
+Im Gastmodus werden folgende Daten NICHT auf dem Server gespeichert:
 - Keine E-Mail-Adresse
 - Keine Account-Daten
 - Kein verschlüsselter Lebenskontext auf Server
@@ -265,8 +294,11 @@ Sie können Ihren Account jederzeit in den Einstellungen löschen. Bei Löschung
 - Gamification-Daten (XP, Level, Achievements)
 - Alle von Ihnen eingereichten Feedbacks
 - API-Nutzungsdaten mit Ihrer User-ID
+- Support-Anfragen, die Ihrer E-Mail zugeordnet sind
 
-**Nach der Löschung verbleiben KEINE personenbezogenen Daten in unserer Datenbank.**
+**Kaufbelege:** Transaktionsdaten ohne Personenbezug (Produkt, Betrag, Status) können aus buchhalterischen Gründen anonymisiert verbleiben.
+
+**Nach der Löschung verbleiben keine weiteren personenbezogenen Daten in unserer Datenbank.**
 
 ## 12. Änderungen der Datenschutzerklärung
 
@@ -274,7 +306,7 @@ Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets de
 
 ---
 
-**Stand:** Dezember 2025`;
+**Stand:** Juli 2026`;
 
 const en_markdown = `This Privacy Policy explains the nature, scope, and purpose of the processing of personal data (hereinafter referred to as "data") within the provision of our services and within our offering and the applications, functions, and content associated with it (hereinafter collectively referred to as "offering").
 
@@ -304,6 +336,7 @@ Website: www.manualmode.at
 - Technical access data (IP address, browser type, access time)
 - API usage data (number of API calls, models used, timestamps)
 - Feedback (optional and only if submitted by user)
+- Purchase and subscription data (product, amount, platform, transaction status — for PayPal web purchases or Apple in-app purchases)
 
 ## 3. Purpose of Processing
 
@@ -320,6 +353,7 @@ Data is processed for the following purposes:
 - **Progress tracking:** Storing gamification data (XP, Level, Achievements)
 - **Cost control:** Monitoring API usage for cost management
 - **Service improvement:** Analyzing feedback to improve our offering
+- **Payment processing:** Premium access, coach unlocks, and subscriptions (web via PayPal, iOS via Apple App Store)
 
 ## 4. Legal Basis for Processing
 
@@ -403,6 +437,25 @@ To improve response times, we use the caching feature of the Gemini API. Parts o
 - **Location:** Germany (EU)
 - **Legal basis:** Art. 28 GDPR (Data Processing Agreement)
 
+### 5.4 Payment processing
+
+#### PayPal (web payments)
+- **Purpose:** One-time purchases and access codes on the website
+- **Data processed:** Email address, name (if provided), transaction IDs, product and amount
+- **Location:** PayPal (EU/US depending on service; standard contractual clauses)
+- **Legal basis:** Art. 6(1)(b) GDPR (contract fulfillment)
+
+#### Apple App Store & RevenueCat (iOS in-app purchases)
+- **Purpose:** Subscriptions and in-app purchases in the native iOS app
+- **Data processed:** Pseudonymised internal user ID (no plaintext email to RevenueCat), product IDs, transaction IDs, subscription status
+- **Apple** is an independent controller for the App Store purchase flow; **RevenueCat** supports us as a processor for entitlement management (SCCs in RevenueCat ToS)
+- **Legal basis:** Art. 6(1)(b) GDPR (contract fulfillment), Art. 28 GDPR (RevenueCat)
+
+### 5.5 DiceBear (avatar service)
+- **Purpose:** Profile avatar generation (seed derived from your email; no plaintext email sent to the CDN)
+- **Location:** Germany (EU)
+- **Legal basis:** Art. 6(1)(f) GDPR (legitimate interest in consistent UI)
+
 ## 6. Data Security
 
 We employ technical and organizational security measures to protect your data against accidental or intentional manipulation, loss, destruction, or access by unauthorized persons:
@@ -414,6 +467,8 @@ We employ technical and organizational security measures to protect your data ag
 
 **IMPORTANT:** Due to end-to-end encryption, we CANNOT recover your password. If you lose your password, your encrypted data (Life Context and Personality Profile) will be irretrievably lost.
 
+**Password reset:** If you reset your password via email (or an administrator resets your password), your Life Context and Personality Profile are **fully deleted**, because they cannot be decrypted without your old password.
+
 ## 7. Storage Duration
 
 - **Account data:** Until deletion of your account by yourself
@@ -424,6 +479,8 @@ We employ technical and organizational security measures to protect your data ag
 - **Email verification tokens:** 24 hours
 - **Password reset tokens:** 1 hour
 - **Server logs:** 7 days
+- **Guest fingerprint (GuestUsage):** 7 days
+- **Purchase records:** Retained for statutory accounting periods; on account deletion, personal fields (email, name, raw PayPal payload) are anonymised
 
 ## 8. Your Rights
 
@@ -471,6 +528,9 @@ You have the right to receive your data in a machine-readable format.
 - Your submitted feedback
 - Upgrade codes you redeemed
 - API usage statistics (last 12 months)
+- Coach practice evaluations and transcript evaluations (if any)
+- Purchases and subscriptions (product, amount, platform, status)
+- Support requests linked to your email (if any)
 
 You can also download your **Life Context file** and your **Personality Profile as PDF** directly in the app at any time.
 
@@ -491,7 +551,8 @@ Our application uses **localStorage** and **sessionStorage** of your browser for
 
 - **Authentication:** Storage of login token
 - **Language setting:** Your preferred language
-- **Guest mode:** Temporary storage of your data (local only, not on server)
+- **Remember email (optional):** Local storage of your email for faster login on this device (only if you enable “Remember email”)
+- **Guest mode:** Temporary storage of your Life Context file and chat data (local only, not on server)
 - **Coach Practice (draft):** Temporary storage of an in-progress practice session in **sessionStorage** (this browser tab only, max. 24 hours). Contains conversation history and session configuration. Deleted when you close the tab, discard the draft, log out, or complete the evaluation. **Not transmitted to the server** until you voluntarily finish the evaluation.
 
 This data is stored **exclusively locally** in your browser and is not transmitted to our servers. You can delete this data at any time in your browser settings.
@@ -500,9 +561,9 @@ This data is stored **exclusively locally** in your browser and is not transmitt
 
 ## 10. Guest Mode
 
-In guest mode, your data is processed **exclusively locally** in your browser. No storage occurs on our servers. You are responsible for saving your Life Context file yourself.
+In guest mode, **conversation content and your Life Context are processed exclusively locally** in your browser — **no chat content and no Life Context** are stored on our servers. You are responsible for saving your Life Context file yourself.
 
-In guest mode, the following data is NOT stored:
+In guest mode, the following data is NOT stored on the server:
 - No email address
 - No account data
 - No encrypted Life Context on server
@@ -534,8 +595,11 @@ You can delete your account at any time in the settings. Upon deletion, the foll
 - Gamification data (XP, Level, Achievements)
 - All feedback submitted by you
 - API usage data with your user ID
+- Support requests linked to your email
 
-**After deletion, NO personal data remains in our database.**
+**Purchase records:** Transaction data without personal reference (product, amount, status) may remain anonymised for accounting reasons.
+
+**After deletion, no further personal data remains in our database.**
 
 ## 12. Changes to Privacy Policy
 
@@ -543,7 +607,7 @@ We reserve the right to adapt this privacy policy to ensure it always complies w
 
 ---
 
-**Last updated:** December 2025`;
+**Last updated:** July 2026`;
 
 const PrivacyPolicyView: React.FC<PrivacyPolicyViewProps> = ({ onBack }) => {
     const { t, language } = useLocalization();

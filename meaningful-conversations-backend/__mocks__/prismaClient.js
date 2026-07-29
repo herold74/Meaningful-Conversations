@@ -12,6 +12,7 @@ const prisma = {
     findMany: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
     delete: jest.fn(),
     count: jest.fn(),
   },
@@ -25,6 +26,7 @@ const prisma = {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    deleteMany: jest.fn(),
   },
   apiUsage: {
     findMany: jest.fn(),
@@ -48,6 +50,7 @@ const prisma = {
     findMany: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
   },
   personalityProfile: {
     findUnique: jest.fn(),
@@ -55,6 +58,7 @@ const prisma = {
     update: jest.fn(),
     upsert: jest.fn(),
     delete: jest.fn(),
+    deleteMany: jest.fn(),
   },
   sessionBehaviorLog: {
     findMany: jest.fn(),
