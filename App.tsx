@@ -1264,6 +1264,18 @@ const App: React.FC = () => {
         setView('botSelection');
     };
 
+    const practiceHistoryReturnRef = useRef<NavView>('practiceSetup');
+
+    const navigateToPracticeHistory = useCallback(() => {
+        practiceHistoryReturnRef.current = view;
+        setView('practiceHistory');
+    }, [view]);
+
+    const handlePracticeHistoryBack = useCallback(() => {
+        const returnView = practiceHistoryReturnRef.current;
+        setView(returnView === 'practiceHistory' ? 'practiceSetup' : returnView);
+    }, []);
+
     /**
      * Quick test for Comfort Check Modal
      * Bypasses full 20-30 min coaching session by directly navigating to SessionReview
@@ -1457,6 +1469,8 @@ const App: React.FC = () => {
         handlePracticeSelfRatingSubmit,
         handlePracticeSelfRatingSkip,
         handlePracticeDone,
+        navigateToPracticeHistory,
+        handlePracticeHistoryBack,
         refinementPreview,
         isLoadingRefinementPreview,
         refinementPreviewError,
