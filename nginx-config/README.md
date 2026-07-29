@@ -31,11 +31,7 @@ The nginx configs on the server are **NOT automatically deployed**. They are man
 
 ### Automatic IP Updates
 
-The `update-nginx-ips.sh` script automatically updates container IPs in the existing configs. It:
-- ✅ Updates `proxy_pass` IP addresses
-- ✅ Preserves all other config settings (including IPv6 listeners)
-- ✅ Creates backups before making changes
-- ❌ Does NOT recreate or overwrite configs from scratch
+The `update-nginx-ips.sh` script **regenerates** the full vhost files from embedded templates (container IPs + SSL + proxy blocks). It includes **`access_log … anonymized`** for GDPR-compliant nginx logs — keep in sync with `*.conf.template` here. See `DOCUMENTATION/NGINX-IP-ANONYMIZATION.md`.
 
 ## 📝 Using These Templates
 

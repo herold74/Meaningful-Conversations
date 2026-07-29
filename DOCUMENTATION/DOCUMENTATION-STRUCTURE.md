@@ -27,6 +27,7 @@ Located in `/memory-bank/`:
 Located in `.cursor/skills/meaningful-conversations/`:
 - **deployment/SKILL.md** — Versioning, staging/production deploy
 - **llm-upgrade/SKILL.md** — Google/Mistral SDK upgrades + classic/practice regression QA sequence
+- **gdpr-compliance/SKILL.md** — GDPR/DSGVO audits, export/erasure, privacy updates
 - **i18n-and-theming/SKILL.md**, **ux-flow/SKILL.md**, **in-app-purchase/SKILL.md**, **132-content-structure/SKILL.md** — domain workflows
 
 ---
@@ -49,7 +50,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **MARIADB-POD-CONFIGURATION.md** - Database setup
 - **NGINX-REVERSE-PROXY-SETUP.md** - Nginx configuration
 - **HTTPS-WWW-DNS-GUIDE.md** - Schrittfolge: Deploy (automatisch), DNS beim Anbieter, TLS/Certbot für Apex+`www` ohne Browser-Warnung
-- **NGINX-IP-ANONYMIZATION.md** - Privacy-compliant logging
+- **NGINX-IP-ANONYMIZATION.md** - GDPR-compliant nginx access log IP anonymization (see also `nginx-config/*.template`, `server-scripts/update-nginx-ips.sh`)
 
 ### Server Migration (Historical - Completed Nov 2024)
 - **SERVER-MIGRATION-GUIDE.md** - General migration guide (⚠️ historical)
@@ -95,8 +96,9 @@ Located in `.cursor/skills/meaningful-conversations/`:
   - **SOCIAL-MEDIA/LINKEDIN-LAUNCH-FUEHRUNGSTOPICS-TOP10.md** — Top-10-Themen für Führungskräfte, aligned mit Launch-Kampagne / Micro-Learning-Kontext.
 
 ### Compliance & Security
-- **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit
-- **DSGVO-COMPLIANCE-AUDIT.html/md** - German GDPR audit
+- **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit (**v2.5.0**, audit date 2026-07-29)
+- **DSGVO-COMPLIANCE-AUDIT.html/md** - German GDPR audit (**v2.5.0**, score 99/100, P1–P3 complete)
+- **GDPR-TRANSCRIPT-REMOVAL.md** - Classic chat transcript DB removal (Art. 5 minimisation)
 - **GOOGLE-CLOUD-DPA-COMPLIANCE.md** - Google DPA
 - **MAILJET-DPA-COMPLIANCE.md** - Mailjet DPA
 
@@ -191,4 +193,4 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** March 24, 2026
+**Last Updated:** July 29, 2026
