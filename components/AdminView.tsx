@@ -772,40 +772,18 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     }, [sessionFeedback, selectedBotFilter, selectedProviderFilter]);
 
     /**
-     * Tab label visibility: icon-only on narrow/phone portrait; labels appear from sm/md up.
-     * Priority left → right (User Management keeps text longest once labels are allowed).
-     * Right tabs lose text first as the viewport narrows; no horizontal scroll.
-     * `aria-label` + `title` always carry the full name for accessibility.
+     * Tab labels: icon-only below lg; full two-line labels from lg up (no truncation).
+     * Labels stay hidden until there is enough width — never clipped mid-word.
+     * `aria-label` + `title` always carry the full name.
      */
-    const tabLabelClass = (tab: AdminTab): string => {
-        const base = 'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs max-w-full';
-        switch (tab) {
-            case 'users':
-                // Was always visible — caused "Benutz/Verwal" truncation on phones
-                return `${base} hidden sm:inline`;
-            case 'feedback':
-                return `${base} hidden min-[420px]:inline`;
-            case 'tickets':
-                return `${base} hidden sm:inline`;
-            case 'codes':
-                return `${base} hidden md:inline`;
-            case 'runner':
-                return `${base} hidden lg:inline`;
-            case 'practice-analytics':
-                return `${base} hidden lg:inline`;
-            case 'api-usage':
-                return `${base} hidden xl:inline`;
-            default:
-                return `${base} hidden md:inline`;
-        }
-    };
+    const tabLabelClass =
+        'whitespace-pre-line text-center leading-tight text-[10px] sm:text-xs hidden lg:inline';
 
     const renderTabs = () => (
         <div className="border-b border-gray-300 dark:border-gray-700 w-full min-w-0">
             <div className="flex w-full min-w-0">
             {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'api-usage'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
-                const textClass = tabLabelClass(tab);
 
                 const hasOpenTickets = tab === 'tickets' && tickets.some(tk => tk.status === 'OPEN');
 
@@ -822,7 +800,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                         title={t(key).replace('\n', ' ')}
                     >
                         <Icon className={`w-5 h-5 flex-shrink-0 ${hasOpenTickets ? 'text-red-500' : ''}`} />
-                        <span className={`${textClass} line-clamp-2 overflow-hidden w-full`}>{t(key)}</span>
+                        <span className={tabLabelClass}>{t(key)}</span>
                     </button>
                 )
             })}
