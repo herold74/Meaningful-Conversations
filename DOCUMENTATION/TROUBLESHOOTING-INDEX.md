@@ -40,6 +40,7 @@ Quick reference guide for common issues and where to find solutions.
 | Registry pull fails (`invalid character '<'`) | Remote uses stale cached image; deploy script uses `--tls-verify=false` + avatar verify + stream fallback | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
 | Coach avatars broken / `/avatars/*.png` returns HTML | Stale frontend image; stream fresh image; verify `content-type: image/png` | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
 | Staging UI old but avatars OK | Verify `Build N` in JS bundle; stream frontend if BUILD_NUMBER mismatch | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
+| Local `podman build` fails: connection refused / unexpected EOF (macOS) | Run `./scripts/ensure-local-podman.sh`; deploy script preflights automatically | [PODMAN-GUIDE.md](./PODMAN-GUIDE.md#macos-podman-vm--before-local-deploy-builds-critical) |
 
 **Primary Resource:** [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)
 
