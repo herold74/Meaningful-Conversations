@@ -124,6 +124,52 @@ Diese URL wird in App Store Connect im EULA-Feld eingetragen und ist am Ende der
 
 ---
 
+## What's New — v2.5.0 (App Store Connect — Einreichung)
+
+**Deutsch:**
+
+Coach Practice Lab: Üben Sie Coaching-Gespräche mit KI-Coachees — Szenario wählen, Gespräch führen und direkt danach strukturiertes Feedback zu Ihrer Gesprächsführung erhalten. Verlauf und Fortschritt bleiben für Sie gespeichert.
+
+Bessere Übungs-Erfahrung: Klarere Navigation in der Practice-Historie, stabilere Coach-Antworten und flüssigere Abläufe beim Einrichten und Auswerten von Übungssitzungen.
+
+Datenschutz & Transparenz: Aktualisierte Datenschutzerklärung mit klareren Hinweisen zu In-App-Käufen (Apple), Datenexport und Kontolöschung.
+
+Weitere Verbesserungen: Überarbeitete Oberfläche auf kleineren Displays, Fehlerbehebungen und allgemeine Stabilitätsverbesserungen.
+
+**English:**
+
+Coach Practice Lab: Practice coaching conversations with AI coachees — choose a scenario, run the session, and receive structured feedback on your coaching skills. History and progress are saved for you.
+
+Smoother practice experience: Clearer navigation in practice history, more reliable coach responses, and improved setup and review flows.
+
+Privacy & transparency: Updated privacy policy with clearer information on in-app purchases (Apple), data export, and account deletion.
+
+Other improvements: Refined UI on smaller screens, bug fixes, and general stability improvements.
+
+### Review Notes — Ergänzung v2.5.0 (Englisch, optional)
+
+Version 2.5.0 adds Coach Practice Lab (Client tier). The demo path below (login → Coaching → Ava) is unchanged. To test Practice Lab: after login, use the Practice / „Üben“ entry on the intent screen (requires Client access on the test account).
+
+### iOS Build vor Einreichung (Production-API)
+
+Store-Build **muss** Production-Backend nutzen (`mc-app.manualmode.at`), **nicht** Staging:
+
+```bash
+npm run build && npx cap sync ios
+# NICHT: npm run sync:ios-staging
+```
+
+Verifikation vor Archive:
+
+```bash
+grep -oh 'mc-[a-z]*\.manualmode\.at' dist/assets/main-*.js | sort -u
+# Erwartung: nur mc-app.manualmode.at
+```
+
+**Production-Deploy-Timing:** Production-Server bleibt bis Store-Freigabe auf der bisherigen Version (Gate: alte Store-Apps nicht brechen). Nach Apple-Freigabe, **vor** Release: `./deploy-manualmode.sh -e production` (2.5.x).
+
+---
+
 ## What's New — v2.1.0 (Entwurf für App Store Connect)
 
 **Deutsch:**
