@@ -3,11 +3,19 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-29**, Build **6**, v2.5.0 — https://mc-beta.manualmode.at (health OK; admin tabs + practice history back nav)
-**Production:** Deployed **2026-07-26**, Build **2**, v2.3.1 — https://mc-app.manualmode.at (health OK)
-**App Store:** iOS live **≤2.0.1** (verify App Store Connect); repo targeting **2.5.0** — sync with `npm run sync:ios-staging` for beta / `npm run build && npx cap sync ios` for Store path
+**Staging:** Deployed **2026-07-29**, Build **6**, v2.5.0 — https://mc-beta.manualmode.at (health OK)
+**Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
+**App Store:** iOS **2.5.0 (6) approved** — **freigeben in App Store Connect** (Production deploy done)
 
-**Production deploy gate:** **No production deploy of 2.4.x+ / 2.5.x** until matching iOS is live in the App Store. Staging may run ahead.
+**Production deploy gate:** ~~Blocked until iOS live~~ — **Production 2.5.0 deployed 2026-07-30** after App Store approval; release iOS in ASC when ready.
+
+## Recent Changes (2026-07-30 — Production 2.5.0 deploy)
+
+- **`./deploy-manualmode.sh -e production`** — Registry images 2.5.0 (same as staging Build 6); health OK
+- **DB:** `prisma migrate status` up to date (28 migrations); `migrate-method-ids.js` — 0 rows (production)
+- **User count:** 32 before/after (unchanged)
+- **Smoke:** `/api/health`, avatars PNG, Build **6**, `/privacy` `/terms` `/support` OK
+- **Next:** App Store Connect → Version 2.5.0 → **Veröffentlichen**
 
 ## Recent Changes (2026-07-29 — Git commit+push workflow)
 
@@ -170,7 +178,7 @@
 - [x] **Legal review + filter-repo + force push** — completed 2026-07-27
 - [x] **Staging v2.4.0 deploy** — Build 3 live at mc-beta.manualmode.at
 - [x] **DB migration staging** — 2 practice_evaluations rows migrated (grow → four-stage-coaching)
-- [ ] **Production deploy 2.4.x** — **blocked** until iOS **2.4.x+** live in App Store; then migrate DB + `./deploy-manualmode.sh -e production`
+- [x] **Production deploy 2.5.0** — done **2026-07-30** (after App Store approval); `migrate-method-ids.js` on production (0 rows)
 - [ ] **Remove legacy aliases** — when obsolete per `DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md` (not before App Store ≥2.4.x + DB clean)
 - [ ] **Console.log Cleanup:** ~43 frontend files with hundreds of console.log calls. TTS debug logs (`[TTS-DBG]`) intentionally kept for stability monitoring.
 - [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot`
