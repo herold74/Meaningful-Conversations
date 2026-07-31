@@ -794,7 +794,7 @@ const App: React.FC = () => {
                 setPracticeConfig(null);
                 setSelectedBot(null);
                 setChatHistory([]);
-                setView('botSelection');
+                setView('practiceSetup');
                 return;
             }
             setView('practiceSelfRating');
@@ -1261,7 +1261,7 @@ const App: React.FC = () => {
         setPracticeEvaluation(null);
         setSelectedBot(null);
         setChatHistory([]);
-        setView('botSelection');
+        setView('practiceSetup');
     };
 
     const practiceHistoryReturnRef = useRef<NavView>('practiceSetup');

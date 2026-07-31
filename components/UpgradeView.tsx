@@ -13,7 +13,7 @@ interface Product {
   price: number;
   finalPrice: number;
   discountReasons: string[];
-  category: 'access' | 'premium' | 'bot';
+  category: 'access' | 'premium' | 'bot' | 'practice';
   duration: string | null;
   description: string;
 }
@@ -162,6 +162,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
 
   const tierLabel = data ? (TIER_LABELS[data.currentTier]?.[language] || data.currentTier) : '';
   const premiumProducts = data ? data.products.filter(p => p.category === 'premium') : [];
+  const practiceProducts = data ? data.products.filter(p => p.category === 'practice') : [];
   const botProducts = data ? data.products.filter(p => p.category === 'bot') : [];
   const accessProducts = data ? data.products.filter(p => p.category === 'access') : [];
   const hasProducts = data ? data.products.length > 0 : false;
@@ -328,6 +329,15 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
               </>
             )}
           </div>
+        </section>
+      )}
+
+      {/* Coach Practice add-on — web PayPal; requires active Premium */}
+      {practiceProducts.length > 0 && !isNativeIOS() && (
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_practice_section')}</h2>
+          <p className="text-sm text-content-subtle mb-4">{t('upgrade_practice_description')}</p>
+          <div className="space-y-4">{practiceProducts.map(renderProductCard)}</div>
         </section>
       )}
 

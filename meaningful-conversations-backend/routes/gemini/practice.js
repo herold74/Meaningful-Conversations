@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth.js');
 const prisma = require('../../prismaClient.js');
-const { requireClientPlus, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
+const { requirePracticeAccess, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
 const { isHardUnlockedForPair } = require('../../practice/practiceUnlocks.js');
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
@@ -15,6 +15,10 @@ const { practiceEvaluationPrompts } = require('../../services/geminiPrompts.js')
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const { withTimeout, parseStructuredJsonResponse } = require('./shared.js');
+const {
+  isClientOnlyPracticeFramework,
+  practiceAccessErrorMessage,
+} = require('../../utils/practiceAccess.js');
 
 const MAX_MESSAGE_LENGTH = 5000;
 const PRACTICE_BOT_ID = 'practice-coachee';
@@ -92,17 +96,24 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
   } = req.body;
 
   try {
-    const access = await requireClientPlus(userId);
+    const access = await requirePracticeAccess(userId);
     if (!access.ok) {
-      return res.status(access.status).json({ error: access.error });
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
     }
 
     const resolvedFrameworkId = resolveFrameworkId(frameworkId);
     if (!resolvedFrameworkId || !scenarioId) {
       return res.status(400).json({ error: 'frameworkId and scenarioId are required.' });
     }
-    if (!getFrameworkById(resolvedFrameworkId) || !getScenarioById(scenarioId)) {
+    const framework = getFrameworkById(resolvedFrameworkId);
+    if (!framework || !getScenarioById(scenarioId)) {
       return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
+    }
+    if (isClientOnlyPracticeFramework(framework) && !access.canUseClientFrameworks) {
+      return res.status(403).json({
+        error: practiceAccessErrorMessage('client_framework'),
+        reason: 'client_framework',
+      });
     }
 
     const sessionParams = await validatePracticeSessionParams(userId, access.user, {
@@ -264,9 +275,9 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
   } = req.body;
 
   try {
-    const access = await requireClientPlus(userId);
+    const access = await requirePracticeAccess(userId);
     if (!access.ok) {
-      return res.status(access.status).json({ error: access.error });
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
     }
 
     if (!history || !frameworkId || !scenarioId) {
@@ -274,6 +285,13 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     }
 
     const resolvedFrameworkId = resolveFrameworkId(frameworkId);
+    const frameworkMeta = resolvedFrameworkId ? getFrameworkById(resolvedFrameworkId) : null;
+    if (frameworkMeta && isClientOnlyPracticeFramework(frameworkMeta) && !access.canUseClientFrameworks) {
+      return res.status(403).json({
+        error: practiceAccessErrorMessage('client_framework'),
+        reason: 'client_framework',
+      });
+    }
 
     const sessionParams = await validatePracticeSessionParams(userId, access.user, {
       difficulty,

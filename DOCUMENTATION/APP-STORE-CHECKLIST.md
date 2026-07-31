@@ -13,10 +13,12 @@
 
 ## App Store Connect — Metadata
 
-- [ ] App name: "MyCoach AI"
-- [ ] Subtitle (max 30 chars)
-- [ ] Description (EN + DE)
-- [ ] Keywords (max 100 chars, EN + DE)
+- [ ] App name: **ManualMode** (DE + EN Lokalisierung)
+- [ ] Subtitle: **KI-Coaching & Kompetenz** / **AI Coaching & Competence**
+- [ ] Description (EN + DE) — siehe `APP-STORE-METADATA.md`
+- [ ] Keywords (EN + DE)
+- [ ] **Lokalisierungen:** Deutsch (Primär) + Englisch (U.S.) vollständig pflegen
+- [ ] Screenshots DE **und** EN pro Gerätegröße (`capture-app-store-screenshots.mjs --lang all`)
 - [ ] Category (primary + secondary)
 - [x] Screenshots: iPhone 6.7" (iPhone 15 Pro Max) — min 3
 - [x] Screenshots: iPhone 6.5" (iPhone 14 Plus) — min 3
@@ -42,6 +44,9 @@
 
 - [x] IAP products submitted for review (must match RevenueCat config)
 - [x] Subscription group: pricing tiers confirmed (Level 1: Premium Yearly, 2: Premium Monthly, 3: Registered Annual, 4: Registered Monthly)
+- [ ] **Coach Practice** subscription group + `mc.practice.monthly` (€6,99/mo) — see `PRACTICE-ADDON-SETUP.md`
+- [ ] RevenueCat: product + offering + optional `practice` entitlement
+- [ ] StoreKit config `MC.storekit` synced (local Xcode testing)
 - [x] `mc.registered.yearly.v2` (Auto-Renewable, 14,99 €/Jahr) — genehmigt 2026-04-29, in Production verifiziert
 - [x] `mc.registered.lifetime` auf Removed gesetzt (neue Käufe deaktiviert; Legacy-Käufer weiterhin unterstützt)
 - [x] Non-consumable coach unlocks: pricing confirmed (Kenji + Chloe je 3,99 €)

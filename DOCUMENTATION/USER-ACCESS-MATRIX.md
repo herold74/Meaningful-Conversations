@@ -2,14 +2,14 @@
 
 This document outlines the different user types within the Meaningful Conversations application, their respective access levels, and a recommended pricing structure.
 
-**Last Updated**: April 28, 2026 — v2.0.1
+**Last Updated**: July 31, 2026 — v2.5.1 (Coach Practice add-on)
 
 ## User Types
 
 1.  **Guest (Gast)**: Unregistered users who can try out the application with limited features. Data is stored locally in the browser.
-2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full feature access including all Premium features). After expiry, they see a paywall with a full product catalog (Registered Annual/Monthly, Premium passes, or code redemption) and can download their Life Context and Personality Profile. Registered users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026. Legacy Lifetime buyers (`accessExpiresAt = null`) are supported permanently.
-3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe, Mike), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL).
-4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor), Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
+2.  **Registered User (Registrierter Nutzer)**: Users who have created an account. They start with a **9-day Premium trial** (full Premium features **and Coach Practice** — except the four client-only practice methods). After expiry, they see a paywall with a full product catalog (Registered Annual/Monthly, Premium passes, Coach Practice add-on, or code redemption) and can download their Life Context and Personality Profile. Registered users benefit from cloud synchronization, E2EE storage, and access to coaching bots (Max, Ava) plus personality profiling (OCEAN). Early adopters (registered in 2025) receive Premium access until June 30, 2026. Legacy Lifetime buyers (`accessExpiresAt = null`) are supported permanently.
+3.  **Premium User (Premium Nutzer)**: Registered users with an active subscription or a redeemed access pass. They unlock advanced coaching bots (Kenji, Chloe, Mike), extended personality profiling (Riemann, Spiral Dynamics), and adaptive learning (DPFL). **Coach Practice is not included** — it requires the separate Practice add-on (€6.90/month web / €6.99/month iOS) or an active registration trial.
+4.  **Client (Klient)**: Users working with a professional manualmode.at coach. They receive full access to all bots (Rob, Victor, Bekky, Dan), all **12 Coach Practice methods**, Transcript Evaluation, and PEP. Access is granted by the coach, not purchased.
 5.  **Admin**: Administrators with access to the backend management panel.
 6.  **Developer**: Technical staff with access to debugging tools and the Test Runner.
 
@@ -52,7 +52,8 @@ This document outlines the different user types within the Meaningful Conversati
 | PEP Solution Blockages (Dr. Bohne) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Transcript Evaluation | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Transcript Evaluation PDF Export | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Coach Practice** (AI-as-coachee training) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Coach Practice** (AI-as-coachee training) | ❌ | ⚠️ Trial only (8 methods) | ⚠️ With add-on (8 methods) | ✅ (12 methods) | ✅ | ✅ |
+| **Coach Practice — client methods** (Rob, Victor, Bekky, Dan) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Bot Recommendations (in Evaluation) | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Audio Transcription (Record & Upload) | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Crisis Response (Helplines) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -99,6 +100,7 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 | Premium 1-Monats-Pass | `ACCESS_PASS_1M` | `ACCESS_PASS_1M` | 30 Tage | Premium |
 | Premium 3-Monats-Pass | `ACCESS_PASS_3M` | `ACCESS_PASS_3M` | 90 Tage | Premium |
 | Premium 1-Jahres-Pass | `ACCESS_PASS_1Y` | `ACCESS_PASS_1Y` | 365 Tage | Premium |
+| Coach Practice Monats-Pass | `PRACTICE_PASS_1M` | `PRACTICE_PASS_1M` | 30 Tage | Practice (requires active Premium) |
 | Kenji Coach Unlock | `KENJI_UNLOCK` | `kenji-resilience` | Permanent | Kenji (einzeln) |
 | Chloe Coach Unlock | `CHLOE_UNLOCK` | `chloe-structured-reflection` | Permanent | Chloe (einzeln) |
 | ~~Registered Lifetime~~ *(Legacy)* | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered (Legacy-Käufer) |

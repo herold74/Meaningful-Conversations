@@ -116,6 +116,8 @@ router.post('/register', registerLimiter, async (req, res) => {
                 accessExpiresAt: accessExpiresAt,
                 isPremium: isPremiumTrial,
                 premiumExpiresAt: premiumExpiresAt,
+                hasPracticeAccess: isPremiumTrial,
+                practiceExpiresAt: isPremiumTrial ? premiumExpiresAt : null,
                 // Set default non-null values for the new fields
                 lifeContext: '',
                 gamificationState: serializeGamificationState({
@@ -161,13 +163,22 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         // Check if Premium status should be revoked due to expired premium pass
         const now = new Date();
+        const practiceUpdates = {};
         if (user.isPremium && user.premiumExpiresAt && new Date(user.premiumExpiresAt) < now) {
             user.isPremium = false;
+            practiceUpdates.isPremium = false;
+            console.log(`🔒 Revoked premium status for user ${user.email} due to expired premium pass`);
+        }
+        if (user.hasPracticeAccess && user.practiceExpiresAt && new Date(user.practiceExpiresAt) < now) {
+            user.hasPracticeAccess = false;
+            practiceUpdates.hasPracticeAccess = false;
+            console.log(`🔒 Revoked practice access for user ${user.email} due to expired practice pass`);
+        }
+        if (Object.keys(practiceUpdates).length > 0) {
             await prisma.user.update({
                 where: { id: user.id },
-                data: { isPremium: false },
+                data: practiceUpdates,
             });
-            console.log(`🔒 Revoked premium status for user ${user.email} due to expired premium pass`);
         }
 
         // Access Pass Check

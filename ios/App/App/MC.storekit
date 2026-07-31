@@ -221,6 +221,52 @@
           "type" : "RecurringSubscription"
         }
       ]
+    },
+    {
+      "id" : "mc_practice_group",
+      "localizations" : [
+        {
+          "displayName" : "Coach Practice",
+          "locale" : "en_US"
+        },
+        {
+          "displayName" : "Coaching üben",
+          "locale" : "de_DE"
+        }
+      ],
+      "name" : "Coach Practice",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "mc_practice_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly Coach Practice add-on. Requires active Premium.",
+              "displayName" : "Coach Practice Monthly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Monatliches Coach-Practice-Add-on. Erfordert aktives Premium.",
+              "displayName" : "Coach Practice Monats-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.practice.monthly",
+          "referenceName" : "Coach Practice Monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "subscriptionGroupID" : "mc_practice_group",
+          "type" : "RecurringSubscription"
+        }
+      ]
     }
   ],
   "version" : {

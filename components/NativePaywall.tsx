@@ -115,6 +115,9 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
           }
         } else if (iap?.tier === 'registered') {
           patched.accessExpiresAt = expiresAt ?? undefined;
+        } else if (iap?.tier === 'practice') {
+          patched.hasPracticeAccess = true;
+          patched.practiceExpiresAt = expiresAt ?? new Date(Date.now() + 30 * 86400000).toISOString();
         } else if (iap?.tier === 'bot') {
           const productToBotId: Record<string, string> = { 'mc.coach.kenji': 'kenji-resilience', 'mc.coach.chloe': 'chloe-structured-reflection' };
           const botId = productToBotId[product.identifier];

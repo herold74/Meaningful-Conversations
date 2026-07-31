@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "ManualMode";
+"NSMicrophoneUsageDescription" = "ManualMode needs microphone access for voice input.";
+"NSSpeechRecognitionUsageDescription" = "ManualMode uses speech recognition for voice input.";

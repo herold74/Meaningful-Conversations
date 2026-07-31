@@ -13,6 +13,7 @@ const APPLE_PRODUCT_MAP = {
   'mc.registered.yearly.v2': { botId: 'REGISTERED_1Y',       type: 'subscription',   tier: 'registered', days: 365 },
   'mc.premium.monthly':      { botId: 'ACCESS_PASS_1M',      type: 'subscription',   tier: 'premium',    days: 30 },
   'mc.premium.yearly':       { botId: 'ACCESS_PASS_1Y',      type: 'subscription',   tier: 'premium',    days: 365 },
+  'mc.practice.monthly':     { botId: 'PRACTICE_PASS_1M',    type: 'subscription',   tier: 'practice',   days: 30 },
   // Legacy: bestehende Non-Consumable-Käufer (mc.registered.yearly war als IAP reserviert, daher .v2)
   'mc.registered.lifetime':  { botId: 'REGISTERED_LIFETIME', type: 'non_consumable', tier: 'registered' },
   'mc.coach.kenji':          { botId: 'kenji-resilience',         type: 'non_consumable', tier: 'bot' },
