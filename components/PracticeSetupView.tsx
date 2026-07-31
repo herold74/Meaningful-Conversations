@@ -30,6 +30,14 @@ const TIER_RANK: Record<PracticeMatchTier, number> = {
   discouraged: 3,
 };
 
+const pickFrameworkId = (frameworks: PracticeFramework[], preferred?: string) => {
+  if (preferred) {
+    const match = frameworks.find((f) => f.id === preferred);
+    if (match && !match.locked) return preferred;
+  }
+  return frameworks.find((f) => !f.locked)?.id ?? preferred ?? '';
+};
+
 const tierLabelKey = (tier: PracticeMatchTier): string => {
   switch (tier) {
     case 'primary': return 'practice_match_primary';
@@ -92,7 +100,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
         setCatalog(data);
         const defaultFw = data.defaultPair?.frameworkId ?? data.frameworks[0]?.id ?? '';
         const defaultSc = data.defaultPair?.scenarioId ?? data.scenarios[0]?.id ?? '';
-        setFrameworkId(defaultFw);
+        setFrameworkId(pickFrameworkId(data.frameworks, defaultFw));
         setScenarioId(defaultSc);
       })
       .catch(() => setError(t('practice_catalog_error')))
@@ -164,12 +172,17 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
 
   const applyRecommendedStart = () => {
     if (!catalog?.defaultPair) return;
-    setFrameworkId(catalog.defaultPair.frameworkId);
+    setFrameworkId(pickFrameworkId(catalog.frameworks, catalog.defaultPair.frameworkId));
     setScenarioId(catalog.defaultPair.scenarioId);
   };
 
+  const selectFramework = (fw: PracticeFramework) => {
+    if (fw.locked) return;
+    setFrameworkId(fw.id);
+  };
+
   const proceedStart = () => {
-    if (!selectedFramework || !selectedScenario) return;
+    if (!selectedFramework || !selectedScenario || selectedFramework.locked) return;
     if (difficulty === 'hard' && !hardUnlocked) return;
     if (liveMode && !liveUnlocked) return;
 
@@ -336,30 +349,43 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                     const isSelected = fw.id === frameworkId;
                     const isExpanded = expandedFramework === fw.id;
                     const botName = sourceBotName(fw);
+                    const isLocked = !!fw.locked;
                     return (
                       <div
                         key={fw.id}
                         className={`rounded-xl border transition-all ${
-                          isSelected ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated'
+                          isLocked
+                            ? 'border-border-primary opacity-60'
+                            : isSelected
+                              ? 'border-accent-primary bg-accent-primary/5'
+                              : 'surface-elevated'
                         }`}
                       >
                         <div className="w-full text-left p-4 flex items-start gap-3">
                           <button
                             type="button"
-                            onClick={() => setFrameworkId(fw.id)}
-                            className="mt-1 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center"
+                            onClick={() => selectFramework(fw)}
+                            disabled={isLocked}
+                            className="mt-1 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center disabled:cursor-not-allowed"
                             aria-label={fw.name}
                           >
-                            <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-accent-primary' : 'bg-transparent'}`} />
+                            <span className={`w-2 h-2 rounded-full ${isSelected && !isLocked ? 'bg-accent-primary' : 'bg-transparent'}`} />
                           </button>
                           <button
                             type="button"
-                            onClick={() => setFrameworkId(fw.id)}
-                            className="flex-1 min-w-0 text-left"
+                            onClick={() => selectFramework(fw)}
+                            disabled={isLocked}
+                            className="flex-1 min-w-0 text-left disabled:cursor-not-allowed"
                           >
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-semibold text-content-primary">{fw.name}</span>
                               <MatchBadge tier={tier} />
+                              {isLocked && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-background-tertiary text-content-secondary inline-flex items-center gap-1">
+                                  <Lock className="w-3 h-3" aria-hidden />
+                                  {t('practice_client_method_locked')}
+                                </span>
+                              )}
                               {botName && (
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-status-info-background text-status-info-foreground">
                                   {t('practice_ai_coach_badge', { name: botName })}
@@ -422,29 +448,42 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                 const isSelected = fw.id === frameworkId;
                 const isExpanded = expandedFramework === fw.id;
                 const botName = sourceBotName(fw);
+                const isLocked = !!fw.locked;
                 return (
                   <div
                     key={fw.id}
                     className={`rounded-xl border transition-all ${
-                      isSelected ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated'
+                      isLocked
+                        ? 'border-border-primary opacity-60'
+                        : isSelected
+                          ? 'border-accent-primary bg-accent-primary/5'
+                          : 'surface-elevated'
                     }`}
                   >
                     <div className="w-full text-left p-4 flex items-start gap-3">
                       <button
                         type="button"
-                        onClick={() => setFrameworkId(fw.id)}
-                        className="mt-1 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center"
+                        onClick={() => selectFramework(fw)}
+                        disabled={isLocked}
+                        className="mt-1 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center disabled:cursor-not-allowed"
                         aria-label={fw.name}
                       >
-                        <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-accent-primary' : 'bg-transparent'}`} />
+                        <span className={`w-2 h-2 rounded-full ${isSelected && !isLocked ? 'bg-accent-primary' : 'bg-transparent'}`} />
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFrameworkId(fw.id)}
-                        className="flex-1 min-w-0 text-left"
+                        onClick={() => selectFramework(fw)}
+                        disabled={isLocked}
+                        className="flex-1 min-w-0 text-left disabled:cursor-not-allowed"
                       >
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-semibold text-content-primary">{fw.name}</span>
+                          {isLocked && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-background-tertiary text-content-secondary inline-flex items-center gap-1">
+                              <Lock className="w-3 h-3" aria-hidden />
+                              {t('practice_client_method_locked')}
+                            </span>
+                          )}
                           {botName && (
                             <span className="text-xs px-2 py-0.5 rounded-full bg-status-info-background text-status-info-foreground">
                               {t('practice_ai_coach_badge', { name: botName })}

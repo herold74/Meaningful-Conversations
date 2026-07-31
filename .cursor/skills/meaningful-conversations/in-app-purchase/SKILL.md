@@ -27,6 +27,14 @@ Subscriptions in one group with descending value — Level 1 = highest service (
 | 3 | `mc.registered.yearly.v2` | 14,99 EUR/yr | 14,90 EUR/yr | Registered |
 | 4 | `mc.registered.monthly` | 3,99 EUR/mo | 3,90 EUR/mo | Registered |
 
+### Subscription Group: "Coach Practice" (Premium add-on)
+
+Requires active Premium. Separate from base Premium subscription.
+
+| Product ID | Price (iOS) | Web Price | Tier |
+|-----------|-------------|-----------|------|
+| `mc.practice.monthly` | 6,99 EUR/mo | 6,90 EUR/mo | Practice |
+
 ### Non-Consumable Purchases
 
 | Product ID | Price (iOS) | Web Price | Effect |
@@ -179,3 +187,4 @@ Handles Apple Server-to-Server Notifications v2:
 | `mc.registered.lifetime` | Legacy only — `REGISTERED_LIFETIME`, permanent (existing buyers) |
 | `mc.coach.kenji` | `kenji-resilience` added to `unlockedCoaches` |
 | `mc.coach.chloe` | `chloe-structured-reflection` added to `unlockedCoaches` |
+| `mc.practice.monthly` | `PRACTICE_PASS_1M`, `hasPracticeAccess`, `practiceExpiresAt` +30d (requires Premium) |

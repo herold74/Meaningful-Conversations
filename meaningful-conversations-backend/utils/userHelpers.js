@@ -29,6 +29,8 @@ function sanitizeUserForClient(user) {
         lastLogin: user.lastLogin,
         accessExpiresAt: user.accessExpiresAt,
         premiumExpiresAt: user.premiumExpiresAt,
+        hasPracticeAccess: user.hasPracticeAccess,
+        practiceExpiresAt: user.practiceExpiresAt,
         gamificationState: user.gamificationState,
         unlockedCoaches: user.unlockedCoaches,
         purchasePlatform: user.purchasePlatform,

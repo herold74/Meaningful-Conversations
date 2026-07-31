@@ -6,21 +6,41 @@ const { getPublicScenarios } = require('../practice/scenarios.js');
 const { enrichCatalog } = require('../practice/methodScenarioMap.js');
 const { resolvePublicAssetUrl } = require('../utils/publicAssetUrl.js');
 const { rollScopeBoundaryTheme, isValidTheme } = require('../practice/scopeBoundary.js');
+const {
+  PRACTICE_USER_SELECT,
+  resolvePracticeAccess,
+  practiceAccessErrorMessage,
+  isClientOnlyPracticeFramework,
+  canUseClientPracticeFrameworks,
+} = require('../utils/practiceAccess.js');
 
 const router = express.Router();
 
 const VALID_DIFFICULTIES = ['easy', 'moderate', 'challenging', 'hard'];
 
-async function requireClientPlus(userId) {
+async function requirePracticeAccess(userId) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { isClient: true, isAdmin: true, isDeveloper: true },
+    select: PRACTICE_USER_SELECT,
   });
   if (!user) return { ok: false, status: 404, error: 'User not found.' };
-  if (!user.isClient && !user.isAdmin && !user.isDeveloper) {
-    return { ok: false, status: 403, error: 'Coach Practice requires Client access or higher.' };
+
+  const access = resolvePracticeAccess(user);
+  if (!access.canAccessPractice) {
+    return {
+      ok: false,
+      status: 403,
+      error: practiceAccessErrorMessage(access.lockReason),
+      reason: access.lockReason,
+    };
   }
-  return { ok: true, user };
+
+  return { ok: true, user, canUseClientFrameworks: access.canUseClientFrameworks };
+}
+
+/** @deprecated Use requirePracticeAccess — kept for tests referencing legacy name */
+async function requireClientPlus(userId) {
+  return requirePracticeAccess(userId);
 }
 
 const { isHardUnlockedForPair, getPracticeUnlocks: buildPracticeUnlocks } = require('../practice/practiceUnlocks.js');
@@ -37,12 +57,25 @@ function resolveScopeBoundaryTheme(difficulty, scenarioId, clientTheme) {
   return clientTheme;
 }
 
+function annotateFrameworkAccess(frameworks, canUseClientFrameworks) {
+  return frameworks.map((framework) => {
+    const clientOnly = isClientOnlyPracticeFramework(framework);
+    const locked = clientOnly && !canUseClientFrameworks;
+    return {
+      ...framework,
+      clientOnly,
+      locked,
+      lockReason: locked ? 'client_required' : null,
+    };
+  });
+}
+
 // GET /api/practice/catalog?language=de
 router.get('/catalog', authMiddleware, async (req, res) => {
   try {
-    const access = await requireClientPlus(req.userId);
+    const access = await requirePracticeAccess(req.userId);
     if (!access.ok) {
-      return res.status(access.status).json({ error: access.error });
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
     }
 
     const language = req.query.language === 'en' ? 'en' : 'de';
@@ -54,9 +87,13 @@ router.get('/catalog', authMiddleware, async (req, res) => {
       avatar: resolvePublicAssetUrl(scenario.avatar),
     }));
     const enriched = enrichCatalog(frameworks, scenarios, language);
+    const frameworksWithAccess = annotateFrameworkAccess(
+      enriched.frameworks,
+      access.canUseClientFrameworks,
+    );
 
     res.json({
-      frameworks: enriched.frameworks,
+      frameworks: frameworksWithAccess,
       scenarios: enriched.scenarios,
       defaultPair: enriched.defaultPair,
       difficulties: [
@@ -66,6 +103,9 @@ router.get('/catalog', authMiddleware, async (req, res) => {
         { id: 'hard', label: language === 'en' ? 'Hard' : 'Schwer' },
       ],
       unlocks,
+      practiceAccess: {
+        canUseClientFrameworks: access.canUseClientFrameworks,
+      },
     });
   } catch (error) {
     console.error('[Practice] catalog error:', error);
@@ -76,9 +116,9 @@ router.get('/catalog', authMiddleware, async (req, res) => {
 // GET /api/practice/evaluations — history
 router.get('/evaluations', authMiddleware, async (req, res) => {
   try {
-    const access = await requireClientPlus(req.userId);
+    const access = await requirePracticeAccess(req.userId);
     if (!access.ok) {
-      return res.status(access.status).json({ error: access.error });
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
     }
 
     const evaluations = await prisma.practiceEvaluation.findMany({
@@ -108,9 +148,9 @@ router.get('/evaluations', authMiddleware, async (req, res) => {
 // DELETE /api/practice/evaluations/:id
 router.delete('/evaluations/:id', authMiddleware, async (req, res) => {
   try {
-    const access = await requireClientPlus(req.userId);
+    const access = await requirePracticeAccess(req.userId);
     if (!access.ok) {
-      return res.status(access.status).json({ error: access.error });
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
     }
 
     const evaluation = await prisma.practiceEvaluation.findUnique({
@@ -130,6 +170,7 @@ router.delete('/evaluations/:id', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.requirePracticeAccess = requirePracticeAccess;
 module.exports.requireClientPlus = requireClientPlus;
 module.exports.getPracticeUnlocks = getPracticeUnlocks;
 module.exports.resolveScopeBoundaryTheme = resolveScopeBoundaryTheme;
