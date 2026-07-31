@@ -112,7 +112,7 @@
 - [x] **iOS staging API target (2026-07-27):** `npm run sync:ios-staging` → `mc-beta.manualmode.at`
 - [x] **Staging v2.3.1 (2026-07-26):** Build **2** — superseded by v2.4.2
 - [x] **Production v2.5.0 (2026-07-30):** Build **6** — https://mc-app.manualmode.at, health OK (staging registry images)
-- [x] **App Store iOS 2.5.0 (6):** Approved 2026-07-30 — pending manual release in App Store Connect
+- [x] **App Store iOS 2.5.0 (6):** **Live 2026-08-01** (AT/DE/CH)
 - [x] **Production v2.3.1 (2026-07-26):** Build **2** — superseded by v2.5.0
 - [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
 - [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1
