@@ -420,6 +420,12 @@ function buildUserUpdate(productMapping, transactionInfo, user) {
     if (!currentAccess || currentAccess < expiresAt) {
       updateData.accessExpiresAt = expiresAt;
     }
+  } else if (productMapping.tier === 'practice') {
+    const expiresAt = transactionInfo.expiresDate
+      ? new Date(transactionInfo.expiresDate)
+      : new Date(Date.now() + productMapping.days * 86400000);
+    updateData.hasPracticeAccess = true;
+    updateData.practiceExpiresAt = expiresAt;
   } else if (productMapping.tier === 'bot') {
     const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
     if (!unlocked.includes(productMapping.botId)) {
@@ -443,12 +449,27 @@ async function revokeAccess(user, productMapping) {
         customerEmail: user.email,
         platform: 'ios',
         subscriptionStatus: 'active',
+        productId: { startsWith: 'mc.premium' },
       },
     });
 
     if (activeSubscriptions === 0) {
       updateData.isPremium = false;
       updateData.premiumExpiresAt = new Date();
+    }
+  } else if (productMapping.tier === 'practice') {
+    const activePractice = await prisma.purchase.count({
+      where: {
+        customerEmail: user.email,
+        platform: 'ios',
+        subscriptionStatus: 'active',
+        productId: 'mc.practice.monthly',
+      },
+    });
+
+    if (activePractice === 0) {
+      updateData.hasPracticeAccess = false;
+      updateData.practiceExpiresAt = new Date();
     }
   } else if (productMapping.tier === 'registered' && productMapping.type === 'subscription') {
     const activeRegistered = await prisma.purchase.count({

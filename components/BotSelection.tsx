@@ -21,6 +21,7 @@ import {
   COACH_SESSION_RING_I18N,
   CoachSessionRing,
 } from '../utils/coachSessionRing';
+import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/practiceAccess';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -405,18 +406,24 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
 };
 
 interface CoachPracticeHeroProps {
-  isClientPlus: boolean;
+  practiceAccess: ReturnType<typeof resolvePracticeAccess>;
   onCoachPractice?: () => void;
   onUpgrade?: () => void;
 }
 
+const practiceLockMessageKey = (reason?: PracticeAccessReason) => {
+  if (reason === 'premium_required') return 'botSelection_practice_premium_required';
+  if (reason === 'practice_required') return 'botSelection_practice_addon_required';
+  return 'botSelection_client_required';
+};
+
 const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
-  isClientPlus,
+  practiceAccess,
   onCoachPractice,
   onUpgrade,
 }) => {
   const { t } = useLocalization();
-  const locked = !isClientPlus;
+  const locked = !practiceAccess.canAccessPractice;
 
   return (
     <div className="max-w-md mx-auto">
@@ -456,7 +463,7 @@ const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
               : 'bg-accent-primary text-button-foreground-on-accent'
           }`}
         >
-          {locked ? t('botSelection_client_required') : t('botSelection_practice_start')}
+          {locked ? t(practiceLockMessageKey(practiceAccess.lockReason)) : t('botSelection_practice_start')}
           {!locked && <span aria-hidden>→</span>}
         </span>
       </motion.div>
@@ -586,6 +593,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>('coaches');
   const isClientPlus = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const isPremiumPlus = !!(currentUser?.isPremium || isClientPlus);
+  const practiceAccess = resolvePracticeAccess(currentUser);
   const [clientSectionOpen, setClientSectionOpen] = useState(!!currentUser?.isClient);
   const managementRef = useRef<HTMLDivElement>(null);
   const topicSearchRef = useRef<HTMLDivElement>(null);
@@ -873,7 +881,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           </div>
           ) : (
             <CoachPracticeHero
-              isClientPlus={isClientPlus}
+              practiceAccess={practiceAccess}
               onCoachPractice={onCoachPractice}
               onUpgrade={onUpgrade}
             />

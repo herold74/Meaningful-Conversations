@@ -71,6 +71,8 @@ export interface User {
     createdAt?: string;
     accessExpiresAt?: string;
     premiumExpiresAt?: string;
+    hasPracticeAccess?: boolean;
+    practiceExpiresAt?: string;
     loginCount?: number;
     lastLogin?: string;
     encryptionSalt?: string; // Hex-encoded string
@@ -302,6 +304,9 @@ export interface PracticeFramework {
     complianceCriteria: string[];
     explainer: PracticeFrameworkExplainer;
     scenarioMatches?: Record<string, PracticeMatchTier>;
+    clientOnly?: boolean;
+    locked?: boolean;
+    lockReason?: 'client_required' | null;
 }
 
 export interface PracticeScenario {

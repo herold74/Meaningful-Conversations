@@ -5,6 +5,7 @@ const prisma = require('../prismaClient');
 const auth = require('../middleware/auth');
 const { purchaseLimiter } = require('../middleware/rateLimiter');
 const { sendPurchaseEmail, sendAdminNotification, generateInvoiceNumber, sendInvoiceEmail } = require('../services/mailService');
+const { isPremiumActive } = require('../utils/practiceAccess.js');
 
 // --- Product Catalog ---
 
@@ -40,6 +41,11 @@ const PRODUCTS = {
     category: 'premium', duration: '1Y', days: 365,
     description: 'Meaningful Conversations — Premium 1 Year',
   },
+  PRACTICE_PASS_1M: {
+    id: 'PRACTICE_PASS_1M', name: 'Coach Practice Monats-Pass', price: 6.90,
+    category: 'practice', duration: '1M', days: 30,
+    description: 'ManualMode — Coach Practice Add-on (requires Premium)',
+  },
   KENJI_UNLOCK: {
     id: 'KENJI_UNLOCK', name: 'Kenji Coach Unlock', price: 3.90,
     category: 'bot', botId: 'kenji-resilience',
@@ -64,6 +70,7 @@ const PRODUCT_MAPPING = {
   'ACCESS_PASS_1M':       'ACCESS_PASS_1M',
   'ACCESS_PASS_3M':       'ACCESS_PASS_3M',
   'ACCESS_PASS_1Y':       'ACCESS_PASS_1Y',
+  'PRACTICE_PASS_1M':     'PRACTICE_PASS_1M',
   'UPGRADE_LT_PREMIUM_1M': 'ACCESS_PASS_1M',
   'UPGRADE_LT_PREMIUM_3M': 'ACCESS_PASS_3M',
   'UPGRADE_LT_PREMIUM_1Y': 'ACCESS_PASS_1Y',
@@ -188,6 +195,18 @@ function checkProductEligibility(user, productId) {
     }
   }
 
+  if (product.category === 'practice') {
+    if (user.isDeveloper || tier === 'client' || tier === 'admin') {
+      return { eligible: false, reason: 'Your current access level already includes Coach Practice.' };
+    }
+    if (!isPremiumActive(user)) {
+      return { eligible: false, reason: 'Coach Practice requires an active Premium subscription.' };
+    }
+    if (user.hasPracticeAccess && user.practiceExpiresAt && new Date(user.practiceExpiresAt) > new Date()) {
+      return { eligible: false, reason: 'You already have active Coach Practice access.' };
+    }
+  }
+
   if (product.category === 'bot') {
     if (tier === 'client' || tier === 'admin') {
       return { eligible: false, reason: 'Your current access level already includes all bots.' };
@@ -247,6 +266,18 @@ async function applyProductEffect(userId, productId) {
     if (!currentAccess || currentAccess < baseDate) {
       updateData.accessExpiresAt = baseDate;
     }
+    botIdForCode = productId;
+  } else if (product.category === 'practice') {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!isPremiumActive(user)) {
+      throw new Error('Coach Practice requires an active Premium subscription.');
+    }
+    const now = new Date();
+    const baseDate = (user.practiceExpiresAt && new Date(user.practiceExpiresAt) > now)
+      ? new Date(user.practiceExpiresAt) : new Date();
+    baseDate.setDate(baseDate.getDate() + product.days);
+    updateData.hasPracticeAccess = true;
+    updateData.practiceExpiresAt = baseDate;
     botIdForCode = productId;
   } else if (product.category === 'bot') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -308,6 +339,15 @@ router.get('/products', auth, async (req, res) => {
         if (tier === 'premium') continue;
       }
 
+      // Practice add-on: active Premium required; hide if already entitled or Client+
+      if (product.category === 'practice') {
+        if (tier === 'client' || tier === 'admin') continue;
+        if (!isPremiumActive(user)) continue;
+        if (user.hasPracticeAccess && user.practiceExpiresAt && new Date(user.practiceExpiresAt) > new Date()) {
+          continue;
+        }
+      }
+
       // Skip bot unlocks if already owned, user has Premium+ (bots included), or access expired
       if (product.category === 'bot') {
         if (tier === 'client' || tier === 'admin') continue;
@@ -337,6 +377,8 @@ router.get('/products', auth, async (req, res) => {
       isLifetime: lifetime,
       isPremium: user.isPremium,
       premiumExpiresAt: user.isPremium ? user.premiumExpiresAt : null,
+      hasPracticeAccess: user.hasPracticeAccess,
+      practiceExpiresAt: user.hasPracticeAccess ? user.practiceExpiresAt : null,
       ownedBots,
       products,
     });
