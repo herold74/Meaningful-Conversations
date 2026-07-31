@@ -5,9 +5,14 @@
 **Branch:** `main`
 **Staging:** Deployed **2026-07-29**, Build **6**, v2.5.0 — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
-**App Store:** iOS **2.5.0 (6) approved** — **freigeben in App Store Connect** (Production deploy done)
+**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH)
 
-**Production deploy gate:** ~~Blocked until iOS live~~ — **Production 2.5.0 deployed 2026-07-30** after App Store approval; release iOS in ASC when ready.
+**Production deploy gate:** **Closed** — Production 2.5.0 + App Store 2.5.0 aligned (2026-07-30 deploy, 2026-08-01 Store release).
+
+## Recent Changes (2026-08-01 — App Store 2.5.0 live)
+
+- **App Store Connect:** Version **2.5.0 (6)** veröffentlicht
+- **Production:** mc-app still **2.5.0 Build 6**, health OK
 
 ## Recent Changes (2026-07-30 — Production 2.5.0 deploy)
 
@@ -15,7 +20,6 @@
 - **DB:** `prisma migrate status` up to date (28 migrations); `migrate-method-ids.js` — 0 rows (production)
 - **User count:** 32 before/after (unchanged)
 - **Smoke:** `/api/health`, avatars PNG, Build **6**, `/privacy` `/terms` `/support` OK
-- **Next:** App Store Connect → Version 2.5.0 → **Veröffentlichen**
 
 ## Recent Changes (2026-07-29 — Git commit+push workflow)
 
