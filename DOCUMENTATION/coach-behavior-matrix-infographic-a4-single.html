@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coach-Verhaltensmatrix (1 Seite) — Meaningful Conversations</title>
+  <style>
+    :root {
+      --primary-teal: #1B7272;
+      --dark-teal: #165a5a;
+      --light-teal: #5BBFBF;
+      --accent-orange: #F59E0B;
+      --bg: #f8fafb;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --border: #d1d5db;
+
+      --c-kurz: #5BBFBF;
+      --c-voll: #1B7272;
+      --c-kein: #F59E0B;
+      --c-spaet: #165a5a;
+
+      --a-keine: #1B7272;
+      --a-einwilligung: #F59E0B;
+      --a-blockade: #5BBFBF;
+      --a-verboten: #b45309;
+      --a-sokratisch: #165a5a;
+
+      --close-yes: #1B7272;
+      --close-no: #9ca3af;
+      --close-partial: #5BBFBF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 7.5pt;
+      line-height: 1.25;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .sheet {
+      width: 285mm;
+      min-height: 198mm;
+      margin: 0 auto;
+      padding: 4mm 6mm;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--primary-teal);
+      padding-bottom: 2.5mm;
+      margin-bottom: 2.5mm;
+      flex-shrink: 0;
+    }
+
+    .page-header h1 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--dark-teal);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .page-header .subtitle {
+      font-size: 7.5pt;
+      color: var(--text-muted);
+      margin-top: 0.8mm;
+    }
+
+    .brand-mark {
+      text-align: right;
+      font-size: 7.5pt;
+      color: var(--primary-teal);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .matrix-wrap {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7pt;
+      table-layout: fixed;
+    }
+
+    table.matrix th {
+      background: var(--dark-teal);
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 1.4mm 1.5mm;
+      font-size: 8pt;
+      vertical-align: bottom;
+    }
+
+    table.matrix th:nth-child(1) { width: 13%; }
+    table.matrix th:nth-child(2) { width: 14%; }
+    table.matrix th:nth-child(3) { width: 8%; }
+    table.matrix th:nth-child(4) { width: 14%; }
+    table.matrix th:nth-child(5) { width: 18%; }
+    table.matrix th:nth-child(6) { width: 15%; }
+
+    table.matrix td {
+      padding: 1.2mm 1.5mm;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    table.matrix tr:nth-child(even) td { background: #f9fafb; }
+    table.matrix tr:last-child td { border-bottom: none; }
+
+    table.matrix tr.gloria-footnote td {
+      background: #fffbeb;
+      border-top: 1px solid var(--accent-orange);
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      padding: 1mm 1.5mm;
+    }
+
+    .coach-cell {
+      font-weight: 700;
+      color: var(--dark-teal);
+      line-height: 1.2;
+    }
+
+    .coach-cell code {
+      display: block;
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 6pt;
+      font-weight: 400;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin-top: 0.3mm;
+    }
+
+    .framework {
+      font-family: ui-monospace, monospace;
+      font-size: 6.5pt;
+      color: var(--primary-teal);
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .tier-badge {
+      display: inline-block;
+      font-size: 6pt;
+      font-weight: 600;
+      padding: 0.2mm 1.2mm;
+      border-radius: 2px;
+      background: #e5e7eb;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .tier-badge.guest { background: #d1fae5; color: #065f46; }
+    .tier-badge.registered { background: #dbeafe; color: #1e40af; }
+    .tier-badge.premium { background: #ede9fe; color: #5b21b6; }
+    .tier-badge.client { background: #fef3c7; color: #92400e; }
+
+    .tag {
+      display: inline-block;
+      padding: 0.3mm 1.2mm;
+      border-radius: 2px;
+      font-size: 6.5pt;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    .tag-kurz { background: var(--c-kurz); color: #0f3d3d; }
+    .tag-voll { background: var(--c-voll); }
+    .tag-kein { background: var(--c-kein); color: #451a03; }
+    .tag-spaet { background: var(--c-spaet); border: 1px solid var(--light-teal); }
+
+    .tag-adv-keine { background: var(--a-keine); }
+    .tag-adv-einwilligung { background: var(--a-einwilligung); color: #451a03; }
+    .tag-adv-blockade { background: var(--a-blockade); color: #0f3d3d; }
+    .tag-adv-verboten { background: var(--a-verboten); }
+    .tag-adv-sokratisch { background: var(--a-sokratisch); }
+
+    .cell-detail {
+      font-size: 6pt;
+      color: var(--text-muted);
+      margin-top: 0.4mm;
+      line-height: 1.2;
+    }
+
+    .close-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2mm;
+      font-size: 6.5pt;
+      line-height: 1.2;
+    }
+
+    .close-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6mm;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 2.2mm;
+      height: 2.2mm;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-yes { background: var(--close-yes); }
+    .dot-no { background: var(--close-no); }
+    .dot-partial { background: var(--close-partial); }
+
+    .legend-bar {
+      margin-top: 2mm;
+      padding: 1.5mm 2mm;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: #f9fafb;
+      font-size: 6.5pt;
+      line-height: 1.35;
+      flex-shrink: 0;
+    }
+
+    .legend-bar strong {
+      color: var(--dark-teal);
+      font-size: 7pt;
+    }
+
+    .legend-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2mm 3mm;
+      align-items: center;
+      margin-top: 0.8mm;
+    }
+
+    .legend-inline .sep {
+      color: var(--border);
+    }
+
+    .footer {
+      margin-top: 1.5mm;
+      padding-top: 1.5mm;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .footer a {
+      color: var(--primary-teal);
+      text-decoration: none;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 7mm;
+      }
+
+      html, body {
+        height: auto;
+        background: #fff;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .sheet {
+        width: auto;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      .tag, .tier-badge, table.matrix th, .dot, .legend-bar, tr.gloria-footnote td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      table.matrix { font-size: 7pt; }
+      table.matrix tr { break-inside: avoid; }
+
+      .no-print { display: none; }
+    }
+
+    @media screen {
+      body { padding: 8mm 0; }
+      .print-hint {
+        max-width: 285mm;
+        margin: 0 auto 4mm;
+        background: #ecfdf5;
+        border: 1px solid var(--light-teal);
+        border-radius: 4px;
+        padding: 3mm 4mm;
+        font-size: 9pt;
+        color: var(--dark-teal);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="print-hint no-print">
+    <strong>Drucken:</strong> <kbd>Strg/Cmd + P</kbd> → Ziel „Als PDF speichern“ → <strong>Querformat (Landscape)</strong>, Ränder „Standard“, <strong>Hintergrundgrafiken aktivieren</strong>.
+  </p>
+
+  <div class="sheet">
+
+    <header class="page-header">
+      <div>
+        <h1>Coach-Verhaltensmatrix</h1>
+        <p class="subtitle">12 Coaches — Kernverhalten aus System-Prompts (Contracting · Abschluss · Ratschläge)</p>
+      </div>
+      <div class="brand-mark">Meaningful Conversations</div>
+    </header>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Framework</th>
+            <th>Tier</th>
+            <th>Contracting</th>
+            <th>Sitzungsabschluss</th>
+            <th>Ratschläge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="coach-cell">Nobody<code>nexus-goal-path-solution</code></td>
+            <td><span class="framework">goal-path-solution</span></td>
+            <td><span class="tier-badge guest">guest</span></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">Thema → Erwartung → GPS</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-partial"></span>Kontrakt impl.</span><span class="close-item"><span class="dot dot-yes"></span>Nächster Schritt</span></div></td>
+            <td><span class="tag tag-adv-blockade">Bei Blockade</span><div class="cell-detail">Fragen first; max. 1 Tipp als Möglichkeit</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Sam<code>sam-forward-focused</code></td>
+            <td><span class="framework">forward-focused-coaching</span></td>
+            <td><span class="tier-badge registered">registered</span></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">Spiegelung → 1 Zukunftsfrage; kein 6-Schritte</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>+1-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Keine</span><div class="cell-detail">Erst wenn „völlig stecken" nach SF-Fragen</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Gabrielle<code>gabrielle-four-stage</code></td>
+            <td><span class="framework">four-stage-coaching</span></td>
+            <td><span class="tier-badge registered">registered</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Thema → Relevanz → Ergebnis → Review</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-einwilligung">Einwilligung</span><div class="cell-detail">2–3 Winkel, dann Permission, max. 1 Perspektive</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Max<code>max-ambitious</code></td>
+            <td><span class="framework">ambitious-coaching</span></td>
+            <td><span class="tier-badge guest">guest</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Keine direkten</span><div class="cell-detail">Ambition / Langfrist / 10x-Fragen</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Ava<code>ava-strategic</code></td>
+            <td><span class="framework">strategic-coaching</span></td>
+            <td><span class="tier-badge guest">guest</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Fragen first</span><div class="cell-detail">Keine voreilige Beratung</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Kenji<code>kenji-resilience</code></td>
+            <td><span class="framework">resilience-coaching</span></td>
+            <td><span class="tier-badge premium">premium</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Stoizismus erst nach Kontrakt</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Schritt 6</span><span class="close-item"><span class="dot dot-yes"></span>Kontinuität</span></div></td>
+            <td><span class="tag tag-adv-sokratisch">Sokratisch</span><div class="cell-detail">Kein Belehren; [MEDITATION:X]</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Chloe<code>chloe-structured-reflection</code></td>
+            <td><span class="framework">structured-reflection</span></td>
+            <td><span class="tier-badge premium">premium</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">7 Schritte inkl. Emotion; Methodik nach Kontrakt</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Schritt 7</span><span class="close-item"><span class="dot dot-yes"></span>Proaktiv</span></div></td>
+            <td><span class="tag tag-adv-keine">Erkundung</span><div class="cell-detail">Keine KVT/Therapie-Labels</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Mike<code>mike-ambivalence-coaching</code></td>
+            <td><span class="framework">ambivalence-coaching</span></td>
+            <td><span class="tier-badge premium">premium</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Signale</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Change-Talk</span></div></td>
+            <td><span class="tag tag-adv-sokratisch">Evokation</span><div class="cell-detail">OARS; Widerstand reflektieren</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Rob<code>rob</code></td>
+            <td><span class="framework">mental-fitness-coaching</span></td>
+            <td><span class="tier-badge client">client</span></td>
+            <td><span class="tag tag-voll">6-Schritte</span><div class="cell-detail">Wie Gabrielle</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Kontrakt-Review</span><span class="close-item"><span class="dot dot-yes"></span>Praxis-Schritt</span></div></td>
+            <td><span class="tag tag-adv-keine">Klient benennt</span><div class="cell-detail">PQ Saboteur/Sage; nicht reparieren</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Victor<code>victor-systemic-coaching</code></td>
+            <td><span class="framework">systemic-coaching</span></td>
+            <td><span class="tier-badge client">client</span></td>
+            <td><span class="tag tag-spaet">6-Schritte, spät</span><div class="cell-detail">Kartierung Phase 1–3, dann Kontrakt</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Eigenes Protokoll</span><span class="close-item"><span class="dot dot-yes"></span>Phase 5</span><span class="close-item"><span class="dot dot-yes"></span>Differenzierung</span></div></td>
+            <td><span class="tag tag-adv-verboten">Strikt keine</span><div class="cell-detail">Detrianguliert; kein „kündigen"-Rat</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Bekky<code>bekky-thought-audit</code></td>
+            <td><span class="framework">thought-audit</span></td>
+            <td><span class="tier-badge client">client</span></td>
+            <td><span class="tag tag-kein">Kein Contracting</span><div class="cell-detail">Direkt Phase 1: Gedanken</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-yes"></span>Gleichgewicht</span><span class="close-item"><span class="dot dot-no"></span>Kein Kontrakt</span><span class="close-item"><span class="dot dot-yes"></span>[AUDIT_TASK]</span></div><div class="cell-detail">Marker → Session Review (unsichtbar im Chat)</div></td>
+            <td><span class="tag tag-adv-verboten">Strikt verboten</span><div class="cell-detail">Max. 1 Modell-Beispiel in Turnarounds</div></td>
+          </tr>
+          <tr>
+            <td class="coach-cell">Dan<code>dan-client-language</code></td>
+            <td><span class="framework">client-exact-language</span></td>
+            <td><span class="tier-badge client">client</span></td>
+            <td><span class="tag tag-kurz">Kurz</span><div class="cell-detail">1 Wunschausgang-Frage aus Pool</div></td>
+            <td><div class="close-row"><span class="close-item"><span class="dot dot-partial"></span>Kurz</span><span class="close-item"><span class="dot dot-no"></span>Kein Kontrakt</span><span class="close-item"><span class="dot dot-yes"></span>„Was wissen …?"</span></div></td>
+            <td><span class="tag tag-adv-verboten">Strikt verboten</span><div class="cell-detail">Keine Metaphern / Interpretation</div></td>
+          </tr>
+          <tr class="gloria-footnote">
+            <td colspan="6">
+              <strong>Gloria</strong> (Interviewer, kein Coach):
+              <code>gloria-life-context</code> guest · Life-Context-Interview, einmalig &nbsp;|&nbsp;
+              <code>gloria-interview</code> registered · Projekt-/Ideen-Interview &nbsp;|&nbsp;
+              Kein Coaching/Rat · 1 Frage/Nachricht · PII-Warnung · Krisenprotokoll wie alle Personas
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend-bar">
+      <strong>Legende</strong>
+      <div class="legend-inline">
+        <span><span class="tag tag-kurz">Kurz</span> Nobody, Sam, Dan</span>
+        <span><span class="tag tag-voll">6-Schritte</span> Gabrielle, Max, Ava, Kenji, Chloe, Mike, Rob</span>
+        <span><span class="tag tag-spaet">Spät</span> Victor</span>
+        <span><span class="tag tag-kein">Kein</span> Bekky</span>
+        <span class="sep">|</span>
+        <span><span class="dot dot-yes"></span> ja/aktiv</span>
+        <span><span class="dot dot-partial"></span> teilw./implizit</span>
+        <span><span class="dot dot-no"></span> nein</span>
+        <span class="sep">|</span>
+        <span><span class="tag tag-adv-einwilligung">Einwilligung</span> Gabrielle</span>
+        <span><span class="tag tag-adv-blockade">Blockade</span> Nobody, Sam</span>
+        <span><span class="tag tag-adv-sokratisch">Sokratisch</span> Kenji, Mike</span>
+        <span><span class="tag tag-adv-verboten">Verboten</span> Victor, Bekky, Dan</span>
+        <span class="sep">|</span>
+        <span><code>[REFERRAL:…]</code> Handoff</span>
+        <span><code>[AUDIT_TASK]</code> Bekky → Review</span>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <span>Meaningful Conversations · v2.4.3 · Stand 2026-07-28</span>
+      <span>Vollständig: <a href="COACH-BEHAVIOR-MATRIX.md">COACH-BEHAVIOR-MATRIX.md</a> · 3-Seiten-Variante: <a href="coach-behavior-matrix-infographic.html">coach-behavior-matrix-infographic.html</a></span>
+    </footer>
+
+  </div>
+
+</body>
+</html>
