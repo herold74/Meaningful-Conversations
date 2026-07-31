@@ -6,6 +6,7 @@ meaningful-conversations-backend/node_modules/
 # Capacitor - iOS
 ios/App/Pods/
 ios/.build/
+ios/App/CapApp-SPM/build/
 ios/App/App/public/
 *.xcworkspace
 !*.xcworkspace/contents.xcworkspacedata
