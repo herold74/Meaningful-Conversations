@@ -1,0 +1,60 @@
+{
+  "runs": [
+    {
+      "runId": "2026-07-28T21-09-53-mistral-harness-force-mistral",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-07-28T21:09:54.478Z",
+      "path": "runs/2026-07-28T21-09-53-mistral-harness-force-mistral",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "1/1",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-07-28T21-07-56-gemini-harness-force-smoke",
+      "provider": "gemini",
+      "suite": "smoke",
+      "createdAt": "2026-07-28T21:07:57.402Z",
+      "path": "runs/2026-07-28T21-07-56-gemini-harness-force-smoke",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "4/4",
+      "models": "gemini-2.5-flash"
+    },
+    {
+      "runId": "2026-07-28T19-52-19-gemini-genai-v2-google",
+      "provider": "gemini",
+      "suite": "regression",
+      "createdAt": "2026-07-28T19:52:20.209Z",
+      "path": "runs/2026-07-28T19-52-19-gemini-genai-v2-google",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "8/9"
+    },
+    {
+      "runId": "2026-07-28T19-44-49-gemini-genai-v2-post",
+      "provider": "gemini",
+      "suite": "regression",
+      "createdAt": "2026-07-28T19:44:49.847Z",
+      "path": "runs/2026-07-28T19-44-49-gemini-genai-v2-post",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "8/9"
+    },
+    {
+      "runId": "2026-07-28T19-29-14-mistral-mistral-small-chat",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-07-28T19:29:15.170Z",
+      "path": "runs/2026-07-28T19-29-14-mistral-mistral-small-chat",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "8/9"
+    },
+    {
+      "runId": "2026-07-28T19-03-49-mistral-mistral-v2-post",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-07-28T19:03:49.533Z",
+      "path": "runs/2026-07-28T19-03-49-mistral-mistral-v2-post",
+      "packageVersion": "2.4.3",
+      "autoCheckPass": "8/9"
+    }
+  ]
+}
