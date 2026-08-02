@@ -41,10 +41,16 @@ const PRODUCTS = {
     category: 'premium', duration: '1Y', days: 365,
     description: 'Meaningful Conversations — Premium 1 Year',
   },
+  ACCESS_PASS_PLUS_1M: {
+    id: 'ACCESS_PASS_PLUS_1M', name: 'Premium+ Monats-Pass', price: 14.90,
+    category: 'premium_plus', duration: '1M', days: 30,
+    description: 'ManualMode — Premium + Coach Practice (single subscription)',
+  },
+  // Legacy: separate Practice add-on (webhook / early sandbox only — not offered in catalog)
   PRACTICE_PASS_1M: {
     id: 'PRACTICE_PASS_1M', name: 'Coach Practice Monats-Pass', price: 6.90,
     category: 'practice', duration: '1M', days: 30,
-    description: 'ManualMode — Coach Practice Add-on (requires Premium)',
+    description: 'ManualMode — Coach Practice Add-on (legacy)',
   },
   KENJI_UNLOCK: {
     id: 'KENJI_UNLOCK', name: 'Kenji Coach Unlock', price: 3.90,
@@ -70,6 +76,7 @@ const PRODUCT_MAPPING = {
   'ACCESS_PASS_1M':       'ACCESS_PASS_1M',
   'ACCESS_PASS_3M':       'ACCESS_PASS_3M',
   'ACCESS_PASS_1Y':       'ACCESS_PASS_1Y',
+  'ACCESS_PASS_PLUS_1M':  'ACCESS_PASS_PLUS_1M',
   'PRACTICE_PASS_1M':     'PRACTICE_PASS_1M',
   'UPGRADE_LT_PREMIUM_1M': 'ACCESS_PASS_1M',
   'UPGRADE_LT_PREMIUM_3M': 'ACCESS_PASS_3M',
@@ -103,6 +110,28 @@ function isLifetimeRegistered(user) {
 function getOwnedPremiumBots(user) {
   const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
   return unlocked.filter(b => ['kenji-resilience', 'chloe-structured-reflection'].includes(b));
+}
+
+function hasActivePracticeAccess(user) {
+  if (!user?.hasPracticeAccess) return false;
+  if (!user.practiceExpiresAt) return true;
+  return new Date(user.practiceExpiresAt) > new Date();
+}
+
+function applyPremiumSubscriptionDates(user, days) {
+  const now = new Date();
+  const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
+    ? new Date(user.premiumExpiresAt) : new Date();
+  baseDate.setDate(baseDate.getDate() + days);
+  const updateData = {
+    isPremium: true,
+    premiumExpiresAt: baseDate,
+  };
+  const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
+  if (!currentAccess || currentAccess < baseDate) {
+    updateData.accessExpiresAt = baseDate;
+  }
+  return updateData;
 }
 
 function calculatePrice(user, productId) {
@@ -195,16 +224,17 @@ function checkProductEligibility(user, productId) {
     }
   }
 
+  if (product.category === 'premium_plus') {
+    if (tier === 'client' || tier === 'admin' || user.isDeveloper) {
+      return { eligible: false, reason: 'Your current access level already includes Premium+.' };
+    }
+    if (hasActivePracticeAccess(user) && isPremiumActive(user)) {
+      return { eligible: false, reason: 'You already have active Premium+ (Coach Practice included).' };
+    }
+  }
+
   if (product.category === 'practice') {
-    if (user.isDeveloper || tier === 'client' || tier === 'admin') {
-      return { eligible: false, reason: 'Your current access level already includes Coach Practice.' };
-    }
-    if (!isPremiumActive(user)) {
-      return { eligible: false, reason: 'Coach Practice requires an active Premium subscription.' };
-    }
-    if (user.hasPracticeAccess && user.practiceExpiresAt && new Date(user.practiceExpiresAt) > new Date()) {
-      return { eligible: false, reason: 'You already have active Coach Practice access.' };
-    }
+    return { eligible: false, reason: 'Coach Practice is now included in Premium+. Please choose Premium+ instead.' };
   }
 
   if (product.category === 'bot') {
@@ -254,18 +284,17 @@ async function applyProductEffect(userId, productId) {
     updateData.accessExpiresAt = baseDate;
   } else if (product.category === 'premium') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const now = new Date();
-    const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
-      ? new Date(user.premiumExpiresAt) : new Date();
-    baseDate.setDate(baseDate.getDate() + product.days);
-    updateData.isPremium = true;
-    updateData.premiumExpiresAt = baseDate;
-    // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
-    // than the existing registered subscription, so users fall back to Registered (not Guest)
-    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
-    if (!currentAccess || currentAccess < baseDate) {
-      updateData.accessExpiresAt = baseDate;
-    }
+    updateData = { ...updateData, ...applyPremiumSubscriptionDates(user, product.days) };
+    botIdForCode = productId;
+  } else if (product.category === 'premium_plus') {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const premiumDates = applyPremiumSubscriptionDates(user, product.days);
+    updateData = {
+      ...updateData,
+      ...premiumDates,
+      hasPracticeAccess: true,
+      practiceExpiresAt: premiumDates.premiumExpiresAt,
+    };
     botIdForCode = productId;
   } else if (product.category === 'practice') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -333,19 +362,19 @@ router.get('/products', auth, async (req, res) => {
         if (tier === 'client' || tier === 'admin' || tier === 'premium') continue;
       }
 
-      // Skip Premium passes if user is already active Premium or higher
+      // Legacy practice add-on — not offered (use Premium+ instead)
+      if (product.category === 'practice') continue;
+
+      // Premium without Coach Practice
       if (product.category === 'premium') {
         if (tier === 'client' || tier === 'admin') continue;
         if (tier === 'premium') continue;
       }
 
-      // Practice add-on: active Premium required; hide if already entitled or Client+
-      if (product.category === 'practice') {
-        if (tier === 'client' || tier === 'admin') continue;
-        if (!isPremiumActive(user)) continue;
-        if (user.hasPracticeAccess && user.practiceExpiresAt && new Date(user.practiceExpiresAt) > new Date()) {
-          continue;
-        }
+      // Premium+ (Premium + Coach Practice, single subscription)
+      if (product.category === 'premium_plus') {
+        if (tier === 'client' || tier === 'admin' || user.isDeveloper) continue;
+        if (hasActivePracticeAccess(user) && isPremiumActive(user)) continue;
       }
 
       // Skip bot unlocks if already owned, user has Premium+ (bots included), or access expired

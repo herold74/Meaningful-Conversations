@@ -107,9 +107,39 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "79.99",
+          "displayPrice" : "14.99",
           "familyShareable" : false,
           "groupNumber" : 1,
+          "internalID" : "mc_premium_plus_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Premium plus Coach Practice — one subscription.",
+              "displayName" : "Premium+ Monthly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Premium inkl. Coaching üben — ein Abo.",
+              "displayName" : "Premium+ Monats-Pass",
+              "locale" : "de_DE"
+            }
+          ],
+          "productID" : "mc.premium_plus.monthly",
+          "referenceName" : "Premium+ Monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "subscriptionGroupID" : "mc_access_group",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "79.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
           "internalID" : "mc_premium_yearly",
           "introductoryOffer" : null,
           "localizations" : [
@@ -139,7 +169,7 @@
           ],
           "displayPrice" : "9.99",
           "familyShareable" : false,
-          "groupNumber" : 2,
+          "groupNumber" : 3,
           "internalID" : "mc_premium_monthly",
           "introductoryOffer" : null,
           "localizations" : [
@@ -169,7 +199,7 @@
           ],
           "displayPrice" : "14.99",
           "familyShareable" : false,
-          "groupNumber" : 3,
+          "groupNumber" : 4,
           "internalID" : "mc_registered_yearly_v2",
           "introductoryOffer" : null,
           "localizations" : [
@@ -199,7 +229,7 @@
           ],
           "displayPrice" : "3.99",
           "familyShareable" : false,
-          "groupNumber" : 4,
+          "groupNumber" : 5,
           "internalID" : "mc_registered_monthly",
           "introductoryOffer" : null,
           "localizations" : [
@@ -218,52 +248,6 @@
           "referenceName" : "Registered Monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "subscriptionGroupID" : "mc_access_group",
-          "type" : "RecurringSubscription"
-        }
-      ]
-    },
-    {
-      "id" : "mc_practice_group",
-      "localizations" : [
-        {
-          "displayName" : "Coach Practice",
-          "locale" : "en_US"
-        },
-        {
-          "displayName" : "Coaching üben",
-          "locale" : "de_DE"
-        }
-      ],
-      "name" : "Coach Practice",
-      "subscriptions" : [
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "6.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "mc_practice_monthly",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Monthly Coach Practice add-on. Requires active Premium.",
-              "displayName" : "Coach Practice Monthly",
-              "locale" : "en_US"
-            },
-            {
-              "description" : "Monatliches Coach-Practice-Add-on. Erfordert aktives Premium.",
-              "displayName" : "Coach Practice Monats-Pass",
-              "locale" : "de_DE"
-            }
-          ],
-          "productID" : "mc.practice.monthly",
-          "referenceName" : "Coach Practice Monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "subscriptionGroupID" : "mc_practice_group",
           "type" : "RecurringSubscription"
         }
       ]

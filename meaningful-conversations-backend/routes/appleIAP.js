@@ -414,8 +414,18 @@ function buildUserUpdate(productMapping, transactionInfo, user) {
       : new Date(Date.now() + productMapping.days * 86400000);
     updateData.isPremium = true;
     updateData.premiumExpiresAt = expiresAt;
-    // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
-    // than the existing registered subscription, so users fall back to Registered (not Guest)
+    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
+    if (!currentAccess || currentAccess < expiresAt) {
+      updateData.accessExpiresAt = expiresAt;
+    }
+  } else if (productMapping.tier === 'premium_plus') {
+    const expiresAt = transactionInfo.expiresDate
+      ? new Date(transactionInfo.expiresDate)
+      : new Date(Date.now() + productMapping.days * 86400000);
+    updateData.isPremium = true;
+    updateData.premiumExpiresAt = expiresAt;
+    updateData.hasPracticeAccess = true;
+    updateData.practiceExpiresAt = expiresAt;
     const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
     if (!currentAccess || currentAccess < expiresAt) {
       updateData.accessExpiresAt = expiresAt;
@@ -443,19 +453,52 @@ async function revokeAccess(user, productMapping) {
   const updateData = {};
 
   if (productMapping.tier === 'premium') {
-    // Check if user has any other active Apple subscriptions
-    const activeSubscriptions = await prisma.purchase.count({
+    const activePremium = await prisma.purchase.count({
       where: {
         customerEmail: user.email,
         platform: 'ios',
         subscriptionStatus: 'active',
-        productId: { startsWith: 'mc.premium' },
+        productId: { in: ['mc.premium.monthly', 'mc.premium.yearly'] },
+      },
+    });
+    const activePlus = await prisma.purchase.count({
+      where: {
+        customerEmail: user.email,
+        platform: 'ios',
+        subscriptionStatus: 'active',
+        productId: 'mc.premium_plus.monthly',
       },
     });
 
-    if (activeSubscriptions === 0) {
+    if (activePremium === 0 && activePlus === 0) {
       updateData.isPremium = false;
       updateData.premiumExpiresAt = new Date();
+    }
+  } else if (productMapping.tier === 'premium_plus') {
+    const activePlus = await prisma.purchase.count({
+      where: {
+        customerEmail: user.email,
+        platform: 'ios',
+        subscriptionStatus: 'active',
+        productId: 'mc.premium_plus.monthly',
+      },
+    });
+
+    if (activePlus === 0) {
+      updateData.hasPracticeAccess = false;
+      updateData.practiceExpiresAt = new Date();
+      const activePremium = await prisma.purchase.count({
+        where: {
+          customerEmail: user.email,
+          platform: 'ios',
+          subscriptionStatus: 'active',
+          productId: { in: ['mc.premium.monthly', 'mc.premium.yearly'] },
+        },
+      });
+      if (activePremium === 0) {
+        updateData.isPremium = false;
+        updateData.premiumExpiresAt = new Date();
+      }
     }
   } else if (productMapping.tier === 'practice') {
     const activePractice = await prisma.purchase.count({

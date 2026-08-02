@@ -7,13 +7,15 @@ export interface IAPProduct {
   appStoreId: string;
   name: string;
   type: 'subscription' | 'non_consumable';
-  tier: 'registered' | 'premium' | 'bot' | 'practice';
+  tier: 'registered' | 'premium' | 'premium_plus' | 'bot' | 'practice';
 }
 
 export const IAP_PRODUCTS: IAPProduct[] = [
   { id: 'mc.registered.monthly',  appStoreId: 'mc.registered.monthly',  name: 'Registered Monthly',  type: 'subscription',    tier: 'registered' },
+  { id: 'mc.premium_plus.monthly', appStoreId: 'mc.premium_plus.monthly', name: 'Premium+ Monthly',   type: 'subscription',    tier: 'premium_plus' },
   { id: 'mc.premium.monthly',     appStoreId: 'mc.premium.monthly',     name: 'Premium Monthly',     type: 'subscription',    tier: 'premium' },
   { id: 'mc.premium.yearly',      appStoreId: 'mc.premium.yearly',      name: 'Premium Yearly',      type: 'subscription',    tier: 'premium' },
+  // Legacy separate Practice add-on (existing sandbox buyers only)
   { id: 'mc.practice.monthly',    appStoreId: 'mc.practice.monthly',    name: 'Coach Practice Monthly', type: 'subscription', tier: 'practice' },
   { id: 'mc.registered.yearly.v2', appStoreId: 'mc.registered.yearly.v2', name: 'Registered Annual',   type: 'subscription',    tier: 'registered' },
   // Legacy: bestehende Lifetime-Käufer (mc.registered.yearly war als IAP reserviert, daher .v2)

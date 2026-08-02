@@ -83,7 +83,8 @@ User (PaywallView)                    Backend                         PayPal API
 | Premium 1 Monat | `ACCESS_PASS_1M` | tbd | Webhook | 30 Tage Premium |
 | Premium 3 Monate | `ACCESS_PASS_3M` | tbd | Webhook | 90 Tage Premium |
 | Premium 1 Jahr | `ACCESS_PASS_1Y` | tbd | Webhook | 365 Tage Premium |
-| Coach Practice 1 Monat | `PRACTICE_PASS_1M` | €6,90 | Direct Checkout | 30 Tage Practice (Premium erforderlich) |
+| Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | €14,90 | Direct Checkout | 30 Tage Premium + Coach Practice |
+| ~~Coach Practice 1 Monat~~ *(Legacy)* | `PRACTICE_PASS_1M` | €6,90 | — | Nicht mehr im Katalog |
 | Kenji Coach | `KENJI_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
 | Chloe Coach | `CHLOE_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
 

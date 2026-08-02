@@ -413,7 +413,7 @@ interface CoachPracticeHeroProps {
 
 const practiceLockMessageKey = (reason?: PracticeAccessReason) => {
   if (reason === 'premium_required') return 'botSelection_practice_premium_required';
-  if (reason === 'practice_required') return 'botSelection_practice_addon_required';
+  if (reason === 'practice_required') return 'botSelection_practice_premium_plus_required';
   return 'botSelection_client_required';
 };
 
