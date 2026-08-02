@@ -23,6 +23,8 @@ interface ProductsResponse {
   isLifetime: boolean;
   isPremium: boolean;
   premiumExpiresAt: string | null;
+  hasPracticeAccess?: boolean;
+  practiceExpiresAt?: string | null;
   ownedBots: string[];
   products: Product[];
 }
@@ -171,6 +173,14 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   const renderProductCard = (product: Product) => {
     const hasDiscount = product.finalPrice < product.price;
     const isPurchasing = purchasingId === product.id;
+    const premiumCredit =
+      product.discountReasons.includes('premium_upgrade') ? product.price - product.finalPrice : 0;
+    const formatEuro = (amount: number) =>
+      language === 'de'
+        ? `${amount.toFixed(2).replace('.', ',')} €`
+        : `€${amount.toFixed(2)}`;
+    const upgradePeriodEnd = new Date();
+    upgradePeriodEnd.setDate(upgradePeriodEnd.getDate() + 30);
 
     return (
       <div key={product.id} className="bg-background-secondary border border-border-primary rounded-lg p-4 sm:p-5 space-y-3">
@@ -203,7 +213,30 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
                 {t('upgrade_bot_credit_badge')}
               </span>
             )}
+            {product.discountReasons.includes('premium_upgrade') && (
+              <span className="text-xs px-2 py-0.5 bg-status-success-background text-status-success-foreground rounded-full">
+                {t('upgrade_premium_upgrade_badge')}
+              </span>
+            )}
           </div>
+        )}
+
+        {premiumCredit > 0 && (
+          <p className="text-xs text-content-subtle leading-relaxed">
+            {data?.premiumExpiresAt
+              ? t('upgrade_premium_upgrade_detail', {
+                  credit: formatEuro(premiumCredit),
+                  date: upgradePeriodEnd.toLocaleDateString(
+                    language === 'de' ? 'de-DE' : 'en-US',
+                  ),
+                })
+              : t('upgrade_premium_upgrade_detail_lifetime', {
+                  credit: formatEuro(premiumCredit),
+                  date: upgradePeriodEnd.toLocaleDateString(
+                    language === 'de' ? 'de-DE' : 'en-US',
+                  ),
+                })}
+          </p>
         )}
 
         {isPurchasing && (
@@ -269,7 +302,11 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       {premiumPlusProducts.length > 0 && !isNativeIOS() && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_premium_plus_section')}</h2>
-          <p className="text-sm text-content-subtle mb-4">{t('upgrade_premium_plus_description')}</p>
+          <p className="text-sm text-content-subtle mb-4">
+            {data?.isPremium && !data?.hasPracticeAccess
+              ? t('upgrade_premium_plus_upgrade_hint')
+              : t('upgrade_premium_plus_description')}
+          </p>
           <div className="space-y-4">{premiumPlusProducts.map(renderProductCard)}</div>
         </section>
       )}
