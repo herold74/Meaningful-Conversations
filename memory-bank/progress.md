@@ -212,7 +212,8 @@
 - [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
 - [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (iOS)
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
-- [x] **Premium Trial:** 9-day trial for new registrations
+- [x] **Premium Trial:** 9-day trial for new registrations (includes Coach Practice during trial)
+- [x] **Premium+ (2026-08-02):** Single subscription bundles Premium + Coach Practice (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`); Practice add-on legacy-only; staging Build 8
 - [x] **iOS In-App Purchase (StoreKit 2):**
     - [x] Backend receipt validation (`/api/apple-iap/verify-receipt`, `restore`)
     - [x] Apple Server Notifications v2 (`/api/apple-iap/notification`)

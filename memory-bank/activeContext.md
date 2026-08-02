@@ -3,13 +3,18 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-07-29**, Build **6**, v2.5.0 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deployed **2026-08-02**, Build **8**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Premium+ paywall)
 **Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH)
 
 **Production deploy gate:** **Closed** — Production 2.5.0 + App Store 2.5.0 aligned (2026-07-30 deploy, 2026-08-01 Store release).
 
-## Recent Changes (2026-08-01 — App Store 2.5.0 live)
+## Recent Changes (2026-08-02 — Premium+ Option A + staging Build 8)
+
+- **Commit `8630576`:** Premium+ tier (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`) — Premium + Coach Practice in one subscription; Practice add-on legacy-only in catalog
+- **Commit `35a472d`:** chore build 8 sync (deploy script)
+- **Staging:** v2.5.0 Build **8** — frontend + backend; health OK; verified Build 8 in bundle
+- **Next (manual):** ASC `mc.premium_plus.monthly` Level 1; RevenueCat import; production deploy after ASC/iOS ready
 
 - **App Store Connect:** Version **2.5.0 (6)** veröffentlicht
 - **Production:** mc-app still **2.5.0 Build 6**, health OK
