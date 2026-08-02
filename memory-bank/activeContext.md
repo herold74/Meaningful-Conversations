@@ -3,21 +3,21 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-08-02**, Build **8**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Premium+ paywall)
+**Staging:** Deployed **2026-08-02**, Build **10**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Premium+ + upgrade credit on web paywall)
 **Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH)
+**Xcode:** `npm run build && npx cap sync ios` done — **Build 10**, production API (`mc-app.manualmode.at`); ready to Archive
 
 **Production deploy gate:** **Closed** — Production 2.5.0 + App Store 2.5.0 aligned (2026-07-30 deploy, 2026-08-01 Store release).
 
+## Recent Changes (2026-08-02 — Staging Build 10 + Premium upgrade pricing)
+
+- **Commit `0af848b`:** Premium→Premium+ web upgrade pricing (Option 2 credit + 30-day period + UI explanation)
+- **Commits `4235b29`, `4bb447c`:** chore build 9/10 sync (interrupted deploy resumed)
+- **Staging:** v2.5.0 Build **10** — frontend + backend deployed; health OK; upgrade credit live on mc-beta
+- **Next (manual):** ASC ManualMode rename + `mc.premium_plus.monthly`; Xcode Archive Build 10; production after App Store
+
 ## Recent Changes (2026-08-02 — Premium+ Option A + staging Build 8)
-
-- **Commit `8630576`:** Premium+ tier (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`) — Premium + Coach Practice in one subscription; Practice add-on legacy-only in catalog
-- **Commit `35a472d`:** chore build 8 sync (deploy script)
-- **Staging:** v2.5.0 Build **8** — frontend + backend; health OK; verified Build 8 in bundle
-- **Next (manual):** ASC `mc.premium_plus.monthly` Level 1; RevenueCat import; production deploy after ASC/iOS ready
-
-- **App Store Connect:** Version **2.5.0 (6)** veröffentlicht
-- **Production:** mc-app still **2.5.0 Build 6**, health OK
 
 ## Recent Changes (2026-07-30 — Production 2.5.0 deploy)
 
