@@ -6,6 +6,10 @@ const auth = require('../middleware/auth');
 const { purchaseLimiter } = require('../middleware/rateLimiter');
 const { sendPurchaseEmail, sendAdminNotification, generateInvoiceNumber, sendInvoiceEmail } = require('../services/mailService');
 const { isPremiumActive } = require('../utils/practiceAccess.js');
+const {
+  computePremiumPlusUpgradePrice,
+  buildPremiumPlusUpgradeUpdate,
+} = require('../utils/premiumPlusUpgradePricing.js');
 
 // --- Product Catalog ---
 
@@ -159,6 +163,15 @@ function calculatePrice(user, productId) {
     }
   }
 
+  if (product.category === 'premium_plus') {
+    const upgradePricing = computePremiumPlusUpgradePrice(user, product);
+    if (upgradePricing) {
+      price = upgradePricing.price;
+      originalPrice = upgradePricing.originalPrice;
+      discountReasons = [...discountReasons, ...upgradePricing.discountReasons];
+    }
+  }
+
   price = Math.round(price * 100) / 100;
 
   return { price, originalPrice, discountReasons };
@@ -288,13 +301,18 @@ async function applyProductEffect(userId, productId) {
     botIdForCode = productId;
   } else if (product.category === 'premium_plus') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    const premiumDates = applyPremiumSubscriptionDates(user, product.days);
-    updateData = {
-      ...updateData,
-      ...premiumDates,
-      hasPracticeAccess: true,
-      practiceExpiresAt: premiumDates.premiumExpiresAt,
-    };
+    const upgradeUpdate = buildPremiumPlusUpgradeUpdate(user, product);
+    if (upgradeUpdate) {
+      updateData = { ...updateData, ...upgradeUpdate };
+    } else {
+      const premiumDates = applyPremiumSubscriptionDates(user, product.days);
+      updateData = {
+        ...updateData,
+        ...premiumDates,
+        hasPracticeAccess: true,
+        practiceExpiresAt: premiumDates.premiumExpiresAt,
+      };
+    }
     botIdForCode = productId;
   } else if (product.category === 'practice') {
     const user = await prisma.user.findUnique({ where: { id: userId } });
