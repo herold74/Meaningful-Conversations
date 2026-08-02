@@ -1,112 +1,72 @@
-# Coach Practice Add-on — Setup Checklist
+# Premium+ & Coach Practice — Setup Checklist
 
-**Product:** Coach Practice monthly subscription (Premium add-on)  
-**Web (PayPal):** `PRACTICE_PASS_1M` — €6,90/month  
-**iOS (IAP):** `mc.practice.monthly` — €6,99/month  
-**Last updated:** 2026-07-31
+**Product model (Option A):** Two Premium tiers, one subscription for Coach Practice.
 
-## Access model (implemented in code)
+| Tier | Web (PayPal) | iOS (IAP) | Coach Practice |
+|------|--------------|-----------|----------------|
+| **Premium** | `ACCESS_PASS_1M` etc. — €9,90 | `mc.premium.monthly` — €9,99 | ❌ |
+| **Premium+** | `ACCESS_PASS_PLUS_1M` — €14,90 | `mc.premium_plus.monthly` — €14,99 | ✅ |
 
-- **Requires active Premium** (except Client / Admin / Developer).
-- **9-day registration trial:** Practice included until trial ends (8 methods; no client-only methods).
-- **Client-only practice methods:** Rob, Victor, Bekky, Dan — require `isClient` (or staff).
+**Legacy:** Separate Practice add-on (`PRACTICE_PASS_1M` / `mc.practice.monthly`) — webhook/sandbox only, **not** in paywall catalog.
 
----
-
-## 1. Database migration (Staging → Production)
-
-Run **before** or **immediately after** backend deploy with the new code:
-
-```bash
-# Staging
-ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx prisma migrate deploy'
-
-# Production (only after staging verified + explicit approval)
-ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-production npx prisma migrate deploy'
-```
-
-Migration: `20260731140000_add_practice_access` (`hasPracticeAccess`, `practiceExpiresAt`).
-
-Verify:
-
-```bash
-ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx prisma migrate status'
-```
+**Last updated:** 2026-08-01
 
 ---
 
-## 2. App Store Connect — IAP
+## Access model
 
-1. **Subscriptions** → **+** Subscription Group: **Coach Practice** (separate from “Meaningful Conversations Access”).
-2. Add subscription:
-   - **Product ID:** `mc.practice.monthly` (exact match — backend mapping depends on this)
-   - **Duration:** 1 month
-   - **Price:** €6,99 (Germany)
-   - **Display name (DE):** Coach Practice Monats-Pass  
-   - **Display name (EN):** Coach Practice Monthly  
-   - **Description:** Requires active Premium; AI coachee for deliberate practice.
-3. Submit for review with the next app version (or attach to current version if ASC allows).
-4. **Local Xcode testing:** `ios/App/App/MC.storekit` includes `mc.practice.monthly` in group `mc_practice_group`.  
-   - Xcode → **Product → Scheme → Edit Scheme → Run → Options → StoreKit Configuration:** `MC.storekit`
+- **Premium+** sets `isPremium`, `premiumExpiresAt`, `hasPracticeAccess`, `practiceExpiresAt` to the **same expiry** — one renewal, one cancellation.
+- **Premium** (without +) sets premium fields only.
+- **9-day trial:** Practice included (same as Premium+ during trial).
+- **Client-only methods:** Rob, Victor, Bekky, Dan — still require `isClient`.
 
 ---
 
-## 3. RevenueCat
+## 1. App Store Connect
 
-1. [RevenueCat Dashboard](https://app.revenuecat.com) → Project → **Products** → add `mc.practice.monthly` (App Store).
-2. **Entitlements:** Create entitlement `practice` (optional but recommended) and attach the product.
-3. **Offerings:** Add `mc.practice.monthly` to the current offering (e.g. `default`) so `Purchases.getOfferings()` returns it on iOS.
-4. Backend sync (`POST /apple-iap/sync-from-revenuecat`) uses `mapAppleProduct()` — no extra RC webhook required for MVP if sync-on-login/paywall is used.
+In subscription group **Meaningful Conversations Access** (same group as Premium):
 
----
+| Level | Product ID | Price | Effect |
+|-------|------------|-------|--------|
+| **1** (new, highest) | `mc.premium_plus.monthly` | €14,99 | Premium + Coach Practice |
+| 2 | `mc.premium.yearly` | … | Premium only |
+| 3 | `mc.premium.monthly` | €9,99 | Premium only |
+| … | Registered … | … | … |
 
-## 4. PayPal (Web — in-app Upgrade view)
+**Do not** create a separate „Coach Practice“ subscription group for new sales.
 
-**No separate Jimdo button required** for in-app checkout: PayPal Smart Buttons are rendered dynamically when the user has **active Premium** and calls `GET /api/purchase/products`.
-
-| Internal ID | PayPal `custom_id` / order `productId` | Price | Effect |
-|-------------|------------------------------------------|-------|--------|
-| `PRACTICE_PASS_1M` | `PRACTICE_PASS_1M` | €6,90 | `hasPracticeAccess` +30 days |
-
-### In-app flow (already wired)
-
-1. User opens **Upgrade** (Web, not iOS native).
-2. Backend returns `PRACTICE_PASS_1M` only if `isPremium` active and no active practice pass.
-3. PayPal Smart Button → `POST /api/purchase/create-order` with `{ productId: "PRACTICE_PASS_1M" }` → capture → user updated.
-
-### Optional: external PayPal link (Jimdo / website)
-
-If you sell Practice outside the app:
-
-1. PayPal button **Custom ID:** `PRACTICE_PASS_1M`
-2. Amount: **€6,90 EUR**
-3. Webhook `PAYMENT.CAPTURE.COMPLETED` → existing `/api/purchase/webhook` maps via `PRODUCT_MAPPING`.
+Local StoreKit: `ios/App/App/MC.storekit` — `mc.premium_plus.monthly` at group level 1.
 
 ---
 
-## 5. Xcode prepare (after code pull)
+## 2. RevenueCat
+
+1. Import **`mc.premium_plus.monthly`** from App Store Connect.
+2. Entitlement **`premium_plus`** (or attach to existing `premium` + grant practice server-side — preferred: dedicated product sync via backend).
+3. Add to **`default`** offering (alongside `mc.premium.monthly`).
+4. Backend maps `mc.premium_plus.monthly` → `ACCESS_PASS_PLUS_1M` in `appleIAPService.js`.
+
+---
+
+## 3. PayPal (Web)
+
+| Internal ID | Price | Effect |
+|-------------|-------|--------|
+| `ACCESS_PASS_PLUS_1M` | €14,90 | Premium + Practice, same expiry |
+
+Upgrade view shows **Premium+** section first, then **Premium** (without practice).
+
+---
+
+## 4. Xcode
 
 ```bash
 npm run build && npx cap sync ios
-# or staging API: npm run sync:ios-staging
 ```
 
-Open `ios/App/App.xcodeproj` → scheme **App** → confirm StoreKit config **MC.storekit**.
+Scheme **App** → StoreKit Configuration: **MC.storekit**
 
-Test on **real iPhone** (not Simulator) with Sandbox account:
-
-1. Premium active (trial or subscription).
-2. Paywall shows **Coach Practice Monthly**.
-3. Purchase → `hasPracticeAccess` true in API user payload.
-
----
-
-## 6. Staging smoke test
-
-1. Register new user → activate → login within trial → **Coaching üben** unlocked (not client methods).
-2. Premium user **without** trial → Practice hero shows “Coach Practice Add-on”.
-3. PayPal purchase `PRACTICE_PASS_1M` (Premium test user) → practice unlocked.
-4. Client user → all 12 methods in practice catalog.
+Sandbox test: purchase Premium+ → `hasPracticeAccess` true, same date as `premiumExpiresAt`.
 
 ---
 
@@ -116,7 +76,6 @@ Test on **real iPhone** (not Simulator) with Sandbox account:
 |------|------|
 | Access logic | `meaningful-conversations-backend/utils/practiceAccess.js` |
 | PayPal catalog | `meaningful-conversations-backend/routes/purchase.js` |
-| Apple IAP map | `meaningful-conversations-backend/services/appleIAPService.js` |
+| Apple IAP | `meaningful-conversations-backend/services/appleIAPService.js` |
 | iOS products | `services/purchaseService.ts` |
-| StoreKit local | `ios/App/App/MC.storekit` |
 | User matrix | `DOCUMENTATION/USER-ACCESS-MATRIX.md` |

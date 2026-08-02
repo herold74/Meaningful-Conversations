@@ -21,19 +21,14 @@ Use this skill when working on native iOS purchases, the paywall, subscription m
 Subscriptions in one group with descending value — Level 1 = highest service (Apple handles upgrade/downgrade):
 
 | Level | Product ID | Price (iOS) | Web Price | Tier |
-|-------|-----------|-------------|-----------|------|
-| 1 | `mc.premium.yearly` | 79,99 EUR/yr | 79,90 EUR/yr | Premium |
-| 2 | `mc.premium.monthly` | 9,99 EUR/mo | 9,90 EUR/mo | Premium |
-| 3 | `mc.registered.yearly.v2` | 14,99 EUR/yr | 14,90 EUR/yr | Registered |
-| 4 | `mc.registered.monthly` | 3,99 EUR/mo | 3,90 EUR/mo | Registered |
+|-------|------------|-------------|-----------|------|
+| 1 | `mc.premium_plus.monthly` | 14,99 EUR/mo | 14,90 EUR/mo | Premium+ (Premium + Coach Practice) |
+| 2 | `mc.premium.yearly` | 79,99 EUR/yr | 79,90 EUR/yr | Premium |
+| 3 | `mc.premium.monthly` | 9,99 EUR/mo | 9,90 EUR/mo | Premium |
+| 4 | `mc.registered.yearly.v2` | 14,99 EUR/yr | 14,90 EUR/yr | Registered |
+| 5 | `mc.registered.monthly` | 3,99 EUR/mo | 3,90 EUR/mo | Registered |
 
-### Subscription Group: "Coach Practice" (Premium add-on)
-
-Requires active Premium. Separate from base Premium subscription.
-
-| Product ID | Price (iOS) | Web Price | Tier |
-|-----------|-------------|-----------|------|
-| `mc.practice.monthly` | 6,99 EUR/mo | 6,90 EUR/mo | Practice |
+**Legacy (do not sell to new users):** `mc.practice.monthly` — separate Practice add-on; webhook/sandbox only.
 
 ### Non-Consumable Purchases
 
@@ -183,8 +178,9 @@ Handles Apple Server-to-Server Notifications v2:
 | `mc.registered.monthly` | `REGISTERED_1M`, Registered tier, `accessExpiresAt` +30d |
 | `mc.registered.yearly.v2` | `REGISTERED_1Y`, Registered tier, `accessExpiresAt` +365d |
 | `mc.premium.monthly` | `ACCESS_PASS_1M`, `isPremium`, `accessExpiresAt` +30d |
+| `mc.premium_plus.monthly` | `ACCESS_PASS_PLUS_1M`, `isPremium` + `hasPracticeAccess`, same expiry +30d |
 | `mc.premium.yearly` | `ACCESS_PASS_1Y`, `isPremium`, `accessExpiresAt` +365d |
 | `mc.registered.lifetime` | Legacy only — `REGISTERED_LIFETIME`, permanent (existing buyers) |
 | `mc.coach.kenji` | `kenji-resilience` added to `unlockedCoaches` |
 | `mc.coach.chloe` | `chloe-structured-reflection` added to `unlockedCoaches` |
-| `mc.practice.monthly` | `PRACTICE_PASS_1M`, `hasPracticeAccess`, `practiceExpiresAt` +30d (requires Premium) |
+| `mc.practice.monthly` | *(Legacy)* `PRACTICE_PASS_1M` — webhook/sandbox only, not in paywall |

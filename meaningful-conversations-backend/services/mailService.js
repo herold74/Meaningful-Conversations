@@ -368,6 +368,7 @@ const getProductName = (botId) => {
     'ACCESS_PASS_1M': { de: 'Premium 1-Monats-Pass', en: 'Premium 1-Month Pass' },
     'ACCESS_PASS_3M': { de: 'Premium 3-Monats-Pass', en: 'Premium 3-Month Pass' },
     'ACCESS_PASS_1Y': { de: 'Premium 1-Jahres-Pass', en: 'Premium 1-Year Pass' },
+    'ACCESS_PASS_PLUS_1M': { de: 'Premium+ Monats-Pass', en: 'Premium+ Monthly Pass' },
     'PRACTICE_PASS_1M': { de: 'Coach Practice Monats-Pass', en: 'Coach Practice Monthly Pass' },
     'kenji-resilience': { de: 'Kenji - Stoischer Coach', en: 'Kenji - Stoic Coach' },
     'chloe-structured-reflection': { de: 'Chloe - Reflektions-Coach', en: 'Chloe - Reflection Coach' }

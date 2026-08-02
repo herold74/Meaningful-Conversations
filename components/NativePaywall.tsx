@@ -104,14 +104,17 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         const iap = products.find(p => p.identifier === product.identifier)?.iapProduct;
         const days = product.identifier.includes('yearly') || product.identifier.includes('yearly.v2') ? 365 : product.identifier.includes('lifetime') ? null : 30;
         const expiresAt = days != null ? new Date(Date.now() + days * 86400000).toISOString() : null;
-        if (iap?.tier === 'premium') {
+        if (iap?.tier === 'premium' || iap?.tier === 'premium_plus') {
           patched.isPremium = true;
           patched.premiumExpiresAt = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
-          // Preserve Registered fallback: only advance accessExpiresAt if premium expires later
           const currentAccess = patched.accessExpiresAt ? new Date(patched.accessExpiresAt) : null;
           const newExpiry = new Date(patched.premiumExpiresAt);
           if (!currentAccess || currentAccess < newExpiry) {
             patched.accessExpiresAt = patched.premiumExpiresAt;
+          }
+          if (iap?.tier === 'premium_plus') {
+            patched.hasPracticeAccess = true;
+            patched.practiceExpiresAt = patched.premiumExpiresAt;
           }
         } else if (iap?.tier === 'registered') {
           patched.accessExpiresAt = expiresAt ?? undefined;
