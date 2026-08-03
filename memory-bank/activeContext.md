@@ -6,7 +6,7 @@
 **Staging:** Deployed **2026-08-03**, Build **11**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Apple subscription merge + Premium+ iOS paywall note)
 **Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH)
-**Xcode:** Rebuild needed for **Build 11** — `npm run build && npx cap sync ios` with `VITE_REVENUECAT_IOS_KEY`; RevenueCat `default` offering includes `premium_plus_monthly`
+**Xcode:** **Build 11** synced — `npm run build` + `cap sync ios` with RevenueCat key; production API `mc-app.manualmode.at`; ready to Archive
 
 **Production deploy gate:** **Closed** — Production 2.5.0 + App Store 2.5.0 aligned (2026-07-30 deploy, 2026-08-01 Store release).
 
