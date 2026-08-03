@@ -3,12 +3,21 @@
 ## Current Status
 **Version:** 2.5.0
 **Branch:** `main`
-**Staging:** Deployed **2026-08-02**, Build **10**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Premium+ + upgrade credit on web paywall)
+**Staging:** Deployed **2026-08-03**, Build **11**, v2.5.0 — https://mc-beta.manualmode.at (health OK; Apple subscription merge + Premium+ iOS paywall note)
 **Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH)
-**Xcode:** `npm run build && npx cap sync ios` done — **Build 10**, production API (`mc-app.manualmode.at`); ready to Archive
+**Xcode:** Rebuild needed for **Build 11** — `npm run build && npx cap sync ios` with `VITE_REVENUECAT_IOS_KEY`; RevenueCat `default` offering includes `premium_plus_monthly`
 
 **Production deploy gate:** **Closed** — Production 2.5.0 + App Store 2.5.0 aligned (2026-07-30 deploy, 2026-08-01 Store release).
+
+## Recent Changes (2026-08-03 — Apple subscription merge + staging Build 11)
+
+- **Commit `f796845`:** `appleSubscriptionMerge.js` — max(active) expiry for RC sync; iOS Premium+ upgrade note in `NativePaywall`
+- **Commit `e5031b6`:** TS fix for paywall expiry patch
+- **Commit `e695dc2`:** chore build 11 sync (deploy script)
+- **RevenueCat:** `mc.premium_plus.monthly` in `default` offering (`premium_plus_monthly` package) — user confirmed
+- **Staging:** v2.5.0 Build **11** deployed; backend merge logic live
+- **Next (manual):** iOS Archive Build 11 + Sandbox paywall test; ASC Premium+ review; production after App Store
 
 ## Recent Changes (2026-08-02 — Staging Build 10 + Premium upgrade pricing)
 
