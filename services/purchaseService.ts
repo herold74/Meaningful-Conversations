@@ -24,6 +24,12 @@ export const IAP_PRODUCTS: IAPProduct[] = [
   { id: 'mc.coach.chloe',         appStoreId: 'mc.coach.chloe',         name: 'Chloe Coach',         type: 'non_consumable',  tier: 'bot' },
 ];
 
+/** Legacy IAP — restore/verify only; never show in paywall (matches web /api/purchase/products). */
+const PAYWALL_EXCLUDED_APP_STORE_IDS = new Set([
+  'mc.registered.lifetime',
+  'mc.practice.monthly',
+]);
+
 export interface StoreProduct {
   identifier: string;
   localizedTitle: string;
@@ -189,6 +195,7 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
 
     for (const pkg of current.availablePackages || []) {
       const storeProduct = pkg.product;
+      if (PAYWALL_EXCLUDED_APP_STORE_IDS.has(storeProduct.identifier)) continue;
       const iapProduct = IAP_PRODUCTS.find(p => p.appStoreId === storeProduct.identifier);
       if (!iapProduct) continue;
 
@@ -212,6 +219,9 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
 export async function purchaseProduct(productId: string): Promise<PurchaseResult> {
   const ready = await ensureRevenueCatConfigured();
   if (!ready) return { success: false, error: 'Store not available' };
+  if (PAYWALL_EXCLUDED_APP_STORE_IDS.has(productId)) {
+    return { success: false, error: 'Product not available' };
+  }
 
   try {
     const offerings = await Purchases.getOfferings();
