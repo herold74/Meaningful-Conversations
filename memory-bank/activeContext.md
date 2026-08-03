@@ -3,20 +3,27 @@
 ## Current Status
 **Version:** 2.5.1
 **Branch:** `main`
-**Staging:** Deployed **2026-08-03**, Build **1**, v2.5.1 — https://mc-beta.manualmode.at (health OK; App Store submission prep)
-**Production:** Deployed **2026-07-30**, Build **6**, v2.5.0 — https://mc-app.manualmode.at (health OK; staging images pulled)
-**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) ready to Archive** for Premium+ / ManualMode submission
-**Xcode:** **Build 1** synced — `npm run build` + `cap sync ios` with `REVENUECAT_IOS_KEY` from `.env.production`; production API `mc-app.manualmode.at`
+**Staging:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-beta.manualmode.at (health OK)
+**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging)
+**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
+**Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **4** after staging redeploys (do not re-Archive unless needed)
 
-**Production deploy gate:** **Open for 2.5.1** — Do not deploy backend/frontend 2.5.1 to production until iOS 2.5.1 is live in App Store.
+**Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review.
+
+## Recent Changes (2026-08-03 — Staging + Production v2.5.1 Build 4)
+
+- **ASC:** iOS 2.5.1 (1) submitted for review; Premium+ (`mc.premium_plus.monthly`) Waiting for Review
+- **Commit `65033da`:** chore build 4 sync (staging deploy auto-commit)
+- **Staging:** v2.5.1 Build **4** deployed (`-c app`); health OK; `sw.js` `v2.5.1-b4`
+- **Production:** v2.5.1 pulled from registry (no rebuild); health OK; `sw.js` `v2.5.1-b4`
+- **Next (manual):** Wait for App Store approval; optional EN subscription-group localization
 
 ## Recent Changes (2026-08-03 — v2.5.1 App Store submission prep)
 
 - **Commit `0a4a3fd`:** Release v2.5.1 — review account script (`setup-app-store-review-account.js`), APP-STORE-METADATA (ManualMode, Premium+, review notes)
 - **Commit `55de8c6`:** chore build 1 sync (staging deploy auto-commit)
 - **Staging:** v2.5.1 Build **1** deployed (`-c app` frontend+backend); health OK
-- **Xcode:** Production API build + `cap sync ios` OK — **2.5.1 (1)** ready to Archive
-- **Next (manual):** Xcode Archive → App Store Connect; ASC metadata from `APP-STORE-METADATA.md`; production deploy after App Store approval
+- **Xcode:** Production API build + `cap sync ios` OK — **2.5.1 (1)** archived and submitted
 
 ## Recent Changes (2026-08-03 — Apple subscription merge + staging Build 11)
 
