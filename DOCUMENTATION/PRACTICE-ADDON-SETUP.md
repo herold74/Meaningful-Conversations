@@ -68,6 +68,17 @@ Scheme **App** → StoreKit Configuration: **MC.storekit**
 
 Sandbox test: purchase Premium+ → `hasPracticeAccess` true, same date as `premiumExpiresAt`.
 
+### ASC review screenshot (Premium+)
+
+Apple requires a screenshot on the subscription’s **Review Information** page. If the iPhone paywall shows *„In-App-Käufe sind derzeit nicht verfügbar“*, RevenueCat returned zero products — fix configuration, not user tier:
+
+1. Import `mc.premium_plus.monthly` in RevenueCat → add to **default** offering (keep existing packages).
+2. Rebuild iOS with `VITE_REVENUECAT_IOS_KEY` in `.env.local`, then `npm run build && npx cap sync ios`.
+3. Run on a **real device** (not Simulator for RevenueCat). Optional: scheme **App** now uses **MC.storekit** for local StoreKit runs.
+4. Sandbox tester (Settings → App Store → Sandbox Account) → Upgrade screen → screenshot Premium+ card.
+
+Web paywall on staging (`mc-beta.manualmode.at`) can supplement review notes but ASC prefers in-app subscription UI when possible.
+
 ---
 
 ## Related files

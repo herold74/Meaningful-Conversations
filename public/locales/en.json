@@ -668,6 +668,7 @@
   "iap_load_error": "Could not load products. Please try again later.",
   "iap_period_month": "month",
   "iap_period_year": "year",
+  "iap_premium_plus_apple_upgrade_note": "Note: Apple will credit your existing Premium subscription (e.g. yearly) and replace it with Premium+ monthly when you upgrade.",
   "paywall_redeem_button": "Redeem Code",
   "paywall_logout_button": "Logout",
   "menu_upgrade": "Upgrade",
