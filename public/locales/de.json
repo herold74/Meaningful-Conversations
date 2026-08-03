@@ -668,6 +668,7 @@
   "iap_load_error": "Produkte konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
   "iap_period_month": "Monat",
   "iap_period_year": "Jahr",
+  "iap_premium_plus_apple_upgrade_note": "Hinweis: Apple rechnet ein bestehendes Premium-Abo (z. B. Jahres-Pass) beim Wechsel auf Premium+ anteilig ab und ersetzt es durch Premium+ monatlich.",
   "paywall_redeem_button": "Code einlösen",
   "paywall_logout_button": "Abmelden",
   "menu_upgrade": "Upgrade",

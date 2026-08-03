@@ -10,6 +10,10 @@ const {
   mapNotificationType,
   getAppleConfig,
 } = require('../services/appleIAPService');
+const {
+  mergeSubscriptionIntoUser,
+  buildUpdateFromActiveSubscriptions,
+} = require('../utils/appleSubscriptionMerge');
 
 // POST /api/apple-iap/verify-receipt
 // Called by the iOS app after a successful StoreKit 2 purchase
@@ -266,20 +270,14 @@ async function syncUserFromRevenueCat(userId) {
   let currentUser = user;
   let updated = false;
 
-  for (const [productId, sub] of Object.entries(subscriptions)) {
-    const mapping = mapAppleProduct(productId);
-    if (!mapping) continue;
-    const expiresDate = sub.expires_date ? new Date(sub.expires_date) : null;
-    if (expiresDate && expiresDate > new Date()) {
-      const transactionInfo = { productId, expiresDate: expiresDate.toISOString() };
-      const updateData = buildUserUpdate(mapping, transactionInfo, currentUser);
-      await prisma.user.update({
-        where: { id: userId },
-        data: { ...updateData, purchasePlatform: 'ios' },
-      });
-      currentUser = await prisma.user.findUnique({ where: { id: userId } });
-      updated = true;
-    }
+  const subUpdate = buildUpdateFromActiveSubscriptions(currentUser, subscriptions);
+  if (subUpdate) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { ...subUpdate, purchasePlatform: 'ios' },
+    });
+    currentUser = await prisma.user.findUnique({ where: { id: userId } });
+    updated = true;
   }
 
   for (const [productId, items] of Object.entries(nonSubs)) {
@@ -401,41 +399,15 @@ router.post('/restore', auth, async (req, res) => {
 function buildUserUpdate(productMapping, transactionInfo, user) {
   const updateData = { updatedAt: new Date() };
 
+  if (productMapping.type === 'subscription') {
+    const expiresAt = transactionInfo.expiresDate
+      ? new Date(transactionInfo.expiresDate)
+      : new Date(Date.now() + productMapping.days * 86400000);
+    return mergeSubscriptionIntoUser(user, productMapping, expiresAt);
+  }
+
   if (productMapping.tier === 'registered' && productMapping.type === 'non_consumable') {
     updateData.accessExpiresAt = null; // Lifetime
-  } else if (productMapping.tier === 'registered' && productMapping.type === 'subscription') {
-    const expiresAt = transactionInfo.expiresDate
-      ? new Date(transactionInfo.expiresDate)
-      : new Date(Date.now() + productMapping.days * 86400000);
-    updateData.accessExpiresAt = expiresAt;
-  } else if (productMapping.tier === 'premium') {
-    const expiresAt = transactionInfo.expiresDate
-      ? new Date(transactionInfo.expiresDate)
-      : new Date(Date.now() + productMapping.days * 86400000);
-    updateData.isPremium = true;
-    updateData.premiumExpiresAt = expiresAt;
-    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
-    if (!currentAccess || currentAccess < expiresAt) {
-      updateData.accessExpiresAt = expiresAt;
-    }
-  } else if (productMapping.tier === 'premium_plus') {
-    const expiresAt = transactionInfo.expiresDate
-      ? new Date(transactionInfo.expiresDate)
-      : new Date(Date.now() + productMapping.days * 86400000);
-    updateData.isPremium = true;
-    updateData.premiumExpiresAt = expiresAt;
-    updateData.hasPracticeAccess = true;
-    updateData.practiceExpiresAt = expiresAt;
-    const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
-    if (!currentAccess || currentAccess < expiresAt) {
-      updateData.accessExpiresAt = expiresAt;
-    }
-  } else if (productMapping.tier === 'practice') {
-    const expiresAt = transactionInfo.expiresDate
-      ? new Date(transactionInfo.expiresDate)
-      : new Date(Date.now() + productMapping.days * 86400000);
-    updateData.hasPracticeAccess = true;
-    updateData.practiceExpiresAt = expiresAt;
   } else if (productMapping.tier === 'bot') {
     const unlocked = user.unlockedCoaches ? JSON.parse(user.unlockedCoaches) : [];
     if (!unlocked.includes(productMapping.botId)) {
