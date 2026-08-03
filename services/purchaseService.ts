@@ -47,6 +47,25 @@ export function sortPaywallProducts(products: StoreProduct[]): StoreProduct[] {
   );
 }
 
+/** Map RevenueCat / StoreKit English errors to locale keys (caller passes `t`). */
+export function localizeIapError(
+  raw: string | undefined,
+  t: (key: string) => string,
+): string {
+  if (!raw) return t('paywall_payment_error');
+  const lower = raw.toLowerCase();
+  if (lower.includes('app store') || lower.includes('storekit') || lower.includes('store problem')) {
+    return t('iap_error_app_store');
+  }
+  if (lower.includes('not available') || lower.includes('unable to purchase') || lower.includes('cannot purchase')) {
+    return t('iap_error_product_unavailable');
+  }
+  if (lower.includes('cancel')) return t('paywall_payment_error');
+  // SDK messages are English-only — do not pass through on localized UI
+  if (/[a-zA-Z]/.test(raw)) return t('paywall_payment_error');
+  return raw;
+}
+
 export interface StoreProduct {
   identifier: string;
   localizedTitle: string;

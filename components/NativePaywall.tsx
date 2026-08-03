@@ -6,6 +6,7 @@ import {
   purchaseProduct,
   restorePurchases,
   logInRevenueCat,
+  localizeIapError,
   sortPaywallProducts,
   StoreProduct,
 } from '../services/purchaseService';
@@ -152,7 +153,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     } else if (result.error === 'cancelled') {
       // User cancelled — no error message
     } else {
-      setError(result.error || t('paywall_payment_error'));
+      setError(localizeIapError(result.error, t));
     }
 
     setPurchasingId(null);
@@ -208,7 +209,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         setTimeout(() => window.location.reload(), 1500);
       }
     } else if (result.error) {
-      setError(result.error);
+      setError(localizeIapError(result.error, t));
     } else {
       setError(t('iap_restore_none'));
     }
