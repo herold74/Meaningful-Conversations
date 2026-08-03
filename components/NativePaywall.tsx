@@ -114,9 +114,9 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               ? newPremiumExp
               : patched.premiumExpiresAt;
           const currentAccess = patched.accessExpiresAt ? new Date(patched.accessExpiresAt) : null;
-          const newExpiry = new Date(patched.premiumExpiresAt);
+          const newExpiry = new Date(patched.premiumExpiresAt ?? newPremiumExp);
           if (!currentAccess || currentAccess < newExpiry) {
-            patched.accessExpiresAt = patched.premiumExpiresAt;
+            patched.accessExpiresAt = patched.premiumExpiresAt ?? newPremiumExp;
           }
           if (iap?.tier === 'premium_plus') {
             patched.hasPracticeAccess = true;
