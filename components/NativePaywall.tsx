@@ -106,7 +106,13 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         const expiresAt = days != null ? new Date(Date.now() + days * 86400000).toISOString() : null;
         if (iap?.tier === 'premium' || iap?.tier === 'premium_plus') {
           patched.isPremium = true;
-          patched.premiumExpiresAt = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
+          const newPremiumExp = expiresAt ?? new Date(Date.now() + 365 * 86400000).toISOString();
+          const existingPremium = patched.premiumExpiresAt ? new Date(patched.premiumExpiresAt) : null;
+          const newPremiumDate = new Date(newPremiumExp);
+          patched.premiumExpiresAt =
+            !existingPremium || newPremiumDate > existingPremium
+              ? newPremiumExp
+              : patched.premiumExpiresAt;
           const currentAccess = patched.accessExpiresAt ? new Date(patched.accessExpiresAt) : null;
           const newExpiry = new Date(patched.premiumExpiresAt);
           if (!currentAccess || currentAccess < newExpiry) {
@@ -114,7 +120,11 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
           }
           if (iap?.tier === 'premium_plus') {
             patched.hasPracticeAccess = true;
-            patched.practiceExpiresAt = patched.premiumExpiresAt;
+            const existingPractice = patched.practiceExpiresAt ? new Date(patched.practiceExpiresAt) : null;
+            patched.practiceExpiresAt =
+              !existingPractice || newPremiumDate > existingPractice
+                ? newPremiumExp
+                : patched.practiceExpiresAt;
           }
         } else if (iap?.tier === 'registered') {
           patched.accessExpiresAt = expiresAt ?? undefined;
@@ -209,6 +219,11 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
   const nonConsumables = products.filter(p => p.iapProduct.type === 'non_consumable');
   const botUnlocks = showBotUnlocks ? nonConsumables.filter(p => p.iapProduct.tier === 'bot') : [];
   const accessPasses = nonConsumables.filter(p => p.iapProduct.tier !== 'bot');
+  const hasPremiumPlusOffer = subscriptions.some(p => p.identifier === 'mc.premium_plus.monthly');
+  const showPremiumPlusAppleNote =
+    !!currentUser?.isPremium &&
+    !currentUser?.hasPracticeAccess &&
+    hasPremiumPlusOffer;
 
   if (isLoading) {
     return (
@@ -267,6 +282,9 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               purchasing={purchasingId === product.identifier}
               isActive={activeProductIds.has(product.identifier)}
               onPurchase={() => handlePurchase(product)}
+              showAppleUpgradeNote={
+                showPremiumPlusAppleNote && product.identifier === 'mc.premium_plus.monthly'
+              }
               t={t}
             />
           ))}
@@ -334,11 +352,19 @@ interface ProductCardProps {
   product: StoreProduct;
   purchasing: boolean;
   isActive?: boolean;
+  showAppleUpgradeNote?: boolean;
   onPurchase: () => void;
   t: (key: string) => string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive, onPurchase, t }) => {
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  purchasing,
+  isActive,
+  showAppleUpgradeNote,
+  onPurchase,
+  t,
+}) => {
   const isSubscription = product.iapProduct.type === 'subscription';
   const periodLabel = product.identifier.includes('yearly')
     ? t('iap_period_year')
@@ -361,6 +387,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, purchasing, isActive
           {product.localizedDescription && (
             <p className="text-xs text-content-subtle mt-0.5">
               {product.localizedDescription}
+            </p>
+          )}
+          {showAppleUpgradeNote && (
+            <p className="text-xs text-status-warning-foreground mt-1.5 leading-relaxed">
+              {t('iap_premium_plus_apple_upgrade_note')}
             </p>
           )}
         </div>

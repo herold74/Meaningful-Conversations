@@ -45,7 +45,7 @@
 - [x] IAP products submitted for review (must match RevenueCat config)
 - [x] Subscription group: pricing tiers confirmed (Level 1: **Premium+ Monthly**, 2: Premium Yearly, 3: Premium Monthly, 4: Registered Annual, 5: Registered Monthly)
 - [ ] **`mc.premium_plus.monthly`** (€14,99/mo) in existing Access group — see `PRACTICE-ADDON-SETUP.md`
-- [ ] RevenueCat: import product + add to default offering
+- [ ] RevenueCat: import product + add to default offering (**required for iOS paywall — empty offering shows „In-App-Käufe nicht verfügbar“**)
 - [ ] StoreKit config `MC.storekit` synced (local Xcode testing) — Premium+ at level 1; no separate Practice group for new sales
 - [x] `mc.registered.yearly.v2` (Auto-Renewable, 14,99 €/Jahr) — genehmigt 2026-04-29, in Production verifiziert
 - [x] `mc.registered.lifetime` auf Removed gesetzt (neue Käufe deaktiviert; Legacy-Käufer weiterhin unterstützt)
