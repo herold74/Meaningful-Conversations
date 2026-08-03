@@ -55,8 +55,8 @@ Verschiedene KI-Coaches mit eigenem Stil stehen Ihnen zur Verfügung — von mot
 IHR LEBENSKONTEXT
 Erstellen Sie eine strukturierte Datei mit Ihren Zielen, Werten und Herausforderungen — per Fragebogen, im Interview mit Gloria oder durch freie Bearbeitung im integrierten Editor. Nach jeder Sitzung schlägt Ihr Coach gezielte Aktualisierungen vor.
 
-COACHING ÜBEN (CLIENT)
-Üben Sie Coaching-Gespräche mit KI-Coachees — wählen Sie Methode und Szenario, führen Sie das Gespräch und erhalten Sie strukturiertes Feedback zu Ihrer Gesprächsführung. Ideal für angehende Coaches in der Ausbildung.
+COACHING ÜBEN (PREMIUM+)
+Üben Sie Coaching-Gespräche mit KI-Coachees — Methode und Szenario wählen, Gespräch führen, strukturiertes Feedback erhalten. Enthalten in Premium+ und in der 9-Tage-Testphase. Client-exklusive Übungsmethoden (z. B. Rob, Victor) erfordern zusätzlich Client-Zugang.
 
 PERSÖNLICHKEITSPROFIL
 Ermitteln Sie Ihr Big-Five-Persönlichkeitsprofil (OCEAN) und geben Sie Ihren Coaches damit ein tieferes Verständnis für Ihren Kommunikationsstil. Premium-Nutzer erhalten zusätzlich Riemann-Thomann- und Spiral-Dynamics-Analysen.
@@ -101,8 +101,8 @@ Multiple AI coaches with distinct styles — from motivating and curious to stra
 YOUR LIFE CONTEXT
 Build a structured file of goals, values, and challenges — via questionnaire, Gloria Interview, or the built-in editor. After each session, your coach suggests targeted updates.
 
-COACH PRACTICE (CLIENT)
-Practice coaching conversations with AI coachees — pick method and scenario, run the session, and receive structured feedback on your coaching skills. Ideal for aspiring coaches in training.
+COACH PRACTICE (PREMIUM+)
+Practice coaching conversations with AI coachees — choose method and scenario, run the session, receive structured feedback. Included with Premium+ and during the 9-day trial. Client-only practice methods (e.g. Rob, Victor) require Client access in addition.
 
 PERSONALITY PROFILE
 Complete your Big Five (OCEAN) profile so coaches understand your communication style. Premium users also get Riemann-Thomann and Spiral Dynamics analyses.
@@ -175,31 +175,74 @@ https://mc-app.manualmode.at/privacy
 
 ## Review Notes (für Apple Reviewer, Englisch)
 
-### Test Account
-- Email: premium@manualmode.at
-- Password: **not stored in this repo** — enter the current demo password in [App Store Connect](https://appstoreconnect.apple.com) → App → App Review Information → Sign-in required. Keep the same value in your private password manager when rotating.
+**Copy into App Store Connect → App Review Information → Notes** (adjust password placeholder).
 
-### Demo Instructions
-1. Open the app. The Welcome screen appears with language selection — choose "Deutsch" or "English".
-2. Tap "Anmelden" / "Log in", then enter the test account email and the demo password from App Store Connect.
-3. After login, the Intent Picker screen appears ("Was möchten Sie heute erreichen?" / "What would you like to achieve today?"). Select "Coaching" to proceed.
-4. The Coach Selection screen opens with the Coaching section highlighted. Select "Ava".
-5. The coaching session begins. Type a message about a career change. The coach responds with personalized questions based on Sarah's pre-loaded Life Context.
-6. To test Voice Mode: Tap the waveform icon (top right of chat header). Microphone permission is required on first use.
-7. To end the session: Tap "SITZUNG BEENDEN" / "End Session". The app generates a Session Review with summary, next steps, and proposed Life Context updates.
-8. Return to the Landing Page. Tap "LEBENSKONTEXT-DATEI EDITIEREN" / "Edit Life Context File" to open the Markdown editor.
-9. Personality Profile: Hamburger menu (☰) → "Persönlichkeitsprofil" / "Personality Profile" (test account has OCEAN completed).
-10. Hamburger menu: User Guide, Data Export, About, Disclaimer with account deletion.
+### Test Account
+- Email: `premium@manualmode.at`
+- Password: *(same as in Sign-In required field — not stored in repo)*
+- **Access tier:** Premium+ (Premium + Coach Practice until expiry set on server). Not a Client account — standard practice methods only; Rob/Victor require Client.
+
+**Production setup (once per review cycle, after deploy):**
+```bash
+ssh root@<YOUR_SERVER_IP>
+podman exec meaningful-conversations-backend-production node scripts/setup-app-store-review-account.js
+```
+Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account.js` — sets `isPremium`, `hasPracticeAccess`, same expiry (~2 years), `isClient=false`.
+
+### Demo Instructions (English)
+
+1. Open the app. On the Welcome screen, choose **Deutsch** or **English**.
+2. Tap **Log in** / **Anmelden**. Sign in with the test account above.
+3. **Intent picker:** Select **"Structure thoughts & master challenges"** / **„Gedanken strukturieren & Herausforderungen meistern“** (Coaching).
+4. **Coach selection:** Default tab **Coaches** — tap **Ava** to test a standard coaching session. Send a message about a career change; responses use Sarah’s pre-loaded Life Context.
+5. **Voice mode (optional):** In chat, tap the waveform icon (microphone permission on first use).
+6. **End session:** Tap **End Session** / **SITZUNG BEENDEN** → Session Review with summary and Life Context update suggestions.
+7. **Coach Practice (Premium+):** Back to coach selection. Toggle tab **Coach Practice** / **Coaching üben** (graduation cap). Tap **Start practice** / **Übung starten**. Pick a method (e.g. GROW), scenario, and difficulty → run the conversation as coach → receive structured evaluation at the end.
+8. **Life Context:** Landing page → **Edit Life Context File** / **LEBENSKONTEXT-DATEI EDITIEREN**.
+9. **Personality profile:** Menu (☰) → **Personality Profile** (OCEAN pre-filled on test account).
+10. **In-App Purchases:** Menu → **About** → **Upgrade**. Premium+ subscription `mc.premium_plus.monthly` is listed. Sandbox purchase optional; test account already has Premium+ access.
+11. **Account deletion:** Menu → **Disclaimer** → delete account flow (do not delete the review account during testing).
 
 ### Notes for Reviewer
-- **Store name (upcoming):** ManualMode. **In-app / legacy listing name:** MyCoach AI until metadata update in App Store Connect.
-- Primary language: German. Full English via language toggle on the Welcome screen.
-- Voice Mode requires microphone permission (prompted on first use).
-- Active internet connection required for AI responses.
-- Guest Mode works without an account. Test account has pre-loaded Life Context and OCEAN profile.
-- In-App Purchases: hamburger menu → "Über diese App" / "About". Test account has Premium access.
+- **Store listing name:** ManualMode (previously MyCoach AI). In-app display name is already **ManualMode**.
+- **Premium+** (`mc.premium_plus.monthly`): bundles Premium and Coach Practice in one subscription.
+- Primary app language: German. Full English via language toggle on Welcome screen.
+- Internet required for AI. Guest mode available without account.
+- Voice mode requires microphone permission.
 
 ---
+
+## Was ist neu — App Store Connect (v2.5.1, Build 1)
+
+**In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (U.S.)** unter „Was ist neu in dieser Version“ einfügen.
+
+### Deutsch
+
+```
+ManualMode: Neuer App-Name im App Store — passend zum Namen auf dem Home-Bildschirm.
+
+Premium+: Neues Abo mit Coaching üben inklusive — ein Abo, ein Verlängerungstermin (In-App-Kauf und Web).
+
+Coaching üben: Übungsszenarien mit KI-Coachees, strukturiertes Feedback und Verlauf — in Premium+ und in der 9-Tage-Testphase enthalten.
+
+Weitere Verbesserungen: Überarbeitete Upgrade-Paywall, klarere Abo-Reihenfolge, Stabilität und Datenschutz-Hinweise.
+```
+
+### English (U.S.)
+
+```
+ManualMode: New App Store name — matches the name on the home screen.
+
+Premium+: New subscription including Coach Practice — one subscription, one renewal date (in-app and web).
+
+Coach Practice: Practice scenarios with AI coachees, structured feedback, and history — included in Premium+ and the 9-day trial.
+
+Other improvements: Refined upgrade paywall, clearer subscription order, stability and privacy updates.
+```
+
+---
+
+## What's New — v2.5.0 (legacy draft, superseded by v2.5.1 block above)
 
 ## Privacy Policy
 
@@ -241,9 +284,11 @@ Privacy & transparency: Updated privacy policy with clearer information on in-ap
 
 Other improvements: Refined UI on smaller screens, bug fixes, and general stability improvements.
 
-### Review Notes — Ergänzung v2.5.0 (Englisch, optional)
+*(Use the **Was ist neu — v2.5.1, Build 1** section above for the current App Store submission.)*
 
-Version 2.5.0 adds Coach Practice Lab (Client tier). To test: after login, use the Practice / „Üben“ / "Coach Practice" entry (requires Client access on the test account).
+### Review Notes — Ergänzung v2.5.0 (veraltet)
+
+~~Version 2.5.0 adds Coach Practice Lab (Client tier).~~ → Test account now has **Premium+**; see Review Notes section above.
 
 ### iOS Build vor Einreichung (Production-API)
 
@@ -273,7 +318,7 @@ node scripts/capture-app-store-screenshots.mjs --lang all
 node scripts/capture-app-store-screenshots.mjs --lang en --device iphone
 ```
 
-Output: `screenshots/app-store-v2.5.0/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+Output: `screenshots/app-store-v2.5.1/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
 
 ---
 
