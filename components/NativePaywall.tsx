@@ -6,6 +6,7 @@ import {
   purchaseProduct,
   restorePurchases,
   logInRevenueCat,
+  sortPaywallProducts,
   StoreProduct,
 } from '../services/purchaseService';
 import { User } from '../types';
@@ -215,11 +216,19 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     setRestoring(false);
   };
 
-  const subscriptions = products.filter(p => p.iapProduct.type === 'subscription');
-  const nonConsumables = products.filter(p => p.iapProduct.type === 'non_consumable');
-  const botUnlocks = showBotUnlocks ? nonConsumables.filter(p => p.iapProduct.tier === 'bot') : [];
-  const accessPasses = nonConsumables.filter(p => p.iapProduct.tier !== 'bot');
-  const hasPremiumPlusOffer = subscriptions.some(p => p.identifier === 'mc.premium_plus.monthly');
+  const registeredProducts = sortPaywallProducts(
+    products.filter(p => p.iapProduct.tier === 'registered'),
+  );
+  const botUnlocks = sortPaywallProducts(
+    showBotUnlocks ? products.filter(p => p.iapProduct.tier === 'bot') : [],
+  );
+  const premiumProducts = sortPaywallProducts(
+    products.filter(p => p.iapProduct.tier === 'premium'),
+  );
+  const premiumPlusProducts = sortPaywallProducts(
+    products.filter(p => p.iapProduct.tier === 'premium_plus'),
+  );
+  const hasPremiumPlusOffer = premiumPlusProducts.some(p => p.identifier === 'mc.premium_plus.monthly');
   const showPremiumPlusAppleNote =
     !!currentUser?.isPremium &&
     !currentUser?.hasPracticeAccess &&
@@ -269,35 +278,13 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         </div>
       )}
 
-      {/* Subscriptions */}
-      {subscriptions.length > 0 && (
+      {/* Registered */}
+      {registeredProducts.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
-            {t('iap_section_subscriptions')}
+            {t('upgrade_access_section')}
           </h3>
-          {subscriptions.map(product => (
-            <ProductCard
-              key={product.identifier}
-              product={product}
-              purchasing={purchasingId === product.identifier}
-              isActive={activeProductIds.has(product.identifier)}
-              onPurchase={() => handlePurchase(product)}
-              showAppleUpgradeNote={
-                showPremiumPlusAppleNote && product.identifier === 'mc.premium_plus.monthly'
-              }
-              t={t}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* One-time access passes */}
-      {accessPasses.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
-            {t('iap_section_lifetime')}
-          </h3>
-          {accessPasses.map(product => (
+          {registeredProducts.map(product => (
             <ProductCard
               key={product.identifier}
               product={product}
@@ -310,7 +297,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
         </div>
       )}
 
-      {/* Bot unlocks */}
+      {/* Coach unlocks */}
       {botUnlocks.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
@@ -323,6 +310,55 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
               purchasing={purchasingId === product.identifier}
               isActive={activeProductIds.has(product.identifier)}
               onPurchase={() => handlePurchase(product)}
+              t={t}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Premium (without Coach Practice) */}
+      {premiumProducts.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
+            {t('upgrade_premium_section')}
+          </h3>
+          <p className="text-xs text-content-subtle px-1">
+            {t('upgrade_premium_without_practice_description')}
+          </p>
+          {premiumProducts.map(product => (
+            <ProductCard
+              key={product.identifier}
+              product={product}
+              purchasing={purchasingId === product.identifier}
+              isActive={activeProductIds.has(product.identifier)}
+              onPurchase={() => handlePurchase(product)}
+              t={t}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Premium+ */}
+      {premiumPlusProducts.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-content-subtle tracking-wide">
+            {t('upgrade_premium_plus_section')}
+          </h3>
+          <p className="text-xs text-content-subtle px-1">
+            {showPremiumPlusAppleNote
+              ? t('upgrade_premium_plus_upgrade_hint')
+              : t('upgrade_premium_plus_description')}
+          </p>
+          {premiumPlusProducts.map(product => (
+            <ProductCard
+              key={product.identifier}
+              product={product}
+              purchasing={purchasingId === product.identifier}
+              isActive={activeProductIds.has(product.identifier)}
+              onPurchase={() => handlePurchase(product)}
+              showAppleUpgradeNote={
+                showPremiumPlusAppleNote && product.identifier === 'mc.premium_plus.monthly'
+              }
               t={t}
             />
           ))}
