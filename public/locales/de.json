@@ -669,6 +669,8 @@
   "iap_period_month": "Monat",
   "iap_period_year": "Jahr",
   "iap_premium_plus_apple_upgrade_note": "Hinweis: Apple rechnet ein bestehendes Premium-Abo (z. B. Jahres-Pass) beim Wechsel auf Premium+ anteilig ab und ersetzt es durch Premium+ monatlich.",
+  "iap_error_app_store": "Der App Store konnte den Kauf gerade nicht abschließen. Bitte versuchen Sie es später erneut oder prüfen Sie Ihr Sandbox-Konto unter Einstellungen → App Store.",
+  "iap_error_product_unavailable": "Dieses Produkt ist im App Store derzeit nicht kaufbar (z. B. noch in Prüfung).",
   "paywall_redeem_button": "Code einlösen",
   "paywall_logout_button": "Abmelden",
   "menu_upgrade": "Upgrade",
