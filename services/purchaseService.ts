@@ -30,6 +30,23 @@ const PAYWALL_EXCLUDED_APP_STORE_IDS = new Set([
   'mc.practice.monthly',
 ]);
 
+/** Display order: Registered → coaches → Premium → Premium+ */
+const PAYWALL_PRODUCT_ORDER: Record<string, number> = {
+  'mc.registered.monthly': 100,
+  'mc.registered.yearly.v2': 110,
+  'mc.coach.chloe': 200,
+  'mc.coach.kenji': 210,
+  'mc.premium.monthly': 300,
+  'mc.premium.yearly': 310,
+  'mc.premium_plus.monthly': 400,
+};
+
+export function sortPaywallProducts(products: StoreProduct[]): StoreProduct[] {
+  return [...products].sort(
+    (a, b) => (PAYWALL_PRODUCT_ORDER[a.identifier] ?? 999) - (PAYWALL_PRODUCT_ORDER[b.identifier] ?? 999),
+  );
+}
+
 export interface StoreProduct {
   identifier: string;
   localizedTitle: string;
@@ -210,7 +227,7 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
       });
     }
 
-    return products;
+    return sortPaywallProducts(products);
   } catch {
     return [];
   }
