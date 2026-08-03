@@ -669,6 +669,8 @@
   "iap_period_month": "month",
   "iap_period_year": "year",
   "iap_premium_plus_apple_upgrade_note": "Note: Apple will credit your existing Premium subscription (e.g. yearly) and replace it with Premium+ monthly when you upgrade.",
+  "iap_error_app_store": "The App Store could not complete the purchase. Please try again later or check your Sandbox account under Settings → App Store.",
+  "iap_error_product_unavailable": "This product is not available for purchase in the App Store yet (e.g. still in review).",
   "paywall_redeem_button": "Redeem Code",
   "paywall_logout_button": "Logout",
   "menu_upgrade": "Upgrade",
