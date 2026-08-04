@@ -5,7 +5,7 @@
 **Branch:** `main`
 **Staging:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; Phase 2 eval fix + framework display names)
 **Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; staging ahead on 2.5.4)
-**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
+**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (1) prep** for ASC re-submission (MARKETING_VERSION synced, production `cap sync ios` done)
 **Xcode:** Local BUILD_NUMBER **4** synced (`CURRENT_PROJECT_VERSION=4`); `npm run sync:ios-staging` OK — staging API build ready to Run/Archive
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.4 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
