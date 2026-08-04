@@ -38,6 +38,12 @@ describe('getFrameworkDisplayName', () => {
       'Forward-focused coaching',
     );
     expect(getFrameworkDisplayName('contracting', { language: 'de' })).toBe('Anliegensklärung');
+    expect(getFrameworkDisplayName('ambivalence-coaching', { language: 'de' })).toBe(
+      'Ambivalenz-Coaching',
+    );
+    expect(getFrameworkDisplayName('structured-reflection', { language: 'de' })).toBe(
+      'Strukturierte Reflexion',
+    );
   });
 
   it('resolves legacy alias before lookup', () => {

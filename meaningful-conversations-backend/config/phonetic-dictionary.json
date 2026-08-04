@@ -1,5 +1,5 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -249,6 +249,150 @@
           "phonetic": "klie-enten",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Sage",
+          "phonetic": "Seidsch",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch), nicht deutsch „Sage“ (Geschichte/Erzählung)"
+        },
+        {
+          "term": "GROW",
+          "phonetic": "Grou",
+          "caseSensitive": true,
+          "notes": "Legacy-Akronym für Vier-Phasen-Coaching"
+        },
+        {
+          "term": "grow",
+          "phonetic": "grou",
+          "caseSensitive": true,
+          "notes": "Legacy-Akronym kleingeschrieben"
+        },
+        {
+          "term": "Mental Fitness",
+          "phonetic": "Mentl Fitness",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Rob)"
+        },
+        {
+          "term": "Contracting",
+          "phonetic": "Kontrecting",
+          "caseSensitive": true,
+          "notes": "Coaching-Begriff"
+        },
+        {
+          "term": "contracting",
+          "phonetic": "kontrecting",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Saboteur",
+          "phonetic": "Sabötör",
+          "caseSensitive": true,
+          "notes": "Mental-Fitness-Begriff (PQ)"
+        },
+        {
+          "term": "saboteur",
+          "phonetic": "sabötör",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Jordan",
+          "phonetic": "Dschordn",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Taylor",
+          "phonetic": "Teilor",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Casey",
+          "phonetic": "Keisi",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Quinn",
+          "phonetic": "Kwin",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Jamie",
+          "phonetic": "Dscheimi",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Drew",
+          "phonetic": "Dru",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Reese",
+          "phonetic": "Riis",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Skyler",
+          "phonetic": "Schailor",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Finley",
+          "phonetic": "Finli",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Emery",
+          "phonetic": "Emeri",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Blair",
+          "phonetic": "Bléer",
+          "caseSensitive": true,
+          "notes": "Coachee-Vorname (englisch)"
+        },
+        {
+          "term": "Ambivalenz-Coaching",
+          "phonetic": "Ambivalents-Koutsching",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Mike)"
+        },
+        {
+          "term": "Vier-Phasen-Coaching",
+          "phonetic": "Fier-Fasen-Koutsching",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Gabrielle)"
+        },
+        {
+          "term": "Strukturierte Reflexion",
+          "phonetic": "Strukturerte Reflexion",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Chloe) — Betonung Reflexion"
+        },
+        {
+          "term": "Zukunftsorientiertes Coaching",
+          "phonetic": "Tsukunftsorientiertes Koutsching",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Sam)"
+        },
+        {
+          "term": "Gedanken-Audit",
+          "phonetic": "Gedanken-Auditt",
+          "caseSensitive": true,
+          "notes": "Coaching-Methode (Dan)"
         }
       ]
     },
