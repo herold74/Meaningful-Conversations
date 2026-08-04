@@ -3,16 +3,22 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **5**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b5`; method suggestion i18n + phonetic dictionary v1.0.5)
+**Staging:** Deployed **2026-08-04**, Build **6**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b6`; coach greeting locale fix + ASC iPhone screenshot set)
 **Production:** Deployed **2026-08-04**, Build **5**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b5`; pull-only from staging registry)
-**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (5) prep** for ASC re-submission (MARKETING_VERSION 2.5.4, production `cap sync ios` done 2026-08-04)
-**Xcode:** BUILD_NUMBER **5** synced (`CURRENT_PROJECT_VERSION=5`); Archive **2.5.4 (5)** pending ASC submit
+**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC prep — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production (2026-08-04). **ASC English localization:** **English (Canada)** — not English (U.S.).
+**Xcode:** BUILD_NUMBER **6** synced (`CURRENT_PROJECT_VERSION=6`, `MARKETING_VERSION=2.5.4`); production API — `npm run build && npx cap sync ios` OK; Archive **2.5.4 (6)** pending ASC submit
 
-**Uncommitted (local):** EN UI German greeting fix — `normalizeLanguage()`, chat/practice routes, ChatView init on locale change; ASC iPhone 8er-Set + script update
 
 **Production deploy gate:** **Open for 2.5.4** — Production web/backend matches staging Build 5 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-04 — Staging v2.5.4 Build 6)
+
+- **Commit `06b53ba`:** Fix coach greeting language mismatch (EN UI + German life context) — `utils/language.js`, chat/practice routes, `aiProviderService`, ChatView locale init; ASC iPhone screenshots + `prepare-asc-screenshots-from-assets.py`
+- **Commit `8be0877`:** chore build 6 sync (deploy script auto-commit)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — success (~9 min); TTS re-tag only; health OK; `sw.js` `v2.5.4-b6`
+- **iOS:** `npm run build && npx cap sync ios` (production API) — success; MARKETING_VERSION 2.5.4, CURRENT_PROJECT_VERSION 6
 
 ## Recent Changes (2026-08-04 — Production v2.5.4 Build 5 patch)
 
@@ -30,9 +36,13 @@
 
 - **Production deploy:** `./deploy-manualmode.sh -e production` — success (~64 s); pull-only (same images as staging); health OK; `sw.js` `v2.5.4-b4`
 - **Parity:** Staging + Production both on v2.5.4-b4
-- **Next (manual):** ASC 2.5.4 submit; after review starts run `setup-app-store-review-account.js` on production if review account needs refresh
+- **Next (manual):** ASC 2.5.4 submit; EN screenshots optional later per localization
 
-## Recent Changes (2026-08-04 — Staging v2.5.4 Build 4 patch)
+## Recent Changes (2026-08-04 — App Store review account Premium+)
+
+- **Production:** `setup-app-store-review-account.js` — `premium@manualmode.at` → `isPremium`, `hasPracticeAccess` until **2028-08-04**, `isClient=false`
+
+## Recent Changes (2026-08-04 — Staging v2.5.4 greeting fix + ASC screenshots)
 
 - **Commit `60ed7f5`:** Practice framework display names — shared `getFrameworkDisplayName` helper (history, progress, resume flows); contracting sentinel label key; backend `frameworks.js` capitalization (four-stage, forward-focused)
 - **Commit `0febd04`:** chore build 4 sync (deploy script auto-commit)
