@@ -3,23 +3,26 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; Phase 2 eval fix + framework display names)
-**Production:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; pull-only from staging registry)
-**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (1) prep** for ASC re-submission (MARKETING_VERSION synced, production `cap sync ios` done)
-**Xcode:** Local BUILD_NUMBER **4** synced (`CURRENT_PROJECT_VERSION=4`); Archive **2.5.4 (1)** pending ASC submit
+**Staging:** Deployed **2026-08-04**, Build **5**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b5`; method suggestion i18n + phonetic dictionary v1.0.5)
+**Production:** Deployed **2026-08-04**, Build **5**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b5`; pull-only from staging registry)
+**App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (5) prep** for ASC re-submission (MARKETING_VERSION 2.5.4, production `cap sync ios` done 2026-08-04)
+**Xcode:** BUILD_NUMBER **5** synced (`CURRENT_PROJECT_VERSION=5`); Archive **2.5.4 (5)** pending ASC submit
 
-**Production deploy gate:** **Open for 2.5.4** — Production web/backend now matches staging Build 4 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
+**Production deploy gate:** **Open for 2.5.4** — Production web/backend matches staging Build 5 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-**Uncommitted (local):** Method suggestion i18n fix + phonetic dictionary v1.0.5 — not yet on staging/production. Deploy staging after commit.
+## Recent Changes (2026-08-04 — Production v2.5.4 Build 5 patch)
 
-## Recent Changes (2026-08-04 — Method suggestion i18n + phonetic, uncommitted)
+- **Production deploy:** `./deploy-manualmode.sh -e production` — success (~59 s); pull-only (same images as staging); health OK; `sw.js` `v2.5.4-b5`
+- **Parity:** Staging + Production both on v2.5.4-b5 (backend digest `433c9dbc6db3`, frontend `cc087570009d`)
 
-- **Root cause:** Contracting eval LLM copied English `frameworkName` from catalog; UI rendered raw field while header used i18n
-- **Fix:** `getFrameworkDisplayName(frameworkId)` in `PracticeEvaluationReview` + `PracticeFollowUpReminderModal`; backend `normalizeMethodSuggestions` + localized `buildContractingFrameworkCatalog`
-- **Phonetic v1.0.5:** Sage→Seidsch, GROW→Grou, method labels (Ambivalenz-Coaching, …), coachee names (Blair, Jordan, …)
-- **Tests:** `practiceFrameworkLabels.test.ts` (7), `frameworkLabels.test.js` (4) — pass
+## Recent Changes (2026-08-04 — Staging v2.5.4 Build 5 patch)
+
+- **Commit `0138954`:** Fix German method suggestion labels + expand phonetic dictionary for TTS (UI `getFrameworkDisplayName`; backend `normalizeMethodSuggestions` + localized catalog; phonetic v1.0.5)
+- **Commit `95a86a7`:** chore build 5 sync (deploy script auto-commit)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — success (~10 min); TTS re-tag only; health OK; `sw.js` `v2.5.4-b5`
+- **iOS:** `npm run build && npx cap sync ios` (production API) — success; MARKETING_VERSION 2.5.4, CURRENT_PROJECT_VERSION 5
 
 ## Recent Changes (2026-08-04 — Production v2.5.4 Build 4)
 
