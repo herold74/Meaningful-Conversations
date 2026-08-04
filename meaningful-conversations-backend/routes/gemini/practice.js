@@ -498,6 +498,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     }
 
     evaluationResult.liveMode = sessionParams.liveMode;
+    evaluationResult.transcript = transcript;
     if (evaluationResult.calibration) {
       evaluationResult.calibration.evidenceRating = evaluationResult.overallScore;
     }
@@ -524,6 +525,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
           evaluationData: JSON.stringify({
             ...evaluationResult,
             liveMode: sessionParams.liveMode,
+            transcript,
           }),
           language: lang,
           selfRating: selfRating ?? null,

@@ -2232,6 +2232,7 @@
   "practice_development_title": "Entwicklungsbereiche",
   "practice_drills_title": "Empfohlene Übungen",
   "practice_done": "Fertig",
+  "practice_download_transcript": "Transkript herunterladen",
   "practice_evaluates_coach_callout": "Die Übung bewertet dich als Coach — wie gut du die gewählte Methode mit dem simulierten Coachee anwendest.",
   "practice_source_bot_callout": "Im normalen Chat nutzt {{bot}} dieselbe Methode aus Sicht des Coachees — hilfreich, um die Methode vor oder nach der Übung in Aktion zu sehen.",
   "practice_review_scoring_hint": "Der Gesamtscore priorisiert Methodentreue. Volle 10/10 Punkte erfordern starke Methodenanwendung (≥9) und einen stimmigen Session-Flow (Contracting, Eröffnung, Abschluss).",

@@ -578,6 +578,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       voiceId: (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null,
     };
 
+    // Streaming already handles TTS for this reply — block the initial-bot useEffect
+    // from calling speak() again (practice human-first path: history becomes [user, bot]).
+    hasSpokenFirstMessageRef.current = true;
+
     return true;
   }, [isTtsEnabled, selectedVoiceURI, ttsMode, isIOS, currentUser, stopTts]);
 
@@ -658,6 +662,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     if (!isTtsEnabled || !text.trim()) {
       return;
     }
+
+    hasSpokenFirstMessageRef.current = true;
 
     if (isSpeakingRef.current && !isRetry) {
       console.log('[TTS] Skipping speak() - already speaking');

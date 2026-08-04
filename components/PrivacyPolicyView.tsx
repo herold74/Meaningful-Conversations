@@ -227,7 +227,7 @@ Sie haben das Recht, Ihre Daten in einem maschinenlesbaren Format zu erhalten.
 - Ihre eingereichten Feedbacks
 - Von Ihnen eingelöste Upgrade-Codes
 - API-Nutzungsstatistiken (letzte 12 Monate)
-- Coach-Practice-Auswertungen und Transkript-Auswertungen (falls vorhanden)
+- Coach-Practice-Auswertungen (inkl. Gesprächstranskript, falls Sie die Auswertung abgeschlossen haben) und Transkript-Auswertungen (falls vorhanden)
 - Käufe und Abonnements (Produkt, Betrag, Plattform, Status)
 - Support-Anfragen (falls über Ihre E-Mail zugeordnet)
 
@@ -253,6 +253,7 @@ Unsere Anwendung verwendet **localStorage** und **sessionStorage** Ihres Browser
 - **Merken der E-Mail (optional):** Lokale Speicherung Ihrer E-Mail für schnelleren Login auf dem Gerät (nur wenn Sie „E-Mail merken“ aktivieren)
 - **Gastmodus:** Temporäre Speicherung Ihrer Lebenskontext-Datei und Chat-Daten (nur lokal, nicht auf Server)
 - **Coach Practice (Entwurf):** Temporäre Speicherung einer laufenden Übungssession im **sessionStorage** (nur in diesem Browser-Tab, maximal 24 Stunden). Enthält Gesprächsverlauf und Session-Konfiguration. Wird beim Schließen des Tabs, beim Verwerfen, beim Logout oder nach erfolgreicher Auswertung gelöscht. **Keine Übertragung an den Server**, bis Sie die Auswertung freiwillig abschließen.
+- **Coach Practice (abgeschlossen):** Nach freiwilliger Auswertung speichern wir die Bewertungsergebnisse und das **Gesprächstranskript** auf unserem Server, damit Sie es später herunterladen können. Gelöscht bei Kontolöschung.
 
 Diese Daten werden **ausschließlich lokal** in Ihrem Browser gespeichert und nicht an unsere Server übertragen. Sie können diese Daten jederzeit in Ihren Browser-Einstellungen löschen.
 
@@ -528,7 +529,7 @@ You have the right to receive your data in a machine-readable format.
 - Your submitted feedback
 - Upgrade codes you redeemed
 - API usage statistics (last 12 months)
-- Coach practice evaluations and transcript evaluations (if any)
+- Coach practice evaluations (including session transcript when you complete an evaluation) and transcript evaluations (if any)
 - Purchases and subscriptions (product, amount, platform, status)
 - Support requests linked to your email (if any)
 
@@ -554,6 +555,7 @@ Our application uses **localStorage** and **sessionStorage** of your browser for
 - **Remember email (optional):** Local storage of your email for faster login on this device (only if you enable “Remember email”)
 - **Guest mode:** Temporary storage of your Life Context file and chat data (local only, not on server)
 - **Coach Practice (draft):** Temporary storage of an in-progress practice session in **sessionStorage** (this browser tab only, max. 24 hours). Contains conversation history and session configuration. Deleted when you close the tab, discard the draft, log out, or complete the evaluation. **Not transmitted to the server** until you voluntarily finish the evaluation.
+- **Coach Practice (completed):** After you voluntarily finish an evaluation, we store the evaluation results and **session transcript** on our server so you can download them later. Deleted when you delete your account.
 
 This data is stored **exclusively locally** in your browser and is not transmitted to our servers. You can delete this data at any time in your browser settings.
 

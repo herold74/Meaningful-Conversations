@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
+import { downloadPracticeTranscript } from '../utils/practiceTranscriptDownload';
 
 interface PracticeEvaluationReviewProps {
   evaluation: PracticeEvaluationResult;
@@ -73,6 +74,20 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
   const isContracting = practiceMode === 'contracting';
   const isFreePlay = practiceMode === 'free-play';
+
+  const handleDownloadTranscript = async () => {
+    if (!evaluation.transcript?.trim()) return;
+    try {
+      await downloadPracticeTranscript(evaluation.transcript, {
+        frameworkName,
+        scenarioName,
+        difficultyLabel,
+        language,
+      });
+    } catch (err) {
+      console.error('Practice transcript download failed:', err);
+    }
+  };
 
   const scoringHint = isContracting
     ? t('practice_review_contracting_scoring_hint')
@@ -342,6 +357,15 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
+        {evaluation.transcript?.trim() && (
+          <button
+            type="button"
+            onClick={handleDownloadTranscript}
+            className="flex-1 py-3 rounded-lg btn-surface-outline font-semibold"
+          >
+            {t('practice_download_transcript')}
+          </button>
+        )}
         {isContracting && onContinuePhase2 && (
           <button
             type="button"
