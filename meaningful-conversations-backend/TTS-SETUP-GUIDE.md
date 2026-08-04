@@ -144,15 +144,21 @@ To add a new voice:
 
 Each bot automatically gets assigned an appropriate voice:
 
-| Bot ID | Language | Voice (DE) | Voice (EN) |
-|--------|----------|----------|----------|
-| gloria-life-context | Both | mls (F) | amy (F) |
-| ava-strategic | Both | mls (F) | amy (F) |
-| chloe-structured-reflection | Both | mls (F) | amy (F) |
-| max-ambitious | Both | thorsten (M) | ryan (M) |
-| rob | Both | thorsten (M, slow) | ryan (M, slow) |
-| kenji-resilience | Both | thorsten (M, slow) | ryan (M, slow) |
-| nexus-goal-path-solution | Both | thorsten (M, fast) | ryan (M, fast) |
+| Bot | Gender | Voice (DE) | Voice (EN) |
+|-----|--------|------------|------------|
+| Gloria (life-context / interview) | F | mls | amy |
+| Ava | F | mls | amy |
+| Chloe | F | mls | amy |
+| Gabrielle | F | mls | amy |
+| Sam | F | mls | amy |
+| Bekky | F | mls | amy |
+| Max | M | thorsten | ryan |
+| Rob | M | thorsten (slow) | ryan (slow) |
+| Kenji | M | thorsten (slow) | ryan (slow) |
+| Nobody | M | thorsten | ryan |
+| Mike | M | thorsten | ryan |
+| Victor | M | thorsten | ryan |
+| Dan | M | thorsten | ryan |
 
 ## Performance
 

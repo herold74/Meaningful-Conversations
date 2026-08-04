@@ -33,32 +33,17 @@ const VOICE_MODELS = {
  * @returns {object} - { model: string, gender: 'male'|'female' }
  */
 function getVoiceForBot(botId, language) {
-    let gender = 'female';
-    
-    // Bot-specific gender assignment (matches ChatView.tsx logic)
-    if (language === 'en') {
-        switch (botId) {
-            case 'gloria-life-context':
-            case 'ava-strategic':
-            case 'chloe-structured-reflection':
-                gender = 'female';
-                break;
-            case 'max-ambitious':
-            case 'rob':
-            case 'kenji-resilience':
-            case 'nexus-goal-path-solution':
-            case 'victor-systemic-coaching':
-                gender = 'male';
-                break;
-            default:
-                gender = 'male';
-        }
-    }
-    // For German, check if voice model exists for gender
-    else if (language === 'de') {
-        const femaleBotsDE = ['gloria-life-context', 'ava-strategic', 'chloe-structured-reflection'];
-        gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
-    }
+    // Canonical female coaches (must stay in sync with hooks/useTts.ts + ChatView.tsx)
+    const femaleBots = [
+        'gloria-life-context',
+        'gloria-interview',
+        'ava-strategic',
+        'chloe-structured-reflection',
+        'gabrielle-four-stage',
+        'sam-forward-focused',
+        'bekky-thought-audit',
+    ];
+    const gender = femaleBots.includes(botId) ? 'female' : 'male';
     
     const voiceModel = VOICE_MODELS[language]?.[gender];
     
