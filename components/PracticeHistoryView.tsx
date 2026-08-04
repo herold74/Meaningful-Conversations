@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationSummary } from '../types';
 import * as geminiService from '../services/geminiService';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 
 interface PracticeHistoryViewProps {
   onBack: () => void;
@@ -10,7 +11,7 @@ interface PracticeHistoryViewProps {
 }
 
 const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onProgress, onViewEvaluation }) => {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const [evaluations, setEvaluations] = useState<PracticeEvaluationSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +65,9 @@ const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onPro
           >
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="font-semibold text-content-primary truncate">{ev.frameworkId}</p>
+                <p className="font-semibold text-content-primary truncate">
+                  {getFrameworkDisplayName(ev.frameworkId, { t, language })}
+                </p>
                 <p className="text-sm text-content-secondary line-clamp-1">{ev.summary}</p>
                 <p className="text-xs text-content-secondary mt-1">
                   {new Date(ev.createdAt).toLocaleDateString()} · {ev.difficulty}

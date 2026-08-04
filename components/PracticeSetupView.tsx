@@ -263,7 +263,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
 
     onStart({
       frameworkId: 'contracting',
-      frameworkName: t('practice_entry_contracting'),
+      frameworkName: t('practice_framework_contracting'),
       scenarioId: contractingScenario.id,
       scenarioName: contractingScenario.coacheeName,
       coacheeName: contractingScenario.coacheeName,

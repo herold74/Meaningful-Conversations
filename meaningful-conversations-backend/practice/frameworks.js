@@ -343,7 +343,7 @@ const FRAMEWORKS = [
       { id: 'commitment', name: { en: 'Commitment', de: 'Commitment' }, description: { en: 'What will they commit to? When and how?', de: 'Wozu committen sie sich? Wann und wie?' } },
     ],
     complianceCriteria: [
-      { en: 'All four four-stage stages addressed in order (session aim → current state → possibilities → commitment)', de: 'Alle vier four-stage-Phasen in Reihenfolge (session aim → current state → possibilities → commitment)' },
+      { en: 'All four stages addressed in order (Session aim → Current state → Possibilities → Commitment)', de: 'Alle vier Phasen in Reihenfolge (Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment)' },
       { en: '"Mitgehen, mitgehen, führen" rhythm — follow the coachee before leading', de: '„Mitgehen, mitgehen, führen"-Rhythmus — dem Coachee folgen, bevor du führst' },
       { en: 'Options before Will; coachee-owned options, not coach advice', de: 'Options vor Will; vom Coachee getragene Optionen, keine Coach-Ratschläge' },
     ],
@@ -354,8 +354,8 @@ const FRAMEWORKS = [
     },
     explainer: {
       summary: {
-        en: 'four-stage model aligned with Gabrielle — Goal, Reality, Options, Will for classic coaching sessions.',
-        de: 'four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.',
+        en: 'Four-stage model aligned with Gabrielle — Goal, Reality, Options, Will for classic coaching sessions.',
+        de: 'Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.',
       },
       why: {
         en: 'Ideal for general coaching sessions where you need clear progression from topic to commitment.',
@@ -386,7 +386,7 @@ const FRAMEWORKS = [
       { id: 'scaling', name: { en: 'Scaling', de: 'Skalierung' }, description: { en: 'Rate progress 0–10; what would +1 look like?', de: 'Fortschritt 0–10; wie sähe +1 aus?' } },
     ],
     complianceCriteria: [
-      { en: 'forward-focused tradition order: brief session focus → preferred future → exceptions → scaling', de: 'forward-focused-Reihenfolge: kurzer Session-Fokus → gewünschte Zukunft → Ausnahmen → Skalierung' },
+      { en: 'Forward-focused tradition order: brief session focus → preferred future → exceptions → scaling', de: 'Forward-focused-Reihenfolge: kurzer Session-Fokus → gewünschte Zukunft → Ausnahmen → Skalierung' },
       { en: 'NO full 6-step contracting — keep focus brief', de: 'KEIN voller 6-Schritte-Contract — Fokus kurz halten' },
       { en: 'NO extended problem exploration ("mitgehen") before SF questions', de: 'KEINE ausgedehnte Problem-Erkundung („Mitgehen") vor SF-Fragen' },
       { en: 'Future-focused questions dominate; minimal problem dissection', de: 'Zukunftsorientierte Fragen dominieren; minimale Problemzerlegung' },
@@ -398,8 +398,8 @@ const FRAMEWORKS = [
     },
     explainer: {
       summary: {
-        en: 'Forward-focused Brief Coaching (forward-focused) aligned with Sam — preferred future, exceptions, scaling.',
-        de: 'Lösungsorientiertes Kurzcoaching (forward-focused) im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.',
+        en: 'Forward-focused brief coaching aligned with Sam — preferred future, exceptions, scaling.',
+        de: 'Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.',
       },
       why: {
         en: 'Use when the coachee is stuck in problem talk and needs a forward lens.',
