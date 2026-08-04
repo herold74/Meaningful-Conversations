@@ -980,7 +980,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                   value={input}
                   onChange={(e) => { if (e.target.value.length <= 5000) setInput(e.target.value); }}
                   onKeyDown={handleKeyDown}
-                  placeholder={coachPracticeConfig ? t('practice_chat_placeholder') : t('chat_placeholder')}
+                  placeholder={coachPracticeConfig && chatHistory.length === 0 ? t('practice_chat_placeholder') : t('chat_placeholder')}
                   disabled={isLoading}
                   maxLength={5000}
                   rows={1}
