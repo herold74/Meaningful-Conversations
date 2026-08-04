@@ -51,10 +51,14 @@ npx cap sync ios
 
 ### 2. Staging
 ```bash
-./deploy-manualmode.sh -e staging
+./deploy-manualmode.sh -e staging -c app
 ```
+**Default (no `-c` flag):** same as `-c app` — builds frontend + backend, **re-tags existing TTS** (no Piper rebuild).
+
+Use **`-c all`** only when `meaningful-conversations-backend/tts-service/` (or voice models) actually changed.
+
 - **macOS:** Preflights local Podman VM via `scripts/ensure-local-podman.sh` before building (see [macOS Podman VM](#-macos-podman-vm-before-local-builds-critical--2026-07-29))
-- Builds all 3 Docker images (backend, frontend, TTS)
+- Builds frontend + backend Docker images; TTS re-tag only (unless `-c all`)
 - Pushes to registry `regy.rhepds.com/gherold/meaningful-conversations` (see `DOCUMENTATION/GITLAB-REGISTRY-SETUP.md`)
 - Pulls on remote server, stops old containers, starts new ones
 - Copies `server-scripts/update-nginx-ips.sh` to `/usr/local/bin/` (and mirrors under `/opt/manualmode-staging` / `/opt/manualmode-production`), then updates nginx reverse proxy IPs
@@ -233,7 +237,7 @@ See `DOCUMENTATION/LOCAL-DEV-MIGRATIONS.md` for local migration workflow and tro
 # Staging FIRST
 ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx prisma migrate deploy'
 # Then deploy code
-./deploy-manualmode.sh -e staging
+./deploy-manualmode.sh -e staging -c app
 ```
 
 ### Step 3: Commit & Push
@@ -248,7 +252,7 @@ ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx 
 
 ### Step 5: Deploy to Staging
 - [ ] `./deploy-manualmode.sh -e staging -c app` (standard — skips TTS rebuild)
-- [ ] Or `./deploy-manualmode.sh -e staging` if TTS files changed
+- [ ] Or `./deploy-manualmode.sh -e staging -c all` if TTS files changed
 - [ ] **After version bump: MUST use `-c app` or `-c all`** — never `-c backend` or `-c frontend` alone
 - [ ] Wait for "Deployment Complete" and health check success
 
@@ -263,7 +267,7 @@ ssh root@$SERVER_HOST 'podman exec meaningful-conversations-backend-staging npx 
 
 Options:
   -e, --env ENV         staging (default) or production
-  -c, --component COMP  all (default), app, frontend, backend, or tts
+  -c, --component COMP  app (default), all, frontend, backend, or tts
   --server HOST         Remote server override
   -s, --skip-build      Skip building images
   -p, --skip-push       Skip pushing to registry

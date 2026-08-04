@@ -41,7 +41,7 @@ VERSION=$(grep -m1 '"version"' package.json | awk -F'"' '{print $4}')
 
 # Parse arguments
 ENVIRONMENT="staging"  # default to staging
-COMPONENT="all"        # default to deploy both
+COMPONENT="app"        # default: frontend+backend; re-tags TTS (no rebuild). Use -c all only when tts-service/ changed
 SKIP_BUILD=false
 SKIP_PUSH=false
 DRY_RUN=false
@@ -54,7 +54,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -e, --env ENV         Environment: staging (default) or production"
-    echo "  -c, --component COMP  Component: all (default), app, frontend, backend, or tts"
+    echo "  -c, --component COMP  Component: app (default), all, frontend, backend, or tts"
     echo "  --server HOST         Remote server (default: root@\$SERVER_HOST)"
     echo "  -s, --skip-build      Skip building images (use existing)"
     echo "  -p, --skip-push       Skip pushing to registry (deploy existing)"
@@ -63,10 +63,9 @@ show_help() {
     echo "  -h, --help            Show this help"
     echo ""
     echo "Examples:"
-    echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Build & deploy all to staging"
+    echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Build & deploy app to staging (re-tags TTS, no rebuild)"
+    echo "  ${BLUE}./deploy-manualmode.sh -c all${NC}             # Full rebuild incl. TTS (only when tts-service/ changed)"
     echo "  ${BLUE}./deploy-manualmode.sh -e production${NC}      # Deploy staging images to production (no rebuild)"
-    echo "  ${BLUE}./deploy-manualmode.sh -c app${NC}             # Build & deploy frontend+backend (no TTS)"
-  echo "  ${BLUE}./deploy-manualmode.sh -c frontend${NC}        # Build & deploy frontend to staging"
     echo "  ${BLUE}./deploy-manualmode.sh --server root@1.2.3.4${NC}  # Deploy to different server"
     echo ""
     echo "Production deploys skip building and pushing — they pull the pre-built"
