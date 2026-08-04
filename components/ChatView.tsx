@@ -123,12 +123,17 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       case 'gloria-interview':
       case 'ava-strategic':
       case 'chloe-structured-reflection':
+      case 'gabrielle-four-stage':
+      case 'sam-forward-focused':
       case 'bekky-thought-audit':
         return 'female';
       case 'max-ambitious':
       case 'rob':
       case 'kenji-resilience':
       case 'nexus-goal-path-solution':
+      case 'mike-ambivalence-coaching':
+      case 'victor-systemic-coaching':
+      case 'dan-client-language':
       default:
         return 'male';
     }

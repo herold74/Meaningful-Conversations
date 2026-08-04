@@ -103,13 +103,16 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       case 'ava-strategic':
       case 'chloe-structured-reflection':
       case 'gabrielle-four-stage':
+      case 'sam-forward-focused':
+      case 'bekky-thought-audit':
         return 'female';
       case 'max-ambitious':
       case 'rob':
       case 'kenji-resilience':
       case 'nexus-goal-path-solution':
-      case 'sam-forward-focused':
       case 'mike-ambivalence-coaching':
+      case 'victor-systemic-coaching':
+      case 'dan-client-language':
       default:
         return 'male';
     }
@@ -154,14 +157,16 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       console.log('[TTS Init] Checking voice availability:', { savedMode, savedVoiceId, savedIsAuto, isNativeiOS });
 
       const getBestServerVoice = (botId: string, lang: string): string | null => {
-        let gender: 'male' | 'female' = 'female';
-        if (lang === 'en') {
-          const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'sam-forward-focused', 'mike-ambivalence-coaching'];
-          gender = maleBotsEN.includes(botId) ? 'male' : 'female';
-        } else if (lang === 'de') {
-          const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection', 'gabrielle-four-stage'];
-          gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
-        }
+        const femaleBots = [
+          'gloria-life-context',
+          'gloria-interview',
+          'ava-strategic',
+          'chloe-structured-reflection',
+          'gabrielle-four-stage',
+          'sam-forward-focused',
+          'bekky-thought-audit',
+        ];
+        const gender: 'male' | 'female' = femaleBots.includes(botId) ? 'female' : 'male';
         if (lang === 'de') {
           return gender === 'female' ? null : 'de-thorsten';
         } else {
@@ -1094,35 +1099,20 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (!finalVoice) {
-      let gender: 'male' | 'female' = 'female';
-
-      if (language === 'de') {
-        gender = botGender;
-      } else {
+      // Rate tweaks for specific bots; gender always comes from botGender
+      if (language !== 'de') {
         switch (bot.id) {
-          case 'gloria-life-context':
-          case 'gloria-interview':
-          case 'ava-strategic':
-          case 'chloe-structured-reflection':
-            gender = 'female';
-            break;
           case 'max-ambitious':
           case 'rob':
-            gender = 'male';
             utterance.rate = 1.05;
             utterance.pitch = 1.0;
             break;
-          case 'kenji-resilience':
-          case 'nexus-goal-path-solution':
-            gender = 'male';
-            break;
           default:
-            gender = 'male';
             break;
         }
       }
 
-      finalVoice = selectVoice(voices, language, gender);
+      finalVoice = selectVoice(voices, language, botGender);
     }
 
     if (isMeditation && (bot.id === 'rob' || bot.id === 'kenji-resilience')) {
@@ -1279,15 +1269,16 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
         if (healthData.status === 'ok' && healthData.piperAvailable) {
           const getBestServerVoice = (botId: string, lang: string): string | null => {
-            let gender: 'male' | 'female' = 'female';
-
-            if (lang === 'en') {
-              const maleBotsEN = ['max-ambitious', 'rob', 'kenji-resilience', 'nexus-goal-path-solution', 'victor-systemic-coaching', 'sam-forward-focused', 'mike-ambivalence-coaching'];
-              gender = maleBotsEN.includes(botId) ? 'male' : 'female';
-            } else if (lang === 'de') {
-              const femaleBotsDE = ['gloria-life-context', 'gloria-interview', 'ava-strategic', 'chloe-structured-reflection', 'gabrielle-four-stage'];
-              gender = femaleBotsDE.includes(botId) ? 'female' : 'male';
-            }
+            const femaleBots = [
+              'gloria-life-context',
+              'gloria-interview',
+              'ava-strategic',
+              'chloe-structured-reflection',
+              'gabrielle-four-stage',
+              'sam-forward-focused',
+              'bekky-thought-audit',
+            ];
+            const gender: 'male' | 'female' = femaleBots.includes(botId) ? 'female' : 'male';
 
             if (lang === 'de') {
               return gender === 'male' ? 'de-thorsten' : null;
