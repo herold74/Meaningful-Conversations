@@ -180,12 +180,6 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
     return BOTS.find((b) => b.id === fw.sourceBotId)?.name || fw.sourceBotId;
   };
 
-  const applyRecommendedStart = () => {
-    if (!catalog?.defaultPair) return;
-    setFrameworkId(pickFrameworkId(catalog.frameworks, catalog.defaultPair.frameworkId));
-    setScenarioId(catalog.defaultPair.scenarioId);
-  };
-
   const selectFramework = (fw: PracticeFramework) => {
     if (fw.locked) return;
     setFrameworkId(fw.id);
@@ -382,16 +376,6 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
         )}
       </div>
 
-      {catalog.defaultPair && (
-        <button
-          type="button"
-          onClick={applyRecommendedStart}
-          className="mb-6 text-sm font-medium text-accent-primary hover:underline"
-        >
-          {t('practice_recommended_start')} (Four-stage · {catalog.scenarios.find((s) => s.id === catalog.defaultPair?.scenarioId)?.coacheeName ?? 'Alex'})
-        </button>
-      )}
-
       {/* Entry: concern clarification (blind contracting) */}
       <section className="mb-4 rounded-xl border border-accent-primary/30 overflow-hidden">
         <button
@@ -461,19 +445,6 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           </div>
         )}
       </section>
-
-      {selectedFramework && selectedScenario && (
-        <div className="mb-6 rounded-xl border border-border-primary bg-background-secondary/50 px-4 py-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-content-primary">
-            {t('practice_match_summary', {
-              method: selectedFramework.name,
-              scenario: selectedScenario.coacheeName,
-              tier: t(tierLabelKey(currentMatchTier)),
-            })}
-          </span>
-          <MatchBadge tier={currentMatchTier} />
-        </div>
-      )}
 
       {/* Entry: from scenario */}
       <section className="mb-4 rounded-xl border border-border-primary overflow-hidden">
