@@ -3,12 +3,19 @@
 ## Current Status
 **Version:** 2.5.1
 **Branch:** `main`
-**Staging:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-beta.manualmode.at (health OK)
+**Staging:** Deployed **2026-08-04**, Build **5**, v2.5.1 — https://mc-beta.manualmode.at (health OK; Sam female TTS fix)
 **Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
 **Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **4** after staging redeploys (do not re-Archive unless needed)
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review.
+
+## Recent Changes (2026-08-04 — Sam female TTS + staging Build 5)
+
+- **Commit `5a33eb4`:** Sam (+ Bekky) female TTS gender in `useTts` / `ChatView` / backend `ttsService`
+- **Commit `161dba5`:** chore build 5 sync
+- **Staging:** v2.5.1 Build **5** deployed (`-c app`); health OK
+- **App Store:** No new iOS submission required for this TTS gender fix alone (see below); 2.5.1 still in review
 
 ## Recent Changes (2026-08-03 — Staging + Production v2.5.1 Build 4)
 
