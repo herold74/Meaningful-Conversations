@@ -1,16 +1,23 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.3
+**Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **4**, v2.5.3 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.3-b4`; Coach Practice v2.5.3 UX)
+**Staging:** Deployed **2026-08-04**, Build **2**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b2`; practice UX polish, TTS signature voice fix, rate limits)
 **Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging Build 4)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
-**Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **4** after v2.5.3 staging deploy (do not re-Archive unless needed)
+**Xcode:** Local BUILD_NUMBER **2** after v2.5.4 staging deploy (do not re-Archive unless needed)
 
-**Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.3 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
+**Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.4 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-04 — Staging v2.5.4 Build 2)
+
+- **Commit `45a101f`:** Release v2.5.4 — practice setup accordion (single-open sections), completion pills with best score (e.g. Moderate 6/10), TTS signature voice fix for practice coachees (female Blair → Amy not Ryan), dev global rate-limit skip + TTS 100/min in staging/prod, Session phonetic → Seschn
+- **Commit `c9864b4`:** chore build 2 sync (deploy script auto-commit)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — success; TTS re-tagged only (no Piper rebuild); health OK; `sw.js` `v2.5.4-b2`
+- **Test on staging:** Blair signature voice (female), Coach Practice setup pills, voice mode without 429s
 
 ## Recent Changes (2026-08-04 — Staging v2.5.3 Build 4)
 
