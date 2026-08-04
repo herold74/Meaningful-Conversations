@@ -356,7 +356,9 @@ node scripts/capture-app-store-screenshots.mjs --lang all
 node scripts/capture-app-store-screenshots.mjs --lang en --device iphone
 ```
 
-Output: `screenshots/app-store-v2.5.1/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+Output: `screenshots/app-store-v2.5.4/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+
+**v2.5.4 DE (Practice):** `scripts/prepare-asc-screenshots-from-assets.py` — iPhone/iPad Practice-Screens aus Geräte-Exports + Basis-Screens aus v2.4.2.
 
 ---
 
