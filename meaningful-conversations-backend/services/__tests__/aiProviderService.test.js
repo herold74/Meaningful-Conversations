@@ -278,6 +278,32 @@ describe('Google → Mistral format conversion', () => {
     const { responseFormat } = mockMistralChatComplete.mock.calls[0][0];
     expect(responseFormat).toEqual({ type: 'json_object' });
   });
+
+  test('empty initial turn uses English greeting trigger when language is en', async () => {
+    await service.generateContent({
+      contents: '',
+      config: { systemInstruction: 'You are a coach.' },
+      language: 'en',
+    });
+    const { messages } = mockMistralChatComplete.mock.calls[0][0];
+    const sys = messages.find(m => m.role === 'system');
+    const user = messages.find(m => m.role === 'user');
+    expect(sys.content).toContain('You MUST respond in English');
+    expect(user.content).toBe('Please start the conversation with your greeting.');
+  });
+
+  test('empty initial turn uses German greeting trigger when language is de', async () => {
+    await service.generateContent({
+      contents: '',
+      config: { systemInstruction: 'Du bist Coach.' },
+      language: 'de',
+    });
+    const { messages } = mockMistralChatComplete.mock.calls[0][0];
+    const sys = messages.find(m => m.role === 'system');
+    const user = messages.find(m => m.role === 'user');
+    expect(sys.content).toContain('Du MUSST auf Deutsch antworten');
+    expect(user.content).toBe('Bitte beginne das Gespräch mit deiner Begrüßung.');
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

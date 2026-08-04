@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, User, CoachPracticeConfig } from '../types';
+import { Bot, Message, User, CoachPracticeConfig, Language } from '../types';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
@@ -73,8 +73,8 @@ interface ChatViewProps {
 /** Prevents duplicate greeting / pre-seed API calls (React StrictMode remounts reset component refs). */
 const chatInitInflight = new Set<string>();
 
-function chatInitKey(botId: string, kind: 'greeting' | 'preseed', seedMessageId?: string) {
-  return kind === 'greeting' ? `greeting:${botId}` : `preseed:${botId}:${seedMessageId ?? ''}`;
+function chatInitKey(botId: string, kind: 'greeting' | 'preseed', language: Language, seedMessageId?: string) {
+  return kind === 'greeting' ? `greeting:${botId}:${language}` : `preseed:${botId}:${language}:${seedMessageId ?? ''}`;
 }
 
 const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError }) => {
@@ -433,7 +433,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   // so the new bot can run greeting (empty history) or pre-seed auto-send (one user row).
   useEffect(() => {
     initialFetchInitiated.current = false;
-  }, [bot.id]);
+  }, [bot.id, language]);
 
   useEffect(() => {
     // This effect handles two cases on mount:
@@ -453,7 +453,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // Case 1: Empty history → fetch greeting
     if (chatHistory.length === 0) {
-        const initKey = chatInitKey(bot.id, 'greeting');
+        const initKey = chatInitKey(bot.id, 'greeting', language);
         if (chatInitInflight.has(initKey)) {
             initialFetchInitiated.current = true;
             return;
@@ -511,7 +511,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
 
         const seedId = chatHistory[0].id;
-        const initKey = chatInitKey(bot.id, 'preseed', seedId);
+        const initKey = chatInitKey(bot.id, 'preseed', language, seedId);
         if (chatInitInflight.has(initKey)) {
             initialFetchInitiated.current = true;
             return;

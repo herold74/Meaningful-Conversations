@@ -1,4 +1,5 @@
 const prisma = require('../prismaClient.js');
+const { normalizeLanguage } = require('../utils/language.js');
 
 // Lazy-loaded clients
 let googleAI = null;
@@ -235,6 +236,7 @@ async function getModelForContext(provider, context = 'chat') {
  * @returns {Promise<object>} Response object with { text, usage, model, provider }
  */
 async function generateContent({ model, contents, config, skipFallback = false, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
+  language = normalizeLanguage(language);
   // Determine provider based on user preference
   let provider;
   if (userRegionPreference === 'eu') {
@@ -637,12 +639,13 @@ async function* streamWithMistral({ model, contents, config, context = 'chat', l
  * Returns an async generator yielding { type: 'chunk', text } and finally { type: 'done', fullText, usage, model, provider }
  */
 async function* streamContent({ model, contents, config, context = 'chat', userRegionPreference = 'optimal', language = 'de' }) {
+  language = normalizeLanguage(language);
   const provider = userRegionPreference === 'eu' ? 'mistral'
     : userRegionPreference === 'us' ? 'google'
     : await getActiveProvider();
 
   if (provider !== 'mistral') {
-    const result = await generateContent({ model, contents, config, context, userRegionPreference });
+    const result = await generateContent({ model, contents, config, context, userRegionPreference, language });
     yield { type: 'chunk', text: result.text };
     yield { type: 'done', fullText: result.text, usage: result.usage, model: result.model, provider: result.provider };
     return;
