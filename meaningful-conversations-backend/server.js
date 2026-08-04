@@ -282,8 +282,8 @@ async function startServer() {
             crossOriginEmbedderPolicy: false, // Required for Capacitor WebView
         }));
 
-        // Global rate limiter for all API endpoints (60 req/min per IP)
-        const { geminiLimiter, globalApiLimiter } = require('./middleware/rateLimiter.js');
+        // Global rate limiter for all API endpoints (60 req/min per IP; TTS uses ttsLimiter)
+        const { geminiLimiter, globalApiLimiter, ttsLimiter } = require('./middleware/rateLimiter.js');
         app.use('/api', globalApiLimiter);
 
         // --- API Routes ---
@@ -302,7 +302,7 @@ async function startServer() {
         app.use('/api/purchase', require('./routes/purchase.js'));
         app.use('/api/apple-iap', require('./routes/appleIAP.js'));
         app.use('/api/newsletter', require('./routes/newsletter.js'));
-        app.use('/api/tts', require('./routes/tts.js'));
+        app.use('/api/tts', ttsLimiter, require('./routes/tts.js'));
         app.use('/api/personality', require('./routes/personality.js'));
         app.use('/api/debug', require('./routes/debug.js'));
 

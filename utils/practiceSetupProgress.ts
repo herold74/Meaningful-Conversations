@@ -11,14 +11,48 @@ const DIFFICULTY_RANK: Record<PracticeDifficulty, number> = {
   hard: 3,
 };
 
-export interface ContractingScenarioProgress {
-  scenarioId: string;
+export interface ScenarioDifficultyProgress {
   highestDifficulty: PracticeDifficulty | null;
   highestDifficultyLabel: string | null;
+  /** Best overallScore at the highest completed difficulty (1–10). */
+  bestScore: number | null;
+}
+
+export interface ContractingScenarioProgress extends ScenarioDifficultyProgress {
+  scenarioId: string;
   /** Latest contracting evaluation suitable for Phase 2 follow-up. */
   followUpSource: PracticeEvaluationSummary | null;
   followUpCompleted: boolean;
 }
+
+export const formatCompletionPillLabel = (
+  difficultyLabel: string | null | undefined,
+  bestScore: number | null | undefined,
+): string | null => {
+  if (!difficultyLabel) return null;
+  if (bestScore == null) return difficultyLabel;
+  return `${difficultyLabel} ${bestScore}/10`;
+};
+
+const applyDifficultyProgress = (
+  existing: ScenarioDifficultyProgress,
+  ev: PracticeEvaluationSummary,
+  difficultyLabels: Record<string, string>,
+): void => {
+  const diff = ev.difficulty as PracticeDifficulty;
+  if (DIFFICULTY_RANK[diff] === undefined) return;
+
+  if (
+    existing.highestDifficulty === null
+    || DIFFICULTY_RANK[diff] > DIFFICULTY_RANK[existing.highestDifficulty]
+  ) {
+    existing.highestDifficulty = diff;
+    existing.highestDifficultyLabel = difficultyLabels[diff] || diff;
+    existing.bestScore = ev.overallScore;
+  } else if (diff === existing.highestDifficulty) {
+    existing.bestScore = Math.max(existing.bestScore ?? 0, ev.overallScore);
+  }
+};
 
 const isContractingEval = (ev: PracticeEvaluationSummary) =>
   ev.frameworkId === 'contracting' || ev.evaluationData.practiceMode === 'contracting';
@@ -48,19 +82,12 @@ export const buildContractingProgressMap = (
       scenarioId: ev.scenarioId,
       highestDifficulty: null,
       highestDifficultyLabel: null,
+      bestScore: null,
       followUpSource: null,
       followUpCompleted: false,
     };
 
-    const diff = ev.difficulty as PracticeDifficulty;
-    if (
-      DIFFICULTY_RANK[diff] !== undefined
-      && (existing.highestDifficulty === null
-        || DIFFICULTY_RANK[diff] > DIFFICULTY_RANK[existing.highestDifficulty])
-    ) {
-      existing.highestDifficulty = diff;
-      existing.highestDifficultyLabel = difficultyLabels[diff] || diff;
-    }
+    applyDifficultyProgress(existing, ev, difficultyLabels);
 
     if (hasFollowUpArtifacts(ev)) {
       const prev = existing.followUpSource;
@@ -84,8 +111,8 @@ export const buildContractingProgressMap = (
 export const buildMethodScenarioProgressMap = (
   evaluations: PracticeEvaluationSummary[],
   difficultyLabels: Record<string, string>,
-): Map<string, { highestDifficulty: PracticeDifficulty | null; highestDifficultyLabel: string | null }> => {
-  const map = new Map<string, { highestDifficulty: PracticeDifficulty | null; highestDifficultyLabel: string | null }>();
+): Map<string, ScenarioDifficultyProgress> => {
+  const map = new Map<string, ScenarioDifficultyProgress>();
 
   for (const ev of evaluations) {
     if (isContractingEval(ev) || ev.frameworkId === 'free-play') continue;
@@ -93,17 +120,10 @@ export const buildMethodScenarioProgressMap = (
     const existing = map.get(ev.scenarioId) ?? {
       highestDifficulty: null,
       highestDifficultyLabel: null,
+      bestScore: null,
     };
 
-    const diff = ev.difficulty as PracticeDifficulty;
-    if (
-      DIFFICULTY_RANK[diff] !== undefined
-      && (existing.highestDifficulty === null
-        || DIFFICULTY_RANK[diff] > DIFFICULTY_RANK[existing.highestDifficulty])
-    ) {
-      existing.highestDifficulty = diff;
-      existing.highestDifficultyLabel = difficultyLabels[diff] || diff;
-    }
+    applyDifficultyProgress(existing, ev, difficultyLabels);
 
     map.set(ev.scenarioId, existing);
   }

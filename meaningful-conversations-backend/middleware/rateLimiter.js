@@ -211,11 +211,14 @@ const resetPasswordLimiter = rateLimit({
 
 /**
  * Global API rate limiter - Catch-all for unprotected endpoints
- * 60 requests per minute per IP
+ * 60 requests per minute per IP (staging / production).
+ * Development: skipped. TTS routes use ttsLimiter instead.
  */
 const globalApiLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 60,
+    skip: (req) =>
+        isDevEnvironment || req.originalUrl.startsWith('/api/tts'),
     message: { 
         error: 'Too many requests. Please slow down.',
         errorCode: 'RATE_LIMIT_GLOBAL'
@@ -224,6 +227,27 @@ const globalApiLimiter = rateLimit({
     legacyHeaders: false,
     handler: (req, res, next, options) => {
         console.warn(`🚫 Global rate limit exceeded from IP: ${req.ip}`);
+        res.status(429).json(options.message);
+    },
+});
+
+/**
+ * TTS rate limiter - Voice mode synthesize/warmup can burst above the global cap
+ * 100 requests per minute per IP (staging / production).
+ * Development: skipped.
+ */
+const ttsLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100,
+    skip: () => isDevEnvironment,
+    message: {
+        error: 'Too many TTS requests. Please slow down.',
+        errorCode: 'RATE_LIMIT_TTS',
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+        console.warn(`🚫 TTS rate limit exceeded from IP: ${req.ip}`);
         res.status(429).json(options.message);
     },
 });
@@ -238,5 +262,6 @@ module.exports = {
     botRecommendationLimiter,
     purchaseLimiter,
     resetPasswordLimiter,
-    globalApiLimiter
+    globalApiLimiter,
+    ttsLimiter,
 };
