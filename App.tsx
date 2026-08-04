@@ -147,6 +147,7 @@ const App: React.FC = () => {
     const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
     const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
+    const [practiceEvalError, setPracticeEvalError] = useState<string | null>(null);
 
     const buildPracticeTranscriptSummary = useCallback((history: Message[], lang: Language) => {
         const coacheeLabel = lang === 'de' ? 'Coachee' : 'Coachee';
@@ -1201,6 +1202,7 @@ const App: React.FC = () => {
         setPracticeConfig(config);
         setPracticeEvaluation(null);
         setPracticeSelfRating(undefined);
+        setPracticeEvalError(null);
         setSelectedBot(botFromPracticeConfig(config));
         setUserMessageCount(0);
         setBaselineMessageCount(0);
@@ -1214,6 +1216,7 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
         setPracticeEvaluation(null);
         setPracticeSelfRating(undefined);
+        setPracticeEvalError(null);
         setPracticeConfig(draft.practiceConfig);
         setSelectedBot(botFromPracticeConfig(draft.practiceConfig));
         setChatHistory(draft.chatHistory);
@@ -1231,6 +1234,7 @@ const App: React.FC = () => {
         if (!practiceConfig) return;
         setIsAnalyzing(true);
         setPracticeSelfRating(selfRating);
+        setPracticeEvalError(null);
         try {
             const result = await geminiService.evaluatePracticeSession(
                 practiceConfig,
@@ -1250,10 +1254,15 @@ const App: React.FC = () => {
             setView('practiceReview');
         } catch (error) {
             console.error('Practice evaluation failed:', error);
-            const message = error instanceof api.ApiError && error.message
-                ? error.message
-                : t('practice_eval_error');
-            alert(message);
+            let message = t('practice_eval_error');
+            if (error instanceof api.ApiError) {
+                if (error.data?.errorCode === 'PRACTICE_PHASE2_TOO_SHORT') {
+                    message = t('practice_phase2_eval_too_short');
+                } else if (error.message) {
+                    message = error.message;
+                }
+            }
+            setPracticeEvalError(message);
             setView('practiceChat');
         } finally {
             setIsAnalyzing(false);
@@ -1519,6 +1528,8 @@ const App: React.FC = () => {
         setPracticeEvaluation,
         practicePhase2Context,
         setPracticePhase2Context,
+        practiceEvalError,
+        setPracticeEvalError,
         handleStartPractice,
         handleContinueToPhase2,
         handleStartPhase2,

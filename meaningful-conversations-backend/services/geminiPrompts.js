@@ -1393,7 +1393,7 @@ const practiceFreePlayEvaluationPrompts = {
 Hidden cues related to: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**. Reward appropriate boundary-setting and referral, not method work on clinical issues.
 ` : '';
       const liveBlock = liveMode ? '\n**Live mode:** Tolerate speech disfluency.\n' : '';
-      const priorBlock = priorContext ? `\n## Prior contracting context\n${priorContext}\n` : '';
+      const priorBlock = priorContext ? `\n## Prior contracting context (read-only background)\n${priorContext}\n` : '';
       return `
 You are an expert coaching supervisor evaluating a **free-play first method session**. The coach chose interventions freely — do NOT score method compliance against any framework.
 
@@ -1409,6 +1409,10 @@ ${selfRating ? `**Coach self-rating:** ${selfRating}` : ''}
 \`\`\`
 ${transcript}
 \`\`\`
+
+**CRITICAL — Transcript scope:** Score ONLY what appears in the ## Transcript block above. Prior contracting context is read-only background to understand the scenario — NEVER quote from it in evidence, gaps, freePlaySuggestions, dimension scores, strengths, or developmentAreas.
+
+**Short transcript:** If the method-session transcript is very short (few coach turns), score conservatively and note in the summary that the session was too brief for a confident assessment.
 
 Score four dimensions (1-10): effectiveness, clarity, coachee autonomy, coachee satisfaction.
 
@@ -1426,7 +1430,7 @@ Set practiceMode to "free-play". No methodCompliance field. Write in English.`;
 Verborgene Hinweise zu: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**. Belohne angemessene Grenzziehung/Überweisung, nicht Methodenarbeit am klinischen Thema.
 ` : '';
       const liveBlock = liveMode ? '\n**Live-Modus:** Sprech-Unsicherheiten tolerieren.\n' : '';
-      const priorBlock = priorContext ? `\n## Kontext aus Anliegensklärung\n${priorContext}\n` : '';
+      const priorBlock = priorContext ? `\n## Kontext aus Anliegensklärung (nur Hintergrund, nicht bewerten)\n${priorContext}\n` : '';
       return `
 Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Freispiel-Erste-Methodensitzung**. Der Coach wählte Interventionen frei — bewerte KEINE Methodentreue gegen ein Framework.
 
@@ -1442,6 +1446,10 @@ ${selfRating ? `**Selbsteinschätzung:** ${selfRating}` : ''}
 \`\`\`
 ${transcript}
 \`\`\`
+
+**KRITISCH — Transkript-Umfang:** Bewerte NUR das, was im ## Transkript-Block oben steht. Der Anliegensklärungs-Kontext ist schreibgeschützter Hintergrund — zitiere daraus NIEMALS in evidence, gaps, freePlaySuggestions, Dimensions-Scores, strengths oder developmentAreas.
+
+**Kurzes Transkript:** Ist das Methoden-Transkript sehr kurz (wenige Coach-Züge), bewerte konservativ und vermerke in der summary, dass die Sitzung zu kurz für eine belastbare Einschätzung war.
 
 Bewerte vier Dimensionen (1-10): Wirksamkeit, Klarheit, Coachee-Autonomie, Coachee-Zufriedenheit.
 

@@ -152,6 +152,8 @@ export interface AppViewRouterProps {
   setPracticeEvaluation: React.Dispatch<React.SetStateAction<PracticeEvaluationResult | null>>;
   practicePhase2Context: PracticePhase2Context | null;
   setPracticePhase2Context: React.Dispatch<React.SetStateAction<PracticePhase2Context | null>>;
+  practiceEvalError: string | null;
+  setPracticeEvalError: React.Dispatch<React.SetStateAction<string | null>>;
   handleStartPractice: (config: CoachPracticeConfig) => void;
   handleContinueToPhase2: () => void;
   handleStartPhase2: (context: PracticePhase2Context) => void;
@@ -266,6 +268,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setPracticeEvaluation,
     practicePhase2Context,
     setPracticePhase2Context,
+    practiceEvalError,
+    setPracticeEvalError,
     handleStartPractice,
     handleContinueToPhase2,
     handleStartPhase2,
@@ -726,12 +730,16 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           chatHistory={chatHistory}
           setChatHistory={setChatHistory}
           onEndSession={handleEndSession}
-          onMessageSent={() => setUserMessageCount((c) => c + 1)}
+          onMessageSent={() => {
+            setPracticeEvalError(null);
+            setUserMessageCount((c) => c + 1);
+          }}
           currentUser={currentUser}
           isNewSession={true}
           encryptionKey={encryptionKey}
           isTestMode={false}
           coachPracticeConfig={practiceConfig}
+          practiceEvalError={practiceEvalError}
         />
       );
     case 'practiceSetup':
