@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const OUT_ROOT = path.join(ROOT, 'screenshots/app-store-v2.5.0');
+const OUT_ROOT = path.join(ROOT, 'screenshots/app-store-v2.5.4');
 
 const BASE_URL = process.argv.includes('--base')
   ? process.argv[process.argv.indexOf('--base') + 1]
