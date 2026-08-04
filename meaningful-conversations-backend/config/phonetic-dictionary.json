@@ -30,25 +30,25 @@
         },
         {
           "term": "Session",
-          "phonetic": "Seschän",
+          "phonetic": "Seschn",
           "caseSensitive": true,
           "notes": "Session-Begriff"
         },
         {
           "term": "session",
-          "phonetic": "seschän",
+          "phonetic": "seschn",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
         },
         {
           "term": "Sessions",
-          "phonetic": "Seschäns",
+          "phonetic": "Seschns",
           "caseSensitive": true,
           "notes": "Plural"
         },
         {
           "term": "sessions",
-          "phonetic": "seschäns",
+          "phonetic": "seschns",
           "caseSensitive": true,
           "notes": "Plural kleingeschrieben"
         },

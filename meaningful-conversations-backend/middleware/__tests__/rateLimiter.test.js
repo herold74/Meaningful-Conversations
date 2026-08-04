@@ -23,6 +23,8 @@ const {
   audioTranscribeLimiter,
   botRecommendationLimiter,
   purchaseLimiter,
+  globalApiLimiter,
+  ttsLimiter,
 } = require('../rateLimiter');
 
 // express-rate-limit needs req.app.get for trustProxy
@@ -58,6 +60,8 @@ describe('rateLimiter exports', () => {
     { name: 'audioTranscribeLimiter', fn: audioTranscribeLimiter },
     { name: 'botRecommendationLimiter', fn: botRecommendationLimiter },
     { name: 'purchaseLimiter', fn: purchaseLimiter },
+    { name: 'globalApiLimiter', fn: globalApiLimiter },
+    { name: 'ttsLimiter', fn: ttsLimiter },
   ];
 
   limiters.forEach(({ name, fn }) => {
@@ -75,9 +79,9 @@ describe('rateLimiter exports', () => {
     });
   });
 
-  it('exports exactly 10 limiters', () => {
+  it('exports exactly 11 limiters', () => {
     const exported = Object.keys(require('../rateLimiter'));
-    expect(exported).toHaveLength(10);
+    expect(exported).toHaveLength(11);
     expect(exported).toContain('loginLimiter');
     expect(exported).toContain('registerLimiter');
     expect(exported).toContain('forgotPasswordLimiter');
@@ -88,6 +92,7 @@ describe('rateLimiter exports', () => {
     expect(exported).toContain('purchaseLimiter');
     expect(exported).toContain('resetPasswordLimiter');
     expect(exported).toContain('globalApiLimiter');
+    expect(exported).toContain('ttsLimiter');
   });
 });
 
@@ -152,5 +157,23 @@ describe('rate limiter configuration', () => {
     expect(config).toBeDefined();
     expect(config.windowMs).toBe(60 * 60 * 1000);
     expect(config.max).toBe(10);
+  });
+
+  it('globalApiLimiter has windowMs 1 min, max 60, and skips dev/TTS routes', () => {
+    const config = capturedConfigs.find((c) => c.message?.errorCode === 'RATE_LIMIT_GLOBAL');
+    expect(config).toBeDefined();
+    expect(config.windowMs).toBe(60 * 1000);
+    expect(config.max).toBe(60);
+    expect(typeof config.skip).toBe('function');
+    expect(config.skip({ originalUrl: '/api/tts/synthesize' })).toBe(true);
+    expect(config.skip({ originalUrl: '/api/auth/login' })).toBe(false);
+  });
+
+  it('ttsLimiter has windowMs 1 min and max 100', () => {
+    const config = capturedConfigs.find((c) => c.message?.errorCode === 'RATE_LIMIT_TTS');
+    expect(config).toBeDefined();
+    expect(config.windowMs).toBe(60 * 1000);
+    expect(config.max).toBe(100);
+    expect(typeof config.skip).toBe('function');
   });
 });
