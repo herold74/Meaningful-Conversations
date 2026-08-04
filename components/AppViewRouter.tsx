@@ -67,6 +67,7 @@ import AdminView from './AdminView';
 import ChangePasswordView from './ChangePasswordView';
 import { TestScenario } from '../utils/testScenarios';
 import { BOTS } from '../constants';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 
 export interface AppViewRouterProps {
   // Navigation
@@ -800,7 +801,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             if (!practiceConfig) {
               setPracticeConfig({
                 frameworkId: item.frameworkId,
-                frameworkName: item.frameworkId,
+                frameworkName: getFrameworkDisplayName(item.frameworkId, { t, language }),
                 scenarioId: item.scenarioId,
                 scenarioName: item.summary,
                 coacheeName: '',
@@ -825,7 +826,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setPracticeEvaluation({ ...item.evaluationData, id: item.id });
             setPracticeConfig({
               frameworkId: item.frameworkId,
-              frameworkName: item.frameworkId,
+              frameworkName: getFrameworkDisplayName(item.frameworkId, { t, language }),
               scenarioId: item.scenarioId,
               scenarioName: item.summary,
               coacheeName: '',

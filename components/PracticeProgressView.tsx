@@ -13,6 +13,7 @@ import {
   scoreColorClass,
   PracticeDimensionAverages,
 } from '../utils/practiceProgress';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 import { TrendingUp, TrendingDown, Minus, Target, Award } from 'lucide-react';
 
 interface PracticeProgressViewProps {
@@ -265,11 +266,14 @@ const PracticeProgressView: React.FC<PracticeProgressViewProps> = ({
     for (const ev of evaluations) {
       counts.set(ev.frameworkId, (counts.get(ev.frameworkId) || 0) + 1);
     }
-    const fromCatalog = catalog?.frameworks.filter((f) => counts.has(f.id)) || [];
-    return fromCatalog
-      .map((f) => ({ ...f, sessionCount: counts.get(f.id) || 0 }))
+    return Array.from(counts.entries())
+      .map(([id, sessionCount]) => ({
+        id,
+        name: getFrameworkDisplayName(id, { catalog, t, language }),
+        sessionCount,
+      }))
       .sort((a, b) => b.sessionCount - a.sessionCount);
-  }, [evaluations, catalog]);
+  }, [evaluations, catalog, t, language]);
 
   const filteredEvaluations = useMemo(() => {
     if (frameworkFilter === 'all') return evaluations;
@@ -281,7 +285,7 @@ const PracticeProgressView: React.FC<PracticeProgressViewProps> = ({
   const isMethodFiltered = frameworkFilter !== 'all';
 
   const frameworkName = (id: string) =>
-    catalog?.frameworks.find((f) => f.id === id)?.name || id;
+    getFrameworkDisplayName(id, { catalog, t, language });
 
   const dimensionLabels = useMemo(
     () =>
