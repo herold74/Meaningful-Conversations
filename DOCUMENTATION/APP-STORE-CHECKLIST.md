@@ -3,7 +3,7 @@
 ## Pre-Submission (Technical)
 
 - [x] Bundle ID: `at.manualmode.mc`
-- [x] Xcode version synced with package.json (`MARKETING_VERSION` + `CURRENT_PROJECT_VERSION`)
+- [ ] Xcode version synced with package.json — **2.5.4:** `MARKETING_VERSION=2.5.4`, `CURRENT_PROJECT_VERSION=1` (Build 1 für erste ASC-Einreichung)
 - [x] Code signing: Automatic, Team `N323R62J9X`
 - [x] Privacy usage descriptions in Info.plist (Microphone, Speech Recognition)
 - [x] Privacy Manifest (`PrivacyInfo.xcprivacy`) with required API declarations
