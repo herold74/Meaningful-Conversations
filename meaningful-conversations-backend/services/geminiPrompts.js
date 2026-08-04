@@ -1136,6 +1136,324 @@ Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — die
     }
 };
 
+const practiceDimensionScoreSchema = {
+  type: 'OBJECT',
+  properties: {
+    score: { type: 'INTEGER', description: 'Score from 1 to 10.' },
+    evidence: { type: 'STRING', description: 'Transcript evidence.' },
+    gaps: { type: 'STRING', description: 'Missed opportunities or gaps.' },
+  },
+  required: ['score', 'evidence', 'gaps'],
+};
+
+const practiceContractingEvaluationSchema = {
+  type: 'OBJECT',
+  properties: {
+    summary: { type: 'STRING', description: '2-3 sentence overview addressing the coach in second person.' },
+    effectiveness: {
+      ...practiceDimensionScoreSchema,
+      properties: {
+        ...practiceDimensionScoreSchema.properties,
+        score: { type: 'INTEGER', description: '1-10: workable, confirmed session contract; readiness for follow-up.' },
+      },
+    },
+    clarity: practiceDimensionScoreSchema,
+    coacheeAutonomy: practiceDimensionScoreSchema,
+    coacheeSatisfaction: practiceDimensionScoreSchema,
+    contractingSteps: {
+      type: 'OBJECT',
+      properties: {
+        topicIdentified: { type: 'BOOLEAN' },
+        relevanceExplored: { type: 'BOOLEAN' },
+        outcomeDefined: { type: 'BOOLEAN' },
+        contractConfirmed: { type: 'BOOLEAN' },
+        evidence: { type: 'STRING' },
+        highlights: { type: 'STRING' },
+      },
+      required: ['topicIdentified', 'relevanceExplored', 'outcomeDefined', 'contractConfirmed', 'evidence', 'highlights'],
+    },
+    sessionContract: { type: 'STRING', description: 'Agreed session contract in one short paragraph.' },
+    clarifiedConcern: { type: 'STRING', description: 'Clarified concern for the follow-up session.' },
+    methodSuggestions: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          frameworkId: { type: 'STRING' },
+          frameworkName: { type: 'STRING' },
+          rationale: { type: 'STRING' },
+        },
+        required: ['frameworkId', 'frameworkName', 'rationale'],
+      },
+    },
+    strengths: { type: 'ARRAY', items: { type: 'STRING' } },
+    developmentAreas: { type: 'ARRAY', items: { type: 'STRING' } },
+    nextDrills: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          action: { type: 'STRING' },
+          rationale: { type: 'STRING' },
+        },
+        required: ['action', 'rationale'],
+      },
+    },
+    calibration: {
+      type: 'OBJECT',
+      properties: {
+        selfRating: { type: 'INTEGER' },
+        evidenceRating: { type: 'INTEGER' },
+        delta: { type: 'STRING' },
+        interpretation: { type: 'STRING' },
+      },
+      required: ['selfRating', 'evidenceRating', 'delta', 'interpretation'],
+    },
+    overallScore: { type: 'INTEGER' },
+    practiceMode: { type: 'STRING', description: 'Always "contracting".' },
+  },
+  required: [
+    'summary', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction',
+    'contractingSteps', 'sessionContract', 'clarifiedConcern', 'methodSuggestions',
+    'strengths', 'developmentAreas', 'nextDrills', 'calibration', 'overallScore', 'practiceMode',
+  ],
+};
+
+const practiceFreePlayEvaluationSchema = {
+  type: 'OBJECT',
+  properties: {
+    summary: { type: 'STRING' },
+    effectiveness: practiceDimensionScoreSchema,
+    clarity: practiceDimensionScoreSchema,
+    coacheeAutonomy: practiceDimensionScoreSchema,
+    coacheeSatisfaction: practiceDimensionScoreSchema,
+    observedMethodElements: {
+      type: 'ARRAY',
+      items: { type: 'STRING' },
+      description: 'Descriptive list of observable method elements — no scoring or judgment.',
+    },
+    freePlaySuggestions: {
+      type: 'OBJECT',
+      properties: {
+        alternatives: { type: 'ARRAY', items: { type: 'STRING' } },
+        wentWell: { type: 'ARRAY', items: { type: 'STRING' } },
+        missedOrOverlooked: { type: 'ARRAY', items: { type: 'STRING' } },
+      },
+      required: ['alternatives', 'wentWell', 'missedOrOverlooked'],
+    },
+    strengths: { type: 'ARRAY', items: { type: 'STRING' } },
+    developmentAreas: { type: 'ARRAY', items: { type: 'STRING' } },
+    nextDrills: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          action: { type: 'STRING' },
+          rationale: { type: 'STRING' },
+        },
+        required: ['action', 'rationale'],
+      },
+    },
+    calibration: {
+      type: 'OBJECT',
+      properties: {
+        selfRating: { type: 'INTEGER' },
+        evidenceRating: { type: 'INTEGER' },
+        delta: { type: 'STRING' },
+        interpretation: { type: 'STRING' },
+      },
+      required: ['selfRating', 'evidenceRating', 'delta', 'interpretation'],
+    },
+    overallScore: { type: 'INTEGER' },
+    practiceMode: { type: 'STRING', description: 'Always "free-play".' },
+    scopeBoundary: {
+      type: 'OBJECT',
+      properties: {
+        active: { type: 'BOOLEAN' },
+        recognized: { type: 'BOOLEAN' },
+        referralQuality: { type: 'STRING' },
+        idealResponse: { type: 'STRING' },
+      },
+      required: ['active', 'recognized', 'referralQuality', 'idealResponse'],
+    },
+  },
+  required: [
+    'summary', 'effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction',
+    'observedMethodElements', 'freePlaySuggestions', 'strengths', 'developmentAreas',
+    'nextDrills', 'calibration', 'overallScore', 'practiceMode', 'scopeBoundary',
+  ],
+};
+
+const CONTRACTING_FRAMEWORK_CATALOG = `Available practice methods (suggest 1-3 if helpful, not mandatory):
+- four-stage-coaching (Four-stage coaching)
+- forward-focused-coaching (Forward-focused coaching)
+- goal-path-solution (Goal–Path–Solution)
+- ambitious-coaching (Ambitious coaching)
+- ambivalence-coaching (Ambivalence coaching)
+- systemic-coaching (Systemic coaching)
+- resilience-coaching (Resilience coaching)
+- structured-reflection (Structured reflection)
+- mental-fitness-coaching (Mental fitness coaching)
+- client-exact-language (Client exact language)
+- strategic-coaching (Strategic coaching)
+- thought-audit (Thought audit)`;
+
+const practiceContractingEvaluationPrompts = {
+  schema: practiceContractingEvaluationSchema,
+  en: {
+    prompt: ({ scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, frameworkCatalog }) => {
+      const liveBlock = liveMode ? '\n**Live mode:** Tolerate speech disfluency; do not penalize clarity harshly for spoken language alone.\n' : '';
+      return `
+You are an expert coaching supervisor evaluating a **concern clarification / contracting practice session**. The human coach practiced clarifying the client's concern and agreeing a session contract — NOT applying a specific coaching method.
+
+**Today's Date:** ${currentDate}
+${liveBlock}
+## Simulated Coachee Scenario (hidden from coach during session)
+${scenarioSummary}
+
+**Difficulty:** ${difficulty}
+${selfRating ? `**Coach self-rating (1-10):** ${selfRating}` : '**Coach self-rating:** not provided'}
+
+## Framework catalog for optional suggestions
+${frameworkCatalog || CONTRACTING_FRAMEWORK_CATALOG}
+
+## Transcript
+\`\`\`
+${transcript}
+\`\`\`
+
+## Evaluation instructions
+
+Score four dimensions (1-10 each) with transcript evidence:
+1. **Effectiveness:** Workable, confirmed session contract; readiness for a follow-up method session.
+2. **Clarity:** Clear questions and contract wording.
+3. **Coachee autonomy:** Coachee formulated topic/outcome; coach did not dictate.
+4. **Coachee satisfaction:** Coachee felt heard, safe, willing to continue.
+
+Also evaluate **contractingSteps** (boolean checklist):
+- topicIdentified, relevanceExplored ("why now?"), outcomeDefined (measurable session outcome), contractConfirmed (explicit confirmation)
+- evidence and highlights for the checklist
+- Do NOT penalize for failing to uncover the hidden agenda — good contracting does not force it.
+
+Provide sessionContract and clarifiedConcern as artifacts for the next session.
+methodSuggestions: optional 1-3 methods from the catalog with rationale — suggestions only, not verdicts.
+
+Set practiceMode to "contracting". Write all output in English. Be constructive and specific.`;
+    },
+  },
+  de: {
+    prompt: ({ scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, frameworkCatalog }) => {
+      const liveBlock = liveMode ? '\n**Live-Modus:** Sprech-Unsicherheiten tolerieren; Klarheit nicht allein wegen gesprochener Sprache hart abwerten.\n' : '';
+      return `
+Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Anliegensklärungs-/Contracting-Übung**. Der menschliche Coach hat Anliegensklärung und Session-Kontrakt geübt — KEINE spezifische Coaching-Methode.
+
+**Heutiges Datum:** ${currentDate}
+${liveBlock}
+## Simuliertes Klienten-Szenario (dem Coach während der Session verborgen)
+${scenarioSummary}
+
+**Schwierigkeit:** ${difficulty}
+${selfRating ? `**Selbsteinschätzung des Coaches (1-10):** ${selfRating}` : '**Selbsteinschätzung:** nicht angegeben'}
+
+## Methoden-Katalog für optionale Vorschläge
+${frameworkCatalog || CONTRACTING_FRAMEWORK_CATALOG}
+
+## Transkript
+\`\`\`
+${transcript}
+\`\`\`
+
+## Bewertungsanweisungen
+
+Bewerte vier Dimensionen (1-10) mit Transkript-Belegen:
+1. **Wirksamkeit:** Brauchbarer, bestätigter Session-Kontrakt; Bereitschaft für Folgesitzung.
+2. **Klarheit:** Verständliche Fragen und Kontraktformulierung.
+3. **Coachee-Autonomie:** Coachee formulierte Thema/Ergebnis; Coach diktierte nicht.
+4. **Coachee-Zufriedenheit:** Coachee fühlte sich gehört, sicher, bereit weiterzumachen.
+
+Bewerte außerdem **contractingSteps** (Checkliste, boolean):
+- topicIdentified, relevanceExplored („Warum jetzt?“), outcomeDefined (messbares Session-Ergebnis), contractConfirmed (explizite Bestätigung)
+- evidence und highlights zur Checkliste
+- KEIN Abzug, wenn die hidden agenda nicht aufgedeckt wurde — gutes Contracting erzwingt sie nicht.
+
+Liefere sessionContract und clarifiedConcern als Artefakte für die nächste Session.
+methodSuggestions: optional 1-3 Methoden aus dem Katalog mit Begründung — nur Vorschläge, kein Urteil.
+
+Setze practiceMode auf "contracting". Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch.`;
+    },
+  },
+};
+
+const practiceFreePlayEvaluationPrompts = {
+  schema: practiceFreePlayEvaluationSchema,
+  en: {
+    prompt: ({ scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel, priorContext }) => {
+      const scopeBlock = scopeBoundaryTheme ? `
+## SCOPE-BOUNDARY DRILL
+Hidden cues related to: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**. Reward appropriate boundary-setting and referral, not method work on clinical issues.
+` : '';
+      const liveBlock = liveMode ? '\n**Live mode:** Tolerate speech disfluency.\n' : '';
+      const priorBlock = priorContext ? `\n## Prior contracting context\n${priorContext}\n` : '';
+      return `
+You are an expert coaching supervisor evaluating a **free-play first method session**. The coach chose interventions freely — do NOT score method compliance against any framework.
+
+**Today's Date:** ${currentDate}
+${liveBlock}${scopeBlock}${priorBlock}
+## Scenario
+${scenarioSummary}
+
+**Difficulty:** ${difficulty}
+${selfRating ? `**Coach self-rating:** ${selfRating}` : ''}
+
+## Transcript
+\`\`\`
+${transcript}
+\`\`\`
+
+Score four dimensions (1-10): effectiveness, clarity, coachee autonomy, coachee satisfaction.
+
+**observedMethodElements:** List observable method elements descriptively WITHOUT scoring or judgment (e.g. "open questions", "summarizing", "contract review").
+
+**freePlaySuggestions:** alternatives (what else could work), wentWell, missedOrOverlooked (cues missed or not heard).
+
+Set practiceMode to "free-play". No methodCompliance field. Write in English.`;
+    },
+  },
+  de: {
+    prompt: ({ scenarioSummary, difficulty, selfRating, transcript, currentDate, liveMode, scopeBoundaryTheme, scopeBoundaryThemeLabel, priorContext }) => {
+      const scopeBlock = scopeBoundaryTheme ? `
+## GRENZFALL-TRAINING
+Verborgene Hinweise zu: **${scopeBoundaryThemeLabel || scopeBoundaryTheme}**. Belohne angemessene Grenzziehung/Überweisung, nicht Methodenarbeit am klinischen Thema.
+` : '';
+      const liveBlock = liveMode ? '\n**Live-Modus:** Sprech-Unsicherheiten tolerieren.\n' : '';
+      const priorBlock = priorContext ? `\n## Kontext aus Anliegensklärung\n${priorContext}\n` : '';
+      return `
+Du bist ein erfahrener Coaching-Supervisor und bewertest eine **Freispiel-Erste-Methodensitzung**. Der Coach wählte Interventionen frei — bewerte KEINE Methodentreue gegen ein Framework.
+
+**Heutiges Datum:** ${currentDate}
+${liveBlock}${scopeBlock}${priorBlock}
+## Szenario
+${scenarioSummary}
+
+**Schwierigkeit:** ${difficulty}
+${selfRating ? `**Selbsteinschätzung:** ${selfRating}` : ''}
+
+## Transkript
+\`\`\`
+${transcript}
+\`\`\`
+
+Bewerte vier Dimensionen (1-10): Wirksamkeit, Klarheit, Coachee-Autonomie, Coachee-Zufriedenheit.
+
+**observedMethodElements:** Beobachtbare Methodenelemente rein deskriptiv OHNE Wertung (z. B. „offene Fragen“, „Zusammenfassen“, „Kontrakt-Review“).
+
+**freePlaySuggestions:** alternatives (was man alternativ tun könnte), wentWell (gut gelaufen), missedOrOverlooked (überhört/übersehen).
+
+Setze practiceMode auf "free-play". Kein methodCompliance-Feld. Schreibe auf Deutsch.`;
+    },
+  },
+};
+
 module.exports = {
     analysisPrompts,
     interviewFormattingPrompts,
@@ -1143,4 +1461,7 @@ module.exports = {
     transcriptEvaluationPrompts,
     botRecommendationPrompts,
     practiceEvaluationPrompts,
+    practiceContractingEvaluationPrompts,
+    practiceFreePlayEvaluationPrompts,
+    CONTRACTING_FRAMEWORK_CATALOG,
 };

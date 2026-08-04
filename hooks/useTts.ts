@@ -4,6 +4,7 @@ import { Bot, Message, Language, User } from '../types';
 import { synthesizeSpeech, splitIntoSentences, getBotVoiceSettings, saveBotVoiceSettings, warmupServerVoice, type TtsMode } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import { selectVoice } from '../utils/voiceUtils';
+import { getBotGender, resolveTtsBotId } from '../utils/botGender';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { brand } from '../config/brand';
 
@@ -22,20 +23,32 @@ export interface UseTtsParams {
   isVoiceMode: boolean;
   isNewSession: boolean;
   t: (key: string) => string;
+  /** Practice coachee voice gender (maps to gender-specific TTS bot id). */
+  genderOverride?: 'male' | 'female';
 }
 
 export type TtsStatus = 'idle' | 'speaking' | 'paused';
 
-export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t }: UseTtsParams) {
+export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride }: UseTtsParams) {
+  const ttsBotId = useMemo(
+    () => resolveTtsBotId(bot.id, genderOverride),
+    [bot.id, genderOverride],
+  );
+
+  const botGender = useMemo((): 'male' | 'female' => {
+    if (genderOverride) return genderOverride;
+    return getBotGender(ttsBotId);
+  }, [genderOverride, ttsBotId]);
+
   const [isTtsEnabled, setIsTtsEnabled] = useState(false);
   const [ttsStatus, setTtsStatus] = useState<TtsStatus>('idle');
   const [ttsMode, setTtsMode] = useState<TtsMode>(() => {
     if (!currentUser) return 'local';
-    const settings = getBotVoiceSettings(bot.id);
+    const settings = getBotVoiceSettings(resolveTtsBotId(bot.id, genderOverride));
     return settings[language].mode;
   });
   const [isAutoMode, setIsAutoMode] = useState<boolean>(() => {
-    const settings = getBotVoiceSettings(bot.id);
+    const settings = getBotVoiceSettings(resolveTtsBotId(bot.id, genderOverride));
     return settings[language].isAuto;
   });
   const [isLoadingAudio, _setIsLoadingAudio] = useState(false);
@@ -57,7 +70,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, []);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(() => {
-    const settings = getBotVoiceSettings(bot.id);
+    const settings = getBotVoiceSettings(resolveTtsBotId(bot.id, genderOverride));
     return settings[language].voiceId;
   });
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -96,43 +109,21 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
 
-  const botGender = useMemo((): 'male' | 'female' => {
-    switch (bot.id) {
-      case 'gloria-life-context':
-      case 'gloria-interview':
-      case 'ava-strategic':
-      case 'chloe-structured-reflection':
-      case 'gabrielle-four-stage':
-      case 'sam-forward-focused':
-      case 'bekky-thought-audit':
-        return 'female';
-      case 'max-ambitious':
-      case 'rob':
-      case 'kenji-resilience':
-      case 'nexus-goal-path-solution':
-      case 'mike-ambivalence-coaching':
-      case 'victor-systemic-coaching':
-      case 'dan-client-language':
-      default:
-        return 'male';
-    }
-  }, [bot.id]);
-
   const saveLanguageVoiceSettings = useCallback((mode: TtsMode, voiceId: string | null, isAuto: boolean) => {
-    console.log('[TTS Save] Saving voice settings:', { bot: bot.id, language, mode, voiceId, isAuto });
-    const allSettings = getBotVoiceSettings(bot.id);
+    console.log('[TTS Save] Saving voice settings:', { bot: ttsBotId, language, mode, voiceId, isAuto });
+    const allSettings = getBotVoiceSettings(ttsBotId);
     allSettings[language] = { mode, voiceId, isAuto };
-    saveBotVoiceSettings(bot.id, allSettings);
+    saveBotVoiceSettings(ttsBotId, allSettings);
     console.log('[TTS Save] Settings after save:', allSettings);
-  }, [bot.id, language]);
+  }, [ttsBotId, language]);
 
   useEffect(() => {
-    const settings = getBotVoiceSettings(bot.id);
+    const settings = getBotVoiceSettings(ttsBotId);
     const langSettings = settings[language];
     setSelectedVoiceURI(langSettings.voiceId);
     setTtsMode(langSettings.mode);
     setIsAutoMode(langSettings.isAuto);
-  }, [language, bot.id]);
+  }, [language, ttsBotId]);
 
   useEffect(() => {
     const audio = new Audio('/sounds/meditation-gong.ogg');
@@ -148,7 +139,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         return;
       }
 
-      const settings = getBotVoiceSettings(bot.id);
+      const settings = getBotVoiceSettings(ttsBotId);
       const langSettings = settings[language];
       const savedMode = langSettings.mode;
       const savedVoiceId = langSettings.voiceId;
@@ -187,7 +178,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             setTtsMode('local');
           } else {
             console.log('[TTS Init] Server voice available, keeping:', savedVoiceId);
-            warmupPromiseRef.current = warmupServerVoice(bot.id, language as 'de' | 'en');
+            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
           }
         } else if (savedMode === 'local' && savedVoiceId) {
           const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
@@ -246,13 +237,13 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
 
           if (serverAvailable) {
-            const bestVoice = getBestServerVoice(bot.id, language);
+            const bestVoice = getBestServerVoice(ttsBotId, language);
             if (bestVoice) {
               console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
               setSelectedVoiceURI(bestVoice);
               setTtsMode('server');
               saveLanguageVoiceSettings('server', bestVoice, true);
-              warmupPromiseRef.current = warmupServerVoice(bot.id, language as 'de' | 'en');
+              warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
             } else {
               setSelectedVoiceURI(null);
               setTtsMode('local');
@@ -274,7 +265,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     };
 
     checkVoiceAvailability();
-  }, [bot.id, language, currentUser, botGender, saveLanguageVoiceSettings]);
+  }, [ttsBotId, language, currentUser, botGender, saveLanguageVoiceSettings]);
 
   useEffect(() => {
     if (!window.speechSynthesis) {
@@ -444,7 +435,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         warmupPromiseRef.current = null;
       }
 
-      const blob = await synthesizeSpeech(s.synthQueue[nextIdx], bot.id, language, false, s.voiceId);
+      const blob = await synthesizeSpeech(s.synthQueue[nextIdx], ttsBotId, language, false, s.voiceId);
       if (!streamingTtsRef.current) return;
       s.resolvedBlobs.push(blob);
       const url = URL.createObjectURL(blob);
@@ -548,7 +539,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (s.synthQueue.length > s.resolvedBlobs.length) processStreamingSynthQueue();
-  }, [bot.id, language]);
+  }, [ttsBotId, language]);
 
   /**
    * Initialize streaming TTS. Returns true if sentence-level streaming
@@ -885,7 +876,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             sentenceQueueRef.current = queue;
 
             // Synthesize sentence 1 with full CPU
-            const firstBlob = await synthesizeSpeech(sentences[0], bot.id, language, isMeditation, voiceIdToUse);
+            const firstBlob = await synthesizeSpeech(sentences[0], ttsBotId, language, isMeditation, voiceIdToUse);
             if (!queue.active) return;
 
             resolvedBlobs[0] = firstBlob;
@@ -899,7 +890,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               for (let i = 1; i < sentences.length; i++) {
                 if (!queue.active) return;
                 try {
-                  const blob = await synthesizeSpeech(sentences[i], bot.id, language, isMeditation, voiceIdToUse);
+                  const blob = await synthesizeSpeech(sentences[i], ttsBotId, language, isMeditation, voiceIdToUse);
                   if (!queue.active) return;
                   resolvedBlobs[i] = blob;
                   resolvedUrls[i] = URL.createObjectURL(blob);
@@ -988,7 +979,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
           } else {
             // ====== SINGLE SENTENCE (original path) ======
-            const audioBlob = await synthesizeSpeech(cleanText, bot.id, language, isMeditation, voiceIdToUse);
+            const audioBlob = await synthesizeSpeech(cleanText, ttsBotId, language, isMeditation, voiceIdToUse);
 
             const elapsed = Date.now() - loadingStartTime;
             if (elapsed < 300) {
@@ -1148,7 +1139,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         window.speechSynthesis.resume();
       }
     }, 10);
-  }, [isTtsEnabled, voices, bot.id, selectedVoiceURI, language, botGender, ttsMode, currentUser]);
+  }, [isTtsEnabled, voices, bot.id, ttsBotId, selectedVoiceURI, language, botGender, ttsMode, currentUser]);
 
   useEffect(() => {
     const lastMessage = chatHistory[chatHistory.length - 1];
@@ -1185,7 +1176,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const handlePreviewServerVoice = useCallback(async (voiceId: string) => {
     const sampleText = t('voiceModal_preview_text');
     try {
-      const audioBlob = await synthesizeSpeech(sampleText, bot.id, language, false, voiceId);
+      const audioBlob = await synthesizeSpeech(sampleText, ttsBotId, language, false, voiceId);
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audio.onended = () => URL.revokeObjectURL(audioUrl);
@@ -1194,7 +1185,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       console.error('Failed to preview server voice:', error);
       alert(t('tts_server_unavailable') || 'Server TTS is not available. This feature requires a running backend with Piper TTS installed. You can still use local device voices.');
     }
-  }, [bot.id, language, t]);
+  }, [ttsBotId, language, t]);
 
   const handlePreviewNativeVoice = useCallback(async (voiceIdentifier: string) => {
     if (!isNativeiOS) return;
@@ -1287,7 +1278,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             }
           };
 
-          const bestVoice = getBestServerVoice(bot.id, language);
+          const bestVoice = getBestServerVoice(ttsBotId, language);
           if (bestVoice) {
             setSelectedVoiceURI(bestVoice);
             setTtsMode('server');
@@ -1326,7 +1317,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       saveLanguageVoiceSettings('local', selection.voiceIdentifier, false);
     }
     setIsVoiceModalOpen(false);
-  }, [bot.id, language, botGender, saveLanguageVoiceSettings]);
+  }, [ttsBotId, language, botGender, saveLanguageVoiceSettings]);
 
   const handleOpenVoiceModal = useCallback(() => {
     if (!window.speechSynthesis) return;
@@ -1438,6 +1429,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     enqueueSentence,
     finishStreamingTts,
     cancelPendingSentences,
+    botGender,
+    ttsBotId,
     ttsStatus,
     isTtsEnabled,
     setIsTtsEnabled: setIsTtsEnabledFromParent,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -24,7 +24,6 @@ import { getQuestionnaireStructure } from './components/questionnaireStructure';
 import type { Big5Result } from './utils/bfi2';
 import type { UserIntent } from './components/IntentPickerView';
 import type { SurveyResult } from './components/PersonalitySurvey';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult } from './types';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { BOTS } from './constants';
@@ -146,6 +145,18 @@ const App: React.FC = () => {
     const [practiceEvaluation, setPracticeEvaluation] = useState<PracticeEvaluationResult | null>(null);
     const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
     const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
+    const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
+    const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
+
+    const buildPracticeTranscriptSummary = useCallback((history: Message[], lang: Language) => {
+        const coacheeLabel = lang === 'de' ? 'Coachee' : 'Coachee';
+        return history
+            .map((msg) => {
+                const label = msg.role === 'user' ? 'Coach' : coacheeLabel;
+                return `${label}: ${msg.text}`;
+            })
+            .join('\n');
+    }, []);
 
     const { isDarkMode, setIsDarkMode, colorTheme, setColorTheme, isAutoThemeEnabled, setIsAutoThemeEnabled } = useTheme();
 
@@ -1228,6 +1239,9 @@ const App: React.FC = () => {
                 selfRating,
             );
             setPracticeEvaluation({ ...result.evaluation, id: result.id || undefined });
+            if (practiceConfig.practiceMode === 'contracting') {
+                setPracticeTranscriptForPhase2(buildPracticeTranscriptSummary(chatHistory, language));
+            }
             clearPracticeSessionDraft();
             setPracticeDraftPrompt(null);
             if (result.saveWarning) {
@@ -1259,9 +1273,36 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
         setPracticeConfig(null);
         setPracticeEvaluation(null);
+        setPracticePhase2Context(null);
+        setPracticeTranscriptForPhase2('');
         setSelectedBot(null);
         setChatHistory([]);
         setView('practiceSetup');
+    };
+
+    const handleContinueToPhase2 = () => {
+        if (!practiceConfig || !practiceEvaluation) return;
+        const transcript = practiceTranscriptForPhase2 || buildPracticeTranscriptSummary(chatHistory, language);
+        setPracticePhase2Context({
+            scenarioId: practiceConfig.scenarioId,
+            coacheeName: practiceConfig.coacheeName,
+            coacheeAvatar: practiceConfig.coacheeAvatar,
+            coacheeGender: practiceConfig.coacheeGender,
+            difficulty: practiceConfig.difficulty,
+            difficultyLabel: practiceConfig.difficultyLabel,
+            liveMode: practiceConfig.liveMode,
+            priorTranscript: transcript,
+            clarifiedConcern: practiceEvaluation.clarifiedConcern
+                || practiceEvaluation.sessionContract
+                || practiceConfig.scenarioName,
+            sessionContract: practiceEvaluation.sessionContract,
+        });
+        setPracticeConfig(null);
+        setPracticeEvaluation(null);
+        setPracticeTranscriptForPhase2('');
+        setSelectedBot(null);
+        setChatHistory([]);
+        setView('practicePhase2Picker');
     };
 
     const practiceHistoryReturnRef = useRef<NavView>('practiceSetup');
@@ -1465,7 +1506,10 @@ const App: React.FC = () => {
         setPracticeConfig,
         practiceEvaluation,
         setPracticeEvaluation,
+        practicePhase2Context,
+        setPracticePhase2Context,
         handleStartPractice,
+        handleContinueToPhase2,
         handlePracticeSelfRatingSubmit,
         handlePracticeSelfRatingSkip,
         handlePracticeDone,

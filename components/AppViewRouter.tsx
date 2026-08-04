@@ -9,7 +9,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context } from '../types';
 import type { UserIntent } from './IntentPickerView';
 import type { SurveyResult } from './PersonalitySurvey';
 import type { RefinementPreviewResult } from '../services/api';
@@ -48,6 +48,7 @@ import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
 import PracticeProgressView from './PracticeProgressView';
 import PracticeSelfRatingView from './PracticeSelfRatingView';
+import PracticePhase2PickerView from './PracticePhase2PickerView';
 import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
@@ -149,7 +150,10 @@ export interface AppViewRouterProps {
   setPracticeConfig: React.Dispatch<React.SetStateAction<CoachPracticeConfig | null>>;
   practiceEvaluation: PracticeEvaluationResult | null;
   setPracticeEvaluation: React.Dispatch<React.SetStateAction<PracticeEvaluationResult | null>>;
+  practicePhase2Context: PracticePhase2Context | null;
+  setPracticePhase2Context: React.Dispatch<React.SetStateAction<PracticePhase2Context | null>>;
   handleStartPractice: (config: CoachPracticeConfig) => void;
+  handleContinueToPhase2: () => void;
   handlePracticeSelfRatingSubmit: (rating: number | undefined) => void;
   handlePracticeSelfRatingSkip: () => void;
   handlePracticeDone: () => void;
@@ -259,7 +263,10 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setPracticeConfig,
     practiceEvaluation,
     setPracticeEvaluation,
+    practicePhase2Context,
+    setPracticePhase2Context,
     handleStartPractice,
+    handleContinueToPhase2,
     handlePracticeSelfRatingSubmit,
     handlePracticeSelfRatingSkip,
     handlePracticeDone,
@@ -750,9 +757,23 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           frameworkName={practiceConfig.frameworkName}
           scenarioName={practiceConfig.scenarioName}
           difficultyLabel={practiceConfig.difficultyLabel}
+          practiceMode={practiceConfig.practiceMode || practiceEvaluation.practiceMode || 'method'}
           onDone={handlePracticeDone}
+          onContinuePhase2={handleContinueToPhase2}
           onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
+        />
+      ) : null;
+    case 'practicePhase2Picker':
+      return practicePhase2Context ? (
+        <PracticePhase2PickerView
+          currentUser={currentUser}
+          phase2Context={practicePhase2Context}
+          onStart={handleStartPractice}
+          onBack={() => {
+            setPracticePhase2Context(null);
+            setView('practiceSetup');
+          }}
         />
       ) : null;
     case 'practiceHistory':
