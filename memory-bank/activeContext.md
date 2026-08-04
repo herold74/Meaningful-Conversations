@@ -1,19 +1,26 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.1
+**Version:** 2.5.2
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **5**, v2.5.1 — https://mc-beta.manualmode.at (health OK; Sam female TTS fix)
-**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging)
+**Staging:** Deployed **2026-08-04**, Build **1**, v2.5.2 — https://mc-beta.manualmode.at (health OK; Coach Practice voice + transcript download)
+**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging Build 4)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
 **Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **4** after staging redeploys (do not re-Archive unless needed)
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review.
 
+## Recent Changes (2026-08-04 — Staging v2.5.2 Build 1)
+
+- **Commit `e81b04a`:** Coach Practice voice fixes (shared STT/TTS), transcript persist + download, privacy docs
+- **Commit `b3c8bd1`:** Release v2.5.2 version bump
+- **Commit `c4f51d4`:** chore build 1 sync (deploy script)
+- **Staging:** v2.5.2 Build **1** deployed; health OK; `sw.js` `v2.5.2-b1`
+
 ## Recent Changes (2026-08-04 — Coach Practice voice + transcript)
 
 - **Helene (`helene@arndgen.de`) review:** 2026-08-04 practice sessions showed STT fragment capture + first-reply TTS double-speak (streaming + initial-bot `useEffect`). **Past 3 evals cannot be re-scored** — no transcript was stored before this fix.
-- **Fix (local, not deployed):** Shared `useTts` marks streaming/speak handled; shared `useSpeechRecognition` sends latest transcript ref; practice evaluate persists `transcript` in `evaluationData` + download on review; privacy/GDPR docs updated.
+- **Fix (staging v2.5.2-b1):** Shared `useTts` marks streaming/speak handled; shared `useSpeechRecognition` sends latest transcript ref; practice evaluate persists `transcript` in `evaluationData` + download on review; privacy/GDPR docs updated.
 
 ## Recent Changes (2026-08-04 — Sam female TTS + staging Build 5)
 

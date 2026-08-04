@@ -846,7 +846,7 @@ function generateHtmlExport(exportData, language = 'de') {
             ${exportData.practiceEvaluations && exportData.practiceEvaluations.length > 0 ? `
             <div class="section">
                 <h2>🎯 ${isGerman ? 'Coaching-Übungssessions' : 'Coach practice sessions'} (${exportData.practiceEvaluations.length})</h2>
-                <p style="margin-bottom: 15px; color: #666;">${isGerman ? 'Auswertungen Ihrer Übungssessions als Coach (keine vollständigen Chat-Transkripte gespeichert).' : 'Evaluations from your coach practice sessions (full chat transcripts are not stored).'}</p>
+                <p style="margin-bottom: 15px; color: #666;">${isGerman ? 'Auswertungen Ihrer Übungssessions als Coach (Bewertung und optional gespeichertes Gesprächstranskript — löschbar in der Auswertungsansicht).' : 'Evaluations from your coach practice sessions (scores and optional stored session transcript — deletable from the evaluation review).'}</p>
                 ${exportData.practiceEvaluations.map(pe => `
                     <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid #16A34A; border-radius: 4px;">
                         <div style="font-weight: 600; margin-bottom: 8px;">${pe.frameworkId} · ${pe.scenarioId} · ${pe.difficulty}</div>

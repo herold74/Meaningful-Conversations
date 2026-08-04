@@ -62,7 +62,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
     if (isPrivileged || unlocks.privileged) return true;
     return unlocks.hardUnlockedPairs.some(
       (p) => p.scenarioId === phase2Context.scenarioId
-        && (p.frameworkId === frameworkId || frameworkId === 'free-play'),
+        && (p.frameworkId === frameworkId || p.frameworkId === 'contracting' || frameworkId === 'free-play'),
     );
   }, [isPrivileged, unlocks, phase2Context.scenarioId, frameworkId]);
 
@@ -107,6 +107,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
         priorTranscript: phase2Context.priorTranscript,
         clarifiedConcern: phase2Context.clarifiedConcern,
         sessionContract: phase2Context.sessionContract,
+        followsContractingEvaluationId: phase2Context.contractingEvaluationId,
       };
     }
 
@@ -127,6 +128,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
       priorTranscript: phase2Context.priorTranscript,
       clarifiedConcern: phase2Context.clarifiedConcern,
       sessionContract: phase2Context.sessionContract,
+      followsContractingEvaluationId: phase2Context.contractingEvaluationId,
     };
   };
 

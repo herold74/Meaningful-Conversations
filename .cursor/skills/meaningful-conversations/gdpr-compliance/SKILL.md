@@ -31,7 +31,7 @@ Use this skill for privacy-related code, documentation, and audits in Meaningful
 ### Data NOT stored in DB
 - Classic chat transcripts (removed migration `20260208120000_remove_encrypted_transcript`)
 - Practice in-progress draft: `sessionStorage` only (`utils/practiceSessionDraft.ts`, max 24h)
-- Practice completed: `practice_evaluations` — scores/JSON **+ session transcript** (after user completes evaluation; downloadable; deleted on account erasure)
+- Practice completed: `practice_evaluations` — scores/JSON **+ session transcript** (after user completes evaluation; downloadable; **user may delete transcript only** from evaluation review; full row deleted on account erasure). **Not E2EE** — survives password reset.
 
 ### Retention (automated — `services/dataRetention.js`)
 | Table | Retention |
