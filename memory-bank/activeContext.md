@@ -3,14 +3,20 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **2**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b2`; practice UX polish, TTS signature voice fix, rate limits)
-**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging Build 4)
+**Staging:** Deployed **2026-08-04**, Build **3**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b3`; practice placeholder fix after session opened)
+**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; staging ahead on 2.5.4)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
-**Xcode:** Local BUILD_NUMBER **2** after v2.5.4 staging deploy (do not re-Archive unless needed)
+**Xcode:** Local BUILD_NUMBER **3** after v2.5.4 patch deploy (do not re-Archive unless needed)
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.4 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-04 — Staging v2.5.4 Build 3 patch)
+
+- **Commit `40c4695`:** fix practice input placeholder after session opened — `ChatView` shows practice placeholder only when `chatHistory.length === 0`
+- **Commit `9409c5d`:** chore build 3 sync (deploy script auto-commit)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — first attempt Podman VM EOF; retry OK. TTS re-tag only. Health OK; `sw.js` `v2.5.4-b3`.
 
 ## Recent Changes (2026-08-04 — Staging v2.5.4 Build 2)
 
