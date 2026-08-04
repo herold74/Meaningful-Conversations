@@ -128,7 +128,7 @@ export async function runPracticeTestSession(
   const ev = evalResult.evaluation;
   const scoresValid = typeof ev.overallScore === 'number'
     && ev.overallScore >= 1 && ev.overallScore <= 10
-    && ev.methodCompliance?.score >= 1 && ev.methodCompliance?.score <= 10
+    && (ev.methodCompliance?.score == null || (ev.methodCompliance.score >= 1 && ev.methodCompliance.score <= 10))
     && ev.effectiveness?.score >= 1 && ev.effectiveness?.score <= 10
     && ev.clarity?.score >= 1 && ev.clarity?.score <= 10
     && ev.coacheeAutonomy?.score != null && ev.coacheeAutonomy.score >= 1 && ev.coacheeAutonomy.score <= 10

@@ -1,7 +1,7 @@
 const { getFrameworkById } = require('./frameworks');
 const { getScenarioForPrompt } = require('./scenarios');
 const { getScopeBoundaryPrompt, isValidTheme } = require('./scopeBoundary');
-const { resolveFrameworkId } = require('./methodTaxonomy');
+const { resolveFrameworkId, isPracticeSentinelFramework } = require('./methodTaxonomy');
 const { getMentalFitnessCoacheeBlock, isMentalFitnessFramework } = require('./mentalFitnessCoacheeProfile');
 
 const LIVE_MODE_MODIFIER = {
@@ -20,21 +20,33 @@ function buildCoacheeSystemPrompt({
   focusNote = '',
   scopeBoundaryTheme = null,
   liveMode = false,
+  practiceMode = 'method',
+  priorTranscript = '',
+  clarifiedConcern = '',
+  sessionContract = '',
 }) {
   const scenario = getScenarioForPrompt(scenarioId, difficulty, language, focusNote);
   if (!scenario) {
     throw new Error(`Unknown scenario: ${scenarioId}`);
   }
 
-  const framework = getFrameworkById(frameworkId);
   const canonicalFrameworkId = resolveFrameworkId(frameworkId);
+  const framework = getFrameworkById(canonicalFrameworkId);
   const lang = language === 'en' ? 'en' : 'de';
+  const mode = practiceMode || (canonicalFrameworkId === 'contracting' ? 'contracting' : canonicalFrameworkId === 'free-play' ? 'free-play' : 'method');
+  const isContracting = mode === 'contracting';
+  const isFreePlay = mode === 'free-play';
 
-  const frameworkHint = framework
-    ? (lang === 'de'
+  let frameworkHint = '';
+  if (!isContracting && !isFreePlay && framework && !isPracticeSentinelFramework(canonicalFrameworkId)) {
+    frameworkHint = lang === 'de'
       ? `\nHINWEIS: Der Coach übt die Methode "${framework.name.de}". Du bist der Klient — lehre die Methode NICHT und spiele nicht den Coach.\n`
-      : `\nNOTE: The coach is practicing "${framework.name.en}". You are the client — do NOT teach the method or play the coach.\n`)
-    : '';
+      : `\nNOTE: The coach is practicing "${framework.name.en}". You are the client — do NOT teach the method or play the coach.\n`;
+  } else if (isFreePlay) {
+    frameworkHint = lang === 'de'
+      ? '\nHINWEIS: Der Coach wählt seine Interventionen frei (Freispiel). Du bist der Klient — lehre keine Methode und spiele nicht den Coach.\n'
+      : '\nNOTE: The coach is choosing interventions freely (free play). You are the client — do NOT teach methods or play the coach.\n';
+  }
 
   const mentalFitnessBlock = isMentalFitnessFramework(canonicalFrameworkId)
     ? getMentalFitnessCoacheeBlock(lang)
@@ -45,17 +57,37 @@ function buildCoacheeSystemPrompt({
     : '';
 
   const scopeBlock =
-    difficulty === 'hard' && scopeBoundaryTheme && isValidTheme(scopeBoundaryTheme)
+    !isContracting && difficulty === 'hard' && scopeBoundaryTheme && isValidTheme(scopeBoundaryTheme)
       ? `\n${getScopeBoundaryPrompt(scopeBoundaryTheme, lang)}\n`
       : '';
 
   const liveBlock = liveMode ? `\n${LIVE_MODE_MODIFIER[lang]}\n` : '';
+
+  const priorContextBlock = (priorTranscript || clarifiedConcern || sessionContract)
+    ? (lang === 'de'
+      ? `\nKONTEXT AUS DER VORHERIGEN ANLIEGENSKLÄRUNG (dies ist bereits passiert — spiele es nicht erneut von vorn):
+${clarifiedConcern ? `Geklärtes Anliegen: ${clarifiedConcern}\n` : ''}${sessionContract ? `Session-Kontrakt: ${sessionContract}\n` : ''}${priorTranscript ? `Kurzüberblick:\n${priorTranscript}\n` : ''}
+Du kennst den Coach bereits. Setze nahtlos fort — wiederhole keine Begrüßung oder komplette Anliegensschilderung.\n`
+      : `\nCONTEXT FROM PRIOR CONCERN CLARIFICATION (already happened — do not replay from scratch):
+${clarifiedConcern ? `Clarified concern: ${clarifiedConcern}\n` : ''}${sessionContract ? `Session contract: ${sessionContract}\n` : ''}${priorTranscript ? `Brief overview:\n${priorTranscript}\n` : ''}
+You already know the coach. Continue seamlessly — no repeated greeting or full concern dump.\n`)
+    : '';
 
   const sentenceRule = liveMode
     ? (lang === 'de' ? '3' : '3')
     : difficulty === 'hard' || difficulty === 'challenging'
       ? (lang === 'de' ? '1-4 (manchmal kürzer oder ausweichend)' : '1-4 (sometimes shorter or evasive)')
       : (lang === 'de' ? '1-4 kurzen Sätzen' : '1-4 short sentences');
+
+  const contractingFirstTurn = lang === 'de'
+    ? 'Bei der allerersten Nachricht des Coaches: stelle dich kurz vor und schildere vage, dass etwas Sie beschäftigt — ohne das volle Anliegen oder den inneren Hintergrund preiszugeben.'
+    : 'On the coach\'s very first message: briefly introduce yourself and vaguely mention something is on your mind — do NOT reveal the full concern or inner backstory yet.';
+
+  const standardFirstTurn = lang === 'de'
+    ? 'Bei der allerersten Nachricht des Coaches: stelle dich kurz vor und skizziere dein Anliegen in eigenen Worten.'
+    : 'On the coach\'s very first message: briefly introduce yourself and outline your concern in your own words.';
+
+  const firstTurnRule = isContracting ? contractingFirstTurn : standardFirstTurn;
 
   if (lang === 'de') {
     return `Du bist ${scenario.coacheeName}, ein Coachee (Klient) in einem Coaching-Übungsgespräch.
@@ -67,9 +99,9 @@ ${scenario.concern}
 
 DEINE EMOTIONALE GRUNDSTIMMUNG: ${scenario.emotionalTone}
 
-(INNERER HINTERGRUND — nur enthüllen, wenn der Coach Vertrauen aufbaut):
+(INNERER HINTERGRUND — nur enthüllen, wenn der Coach Vertrauen aufbaut; bei Anliegensklärung NICHT erzwingen lassen):
 ${scenario.hiddenAgenda}
-${frameworkHint}${mentalFitnessBlock}${focusBlock}
+${frameworkHint}${mentalFitnessBlock}${focusBlock}${priorContextBlock}
 ${scenario.difficultyModifier}${scopeBlock}${liveBlock}
 
 REGELN:
@@ -81,7 +113,7 @@ REGELN:
 6. KEINE Verhaltenshinweise mit Sternchen (*seufzt*, *nickt*)
 7. Schreibe wie ein echter Mensch in normalem Text
 
-Bei der allerersten Nachricht des Coaches: stelle dich kurz vor und skizziere dein Anliegen in eigenen Worten.`;
+${firstTurnRule}`;
   }
 
   return `You are ${scenario.coacheeName}, a coachee (client) in a coaching practice conversation.
@@ -93,9 +125,9 @@ ${scenario.concern}
 
 YOUR EMOTIONAL BASELINE: ${scenario.emotionalTone}
 
-(INNER BACKSTORY — reveal only if the coach builds trust):
+(INNER BACKSTORY — reveal only if the coach builds trust; do not let contracting force this out):
 ${scenario.hiddenAgenda}
-${frameworkHint}${mentalFitnessBlock}${focusBlock}
+${frameworkHint}${mentalFitnessBlock}${focusBlock}${priorContextBlock}
 ${scenario.difficultyModifier}${scopeBlock}${liveBlock}
 
 RULES:
@@ -107,7 +139,7 @@ RULES:
 6. NO action descriptions with asterisks (*sighs*, *nods*)
 7. Write like a real person in plain text
 
-On the coach's very first message: briefly introduce yourself and outline your concern in your own words.`;
+${firstTurnRule}`;
 }
 
 module.exports = {

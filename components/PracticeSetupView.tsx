@@ -91,6 +91,9 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const [methodSectionOpen, setMethodSectionOpen] = useState(false);
   const [showDiscouragedModal, setShowDiscouragedModal] = useState(false);
   const [subtitleInfoOpen, setSubtitleInfoOpen] = useState(false);
+  const [contractingSectionOpen, setContractingSectionOpen] = useState(false);
+  const [contractingScenarioId, setContractingScenarioId] = useState('');
+  const [difficultyInfoOpen, setDifficultyInfoOpen] = useState(false);
 
   const isPrivileged = !!(currentUser?.isAdmin || currentUser?.isDeveloper);
 
@@ -102,6 +105,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
         const defaultSc = data.defaultPair?.scenarioId ?? data.scenarios[0]?.id ?? '';
         setFrameworkId(pickFrameworkId(data.frameworks, defaultFw));
         setScenarioId(defaultSc);
+        setContractingScenarioId(defaultSc);
       })
       .catch(() => setError(t('practice_catalog_error')))
       .finally(() => setLoading(false));
@@ -133,7 +137,13 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
 
   const selectedFramework = catalog?.frameworks.find((f) => f.id === frameworkId);
   const selectedScenario = catalog?.scenarios.find((s) => s.id === scenarioId);
+  const contractingScenario = catalog?.scenarios.find((s) => s.id === contractingScenarioId);
   const difficultyLabel = catalog?.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+
+  const contractingHardUnlocked = useMemo(() => {
+    if (isPrivileged || unlocks.privileged) return true;
+    return unlocks.hardUnlockedPairs.some((p) => p.scenarioId === contractingScenarioId);
+  }, [isPrivileged, unlocks, contractingScenarioId]);
 
   const currentMatchTier: PracticeMatchTier = useMemo(() => {
     if (!selectedScenario || !selectedFramework) return 'neutral';
@@ -196,11 +206,13 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       scenarioName: selectedScenario.concern,
       coacheeName: selectedScenario.coacheeName,
       coacheeAvatar: selectedScenario.avatar,
+      coacheeGender: selectedScenario.coacheeGender,
       difficulty,
       difficultyLabel: liveMode ? `${difficultyLabel} · ${t('practice_live_badge')}` : difficultyLabel,
       focusNote: focusNote.trim() || undefined,
       liveMode,
       scopeBoundaryTheme,
+      practiceMode: 'method',
     });
   };
 
@@ -212,6 +224,97 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
     }
     proceedStart();
   };
+
+  const proceedStartContracting = () => {
+    if (!contractingScenario) return;
+    if (difficulty === 'hard' && !contractingHardUnlocked) return;
+    if (liveMode && !contractingHardUnlocked) return;
+
+    onStart({
+      frameworkId: 'contracting',
+      frameworkName: t('practice_entry_contracting'),
+      scenarioId: contractingScenario.id,
+      scenarioName: contractingScenario.coacheeName,
+      coacheeName: contractingScenario.coacheeName,
+      coacheeAvatar: contractingScenario.avatar,
+      coacheeGender: contractingScenario.coacheeGender,
+      difficulty,
+      difficultyLabel: liveMode ? `${difficultyLabel} · ${t('practice_live_badge')}` : difficultyLabel,
+      focusNote: focusNote.trim() || undefined,
+      liveMode,
+      scopeBoundaryTheme: null,
+      practiceMode: 'contracting',
+      hideScenarioBrief: true,
+    });
+  };
+
+  const handleStartContracting = () => {
+    if (!contractingScenario) return;
+    proceedStartContracting();
+  };
+
+  const difficultyLevels: PracticeDifficulty[] = ['easy', 'moderate', 'challenging', 'hard'];
+
+  const renderDifficultyPicker = (hardUnlockedForMode: boolean) => (
+    <section className="mb-6">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h2 className="text-lg font-semibold text-content-primary">{t('practice_difficulty_label')}</h2>
+        <button
+          type="button"
+          onClick={() => setDifficultyInfoOpen((open) => !open)}
+          aria-expanded={difficultyInfoOpen}
+          aria-controls="practice-difficulty-info"
+          aria-label={t('practice_difficulty_info_label')}
+          className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-accent-primary hover:text-accent-primary/80 transition-colors rounded-md px-1.5 py-1"
+        >
+          <Info className="w-4 h-4" aria-hidden />
+          <span className="hidden sm:inline">{t('practice_difficulty_info_label')}</span>
+        </button>
+      </div>
+      {difficultyInfoOpen && (
+        <div
+          id="practice-difficulty-info"
+          className="mb-3 rounded-xl border border-border-primary bg-background-secondary/50 p-3 max-h-48 overflow-y-auto"
+        >
+          <ul className="space-y-2 text-sm text-content-secondary leading-relaxed">
+            {difficultyLevels.map((level) => (
+              <li key={level}>
+                <span className="font-semibold text-content-primary">
+                  {catalog?.difficulties.find((d) => d.id === level)?.label || level}:
+                </span>{' '}
+                {t(`practice_difficulty_${level}_desc`)}
+              </li>
+            ))}
+            <li className="text-xs text-content-subtle pt-1">{t('practice_difficulty_scope_note')}</li>
+          </ul>
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        {catalog!.difficulties.map((d) => {
+          const locked = d.id === 'hard' && !hardUnlockedForMode;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              disabled={locked}
+              title={locked ? t('practice_unlock_hard_hint') : undefined}
+              onClick={() => !locked && setDifficulty(d.id)}
+              className={`px-3 py-2 sm:px-4 rounded-lg border text-sm font-medium transition-all inline-flex items-center justify-center gap-1.5 min-w-0 ${
+                difficulty === d.id
+                  ? 'border-accent-primary bg-accent-primary text-button-foreground-on-accent'
+                  : locked
+                    ? 'btn-surface-outline text-content-subtle opacity-60 cursor-not-allowed'
+                    : 'btn-surface-outline text-content-secondary'
+              }`}
+            >
+              {locked && <Lock className="w-3.5 h-3.5" aria-hidden />}
+              {d.label}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
 
   if (loading) {
     return (
@@ -288,6 +391,76 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           {t('practice_recommended_start')} (Four-stage · {catalog.scenarios.find((s) => s.id === catalog.defaultPair?.scenarioId)?.coacheeName ?? 'Alex'})
         </button>
       )}
+
+      {/* Entry: concern clarification (blind contracting) */}
+      <section className="mb-4 rounded-xl border border-accent-primary/30 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setContractingSectionOpen((open) => !open)}
+          className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-accent-primary/5 transition-colors"
+          aria-expanded={contractingSectionOpen}
+        >
+          <div>
+            <h2 className="text-lg font-semibold text-content-primary">{t('practice_entry_contracting')}</h2>
+            <p className="text-sm text-content-secondary mt-1">{t('practice_contracting_desc')}</p>
+          </div>
+          {contractingSectionOpen ? (
+            <ChevronUp className="w-5 h-5 text-content-secondary shrink-0" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-content-secondary shrink-0" />
+          )}
+        </button>
+        {contractingSectionOpen && (
+          <div className="px-4 pb-4 border-t border-border-primary/50">
+            <p className="text-sm text-content-secondary mt-3 mb-3">{t('practice_contracting_scenario_hint')}</p>
+            <div className="grid gap-2 sm:grid-cols-2 mb-4">
+              {catalog.scenarios.map((sc: PracticeScenario) => (
+                <button
+                  key={`contract-${sc.id}`}
+                  type="button"
+                  onClick={() => setContractingScenarioId(sc.id)}
+                  className={`text-left p-4 rounded-xl border transition-all ${
+                    contractingScenarioId === sc.id ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated hover:border-accent-primary/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
+                    <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {renderDifficultyPicker(contractingHardUnlocked)}
+            <label
+              className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all mb-4 ${
+                liveMode ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated'
+              } ${!contractingHardUnlocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              <input
+                type="checkbox"
+                className="mt-1 accent-accent-primary"
+                checked={liveMode}
+                disabled={!contractingHardUnlocked}
+                onChange={(e) => setLiveMode(e.target.checked)}
+              />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+                  <Mic className="w-4 h-4 text-accent-primary shrink-0" aria-hidden />
+                  {t('practice_live_label')}
+                </div>
+              </div>
+            </label>
+            <button
+              type="button"
+              onClick={handleStartContracting}
+              disabled={!contractingScenario}
+              className="w-full py-3 rounded-lg btn-accent-solid font-semibold disabled:opacity-50"
+            >
+              {t('practice_contracting_start')}
+            </button>
+          </div>
+        )}
+      </section>
 
       {selectedFramework && selectedScenario && (
         <div className="mb-6 rounded-xl border border-border-primary bg-background-secondary/50 px-4 py-3 flex flex-wrap items-center gap-2">
@@ -559,36 +732,10 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       </section>
 
       {/* Difficulty */}
-      <section className="mb-6">
-        <h2 className="text-lg font-semibold text-content-primary mb-3">{t('practice_difficulty_label')}</h2>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          {catalog.difficulties.map((d) => {
-            const locked = d.id === 'hard' && !hardUnlocked;
-            return (
-              <button
-                key={d.id}
-                type="button"
-                disabled={locked}
-                title={locked ? t('practice_unlock_hard_hint') : undefined}
-                onClick={() => !locked && setDifficulty(d.id)}
-                className={`px-3 py-2 sm:px-4 rounded-lg border text-sm font-medium transition-all inline-flex items-center justify-center gap-1.5 min-w-0 ${
-                  difficulty === d.id
-                    ? 'border-accent-primary bg-accent-primary text-button-foreground-on-accent'
-                    : locked
-                      ? 'btn-surface-outline text-content-subtle opacity-60 cursor-not-allowed'
-                      : 'btn-surface-outline text-content-secondary'
-                }`}
-              >
-                {locked && <Lock className="w-3.5 h-3.5" aria-hidden />}
-                {d.label}
-              </button>
-            );
-          })}
-        </div>
-        {difficulty === 'hard' && (
-          <p className="text-xs text-content-secondary mt-2 leading-relaxed">{t('practice_hard_desc')}</p>
-        )}
-      </section>
+      {renderDifficultyPicker(hardUnlocked)}
+      {difficulty === 'hard' && (
+        <p className="text-xs text-content-secondary -mt-4 mb-6 leading-relaxed">{t('practice_hard_desc')}</p>
+      )}
 
       {/* Live overlay */}
       <section className="mb-8">
