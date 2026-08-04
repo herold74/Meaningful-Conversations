@@ -2157,6 +2157,8 @@
   "practice_loading": "Laden...",
   "practice_catalog_error": "Übungs-Katalog konnte nicht geladen werden.",
   "practice_eval_error": "Auswertung fehlgeschlagen. Bitte erneut versuchen.",
+  "practice_phase2_eval_too_short": "Die Methodensitzung ist zu kurz für eine Auswertung. Sende mindestens zwei Coach-Nachrichten, bevor du die Sitzung beendest.",
+  "practice_review_phase2_scope_note": "Dieses Feedback bezieht sich nur auf die Methodensitzung — nicht auf die vorherige Anliegensklärung.",
   "practice_ai_coach_badge": "Auch als AI-Coach verfügbar: {{name}}",
   "practice_only_badge": "Nur Übungsmodus",
   "practice_explainer_toggle": "Methodendetails anzeigen",

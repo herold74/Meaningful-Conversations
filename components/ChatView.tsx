@@ -65,6 +65,8 @@ interface ChatViewProps {
   onReferralSwitch?: (targetBotId: string, seedUserMessage: string) => void;
   /** Coach Practice mode: human is coach, AI is coachee */
   coachPracticeConfig?: CoachPracticeConfig | null;
+  /** Shown when Phase 2 evaluation fails (e.g. session too short) */
+  practiceEvalError?: string | null;
 }
 
 
@@ -75,7 +77,7 @@ function chatInitKey(botId: string, kind: 'greeting' | 'preseed', seedMessageId?
   return kind === 'greeting' ? `greeting:${botId}` : `preseed:${botId}:${seedMessageId ?? ''}`;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError }) => {
   const { t, language } = useLocalization();
 
   const [input, setInput] = useState('');
@@ -761,6 +763,14 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-status-warning-background border-b border-status-warning-border/40">
           <p className="text-xs sm:text-sm text-status-warning-foreground text-center font-medium leading-snug">
             {t('practice_live_session_banner')}
+          </p>
+        </div>
+      )}
+
+      {coachPracticeConfig && practiceEvalError && (
+        <div className="px-3 sm:px-4 py-2 bg-status-error-background border-b border-status-error-border/40">
+          <p className="text-xs sm:text-sm text-status-error-foreground text-center font-medium leading-snug">
+            {practiceEvalError}
           </p>
         </div>
       )}
