@@ -2117,7 +2117,6 @@
   "practice_match_neutral": "Neutral",
   "practice_match_discouraged": "Schlechte Passung",
   "practice_recommended_start": "Empfohlener Start",
-  "practice_match_summary": "{{method}} + {{scenario}}: {{tier}}",
   "practice_discouraged_title": "Ungewöhnliche Methoden-Kombination",
   "practice_discouraged_body": "{{reason}} Du kannst trotzdem starten, wenn du bewusst eine schwache Passung üben möchtest.",
   "practice_discouraged_confirm": "Trotzdem starten",
