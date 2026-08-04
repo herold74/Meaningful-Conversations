@@ -549,10 +549,33 @@ function getFrameworkForEvaluation(id, language = 'de') {
   };
 }
 
+/** Localized method list for contracting evaluation prompts. */
+function buildContractingFrameworkCatalog(language = 'de') {
+  const lang = language === 'en' ? 'en' : 'de';
+  return FRAMEWORKS.map((f) => `- ${f.id} (${f.name[lang]})`).join('\n');
+}
+
+/** Replace LLM-supplied frameworkName with canonical localized labels. */
+function normalizeMethodSuggestions(methodSuggestions, language = 'de') {
+  if (!Array.isArray(methodSuggestions)) return methodSuggestions;
+  const lang = language === 'en' ? 'en' : 'de';
+  return methodSuggestions.map((s) => {
+    if (!s?.frameworkId) return s;
+    const fw = getFrameworkById(s.frameworkId);
+    return {
+      ...s,
+      frameworkId: resolveFrameworkId(s.frameworkId),
+      frameworkName: fw?.name?.[lang] || s.frameworkName,
+    };
+  });
+}
+
 module.exports = {
   FRAMEWORKS,
   SENTINEL_FRAMEWORKS,
   getFrameworkById,
   getPublicCatalog,
   getFrameworkForEvaluation,
+  buildContractingFrameworkCatalog,
+  normalizeMethodSuggestions,
 };

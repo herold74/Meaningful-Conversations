@@ -4,6 +4,7 @@ import { PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
 import { downloadPracticeTranscript } from '../utils/practiceTranscriptDownload';
 import * as geminiService from '../services/geminiService';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 import { Info } from 'lucide-react';
 
 interface PracticeEvaluationReviewProps {
@@ -335,7 +336,9 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
           <div className="space-y-3">
             {evaluation.methodSuggestions.map((s, i) => (
               <div key={i} className="rounded-lg border border-border-secondary bg-background-primary/50 p-3">
-                <p className="text-sm font-semibold text-content-primary">{s.frameworkName}</p>
+                <p className="text-sm font-semibold text-content-primary">
+                  {getFrameworkDisplayName(s.frameworkId, { t, language })}
+                </p>
                 <p className="text-sm text-content-secondary mt-1">{s.rationale}</p>
               </div>
             ))}

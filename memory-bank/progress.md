@@ -104,7 +104,8 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.5.1 (2026-08-03):** Build **4** — https://mc-app.manualmode.at, health OK (registry images from staging; ASC 2.5.1 in review)
+- [x] **Production v2.5.4 (2026-08-04):** Build **4** — https://mc-app.manualmode.at, health OK (pull-only staging registry images; parity with staging)
+- [x] **Production v2.5.1 (2026-08-03):** Build **4** — superseded by v2.5.4
 - [x] **Staging v2.5.1 (2026-08-03):** Build **4** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.1-b4)
 - [x] **Staging v2.5.1 (2026-08-03):** Build **1** — superseded by Build 4 (App Store submission prep)
 - [x] **Staging v2.5.0 (2026-07-28/29):** Practice region routing + coach token limit + Admin icon-only tabs + regression providerGuard; GenAI/Mistral already on 2.x

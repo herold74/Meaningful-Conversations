@@ -5,7 +5,7 @@ const prisma = require('../../prismaClient.js');
 const { requirePracticeAccess, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
 const { isHardUnlockedForPair } = require('../../practice/practiceUnlocks.js');
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
-const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
+const { getFrameworkById, getFrameworkForEvaluation, buildContractingFrameworkCatalog, normalizeMethodSuggestions } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
 const { getMatchTier, getDiscouragedReason } = require('../../practice/methodScenarioMap.js');
 const { resolveFrameworkId, isPracticeSentinelFramework } = require('../../practice/methodTaxonomy.js');
@@ -401,6 +401,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
         transcript,
         currentDate,
         liveMode: sessionParams.liveMode,
+        frameworkCatalog: buildContractingFrameworkCatalog(lang),
       });
       responseSchema = practiceContractingEvaluationPrompts.schema;
     } else if (resolvedPracticeMode === 'free-play') {
@@ -478,6 +479,13 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     }
 
     evaluationResult.practiceMode = evaluationMode;
+
+    if (evaluationResult.methodSuggestions?.length) {
+      evaluationResult.methodSuggestions = normalizeMethodSuggestions(
+        evaluationResult.methodSuggestions,
+        lang,
+      );
+    }
 
     if (evaluationMode === 'contracting') {
       evaluationResult.overallScore = computeContractingOverallScore(evaluationResult);
