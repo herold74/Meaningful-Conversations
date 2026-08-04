@@ -435,6 +435,8 @@ export interface PracticeEvaluationResult {
     overallScore: number;
     id?: string;
     liveMode?: boolean;
+    /** Full session transcript (Coach Practice only), stored after user completes evaluation. */
+    transcript?: string;
     scopeBoundary?: {
         active: boolean;
         theme?: string;

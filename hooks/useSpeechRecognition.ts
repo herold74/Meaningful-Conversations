@@ -28,6 +28,8 @@ export function useSpeechRecognition({
 }: UseSpeechRecognitionParams) {
   const [isListening, setIsListening] = useState(false);
   const baseTranscriptRef = useRef<string>('');
+  /** Latest combined transcript from onResult — avoids stale React input on stop-and-send. */
+  const latestTranscriptRef = useRef<string>('');
   const usingNativeSpeech = isNativeApp;
 
   const handleVoiceInteraction = useCallback(async () => {
@@ -43,21 +45,23 @@ export function useSpeechRecognition({
         console.error('[Speech] Error stopping recognition:', e);
       }
 
-      const currentInput = input;
-
       if (isIOS && !usingNativeSpeech) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      if (currentInput.trim()) {
+      const textToSend = (latestTranscriptRef.current || input).trim();
+
+      if (textToSend) {
         baseTranscriptRef.current = '';
+        latestTranscriptRef.current = '';
         setIsLoading(true);
-        await sendMessage(currentInput);
+        await sendMessage(textToSend);
         setInput('');
       }
     } else {
       stopTts();
       baseTranscriptRef.current = input.trim() ? input.trim() + ' ' : '';
+      latestTranscriptRef.current = baseTranscriptRef.current;
 
       try {
         console.log('[Speech] Starting speech recognition');
@@ -69,7 +73,9 @@ export function useSpeechRecognition({
           },
           (result) => {
             const combined = baseTranscriptRef.current + result.transcript;
-            setInput(combined.length <= 5000 ? combined : combined.slice(0, 5000));
+            const capped = combined.length <= 5000 ? combined : combined.slice(0, 5000);
+            latestTranscriptRef.current = capped;
+            setInput(capped);
           },
           (error) => {
             setIsListening(false);

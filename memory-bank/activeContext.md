@@ -10,6 +10,11 @@
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review.
 
+## Recent Changes (2026-08-04 — Coach Practice voice + transcript)
+
+- **Helene (`helene@arndgen.de`) review:** 2026-08-04 practice sessions showed STT fragment capture + first-reply TTS double-speak (streaming + initial-bot `useEffect`). **Past 3 evals cannot be re-scored** — no transcript was stored before this fix.
+- **Fix (local, not deployed):** Shared `useTts` marks streaming/speak handled; shared `useSpeechRecognition` sends latest transcript ref; practice evaluate persists `transcript` in `evaluationData` + download on review; privacy/GDPR docs updated.
+
 ## Recent Changes (2026-08-04 — Sam female TTS + staging Build 5)
 
 - **Commit `5a33eb4`:** Sam (+ Bekky) female TTS gender in `useTts` / `ChatView` / backend `ttsService`
