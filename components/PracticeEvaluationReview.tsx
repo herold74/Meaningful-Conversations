@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
-import { PracticeEvaluationResult } from '../types';
+import { PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
 
 interface PracticeEvaluationReviewProps {
@@ -8,7 +8,9 @@ interface PracticeEvaluationReviewProps {
   frameworkName: string;
   scenarioName: string;
   difficultyLabel: string;
+  practiceMode?: PracticeMode;
   onDone: () => void;
+  onContinuePhase2?: () => void;
   onHistory: () => void;
   onProgress: () => void;
 }
@@ -31,10 +33,10 @@ const DimensionSection: React.FC<{
   gapsLabel: string;
 }> = ({ title, data, stagesLabel, evidenceLabel, gapsLabel }) => (
   <Section title={title} badge={<ScoreBadge score={data.score} />}>
-    <p className="text-sm text-content-secondary mb-2">
+    <p className="text-sm text-content-secondary mb-2 break-words">
       <span className="font-semibold text-content-primary">{evidenceLabel}</span> {data.evidence}
     </p>
-    <p className="text-sm text-content-secondary">
+    <p className="text-sm text-content-secondary break-words">
       <span className="font-semibold text-content-primary">{gapsLabel}</span> {data.gaps}
     </p>
     {data.stagesCovered && data.stagesCovered.length > 0 && stagesLabel && (
@@ -48,18 +50,35 @@ const DimensionSection: React.FC<{
   </Section>
 );
 
+const CheckItem: React.FC<{ label: string; done: boolean }> = ({ label, done }) => (
+  <li className="text-sm flex items-start gap-2">
+    <span className={done ? 'text-status-success-foreground' : 'text-content-subtle'}>{done ? '✓' : '○'}</span>
+    <span className={done ? 'text-content-primary' : 'text-content-secondary'}>{label}</span>
+  </li>
+);
+
 const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   evaluation,
   frameworkName,
   scenarioName,
   difficultyLabel,
+  practiceMode = evaluation.practiceMode || 'method',
   onDone,
+  onContinuePhase2,
   onHistory,
   onProgress,
 }) => {
   const { t, language } = useLocalization();
   const evidenceLabel = language === 'de' ? 'Belege:' : 'Evidence:';
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
+  const isContracting = practiceMode === 'contracting';
+  const isFreePlay = practiceMode === 'free-play';
+
+  const scoringHint = isContracting
+    ? t('practice_review_contracting_scoring_hint')
+    : isFreePlay
+      ? t('practice_review_freeplay_scoring_hint')
+      : t('practice_review_scoring_hint');
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 sm:py-8">
@@ -76,6 +95,18 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       <Section title={t('practice_review_summary')}>
         <p className="text-content-primary leading-relaxed">{evaluation.summary}</p>
       </Section>
+
+      {isContracting && evaluation.sessionContract && (
+        <Section title={t('practice_review_session_contract')}>
+          <p className="text-sm text-content-primary leading-relaxed break-words">{evaluation.sessionContract}</p>
+        </Section>
+      )}
+
+      {isContracting && evaluation.clarifiedConcern && (
+        <Section title={t('practice_review_clarified_concern')}>
+          <p className="text-sm text-content-primary leading-relaxed break-words">{evaluation.clarifiedConcern}</p>
+        </Section>
+      )}
 
       {evaluation.scopeBoundary?.active && (
         <div className="rounded-xl border-2 border-status-warning-border bg-status-warning-background/40 p-4 sm:p-5 mb-4">
@@ -111,7 +142,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         <p className="text-xs text-content-secondary mb-4">{t('practice_review_live_note')}</p>
       )}
 
-      <p className="text-xs text-content-secondary mb-4">{t('practice_review_scoring_hint')}</p>
+      <p className="text-xs text-content-secondary mb-4">{scoringHint}</p>
 
       {evaluation.scenarioMethodFit && (
         <div className="rounded-xl border border-border-primary bg-background-secondary/50 p-4 mb-4">
@@ -120,7 +151,24 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         </div>
       )}
 
-      {evaluation.sessionFlow && (
+      {isContracting && evaluation.contractingSteps && (
+        <Section title={t('practice_review_contracting_steps')}>
+          <ul className="space-y-2 mb-3">
+            <CheckItem label={t('practice_review_contracting_topic')} done={evaluation.contractingSteps.topicIdentified} />
+            <CheckItem label={t('practice_review_contracting_relevance')} done={evaluation.contractingSteps.relevanceExplored} />
+            <CheckItem label={t('practice_review_contracting_outcome')} done={evaluation.contractingSteps.outcomeDefined} />
+            <CheckItem label={t('practice_review_contracting_confirm')} done={evaluation.contractingSteps.contractConfirmed} />
+          </ul>
+          {evaluation.contractingSteps.highlights && (
+            <p className="text-sm text-content-primary mb-2 leading-relaxed">{evaluation.contractingSteps.highlights}</p>
+          )}
+          <p className="text-sm text-content-secondary break-words">
+            <span className="font-semibold text-content-primary">{evidenceLabel}</span> {evaluation.contractingSteps.evidence}
+          </p>
+        </Section>
+      )}
+
+      {evaluation.sessionFlow && !isContracting && (
         <div className={`rounded-xl border p-4 sm:p-5 mb-4 ${
           evaluation.sessionFlow.coherent
             ? 'border-status-success-border bg-status-success-background/30'
@@ -138,10 +186,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
                 : t('practice_review_session_flow_incoherent')}
             </span>
           </div>
-          {evaluation.sessionFlow.coherent && evaluation.sessionFlow.highlights && (
-            <p className="text-sm text-content-primary mb-2 leading-relaxed">{evaluation.sessionFlow.highlights}</p>
-          )}
-          {!evaluation.sessionFlow.coherent && evaluation.sessionFlow.highlights && (
+          {evaluation.sessionFlow.highlights && (
             <p className="text-sm text-content-secondary mb-2 leading-relaxed">{evaluation.sessionFlow.highlights}</p>
           )}
           <p className="text-sm text-content-secondary leading-relaxed break-words">
@@ -150,13 +195,16 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         </div>
       )}
 
-      <DimensionSection
-        title={t('practice_dim_compliance')}
-        data={evaluation.methodCompliance}
-        stagesLabel={t('practice_stages_covered')}
-        evidenceLabel={evidenceLabel}
-        gapsLabel={gapsLabel}
-      />
+      {evaluation.methodCompliance && !isContracting && !isFreePlay && (
+        <DimensionSection
+          title={t('practice_dim_compliance')}
+          data={evaluation.methodCompliance}
+          stagesLabel={t('practice_stages_covered')}
+          evidenceLabel={evidenceLabel}
+          gapsLabel={gapsLabel}
+        />
+      )}
+
       <DimensionSection
         title={t('practice_dim_effectiveness')}
         data={evaluation.effectiveness}
@@ -187,6 +235,70 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         gapsLabel={gapsLabel}
       />
 
+      {isFreePlay && evaluation.observedMethodElements && evaluation.observedMethodElements.length > 0 && (
+        <Section title={t('practice_review_observed_elements')}>
+          <ul className="space-y-1">
+            {evaluation.observedMethodElements.map((el, i) => (
+              <li key={i} className="text-sm text-content-primary list-disc list-inside">{el}</li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {isFreePlay && evaluation.freePlaySuggestions && (
+        <>
+          {evaluation.freePlaySuggestions.wentWell.length > 0 && (
+            <Section title={t('practice_review_freeplay_went_well')}>
+              <ul className="space-y-1">
+                {evaluation.freePlaySuggestions.wentWell.map((s, i) => (
+                  <li key={i} className="text-sm text-content-primary flex gap-2">
+                    <span className="text-status-success-foreground shrink-0">+</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+          {evaluation.freePlaySuggestions.alternatives.length > 0 && (
+            <Section title={t('practice_review_freeplay_alternatives')}>
+              <ul className="space-y-1">
+                {evaluation.freePlaySuggestions.alternatives.map((s, i) => (
+                  <li key={i} className="text-sm text-content-primary flex gap-2">
+                    <span className="text-accent-primary shrink-0">→</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+          {evaluation.freePlaySuggestions.missedOrOverlooked.length > 0 && (
+            <Section title={t('practice_review_freeplay_missed')}>
+              <ul className="space-y-1">
+                {evaluation.freePlaySuggestions.missedOrOverlooked.map((s, i) => (
+                  <li key={i} className="text-sm text-content-primary flex gap-2">
+                    <span className="text-status-warning-foreground shrink-0">!</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+        </>
+      )}
+
+      {isContracting && evaluation.methodSuggestions && evaluation.methodSuggestions.length > 0 && (
+        <Section title={t('practice_review_method_suggestions')}>
+          <div className="space-y-3">
+            {evaluation.methodSuggestions.map((s, i) => (
+              <div key={i} className="rounded-lg border border-border-secondary bg-background-primary/50 p-3">
+                <p className="text-sm font-semibold text-content-primary">{s.frameworkName}</p>
+                <p className="text-sm text-content-secondary mt-1">{s.rationale}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
       {evaluation.calibration && evaluation.calibration.selfRating > 0 && (
         <Section title={t('practice_calibration_title')}>
           <p className="text-sm text-content-primary">{evaluation.calibration.delta}</p>
@@ -216,22 +328,33 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         </ul>
       </Section>
 
-      <Section title={t('practice_drills_title')}>
-        <div className="space-y-3">
-          {evaluation.nextDrills.map((d, i) => (
-            <div key={i} className="rounded-lg border border-border-secondary bg-background-primary/50 p-3">
-              <p className="text-sm font-semibold text-content-primary">{d.action}</p>
-              <p className="text-sm text-content-secondary mt-1">{d.rationale}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {!isFreePlay && (
+        <Section title={t('practice_drills_title')}>
+          <div className="space-y-3">
+            {evaluation.nextDrills.map((d, i) => (
+              <div key={i} className="rounded-lg border border-border-secondary bg-background-primary/50 p-3">
+                <p className="text-sm font-semibold text-content-primary">{d.action}</p>
+                <p className="text-sm text-content-secondary mt-1">{d.rationale}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
+        {isContracting && onContinuePhase2 && (
+          <button
+            type="button"
+            onClick={onContinuePhase2}
+            className="flex-1 py-3 rounded-lg btn-accent-solid font-semibold"
+          >
+            {t('practice_continue_phase2')}
+          </button>
+        )}
         <button
           type="button"
           onClick={onDone}
-          className="flex-1 py-3 rounded-lg btn-accent-solid font-semibold"
+          className={`flex-1 py-3 rounded-lg font-semibold ${isContracting && onContinuePhase2 ? 'btn-surface-outline' : 'btn-accent-solid'}`}
         >
           {t('practice_done')}
         </button>

@@ -1,5 +1,7 @@
 const {
   computePracticeOverallScore,
+  computeContractingOverallScore,
+  computeFreePlayOverallScore,
   buildScenarioMethodFit,
 } = require('../evaluationScoring.js');
 
@@ -52,6 +54,37 @@ describe('computePracticeOverallScore', () => {
       coacheeAutonomy: { score: 8 },
       coacheeSatisfaction: { score: 8 },
     })).toBe(9);
+  });
+});
+
+describe('computeContractingOverallScore', () => {
+  const dims = {
+    effectiveness: { score: 8 },
+    clarity: { score: 8 },
+    coacheeAutonomy: { score: 8 },
+    coacheeSatisfaction: { score: 8 },
+  };
+
+  test('averages four dimensions', () => {
+    expect(computeContractingOverallScore({ ...dims, contractingSteps: { outcomeDefined: true, contractConfirmed: true } })).toBe(8);
+  });
+
+  test('caps at 8 when outcome/confirm missing despite high scores', () => {
+    expect(computeContractingOverallScore({
+      ...dims,
+      contractingSteps: { outcomeDefined: false, contractConfirmed: false },
+    })).toBe(8);
+  });
+});
+
+describe('computeFreePlayOverallScore', () => {
+  test('averages four dimensions without method compliance', () => {
+    expect(computeFreePlayOverallScore({
+      effectiveness: { score: 7 },
+      clarity: { score: 9 },
+      coacheeAutonomy: { score: 8 },
+      coacheeSatisfaction: { score: 6 },
+    })).toBe(8);
   });
 });
 

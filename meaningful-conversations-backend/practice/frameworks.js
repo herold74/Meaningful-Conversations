@@ -462,9 +462,53 @@ const FRAMEWORKS = [
   },
 ];
 
+/** Internal practice-only frameworks (not in public catalog). */
+const SENTINEL_FRAMEWORKS = [
+  {
+    id: 'contracting',
+    sourceBotId: null,
+    isPracticeOnly: true,
+    name: { en: 'Concern clarification', de: 'Anliegensklärung' },
+    shortDescription: {
+      en: 'Practice contracting and clarifying the client concern before method work.',
+      de: 'Anliegensklärung und Contracting üben, bevor Methodenarbeit beginnt.',
+    },
+    stages: [],
+    complianceCriteria: [],
+    sessionFlowRubric: { en: '', de: '' },
+    explainer: {
+      summary: { en: '', de: '' },
+      why: { en: '', de: '' },
+      goodCompliance: { en: '', de: '' },
+    },
+    evaluatorRubric: { en: '', de: '' },
+  },
+  {
+    id: 'free-play',
+    sourceBotId: null,
+    isPracticeOnly: true,
+    name: { en: 'Free play', de: 'Freispiel' },
+    shortDescription: {
+      en: 'First method session without a fixed framework — coach chooses interventions freely.',
+      de: 'Erste Methodensitzung ohne fixe Methode — Coach wählt Interventionen frei.',
+    },
+    stages: [],
+    complianceCriteria: [],
+    sessionFlowRubric: { en: '', de: '' },
+    explainer: {
+      summary: { en: '', de: '' },
+      why: { en: '', de: '' },
+      goodCompliance: { en: '', de: '' },
+    },
+    evaluatorRubric: { en: '', de: '' },
+  },
+];
+
 function getFrameworkById(id) {
   const canonical = resolveFrameworkId(id);
-  return FRAMEWORKS.find((f) => f.id === canonical) || null;
+  return FRAMEWORKS.find((f) => f.id === canonical)
+    || SENTINEL_FRAMEWORKS.find((f) => f.id === canonical)
+    || null;
 }
 
 /** Public catalog metadata (no evaluator rubrics). */
@@ -507,6 +551,7 @@ function getFrameworkForEvaluation(id, language = 'de') {
 
 module.exports = {
   FRAMEWORKS,
+  SENTINEL_FRAMEWORKS,
   getFrameworkById,
   getPublicCatalog,
   getFrameworkForEvaluation,

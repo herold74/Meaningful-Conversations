@@ -8,10 +8,14 @@ const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
 const { getFrameworkById, getFrameworkForEvaluation } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
 const { getMatchTier, getDiscouragedReason } = require('../../practice/methodScenarioMap.js');
-const { resolveFrameworkId } = require('../../practice/methodTaxonomy.js');
+const { resolveFrameworkId, isPracticeSentinelFramework } = require('../../practice/methodTaxonomy.js');
 const { getThemeLabel } = require('../../practice/scopeBoundary.js');
-const { computePracticeOverallScore, buildScenarioMethodFit } = require('../../practice/evaluationScoring.js');
-const { practiceEvaluationPrompts } = require('../../services/geminiPrompts.js');
+const { computePracticeOverallScore, computeContractingOverallScore, computeFreePlayOverallScore, buildScenarioMethodFit } = require('../../practice/evaluationScoring.js');
+const {
+  practiceEvaluationPrompts,
+  practiceContractingEvaluationPrompts,
+  practiceFreePlayEvaluationPrompts,
+} = require('../../services/geminiPrompts.js');
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const { withTimeout, parseStructuredJsonResponse } = require('./shared.js');
@@ -48,15 +52,21 @@ async function validatePracticeSessionParams(userId, user, {
   scopeBoundaryTheme,
   frameworkId,
   scenarioId,
+  practiceMode = 'method',
 }) {
   const diff = VALID_DIFFICULTIES.includes(difficulty) ? difficulty : 'moderate';
   const unlocks = await getPracticeUnlocks(userId, user);
-  const pairUnlocked = isHardUnlockedForPair(
-    unlocks.hardUnlockedPairs,
-    frameworkId,
-    scenarioId,
-    unlocks.privileged,
-  );
+  const resolvedFw = resolveFrameworkId(frameworkId);
+  const pairUnlocked = unlocks.privileged
+    ? true
+    : isPracticeSentinelFramework(resolvedFw)
+      ? unlocks.hardUnlockedPairs.some((p) => p.scenarioId === scenarioId)
+      : isHardUnlockedForPair(
+        unlocks.hardUnlockedPairs,
+        resolvedFw,
+        scenarioId,
+        unlocks.privileged,
+      );
 
   if (diff === 'hard' && !pairUnlocked) {
     return {
@@ -73,8 +83,11 @@ async function validatePracticeSessionParams(userId, user, {
     };
   }
 
+  const skipScope = practiceMode === 'contracting' || resolvedFw === 'contracting';
   const resolvedTheme =
-    diff === 'hard' ? resolveScopeBoundaryTheme(diff, scenarioId, scopeBoundaryTheme) : null;
+    !skipScope && diff === 'hard'
+      ? resolveScopeBoundaryTheme(diff, scenarioId, scopeBoundaryTheme)
+      : null;
 
   return { ok: true, difficulty: diff, liveMode: !!liveMode, scopeBoundaryTheme: resolvedTheme };
 }
@@ -93,6 +106,10 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     stream = false,
     liveMode = false,
     scopeBoundaryTheme = null,
+    practiceMode = 'method',
+    priorTranscript = '',
+    clarifiedConcern = '',
+    sessionContract = '',
   } = req.body;
 
   try {
@@ -109,7 +126,11 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     if (!framework || !getScenarioById(scenarioId)) {
       return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
     }
-    if (isClientOnlyPracticeFramework(framework) && !access.canUseClientFrameworks) {
+    if (
+      !isPracticeSentinelFramework(resolvedFrameworkId)
+      && isClientOnlyPracticeFramework(framework)
+      && !access.canUseClientFrameworks
+    ) {
       return res.status(403).json({
         error: practiceAccessErrorMessage('client_framework'),
         reason: 'client_framework',
@@ -122,6 +143,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       scopeBoundaryTheme,
       frameworkId: resolvedFrameworkId,
       scenarioId,
+      practiceMode,
     });
     if (!sessionParams.ok) {
       return res.status(sessionParams.status).json({ error: sessionParams.error });
@@ -144,6 +166,9 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     });
     const userRegionPreference = regionUser?.aiRegionPreference || 'optimal';
 
+    const resolvedPracticeMode = practiceMode
+      || (resolvedFrameworkId === 'contracting' ? 'contracting' : resolvedFrameworkId === 'free-play' ? 'free-play' : 'method');
+
     const systemInstruction = buildCoacheeSystemPrompt({
       frameworkId: resolvedFrameworkId,
       scenarioId,
@@ -152,6 +177,10 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       focusNote,
       scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
       liveMode: sessionParams.liveMode,
+      practiceMode: resolvedPracticeMode,
+      priorTranscript,
+      clarifiedConcern,
+      sessionContract,
     });
 
     const geminiHistory = formatHistoryForGemini(history.slice(0, -1));
@@ -272,6 +301,10 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     language = 'de',
     liveMode = false,
     scopeBoundaryTheme = null,
+    practiceMode = 'method',
+    priorTranscript = '',
+    clarifiedConcern = '',
+    sessionContract = '',
   } = req.body;
 
   try {
@@ -285,8 +318,16 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     }
 
     const resolvedFrameworkId = resolveFrameworkId(frameworkId);
+    const resolvedPracticeMode = practiceMode
+      || (resolvedFrameworkId === 'contracting' ? 'contracting' : resolvedFrameworkId === 'free-play' ? 'free-play' : 'method');
+
     const frameworkMeta = resolvedFrameworkId ? getFrameworkById(resolvedFrameworkId) : null;
-    if (frameworkMeta && isClientOnlyPracticeFramework(frameworkMeta) && !access.canUseClientFrameworks) {
+    if (
+      frameworkMeta
+      && !isPracticeSentinelFramework(resolvedFrameworkId)
+      && isClientOnlyPracticeFramework(frameworkMeta)
+      && !access.canUseClientFrameworks
+    ) {
       return res.status(403).json({
         error: practiceAccessErrorMessage('client_framework'),
         reason: 'client_framework',
@@ -299,15 +340,15 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       scopeBoundaryTheme,
       frameworkId: resolvedFrameworkId,
       scenarioId,
+      practiceMode: resolvedPracticeMode,
     });
     if (!sessionParams.ok) {
       return res.status(sessionParams.status).json({ error: sessionParams.error });
     }
 
-    const framework = getFrameworkForEvaluation(resolvedFrameworkId, language);
     const scenario = getScenarioById(scenarioId);
-    if (!framework || !scenario) {
-      return res.status(400).json({ error: 'Invalid frameworkId or scenarioId.' });
+    if (!scenario) {
+      return res.status(400).json({ error: 'Invalid scenarioId.' });
     }
 
     const lang = language === 'en' ? 'en' : 'de';
@@ -330,34 +371,77 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       : `Coachee: ${scenario.coacheeName.en}\nConcern: ${scenario.concern.en}\nTone: ${scenario.emotionalTone.en}${focusNote ? `\nCoach focus: ${focusNote}` : ''}`;
 
     const currentDate = new Date().toISOString().split('T')[0];
-    const matchTier = getMatchTier(scenarioId, resolvedFrameworkId);
-    const discouragedReason = getDiscouragedReason(scenarioId, resolvedFrameworkId, lang);
-    const promptFn = practiceEvaluationPrompts[lang]?.prompt || practiceEvaluationPrompts.en.prompt;
-    const prompt = promptFn({
-      framework,
-      scenarioSummary,
-      difficulty: sessionParams.difficulty,
-      selfRating: selfRating || null,
-      transcript,
-      currentDate,
-      liveMode: sessionParams.liveMode,
-      scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
-      scopeBoundaryThemeLabel: sessionParams.scopeBoundaryTheme
-        ? getThemeLabel(sessionParams.scopeBoundaryTheme, lang)
-        : null,
-      matchTier,
-      discouragedReason,
-      sessionFlowRubric: framework.sessionFlowRubric || '',
-    });
-
     const modelName = 'gemini-2.5-pro';
+
+    let prompt;
+    let responseSchema;
+    let evaluationMode = resolvedPracticeMode;
+
+    if (resolvedPracticeMode === 'contracting') {
+      const promptFn = practiceContractingEvaluationPrompts[lang]?.prompt
+        || practiceContractingEvaluationPrompts.en.prompt;
+      prompt = promptFn({
+        scenarioSummary,
+        difficulty: sessionParams.difficulty,
+        selfRating: selfRating || null,
+        transcript,
+        currentDate,
+        liveMode: sessionParams.liveMode,
+      });
+      responseSchema = practiceContractingEvaluationPrompts.schema;
+    } else if (resolvedPracticeMode === 'free-play') {
+      const priorContext = [clarifiedConcern, sessionContract, priorTranscript].filter(Boolean).join('\n');
+      const promptFn = practiceFreePlayEvaluationPrompts[lang]?.prompt
+        || practiceFreePlayEvaluationPrompts.en.prompt;
+      prompt = promptFn({
+        scenarioSummary,
+        difficulty: sessionParams.difficulty,
+        selfRating: selfRating || null,
+        transcript,
+        currentDate,
+        liveMode: sessionParams.liveMode,
+        scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
+        scopeBoundaryThemeLabel: sessionParams.scopeBoundaryTheme
+          ? getThemeLabel(sessionParams.scopeBoundaryTheme, lang)
+          : null,
+        priorContext,
+      });
+      responseSchema = practiceFreePlayEvaluationPrompts.schema;
+    } else {
+      const framework = getFrameworkForEvaluation(resolvedFrameworkId, language);
+      if (!framework) {
+        return res.status(400).json({ error: 'Invalid frameworkId.' });
+      }
+      const matchTier = getMatchTier(scenarioId, resolvedFrameworkId);
+      const discouragedReason = getDiscouragedReason(scenarioId, resolvedFrameworkId, lang);
+      const promptFn = practiceEvaluationPrompts[lang]?.prompt || practiceEvaluationPrompts.en.prompt;
+      prompt = promptFn({
+        framework,
+        scenarioSummary,
+        difficulty: sessionParams.difficulty,
+        selfRating: selfRating || null,
+        transcript,
+        currentDate,
+        liveMode: sessionParams.liveMode,
+        scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
+        scopeBoundaryThemeLabel: sessionParams.scopeBoundaryTheme
+          ? getThemeLabel(sessionParams.scopeBoundaryTheme, lang)
+          : null,
+        matchTier,
+        discouragedReason,
+        sessionFlowRubric: framework.sessionFlowRubric || '',
+      });
+      responseSchema = practiceEvaluationPrompts.schema;
+      evaluationMode = 'method';
+    }
+
     const result = await withTimeout(
       aiProviderService.generateContent({
         model: modelName,
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
-          responseSchema: practiceEvaluationPrompts.schema,
+          responseSchema,
           temperature: 0.2,
         },
         context: 'analysis',
@@ -379,23 +463,41 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Failed to parse evaluation response.' });
     }
 
-    if (sessionParams.scopeBoundaryTheme) {
-      evaluationResult.scopeBoundary = {
-        active: true,
-        theme: sessionParams.scopeBoundaryTheme,
-        themeLabel: getThemeLabel(sessionParams.scopeBoundaryTheme, lang),
-        ...(evaluationResult.scopeBoundary || {}),
-      };
-    } else {
-      evaluationResult.scopeBoundary = evaluationResult.scopeBoundary || { active: false };
-    }
-    evaluationResult.liveMode = sessionParams.liveMode;
+    evaluationResult.practiceMode = evaluationMode;
 
-    const scenarioMethodFit = buildScenarioMethodFit(scenarioId, resolvedFrameworkId, lang);
-    if (scenarioMethodFit) {
-      evaluationResult.scenarioMethodFit = scenarioMethodFit;
+    if (evaluationMode === 'contracting') {
+      evaluationResult.overallScore = computeContractingOverallScore(evaluationResult);
+    } else if (evaluationMode === 'free-play') {
+      if (sessionParams.scopeBoundaryTheme) {
+        evaluationResult.scopeBoundary = {
+          active: true,
+          theme: sessionParams.scopeBoundaryTheme,
+          themeLabel: getThemeLabel(sessionParams.scopeBoundaryTheme, lang),
+          ...(evaluationResult.scopeBoundary || {}),
+        };
+      } else {
+        evaluationResult.scopeBoundary = evaluationResult.scopeBoundary || { active: false };
+      }
+      evaluationResult.overallScore = computeFreePlayOverallScore(evaluationResult);
+    } else {
+      if (sessionParams.scopeBoundaryTheme) {
+        evaluationResult.scopeBoundary = {
+          active: true,
+          theme: sessionParams.scopeBoundaryTheme,
+          themeLabel: getThemeLabel(sessionParams.scopeBoundaryTheme, lang),
+          ...(evaluationResult.scopeBoundary || {}),
+        };
+      } else {
+        evaluationResult.scopeBoundary = evaluationResult.scopeBoundary || { active: false };
+      }
+      const scenarioMethodFit = buildScenarioMethodFit(scenarioId, resolvedFrameworkId, lang);
+      if (scenarioMethodFit) {
+        evaluationResult.scenarioMethodFit = scenarioMethodFit;
+      }
+      evaluationResult.overallScore = computePracticeOverallScore(evaluationResult);
     }
-    evaluationResult.overallScore = computePracticeOverallScore(evaluationResult);
+
+    evaluationResult.liveMode = sessionParams.liveMode;
     if (evaluationResult.calibration) {
       evaluationResult.calibration.evidenceRating = evaluationResult.overallScore;
     }

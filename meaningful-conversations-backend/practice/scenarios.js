@@ -2,6 +2,21 @@
  * Coachee scenarios for Coach Practice mode (orthogonal to framework choice).
  */
 
+const AVATAR_GENDER = {
+  '/avatars/max.png': 'male',
+  '/avatars/ava.png': 'female',
+  '/avatars/kenji.png': 'male',
+  '/avatars/chloe.png': 'female',
+  '/avatars/rob.png': 'male',
+  '/avatars/victor.png': 'male',
+  '/avatars/bekky.png': 'female',
+  '/avatars/dan.png': 'male',
+};
+
+function getCoacheeGenderFromAvatar(avatar) {
+  return AVATAR_GENDER[avatar] || 'male';
+}
+
 const SCENARIOS = [
   {
     id: 'career-decision',
@@ -202,6 +217,7 @@ function getPublicScenarios(language = 'de') {
     id: s.id,
     coacheeName: s.coacheeName[lang],
     avatar: s.avatar,
+    coacheeGender: getCoacheeGenderFromAvatar(s.avatar),
     concern: s.concern[lang],
     emotionalTone: s.emotionalTone[lang],
   }));
@@ -224,6 +240,8 @@ function getScenarioForPrompt(id, difficulty, language = 'de', focusNote = '') {
 
 module.exports = {
   SCENARIOS,
+  AVATAR_GENDER,
+  getCoacheeGenderFromAvatar,
   DIFFICULTY_MODIFIERS,
   getScenarioById,
   getPublicScenarios,

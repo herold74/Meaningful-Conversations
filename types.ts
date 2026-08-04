@@ -50,6 +50,7 @@ export type NavView =
     | 'practiceChat'
     | 'practiceSelfRating'
     | 'practiceReview'
+    | 'practicePhase2Picker'
     | 'practiceHistory'
     | 'practiceProgress';
 
@@ -261,6 +262,22 @@ export interface TranscriptEvaluationSummary {
 
 export type PracticeDifficulty = 'easy' | 'moderate' | 'challenging' | 'hard';
 
+export type PracticeMode = 'method' | 'contracting' | 'free-play';
+
+/** Context carried from Phase 1 (contracting) into Phase 2 (method or free-play). */
+export interface PracticePhase2Context {
+    scenarioId: string;
+    coacheeName: string;
+    coacheeAvatar: string;
+    coacheeGender?: 'male' | 'female';
+    difficulty: PracticeDifficulty;
+    difficultyLabel: string;
+    liveMode: boolean;
+    priorTranscript: string;
+    clarifiedConcern: string;
+    sessionContract?: string;
+}
+
 export type ScopeBoundaryTheme =
     | 'trauma'
     | 'addiction'
@@ -313,6 +330,8 @@ export interface PracticeScenario {
     id: string;
     coacheeName: string;
     avatar: string;
+    /** TTS voice gender — derived from coach avatar persona when omitted. */
+    coacheeGender?: 'male' | 'female';
     concern: string;
     emotionalTone: string;
     frameworkMatches?: Record<string, PracticeMatchTier>;
@@ -334,11 +353,22 @@ export interface CoachPracticeConfig {
     scenarioName: string;
     coacheeName: string;
     coacheeAvatar: string;
+    /** TTS voice gender for the practice coachee. */
+    coacheeGender?: 'male' | 'female';
     difficulty: PracticeDifficulty;
     difficultyLabel: string;
     focusNote?: string;
     liveMode: boolean;
     scopeBoundaryTheme?: ScopeBoundaryTheme | null;
+    /** Defaults to `method` when omitted (classic practice). */
+    practiceMode?: PracticeMode;
+    /** Hide scenario concern in setup/chat empty state (contracting Phase 1). */
+    hideScenarioBrief?: boolean;
+    /** Phase 2: transcript summary from contracting session. */
+    priorTranscript?: string;
+    /** Phase 2: clarified concern / contract from contracting evaluation. */
+    clarifiedConcern?: string;
+    sessionContract?: string;
 }
 
 export interface PracticeDimensionScore {
@@ -347,9 +377,25 @@ export interface PracticeDimensionScore {
     gaps: string;
 }
 
+export interface PracticeContractingSteps {
+    topicIdentified: boolean;
+    relevanceExplored: boolean;
+    outcomeDefined: boolean;
+    contractConfirmed: boolean;
+    evidence: string;
+    highlights: string;
+}
+
+export interface PracticeMethodSuggestion {
+    frameworkId: string;
+    frameworkName: string;
+    rationale: string;
+}
+
 export interface PracticeEvaluationResult {
     summary: string;
-    methodCompliance: PracticeDimensionScore & { stagesCovered: string[] };
+    /** Present for method-mode evaluations; optional for contracting / free-play. */
+    methodCompliance?: PracticeDimensionScore & { stagesCovered: string[] };
     effectiveness: PracticeDimensionScore;
     clarity: PracticeDimensionScore;
     coacheeAutonomy?: PracticeDimensionScore;
@@ -358,6 +404,20 @@ export interface PracticeEvaluationResult {
         coherent: boolean;
         evidence: string;
         highlights: string;
+    };
+    /** Contracting evaluation only. */
+    practiceMode?: PracticeMode;
+    contractingSteps?: PracticeContractingSteps;
+    sessionContract?: string;
+    clarifiedConcern?: string;
+    methodSuggestions?: PracticeMethodSuggestion[];
+    /** Free-play evaluation only — descriptive, not scored. */
+    observedMethodElements?: string[];
+    /** Free-play: what went well / alternatives / missed cues. */
+    freePlaySuggestions?: {
+        alternatives: string[];
+        wentWell: string[];
+        missedOrOverlooked: string[];
     };
     scenarioMethodFit?: {
         tier: PracticeMatchTier;

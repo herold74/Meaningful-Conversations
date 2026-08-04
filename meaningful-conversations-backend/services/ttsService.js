@@ -42,6 +42,7 @@ function getVoiceForBot(botId, language) {
         'gabrielle-four-stage',
         'sam-forward-focused',
         'bekky-thought-audit',
+        'practice-coachee-female',
     ];
     const gender = femaleBots.includes(botId) ? 'female' : 'male';
     

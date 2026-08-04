@@ -53,8 +53,10 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
 const avg = (values: number[]) =>
   values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 
+const PRACTICE_SENTINEL_FRAMEWORKS = new Set(['contracting', 'free-play']);
+
 const dimensionsFromEval = (ev: PracticeEvaluationSummary): PracticeDimensionAverages => ({
-  methodCompliance: ev.evaluationData.methodCompliance.score,
+  methodCompliance: ev.evaluationData.methodCompliance?.score ?? 0,
   effectiveness: ev.evaluationData.effectiveness.score,
   clarity: ev.evaluationData.clarity.score,
   coacheeAutonomy: ev.evaluationData.coacheeAutonomy?.score ?? null,
@@ -107,6 +109,7 @@ export const computePracticeProgress = (
 
   const frameworkMap = new Map<string, PracticeEvaluationSummary[]>();
   for (const ev of sorted) {
+    if (PRACTICE_SENTINEL_FRAMEWORKS.has(ev.frameworkId)) continue;
     const list = frameworkMap.get(ev.frameworkId) || [];
     list.push(ev);
     frameworkMap.set(ev.frameworkId, list);
@@ -221,6 +224,30 @@ export const buildRecommendedPracticeConfig = (
   const frameworkId = latest?.frameworkId ?? defaultPair?.frameworkId;
   const scenarioId = latest?.scenarioId ?? defaultPair?.scenarioId;
 
+  if (frameworkId && PRACTICE_SENTINEL_FRAMEWORKS.has(frameworkId)) {
+    const scenario = catalog.scenarios.find((s) => s.id === scenarioId) || catalog.scenarios[0];
+    const framework = catalog.frameworks.find((f) => !f.locked) || catalog.frameworks[0];
+    if (!framework || !scenario) return null;
+    const difficulty = (latest?.difficulty as PracticeDifficulty) || 'moderate';
+    const difficultyLabel =
+      catalog.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+    return {
+      frameworkId: framework.id,
+      frameworkName: framework.name,
+      scenarioId: scenario.id,
+      scenarioName: scenario.concern,
+      coacheeName: scenario.coacheeName,
+      coacheeAvatar: scenario.avatar,
+      coacheeGender: scenario.coacheeGender,
+      difficulty,
+      difficultyLabel,
+      focusNote: stats.nextDrill?.action?.trim() || undefined,
+      liveMode: false,
+      scopeBoundaryTheme: null,
+      practiceMode: 'method',
+    };
+  }
+
   const framework = catalog.frameworks.find((f) => f.id === frameworkId) || catalog.frameworks[0];
   const scenario = catalog.scenarios.find((s) => s.id === scenarioId) || catalog.scenarios[0];
   if (!framework || !scenario) return null;
@@ -238,13 +265,15 @@ export const buildRecommendedPracticeConfig = (
     scenarioName: scenario.concern,
     coacheeName: scenario.coacheeName,
     coacheeAvatar: scenario.avatar,
+    coacheeGender: scenario.coacheeGender,
     difficulty,
     difficultyLabel,
     focusNote,
-    liveMode: false,
-    scopeBoundaryTheme: null,
+      liveMode: false,
+      scopeBoundaryTheme: null,
+      practiceMode: 'method',
+    };
   };
-};
 
 export const scoreColorClass = (score: number, max = 10): string => {
   const ratio = score / max;

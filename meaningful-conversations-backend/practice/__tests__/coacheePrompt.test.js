@@ -39,3 +39,46 @@ describe('buildCoacheeSystemPrompt — mental fitness', () => {
     expect(prompt).not.toContain('PQ-Reps');
   });
 });
+
+describe('buildCoacheeSystemPrompt — contracting & phase 2', () => {
+  test('contracting mode uses vague first-turn rule and no method hint', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'contracting',
+      scenarioId: 'motivation-dip',
+      difficulty: 'moderate',
+      language: 'de',
+      practiceMode: 'contracting',
+    });
+    expect(prompt).toContain('vage');
+    expect(prompt).not.toContain('Der Coach übt die Methode');
+  });
+
+  test('contracting hard difficulty does not inject scope boundary block', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'contracting',
+      scenarioId: 'motivation-dip',
+      difficulty: 'hard',
+      language: 'de',
+      practiceMode: 'contracting',
+      scopeBoundaryTheme: 'trauma',
+    });
+    expect(prompt).not.toContain('GRENZFALL');
+    expect(prompt).not.toContain('SCOPE');
+  });
+
+  test('phase 2 includes prior contracting context', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'free-play',
+      scenarioId: 'motivation-dip',
+      difficulty: 'moderate',
+      language: 'en',
+      practiceMode: 'free-play',
+      priorTranscript: 'Coach: Hello\nCoachee: Hi',
+      clarifiedConcern: 'Need clarity on career move',
+      sessionContract: 'Decide next step by end of session',
+    });
+    expect(prompt).toContain('PRIOR CONCERN CLARIFICATION');
+    expect(prompt).toContain('Need clarity on career move');
+    expect(prompt).toContain('Decide next step');
+  });
+});

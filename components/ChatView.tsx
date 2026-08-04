@@ -29,6 +29,7 @@ import { resolveAssetUrl } from '../utils/assetUrl';
 import { useWakeLock } from '../hooks/useWakeLock';
 import CoachInfoModal from './CoachInfoModal';
 import { useTts } from '../hooks/useTts';
+import { resolvePracticeCoacheeGender } from '../utils/botGender';
 import { useMeditation } from '../hooks/useMeditation';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
@@ -94,7 +95,24 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
 
-  const tts = useTts({ bot, language, currentUser, chatHistory, isVoiceMode: showVoiceUi, isNewSession, t });
+  const practiceCoacheeGender = useMemo((): 'male' | 'female' | undefined => {
+    if (bot.id !== 'practice-coachee' || !coachPracticeConfig) return undefined;
+    return resolvePracticeCoacheeGender(
+      coachPracticeConfig.coacheeGender,
+      coachPracticeConfig.coacheeAvatar,
+    );
+  }, [bot.id, coachPracticeConfig]);
+
+  const tts = useTts({
+    bot,
+    language,
+    currentUser,
+    chatHistory,
+    isVoiceMode: showVoiceUi,
+    isNewSession,
+    t,
+    genderOverride: practiceCoacheeGender,
+  });
   const meditation = useMeditation({
     speak: tts.speak,
     setIsVoiceMode: practiceLiveMode ? () => {} : setIsVoiceMode,
@@ -116,28 +134,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [guestLimitRemaining, setGuestLimitRemaining] = useState<number | null>(null);
   const [guestFingerprint, setGuestFingerprint] = useState<string | null>(null);
   const isGuest = !currentUser;
-
-  const botGender = useMemo((): 'male' | 'female' => {
-    switch (bot.id) {
-      case 'gloria-life-context':
-      case 'gloria-interview':
-      case 'ava-strategic':
-      case 'chloe-structured-reflection':
-      case 'gabrielle-four-stage':
-      case 'sam-forward-focused':
-      case 'bekky-thought-audit':
-        return 'female';
-      case 'max-ambitious':
-      case 'rob':
-      case 'kenji-resilience':
-      case 'nexus-goal-path-solution':
-      case 'mike-ambivalence-coaching':
-      case 'victor-systemic-coaching':
-      case 'dan-client-language':
-      default:
-        return 'male';
-    }
-  }, [bot.id]);
 
   const coachingMode = currentUser?.coachingMode || 'off';
   const effectiveCoachingMode = (bot.id === 'nexus-goal-path-solution' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
@@ -910,7 +906,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                 className="w-20 h-20 rounded-full mb-4 ring-2 ring-accent-primary/30 shadow-sm"
               />
               <p className="text-lg font-semibold text-content-primary mb-2">{coachPracticeConfig.coacheeName}</p>
-              <p className="text-sm text-content-secondary max-w-md">{coachPracticeConfig.scenarioName}</p>
+              {coachPracticeConfig.hideScenarioBrief ? (
+                <p className="text-sm text-content-secondary max-w-md leading-relaxed">{t('practice_contracting_chat_hint')}</p>
+              ) : (
+                <p className="text-sm text-content-secondary max-w-md">{coachPracticeConfig.scenarioName}</p>
+              )}
             </div>
           )}
           {chatHistory.map((message, index) => (
@@ -1015,7 +1015,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         onPreviewServerVoice={tts.handlePreviewServerVoice}
         onPreviewNativeVoice={tts.handlePreviewNativeVoice}
         botLanguage={language}
-        botGender={botGender}
+        botGender={tts.botGender}
         isGuest={isGuest}
     />
      <CoachInfoModal

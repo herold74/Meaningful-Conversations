@@ -5,6 +5,13 @@ const NEUTRAL_FIT_NOTES = {
   de: 'Diese Methoden-Szenario-Kombination ist akzeptabel, aber keine Primary-Empfehlung.',
 };
 
+function avgDimensionScores(ev, keys) {
+  const scores = keys
+    .map((k) => ev[k]?.score)
+    .filter((s) => typeof s === 'number');
+  return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+}
+
 function computePracticeOverallScore(ev) {
   const m = ev.methodCompliance?.score ?? 0;
   const coherent = ev.sessionFlow?.coherent === true;
@@ -14,6 +21,26 @@ function computePracticeOverallScore(ev) {
     .filter((s) => typeof s === 'number');
   const avgOthers = others.length ? others.reduce((a, b) => a + b, 0) / others.length : m;
   return Math.max(1, Math.min(9, Math.round(m * 0.6 + avgOthers * 0.4)));
+}
+
+/** Contracting: four core dimensions; quality gate on contracting steps. */
+function computeContractingOverallScore(ev) {
+  const keys = ['effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction'];
+  const avg = avgDimensionScores(ev, keys);
+  let score = Math.max(1, Math.min(10, Math.round(avg)));
+  const steps = ev.contractingSteps;
+  const gateOk = steps
+    && steps.outcomeDefined
+    && steps.contractConfirmed;
+  if (!gateOk && score >= 9) score = 8;
+  return score;
+}
+
+/** Free-play: average of four dimensions (no method compliance). */
+function computeFreePlayOverallScore(ev) {
+  const keys = ['effectiveness', 'clarity', 'coacheeAutonomy', 'coacheeSatisfaction'];
+  const avg = avgDimensionScores(ev, keys);
+  return Math.max(1, Math.min(10, Math.round(avg)));
 }
 
 function buildScenarioMethodFit(scenarioId, frameworkId, language) {
@@ -28,6 +55,8 @@ function buildScenarioMethodFit(scenarioId, frameworkId, language) {
 
 module.exports = {
   computePracticeOverallScore,
+  computeContractingOverallScore,
+  computeFreePlayOverallScore,
   buildScenarioMethodFit,
   NEUTRAL_FIT_NOTES,
 };

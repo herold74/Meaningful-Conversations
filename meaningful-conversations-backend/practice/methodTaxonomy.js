@@ -46,7 +46,23 @@ const ALL_FRAMEWORK_IDS = [
   'four-stage-coaching',
   'forward-focused-coaching',
   'ambivalence-coaching',
+  'contracting',
+  'free-play',
 ];
+
+/** Practice-only sentinel IDs — excluded from public catalog and progress milestones. */
+const PRACTICE_SENTINEL_FRAMEWORKS = ['contracting', 'free-play'];
+
+function isPracticeSentinelFramework(id) {
+  if (!id || typeof id !== 'string') return false;
+  const canonical = resolveFrameworkId(id);
+  return PRACTICE_SENTINEL_FRAMEWORKS.includes(canonical);
+}
+
+function isRealPracticeFramework(id) {
+  if (!id || typeof id !== 'string') return false;
+  return !isPracticeSentinelFramework(id);
+}
 
 const DEFAULT_PRACTICE_PAIR = {
   frameworkId: 'four-stage-coaching',
@@ -72,8 +88,11 @@ module.exports = {
   LEGACY_FRAMEWORK_ALIASES,
   LEGACY_BOT_ALIASES,
   ALL_FRAMEWORK_IDS,
+  PRACTICE_SENTINEL_FRAMEWORKS,
   DEFAULT_PRACTICE_PAIR,
   resolveFrameworkId,
   resolveBotId,
   normalizeUnlockedCoaches,
+  isPracticeSentinelFramework,
+  isRealPracticeFramework,
 };

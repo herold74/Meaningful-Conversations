@@ -1038,7 +1038,17 @@ Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich
 **Schritt 1: Übung konfigurieren**
 - **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. Vier-Phasen-Coaching, zukunftsorientiertes Coaching, Ambivalenz-Coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
 - **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
-- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält.
+- **Mit Anliegensklärung starten (neu):** Das Szenario bleibt verborgen — Sie üben reines Contracting und erhalten danach optional eine erste Methodensitzung (Methode oder Freispiel).
+- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält. Im Setup können Sie **„Level erklärt“** aufklappen:
+
+| Level | Verhalten des KI-Klienten |
+|-------|---------------------------|
+| **Leicht** | Kooperativ, klar, offen; kaum Widerstand |
+| **Mittel** | Anfangs vage; 2–3 gute Fragen bis zur Öffnung |
+| **Herausfordernd** | Stärkerer Widerstand/Themenwechsel; versteckte Agenda nur bei Vertrauen |
+| **Schwer** | Sehr starker Widerstand + Nebenstressoren; Agenda erst nach Trust-Building |
+
+**Hinweis:** Grenzfall-Training (Hinweise außerhalb des Coaching-Scope) erscheint nur in **Methodensitzungen** bzw. **Phase 2 nach Anliegensklärung** — nicht in der reinen Anliegensklärungs-Phase.
 - **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
 
 **Schritt 2: Übungssitzung führen**
@@ -2016,7 +2026,17 @@ This feature is available from the **Client access tier** and is located in the 
 **Step 1: Configure your practice**
 - **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. four-stage coaching, forward-focused coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
 - **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
-- **Difficulty:** Controls how cooperative or challenging the client behaves.
+- **Start with concern clarification (new):** The scenario stays hidden — you practice pure contracting, then optionally continue with a first method session (method or free play).
+- **Difficulty:** Controls how cooperative or challenging the client behaves. Tap **Level guide** in setup to expand:
+
+| Level | Client behavior |
+|-------|-----------------|
+| **Easy** | Cooperative, clear, open; little resistance |
+| **Moderate** | Vague at first; 2–3 good questions before opening up |
+| **Challenging** | Stronger resistance/topic shifts; hidden agenda only with trust |
+| **Hard** | Very strong resistance + secondary stressors; agenda only after trust-building |
+
+**Note:** Scope-boundary training (out-of-scope clinical cues) appears only in **method sessions** or **Phase 2 after concern clarification** — not during pure concern-clarification practice.
 - **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
 
 **Step 2: Run the practice session**
