@@ -1,7 +1,15 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { Bot, Message, Language, User } from '../types';
-import { synthesizeSpeech, splitIntoSentences, getBotVoiceSettings, saveBotVoiceSettings, warmupServerVoice, type TtsMode } from '../services/ttsService';
+import {
+  synthesizeSpeech,
+  splitIntoSentences,
+  getBotVoiceSettings,
+  saveBotVoiceSettings,
+  warmupServerVoice,
+  resolveServerVoiceIdForSynthesis,
+  type TtsMode,
+} from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
 import { selectVoice } from '../utils/voiceUtils';
 import { getBotGender, resolveTtsBotId } from '../utils/botGender';
@@ -147,24 +155,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
       console.log('[TTS Init] Checking voice availability:', { savedMode, savedVoiceId, savedIsAuto, isNativeiOS });
 
-      const getBestServerVoice = (botId: string, lang: string): string | null => {
-        const femaleBots = [
-          'gloria-life-context',
-          'gloria-interview',
-          'ava-strategic',
-          'chloe-structured-reflection',
-          'gabrielle-four-stage',
-          'sam-forward-focused',
-          'bekky-thought-audit',
-        ];
-        const gender: 'male' | 'female' = femaleBots.includes(botId) ? 'female' : 'male';
-        if (lang === 'de') {
-          return gender === 'female' ? null : 'de-thorsten';
-        } else {
-          return gender === 'female' ? 'en-amy' : 'en-ryan';
-        }
-      };
-
       try {
         const apiBaseUrl = getApiBaseUrl();
         const healthResponse = await fetch(`${apiBaseUrl}/api/tts/health`, {
@@ -237,18 +227,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
 
           if (serverAvailable) {
-            const bestVoice = getBestServerVoice(ttsBotId, language);
-            if (bestVoice) {
-              console.log('[TTS Init] Auto mode - selected server voice:', bestVoice);
-              setSelectedVoiceURI(bestVoice);
-              setTtsMode('server');
-              saveLanguageVoiceSettings('server', bestVoice, true);
-              warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
-            } else {
-              setSelectedVoiceURI(null);
-              setTtsMode('local');
-              saveLanguageVoiceSettings('local', null, true);
-            }
+            console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
+            setSelectedVoiceURI(null);
+            setTtsMode('server');
+            saveLanguageVoiceSettings('server', null, true);
+            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
           } else {
             setSelectedVoiceURI(null);
             setTtsMode('local');
@@ -575,7 +558,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       synthInProgress: false,
       audio: null,
       hasStartedPlaying: false,
-      voiceId: (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null,
+      voiceId: resolveServerVoiceIdForSynthesis(ttsMode, isAutoMode, selectedVoiceURI),
     };
 
     // Streaming already handles TTS for this reply — block the initial-bot useEffect
@@ -583,7 +566,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     hasSpokenFirstMessageRef.current = true;
 
     return true;
-  }, [isTtsEnabled, selectedVoiceURI, ttsMode, isIOS, currentUser, stopTts]);
+  }, [isTtsEnabled, selectedVoiceURI, ttsMode, isAutoMode, isIOS, currentUser, stopTts]);
 
   /**
    * Enqueue a single sentence for streaming TTS synthesis and playback.
@@ -762,7 +745,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           audioRef.current = null;
         }
 
-        const voiceIdToUse = (ttsMode === 'server' && selectedVoiceURI) ? selectedVoiceURI : null;
+        const voiceIdToUse = resolveServerVoiceIdForSynthesis(ttsMode, isAutoMode, selectedVoiceURI);
 
         // --- Shared error handler for the Audio element ---
         const attachErrorHandler = (audio: HTMLAudioElement) => {
@@ -1145,7 +1128,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         window.speechSynthesis.resume();
       }
     }, 10);
-  }, [isTtsEnabled, voices, bot.id, ttsBotId, selectedVoiceURI, language, botGender, ttsMode, currentUser]);
+  }, [isTtsEnabled, voices, bot.id, ttsBotId, selectedVoiceURI, language, botGender, ttsMode, isAutoMode, currentUser]);
 
   useEffect(() => {
     const lastMessage = chatHistory[chatHistory.length - 1];
@@ -1265,35 +1248,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         const healthData = await healthResponse.json();
 
         if (healthData.status === 'ok' && healthData.piperAvailable) {
-          const getBestServerVoice = (botId: string, lang: string): string | null => {
-            const femaleBots = [
-              'gloria-life-context',
-              'gloria-interview',
-              'ava-strategic',
-              'chloe-structured-reflection',
-              'gabrielle-four-stage',
-              'sam-forward-focused',
-              'bekky-thought-audit',
-            ];
-            const gender: 'male' | 'female' = femaleBots.includes(botId) ? 'female' : 'male';
-
-            if (lang === 'de') {
-              return gender === 'male' ? 'de-thorsten' : null;
-            } else {
-              return gender === 'female' ? 'en-amy' : 'en-ryan';
-            }
-          };
-
-          const bestVoice = getBestServerVoice(ttsBotId, language);
-          if (bestVoice) {
-            setSelectedVoiceURI(bestVoice);
-            setTtsMode('server');
-            saveLanguageVoiceSettings('server', bestVoice, true);
-          } else {
-            setSelectedVoiceURI(null);
-            setTtsMode('local');
-            saveLanguageVoiceSettings('local', null, true);
-          }
+          console.log('[TTS Select] Auto mode - server signature voice for bot:', ttsBotId);
+          setSelectedVoiceURI(null);
+          setTtsMode('server');
+          saveLanguageVoiceSettings('server', null, true);
         } else {
           setSelectedVoiceURI(null);
           setTtsMode('local');

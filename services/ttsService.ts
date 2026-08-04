@@ -1,5 +1,7 @@
 import { apiFetch, getApiBaseUrl, getAuthHeaders } from './api';
 
+export { getBestServerVoiceForBot, resolveServerVoiceIdForSynthesis } from '../utils/ttsVoiceSelection';
+
 export type TtsMode = 'local' | 'server';
 
 export interface ServerVoice {

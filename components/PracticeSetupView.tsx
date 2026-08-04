@@ -22,6 +22,7 @@ import {
   buildMethodScenarioProgressMap,
   buildPhase2ContextFromEvaluation,
   ContractingScenarioProgress,
+  formatCompletionPillLabel,
 } from '../utils/practiceSetupProgress';
 import PracticeFollowUpReminderModal from './PracticeFollowUpReminderModal';
 
@@ -100,11 +101,10 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const [liveMode, setLiveMode] = useState(false);
   const [focusNote, setFocusNote] = useState('');
   const [expandedFramework, setExpandedFramework] = useState<string | null>(null);
-  const [scenarioSectionOpen, setScenarioSectionOpen] = useState(false);
-  const [methodSectionOpen, setMethodSectionOpen] = useState(false);
+  type PracticeEntrySection = 'contracting' | 'scenario' | 'method';
+  const [expandedSection, setExpandedSection] = useState<PracticeEntrySection | null>(null);
   const [showDiscouragedModal, setShowDiscouragedModal] = useState(false);
   const [subtitleInfoOpen, setSubtitleInfoOpen] = useState(false);
-  const [contractingSectionOpen, setContractingSectionOpen] = useState(false);
   const [contractingScenarioId, setContractingScenarioId] = useState('');
   const [difficultyInfoOpen, setDifficultyInfoOpen] = useState(false);
   const [followUpModal, setFollowUpModal] = useState<{
@@ -437,21 +437,21 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       <section className="mb-4 rounded-xl border border-accent-primary/30 overflow-hidden">
         <button
           type="button"
-          onClick={() => setContractingSectionOpen((open) => !open)}
+          onClick={() => setExpandedSection((current) => (current === 'contracting' ? null : 'contracting'))}
           className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-accent-primary/5 transition-colors"
-          aria-expanded={contractingSectionOpen}
+          aria-expanded={expandedSection === 'contracting'}
         >
           <div>
             <h2 className="text-lg font-semibold text-content-primary">{t('practice_entry_contracting')}</h2>
             <p className="text-sm text-content-secondary mt-1">{t('practice_contracting_desc')}</p>
           </div>
-          {contractingSectionOpen ? (
+          {expandedSection === 'contracting' ? (
             <ChevronUp className="w-5 h-5 text-content-secondary shrink-0" />
           ) : (
             <ChevronDown className="w-5 h-5 text-content-secondary shrink-0" />
           )}
         </button>
-        {contractingSectionOpen && (
+        {expandedSection === 'contracting' && (
           <div className="px-4 pb-4 border-t border-border-primary/50">
             <p className="text-sm text-content-secondary mt-3 mb-3">{t('practice_contracting_scenario_hint')}</p>
             <div className="grid gap-2 sm:grid-cols-2 mb-4">
@@ -472,7 +472,10 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                   </div>
                   {(progress?.highestDifficultyLabel || progress?.followUpSource) && (
                     <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                      {renderCompletionPill(progress?.highestDifficultyLabel)}
+                      {renderCompletionPill(formatCompletionPillLabel(
+                        progress?.highestDifficultyLabel,
+                        progress?.bestScore,
+                      ))}
                       {progress?.followUpSource && (
                         <button
                           type="button"
@@ -529,22 +532,24 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       <section className="mb-4 rounded-xl border border-border-primary overflow-hidden">
         <button
           type="button"
-          onClick={() => setScenarioSectionOpen((open) => !open)}
+          onClick={() => setExpandedSection((current) => (current === 'scenario' ? null : 'scenario'))}
           className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-background-secondary/50 transition-colors"
-          aria-expanded={scenarioSectionOpen}
+          aria-expanded={expandedSection === 'scenario'}
         >
           <h2 className="text-lg font-semibold text-content-primary">{t('practice_entry_scenario')}</h2>
-          {scenarioSectionOpen ? (
+          {expandedSection === 'scenario' ? (
             <ChevronUp className="w-5 h-5 text-content-secondary shrink-0" />
           ) : (
             <ChevronDown className="w-5 h-5 text-content-secondary shrink-0" />
           )}
         </button>
-        {scenarioSectionOpen && (
+        {expandedSection === 'scenario' && (
           <div className="px-4 pb-4 border-t border-border-primary/50">
             <p className="text-sm text-content-secondary mt-3 mb-3">{t('practice_scenario_label')}</p>
             <div className="grid gap-2 sm:grid-cols-2 mb-6">
-              {catalog.scenarios.map((sc: PracticeScenario) => (
+              {catalog.scenarios.map((sc: PracticeScenario) => {
+                const progress = methodProgressMap.get(sc.id);
+                return (
                 <button
                   key={sc.id}
                   type="button"
@@ -556,12 +561,15 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                   <div className="flex items-center gap-3 mb-2">
                     <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                     <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
-                    {renderCompletionPill(methodProgressMap.get(sc.id)?.highestDifficultyLabel)}
+                    {renderCompletionPill(formatCompletionPillLabel(
+                      progress?.highestDifficultyLabel,
+                      progress?.bestScore,
+                    ))}
                   </div>
                   <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
                   <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
                 </button>
-              ))}
+              );})}
             </div>
 
             {scenarioId && (
@@ -653,18 +661,18 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       <section className="mb-8 rounded-xl border border-border-primary overflow-hidden">
         <button
           type="button"
-          onClick={() => setMethodSectionOpen((open) => !open)}
+          onClick={() => setExpandedSection((current) => (current === 'method' ? null : 'method'))}
           className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-background-secondary/50 transition-colors"
-          aria-expanded={methodSectionOpen}
+          aria-expanded={expandedSection === 'method'}
         >
           <h2 className="text-lg font-semibold text-content-primary">{t('practice_entry_method')}</h2>
-          {methodSectionOpen ? (
+          {expandedSection === 'method' ? (
             <ChevronUp className="w-5 h-5 text-content-secondary shrink-0" />
           ) : (
             <ChevronDown className="w-5 h-5 text-content-secondary shrink-0" />
           )}
         </button>
-        {methodSectionOpen && (
+        {expandedSection === 'method' && (
           <div className="px-4 pb-4 border-t border-border-primary/50">
             <p className="text-sm text-content-secondary mt-3 mb-3">{t('practice_framework_label')}</p>
             <div className="space-y-2 mb-6">
@@ -756,6 +764,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                 <div className="grid gap-2 sm:grid-cols-2">
                   {sortedScenarios.map((sc: PracticeScenario) => {
                     const tier = catalog.frameworks.find((f) => f.id === frameworkId)?.scenarioMatches?.[sc.id] ?? 'neutral';
+                    const progress = methodProgressMap.get(sc.id);
                     return (
                       <button
                         key={sc.id}
@@ -769,7 +778,10 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                           <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                           <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                           <MatchBadge tier={tier} />
-                          {renderCompletionPill(methodProgressMap.get(sc.id)?.highestDifficultyLabel)}
+                          {renderCompletionPill(formatCompletionPillLabel(
+                            progress?.highestDifficultyLabel,
+                            progress?.bestScore,
+                          ))}
                         </div>
                         <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
                         <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
@@ -783,7 +795,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
         )}
       </section>
 
-      {(scenarioSectionOpen || methodSectionOpen) && (
+      {(expandedSection === 'scenario' || expandedSection === 'method') && (
         <>
       {/* Difficulty */}
       {renderDifficultyPicker(hardUnlocked)}
