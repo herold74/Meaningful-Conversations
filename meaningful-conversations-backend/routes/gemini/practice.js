@@ -27,6 +27,7 @@ const {
   buildFreePlayPriorContext,
   validatePhase2EvaluationGate,
 } = require('../../practice/phase2Evaluation.js');
+const { normalizeLanguage } = require('../../utils/language.js');
 
 const MAX_MESSAGE_LENGTH = 5000;
 const PRACTICE_BOT_ID = 'practice-coachee';
@@ -102,7 +103,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
   const userId = req.userId;
   const {
     history,
-    language = 'de',
+    language,
     frameworkId,
     scenarioId,
     difficulty = 'moderate',
@@ -116,6 +117,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     sessionContract = '',
     followsContractingEvaluationId = '',
   } = req.body;
+  const lang = normalizeLanguage(language);
 
   try {
     const access = await requirePracticeAccess(userId);
@@ -178,7 +180,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       frameworkId: resolvedFrameworkId,
       scenarioId,
       difficulty: sessionParams.difficulty,
-      language,
+      language: lang,
       focusNote,
       scopeBoundaryTheme: sessionParams.scopeBoundaryTheme,
       liveMode: sessionParams.liveMode,
@@ -203,7 +205,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       },
       context: 'chat',
       userRegionPreference,
-      language,
+      language: lang,
     };
 
     if (stream) {
@@ -225,7 +227,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
         },
         context: 'chat',
         userRegionPreference,
-        language,
+        language: lang,
       });
 
       let finalEvent = null;
@@ -357,7 +359,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Invalid scenarioId.' });
     }
 
-    const lang = language === 'en' ? 'en' : 'de';
+    const lang = normalizeLanguage(language);
     const transcript = buildTranscriptFromHistory(history, lang);
     if (!transcript.trim()) {
       return res.status(400).json({ error: 'Practice transcript is empty. Send at least one message as coach before ending the session.' });
@@ -423,7 +425,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       });
       responseSchema = practiceFreePlayEvaluationPrompts.schema;
     } else {
-      const framework = getFrameworkForEvaluation(resolvedFrameworkId, language);
+      const framework = getFrameworkForEvaluation(resolvedFrameworkId, lang);
       if (!framework) {
         return res.status(400).json({ error: 'Invalid frameworkId.' });
       }

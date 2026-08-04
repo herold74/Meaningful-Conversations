@@ -8,7 +8,7 @@
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (5) prep** for ASC re-submission (MARKETING_VERSION 2.5.4, production `cap sync ios` done 2026-08-04)
 **Xcode:** BUILD_NUMBER **5** synced (`CURRENT_PROJECT_VERSION=5`); Archive **2.5.4 (5)** pending ASC submit
 
-**ASC screenshots (DE):** `screenshots/app-store-v2.5.4/` — full-res sources in `screenshots/source/v2.5.4/`; regenerate via `prepare-asc-screenshots-from-assets.py`
+**Uncommitted (local):** EN UI German greeting fix — `normalizeLanguage()`, chat/practice routes, ChatView init on locale change; ASC iPhone 8er-Set + script update
 
 **Production deploy gate:** **Open for 2.5.4** — Production web/backend matches staging Build 5 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
 

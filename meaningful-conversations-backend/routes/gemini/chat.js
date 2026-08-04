@@ -9,6 +9,7 @@ const aiProviderService = require('../../services/aiProviderService.js');
 const dynamicPromptController = require('../../services/dynamicPromptController.js');
 const behaviorLogger = require('../../services/behaviorLogger.js');
 const { withTimeout } = require('./shared.js');
+const { normalizeLanguage } = require('../../utils/language.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
@@ -17,6 +18,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         // Test mode support
         testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
     } = req.body;
+    const lang = normalizeLanguage(language);
     const userId = req.userId; // This will be undefined for guests
     const isTestMode = req.headers['x-test-mode'] === 'true';
 
@@ -88,12 +90,12 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         return res.status(403).json({ error: 'You do not have permission to access this coach.' });
     }
 
-    let systemInstruction = language === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
+    let systemInstruction = lang === 'de' ? (bot.systemPrompt_de || bot.systemPrompt) : bot.systemPrompt;
 
     // Get and format the current date based on the request language.
     const today = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const locale = language === 'de' ? 'de-DE' : 'en-US';
+    const locale = lang === 'de' ? 'de-DE' : 'en-US';
     const formattedDate = new Intl.DateTimeFormat(locale, options).format(today);
 
     // Replace the date placeholder in the system instruction.
@@ -105,20 +107,20 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const isPreSeededTopic = !isInitialMessage && isNewSession && history.length === 1 && history[0]?.role === 'user';
 
     if (isPreSeededTopic && !isInterviewBot) {
-        if (language === 'de') {
+        if (lang === 'de') {
             systemInstruction += "\n\n## ⚠️ KRITISCH — Der Benutzer hat bereits sein Thema genannt:\nDer Benutzer hat sein Thema in der ersten Nachricht klar definiert. Sie MÜSSEN dieses Thema direkt ansprechen. IGNORIEREN Sie vollständig alle 'Initial Interaction Priority'-Regeln und alle 'Achievable Next Steps' aus dem Lebenskontext. Fragen Sie NICHT nach früheren Vorhaben oder Zielen. Beginnen Sie direkt mit dem Thema des Benutzers.";
         } else {
             systemInstruction += "\n\n## ⚠️ CRITICAL — The user has already stated their topic:\nThe user has clearly defined their topic in the first message. You MUST address this topic directly. COMPLETELY IGNORE any 'Initial Interaction Priority' rules and any 'Achievable Next Steps' from the life context. Do NOT ask about previous intentions or goals. Start directly with the user's topic.";
         }
     } else if (isInitialMessage && isNewSession && !isInterviewBot) {
-        if (language === 'de') {
+        if (lang === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
         } else {
             systemInstruction += "\n\n## Special Instruction for this First Message:\nThis is the user's very first interaction in this session. You MUST ignore any 'Initial Interaction Priority' rules about checking 'Next Steps'. Your first message MUST be your standard, warm welcome, asking what is on their mind. Do not mention anything about 'welcome back' or previous steps.";
         }
     } else if (isInitialMessage && !isNewSession && !isInterviewBot) {
         // Returning user - enforce strict first-message rules for Next Steps check-in
-        if (language === 'de') {
+        if (lang === 'de') {
             systemInstruction += `\n\n## ⚠️ STRIKTE REGELN FÜR DIESE ERSTE NACHRICHT (ÜBERSCHREIBT ALLES ANDERE):
 Wenn du nach "Next Steps" oder früheren Vorhaben fragst:
 1. Kurze Begrüßung
@@ -161,7 +163,7 @@ STRICTLY FORBIDDEN in this first message:
                 const dpcResult = await dynamicPromptController.generatePromptForUser(
                     userId || 'guest',
                     profileToUse,
-                    language, // Pass language to DPC
+                    lang, // Pass language to DPC
                     botId // Pass botId for bot-specific adaptations (e.g., AVA's enhanced challenge logic)
                 );
 
@@ -234,7 +236,7 @@ STRICTLY FORBIDDEN in this first message:
         let historySummary = '\n\n**CONVERSATION-STATE-KONTEXT (für deine State-Awareness):**\n\n';
 
         if (botChallenges.length > 0) {
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? `Du hast bereits ${botChallenges.length} Blindspot-Challenge(s) gestellt:\n`
                 : `You have already posed ${botChallenges.length} blindspot challenge(s):\n`;
             botChallenges.slice(-2).forEach((q, idx) => {
@@ -242,23 +244,23 @@ STRICTLY FORBIDDEN in this first message:
             });
             historySummary += '\n';
         } else {
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? 'Du hast noch KEINE Blindspot-Challenges gestellt.\n\n'
                 : 'You have NOT posed any blindspot challenges yet.\n\n';
         }
 
         if (resourceQuestions.length > 0) {
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? `Du hast bereits nach RESSOURCEN gefragt (${resourceQuestions.length}× in den letzten Nachrichten):\n`
                 : `You have already asked about RESOURCES (${resourceQuestions.length}× in recent messages):\n`;
             resourceQuestions.slice(-1).forEach(q => {
                 historySummary += `"${q.substring(0, 80)}..."\n`;
             });
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? '→ Du bist vermutlich in **PHASE 2** (Ressourcen aktiviert, bereit für Blindspot-Brücke)\n\n'
                 : '→ You are likely in **PHASE 2** (Resources activated, ready for blindspot bridge)\n\n';
         } else {
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? 'Du hast noch NICHT nach Ressourcen gefragt.\n→ Wenn User "festgefahren" signalisiert: Starte mit **PHASE 1** (Ressourcen-Exploration)\n\n'
                 : 'You have NOT asked about resources yet.\n→ If user signals "stuck": Start with **PHASE 1** (Resource exploration)\n\n';
         }
@@ -267,7 +269,7 @@ STRICTLY FORBIDDEN in this first message:
         const userRespondedToChallenge = botChallenges.length > 0 && userLastMessage.length > 30;
 
         if (botChallenges.length > 0 && !userRespondedToChallenge) {
-            historySummary += language === 'de'
+            historySummary += lang === 'de'
                 ? '⚠️ User hat auf letzte Challenge NICHT geantwortet (Ausweichen?) → Wähle anderen Blindspot oder warte ab\n\n'
                 : '⚠️ User did NOT respond to last challenge (Avoidance?) → Choose different blindspot or wait\n\n';
         }
@@ -278,7 +280,6 @@ STRICTLY FORBIDDEN in this first message:
     // Context injection logic per bot type:
     if (bot.id === 'gloria-life-context' && context && context.trim()) {
         // Gloria with existing context: extend & enrich instead of starting from scratch
-        const lang = language === 'de' ? 'de' : 'en';
         const extensionPrompt = lang === 'de'
             ? `\n\n## MODUS: Bestehenden Lebenskontext erweitern
 
@@ -339,7 +340,10 @@ Help the user EXTEND and ENRICH their existing Life Context.
         finalSystemInstruction += extensionPrompt;
     } else if (bot.id !== 'gloria-life-context' && bot.id !== 'gloria-interview') {
         // Standard context injection for coaching bots
-        finalSystemInstruction += `\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
+        const languageReminder = lang === 'en'
+            ? '\n\nIMPORTANT: The context below may be written in German or another language. You MUST still respond in English.'
+            : '\n\nWICHTIG: Der Kontext unten kann auf Englisch oder in einer anderen Sprache verfasst sein. Du MUSST trotzdem auf Deutsch antworten.';
+        finalSystemInstruction += `\n\n## User Context\nThe user has provided the following context for this session. You MUST use this to inform your responses.${languageReminder}\n\n<context>\n${context || 'The user has not provided a life context.'}\n</context>`;
     }
 
     const modelHistory = history.map((msg) => ({
@@ -389,7 +393,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                 config,
                 context: 'chat',
                 userRegionPreference,
-                language,
+                language: lang,
             });
 
             let finalEvent = null;
@@ -427,7 +431,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                 if (coachingMode === 'dpfl' && userId) {
                     const messageToAnalyze = testUserMessage || req.body.userMessage || '';
                     setImmediate(() => {
-                        try { behaviorLogger.analyzeMessage(messageToAnalyze, language); }
+                        try { behaviorLogger.analyzeMessage(messageToAnalyze, lang); }
                         catch (e) { /* fail silently */ }
                     });
                 }
@@ -459,7 +463,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                 config,
                 context: 'chat',
                 userRegionPreference,
-                language,
+                language: lang,
             }),
             30000,
             'Chat AI response'
@@ -497,7 +501,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                     .map(m => m.text || m.content || '');
 
                 const enhancedResult = behaviorLogger.analyzeMessageEnhanced(
-                    messageToAnalyze, language, recentUserMessages
+                    messageToAnalyze, lang, recentUserMessages
                 );
 
                 const extractKeywords = (frameworkResult, prefix) => {
@@ -573,7 +577,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
         } else if (coachingMode === 'dpfl' && userId) {
             setImmediate(async () => {
                 try {
-                    behaviorLogger.analyzeMessage(messageToAnalyze, language);
+                    behaviorLogger.analyzeMessage(messageToAnalyze, lang);
                 } catch (error) {
                     console.error('[DPFL] Behavior logging error:', error);
                 }
