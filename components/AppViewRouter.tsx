@@ -154,6 +154,7 @@ export interface AppViewRouterProps {
   setPracticePhase2Context: React.Dispatch<React.SetStateAction<PracticePhase2Context | null>>;
   handleStartPractice: (config: CoachPracticeConfig) => void;
   handleContinueToPhase2: () => void;
+  handleStartPhase2: (context: PracticePhase2Context) => void;
   handlePracticeSelfRatingSubmit: (rating: number | undefined) => void;
   handlePracticeSelfRatingSkip: () => void;
   handlePracticeDone: () => void;
@@ -267,6 +268,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setPracticePhase2Context,
     handleStartPractice,
     handleContinueToPhase2,
+    handleStartPhase2,
     handlePracticeSelfRatingSubmit,
     handlePracticeSelfRatingSkip,
     handlePracticeDone,
@@ -737,6 +739,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         <PracticeSetupView
           currentUser={currentUser}
           onStart={handleStartPractice}
+          onStartPhase2={handleStartPhase2}
           onBack={() => setView('botSelection')}
           onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
@@ -762,6 +765,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onContinuePhase2={handleContinueToPhase2}
           onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
+          onTranscriptDeleted={() => {
+            setPracticeEvaluation((prev) => (prev ? { ...prev, transcript: undefined } : prev));
+          }}
         />
       ) : null;
     case 'practicePhase2Picker':
@@ -782,7 +788,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onBack={handlePracticeHistoryBack}
           onProgress={() => setView('practiceProgress')}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
-            setPracticeEvaluation(item.evaluationData);
+            setPracticeEvaluation({ ...item.evaluationData, id: item.id });
             if (!practiceConfig) {
               setPracticeConfig({
                 frameworkId: item.frameworkId,
@@ -808,7 +814,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onBack={() => setView('practiceSetup')}
           onHistory={navigateToPracticeHistory}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
-            setPracticeEvaluation(item.evaluationData);
+            setPracticeEvaluation({ ...item.evaluationData, id: item.id });
             setPracticeConfig({
               frameworkId: item.frameworkId,
               frameworkName: item.frameworkId,

@@ -110,6 +110,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
     priorTranscript = '',
     clarifiedConcern = '',
     sessionContract = '',
+    followsContractingEvaluationId = '',
   } = req.body;
 
   try {
@@ -305,6 +306,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     priorTranscript = '',
     clarifiedConcern = '',
     sessionContract = '',
+    followsContractingEvaluationId = '',
   } = req.body;
 
   try {
@@ -499,6 +501,9 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
 
     evaluationResult.liveMode = sessionParams.liveMode;
     evaluationResult.transcript = transcript;
+    if (followsContractingEvaluationId?.trim()) {
+      evaluationResult.followsContractingEvaluationId = followsContractingEvaluationId.trim();
+    }
     if (evaluationResult.calibration) {
       evaluationResult.calibration.evidenceRating = evaluationResult.overallScore;
     }

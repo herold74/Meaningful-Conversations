@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
 import { downloadPracticeTranscript } from '../utils/practiceTranscriptDownload';
+import * as geminiService from '../services/geminiService';
+import { Info } from 'lucide-react';
 
 interface PracticeEvaluationReviewProps {
   evaluation: PracticeEvaluationResult;
@@ -14,6 +16,7 @@ interface PracticeEvaluationReviewProps {
   onContinuePhase2?: () => void;
   onHistory: () => void;
   onProgress: () => void;
+  onTranscriptDeleted?: () => void;
 }
 
 const Section: React.FC<{ title: string; children: React.ReactNode; badge?: React.ReactNode }> = ({ title, children, badge }) => (
@@ -68,15 +71,21 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   onContinuePhase2,
   onHistory,
   onProgress,
+  onTranscriptDeleted,
 }) => {
   const { t, language } = useLocalization();
   const evidenceLabel = language === 'de' ? 'Belege:' : 'Evidence:';
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
   const isContracting = practiceMode === 'contracting';
   const isFreePlay = practiceMode === 'free-play';
+  const [transcriptDeleted, setTranscriptDeleted] = useState(false);
+  const [deletingTranscript, setDeletingTranscript] = useState(false);
+
+  const hasStoredTranscript = !transcriptDeleted && !!evaluation.transcript?.trim();
+  const evaluationId = evaluation.id;
 
   const handleDownloadTranscript = async () => {
-    if (!evaluation.transcript?.trim()) return;
+    if (!hasStoredTranscript || !evaluation.transcript?.trim()) return;
     try {
       await downloadPracticeTranscript(evaluation.transcript, {
         frameworkName,
@@ -86,6 +95,22 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       });
     } catch (err) {
       console.error('Practice transcript download failed:', err);
+    }
+  };
+
+  const handleDeleteTranscript = async () => {
+    if (!evaluationId || !hasStoredTranscript) return;
+    if (!window.confirm(t('practice_delete_transcript_confirm'))) return;
+    setDeletingTranscript(true);
+    try {
+      await geminiService.deletePracticeTranscript(evaluationId);
+      setTranscriptDeleted(true);
+      onTranscriptDeleted?.();
+    } catch (err) {
+      console.error('Practice transcript delete failed:', err);
+      alert(t('practice_delete_transcript_error'));
+    } finally {
+      setDeletingTranscript(false);
     }
   };
 
@@ -356,16 +381,38 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         </Section>
       )}
 
+      <div className="rounded-xl border border-border-primary bg-background-secondary/40 p-4 mb-6 flex gap-3">
+        <Info className="w-5 h-5 text-accent-primary shrink-0 mt-0.5" aria-hidden />
+        <div className="min-w-0 space-y-3">
+          <p className="text-sm text-content-primary leading-relaxed">{t('practice_transcript_storage_note')}</p>
+          {transcriptDeleted && (
+            <p className="text-sm text-content-secondary">{t('practice_transcript_deleted_note')}</p>
+          )}
+          {hasStoredTranscript && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadTranscript}
+                className="py-2 px-4 rounded-lg btn-surface-outline text-sm font-semibold"
+              >
+                {t('practice_download_transcript')}
+              </button>
+              {evaluationId && (
+                <button
+                  type="button"
+                  onClick={handleDeleteTranscript}
+                  disabled={deletingTranscript}
+                  className="py-2 px-4 rounded-lg text-sm font-semibold text-status-danger-foreground border border-status-danger-border hover:bg-status-danger-background/30 disabled:opacity-50"
+                >
+                  {deletingTranscript ? t('practice_loading') : t('practice_delete_transcript')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
-        {evaluation.transcript?.trim() && (
-          <button
-            type="button"
-            onClick={handleDownloadTranscript}
-            className="flex-1 py-3 rounded-lg btn-surface-outline font-semibold"
-          >
-            {t('practice_download_transcript')}
-          </button>
-        )}
         {isContracting && onContinuePhase2 && (
           <button
             type="button"

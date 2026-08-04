@@ -115,7 +115,7 @@
 ### 14. Coach Practice Lab (NEU v2.3–2.5)
 - **Status:** DSGVO-KONFORM (mit Transparenz-Empfehlung für Draft)
 - **In-Progress-Draft:** `sessionStorage` (`mc_practice_draft_v1`), max. 24h, tab-scoped, **nicht** an Server — `utils/practiceSessionDraft.ts`
-- **Abgeschlossene Sessions:** `practice_evaluations` — strukturierte Scores/JSON **+ Gesprächstranskript** (nach freiwilliger Auswertung; Download; Löschung bei Kontolöschung)
+- **Abgeschlossene Sessions:** `practice_evaluations` — strukturierte Scores/JSON **+ Gesprächstranskript** (nach freiwilliger Auswertung; Download; **Nutzer kann Transkript einzeln in der Auswertungsansicht löschen**; vollständige Löschung bei Kontolöschung). **Nicht E2EE** — überlebt Passwort-Reset.
 - Evaluation via KI (Google/Mistral je nach Region)
 - Export in `/api/data/export` enthalten
 - **Art. 6 Abs. 1 lit. b DSGVO**

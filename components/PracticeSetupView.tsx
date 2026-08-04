@@ -4,9 +4,12 @@ import {
   PracticeCatalog,
   PracticeFramework,
   PracticeScenario,
+  PracticeContractingScenario,
   PracticeDifficulty,
   PracticeMatchTier,
   CoachPracticeConfig,
+  PracticeEvaluationSummary,
+  PracticePhase2Context,
   User,
 } from '../types';
 import * as geminiService from '../services/geminiService';
@@ -14,10 +17,18 @@ import { BOTS } from '../constants';
 import { ChevronDown, ChevronUp, Info, Mic, Lock, AlertTriangle } from 'lucide-react';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { rollScopeBoundaryTheme } from '../utils/practiceScopeBoundary';
+import {
+  buildContractingProgressMap,
+  buildMethodScenarioProgressMap,
+  buildPhase2ContextFromEvaluation,
+  ContractingScenarioProgress,
+} from '../utils/practiceSetupProgress';
+import PracticeFollowUpReminderModal from './PracticeFollowUpReminderModal';
 
 interface PracticeSetupViewProps {
   currentUser: User | null;
   onStart: (config: CoachPracticeConfig) => void;
+  onStartPhase2: (context: PracticePhase2Context) => void;
   onBack: () => void;
   onHistory: () => void;
   onProgress: () => void;
@@ -72,12 +83,14 @@ const MatchBadge: React.FC<{ tier: PracticeMatchTier }> = ({ tier }) => {
 const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   currentUser,
   onStart,
+  onStartPhase2,
   onBack,
   onHistory,
   onProgress,
 }) => {
   const { t, language } = useLocalization();
   const [catalog, setCatalog] = useState<PracticeCatalog | null>(null);
+  const [evaluations, setEvaluations] = useState<PracticeEvaluationSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -94,18 +107,26 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const [contractingSectionOpen, setContractingSectionOpen] = useState(false);
   const [contractingScenarioId, setContractingScenarioId] = useState('');
   const [difficultyInfoOpen, setDifficultyInfoOpen] = useState(false);
+  const [followUpModal, setFollowUpModal] = useState<{
+    evaluation: PracticeEvaluationSummary;
+    coachee: PracticeContractingScenario;
+  } | null>(null);
 
   const isPrivileged = !!(currentUser?.isAdmin || currentUser?.isDeveloper);
 
   useEffect(() => {
-    geminiService.getPracticeCatalog(language)
-      .then((data) => {
+    Promise.all([
+      geminiService.getPracticeCatalog(language),
+      geminiService.getPracticeEvaluations().catch(() => [] as PracticeEvaluationSummary[]),
+    ])
+      .then(([data, evals]) => {
         setCatalog(data);
+        setEvaluations(evals);
         const defaultFw = data.defaultPair?.frameworkId ?? data.frameworks[0]?.id ?? '';
         const defaultSc = data.defaultPair?.scenarioId ?? data.scenarios[0]?.id ?? '';
         setFrameworkId(pickFrameworkId(data.frameworks, defaultFw));
         setScenarioId(defaultSc);
-        setContractingScenarioId(defaultSc);
+        setContractingScenarioId(data.contractingScenarios[0]?.id ?? '');
       })
       .catch(() => setError(t('practice_catalog_error')))
       .finally(() => setLoading(false));
@@ -137,8 +158,24 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
 
   const selectedFramework = catalog?.frameworks.find((f) => f.id === frameworkId);
   const selectedScenario = catalog?.scenarios.find((s) => s.id === scenarioId);
-  const contractingScenario = catalog?.scenarios.find((s) => s.id === contractingScenarioId);
+  const contractingScenario = catalog?.contractingScenarios.find((s) => s.id === contractingScenarioId);
   const difficultyLabel = catalog?.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+
+  const difficultyLabels = useMemo(() => {
+    const labels: Record<string, string> = {};
+    catalog?.difficulties.forEach((d) => { labels[d.id] = d.label; });
+    return labels;
+  }, [catalog]);
+
+  const contractingProgressMap = useMemo(
+    () => buildContractingProgressMap(evaluations, difficultyLabels),
+    [evaluations, difficultyLabels],
+  );
+
+  const methodProgressMap = useMemo(
+    () => buildMethodScenarioProgressMap(evaluations, difficultyLabels),
+    [evaluations, difficultyLabels],
+  );
 
   const contractingHardUnlocked = useMemo(() => {
     if (isPrivileged || unlocks.privileged) return true;
@@ -248,6 +285,25 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   };
 
   const difficultyLevels: PracticeDifficulty[] = ['easy', 'moderate', 'challenging', 'hard'];
+
+  const renderCompletionPill = (label: string | null | undefined) => {
+    if (!label) return null;
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-full bg-status-success-background text-status-success-foreground font-medium">
+        {label}
+      </span>
+    );
+  };
+
+  const handleFollowUpClick = (
+    e: React.MouseEvent,
+    sc: PracticeContractingScenario,
+    progress: ContractingScenarioProgress,
+  ) => {
+    e.stopPropagation();
+    if (!progress?.followUpSource) return;
+    setFollowUpModal({ evaluation: progress.followUpSource, coachee: sc });
+  };
 
   const renderDifficultyPicker = (hardUnlockedForMode: boolean) => (
     <section className="mb-6">
@@ -368,6 +424,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
             <div className="text-sm text-content-primary space-y-2 min-w-0">
               <p className="font-semibold text-content-primary">{t('practice_subtitle_info_label')}</p>
               <p>{t('practice_evaluates_coach_callout')}</p>
+              <p>{t('practice_transcript_setup_note')}</p>
               {selectedFramework && sourceBotName(selectedFramework) && (
                 <p>{t('practice_source_bot_callout', { bot: sourceBotName(selectedFramework)! })}</p>
               )}
@@ -398,7 +455,9 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           <div className="px-4 pb-4 border-t border-border-primary/50">
             <p className="text-sm text-content-secondary mt-3 mb-3">{t('practice_contracting_scenario_hint')}</p>
             <div className="grid gap-2 sm:grid-cols-2 mb-4">
-              {catalog.scenarios.map((sc: PracticeScenario) => (
+              {(catalog.contractingScenarios ?? []).map((sc: PracticeContractingScenario) => {
+                const progress = contractingProgressMap.get(sc.id);
+                return (
                 <button
                   key={`contract-${sc.id}`}
                   type="button"
@@ -411,8 +470,28 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                     <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                     <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                   </div>
+                  {(progress?.highestDifficultyLabel || progress?.followUpSource) && (
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      {renderCompletionPill(progress?.highestDifficultyLabel)}
+                      {progress?.followUpSource && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleFollowUpClick(e, sc, progress!)}
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${
+                            progress.followUpCompleted
+                              ? 'bg-background-secondary text-content-secondary hover:bg-accent-primary/10'
+                              : 'bg-accent-primary/15 text-accent-primary hover:bg-accent-primary/25'
+                          }`}
+                        >
+                          {progress.followUpCompleted
+                            ? t('practice_pill_followup_done')
+                            : t('practice_pill_followup')}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </button>
-              ))}
+              );})}
             </div>
             {renderDifficultyPicker(contractingHardUnlocked)}
             <label
@@ -477,6 +556,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                   <div className="flex items-center gap-3 mb-2">
                     <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                     <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
+                    {renderCompletionPill(methodProgressMap.get(sc.id)?.highestDifficultyLabel)}
                   </div>
                   <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
                   <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
@@ -689,6 +769,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                           <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
                           <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                           <MatchBadge tier={tier} />
+                          {renderCompletionPill(methodProgressMap.get(sc.id)?.highestDifficultyLabel)}
                         </div>
                         <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
                         <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
@@ -702,6 +783,8 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
         )}
       </section>
 
+      {(scenarioSectionOpen || methodSectionOpen) && (
+        <>
       {/* Difficulty */}
       {renderDifficultyPicker(hardUnlocked)}
       {difficulty === 'hard' && (
@@ -767,6 +850,26 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       >
         {t('practice_start')}
       </button>
+        </>
+      )}
+
+      {followUpModal && (
+        <PracticeFollowUpReminderModal
+          evaluation={followUpModal.evaluation}
+          coacheeName={followUpModal.coachee.coacheeName}
+          coacheeAvatar={followUpModal.coachee.avatar}
+          onCancel={() => setFollowUpModal(null)}
+          onContinue={() => {
+            const ctx = buildPhase2ContextFromEvaluation(
+              followUpModal.evaluation,
+              followUpModal.coachee,
+              difficultyLabels,
+            );
+            setFollowUpModal(null);
+            onStartPhase2(ctx);
+          }}
+        />
+      )}
 
       {showDiscouragedModal && (
         <div

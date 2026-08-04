@@ -382,6 +382,7 @@ export const evaluatePracticeSession = async (
             priorTranscript: config.priorTranscript || '',
             clarifiedConcern: config.clarifiedConcern || '',
             sessionContract: config.sessionContract || '',
+            followsContractingEvaluationId: config.followsContractingEvaluationId || '',
             selfRating,
             language,
         }),
@@ -429,4 +430,8 @@ export const getPracticeEvaluations = async (): Promise<PracticeEvaluationSummar
 
 export const deletePracticeEvaluation = async (id: string): Promise<void> => {
     await apiFetch(`/practice/evaluations/${id}`, { method: 'DELETE' });
+};
+
+export const deletePracticeTranscript = async (id: string): Promise<void> => {
+    await apiFetch(`/practice/evaluations/${id}/transcript`, { method: 'DELETE' });
 };

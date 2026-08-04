@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/auth.js');
 const prisma = require('../prismaClient.js');
 const { getPublicCatalog } = require('../practice/frameworks.js');
-const { getPublicScenarios } = require('../practice/scenarios.js');
+const { getPublicScenarios, getPublicContractingScenarios } = require('../practice/scenarios.js');
 const { enrichCatalog } = require('../practice/methodScenarioMap.js');
 const { resolvePublicAssetUrl } = require('../utils/publicAssetUrl.js');
 const { rollScopeBoundaryTheme, isValidTheme } = require('../practice/scopeBoundary.js');
@@ -86,6 +86,10 @@ router.get('/catalog', authMiddleware, async (req, res) => {
       ...scenario,
       avatar: resolvePublicAssetUrl(scenario.avatar),
     }));
+    const contractingScenarios = getPublicContractingScenarios(language).map((scenario) => ({
+      ...scenario,
+      avatar: resolvePublicAssetUrl(scenario.avatar),
+    }));
     const enriched = enrichCatalog(frameworks, scenarios, language);
     const frameworksWithAccess = annotateFrameworkAccess(
       enriched.frameworks,
@@ -95,6 +99,7 @@ router.get('/catalog', authMiddleware, async (req, res) => {
     res.json({
       frameworks: frameworksWithAccess,
       scenarios: enriched.scenarios,
+      contractingScenarios,
       defaultPair: enriched.defaultPair,
       difficulties: [
         { id: 'easy', label: language === 'en' ? 'Easy' : 'Leicht' },
@@ -142,6 +147,47 @@ router.get('/evaluations', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('[Practice] list evaluations error:', error);
     res.status(500).json({ error: 'Failed to load practice history.' });
+  }
+});
+
+// DELETE /api/practice/evaluations/:id/transcript — remove stored transcript only (scores kept)
+router.delete('/evaluations/:id/transcript', authMiddleware, async (req, res) => {
+  try {
+    const access = await requirePracticeAccess(req.userId);
+    if (!access.ok) {
+      return res.status(access.status).json({ error: access.error, reason: access.reason });
+    }
+
+    const evaluation = await prisma.practiceEvaluation.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!evaluation || evaluation.userId !== req.userId) {
+      return res.status(404).json({ error: 'Evaluation not found.' });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(evaluation.evaluationData);
+    } catch {
+      return res.status(500).json({ error: 'Invalid evaluation data.' });
+    }
+
+    if (!data.transcript?.trim()) {
+      return res.status(404).json({ error: 'No transcript stored for this evaluation.' });
+    }
+
+    delete data.transcript;
+
+    await prisma.practiceEvaluation.update({
+      where: { id: req.params.id },
+      data: { evaluationData: JSON.stringify(data) },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Practice] delete transcript error:', error);
+    res.status(500).json({ error: 'Failed to delete practice transcript.' });
   }
 });
 
