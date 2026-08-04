@@ -212,11 +212,49 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 
 ---
 
-## Was ist neu — App Store Connect (v2.5.1, Build 1)
+## Was ist neu — App Store Connect (v2.5.4, Build 1) — **aktuelle Einreichung**
 
-**In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (U.S.)** unter „Was ist neu in dieser Version“ einfügen.
+**In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (U.S.)** unter „Was ist neu in dieser Version“ einfügen. Neue Version **2.5.4** anlegen (nicht die zurückgezogene 2.5.1-Einreichung).
 
 ### Deutsch
+
+```
+ManualMode: Neuer App-Name im App Store — passend zum Namen auf dem Home-Bildschirm.
+
+Premium+: Ein Abo mit Coaching üben inklusive — ein Verlängerungstermin für Premium und Übung (In-App und Web).
+
+Coaching üben: Anliegensklärung und Methoden-Übung mit KI-Coachees, Fortschrittsanzeige, strukturiertes Feedback und Verlauf — in Premium+ und in der 9-Tage-Testphase.
+
+Voice & Stabilität: Zuverlässigere Stimmen in Übungsszenarien, flüssigere Sprachausgabe und klarere Oberfläche beim Einrichten von Sitzungen.
+
+Datenschutz: Hinweise zu Übungstranskripten und Möglichkeit, gespeicherte Transkripte in der Auswertung zu löschen.
+
+Weitere Verbesserungen: Einheitliche Bezeichnungen der Coaching-Methoden, Fehlerbehebungen und allgemeine Stabilität.
+```
+
+### English (U.S.)
+
+```
+ManualMode: New App Store name — matches the name on the home screen.
+
+Premium+: One subscription including Coach Practice — one renewal date for Premium and practice (in-app and web).
+
+Coach Practice: Concern clarification and method practice with AI coachees, progress indicators, structured feedback, and history — included in Premium+ and the 9-day trial.
+
+Voice & stability: More reliable voices in practice scenarios, smoother speech output, and a clearer session setup experience.
+
+Privacy: Clearer notes on practice transcripts and the option to delete stored transcripts from your evaluation review.
+
+Other improvements: Consistent coaching method labels, bug fixes, and general stability.
+```
+
+---
+
+## Was ist neu — App Store Connect (v2.5.1, Build 1) — zurückgezogen
+
+*(Ersetzt durch v2.5.4 oben.)*
+
+### Deutsch (Archiv)
 
 ```
 ManualMode: Neuer App-Name im App Store — passend zum Namen auf dem Home-Bildschirm.
@@ -228,7 +266,7 @@ Coaching üben: Übungsszenarien mit KI-Coachees, strukturiertes Feedback und Ve
 Weitere Verbesserungen: Überarbeitete Upgrade-Paywall, klarere Abo-Reihenfolge, Stabilität und Datenschutz-Hinweise.
 ```
 
-### English (U.S.)
+### English (U.S.) (Archiv)
 
 ```
 ManualMode: New App Store name — matches the name on the home screen.
