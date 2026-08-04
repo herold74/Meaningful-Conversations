@@ -2,6 +2,12 @@
  * Coachee scenarios for Coach Practice mode (orthogonal to framework choice).
  */
 
+const {
+  CONTRACTING_SCENARIOS,
+  getContractingScenarioById,
+  getPublicContractingScenarios,
+} = require('./contractingScenarios.js');
+
 const AVATAR_GENDER = {
   '/avatars/max.png': 'male',
   '/avatars/ava.png': 'female',
@@ -208,7 +214,9 @@ const DIFFICULTY_MODIFIERS = {
 };
 
 function getScenarioById(id) {
-  return SCENARIOS.find((s) => s.id === id) || null;
+  return SCENARIOS.find((s) => s.id === id)
+    || getContractingScenarioById(id)
+    || null;
 }
 
 function getPublicScenarios(language = 'de') {
@@ -240,10 +248,13 @@ function getScenarioForPrompt(id, difficulty, language = 'de', focusNote = '') {
 
 module.exports = {
   SCENARIOS,
+  CONTRACTING_SCENARIOS,
   AVATAR_GENDER,
   getCoacheeGenderFromAvatar,
   DIFFICULTY_MODIFIERS,
   getScenarioById,
   getPublicScenarios,
+  getPublicContractingScenarios,
+  getContractingScenarioById,
   getScenarioForPrompt,
 };

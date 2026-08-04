@@ -276,6 +276,8 @@ export interface PracticePhase2Context {
     priorTranscript: string;
     clarifiedConcern: string;
     sessionContract?: string;
+    /** Source contracting evaluation (for follow-up tracking). */
+    contractingEvaluationId?: string;
 }
 
 export type ScopeBoundaryTheme =
@@ -338,9 +340,18 @@ export interface PracticeScenario {
     discouragedReasons?: Record<string, string>;
 }
 
+/** Blind contracting picker — concern hidden from coach until evaluation. */
+export interface PracticeContractingScenario {
+    id: string;
+    coacheeName: string;
+    avatar: string;
+    coacheeGender?: 'male' | 'female';
+}
+
 export interface PracticeCatalog {
     frameworks: PracticeFramework[];
     scenarios: PracticeScenario[];
+    contractingScenarios: PracticeContractingScenario[];
     defaultPair?: PracticeDefaultPair;
     difficulties: { id: PracticeDifficulty; label: string; locked?: boolean }[];
     unlocks: PracticeUnlocks;
@@ -369,6 +380,8 @@ export interface CoachPracticeConfig {
     /** Phase 2: clarified concern / contract from contracting evaluation. */
     clarifiedConcern?: string;
     sessionContract?: string;
+    /** Links a Phase 2 session back to its contracting evaluation. */
+    followsContractingEvaluationId?: string;
 }
 
 export interface PracticeDimensionScore {
@@ -437,6 +450,8 @@ export interface PracticeEvaluationResult {
     liveMode?: boolean;
     /** Full session transcript (Coach Practice only), stored after user completes evaluation. */
     transcript?: string;
+    /** Phase 2 sessions: id of the contracting evaluation this continues. */
+    followsContractingEvaluationId?: string;
     scopeBoundary?: {
         active: boolean;
         theme?: string;

@@ -1296,7 +1296,18 @@ const App: React.FC = () => {
                 || practiceEvaluation.sessionContract
                 || practiceConfig.scenarioName,
             sessionContract: practiceEvaluation.sessionContract,
+            contractingEvaluationId: practiceEvaluation.id,
         });
+        setPracticeConfig(null);
+        setPracticeEvaluation(null);
+        setPracticeTranscriptForPhase2('');
+        setSelectedBot(null);
+        setChatHistory([]);
+        setView('practicePhase2Picker');
+    };
+
+    const handleStartPhase2 = (context: PracticePhase2Context) => {
+        setPracticePhase2Context(context);
         setPracticeConfig(null);
         setPracticeEvaluation(null);
         setPracticeTranscriptForPhase2('');
@@ -1510,6 +1521,7 @@ const App: React.FC = () => {
         setPracticePhase2Context,
         handleStartPractice,
         handleContinueToPhase2,
+        handleStartPhase2,
         handlePracticeSelfRatingSubmit,
         handlePracticeSelfRatingSkip,
         handlePracticeDone,
