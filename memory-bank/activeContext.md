@@ -3,14 +3,22 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **3**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b3`; practice placeholder fix after session opened)
+**Staging:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; Phase 2 eval fix + framework display names)
 **Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; staging ahead on 2.5.4)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
-**Xcode:** Local BUILD_NUMBER **3** after v2.5.4 patch deploy (do not re-Archive unless needed)
+**Xcode:** Local BUILD_NUMBER **4** synced (`CURRENT_PROJECT_VERSION=4`); `npm run sync:ios-staging` OK — staging API build ready to Run/Archive
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.4 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-04 — Staging v2.5.4 Build 4 patch)
+
+- **Commit `60ed7f5`:** Practice framework display names — shared `getFrameworkDisplayName` helper (history, progress, resume flows); contracting sentinel label key; backend `frameworks.js` capitalization (four-stage, forward-focused)
+- **Commit `0febd04`:** chore build 4 sync (deploy script auto-commit)
+- **Also on staging (from prior commits):** `bef966f` Phase 2 free-play eval scores method session only; `40c4695` practice input placeholder fix
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — success; TTS re-tag only; health OK; `sw.js` `v2.5.4-b4`
+- **Xcode:** `npm run sync:ios-staging` — web assets synced to `ios/App/App/public`
 
 ## Recent Changes (2026-08-04 — Staging v2.5.4 Build 3 patch)
 
