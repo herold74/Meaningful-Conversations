@@ -257,8 +257,8 @@ monitor: ## Show real-time resource usage
 
 # ============ MEANINGFUL CONVERSATIONS DEPLOYMENT ============
 
-deploy-staging: ## Deploy to staging environment
-	@./deploy-manualmode.sh -e staging
+deploy-staging: ## Deploy to staging environment (app: frontend+backend, re-tags TTS)
+	@./deploy-manualmode.sh -e staging -c app
 
 deploy-production: ## Deploy to production environment
 	@./deploy-manualmode.sh -e production

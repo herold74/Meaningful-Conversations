@@ -1,14 +1,23 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.2
+**Version:** 2.5.3 (committed); staging deploy pending
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **1**, v2.5.2 — https://mc-beta.manualmode.at (health OK; Coach Practice voice + transcript download)
+**Staging:** Still **v2.5.2 Build 1** at https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.2-b1`) — v2.5.3 deploy **aborted by user**; re-run when ready: `./deploy-manualmode.sh -e staging -c app`
 **Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; same registry images as staging Build 4)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01** (AT/DE/CH); **2.5.1 (1) Waiting for Review** (Premium+ / ManualMode)
-**Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **4** after staging redeploys (do not re-Archive unless needed)
+**Xcode:** **Build 1** was archived/submitted; local BUILD_NUMBER now **3** after v2.5.3 staging deploy attempts (do not re-Archive unless needed)
 
 **Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review.
+
+**Deploy default (uncommitted):** `deploy-manualmode.sh` + `Makefile deploy-staging` now default to `-c app` (frontend+backend, TTS re-tag only). Previously bare `./deploy-manualmode.sh -e staging` used `-c all`, which triggered unnecessary full TTS/Piper rebuilds when `-c app` was omitted out of habit.
+
+## Recent Changes (2026-08-04 — v2.5.3 committed, staging deploy pending)
+
+- **Commit `bdf662b`:** Release v2.5.3 — Coach Practice UX: blind contracting scenarios (anti-cheat), progress pills, on-demand Phase 2 + reminder modal, manual transcript delete, duplicate difficulty fix, GDPR copy for server-side practice transcripts
+- **Commits `a24c362`, `7f2b53b`:** chore build 2/3 sync — staging deploy attempts used bare `-e staging` (old default `-c all`), causing full TTS rebuilds; code live in repo but mc-beta still on v2.5.2-b1
+- **Uncommitted (doc/skill cleanup done):** deploy default `-c app` in `deploy-manualmode.sh`, `Makefile`, deployment skill; `activeContext.md` updated
+- **Next (user's call):** `./deploy-manualmode.sh -e staging -c app` — app-only, no TTS rebuild
 
 ## Recent Changes (2026-08-04 — Staging v2.5.2 Build 1)
 
