@@ -4,13 +4,28 @@
 **Version:** 2.5.4
 **Branch:** `main`
 **Staging:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; Phase 2 eval fix + framework display names)
-**Production:** Deployed **2026-08-03**, Build **4**, v2.5.1 — https://mc-app.manualmode.at (health OK; staging ahead on 2.5.4)
+**Production:** Deployed **2026-08-04**, Build **4**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b4`; pull-only from staging registry)
 **App Store:** iOS **2.5.0 (6) live** — released **2026-08-01**; **2.5.1 withdrawn** from review; **2.5.4 (1) prep** for ASC re-submission (MARKETING_VERSION synced, production `cap sync ios` done)
-**Xcode:** Local BUILD_NUMBER **4** synced (`CURRENT_PROJECT_VERSION=4`); `npm run sync:ios-staging` OK — staging API build ready to Run/Archive
+**Xcode:** Local BUILD_NUMBER **4** synced (`CURRENT_PROJECT_VERSION=4`); Archive **2.5.4 (1)** pending ASC submit
 
-**Production deploy gate:** **Closed for 2.5.1** — Production web/backend aligned with staging Build 4; iOS 2.5.1 still in App Review. **2.5.4 staging ahead of production** — do not deploy production until App Store gate cleared for 2.5.x.
+**Production deploy gate:** **Open for 2.5.4** — Production web/backend now matches staging Build 4 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+**Uncommitted (local):** Method suggestion i18n fix + phonetic dictionary v1.0.5 — not yet on staging/production. Deploy staging after commit.
+
+## Recent Changes (2026-08-04 — Method suggestion i18n + phonetic, uncommitted)
+
+- **Root cause:** Contracting eval LLM copied English `frameworkName` from catalog; UI rendered raw field while header used i18n
+- **Fix:** `getFrameworkDisplayName(frameworkId)` in `PracticeEvaluationReview` + `PracticeFollowUpReminderModal`; backend `normalizeMethodSuggestions` + localized `buildContractingFrameworkCatalog`
+- **Phonetic v1.0.5:** Sage→Seidsch, GROW→Grou, method labels (Ambivalenz-Coaching, …), coachee names (Blair, Jordan, …)
+- **Tests:** `practiceFrameworkLabels.test.ts` (7), `frameworkLabels.test.js` (4) — pass
+
+## Recent Changes (2026-08-04 — Production v2.5.4 Build 4)
+
+- **Production deploy:** `./deploy-manualmode.sh -e production` — success (~64 s); pull-only (same images as staging); health OK; `sw.js` `v2.5.4-b4`
+- **Parity:** Staging + Production both on v2.5.4-b4
+- **Next (manual):** ASC 2.5.4 submit; after review starts run `setup-app-store-review-account.js` on production if review account needs refresh
 
 ## Recent Changes (2026-08-04 — Staging v2.5.4 Build 4 patch)
 

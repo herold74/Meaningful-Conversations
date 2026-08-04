@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationSummary } from '../types';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 
 interface PracticeFollowUpReminderModalProps {
   evaluation: PracticeEvaluationSummary;
@@ -18,7 +19,7 @@ const PracticeFollowUpReminderModal: React.FC<PracticeFollowUpReminderModalProps
   onContinue,
   onCancel,
 }) => {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const data = evaluation.evaluationData;
 
   return (
@@ -69,7 +70,10 @@ const PracticeFollowUpReminderModal: React.FC<PracticeFollowUpReminderModalProps
             <ul className="space-y-2">
               {data.methodSuggestions.slice(0, 3).map((s, i) => (
                 <li key={i} className="text-sm text-content-secondary">
-                  <span className="font-semibold text-content-primary">{s.frameworkName}:</span> {s.rationale}
+                  <span className="font-semibold text-content-primary">
+                    {getFrameworkDisplayName(s.frameworkId, { t, language })}:
+                  </span>{' '}
+                  {s.rationale}
                 </li>
               ))}
             </ul>
