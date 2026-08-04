@@ -17,6 +17,7 @@ const {
   transcriptEvaluationPrompts,
   botRecommendationPrompts,
   practiceEvaluationPrompts,
+  practiceFreePlayEvaluationPrompts,
 } = require('../geminiPrompts');
 
 beforeEach(() => {
@@ -371,6 +372,44 @@ describe('geminiPrompts', () => {
       expect(fw.sessionFlowRubric).not.toMatch(/NOT a full 6-step contract/i);
       expect(fw.complianceCriteria).toContain('Full session contracting');
       expect(fw.evaluatorRubric).not.toMatch(/Penalize full.*contracting/i);
+    });
+  });
+
+  describe('practiceFreePlayEvaluationPrompts', () => {
+    test('en prompt instructs scoring transcript only, not prior context', () => {
+      const prompt = practiceFreePlayEvaluationPrompts.en.prompt({
+        scenarioSummary: 'Test scenario',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Method session turn\nCoachee: Reply',
+        currentDate: '2026-08-04',
+        liveMode: false,
+        scopeBoundaryTheme: null,
+        scopeBoundaryThemeLabel: null,
+        priorContext: 'Clarified concern only',
+      });
+      expect(prompt).toContain('Score ONLY what appears in the ## Transcript block');
+      expect(prompt).toContain('NEVER quote from it');
+      expect(prompt).toContain('score conservatively');
+      expect(prompt).toContain('Clarified concern only');
+      expect(prompt).not.toContain('Coach: Contracting turn');
+    });
+
+    test('de prompt instructs scoring transcript only, not prior context', () => {
+      const prompt = practiceFreePlayEvaluationPrompts.de.prompt({
+        scenarioSummary: 'Testszenario',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Methoden-Zug\nCoachee: Antwort',
+        currentDate: '2026-08-04',
+        liveMode: false,
+        scopeBoundaryTheme: null,
+        scopeBoundaryThemeLabel: null,
+        priorContext: 'Geklärtes Anliegen',
+      });
+      expect(prompt).toContain('Bewerte NUR das, was im ## Transkript-Block');
+      expect(prompt).toContain('NIEMALS');
+      expect(prompt).toContain('konservativ');
     });
   });
 });

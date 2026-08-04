@@ -2157,6 +2157,8 @@
   "practice_loading": "Loading...",
   "practice_catalog_error": "Could not load practice catalog.",
   "practice_eval_error": "Evaluation failed. Please try again.",
+  "practice_phase2_eval_too_short": "The method session is too short for evaluation. Send at least two coach messages before ending the session.",
+  "practice_review_phase2_scope_note": "This feedback reflects the method session only — not the prior concern-clarification phase.",
   "practice_ai_coach_badge": "Also available as AI coach: {{name}}",
   "practice_only_badge": "Practice-only method",
   "practice_explainer_toggle": "Show method details",

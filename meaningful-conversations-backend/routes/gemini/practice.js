@@ -23,6 +23,10 @@ const {
   isClientOnlyPracticeFramework,
   practiceAccessErrorMessage,
 } = require('../../utils/practiceAccess.js');
+const {
+  buildFreePlayPriorContext,
+  validatePhase2EvaluationGate,
+} = require('../../practice/phase2Evaluation.js');
 
 const MAX_MESSAGE_LENGTH = 5000;
 const PRACTICE_BOT_ID = 'practice-coachee';
@@ -362,6 +366,14 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Transcript exceeds maximum length.' });
     }
 
+    const phase2Gate = validatePhase2EvaluationGate(followsContractingEvaluationId, history);
+    if (!phase2Gate.ok) {
+      return res.status(400).json({
+        error: 'The method session is too short for evaluation. Send at least two coach messages before ending.',
+        errorCode: phase2Gate.errorCode,
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { aiRegionPreference: true },
@@ -392,7 +404,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
       });
       responseSchema = practiceContractingEvaluationPrompts.schema;
     } else if (resolvedPracticeMode === 'free-play') {
-      const priorContext = [clarifiedConcern, sessionContract, priorTranscript].filter(Boolean).join('\n');
+      const priorContext = buildFreePlayPriorContext({ clarifiedConcern, sessionContract });
       const promptFn = practiceFreePlayEvaluationPrompts[lang]?.prompt
         || practiceFreePlayEvaluationPrompts.en.prompt;
       prompt = promptFn({

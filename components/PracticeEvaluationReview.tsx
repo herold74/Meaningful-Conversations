@@ -182,6 +182,10 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
         <p className="text-xs text-content-secondary mb-4">{t('practice_review_live_note')}</p>
       )}
 
+      {evaluation.followsContractingEvaluationId && (
+        <p className="text-xs text-content-secondary mb-4">{t('practice_review_phase2_scope_note')}</p>
+      )}
+
       <p className="text-xs text-content-secondary mb-4">{scoringHint}</p>
 
       {evaluation.scenarioMethodFit && (
