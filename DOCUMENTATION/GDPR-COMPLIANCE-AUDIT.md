@@ -115,7 +115,7 @@
 ### 14. Coach Practice Lab (NEW v2.3–2.5)
 - **Status:** GDPR-COMPLIANT (transparency recommendation for draft)
 - **In-progress draft:** `sessionStorage` (`mc_practice_draft_v1`), max 24h, tab-scoped, **not** sent to server — `utils/practiceSessionDraft.ts`
-- **Completed sessions:** `practice_evaluations` — structured scores/JSON, **no** full chat transcript
+- **Completed sessions:** `practice_evaluations` — structured scores/JSON **+ session transcript** (after user completes evaluation; included in export; deleted on account erasure)
 - Evaluation via AI (Google/Mistral per region)
 - Included in `/api/data/export`
 - **Art. 6(1)(b) GDPR**
