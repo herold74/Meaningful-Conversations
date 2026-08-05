@@ -1,0 +1,32 @@
+---
+description: Git commit and push workflow — always push after commit unless opted out
+globs:
+alwaysApply: true
+---
+## Git: Commit + Push in One Step
+
+When the user asks to **commit** (or approves committing your changes), treat that as **commit and push together** — one workflow, no separate confirmation.
+
+### Default sequence
+
+1. `git status` / `git diff` / `git log` (analyze changes)
+2. Stage relevant files
+3. Commit with a clear message
+4. **`git push origin HEAD`** (or push the current branch)
+5. Confirm commit hash **and** that push succeeded
+
+Do **not** stop after commit and ask „Soll ich auch pushen?“ unless push fails or is blocked.
+
+### Opt-out (only then skip push)
+
+Skip push only when the user explicitly says:
+- „commit only“ / „nur committen“ / „don't push“ / „nicht pushen“
+- „local commit“ / „lokal committen“
+
+### Still apply Git Safety Protocol
+
+- Never force-push `main`/`master` without explicit user request
+- Never skip hooks unless explicitly requested
+- Never commit secrets (`.env`, credentials)
+- Follow amend rules from user commit instructions
+- If push fails (network, auth, rejected), report the error and do not claim success

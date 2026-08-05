@@ -1,0 +1,35 @@
+---
+description: Coach Practice coachee prompts, avatars, and DE/EN parity
+globs: "**/practice/**,**/coacheePrompt*"
+alwaysApply: false
+---
+
+# Practice Coaching Patterns
+
+## Coachee role guard
+
+`meaningful-conversations-backend/practice/coacheePrompt.js` defines `COACHEE_ROLE_GUARD` (DE/EN). The AI coachee must **not**:
+
+- Mirror or scale like a coach
+- Ask permission/meta questions or control the session
+
+When changing coachee behavior, update **both** language blocks and run:
+
+```bash
+cd meaningful-conversations-backend && npx jest practice/__tests__/coacheePrompt.test.js --ci --forceExit
+```
+
+## Avatar gender
+
+- Use `practice/avatarGender.js` for gender mapping
+- Keep 12 unique avatars per selection set; gender must match voice/TTS config
+- Eval prompts: include `coacheeGender` in practice evaluate flows (see `buildPracticeScenarioSummary`)
+
+## DE/EN parity
+
+Every prompt change in `coacheePrompt.js` needs matching DE and EN strings. Admin simulate route (`routes/gemini/admin.js`) must stay aligned with production prompts.
+
+## Reference
+
+- `DOCUMENTATION/COACH-BEHAVIOR-MATRIX.md` — coach personas and practice methods
+- `.cursor/skills/meaningful-conversations/llm-upgrade/SKILL.md` — regression after prompt changes

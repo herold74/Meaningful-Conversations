@@ -1,0 +1,38 @@
+---
+description: React/TypeScript frontend patterns for Meaningful Conversations
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Frontend React Patterns
+
+Applies to frontend TypeScript/React. Backend code lives under `meaningful-conversations-backend/` — use `backend-express.mdc` there.
+
+## Stack
+
+- React 18 functional components, Vite, Tailwind CSS
+- Custom `LocalizationContext` — use `t('key')` from `useLocalization()`, never hardcode user-facing strings
+- Capacitor for iOS — test voice/TTS paths on native when touching audio hooks
+
+## Conventions
+
+- Extract reusable logic into `hooks/` (e.g. `useWakeLock`, `useTts`, `useAppRouting`)
+- Brand/server config via `config/brand.ts` and `VITE_*` env vars — **never hardcode server IPs** in committed files
+- State: React Context for auth, localization, theme; avoid unnecessary global stores
+
+## Before shipping UI changes
+
+1. Add translation keys to **both** `public/locales/de.json` and `public/locales/en.json`
+2. Run `npx tsc --noEmit` — deploy builds fail on TS errors
+3. Run `npm test` for touched units
+
+## Examples
+
+```tsx
+// ✅ GOOD
+const { t } = useLocalization();
+<h1>{t('bot_selection_title')}</h1>
+
+// ❌ BAD — hardcoded string, no i18n
+<h1>Choose your coach</h1>
+```

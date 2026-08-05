@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/session-start.sh"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/gate-production-deploy.sh",
+        "matcher": "deploy-manualmode\\.sh.*-e production|make deploy-production|deploy-manualmode-production"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": ".cursor/hooks/scan-secrets.sh",
+        "matcher": "UserPromptSubmit"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/scan-secrets.sh",
+        "matcher": "Write|StrReplace"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/post-edit-tsc.sh",
+        "matcher": "Write|StrReplace"
+      },
+      {
+        "command": ".cursor/hooks/post-edit-i18n.sh",
+        "matcher": "Write|StrReplace"
+      }
+    ]
+  }
+}

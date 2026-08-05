@@ -2,6 +2,13 @@
 
 Persistent **handoff context** for this repo between AI sessions. For long-form guides see `DOCUMENTATION/`; for task procedures see `.cursor/skills/meaningful-conversations/`.
 
+## Agent entry (start here)
+
+1. **Read `activeContext.md`** — current version, deploy state, recent changes
+2. **Pick a skill** — see [`.cursor/rules/README.md`](../.cursor/rules/README.md) or [`AGENTS.md`](../AGENTS.md)
+3. **Use a slash command** if available (e.g. `/deploy-staging`, `/memory-bank-update`)
+4. **Stay in PLAN mode** until the user types `ACT` (see `.cursor/rules/core.mdc`)
+
 ## Core files (read `activeContext.md` first)
 
 | File | Purpose |
