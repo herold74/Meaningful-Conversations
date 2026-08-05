@@ -44,9 +44,9 @@ export function useSpeechRecognition({
 
     const sendTranscript = async () => {
       const textToSend = (
-        stableTranscriptRef.current ||
         latestTranscriptRef.current ||
-        input
+        input ||
+        stableTranscriptRef.current
       ).trim();
       if (!textToSend) return;
       baseTranscriptRef.current = '';

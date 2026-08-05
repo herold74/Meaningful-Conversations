@@ -112,7 +112,15 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const hasSpokenFirstMessageRef = useRef(false);
   const warmupPromiseRef = useRef<Promise<void> | null>(null);
   /** Set after `speak` is defined — used for server-TTS failure fallback from streaming queue. */
-  const speakFallbackRef = useRef<{ fn: ((text: string, isMeditation?: boolean, isRetry?: boolean, forceLocal?: boolean) => Promise<void>) | null }>({ fn: null });
+  const speakFallbackRef = useRef<{ fn: ((text: string, isMeditation?: boolean, isRetry?: boolean, forceLocal?: boolean, forceServerRefresh?: boolean) => Promise<void>) | null }>({ fn: null });
+
+  const invalidateCachedAudio = useCallback(() => {
+    const cached = cachedAudioRef.current;
+    if (cached?.url) {
+      URL.revokeObjectURL(cached.url);
+    }
+    cachedAudioRef.current = null;
+  }, []);
 
   const isIOS = useMemo(() => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -513,7 +521,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         sentenceQueueRef.current = null;
         s.synthInProgress = false;
         if (remaining.trim()) {
-          void speakFallbackRef.current.fn?.(remaining, false, true, true);
+          void speakFallbackRef.current.fn?.(remaining, false, false, false, true);
         } else {
           setIsLoadingAudio(false);
           setTtsStatus('idle');
@@ -659,7 +667,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     isSpeakingRef.current = false;
   }, []);
 
-  const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false, forceLocalTts: boolean = false) => {
+  const speak = useCallback(async (text: string, isMeditation: boolean = false, isRetry: boolean = false, forceLocalTts: boolean = false, forceServerRefresh: boolean = false) => {
     if (!isTtsEnabled || !text.trim()) {
       return;
     }
@@ -785,6 +793,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               networkState: audio.networkState,
               event: e
             });
+            invalidateCachedAudio();
             setTtsStatus('idle');
             setIsLoadingAudio(false);
             isSpeakingRef.current = false;
@@ -792,7 +801,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         };
 
         // --- Check cache (supports both single-blob and sentence-blobs) ---
-        if (cachedAudioRef.current && cachedAudioRef.current.text === cleanText) {
+        if (!forceServerRefresh && cachedAudioRef.current && cachedAudioRef.current.text === cleanText) {
           console.log('[TTS] Using cached audio for instant replay');
 
           const cached = cachedAudioRef.current;
@@ -1010,6 +1019,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         }
       } catch (error) {
         console.error('[TTS] Server TTS error:', error);
+        invalidateCachedAudio();
         setTtsStatus('idle');
         if (!isRetry) {
           setTimeout(() => speak(text, isMeditation, true, true), 100);
@@ -1401,9 +1411,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const handleRepeatTTS = useCallback(() => {
     if (lastSpokenTextRef.current) {
-      speak(lastSpokenTextRef.current);
+      invalidateCachedAudio();
+      speak(lastSpokenTextRef.current, false, false, false, true);
     }
-  }, [speak]);
+  }, [speak, invalidateCachedAudio]);
 
   const setIsTtsEnabledFromParent = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
     setIsTtsEnabled(value);
