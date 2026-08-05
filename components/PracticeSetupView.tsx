@@ -467,7 +467,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
+                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full object-cover object-center shrink-0" />
                     <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                   </div>
                   {(progress?.highestDifficultyLabel || progress?.followUpSource) && (
@@ -559,7 +559,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
+                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full object-cover object-center shrink-0" />
                     <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                     {renderCompletionPill(formatCompletionPillLabel(
                       progress?.highestDifficultyLabel,
@@ -775,7 +775,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                         }`}
                       >
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full" />
+                          <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full object-cover object-center shrink-0" />
                           <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
                           <MatchBadge tier={tier} />
                           {renderCompletionPill(formatCompletionPillLabel(
