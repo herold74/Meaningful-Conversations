@@ -37,9 +37,11 @@
 
 | Content type | Status | Deadline |
 |--------------|--------|----------|
+| Session summary `.txt` export | **Marked** (`utils/aiContentMarking.ts`) | — |
+| Personality PDF | **Human label in footer** | — |
 | Chat text (in-app) | Not marked | Evaluate by Dec 2026 |
 | TTS audio | Not marked | Evaluate by Dec 2026 |
-| Exported summaries / PDFs | Not marked | Evaluate by Dec 2026 |
+| Other exports (transcript eval, practice) | Not marked | Evaluate by Dec 2026 |
 
 Grace period for systems on market before 2 Aug 2026: **2 Dec 2026**.
 
@@ -75,3 +77,4 @@ Grace period for systems on market before 2 Aug 2026: **2 Dec 2026**.
 | Date | Change |
 |------|--------|
 | 2026-08 | Initial classification; Bot Selection Art. 50(1) notices implemented |
+| 2026-08 | Disclaimer Art. 50 cross-ref; session-summary export marking; PDF footer label |

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line, Polygon, Rect, G, Path } from '@react-pdf/renderer';
 import { brand } from '../config/brand';
+import { buildAiContentHumanLabel } from './aiContentMarking';
 import { SurveyResult } from '../components/PersonalitySurvey';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -824,10 +825,14 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const footerLine1 = language === 'de'
     ? `Erstellt für ${userEmail || 'Unbekannt'} • Persönlich und Vertraulich • ${date}`
     : `Generated for ${userEmail || 'Unknown'} • Personal and Confidential • ${date}`;
+  const footerAiLine = language === 'de'
+    ? buildAiContentHumanLabel('de')
+    : buildAiContentHumanLabel('en');
   const Footer = () => (
     <View style={styles.footerContainer} fixed>
       <View style={styles.footer}>
         <Text>{footerLine1}</Text>
+        <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>{footerAiLine}</Text>
         <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 2 }}>
           <Text style={styles.footerBold}>{brand.appName}</Text> by {brand.providerName}
         </Text>
