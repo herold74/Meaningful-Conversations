@@ -1,13 +1,14 @@
 # Memory Bank
 
-Persistent **handoff context** for this repo between AI sessions. For long-form guides see `DOCUMENTATION/`; for task procedures see `.cursor/skills/meaningful-conversations/`.
+Persistent **handoff context** for this repo between AI sessions. For long-form guides see `DOCUMENTATION/`.
+
+**Note:** Cursor agent config (`.cursor/`, `AGENTS.md`) is **local/maintainer-only** — not in the public repo. Use `DOCUMENTATION/` and `memory-bank/` for shared project context.
 
 ## Agent entry (start here)
 
 1. **Read `activeContext.md`** — current version, deploy state, recent changes
-2. **Pick a skill** — see [`.cursor/rules/README.md`](../.cursor/rules/README.md) or [`AGENTS.md`](../AGENTS.md)
-3. **Use a slash command** if available (e.g. `/deploy-staging`, `/memory-bank-update`)
-4. **Stay in PLAN mode** until the user types `ACT` (see `.cursor/rules/core.mdc`)
+2. **Long-form procedures** — `DOCUMENTATION/` (deploy, troubleshooting, access matrix)
+3. **Maintainer only:** local `.cursor/skills/` and rules (not versioned)
 
 ## Core files (read `activeContext.md` first)
 

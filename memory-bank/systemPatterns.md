@@ -195,6 +195,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Opt-out:** User says „commit only“, „nur committen“, „don't push“, or „nicht pushen“.
 - **Implementation:** `.cursor/rules/git-workflow.mdc` (local Cursor rule); Git Safety Protocol still applies (no force-push to main, no secrets, amend rules).
 
+### 25. Cursor agent config local-only (2026-08-05)
+- **Decision:** `.cursor/` (rules, skills, commands, hooks) and `AGENTS.md` are **not versioned** in the public repo — maintainer intellectual property and personal workflow.
+- **Reasoning:** Owner preference; reverses Decision implied by commit `c8528f2` (shared agent infrastructure in git).
+- **Implementation:** `.gitignore` ignores `.cursor/` and `AGENTS.md`; `git rm --cached` removes from tracking. Files remain on maintainer disk. Shared project context stays in `memory-bank/` and `DOCUMENTATION/`.
+
 ### 22. Entry-screen 3-card selection hubs (2026-07-24)
 - **Decision:** LandingPage and IntentPickerView use a shared visual pattern — three action cards in a responsive grid, with the primary path on a `.action-card-featured` dark-teal gradient tile (white text).
 - **Reasoning:** Mockup-aligned entry UX; clearer choice architecture than upload-first or stacked list layouts.
