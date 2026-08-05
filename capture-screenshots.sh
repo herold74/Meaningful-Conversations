@@ -49,7 +49,7 @@ show_progress() {
     echo ""
     
     total=0
-    for dir in "$SCREENSHOTS_DIR"/*/; do
+    for dir in "$SCREENSHOTS_DIR/journey"/*/; do
         if [ -d "$dir" ]; then
             dirname=$(basename "$dir")
             count=$(find "$dir" -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" \) 2>/dev/null | wc -l | tr -d ' ')

@@ -2,6 +2,10 @@
 /**
  * App Store screenshot capture (iPhone 6.5" + iPad Pro 12.9"/13"), DE and/or EN.
  *
+ * ASC English localization is English (Canada) — not English (U.S.); the app is
+ * not released on the U.S. storefront. Screenshots use the in-app `en` locale
+ * strings; Playwright locale is en-CA to match the Canadian English store listing.
+ *
  * Usage:
  *   node scripts/capture-app-store-screenshots.mjs [--base URL] [--headed]
  *     [--device iphone|ipad] [--lang de|en|all]
@@ -15,7 +19,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
-const OUT_ROOT = path.join(ROOT, 'screenshots/app-store-v2.5.4');
+const OUT_ROOT = path.join(ROOT, 'screenshots/app-store/v2.5.4');
 
 const BASE_URL = process.argv.includes('--base')
   ? process.argv[process.argv.indexOf('--base') + 1]
@@ -92,8 +96,8 @@ const LOCALES = {
 `,
   },
   en: {
-    code: 'en',
-    playwrightLocale: 'en-US',
+    code: 'en', // in-app UI strings (shared `en` locale file)
+    playwrightLocale: 'en-CA', // ASC store localization: English (Canada)
     suffix: { iphone: 'iphone-en', ipad: 'ipad13-en' },
     splashLoading: 'Loading your experience',
     welcomeHints: ['Welcome', 'Login'],
@@ -346,7 +350,7 @@ async function captureBotSelection(page, deviceKey, loc) {
     coaching?.scrollIntoView({ block: 'center' });
   }, loc.coachingSection);
   await waitStable(page, 800);
-  await snap(page, deviceKey, '03-bot-selection', loc);
+  await snap(page, deviceKey, '03-coach-grid', loc);
 }
 
 async function captureChat(page, deviceKey, loc) {
