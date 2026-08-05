@@ -12,7 +12,7 @@ Meaningful Conversations bridges this gap by creating a "living" document of the
 The user journey is circular and iterative:
 1.  **Context Creation:** Create a Life Context via questionnaire or upload an existing one.
 2.  **Personality Profile (Optional):** Complete surveys (Riemann-Thomann, Big Five, Spiral Dynamics) for adaptive coaching.
-3.  **Coach Selection:** Choose from 8 bots: 6 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob), Gloria Life Context (onboarding interview), and Gloria Interview (structured topic interviews with transcript export).
+3.  **Coach Selection:** Choose from 14 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob, Victor, Bekky, Dan, Gloria variants, etc.) plus **Coach Practice** lab.
 4.  **Conversation:** Voice or text dialogue. AI uses Life Context and personality profile for personalized guidance.
 5.  **Analysis & Review:** AI generates summary, proposes Life Context updates, and optionally refines personality profile (DPFL mode).
 6.  **Commit:** Review and accept changes, export calendar items for action steps.
@@ -22,7 +22,7 @@ The user journey is circular and iterative:
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
 
 ## Distribution
-- **iOS App Store:** Live as "MyCoach AI" (v2.0.0) in AT/DE/CH. Regional restriction intentional for manageable support coverage. **Not released on the U.S. storefront.** In App Store Connect, English store metadata uses **English (Canada)** — not English (U.S.). In-app UI language `en` is unchanged.
+- **iOS App Store:** **2.5.0 (6) live** (AT/DE/CH — not U.S. storefront). **2.5.4** in ASC review pipeline. English metadata: **English (Canada)**.
 - **PWA:** Available at https://mc-app.manualmode.at for all platforms.
 - **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 

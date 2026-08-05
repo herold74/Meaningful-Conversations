@@ -93,7 +93,7 @@ Dieses Projekt besteht aus einer Frontend-Anwendung (dieses Verzeichnis) und ein
 
 Der Backend-Server ist erforderlich, damit das Frontend funktioniert. Bitte folgen Sie den detaillierten Einrichtungsanweisungen in der README-Datei des Backends, um es zum Laufen zu bringen.
 
-**➡️ [`meaningful-conversations-backend/README.md`](./meaningful-conversations-backend/README.md)**
+**➡️ [`meaningful-conversations-backend/README.md`](../meaningful-conversations-backend/README.md)**
 
 ### Frontend-Einrichtung
 
@@ -151,8 +151,8 @@ Das Frontend bestimmt, mit welchem Backend es sich verbindet, basierend auf der 
 Detaillierte Dokumentation finden Sie im [`DOCUMENTATION`](./DOCUMENTATION/) Verzeichnis:
 
 *   **[DSGVO-COMPLIANCE-AUDIT.md](./DSGVO-COMPLIANCE-AUDIT.md)**: Vollständige DSGVO-Compliance-Prüfung
-*   **[USER-JOURNEY.md](./USER-JOURNEY.md)**: Detaillierte User-Journey durch die App
-*   **[DEVELOPMENT-HISTORY.md](./DEVELOPMENT-HISTORY.md)**: Entwicklungsgeschichte und wichtige Meilensteine
+*   **[USER-JOURNEY.md](../USER-JOURNEY.md)**: Detaillierte User-Journey durch die App
+*   **[DEVELOPMENT-HISTORY.md](./ARCHIVED/DEVELOPMENT-HISTORY.md)**: Entwicklungsgeschichte und wichtige Meilensteine
 *   **[DOCUMENTATION/](./DOCUMENTATION/)**: Technische Dokumentation zu Deployment, Server-Setup, APIs, etc.
 
 ## 🚀 Deployment
@@ -163,8 +163,8 @@ Die Anwendung läuft in einer Dual-Environment-Setup:
 *   **Produktion**: `https://mc-app.manualmode.at`
 
 Deployment-Anleitungen finden Sie in:
-*   [DOCUMENTATION/MANUALMODE-DUAL-ENVIRONMENT.md](./DOCUMENTATION/MANUALMODE-DUAL-ENVIRONMENT.md)
-*   [DOCUMENTATION/QUICK-START-MANUALMODE-SERVER.md](./DOCUMENTATION/QUICK-START-MANUALMODE-SERVER.md)
+*   [MANUALMODE-DUAL-ENVIRONMENT.md](./MANUALMODE-DUAL-ENVIRONMENT.md)
+*   [QUICK-START-MANUALMODE-SERVER.md](./QUICK-START-MANUALMODE-SERVER.md)
 
 ## 🤝 Beitragen
 

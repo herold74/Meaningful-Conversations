@@ -3,8 +3,8 @@
 This project uses **Podman** as the container engine for the alternative server deployment.
 
 > **Note:** This is a reference guide for Podman commands and concepts. For deployment instructions, see:
-> - [Alternative Server Quick Start](QUICK-START-ALTERNATIVE-SERVER.md)
-> - [Alternative Server Complete Guide](ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md)
+> - [Quick Start ManualMode Server](QUICK-START-MANUALMODE-SERVER.md)
+> - [ManualMode Dual Environment](MANUALMODE-DUAL-ENVIRONMENT.md)
 
 ## 🎯 About Podman
 

@@ -26,6 +26,37 @@ const { ensureDefaultConfig } = require('./services/initService');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+/**
+ * Fail fast when required secrets are missing in staging/production.
+ */
+function validateEnvironmentSecrets() {
+    const envType = process.env.ENVIRONMENT_TYPE || 'development';
+    if (envType === 'development') return;
+
+    const missing = [];
+    if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+    if (!process.env.DATABASE_URL && !process.env.INSTANCE_UNIX_SOCKET) {
+        missing.push('DATABASE_URL (or INSTANCE_UNIX_SOCKET + DB_*)');
+    }
+    if (!process.env.PAYPAL_WEBHOOK_ID) missing.push('PAYPAL_WEBHOOK_ID');
+
+    const appleKeys = ['APPLE_KEY_ID', 'APPLE_ISSUER_ID', 'APPLE_PRIVATE_KEY'];
+    if (appleKeys.some((k) => !process.env[k])) {
+        missing.push('APPLE_KEY_ID / APPLE_ISSUER_ID / APPLE_PRIVATE_KEY (IAP)');
+    }
+    if (envType === 'production' && process.env.APPLE_IAP_ENVIRONMENT === 'production' && !process.env.APPLE_APP_ID) {
+        missing.push('APPLE_APP_ID (production IAP notifications)');
+    }
+
+    if (missing.length) {
+        console.error(`FATAL: Missing required environment variables for ${envType}:`);
+        missing.forEach((m) => console.error(`  - ${m}`));
+        process.exit(1);
+    }
+}
+
+validateEnvironmentSecrets();
+
 // --- UTILITY FUNCTIONS ---
 
 /**
@@ -273,7 +304,7 @@ async function startServer() {
         // Trust the first proxy (nginx) for correct IP detection in rate limiting
         app.set('trust proxy', 1);
         
-        app.use(express.json());
+        app.use(express.json({ limit: '1mb' }));
 
         // Security headers (fallback when not behind nginx)
         const helmet = require('helmet');

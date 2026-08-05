@@ -701,8 +701,13 @@ router.post('/webhook', express.json(), async (req, res) => {
 
 async function verifyPayPalSignature(req) {
   if (!process.env.PAYPAL_WEBHOOK_ID) {
-    console.warn('[PayPal] PAYPAL_WEBHOOK_ID not configured — skipping webhook signature verification');
-    return true;
+    const envType = process.env.ENVIRONMENT_TYPE || 'development';
+    if (envType === 'development') {
+      console.warn('[PayPal] PAYPAL_WEBHOOK_ID not configured — skipping webhook signature verification (development only)');
+      return true;
+    }
+    console.error('[PayPal] PAYPAL_WEBHOOK_ID not configured — rejecting webhook');
+    return false;
   }
 
   try {
@@ -772,3 +777,4 @@ async function verifyPayPalSignature(req) {
 }
 
 module.exports = router;
+module.exports.verifyPayPalSignature = verifyPayPalSignature;
