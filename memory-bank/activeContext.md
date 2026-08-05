@@ -3,15 +3,19 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-04**, Build **6**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b6`; coach greeting locale fix + ASC iPhone screenshot set)
-**Production:** Deployed **2026-08-04**, Build **5**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b5`; pull-only from staging registry)
-**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC prep — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production (2026-08-04). **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** BUILD_NUMBER **6** synced (`CURRENT_PROJECT_VERSION=6`, `MARKETING_VERSION=2.5.4`); production API — `npm run build && npx cap sync ios` OK; Archive **2.5.4 (6)** pending ASC submit
-
-
-**Production deploy gate:** **Open for 2.5.4** — Production web/backend matches staging Build 5 (2026-08-04). Live Store users still on iOS 2.5.0; backward-compatible for method-only Coach Practice.
+**Staging:** Deployed **2026-08-05**, Build **7**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b7`; coach greeting locale fix live)
+**Production:** Deployed **2026-08-05**, Build **7**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b7`; parity with staging)
+**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
+**Xcode:** BUILD_NUMBER **7** in repo (`CURRENT_PROJECT_VERSION=7` after deploy sync); last Archive **2.5.4 (6)** — optional re-sync for Build 7 label only (greeting fix is backend, now on prod b7)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 7)
+
+- **Commit `76d1bef`:** chore build 7 sync (deploy script auto-commit)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — success (~5 min); health OK; `sw.js` `v2.5.4-b7`
+- **Production deploy:** `./deploy-manualmode.sh -e production` — success (~56 s); pull-only; health OK; `sw.js` `v2.5.4-b7`
+- **Parity:** Staging + Production both on v2.5.4-b7 — coach greeting language fix now live on production API (fixes EN UI + DE life context bug for iOS Build 6)
 
 ## Recent Changes (2026-08-04 — Staging v2.5.4 Build 6)
 

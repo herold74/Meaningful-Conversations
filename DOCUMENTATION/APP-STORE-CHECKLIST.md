@@ -17,8 +17,8 @@
 - [ ] Subtitle: **KI-Coaching & Kompetenz** / **AI Coaching & Competence**
 - [ ] Description (EN + DE) — siehe `APP-STORE-METADATA.md`
 - [ ] Keywords (EN + DE)
-- [ ] **Lokalisierungen:** Deutsch (Primär) + Englisch (U.S.) vollständig pflegen
-- [ ] Screenshots DE **und** EN pro Gerätegröße (`capture-app-store-screenshots.mjs --lang all`)
+- [ ] **Lokalisierungen:** Deutsch (Primär) + **Englisch (Kanada)** vollständig pflegen (nicht U.S. — App nicht im U.S.-Store)
+- [ ] Screenshots DE **und** EN pro Gerätegröße — siehe `app-store-connect/SKILL.md` (wann editierbar; EN später = neue ASC-Version, gleicher Build OK)
 - [ ] Category (primary + secondary)
 - [x] Screenshots: iPhone 6.7" (iPhone 15 Pro Max) — min 3
 - [x] Screenshots: iPhone 6.5" (iPhone 14 Plus) — min 3
