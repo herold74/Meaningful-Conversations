@@ -1,5 +1,6 @@
 const { getFrameworkById } = require('./frameworks');
-const { getScenarioForPrompt } = require('./scenarios');
+const { getScenarioForPrompt, getScenarioById } = require('./scenarios');
+const { resolveCoacheeGender } = require('./avatarGender');
 const { getScopeBoundaryPrompt, isValidTheme } = require('./scopeBoundary');
 const { resolveFrameworkId, isPracticeSentinelFramework } = require('./methodTaxonomy');
 const { getMentalFitnessCoacheeBlock, isMentalFitnessFramework } = require('./mentalFitnessCoacheeProfile');
@@ -130,8 +131,13 @@ You already know the coach. Continue seamlessly — no repeated greeting or full
   const firstTurnRule = isContracting ? contractingFirstTurn : standardFirstTurn;
   const roleGuardBlock = `\n${COACHEE_ROLE_GUARD[lang]}\n`;
 
+  const rawScenario = getScenarioById(scenarioId);
+  const coacheeGender = resolveCoacheeGender(rawScenario);
+  const roleLabelDe = coacheeGender === 'female' ? 'Klientin' : 'Klient';
+  const roleLabelEn = coacheeGender === 'female' ? 'client (female)' : 'client (male)';
+
   if (lang === 'de') {
-    return `Du bist ${scenario.coacheeName}, ein Coachee (Klient) in einem Coaching-Übungsgespräch.
+    return `Du bist ${scenario.coacheeName}, ${coacheeGender === 'female' ? 'eine' : 'ein'} Coachee (${roleLabelDe}) in einem Coaching-Übungsgespräch.
 
 WICHTIG: Du bist NICHT der Coach! Du suchst Unterstützung bei einem Problem.
 
@@ -156,7 +162,7 @@ REGELN:
 ${firstTurnRule}`;
   }
 
-  return `You are ${scenario.coacheeName}, a coachee (client) in a coaching practice conversation.
+  return `You are ${scenario.coacheeName}, a coachee (${roleLabelEn}) in a coaching practice conversation.
 
 IMPORTANT: You are NOT the coach! You are seeking support with a problem.
 
