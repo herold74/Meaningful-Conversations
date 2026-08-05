@@ -288,6 +288,20 @@ def synthesize_with_piper_safe(text, model, length_scale, speaker=None):
             logger.info(f"Piper chunk fallback: {len(wav_parts)}/{len(chunks)} chunks OK")
             return concat_wav_bytes(wav_parts)
 
+    # Single-chunk ONNX failure: try word-by-word synthesis
+    if last_error and base:
+        words = [w for w in base.split() if w.strip()]
+        if len(words) > 1:
+            wav_parts = []
+            for idx, word in enumerate(words):
+                try:
+                    wav_parts.append(synthesize_with_piper(word, model, length_scale, speaker))
+                except Exception as word_err:
+                    logger.warning(f"Piper word {idx + 1}/{len(words)} failed: {word_err}")
+            if wav_parts:
+                logger.info(f"Piper word fallback: {len(wav_parts)}/{len(words)} words OK")
+                return concat_wav_bytes(wav_parts)
+
     if last_error:
         raise last_error
     raise ValueError('No synthesizable text')

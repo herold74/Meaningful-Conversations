@@ -1160,13 +1160,13 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         (chatHistory.length === 2 && chatHistory[0].role === 'user'));
 
     if (isInitialBotResponse &&
-      voices.length > 0 &&
+      (ttsMode === 'server' || voices.length > 0) &&
       isTtsEnabled &&
       !hasSpokenFirstMessageRef.current) {
       hasSpokenFirstMessageRef.current = true;
       speak(lastMessage.text);
     }
-  }, [chatHistory, voices, isTtsEnabled, speak]);
+  }, [chatHistory, voices, isTtsEnabled, ttsMode, speak]);
 
   const handlePreviewVoice = useCallback(async (voice: SpeechSynthesisVoice) => {
     if (!voice || !window.speechSynthesis) return;
