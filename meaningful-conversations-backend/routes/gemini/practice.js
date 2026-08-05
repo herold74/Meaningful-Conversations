@@ -27,6 +27,7 @@ const {
   buildFreePlayPriorContext,
   validatePhase2EvaluationGate,
 } = require('../../practice/phase2Evaluation.js');
+const { buildPracticeScenarioSummary } = require('../../practice/avatarGender.js');
 const { normalizeLanguage } = require('../../utils/language.js');
 
 const MAX_MESSAGE_LENGTH = 5000;
@@ -382,9 +383,7 @@ router.post('/practice/evaluate', authMiddleware, async (req, res) => {
     });
     const userRegionPreference = user?.aiRegionPreference || 'optimal';
 
-    const scenarioSummary = lang === 'de'
-      ? `Coachee: ${scenario.coacheeName.de}\nAnliegen: ${scenario.concern.de}\nStimmung: ${scenario.emotionalTone.de}${focusNote ? `\nCoach-Fokus: ${focusNote}` : ''}`
-      : `Coachee: ${scenario.coacheeName.en}\nConcern: ${scenario.concern.en}\nTone: ${scenario.emotionalTone.en}${focusNote ? `\nCoach focus: ${focusNote}` : ''}`;
+    const scenarioSummary = buildPracticeScenarioSummary(scenario, lang, focusNote);
 
     const currentDate = new Date().toISOString().split('T')[0];
     const modelName = 'gemini-2.5-pro';

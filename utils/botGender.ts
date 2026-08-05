@@ -25,6 +25,13 @@ const PRACTICE_AVATAR_GENDER: Record<string, 'male' | 'female'> = {
   '/avatars/victor.png': 'male',
   '/avatars/bekky.png': 'female',
   '/avatars/dan.png': 'male',
+  '/avatars/gabrielle.png': 'female',
+  '/avatars/gloria.png': 'female',
+  '/avatars/mike.png': 'male',
+  '/avatars/sam.png': 'male',
+  '/avatars/nobody.png': 'male',
+  '/avatars/finley.png': 'female',
+  '/avatars/rowan.png': 'male',
 };
 
 export function getBotGender(botId: string): 'male' | 'female' {

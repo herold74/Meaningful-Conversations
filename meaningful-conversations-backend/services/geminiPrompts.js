@@ -1036,7 +1036,7 @@ Also provide strengths, development areas, 2-4 nextDrills (concrete practice sug
 - If method compliance ≥ 9 BUT sessionFlow.coherent=false → cap at 9/10
 - If method compliance < 9 → weight method 60%, average of other four dimensions 40%
 
-Write all output in English. Be constructive and specific — this is training, not punishment.`;
+Write all output in English. Be constructive and specific — this is training, not punishment.${PRACTICE_EVAL_PRONOUN_RULE.en}`;
         }
     },
     de: {
@@ -1131,7 +1131,7 @@ Außerdem: Stärken, Entwicklungsbereiche, 2-4 nextDrills (konkrete Übungsvorsc
 - Methodentreue ≥ 9 ABER sessionFlow.coherent=false → Deckel bei 9/10
 - Methodentreue < 9 → Gewichtung Methodentreue 60 %, Durchschnitt der vier anderen Dimensionen 40 %
 
-Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.`;
+Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch — dies ist Training, keine Bestrafung.${PRACTICE_EVAL_PRONOUN_RULE.de}`;
         }
     }
 };
@@ -1298,6 +1298,11 @@ const CONTRACTING_FRAMEWORK_CATALOG = `Available practice methods (suggest 1-3 i
 - strategic-coaching (Strategic coaching)
 - thought-audit (Thought audit)`;
 
+const PRACTICE_EVAL_PRONOUN_RULE = {
+  en: '\n**Pronouns (CRITICAL):** Refer to the coachee using ONLY the gender stated in the scenario block above — never infer from the first name. Apply consistently in summary, strengths, developmentAreas, nextDrills, and all dimension evidence.\n',
+  de: '\n**Pronomen (KRITISCH):** Beziehe dich auf den Coachee ausschließlich nach der Geschlechtsangabe im Szenario-Block oben — niemals aus dem Vornamen ableiten. Gilt für summary, strengths, developmentAreas, nextDrills und alle Dimensions-Belege.\n',
+};
+
 const practiceContractingEvaluationPrompts = {
   schema: practiceContractingEvaluationSchema,
   en: {
@@ -1338,7 +1343,7 @@ Also evaluate **contractingSteps** (boolean checklist):
 Provide sessionContract and clarifiedConcern as artifacts for the next session.
 methodSuggestions: optional 1-3 methods from the catalog with rationale — suggestions only, not verdicts.
 
-Set practiceMode to "contracting". Write all output in English. Be constructive and specific.`;
+Set practiceMode to "contracting". Write all output in English. Be constructive and specific.${PRACTICE_EVAL_PRONOUN_RULE.en}`;
     },
   },
   de: {
@@ -1379,7 +1384,7 @@ Bewerte außerdem **contractingSteps** (Checkliste, boolean):
 Liefere sessionContract und clarifiedConcern als Artefakte für die nächste Session.
 methodSuggestions: optional 1-3 Methoden aus dem Katalog mit Begründung — nur Vorschläge, kein Urteil.
 
-Setze practiceMode auf "contracting". Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch.`;
+Setze practiceMode auf "contracting". Schreibe die gesamte Ausgabe auf Deutsch. Sei konstruktiv und spezifisch.${PRACTICE_EVAL_PRONOUN_RULE.de}`;
     },
   },
 };
@@ -1420,7 +1425,7 @@ Score four dimensions (1-10): effectiveness, clarity, coachee autonomy, coachee 
 
 **freePlaySuggestions:** alternatives (what else could work), wentWell, missedOrOverlooked (cues missed or not heard).
 
-Set practiceMode to "free-play". No methodCompliance field. Write in English.`;
+Set practiceMode to "free-play". No methodCompliance field. Write in English.${PRACTICE_EVAL_PRONOUN_RULE.en}`;
     },
   },
   de: {
@@ -1457,7 +1462,7 @@ Bewerte vier Dimensionen (1-10): Wirksamkeit, Klarheit, Coachee-Autonomie, Coach
 
 **freePlaySuggestions:** alternatives (was man alternativ tun könnte), wentWell (gut gelaufen), missedOrOverlooked (überhört/übersehen).
 
-Setze practiceMode auf "free-play". Kein methodCompliance-Feld. Schreibe auf Deutsch.`;
+Setze practiceMode auf "free-play". Kein methodCompliance-Feld. Schreibe auf Deutsch.${PRACTICE_EVAL_PRONOUN_RULE.de}`;
     },
   },
 };
