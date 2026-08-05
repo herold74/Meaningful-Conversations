@@ -525,9 +525,9 @@ nginx -T | grep "server_name"
 
 ## 📚 Related Documentation
 
-- [Alternative Server Deployment](ALTERNATIVE-SERVER-DUAL-ENVIRONMENT.md)
+- [ManualMode Dual Environment Deployment](MANUALMODE-DUAL-ENVIRONMENT.md)
 - [MariaDB & Pod Configuration](MARIADB-POD-CONFIGURATION.md)
-- [Deployment Quick Start](QUICK-START-ALTERNATIVE-SERVER.md)
+- [Deployment Quick Start](QUICK-START-MANUALMODE-SERVER.md)
 - [Podman Guide](PODMAN-GUIDE.md)
 
 ---

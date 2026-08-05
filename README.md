@@ -106,7 +106,7 @@ This project supports full white-label rebranding via environment variables — 
     *   Web Speech API for voice input/output
     *   Web Crypto API for End-to-End Encryption (E2EE)
     *   Capacitor (iOS native app, StoreKit 2 In-App Purchases)
-    *   html2pdf.js for PDF export
+    *   `@react-pdf/renderer` for PDF export
     *   ICS library for calendar events
 *   **Backend**:
     *   Node.js & Express.js

@@ -11,8 +11,9 @@ alwaysApply: true
 
 When encountering any task, error, or decision point:
 
-1. **First**: Check if a skill (.mdc file) or documentation exists for this area
-   - `.cursor/skills/meaningful-conversations/` - Project-specific skills (deployment, auth, TTS, email, etc.)
+1. **First**: Check if a skill or rule exists for this area
+   - `.cursor/skills/meaningful-conversations/*/SKILL.md` — domain procedures (see [`.cursor/rules/README.md`](.cursor/rules/README.md))
+   - `.cursor/rules/*.mdc` — always-apply and file-scoped constraints
    - `DOCUMENTATION/*.md` - Detailed guides and checklists
    - `DOCUMENTATION/DOCUMENTATION-STRUCTURE.md` - Index of all documentation
 

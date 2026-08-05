@@ -104,6 +104,9 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
+- [x] **Production v2.5.5 (2026-08-05):** Build **2** — https://mc-app.manualmode.at, health OK
+- [x] **Staging v2.5.5 (2026-08-05):** Build **3** — https://mc-beta.manualmode.at, health OK
+- [x] **Cursor agent workflow (2026-08-05):** Rules, commands, hooks, AGENTS.md (`c8528f2`)
 - [x] **Production v2.5.4 (2026-08-04):** Build **5** — https://mc-app.manualmode.at, health OK (`sw.js` v2.5.4-b5; method i18n + phonetic; commit `0138954` + `95a86a7`; parity with staging)
 - [x] **Staging v2.5.4 (2026-08-04):** Build **5** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.4-b5)
 - [x] **Production v2.5.4 (2026-08-04):** Build **4** — superseded by Build 5
@@ -175,11 +178,12 @@
 - [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687, OpenSSL 3.5.5, Podman 5.8.2 (dnf upgrade 2026-07-15)
 - [x] **Backup script:** Duplicate log line bug fixed; daily backups healthy (2.8 MB / 16 files, 7-day retention)
 
-## Code Quality (v1.9.8)
+## Code Quality (v2.5.5)
 - [x] **Test Coverage:**
-    - [x] Frontend: 9 utility test suites (encryption, gamification, BFI-2, diff, PII, voice, dates, behavior, survey)
-    - [x] Backend: 7 service tests, 5 route integration tests, 4 middleware tests
-    - [x] Total: 33 suites, 724+ tests
+    - [x] Frontend: 25 suites, 220 tests — `collectCoverageFrom` widened (utils, services, hooks, context, config); floors 20% statements/lines, 30% branches, 35% functions
+    - [x] Backend: 45 suites, 742 tests — coverage includes routes/middleware/practice/utils (excludes `routes/gemini/**`); floors ~40% statements/lines, 30% branches, 50% functions
+    - [x] **Payment/IAP tests (2026-08-05):** PayPal webhook fail-closed, Apple JWS verifier wiring, notification route 400/401/200
+    - [x] **CI parity:** `npm run ci` (frontend + backend jest, typecheck, locale parity, build); `make test` / `make ci`
 - [x] **Backend Modularization:**
     - [x] gemini.js → 8 focused route modules in routes/gemini/
     - [x] constants.js → bots.js + crisisText.js

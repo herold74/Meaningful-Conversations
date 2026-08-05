@@ -94,6 +94,7 @@ prompt: Investigate failing check [name] on PR [url]. Return root cause + fix su
 | `/security-review` | Security review subagent |
 | `/explore` | Codebase exploration |
 | `/asc-update` | App Store Connect |
+| `/ci-investigate` | CI failure triage (ci-investigator subagent) |
 
 ## Hooks reference
 

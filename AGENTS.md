@@ -47,7 +47,7 @@ Entry map for AI coding agents working in this repository.
 | Multi-area refactor | `generalPurpose` | Parent integrates results |
 | Pre-PR review | `bugbot` | Use `/review` command |
 | Auth, PayPal, E2EE, webhooks | `security-review` | Use `/security-review` command |
-| Failed CI on PR | `ci-investigator` | One failing check at a time |
+| Failed CI on PR | `ci-investigator` | Use `/ci-investigate` command |
 
 **Subagent rules:**
 
@@ -65,9 +65,19 @@ Full playbook: [`.cursor/skills/meaningful-conversations/agent-workflows/SKILL.m
 | Deploy staging | `/deploy-staging` → deployment skill |
 | Deploy production | `/deploy-production` (explicit approval required) |
 | Version release | `/release` |
-| Tests before deploy | `/pre-deploy-check` |
+| Tests before deploy | `/pre-deploy-check` or `make ci` |
 | LLM QA on staging | `/llm-regression` → llm-upgrade skill |
 | App Store | `/asc-update` |
+| TTS / voice mode | `tts-voice/SKILL.md` |
+| Auth / roles / trial | `auth-access/SKILL.md` |
+| Email / Mailjet | `email-transactional/SKILL.md` |
+| PDF export | `pdf-export/SKILL.md` |
+| Coach Practice | `practice-coaching/SKILL.md` |
+| GDPR / privacy | `gdpr-compliance/SKILL.md` |
+| i18n / themes | `i18n-and-theming/SKILL.md` |
+| UX / onboarding | `ux-flow/SKILL.md` |
+| IAP / paywall | `in-app-purchase/SKILL.md` |
+| CI failure | `/ci-investigate` |
 | Troubleshooting | `DOCUMENTATION/TROUBLESHOOTING-INDEX.md` |
 
 ## Hooks (automatic)

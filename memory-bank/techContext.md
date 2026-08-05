@@ -17,7 +17,7 @@
     - `@capacitor/ios`: iOS platform
     - `@capacitor-community/native-audio`: Audio handling
     - `@capacitor-community/speech-recognition`: Native speech recognition
-- **PDF:** html2pdf.js (client-side)
+- **PDF:** `@react-pdf/renderer` via `utils/pdfGeneratorReact.tsx`
 - **Animation:** Framer Motion (page transitions, micro-interactions, loader animations)
 - **Font:** Inter Variable (self-hosted in `public/fonts/`)
 - **Utilities:**
@@ -34,7 +34,7 @@
 - **Loader:** `BrandLoader` wrapper with lazy-loaded variants: `tetris`, `steering-wheel`, `dots`, `pulse`
 - **Override:** Set `VITE_BRAND_COLOR_1` to `_4`, `VITE_BRAND_ACCENT`, `VITE_BRAND_LOADER` in `.env`
 
-### iOS Audio Handling (v1.7.9)
+### iOS Audio Handling (v2.5.5)
 - **Problem:** iOS switches to "playAndRecord" mode after microphone use, degrading TTS quality
 - **Fix 1 (Audio Session Reset):** Play silent WAV (16-bit null samples) immediately after mic stops
   - Forces iOS back to stereo/A2DP mode
@@ -42,7 +42,7 @@
 - **Fix 2 (MediaSession):** Activate/deactivate MediaSession around TTS playback
 - **TTS Mode:** iOS is forced to local Web Speech API (server TTS disabled due to autoplay restrictions)
 
-### Voice Mode Spinner (v1.7.9)
+### Voice Mode Spinner (v2.5.5)
 - Single spinner implementation (bouncing dots)
 - Position: Bottom of screen near Play/Repeat buttons
 - States: `isLoading` (AI response) and `isLoadingAudio` (TTS loading)
@@ -52,7 +52,7 @@
 - **Platform:** iOS (Native App)
 - **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
-- **App Store:** Live as "MyCoach AI" (v2.0.0, AT/DE/CH)
+- **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH); staging/production web **v2.5.5** (2026-08-05)
 - **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control

@@ -31,6 +31,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **gdpr-compliance/SKILL.md** — GDPR/DSGVO audits, export/erasure, privacy updates
 - **i18n-and-theming/SKILL.md**, **ux-flow/SKILL.md**, **in-app-purchase/SKILL.md**, **132-content-structure/SKILL.md** — domain workflows
 - **agent-workflows/SKILL.md** — Subagents, slash commands, hooks
+- **tts-voice/SKILL.md**, **auth-access/SKILL.md**, **email-transactional/SKILL.md**, **pdf-export/SKILL.md**, **practice-coaching/SKILL.md** — domain workflows
 
 ### Cursor agent infrastructure
 - **`.cursor/rules/`** — Always-apply and file-scoped rules (see `README.md`)
@@ -61,12 +62,11 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **NGINX-IP-ANONYMIZATION.md** - GDPR-compliant nginx access log IP anonymization (see also `nginx-config/*.template`, `server-scripts/update-nginx-ips.sh`)
 
 ### Server Migration (Historical - Completed Nov 2024)
-- **SERVER-MIGRATION-GUIDE.md** - General migration guide (⚠️ historical)
-- **SERVER-MIGRATION-TO-MANUALMODE.md** - Specific migration docs (⚠️ historical)
-- **MANUALMODE-SERVER-MIGRATION-SUMMARY.md** - Migration summary (⚠️ historical)
-- **QUICK-MIGRATION.md** - Quick migration steps (⚠️ historical)
+- **ARCHIVED/SERVER-MIGRATION-GUIDE.md** - General migration guide (historical)
+- **ARCHIVED/SERVER-MIGRATION-TO-MANUALMODE.md** - Specific migration docs (historical)
+- **ARCHIVED/QUICK-MIGRATION.md** - Quick migration steps (historical)
 
-*Note: All server migration docs are marked as historical - the migration was completed in November 2024.*
+*Note: All server migration docs are in ARCHIVED/ — migration completed November 2024.*
 
 ### Registry & Images
 - **GITLAB-REGISTRY-SETUP.md** - GitLab Container Registry (current)
@@ -99,7 +99,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **APP-STORE-METADATA.md** - **⭐ App Store Connect metadata (description, keywords, review notes, test account, URLs)**
 
 ### Social & marketing (local workspace)
-- **`DOCUMENTATION/SOCIAL-MEDIA/`** — LinkedIn carousel HTML, video scripts, blog-series drafts, strategy notes. **Gitignored** (not in the public repo). Conventions and workflow: **`.cursor/skills/meaningful-conversations/linkedin-social-assets/SKILL.md`**. Committable article/newsletter copy may also live under **`NEWSLETTER/`** (e.g. LinkedIn article Markdown).
+- **`DOCUMENTATION/SOCIAL-MEDIA/`** — LinkedIn carousel HTML, video scripts, blog-series drafts, strategy notes. **Gitignored** (not in the public repo). Committable article/newsletter copy may live under **`NEWSLETTER/`**.
 - **132 content structure (1 Kernaussage / 3 Punkte / 2 Schlüsse):** **`.cursor/skills/meaningful-conversations/132-content-structure/SKILL.md`**
   - **SOCIAL-MEDIA/LINKEDIN-VIDEO-SKRIPTE.md** — Video-Leitfäden (Serien, z. B. „Gespräche, die entscheiden“).
   - **SOCIAL-MEDIA/LINKEDIN-LAUNCH-FUEHRUNGSTOPICS-TOP10.md** — Top-10-Themen für Führungskräfte, aligned mit Launch-Kampagne / Micro-Learning-Kontext.
@@ -145,7 +145,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **PDF-IMPLEMENTATION.md** - PDF export docs
 
 ### Incident Reports
-- **INCIDENT-REPORT-2025-12-15.md** - Recent incident
+- **INCIDENT-REPORTS/INCIDENT-REPORT-2025-12-15.md** - Recent incident
 - **INCIDENT-REPORTS/** - Historical incidents
 
 ### Configuration
@@ -191,15 +191,30 @@ Located in `.cursor/skills/meaningful-conversations/`:
 
 ---
 
+## Documentation audit reports (Feb 2026)
+
+Historical drift audits — use for reference; many items resolved in 2026-08 agent/doc cleanup:
+
+| Report | Focus |
+|--------|-------|
+| **DOCUMENTATION-DRIFT-AUDIT-CONSOLIDATED-2026-02-26.md** | Master list of open/resolved drift |
+| **DOCUMENTATION-DRIFT-AUDIT-2026-02-26.md** | Security & compliance |
+| **DOCUMENTATION-AUDIT-REPORT-2026-02-26.md** | UX & admin guides |
+| **AUDIT-REPORT-DEPLOYMENT-DOCS.md** | Deployment doc accuracy |
+
+**Still open (as of 2026-08-05):** TTS/PDF doc refresh, env template completeness — see improvement plan in repo.
+
+---
+
 ## Current Setup
 
-- **Version:** 2.0.0
+- **Version:** 2.5.5
 - **Server:** Hetzner VPS (<YOUR_SERVER_IP>)
 - **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
 - **Container Engine:** Podman + podman-compose
 - **Containers:** Frontend, Backend (PM2 x2), TTS (Piper), MariaDB 11.2
-- **Registry:** git.rhepds.com/gherold/meaningful-conversations
+- **Registry:** regy.rhepds.com/gherold/meaningful-conversations
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** July 29, 2026
+**Last Updated:** August 5, 2026

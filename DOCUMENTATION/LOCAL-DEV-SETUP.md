@@ -357,7 +357,7 @@ Meaningful-Conversations-Project/
 After setup:
 
 1. **Read the docs:**
-   - [DOCUMENTATION-STRUCTURE.md](./DOCUMENTATION/DOCUMENTATION-STRUCTURE.md) - Overview of all documentation
+   - [DOCUMENTATION-STRUCTURE.md](./DOCUMENTATION-STRUCTURE.md) - Overview of all documentation
    - [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) - Deployment workflow
    
 2. **Explore features:**
@@ -366,11 +366,11 @@ After setup:
    - Test voice mode (requires HTTPS or localhost)
 
 3. **Make changes:**
-   - See [DOCUMENTATION/VERSION-MANAGEMENT.md](./DOCUMENTATION/VERSION-MANAGEMENT.md) for versioning
+   - See [VERSION-MANAGEMENT.md](./VERSION-MANAGEMENT.md) for versioning
    - See [LOCAL-DEV-MIGRATIONS.md](./LOCAL-DEV-MIGRATIONS.md) for database changes
 
 4. **Deploy:**
-   - See [DEPLOYMENT-CHECKLIST.md](./DOCUMENTATION/DEPLOYMENT-CHECKLIST.md) for deployment procedures
+   - See [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md) for deployment procedures
 
 ---
 
@@ -378,8 +378,8 @@ After setup:
 
 - **Database issues:** [LOCAL-DEV-MIGRATIONS.md](./LOCAL-DEV-MIGRATIONS.md)
 - **General troubleshooting:** [TROUBLESHOOTING-INDEX.md](./TROUBLESHOOTING-INDEX.md)
-- **Deployment questions:** [DEPLOYMENT-CHECKLIST.md](./DOCUMENTATION/DEPLOYMENT-CHECKLIST.md)
-- **Feature documentation:** [DOCUMENTATION-STRUCTURE.md](./DOCUMENTATION/DOCUMENTATION-STRUCTURE.md)
+- **Deployment questions:** [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md)
+- **Feature documentation:** [DOCUMENTATION-STRUCTURE.md](./DOCUMENTATION-STRUCTURE.md)
 
 ---
 

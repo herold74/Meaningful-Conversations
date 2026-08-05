@@ -32,11 +32,16 @@
 | [ux-flow/SKILL.md](../skills/meaningful-conversations/ux-flow/SKILL.md) | Onboarding, routing, intent picker |
 | [in-app-purchase/SKILL.md](../skills/meaningful-conversations/in-app-purchase/SKILL.md) | StoreKit, RevenueCat, paywall |
 | [132-content-structure/SKILL.md](../skills/meaningful-conversations/132-content-structure/SKILL.md) | Content structure |
+| [tts-voice/SKILL.md](../skills/meaningful-conversations/tts-voice/SKILL.md) | TTS/STT, voice mode |
+| [auth-access/SKILL.md](../skills/meaningful-conversations/auth-access/SKILL.md) | Auth, roles, trial |
+| [email-transactional/SKILL.md](../skills/meaningful-conversations/email-transactional/SKILL.md) | Mailjet email |
+| [pdf-export/SKILL.md](../skills/meaningful-conversations/pdf-export/SKILL.md) | PDF export |
+| [practice-coaching/SKILL.md](../skills/meaningful-conversations/practice-coaching/SKILL.md) | Coach Practice |
 | [agent-workflows/SKILL.md](../skills/meaningful-conversations/agent-workflows/SKILL.md) | Subagents, slash commands, hooks |
 
 ## Slash commands (`.cursor/commands/`)
 
-Type `/` in chat: `deploy-staging`, `deploy-production`, `release`, `memory-bank-update`, `llm-regression`, `pre-deploy-check`, `review`, `security-review`, `explore`, `asc-update`.
+Type `/` in chat: `deploy-staging`, `deploy-production`, `release`, `memory-bank-update`, `llm-regression`, `pre-deploy-check`, `review`, `security-review`, `explore`, `asc-update`, `ci-investigate`.
 
 ## Hooks (`.cursor/hooks.json`)
 

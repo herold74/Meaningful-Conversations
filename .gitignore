@@ -91,6 +91,16 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# DB backups from Makefile (repo root)
+backup-staging-*.sql
+backup-production-*.sql
+
+# sed backup files
+*.bak
 
 # Regression test runs (reference baselines in local-* remain committed)
 utils/practiceRegressionBaselines/runs/*
@@ -116,7 +126,8 @@ meaningful-conversations-backend/prisma/*.db-journal
 # Personal Information Files
 # Use .example.tsx versions instead (they contain dummy data)
 components/ImprintView.tsx
-components/PrivacyPolicyView.tsxSYSTEM-CONFIG.md
+components/PrivacyPolicyView.tsx
+SYSTEM-CONFIG.md
 
 # Social Media & Marketing Content (not part of the repository)
 DOCUMENTATION/SOCIAL-MEDIA/

@@ -10,6 +10,19 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Recent Changes (2026-08-05 — P5 test coverage)
+
+- **Frontend:** Fixed vitest→Jest in `botGender.test.ts`, `ttsServiceVoice.test.ts`; widened `collectCoverageFrom` (utils, services, hooks, context, config); coverage floors + `coverageProvider: v8`
+- **Backend:** Widened coverage to routes/middleware/practice/utils; PayPal webhook fail-closed tests; Apple IAP JWS + notification route tests; coverage floors (~40% statements baseline)
+- **No deploy**
+
+## Recent Changes (2026-08-05 — Repo improvements audit)
+
+- **Security:** PayPal webhook fail-closed without `PAYPAL_WEBHOOK_ID`; Apple S2S notification JWS verification (`@apple/app-store-server-library`); startup secret validation; JSON body 1mb limit; MariaDB localhost-only bind in compose
+- **CI/DX:** `npm run build` in CI, locale parity script, audit level high, Dependabot, `make test`/`make ci`, root `npm run ci`
+- **Docs:** Fixed broken links, TTS/PDF/VERSION refresh, memory bank sync; new skills (tts-voice, auth-access, email-transactional, pdf-export, practice-coaching)
+- **No deploy**
+
 ## Recent Changes (2026-08-05 — Cursor agent workflow infrastructure)
 
 - **Commit `c8528f2`:** Add Cursor agent workflow infrastructure — versioned `.cursor/rules/`, slash commands, hooks (production deploy gate, secret scan), `AGENTS.md`, `agent-workflows` skill; fix doc links to skills; extend `.gitignore` to track shared Cursor config
