@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meaningful-conversations-cache-v2.5.4-b7';
+const CACHE_NAME = 'meaningful-conversations-cache-v2.5.4-b8';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
