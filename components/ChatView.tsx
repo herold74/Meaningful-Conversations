@@ -855,10 +855,10 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     <div className="shrink-0 flex flex-col items-center pt-6 pb-4">
                         <button
                             onClick={speech.handleVoiceInteraction}
-                            disabled={isLoading || (showVoiceSendButton && !speech.canSendVoiceTranscript)}
+                            disabled={isLoading}
                             className={`w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
-                                speech.isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300 animate-pulse' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
-                            } ${isLoading || (showVoiceSendButton && !speech.canSendVoiceTranscript) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                speech.isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
+                            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             aria-label={
                                 speech.isListening
                                   ? t('chat_voice_stop_and_send')
