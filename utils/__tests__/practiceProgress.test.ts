@@ -37,10 +37,10 @@ const catalog: PracticeCatalog = {
   frameworks: [{ id: 'four-stage-coaching', name: 'Four-stage coaching', sourceBotId: null, isPracticeOnly: false, shortDescription: '', stages: [], complianceCriteria: [], explainer: { summary: '', why: '', goodCompliance: '' } }],
   scenarios: [{
     id: 'career-decision',
-    coacheeName: 'Alex',
+    coacheeName: 'Lukas',
     concern: 'Career choice',
     emotionalTone: 'Uncertain',
-    avatar: '/avatars/alex.png',
+    avatar: '/avatars/max.png',
   }],
   defaultPair: { frameworkId: 'four-stage-coaching', scenarioId: 'career-decision' },
   difficulties: [
@@ -81,7 +81,7 @@ describe('practiceProgress', () => {
     expect(config?.frameworkId).toBe('four-stage-coaching');
     expect(config?.scenarioId).toBe('career-decision');
     expect(config?.focusNote).toBe('Practice opening');
-    expect(config?.coacheeName).toBe('Alex');
+    expect(config?.coacheeName).toBe('Lukas');
   });
 
   test('buildRecommendedPracticeConfig falls back to defaultPair when no sessions', () => {

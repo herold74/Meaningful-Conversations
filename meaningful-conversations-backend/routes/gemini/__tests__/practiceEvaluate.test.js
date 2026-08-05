@@ -132,7 +132,7 @@ describe('POST /api/gemini/practice/evaluate Phase 2', () => {
     expect(prompt).toContain('read-only background');
   });
 
-  test('contracting evaluate prompt includes coachee gender for Finley', async () => {
+  test('contracting evaluate prompt includes coachee gender for Nadia', async () => {
     const contractingEval = {
       ...mockEvalResponse,
       practiceMode: 'contracting',
@@ -168,7 +168,7 @@ describe('POST /api/gemini/practice/evaluate Phase 2', () => {
 
     expect(res.status).toBe(200);
     const prompt = aiProviderService.generateContent.mock.calls.at(-1)[0].contents;
-    expect(prompt).toContain('Finley');
+    expect(prompt).toContain('Nadia');
     expect(prompt).toContain('weiblich');
     expect(prompt).toContain('Pronomen (KRITISCH)');
   });

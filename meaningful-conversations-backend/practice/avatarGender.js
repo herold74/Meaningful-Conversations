@@ -15,8 +15,8 @@ const AVATAR_GENDER = {
   '/avatars/mike.png': 'male',
   '/avatars/sam.png': 'male',
   '/avatars/nobody.png': 'male',
-  '/avatars/finley.png': 'female',
-  '/avatars/rowan.png': 'male',
+  '/avatars/nadia.png': 'female',
+  '/avatars/martin.png': 'male',
 };
 
 function getCoacheeGenderFromAvatar(avatar) {

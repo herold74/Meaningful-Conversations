@@ -16,7 +16,8 @@ const {
 const SCENARIOS = [
   {
     id: 'career-decision',
-    coacheeName: { en: 'Alex', de: 'Alex' },
+    coacheeName: { en: 'Lukas', de: 'Lukas' },
+    coacheeGender: 'male',
     avatar: '/avatars/max.png',
     concern: {
       en: 'Is considering leaving a stable job for a startup offer and feels torn between security and growth.',
@@ -30,7 +31,8 @@ const SCENARIOS = [
   },
   {
     id: 'team-conflict',
-    coacheeName: { en: 'Sam', de: 'Sam' },
+    coacheeName: { en: 'Lisa', de: 'Lisa' },
+    coacheeGender: 'female',
     avatar: '/avatars/ava.png',
     concern: {
       en: 'Has ongoing tension with a colleague who takes credit for their work and avoids confrontation.',
@@ -44,7 +46,8 @@ const SCENARIOS = [
   },
   {
     id: 'motivation-dip',
-    coacheeName: { en: 'Jordan', de: 'Jordan' },
+    coacheeName: { en: 'Jonas', de: 'Jonas' },
+    coacheeGender: 'male',
     avatar: '/avatars/kenji.png',
     concern: {
       en: 'Has lost motivation on a long project, procrastinates, and feels guilty.',
@@ -58,7 +61,8 @@ const SCENARIOS = [
   },
   {
     id: 'relationship-boundary',
-    coacheeName: { en: 'Taylor', de: 'Taylor' },
+    coacheeName: { en: 'Laura', de: 'Laura' },
+    coacheeGender: 'female',
     avatar: '/avatars/chloe.png',
     concern: {
       en: 'A friend keeps dumping emotional problems late at night, and they are unsure how to set boundaries.',
@@ -72,7 +76,8 @@ const SCENARIOS = [
   },
   {
     id: 'overwhelm',
-    coacheeName: { en: 'Casey', de: 'Casey' },
+    coacheeName: { en: 'Thomas', de: 'Thomas' },
+    coacheeGender: 'male',
     avatar: '/avatars/rob.png',
     concern: {
       en: 'Has too many priorities at work and home and feels like they are failing everywhere.',
@@ -86,7 +91,8 @@ const SCENARIOS = [
   },
   {
     id: 'resistance-change',
-    coacheeName: { en: 'Morgan', de: 'Morgan' },
+    coacheeName: { en: 'Marc', de: 'Marc' },
+    coacheeGender: 'male',
     avatar: '/avatars/victor.png',
     concern: {
       en: 'Knows they should delegate more but keeps micromanaging and gets defensive when challenged.',
@@ -100,11 +106,12 @@ const SCENARIOS = [
   },
   {
     id: 'imposter-promotion',
-    coacheeName: { en: 'Riley', de: 'Riley' },
+    coacheeName: { en: 'Mia', de: 'Mia' },
+    coacheeGender: 'female',
     avatar: '/avatars/bekky.png',
     concern: {
       en: 'Was recently promoted to lead a team, feels like a fraud, and hides their uncertainty.',
-      de: 'Wurde kürzlich befördert und leitet nun ein Team, fühlt sich jedoch wie ein Betrüger und verbirgt die eigene Unsicherheit.',
+      de: 'Wurde kürzlich befördert und leitet nun ein Team, fühlt sich jedoch wie eine Betrügerin und verbirgt die eigene Unsicherheit.',
     },
     emotionalTone: { en: 'insecure, guarded', de: 'unsicher, verschlossen' },
     hiddenAgenda: {
@@ -114,7 +121,8 @@ const SCENARIOS = [
   },
   {
     id: 'life-balance',
-    coacheeName: { en: 'Quinn', de: 'Quinn' },
+    coacheeName: { en: 'Felix', de: 'Felix' },
+    coacheeGender: 'male',
     avatar: '/avatars/dan.png',
     concern: {
       en: 'Works late every day, misses family time, and their partner is unhappy.',
@@ -129,6 +137,7 @@ const SCENARIOS = [
   {
     id: 'career-plateau',
     coacheeName: { en: 'Chris', de: 'Chris' },
+    coacheeGender: 'male',
     avatar: '/avatars/mike.png',
     concern: {
       en: 'Has been in the same role for years, performs well, but feels invisible and wonders if ambition still matters.',
@@ -143,20 +152,22 @@ const SCENARIOS = [
   {
     id: 'strategic-pivot',
     coacheeName: { en: 'Priya', de: 'Priya' },
+    coacheeGender: 'female',
     avatar: '/avatars/gabrielle.png',
     concern: {
       en: 'Their industry is shifting fast; they must decide whether to pivot skills, change employers, or double down on the current path.',
-      de: 'Die Branche verändert sich schnell; sie müssen entscheiden, ob sie Fähigkeiten neu ausrichten, den Arbeitgeber wechseln oder am bisherigen Weg festhalten.',
+      de: 'Die Branche verändert sich schnell; sie muss entscheiden, ob sie Fähigkeiten neu ausrichten, den Arbeitgeber wechseln oder am bisherigen Weg festhalten.',
     },
     emotionalTone: { en: 'analytical but anxious', de: 'analytisch, aber ängstlich' },
     hiddenAgenda: {
       en: 'Already leaning toward one option but wants the coach to validate it without doing the hard trade-off work.',
-      de: 'Neigen bereits zu einer Option, wollen aber vom Coach Bestätigung, ohne die harte Abwägung selbst zu leisten.',
+      de: 'Neigt bereits zu einer Option, will aber vom Coach Bestätigung, ohne die harte Abwägung selbst zu leisten.',
     },
   },
   {
     id: 'feedback-anxiety',
-    coacheeName: { en: 'Jamie', de: 'Jamie' },
+    coacheeName: { en: 'Julia', de: 'Julia' },
+    coacheeGender: 'female',
     avatar: '/avatars/gloria.png',
     concern: {
       en: 'Dreads upcoming performance feedback, replays past criticism, and avoids asking for clarity from their manager.',
@@ -170,7 +181,8 @@ const SCENARIOS = [
   },
   {
     id: 'stuck-metaphor',
-    coacheeName: { en: 'Robin', de: 'Robin' },
+    coacheeName: { en: 'Roland', de: 'Roland' },
+    coacheeGender: 'male',
     avatar: '/avatars/sam.png',
     concern: {
       en: 'Feels like walking through fog at work — stuck in mud, can’t see the path ahead, and keeps circling the same worries without naming a concrete problem.',
