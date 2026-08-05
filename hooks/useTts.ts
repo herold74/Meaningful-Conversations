@@ -111,6 +111,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   } | null>(null);
   const hasSpokenFirstMessageRef = useRef(false);
   const warmupPromiseRef = useRef<Promise<void> | null>(null);
+  /** Set after `speak` is defined — used for server-TTS failure fallback from streaming queue. */
+  const speakFallbackRef = useRef<(text: string, isMeditation?: boolean, isRetry?: boolean, forceLocal?: boolean) => Promise<void> | null>(null);
 
   const isIOS = useMemo(() => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -502,7 +504,23 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         await audio.play();
       }
     } catch (err) {
-      console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed, skipping:`, err);
+      console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed:`, err);
+      if (nextIdx === 0 && s.synthQueue.length > 0) {
+        const remaining = s.synthQueue.slice(nextIdx).join(' ');
+        s.active = false;
+        streamingTtsRef.current = null;
+        if (sentenceQueueRef.current) sentenceQueueRef.current.active = false;
+        sentenceQueueRef.current = null;
+        s.synthInProgress = false;
+        if (remaining.trim()) {
+          void speakFallbackRef.current?.(remaining, false, true, true);
+        } else {
+          setIsLoadingAudio(false);
+          setTtsStatus('idle');
+          isSpeakingRef.current = false;
+        }
+        return;
+      }
       // Only push skip markers if synthesis failed (not if audio.play() failed after push)
       if (s.resolvedBlobs.length <= nextIdx) {
         s.resolvedBlobs.push(null);
@@ -1129,6 +1147,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       }
     }, 10);
   }, [isTtsEnabled, voices, bot.id, ttsBotId, selectedVoiceURI, language, botGender, ttsMode, isAutoMode, currentUser]);
+
+  useEffect(() => {
+    speakFallbackRef.current = speak;
+  }, [speak]);
 
   useEffect(() => {
     const lastMessage = chatHistory[chatHistory.length - 1];

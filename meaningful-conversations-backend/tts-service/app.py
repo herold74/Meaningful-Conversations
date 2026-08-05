@@ -9,6 +9,8 @@ import sys
 import tempfile
 import logging
 import threading
+import re
+import unicodedata
 
 app = Flask(__name__)
 CORS(app)
@@ -28,43 +30,124 @@ _cache_lock = threading.Lock()
 MODEL_TTL_SECONDS = 600  # evict after 10 min of inactivity
 
 
-def _get_voice(model_name):
-    """Get or lazily load a PiperVoice model. Thread-safe."""
+def sanitize_text_for_piper(text: str) -> str:
+    """Normalize unicode and strip characters that trigger Piper/ONNX runtime errors."""
+    if not text:
+        return ''
+    text = unicodedata.normalize('NFKC', text)
+    for src, dst in [
+        ('\u2018', "'"), ('\u2019', "'"), ('\u201c', '"'), ('\u201d', '"'),
+        ('\u2013', '-'), ('\u2014', '-'), ('\u2026', '...'), ('\u00ad', ''),
+    ]:
+        text = text.replace(src, dst)
+    text = re.sub(r"[^\w\s.,!?;:'\"()\-\–—/äöüÄÖÜß]", ' ', text, flags=re.UNICODE)
+    return re.sub(r'\s+', ' ', text).strip()
+
+
+def split_tts_chunks(text: str, max_len: int = 180) -> list:
+    """Split long or problematic text at sentence boundaries for per-chunk synthesis."""
+    text = text.strip()
+    if not text:
+        return []
+    if len(text) <= max_len:
+        return [text]
+
+    parts = re.split(r'(?<=[.!?…;])\s+', text)
+    chunks = []
+    current = ''
+    for part in parts:
+        part = part.strip()
+        if not part:
+            continue
+        if len(part) > max_len:
+            if current:
+                chunks.append(current)
+                current = ''
+            for i in range(0, len(part), max_len):
+                piece = part[i:i + max_len].strip()
+                if piece:
+                    chunks.append(piece)
+            continue
+        candidate = f'{current} {part}'.strip() if current else part
+        if len(candidate) <= max_len:
+            current = candidate
+        else:
+            if current:
+                chunks.append(current)
+            current = part
+    if current:
+        chunks.append(current)
+    return chunks or [text]
+
+
+def concat_wav_bytes(wav_chunks: list) -> bytes:
+    """Concatenate WAV byte strings (same format) into one WAV."""
+    if not wav_chunks:
+        return b''
+    if len(wav_chunks) == 1:
+        return wav_chunks[0]
+
+    out = io.BytesIO()
+    params = None
+    all_frames = b''
+    for data in wav_chunks:
+        with wave.open(io.BytesIO(data), 'rb') as wf:
+            p = wf.getparams()
+            if params is None:
+                params = p
+            all_frames += wf.readframes(wf.getnframes())
+    with wave.open(out, 'wb') as wf_out:
+        wf_out.setparams(params)
+        wf_out.writeframes(all_frames)
+    return out.getvalue()
+
+
+def _ensure_model_entry(model_name):
+    """Create cache slot + per-model lock before load (prevents parallel load races)."""
     with _cache_lock:
-        entry = _model_cache.get(model_name)
-        if entry:
-            entry['last_used'] = time.time()
-            return entry['voice']
-
-    # Load outside the global lock (can take ~1.5s)
-    model_path = f"{VOICE_DIR}/{model_name}.onnx"
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f'Piper model not found: {model_name}')
-
-    from piper import PiperVoice
-    t0 = time.time()
-    voice = PiperVoice.load(model_path)
-    load_ms = int((time.time() - t0) * 1000)
-    logger.info(f"Model loaded: {model_name} in {load_ms}ms")
-
-    with _cache_lock:
-        # Another thread may have loaded it while we were loading
         if model_name not in _model_cache:
             _model_cache[model_name] = {
-                'voice': voice,
+                'voice': None,
                 'last_used': time.time(),
                 'lock': threading.Lock(),
             }
-        else:
-            _model_cache[model_name]['last_used'] = time.time()
-        return _model_cache[model_name]['voice']
+        return _model_cache[model_name]
+
+
+def _get_voice(model_name):
+    """Get or lazily load a PiperVoice model. Thread-safe."""
+    entry = _ensure_model_entry(model_name)
+    if entry['voice'] is not None:
+        with _cache_lock:
+            entry['last_used'] = time.time()
+        return entry['voice']
+
+    with entry['lock']:
+        if entry['voice'] is not None:
+            with _cache_lock:
+                entry['last_used'] = time.time()
+            return entry['voice']
+
+        model_path = f"{VOICE_DIR}/{model_name}.onnx"
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f'Piper model not found: {model_name}')
+
+        from piper import PiperVoice
+        t0 = time.time()
+        voice = PiperVoice.load(model_path)
+        load_ms = int((time.time() - t0) * 1000)
+        logger.info(f"Model loaded: {model_name} in {load_ms}ms")
+
+        entry['voice'] = voice
+        with _cache_lock:
+            entry['last_used'] = time.time()
+        return voice
 
 
 def _get_model_lock(model_name):
     """Get the per-model lock (ensures sequential Piper calls per model)."""
-    with _cache_lock:
-        entry = _model_cache.get(model_name)
-        return entry['lock'] if entry else threading.Lock()
+    entry = _ensure_model_entry(model_name)
+    return entry['lock']
 
 
 def _evict_stale_models():
@@ -72,7 +155,8 @@ def _evict_stale_models():
     now = time.time()
     with _cache_lock:
         stale = [k for k, v in _model_cache.items()
-                 if now - v['last_used'] > MODEL_TTL_SECONDS]
+                 if v.get('voice') is not None
+                 and now - v['last_used'] > MODEL_TTL_SECONDS]
         for k in stale:
             del _model_cache[k]
             logger.info(f"Model evicted (idle): {k}")
@@ -175,6 +259,40 @@ def synthesize_with_piper(text, model, length_scale, speaker=None):
         return buf.getvalue()
 
 
+def synthesize_with_piper_safe(text, model, length_scale, speaker=None):
+    """Synthesize with sanitize + sentence-chunk fallbacks for ONNX edge cases."""
+    last_error = None
+    sanitized = sanitize_text_for_piper(text)
+
+    for label, attempt in [('full', text), ('sanitized', sanitized)]:
+        if not attempt or not attempt.strip():
+            continue
+        if label == 'sanitized' and attempt == text:
+            continue
+        try:
+            return synthesize_with_piper(attempt, model, length_scale, speaker)
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Piper {label} attempt failed ({len(attempt)} chars): {e}")
+
+    base = sanitized or text
+    chunks = split_tts_chunks(base)
+    if len(chunks) > 1:
+        wav_parts = []
+        for idx, chunk in enumerate(chunks):
+            try:
+                wav_parts.append(synthesize_with_piper(chunk, model, length_scale, speaker))
+            except Exception as chunk_err:
+                logger.warning(f"Piper chunk {idx + 1}/{len(chunks)} failed: {chunk_err}")
+        if wav_parts:
+            logger.info(f"Piper chunk fallback: {len(wav_parts)}/{len(chunks)} chunks OK")
+            return concat_wav_bytes(wav_parts)
+
+    if last_error:
+        raise last_error
+    raise ValueError('No synthesizable text')
+
+
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
     """Synthesize speech from text using Piper, with optional Opus/MP3 encoding."""
@@ -193,7 +311,7 @@ def synthesize():
         if not text:
             return jsonify({'error': 'Text is required'}), 400
 
-        wav_data = synthesize_with_piper(text, model, length_scale, speaker)
+        wav_data = synthesize_with_piper_safe(text, model, length_scale, speaker)
 
         piper_ms = int((time.time() - start_time) * 1000)
         audio_data, mimetype = convert_audio(wav_data, output_format)
