@@ -1,14 +1,22 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.4
+**Version:** 2.5.5 (deploying)
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-beta.manualmode.at (health OK; TTS gender + MLS burble fix live)
-**Production:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-app.manualmode.at (health OK; parity with staging)
+**Staging:** pending v2.5.5 Build 1 — https://mc-beta.manualmode.at
+**Production:** pending v2.5.5 Build 1 — https://mc-app.manualmode.at
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** BUILD_NUMBER **7** in repo (`CURRENT_PROJECT_VERSION=7` after deploy sync); last Archive **2.5.4 (6)** — optional re-sync for Build 7 label only (greeting fix is backend, now on prod b7)
+**Xcode:** MARKETING_VERSION **2.5.5**, CURRENT_PROJECT_VERSION **1**
 
-**Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+**Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` when `tts-service/` changed — **required for 2.5.5** (Piper ONNX fallback).
+
+## Release 2.5.5 (2026-08-05)
+
+Includes since 2.5.4-b10:
+- **`b0f0c45`:** STT desktop pause fix (transcript preservation)
+- **`c963ce5`:** TTS Piper ONNX fallback (sanitize, chunk, Web Speech fallback)
+- **`7e05d22`:** Coachee role guard (no coach language in practice coachee turns)
+- **`2f39435`:** speakFallbackRef TypeScript fix
 
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 9)
 
