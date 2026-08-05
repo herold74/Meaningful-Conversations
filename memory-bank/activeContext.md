@@ -1,22 +1,27 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.5 (deploying)
+**Version:** 2.5.4
 **Branch:** `main`
-**Staging:** pending v2.5.5 Build 1 — https://mc-beta.manualmode.at
-**Production:** pending v2.5.5 Build 1 — https://mc-app.manualmode.at
+**Staging:** Deployed **2026-08-05**, Build **10**, v2.5.4 — https://mc-beta.manualmode.at (health OK; coachee role guard live on backend)
+**Production:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-app.manualmode.at (health OK; coachee role guard **not yet** on prod)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** MARKETING_VERSION **2.5.5**, CURRENT_PROJECT_VERSION **1**
+**Xcode:** BUILD_NUMBER **10** in repo (`CURRENT_PROJECT_VERSION=10` after deploy sync)
 
-**Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` when `tts-service/` changed — **required for 2.5.5** (Piper ONNX fallback).
+**Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Release 2.5.5 (2026-08-05)
+## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 coachee role guard)
 
-Includes since 2.5.4-b10:
-- **`b0f0c45`:** STT desktop pause fix (transcript preservation)
-- **`c963ce5`:** TTS Piper ONNX fallback (sanitize, chunk, Web Speech fallback)
-- **`7e05d22`:** Coachee role guard (no coach language in practice coachee turns)
-- **`2f39435`:** speakFallbackRef TypeScript fix
+- **Commit `7e05d22`:** fix(practice): add coachee role guard against coach-language drift — `COACHEE_ROLE_GUARD` (DE/EN) in `coacheePrompt.js`; dev `/api/gemini/test/simulate-coachee` aligned; 9/9 `coacheePrompt.test.js` pass
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c backend` — backend-only (frontend `-c app` blocked by unrelated `useTts.ts` TS2540); health OK; Build **10** unchanged
+- **Context:** Helene Practice Voice — AI coachee was mirroring/scaling like a coach; guard forbids mirroring, permission/meta questions, scaling, session control
+
+## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 STT fix)
+
+- **Commit `b0f0c45`:** fix(stt): preserve desktop voice transcript across pauses — `webSpeechResultProcessing.ts` + `WebSpeechService` resultIndex accumulation; Android path unchanged; 7 unit tests
+- **Commit `62c0417`:** chore build 10 sync (deploy script)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c frontend` — Build 10; health OK
+- **Context:** Helene (`helene@arndgen.de`) Practice Voice Mode — STT fragments on Chrome/macOS; TTS 500s separate issue
 
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 9)
 
