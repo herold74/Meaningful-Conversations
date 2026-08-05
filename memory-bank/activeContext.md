@@ -10,6 +10,11 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Recent Changes (2026-08-05 — Cursor agent workflow infrastructure)
+
+- **Commit `c8528f2`:** Add Cursor agent workflow infrastructure — versioned `.cursor/rules/`, slash commands, hooks (production deploy gate, secret scan), `AGENTS.md`, `agent-workflows` skill; fix doc links to skills; extend `.gitignore` to track shared Cursor config
+- **No deploy** — docs/config only
+
 ## Recent Changes (2026-08-05 — Coachee gender eval + unique avatars)
 
 - **Evaluate:** `buildPracticeScenarioSummary()` — `coacheeGender` + Pronomen-Regel in Method/Contracting/Free-Play Eval-Prompts (DE/EN)
