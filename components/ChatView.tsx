@@ -328,7 +328,6 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     sendMessage,
     isLoading,
     setIsLoading,
-    isIOS,
     stopTts: tts.stopTts,
     t,
   });
@@ -590,6 +589,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
   const hasVoiceTranscript = Boolean(input.trim());
   const showVoiceSendButton = speech.isListening || hasVoiceTranscript;
+  const voiceButtonBusy = isLoading || speech.isFinalizingTranscript;
 
   const handleOpenFeedbackModal = (botMessage: Message) => {
     const botMessageIndex = chatHistory.findIndex(m => m.id === botMessage.id);
@@ -855,19 +855,27 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     <div className="shrink-0 flex flex-col items-center pt-6 pb-4">
                         <button
                             onClick={speech.handleVoiceInteraction}
-                            disabled={isLoading}
-                            className={`w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-xl focus:outline-none focus:ring-4 ${
+                            disabled={voiceButtonBusy}
+                            className={`w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl focus:outline-none focus:ring-4 ${
                                 speech.isListening ? 'bg-red-500 hover:bg-red-600 focus:ring-red-300' : 'bg-accent-primary hover:bg-accent-primary-hover focus:ring-accent-primary/50'
-                            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            } ${voiceButtonBusy ? 'opacity-50 cursor-not-allowed' : 'transform hover:scale-105'}`}
                             aria-label={
-                                speech.isListening
+                                speech.isFinalizingTranscript
+                                  ? t('chat_send_message')
+                                  : speech.isListening
                                   ? t('chat_voice_stop_and_send')
                                   : hasVoiceTranscript
                                     ? t('chat_send_message')
                                     : t('chat_voice_start_recording')
                             }
                         >
-                            {showVoiceSendButton ? <PaperPlaneIcon className="w-12 h-12 text-white" /> : <MicrophoneIcon className="w-12 h-12 text-white" />}
+                            {speech.isFinalizingTranscript ? (
+                              <BrandLoader size="md" />
+                            ) : showVoiceSendButton ? (
+                              <PaperPlaneIcon className="w-12 h-12 text-white" />
+                            ) : (
+                              <MicrophoneIcon className="w-12 h-12 text-white" />
+                            )}
                         </button>
                     </div>
 

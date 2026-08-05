@@ -232,6 +232,7 @@
   "chat_voice_resume_speech": "Sprache fortsetzen",
   "chat_voice_start_recording": "Aufnahme starten",
   "chat_voice_stop_and_send": "Stoppen und senden",
+  "chat_voice_finalize_empty": "Kein erkannter Text — bitte erneut sprechen.",
   "analyzing_title": "Sitzung wird analysiert...",
   "analyzing_subtitle": "Ihr Coach bereitet Ihre Sitzungszusammenfassung vor.",
   "sessionReview_title": "Diskursanalyse",
