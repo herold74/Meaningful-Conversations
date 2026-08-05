@@ -3,12 +3,22 @@
 ## Current Status
 **Version:** 2.5.4
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **7**, v2.5.4 — https://mc-beta.manualmode.at (health OK; `sw.js` `v2.5.4-b7`; coach greeting locale fix live)
-**Production:** Deployed **2026-08-05**, Build **7**, v2.5.4 — https://mc-app.manualmode.at (health OK; `sw.js` `v2.5.4-b7`; parity with staging)
+**Staging:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-beta.manualmode.at (health OK; TTS gender + MLS burble fix live)
+**Production:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-app.manualmode.at (health OK; parity with staging)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
 **Xcode:** BUILD_NUMBER **7** in repo (`CURRENT_PROJECT_VERSION=7` after deploy sync); last Archive **2.5.4 (6)** — optional re-sync for Build 7 label only (greeting fix is backend, now on prod b7)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 9)
+
+- **Commit `663d1a4`:** fix(tts): correct Sam gender to male + replace broken MLS voice with Eva K
+  - `sam-forward-focused` removed from `FEMALE_BOT_IDS` (frontend) and `femaleBots` (backend) — Sam's avatar is male; commit `5a33eb4` introduced the regression
+  - Backend `VOICE_MODELS.de.female` switched from `de_DE-mls-medium` → `de_DE-eva_k-x_low`: MLS is 236-speaker, was always called without `speaker_id`, defaulting to speaker 0 (random corpus voice = "drunken burble"). Eva K is single-speaker, no speaker_id needed.
+  - Backend `voiceMap` updated: `de-mls` removed, `de-eva` → `de_DE-eva_k-x_low` (short ID now routes correctly end-to-end)
+  - Missing `vitest` import added to `ttsServiceVoice.test.ts`
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c app` — Build 9; health OK
+- **Production deploy:** `./deploy-manualmode.sh -e production` — Build 9; health OK
 
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 7)
 
