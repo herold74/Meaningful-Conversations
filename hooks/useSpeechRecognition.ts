@@ -44,9 +44,9 @@ export function useSpeechRecognition({
 
     const sendTranscript = async () => {
       const textToSend = (
+        stableTranscriptRef.current ||
         latestTranscriptRef.current ||
-        input ||
-        stableTranscriptRef.current
+        input
       ).trim();
       if (!textToSend) return;
       baseTranscriptRef.current = '';
@@ -59,7 +59,6 @@ export function useSpeechRecognition({
     };
 
     if (isListening) {
-      if (!hasStableTranscript) return;
       console.log('[Speech] Stopping speech recognition');
 
       try {
