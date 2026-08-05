@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
 import { HowItWorks } from './HowItWorks';
+import { AboutCoachPractice } from './AboutCoachPractice';
 import { brand } from '../config/brand';
 
 interface InfoViewProps {
@@ -48,7 +49,7 @@ const en_final_sentence = `This application is a project born from a passion for
 const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](${brand.providerUrl}).`;
 
 
-type AboutTab = 'about' | 'coach';
+type AboutTab = 'about' | 'coach' | 'practice';
 
 const AboutView: React.FC<InfoViewProps> = () => {
     const { t, language } = useLocalization();
@@ -70,7 +71,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     <button
                         type="button"
                         onClick={() => setActiveTab('coach')}
-                        className={`pb-3 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
                             activeTab === 'coach'
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-tertiary hover:text-content-primary'
@@ -80,8 +81,19 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     </button>
                     <button
                         type="button"
+                        onClick={() => setActiveTab('practice')}
+                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                            activeTab === 'practice'
+                                ? 'text-accent-primary border-b-2 border-accent-primary'
+                                : 'text-content-tertiary hover:text-content-primary'
+                        }`}
+                    >
+                        {t('about_practice_tab')}
+                    </button>
+                    <button
+                        type="button"
                         onClick={() => setActiveTab('about')}
-                        className={`pb-3 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
                             activeTab === 'about'
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-tertiary hover:text-content-primary'
@@ -134,6 +146,9 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     )}
                     {activeTab === 'coach' && (
                         <HowItWorks />
+                    )}
+                    {activeTab === 'practice' && (
+                        <AboutCoachPractice />
                     )}
                 </div>
                 {activeTab === 'about' && (

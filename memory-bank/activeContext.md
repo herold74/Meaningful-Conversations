@@ -3,12 +3,24 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **6**, v2.5.6 — https://mc-beta.manualmode.at (health OK; coachee names/genders + voice Flieger button fix live; `sw.js` v2.5.6-b6)
+**Staging:** Deployed **2026-08-05**, Build **7**, v2.5.6 — https://mc-beta.manualmode.at (health OK; AI Act box centered + voice copy; Practice/DPC docs; phonetic Stakeholder/LinkedIn; `sw.js` v2.5.6-b7)
 **Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=6` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=7` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — About Coach Practice tab + user guide callouts, local review)
+
+- **Pending deploy:** About page third tab „Coaching üben“ / `AboutCoachPractice`; user guide ⚠️/ℹ️ callout boxes (DE+EN)
+- **Staging/Production:** not deployed — owner reviewing locally first
+
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 7 docs + AI Act UX)
+
+- **Commit `4ec0150`:** Practice vs DPC/DPFL scope (GDPR, user guide, privacy); AI Act box centered + voice transparency copy; phonetic Stakeholder/LinkedIn (v1.0.6)
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commit `faaae65` build 7 sync
+- **Verified:** health OK on staging
+- **Production:** not deployed (still v2.5.5)
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 6 voice button UX fix)
 

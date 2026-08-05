@@ -22,6 +22,23 @@ const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
 const deChapterLabel = (num: number) => `Kapitel ${num}`;
 const enChapterLabel = (num: number) => `Chapter ${num}`;
 
+/** Callout boxes for user guide markdown (rendered via rehype-raw). */
+const guideWarningBox = (body: string) => `
+<div class="not-prose my-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg">
+<div class="flex items-start gap-3">
+<div class="text-2xl mt-0.5 shrink-0">⚠️</div>
+<div class="text-sm text-content-secondary">${body}</div>
+</div>
+</div>`;
+
+const guideInfoBox = (body: string) => `
+<div class="not-prose my-4 p-4 bg-accent-primary/10 dark:bg-accent-primary/15 border-2 border-accent-primary/50 rounded-lg">
+<div class="flex items-start gap-3">
+<div class="text-2xl mt-0.5 shrink-0">ℹ️</div>
+<div class="text-sm text-content-secondary">${body}</div>
+</div>
+</div>`;
+
 const deTranscriptToolsSection = (
     isNative: boolean,
     isRegistered: boolean,
@@ -91,7 +108,9 @@ const de_markdown = (
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
-Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient. Indem Sie es nach jeder Sitzung aktualisieren, stellen Sie sicher, dass Ihr Coaching kontinuierlich und kontextbezogen ist.
+Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient.
+
+${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> Nach jeder Sitzung schlägt die App automatisch Aktualisierungen vor; Sie prüfen sie kurz und übernehmen nur, was für Sie passt — oder passen den Text an, bevor Sie speichern. So bleibt Ihr Coaching kontinuierlich und kontextbezogen, ohne Extra-Aufwand.</p>')}
 
 </div>
 </details>
@@ -122,8 +141,10 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 **Hinweis:** Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
 
 ### 1.2 Gast vs. Registrierter Benutzer
-- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet. **Wichtig:** Sie müssen Ihre Lebenskontext-Datei am Ende jeder Sitzung manuell herunterladen, um Ihren Fortschritt zu speichern.
+- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
 - **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
+
+${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Ohne Download geht Ihr Fortschritt verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie zu speichern.</p>')}
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
 
@@ -224,13 +245,14 @@ ${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Pu
 
 ### 2.3 KI-Transparenz (EU AI Act)
 
-Alle „Coaches“ in dieser App sind **KI-Systeme** — keine menschlichen Berater:innen oder Therapeut:innen. Avatare und Namen dienen der Orientierung; Antworten werden von Sprachmodellen (Google Gemini und/oder Mistral AI) generiert.
-
-- **Bildungs- und Reflexionszweck:** Die App ersetzt keine professionelle Beratung (siehe Haftungsausschluss).
-- **Keine biometrische Emotionserkennung:** Es werden keine Kamera-, Video- oder Stimmprofile ausgewertet, um Emotionen zu erkennen.
-- **Keine automatisierten Entscheidungen mit rechtlicher Wirkung:** Es werden keine Entscheidungen über Sie getroffen, die rechtliche oder vergleichbar erhebliche Folgen hätten.
-- **Menschliche Aufsicht:** Fehlerhafte Antworten können Sie im Chat melden (Flaggen-Symbol) und nach der Sitzung bewerten; bei Fragen: support@manualmode.at.
-- **Datenverarbeitung:** Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung.
+${guideWarningBox(`<p class="m-0 mb-2"><strong>KI-Transparenz:</strong> Alle „Coaches“ in dieser App sind <strong>KI-Systeme</strong> — keine menschlichen Berater:innen oder Therapeut:innen. Avatare und Namen dienen der Orientierung; Antworten werden von Sprachmodellen (Google Gemini und/oder Mistral AI) generiert.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Bildungs- und Reflexionszweck:</strong> Die App ersetzt keine professionelle Beratung (siehe Haftungsausschluss).</li>
+<li><strong>Keine biometrische Emotionserkennung:</strong> Es werden keine Kamera-, Video- oder Stimmprofile ausgewertet, um Emotionen zu erkennen.</li>
+<li><strong>Keine automatisierten Entscheidungen mit rechtlicher Wirkung.</strong></li>
+<li><strong>Menschliche Aufsicht:</strong> Fehlerhafte Antworten können Sie im Chat melden (Flaggen-Symbol) und nach der Sitzung bewerten; bei Fragen: support@manualmode.at.</li>
+<li><strong>Datenverarbeitung:</strong> Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung.</li>
+</ul>`)}
 
 </div>
 </details>
@@ -448,7 +470,9 @@ Die Ebenen im Überblick: Sicherheit, Zugehörigkeit, Macht, Ordnung, Leistung, 
 | **Gelb** | Integration, Systemdenken, Flexibilität | Ich |
 | **Türkis** | Ganzheitlichkeit, globales Bewusstsein | Wir |
 
-**Wichtiger Hinweis zur Messung:** In dieser App verwenden wir den **PVQ-21 (Portrait Values Questionnaire)** von Shalom Schwartz, dessen Ergebnisse auf die Spiral Dynamics-Farbebenen abgebildet werden. Der PVQ-21 misst Werteprioritäten -- nicht Entwicklungsstufen im engeren Sinne. Die Zuordnung zu SD-Farben ist eine bewährte, aber vereinfachende Annäherung. Eine vollständige Spiral Dynamics-Bewertung würde vertiefte Interviews oder spezialisierte Instrumente erfordern.
+**Wichtiger Hinweis zur Messung:** In dieser App verwenden wir den **PVQ-21 (Portrait Values Questionnaire)** von Shalom Schwartz, dessen Ergebnisse auf die Spiral Dynamics-Farbebenen abgebildet werden.
+
+${guideWarningBox('<p class="m-0">Der PVQ-21 misst Werteprioritäten — <strong>nicht</strong> Entwicklungsstufen im engeren Sinne. Die Zuordnung zu SD-Farben ist eine bewährte, aber vereinfachende Annäherung. Eine vollständige Spiral-Dynamics-Bewertung würde vertiefte Interviews oder spezialisierte Instrumente erfordern.</p>')}
 
 **Verbreitung:** Spiral Dynamics wird weltweit in Coaching, Organisationsentwicklung, Leadership-Training und politischer Beratung eingesetzt. Im deutschsprachigen Raum ist das Modell insbesondere durch das *Center for Human Emergence (CHE)* und die SDi-Community verbreitet.
 
@@ -500,7 +524,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 - Wenn Sie zurück zu DPC oder Aus wechseln, bleiben gesammelte Verfeinerungen erhalten
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
 
-**⚠️ Hinweis:** Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der **Persönlichkeits-Signatur** (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren, um die Auswirkungen der Profilanpassungen in Ihrer Signatur sichtbar und erfahrbar zu machen.
+${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
 
 **Anzeige:** Der aktive Coaching-Modus wird im **Coach-Info-Modal** angezeigt (klicken Sie auf den Coach-Namen im Chat).
 
@@ -819,7 +843,10 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Transkript herunterladen:** Speichert den vollständigen Chatverlauf mit Zeitstempeln als \`.txt\`-Datei.
   - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
 - **Speichern & Fortfahren:**
-  - **Kontext herunterladen (Backup):** **Dies ist für Gastbenutzer unerlässlich!** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern. Registrierte Benutzer können dies als Backup verwenden.
+
+${guideWarningBox('<p class="m-0"><strong>Gastmodus:</strong> Unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre aktualisierte .md-Datei speichern — sonst ist der Fortschritt nach dem Schließen des Browsers weg. Registrierte Nutzer können dies optional als Backup nutzen.</p>')}
+
+  - **Kontext herunterladen (Backup):** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern.
   - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
   - **Coach wechseln:** Speichert die Änderungen und bringt Sie zurück zum Coach-Auswahlbildschirm.
   - **(Nur für registrierte Benutzer) "Textänderungen nicht speichern...":** Wenn Sie dieses Kästchen ankreuzen, wird Ihr Gamification-Fortschritt gespeichert, aber die Textänderungen an Ihrem Lebenskontext werden verworfen.
@@ -970,7 +997,7 @@ Für Gespräche vor Ort oder Telefonate:
 **3. Manuelle Erstellung**
 Für kurze Gespräche können Sie auch einfach aus der Erinnerung ein Protokoll schreiben. Verwenden Sie das Format "Sprecher: Text" – die KI kommt auch mit ungenauen Transkripten gut zurecht.
 
-**⚠️ Wichtig:** Sie sind dafür verantwortlich, dass alle Gesprächsteilnehmer der Aufzeichnung und Analyse zugestimmt haben. Beachten Sie die geltenden Gesetze zur Gesprächsaufzeichnung in Ihrem Land.
+${guideWarningBox('<p class="m-0"><strong>Wichtig:</strong> Sie sind dafür verantwortlich, dass alle Gesprächsteilnehmer der Aufzeichnung und Analyse zugestimmt haben. Beachten Sie die geltenden Gesetze zur Gesprächsaufzeichnung in Ihrem Land.</p>')}
 
 ### Tipps für beste Ergebnisse
 
@@ -1000,8 +1027,11 @@ Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich
 
 ### Wie funktioniert es?
 
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Einwilligung:</strong> Sie müssen bestätigen, dass alle Gesprächsteilnehmer der Aufzeichnung zugestimmt haben. Beachten Sie die geltenden Gesetze zur Gesprächsaufzeichnung in Ihrem Land.</p>
+<p class="m-0"><strong>KI-Anbieter:</strong> Die Audio-Transkription verwendet immer <strong>Google Gemini</strong> — auch wenn Sie Mistral als bevorzugten KI-Anbieter eingestellt haben. Glättung und Auswertung respektieren hingegen Ihre KI-Anbieter-Einstellung.</p>`)}
+
 **Schritt 1: Einwilligung**
-Bevor Sie beginnen, müssen Sie bestätigen, dass alle Gesprächsteilnehmer der Aufzeichnung zugestimmt haben. Ein Hinweis informiert Sie darüber, dass die Audio-Transkription immer **Google Gemini** verwendet — auch wenn Sie Mistral als bevorzugten KI-Anbieter eingestellt haben. Die anschließende Glättung und Auswertung respektieren hingegen Ihre KI-Anbieter-Einstellung.
+Bevor Sie beginnen, bestätigen Sie die Einwilligung aller Gesprächsteilnehmer in der App.
 
 **Schritt 2: Aufnehmen oder Hochladen**
 Sie haben zwei Möglichkeiten:
@@ -1057,7 +1087,7 @@ Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase*
 
 **Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
-**Hinweis:** Die Coaching-Methoden in der App sind **generische, beschreibende Bezeichnungen** für didaktische Übungszwecke. Sie stehen in **keiner Verbindung** zu und werden **nicht unterstützt oder zertifiziert** durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.
+${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung zu und werden nicht unterstützt oder zertifiziert durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.</p>')}
 
 ### Wie funktioniert es?
 
@@ -1080,8 +1110,9 @@ Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase*
 **Schritt 2: Übungssitzung führen**
 - Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
 - Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
-- Dies ist **keine reguläre Coaching-Sitzung**: Es gibt keinen Lebenskontext-Analyseprozess am Ende, und Ihre Lebenskontext-Datei wird nicht aktualisiert.
-- **Kein DPC/DPFL:** Ihr Persönlichkeitsprofil und der adaptive Coaching-Modus (DPC/DPFL) gelten nur für Classic Coaching — nicht für Coaching üben. Die KI-Klientin/-der Klient wird ausschließlich über Szenario und Methode gesteuert.
+
+${guideInfoBox(`<p class="m-0 mb-2"><strong>Keine reguläre Coaching-Sitzung:</strong> Es gibt keinen Lebenskontext-Analyseprozess am Ende; Ihre Lebenskontext-Datei wird nicht aktualisiert.</p>
+<p class="m-0"><strong>Kein DPC/DPFL:</strong> Persönlichkeitsprofil und adaptiver Coaching-Modus gelten nur für Classic Coaching — nicht für Coaching üben. Die KI spielt ausschließlich den Klienten nach Szenario und Methode.</p>`)}
 
 **Schritt 3: Sitzung beenden & Selbsteinschätzung**
 - Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
@@ -1130,7 +1161,9 @@ const en_markdown = (
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
-Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory. By updating it after each session, you ensure your coaching is continuous and contextual.
+Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory.
+
+${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> After each session, the app automatically proposes updates; you review them briefly and accept only what fits—or edit the text before saving. That keeps coaching continuous and contextual, without extra work.</p>')}
 
 </div>
 </details>
@@ -1161,8 +1194,10 @@ Your chosen intent determines which section is highlighted in the coach selectio
 **Note:** Registered users can disable the Intent Picker under **My Account**.
 
 ### 1.2 Guest vs. Registered User
-- **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device. **Important:** You must manually download your Life Context file at the end of each session to save your progress.
+- **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
 - **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
+
+${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Without a download, your progress is lost. At the end of each session, download your Life Context file from the review screen to save it.</p>')}
 
 **Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
 
@@ -1263,13 +1298,14 @@ ${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **P
 
 ### 2.3 AI Transparency (EU AI Act)
 
-All "coaches" in this app are **AI systems** — not human advisors or therapists. Avatars and names help you navigate; responses are generated by language models (Google Gemini and/or Mistral AI).
-
-- **Educational and reflection purpose:** The app does not replace professional advice (see Disclaimer).
-- **No biometric emotion recognition:** No camera, video, or voice profiling is used to detect emotions.
-- **No automated decisions with legal effect:** No decisions about you are made that produce legal or similarly significant consequences.
-- **Human oversight:** You can report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.
-- **Data processing:** Conversation content is sent to the configured AI service to generate responses — details in the Privacy Policy.
+${guideWarningBox(`<p class="m-0 mb-2"><strong>AI transparency:</strong> All "coaches" in this app are <strong>AI systems</strong> — not human advisors or therapists. Avatars and names help you navigate; responses are generated by language models (Google Gemini and/or Mistral AI).</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Educational and reflection purpose:</strong> The app does not replace professional advice (see Disclaimer).</li>
+<li><strong>No biometric emotion recognition.</strong></li>
+<li><strong>No automated decisions with legal effect.</strong></li>
+<li><strong>Human oversight:</strong> Report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.</li>
+<li><strong>Data processing:</strong> Conversation content is sent to the configured AI service — details in the Privacy Policy.</li>
+</ul>`)}
 
 </div>
 </details>
@@ -1387,7 +1423,9 @@ Spiral Dynamics captures your value systems and inner driving forces across eigh
 | **Yellow** | Integration, systems thinking, flexibility | Self |
 | **Turquoise** | Holism, global consciousness | Community |
 
-**Important note on measurement:** In this app, we use the **PVQ-21 (Portrait Values Questionnaire)** by Shalom Schwartz, whose results are mapped to Spiral Dynamics color levels. The PVQ-21 measures value priorities -- not developmental stages in the strict sense. The mapping to SD colors is a well-established but simplified approximation. A full Spiral Dynamics assessment would require in-depth interviews or specialized instruments.
+**Important note on measurement:** In this app, we use the **PVQ-21 (Portrait Values Questionnaire)** by Shalom Schwartz, whose results are mapped to Spiral Dynamics color levels.
+
+${guideWarningBox('<p class="m-0">The PVQ-21 measures value priorities — <strong>not</strong> developmental stages in the strict sense. The mapping to SD colors is a well-established but simplified approximation. A full Spiral Dynamics assessment would require in-depth interviews or specialized instruments.</p>')}
 
 **Sources:**
 - Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values.* Journal of Humanistic Psychology.
@@ -1508,7 +1546,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 - If you switch back to DPC or Off, collected refinements are preserved
 - Ideal for: Self-discovery & continuous growth
 
-**⚠️ Note:** Starting a new personality test will overwrite all previous DPFL refinements. However, creating or updating your **Personality Signature** (see 4.3) has no effect on your refinements — on the contrary: it is particularly useful to regenerate the signature after a few DPFL sessions, so you can see and experience the impact of your profile adjustments reflected in your signature.
+${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see 4.3) does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
 
 **Display:** The active coaching mode is shown in the **Coach Info Modal** (click on the coach's name in the chat).
 
@@ -1827,7 +1865,10 @@ This is the most important screen for capturing your insights.
   - **Download Transcript:** Saves the full chat history with timestamps as a \`.txt\` file.
   - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
 - **Saving & Continuing:**
-  - **Download Context (Backup):** **This is essential for guest users!** Click this to save your updated \`.md\` file. Registered users can use this as a backup.
+
+${guideWarningBox('<p class="m-0"><strong>Guest mode:</strong> Under "Download Context (Backup)", <strong>always</strong> save your updated .md file — otherwise progress is lost when you close the browser. Registered users can use this as an optional backup.</p>')}
+
+  - **Download Context (Backup):** Click here to save your updated \`.md\` file.
   - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
   - **Switch Coach:** Saves the changes and takes you back to the coach selection screen.
   - **(Registered Users Only) "Don't save text changes...":** If you check this box, your gamification progress will be saved, but the text changes to your Life Context will be discarded.
@@ -1978,7 +2019,7 @@ For face-to-face meetings or phone calls:
 **3. Manual Creation**
 For short conversations, you can simply write a protocol from memory. Use the format "Speaker: Text" – the AI handles imperfect transcripts quite well.
 
-**⚠️ Important:** You are responsible for ensuring that all conversation participants have consented to recording and analysis. Please observe the applicable laws regarding conversation recording in your country.
+${guideWarningBox('<p class="m-0"><strong>Important:</strong> You are responsible for ensuring that all conversation participants have consented to recording and analysis. Please observe the applicable laws regarding conversation recording in your country.</p>')}
 
 ### Tips for Best Results
 
@@ -2008,8 +2049,11 @@ This feature is available from the **Client access tier** and is located in the 
 
 ### How Does It Work?
 
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Consent:</strong> You must confirm that all conversation participants have consented to the recording. Please observe applicable recording laws in your country.</p>
+<p class="m-0"><strong>AI provider:</strong> Audio transcription always uses <strong>Google Gemini</strong> — even if you have set Mistral as your preferred AI provider. Smoothing and evaluation respect your AI provider setting.</p>`)}
+
 **Step 1: Consent**
-Before you begin, you must confirm that all conversation participants have consented to the recording. A notice informs you that audio transcription always uses **Google Gemini** — even if you have set Mistral as your preferred AI provider. The subsequent smoothing and evaluation, however, respect your AI provider setting.
+Before you begin, confirm participant consent in the app.
 
 **Step 2: Record or Upload**
 You have two options:
@@ -2065,7 +2109,7 @@ This feature is available with **Premium+**, during the **9-day trial** after re
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
-**Note:** The coaching methods in the app are **generic descriptive labels** for educational practice purposes. They are **not affiliated with, endorsed by, or certified by** any owners of trademarks, registered method names, or copyrighted coaching approaches.
+${guideWarningBox('<p class="m-0"><strong>Note:</strong> The coaching methods in the app are generic descriptive labels for educational practice purposes. They are not affiliated with, endorsed by, or certified by any owners of trademarks, registered method names, or copyrighted coaching approaches.</p>')}
 
 ### How Does It Work?
 
@@ -2088,8 +2132,9 @@ This feature is available with **Premium+**, during the **9-day trial** after re
 **Step 2: Run the practice session**
 - You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
 - The interface matches the regular chat (text, voice input, optional TTS).
-- This is **not a regular coaching session**: there is no Life Context analysis at the end, and your Life Context file is not updated.
-- **No DPC/DPFL:** Your personality profile and adaptive coaching mode (DPC/DPFL) apply to classic coaching only — not Coach Practice. The AI client is driven by scenario and method prompts only.
+
+${guideInfoBox(`<p class="m-0 mb-2"><strong>Not a regular coaching session:</strong> There is no Life Context analysis at the end; your Life Context file is not updated.</p>
+<p class="m-0"><strong>No DPC/DPFL:</strong> Your personality profile and adaptive coaching mode apply to classic coaching only — not Coach Practice. The AI plays the client based on scenario and method prompts only.</p>`)}
 
 **Step 3: End session & self-rating**
 - End the session as usual via **End Session**.
