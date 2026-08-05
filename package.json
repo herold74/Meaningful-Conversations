@@ -1,7 +1,7 @@
 {
   "name": "meaningful-conversations-frontend",
   "description": "AI-powered coaching platform with Life Context memory, structured interviewing, and communication analysis.",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "engines": {
     "node": ">=22.0.0"
   },

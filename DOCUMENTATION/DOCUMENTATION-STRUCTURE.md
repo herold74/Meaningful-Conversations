@@ -29,6 +29,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **app-store-connect/SKILL.md** — ASC locales (DE + EN Canada), screenshots, submission locks, metadata-only updates
 - **llm-upgrade/SKILL.md** — Google/Mistral SDK upgrades + classic/practice regression QA sequence
 - **gdpr-compliance/SKILL.md** — GDPR/DSGVO audits, export/erasure, privacy updates
+- **ai-act-compliance/SKILL.md** — EU AI Act Art. 50 transparency, bot-selection disclosure, 50(2) marking roadmap
 - **i18n-and-theming/SKILL.md**, **ux-flow/SKILL.md**, **in-app-purchase/SKILL.md**, **132-content-structure/SKILL.md** — domain workflows
 - **agent-workflows/SKILL.md** — Subagents, slash commands, hooks
 - **tts-voice/SKILL.md**, **auth-access/SKILL.md**, **email-transactional/SKILL.md**, **pdf-export/SKILL.md**, **practice-coaching/SKILL.md** — domain workflows
@@ -105,6 +106,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
   - **SOCIAL-MEDIA/LINKEDIN-LAUNCH-FUEHRUNGSTOPICS-TOP10.md** — Top-10-Themen für Führungskräfte, aligned mit Launch-Kampagne / Micro-Learning-Kontext.
 
 ### Compliance & Security
+- **EU-AI-ACT-COMPLIANCE.md** - EU AI Act risk classification + Art. 50 obligation checklist
 - **GDPR-COMPLIANCE-AUDIT.html/md** - English GDPR audit (**v2.5.0**, audit date 2026-07-29)
 - **DSGVO-COMPLIANCE-AUDIT.html/md** - German GDPR audit (**v2.5.0**, score 99/100, P1–P3 complete)
 - **GDPR-TRANSCRIPT-REMOVAL.md** - Classic chat transcript DB removal (Art. 5 minimisation)
