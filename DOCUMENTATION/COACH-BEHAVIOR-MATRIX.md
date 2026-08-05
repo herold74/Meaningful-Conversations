@@ -1,7 +1,7 @@
 # Coach-Verhaltensmatrix
 
-**Stand:** 2026-07-28  
-**Quellen:** `meaningful-conversations-backend/bots.js`, `bots/newCoaches.js`, `bots/coachingPromptBlocks.js`, `crisisText.js`, `practice/frameworks.js`
+**Stand:** 2026-08-05  
+**Quellen:** `meaningful-conversations-backend/bots.js`, `bots/newCoaches.js`, `bots/coachingPromptBlocks.js`, `crisisText.js`, `practice/frameworks.js`, `practice/methodScenarioMap.js`, `practice/scenarios.js`
 
 Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in der App — abgeleitet aus den System-Prompts (Single Source of Truth). Technische IDs bleiben auf Englisch; Beschreibungen sind auf Deutsch.
 
@@ -326,8 +326,336 @@ Beide Varianten: PII-Warnung, 1 Frage pro Nachricht, keine Rollenspiel-Sternchen
 
 ---
 
+## Practice Lab — Methoden-Cheatsheet
+
+Druckbares Nachschlagewerk für Coach Practice — spiegelt die Info-Felder aus dem Practice Setup (`frameworks.js` → `getPublicCatalog`). Während der Übungssitzung sind diese Details in der App nicht sichtbar.
+
+**Drucken:** [practice-method-cheatsheet.html](practice-method-cheatsheet.html) im Browser öffnen → Drucken → Als PDF speichern (A4 Querformat, Hintergrundgrafiken an). Vier Seiten: 12 Methoden-Karten, Sonderpfade, Szenario-Tabelle.
+
+Quellen: `practice/frameworks.js`, `practice/methodScenarioMap.js`, `practice/scenarios.js`, Contracting-Evaluator in `services/geminiPrompts.js`.
+
+### Teil 1 — Methoden-Karten (12 Frameworks)
+
+---
+
+#### Goal–Path–Solution {#goal-path-solution}
+
+**Auch als AI-Coach verfügbar:** Nobody
+
+Goal–Problem–Solution: Ziel klären, Problem erkunden, gemeinsam Lösungen entwickeln.
+
+Strukturierte Problemlösung im Stil von Nobody (GPS).
+
+**Wann einsetzen:** Wenn du vor dem Handeln klare Struktur brauchst.
+
+**Gute Methodentreue sieht so aus:** Du hältst die Reihenfolge G→P→S und vermeidest zu frühes Lösungs-Push.
+
+**PHASEN**
+
+- **Session-Ziel:** Klären, was der Coachee erreichen möchte.
+- **Problem:** Hindernisse und Ursachen erkunden, ohne sofort Lösungen zu liefern.
+- **Solution:** Umsetzbare Optionen und nächste Schritte gemeinsam entwickeln.
+
+---
+
+#### Ambitioniertes Coaching {#ambitious-coaching}
+
+**Auch als AI-Coach verfügbar:** Max
+
+Perspektive erweitern, Session contracten und langfristiges Potenzial durch kraftvolle Fragen freisetzen.
+
+Entspricht Max — Ambition und langfristiges Denken.
+
+**Wann einsetzen:** Üben, Coachees über sichere Antworten hinaus zu führen.
+
+**Gute Methodentreue sieht so aus:** Du contractest früh und stellst erweiternde „Was wäre wenn“-Fragen vor dem Abschluss.
+
+**PHASEN**
+
+- **Contracting:** Fokus, Ergebnis und Zeit der Session vereinbaren.
+- **Erweitern:** Limitierende Annahmen hinterfragen und größer denken.
+- **Commitment:** Konkrete nächste Schritte mit Energie vereinbaren.
+
+*Hinweis:* Volles Session-Contracting (Thema → Relevanz → Ergebnis → Bestätigung) vor Ambitionsarbeit.
+
+---
+
+#### Strategisches Coaching {#strategic-coaching}
+
+**Auch als AI-Coach verfügbar:** Ava
+
+Makrokontext, Wettbewerb, Ressourcen und Entscheidungskriterien.
+
+Entspricht Ava — strategisches Denken bei komplexen Entscheidungen.
+
+**Wann einsetzen:** Strategische Linse unter Druck halten üben.
+
+**Gute Methodentreue sieht so aus:** Du erweiterst den Rahmen, bevor du auf Handlung eingrenzt.
+
+**PHASEN**
+
+- **Kontext:** Externe Kräfte und Stakeholder erfassen.
+- **Optionen:** Strategische Alternativen entwickeln.
+- **Entscheiden:** Kriterien und Trade-offs klären.
+
+---
+
+#### Resilienz-Coaching {#resilience-coaching}
+
+**Auch als AI-Coach verfügbar:** Kenji
+
+Fokus auf das Kontrollierbare, Akzeptanz des Unkontrollierbaren, innere Stärke aufbauen.
+
+Entspricht Kenji — stoische Philosophie für Widerstandsfähigkeit.
+
+**Wann einsetzen:** Emotionalen Coachee auf das Einflussbare fokieren üben.
+
+**Gute Methodentreue sieht so aus:** Du sortierst steuerbare Handlungen ohne toxische Positivität.
+
+**PHASEN**
+
+- **Kreis der Kontrolle:** Kontrollierbares vom Unkontrollierbaren trennen.
+- **Umdeuten:** Stoische Perspektive auf die Situation anwenden.
+- **Tägliche Praxis:** Kleine Praxis für Widerstandsfähigkeit definieren.
+
+*Hinweis:* Stoische Arbeit erst nach bestätigtem Sitzungskontrakt.
+
+---
+
+#### Strukturierte Reflexion {#structured-reflection}
+
+**Auch als AI-Coach verfügbar:** Chloe
+
+Gedanken, Gefühle und Verhalten untersuchen, um hilfreichere Muster zu finden.
+
+Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.
+
+**Wann einsetzen:** Führen ohne Etikettieren oder Therapeutisieren üben.
+
+**Gute Methodentreue sieht so aus:** Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.
+
+**PHASEN**
+
+- **Situation:** Konkrete Auslösesituation benennen.
+- **Gedanken:** Automatische Gedanken und Überzeugungen sichtbar machen.
+- **Alternativen:** Ausgewogene Perspektiven und Verhalten erkunden.
+
+---
+
+#### Mentale Fitness {#mental-fitness-coaching}
+
+**Auch als AI-Coach verfügbar:** Rob
+
+Saboteur-Stimmen erkennen und Weise-Antworten stärken.
+
+Entspricht Rob — mentale Fitness im PQ-Stil.
+
+**Wann einsetzen:** Selbstsabotage mit Mitgefühl abfangen üben.
+
+**Gute Methodentreue sieht so aus:** Du hilfst Muster zu benennen; du „reparierst“ den Coachee nicht.
+
+**PHASEN**
+
+- **Bewusstsein:** Inneren Kritiker / Saboteur-Muster wahrnehmen.
+- **Abfangen:** Pause, Muster benennen ohne Scham.
+- **Weise-Antwort:** Konstruktive innere Antwort wählen.
+
+---
+
+#### Systemisches Coaching {#systemic-coaching}
+
+**Auch als AI-Coach verfügbar:** Victor
+
+Beziehungen, Rollen und Muster im System des Coachees erkunden.
+
+Entspricht Victor — systemisch inspiriertes Coaching.
+
+**Wann einsetzen:** Coachee im Kontext, nicht isoliert sehen üben.
+
+**Gute Methodentreue sieht so aus:** Du fragst nach Rollen und Mustern im gesamten System.
+
+**PHASEN**
+
+- **System kartieren:** Wichtige Personen, Rollen und Dynamiken identifizieren.
+- **Muster:** Wiederkehrende Interaktionsschleifen erkennen.
+- **Verschiebung:** Kleine systemische Experimente finden.
+
+*Hinweis:* Systemkartierung vor Intervention oder Ratschlägen.
+
+---
+
+#### Thought Audit {#thought-audit}
+
+**Auch als AI-Coach verfügbar:** Bekky
+
+Strukturierter Audit eines wiederkehrenden Gedankens: Belege, Wirkung, Revision.
+
+Entspricht Bekky — Thought-Audit-Methodik.
+
+**Wann einsetzen:** Gedanken rigoros prüfen ohne Belehrung üben.
+
+**Gute Methodentreue sieht so aus:** Du bleibst bei einem Gedanken und fragst nach Belegen vor der Revision.
+
+**PHASEN**
+
+- **Gedanken erfassen:** Gedanken wörtlich festhalten.
+- **Belege:** Stützende und widerlegende Belege prüfen.
+- **Überarbeiten:** Genaueren, nutzbaren Gedanken formulieren.
+
+*Hinweis:* Kein Contracting-Ritual — direkt in Gedanken-Identifikation.
+
+---
+
+#### Exakte Klientensprache {#client-exact-language}
+
+**Auch als AI-Coach verfügbar:** Dan
+
+Exakte Worte des Coachees nutzen; saubere Fragen ohne Metaphern oder Ratschläge.
+
+Entspricht Dan — Client-exact-language-Fragen.
+
+**Wann einsetzen:** In der Sprache des Coachees bleiben, wenn du fixen willst.
+
+**Gute Methodentreue sieht so aus:** Deine Fragen nutzen ihre Worte; du fügst kaum neue Bilder hinzu.
+
+**PHASEN**
+
+- **Zuhören:** Schlüsselwörter und Phrasen exakt spiegeln.
+- **Entwickeln:** Entwicklungsfragen in ihrer Sprache stellen.
+- **Erkenntnis verankern:** Erkenntnis entstehen lassen; nicht für sie interpretieren.
+
+*Hinweis:* Nur kurze Wunschausgang-Frage — kein voller 6-Schritte-Contract.
+
+---
+
+#### Vier-Phasen-Coaching {#four-stage-coaching}
+
+**Auch als AI-Coach verfügbar:** Gabrielle
+
+Goal → Reality → Options → Will: klassische Coaching-Struktur für Klarheit und Commitment.
+
+Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.
+
+**Wann einsetzen:** Ideal für allgemeine Sessions mit klarem Verlauf vom Thema zum Commitment.
+
+**Gute Methodentreue sieht so aus:** Du gehst session aim → current state → possibilities → commitment durch, überspringst Reality nicht und drängst in Options nicht zu Ratschlägen.
+
+**PHASEN**
+
+- **Session-Ziel:** Was will der Coachee aus dieser Session / langfristig?
+- **Ist-Zustand:** Was passiert jetzt? Fakten und Gefühle.
+- **Möglichkeiten:** Was könnten sie tun? Brainstormen ohne Bewertung.
+- **Commitment:** Wozu committen sie sich? Wann und wie?
+
+---
+
+#### Zukunftsorientiertes Coaching {#forward-focused-coaching}
+
+**Auch als AI-Coach verfügbar:** Sam
+
+Fokus auf gewünschte Zukunft, Ausnahmen vom Problem und Skalierung des Fortschritts.
+
+Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.
+
+**Wann einsetzen:** Wenn der Coachee in Problemgespräch steckt und einen Vorwärts-Blick braucht.
+
+**Gute Methodentreue sieht so aus:** Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst.
+
+**PHASEN**
+
+- **Gewünschte Zukunft:** Leben beschreiben, wenn das Problem gelöst ist.
+- **Ausnahmen:** Wann ist das Problem schon kleiner oder absent?
+- **Skalierung:** Fortschritt 0–10; wie sähe +1 aus?
+
+*Hinweis:* Kein voller 6-Schritte-Contract — Fokus kurz halten. Keine ausgedehnte Problem-Erkundung vor SF-Fragen.
+
+---
+
+#### Ambivalenz-Coaching {#ambivalence-coaching}
+
+**Auch als AI-Coach verfügbar:** Mike
+
+Offene Fragen, Bestärkungen, reflektierendes Zuhören und Zusammenfassungen — eigene Veränderungsgründe des Klienten fördern.
+
+Ambivalenz-Coaching im Stil von Mike — Zuhörkompetenzen bei Ambivalenz und eigener Motivation.
+
+**Wann einsetzen:** Wichtig, wenn der Coachee sagt „einerseits will ich, andererseits nicht“.
+
+**Gute Methodentreue sieht so aus:** Du spiegelst und bestärkst; du belehrst oder konfrontierst nicht bei Widerstand.
+
+**PHASEN**
+
+- **Offene Fragen:** Ambivalenz erkunden ohne Druck.
+- **Bestärkungen:** Stärken und Einsatz authentisch anerkennen.
+- **Reflektierendes Zuhören:** Bedeutung und Gefühl treffend spiegeln.
+- **Zusammenfassungen:** Veränderungsgründe sammeln; Richtung Commitment zusammenfassen.
+
+---
+
+### Teil 2 — Sonderpfade (Practice-only)
+
+---
+
+#### Anliegensklärung {#contracting}
+
+Anliegensklärung und Contracting üben, bevor Methodenarbeit beginnt.
+
+**Wann einsetzen:** Phase 1 vor Methodenwahl. Das Szenario-Anliegen ist **blind** — kein Briefing sichtbar; der Coachee bringt das Thema selbst ein.
+
+**Gute Methodentreue sieht so aus:** Du führst eine vollständige Anliegensklärung durch und bestätigst den Session-Kontrakt explizit, bevor du in Methodenarbeit gehst. Gutes Contracting erzwingt keine hidden agenda.
+
+**SCHRITTE** (Evaluator-Checkliste `contractingSteps`)
+
+1. **Thema identifiziert** — Das Anliegen ist benannt.
+2. **Relevanz erkundet** — „Warum jetzt?“ ist erkundet.
+3. **Messbares Session-Ergebnis** — Konkretes Ergebnis für diese Session definiert.
+4. **Kontrakt bestätigt** — Explizite Bestätigung durch Coachee.
+
+---
+
+#### Freispiel {#free-play}
+
+Erste Methodensitzung ohne fixe Methode — Coach wählt Interventionen frei.
+
+**Wann einsetzen:** Phase 2 nach Anliegensklärung — erste Methodensitzung ohne vorgegebene Struktur.
+
+**Gute Methodentreue sieht so aus:** Du wählst situativ passende Interventionen; du erzwingst keine fixe Phasenfolge. Der Evaluator bewertet Wirksamkeit und Coachee-Autonomie, nicht Methodentreue zu einem Framework.
+
+**PHASEN**
+
+*(Keine fixe Phasenfolge — Coach entscheidet situativ.)*
+
+---
+
+### Teil 3 — Szenario → empfohlene Struktur
+
+**Default-Paar:** `career-decision` (Alex) + [Vier-Phasen-Coaching](#four-stage-coaching) — aus `DEFAULT_PRACTICE_PAIR` in `methodTaxonomy.js`.
+
+| Szenario-ID | Label (DE) | Coachee | Primary-Methoden | Verweis (1. Primary) | Alternative |
+|-------------|------------|---------|------------------|----------------------|-------------|
+| `career-decision` | Karriereentscheidung | Alex | Strategisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Strategisches Coaching](#strategic-coaching) | Zukunftsorientiertes Coaching, Ambivalenz-Coaching, Ambitioniertes Coaching |
+| `team-conflict` | Teamkonflikt | Sam | Systemisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Systemisches Coaching](#systemic-coaching) | Zukunftsorientiertes Coaching, Strukturierte Reflexion, Resilienz-Coaching |
+| `motivation-dip` | Motivationstief | Jordan | Mentale Fitness, Strukturierte Reflexion, Goal–Path–Solution | → [Mentale Fitness](#mental-fitness-coaching) | Vier-Phasen-Coaching, Zukunftsorientiertes Coaching, Resilienz-Coaching |
+| `relationship-boundary` | Beziehungsgrenze | Taylor | Vier-Phasen-Coaching, Goal–Path–Solution, Zukunftsorientiertes Coaching | → [Vier-Phasen-Coaching](#four-stage-coaching) | Strukturierte Reflexion, Mentale Fitness, Ambivalenz-Coaching |
+| `overwhelm` | Überforderung | Casey | Goal–Path–Solution, Strukturierte Reflexion, Mentale Fitness | → [Goal–Path–Solution](#goal-path-solution) | Vier-Phasen-Coaching, Resilienz-Coaching, Zukunftsorientiertes Coaching |
+| `resistance-change` | Widerstand gegen Veränderung | Morgan | Ambivalenz-Coaching, Systemisches Coaching, Vier-Phasen-Coaching | → [Ambivalenz-Coaching](#ambivalence-coaching) | Goal–Path–Solution, Zukunftsorientiertes Coaching, Resilienz-Coaching |
+| `imposter-promotion` | Hochstaplergefühl nach Beförderung | Riley | Thought Audit, Strukturierte Reflexion, Vier-Phasen-Coaching | → [Thought Audit](#thought-audit) | Mentale Fitness, Goal–Path–Solution, Resilienz-Coaching |
+| `life-balance` | Work-Life-Balance | Quinn | Goal–Path–Solution, Vier-Phasen-Coaching, Resilienz-Coaching | → [Goal–Path–Solution](#goal-path-solution) | Strukturierte Reflexion, Mentale Fitness, Zukunftsorientiertes Coaching |
+| `career-plateau` | Karriereplateau | Chris | Ambitioniertes Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Ambitioniertes Coaching](#ambitious-coaching) | Strategisches Coaching, Zukunftsorientiertes Coaching, Ambivalenz-Coaching |
+| `strategic-pivot` | Strategische Neuausrichtung | Priya | Strategisches Coaching, Goal–Path–Solution, Vier-Phasen-Coaching | → [Strategisches Coaching](#strategic-coaching) | Ambitioniertes Coaching, Systemisches Coaching, Zukunftsorientiertes Coaching |
+| `feedback-anxiety` | Feedback-Angst | Jamie | Thought Audit, Strukturierte Reflexion, Mentale Fitness | → [Thought Audit](#thought-audit) | Vier-Phasen-Coaching, Goal–Path–Solution, Resilienz-Coaching |
+| `stuck-metaphor` | In Metaphern verpacktes Anliegen | Robin | Exakte Klientensprache | → [Exakte Klientensprache](#client-exact-language) | Vier-Phasen-Coaching, Goal–Path–Solution, Strukturierte Reflexion |
+
+---
+
 ## Wartung
 
 Bei Prompt-Änderungen in `bots.js` / `newCoaches.js` / `coachingPromptBlocks.js` diese Matrix aktualisieren. Evaluator-Rubriken in `practice/frameworks.js` sollten konsistent bleiben.
+
+**Practice-Cheatsheet** (Sektion „Practice Lab — Methoden-Cheatsheet“ + [practice-method-cheatsheet.html](practice-method-cheatsheet.html)):
+- `practice/frameworks.js` (`name`, `shortDescription`, `explainer`, `stages`, `complianceCriteria`) → **Teil 1** und Sonderpfade in **Teil 2** (Markdown + HTML)
+- `practice/methodScenarioMap.js` → **Teil 3** (Markdown + HTML)
+- Contracting-Eval-Schema in `services/geminiPrompts.js` (`contractingSteps`) → **Teil 2** Anliegensklärung
+- Persona-Namen / `sourceBotId`-Mapping → Coach-Zeile in Teil 1
 
 **Siehe auch:** `meaningful-conversations-backend/prompt_evolution.md`, `.cursor/skills/meaningful-conversations/ux-flow/SKILL.md`

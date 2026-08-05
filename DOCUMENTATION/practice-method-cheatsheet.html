@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice Lab — Methoden-Cheatsheet — Meaningful Conversations</title>
+  <style>
+    :root {
+      --primary-teal: #1B7272;
+      --dark-teal: #165a5a;
+      --light-teal: #5BBFBF;
+      --accent-orange: #F59E0B;
+      --bg: #f8fafb;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-muted: #4b5563;
+      --border: #d1d5db;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 8pt;
+      line-height: 1.35;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .page {
+      width: 277mm;
+      min-height: 190mm;
+      margin: 0 auto 6mm;
+      padding: 8mm 10mm;
+      background: var(--surface);
+      page-break-after: always;
+    }
+
+    .page:last-child { page-break-after: auto; }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--primary-teal);
+      padding-bottom: 3mm;
+      margin-bottom: 4mm;
+    }
+
+    .page-header h1 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: var(--dark-teal);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .page-header .subtitle {
+      font-size: 8pt;
+      color: var(--text-muted);
+      margin-top: 1mm;
+      max-width: 180mm;
+    }
+
+    .brand-mark {
+      text-align: right;
+      font-size: 8pt;
+      color: var(--primary-teal);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-size: 10pt;
+      font-weight: 700;
+      color: var(--dark-teal);
+      margin-bottom: 3mm;
+      padding-left: 2mm;
+      border-left: 3px solid var(--accent-orange);
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3mm 4mm;
+    }
+
+    .method-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3mm;
+      background: #fff;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .method-card h3 {
+      font-size: 9.5pt;
+      color: var(--dark-teal);
+      margin-bottom: 1mm;
+      line-height: 1.2;
+    }
+
+    .coach-badge {
+      display: inline-block;
+      font-size: 7pt;
+      font-weight: 600;
+      color: var(--primary-teal);
+      background: #e6f4f4;
+      padding: 0.5mm 1.5mm;
+      border-radius: 2px;
+      margin-bottom: 1.5mm;
+    }
+
+    .tagline {
+      font-weight: 600;
+      font-size: 7.5pt;
+      margin-bottom: 1mm;
+    }
+
+    .summary {
+      font-size: 7.5pt;
+      color: var(--text-muted);
+      margin-bottom: 1.5mm;
+    }
+
+    .label-block {
+      font-size: 7pt;
+      margin-bottom: 1mm;
+    }
+
+    .label-block strong {
+      color: var(--dark-teal);
+      font-weight: 700;
+    }
+
+    .phases-title {
+      font-size: 7pt;
+      font-weight: 700;
+      color: var(--dark-teal);
+      letter-spacing: 0.04em;
+      margin: 1.5mm 0 0.8mm;
+      text-transform: uppercase;
+    }
+
+    .phases {
+      list-style: none;
+      font-size: 7pt;
+    }
+
+    .phases li {
+      margin-bottom: 0.5mm;
+      padding-left: 2.5mm;
+      position: relative;
+    }
+
+    .phases li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--light-teal);
+      font-weight: 700;
+    }
+
+    .phases li strong {
+      color: var(--text);
+    }
+
+    .hint {
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 1mm;
+    }
+
+    .special-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+      margin-bottom: 5mm;
+    }
+
+    .special-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3.5mm;
+      background: #fff;
+      break-inside: avoid;
+    }
+
+    .special-card h3 {
+      font-size: 10pt;
+      color: var(--dark-teal);
+      margin-bottom: 1.5mm;
+    }
+
+    .steps {
+      list-style: decimal;
+      padding-left: 4mm;
+      font-size: 7.5pt;
+    }
+
+    .steps li { margin-bottom: 0.8mm; }
+
+    .default-pair {
+      font-size: 7.5pt;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 3px;
+      padding: 2mm 3mm;
+      margin-bottom: 3mm;
+    }
+
+    .default-pair strong { color: #92400e; }
+
+    .scenario-wrap {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    table.scenarios {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 6.5pt;
+      table-layout: fixed;
+    }
+
+    table.scenarios th {
+      background: var(--dark-teal);
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 1.5mm 1.8mm;
+      font-size: 7pt;
+      vertical-align: bottom;
+    }
+
+    table.scenarios th:nth-child(1) { width: 14%; }
+    table.scenarios th:nth-child(2) { width: 14%; }
+    table.scenarios th:nth-child(3) { width: 8%; }
+    table.scenarios th:nth-child(4) { width: 26%; }
+    table.scenarios th:nth-child(5) { width: 16%; }
+    table.scenarios th:nth-child(6) { width: 22%; }
+
+    table.scenarios td {
+      padding: 1.2mm 1.8mm;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    table.scenarios tr:nth-child(even) td { background: #f9fafb; }
+    table.scenarios tr:last-child td { border-bottom: none; }
+
+    table.scenarios code {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 6pt;
+      color: var(--text-muted);
+    }
+
+    .ref-link {
+      color: var(--primary-teal);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    footer.footer {
+      margin-top: 4mm;
+      padding-top: 2mm;
+      border-top: 1px solid var(--border);
+      font-size: 6.5pt;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 4mm;
+    }
+
+    footer.footer a { color: var(--primary-teal); }
+
+    .print-hint {
+      text-align: center;
+      font-size: 8pt;
+      color: var(--text-muted);
+      padding: 4mm;
+      background: #fff;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+
+      body {
+        background: #fff;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .print-hint { display: none; }
+
+      .page {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+
+      .method-card,
+      .special-card,
+      .scenario-wrap,
+      table.scenarios th,
+      .coach-badge,
+      .default-pair {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    @media screen {
+      .page {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="print-hint">Drucken: <strong>Querformat (A4)</strong> · Hintergrundgrafiken aktivieren · „Als PDF speichern“</p>
+
+  <!-- Seite 1: Methoden 1–4 -->
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <h1>Practice Lab — Methoden-Cheatsheet</h1>
+        <p class="subtitle">Nachschlagewerk für Coach Practice (Setup-Info-Felder). Während der Übung ausdrucken oder auf zweitem Monitor offen halten. Quelle: <code>frameworks.js</code> · Stand 2026-08-05</p>
+      </div>
+      <div class="brand-mark">Meaningful Conversations</div>
+    </header>
+
+    <h2 class="section-title">Teil 1 — Methoden-Karten (1–4)</h2>
+    <div class="method-grid">
+
+      <article class="method-card" id="goal-path-solution">
+        <h3>Goal–Path–Solution</h3>
+        <span class="coach-badge">AI-Coach: Nobody</span>
+        <p class="tagline">Goal–Problem–Solution: Ziel klären, Problem erkunden, gemeinsam Lösungen entwickeln.</p>
+        <p class="summary">Strukturierte Problemlösung im Stil von Nobody (GPS).</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Wenn du vor dem Handeln klare Struktur brauchst.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du hältst die Reihenfolge G→P→S und vermeidest zu frühes Lösungs-Push.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Session-Ziel:</strong> Klären, was der Coachee erreichen möchte.</li>
+          <li><strong>Problem:</strong> Hindernisse und Ursachen erkunden, ohne sofort Lösungen zu liefern.</li>
+          <li><strong>Solution:</strong> Umsetzbare Optionen und nächste Schritte gemeinsam entwickeln.</li>
+        </ul>
+      </article>
+
+      <article class="method-card" id="ambitious-coaching">
+        <h3>Ambitioniertes Coaching</h3>
+        <span class="coach-badge">AI-Coach: Max</span>
+        <p class="tagline">Perspektive erweitern, Session contracten und langfristiges Potenzial durch kraftvolle Fragen freisetzen.</p>
+        <p class="summary">Entspricht Max — Ambition und langfristiges Denken.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Üben, Coachees über sichere Antworten hinaus zu führen.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du contractest früh und stellst erweiternde „Was wäre wenn“-Fragen vor dem Abschluss.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Contracting:</strong> Fokus, Ergebnis und Zeit der Session vereinbaren.</li>
+          <li><strong>Erweitern:</strong> Limitierende Annahmen hinterfragen und größer denken.</li>
+          <li><strong>Commitment:</strong> Konkrete nächste Schritte mit Energie vereinbaren.</li>
+        </ul>
+        <p class="hint">Volles Session-Contracting vor Ambitionsarbeit.</p>
+      </article>
+
+      <article class="method-card" id="strategic-coaching">
+        <h3>Strategisches Coaching</h3>
+        <span class="coach-badge">AI-Coach: Ava</span>
+        <p class="tagline">Makrokontext, Wettbewerb, Ressourcen und Entscheidungskriterien.</p>
+        <p class="summary">Entspricht Ava — strategisches Denken bei komplexen Entscheidungen.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Strategische Linse unter Druck halten üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du erweiterst den Rahmen, bevor du auf Handlung eingrenzt.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Kontext:</strong> Externe Kräfte und Stakeholder erfassen.</li>
+          <li><strong>Optionen:</strong> Strategische Alternativen entwickeln.</li>
+          <li><strong>Entscheiden:</strong> Kriterien und Trade-offs klären.</li>
+        </ul>
+      </article>
+
+      <article class="method-card" id="resilience-coaching">
+        <h3>Resilienz-Coaching</h3>
+        <span class="coach-badge">AI-Coach: Kenji</span>
+        <p class="tagline">Fokus auf das Kontrollierbare, Akzeptanz des Unkontrollierbaren, innere Stärke aufbauen.</p>
+        <p class="summary">Entspricht Kenji — stoische Philosophie für Widerstandsfähigkeit.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Emotionalen Coachee auf das Einflussbare fokieren üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du sortierst steuerbare Handlungen ohne toxische Positivität.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Kreis der Kontrolle:</strong> Kontrollierbares vom Unkontrollierbaren trennen.</li>
+          <li><strong>Umdeuten:</strong> Stoische Perspektive auf die Situation anwenden.</li>
+          <li><strong>Tägliche Praxis:</strong> Kleine Praxis für Widerstandsfähigkeit definieren.</li>
+        </ul>
+        <p class="hint">Stoische Arbeit erst nach bestätigtem Sitzungskontrakt.</p>
+      </article>
+
+    </div>
+
+    <footer class="footer">
+      <span>Practice Lab Methoden-Cheatsheet · Seite 1/4</span>
+      <span>Vollständig: <a href="COACH-BEHAVIOR-MATRIX.md">COACH-BEHAVIOR-MATRIX.md</a></span>
+    </footer>
+  </div>
+
+  <!-- Seite 2: Methoden 5–8 -->
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <h1>Practice Lab — Methoden-Cheatsheet</h1>
+        <p class="subtitle">Teil 1 — Methoden-Karten (5–8)</p>
+      </div>
+      <div class="brand-mark">Meaningful Conversations</div>
+    </header>
+
+    <div class="method-grid">
+
+      <article class="method-card" id="structured-reflection">
+        <h3>Strukturierte Reflexion</h3>
+        <span class="coach-badge">AI-Coach: Chloe</span>
+        <p class="tagline">Gedanken, Gefühle und Verhalten untersuchen, um hilfreichere Muster zu finden.</p>
+        <p class="summary">Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Führen ohne Etikettieren oder Therapeutisieren üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Situation:</strong> Konkrete Auslösesituation benennen.</li>
+          <li><strong>Gedanken:</strong> Automatische Gedanken und Überzeugungen sichtbar machen.</li>
+          <li><strong>Alternativen:</strong> Ausgewogene Perspektiven und Verhalten erkunden.</li>
+        </ul>
+      </article>
+
+      <article class="method-card" id="mental-fitness-coaching">
+        <h3>Mentale Fitness</h3>
+        <span class="coach-badge">AI-Coach: Rob</span>
+        <p class="tagline">Saboteur-Stimmen erkennen und Weise-Antworten stärken.</p>
+        <p class="summary">Entspricht Rob — mentale Fitness im PQ-Stil.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Selbstsabotage mit Mitgefühl abfangen üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du hilfst Muster zu benennen; du „reparierst“ den Coachee nicht.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Bewusstsein:</strong> Inneren Kritiker / Saboteur-Muster wahrnehmen.</li>
+          <li><strong>Abfangen:</strong> Pause, Muster benennen ohne Scham.</li>
+          <li><strong>Weise-Antwort:</strong> Konstruktive innere Antwort wählen.</li>
+        </ul>
+      </article>
+
+      <article class="method-card" id="systemic-coaching">
+        <h3>Systemisches Coaching</h3>
+        <span class="coach-badge">AI-Coach: Victor</span>
+        <p class="tagline">Beziehungen, Rollen und Muster im System des Coachees erkunden.</p>
+        <p class="summary">Entspricht Victor — systemisch inspiriertes Coaching.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Coachee im Kontext, nicht isoliert sehen üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst nach Rollen und Mustern im gesamten System.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>System kartieren:</strong> Wichtige Personen, Rollen und Dynamiken identifizieren.</li>
+          <li><strong>Muster:</strong> Wiederkehrende Interaktionsschleifen erkennen.</li>
+          <li><strong>Verschiebung:</strong> Kleine systemische Experimente finden.</li>
+        </ul>
+        <p class="hint">Systemkartierung vor Intervention oder Ratschlägen.</p>
+      </article>
+
+      <article class="method-card" id="thought-audit">
+        <h3>Thought Audit</h3>
+        <span class="coach-badge">AI-Coach: Bekky</span>
+        <p class="tagline">Strukturierter Audit eines wiederkehrenden Gedankens: Belege, Wirkung, Revision.</p>
+        <p class="summary">Entspricht Bekky — Thought-Audit-Methodik.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Gedanken rigoros prüfen ohne Belehrung üben.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du bleibst bei einem Gedanken und fragst nach Belegen vor der Revision.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Gedanken erfassen:</strong> Gedanken wörtlich festhalten.</li>
+          <li><strong>Belege:</strong> Stützende und widerlegende Belege prüfen.</li>
+          <li><strong>Überarbeiten:</strong> Genaueren, nutzbaren Gedanken formulieren.</li>
+        </ul>
+        <p class="hint">Kein Contracting-Ritual — direkt in Gedanken-Identifikation.</p>
+      </article>
+
+    </div>
+
+    <footer class="footer">
+      <span>Practice Lab Methoden-Cheatsheet · Seite 2/4</span>
+      <span>Coach-Verhaltensmatrix: <a href="coach-behavior-matrix-infographic-a4-single.html">Persona-Matrix (1 Seite)</a></span>
+    </footer>
+  </div>
+
+  <!-- Seite 3: Methoden 9–12 -->
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <h1>Practice Lab — Methoden-Cheatsheet</h1>
+        <p class="subtitle">Teil 1 — Methoden-Karten (9–12)</p>
+      </div>
+      <div class="brand-mark">Meaningful Conversations</div>
+    </header>
+
+    <div class="method-grid">
+
+      <article class="method-card" id="client-exact-language">
+        <h3>Exakte Klientensprache</h3>
+        <span class="coach-badge">AI-Coach: Dan</span>
+        <p class="tagline">Exakte Worte des Coachees nutzen; saubere Fragen ohne Metaphern oder Ratschläge.</p>
+        <p class="summary">Entspricht Dan — Client-exact-language-Fragen.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> In der Sprache des Coachees bleiben, wenn du fixen willst.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Deine Fragen nutzen ihre Worte; du fügst kaum neue Bilder hinzu.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Zuhören:</strong> Schlüsselwörter und Phrasen exakt spiegeln.</li>
+          <li><strong>Entwickeln:</strong> Entwicklungsfragen in ihrer Sprache stellen.</li>
+          <li><strong>Erkenntnis verankern:</strong> Erkenntnis entstehen lassen; nicht für sie interpretieren.</li>
+        </ul>
+        <p class="hint">Nur kurze Wunschausgang-Frage — kein voller 6-Schritte-Contract.</p>
+      </article>
+
+      <article class="method-card" id="four-stage-coaching">
+        <h3>Vier-Phasen-Coaching</h3>
+        <span class="coach-badge">AI-Coach: Gabrielle</span>
+        <p class="tagline">Goal → Reality → Options → Will: klassische Coaching-Struktur für Klarheit und Commitment.</p>
+        <p class="summary">Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Ideal für allgemeine Sessions mit klarem Verlauf vom Thema zum Commitment.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du gehst session aim → current state → possibilities → commitment durch, überspringst Reality nicht und drängst in Options nicht zu Ratschlägen.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Session-Ziel:</strong> Was will der Coachee aus dieser Session / langfristig?</li>
+          <li><strong>Ist-Zustand:</strong> Was passiert jetzt? Fakten und Gefühle.</li>
+          <li><strong>Möglichkeiten:</strong> Was könnten sie tun? Brainstormen ohne Bewertung.</li>
+          <li><strong>Commitment:</strong> Wozu committen sie sich? Wann und wie?</li>
+        </ul>
+      </article>
+
+      <article class="method-card" id="forward-focused-coaching">
+        <h3>Zukunftsorientiertes Coaching</h3>
+        <span class="coach-badge">AI-Coach: Sam</span>
+        <p class="tagline">Fokus auf gewünschte Zukunft, Ausnahmen vom Problem und Skalierung des Fortschritts.</p>
+        <p class="summary">Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Wenn der Coachee in Problemgespräch steckt und einen Vorwärts-Blick braucht.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Gewünschte Zukunft:</strong> Leben beschreiben, wenn das Problem gelöst ist.</li>
+          <li><strong>Ausnahmen:</strong> Wann ist das Problem schon kleiner oder absent?</li>
+          <li><strong>Skalierung:</strong> Fortschritt 0–10; wie sähe +1 aus?</li>
+        </ul>
+        <p class="hint">Kein voller 6-Schritte-Contract. Keine ausgedehnte Problem-Erkundung vor SF-Fragen.</p>
+      </article>
+
+      <article class="method-card" id="ambivalence-coaching">
+        <h3>Ambivalenz-Coaching</h3>
+        <span class="coach-badge">AI-Coach: Mike</span>
+        <p class="tagline">Offene Fragen, Bestärkungen, reflektierendes Zuhören und Zusammenfassungen — eigene Veränderungsgründe des Klienten fördern.</p>
+        <p class="summary">Ambivalenz-Coaching im Stil von Mike — Zuhörkompetenzen bei Ambivalenz und eigener Motivation.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Wichtig, wenn der Coachee sagt „einerseits will ich, andererseits nicht“.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du spiegelst und bestärkst; du belehrst oder konfrontierst nicht bei Widerstand.</p>
+        <p class="phases-title">Phasen</p>
+        <ul class="phases">
+          <li><strong>Offene Fragen:</strong> Ambivalenz erkunden ohne Druck.</li>
+          <li><strong>Bestärkungen:</strong> Stärken und Einsatz authentisch anerkennen.</li>
+          <li><strong>Reflektierendes Zuhören:</strong> Bedeutung und Gefühl treffend spiegeln.</li>
+          <li><strong>Zusammenfassungen:</strong> Veränderungsgründe sammeln; Richtung Commitment zusammenfassen.</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <footer class="footer">
+      <span>Practice Lab Methoden-Cheatsheet · Seite 3/4</span>
+      <span>Default-Paar: Alex + Vier-Phasen-Coaching</span>
+    </footer>
+  </div>
+
+  <!-- Seite 4: Sonderpfade + Szenario-Tabelle -->
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <h1>Practice Lab — Methoden-Cheatsheet</h1>
+        <p class="subtitle">Teil 2 — Sonderpfade · Teil 3 — Szenario-Empfehlungen</p>
+      </div>
+      <div class="brand-mark">Meaningful Conversations</div>
+    </header>
+
+    <h2 class="section-title">Teil 2 — Sonderpfade</h2>
+    <div class="special-grid">
+
+      <article class="special-card" id="contracting">
+        <h3>Anliegensklärung</h3>
+        <p class="tagline">Anliegensklärung und Contracting üben, bevor Methodenarbeit beginnt.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Phase 1 vor Methodenwahl. Szenario-Anliegen ist blind — kein Briefing sichtbar.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Vollständige Anliegensklärung und explizite Kontrakt-Bestätigung. Hidden agenda nicht erzwingen.</p>
+        <p class="phases-title">Schritte (contractingSteps)</p>
+        <ol class="steps">
+          <li><strong>Thema identifiziert</strong> — Anliegen benannt.</li>
+          <li><strong>Relevanz erkundet</strong> — „Warum jetzt?“</li>
+          <li><strong>Messbares Session-Ergebnis</strong> — Konkretes Ergebnis definiert.</li>
+          <li><strong>Kontrakt bestätigt</strong> — Explizite Bestätigung durch Coachee.</li>
+        </ol>
+      </article>
+
+      <article class="special-card" id="free-play">
+        <h3>Freispiel</h3>
+        <p class="tagline">Erste Methodensitzung ohne fixe Methode — Coach wählt Interventionen frei.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Phase 2 nach Anliegensklärung — keine vorgegebene Struktur.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Situativ passende Interventionen; keine erzwungene Phasenfolge. Evaluator bewertet Wirksamkeit und Coachee-Autonomie.</p>
+        <p class="phases-title">Phasen</p>
+        <p class="hint" style="font-style: normal; margin-top: 0;">Keine fixe Phasenfolge — Coach entscheidet situativ.</p>
+      </article>
+
+    </div>
+
+    <h2 class="section-title">Teil 3 — Szenario → empfohlene Struktur</h2>
+    <p class="default-pair"><strong>Default-Paar:</strong> <code>career-decision</code> (Alex) + <a class="ref-link" href="#four-stage-coaching">Vier-Phasen-Coaching</a></p>
+
+    <div class="scenario-wrap">
+      <table class="scenarios">
+        <thead>
+          <tr>
+            <th>Szenario</th>
+            <th>Label</th>
+            <th>Coachee</th>
+            <th>Primary-Methoden</th>
+            <th>1. Primary</th>
+            <th>Alternative</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>career-decision</code></td>
+            <td>Karriereentscheidung</td>
+            <td>Alex</td>
+            <td>Strategisch, Vier-Phasen, GPS</td>
+            <td><a class="ref-link" href="#strategic-coaching">Strategisch</a></td>
+            <td>Zukunftsorientiert, Ambivalenz, Ambitioniert</td>
+          </tr>
+          <tr>
+            <td><code>team-conflict</code></td>
+            <td>Teamkonflikt</td>
+            <td>Sam</td>
+            <td>Systemisch, Vier-Phasen, GPS</td>
+            <td><a class="ref-link" href="#systemic-coaching">Systemisch</a></td>
+            <td>Zukunftsorientiert, Strukt. Reflexion, Resilienz</td>
+          </tr>
+          <tr>
+            <td><code>motivation-dip</code></td>
+            <td>Motivationstief</td>
+            <td>Jordan</td>
+            <td>Mentale Fitness, Strukt. Reflexion, GPS</td>
+            <td><a class="ref-link" href="#mental-fitness-coaching">Mentale Fitness</a></td>
+            <td>Vier-Phasen, Zukunftsorientiert, Resilienz</td>
+          </tr>
+          <tr>
+            <td><code>relationship-boundary</code></td>
+            <td>Beziehungsgrenze</td>
+            <td>Taylor</td>
+            <td>Vier-Phasen, GPS, Zukunftsorientiert</td>
+            <td><a class="ref-link" href="#four-stage-coaching">Vier-Phasen</a></td>
+            <td>Strukt. Reflexion, Mentale Fitness, Ambivalenz</td>
+          </tr>
+          <tr>
+            <td><code>overwhelm</code></td>
+            <td>Überforderung</td>
+            <td>Casey</td>
+            <td>GPS, Strukt. Reflexion, Mentale Fitness</td>
+            <td><a class="ref-link" href="#goal-path-solution">GPS</a></td>
+            <td>Vier-Phasen, Resilienz, Zukunftsorientiert</td>
+          </tr>
+          <tr>
+            <td><code>resistance-change</code></td>
+            <td>Widerstand gg. Veränderung</td>
+            <td>Morgan</td>
+            <td>Ambivalenz, Systemisch, Vier-Phasen</td>
+            <td><a class="ref-link" href="#ambivalence-coaching">Ambivalenz</a></td>
+            <td>GPS, Zukunftsorientiert, Resilienz</td>
+          </tr>
+          <tr>
+            <td><code>imposter-promotion</code></td>
+            <td>Hochstaplergefühl</td>
+            <td>Riley</td>
+            <td>Thought Audit, Strukt. Reflexion, Vier-Phasen</td>
+            <td><a class="ref-link" href="#thought-audit">Thought Audit</a></td>
+            <td>Mentale Fitness, GPS, Resilienz</td>
+          </tr>
+          <tr>
+            <td><code>life-balance</code></td>
+            <td>Work-Life-Balance</td>
+            <td>Quinn</td>
+            <td>GPS, Vier-Phasen, Resilienz</td>
+            <td><a class="ref-link" href="#goal-path-solution">GPS</a></td>
+            <td>Strukt. Reflexion, Mentale Fitness, Zukunftsorientiert</td>
+          </tr>
+          <tr>
+            <td><code>career-plateau</code></td>
+            <td>Karriereplateau</td>
+            <td>Chris</td>
+            <td>Ambitioniert, Vier-Phasen, GPS</td>
+            <td><a class="ref-link" href="#ambitious-coaching">Ambitioniert</a></td>
+            <td>Strategisch, Zukunftsorientiert, Ambivalenz</td>
+          </tr>
+          <tr>
+            <td><code>strategic-pivot</code></td>
+            <td>Strateg. Neuausrichtung</td>
+            <td>Priya</td>
+            <td>Strategisch, GPS, Vier-Phasen</td>
+            <td><a class="ref-link" href="#strategic-coaching">Strategisch</a></td>
+            <td>Ambitioniert, Systemisch, Zukunftsorientiert</td>
+          </tr>
+          <tr>
+            <td><code>feedback-anxiety</code></td>
+            <td>Feedback-Angst</td>
+            <td>Jamie</td>
+            <td>Thought Audit, Strukt. Reflexion, Mentale Fitness</td>
+            <td><a class="ref-link" href="#thought-audit">Thought Audit</a></td>
+            <td>Vier-Phasen, GPS, Resilienz</td>
+          </tr>
+          <tr>
+            <td><code>stuck-metaphor</code></td>
+            <td>Metaphern-Anliegen</td>
+            <td>Robin</td>
+            <td>Exakte Klientensprache</td>
+            <td><a class="ref-link" href="#client-exact-language">Klientensprache</a></td>
+            <td>Vier-Phasen, GPS, Strukt. Reflexion</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="footer">
+      <span>Meaningful Conversations · Practice Lab · Stand 2026-08-05</span>
+      <span>Markdown: <a href="COACH-BEHAVIOR-MATRIX.md">COACH-BEHAVIOR-MATRIX.md</a> · Druck: Querformat A4, Hintergrundgrafiken an</span>
+    </footer>
+  </div>
+
+</body>
+</html>
