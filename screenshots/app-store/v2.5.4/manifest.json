@@ -1,0 +1,193 @@
+{
+  "version": "2.5.4",
+  "iphoneAscSize": [
+    1284,
+    2778
+  ],
+  "ipadAscSize": [
+    2048,
+    2732
+  ],
+  "iphone": [
+    {
+      "file": "01-welcome-dark-iphone-de.png",
+      "source": "app-store/v2.4.2/iphone/01-welcome-dark-iphone-de.png",
+      "screen": "Welcome / auth",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "02-intent-picker-iphone-de.png",
+      "source": "journey/03-context-setup/06-intent-picker-dark-iphone-de.png",
+      "screen": "Intent picker",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "03-coach-grid-iphone-de.png",
+      "source": "journey/04-bot-selection/02-coaching-section-iphone-de.png",
+      "screen": "Coach selection (Coaching section)",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "04-coaching-chat-iphone-de.png",
+      "source": "app-store/v2.4.2/iphone/04-coaching-chat-iphone-de.png",
+      "screen": "Coaching chat",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "05-session-analyzing-iphone-de.png",
+      "source": "journey/05-chat/07-session-analyzing-iphone-de.png",
+      "screen": "Session analyzing",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "06-session-review-iphone-de.png",
+      "source": "app-store/v2.4.2/iphone/06-session-review-iphone-de.png",
+      "screen": "Session review",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "07-session-review-updates-iphone-de.png",
+      "source": "app-store/v2.4.2/iphone/07-session-review-updates-iphone-de.png",
+      "screen": "Context updates diff",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "08-landing-hub-iphone-de.png",
+      "source": "journey/01-landing/04-landing-template-context-iphone-de.png",
+      "screen": "Landing hub / life context",
+      "size": [
+        1284,
+        2778
+      ]
+    },
+    {
+      "file": "09-practice-setup-iphone-de.png",
+      "source": "journey/10-practice/iphone/01-practice-setup-iphone-de.png",
+      "screen": "Practice setup",
+      "size": [
+        1284,
+        2778
+      ],
+      "optional": true
+    },
+    {
+      "file": "10-practice-contracting-iphone-de.png",
+      "source": "journey/10-practice/iphone/02-practice-contracting-iphone-de.png",
+      "screen": "Practice contracting",
+      "size": [
+        1284,
+        2778
+      ],
+      "optional": true
+    }
+  ],
+  "ipad": [
+    {
+      "file": "01-welcome-dark-ipad13-de.png",
+      "source": "app-store/v2.4.2/ipad/01-welcome-dark-ipad13-de.png",
+      "screen": "01-welcome-dark-ipad13-de.png",
+      "size": [
+        2048,
+        2732
+      ]
+    },
+    {
+      "file": "02-landing-hub-ipad13-de.png",
+      "source": "app-store/v2.4.2/ipad/02-landing-hub-ipad13-de.png",
+      "screen": "02-landing-hub-ipad13-de.png",
+      "size": [
+        2048,
+        2732
+      ]
+    },
+    {
+      "file": "03-bot-selection-ipad13-de.png",
+      "source": "app-store/v2.4.2/ipad/03-bot-selection-ipad13-de.png",
+      "screen": "03-bot-selection-ipad13-de.png",
+      "size": [
+        2048,
+        2732
+      ]
+    },
+    {
+      "file": "04-coaching-chat-ipad13-de.png",
+      "source": "app-store/v2.4.2/ipad/04-coaching-chat-ipad13-de.png",
+      "screen": "04-coaching-chat-ipad13-de.png",
+      "size": [
+        2048,
+        2732
+      ]
+    },
+    {
+      "file": "05-practice-setup-ipad13-de.png",
+      "source": "journey/10-practice/ipad/01-practice-setup-ipad13-de.png",
+      "screen": "Practice setup",
+      "size": [
+        2048,
+        2732
+      ],
+      "optional": true
+    },
+    {
+      "file": "06-practice-scenarios-ipad13-de.png",
+      "source": "journey/10-practice/ipad/02-practice-scenarios-ipad13-de.png",
+      "screen": "Practice scenarios",
+      "size": [
+        2048,
+        2732
+      ],
+      "optional": true
+    },
+    {
+      "file": "07-practice-methods-ipad13-de.png",
+      "source": "journey/10-practice/ipad/03-practice-methods-ipad13-de.png",
+      "screen": "Practice methods",
+      "size": [
+        2048,
+        2732
+      ],
+      "optional": true
+    },
+    {
+      "file": "08-practice-contracting-setup-ipad13-de.png",
+      "source": "journey/10-practice/ipad/04-practice-contracting-setup-ipad13-de.png",
+      "screen": "Practice contracting",
+      "size": [
+        2048,
+        2732
+      ],
+      "optional": true
+    },
+    {
+      "file": "09-practice-evaluation-ipad13-de.png",
+      "source": "journey/10-practice/ipad/05-practice-evaluation-ipad13-de.png",
+      "screen": "Practice evaluation",
+      "size": [
+        2048,
+        2732
+      ],
+      "optional": true
+    }
+  ]
+}
