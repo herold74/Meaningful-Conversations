@@ -17,7 +17,7 @@ const USE_TTS_CONTAINER = process.env.TTS_SERVICE_URL ? true : false;
  */
 const VOICE_MODELS = {
     de: {
-        female: 'de_DE-mls-medium',  // Piper: MLS with speaker_id=73 (Eva)
+        female: 'de_DE-eva_k-x_low',  // Piper: Eva K (single-speaker, no speaker_id needed)
         male: 'de_DE-thorsten-medium',  // Piper: Thorsten medium quality
     },
     en: {
@@ -40,7 +40,6 @@ function getVoiceForBot(botId, language) {
         'ava-strategic',
         'chloe-structured-reflection',
         'gabrielle-four-stage',
-        'sam-forward-focused',
         'bekky-thought-audit',
         'practice-coachee-female',
     ];
@@ -90,7 +89,6 @@ function getVoiceModelFromId(voiceId) {
     if (voiceId && voiceId.includes('_')) {
         // Verify it's a valid model name
         const validModels = [
-            'de_DE-mls-medium',
             'de_DE-thorsten-medium',
             'de_DE-eva_k-x_low',
             'en_US-amy-medium',
@@ -103,7 +101,7 @@ function getVoiceModelFromId(voiceId) {
     
     // Otherwise, map short IDs to full model names
     const voiceMap = {
-        'de-mls': 'de_DE-mls-medium',
+        'de-eva': 'de_DE-eva_k-x_low',
         'de-thorsten': 'de_DE-thorsten-medium',
         'en-amy': 'en_US-amy-medium',
         'en-ryan': 'en_US-ryan-medium',

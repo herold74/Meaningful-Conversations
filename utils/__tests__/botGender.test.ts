@@ -10,12 +10,13 @@ import {
 describe('botGender', () => {
   it('maps known female coach ids', () => {
     expect(getBotGender('ava-strategic')).toBe('female');
-    expect(getBotGender('sam-forward-focused')).toBe('female');
+    expect(getBotGender('bekky-thought-audit')).toBe('female');
     expect(getBotGender('practice-coachee-female')).toBe('female');
   });
 
   it('maps known male coach ids', () => {
     expect(getBotGender('max-ambitious')).toBe('male');
+    expect(getBotGender('sam-forward-focused')).toBe('male');
     expect(getBotGender('practice-coachee-male')).toBe('male');
   });
 
