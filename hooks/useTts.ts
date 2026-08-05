@@ -11,7 +11,7 @@ import {
   type TtsMode,
 } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
-import { selectVoice } from '../utils/voiceUtils';
+import { selectVoice, voiceNameIncludesToken } from '../utils/voiceUtils';
 import { getBotGender, resolveTtsBotId } from '../utils/botGender';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { brand } from '../config/brand';
@@ -217,9 +217,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
                 const targetNames = botGender === 'female' ? femaleNames : maleNames;
                 const oppositeNames = botGender === 'female' ? maleNames : femaleNames;
 
-                const genderMatched = pool.filter(v => targetNames.some(n => v.name.toLowerCase().includes(n)));
+                const genderMatched = pool.filter(v => targetNames.some(n => voiceNameIncludesToken(v.name, n)));
                 const notOpposite = genderMatched.length > 0 ? genderMatched
-                  : pool.filter(v => !oppositeNames.some(n => v.name.toLowerCase().includes(n)));
+                  : pool.filter(v => !oppositeNames.some(n => voiceNameIncludesToken(v.name, n)));
                 const candidateVoices = notOpposite.length > 0 ? notOpposite : pool;
 
                 const bestVoice = candidateVoices.find(v => v.quality === 'premium')
@@ -1244,11 +1244,12 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
           const genderFilteredVoices = nativeVoices.filter(v => {
             const nameLower = v.name.toLowerCase();
+            const matchesMale = maleNames.some(n => voiceNameIncludesToken(nameLower, n));
+            const matchesFemale = femaleNames.some(n => voiceNameIncludesToken(nameLower, n));
             if (botGender === 'male') {
-              return maleNames.some(n => nameLower.includes(n)) || !femaleNames.some(n => nameLower.includes(n));
-            } else {
-              return femaleNames.some(n => nameLower.includes(n)) || !maleNames.some(n => nameLower.includes(n));
+              return matchesMale || !matchesFemale;
             }
+            return matchesFemale || !matchesMale;
           });
 
           const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : nativeVoices;

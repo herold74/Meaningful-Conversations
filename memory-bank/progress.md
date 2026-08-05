@@ -164,6 +164,7 @@
     - [ ] Commit + deploy method–scenario mapping + Hard/Live bundle (local uncommitted mapping changes)
     - [ ] Custom avatar art for Steve, Gabrielle, Mike (placeholders in use)
 - [ ] **Roadmap — Coach-side feedback from Practice** *(2026-08-05)*: DPC/DPFL sind in Practice **nicht** aktiv. **Heute:** Post-Session-Tipps (`nextDrills`) + wiederkehrende Entwicklungsthemen im Fortschritt reichen. **Später (Roadmap):** Herangehensweise/Verhalten des menschlichen Coaches aus Practice-Sessions optional für Profil- oder Coaching-Stil-Insights nutzen — Abgrenzung zu Classic-DPFL, Einwilligung, UX offen.
+- [ ] **Roadmap — Entwickler-Feedback nach Practice-Auswertung** *(2026-08-05)*: Nach `PracticeEvaluationReview` fehlt ein dedizierter Schritt (analog Transkript-Eval `EvaluationRating` / Classic `SessionReview`): „War die Auswertung hilfreich?“ (1–10) + optionaler Kommentar an Entwickler, Kontakt-Opt-in. **Heute:** Flaggen-Meldung im Chat während der Session; E-Mail support@manualmode.at. Aufwand grob **S**.
 
 ## Security & Infrastructure (v2.0.1 — 2026-07-15)
 - [x] **PayPal Webhook Verification:** Full signature verification via PayPal API

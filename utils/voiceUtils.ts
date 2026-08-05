@@ -1,6 +1,14 @@
 import { Language } from '../types';
 
 /**
+ * Match a voice-name token without substring false positives (e.g. martin ≠ martina).
+ */
+export function voiceNameIncludesToken(voiceName: string, token: string): boolean {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`\\b${escaped}\\b`, 'i').test(voiceName.toLowerCase());
+}
+
+/**
  * Attempts to determine the gender of a voice based on keywords and common names.
  */
 export const getVoiceGender = (voice: SpeechSynthesisVoice): 'male' | 'female' | 'unknown' => {
@@ -54,7 +62,7 @@ export const selectVoice = (
       const whitelistedVoices = voices.filter(v => {
           if (!v.lang.toLowerCase().startsWith(langPrefix)) return false;
           const name = v.name.toLowerCase();
-          return allowedNames.some(allowedName => name.includes(allowedName));
+          return allowedNames.some((allowedName) => voiceNameIncludesToken(name, allowedName));
       });
 
       if (whitelistedVoices.length > 0) {

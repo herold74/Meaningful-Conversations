@@ -10,10 +10,15 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Recent Changes (2026-08-05 — About Coach Practice tab + user guide callouts, local review)
+## Recent Changes (2026-08-05 — About Practice tab polish + voice token fix, staging deploy pending)
 
-- **Pending deploy:** About page third tab „Coaching üben“ / `AboutCoachPractice`; user guide ⚠️/ℹ️ callout boxes (DE+EN)
-- **Staging/Production:** not deployed — owner reviewing locally first
+- **Commit pending:** About „Coaching üben“ tab layout parity with HowItWorks; ℹ️ access info box; step 4 „Fortschritt sehen“; `voiceNameIncludesToken` (martin ≠ martina for local/iOS TTS)
+- **Roadmap added:** Entwickler-Feedback nach Practice-Auswertung (S) — see `progress.md`
+
+## Recent Changes (2026-08-05 — About Coach Practice tab + user guide callouts)
+
+- **Commit `9e2de02`:** About page third tab „Coaching üben“; user guide ⚠️/ℹ️ callout boxes (DE+EN)
+- **Follow-up (this session):** visual parity + voice fix — deploy Build 8
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 7 docs + AI Act UX)
 
