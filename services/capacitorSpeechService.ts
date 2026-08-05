@@ -18,6 +18,11 @@
 
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { isAndroidBrowser } from '../utils/platformDetection';
+import {
+    mergeTranscriptPrefix,
+    processIncrementalSpeechResults,
+    type IncrementalSpeechState,
+} from '../utils/webSpeechResultProcessing';
 
 // Detect if running in native Capacitor environment
 export const isNativeApp = Capacitor.isNativePlatform();
@@ -125,14 +130,16 @@ class WebSpeechService implements ISpeechService {
         onStart?: () => void;
         onEnd?: () => void;
     } | null = null;
-    /** Accumulated transcript from previous auto-restart sessions (Android only).
-     *  When Chrome kills the session after a silence pause and we auto-restart,
+    /** Accumulated transcript from previous auto-restart sessions.
+     *  When the browser kills the session after a silence pause and we auto-restart,
      *  the Web Speech API resets event.results. This field preserves everything
      *  spoken before the restart so no text is lost. */
     private accumulatedTranscript: string = '';
     /** Transcript from the current recognition session, updated on every onresult.
      *  Captured into accumulatedTranscript before each auto-restart. */
     private currentSessionTranscript: string = '';
+    /** Desktop/iOS browser: isFinal segments appended across result-array resets (manual send only). */
+    private incrementalSpeechState: IncrementalSpeechState = { committedFinalText: '' };
 
     async isAvailable(): Promise<boolean> {
         return typeof window !== 'undefined' && 
@@ -169,6 +176,7 @@ class WebSpeechService implements ISpeechService {
         // Reset accumulation for the new recording session
         this.accumulatedTranscript = '';
         this.currentSessionTranscript = '';
+        this.incrementalSpeechState = { committedFinalText: '' };
 
         this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
 
@@ -198,11 +206,13 @@ class WebSpeechService implements ISpeechService {
             // Auto-restart keeps the mic open so the user can pause naturally.
             if (!this.stoppedManually && this.lastStartArgs) {
                 if (this.currentSessionTranscript.trim()) {
-                    this.accumulatedTranscript = this.accumulatedTranscript
-                        ? this.accumulatedTranscript + ' ' + this.currentSessionTranscript
-                        : this.currentSessionTranscript;
+                    this.accumulatedTranscript = mergeTranscriptPrefix(
+                        this.accumulatedTranscript,
+                        this.currentSessionTranscript,
+                    );
                     this.currentSessionTranscript = '';
                 }
+                this.incrementalSpeechState = { committedFinalText: '' };
                 console.log('[WebSpeechService] 🔄 Auto-restart after silence timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
                 try {
                     recognition.start();
@@ -217,6 +227,7 @@ class WebSpeechService implements ISpeechService {
             this.lastStartArgs = null;
             this.accumulatedTranscript = '';
             this.currentSessionTranscript = '';
+            this.incrementalSpeechState = { committedFinalText: '' };
             onEnd?.();
         };
 
@@ -276,6 +287,7 @@ class WebSpeechService implements ISpeechService {
         this.lastStartArgs = null;
         this.accumulatedTranscript = '';
         this.currentSessionTranscript = '';
+        this.incrementalSpeechState = { committedFinalText: '' };
         if (this.recognition) {
             try {
                 this.recognition.stop();
@@ -329,53 +341,47 @@ class WebSpeechService implements ISpeechService {
         // #endregion
         
         let finalTranscript = '';
+        let isFinal = false;
+        let confidence = 0;
 
-        if (resultsArray.length === 1) {
-            finalTranscript = resultsArray[0][0].transcript;
-        } else if (isAndroidBrowser) {
+        if (isAndroidBrowser) {
             // Android adaptive detection — devices may deliver cumulative or incremental results
             const lastTranscript = resultsArray[resultsArray.length - 1][0].transcript;
-            const secondLastTranscript = resultsArray[resultsArray.length - 2][0].transcript;
 
-            if (lastTranscript.startsWith(secondLastTranscript) ||
-                lastTranscript.toLowerCase().startsWith(secondLastTranscript.toLowerCase())) {
-                finalTranscript = lastTranscript;
-            } else if (lastTranscript.length > secondLastTranscript.length * 0.8) {
+            if (resultsArray.length === 1) {
                 finalTranscript = lastTranscript;
             } else {
-                finalTranscript = resultsArray
-                    .filter((r: any) => r.isFinal)
-                    .map((r: any) => r[0].transcript)
-                    .join(' ');
-                if (!finalTranscript.trim()) {
+                const secondLastTranscript = resultsArray[resultsArray.length - 2][0].transcript;
+
+                if (lastTranscript.startsWith(secondLastTranscript) ||
+                    lastTranscript.toLowerCase().startsWith(secondLastTranscript.toLowerCase())) {
                     finalTranscript = lastTranscript;
+                } else if (lastTranscript.length > secondLastTranscript.length * 0.8) {
+                    finalTranscript = lastTranscript;
+                } else {
+                    finalTranscript = resultsArray
+                        .filter((r: any) => r.isFinal)
+                        .map((r: any) => r[0].transcript)
+                        .join(' ');
+                    if (!finalTranscript.trim()) {
+                        finalTranscript = lastTranscript;
+                    }
                 }
             }
-        } else {
-            // Desktop / iOS browsers: results are always incremental — concatenate all
-            const finals = resultsArray
-                .filter((r: any) => r.isFinal)
-                .map((r: any) => r[0].transcript)
-                .join(' ');
+
+            this.currentSessionTranscript = finalTranscript;
+            finalTranscript = mergeTranscriptPrefix(this.accumulatedTranscript, finalTranscript);
             const lastResult = resultsArray[resultsArray.length - 1];
-            if (!lastResult.isFinal) {
-                finalTranscript = finals
-                    ? finals + ' ' + lastResult[0].transcript
-                    : lastResult[0].transcript;
-            } else {
-                finalTranscript = finals;
-            }
+            isFinal = lastResult.isFinal;
+            confidence = lastResult[0].confidence || 0;
+        } else {
+            // Desktop / iOS browsers: append isFinal segments via resultIndex (survives results-array resets)
+            const processed = processIncrementalSpeechResults(event, this.incrementalSpeechState);
+            this.currentSessionTranscript = processed.sessionTranscript;
+            finalTranscript = mergeTranscriptPrefix(this.accumulatedTranscript, processed.sessionTranscript);
+            isFinal = processed.isFinal;
+            confidence = processed.confidence;
         }
-
-        this.currentSessionTranscript = finalTranscript;
-
-        if (this.accumulatedTranscript) {
-            finalTranscript = this.accumulatedTranscript + ' ' + finalTranscript;
-        }
-
-        const lastResult = resultsArray[resultsArray.length - 1];
-        const isFinal = lastResult.isFinal;
-        const confidence = lastResult[0].confidence || 0;
 
         return { transcript: finalTranscript, isFinal, confidence };
     }
