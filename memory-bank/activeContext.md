@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.5.5
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-beta.manualmode.at (health OK; STT + TTS ONNX fallback + coachee role guard live)
+**Staging:** Deployed **2026-08-05**, Build **3**, v2.5.5 — https://mc-beta.manualmode.at (health OK; coachee gender eval + unique avatars finley/rowan live)
 **Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; parity with staging images)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
 **Xcode:** `CURRENT_PROJECT_VERSION=2` in repo (`BUILD_NUMBER` after deploy sync)
@@ -16,7 +16,7 @@
 - **Avatars:** 12/12 eindeutig pro Auswahl; neue `public/avatars/finley.png`, `rowan.png` (Rowan regen — upright head, auburn hair, distinct from max); Methoden-Remap (Chris→mike, Priya→gabrielle, Jamie→gloria, Robin→sam)
 - **Shared:** `practice/avatarGender.js`; `coacheePrompt` → Klientin/Klient; `utils/botGender.ts` erweitert
 - **Tests:** 18/18 (avatarGender, coacheePrompt Finley, practiceEvaluate contracting gender)
-- **Deploy:** `-c app` (Frontend PNGs + Backend)
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app` — Build **3**; commit `ab5782b` sync; health OK
 
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.5 Build 2)
 
