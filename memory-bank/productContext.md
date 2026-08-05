@@ -22,7 +22,7 @@ The user journey is circular and iterative:
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
 
 ## Distribution
-- **iOS App Store:** Live as "MyCoach AI" (v2.0.0) in AT/DE/CH. Regional restriction intentional for manageable support coverage.
+- **iOS App Store:** Live as "MyCoach AI" (v2.0.0) in AT/DE/CH. Regional restriction intentional for manageable support coverage. **Not released on the U.S. storefront.** In App Store Connect, English store metadata uses **English (Canada)** — not English (U.S.). In-app UI language `en` is unchanged.
 - **PWA:** Available at https://mc-app.manualmode.at for all platforms.
 - **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 
