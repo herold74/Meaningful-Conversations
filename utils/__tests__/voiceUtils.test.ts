@@ -2,7 +2,7 @@
  * Tests for voice utilities
  */
 
-import { getVoiceGender, cleanVoiceName, selectVoice } from '../voiceUtils';
+import { getVoiceGender, cleanVoiceName, selectVoice, voiceNameIncludesToken } from '../voiceUtils';
 import type { Language } from '../types';
 
 const createVoice = (name: string, lang: string = 'de-DE', localService = true, isDefault = false): SpeechSynthesisVoice =>
@@ -38,6 +38,14 @@ describe('voiceUtils', () => {
 
     test('returns unknown when no match', () => {
       expect(getVoiceGender(createVoice('Unknown Voice XYZ'))).toBe('unknown');
+    });
+  });
+
+  describe('voiceNameIncludesToken', () => {
+    test('matches whole token only', () => {
+      expect(voiceNameIncludesToken('Martin (Enhanced)', 'martin')).toBe(true);
+      expect(voiceNameIncludesToken('Martina (Enhanced)', 'martin')).toBe(false);
+      expect(voiceNameIncludesToken('de-DE Markus', 'markus')).toBe(true);
     });
   });
 
@@ -93,6 +101,17 @@ describe('voiceUtils', () => {
       const selected = selectVoice(voices, 'de' as Language, 'male');
       expect(selected).not.toBeNull();
       expect(selected!.name).toContain('Markus');
+    });
+
+    test('does not treat Martina as Martin for male voice whitelist', () => {
+      const voices = [
+        createVoice('Martina (Enhanced)', 'de-DE'),
+        createVoice('Markus', 'de-DE'),
+      ];
+      const selected = selectVoice(voices, 'de' as Language, 'male');
+      expect(selected).not.toBeNull();
+      expect(selected!.name).toContain('Markus');
+      expect(selected!.name.toLowerCase()).not.toContain('martina');
     });
 
     test('selects whitelisted English female voice', () => {

@@ -5,7 +5,7 @@ import { XIcon } from './icons/XIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
-import { getVoiceGender, cleanVoiceName } from '../utils/voiceUtils';
+import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken } from '../utils/voiceUtils';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
@@ -175,7 +175,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             if (!isIOSBrowser && !v.localService) return false;
             if (!v.lang.toLowerCase().startsWith(botLanguage)) return false;
             const name = v.name.toLowerCase();
-            return allowedNames.some(allowedName => name.includes(allowedName));
+            return allowedNames.some((allowedName) => voiceNameIncludesToken(name, allowedName));
         });
 
         console.log('[VoiceModal] Whitelist filter found', whitelistedVoices.length, 'voices:', 
