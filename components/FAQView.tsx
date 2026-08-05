@@ -46,6 +46,16 @@ Sie kommunizieren **ausschließlich mit KI-Systemen** — nicht mit menschlichen
 ### Die Antwort des Coaches ist nicht hilfreich. Was kann ich tun?
 KI ist ein mächtiges Werkzeug, aber sie ist nicht perfekt. Wenn eine Antwort nicht hilfreich ist, versuchen Sie, Ihre Aussage umzuformulieren oder mehr Kontext zu geben. Sie können den Coach auch sanft wieder auf den richtigen Weg bringen, indem Sie etwas sagen wie: "Lassen Sie uns zurückkehren zu..." oder "Ich möchte mich auf... konzentrieren". Sie können bestimmte problematische Antworten direkt im Chat über das Flaggensymbol melden, das neben der Nachricht des Coaches erscheint. Zusätzlich können Sie nach der Sitzung das allgemeine Feedback- und Bewertungssystem nutzen, um Probleme zu melden, was uns hilft, das System zu verbessern.
 
+### Warum wird beim Sprechen manchmal nur ein Satzteil gesendet?
+Die Spracherkennung liefert zuerst vorläufige Wortvorschläge und erst danach den fertigen Satz. Wenn Sie zu früh senden, kann noch nicht der vollständige Text übermittelt werden.
+
+**Tipp:** Warten Sie, bis der gesprochene Satz **vollständig und stabil** im Eingabefeld bzw. im Voice-Modus angezeigt wird — also bis sich der Text nicht mehr ändert —, bevor Sie im **Textmodus** auf das **Mikrofon** (Stop) oder den **Senden**-Button tippen, oder im **Sprachmodus** auf den **Flieger** tippen. Im Sprachmodus versucht die App nach dem Tippen kurz, den Satz noch zu finalisieren; zuverlässiger ist es, den vollständigen Text vorher abzuwarten.
+
+### Warum klingt die Coach-Stimme plötzlich anders?
+Jeder Coach hat eine bevorzugte Signature Voice (Server-TTS). Ist diese ausgewählt und kurzzeitig nicht erreichbar — z. B. bei schwacher Verbindung — wechselt die App vorübergehend auf eine Ersatzstimme (Gerätestimme oder andere verfügbare Stimme). Das Gespräch läuft weiter; aber die Klangfarbe, oder auch das Geschlecht kann sich unterscheiden.
+
+**Kein dauerhafter Wechsel:** Beim Wiederholen einer Antwort (Repeat) oder bei der nächsten Coach-Nachricht versucht die App automatisch erneut, die eingestellte Signature Voice in bester Qualität zu nutzen. Sie müssen nichts manuell einstellen.
+
 ### Kann ich während einer Sitzung den Coach wechseln?
 Sie wählen zu Beginn jeder Sitzung einen Coach aus. Wenn Sie das Gefühl haben, dass der Stil eines anderen Coaches vorteilhafter wäre, können Sie die aktuelle Sitzung beenden. Nach der Sitzungsüberprüfung haben Sie die Möglichkeit, "Coach wechseln" auszuwählen, was Sie mit Ihrem aktualisierten Lebenskontext zurück zum Coach-Auswahlbildschirm bringt.
 
@@ -115,6 +125,16 @@ You communicate **exclusively with AI systems** — not with human coaches. Avat
 
 ### The coach's response isn't helpful. What can I do?
 AI is a powerful tool, but it's not perfect. If a response is unhelpful, try rephrasing your statement or providing more context. You can also gently guide the coach back on track by saying something like, "Let's go back to..." or "I'd like to focus on...". You can report specific problematic responses directly in the chat using the flag icon that appears next to the coach's message. Additionally, after the session, you can use the overall feedback and rating system to report issues, which helps us improve the system.
+
+### Why is sometimes only part of my sentence sent when I use voice input?
+Speech recognition first shows provisional word guesses and only then the finished sentence. If you send too early, the full text may not be transmitted yet.
+
+**Tip:** Wait until the spoken sentence is **fully and stably** displayed — i.e. the text stops changing — before you tap the **microphone** (stop) or **Send** button in **text mode**, or tap the **paper-plane** button in **voice mode**. In voice mode, the app briefly tries to finalize the transcript after you tap send; waiting for the complete text beforehand is still the most reliable approach.
+
+### Why does the coach's voice suddenly sound different?
+Each coach has a preferred signature voice (server TTS). If that voice is selected and temporarily unavailable — e.g. due to a weak connection — the app briefly switches to a fallback voice (device voice or another available voice). The conversation continues, but the tone or even the perceived gender may differ.
+
+**Not a permanent change:** When you **repeat** a response or on the **next coach message**, the app automatically tries again to use your selected signature voice at the best available quality. No manual action is required.
 
 ### Can I change coaches during a session?
 You choose a coach at the start of each session. If you feel another coach's style would be more beneficial, you can end the current session. After the session review, you will have the option to "Switch Coach," which will take you back to the coach selection screen with your updated Life Context.
