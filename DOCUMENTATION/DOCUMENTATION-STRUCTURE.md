@@ -26,6 +26,7 @@ Located in `/memory-bank/`:
 ### Cursor agent skills (project)
 Located in `.cursor/skills/meaningful-conversations/`:
 - **deployment/SKILL.md** — Versioning, staging/production deploy
+- **app-store-connect/SKILL.md** — ASC locales (DE + EN Canada), screenshots, submission locks, metadata-only updates
 - **llm-upgrade/SKILL.md** — Google/Mistral SDK upgrades + classic/practice regression QA sequence
 - **gdpr-compliance/SKILL.md** — GDPR/DSGVO audits, export/erasure, privacy updates
 - **i18n-and-theming/SKILL.md**, **ux-flow/SKILL.md**, **in-app-purchase/SKILL.md**, **132-content-structure/SKILL.md** — domain workflows

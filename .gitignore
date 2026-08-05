@@ -1,3 +1,5 @@
+# Dependencies
+node_modules/
 screenshots/_wip/*
 !screenshots/_wip/README.md
 /node_modules
