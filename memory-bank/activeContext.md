@@ -3,12 +3,18 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **10**, v2.5.6 — https://mc-beta.manualmode.at (health OK; FAQ STT wait + signature voice fallback; `sw.js` v2.5.6-b10)
-**Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
+**Staging:** Deployed **2026-08-05**, Build **11**, v2.5.6 — https://mc-beta.manualmode.at (health OK; FAQ Intent-Picker-Nachfolger entfernt; `sw.js` v2.5.6-b11)
+**Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; gleiche Images wie Staging Build 11 — erster Production-Deploy 2.5.6)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=10` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=11` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging Build 11 + Production v2.5.6 FAQ trim)
+
+- **Commit `bc14105`:** FAQ — „Was passiert nach dem Intent Picker?“ ersatzlos entfernt (DE+EN)
+- **Deploy:** staging Build 11 (`417204b` sync) → production v2.5.6 (pre-built staging images)
+- **Verified:** frontend + backend health OK on staging and production
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 10 FAQ STT + TTS)
 
