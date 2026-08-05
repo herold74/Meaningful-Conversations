@@ -147,6 +147,7 @@ Key assertions:
 
 ## Related Skills
 
+- **ai-act-compliance** — EU AI Act Art. 50 transparency, bot-selection disclosure
 - **in-app-purchase** — RevenueCat, StoreKit, product IDs
 - **deployment** — no special GDPR deploy steps; privacy.html ships with frontend build
 - **llm-upgrade** — SDK changes may affect AI data routing (region preference)
