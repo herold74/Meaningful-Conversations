@@ -358,7 +358,7 @@ After setup:
 
 1. **Read the docs:**
    - [DOCUMENTATION-STRUCTURE.md](./DOCUMENTATION/DOCUMENTATION-STRUCTURE.md) - Overview of all documentation
-   - [deployment.mdc](./.cursor/rules/deployment.mdc) - Deployment workflow
+   - [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) - Deployment workflow
    
 2. **Explore features:**
    - Try different bots
