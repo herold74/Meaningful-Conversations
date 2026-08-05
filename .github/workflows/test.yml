@@ -45,12 +45,40 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm audit --audit-level=critical
+      - run: npm audit --audit-level=high
       - name: Backend audit
         working-directory: meaningful-conversations-backend
         run: |
           npm ci
-          npm audit --audit-level=critical
+          npm audit --audit-level=high
+
+  locale-parity:
+    name: Locale Parity (DE/EN)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-locale-parity.mjs
+
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ensure gitignored templates exist
+        run: |
+          for f in components/*.example.tsx; do
+            target="${f%.example.tsx}.tsx"
+            [ -f "$target" ] || cp "$f" "$target"
+          done
+      - run: npm run build
 
   typecheck:
     name: TypeScript Check

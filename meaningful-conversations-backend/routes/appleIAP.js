@@ -4,8 +4,8 @@ const prisma = require('../prismaClient');
 const auth = require('../middleware/auth');
 const {
   verifyTransaction,
-  decodeNotificationPayload,
-  decodeJWSPayload,
+  verifyAndDecodeNotification,
+  verifyAndDecodeTransaction,
   mapAppleProduct,
   mapNotificationType,
   getAppleConfig,
@@ -110,7 +110,13 @@ router.post('/notification', async (req, res) => {
       return res.status(400).json({ error: 'Missing signedPayload' });
     }
 
-    const notification = decodeNotificationPayload(signedPayload);
+    let notification;
+    try {
+      notification = await verifyAndDecodeNotification(signedPayload);
+    } catch (verifyErr) {
+      console.error('❌ Apple notification signature verification failed:', verifyErr.message);
+      return res.status(401).json({ error: 'Invalid notification signature.' });
+    }
     const { notificationType, subtype, data } = notification;
 
     console.log(`📥 Apple notification: ${notificationType}${subtype ? '/' + subtype : ''}`);
@@ -120,9 +126,15 @@ router.post('/notification', async (req, res) => {
       return res.status(200).json({ status: 'ok' });
     }
 
-    const transactionInfo = decodeJWSPayload(data.signedTransactionInfo);
+    let transactionInfo;
+    try {
+      transactionInfo = await verifyAndDecodeTransaction(data.signedTransactionInfo);
+    } catch (verifyErr) {
+      console.error('❌ Apple transaction JWS verification failed:', verifyErr.message);
+      return res.status(401).json({ error: 'Invalid transaction signature.' });
+    }
     const renewalInfo = data.signedRenewalInfo
-      ? decodeJWSPayload(data.signedRenewalInfo)
+      ? await verifyAndDecodeTransaction(data.signedRenewalInfo).catch(() => null)
       : null;
 
     const action = mapNotificationType(notificationType, subtype);

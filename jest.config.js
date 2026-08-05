@@ -6,11 +6,25 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   collectCoverageFrom: [
     'utils/**/*.{ts,tsx}',
-    '!utils/**/*.test.{ts,tsx}',
-    '!utils/**/__tests__/**',
+    'services/**/*.{ts,tsx}',
+    'hooks/**/*.{ts,tsx}',
+    'context/**/*.{ts,tsx}',
+    'config/**/*.{ts,tsx}',
+    '!**/*.test.{ts,tsx}',
+    '!**/__tests__/**',
+    '!**/node_modules/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  coverageProvider: 'v8',
+  coverageThreshold: {
+    global: {
+      branches: 30,
+      functions: 35,
+      lines: 20,
+      statements: 20,
+    },
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^(\\.\\.?\\/)*config/brand$': '<rootDir>/__mocks__/brand.ts',
@@ -24,4 +38,3 @@ module.exports = {
     }],
   },
 };
-

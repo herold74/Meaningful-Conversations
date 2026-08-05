@@ -219,6 +219,19 @@ install: ## Install dependencies locally (for development)
 	@cd meaningful-conversations-backend && npm install
 	@echo "$(GREEN)✓ Dependencies installed$(NC)"
 
+test: ## Run frontend + backend tests
+	@npm test
+	@cd meaningful-conversations-backend && npm test
+
+ci: ## Mirror pre-deploy-check (tests, typecheck, locales, build)
+	@npm run ci
+
+typecheck: ## Run TypeScript check (frontend)
+	@npm run typecheck
+
+check-locales: ## Verify DE/EN locale key parity
+	@npm run check:locales
+
 lint: ## Run linters (if available)
 	@npm run lint 2>/dev/null || echo "No lint script found"
 	@cd meaningful-conversations-backend && npm run lint 2>/dev/null || echo "No backend lint script found"

@@ -167,7 +167,7 @@ cat /opt/meaningful-conversations/.env | grep REGISTRY
 ## 📚 Full Documentation
 
 - **[Complete Quay Guide](QUAY-REGISTRY-SETUP.md)** - Everything about the registry
-- **[Quick Start](QUICK-START-ALTERNATIVE-SERVER.md)** - Full deployment guide
+- **[Quick Start](QUICK-START-MANUALMODE-SERVER.md)** - Full deployment guide
 - **[MariaDB & Pod](MARIADB-POD-CONFIGURATION.md)** - Database configuration
 
 ---

@@ -1,5 +1,7 @@
-const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const jwt = require('jsonwebtoken');
+const { SignedDataVerifier, Environment } = require('@apple/app-store-server-library');
 
 // Apple App Store Server API v2 — JWT-based authentication and receipt verification
 // Docs: https://developer.apple.com/documentation/appstoreserverapi
@@ -77,8 +79,12 @@ async function verifyTransaction(transactionId) {
 
   const data = await res.json();
   const signedTransaction = data.signedTransactionInfo;
-  const decoded = decodeJWSPayload(signedTransaction);
-  return decoded;
+  try {
+    return await verifyAndDecodeTransaction(signedTransaction);
+  } catch (verifyErr) {
+    console.warn('[Apple IAP] JWS verify failed, falling back to decode:', verifyErr.message);
+    return decodeJWSPayload(signedTransaction);
+  }
 }
 
 async function getSubscriptionStatus(originalTransactionId) {
@@ -105,7 +111,54 @@ function decodeJWSPayload(jws) {
   return JSON.parse(payload);
 }
 
+function loadAppleRootCAs() {
+  const certDir = path.join(__dirname, '../certs/apple');
+  if (!fs.existsSync(certDir)) {
+    throw new Error('Apple root CA directory missing: certs/apple/');
+  }
+  return fs.readdirSync(certDir)
+    .filter((f) => f.endsWith('.cer'))
+    .map((f) => fs.readFileSync(path.join(certDir, f)));
+}
+
+let notificationVerifier = null;
+
+function getNotificationVerifier() {
+  if (notificationVerifier) return notificationVerifier;
+  const config = getAppleConfig();
+  const environment = config.environment === 'production'
+    ? Environment.PRODUCTION
+    : Environment.SANDBOX;
+  const appAppleId = process.env.APPLE_APP_ID
+    ? parseInt(process.env.APPLE_APP_ID, 10)
+    : undefined;
+  if (environment === Environment.PRODUCTION && !appAppleId) {
+    throw new Error('APPLE_APP_ID is required for production Apple notification verification');
+  }
+  notificationVerifier = new SignedDataVerifier(
+    loadAppleRootCAs(),
+    true,
+    environment,
+    config.bundleId,
+    appAppleId
+  );
+  return notificationVerifier;
+}
+
+/** Verify JWS signature and decode App Store Server Notification v2 payload. */
+async function verifyAndDecodeNotification(signedPayload) {
+  const verifier = getNotificationVerifier();
+  return verifier.verifyAndDecodeNotification(signedPayload);
+}
+
+/** Verify JWS from Apple API responses (transaction / renewal info). */
+async function verifyAndDecodeTransaction(signedTransaction) {
+  const verifier = getNotificationVerifier();
+  return verifier.verifyAndDecodeTransaction(signedTransaction);
+}
+
 function decodeNotificationPayload(signedPayload) {
+  // Legacy decode-only path — prefer verifyAndDecodeNotification in production routes
   return decodeJWSPayload(signedPayload);
 }
 
@@ -142,6 +195,8 @@ module.exports = {
   getSubscriptionStatus,
   decodeJWSPayload,
   decodeNotificationPayload,
+  verifyAndDecodeNotification,
+  verifyAndDecodeTransaction,
   mapAppleProduct,
   mapNotificationType,
 };
