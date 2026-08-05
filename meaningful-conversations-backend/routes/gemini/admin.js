@@ -6,6 +6,7 @@ const { getCacheStats } = require('../../services/promptCache.js');
 const { trackApiUsage } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const behaviorLogger = require('../../services/behaviorLogger.js');
+const { COACHEE_ROLE_GUARD } = require('../../practice/coacheePrompt.js');
 
 // GET /api/gemini/cache/stats - Admin endpoint for cache statistics
 router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
@@ -55,40 +56,41 @@ router.post('/test/simulate-coachee', optionalAuthMiddleware, async (req, res) =
     const startTime = Date.now();
 
     try {
-        // Build system prompt for coachee simulation
-        const systemPrompt = language === 'de'
+        // Build system prompt for coachee simulation (role guard aligned with practice mode)
+        const lang = language === 'en' ? 'en' : 'de';
+        const systemPrompt = lang === 'de'
             ? `Du bist ein Coachee (Klient) in einem Coaching-Gespräch. Du hast ein Problem und suchst Hilfe.
 
 WICHTIG: Du bist NICHT der Coach! Du bist der Klient, der Unterstützung sucht.
 
 ${personalityContext ? `DEINE PERSÖNLICHKEIT:\n${personalityContext}\n` : ''}
 ${scenarioDescription ? `DEIN THEMA: ${scenarioDescription}\n` : ''}
+${COACHEE_ROLE_GUARD.de}
 
 REGELN für deine Antwort:
 1. Beantworte die Frage des Coaches direkt und konkret
 2. Teile deine Gefühle, Sorgen und Gedanken authentisch
 3. Sei verletzlich - du bist jemand, der Hilfe sucht
 4. Antworte in 1-3 kurzen Sätzen
-5. KEINE Coaching-Phrasen wie "Lass uns...", "Ich verstehe...", "Was denkst du..."
-6. KEINE Fragen zurück an den Coach (außer Verständnisfragen)
-7. KEINE Verhaltenshinweise mit Sternchen (wie *seufzt*, *nickt*, *schaut weg*)
-8. Antworte so, wie ein echter Mensch mit diesem Problem antworten würde - in normalem Text ohne Rollenspiel-Formatierung`
+5. Halte den ROLLEN-GUARD ein — keine Coach-Techniken (siehe oben)
+6. KEINE Verhaltenshinweise mit Sternchen (wie *seufzt*, *nickt*, *schaut weg*)
+7. Antworte so, wie ein echter Mensch mit diesem Problem antworten würde - in normalem Text ohne Rollenspiel-Formatierung`
             : `You are a coachee (client) in a coaching conversation. You have a problem and are seeking help.
 
 IMPORTANT: You are NOT the coach! You are the client seeking support.
 
 ${personalityContext ? `YOUR PERSONALITY:\n${personalityContext}\n` : ''}
 ${scenarioDescription ? `YOUR TOPIC: ${scenarioDescription}\n` : ''}
+${COACHEE_ROLE_GUARD.en}
 
 RULES for your response:
 1. Answer the coach's question directly and concretely
 2. Share your feelings, worries, and thoughts authentically
 3. Be vulnerable - you are someone seeking help
 4. Respond in 1-3 short sentences
-5. NO coaching phrases like "Let's...", "I understand...", "What do you think..."
-6. NO questions back to the coach (except clarifying questions)
-7. NO action descriptions with asterisks (like *sighs*, *nods*, *looks away*)
-8. Respond like a real person with this problem would respond - in plain text without roleplay formatting`;
+5. Obey the ROLE GUARD — no coach techniques (see above)
+6. NO action descriptions with asterisks (like *sighs*, *nods*, *looks away*)
+7. Respond like a real person with this problem would respond - in plain text without roleplay formatting`;
 
         const userPrompt = language === 'de'
             ? `Der Coach hat gerade gesagt:
