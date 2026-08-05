@@ -84,17 +84,21 @@ Use this skill for **EU AI Act / KI-Verordnung** work — transparency, risk cla
 3. **Accessibility:** `role="note"` on container; sufficient color contrast via existing `content-secondary` / border tokens
 4. **Out of scope:** Per-chat banners, CoachInfoModal badges, greeting-message changes — unless product owner changes policy
 
-### Phase 2 — Legal text cross-reference (optional / low priority)
+### Phase 2 — Legal text cross-reference (done)
 
-- Add short § to `DisclaimerView.tsx`: reference EU AI Act Art. 50 + pointer to bot selection notice
-- Mirror in `public/privacy.html` if material (not required for Art. 50 if UI notice is sufficient)
+- Short § in `DisclaimerView.tsx`: EU AI Act Art. 50 + pointer to bot selection notice
 
-### Phase 3 — Art. 50(2) marking (by 2 Dec 2026)
+### Phase 3 — Art. 50(2) marking (in progress — deadline Dec 2026)
 
-Evaluate machine-readable marking for:
-- Downloaded session summaries / PDF exports (`utils/pdfGeneratorReact.tsx`)
+**Done:**
+- `utils/aiContentMarking.ts` — stable machine-readable marker line + human label
+- Session summary `.txt` export (`SessionReview.tsx`)
+- Personality PDF footer label (`pdfGeneratorReact.tsx`)
+
+**Still to evaluate:**
 - TTS audio streams (metadata / provenance if feasible)
-- Track EU Code of Practice / C2PA guidance
+- Other AI text exports (transcript evaluation, practice evaluations)
+- Full C2PA / EU Code of Practice alignment
 
 ### Phase 4 — Audit documentation
 
