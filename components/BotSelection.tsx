@@ -726,7 +726,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         </p>
         <div
           role="note"
-          className="mt-4 mx-auto max-w-2xl text-left text-sm text-content-secondary leading-relaxed px-4 py-3 rounded-lg border border-border-primary bg-background-secondary/80"
+          className="mt-4 mx-auto max-w-2xl text-center text-sm text-content-secondary leading-relaxed px-4 py-3 rounded-lg border border-border-primary bg-background-secondary/80"
         >
           <p>{t('botSelection_ai_act_notice')}</p>
           <p className="mt-2">{t('botSelection_voice_natural_notice')}</p>

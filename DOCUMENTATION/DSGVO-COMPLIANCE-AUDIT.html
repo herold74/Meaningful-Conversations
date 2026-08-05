@@ -127,6 +127,7 @@
 <h3 id="10-dpc--dpfl-experimental-mode">10. DPC / DPFL (Experimental Mode)</h3>
 <ul>
 <li><strong>Status:</strong> DSGVO-KONFORM</li>
+<li><strong>Geltungsbereich:</strong> <strong>Nur Classic Coaching</strong> (<code>/api/gemini/chat</code>) — <strong>nicht</strong> Coach Practice (<code>/api/gemini/practice/*</code>)</li>
 <li>Opt-In; Pseudonymisierung gegenüber KI (keine userId/E-Mail an Provider)</li>
 <li>Session Behavior Logs ohne Transkript</li>
 <li><strong>Art. 25 DSGVO:</strong> Privacy by Design</li>
@@ -159,7 +160,9 @@
 <ul>
 <li><strong>Status:</strong> DSGVO-KONFORM (mit Transparenz-Empfehlung für Draft)</li>
 <li><strong>In-Progress-Draft:</strong> <code>sessionStorage</code> (<code>mc_practice_draft_v1</code>), max. 24h, tab-scoped, <strong>nicht</strong> an Server — <code>utils/practiceSessionDraft.ts</code></li>
-<li><strong>Abgeschlossene Sessions:</strong> <code>practice_evaluations</code> — strukturierte Scores/JSON, <strong>kein</strong> vollständiges Chat-Transkript</li>
+<li><strong>Abgeschlossene Sessions:</strong> <code>practice_evaluations</code> — strukturierte Scores/JSON <strong>+ Gesprächstranskript</strong> (nach Auswertung; Export; Transkript einzeln löschbar; Kontolöschung löscht alles). <strong>Nicht E2EE</strong></li>
+<li><strong>KI während Practice-Chat:</strong> Coachee-System-Prompt + Transkript — <strong>kein</strong> Life Context, <strong>kein</strong> Persönlichkeitsprofil, <strong>keine</strong> DPC/DPFL-Injektion</li>
+<li><strong>Feedback für den übenden Coach (aktuell):</strong> Auswertung (Stärken, Entwicklungsbereiche, Übungsvorschläge) + wiederkehrende Entwicklungsthemen im Fortschritt — <strong>ohne</strong> OCEAN/Riemann/DPFL-Profil</li>
 <li>Evaluation via KI (Google/Mistral je nach Region)</li>
 <li>Export in <code>/api/data/export</code> enthalten</li>
 <li><strong>Art. 6 Abs. 1 lit. b DSGVO</strong></li>
@@ -388,7 +391,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>An KI gesendet (Classic/Practice/Analysis):</strong> Gesprächstexte, System-Prompts, ggf. entschlüsseltes Profil (DPC/DPFL); <strong>keine</strong> userId/E-Mail in Prompts.</p>
+<p><strong>An KI gesendet — nach Feature:</strong> Classic Coaching: Gesprächstext + Bot-Prompt, Persönlichkeitsprofil nur bei DPC/DPFL. Coach Practice: nur Coachee-/Eval-Prompts + Transkript, <strong>nie</strong> Profil. Transkript-Analyse: wie Classic, wenn DPC/DPFL aktiv. <strong>Keine</strong> userId/E-Mail in Prompts.</p>
 <hr />
 <h2 id="änderungen-seit-v197--v250">ÄNDERUNGEN SEIT v1.9.7 → v2.5.0</h2>
 <table>

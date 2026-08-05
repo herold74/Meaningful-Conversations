@@ -366,3 +366,12 @@ Apple Small Business Program (Umsatz < 1M USD/Jahr): **15% Provision**. iOS-Prei
 ## Notes on DPFL (Dynamic Prompt & Feedback Learning)
 
 *   DPFL requires a persistent history of session analyses to "learn" and adapt the coaching style. Therefore, it is only fully effective for registered users where this history is securely stored and synchronized.
+*   **Scope:** DPC and DPFL apply to **classic coaching** (`/api/gemini/chat`) only. They do **not** run during **Coach Practice** — the AI coachee never receives the user's personality profile.
+
+## Notes on Coach Practice — coach-side feedback
+
+*   In Coach Practice the **human user is the coach**; the AI plays the coachee. Feedback targets the coach's method application, not the coachee persona.
+*   **Current feedback loop (no profile adaptation):**
+    *   Per session: evaluation scores, strengths, development areas, and **suggested drills** (`nextDrills`)
+    *   Over multiple sessions: **recurring development themes** on the progress dashboard (`PracticeProgressView`, aggregated from `developmentAreas`)
+*   **Roadmap (not implemented):** Derive a coaching-style signature or optional profile link from practice patterns — see `memory-bank/progress.md`.

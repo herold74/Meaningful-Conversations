@@ -80,6 +80,17 @@ The personality data sent to the AI is **pseudonymized** - it cannot be traced b
 - DPC/DPFL mode is opt-in - you choose to enable it
 - You can switch back to standard mode at any time
 - A warning is displayed when you first enable the mode
+- **Coach Practice** (training mode where you play the coach) does **not** use DPC/DPFL — the AI never receives your personality profile during practice chat or evaluation
+
+### Coach Practice — what the AI sees
+
+During **Coach Practice**, only your coaching messages and the coachee scenario/method prompts are sent to the AI. Your Life Context and personality profile are **not** included.
+
+**Coach-side feedback today (no profile adaptation):**
+- After each session: strengths, development areas, and suggested drills (`nextDrills`)
+- Over time: **recurring development themes** on your progress dashboard (aggregated from past evaluations)
+
+A future roadmap item may connect practice patterns to profile or coaching-style insights — not implemented yet.
 
 ### What data do you collect and store?
 

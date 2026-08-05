@@ -1081,6 +1081,7 @@ Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase*
 - Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
 - Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
 - Dies ist **keine reguläre Coaching-Sitzung**: Es gibt keinen Lebenskontext-Analyseprozess am Ende, und Ihre Lebenskontext-Datei wird nicht aktualisiert.
+- **Kein DPC/DPFL:** Ihr Persönlichkeitsprofil und der adaptive Coaching-Modus (DPC/DPFL) gelten nur für Classic Coaching — nicht für Coaching üben. Die KI-Klientin/-der Klient wird ausschließlich über Szenario und Methode gesteuert.
 
 **Schritt 3: Sitzung beenden & Selbsteinschätzung**
 - Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
@@ -1104,6 +1105,8 @@ Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Ent
 Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
 
 Über **Dein Fortschritt** sehen Sie zusätzlich Score-Verlauf, Kompetenzprofil, Meilensteine und eine empfohlene nächste Übung — ideal, um Entwicklung über mehrere Sessions hinweg zu vergleichen.
+
+**Ihr Feedback als Coach (aktuell):** Nach jeder Session erhalten Sie konkrete **Übungsvorschläge**; im Fortschritt werden **wiederkehrende Entwicklungsthemen** sichtbar, wenn dieselben Muster in mehreren Auswertungen auftauchen. Das ersetzt (noch) keine Anbindung an Ihr OCEAN-/Riemann-Profil — eine vertiefte Coaching-Stil-Signatur ist für spätere Versionen geplant.
 
 ### Tipps für beste Ergebnisse
 
@@ -2086,6 +2089,7 @@ This feature is available with **Premium+**, during the **9-day trial** after re
 - You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
 - The interface matches the regular chat (text, voice input, optional TTS).
 - This is **not a regular coaching session**: there is no Life Context analysis at the end, and your Life Context file is not updated.
+- **No DPC/DPFL:** Your personality profile and adaptive coaching mode (DPC/DPFL) apply to classic coaching only — not Coach Practice. The AI client is driven by scenario and method prompts only.
 
 **Step 3: End session & self-rating**
 - End the session as usual via **End Session**.
@@ -2109,6 +2113,8 @@ You also receive a summary, covered method stages, strengths, development areas,
 From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
 
 From **Your progress**, you can also view score trends, a competency profile, milestones, and a recommended next drill — useful for comparing development across multiple sessions.
+
+**Your feedback as coach (today):** After each session you get concrete **drill suggestions**; in progress, **recurring development themes** appear when the same patterns show up across evaluations. This does not yet link to your OCEAN/Riemann profile — a deeper coaching-style signature is planned for a future release.
 
 ### Tips for Best Results
 
