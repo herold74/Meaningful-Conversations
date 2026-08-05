@@ -3,22 +3,23 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **7**, v2.5.6 — https://mc-beta.manualmode.at (health OK; AI Act box centered + voice copy; Practice/DPC docs; phonetic Stakeholder/LinkedIn; `sw.js` v2.5.6-b7)
+**Staging:** Deployed **2026-08-05**, Build **8**, v2.5.6 — https://mc-beta.manualmode.at (health OK; About Coach Practice tab; user guide callouts; voice token fix; `sw.js` v2.5.6-b8)
 **Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=7` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=8` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Recent Changes (2026-08-05 — About Practice tab polish + voice token fix, staging deploy pending)
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 8 About Practice + voice fix)
 
-- **Commit pending:** About „Coaching üben“ tab layout parity with HowItWorks; ℹ️ access info box; step 4 „Fortschritt sehen“; `voiceNameIncludesToken` (martin ≠ martina for local/iOS TTS)
-- **Roadmap added:** Entwickler-Feedback nach Practice-Auswertung (S) — see `progress.md`
+- **Commit `c0a37b3`:** About „Coaching üben“ tab layout parity; ℹ️ access box; „Fortschritt sehen“; `voiceNameIncludesToken` (martin ≠ martina); roadmap practice dev feedback
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commit `10bf31e` build 8 sync
+- **Verified:** frontend + backend health OK on staging
+- **Production:** not deployed (still v2.5.5)
 
 ## Recent Changes (2026-08-05 — About Coach Practice tab + user guide callouts)
 
-- **Commit `9e2de02`:** About page third tab „Coaching üben“; user guide ⚠️/ℹ️ callout boxes (DE+EN)
-- **Follow-up (this session):** visual parity + voice fix — deploy Build 8
+- **Commit `9e2de02`:** About page third tab „Coaching üben“; user guide ⚠️/ℹ️ callout boxes (DE+EN) — included in Build 8 deploy
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 7 docs + AI Act UX)
 
@@ -424,5 +425,6 @@
 - [ ] Self-hosted SLM as Gemini replacement (milestone: >1000 paying users)
 - [ ] Coaching Framework Roadmap: client exact language bot, The Work bot, NLP Meta-Modell lens, Logische Ebenen lens
 - [ ] **Coach Practice → Coach-Feedback / Profil (Roadmap):** Aktuell Tipps + wiederkehrende Beobachtungen; später optional Coaching-Stil aus Practice — siehe `progress.md`
+- [ ] **Coach Practice → Entwickler-Feedback nach Auswertung (Roadmap, S):** Rating + optionaler Kommentar auf `PracticeEvaluationReview` — analog TE/SessionReview
 - [ ] Presentation Evaluator (Premium Feature, backlog)
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)
