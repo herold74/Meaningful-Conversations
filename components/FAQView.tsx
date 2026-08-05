@@ -66,9 +66,6 @@ Sie wählen zu Beginn jeder Sitzung einen Coach aus. Wenn Sie das Gefühl haben,
 ### Was ist der Intent Picker?
 Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation**, **Coaching** (hervorgehoben) oder **Begleitendes Coaching**. Ihre Wahl bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird. Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
 
-### Was passiert nach dem Intent Picker?
-Sie gelangen zum **Lebenskontext-Startbildschirm** mit drei Aktionskarten: Kontext fortsetzen, neues Gespräch starten oder mit Gloria interviewen. Darunter können Sie eine \`.md\`-Lebenskontext-Datei hochladen.
-
 ### Die App zeigt eine leere Seite — was tun?
 Nach einem Update kann eine zwischengespeicherte Version kurz Probleme machen. Öffnen Sie das Menü (☰) und wählen Sie **App aktualisieren** (↻). Alternativ: Hard-Reload im Browser (Strg+F5 / Cmd+Shift+R) oder den Website-Cache in den Browser-Einstellungen leeren.
 
@@ -145,9 +142,6 @@ You choose a coach at the start of each session. If you feel another coach's sty
 
 ### What is the Intent Picker?
 After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication**, **Coaching** (featured), or **Augmented Coaching**. Your choice determines which section is highlighted in coach selection. Registered users can disable the Intent Picker under **My Account**.
-
-### What happens after the Intent Picker?
-You reach the **Life Context start screen** with three action cards: continue with context, start a new conversation, or build with an interview (Gloria). Below the cards, you can upload a \`.md\` Life Context file.
 
 ### The app shows a blank page — what should I do?
 After an update, a cached version can briefly cause loading issues. Open the menu (☰) and select **Refresh App** (↻). Alternatively, hard-reload in your browser (Ctrl+F5 / Cmd+Shift+R) or clear the site cache in browser settings.
