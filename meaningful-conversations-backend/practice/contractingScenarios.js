@@ -12,6 +12,7 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-return-work',
     coacheeName: { en: 'Nina', de: 'Nina' },
+    coacheeGender: 'female',
     avatar: '/avatars/chloe.png',
     concern: {
       en: 'Returning from parental leave and unsure how to re-enter the team without losing credibility or boundaries.',
@@ -26,6 +27,7 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-sibling-estate',
     coacheeName: { en: 'Leo', de: 'Leo' },
+    coacheeGender: 'male',
     avatar: '/avatars/victor.png',
     concern: {
       en: 'Locked in a bitter dispute with a sibling over an inheritance and unable to speak without escalating.',
@@ -39,7 +41,8 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-anxiety-help',
-    coacheeName: { en: 'Sage', de: 'Sage' },
+    coacheeName: { en: 'Clara', de: 'Clara' },
+    coacheeGender: 'female',
     avatar: '/avatars/ava.png',
     concern: {
       en: 'Rising anxiety before meetings and wondering whether they need therapy, coaching, or just a vacation.',
@@ -53,11 +56,12 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-new-manager',
-    coacheeName: { en: 'Drew', de: 'Drew' },
+    coacheeName: { en: 'David', de: 'David' },
+    coacheeGender: 'male',
     avatar: '/avatars/max.png',
     concern: {
       en: 'Recently became manager; the team treats them like a peer and ignores their decisions.',
-      de: 'Ist kürzlich Manager geworden; das Team behandelt sie wie eine Peer und ignoriert Entscheidungen.',
+      de: 'Ist kürzlich Manager geworden; das Team behandelt ihn wie einen Peer und ignoriert Entscheidungen.',
     },
     emotionalTone: { en: 'frustrated, embarrassed', de: 'frustriert, verlegen' },
     hiddenAgenda: {
@@ -67,7 +71,8 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-side-project',
-    coacheeName: { en: 'Avery', de: 'Avery' },
+    coacheeName: { en: 'Anna', de: 'Anna' },
+    coacheeGender: 'female',
     avatar: '/avatars/bekky.png',
     concern: {
       en: 'Passionate about a side project but exhausted from juggling it with a demanding day job.',
@@ -81,7 +86,8 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-volunteer-no',
-    coacheeName: { en: 'Reese', de: 'Reese' },
+    coacheeName: { en: 'Markus', de: 'Markus' },
+    coacheeGender: 'male',
     avatar: '/avatars/kenji.png',
     concern: {
       en: 'Pressured to join a volunteer board role and cannot find words to decline without guilt.',
@@ -90,12 +96,13 @@ const CONTRACTING_SCENARIOS = [
     emotionalTone: { en: 'obligated, resentful', de: 'verpflichtet, verbittert' },
     hiddenAgenda: {
       en: 'Believes saying no will damage their reputation in the community.',
-      de: 'Glaubt, Nein sagen schade ihrem Ruf in der Community.',
+      de: 'Glaubt, Nein sagen schade seinem Ruf in der Community.',
     },
   },
   {
     id: 'contract-remote-isolation',
-    coacheeName: { en: 'Dakota', de: 'Dakota' },
+    coacheeName: { en: 'Oliver', de: 'Oliver' },
+    coacheeGender: 'male',
     avatar: '/avatars/dan.png',
     concern: {
       en: 'Works fully remote, feels invisible, and misses casual belonging at the office.',
@@ -104,13 +111,14 @@ const CONTRACTING_SCENARIOS = [
     emotionalTone: { en: 'lonely, flat', de: 'einsam, flat' },
     hiddenAgenda: {
       en: 'Uses isolation to avoid performance conversations they fear.',
-      de: 'Nutzt Isolation, um Leistungsgespräche zu vermeiden, die sie fürchtet.',
+      de: 'Nutzt Isolation, um Leistungsgespräche zu vermeiden, die er fürchtet.',
     },
   },
   {
     id: 'contract-ethics-dilemma',
-    coacheeName: { en: 'Skyler', de: 'Skyler' },
-    avatar: '/avatars/rob.png',
+    coacheeName: { en: 'Elena', de: 'Elena' },
+    coacheeGender: 'female',
+    avatar: '/avatars/bekky.png',
     concern: {
       en: 'Witnessed something ethically questionable at work and fears retaliation if they speak up.',
       de: 'Hat etwas ethisch Fragwürdiges bei der Arbeit mitbekommen und fürchtet Repressalien, wenn sie sich meldet.',
@@ -123,9 +131,9 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-teen-talk',
-    coacheeName: { en: 'Finley', de: 'Finley' },
-    avatar: '/avatars/finley.png',
+    coacheeName: { en: 'Nadia', de: 'Nadia' },
     coacheeGender: 'female',
+    avatar: '/avatars/nadia.png',
     concern: {
       en: 'Needs to address their teenager\'s slipping grades but every attempt turns into shouting.',
       de: 'Muss die schlechteren Noten des Teenagers ansprechen, aber jedes Gespräch endet im Schreien.',
@@ -138,9 +146,9 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-midlife-restless',
-    coacheeName: { en: 'Rowan', de: 'Rowan' },
-    avatar: '/avatars/rowan.png',
+    coacheeName: { en: 'Martin', de: 'Martin' },
     coacheeGender: 'male',
+    avatar: '/avatars/martin.png',
     concern: {
       en: 'Successful on paper but restless — something feels missing without being able to name it.',
       de: 'Auf dem Papier erfolgreich, aber unruhig — etwas fehlt, ohne es benennen zu können.',
@@ -153,7 +161,8 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-public-mistake',
-    coacheeName: { en: 'Emery', de: 'Emery' },
+    coacheeName: { en: 'Emma', de: 'Emma' },
+    coacheeGender: 'female',
     avatar: '/avatars/gloria.png',
     concern: {
       en: 'Made a visible mistake in a client meeting and cannot stop replaying it.',
@@ -167,8 +176,9 @@ const CONTRACTING_SCENARIOS = [
   },
   {
     id: 'contract-relocation',
-    coacheeName: { en: 'Blair', de: 'Blair' },
-    avatar: '/avatars/mike.png',
+    coacheeName: { en: 'Sophie', de: 'Sophie' },
+    coacheeGender: 'female',
+    avatar: '/avatars/gabrielle.png',
     concern: {
       en: 'Partner wants to relocate abroad; they are torn between love and their established career.',
       de: 'Partner will ins Ausland ziehen; hin- und hergerissen zwischen Beziehung und etablierter Karriere.',

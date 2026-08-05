@@ -251,12 +251,6 @@
           "notes": "Kleingeschrieben"
         },
         {
-          "term": "Sage",
-          "phonetic": "Seidsch",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch), nicht deutsch „Sage“ (Geschichte/Erzählung)"
-        },
-        {
           "term": "GROW",
           "phonetic": "Grou",
           "caseSensitive": true,
@@ -297,72 +291,6 @@
           "phonetic": "sabötör",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
-        },
-        {
-          "term": "Jordan",
-          "phonetic": "Dschordn",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Taylor",
-          "phonetic": "Teilor",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Casey",
-          "phonetic": "Keisi",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Quinn",
-          "phonetic": "Kwin",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Jamie",
-          "phonetic": "Dscheimi",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Drew",
-          "phonetic": "Dru",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Reese",
-          "phonetic": "Riis",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Skyler",
-          "phonetic": "Schailor",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Finley",
-          "phonetic": "Finli",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Emery",
-          "phonetic": "Emeri",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
-        },
-        {
-          "term": "Blair",
-          "phonetic": "Bléer",
-          "caseSensitive": true,
-          "notes": "Coachee-Vorname (englisch)"
         },
         {
           "term": "Ambivalenz-Coaching",

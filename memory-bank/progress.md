@@ -104,8 +104,10 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
+- [x] **Staging v2.5.6 (2026-08-05):** Build **4** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b4; docs + voice/STT/TTS fixes from `438401c`)
+- [x] **Staging v2.5.6 (2026-08-05):** Build **3** — superseded by Build 4 (docs-only deploy)
 - [x] **Production v2.5.5 (2026-08-05):** Build **2** — https://mc-app.manualmode.at, health OK
-- [x] **Staging v2.5.5 (2026-08-05):** Build **3** — https://mc-beta.manualmode.at, health OK
+- [x] **Staging v2.5.5 (2026-08-05):** Build **3** — superseded by v2.5.6
 - [x] **Cursor agent workflow (2026-08-05):** Rules, commands, hooks, AGENTS.md (`c8528f2`)
 - [x] **Production v2.5.4 (2026-08-04):** Build **5** — https://mc-app.manualmode.at, health OK (`sw.js` v2.5.4-b5; method i18n + phonetic; commit `0138954` + `95a86a7`; parity with staging)
 - [x] **Staging v2.5.4 (2026-08-04):** Build **5** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.4-b5)

@@ -1,14 +1,29 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.5
+**Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **3**, v2.5.5 — https://mc-beta.manualmode.at (health OK; coachee gender eval + unique avatars finley/rowan live)
-**Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; parity with staging images)
+**Staging:** Deployed **2026-08-05**, Build **4**, v2.5.6 — https://mc-beta.manualmode.at (health OK; docs + voice/STT/TTS fixes live; `sw.js` v2.5.6-b4)
+**Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=2` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=4` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 4 voice + TTS deploy)
+
+- **Commit `438401c`:** Voice send gated on stable STT (`hasStableTranscript`); send after STT ends with visible text; server-TTS greeting without `voices.length` wait; Piper word-level fallback for single-chunk ONNX failures
+- **Deploy:** `./deploy-manualmode.sh -e staging -c all` (~18 min; full TTS rebuild); commit `42bf013` build 4 sync
+- **Verified:** health OK; bundle contains `hasStableTranscript` / `canSendVoiceTranscript`; `sw.js` v2.5.6-b4
+- **Production:** not deployed (still v2.5.5)
+
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 3 docs deploy)
+
+- **Docs (included in bundle):** User guide Premium+ / 9-day trial, Kap. 2.3 KI-Transparenz, Coach Practice chapter visibility fix; Disclaimer + Privacy AI Act transparency; FAQ tier updates
+- **Commits:** `715462b` docs sync; `50341e1`/`4d3f492` build sync (Build 2→3 after re-run)
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app` — first attempt failed (main lost upstream after filter-repo); fixed with `git push -u origin main`, re-run succeeded (~9 min)
+- **Verified:** health OK; bundle contains `9-Tage-Premium-Test`, `KI-Transparenz`, `Coaching üben`; `sw.js` v2.5.6-b3
+- **Production:** not deployed (staging only)
 
 ## Recent Changes (2026-08-05 — Cursor config private)
 

@@ -6,18 +6,18 @@ const {
 const { getContractingScenarioById } = require('../contractingScenarios');
 
 describe('avatarGender', () => {
-  test('finley.png is female', () => {
-    expect(getCoacheeGenderFromAvatar('/avatars/finley.png')).toBe('female');
+  test('nadia.png is female', () => {
+    expect(getCoacheeGenderFromAvatar('/avatars/nadia.png')).toBe('female');
   });
 
-  test('rowan.png is male', () => {
-    expect(getCoacheeGenderFromAvatar('/avatars/rowan.png')).toBe('male');
+  test('martin.png is male', () => {
+    expect(getCoacheeGenderFromAvatar('/avatars/martin.png')).toBe('male');
   });
 
-  test('buildPracticeScenarioSummary includes female gender for Finley', () => {
+  test('buildPracticeScenarioSummary includes female gender for Nadia', () => {
     const scenario = getContractingScenarioById('contract-teen-talk');
     const summary = buildPracticeScenarioSummary(scenario, 'de');
-    expect(summary).toContain('Finley');
+    expect(summary).toContain('Nadia');
     expect(summary).toContain('weiblich');
     expect(summary).toContain('sie/ihr/ihre');
   });
