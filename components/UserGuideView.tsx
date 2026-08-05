@@ -7,6 +7,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { brand } from '../config/brand';
 import { isNativeApp } from '../utils/platformDetection';
 import { User } from '../types';
+import { resolvePracticeAccess } from '../utils/practiceAccess';
 
 interface InfoViewProps {
     currentUser?: User | null;
@@ -21,51 +22,61 @@ const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
 const deChapterLabel = (num: number) => `Kapitel ${num}`;
 const enChapterLabel = (num: number) => `Chapter ${num}`;
 
-const deToolsSection = (
+const deTranscriptToolsSection = (
     isNative: boolean,
     isRegistered: boolean,
     showChapter8: boolean,
-    showChapter9: boolean,
 ): string => {
-    if (!showChapter8 && !showChapter9) return '';
+    if (!showChapter8) return '';
     const base = coachingChapterNum(isNative, isRegistered);
-    const lines: string[] = [];
-    if (showChapter8) {
-        lines.push(`- **Transkript-Auswertung** (Premium+) — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.`);
-    }
-    if (showChapter9) {
-        lines.push(`- **Audio-Transkription** (Klienten) — Live-Aufnahme oder Upload von Audiodateien mit automatischer Transkription. Ausführliche Anleitung: ${deChapterLabel(base + 4)}.`);
-        lines.push(`- **Coach-Übung** (Klienten) — Sie spielen den Coach, die KI den Klienten; strukturiertes Feedback zu Ihrer Methodenführung. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.`);
-    }
-    return `### 5.2 Tools-Bereich (Premium & Klienten)
+    return `### 5.2 Transkript-Tools (Premium)
 
-Unterhalb der Coach-Liste finden Sie im Bereich **Tools** weitere Funktionen — abhängig von Ihrer Zugangsstufe:
-
-${lines.join('\n')}
+Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium**:
+- **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.
 `;
 };
 
-const enToolsSection = (
+const dePracticeTabSection = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showChapter10: boolean,
+): string => {
+    if (!showChapter10) return '';
+    const base = coachingChapterNum(isNative, isRegistered);
+    return `### 5.3 Coaching üben (Premium+, Trial oder Klient)
+
+Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.
+
+**Zugang:** Aktives **Premium+**-Abo, **9-Tage-Testphase** nach Registrierung oder **Klienten**-Zugang. Standard-Premium ohne Premium+ enthält Coach Practice nicht.
+`;
+};
+
+const enTranscriptToolsSection = (
     isNative: boolean,
     isRegistered: boolean,
     showChapter8: boolean,
-    showChapter9: boolean,
 ): string => {
-    if (!showChapter8 && !showChapter9) return '';
+    if (!showChapter8) return '';
     const base = coachingChapterNum(isNative, isRegistered);
-    const lines: string[] = [];
-    if (showChapter8) {
-        lines.push(`- **Transcript Evaluation** (Premium+) — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.`);
-    }
-    if (showChapter9) {
-        lines.push(`- **Audio Transcription** (Client) — Record live or upload audio files with automatic transcription. Full instructions: ${enChapterLabel(base + 4)}.`);
-        lines.push(`- **Coach Practice** (Client) — You play the coach and the AI plays the client; structured feedback on your coaching method. Full instructions: ${enChapterLabel(base + 5)}.`);
-    }
-    return `### 5.2 Tools Area (Premium & Client)
+    return `### 5.2 Transcript Tools (Premium)
 
-Below the coach list, the **Tools** section offers additional features depending on your access tier:
+In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward:
+- **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.
+`;
+};
 
-${lines.join('\n')}
+const enPracticeTabSection = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showChapter10: boolean,
+): string => {
+    if (!showChapter10) return '';
+    const base = coachingChapterNum(isNative, isRegistered);
+    return `### 5.3 Coach Practice (Premium+, trial, or Client)
+
+In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(base + 5)}.
+
+**Access:** Active **Premium+** subscription, **9-day trial** after registration, or **Client** access. Standard Premium without Premium+ does not include Coach Practice.
 `;
 };
 
@@ -75,6 +86,7 @@ const de_markdown = (
     isNative: boolean,
     showChapter8: boolean,
     showChapter9: boolean,
+    showChapter10: boolean,
 ) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
@@ -195,19 +207,30 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 
 ### 2.2 Zugangsstufen & Upgrade
 
-Die App bietet vier Zugangsstufen mit steigendem Funktionsumfang:
+Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 
 | Stufe | Zugang | Coaches | Funktionen |
 | :--- | :--- | :--- | :--- |
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
-| **Registriert** | Kostenloses Konto | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification |
-| **Premium** | Kostenpflichtiges Upgrade | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, Coach-Übung, alle Features |
+| **Registriert** | Kostenloses Konto inkl. **9-Tage-Premium-Test** | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
+| **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
+| **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
+| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, **Coach Practice (12 Methoden)**, alle Features |
 
 **So upgraden Sie:**
-${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
-- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium-Pässe sowie Einzelcoach-Freischaltungen via PayPal.`}
+${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
+- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.`}
 - **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.
+
+### 2.3 KI-Transparenz (EU AI Act)
+
+Alle „Coaches“ in dieser App sind **KI-Systeme** — keine menschlichen Berater:innen oder Therapeut:innen. Avatare und Namen dienen der Orientierung; Antworten werden von Sprachmodellen (Google Gemini und/oder Mistral AI) generiert.
+
+- **Bildungs- und Reflexionszweck:** Die App ersetzt keine professionelle Beratung (siehe Haftungsausschluss).
+- **Keine biometrische Emotionserkennung:** Es werden keine Kamera-, Video- oder Stimmprofile ausgewertet, um Emotionen zu erkennen.
+- **Keine automatisierten Entscheidungen mit rechtlicher Wirkung:** Es werden keine Entscheidungen über Sie getroffen, die rechtliche oder vergleichbar erhebliche Folgen hätten.
+- **Menschliche Aufsicht:** Fehlerhafte Antworten können Sie im Chat melden (Flaggen-Symbol) und nach der Sitzung bewerten; bei Fragen: support@manualmode.at.
+- **Datenverarbeitung:** Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung.
 
 </div>
 </details>
@@ -728,8 +751,9 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-${deToolsSection(isNative, isRegistered, showChapter8, showChapter9)}
-### 5.3 Coach-Empfehlung (KI-gestützte Suche)
+${deTranscriptToolsSection(isNative, isRegistered, showChapter8)}
+${dePracticeTabSection(isNative, isRegistered, showChapter10)}
+### 5.4 Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
 
@@ -742,7 +766,7 @@ ${deToolsSection(isNative, isRegistered, showChapter8, showChapter9)}
 
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
-### 5.4 Die Chat-Oberfläche
+### 5.5 Die Chat-Oberfläche
 - **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
@@ -868,7 +892,7 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Premium-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm.
+Dieses Feature ist ab der **Premium-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation**.
 
 ### Wie funktioniert es?
 
@@ -972,7 +996,7 @@ Die Audio-Transkription ermöglicht es Ihnen, **echte Gespräche direkt in der A
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm.
+Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation** (Aufnahme/Upload).
 
 ### Wie funktioniert es?
 
@@ -1020,7 +1044,7 @@ const de_chapter10 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Premium+, Trial & Klienten)</summary>
 <div style="padding: 16px;">
 
 ### Was ist Coach-Übung?
@@ -1029,7 +1053,9 @@ Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich im Bereich **"Tools"** auf dem Coach-Auswahlbildschirm (Karte **Coach-Übung**).
+Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase** nach Registrierung oder mit **Klienten**-Zugang. Es befindet sich im Tab **Coaching üben** im Coaching-Bereich (nicht bei den Transkript-Tools).
+
+**Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
 **Hinweis:** Die Coaching-Methoden in der App sind **generische, beschreibende Bezeichnungen** für didaktische Übungszwecke. Sie stehen in **keiner Verbindung** zu und werden **nicht unterstützt oder zertifiziert** durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.
 
@@ -1074,8 +1100,10 @@ Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/
 
 Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
 
-**Schritt 5: Verlauf ansehen**
+**Schritt 5: Verlauf & Fortschritt**
 Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
+
+Über **Dein Fortschritt** sehen Sie zusätzlich Score-Verlauf, Kompetenzprofil, Meilensteine und eine empfohlene nächste Übung — ideal, um Entwicklung über mehrere Sessions hinweg zu vergleichen.
 
 ### Tipps für beste Ergebnisse
 
@@ -1094,6 +1122,7 @@ const en_markdown = (
     isNative: boolean,
     showChapter8: boolean,
     showChapter9: boolean,
+    showChapter10: boolean,
 ) => `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
@@ -1214,19 +1243,30 @@ Via the menu (☰), you can access **Account Management** with the following opt
 
 ### 2.2 Access Tiers & Upgrade
 
-The app offers four access tiers with increasing functionality:
+The app offers several access tiers with increasing functionality:
 
 | Tier | Access | Coaches | Features |
 | :--- | :--- | :--- | :--- |
 | **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
-| **Registered** | Free account | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification |
-| **Premium** | Paid upgrade | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, Coach Practice, all features |
+| **Registered** | Free account incl. **9-day Premium trial** | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification; during trial also Premium features and Coach Practice (8 methods) |
+| **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
+| **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
+| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, **Coach Practice (12 methods)**, all features |
 
 **How to upgrade:**
-${isNative ? `- Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Subscriptions are managed automatically through your Apple account.
-- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium passes and individual coach unlocks via PayPal.`}
+${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
+- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.`}
 - **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.
+
+### 2.3 AI Transparency (EU AI Act)
+
+All "coaches" in this app are **AI systems** — not human advisors or therapists. Avatars and names help you navigate; responses are generated by language models (Google Gemini and/or Mistral AI).
+
+- **Educational and reflection purpose:** The app does not replace professional advice (see Disclaimer).
+- **No biometric emotion recognition:** No camera, video, or voice profiling is used to detect emotions.
+- **No automated decisions with legal effect:** No decisions about you are made that produce legal or similarly significant consequences.
+- **Human oversight:** You can report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.
+- **Data processing:** Conversation content is sent to the configured AI service to generate responses — details in the Privacy Policy.
 
 </div>
 </details>
@@ -1716,8 +1756,9 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-${enToolsSection(isNative, isRegistered, showChapter8, showChapter9)}
-### 5.3 Coach Recommendation (AI-Powered Search)
+${enTranscriptToolsSection(isNative, isRegistered, showChapter8)}
+${enPracticeTabSection(isNative, isRegistered, showChapter10)}
+### 5.4 Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
 
@@ -1730,7 +1771,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
-### 5.4 The Chat Interface
+### 5.5 The Chat Interface
 - **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
 - **Text Mode (Default):**
   - Type your message in the text area at the bottom.
@@ -1856,7 +1897,7 @@ Transcript Evaluation helps you reflect on real conversations—e.g., with clien
 
 ### Who Can Use It?
 
-This feature is available from the **Premium access tier** and above, and is located in the **"Tools"** area on the coach selection screen.
+This feature is available from the **Premium access tier** and above, and is located in the **Transcript Tools** card in the **Management & Communication** section.
 
 ### How Does It Work?
 
@@ -1960,7 +2001,7 @@ Audio Transcription allows you to **record live conversations directly in the ap
 
 ### Who Can Use It?
 
-This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen.
+This feature is available from the **Client access tier** and is located in the **Transcript Tools** card in the **Management & Communication** section (record/upload).
 
 ### How Does It Work?
 
@@ -2008,7 +2049,7 @@ const en_chapter10 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Premium+, Trial & Client)</summary>
 <div style="padding: 16px;">
 
 ### What is Coach Practice?
@@ -2017,7 +2058,9 @@ Coach Practice is a **training mode for aspiring or experienced coaches**: you p
 
 ### Who Can Use It?
 
-This feature is available from the **Client access tier** and is located in the **"Tools"** area on the coach selection screen (**Coach Practice** card).
+This feature is available with **Premium+**, during the **9-day trial** after registration, or with **Client** access. It is located in the **Coach Practice** tab in the Coaching section (not in Transcript Tools).
+
+**Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
 **Note:** The coaching methods in the app are **generic descriptive labels** for educational practice purposes. They are **not affiliated with, endorsed by, or certified by** any owners of trademarks, registered method names, or copyrighted coaching approaches.
 
@@ -2062,8 +2105,10 @@ The **overall score (1–10)** prioritizes **method compliance**. A perfect **10
 
 You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. four-stage, forward-focused, ambivalence), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
 
-**Step 5: Review history**
+**Step 5: History & progress**
 From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
+
+From **Your progress**, you can also view score trends, a competency profile, milestones, and a recommended next drill — useful for comparing development across multiple sessions.
 
 ### Tips for Best Results
 
@@ -2079,8 +2124,10 @@ From **Practice history** on the setup screen, you can reopen or delete past eva
 const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const { t, language } = useLocalization();
 
-    const showChapter8 = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
-    const showChapter9 = currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
+    const practiceAccess = useMemo(() => resolvePracticeAccess(currentUser ?? null), [currentUser]);
+    const showChapter8 = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
+    const showChapter9 = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
+    const showChapter10 = practiceAccess.canAccessPractice;
 
     const isRegistered = !!currentUser;
     const isPremiumUser = currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper;
@@ -2088,13 +2135,13 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
     const markdownContent = useMemo(() => {
         const native = isNativeApp();
         const base = language === 'de'
-            ? de_markdown(isRegistered, !!isPremiumUser, native, !!showChapter8, !!showChapter9)
-            : en_markdown(isRegistered, !!isPremiumUser, native, !!showChapter8, !!showChapter9);
+            ? de_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10)
+            : en_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10);
         const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
         const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
         const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
-        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch10 : '');
-    }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9]);
+        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '') + (showChapter10 ? ch10 : '');
+    }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9, showChapter10]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">

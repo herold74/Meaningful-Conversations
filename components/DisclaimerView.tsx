@@ -7,8 +7,13 @@ interface DisclaimerViewProps {}
 
 const de_markdown = `Diese Anwendung und die darin enthaltenen KI-Coaches dienen nur zu Informations- und Bildungszwecken.
 
-## KI-Transparenz (EU-KI-Verordnung)
-Alle Coaches sind KI-Systeme — keine menschlichen Ansprechpartner. Der Hinweis dazu finden Sie vor dem Gesprächsstart auf der Coach-Auswahlseite (Art. 50 EU-KI-Verordnung).
+## KI-Transparenz (EU-KI-Verordnung / AI Act)
+Sie interagieren in dieser Anwendung **ausschließlich mit KI-Systemen** — nicht mit menschlichen Coaches, Therapeut:innen oder Berater:innen. Die Coach-Avatare und Namen dienen der Orientierung; dahinter stehen automatisierte Sprachmodelle (Google Gemini und/oder Mistral AI). Ein Hinweis dazu finden Sie vor dem Gesprächsstart auf der Coach-Auswahlseite (Art. 50 EU-KI-Verordnung).
+
+- **Keine biometrische Emotionserkennung:** Die App wertet keine Kamera-, Video- oder Stimmprofile aus, um Emotionen zu erkennen.
+- **Keine automatisierten Entscheidungen mit rechtlicher Wirkung:** Es werden keine Entscheidungen über Sie getroffen, die rechtliche oder vergleichbar erhebliche Folgen hätten.
+- **Menschliche Aufsicht:** Fehlerhafte Antworten können Sie im Chat melden (Flaggen-Symbol) und nach der Sitzung bewerten; bei Fragen wenden Sie sich an support@manualmode.at.
+- **Datenverarbeitung:** Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung und im Benutzerhandbuch (Kapitel 2.3).
 
 ## Kein Ersatz für professionelle Beratung
 Die KI-Coaches sind keine lizenzierten medizinischen, rechtlichen, finanziellen oder therapeutischen Fachkräfte. Die erbrachte Leistung stellt somit **ausdrücklich keine medizinische, psychologische oder psychotherapeutische Diagnose, Therapie oder Heilbehandlung dar und ersetzt diese in keiner Weise**. Laufende Behandlungen in diesen Bereichen sollen aufgrund des Coachings weder unterbrochen, abgebrochen noch unterlassen werden. Die Gespräche, die Sie führen, sind kein Ersatz für die Beratung durch einen qualifizierten Fachmann. 
@@ -33,7 +38,12 @@ Die Coaching-Methoden in dieser Anwendung sind **generische, beschreibende Bezei
 const en_markdown = `This application and the AI coaches contained within are for informational and educational purposes only.
 
 ## AI Transparency (EU AI Act)
-All coaches are AI systems — not human professionals. You will see this notice on the coach selection screen before starting a session (Art. 50 EU AI Act).
+In this application, you interact **exclusively with AI systems** — not with human coaches, therapists, or advisors. Coach avatars and names help you navigate; automated language models (Google Gemini and/or Mistral AI) generate the responses. You will see this notice on the coach selection screen before starting a session (Art. 50 EU AI Act).
+
+- **No biometric emotion recognition:** The app does not analyze camera, video, or voice profiles to detect emotions.
+- **No automated decisions with legal effect:** No decisions about you are made that produce legal or similarly significant consequences.
+- **Human oversight:** You can report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.
+- **Data processing:** Conversation content is sent to the configured AI service to generate responses — details in the Privacy Policy and User Guide (Chapter 2.3).
 
 ## No Substitute for Professional Advice
 The AI coaches are not licensed medical, legal, financial, or therapeutic professionals. The services provided therefore **expressly do not constitute and do not replace medical, psychological, or psychotherapeutic diagnosis, therapy, or healing treatment in any way**. Ongoing treatments in these areas should not be interrupted, discontinued, or refrained from as a result of the coaching. The conversations you have are not a substitute for advice from a qualified professional.
