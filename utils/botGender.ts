@@ -5,7 +5,6 @@ export const FEMALE_BOT_IDS = [
   'ava-strategic',
   'chloe-structured-reflection',
   'gabrielle-four-stage',
-  'sam-forward-focused',
   'bekky-thought-audit',
   'practice-coachee-female',
 ] as const;
