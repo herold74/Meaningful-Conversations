@@ -10,6 +10,17 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Session handoff (2026-08-06 — Feierabend)
+
+**Heute live (Staging Build 11 + Production v2.5.6):** About-Tab „Coaching üben“, User-Guide-Callouts, Voice-STT-Finalize auf Flieger, FAQ STT/TTS-Hinweise, FAQ Intent-Picker-Nachfolger entfernt, Martin/Martina-Voice-Fix.
+
+**Nächste Session (Vorschläge, nicht dringend):**
+- Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung (`PracticeEvaluationReview`)
+- **ASC / iOS:** Store noch 2.5.0 — Web/PWA auf 2.5.6; nächstes iOS-Release bündelt Frontend-Änderungen
+- Smoke auf Production: FAQ, Voice-Modus Flieger, About Practice-Tab
+
+**Repo:** `main` clean, pushed (`f5a176a`).
+
 ## Recent Changes (2026-08-05 — Staging Build 11 + Production v2.5.6 FAQ trim)
 
 - **Commit `bc14105`:** FAQ — „Was passiert nach dem Intent Picker?“ ersatzlos entfernt (DE+EN)
