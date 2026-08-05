@@ -87,6 +87,7 @@
 
 ### 10. DPC / DPFL (Experimental Mode)
 - **Status:** GDPR-COMPLIANT
+- **Scope:** **Classic coaching only** (`/api/gemini/chat`) — **not** Coach Practice (`/api/gemini/practice/*`)
 - Opt-in; pseudonymisation towards AI (no userId/email to provider)
 - Session behaviour logs without transcript
 - **Art. 25 GDPR:** Privacy by design
@@ -116,6 +117,8 @@
 - **Status:** GDPR-COMPLIANT (transparency recommendation for draft)
 - **In-progress draft:** `sessionStorage` (`mc_practice_draft_v1`), max 24h, tab-scoped, **not** sent to server — `utils/practiceSessionDraft.ts`
 - **Completed sessions:** `practice_evaluations` — structured scores/JSON **+ session transcript** (after user completes evaluation; included in export; user may delete transcript only via evaluation review; full row deleted on account erasure). **Not E2EE** — transcript survives password reset.
+- **AI during practice chat:** Coachee system prompt (scenario, method, difficulty) + coach/coachee transcript turns only — **no** Life Context, **no** personality profile, **no** DPC/DPFL injection (`buildCoacheeSystemPrompt` in `routes/gemini/practice.js`)
+- **Coach-side feedback (current):** Post-session evaluation (strengths, development areas, `nextDrills` tips) and progress dashboard **recurring development themes** aggregated from past evaluations — **not** linked to OCEAN/Riemann/DPFL profile
 - Evaluation via AI (Google/Mistral per region)
 - Included in `/api/data/export`
 - **Art. 6(1)(b) GDPR**
@@ -225,7 +228,15 @@
 | Piper TTS | Self-hosted | GDPR-COMPLIANT | `TTS-SETUP-GUIDE.md` |
 | DiceBear | Avatar CDN (DE) | GDPR-COMPLIANT | Mention in privacy (RECOMMENDED) |
 
-**Sent to AI (classic/practice/analysis):** Conversation text, system prompts, optionally decrypted profile (DPC/DPFL); **no** userId/email in prompts.
+**Sent to AI — by feature:**
+
+| Feature | Conversation text | System prompt | Decrypted personality profile (DPC/DPFL) |
+|---------|-------------------|---------------|------------------------------------------|
+| Classic coaching | ✅ | ✅ (bot prompt + optional DPC/DPFL) | ✅ only if user enabled DPC/DPFL |
+| Coach Practice (chat + evaluate) | ✅ | ✅ (coachee/eval prompts only) | ❌ never |
+| Transcript / session analysis | ✅ | ✅ | ✅ only if DPC/DPFL active in classic context |
+
+**No** userId/email in prompts to AI providers.
 
 ---
 

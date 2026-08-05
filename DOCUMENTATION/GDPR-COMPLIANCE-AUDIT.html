@@ -413,6 +413,7 @@
 <h3 id="10-dpc--dpfl-experimental-mode">10. DPC / DPFL (Experimental Mode)</h3>
 <ul>
 <li><strong>Status:</strong> GDPR-COMPLIANT</li>
+<li><strong>Scope:</strong> <strong>Classic coaching only</strong> (<code>/api/gemini/chat</code>) — <strong>not</strong> Coach Practice (<code>/api/gemini/practice/*</code>)</li>
 <li>Opt-in; pseudonymisation towards AI (no userId/email to provider)</li>
 <li>Session behaviour logs without transcript</li>
 <li><strong>Art. 25 GDPR:</strong> Privacy by design</li>
@@ -445,7 +446,9 @@
 <ul>
 <li><strong>Status:</strong> GDPR-COMPLIANT (transparency recommendation for draft)</li>
 <li><strong>In-progress draft:</strong> <code>sessionStorage</code> (<code>mc_practice_draft_v1</code>), max 24h, tab-scoped, <strong>not</strong> sent to server — <code>utils/practiceSessionDraft.ts</code></li>
-<li><strong>Completed sessions:</strong> <code>practice_evaluations</code> — structured scores/JSON, <strong>no</strong> full chat transcript</li>
+<li><strong>Completed sessions:</strong> <code>practice_evaluations</code> — structured scores/JSON <strong>+ session transcript</strong> (after evaluation; export; transcript deletable; account erasure deletes all). <strong>Not E2EE</strong></li>
+<li><strong>AI during practice chat:</strong> Coachee system prompt + transcript only — <strong>no</strong> Life Context, <strong>no</strong> personality profile, <strong>no</strong> DPC/DPFL injection</li>
+<li><strong>Coach-side feedback (current):</strong> Evaluation (strengths, development areas, drill tips) + recurring development themes in progress — <strong>not</strong> linked to OCEAN/Riemann/DPFL profile</li>
 <li>Evaluation via AI (Google/Mistral per region)</li>
 <li>Included in <code>/api/data/export</code></li>
 <li><strong>Art. 6(1)(b) GDPR</strong></li>
@@ -674,7 +677,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Sent to AI (classic/practice/analysis):</strong> Conversation text, system prompts, optionally decrypted profile (DPC/DPFL); <strong>no</strong> userId/email in prompts.</p>
+<p><strong>Sent to AI — by feature:</strong> Classic coaching: conversation text + bot prompt; personality profile only with DPC/DPFL. Coach Practice: coachee/eval prompts + transcript only, <strong>never</strong> profile. Transcript analysis: as classic when DPC/DPFL active. <strong>No</strong> userId/email in prompts.</p>
 <hr />
 <h2 id="changes-since-v197--v250">CHANGES SINCE v1.9.7 → v2.5.0</h2>
 <table>

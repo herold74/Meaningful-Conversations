@@ -3,12 +3,24 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **4**, v2.5.6 — https://mc-beta.manualmode.at (health OK; docs + voice/STT/TTS fixes live; `sw.js` v2.5.6-b4)
+**Staging:** Deployed **2026-08-05**, Build **6**, v2.5.6 — https://mc-beta.manualmode.at (health OK; coachee names/genders + voice Flieger button fix live; `sw.js` v2.5.6-b6)
 **Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=4` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=6` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 6 voice button UX fix)
+
+- **Commit `f73d681`:** Voice Flieger button always solid red + clickable during recording; send still prefers stable STT transcript after stop (no interim fragments)
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app` (~5 min); commit `250dca8` build 6 sync
+- **Verified:** health OK on staging
+- **Production:** not deployed (still v2.5.5)
+
+## Recent Changes (2026-08-05 — Staging + Production v2.5.6 Build 5 coachee overhaul)
+
+- **Commit `6e8f456`:** International coachee names, explicit `coacheeGender`, avatar renames (finley→nadia, rowan→martin), Skyler→Elena, Blair→Sophie
+- **Deploy:** staging + production (Build 5) — coachee API/names live on both environments
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 4 voice + TTS deploy)
 
@@ -394,5 +406,6 @@
 - [ ] Formal WCAG accessibility audit
 - [ ] Self-hosted SLM as Gemini replacement (milestone: >1000 paying users)
 - [ ] Coaching Framework Roadmap: client exact language bot, The Work bot, NLP Meta-Modell lens, Logische Ebenen lens
+- [ ] **Coach Practice → Coach-Feedback / Profil (Roadmap):** Aktuell Tipps + wiederkehrende Beobachtungen; später optional Coaching-Stil aus Practice — siehe `progress.md`
 - [ ] Presentation Evaluator (Premium Feature, backlog)
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)

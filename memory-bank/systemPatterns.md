@@ -51,6 +51,13 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 6.  **Update:** AI proposes context changes -> Frontend shows diff -> User approves -> Client encrypts -> Backend stores.
 7.  **DPFL (Optional):** Session behavior logged -> Profile refinement suggestions -> User approves adjustments.
 
+## Coach Practice Data Flow (separate from DPC/DPFL)
+1.  **Setup:** User picks method, scenario, difficulty — no Life Context or personality profile sent.
+2.  **Chat:** `/api/gemini/practice/send-message` — `buildCoacheeSystemPrompt` only (scenario + method + difficulty + role guard).
+3.  **Evaluate:** `/api/gemini/practice/evaluate` — transcript + rubric; returns strengths, development areas, `nextDrills`.
+4.  **Progress:** Client aggregates recurring `developmentAreas` across saved evaluations (`utils/practiceProgress.ts`) — coach-side feedback only, not OCEAN/Riemann/DPFL.
+5.  **Roadmap:** Optional future link from practice patterns to coaching-style / profile insights — not implemented.
+
 ### 8. Backend Scaling & Process Management
 - **Decision:** Use PM2 for Node.js process management.
 - **Reasoning:** Node.js is single-threaded. PM2 allows utilizing multi-core systems via "Cluster Mode" without changing code. It also provides automatic restarts on crash.

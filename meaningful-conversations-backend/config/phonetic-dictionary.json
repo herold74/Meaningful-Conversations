@@ -1,5 +1,5 @@
 {
-  "version": "1.0.5",
+  "version": "1.0.6",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -321,6 +321,42 @@
           "phonetic": "Gedanken-Auditt",
           "caseSensitive": true,
           "notes": "Coaching-Methode (Dan)"
+        },
+        {
+          "term": "Stakeholder",
+          "phonetic": "Steikholdör",
+          "caseSensitive": true,
+          "notes": "Business-Begriff"
+        },
+        {
+          "term": "stakeholder",
+          "phonetic": "steikholdör",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "Stakeholders",
+          "phonetic": "Steikholdörs",
+          "caseSensitive": true,
+          "notes": "Plural"
+        },
+        {
+          "term": "stakeholders",
+          "phonetic": "steikholdörs",
+          "caseSensitive": true,
+          "notes": "Plural kleingeschrieben"
+        },
+        {
+          "term": "LinkedIn",
+          "phonetic": "Linkt-In",
+          "caseSensitive": true,
+          "notes": "Social-Media-Plattform"
+        },
+        {
+          "term": "linkedin",
+          "phonetic": "linkt-in",
+          "caseSensitive": true,
+          "notes": "Kleingeschrieben"
         }
       ]
     },

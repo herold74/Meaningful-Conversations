@@ -45,7 +45,7 @@ Gemäß den Regeln und Vorschriften von AI Studio ist dieses Projekt unter der A
 *   **Automatisierte Kontext-Updates**: Am Ende jeder Sitzung analysiert die KI das Gespräch und schlägt Aktualisierungen für Ihre Lebenskontext-Datei vor, um Ihnen zu helfen, Erkenntnisse und Fortschritte zu verfolgen.
 *   **Sprach- & Text-Chat**: Interagieren Sie mit Ihrem Coach über Text oder im freihändigen Sprachkonversationsmodus.
 *   **Ende-zu-Ende-Verschlüsselung**: Für registrierte Benutzer ist Ihre Lebenskontext-Datei Ende-zu-Ende-verschlüsselt. Nur Sie können sie auf Ihrem Gerät mit Ihrem Passwort entschlüsseln.
-*   **Persönlichkeitsprofile**: OCEAN (Big Five), Riemann-Thomann und Spiral Dynamics Assessments mit verschlüsselter Speicherung. Coaching-Stil wird automatisch an Ihr Profil angepasst (DPC/DPFL).
+*   **Persönlichkeitsprofile**: OCEAN (Big Five), Riemann-Thomann und Spiral Dynamics Assessments mit verschlüsselter Speicherung. Coaching-Stil wird im **Classic Coaching** automatisch an Ihr Profil angepasst (DPC/DPFL) — **nicht** in Coach Practice (Coaching üben).
 *   **Transkript-Auswertung**: Laden Sie Gesprächstranskripte hoch und erhalten Sie KI-gestützte Kommunikationsanalyse mit Bewertungen, Blindspot-Erkennung und Coach-Empfehlungen.
 *   **Intent Picker**: Wählen Sie beim Start, was Sie erreichen möchten (Kommunikation, Coaching, Begleitendes Coaching) und werden Sie direkt zum passenden Bereich geleitet.
 *   **iOS App & In-App Purchase**: Native iOS-App via Capacitor mit Apple In-App Purchases (StoreKit 2 / RevenueCat) für Abonnements und Einzelkäufe.

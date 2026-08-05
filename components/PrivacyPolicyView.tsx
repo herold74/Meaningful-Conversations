@@ -116,6 +116,7 @@ Die an den KI-Anbieter übermittelten Persönlichkeitsdaten sind **pseudonymisie
 - DPC/DPFL-Modus ist Opt-In - Sie wählen aktiv, ihn zu aktivieren
 - Sie können jederzeit zum Standard-Modus zurückkehren
 - Bei der ersten Aktivierung wird eine Warnung angezeigt
+- **Coach Practice (Coaching üben):** DPC/DPFL gelten **nicht** — während der Übung wird Ihr Persönlichkeitsprofil nicht an die KI übermittelt. Feedback für Sie als Coach: Auswertung mit Übungsvorschlägen und wiederkehrende Entwicklungsthemen im Fortschritt.
 
 #### Performance-Optimierung (Prompt Caching)
 Zur Verbesserung der Antwortgeschwindigkeit nutzen wir die Caching-Funktion der Gemini API. Dabei werden Teile Ihres Lebenskontexts (unverschlüsselt, wie bei jeder API-Anfrage) für maximal **5 Minuten** auf Servern von Google LLC (USA) zwischengespeichert. Die gecachten Daten:
@@ -430,6 +431,7 @@ The personality data transmitted to the AI provider is **pseudonymized** - it ca
 - DPC/DPFL mode is opt-in - you actively choose to enable it
 - You can return to standard mode at any time
 - A warning is displayed upon first activation
+- **Coach Practice:** DPC/DPFL do **not** apply — your personality profile is not sent to the AI during practice. Coach-side feedback: evaluation drill tips and recurring development themes in your progress view.
 
 #### Performance Optimization (Prompt Caching)
 To improve response times, we use the caching feature of the Gemini API. Parts of your Life Context (unencrypted, as with every API request) are temporarily stored on Google LLC (USA) servers for up to **5 minutes**. The cached data:

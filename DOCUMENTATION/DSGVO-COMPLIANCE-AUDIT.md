@@ -87,6 +87,7 @@
 
 ### 10. DPC / DPFL (Experimental Mode)
 - **Status:** DSGVO-KONFORM
+- **Geltungsbereich:** **Nur Classic Coaching** (`/api/gemini/chat`) — **nicht** Coach Practice (`/api/gemini/practice/*`)
 - Opt-In; Pseudonymisierung gegenüber KI (keine userId/E-Mail an Provider)
 - Session Behavior Logs ohne Transkript
 - **Art. 25 DSGVO:** Privacy by Design
@@ -116,6 +117,8 @@
 - **Status:** DSGVO-KONFORM (mit Transparenz-Empfehlung für Draft)
 - **In-Progress-Draft:** `sessionStorage` (`mc_practice_draft_v1`), max. 24h, tab-scoped, **nicht** an Server — `utils/practiceSessionDraft.ts`
 - **Abgeschlossene Sessions:** `practice_evaluations` — strukturierte Scores/JSON **+ Gesprächstranskript** (nach freiwilliger Auswertung; Download; **Nutzer kann Transkript einzeln in der Auswertungsansicht löschen**; vollständige Löschung bei Kontolöschung). **Nicht E2EE** — überlebt Passwort-Reset.
+- **KI während Practice-Chat:** Coachee-System-Prompt (Szenario, Methode, Schwierigkeit) + Coach/Coachee-Transkript — **kein** Life Context, **kein** Persönlichkeitsprofil, **keine** DPC/DPFL-Injektion (`buildCoacheeSystemPrompt` in `routes/gemini/practice.js`)
+- **Feedback für den übenden Coach (aktuell):** Post-Session-Auswertung (Stärken, Entwicklungsbereiche, `nextDrills`-Übungsvorschläge) und im Fortschritts-Dashboard **wiederkehrende Entwicklungsthemen** aus vergangenen Auswertungen — **ohne** Anbindung an OCEAN/Riemann/DPFL-Profil
 - Evaluation via KI (Google/Mistral je nach Region)
 - Export in `/api/data/export` enthalten
 - **Art. 6 Abs. 1 lit. b DSGVO**
@@ -225,7 +228,15 @@
 | Piper TTS | Self-hosted | DSGVO-KONFORM | `TTS-SETUP-GUIDE.md` |
 | DiceBear | Avatar-CDN (DE) | DSGVO-KONFORM | In Privacy erwähnen (EMPFOHLEN) |
 
-**An KI gesendet (Classic/Practice/Analysis):** Gesprächstexte, System-Prompts, ggf. entschlüsseltes Profil (DPC/DPFL); **keine** userId/E-Mail in Prompts.
+**An KI gesendet — nach Feature:**
+
+| Feature | Gesprächstext | System-Prompt | Entschlüsseltes Persönlichkeitsprofil (DPC/DPFL) |
+|---------|---------------|---------------|--------------------------------------------------|
+| Classic Coaching | ✅ | ✅ (Bot-Prompt + optional DPC/DPFL) | ✅ nur bei aktiviertem DPC/DPFL |
+| Coach Practice (Chat + Auswertung) | ✅ | ✅ (nur Coachee-/Eval-Prompts) | ❌ nie |
+| Transkript-/Session-Analyse | ✅ | ✅ | ✅ nur wenn DPC/DPFL im Classic-Kontext aktiv |
+
+**Keine** userId/E-Mail in Prompts an KI-Provider.
 
 ---
 
