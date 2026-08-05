@@ -25,7 +25,7 @@
 - **Commit `2f39435`:** fix(tts): resolve `speakFallbackRef` readonly TypeScript error (blocked first full deploy)
 - **Commit `4c33724`:** chore build 11 sync (deploy script auto-commit after successful staging deploy)
 - **Staging deploy:** `./deploy-manualmode.sh -e staging -c all` — full rebuild (TTS `app.py` changed); first attempt failed at frontend `tsc`; second attempt succeeded (~18 min); health OK; TTS container has `synthesize_with_piper_safe`; Piper health OK
-- **Production:** **not deployed** — pending user approval after staging verification
+- **Production:** superseded by **v2.5.5 Build 2** deploy (same session)
 - **Context:** Helene (`helene@arndgen.de`) Practice Voice Mode on prod — STT one-word fragments on Chrome/macOS; 32× TTS HTTP 500 (Piper ONNX `GatherElements`/`Reshape`/`ScatterND` on specific text → silent voice mode)
 
 ## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 coachee role guard)
