@@ -40,6 +40,48 @@ describe('buildCoacheeSystemPrompt — mental fitness', () => {
   });
 });
 
+describe('buildCoacheeSystemPrompt — role guard', () => {
+  test('German prompt includes ROLLEN-GUARD with forbidden coach techniques', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'contracting',
+      scenarioId: 'motivation-dip',
+      difficulty: 'moderate',
+      language: 'de',
+      practiceMode: 'contracting',
+    });
+    expect(prompt).toContain('ROLLEN-GUARD');
+    expect(prompt).toContain('Du sagst');
+    expect(prompt).toContain('Danke für die Beschreibung');
+    expect(prompt).toContain('Wenn du diesem Gefühl eine Farbe geben müsstest');
+    expect(prompt).toContain('NEGATIV-BEISPIEL');
+  });
+
+  test('English prompt includes ROLE GUARD with forbidden coach techniques', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'forward-focused-coaching',
+      scenarioId: 'motivation-dip',
+      difficulty: 'moderate',
+      language: 'en',
+    });
+    expect(prompt).toContain('ROLE GUARD');
+    expect(prompt).toContain('Thank you for sharing');
+    expect(prompt).toContain('On a scale of 1 to 10');
+    expect(prompt).toContain('NEGATIVE EXAMPLE');
+  });
+
+  test('rules reference role guard instead of legacy coaching-phrase rule', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'contracting',
+      scenarioId: 'motivation-dip',
+      difficulty: 'moderate',
+      language: 'de',
+      practiceMode: 'contracting',
+    });
+    expect(prompt).toContain('Halte den ROLLEN-GUARD ein');
+    expect(prompt).not.toContain('KEINE Coaching-Phrasen wie "Lass uns..."');
+  });
+});
+
 describe('buildCoacheeSystemPrompt — contracting & phase 2', () => {
   test('contracting mode uses vague first-turn rule and no method hint', () => {
     const prompt = buildCoacheeSystemPrompt({
