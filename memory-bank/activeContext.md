@@ -3,17 +3,22 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **8**, v2.5.6 — https://mc-beta.manualmode.at (health OK; About Coach Practice tab; user guide callouts; voice token fix; `sw.js` v2.5.6-b8)
+**Staging:** Deployed **2026-08-05**, Build **9**, v2.5.6 — https://mc-beta.manualmode.at (health OK; voice stable STT send on Flieger tap; `sw.js` v2.5.6-b9)
 **Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; **behind staging** — still v2.5.5)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=8` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=9` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Recent Changes (2026-08-05 — Staging v2.5.6 Build 9 voice stable STT send)
+
+- **Commit `f1e74ad`:** `stopAndFinalize()` — Flieger sofort tippbar, kurzer Spinner, nur committed Text wird gesendet
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commit `5332be5` build 9 sync
+- **Verified:** frontend + backend health OK on staging
+
 ## Recent Changes (2026-08-05 — Voice send: wait for stable STT on Flieger tap)
 
-- **Commit pending:** `stopAndFinalize()` in speech service; Flieger tap → spinner → send only committed transcript (no interim fallback)
-- **Staging:** deploy Build 9 pending
+- Superseded by Build 9 deploy above
 
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 8 About Practice + voice fix)
 
