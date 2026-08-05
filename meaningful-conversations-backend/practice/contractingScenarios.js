@@ -3,20 +3,10 @@
  * Same avatar roster style; concerns hidden until evaluation.
  */
 
-const AVATAR_GENDER = {
-  '/avatars/max.png': 'male',
-  '/avatars/ava.png': 'female',
-  '/avatars/kenji.png': 'male',
-  '/avatars/chloe.png': 'female',
-  '/avatars/rob.png': 'male',
-  '/avatars/victor.png': 'male',
-  '/avatars/bekky.png': 'female',
-  '/avatars/dan.png': 'male',
-};
-
-function getCoacheeGenderFromAvatar(avatar) {
-  return AVATAR_GENDER[avatar] || 'male';
-}
+const {
+  getCoacheeGenderFromAvatar,
+  resolveCoacheeGender,
+} = require('./avatarGender.js');
 
 const CONTRACTING_SCENARIOS = [
   {
@@ -134,7 +124,8 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-teen-talk',
     coacheeName: { en: 'Finley', de: 'Finley' },
-    avatar: '/avatars/chloe.png',
+    avatar: '/avatars/finley.png',
+    coacheeGender: 'female',
     concern: {
       en: 'Needs to address their teenager\'s slipping grades but every attempt turns into shouting.',
       de: 'Muss die schlechteren Noten des Teenagers ansprechen, aber jedes Gespräch endet im Schreien.',
@@ -148,7 +139,8 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-midlife-restless',
     coacheeName: { en: 'Rowan', de: 'Rowan' },
-    avatar: '/avatars/max.png',
+    avatar: '/avatars/rowan.png',
+    coacheeGender: 'male',
     concern: {
       en: 'Successful on paper but restless — something feels missing without being able to name it.',
       de: 'Auf dem Papier erfolgreich, aber unruhig — etwas fehlt, ohne es benennen zu können.',
@@ -162,7 +154,7 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-public-mistake',
     coacheeName: { en: 'Emery', de: 'Emery' },
-    avatar: '/avatars/bekky.png',
+    avatar: '/avatars/gloria.png',
     concern: {
       en: 'Made a visible mistake in a client meeting and cannot stop replaying it.',
       de: 'Hat in einem Kundentermin einen sichtbaren Fehler gemacht und kann nicht aufhören, ihn abzuspulen.',
@@ -176,7 +168,7 @@ const CONTRACTING_SCENARIOS = [
   {
     id: 'contract-relocation',
     coacheeName: { en: 'Blair', de: 'Blair' },
-    avatar: '/avatars/ava.png',
+    avatar: '/avatars/mike.png',
     concern: {
       en: 'Partner wants to relocate abroad; they are torn between love and their established career.',
       de: 'Partner will ins Ausland ziehen; hin- und hergerissen zwischen Beziehung und etablierter Karriere.',
@@ -199,7 +191,7 @@ function getPublicContractingScenarios(language = 'de') {
     id: s.id,
     coacheeName: s.coacheeName[lang],
     avatar: s.avatar,
-    coacheeGender: getCoacheeGenderFromAvatar(s.avatar),
+    coacheeGender: resolveCoacheeGender(s),
   }));
 }
 

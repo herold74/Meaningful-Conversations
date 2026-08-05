@@ -131,4 +131,45 @@ describe('POST /api/gemini/practice/evaluate Phase 2', () => {
     expect(prompt).not.toContain('Contracting quote');
     expect(prompt).toContain('read-only background');
   });
+
+  test('contracting evaluate prompt includes coachee gender for Finley', async () => {
+    const contractingEval = {
+      ...mockEvalResponse,
+      practiceMode: 'contracting',
+      contractingSteps: {
+        topicIdentified: true,
+        relevanceExplored: true,
+        outcomeDefined: true,
+        contractConfirmed: true,
+        evidence: 'Clear contract',
+        highlights: ['Good pacing'],
+      },
+      sessionContract: 'Explore teen grades',
+      clarifiedConcern: 'Parent-teen conflict',
+      methodSuggestions: [],
+    };
+    aiProviderService.generateContent.mockResolvedValueOnce({
+      text: JSON.stringify(contractingEval),
+    });
+
+    const res = await request(app)
+      .post('/api/gemini/practice/evaluate')
+      .send({
+        frameworkId: 'contracting',
+        scenarioId: 'contract-teen-talk',
+        difficulty: 'moderate',
+        practiceMode: 'contracting',
+        language: 'de',
+        history: [
+          { role: 'user', text: 'Erzählen Sie mir von Ihrem Anliegen.' },
+          { role: 'bot', text: 'Es geht um die Noten meines Teenagers.' },
+        ],
+      });
+
+    expect(res.status).toBe(200);
+    const prompt = aiProviderService.generateContent.mock.calls.at(-1)[0].contents;
+    expect(prompt).toContain('Finley');
+    expect(prompt).toContain('weiblich');
+    expect(prompt).toContain('Pronomen (KRITISCH)');
+  });
 });

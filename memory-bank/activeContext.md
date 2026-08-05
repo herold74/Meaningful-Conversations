@@ -10,6 +10,14 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Recent Changes (2026-08-05 — Coachee gender eval + unique avatars)
+
+- **Evaluate:** `buildPracticeScenarioSummary()` — `coacheeGender` + Pronomen-Regel in Method/Contracting/Free-Play Eval-Prompts (DE/EN)
+- **Avatars:** 12/12 eindeutig pro Auswahl; neue `public/avatars/finley.png`, `rowan.png` (Rowan regen — upright head, auburn hair, distinct from max); Methoden-Remap (Chris→mike, Priya→gabrielle, Jamie→gloria, Robin→sam)
+- **Shared:** `practice/avatarGender.js`; `coacheePrompt` → Klientin/Klient; `utils/botGender.ts` erweitert
+- **Tests:** 18/18 (avatarGender, coacheePrompt Finley, practiceEvaluate contracting gender)
+- **Deploy:** `-c app` (Frontend PNGs + Backend)
+
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.5 Build 2)
 
 - **Commit `468a70e`:** chore: release v2.5.5 — STT pause fix, TTS ONNX fallback, coachee role guard bundle

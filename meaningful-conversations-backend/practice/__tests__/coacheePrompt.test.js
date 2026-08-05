@@ -80,6 +80,19 @@ describe('buildCoacheeSystemPrompt — role guard', () => {
     expect(prompt).toContain('Halte den ROLLEN-GUARD ein');
     expect(prompt).not.toContain('KEINE Coaching-Phrasen wie "Lass uns..."');
   });
+
+  test('Finley contracting uses Klientin role label', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'contracting',
+      scenarioId: 'contract-teen-talk',
+      difficulty: 'moderate',
+      language: 'de',
+      practiceMode: 'contracting',
+    });
+    expect(prompt).toContain('Finley');
+    expect(prompt).toContain('Klientin');
+    expect(prompt).not.toMatch(/ein Coachee \(Klient\)/);
+  });
 });
 
 describe('buildCoacheeSystemPrompt — contracting & phase 2', () => {

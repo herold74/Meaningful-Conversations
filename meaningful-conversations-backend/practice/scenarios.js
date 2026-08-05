@@ -7,21 +7,11 @@ const {
   getContractingScenarioById,
   getPublicContractingScenarios,
 } = require('./contractingScenarios.js');
-
-const AVATAR_GENDER = {
-  '/avatars/max.png': 'male',
-  '/avatars/ava.png': 'female',
-  '/avatars/kenji.png': 'male',
-  '/avatars/chloe.png': 'female',
-  '/avatars/rob.png': 'male',
-  '/avatars/victor.png': 'male',
-  '/avatars/bekky.png': 'female',
-  '/avatars/dan.png': 'male',
-};
-
-function getCoacheeGenderFromAvatar(avatar) {
-  return AVATAR_GENDER[avatar] || 'male';
-}
+const {
+  AVATAR_GENDER,
+  getCoacheeGenderFromAvatar,
+  resolveCoacheeGender,
+} = require('./avatarGender.js');
 
 const SCENARIOS = [
   {
@@ -139,7 +129,7 @@ const SCENARIOS = [
   {
     id: 'career-plateau',
     coacheeName: { en: 'Chris', de: 'Chris' },
-    avatar: '/avatars/max.png',
+    avatar: '/avatars/mike.png',
     concern: {
       en: 'Has been in the same role for years, performs well, but feels invisible and wonders if ambition still matters.',
       de: 'Ist seit Jahren in derselben Rolle, leistet gute Arbeit, fühlt sich aber unsichtbar und fragt sich, ob Ambition noch zählt.',
@@ -153,7 +143,7 @@ const SCENARIOS = [
   {
     id: 'strategic-pivot',
     coacheeName: { en: 'Priya', de: 'Priya' },
-    avatar: '/avatars/ava.png',
+    avatar: '/avatars/gabrielle.png',
     concern: {
       en: 'Their industry is shifting fast; they must decide whether to pivot skills, change employers, or double down on the current path.',
       de: 'Die Branche verändert sich schnell; sie müssen entscheiden, ob sie Fähigkeiten neu ausrichten, den Arbeitgeber wechseln oder am bisherigen Weg festhalten.',
@@ -167,7 +157,7 @@ const SCENARIOS = [
   {
     id: 'feedback-anxiety',
     coacheeName: { en: 'Jamie', de: 'Jamie' },
-    avatar: '/avatars/bekky.png',
+    avatar: '/avatars/gloria.png',
     concern: {
       en: 'Dreads upcoming performance feedback, replays past criticism, and avoids asking for clarity from their manager.',
       de: 'Fürchtet anstehendes Performance-Feedback, grübelt über frühere Kritik nach und vermeidet, beim Manager nachzufragen.',
@@ -181,7 +171,7 @@ const SCENARIOS = [
   {
     id: 'stuck-metaphor',
     coacheeName: { en: 'Robin', de: 'Robin' },
-    avatar: '/avatars/dan.png',
+    avatar: '/avatars/sam.png',
     concern: {
       en: 'Feels like walking through fog at work — stuck in mud, can’t see the path ahead, and keeps circling the same worries without naming a concrete problem.',
       de: 'Fühlt sich bei der Arbeit an wie im Nebel — im Matsch fest, sieht keinen Weg voraus und kreist immer wieder um dieselben Sorgen, ohne ein konkretes Problem zu benennen.',
@@ -225,7 +215,7 @@ function getPublicScenarios(language = 'de') {
     id: s.id,
     coacheeName: s.coacheeName[lang],
     avatar: s.avatar,
-    coacheeGender: getCoacheeGenderFromAvatar(s.avatar),
+    coacheeGender: resolveCoacheeGender(s),
     concern: s.concern[lang],
     emotionalTone: s.emotionalTone[lang],
   }));
@@ -251,6 +241,7 @@ module.exports = {
   CONTRACTING_SCENARIOS,
   AVATAR_GENDER,
   getCoacheeGenderFromAvatar,
+  resolveCoacheeGender,
   DIFFICULTY_MODIFIERS,
   getScenarioById,
   getPublicScenarios,
