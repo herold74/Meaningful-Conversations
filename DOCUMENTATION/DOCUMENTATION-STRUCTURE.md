@@ -30,6 +30,13 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **llm-upgrade/SKILL.md** — Google/Mistral SDK upgrades + classic/practice regression QA sequence
 - **gdpr-compliance/SKILL.md** — GDPR/DSGVO audits, export/erasure, privacy updates
 - **i18n-and-theming/SKILL.md**, **ux-flow/SKILL.md**, **in-app-purchase/SKILL.md**, **132-content-structure/SKILL.md** — domain workflows
+- **agent-workflows/SKILL.md** — Subagents, slash commands, hooks
+
+### Cursor agent infrastructure
+- **`.cursor/rules/`** — Always-apply and file-scoped rules (see `README.md`)
+- **`.cursor/commands/`** — Slash commands (`/deploy-staging`, `/review`, etc.)
+- **`.cursor/hooks.json`** — Project hooks (production deploy gate, secret scan)
+- **`AGENTS.md`** (repo root) — Agent entry map
 
 ---
 

@@ -34,9 +34,9 @@ Quick reference guide for common issues and where to find solutions.
 | 502 on `www.mc-app…` but apex works | Add `www` to nginx `server_name`; TLS/DNS for `www` | [NGINX-REVERSE-PROXY-SETUP.md](./NGINX-REVERSE-PROXY-SETUP.md) (§502 / `www`) |
 | `www.mc-beta…` unreachable / 502 | Staging `server_name` + DNS + cert SAN for `www` | [NGINX-REVERSE-PROXY-SETUP.md](./NGINX-REVERSE-PROXY-SETUP.md) (§1c staging www) |
 | Health check fails | Check backend logs, verify migrations | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md#pre-deployment-checklist) |
-| Version mismatch after deploy | Update all 5 version files | [deployment.mdc](../.cursor/rules/deployment.mdc) |
+| Version mismatch after deploy | Update all 5 version files | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
 | Containers not starting | Check `podman ps`, verify compose file | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md) |
-| Auto-rollback triggered | Check health endpoint, review logs | [deployment.mdc](../.cursor/rules/deployment.mdc#automatic-rollback) |
+| Auto-rollback triggered | Check health endpoint, review logs | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
 | Registry pull fails (`invalid character '<'`) | Remote uses stale cached image; deploy script uses `--tls-verify=false` + avatar verify + stream fallback | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
 | Coach avatars broken / `/avatars/*.png` returns HTML | Stale frontend image; stream fresh image; verify `content-type: image/png` | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
 | Staging UI old but avatars OK | Verify `Build N` in JS bundle; stream frontend if BUILD_NUMBER mismatch | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md#-staging-registry-pull-fails-silently-critical--2026-07-23) |
@@ -67,13 +67,12 @@ Quick reference guide for common issues and where to find solutions.
 
 | Issue | Solution | Guide |
 |-------|----------|-------|
-| TTS not working | Check service status, verify voice config | [tts-debugging.mdc](../.cursor/rules/tts-debugging.mdc) |
+| TTS not working | Check service status, verify voice config | [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md) |
 | Voice mode stuck | Check browser permissions, network | [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md) |
 | Server voices unavailable | Fallback to local TTS is automatic | [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md) |
-| Audio playback issues | Check browser console, verify audio element | [tts-debugging.mdc](../.cursor/rules/tts-debugging.mdc) |
+| Audio playback issues | Check browser console, verify audio element | [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md) |
 
-**Primary Resource:** [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md)  
-**Debugging Skill:** [tts-debugging.mdc](../.cursor/rules/tts-debugging.mdc)
+**Primary Resource:** [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md)
 
 ---
 
@@ -82,12 +81,12 @@ Quick reference guide for common issues and where to find solutions.
 | Issue | Solution | Guide |
 |-------|----------|-------|
 | Login shows **HTTP 500** (often **with** `Origin` header, **without** works in `curl`) | **`FRONTEND_URL`** in server `.env` must match the public site (e.g. production `https://mc-app.manualmode.at`, not staging). After deploy, backend logs show `CORS allowlist (… entries): …`. | `meaningful-conversations-backend/server.js` (`expandFrontendUrlForCors`), `podman-compose-*.yml` defaults |
-| "Unauthorized" errors | Check JWT token validity | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
-| Role-based access not working | Verify user role in database | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
-| Can't access Premium features | Check subscription status | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
+| "Unauthorized" errors | Check JWT token validity | [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md), backend auth middleware |
+| Role-based access not working | Verify user role in database | [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md) |
+| Can't access Premium features | Check subscription status | [in-app-purchase/SKILL.md](../.cursor/skills/meaningful-conversations/in-app-purchase/SKILL.md) |
 | Guest mode limitations | Feature is Premium-only | [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md) |
 
-**Primary Resource:** [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc)
+**Primary Resource:** [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md)
 
 ---
 
@@ -96,14 +95,13 @@ Quick reference guide for common issues and where to find solutions.
 | Issue | Solution | Guide |
 |-------|----------|-------|
 | AI not responding | Check API keys, quota limits | [LOCAL-DEV-SETUP.md](./LOCAL-DEV-SETUP.md#ai-not-responding) |
-| Adaptation not working | Verify personality profile exists | [adaptation-engine.mdc](../.cursor/rules/adaptation-engine.mdc) |
-| Coaching mode issues | Check session state, verify mode config | [coaching-engine.mdc](../.cursor/rules/coaching-engine.mdc) |
-| Personality profile errors | Check encryption/decryption flow | [personality-system.mdc](../.cursor/rules/personality-system.mdc) |
+| Adaptation not working | Verify personality profile exists | [systemPatterns.md](../memory-bank/systemPatterns.md) |
+| Coaching mode issues | Check session state, verify mode config | [COACH-BEHAVIOR-MATRIX.md](./COACH-BEHAVIOR-MATRIX.md) |
+| Personality profile errors | Check encryption/decryption flow | [systemPatterns.md](../memory-bank/systemPatterns.md) |
 
 **Primary Resources:**
-- [adaptation-engine.mdc](../.cursor/rules/adaptation-engine.mdc)
-- [coaching-engine.mdc](../.cursor/rules/coaching-engine.mdc)
-- [personality-system.mdc](../.cursor/rules/personality-system.mdc)
+- [COACH-BEHAVIOR-MATRIX.md](./COACH-BEHAVIOR-MATRIX.md)
+- [systemPatterns.md](../memory-bank/systemPatterns.md)
 
 ---
 
@@ -111,11 +109,11 @@ Quick reference guide for common issues and where to find solutions.
 
 | Issue | Solution | Guide |
 |-------|----------|-------|
-| Missing translations | Add keys to `public/locales/*.json` | [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc) |
-| Translation not showing | Check key exists in both DE and EN | [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc) |
-| Language switch not working | Verify i18n initialization | [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc) |
+| Missing translations | Add keys to `public/locales/*.json` | [i18n-and-theming/SKILL.md](../.cursor/skills/meaningful-conversations/i18n-and-theming/SKILL.md) |
+| Translation not showing | Check key exists in both DE and EN | [i18n-and-theming/SKILL.md](../.cursor/skills/meaningful-conversations/i18n-and-theming/SKILL.md) |
+| Language switch not working | Verify i18n initialization | [i18n-and-theming/SKILL.md](../.cursor/skills/meaningful-conversations/i18n-and-theming/SKILL.md) |
 
-**Primary Resource:** [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc)
+**Primary Resource:** [i18n-and-theming/SKILL.md](../.cursor/skills/meaningful-conversations/i18n-and-theming/SKILL.md)
 
 ---
 
@@ -148,13 +146,13 @@ Quick reference guide for common issues and where to find solutions.
 
 | Issue | Solution | Guide |
 |-------|----------|-------|
-| Docker/Podman build fails | Check Dockerfile, verify npm ci | [deployment.mdc](../.cursor/rules/deployment.mdc) |
+| Docker/Podman build fails | Check Dockerfile, verify npm ci | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
 | Image size too large | Review COPY instructions, .dockerignore | [PODMAN-GUIDE.md](./PODMAN-GUIDE.md) |
 | Container networking issues | Check compose file networks | [MARIADB-POD-CONFIGURATION.md](./MARIADB-POD-CONFIGURATION.md) |
 | Registry push fails | Verify GitLab token scopes (`read_registry`, `write_registry`) | [GITLAB-REGISTRY-SETUP.md](./GITLAB-REGISTRY-SETUP.md) |
 
 **Primary Resources:**
-- [deployment.mdc](../.cursor/rules/deployment.mdc)
+- [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md)
 - [PODMAN-GUIDE.md](./PODMAN-GUIDE.md)
 
 ---
@@ -185,9 +183,9 @@ Quick reference guide for common issues and where to find solutions.
 | `P3018: A migration failed to apply` | Incomplete migration in database | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md#backend-startet-nicht-migration-fehler) |
 | `ECONNREFUSED` on localhost:3001 | Backend not running or wrong port | [LOCAL-DEV-SETUP.md](./LOCAL-DEV-SETUP.md#backend-wont-start) |
 | `Table 'X' already exists` | Migration trying to recreate table | [LOCAL-DEV-MIGRATIONS.md](./LOCAL-DEV-MIGRATIONS.md) |
-| `ERR_ERL_KEY_GEN_IPV6` | express-rate-limit version mismatch | [deployment.mdc](../.cursor/rules/deployment.mdc#known-pitfalls) |
+| `ERR_ERL_KEY_GEN_IPV6` | express-rate-limit version mismatch | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
 | `Cannot find module` | Dependencies not installed | Run `npm install` |
-| `Unauthorized` (API) | Missing/invalid JWT token | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
+| `Unauthorized` (API) | Missing/invalid JWT token | [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md) |
 
 ---
 
@@ -200,10 +198,10 @@ Quick reference guide for common issues and where to find solutions.
 | Set up the project from scratch | [LOCAL-DEV-SETUP.md](./LOCAL-DEV-SETUP.md) |
 | Add a database migration | [LOCAL-DEV-MIGRATIONS.md](./LOCAL-DEV-MIGRATIONS.md) |
 | Deploy to staging/production | [DEPLOYMENT-CHECKLIST.md](./DEPLOYMENT-CHECKLIST.md) |
-| Add a new translation | [i18n-and-theming.mdc](../.cursor/rules/i18n-and-theming.mdc) |
-| Debug TTS issues | [tts-debugging.mdc](../.cursor/rules/tts-debugging.mdc) |
-| Update version number | [deployment.mdc](../.cursor/rules/deployment.mdc) |
-| Understand user roles | [auth-and-roles.mdc](../.cursor/rules/auth-and-roles.mdc) |
+| Add a new translation | [i18n-and-theming/SKILL.md](../.cursor/skills/meaningful-conversations/i18n-and-theming/SKILL.md) |
+| Debug TTS issues | [TTS-FINAL-STATUS.md](./TTS-FINAL-STATUS.md) |
+| Update version number | [deployment/SKILL.md](../.cursor/skills/meaningful-conversations/deployment/SKILL.md) |
+| Understand user roles | [USER-ACCESS-MATRIX.md](./USER-ACCESS-MATRIX.md) |
 | Configure server infrastructure | [QUICK-START-MANUALMODE-SERVER.md](./QUICK-START-MANUALMODE-SERVER.md) |
 
 ---
@@ -227,5 +225,5 @@ Can't find what you're looking for? Check the complete documentation index:
 
 ---
 
-**Last Updated:** February 13, 2026  
+**Last Updated:** August 5, 2026  
 **Version:** 1.0

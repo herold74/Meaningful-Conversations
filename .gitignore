@@ -67,10 +67,19 @@ backups/
 *.ntvs*
 *.njsproj
 *.sln
-# Cursor IDE — ignore local config; version agent skills under .cursor/skills/
+# Cursor IDE — ignore local config; version shared agent infrastructure
 .cursor/*
 !.cursor/skills/
 !.cursor/skills/**
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/commands/
+!.cursor/commands/**
+!.cursor/hooks/
+!.cursor/hooks/**
+!.cursor/hooks.json
+!.cursor/automations/
+!.cursor/automations/**
 
 # OS generated files
 .DS_Store
