@@ -10,7 +10,12 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Recent Changes (2026-08-05 — P5 test coverage)
+## Recent Changes (2026-08-05 — Cursor config private)
+
+- **Policy:** `.cursor/` and `AGENTS.md` removed from git tracking — maintainer workflow/IP stays local only (reverses commit `c8528f2` versioning approach)
+- **Public repo:** `DOCUMENTATION/` + `memory-bank/` remain the shared handoff layer
+
+## Recent Changes (2026-08-05 — User guide + AI Act docs)
 
 - **Frontend:** Fixed vitest→Jest in `botGender.test.ts`, `ttsServiceVoice.test.ts`; widened `collectCoverageFrom` (utils, services, hooks, context, config); coverage floors + `coverageProvider: v8`
 - **Backend:** Widened coverage to routes/middleware/practice/utils; PayPal webhook fail-closed tests; Apple IAP JWS + notification route tests; coverage floors (~40% statements baseline)
