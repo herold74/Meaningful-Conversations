@@ -14,6 +14,7 @@ import * as userService from '../services/userService';
 import { buildUpdatedContext, getExistingHeadlines, AppliedUpdatePayload, HeadlineOption, normalizeHeadline, fuzzyMatchHeadline, getEmojiForHeadline } from '../utils/contextUpdater';
 import { FileTextIcon } from './icons/FileTextIcon';
 import { downloadTextFile } from '../utils/fileDownload';
+import { wrapAiGeneratedTextExport } from '../utils/aiContentMarking';
 import { CalendarIcon } from './icons/CalendarIcon';
 import { exportSingleEvent, exportAllEvents, exportSingleEventWithDate } from '../utils/calendarExport';
 import DatePickerModal from './DatePickerModal';
@@ -641,7 +642,10 @@ const SessionReview: React.FC<SessionReviewProps> = ({
             });
         }
         try {
-            await downloadTextFile(summaryContent.trim(), 'Session_Summary.txt');
+            await downloadTextFile(
+                wrapAiGeneratedTextExport(summaryContent.trim(), language, 'session-summary'),
+                'Session_Summary.txt',
+            );
         } catch (err) {
             console.error('Summary download failed:', err);
         }
