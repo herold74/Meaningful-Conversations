@@ -13,6 +13,7 @@
 ## Recent Changes (2026-08-05 — Cursor config private)
 
 - **Policy:** `.cursor/` and `AGENTS.md` removed from git tracking — maintainer workflow/IP stays local only (reverses commit `c8528f2` versioning approach)
+- **History purge:** `git filter-repo` removed `.cursor/` + `AGENTS.md` from **all** commits; `main` force-pushed. Recovery tag on remote: `backup/pre-cursor-history-purge-20260805` (pre-purge history)
 - **Public repo:** `DOCUMENTATION/` + `memory-bank/` remain the shared handoff layer
 
 ## Recent Changes (2026-08-05 — User guide + AI Act docs)
