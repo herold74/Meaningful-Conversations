@@ -7,6 +7,9 @@ interface DisclaimerViewProps {}
 
 const de_markdown = `Diese Anwendung und die darin enthaltenen KI-Coaches dienen nur zu Informations- und Bildungszwecken.
 
+## KI-Transparenz (EU-KI-Verordnung)
+Alle Coaches sind KI-Systeme — keine menschlichen Ansprechpartner. Der Hinweis dazu finden Sie vor dem Gesprächsstart auf der Coach-Auswahlseite (Art. 50 EU-KI-Verordnung).
+
 ## Kein Ersatz für professionelle Beratung
 Die KI-Coaches sind keine lizenzierten medizinischen, rechtlichen, finanziellen oder therapeutischen Fachkräfte. Die erbrachte Leistung stellt somit **ausdrücklich keine medizinische, psychologische oder psychotherapeutische Diagnose, Therapie oder Heilbehandlung dar und ersetzt diese in keiner Weise**. Laufende Behandlungen in diesen Bereichen sollen aufgrund des Coachings weder unterbrochen, abgebrochen noch unterlassen werden. Die Gespräche, die Sie führen, sind kein Ersatz für die Beratung durch einen qualifizierten Fachmann. 
 
@@ -28,6 +31,9 @@ Die Coaching-Methoden in dieser Anwendung sind **generische, beschreibende Bezei
 (3) Im Übrigen (reine Vermögensschäden) ist die Haftung des Anbieters bei leichter Fahrlässigkeit ausgeschlossen, sofern es sich dabei nicht um die Verletzung von Kardinalpflichten handelt. In diesem Fall ist die Haftung betragsmäßig auf das vom Anwender für die konkrete Leistung tatsächlich bezahlte Honorar beschränkt.`;
 
 const en_markdown = `This application and the AI coaches contained within are for informational and educational purposes only.
+
+## AI Transparency (EU AI Act)
+All coaches are AI systems — not human professionals. You will see this notice on the coach selection screen before starting a session (Art. 50 EU AI Act).
 
 ## No Substitute for Professional Advice
 The AI coaches are not licensed medical, legal, financial, or therapeutic professionals. The services provided therefore **expressly do not constitute and do not replace medical, psychological, or psychotherapeutic diagnosis, therapy, or healing treatment in any way**. Ongoing treatments in these areas should not be interrupted, discontinued, or refrained from as a result of the coaching. The conversations you have are not a substitute for advice from a qualified professional.
