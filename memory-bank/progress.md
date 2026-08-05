@@ -104,7 +104,9 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Staging v2.5.6 (2026-08-05):** Build **4** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b4; docs + voice/STT/TTS fixes from `438401c`)
+- [x] **Staging v2.5.6 (2026-08-05):** Build **10** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b10; FAQ STT wait + signature voice fallback from `77f7396`)
+- [x] **Staging v2.5.6 (2026-08-05):** Build **9** — superseded by Build 10 (voice stable STT send on Flieger tap)
+- [x] **Staging v2.5.6 (2026-08-05):** Build **4** — superseded by Build 9 (docs + voice/STT/TTS fixes from `438401c`)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **3** — superseded by Build 4 (docs-only deploy)
 - [x] **Production v2.5.5 (2026-08-05):** Build **2** — https://mc-app.manualmode.at, health OK
 - [x] **Staging v2.5.5 (2026-08-05):** Build **3** — superseded by v2.5.6
