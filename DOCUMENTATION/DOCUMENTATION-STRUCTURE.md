@@ -70,7 +70,8 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **VERSION-MANAGEMENT.md** - Version update workflow
 
 ### Features
-- **COACH-BEHAVIOR-MATRIX.md** - **⭐ Complete behavior matrix of all coaches (contracting, rhythm, closing, advice policy, boundaries)**
+- **COACH-BEHAVIOR-MATRIX.md** - **⭐ Complete behavior matrix of all coaches (contracting, rhythm, closing, advice policy, boundaries)**; includes **Practice Lab method cheatsheet** (12 method cards, contracting/free-play, scenario→method mapping) for use during Coach Practice sessions
+- **practice-method-cheatsheet.html** - **Printable Practice Lab cheatsheet** (A4 landscape, 4 pages): 12 method cards, Anliegensklärung/Freispiel, scenario→method table; open in browser → Print → Save as PDF (landscape, background graphics on). Markdown source: section in COACH-BEHAVIOR-MATRIX.md. Optional pre-generated copy: **practice-method-cheatsheet.pdf** (same folder, if present).
 - **coach-behavior-matrix-infographic.html** - **Printable infographic** (A4 landscape, 3 pages) summarizing all 14 personas and comparison matrix; open in browser → Print → Save as PDF (landscape, background graphics on). Optional pre-generated copy: **coach-behavior-matrix-infographic.pdf** (same folder, if present).
 - **coach-behavior-matrix-infographic-a4-single.html** - **Compact single-page A4 landscape** table-only variant (12 coaches + Gloria footnote); same print settings. Optional PDF: **coach-behavior-matrix-infographic-a4-single.pdf** (same folder, if present).
 - **TTS-FINAL-STATUS.md** - Text-to-Speech implementation (current)
