@@ -2,21 +2,25 @@
 
 **App Store ID:** `6759491083` · **Bundle ID:** `at.manualmode.mc`  
 **Primärsprache in App Store Connect:** Deutsch  
-**Store-Lokalisierungen:** Deutsch + Englisch (U.S.) — beide vollständig pflegen
+**Store-Lokalisierungen:** Deutsch + **Englisch (Kanada)** — beide vollständig pflegen  
+**Nicht im U.S.-Store:** Die App ist **nicht** für die U.S.-Storefront freigegeben (nur AT/DE/CH und andere nicht-U.S.-Märkte). In ASC daher **English (Canada)** wählen — **nicht** English (U.S.).
+
+**ASC-Workflow (Screenshots, Einreichung, Lokalisierungen):** `.cursor/skills/meaningful-conversations/app-store-connect/SKILL.md`
 
 ---
 
 ## App Store Connect — DE/EN Checkliste
 
 1. **App Store Connect → App → App Store → Lokalisierung**
-   - **Deutsch** und **Englisch (U.S.)** anlegen (falls noch nicht vorhanden)
+   - **Deutsch** und **Englisch (Kanada)** anlegen (falls noch nicht vorhanden)
    - **Primärsprache:** Deutsch
 2. **Pro Lokalisierung ausfüllen:** Name, Untertitel, Beschreibung, Keywords, Werbetext (optional), „Was ist neu“
 3. **Screenshots:** je Gerätegröße **DE und EN** hochladen (siehe `scripts/capture-app-store-screenshots.mjs --lang all`)
 4. **Review Notes:** Englisch (unten) — Hinweis auf Sprachumschaltung auf dem Welcome-Screen
 5. **Verifikation:** Store-Seite mit `?l=de` vs. englischer Storefront prüfen  
    - DE: https://apps.apple.com/at/app/id6759491083  
-   - EN: https://apps.apple.com/us/app/id6759491083
+   - EN (Canada): https://apps.apple.com/ca/app/id6759491083  
+   - **Nicht** die U.S.-Storefront (`/us/`) — App dort nicht verfügbar
 
 Leere EN-Felder → Apple zeigt Fallback auf Deutsch.
 
@@ -24,7 +28,7 @@ Leere EN-Felder → Apple zeigt Fallback auf Deutsch.
 
 ## Name & Untertitel
 
-| Feld | Deutsch | English (U.S.) |
+| Feld | Deutsch | English (Canada) |
 |------|---------|----------------|
 | **Name** | ManualMode | ManualMode |
 | **Untertitel** (max 30) | KI-Coaching & Kompetenz | AI Coaching & Competence |
@@ -214,7 +218,7 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 
 ## Was ist neu — App Store Connect (v2.5.4, Build 1) — **aktuelle Einreichung**
 
-**In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (U.S.)** unter „Was ist neu in dieser Version“ einfügen. Neue Version **2.5.4** anlegen (nicht die zurückgezogene 2.5.1-Einreichung).
+**In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen. Neue Version **2.5.4** anlegen (nicht die zurückgezogene 2.5.1-Einreichung).
 
 ### Deutsch
 
@@ -232,7 +236,7 @@ Datenschutz: Hinweise zu Übungstranskripten und Möglichkeit, gespeicherte Tran
 Weitere Verbesserungen: Einheitliche Bezeichnungen der Coaching-Methoden, Fehlerbehebungen und allgemeine Stabilität.
 ```
 
-### English (U.S.)
+### English (Canada)
 
 ```
 ManualMode: New App Store name — matches the name on the home screen.
@@ -266,7 +270,7 @@ Coaching üben: Übungsszenarien mit KI-Coachees, strukturiertes Feedback und Ve
 Weitere Verbesserungen: Überarbeitete Upgrade-Paywall, klarere Abo-Reihenfolge, Stabilität und Datenschutz-Hinweise.
 ```
 
-### English (U.S.) (Archiv)
+### English (Canada) (Archiv)
 
 ```
 ManualMode: New App Store name — matches the name on the home screen.
@@ -356,7 +360,7 @@ node scripts/capture-app-store-screenshots.mjs --lang all
 node scripts/capture-app-store-screenshots.mjs --lang en --device iphone
 ```
 
-Output: `screenshots/app-store-v2.5.4/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+Output: `screenshots/app-store/v2.5.4/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
 
 **v2.5.4 DE (Practice):** `scripts/prepare-asc-screenshots-from-assets.py` — iPhone/iPad Practice-Screens aus Geräte-Exports + Basis-Screens aus v2.4.2.
 
