@@ -10,6 +10,11 @@
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
+## Recent Changes (2026-08-05 — Voice send: wait for stable STT on Flieger tap)
+
+- **Commit pending:** `stopAndFinalize()` in speech service; Flieger tap → spinner → send only committed transcript (no interim fallback)
+- **Staging:** deploy Build 9 pending
+
 ## Recent Changes (2026-08-05 — Staging v2.5.6 Build 8 About Practice + voice fix)
 
 - **Commit `c0a37b3`:** About „Coaching üben“ tab layout parity; ℹ️ access box; „Fortschritt sehen“; `voiceNameIncludesToken` (martin ≠ martina); roadmap practice dev feedback

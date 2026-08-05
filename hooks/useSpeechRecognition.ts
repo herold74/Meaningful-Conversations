@@ -10,7 +10,6 @@ export interface UseSpeechRecognitionParams {
   sendMessage: (text: string) => Promise<void>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  isIOS: boolean;
   stopTts: () => void;
   t: (key: string) => string;
 }
@@ -22,62 +21,66 @@ export function useSpeechRecognition({
   sendMessage,
   isLoading,
   setIsLoading,
-  isIOS,
   stopTts,
   t,
 }: UseSpeechRecognitionParams) {
   const [isListening, setIsListening] = useState(false);
+  /** True while waiting for committed STT after user taps stop-and-send. */
+  const [isFinalizingTranscript, setIsFinalizingTranscript] = useState(false);
   /** True when the last STT chunk was final (text no longer jumping) or recording ended with text. */
   const [hasStableTranscript, setHasStableTranscript] = useState(false);
   const baseTranscriptRef = useRef<string>('');
-  /** Latest combined transcript from onResult — avoids stale React input on stop-and-send. */
+  /** Latest combined transcript from onResult — UI display only during recording. */
   const latestTranscriptRef = useRef<string>('');
-  /** Committed transcript at last isFinal — used for send so interim suffix is never sent. */
+  /** Committed transcript at last isFinal — used for send when not calling stopAndFinalize. */
   const stableTranscriptRef = useRef<string>('');
   const usingNativeSpeech = isNativeApp;
 
   const canSendVoiceTranscript =
     Boolean(input.trim()) && (!isListening || hasStableTranscript);
 
-  const handleVoiceInteraction = useCallback(async () => {
-    if (isLoading) return;
+  const sendTranscript = useCallback(async (textToSend: string) => {
+    const trimmed = textToSend.trim();
+    if (!trimmed) return;
+    baseTranscriptRef.current = '';
+    latestTranscriptRef.current = '';
+    stableTranscriptRef.current = '';
+    setHasStableTranscript(false);
+    setIsLoading(true);
+    await sendMessage(trimmed);
+    setInput('');
+  }, [sendMessage, setInput, setIsLoading]);
 
-    const sendTranscript = async () => {
-      const textToSend = (
-        stableTranscriptRef.current ||
-        latestTranscriptRef.current ||
-        input
-      ).trim();
-      if (!textToSend) return;
-      baseTranscriptRef.current = '';
-      latestTranscriptRef.current = '';
-      stableTranscriptRef.current = '';
-      setHasStableTranscript(false);
-      setIsLoading(true);
-      await sendMessage(textToSend);
-      setInput('');
-    };
+  const handleVoiceInteraction = useCallback(async () => {
+    if (isLoading || isFinalizingTranscript) return;
 
     if (isListening) {
-      console.log('[Speech] Stopping speech recognition');
-
+      setIsFinalizingTranscript(true);
       try {
-        await speechService.stop();
+        const { transcript } = await speechService.stopAndFinalize();
         setIsListening(false);
+        if (!transcript.trim()) {
+          alert(t('chat_voice_finalize_empty'));
+          return;
+        }
+        setInput(transcript);
+        await sendTranscript(transcript);
       } catch (e) {
-        console.error('[Speech] Error stopping recognition:', e);
+        console.error('[Speech] Error finalizing recognition:', e);
+        setIsListening(false);
+      } finally {
+        setIsFinalizingTranscript(false);
       }
-
-      if (isIOS && !usingNativeSpeech) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      await sendTranscript();
       return;
     }
 
     if (input.trim()) {
-      await sendTranscript();
+      const textToSend = (stableTranscriptRef.current || input).trim();
+      if (!textToSend) {
+        alert(t('chat_voice_finalize_empty'));
+        return;
+      }
+      await sendTranscript(textToSend);
       return;
     }
 
@@ -134,7 +137,7 @@ export function useSpeechRecognition({
       console.error('[Speech] Failed to start recognition:', error);
       alert(t('microphone_start_error') || 'Failed to start microphone. Please try again.');
     }
-  }, [isLoading, isListening, hasStableTranscript, input, language, sendMessage, setInput, setIsLoading, isIOS, usingNativeSpeech, t, stopTts]);
+  }, [isLoading, isFinalizingTranscript, isListening, input, language, sendTranscript, setInput, t, stopTts]);
 
   const stopSpeech = useCallback(async () => {
     try {
@@ -147,10 +150,11 @@ export function useSpeechRecognition({
 
   return {
     isListening,
+    isFinalizingTranscript,
     hasStableTranscript,
     canSendVoiceTranscript,
     usingNativeSpeech,
     handleVoiceInteraction,
     stopSpeech,
   };
-}
+};

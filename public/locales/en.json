@@ -233,6 +233,7 @@
   "chat_voice_resume_speech": "Resume Speech",
   "chat_voice_start_recording": "Start recording",
   "chat_voice_stop_and_send": "Stop and send",
+  "chat_voice_finalize_empty": "No speech recognized — please try again.",
   "analyzing_title": "Analyzing Session...",
   "analyzing_subtitle": "Your coach is preparing your session summary.",
   "sessionReview_title": "Session Review",

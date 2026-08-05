@@ -19,6 +19,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { isAndroidBrowser } from '../utils/platformDetection';
 import {
+    appendFinalSegment,
     mergeTranscriptPrefix,
     processIncrementalSpeechResults,
     type IncrementalSpeechState,
@@ -52,6 +53,13 @@ export interface SpeechResult {
     isFinal: boolean;
     confidence?: number;
 }
+
+export interface FinalizeSpeechResult {
+    transcript: string;
+    isFinal: boolean;
+}
+
+const FINALIZE_SPEECH_TIMEOUT_MS = 2000;
 
 /**
  * Speech recognition options
@@ -100,6 +108,11 @@ export interface ISpeechService {
     stop(): Promise<void>;
 
     /**
+     * Stop and wait for a committed (non-interim) transcript before returning.
+     */
+    stopAndFinalize(): Promise<FinalizeSpeechResult>;
+
+    /**
      * Check if currently listening
      */
     isListening(): boolean;
@@ -140,6 +153,54 @@ class WebSpeechService implements ISpeechService {
     private currentSessionTranscript: string = '';
     /** Desktop/iOS browser: isFinal segments appended across result-array resets (manual send only). */
     private incrementalSpeechState: IncrementalSpeechState = { committedFinalText: '' };
+    private finalizePending: {
+        resolve: (result: FinalizeSpeechResult) => void;
+        timeoutId: ReturnType<typeof setTimeout>;
+    } | null = null;
+
+    private getCommittedTranscriptOnly(): string {
+        const committed = this.incrementalSpeechState.committedFinalText.trim();
+        if (committed) {
+            return mergeTranscriptPrefix(this.accumulatedTranscript, committed).trim();
+        }
+        return this.accumulatedTranscript.trim();
+    }
+
+    private resolveFinalize(transcript: string, isFinal: boolean): void {
+        if (!this.finalizePending) return;
+        clearTimeout(this.finalizePending.timeoutId);
+        const resolve = this.finalizePending.resolve;
+        this.finalizePending = null;
+        this.cleanupRecognitionSession();
+        resolve({ transcript: transcript.trim(), isFinal: isFinal && transcript.trim().length > 0 });
+    }
+
+    private cleanupRecognitionSession(): void {
+        this.listening = false;
+        this.lastStartArgs = null;
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
+        this.incrementalSpeechState = { committedFinalText: '' };
+        this.recognition = null;
+    }
+
+    private deliverResult(
+        processed: { transcript: string; isFinal: boolean; confidence: number },
+        onResult: (result: SpeechResult) => void,
+    ): void {
+        if (this.finalizePending) {
+            if (processed.isFinal) {
+                this.resolveFinalize(processed.transcript, true);
+            }
+            return;
+        }
+        if (this.stoppedManually) return;
+        onResult({
+            transcript: processed.transcript,
+            isFinal: processed.isFinal,
+            confidence: processed.confidence,
+        });
+    }
 
     async isAvailable(): Promise<boolean> {
         return typeof window !== 'undefined' && 
@@ -201,6 +262,11 @@ class WebSpeechService implements ISpeechService {
         };
 
         recognition.onend = () => {
+            if (this.finalizePending) {
+                this.resolveFinalize(this.getCommittedTranscriptOnly(), true);
+                return;
+            }
+
             // Browsers may fire onend after silence even with continuous=true
             // (Android Chrome: ~2-3s, Safari: varies, desktop Chrome: rare but possible).
             // Auto-restart keeps the mic open so the user can pause naturally.
@@ -270,19 +336,15 @@ class WebSpeechService implements ISpeechService {
         };
 
         recognition.onresult = (event: any) => {
-            if (this.stoppedManually) return;
             const processed = this.processResults(event);
-            onResult({
-                transcript: processed.transcript,
-                isFinal: processed.isFinal,
-                confidence: processed.confidence
-            });
+            this.deliverResult(processed, onResult);
         };
 
         recognition.start();
     }
 
     async stop(): Promise<void> {
+        this.finalizePending = null;
         this.stoppedManually = true;
         this.lastStartArgs = null;
         this.accumulatedTranscript = '';
@@ -297,6 +359,35 @@ class WebSpeechService implements ISpeechService {
             this.recognition = null;
         }
         this.listening = false;
+    }
+
+    async stopAndFinalize(): Promise<FinalizeSpeechResult> {
+        if (!this.recognition) {
+            return { transcript: this.getCommittedTranscriptOnly(), isFinal: false };
+        }
+
+        return new Promise((resolve) => {
+            const timeoutId = setTimeout(() => {
+                this.finalizePending = null;
+                const transcript = this.getCommittedTranscriptOnly();
+                this.cleanupRecognitionSession();
+                resolve({ transcript, isFinal: transcript.length > 0 });
+            }, FINALIZE_SPEECH_TIMEOUT_MS);
+
+            this.finalizePending = { resolve, timeoutId };
+            this.stoppedManually = true;
+            this.lastStartArgs = null;
+
+            try {
+                this.recognition.stop();
+            } catch (e) {
+                clearTimeout(timeoutId);
+                this.finalizePending = null;
+                const transcript = this.getCommittedTranscriptOnly();
+                this.cleanupRecognitionSession();
+                resolve({ transcript, isFinal: transcript.length > 0 });
+            }
+        });
     }
 
     isListening(): boolean {
@@ -374,6 +465,18 @@ class WebSpeechService implements ISpeechService {
             const lastResult = resultsArray[resultsArray.length - 1];
             isFinal = lastResult.isFinal;
             confidence = lastResult[0].confidence || 0;
+            if (isFinal) {
+                const finalOnly = resultsArray
+                    .filter((r: any) => r.isFinal)
+                    .map((r: any) => r[0].transcript)
+                    .join(' ');
+                if (finalOnly.trim()) {
+                    this.incrementalSpeechState.committedFinalText = appendFinalSegment(
+                        this.incrementalSpeechState.committedFinalText,
+                        finalOnly,
+                    );
+                }
+            }
         } else {
             // Desktop / iOS browsers: append isFinal segments via resultIndex (survives results-array resets)
             const processed = processIncrementalSpeechResults(event, this.incrementalSpeechState);
@@ -401,6 +504,11 @@ class NativeSpeechService implements ISpeechService {
     private stoppedManually: boolean = false;
     private accumulatedTranscript: string = '';
     private currentSessionTranscript: string = '';
+    private sessionCommittedFinal: string = '';
+    private finalizePending: {
+        resolve: (result: FinalizeSpeechResult) => void;
+        timeoutId: ReturnType<typeof setTimeout>;
+    } | null = null;
     private lastStartArgs: {
         options: SpeechOptions;
         onResult: (result: SpeechResult) => void;
@@ -442,6 +550,7 @@ class NativeSpeechService implements ISpeechService {
         this.stoppedManually = false;
         this.accumulatedTranscript = '';
         this.currentSessionTranscript = '';
+        this.sessionCommittedFinal = '';
         this.lastStartArgs = { options, onResult, onError, onStart, onEnd };
 
         await this.startInternal(options, onResult, onError, onStart, onEnd);
@@ -457,9 +566,20 @@ class NativeSpeechService implements ISpeechService {
         try {
             const partialResultListener = await NativeSTT.addListener('partialResult', (data) => {
                 this.currentSessionTranscript = data.transcript;
+                if (data.isFinal && data.transcript.trim()) {
+                    this.sessionCommittedFinal = data.transcript.trim();
+                }
                 const combined = this.accumulatedTranscript
                     ? this.accumulatedTranscript + ' ' + data.transcript
                     : data.transcript;
+
+                if (this.finalizePending) {
+                    if (data.isFinal) {
+                        this.resolveNativeFinalize(combined, true);
+                    }
+                    return;
+                }
+
                 onResult({
                     transcript: combined,
                     isFinal: data.isFinal
@@ -486,6 +606,11 @@ class NativeSpeechService implements ISpeechService {
             this.listeners.push(startedListener);
 
             const stoppedListener = await NativeSTT.addListener('stopped', () => {
+                if (this.finalizePending) {
+                    this.resolveNativeFinalize(this.getNativeCommittedTranscript(), true);
+                    return;
+                }
+
                 if (!this.stoppedManually && this.lastStartArgs) {
                     if (this.currentSessionTranscript.trim()) {
                         this.accumulatedTranscript = this.accumulatedTranscript
@@ -537,10 +662,12 @@ class NativeSpeechService implements ISpeechService {
     }
 
     async stop(): Promise<void> {
+        this.finalizePending = null;
         this.stoppedManually = true;
         this.lastStartArgs = null;
         this.accumulatedTranscript = '';
         this.currentSessionTranscript = '';
+        this.sessionCommittedFinal = '';
         try {
             this.removeAllListeners();
             await NativeSTT.stop();
@@ -549,6 +676,60 @@ class NativeSpeechService implements ISpeechService {
             console.warn('[NativeSpeechService] Stop error (ignored):', e);
         }
         this.listening = false;
+    }
+
+    private getNativeCommittedTranscript(): string {
+        const sessionFinal = this.sessionCommittedFinal.trim();
+        if (sessionFinal) {
+            return mergeTranscriptPrefix(this.accumulatedTranscript, sessionFinal).trim();
+        }
+        return this.accumulatedTranscript.trim();
+    }
+
+    private resolveNativeFinalize(transcript: string, isFinal: boolean): void {
+        if (!this.finalizePending) return;
+        clearTimeout(this.finalizePending.timeoutId);
+        const resolve = this.finalizePending.resolve;
+        this.finalizePending = null;
+        this.cleanupNativeSession();
+        resolve({ transcript: transcript.trim(), isFinal: isFinal && transcript.trim().length > 0 });
+    }
+
+    private cleanupNativeSession(): void {
+        this.listening = false;
+        this.lastStartArgs = null;
+        this.accumulatedTranscript = '';
+        this.currentSessionTranscript = '';
+        this.sessionCommittedFinal = '';
+        this.removeAllListeners();
+    }
+
+    async stopAndFinalize(): Promise<FinalizeSpeechResult> {
+        if (!this.listening) {
+            return { transcript: this.getNativeCommittedTranscript(), isFinal: false };
+        }
+
+        return new Promise((resolve) => {
+            const timeoutId = setTimeout(() => {
+                this.finalizePending = null;
+                const transcript = this.getNativeCommittedTranscript();
+                this.cleanupNativeSession();
+                void NativeSTT.stop().catch(() => {});
+                resolve({ transcript, isFinal: transcript.length > 0 });
+            }, FINALIZE_SPEECH_TIMEOUT_MS);
+
+            this.finalizePending = { resolve, timeoutId };
+            this.stoppedManually = true;
+            this.lastStartArgs = null;
+
+            void NativeSTT.stop().catch(() => {
+                clearTimeout(timeoutId);
+                this.finalizePending = null;
+                const transcript = this.getNativeCommittedTranscript();
+                this.cleanupNativeSession();
+                resolve({ transcript, isFinal: transcript.length > 0 });
+            });
+        });
     }
 
     isListening(): boolean {
