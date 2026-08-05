@@ -1,14 +1,32 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.4
+**Version:** 2.5.5
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **10**, v2.5.4 — https://mc-beta.manualmode.at (health OK; coachee role guard live on backend)
-**Production:** Deployed **2026-08-05**, Build **9**, v2.5.4 — https://mc-app.manualmode.at (health OK; coachee role guard **not yet** on prod)
+**Staging:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-beta.manualmode.at (health OK; STT + TTS ONNX fallback + coachee role guard live)
+**Production:** Deployed **2026-08-05**, Build **2**, v2.5.5 — https://mc-app.manualmode.at (health OK; parity with staging images)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** BUILD_NUMBER **10** in repo (`CURRENT_PROJECT_VERSION=10` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=2` in repo (`BUILD_NUMBER` after deploy sync)
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Recent Changes (2026-08-05 — Staging + Production v2.5.5 Build 2)
+
+- **Commit `468a70e`:** chore: release v2.5.5 — STT pause fix, TTS ONNX fallback, coachee role guard bundle
+- **Commit `4e61364`:** chore: restore v2.5.5 build 1 sync after mistaken 2.5.4 deploy
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c all` — ~23 min; TTS rebuild with `sanitize_text_for_piper`; health OK
+- **Production deploy:** `./deploy-manualmode.sh -e production` — pull-only 2.5.5 images; health OK
+- **Parity:** Staging + Production both on v2.5.5-b2
+
+## Recent Changes (2026-08-05 — Staging v2.5.4 Build 11 STT + TTS fixes — superseded by 2.5.5)
+
+- **Commit `b0f0c45`:** fix(stt): preserve desktop voice transcript across pauses — `webSpeechResultProcessing.ts` + incremental WebSpeech results; Android path unchanged; 7 unit tests
+- **Commit `c963ce5`:** fix(tts): recover from Piper ONNX failures on edge-case text — `sanitize_text_for_piper`, sentence-chunk fallback, WAV concat in `tts-service/app.py`; NFKC normalization in backend `ttsService.js`; client streaming fallback to local speech in `useTts.ts`
+- **Commit `2f39435`:** fix(tts): resolve `speakFallbackRef` readonly TypeScript error (blocked first full deploy)
+- **Commit `4c33724`:** chore build 11 sync (deploy script auto-commit after successful staging deploy)
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c all` — full rebuild (TTS `app.py` changed); first attempt failed at frontend `tsc`; second attempt succeeded (~18 min); health OK; TTS container has `synthesize_with_piper_safe`; Piper health OK
+- **Production:** **not deployed** — pending user approval after staging verification
+- **Context:** Helene (`helene@arndgen.de`) Practice Voice Mode on prod — STT one-word fragments on Chrome/macOS; 32× TTS HTTP 500 (Piper ONNX `GatherElements`/`Reshape`/`ScatterND` on specific text → silent voice mode)
 
 ## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 coachee role guard)
 
@@ -16,12 +34,10 @@
 - **Staging deploy:** `./deploy-manualmode.sh -e staging -c backend` — backend-only (frontend `-c app` blocked by unrelated `useTts.ts` TS2540); health OK; Build **10** unchanged
 - **Context:** Helene Practice Voice — AI coachee was mirroring/scaling like a coach; guard forbids mirroring, permission/meta questions, scaling, session control
 
-## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 STT fix)
+## Recent Changes (2026-08-05 — Staging v2.5.4 Build 10 STT-only deploy)
 
-- **Commit `b0f0c45`:** fix(stt): preserve desktop voice transcript across pauses — `webSpeechResultProcessing.ts` + `WebSpeechService` resultIndex accumulation; Android path unchanged; 7 unit tests
 - **Commit `62c0417`:** chore build 10 sync (deploy script)
-- **Staging deploy:** `./deploy-manualmode.sh -e staging -c frontend` — Build 10; health OK
-- **Context:** Helene (`helene@arndgen.de`) Practice Voice Mode — STT fragments on Chrome/macOS; TTS 500s separate issue
+- **Staging deploy:** `./deploy-manualmode.sh -e staging -c frontend` — Build 10; health OK (superseded by Build 11 full deploy above)
 
 ## Recent Changes (2026-08-05 — Staging + Production v2.5.4 Build 9)
 
