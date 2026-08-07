@@ -3,23 +3,32 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-05**, Build **11**, v2.5.6 — https://mc-beta.manualmode.at (health OK; FAQ Intent-Picker-Nachfolger entfernt; `sw.js` v2.5.6-b11)
-**Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; gleiche Images wie Staging Build 11 — erster Production-Deploy 2.5.6)
+**Staging:** Deployed **2026-08-07**, Build **13**, v2.5.6 — https://mc-beta.manualmode.at (health OK; Intent-UX, Flow-Fixes, Menü Lebenskontext; `sw.js` v2.5.6-b13)
+**Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=11` in repo (`BUILD_NUMBER` after deploy sync)
+**Xcode:** `CURRENT_PROJECT_VERSION=13` in repo; **`npm run sync:ios-staging`** ausgeführt (2026-08-07) — bereit für Archive mit Staging-Backend
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Session handoff (2026-08-06 — Feierabend)
+## Session handoff (2026-08-07)
 
-**Heute live (Staging Build 11 + Production v2.5.6):** About-Tab „Coaching üben“, User-Guide-Callouts, Voice-STT-Finalize auf Flieger, FAQ STT/TTS-Hinweise, FAQ Intent-Picker-Nachfolger entfernt, Martin/Martina-Voice-Fix.
+**Heute live (Staging Build 13):** Intent-Picker UX (3 Karten, coachPractice-Routing), Flow-Audit-Fixes (Onboarding→Intent, Premium+-Upgrade, Practice-Back), Burger-Menü **Lebenskontext** (Gast→Editor-Overlay), Coachee-Sanitizer + STT-Verbesserungen.
 
-**Nächste Session (Vorschläge, nicht dringend):**
-- Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung (`PracticeEvaluationReview`)
-- **ASC / iOS:** Store noch 2.5.0 — Web/PWA auf 2.5.6; nächstes iOS-Release bündelt Frontend-Änderungen
-- Smoke auf Production: FAQ, Voice-Modus Flieger, About Practice-Tab
+**Commits:** `8c61c72` (Feature) → `7cb43b3` (build 12 sync, vorheriger abgebrochener Deploy) → `047d407` (build 13 sync nach erfolgreichem Staging-Deploy).
 
-**Repo:** `main` clean, pushed (`f5a176a`).
+**Nächste Session (Vorschläge):**
+- Smoke Staging: Intent-Flow (Gast/Registriert/Premium+), Menü Lebenskontext, Practice-Lock → Upgrade
+- **ASC / iOS:** Xcode Archive Build 13 testen; Production-Deploy erst nach expliziter Freigabe
+- Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung
+
+**Repo:** `main` clean, pushed (`047d407`).
+
+## Recent Changes (2026-08-07 — Staging Build 13 Intent UX + LC menu)
+
+- **Commit `8c61c72`:** Intent-Picker UX, Flow-Fixes, Menü Lebenskontext, Practice/Premium+-Routing, Coachee-Sanitizer
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commits `7cb43b3` (build 12 sync, vorheriger Deploy unvollständig) + `047d407` (build 13 sync)
+- **iOS:** `npm run sync:ios-staging` — Capacitor sync + Plugin-Verify OK
+- **Verified:** staging health 200, avatars `image/png`, bundle **Build 13**, `menu_life_context` im JS
 
 ## Recent Changes (2026-08-05 — Staging Build 11 + Production v2.5.6 FAQ trim)
 
