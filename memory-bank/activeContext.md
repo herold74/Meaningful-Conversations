@@ -3,25 +3,31 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-07**, Build **13**, v2.5.6 — https://mc-beta.manualmode.at (health OK; Intent-UX, Flow-Fixes, Menü Lebenskontext; `sw.js` v2.5.6-b13)
+**Staging:** Deployed **2026-08-07**, Build **14**, v2.5.6 — https://mc-beta.manualmode.at (health OK; lighter EU AI Act hint on coach selection; `sw.js` v2.5.6-b14)
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=13` in repo; **`npm run sync:ios-staging`** ausgeführt (2026-08-07) — bereit für Archive mit Staging-Backend
+**Xcode:** `CURRENT_PROJECT_VERSION=14` in repo (build sync); **`npm run sync:ios-staging`** ausgeführt (2026-08-07) — vor Archive ggf. erneut syncen
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
 ## Session handoff (2026-08-07)
 
-**Heute live (Staging Build 13):** Intent-Picker UX (3 Karten, coachPractice-Routing), Flow-Audit-Fixes (Onboarding→Intent, Premium+-Upgrade, Practice-Back), Burger-Menü **Lebenskontext** (Gast→Editor-Overlay), Coachee-Sanitizer + STT-Verbesserungen.
+**Heute live (Staging Build 14):** Leichter EU-KI-Verordnung-Hinweis auf Coach-Auswahl — inline Info-Zeile statt Box; gekürzte DE/EN-Copy (Art. 50 Offenlegung + synthetische Stimmen).
 
-**Commits:** `8c61c72` (Feature) → `7cb43b3` (build 12 sync, vorheriger abgebrochener Deploy) → `047d407` (build 13 sync nach erfolgreichem Staging-Deploy).
+**Commits:** `a1088a8` (EU AI Act hint UX) → `7e92588` (build 14 sync nach Staging-Deploy). Vorher: Build 13 Intent-UX, Flow-Fixes, Menü Lebenskontext.
 
 **Nächste Session (Vorschläge):**
-- Smoke Staging: Intent-Flow (Gast/Registriert/Premium+), Menü Lebenskontext, Practice-Lock → Upgrade
-- **ASC / iOS:** Xcode Archive Build 13 testen; Production-Deploy erst nach expliziter Freigabe
+- Smoke Staging: Coach-Auswahl — Hinweis lesbar aber dezent; Intent-Flow, Menü Lebenskontext
+- **ASC / iOS:** Xcode Archive Build 14 testen; Production-Deploy erst nach expliziter Freigabe
 - Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung
 
-**Repo:** `main` clean, pushed (`047d407`).
+**Repo:** `main` clean, pushed (`7e92588`).
+
+## Recent Changes (2026-08-07 — Staging Build 14 EU AI Act hint UX)
+
+- **Commit `a1088a8`:** BotSelection — boxed notice → subtle inline Info line; tighter DE/EN copy for EU AI Act disclosure + synthetic voice note
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commit `7e92588` (build 14 sync)
+- **Verified:** staging health 200, avatars `image/png`, bundle **Build 14**, `botSelection_ai_act_notice` im JS, `sw.js` v2.5.6-b14
 
 ## Recent Changes (2026-08-07 — Staging Build 13 Intent UX + LC menu)
 
