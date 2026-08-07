@@ -13,11 +13,47 @@ interface IntentPickerViewProps {
   safeAreaTop?: number;
 }
 
-const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string; featured?: boolean }[] = [
-  { id: 'communication', Icon: MessageCircle, titleKey: 'intent_communication_title', descKey: 'intent_communication_desc' },
-  { id: 'coaching', Icon: Lightbulb, titleKey: 'intent_coaching_title', descKey: 'intent_coaching_desc', featured: true },
-  { id: 'coachPractice', Icon: GraduationCap, titleKey: 'intent_coach_practice_title', descKey: 'intent_coach_practice_desc' },
+type IntentCardTheme = 'bronze' | 'featured' | 'silver';
+
+const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string; theme: IntentCardTheme }[] = [
+  { id: 'communication', Icon: MessageCircle, titleKey: 'intent_communication_title', descKey: 'intent_communication_desc', theme: 'bronze' },
+  { id: 'coaching', Icon: Lightbulb, titleKey: 'intent_coaching_title', descKey: 'intent_coaching_desc', theme: 'featured' },
+  { id: 'coachPractice', Icon: GraduationCap, titleKey: 'intent_coach_practice_title', descKey: 'intent_coach_practice_desc', theme: 'silver' },
 ];
+
+const CARD_THEME_CLASSES: Record<IntentCardTheme, {
+  card: string;
+  iconBox: string;
+  icon: string;
+  title: string;
+  desc: string;
+  cta: string;
+}> = {
+  bronze: {
+    card: 'surface-elevated shadow-card border border-section-bronze/25 bg-section-bronze/[0.06] hover:border-section-bronze/50 hover:shadow-card-elevated hover:bg-section-bronze/[0.09]',
+    iconBox: 'bg-section-bronze/15 ring-1 ring-section-bronze/20',
+    icon: 'text-section-bronze',
+    title: 'text-content-primary group-hover:text-section-bronze transition-colors',
+    desc: 'text-content-secondary',
+    cta: 'text-section-bronze opacity-80 group-hover:opacity-100 transition-opacity',
+  },
+  featured: {
+    card: 'action-card-featured shadow-card-elevated border border-transparent',
+    iconBox: 'bg-black/10 dark:bg-black/20 ring-1 ring-black/10 dark:ring-white/10',
+    icon: 'text-inherit',
+    title: 'text-inherit',
+    desc: 'text-inherit opacity-90',
+    cta: 'text-inherit',
+  },
+  silver: {
+    card: 'surface-elevated shadow-card border border-section-silver/25 bg-section-silver/[0.06] hover:border-section-silver/45 hover:shadow-card-elevated hover:bg-section-silver/[0.09]',
+    iconBox: 'bg-section-silver/15 ring-1 ring-section-silver/20',
+    icon: 'text-section-silver',
+    title: 'text-content-primary group-hover:text-section-silver transition-colors',
+    desc: 'text-content-secondary',
+    cta: 'text-section-silver opacity-80 group-hover:opacity-100 transition-opacity',
+  },
+};
 
 const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
@@ -49,7 +85,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
           const description = isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
             ? t(`${intent.descKey}_guest`)
             : t(intent.descKey);
-          const featured = intent.featured;
+          const styles = CARD_THEME_CLASSES[intent.theme];
 
           return (
             <motion.button
@@ -59,24 +95,18 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
               transition={{ delay: 0.15 + i * 0.1, duration: 0.4, ease: 'easeOut' }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(intent.id)}
-              className={`
-                w-full h-full flex flex-col text-left rounded-card p-5 transition-all group
-                ${featured
-                  ? 'action-card-featured shadow-card-elevated border border-transparent'
-                  : 'surface-elevated shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated'
-                }
-              `}
+              className={`w-full h-full flex flex-col text-left rounded-card p-5 transition-all group ${styles.card}`}
             >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${featured ? 'bg-black/10 dark:bg-black/20' : 'bg-accent-primary/10'}`}>
-                <intent.Icon className={`w-5 h-5 ${featured ? 'text-inherit' : 'text-accent-primary'}`} aria-hidden="true" />
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${styles.iconBox}`}>
+                <intent.Icon className={`w-5 h-5 ${styles.icon}`} aria-hidden="true" />
               </div>
-              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${featured ? 'text-inherit' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
+              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${styles.title}`}>
                 {t(intent.titleKey)}
               </h3>
-              <p className={`text-sm leading-relaxed flex-1 ${featured ? 'text-inherit opacity-90' : 'text-content-secondary'}`}>
+              <p className={`text-sm leading-relaxed flex-1 ${styles.desc}`}>
                 {description}
               </p>
-              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${featured ? 'text-inherit' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
+              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${styles.cta}`}>
                 <span>{t('intent_card_cta')}</span>
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </div>

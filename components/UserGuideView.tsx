@@ -132,7 +132,7 @@ Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare
 Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
 - **Kommunikation & Management** — Öffnet den Bereich Management & Kommunikation (Nobody, Sam, Gloria, Transkript-Tools)
 - **Coaching zu meinem Anliegen** (hervorgehoben) — Fokus auf die Anliegen-Suche; Coach-Bereiche bleiben eingeklappt
-- **Als Coach üben** — Direkt zur Coach Practice-Übung (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
+- **Als Coach üben** — Direkt zum Übungsbereich (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
 
@@ -1185,7 +1185,7 @@ After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatar
 On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
 - **Communication & management** — Opens the Management & Communication section (Nobody, Sam, Gloria, transcript tools)
 - **Coaching for my concern** (featured) — Focuses the topic search; coach sections stay collapsed
-- **Practice as a coach** — Goes straight to Coach Practice (Silver section, Practice tab); **skips Life Context screens**
+- **Practice as a coach** — Goes straight to the practice area (Silver section, Practice tab); **skips Life Context screens**
 
 Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
 

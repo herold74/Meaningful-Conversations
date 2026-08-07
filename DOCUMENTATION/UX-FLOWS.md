@@ -419,7 +419,7 @@ UI-Texte aus `public/locales/de.json` / `en.json` (Kurzfassung):
 |:---|:---|:---|:---|
 | Kommunikation | Kommunikation & Management | Communication & management | Bronze (ausgeklappt) |
 | Coaching | Coaching zu meinem Anliegen | Coaching for my concern | TopicSearch (alle Pillen eingeklappt) |
-| Coach Practice | Als Coach üben | Practice as a coach | Silber / Practice-Tab (LC-Bypass) |
+| Als Coach üben | Als Coach üben | Practice as a coach | Silber / Practice-Tab (LC-Bypass) |
 
 Details und Laengenbeschreibungen: Keys `intent_*_desc` (bzw. `*_guest` fuer Gaeste).
 
