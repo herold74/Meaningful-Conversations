@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -749,13 +749,17 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         <p className="mt-2 text-base text-content-secondary leading-relaxed">
         {t('botSelection_subtitle')}
         </p>
-        <div
+        <p
           role="note"
-          className="mt-4 mx-auto max-w-2xl text-center text-sm text-content-secondary leading-relaxed px-4 py-3 rounded-lg border border-border-primary bg-background-secondary/80"
+          className="mt-3 mx-auto max-w-2xl flex items-start justify-center gap-2 text-xs text-content-subtle leading-relaxed px-2 text-left sm:text-center"
         >
-          <p>{t('botSelection_ai_act_notice')}</p>
-          <p className="mt-2">{t('botSelection_voice_natural_notice')}</p>
-        </div>
+          <Info className="w-3.5 h-3.5 text-accent-primary/70 shrink-0 mt-0.5 sm:mt-px" aria-hidden />
+          <span className="min-w-0">
+            {t('botSelection_ai_act_notice')}
+            <span className="text-content-subtle/50 mx-1.5" aria-hidden>·</span>
+            {t('botSelection_voice_natural_notice')}
+          </span>
+        </p>
       </div>
 
       {(currentUser || entryIntent === 'coaching') && (
