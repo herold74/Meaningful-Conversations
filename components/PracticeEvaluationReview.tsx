@@ -4,14 +4,14 @@ import { PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
 import { downloadPracticeTranscript } from '../utils/practiceTranscriptDownload';
 import * as geminiService from '../services/geminiService';
-import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
+import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 import { Info } from 'lucide-react';
 
 interface PracticeEvaluationReviewProps {
   evaluation: PracticeEvaluationResult;
   frameworkName: string;
   scenarioName: string;
-  difficultyLabel: string;
+  difficulty: string;
   practiceMode?: PracticeMode;
   onDone: () => void;
   onContinuePhase2?: () => void;
@@ -66,7 +66,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   evaluation,
   frameworkName,
   scenarioName,
-  difficultyLabel,
+  difficulty,
   practiceMode = evaluation.practiceMode || 'method',
   onDone,
   onContinuePhase2,
@@ -77,6 +77,9 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   const { t, language } = useLocalization();
   const evidenceLabel = language === 'de' ? 'Belege:' : 'Evidence:';
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
+  const resolvedDifficultyLabel = getPracticeDifficultyLabel(difficulty, t, {
+    liveMode: evaluation.liveMode === true,
+  });
   const isContracting = practiceMode === 'contracting';
   const isFreePlay = practiceMode === 'free-play';
   const [transcriptDeleted, setTranscriptDeleted] = useState(false);
@@ -91,7 +94,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       await downloadPracticeTranscript(evaluation.transcript, {
         frameworkName,
         scenarioName,
-        difficultyLabel,
+        difficultyLabel: resolvedDifficultyLabel,
         language,
       });
     } catch (err) {
@@ -129,7 +132,7 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       </div>
 
       <p className="text-sm text-content-secondary mb-1 break-words">
-        {frameworkName} · {difficultyLabel}
+        {frameworkName} · {resolvedDifficultyLabel}
       </p>
       <p className="text-sm text-content-secondary mb-6 break-words">{scenarioName}</p>
 

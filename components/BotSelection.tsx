@@ -22,19 +22,24 @@ import {
   CoachSessionRing,
 } from '../utils/coachSessionRing';
 import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/practiceAccess';
+import type { UserIntent } from './IntentPickerView';
+import { getBotSelectionSectionState, type HighlightSection } from '../utils/userIntent';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
   onCoachPractice?: () => void;
+  onAuthRequired?: () => void;
   onUpgrade?: () => void;
+  onPracticeUpgrade?: () => void;
   onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
   currentUser: User | null;
   hasPersonalityProfile?: boolean;
   coachingMode?: CoachingMode;
-  highlightSection?: 'management' | 'topicSearch' | null;
+  highlightSection?: HighlightSection;
   onHighlightDone?: () => void;
+  entryIntent?: UserIntent | null;
 }
 
 interface BotCardProps {
@@ -408,10 +413,12 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
 interface CoachPracticeHeroProps {
   practiceAccess: ReturnType<typeof resolvePracticeAccess>;
   onCoachPractice?: () => void;
-  onUpgrade?: () => void;
+  onAuthRequired?: () => void;
+  onPracticeUpgrade?: () => void;
 }
 
 const practiceLockMessageKey = (reason?: PracticeAccessReason) => {
+  if (reason === 'login_required') return 'botSelection_practice_login_required';
   if (reason === 'premium_required') return 'botSelection_practice_premium_required';
   if (reason === 'practice_required') return 'botSelection_practice_premium_plus_required';
   return 'botSelection_client_required';
@@ -420,21 +427,30 @@ const practiceLockMessageKey = (reason?: PracticeAccessReason) => {
 const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
   practiceAccess,
   onCoachPractice,
-  onUpgrade,
+  onAuthRequired,
+  onPracticeUpgrade,
 }) => {
   const { t } = useLocalization();
   const locked = !practiceAccess.canAccessPractice;
+
+  const handleLockedClick = () => {
+    if (practiceAccess.lockReason === 'login_required') {
+      onAuthRequired?.();
+    } else {
+      onPracticeUpgrade?.();
+    }
+  };
 
   return (
     <div className="max-w-md mx-auto">
       <motion.div
         role="button"
         tabIndex={0}
-        onClick={() => (locked ? onUpgrade?.() : onCoachPractice?.())}
+        onClick={() => (locked ? handleLockedClick() : onCoachPractice?.())}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            locked ? onUpgrade?.() : onCoachPractice?.();
+            locked ? handleLockedClick() : onCoachPractice?.();
           }
         }}
         className={`relative flex flex-col items-center text-center p-8 rounded-card border shadow-card transition-all duration-200 ${
@@ -585,19 +601,30 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
   const { t, language } = useLocalization();
+  const initialSectionState = getBotSelectionSectionState(entryIntent);
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeHighlight, setActiveHighlight] = useState<'management' | 'topicSearch' | null>(null);
-  const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>('coaches');
+  const [activeHighlight, setActiveHighlight] = useState<HighlightSection>(null);
+  const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>(initialSectionState.coachingView);
   const isClientPlus = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const isPremiumPlus = !!(currentUser?.isPremium || isClientPlus);
   const practiceAccess = resolvePracticeAccess(currentUser);
-  const [clientSectionOpen, setClientSectionOpen] = useState(!!currentUser?.isClient);
+  const [kommunikationSectionOpen, setKommunikationSectionOpen] = useState(initialSectionState.kommunikationOpen);
+  const [coachingSectionOpen, setCoachingSectionOpen] = useState(initialSectionState.coachingOpen);
+  const [clientSectionOpen, setClientSectionOpen] = useState(initialSectionState.clientOpen);
   const managementRef = useRef<HTMLDivElement>(null);
   const topicSearchRef = useRef<HTMLDivElement>(null);
   const coachingRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const next = getBotSelectionSectionState(entryIntent);
+    setKommunikationSectionOpen(next.kommunikationOpen);
+    setCoachingSectionOpen(next.coachingOpen);
+    setClientSectionOpen(next.clientOpen);
+    setCoachingView(next.coachingView);
+  }, [entryIntent]);
 
   useEffect(() => {
     if (!highlightSection || isLoading) return;
@@ -607,6 +634,8 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         target = managementRef.current;
       } else if (highlightSection === 'topicSearch') {
         target = currentUser ? topicSearchRef.current : coachingRef.current;
+      } else if (highlightSection === 'coachPractice') {
+        target = coachingRef.current;
       }
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -619,10 +648,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
     }, 300);
     return () => clearTimeout(timer);
   }, [highlightSection, isLoading, onHighlightDone, currentUser]);
-
-  useEffect(() => {
-    setClientSectionOpen(!!currentUser?.isClient);
-  }, [currentUser?.isClient]);
 
   useEffect(() => {
     const fetchAndSetBots = async () => {
@@ -733,7 +758,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         </div>
       </div>
 
-      {currentUser && (
+      {(currentUser || entryIntent === 'coaching') && (
         <TopicSearchSection
           bots={bots}
           onStartSessionWithPrompt={onStartSessionWithPrompt}
@@ -748,9 +773,15 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
       <div className="space-y-12">
         {/* 1. Kommunikation Section — Bronze */}
         <section className="w-full max-w-6xl mx-auto">
-          {/* Section Divider */}
           <div ref={managementRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'management' ? 'ring-4 ring-section-bronze/70 shadow-xl shadow-section-bronze/20 bg-section-bronze/5 animate-pulse' : ''}`}>
-            <div className="flex items-center gap-4">
+            <div
+              className="flex items-center gap-4 cursor-pointer select-none"
+              onClick={() => setKommunikationSectionOpen(prev => !prev)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setKommunikationSectionOpen(prev => !prev); } }}
+              aria-expanded={kommunikationSectionOpen}
+            >
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-bronze/50 to-transparent"></div>
               <div className="flex items-center gap-2 px-4 py-2 bot-section-pill-bronze">
                 <MessageCircle className="w-5 h-5 text-section-bronze shrink-0" aria-hidden="true" />
@@ -762,11 +793,20 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                     {t('botSelection_section_kommunikation_desc')}
                   </div>
                 </div>
+                <svg
+                  className={`w-4 h-4 text-section-bronze shrink-0 transition-transform duration-200 ${kommunikationSectionOpen ? 'rotate-180' : ''}`}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-bronze/50 to-transparent"></div>
             </div>
           </div>
-          
+
+          {kommunikationSectionOpen && (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Nobody Bot Card */}
             {availableKommunikationBots.map((bot) => (
@@ -802,23 +842,47 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             />
           </div>
           <CoachRingLegend />
+          </>
+          )}
         </section>
 
         {/* 2. Coaching Section — Silver toggle: Coaches | Coach Practice */}
         <section className="w-full max-w-6xl mx-auto">
-          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${!currentUser && activeHighlight === 'topicSearch' ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
+          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'coachPractice' || (!currentUser && activeHighlight === 'topicSearch') ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
               <div
-                className="inline-flex bot-section-pill-silver p-1"
-                role="tablist"
-                aria-label={t('botSelection_section_coaching')}
+                className="inline-flex bot-section-pill-silver p-1 items-center gap-1"
+                role="presentation"
               >
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-section-silver/80 hover:text-section-silver transition-colors shrink-0"
+                  onClick={() => setCoachingSectionOpen(prev => !prev)}
+                  aria-expanded={coachingSectionOpen}
+                  aria-label={coachingSectionOpen ? t('botSelection_section_collapse') : t('botSelection_section_expand')}
+                >
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${coachingSectionOpen ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div
+                  className="inline-flex p-1"
+                  role="tablist"
+                  aria-label={t('botSelection_section_coaching')}
+                >
                 <button
                   type="button"
                   role="tab"
                   aria-selected={coachingView === 'coaches'}
-                  onClick={() => setCoachingView('coaches')}
+                  onClick={() => {
+                    setCoachingSectionOpen(true);
+                    setCoachingView('coaches');
+                  }}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                     coachingView === 'coaches'
                       ? 'bot-section-tab-active'
@@ -832,7 +896,10 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                   type="button"
                   role="tab"
                   aria-selected={coachingView === 'practice'}
-                  onClick={() => setCoachingView('practice')}
+                  onClick={() => {
+                    setCoachingSectionOpen(true);
+                    setCoachingView('practice');
+                  }}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                     coachingView === 'practice'
                       ? 'bot-section-tab-active'
@@ -842,17 +909,20 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                   <GraduationCap className="w-4 h-4 shrink-0" aria-hidden />
                   <span>{t('botSelection_tab_practice')}</span>
                 </button>
+                </div>
               </div>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
             </div>
+            {coachingSectionOpen && (
             <p className="text-xs text-section-silver/80 text-center mt-3 max-w-lg mx-auto">
               {coachingView === 'coaches'
                 ? t('botSelection_section_coaching_desc')
                 : t('practice_card_description')}
             </p>
+            )}
           </div>
 
-          {coachingView === 'coaches' ? (
+          {coachingSectionOpen && (coachingView === 'coaches' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {availableCoachingBots.map((bot) => (
               <BotCard 
@@ -890,9 +960,10 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             <CoachPracticeHero
               practiceAccess={practiceAccess}
               onCoachPractice={onCoachPractice}
-              onUpgrade={onUpgrade}
+              onAuthRequired={onAuthRequired}
+              onPracticeUpgrade={onPracticeUpgrade}
             />
-          )}
+          ))}
         </section>
 
         {/* 3. Exklusiv für Klienten Section */}

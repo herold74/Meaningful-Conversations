@@ -11,6 +11,7 @@ import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
 import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context } from '../types';
 import type { UserIntent } from './IntentPickerView';
+import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
 import type { SurveyResult } from './PersonalitySurvey';
 import type { RefinementPreviewResult } from '../services/api';
 
@@ -67,7 +68,7 @@ import AdminView from './AdminView';
 import ChangePasswordView from './ChangePasswordView';
 import { TestScenario } from '../utils/testScenarios';
 import { BOTS } from '../constants';
-import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
+import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 
 export interface AppViewRouterProps {
   // Navigation
@@ -121,8 +122,8 @@ export interface AppViewRouterProps {
   setPaywallUserEmail: React.Dispatch<React.SetStateAction<string | null>>;
 
   // Intent Picker / Bot Selection
-  highlightSection: 'management' | 'topicSearch' | null;
-  setHighlightSection: React.Dispatch<React.SetStateAction<'management' | 'topicSearch' | null>>;
+  highlightSection: HighlightSection;
+  setHighlightSection: React.Dispatch<React.SetStateAction<HighlightSection>>;
   postOceanRoute: 'landing' | 'intent';
   setPostOceanRoute: React.Dispatch<React.SetStateAction<'landing' | 'intent'>>;
 
@@ -198,6 +199,12 @@ export interface AppViewRouterProps {
   // Routing helpers
   applyIntentLogic: (intent: UserIntent | null) => void;
   routeWithIntentPicker: (hasContext: boolean) => Promise<void>;
+  routeToCoachPractice: () => void;
+  handlePracticeSetupBack: () => void;
+  openUpgrade: (focus?: 'premium_plus') => void;
+  upgradeFocus: 'premium_plus' | null;
+  closeLifeContextEditor: () => void;
+  setLifeContextEditorReturnView: React.Dispatch<React.SetStateAction<NavView | null>>;
   buildEmptyLifeContextTemplate: (name: string) => string;
 
   // Translation
@@ -306,6 +313,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     onDeleteAccount,
     applyIntentLogic,
     routeWithIntentPicker,
+    routeToCoachPractice,
+    handlePracticeSetupBack,
+    openUpgrade,
+    upgradeFocus,
+    closeLifeContextEditor,
+    setLifeContextEditorReturnView,
     buildEmptyLifeContextTemplate,
     isSessionQualified,
     t,
@@ -558,19 +571,6 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onSelect={handleIntentSelected}
           isGuest={!currentUser}
           safeAreaTop={iosSafeAreaTop}
-          onSkipPermanently={() => {
-            try {
-              localStorage.setItem('intentPickerDisabled', 'true');
-            } catch {}
-            if (!lifeContext) {
-              setView('namePrompt');
-            } else if (!hasPersonalityProfile) {
-              setPostOceanRoute('intent');
-              setView('oceanOnboarding');
-            } else {
-              setView(lifeContext ? 'contextChoice' : 'landing');
-            }
-          }}
         />
       );
     case 'namePrompt':
@@ -585,16 +585,16 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 .saveUserData(template, serializeGamificationState(gamificationState), encryptionKey)
                 .catch((e) => console.error('Failed to save initial LC:', e));
               if (!hasPersonalityProfile) {
-                setPostOceanRoute('landing');
+                setPostOceanRoute('intent');
                 setView('oceanOnboarding');
               } else {
-                setView('landing');
+                applyIntentLogic(null);
               }
             } else {
-              setView('landing');
+              applyIntentLogic(null);
             }
           }}
-          onSkip={!currentUser ? () => setView('landing') : undefined}
+          onSkip={!currentUser ? () => applyIntentLogic(null) : undefined}
           safeAreaTop={iosSafeAreaTop}
         />
       );
@@ -654,7 +654,10 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           currentUser={currentUser}
           onUserUpdate={setCurrentUser}
           lifeContext={lifeContext}
-          onEditLifeContext={() => setMenuView('lifeContextEditor')}
+          onEditLifeContext={() => {
+            setLifeContextEditorReturnView('personalityProfile');
+            setMenuView('lifeContextEditor');
+          }}
         />
       );
     case 'lifeContextEditor':
@@ -674,9 +677,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 console.error('Failed to save edited context:', error);
               }
             }
-            setMenuView('personalityProfile');
+            closeLifeContextEditor();
           }}
-          onCancel={() => setMenuView('personalityProfile')}
+          onCancel={closeLifeContextEditor}
         />
       );
     case 'botSelection':
@@ -694,17 +697,21 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setView('transcriptRecord');
           }}
           onCoachPractice={() => {
+            if (!currentUser) return;
             setPracticeConfig(null);
             setPracticeEvaluation(null);
             setView('practiceSetup');
           }}
-          onUpgrade={() => setMenuView('upgrade')}
+          onAuthRequired={() => setView('auth')}
+          onUpgrade={() => openUpgrade()}
+          onPracticeUpgrade={() => openUpgrade('premium_plus')}
           onStartSessionWithPrompt={handleStartSessionFromEval}
           currentUser={currentUser}
           hasPersonalityProfile={hasPersonalityProfile}
           coachingMode={currentUser?.coachingMode || 'off'}
           highlightSection={highlightSection}
           onHighlightDone={() => setHighlightSection(null)}
+          entryIntent={getStoredUserIntent()}
         />
       );
     case 'chat':
@@ -749,7 +756,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           currentUser={currentUser}
           onStart={handleStartPractice}
           onStartPhase2={handleStartPhase2}
-          onBack={() => setView('botSelection')}
+          onBack={handlePracticeSetupBack}
           onHistory={navigateToPracticeHistory}
           onProgress={() => setView('practiceProgress')}
         />
@@ -768,7 +775,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           evaluation={practiceEvaluation}
           frameworkName={practiceConfig.frameworkName}
           scenarioName={practiceConfig.scenarioName}
-          difficultyLabel={practiceConfig.difficultyLabel}
+          difficulty={practiceConfig.difficulty}
           practiceMode={practiceConfig.practiceMode || practiceEvaluation.practiceMode || 'method'}
           onDone={handlePracticeDone}
           onContinuePhase2={handleContinueToPhase2}
@@ -807,7 +814,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 coacheeName: '',
                 coacheeAvatar: '/avatars/max.png',
                 difficulty: (item.difficulty as 'easy' | 'moderate' | 'challenging' | 'hard') || 'moderate',
-                difficultyLabel: item.difficulty,
+                difficultyLabel: getPracticeDifficultyLabel(item.difficulty, t, {
+                  liveMode: item.evaluationData.liveMode === true,
+                }),
                 focusNote: item.focusNote || undefined,
                 liveMode: item.evaluationData.liveMode === true,
                 scopeBoundaryTheme: null,
@@ -1010,6 +1019,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return (
         <UpgradeView
           currentUser={currentUser!}
+          focusSection={upgradeFocus}
           onPurchaseSuccess={(user) => {
             setAndProcessUser(user);
             setMenuView(null);

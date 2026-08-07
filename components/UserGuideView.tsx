@@ -130,11 +130,11 @@ Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare
 ### 1.1 Intent Picker & Name
 
 Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
-- **Kommunikation** — Leitet Sie zum Bereich Management & Kommunikation (Nobody, Sam, Gloria)
-- **Coaching** (hervorgehoben) — Leitet Sie zum Coaching-Bereich (Max, Ava, Gabrielle, Kenji, Chloe, Mike)
-- **Begleitendes Coaching** — Leitet Sie zum Exklusiv-Bereich (Rob, Victor — nur für Klienten)
+- **Kommunikation & Management** — Öffnet den Bereich Management & Kommunikation (Nobody, Sam, Gloria, Transkript-Tools)
+- **Coaching zu meinem Anliegen** (hervorgehoben) — Fokus auf die Anliegen-Suche; Coach-Bereiche bleiben eingeklappt
+- **Als Coach üben** — Direkt zur Coach Practice-Übung (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
 
-Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird.
+Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
 
 **Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Gäste können diesen Schritt überspringen.
 
@@ -1183,11 +1183,11 @@ After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatar
 ### 1.1 Intent Picker & Name
 
 On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
-- **Communication** — Routes you to the Management & Communication section (Nobody, Sam, Gloria)
-- **Coaching** (featured) — Routes you to the Coaching section (Max, Ava, Gabrielle, Kenji, Chloe, Mike)
-- **Augmented Coaching** — Routes you to the Exclusive section (Rob, Victor — Client only)
+- **Communication & management** — Opens the Management & Communication section (Nobody, Sam, Gloria, transcript tools)
+- **Coaching for my concern** (featured) — Focuses the topic search; coach sections stay collapsed
+- **Practice as a coach** — Goes straight to Coach Practice (Silver section, Practice tab); **skips Life Context screens**
 
-Your chosen intent determines which section is highlighted in the coach selection screen.
+Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
 
 **Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. Guests can skip this step.
 

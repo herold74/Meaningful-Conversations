@@ -30,6 +30,7 @@ import { useWakeLock } from '../hooks/useWakeLock';
 import CoachInfoModal from './CoachInfoModal';
 import { useTts } from '../hooks/useTts';
 import { resolvePracticeCoacheeGender } from '../utils/botGender';
+import { getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 import { useMeditation } from '../hooks/useMeditation';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
@@ -641,7 +642,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                     {coachPracticeConfig && (
                       <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
-                        {t('practice_chat_you_are_coach')} · {coachPracticeConfig.frameworkName} · {coachPracticeConfig.difficultyLabel}
+                        {t('practice_chat_you_are_coach')} · {coachPracticeConfig.frameworkName} · {getPracticeDifficultyLabel(coachPracticeConfig.difficulty, t, { liveMode: coachPracticeConfig.liveMode })}
                         {practiceLiveMode && ` · ${t('practice_live_badge')}`}
                       </p>
                     )}

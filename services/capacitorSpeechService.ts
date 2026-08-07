@@ -569,9 +569,7 @@ class NativeSpeechService implements ISpeechService {
                 if (data.isFinal && data.transcript.trim()) {
                     this.sessionCommittedFinal = data.transcript.trim();
                 }
-                const combined = this.accumulatedTranscript
-                    ? this.accumulatedTranscript + ' ' + data.transcript
-                    : data.transcript;
+                const combined = this.combineNativeTranscript(data.transcript);
 
                 if (this.finalizePending) {
                     if (data.isFinal) {
@@ -612,11 +610,11 @@ class NativeSpeechService implements ISpeechService {
                 }
 
                 if (!this.stoppedManually && this.lastStartArgs) {
-                    if (this.currentSessionTranscript.trim()) {
-                        this.accumulatedTranscript = this.accumulatedTranscript
-                            ? this.accumulatedTranscript + ' ' + this.currentSessionTranscript
-                            : this.currentSessionTranscript;
+                    const segment = this.sessionCommittedFinal.trim() || this.currentSessionTranscript.trim();
+                    if (segment) {
+                        this.accumulatedTranscript = appendFinalSegment(this.accumulatedTranscript, segment);
                         this.currentSessionTranscript = '';
+                        this.sessionCommittedFinal = '';
                     }
                     console.log('[NativeSpeechService] 🔄 Auto-restart after silence/timeout, accumulated:', this.accumulatedTranscript.length, 'chars');
 
@@ -678,12 +676,13 @@ class NativeSpeechService implements ISpeechService {
         this.listening = false;
     }
 
+    private combineNativeTranscript(sessionTranscript: string): string {
+        return appendFinalSegment(this.accumulatedTranscript, sessionTranscript.trim());
+    }
+
     private getNativeCommittedTranscript(): string {
-        const sessionFinal = this.sessionCommittedFinal.trim();
-        if (sessionFinal) {
-            return mergeTranscriptPrefix(this.accumulatedTranscript, sessionFinal).trim();
-        }
-        return this.accumulatedTranscript.trim();
+        const session = this.sessionCommittedFinal.trim() || this.currentSessionTranscript.trim();
+        return this.combineNativeTranscript(session).trim();
     }
 
     private resolveNativeFinalize(transcript: string, isFinal: boolean): void {

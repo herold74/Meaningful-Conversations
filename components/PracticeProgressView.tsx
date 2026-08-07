@@ -13,7 +13,7 @@ import {
   scoreColorClass,
   PracticeDimensionAverages,
 } from '../utils/practiceProgress';
-import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
+import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 import { TrendingUp, TrendingDown, Minus, Target, Award } from 'lucide-react';
 
 interface PracticeProgressViewProps {
@@ -684,7 +684,7 @@ const PracticeProgressView: React.FC<PracticeProgressViewProps> = ({
                   </p>
                   <p className="text-sm text-content-secondary line-clamp-1">{ev.summary}</p>
                   <p className="text-xs text-content-secondary mt-1">
-                    {new Date(ev.createdAt).toLocaleDateString()} · {ev.difficulty}
+                    {new Date(ev.createdAt).toLocaleDateString()} · {getPracticeDifficultyLabel(ev.difficulty, t, { liveMode: ev.evaluationData.liveMode === true })}
                   </p>
                 </div>
                 <ScoreBadge score={ev.overallScore} max={10} />

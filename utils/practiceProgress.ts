@@ -4,6 +4,7 @@ import {
   PracticeEvaluationSummary,
   PracticeDifficulty,
 } from '../types';
+import { getPracticeDifficultyLabel } from './practiceFrameworkLabels';
 
 export type PracticeLevelId = 'beginner' | 'developing' | 'advanced' | 'expert';
 
@@ -229,8 +230,9 @@ export const buildRecommendedPracticeConfig = (
     const framework = catalog.frameworks.find((f) => !f.locked) || catalog.frameworks[0];
     if (!framework || !scenario) return null;
     const difficulty = (latest?.difficulty as PracticeDifficulty) || 'moderate';
-    const difficultyLabel =
-      catalog.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+    const difficultyLabel = getPracticeDifficultyLabel(difficulty, undefined, {
+      language: latest?.language === 'en' ? 'en' : 'de',
+    });
     return {
       frameworkId: framework.id,
       frameworkName: framework.name,
@@ -253,8 +255,9 @@ export const buildRecommendedPracticeConfig = (
   if (!framework || !scenario) return null;
 
   const difficulty = (latest?.difficulty as PracticeDifficulty) || 'moderate';
-  const difficultyLabel =
-    catalog.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+  const difficultyLabel = getPracticeDifficultyLabel(difficulty, undefined, {
+    language: latest?.language === 'en' ? 'en' : 'de',
+  });
 
   const focusNote = stats.nextDrill?.action?.trim() || undefined;
 

@@ -1,5 +1,6 @@
 import {
   getFrameworkDisplayName,
+  getPracticeDifficultyLabel,
   resolvePracticeFrameworkId,
 } from '../practiceFrameworkLabels';
 
@@ -53,5 +54,27 @@ describe('getFrameworkDisplayName', () => {
   it('does not return raw slug for known ids', () => {
     expect(getFrameworkDisplayName('free-play', { language: 'en' })).not.toBe('free-play');
     expect(getFrameworkDisplayName('contracting', { language: 'en' })).not.toBe('contracting');
+  });
+});
+
+describe('getPracticeDifficultyLabel', () => {
+  it('returns localized label via t()', () => {
+    const t = (key: string) =>
+      ({
+        practice_difficulty_moderate: 'Mittel',
+        practice_difficulty_hard: 'Schwer',
+        practice_live_badge: 'Live',
+      })[key] ?? key;
+    expect(getPracticeDifficultyLabel('moderate', t)).toBe('Mittel');
+    expect(getPracticeDifficultyLabel('hard', t, { liveMode: true })).toBe('Schwer · Live');
+  });
+
+  it('falls back to static labels without t()', () => {
+    expect(getPracticeDifficultyLabel('moderate', undefined, { language: 'de' })).toBe('Mittel');
+    expect(getPracticeDifficultyLabel('moderate', undefined, { language: 'en' })).toBe('Moderate');
+  });
+
+  it('normalizes unknown difficulty to moderate', () => {
+    expect(getPracticeDifficultyLabel('unknown', undefined, { language: 'de' })).toBe('Mittel');
   });
 });

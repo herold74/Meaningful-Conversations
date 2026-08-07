@@ -40,6 +40,54 @@ const FRAMEWORK_LABELS: Record<string, { en: string; de: string }> = {
   'free-play': { en: 'Free play', de: 'Freispiel' },
 };
 
+export const PRACTICE_DIFFICULTY_IDS = ['easy', 'moderate', 'challenging', 'hard'] as const;
+export type PracticeDifficultyId = (typeof PRACTICE_DIFFICULTY_IDS)[number];
+
+const DIFFICULTY_LABELS: Record<PracticeDifficultyId, { en: string; de: string }> = {
+  easy: { en: 'Easy', de: 'Leicht' },
+  moderate: { en: 'Moderate', de: 'Mittel' },
+  challenging: { en: 'Challenging', de: 'Herausfordernd' },
+  hard: { en: 'Hard', de: 'Schwer' },
+};
+
+export function normalizePracticeDifficultyId(
+  difficulty: string | null | undefined,
+): PracticeDifficultyId {
+  if (difficulty && (PRACTICE_DIFFICULTY_IDS as readonly string[]).includes(difficulty)) {
+    return difficulty as PracticeDifficultyId;
+  }
+  return 'moderate';
+}
+
+type GetPracticeDifficultyLabelOptions = {
+  liveMode?: boolean;
+  language?: 'en' | 'de';
+};
+
+export function getPracticeDifficultyLabel(
+  difficulty: string | null | undefined,
+  t?: (key: string) => string,
+  options: GetPracticeDifficultyLabelOptions = {},
+): string {
+  const id = normalizePracticeDifficultyId(difficulty);
+  const key = `practice_difficulty_${id}`;
+  let label: string;
+
+  if (t) {
+    const translated = t(key);
+    label = translated !== key ? translated : DIFFICULTY_LABELS[id][options.language ?? 'en'];
+  } else {
+    label = DIFFICULTY_LABELS[id][options.language ?? 'en'];
+  }
+
+  if (options.liveMode) {
+    const liveBadge = t ? t('practice_live_badge') : 'Live';
+    label = `${label} · ${liveBadge}`;
+  }
+
+  return label;
+}
+
 export function resolvePracticeFrameworkId(frameworkId: string): string {
   return LEGACY_FRAMEWORK_ALIASES[frameworkId] ?? frameworkId;
 }

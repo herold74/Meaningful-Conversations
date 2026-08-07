@@ -156,7 +156,7 @@ REGELN:
 2. Teile Gefühle, Sorgen und Gedanken authentisch
 3. Antworte in ${sentenceRule}
 4. Halte den ROLLEN-GUARD ein — keine Coach-Techniken (siehe oben)
-5. KEINE Verhaltenshinweise mit Sternchen (*seufzt*, *nickt*)
+5. KEINE Bühnenanweisungen — weder mit Sternchen (*seufzt*, *nickt*) noch in Klammern ((denkt kurz nach), (pause))
 6. Schreibe wie ein echter Mensch in normalem Text
 
 ${firstTurnRule}`;
@@ -181,7 +181,7 @@ RULES:
 2. Share feelings, worries, and thoughts authentically
 3. Respond in ${sentenceRule}
 4. Obey the ROLE GUARD — no coach techniques (see above)
-5. NO action descriptions with asterisks (*sighs*, *nods*)
+5. NO stage directions — neither with asterisks (*sighs*, *nods*) nor in parentheses ((pauses briefly), (thinks for a moment))
 6. Write like a real person in plain text
 
 ${firstTurnRule}`;

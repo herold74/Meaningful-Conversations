@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationSummary } from '../types';
 import * as geminiService from '../services/geminiService';
-import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
+import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 
 interface PracticeHistoryViewProps {
   onBack: () => void;
@@ -70,7 +70,7 @@ const PracticeHistoryView: React.FC<PracticeHistoryViewProps> = ({ onBack, onPro
                 </p>
                 <p className="text-sm text-content-secondary line-clamp-1">{ev.summary}</p>
                 <p className="text-xs text-content-secondary mt-1">
-                  {new Date(ev.createdAt).toLocaleDateString()} · {ev.difficulty}
+                  {new Date(ev.createdAt).toLocaleDateString()} · {getPracticeDifficultyLabel(ev.difficulty, t, { liveMode: ev.evaluationData.liveMode === true })}
                 </p>
               </div>
               <div className="flex items-center gap-3 shrink-0">
