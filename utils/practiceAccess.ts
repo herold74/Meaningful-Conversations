@@ -7,7 +7,7 @@ const CLIENT_ONLY_PRACTICE_SOURCE_BOTS = new Set([
   'dan-client-language',
 ]);
 
-export type PracticeAccessReason = 'premium_required' | 'practice_required' | 'client_framework';
+export type PracticeAccessReason = 'login_required' | 'premium_required' | 'practice_required' | 'client_framework';
 
 export interface PracticeAccessState {
   canAccessPractice: boolean;
@@ -33,6 +33,10 @@ export function isPracticeEntitlementActive(user: User | null | undefined, now =
 }
 
 export function resolvePracticeAccess(user: User | null | undefined): PracticeAccessState {
+  if (!user) {
+    return { canAccessPractice: false, canUseClientFrameworks: false, lockReason: 'login_required' };
+  }
+
   if (isStaffOrClient(user)) {
     return { canAccessPractice: true, canUseClientFrameworks: true };
   }

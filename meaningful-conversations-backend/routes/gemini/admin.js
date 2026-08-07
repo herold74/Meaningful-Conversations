@@ -7,6 +7,7 @@ const { trackApiUsage } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const behaviorLogger = require('../../services/behaviorLogger.js');
 const { COACHEE_ROLE_GUARD } = require('../../practice/coacheePrompt.js');
+const { stripCoacheeStageDirections } = require('../../practice/coacheeResponseSanitizer.js');
 
 // GET /api/gemini/cache/stats - Admin endpoint for cache statistics
 router.get('/cache/stats', optionalAuthMiddleware, async (req, res) => {
@@ -73,7 +74,7 @@ REGELN für deine Antwort:
 3. Sei verletzlich - du bist jemand, der Hilfe sucht
 4. Antworte in 1-3 kurzen Sätzen
 5. Halte den ROLLEN-GUARD ein — keine Coach-Techniken (siehe oben)
-6. KEINE Verhaltenshinweise mit Sternchen (wie *seufzt*, *nickt*, *schaut weg*)
+6. KEINE Bühnenanweisungen — weder mit Sternchen (*seufzt*, *nickt*) noch in Klammern ((denkt kurz nach))
 7. Antworte so, wie ein echter Mensch mit diesem Problem antworten würde - in normalem Text ohne Rollenspiel-Formatierung`
             : `You are a coachee (client) in a coaching conversation. You have a problem and are seeking help.
 
@@ -89,7 +90,7 @@ RULES for your response:
 3. Be vulnerable - you are someone seeking help
 4. Respond in 1-3 short sentences
 5. Obey the ROLE GUARD — no coach techniques (see above)
-6. NO action descriptions with asterisks (like *sighs*, *nods*, *looks away*)
+6. NO stage directions — neither with asterisks (*sighs*, *nods*) nor in parentheses ((pauses briefly))
 7. Respond like a real person with this problem would respond - in plain text without roleplay formatting`;
 
         const userPrompt = language === 'de'
@@ -116,7 +117,7 @@ Your response as coachee (answer the coach's question directly):`;
             context: 'chat'
         });
 
-        const generatedText = result.text || '';
+        const generatedText = stripCoacheeStageDirections(result.text || '');
 
         // Log for debugging truncation issues
         console.log(`[Coachee Simulation] Response length: ${generatedText.length} chars, finishReason: ${result.rawResponse?.candidates?.[0]?.finishReason || 'unknown'}`);

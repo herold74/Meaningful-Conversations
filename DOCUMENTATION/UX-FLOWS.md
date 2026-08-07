@@ -390,19 +390,21 @@ flowchart TD
 
     SELECT -->|Kommunikation| COMM[intent = 'communication'<br/>highlight = 'management']
     SELECT -->|Coaching| COACH[intent = 'coaching'<br/>highlight = 'topicSearch']
-    SELECT -->|Begl. Coaching| LIFE[intent = 'lifecoaching'<br/>highlight = 'topicSearch']
+    SELECT -->|Coach Practice| PRACT[intent = 'coachPractice'<br/>highlight = 'coachPractice']
 
-    COMM --> BS_MGMT[BotSelection<br/>Management-Sektion hervorgehoben:<br/>Suchfeld + Sektions-Header]
-    COACH --> BS_TOPIC[BotSelection<br/>TopicSearch hervorgehoben]
-    LIFE --> BS_TOPIC
+    COMM --> BS_MGMT[BotSelection<br/>Bronze ausgeklappt]
+    COACH --> BS_TOPIC[BotSelection<br/>TopicSearch hervorgehoben<br/>alle Pillen eingeklappt]
+    PRACT --> BS_PRACT[BotSelection direkt<br/>LC uebersprungen<br/>Practice-Tab offen]
 
-    BS_MGMT --> BOT_TILES[Bot-Kacheln anzeigen<br/>Hervorhebung = Suchfeld +<br/>zugehoeriger Sektions-Header<br/>Pulsierender Ring, Schatten, ca. 3,5s]
+    BS_MGMT --> BOT_TILES[Bot-Kacheln / Sektionen<br/>Pulsierender Ring ca. 3,5s]
     BS_TOPIC --> BOT_TILES
+    BS_PRACT --> BOT_TILES
 
-    INTENT -->|Permanent ueberspringen| SKIP{Kontext?}
-    SKIP -->|Kein Kontext| NAME[NamePromptView]
-    SKIP -->|Kontext, kein Profil| OCEAN[OceanOnboarding]
-    SKIP -->|Kontext + Profil| CC[ContextChoiceView]
+    INTENT -->|Permanent ueberspringen| SKIP{Gespeicherter Intent?}
+    SKIP -->|coachPractice| BS_PRACT
+    SKIP -->|Sonst, kein Kontext| NAME[NamePromptView]
+    SKIP -->|Sonst, Kontext, kein Profil| OCEAN[OceanOnboarding]
+    SKIP -->|Sonst, Kontext + Profil| CC[ContextChoiceView]
 
     style INTENT fill:#fff9c4
     style BS_MGMT fill:#e8eaf6
@@ -415,9 +417,9 @@ UI-Texte aus `public/locales/de.json` / `en.json` (Kurzfassung):
 
 | Intent | Deutsch (Titel) | Englisch (Titel) | Ziel-Sektion |
 |:---|:---|:---|:---|
-| Kommunikation | Kommunikation verstehen & verbessern | Understand & improve communication | Management & Kommunikation |
-| Coaching | Gedanken strukturieren & Herausforderungen meistern | Structure thoughts & tackle challenges | TopicSearch (Coaching) |
-| Begleitendes Coaching | Begleitendes Coaching | Augmented Coaching | TopicSearch (Coaching) |
+| Kommunikation | Kommunikation & Management | Communication & management | Bronze (ausgeklappt) |
+| Coaching | Coaching zu meinem Anliegen | Coaching for my concern | TopicSearch (alle Pillen eingeklappt) |
+| Coach Practice | Als Coach üben | Practice as a coach | Silber / Practice-Tab (LC-Bypass) |
 
 Details und Laengenbeschreibungen: Keys `intent_*_desc` (bzw. `*_guest` fuer Gaeste).
 

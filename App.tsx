@@ -20,9 +20,16 @@ import AnalyzingView from './components/AnalyzingView';
 import DeleteAccountModal from './components/DeleteAccountModal';
 import UpdateNotification from './components/UpdateNotification';
 import AppViewRouter from './components/AppViewRouter';
+import type { UserIntent } from './components/IntentPickerView';
 import { getQuestionnaireStructure } from './components/questionnaireStructure';
 import type { Big5Result } from './utils/bfi2';
-import type { UserIntent } from './components/IntentPickerView';
+import {
+    getHighlightSectionForIntent,
+    getStoredUserIntent,
+    isCoachPracticeIntent,
+    type HighlightSection,
+} from './utils/userIntent';
+import { resolvePracticeAccess } from './utils/practiceAccess';
 import type { SurveyResult } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
@@ -129,8 +136,10 @@ const App: React.FC = () => {
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
     // Intent Picker / Bot Selection highlight
-    const [highlightSection, setHighlightSection] = useState<'management' | 'topicSearch' | null>(null);
+    const [highlightSection, setHighlightSection] = useState<HighlightSection>(null);
     const [postOceanRoute, setPostOceanRoute] = useState<'landing' | 'intent'>('intent');
+    const [upgradeFocus, setUpgradeFocus] = useState<'premium_plus' | null>(null);
+    const [lifeContextEditorReturnView, setLifeContextEditorReturnView] = useState<NavView | null>(null);
     const [completedLenses, setCompletedLenses] = useState<string[]>([]);
 
     // Transcript Evaluation States
@@ -148,6 +157,26 @@ const App: React.FC = () => {
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
     const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
     const [practiceEvalError, setPracticeEvalError] = useState<string | null>(null);
+
+    const routeToCoachPractice = useCallback(() => {
+        if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
+            setHighlightSection('coachPractice');
+            setView('botSelection');
+            return;
+        }
+        clearPracticeSessionDraft();
+        setPracticeConfig(null);
+        setPracticeEvaluation(null);
+        setPracticeEvalError(null);
+        setPracticeDraftPrompt(null);
+        setHighlightSection(null);
+        setView('practiceSetup');
+    }, [currentUser]);
+
+    const openUpgrade = useCallback((focus?: 'premium_plus') => {
+        setUpgradeFocus(focus ?? null);
+        setMenuView('upgrade');
+    }, []);
 
     const buildPracticeTranscriptSummary = useCallback((history: Message[], lang: Language) => {
         const coacheeLabel = lang === 'de' ? 'Coachee' : 'Coachee';
@@ -181,7 +210,23 @@ const App: React.FC = () => {
         }
     };
 
-    const { loadProfileInfo, applyIntentLogic, routeWithIntentPicker, shouldShowProfileHint, routeWithProfileHint } = useAppRouting({ currentUser, lifeContext, completedLenses, setView, setHighlightSection, setPostOceanRoute, setHasPersonalityProfile, setCompletedLenses });
+    const { loadProfileInfo, applyIntentLogic, routeWithIntentPicker, shouldShowProfileHint, routeWithProfileHint } = useAppRouting({ currentUser, lifeContext, completedLenses, setView, setHighlightSection, setPostOceanRoute, setHasPersonalityProfile, setCompletedLenses, routeToCoachPractice });
+
+    const handlePracticeSetupBack = useCallback(() => {
+        const intent = getStoredUserIntent();
+        if (isCoachPracticeIntent(intent)) {
+            const pickerDisabled = localStorage.getItem('intentPickerDisabled') === 'true';
+            if (!pickerDisabled) {
+                setHighlightSection(null);
+                setView('intentPicker');
+                return;
+            }
+            setHighlightSection('coachPractice');
+            setView('botSelection');
+            return;
+        }
+        applyIntentLogic(null);
+    }, [applyIntentLogic]);
     const { handleLoginSuccess, handleAccessExpired, handleLogout: authLogout } = useAuthHandlers({ setAndProcessUser, setEncryptionKey, setLifeContext, setGamificationState, setView, setPaywallUserEmail, setAuthRedirectReason, setMenuView, routeWithIntentPicker, DEFAULT_GAMIFICATION_STATE });
 
     const handleLogout = useCallback(() => {
@@ -489,16 +534,19 @@ const App: React.FC = () => {
         try { localStorage.setItem('userIntent', intent); } catch {}
         analyticsService.trackEvent({ eventType: 'INTENT_SELECTED', metadata: { intent } });
 
-        if (intent === 'communication') setHighlightSection('management');
-        else if (intent === 'coaching' || intent === 'lifecoaching') setHighlightSection('topicSearch');
-        else setHighlightSection(null);
+        setHighlightSection(getHighlightSectionForIntent(intent));
+
+        if (isCoachPracticeIntent(intent)) {
+            routeToCoachPractice();
+            return;
+        }
 
         // Guest flow
         if (!currentUser) {
             if (!localStorage.getItem('guestName')) {
                 setView('namePrompt');
             } else {
-                setView('landing');
+                applyIntentLogic(intent);
             }
             return;
         }
@@ -518,7 +566,7 @@ const App: React.FC = () => {
 
         // Registered user: substantial LC + profile → profile hint or intent logic
         routeWithProfileHint(intent);
-    }, [currentUser, hasPersonalityProfile, lifeContext, routeWithProfileHint]);
+    }, [currentUser, hasPersonalityProfile, lifeContext, routeWithProfileHint, routeToCoachPractice, applyIntentLogic]);
 
     const routeAfterOcean = useCallback(() => {
         if (postOceanRoute === 'landing') {
@@ -806,7 +854,7 @@ const App: React.FC = () => {
                 setPracticeConfig(null);
                 setSelectedBot(null);
                 setChatHistory([]);
-                setView('practiceSetup');
+                routeToCoachPractice();
                 return;
             }
             setView('practiceSelfRating');
@@ -818,7 +866,7 @@ const App: React.FC = () => {
             if (userMessageCount === 0 && !isTestMode) {
                 setSelectedBot(null);
                 setChatHistory([]);
-                setView('botSelection');
+                applyIntentLogic(null);
                 return;
             }
             // Route directly to the transcript view with the chat history
@@ -887,7 +935,7 @@ const App: React.FC = () => {
         if ((userMessageCount - baselineMessageCount) === 0 && !isTestMode) {
             setSelectedBot(null);
             setChatHistory([]);
-            setView('botSelection');
+            applyIntentLogic(null);
             return;
         }
 
@@ -1107,7 +1155,7 @@ const App: React.FC = () => {
         if (selectedBot) {
             setView('chat');
         } else {
-            setView('botSelection');
+            applyIntentLogic(null);
         }
     };
 
@@ -1141,7 +1189,7 @@ const App: React.FC = () => {
         
         setSelectedBot(null);
         setChatHistory([]);
-        setView('botSelection');
+        applyIntentLogic(null);
     };
 
     const handleStartOver = useCallback(() => {
@@ -1154,23 +1202,24 @@ const App: React.FC = () => {
         setBaselineMessageCount(0);
         setIsTestMode(false);
         setTestScenarioId(null);
+        setPracticeConfig(null);
+        setPracticeEvaluation(null);
+        setPracticeEvalError(null);
+        setPracticeDraftPrompt(null);
+        clearPracticeSessionDraft();
+        setHighlightSection(null);
         
         // Close menu
         setIsMenuOpen(false);
         setMenuView(null);
 
-        if (currentUser) {
-            // A logged-in user with a saved context goes to the choice screen.
-            // If they are logged-in but started a new session (lifeContext is empty), they go to landing.
-            setView(lifeContext ? 'contextChoice' : 'landing');
-        } else {
-            // A guest user is fully reset to the landing page.
+        if (!currentUser) {
             setLifeContext('');
             setGamificationState(DEFAULT_GAMIFICATION_STATE);
-            setView('landing');
         }
-    // FIX: Add missing dependencies to useCallback
-    }, [currentUser, lifeContext]);
+
+        setView('intentPicker');
+    }, [currentUser]);
 
     const handleRunTestSession = async (scenario: TestScenario, adminLifeContext: string) => {
         // Set up test mode state
@@ -1286,7 +1335,7 @@ const App: React.FC = () => {
         setPracticeTranscriptForPhase2('');
         setSelectedBot(null);
         setChatHistory([]);
-        setView('practiceSetup');
+        routeToCoachPractice();
     };
 
     const handleContinueToPhase2 = () => {
@@ -1447,6 +1496,25 @@ const App: React.FC = () => {
         setIsMenuOpen(false); // Close the slide-out panel
     };
 
+    const handleNavigateToLifeContext = useCallback(() => {
+        setIsMenuOpen(false);
+        if (currentUser && lifeContext.trim()) {
+            setMenuView(null);
+            setView('contextChoice');
+        } else if (!currentUser && lifeContext.trim()) {
+            setLifeContextEditorReturnView(null);
+            setMenuView('lifeContextEditor');
+        } else {
+            setMenuView(null);
+            setView('landing');
+        }
+    }, [currentUser, lifeContext]);
+
+    const closeLifeContextEditor = useCallback(() => {
+        setMenuView(lifeContextEditorReturnView);
+        setLifeContextEditorReturnView(null);
+    }, [lifeContextEditorReturnView]);
+
     // This is called from the "Exit" button in the top bar when a sub-menu is open
     const handleCloseSubMenu = () => {
         setMenuView(null); // Clear the sub-menu view, returning to the main view
@@ -1565,6 +1633,12 @@ const App: React.FC = () => {
         onDeleteAccount: () => setIsDeleteModalOpen(true),
         applyIntentLogic,
         routeWithIntentPicker,
+        routeToCoachPractice,
+        handlePracticeSetupBack,
+        openUpgrade,
+        upgradeFocus,
+        closeLifeContextEditor,
+        setLifeContextEditorReturnView,
         buildEmptyLifeContextTemplate,
         t,
     };
@@ -1719,6 +1793,7 @@ const App: React.FC = () => {
                 onClose={handleCloseAllMenus}
                 currentUser={currentUser}
                 onNavigate={handleNavigateFromMenu}
+                onNavigateToLifeContext={handleNavigateToLifeContext}
                 onLogout={handleLogout}
                 onStartOver={handleStartOver}
                 showProfileBadge={currentUser?.isPremium && completedLenses.includes('ocean') && (!completedLenses.includes('sd') || !completedLenses.includes('riemann'))}

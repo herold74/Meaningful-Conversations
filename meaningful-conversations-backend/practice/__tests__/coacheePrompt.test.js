@@ -78,6 +78,7 @@ describe('buildCoacheeSystemPrompt — role guard', () => {
       practiceMode: 'contracting',
     });
     expect(prompt).toContain('Halte den ROLLEN-GUARD ein');
+    expect(prompt).toContain('KEINE Bühnenanweisungen');
     expect(prompt).not.toContain('KEINE Coaching-Phrasen wie "Lass uns..."');
   });
 

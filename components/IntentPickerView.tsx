@@ -1,26 +1,25 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { MessageCircle, Lightbulb, Compass, ChevronRight, type LucideIcon } from 'lucide-react';
+import { MessageCircle, Lightbulb, GraduationCap, ChevronRight, type LucideIcon } from 'lucide-react';
 import { LogoIcon } from './icons/LogoIcon';
 import { useLocalization } from '../context/LocalizationContext';
 
-export type UserIntent = 'communication' | 'coaching' | 'lifecoaching';
+export type UserIntent = 'communication' | 'coaching' | 'coachPractice';
 
 interface IntentPickerViewProps {
   onSelect: (intent: UserIntent) => void;
   isGuest?: boolean;
   safeAreaTop?: number;
-  onSkipPermanently?: () => void;
 }
 
 const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string; featured?: boolean }[] = [
   { id: 'communication', Icon: MessageCircle, titleKey: 'intent_communication_title', descKey: 'intent_communication_desc' },
   { id: 'coaching', Icon: Lightbulb, titleKey: 'intent_coaching_title', descKey: 'intent_coaching_desc', featured: true },
-  { id: 'lifecoaching', Icon: Compass, titleKey: 'intent_lifecoaching_title', descKey: 'intent_lifecoaching_desc' },
+  { id: 'coachPractice', Icon: GraduationCap, titleKey: 'intent_coach_practice_title', descKey: 'intent_coach_practice_desc' },
 ];
 
-const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, safeAreaTop = 0, onSkipPermanently }) => {
+const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
 
   return (
@@ -85,18 +84,6 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
           );
         })}
       </div>
-
-      {!isGuest && onSkipPermanently && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          onClick={onSkipPermanently}
-          className="mt-8 text-xs text-content-secondary hover:text-content-primary transition-colors"
-        >
-          {t('intent_skip_permanently')}
-        </motion.button>
-      )}
     </div>
     </>
   );

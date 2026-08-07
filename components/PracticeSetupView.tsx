@@ -25,6 +25,11 @@ import {
   formatCompletionPillLabel,
 } from '../utils/practiceSetupProgress';
 import PracticeFollowUpReminderModal from './PracticeFollowUpReminderModal';
+import { resolvePracticeAccess } from '../utils/practiceAccess';
+import {
+  getPracticeDifficultyLabel,
+  PRACTICE_DIFFICULTY_IDS,
+} from '../utils/practiceFrameworkLabels';
 
 interface PracticeSetupViewProps {
   currentUser: User | null;
@@ -113,6 +118,13 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   } | null>(null);
 
   const isPrivileged = !!(currentUser?.isAdmin || currentUser?.isDeveloper);
+  const practiceAccess = resolvePracticeAccess(currentUser);
+
+  useEffect(() => {
+    if (!practiceAccess.canAccessPractice) {
+      onBack();
+    }
+  }, [practiceAccess.canAccessPractice, onBack]);
 
   useEffect(() => {
     Promise.all([
@@ -159,13 +171,13 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const selectedFramework = catalog?.frameworks.find((f) => f.id === frameworkId);
   const selectedScenario = catalog?.scenarios.find((s) => s.id === scenarioId);
   const contractingScenario = catalog?.contractingScenarios.find((s) => s.id === contractingScenarioId);
-  const difficultyLabel = catalog?.difficulties.find((d) => d.id === difficulty)?.label || difficulty;
+  const difficultyLabel = getPracticeDifficultyLabel(difficulty, t);
 
   const difficultyLabels = useMemo(() => {
-    const labels: Record<string, string> = {};
-    catalog?.difficulties.forEach((d) => { labels[d.id] = d.label; });
-    return labels;
-  }, [catalog]);
+    return Object.fromEntries(
+      PRACTICE_DIFFICULTY_IDS.map((id) => [id, getPracticeDifficultyLabel(id, t)]),
+    ) as Record<string, string>;
+  }, [t]);
 
   const contractingProgressMap = useMemo(
     () => buildContractingProgressMap(evaluations, difficultyLabels),
@@ -330,7 +342,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
             {difficultyLevels.map((level) => (
               <li key={level}>
                 <span className="font-semibold text-content-primary">
-                  {catalog?.difficulties.find((d) => d.id === level)?.label || level}:
+                  {getPracticeDifficultyLabel(level, t)}:
                 </span>{' '}
                 {t(`practice_difficulty_${level}_desc`)}
               </li>

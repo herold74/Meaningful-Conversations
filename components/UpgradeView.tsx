@@ -33,6 +33,7 @@ interface UpgradeViewProps {
   currentUser: User;
   onPurchaseSuccess: (user: User) => void;
   onRedeem: () => void;
+  focusSection?: 'premium_plus' | null;
 }
 
 const TIER_LABELS: Record<string, { de: string; en: string }> = {
@@ -42,7 +43,7 @@ const TIER_LABELS: Record<string, { de: string; en: string }> = {
   admin: { de: 'Administrator', en: 'Administrator' },
 };
 
-const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSuccess, onRedeem }) => {
+const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSuccess, onRedeem, focusSection = null }) => {
   const { t, language } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [data, setData] = useState<ProductsResponse | null>(null);
@@ -53,6 +54,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
   const [selectedPremiumId, setSelectedPremiumId] = useState<string | null>(null);
   const paypalButtonRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const renderedButtonsRef = useRef<Set<string>>(new Set());
+  const premiumPlusSectionRef = useRef<HTMLElement | null>(null);
 
   const showPayPal = !isNativeApp();
 
@@ -71,6 +73,11 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (focusSection !== 'premium_plus' || isLoading || !premiumPlusSectionRef.current) return;
+    premiumPlusSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [focusSection, isLoading, data]);
 
   const renderPayPalButton = useCallback((productId: string, container: HTMLDivElement) => {
     if (!window.paypal?.Buttons) return;
@@ -300,7 +307,7 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
 
       {/* Premium+ — Premium + Coach Practice (single subscription) */}
       {premiumPlusProducts.length > 0 && !isNativeIOS() && (
-        <section className="mb-8">
+        <section ref={premiumPlusSectionRef} className="mb-8">
           <h2 className="text-lg font-semibold text-content-primary mb-3">{t('upgrade_premium_plus_section')}</h2>
           <p className="text-sm text-content-subtle mb-4">
             {data?.isPremium && !data?.hasPracticeAccess

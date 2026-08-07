@@ -59,12 +59,13 @@ export function useSpeechRecognition({
       try {
         const { transcript } = await speechService.stopAndFinalize();
         setIsListening(false);
-        if (!transcript.trim()) {
+        const textToSend = transcript.trim() || latestTranscriptRef.current.trim();
+        if (!textToSend) {
           alert(t('chat_voice_finalize_empty'));
           return;
         }
-        setInput(transcript);
-        await sendTranscript(transcript);
+        setInput(textToSend);
+        await sendTranscript(textToSend);
       } catch (e) {
         console.error('[Speech] Error finalizing recognition:', e);
         setIsListening(false);

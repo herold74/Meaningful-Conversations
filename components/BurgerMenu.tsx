@@ -17,6 +17,7 @@ import { GearIcon } from './icons/GearIcon';
 import { KeyIcon } from './icons/KeyIcon';
 import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
+import { FileTextIcon } from './icons/FileTextIcon';
 import { useFocusTrap } from '../utils/useFocusTrap';
 
 interface BurgerMenuProps {
@@ -24,12 +25,13 @@ interface BurgerMenuProps {
     onClose: () => void;
     currentUser: User | null;
     onNavigate: (view: NavView) => void;
+    onNavigateToLifeContext: () => void;
     onLogout: () => void;
     onStartOver: () => void;
     showProfileBadge?: boolean;
 }
 
-const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onLogout, onStartOver, showProfileBadge }) => {
+const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, onNavigate, onNavigateToLifeContext, onLogout, onStartOver, showProfileBadge }) => {
     const { t } = useLocalization();
     const menuRef = useRef<HTMLDivElement>(null);
     useFocusTrap(menuRef, onClose, isOpen);
@@ -99,6 +101,7 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                 
                 <nav className="flex-1 flex flex-col space-y-2 overflow-y-auto">
                     <MenuItem icon={RepeatIcon} text={t('menu_start_over')} onClick={handleStartOverAndClose} />
+                    <MenuItem icon={FileTextIcon} text={t('menu_life_context')} onClick={onNavigateToLifeContext} />
                     <hr className="border-border-primary my-2" />
                     
                     {(currentUser?.isAdmin || currentUser?.isDeveloper) && (

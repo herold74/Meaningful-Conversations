@@ -5,6 +5,7 @@ const prisma = require('../../prismaClient.js');
 const { requirePracticeAccess, resolveScopeBoundaryTheme, VALID_DIFFICULTIES, getPracticeUnlocks } = require('../practice.js');
 const { isHardUnlockedForPair } = require('../../practice/practiceUnlocks.js');
 const { buildCoacheeSystemPrompt } = require('../../practice/coacheePrompt.js');
+const { stripCoacheeStageDirections } = require('../../practice/coacheeResponseSanitizer.js');
 const { getFrameworkById, getFrameworkForEvaluation, buildContractingFrameworkCatalog, normalizeMethodSuggestions } = require('../../practice/frameworks.js');
 const { getScenarioById } = require('../../practice/scenarios.js');
 const { getMatchTier, getDiscouragedReason } = require('../../practice/methodScenarioMap.js');
@@ -252,7 +253,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
         success: true,
       });
 
-      res.write(`data: ${JSON.stringify({ done: true, text: finalEvent?.fullText || '', provider: finalEvent?.provider ?? null })}\n\n`);
+      res.write(`data: ${JSON.stringify({ done: true, text: stripCoacheeStageDirections(finalEvent?.fullText || ''), provider: finalEvent?.provider ?? null })}\n\n`);
       res.end();
       return;
     }
@@ -275,7 +276,7 @@ router.post('/practice/send-message', authMiddleware, async (req, res) => {
       success: true,
     });
 
-    res.json({ text: result.text || '', provider: result.model || null });
+    res.json({ text: stripCoacheeStageDirections(result.text || ''), provider: result.model || null });
   } catch (error) {
     console.error('[Practice] send-message error:', error);
     await trackApiUsage({
