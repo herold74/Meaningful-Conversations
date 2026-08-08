@@ -3,24 +3,20 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **19**, v2.5.6 — https://mc-beta.manualmode.at (health OK; user guide overhaul — coaches, chapter 10, copy; `sw.js` v2.5.6-b19)
+**Staging:** Deployed **2026-08-08**, Build **20**, v2.5.6 — https://mc-beta.manualmode.at (health 200; avatars `image/png`; bundle `main-C4zYntxz.js` Build 20; `sw.js` v2.5.6-b20). Includes User Guide/FAQ/Improvisation (`9460caf`), guest LC fix (`24300f6`), Premium+ PayPal paywall (`e90e4e7`).
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=19` in repo; `npm run sync:ios-staging` (2026-08-08) — bereit für Archive
+**Xcode:** `CURRENT_PROJECT_VERSION=20`; `npm run sync:ios-staging` completed **2026-08-08** — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
 ## Session handoff (2026-08-08)
 
-**Committed (not yet deployed):** Guest LC routing fix — name-only template on Landing „Neues Gespräch starten“ opens questionnaire (not Markdown editor); UserGuide DE/EN aligned. Also pending: `e90e4e7` (Premium+ PayPal paywall), `9460caf` (User Guide/FAQ/Improvisation). Staging still **Build 19** until next deploy.
+**Heute live (Staging Build 20):** User Guide Lesbarkeit/Redundanzen, FAQ Coach Practice (4 Einträge + Struktur), UI **Improvisation**, guest LC name-only → Fragebogen, Premium+ PayPal paywall.
 
-**Previously live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
+**Commits:** `24300f6` (guest LC fix) · `2a616fd` (build 20 sync + Staging deploy) · `9460caf` (guide/FAQ/Improvisation) · `e90e4e7` (PayPal Premium+ paywall).
 
-**Commits:** `e90e4e7` (PayPal Premium+ paywall) · `9460caf` (guide/FAQ/Improvisation) · `657e959` (memory bank) · `0cded08` → `e029b46` (build 19 deploy).
-
-**PayPal web:** Backend `ACCESS_PASS_PLUS_1M` existed; gap was trial-expired **PaywallView** only. No new PayPal dashboard product for REST checkout — env: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`.
-
-**Repo:** `main` pushed; Xcode synced Build 19; **staging deploy + ios sync still open**.
+**Repo:** `main` pushed; Xcode synced Build 20.
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 
