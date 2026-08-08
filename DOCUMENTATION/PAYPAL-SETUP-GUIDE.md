@@ -83,10 +83,59 @@ User (PaywallView)                    Backend                         PayPal API
 | Premium 1 Monat | `ACCESS_PASS_1M` | tbd | Webhook | 30 Tage Premium |
 | Premium 3 Monate | `ACCESS_PASS_3M` | tbd | Webhook | 90 Tage Premium |
 | Premium 1 Jahr | `ACCESS_PASS_1Y` | tbd | Webhook | 365 Tage Premium |
-| Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | €14,90 | Direct Checkout | 30 Tage Premium + Coach Practice |
+| Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | €14,90 | Direct Checkout **oder** Webhook (Website) | 30 Tage Premium + Coach Practice |
 | ~~Coach Practice 1 Monat~~ *(Legacy)* | `PRACTICE_PASS_1M` | €6,90 | — | Nicht mehr im Katalog |
 | Kenji Coach | `KENJI_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
 | Chloe Coach | `CHLOE_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
+
+---
+
+## 🌐 Website Hosted Buttons (Jimdo / manualmode.at)
+
+Käufe über die **Marketing-Website** (Jimdo, E-Mail-Links) nutzen **nicht** die In-App Smart Buttons, sondern **PayPal Hosted Buttons** + den **Webhook-Flow**:
+
+1. Käufer zahlt auf der Website
+2. PayPal sendet `PAYMENT.Capture.COMPLETED` an `/api/purchase/webhook`
+3. Backend erzeugt einen **Upgrade-Code** und mailt ihn an den Käufer
+4. Käufer löst den Code in der App ein (Menü → Upgrade → Code einlösen)
+
+**Wichtig:** Der Button muss die **Custom ID** (`custom_id`) setzen — sonst kann der Webhook das Produkt nicht zuordnen.
+
+### Premium+ Monats-Pass (neu)
+
+| Feld | Wert |
+|------|------|
+| **Custom ID** | `ACCESS_PASS_PLUS_1M` |
+| **Preis** | **€14,90** EUR |
+| **Produktname DE** | Premium+ Monats-Pass — ManualMode |
+| **Produktname EN** | Premium+ Monthly Pass — ManualMode |
+| **Beschreibung** | Premium inkl. Coaching üben, 30 Tage |
+
+### Button in PayPal anlegen
+
+1. [PayPal Business](https://www.paypal.com/de/businessmanage/account/settings) → **Zahlungsbuttons** → **Button erstellen**
+2. Typ: **Jetzt kaufen** (Einmalzahlung, kein Abo)
+3. Preis: **14,90 EUR**
+4. Unter **Erweiterte Optionen** → **Custom field** / **Tracking-ID**: `ACCESS_PASS_PLUS_1M`
+   - Alternativ bei „Hosted Buttons“ in den PayPal-Entwicklertools: `custom_id` in den Button-Einstellungen
+5. Einbettungscode kopieren → in Jimdo als **HTML-Element** einfügen (neben dem bestehenden Premium-Button)
+
+### Bestehende Website-Buttons (Referenz)
+
+| Produkt | Custom ID | Preis |
+|---------|-----------|-------|
+| Premium 1 Monat | `ACCESS_PASS_1M` | €9,90 |
+| Premium 3 Monate | `ACCESS_PASS_3M` | €24,90 |
+| Premium 1 Jahr | `ACCESS_PASS_1Y` | €79,90 |
+| Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | **€14,90** |
+| Kenji Unlock | `KENJI_UNLOCK` | €3,90 |
+| Chloe Unlock | `CHLOE_UNLOCK` | €3,90 |
+
+Backend-Mapping: `PRODUCT_MAPPING` in `meaningful-conversations-backend/routes/purchase.js`.
+
+Code-Einlösung: `ACCESS_PASS_PLUS_1M` in `routes/data.js` → Premium + Coach Practice für 30 Tage.
+
+**Kein Deploy nötig** für den Button selbst (PayPal + Jimdo). **Backend-Deploy nötig**, wenn die Code-Einlösung für Premium+ erst mit diesem Fix live geht.
 
 ---
 
