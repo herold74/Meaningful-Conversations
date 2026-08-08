@@ -487,7 +487,7 @@ const SENTINEL_FRAMEWORKS = [
     id: 'free-play',
     sourceBotId: null,
     isPracticeOnly: true,
-    name: { en: 'Free play', de: 'Freispiel' },
+    name: { en: 'Improvisation', de: 'Improvisation' },
     shortDescription: {
       en: 'First method session without a fixed framework — coach chooses interventions freely.',
       de: 'Erste Methodensitzung ohne fixe Methode — Coach wählt Interventionen frei.',

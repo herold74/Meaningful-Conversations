@@ -30,8 +30,8 @@ describe('getFrameworkDisplayName', () => {
   });
 
   it('uses i18n for free-play sentinel', () => {
-    const t = (key: string) => (key === 'practice_free_play_title' ? 'Free play' : key);
-    expect(getFrameworkDisplayName('free-play', { t, language: 'en' })).toBe('Free play');
+    const t = (key: string) => (key === 'practice_free_play_title' ? 'Improvisation' : key);
+    expect(getFrameworkDisplayName('free-play', { t, language: 'en' })).toBe('Improvisation');
   });
 
   it('falls back to static labels without catalog or t', () => {

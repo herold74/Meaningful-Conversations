@@ -37,7 +37,7 @@ const FRAMEWORK_LABELS: Record<string, { en: string; de: string }> = {
   'forward-focused-coaching': { en: 'Forward-focused coaching', de: 'Zukunftsorientiertes Coaching' },
   'ambivalence-coaching': { en: 'Ambivalence coaching', de: 'Ambivalenz-Coaching' },
   contracting: { en: 'Concern clarification', de: 'Anliegensklärung' },
-  'free-play': { en: 'Free play', de: 'Freispiel' },
+  'free-play': { en: 'Improvisation', de: 'Improvisation' },
 };
 
 export const PRACTICE_DIFFICULTY_IDS = ['easy', 'moderate', 'challenging', 'hard'] as const;
