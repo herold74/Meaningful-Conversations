@@ -3,25 +3,32 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-07**, Build **14**, v2.5.6 — https://mc-beta.manualmode.at (health OK; lighter EU AI Act hint on coach selection; `sw.js` v2.5.6-b14)
+**Staging:** Deployed **2026-08-08**, Build **16**, v2.5.6 — https://mc-beta.manualmode.at (health OK; Intent-Picker bronze/silver/featured tile styling + copy refinements; `sw.js` v2.5.6-b16)
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=14` in repo (build sync); **`npm run sync:ios-staging`** ausgeführt (2026-08-07) — vor Archive ggf. erneut syncen
+**Xcode:** `CURRENT_PROJECT_VERSION=16` in repo (build sync); **`npm run sync:ios-staging`** ausgeführt (2026-08-08) — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Session handoff (2026-08-07)
+## Session handoff (2026-08-08)
 
-**Heute live (Staging Build 14):** Leichter EU-KI-Verordnung-Hinweis auf Coach-Auswahl — inline Info-Zeile statt Box; gekürzte DE/EN-Copy (Art. 50 Offenlegung + synthetische Stimmen).
+**Heute live (Staging Build 16):** Intent-Picker — individuelle Karten-Themes (Bronze / Featured / Silber), Copy-Verfeinerungen (Tile 3 gekürzt, „manuelle Methodenwahl“, kein „Coach Practice“ in Beschreibung); User Guide + UX-FLOWS angepasst.
 
-**Commits:** `a1088a8` (EU AI Act hint UX) → `7e92588` (build 14 sync nach Staging-Deploy). Vorher: Build 13 Intent-UX, Flow-Fixes, Menü Lebenskontext.
+**Commits:** `c79228d` (Intent picker UX + copy) → `f7dd0cf` + `43f0fef` (build 15/16 sync nach Staging-Deploy).
 
 **Nächste Session (Vorschläge):**
-- Smoke Staging: Coach-Auswahl — Hinweis lesbar aber dezent; Intent-Flow, Menü Lebenskontext
-- **ASC / iOS:** Xcode Archive Build 14 testen; Production-Deploy erst nach expliziter Freigabe
+- Smoke Staging: Intent-Picker — Bronze/Silber-Styling visuell prüfen; drei Flows durchklicken
+- **ASC / iOS:** Xcode Archive Build 16 testen; Production-Deploy erst nach expliziter Freigabe
 - Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung
 
-**Repo:** `main` clean, pushed (`7e92588`).
+**Repo:** `main` clean, pushed (`43f0fef`).
+
+## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
+
+- **Commit `c79228d`:** IntentPickerView — bronze/silver/featured card themes; DE/EN intent copy (tile 3 shortened, „manuelle Methodenwahl“, practice ohne „Coach Practice“); UserGuideView + UX-FLOWS
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commits `f7dd0cf` (build 15 sync) + `43f0fef` (build 16 sync)
+- **iOS:** `npm run sync:ios-staging` — Capacitor sync + Plugin-Verify OK
+- **Verified:** staging health 200, avatars `image/png`, bundle **Build 16**, `section-bronze` + intent copy im JS, `sw.js` v2.5.6-b16
 
 ## Recent Changes (2026-08-07 — Staging Build 14 EU AI Act hint UX)
 
