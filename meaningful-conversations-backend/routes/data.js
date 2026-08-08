@@ -255,7 +255,8 @@ router.post('/redeem-code', async (req, res) => {
         }
 
         const ACCESS_CODE_TYPES = [
-            'ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M',
+            'ACCESS_PASS_1Y', 'ACCESS_PASS_3M', 'ACCESS_PASS_1M', 'ACCESS_PASS_PLUS_1M',
+            'PRACTICE_PASS_1M',
             'REGISTERED_1M', 'REGISTERED_1Y', 'REGISTERED_LIFETIME', 'premium', 'client',
         ];
         const isAccessCode = ACCESS_CODE_TYPES.includes(upgradeCode.botId);
@@ -298,6 +299,33 @@ router.post('/redeem-code', async (req, res) => {
             updateData.isPremium = true;
             updateData.premiumExpiresAt = baseDate;
             updateData.accessExpiresAt = baseDate;
+        } else if (upgradeCode.botId === 'ACCESS_PASS_PLUS_1M') {
+            const now = new Date();
+            const baseDate = (user.premiumExpiresAt && new Date(user.premiumExpiresAt) > now)
+                ? new Date(user.premiumExpiresAt) : new Date();
+            baseDate.setDate(baseDate.getDate() + 30);
+            updateData.isPremium = true;
+            updateData.premiumExpiresAt = baseDate;
+            updateData.hasPracticeAccess = true;
+            updateData.practiceExpiresAt = baseDate;
+            const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
+            if (!currentAccess || currentAccess < baseDate) {
+                updateData.accessExpiresAt = baseDate;
+            }
+        } else if (upgradeCode.botId === 'PRACTICE_PASS_1M') {
+            const premiumActive = user.isPremium && (!user.premiumExpiresAt || new Date(user.premiumExpiresAt) > new Date());
+            if (!premiumActive && !user.isClient && !user.isAdmin && !user.isDeveloper) {
+                return res.status(403).json({
+                    error: 'Coach Practice requires an active Premium subscription.',
+                    errorCode: 'PRACTICE_REQUIRES_PREMIUM',
+                });
+            }
+            const now = new Date();
+            const baseDate = (user.practiceExpiresAt && new Date(user.practiceExpiresAt) > now)
+                ? new Date(user.practiceExpiresAt) : new Date();
+            baseDate.setDate(baseDate.getDate() + 30);
+            updateData.hasPracticeAccess = true;
+            updateData.practiceExpiresAt = baseDate;
         } else if (upgradeCode.botId === 'REGISTERED_1M') {
             const now = new Date();
             const baseDate = (user.accessExpiresAt && new Date(user.accessExpiresAt) > now)

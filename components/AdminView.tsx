@@ -654,6 +654,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         if (botId === 'ACCESS_PASS_1Y') return t('admin_codes_unlock_access_pass');
         if (botId === 'ACCESS_PASS_3M') return t('admin_codes_unlock_access_pass_3m');
         if (botId === 'ACCESS_PASS_1M') return t('admin_codes_unlock_access_pass_1m');
+        if (botId === 'ACCESS_PASS_PLUS_1M') return t('admin_codes_unlock_access_pass_plus_1m');
         if (botId === 'premium') return t('admin_codes_unlock_premium');
         if (botId === 'client') return t('admin_codes_unlock_client');
         if (botId === 'big5') return t('admin_codes_unlock_big5');
@@ -1070,6 +1071,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="ACCESS_PASS_3M">{t('admin_codes_unlock_access_pass_3m')}</option>
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
+                            <option value="ACCESS_PASS_PLUS_1M">{t('admin_codes_unlock_access_pass_plus_1m')}</option>
                             <option disabled>— Features —</option>
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
                             <option disabled>— Coaches —</option>

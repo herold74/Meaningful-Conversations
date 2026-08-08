@@ -3,20 +3,22 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **20**, v2.5.6 — https://mc-beta.manualmode.at (health 200; avatars `image/png`; bundle `main-C4zYntxz.js` Build 20; `sw.js` v2.5.6-b20). Includes User Guide/FAQ/Improvisation (`9460caf`), guest LC fix (`24300f6`), Premium+ PayPal paywall (`e90e4e7`).
+**Staging:** Deployed **2026-08-08**, Build **21**, v2.5.6 — https://mc-beta.manualmode.at (health 200; bundle Build 21; guest fix `24300f6` verified). Includes User Guide/FAQ/Improvisation (`9460caf`), Premium+ PayPal paywall (`e90e4e7`).
+
+**Pending staging deploy:** Premium+ website redeem fix (`data.js` — `ACCESS_PASS_PLUS_1M` code redemption for Jimdo/PayPal Hosted Buttons).
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=20`; `npm run sync:ios-staging` completed **2026-08-08** — bereit für Archive
+**Xcode:** `CURRENT_PROJECT_VERSION=21`; `npm run sync:ios-staging` completed **2026-08-08**
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
 ## Session handoff (2026-08-08)
 
-**Heute live (Staging Build 20):** User Guide Lesbarkeit/Redundanzen, FAQ Coach Practice (4 Einträge + Struktur), UI **Improvisation**, guest LC name-only → Fragebogen, Premium+ PayPal paywall.
+**Heute live (Staging Build 21):** User Guide Lesbarkeit/Redundanzen, FAQ Coach Practice, UI **Improvisation**, Premium+ PayPal paywall (In-App), guest LC name-only → Fragebogen.
 
-**Commits:** `24300f6` (guest LC fix) · `2a616fd` (build 20 sync + Staging deploy) · `9460caf` (guide/FAQ/Improvisation) · `e90e4e7` (PayPal Premium+ paywall).
+**Website Premium+ (Jimdo):** PayPal Hosted Button manuell anlegen (`custom_id` = `ACCESS_PASS_PLUS_1M`, €14,90) — Anleitung `DOCUMENTATION/PAYPAL-SETUP-GUIDE.md`. Backend-Redeem-Fix + Admin-Code-Option lokal, **Staging-Deploy ausstehend**.
 
-**Repo:** `main` pushed; Xcode synced Build 20.
+**Commits:** `ef4064a4` (build 21 sync + guest fix deploy) · `24300f6` · `2a616fd` · `9460caf` · `e90e4e7`.
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 

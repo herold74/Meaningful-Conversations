@@ -54,6 +54,10 @@ Local StoreKit: `ios/App/App/MC.storekit` — `mc.premium_plus.monthly` at group
 |-------------|-------|--------|
 | `ACCESS_PASS_PLUS_1M` | €14,90 | Premium + Practice, same expiry |
 
+**In-App:** Upgrade view + PaywallView (Smart Buttons, Direct Checkout).
+
+**Website (Jimdo):** PayPal Hosted Button mit `custom_id` = `ACCESS_PASS_PLUS_1M`, Preis **€14,90** → Webhook → Upgrade-Code per E-Mail. Anleitung: `DOCUMENTATION/PAYPAL-SETUP-GUIDE.md` → Abschnitt „Website Hosted Buttons“.
+
 Upgrade view shows **Premium+** section first, then **Premium** (without practice).
 
 ---
