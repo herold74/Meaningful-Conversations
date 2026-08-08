@@ -4,7 +4,7 @@
 **Version:** 2.5.6
 **Branch:** `main`
 **Staging:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-beta.manualmode.at (health 200; bundle Build 23; `sw.js` v2.5.6-b23). Premium+ website redeem (`0265193`); guest LC fix (`24300f6`); User Guide/FAQ/Improvisation (`9460caf`); Premium+ PayPal paywall (`e90e4e7`); Registered Lifetime docs removed (`31acb69c`).
-**Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
+**Production:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-app.manualmode.at (health 200; bundle Build 23; parity mit Staging).
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
 **Xcode:** `CURRENT_PROJECT_VERSION=23`; `npm run sync:ios-staging` completed **2026-08-08** — bereit für Archive
 
@@ -16,7 +16,12 @@
 
 **Website Premium+ (Jimdo):** Button mit `ACCESS_PASS_PLUS_1M`, €14,90 — Anleitung `PAYPAL-SETUP-GUIDE.md`.
 
-**Commits (Build 23 deploy):** `49b1ce0c` (build 23 sync) · `31acb69c` (Lifetime docs).
+**Commits (Build 23 deploy):** `49b1ce0c` (build 23 sync) · `31acb69c` (Lifetime docs). **Production:** gleiche Images wie Staging, **2026-08-08**.
+
+## Recent Changes (2026-08-08 — Production Build 23)
+
+- **Deploy:** `./deploy-manualmode.sh -e production` (pre-built staging images)
+- **Verified:** mc-app health 200, bundle **Build 23**
 
 ## Recent Changes (2026-08-08 — Staging Build 23)
 
