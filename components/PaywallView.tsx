@@ -16,9 +16,16 @@ interface Product {
   price: number;
   finalPrice: number;
   discountReasons: string[];
-  category: 'access' | 'premium' | 'bot';
+  category: 'access' | 'premium' | 'premium_plus' | 'bot';
   duration: string | null;
   description: string;
+}
+
+interface ProductsResponse {
+  isPremium?: boolean;
+  premiumExpiresAt?: string | null;
+  hasPracticeAccess?: boolean;
+  products: Product[];
 }
 
 interface PaywallViewProps {
@@ -38,9 +45,10 @@ const escapeHtml = (str: string): string =>
   str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, currentUser, safeAreaTop = 0, onRedeem, onPurchaseSuccess, onLogout, onDownloadData, onDownloadLifeContext, onDownloadProfile }) => {
-  const { t } = useLocalization();
+  const { t, language } = useLocalization();
   const { ready: paypalReady, error: paypalError, createOrder, captureOrder, fetchProducts } = usePayPal();
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsMeta, setProductsMeta] = useState<Pick<ProductsResponse, 'isPremium' | 'premiumExpiresAt' | 'hasPracticeAccess'>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -55,9 +63,14 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     renderedButtonsRef.current = new Set();
     (async () => {
       try {
-        const result = await fetchProducts();
+        const result: ProductsResponse = await fetchProducts();
         const prods = result.products || [];
         setProducts(prods);
+        setProductsMeta({
+          isPremium: result.isPremium,
+          premiumExpiresAt: result.premiumExpiresAt,
+          hasPracticeAccess: result.hasPracticeAccess,
+        });
         const premiums = prods.filter((p: Product) => p.category === 'premium');
         if (premiums.length > 0) setSelectedPremiumId(premiums[0].id);
       } catch {
@@ -144,6 +157,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     : t('paywall_description_new');
 
   const accessProducts = products.filter(p => p.category === 'access');
+  const premiumPlusProducts = products.filter(p => p.category === 'premium_plus');
   const premiumProducts = products.filter(p => p.category === 'premium');
   const selectedPremium = premiumProducts.find(p => p.id === selectedPremiumId) || null;
 
@@ -161,6 +175,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     ACCESS_PASS_1M:      'paywall_product_premium_1m',
     ACCESS_PASS_3M:      'paywall_product_premium_3m',
     ACCESS_PASS_1Y:      'paywall_product_premium_1y',
+    ACCESS_PASS_PLUS_1M: 'paywall_product_premium_plus_1m',
     KENJI_UNLOCK:        'paywall_product_kenji',
     CHLOE_UNLOCK:        'paywall_product_chloe',
   };
@@ -169,6 +184,14 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
   const renderProductCard = (product: Product) => {
     const hasDiscount = product.finalPrice < product.price;
     const isPurchasing = purchasingId === product.id;
+    const premiumCredit =
+      product.discountReasons.includes('premium_upgrade') ? product.price - product.finalPrice : 0;
+    const formatEuro = (amount: number) =>
+      language === 'de'
+        ? `${amount.toFixed(2).replace('.', ',')} €`
+        : `€${amount.toFixed(2)}`;
+    const upgradePeriodEnd = new Date();
+    upgradePeriodEnd.setDate(upgradePeriodEnd.getDate() + 30);
 
     return (
       <div key={product.id} className="bg-background-tertiary border border-border-primary rounded-card p-4 space-y-2">
@@ -201,7 +224,30 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                 {t('upgrade_bot_credit_badge')}
               </span>
             )}
+            {product.discountReasons.includes('premium_upgrade') && (
+              <span className="text-xs px-2 py-0.5 bg-status-success-background text-status-success-foreground rounded-full">
+                {t('upgrade_premium_upgrade_badge')}
+              </span>
+            )}
           </div>
+        )}
+
+        {premiumCredit > 0 && (
+          <p className="text-xs text-content-subtle leading-relaxed">
+            {productsMeta.premiumExpiresAt
+              ? t('upgrade_premium_upgrade_detail', {
+                  credit: formatEuro(premiumCredit),
+                  date: upgradePeriodEnd.toLocaleDateString(
+                    language === 'de' ? 'de-DE' : 'en-US',
+                  ),
+                })
+              : t('upgrade_premium_upgrade_detail_lifetime', {
+                  credit: formatEuro(premiumCredit),
+                  date: upgradePeriodEnd.toLocaleDateString(
+                    language === 'de' ? 'de-DE' : 'en-US',
+                  ),
+                })}
+          </p>
         )}
 
         {isPurchasing && (
@@ -255,7 +301,29 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
 
         {/* Product catalog — web only (PayPal); hidden on native iOS where NativePaywall is used */}
         {!isLoading && products.length > 0 && !isNativeIOS() && (
-          <div className="md:flex md:gap-6 md:items-start space-y-4 md:space-y-0 text-left mb-6">
+          <div className="space-y-4 text-left mb-6">
+
+            {/* Premium+ — Premium + Coach Practice (same as trial) */}
+            {premiumPlusProducts.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-content-subtle tracking-wide">
+                    {t('upgrade_premium_plus_section')}
+                  </h2>
+                  <span className="text-xs px-2 py-0.5 bg-brand-accent/15 text-brand-accent rounded-pill font-semibold">
+                    {t('paywall_recommended')}
+                  </span>
+                </div>
+                <p className="text-xs text-content-subtle">
+                  {productsMeta.isPremium && !productsMeta.hasPracticeAccess
+                    ? t('upgrade_premium_plus_upgrade_hint')
+                    : t('upgrade_premium_plus_description')}
+                </p>
+                {premiumPlusProducts.map(renderProductCard)}
+              </div>
+            )}
+
+            <div className="md:flex md:gap-6 md:items-start space-y-4 md:space-y-0">
 
             {/* Access products (Registered Monthly + Lifetime) */}
             {accessProducts.length > 0 && (
@@ -270,16 +338,11 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
             {/* Premium products — dropdown selector (recommended) */}
             {premiumProducts.length > 0 && (
               <div className="md:flex-1 space-y-3">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-semibold text-content-subtle tracking-wide">
-                    {t('paywall_section_premium')}
-                  </h2>
-                  <span className="text-xs px-2 py-0.5 bg-brand-accent/15 text-brand-accent rounded-pill font-semibold">
-                    {t('paywall_recommended')}
-                  </span>
-                </div>
+                <h2 className="text-sm font-semibold text-content-subtle tracking-wide">
+                  {t('paywall_section_premium')}
+                </h2>
                 <p className="text-xs text-content-subtle">
-                  {t('paywall_premium_includes_all')}
+                  {t('upgrade_premium_without_practice_description')}
                 </p>
                 <div className="bg-background-tertiary border-2 border-brand-accent/40 rounded-card p-4 space-y-3">
                   <select
@@ -342,6 +405,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
 
