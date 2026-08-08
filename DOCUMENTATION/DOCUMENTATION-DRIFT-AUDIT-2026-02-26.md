@@ -149,7 +149,7 @@
 | Doc Section / Line | Issue | Code Reality |
 |--------------------|-------|--------------|
 | **Security – Webhook signature** (line 152) | Doc says: "⚠️ Noch nicht implementiert (TODO für Production)" | **Correct.** `routes/purchase.js` lines 424–439: `verifyPayPalSignature()` exists but returns `true` always. |
-| **Direct Checkout** | Doc says `REGISTERED_LIFETIME` | **Correct.** `routes/purchase.js` has create-order, capture-order. |
+| **Direct Checkout** | Doc listed `REGISTERED_LIFETIME` as active product | **Updated 2026-08:** Removed from website; legacy webhook/redeem still supported in `purchase.js` |
 | **Products** | Doc lists `REGISTERED_1M` | **Correct.** `routes/purchase.js` PRODUCTS includes `REGISTERED_1M`. |
 | **Webhook** | Doc says POST `/api/purchase/webhook` | **Correct.** Route exists. |
 

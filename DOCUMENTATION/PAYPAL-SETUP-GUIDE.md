@@ -1,7 +1,7 @@
 # PayPal Integration Guide
 
 **Erstellt**: 12. November 2025  
-**Aktualisiert**: 18. Februar 2026  
+**Aktualisiert**: 8. August 2026  
 **Projekt**: Meaningful Conversations — Payment Integration
 
 ---
@@ -19,14 +19,14 @@ Die PayPal-Integration besteht aus zwei Methoden:
 
 ### Direct Checkout (In-App)
 - ✅ `GET /api/purchase/config` — liefert PayPal Client ID ans Frontend
-- ✅ `POST /api/purchase/create-order` — erstellt PayPal Order (€14,90 EUR)
+- ✅ `POST /api/purchase/create-order` — erstellt PayPal Order (produktabhängiger Preis)
 - ✅ `POST /api/purchase/capture-order` — fängt Zahlung ein, aktiviert User sofort
 - ✅ PayPal JS SDK dynamisch geladen über `usePayPal` Hook
 - ✅ PayPal Smart Buttons in der PaywallView (PayPal + Kreditkarte/Debitkarte)
 - ✅ iOS Native App: PayPal-Buttons ausgeblendet (Hinweis auf zukünftigen IAP)
 - ✅ Rate Limiting: 10 Purchase-Requests pro Stunde pro User
 - ✅ Duplikat-Schutz: paypalOrderId wird nur einmal verarbeitet
-- ✅ Betrags-Validierung: Server prüft ≥ €14,90 EUR
+- ✅ Betrags-Validierung: Server prüft ≥ erwarteter Produktpreis
 
 ### Webhook (Legacy/Extern)
 - ✅ `POST /api/purchase/webhook` — verarbeitet PayPal PAYMENT.CAPTURE.COMPLETED Events
@@ -57,7 +57,7 @@ User (PaywallView)                    Backend                         PayPal API
        │─── POST /purchase/capture-order▶│─── POST /v2/.../capture ─────▶│
        │                                │◀── { status: COMPLETED } ─────│
        │                                │                                │
-       │                                │  [Update User: accessExpiresAt = null]
+       │                                │  [Update User access / premium fields]
        │                                │  [Create Purchase record]
        │                                │  [Send admin notification]
        │                                │                                │
@@ -79,14 +79,16 @@ User (PaywallView)                    Backend                         PayPal API
 
 | Produkt | Custom ID | Preis | Methode | Beschreibung |
 |---------|-----------|-------|---------|--------------|
-| Registered Lifetime | `REGISTERED_LIFETIME` | €14,90 | Direct Checkout | Permanenter Basiszugang |
-| Premium 1 Monat | `ACCESS_PASS_1M` | tbd | Webhook | 30 Tage Premium |
-| Premium 3 Monate | `ACCESS_PASS_3M` | tbd | Webhook | 90 Tage Premium |
-| Premium 1 Jahr | `ACCESS_PASS_1Y` | tbd | Webhook | 365 Tage Premium |
+| Registered Jahres-Pass | `REGISTERED_1Y` | €14,90 | Direct Checkout | 365 Tage Registered |
+| Registered Monats-Pass | `REGISTERED_1M` | €3,90 | Direct Checkout | 30 Tage Registered |
+| Premium 1 Monat | `ACCESS_PASS_1M` | €9,90 | Webhook (Website) | 30 Tage Premium |
+| Premium 3 Monate | `ACCESS_PASS_3M` | €24,90 | Webhook (Website) | 90 Tage Premium |
+| Premium 1 Jahr | `ACCESS_PASS_1Y` | €79,90 | Webhook (Website) | 365 Tage Premium |
 | Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | €14,90 | Direct Checkout **oder** Webhook (Website) | 30 Tage Premium + Coach Practice |
 | ~~Coach Practice 1 Monat~~ *(Legacy)* | `PRACTICE_PASS_1M` | €6,90 | — | Nicht mehr im Katalog |
-| Kenji Coach | `KENJI_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
-| Chloe Coach | `CHLOE_UNLOCK` | tbd | Webhook | Einzelner Bot-Unlock |
+| ~~Registered Lifetime~~ *(Legacy, entfernt)* | `REGISTERED_LIFETIME` | €14,90 | — | **Nicht mehr auf Website/In-App.** Webhook/Code-Einlösung für Altbestand weiterhin unterstützt |
+| Kenji Coach | `KENJI_UNLOCK` | €3,90 | Webhook (Website) | Einzelner Bot-Unlock |
+| Chloe Coach | `CHLOE_UNLOCK` | €3,90 | Webhook (Website) | Einzelner Bot-Unlock |
 
 ---
 
@@ -100,6 +102,8 @@ Käufe über die **Marketing-Website** (Jimdo, E-Mail-Links) nutzen **nicht** di
 4. Käufer löst den Code in der App ein (Menü → Upgrade → Code einlösen)
 
 **Wichtig:** Der Button muss die **Custom ID** (`custom_id`) setzen — sonst kann der Webhook das Produkt nicht zuordnen.
+
+**Entfernt (2026-08):** ~~Registered Lifetime~~ (`REGISTERED_LIFETIME`, €14,90 einmalig) — Button von Jimdo/manualmode.at entfernen. Bestehende Lifetime-Käufer behalten Zugang; Loyalty-Upgrade-Buttons (`UPGRADE_LT_*`) bleiben für Altbestand gültig.
 
 ### Premium+ Monats-Pass (neu)
 
@@ -130,6 +134,7 @@ Käufe über die **Marketing-Website** (Jimdo, E-Mail-Links) nutzen **nicht** di
 | Premium+ 1 Monat | `ACCESS_PASS_PLUS_1M` | **€14,90** |
 | Kenji Unlock | `KENJI_UNLOCK` | €3,90 |
 | Chloe Unlock | `CHLOE_UNLOCK` | €3,90 |
+| ~~Registered Lifetime~~ *(entfernt)* | ~~`REGISTERED_LIFETIME`~~ | ~~€14,90~~ |
 
 Backend-Mapping: `PRODUCT_MAPPING` in `meaningful-conversations-backend/routes/purchase.js`.
 
@@ -195,7 +200,7 @@ podman-compose -f podman-compose-staging.yml restart
 1. Setze `PAYPAL_API_BASE=https://api-m.sandbox.paypal.com` in `.env.staging`
 2. Verwende Sandbox Client ID / Secret
 3. Teste den Checkout-Flow mit einem PayPal Sandbox-Account
-4. Prüfe: Purchase in DB, User `accessExpiresAt = null`, Admin-E-Mail
+4. Prüfe: Purchase in DB, User-Zugang aktualisiert, Admin-E-Mail
 
 ### Production Testing
 
@@ -212,7 +217,7 @@ podman-compose -f podman-compose-staging.yml restart
 
 ## 🔐 Sicherheit
 
-- **Server-seitige Betragsvalidierung**: Backend prüft ≥ €14,90 EUR
+- **Server-seitige Betragsvalidierung**: Backend prüft ≥ erwarteter Produktpreis
 - **Duplikat-Schutz**: paypalOrderId wird in der DB gespeichert, doppelte Verarbeitung verhindert
 - **Rate Limiting**: 10 Purchase-Requests pro Stunde pro User
 - **JWT-Authentifizierung**: create-order und capture-order erfordern gültiges JWT
@@ -239,7 +244,7 @@ podman-compose -f podman-compose-staging.yml restart
 - [ ] Backend-Container neu gestartet nach Env-Änderungen
 - [ ] Test-Kauf auf Staging durchgeführt
 - [ ] Purchase in Datenbank sichtbar
-- [ ] User-Account sofort aktiviert (accessExpiresAt = null)
+- [ ] User-Account sofort aktiviert (Zugangsdauer korrekt gesetzt)
 - [ ] Admin-Benachrichtigung per E-Mail erhalten
 - [ ] Code-Einlösung funktioniert weiterhin parallel
 
