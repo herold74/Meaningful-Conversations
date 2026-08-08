@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **21**, v2.5.6 — https://mc-beta.manualmode.at (health 200; bundle Build 21; guest fix `24300f6` verified). Includes User Guide/FAQ/Improvisation (`9460caf`), Premium+ PayPal paywall (`e90e4e7`).
+**Staging:** Deployed **2026-08-08**, Build **21**, v2.5.6 — https://mc-beta.manualmode.at (health 200; avatars `image/png`; bundle Build 21; `sw.js` v2.5.6-b21). Guest LC name-only → Fragebogen fix (`24300f6`); User Guide/FAQ/Improvisation (`9460caf`); Premium+ PayPal paywall (`e90e4e7`).
 
 **Pending staging deploy:** Premium+ website redeem fix (`data.js` — `ACCESS_PASS_PLUS_1M` code redemption for Jimdo/PayPal Hosted Buttons).
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
@@ -18,7 +18,20 @@
 
 **Website Premium+ (Jimdo):** PayPal Hosted Button manuell anlegen (`custom_id` = `ACCESS_PASS_PLUS_1M`, €14,90) — Anleitung `DOCUMENTATION/PAYPAL-SETUP-GUIDE.md`. Backend-Redeem-Fix + Admin-Code-Option lokal, **Staging-Deploy ausstehend**.
 
-**Commits:** `ef4064a4` (build 21 sync + guest fix deploy) · `24300f6` · `2a616fd` · `9460caf` · `e90e4e7`.
+**Commits (Build 21 deploy):** `ef4064a4` (build 21 sync) · `24300f6` (guest LC routing).
+
+## Recent Changes (2026-08-08 — Staging Build 21 guest LC routing fix)
+
+- **Commit `24300f6`:** Guest name-only Life Context → questionnaire (Disclaimer-Flow); `hasGuestNameProvided` in `App.tsx` / `guestSession.ts`
+- **Deploy:** `./scripts/ensure-local-podman.sh && ./deploy-manualmode.sh -e staging -c app`; commit `ef4064a4` (build 21 sync)
+- **iOS:** `npm run sync:ios-staging` — Capacitor sync + Plugin-Verify OK
+- **Verified:** staging health 200, avatars `image/png`, bundle **Build 21**, `sw.js` v2.5.6-b21
+
+## Recent Changes (2026-08-08 — Staging Build 20 User Guide + Premium+ paywall)
+
+- **Deploy:** `./deploy-manualmode.sh -e staging -c app`; commit `2a616fd` (build 20 sync)
+- **Includes:** User Guide/FAQ/Improvisation (`9460caf`), Premium+ PayPal paywall (`e90e4e7`)
+- **Verified:** staging health 200, avatars `image/png`, bundle **Build 20**, `sw.js` v2.5.6-b20
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 
