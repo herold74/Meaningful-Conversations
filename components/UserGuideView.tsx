@@ -160,15 +160,15 @@ Nach Auth, Intent und (bei Gästen) der Namensabfrage landen Sie auf dem **Start
 
 - **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext in die Vorschau oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
 - **Neues Gespräch starten** (hervorgehoben)
-  - **Mit bestehendem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung.
-  - **Ohne Kontext:** startet den Fragebogen.
+  - **Mit angereichertem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung.
+  - **Ohne Kontext oder nur Name-Vorlage:** startet den Fragebogen.
 - **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
 
 **Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
 
 **Menü → Lebenskontext:** Gäste gelangen immer zum **Startbildschirm**; registrierte Nutzer mit gespeichertem Kontext zur **Kontextauswahl**.
 
-**Fragebogen (über „Neues Gespräch starten", wenn noch kein Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro Tab-Sitzung. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
+**Fragebogen (über „Neues Gespräch starten", wenn noch kein oder nur minimaler Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro Tab-Sitzung. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
 
 **Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
 
@@ -1291,15 +1291,15 @@ After auth, intent, and (for guests) the name prompt, you arrive at the **start 
 
 - **Continue with your Life Context** — Loads your saved context into preview, or opens the file picker if no substantial file exists yet.
 - **Start a new conversation** (featured)
-  - **With existing context:** opens the **Markdown editor** for editing.
-  - **Without context:** starts the questionnaire.
+  - **With enriched context:** opens the **Markdown editor** for editing.
+  - **Without context or name-only template:** starts the questionnaire.
 - **Build with an interview** — Begins a guided interview with Gloria.
 
 **Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
 
 **Menu → Life Context:** Guests always reach the **start screen**; registered users with a saved context reach **Context Choice**.
 
-**Questionnaire (via “Start a new conversation” when no context yet):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per tab session. **Generate File & Continue** takes you to coach selection.
+**Questionnaire (via “Start a new conversation” when no or only minimal context):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per tab session. **Generate File & Continue** takes you to coach selection.
 
 **Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
 

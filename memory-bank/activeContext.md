@@ -12,7 +12,7 @@
 
 ## Session handoff (2026-08-08)
 
-**Committed (not yet deployed):** `e90e4e7` — Premium+ in **PayPal Paywall** (`PaywallView`, DE/EN product label). Also pending on staging: `9460caf` (User Guide/FAQ/Improvisation). Staging still **Build 19** until next deploy.
+**Committed (not yet deployed):** Guest LC routing fix — name-only template on Landing „Neues Gespräch starten“ opens questionnaire (not Markdown editor); UserGuide DE/EN aligned. Also pending: `e90e4e7` (Premium+ PayPal paywall), `9460caf` (User Guide/FAQ/Improvisation). Staging still **Build 19** until next deploy.
 
 **Previously live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
 

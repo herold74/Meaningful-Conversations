@@ -127,7 +127,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
   };
 
   const handleConversationCard = () => {
-    if (existingContext?.trim() && onEditContext) {
+    if (existingContext?.trim() && onEditContext && !isTemplateContext) {
       onEditContext(existingContext);
       return;
     }
