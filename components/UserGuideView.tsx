@@ -48,8 +48,9 @@ const deTranscriptToolsSection = (
     const base = coachingChapterNum(isNative, isRegistered);
     return `### 5.2 Transkript-Tools (Premium)
 
-Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium**:
+Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium** (nach Anmeldung):
 - **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.
+- **Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Anmeldung oder Registrierung**, nicht direkt zum Upgrade-Dialog.
 `;
 };
 
@@ -77,8 +78,9 @@ const enTranscriptToolsSection = (
     const base = coachingChapterNum(isNative, isRegistered);
     return `### 5.2 Transcript Tools (Premium)
 
-In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward:
+In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward (after sign-in):
 - **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.
+- **Guests:** The card is visible but locked — tapping it prompts you to **sign in or register**, not the upgrade dialog directly.
 `;
 };
 
@@ -136,7 +138,9 @@ Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten*
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
 
-**Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Gäste können diesen Schritt überspringen.
+**Name (Gäste):** Haben Sie in **dieser Browser-Tab-Sitzung** noch keinen Namen angegeben, folgt nach dem Intent die Abfrage Ihres Vornamens (oder Pseudonyms). Daraus entsteht eine minimale Lebenskontext-Vorlage; Sie können den Schritt auch **überspringen**. Anschließend gelangen Sie zum **Startbildschirm** zur Lebenskontext-Einrichtung. Haben Sie in derselben Sitzung bereits einen Namen **und** einen Lebenskontext, springt die App nach dem Intent direkt zur **Coach-Auswahl**.
+
+**Name (registriert):** Ohne gespeicherten Lebenskontext werden Sie nach Ihrem Namen gefragt; er wird in den verschlüsselten Lebenskontext integriert (kein Überspringen).
 
 **Hinweis:** Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
 
@@ -144,7 +148,7 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
 - **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Ohne Download geht Ihr Fortschritt verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie zu speichern.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Name und Kontext gelten nur für <strong>diese Browser-Tab-Sitzung</strong>. Ohne Download geht Ihr Fortschritt beim Schließen des Tabs verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie dauerhaft zu speichern.</p>')}
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
 
@@ -152,15 +156,17 @@ ${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong>
 
 ### 1.3 Der Lebenskontext-Startbildschirm
 
-Nach Auth und Intent landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
+Nach Auth, Intent und (bei Gästen) der Namensabfrage landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
 
-- **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext (wiederkehrende Nutzer) oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
-- **Neues Gespräch starten** (hervorgehoben) — Startet den Fragebogen zum Erstellen oder Erweitern Ihres Kontexts.
+- **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext in die Vorschau oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
+- **Neues Gespräch starten** (hervorgehoben) — **Mit bestehendem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung; **ohne Kontext:** startet den Fragebogen. Nach **Speichern & Weiter** im Editor geht es zur **Coach-Auswahl**.
 - **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
 
 **Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
 
-**Fragebogen (über „Neues Gespräch starten"):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
+**Menü → Lebenskontext:** Gäste gelangen immer zum **Startbildschirm**; registrierte Nutzer mit gespeichertem Kontext zur **Kontextauswahl**.
+
+**Fragebogen (über „Neues Gespräch starten", wenn noch kein Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro Tab-Sitzung. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
 
 **Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
 
@@ -183,7 +189,7 @@ Der Editor ermöglicht Ihnen die direkte Bearbeitung Ihres Lebenskontexts:
 - **Downloads:** Zwei Buttons unter dem Editor ermöglichen den Export:
   - **📥 .md** — Speichert den Lebenskontext als Markdown-Datei auf Ihrem Gerät.
   - **📄 PDF** — Generiert ein formatiertes PDF-Dokument mit Ihrem Lebenskontext.
-- **Speichern & Zurück:** Übernimmt Ihre Änderungen und kehrt zum Startbildschirm zurück.
+- **Speichern & Zurück:** Übernimmt Ihre Änderungen. Vom Startbildschirm (Karte „Neues Gespräch starten") führt Speichern zur **Coach-Auswahl**; aus dem Menü kehren Sie zum zuvor geöffneten Bildschirm zurück.
 - **Abbrechen:** Verwirft alle Änderungen.
 
 #### Lebenskontext mit Gloria erweitern
@@ -540,6 +546,8 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 ### 5.1 Einen Coach auswählen
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
+Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunikation, Coaching oder Coach Practice). **Gäste** sehen die **Anliegen-Suche** nicht — bei Intent „Coaching zu meinem Anliegen" wird stattdessen der **Coaching-Bereich** hervorgehoben.
+
 **Ihr Guide:**
 - **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
 - **Sam** -- Kurzes zukunftsorientiertes Coaching für Beruf und Alltag (Registriert)
@@ -844,7 +852,7 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
 - **Speichern & Fortfahren:**
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus:</strong> Unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre aktualisierte .md-Datei speichern — sonst ist der Fortschritt nach dem Schließen des Browsers weg. Registrierte Nutzer können dies optional als Backup nutzen.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Gastmodus:</strong> Unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre aktualisierte .md-Datei speichern — sonst ist der Fortschritt nach dem Schließen des Tabs weg. Registrierte Nutzer können dies optional als Backup nutzen.</p>')}
 
   - **Kontext herunterladen (Backup):** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern.
   - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
@@ -1189,7 +1197,9 @@ On launch, the **Intent Picker** appears — a screen with **three cards** askin
 
 Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
 
-**Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. Guests can skip this step.
+**Name (guests):** If you have not entered a name in **this browser tab session** yet, the app asks for your first name (or pseudonym) after the intent. This creates a minimal Life Context template; you can also **skip** this step. You then reach the **start screen** to set up your Life Context. If you already have a name **and** a Life Context in the same session, the app goes straight to **coach selection** after the intent.
+
+**Name (registered):** Without a saved Life Context, you are asked for your name; it is integrated into the encrypted Life Context (no skip option).
 
 **Note:** Registered users can disable the Intent Picker under **My Account**.
 
@@ -1197,7 +1207,7 @@ Your chosen intent determines which section is highlighted and expanded on the c
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
 - **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Without a download, your progress is lost. At the end of each session, download your Life Context file from the review screen to save it.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this browser tab session</strong>. Without a download, progress is lost when you close the tab. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>')}
 
 **Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
 
@@ -1205,15 +1215,17 @@ ${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> W
 
 ### 1.3 The Life Context Start Screen
 
-After auth and intent, you arrive at the **start screen** with **three action cards** and an upload area below:
+After auth, intent, and (for guests) the name prompt, you arrive at the **start screen** with **three action cards** and an upload area below:
 
-- **Continue with your Life Context** — Loads your saved context (returning users) or opens the file picker if no substantial file exists yet.
-- **Start a new conversation** (featured) — Starts the questionnaire to create or extend your context.
+- **Continue with your Life Context** — Loads your saved context into preview, or opens the file picker if no substantial file exists yet.
+- **Start a new conversation** (featured) — **With existing context:** opens the **Markdown editor** for editing; **without context:** starts the questionnaire. After **Save & Continue** in the editor, you proceed to **coach selection**.
 - **Build with an interview** — Begins a guided interview with Gloria.
 
 **Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
 
-**Questionnaire (via “Start a new conversation”):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Generate File & Continue** takes you to coach selection.
+**Menu → Life Context:** Guests always reach the **start screen**; registered users with a saved context reach **Context Choice**.
+
+**Questionnaire (via “Start a new conversation” when no context yet):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per tab session. **Generate File & Continue** takes you to coach selection.
 
 **Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
 
@@ -1236,7 +1248,7 @@ The editor allows you to directly edit your Life Context:
 - **Downloads:** Two buttons below the editor allow you to export:
   - **📥 .md** — Saves the Life Context as a Markdown file to your device.
   - **📄 PDF** — Generates a formatted PDF document with your Life Context.
-- **Save & Return:** Applies your changes and returns to the start screen.
+- **Save & Return:** Applies your changes. From the start screen (“Start a new conversation” card), saving takes you to **coach selection**; from the menu, you return to the screen you opened the editor from.
 - **Cancel:** Discards all changes.
 
 #### Extending Your Life Context with Gloria
@@ -1562,6 +1574,8 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personal
 ### 5.1 Choosing Your Coach
 On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
+Your chosen **intent** expands the matching section (Management & Communication, Coaching, or Coach Practice). **Guests** do not see **topic search** — with intent “Coaching for my concern”, the **Coaching section** is highlighted instead.
+
 **Your Guide:**
 - **Nobody** -- Your pragmatic sparring partner for management and communication topics
 - **Sam** -- Brief forward-focused coaching for work and everyday challenges (Registered)
@@ -1866,7 +1880,7 @@ This is the most important screen for capturing your insights.
   - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
 - **Saving & Continuing:**
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode:</strong> Under "Download Context (Backup)", <strong>always</strong> save your updated .md file — otherwise progress is lost when you close the browser. Registered users can use this as an optional backup.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Guest mode:</strong> Under "Download Context (Backup)", <strong>always</strong> save your updated .md file — otherwise progress is lost when you close the tab. Registered users can use this as an optional backup.</p>')}
 
   - **Download Context (Backup):** Click here to save your updated \`.md\` file.
   - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
