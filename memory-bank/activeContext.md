@@ -3,20 +3,20 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **17**, v2.5.6 — https://mc-beta.manualmode.at (health OK; guest onboarding/LC flows, transcript tools, landing copy; `sw.js` v2.5.6-b17)
+**Staging:** Deployed **2026-08-08**, Build **19**, v2.5.6 — https://mc-beta.manualmode.at (health OK; user guide overhaul — coaches, chapter 10, copy; `sw.js` v2.5.6-b19)
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=17` in repo; `npm run build` + `npx cap sync ios` (2026-08-08) — bereit für Archive
+**Xcode:** `CURRENT_PROJECT_VERSION=19` in repo; `npm run sync:ios-staging` (2026-08-08) — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
 ## Session handoff (2026-08-08)
 
-**Heute live (Staging Build 17):** Guest onboarding/LC flows (sessionStorage name, landing nach Name-Prompt, PII 1×/Session, LC-Menü → Landing, Editor → Bot-Auswahl); Transkript-Tools/Topic-Suche Guest-Gating; Landing-Karten-Copy DE/EN.
+**Heute live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
 
-**Commits:** `9f3c4f1` (guest UX) → `a1493ac` (build 17 sync + Staging deploy).
+**Commits:** `0cded08` (user guide overhaul) → `e029b46` (build 19 sync + Staging deploy).
 
-**Repo:** `main` pushed; Xcode synced Build 17.
+**Repo:** `main` pushed; Xcode synced Build 19.
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 
