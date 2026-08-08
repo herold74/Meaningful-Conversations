@@ -12,13 +12,15 @@
 
 ## Session handoff (2026-08-08)
 
-**Committed (not yet deployed):** `9460caf` — User Guide Lesbarkeit/Redundanzen (DE/EN), FAQ Coach Practice + Struktur, UI-Label **Improvisation** (free-play). Staging still **Build 19** until next deploy.
+**Committed (not yet deployed):** `e90e4e7` — Premium+ in **PayPal Paywall** (`PaywallView`, DE/EN product label). Also pending on staging: `9460caf` (User Guide/FAQ/Improvisation). Staging still **Build 19** until next deploy.
 
 **Previously live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
 
-**Commits:** `9460caf` (guide/FAQ/Improvisation) · `0cded08` (user guide overhaul) → `e029b46` (build 19 sync + Staging deploy).
+**Commits:** `e90e4e7` (PayPal Premium+ paywall) · `9460caf` (guide/FAQ/Improvisation) · `657e959` (memory bank) · `0cded08` → `e029b46` (build 19 deploy).
 
-**Repo:** `main` pushed; Xcode synced Build 19.
+**PayPal web:** Backend `ACCESS_PASS_PLUS_1M` existed; gap was trial-expired **PaywallView** only. No new PayPal dashboard product for REST checkout — env: `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`.
+
+**Repo:** `main` pushed; Xcode synced Build 19; **staging deploy + ios sync still open**.
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 
