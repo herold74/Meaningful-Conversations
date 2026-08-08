@@ -12,9 +12,11 @@
 
 ## Session handoff (2026-08-08)
 
-**Heute live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
+**Committed (not yet deployed):** `9460caf` — User Guide Lesbarkeit/Redundanzen (DE/EN), FAQ Coach Practice + Struktur, UI-Label **Improvisation** (free-play). Staging still **Build 19** until next deploy.
 
-**Commits:** `0cded08` (user guide overhaul) → `e029b46` (build 19 sync + Staging deploy).
+**Previously live (Staging Build 19):** User Guide — Bekky/Dan, Kapitel 10 Coach-Übung (App-Reihenfolge, Ausbildungs-Disclaimer), Copy-Fixes (zunächst kostenlos, Landing-Punkte, 5.1-Reihenfolge).
+
+**Commits:** `9460caf` (guide/FAQ/Improvisation) · `0cded08` (user guide overhaul) → `e029b46` (build 19 sync + Staging deploy).
 
 **Repo:** `main` pushed; Xcode synced Build 19.
 
