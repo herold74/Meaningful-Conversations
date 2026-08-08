@@ -367,7 +367,7 @@
   "profile_error": "Error updating profile.",
   "user_guide_title": "User Guide",
   "user_guide_attention_title": "Attention: Data Security",
-  "user_guide_attention_guest": "<strong>Guest Users:</strong> Your progress is only saved if you manually <strong>download your Life Context file</strong> at the end of each session review. If you close the browser without downloading, your progress is lost.",
+  "user_guide_attention_guest": "<strong>Guest users:</strong> Your name and context apply only to <strong>this browser tab session</strong>. Progress is saved permanently only if you manually <strong>download your Life Context file</strong> at the end of each session review. Close the tab without downloading and your progress is lost.",
   "user_guide_attention_registered": "<strong>Registered Users:</strong> Your data is end-to-end encrypted. If you <strong>forget your password</strong>, your data cannot be recovered and will be permanently lost. We recommend making regular backups by downloading your file.",
   "formatting_title": "Formatting Help",
   "formatting_p1": "You can use basic <a href=\"https://www.markdownguide.org/basic-syntax/\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-green-600 dark:text-green-400 hover:underline\">Markdown</a> to structure your Life Context file. This helps the AI understand the document's hierarchy.",
