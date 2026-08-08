@@ -3,25 +3,20 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **16**, v2.5.6 — https://mc-beta.manualmode.at (health OK; Intent-Picker bronze/silver/featured tile styling + copy refinements; `sw.js` v2.5.6-b16)
+**Staging:** Deployed **2026-08-08**, Build **17**, v2.5.6 — https://mc-beta.manualmode.at (health OK; guest onboarding/LC flows, transcript tools, landing copy; `sw.js` v2.5.6-b17)
 **Production:** Deployed **2026-08-05**, v2.5.6 — https://mc-app.manualmode.at (health OK; noch Build **11** — kein Production-Deploy dieser Session)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=16` in repo (build sync); **`npm run sync:ios-staging`** ausgeführt (2026-08-08) — bereit für Archive
+**Xcode:** `CURRENT_PROJECT_VERSION=17` in repo; `npm run build` + `npx cap sync ios` (2026-08-08) — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
 ## Session handoff (2026-08-08)
 
-**Heute live (Staging Build 16):** Intent-Picker — individuelle Karten-Themes (Bronze / Featured / Silber), Copy-Verfeinerungen (Tile 3 gekürzt, „manuelle Methodenwahl“, kein „Coach Practice“ in Beschreibung); User Guide + UX-FLOWS angepasst.
+**Heute live (Staging Build 17):** Guest onboarding/LC flows (sessionStorage name, landing nach Name-Prompt, PII 1×/Session, LC-Menü → Landing, Editor → Bot-Auswahl); Transkript-Tools/Topic-Suche Guest-Gating; Landing-Karten-Copy DE/EN.
 
-**Commits:** `c79228d` (Intent picker UX + copy) → `f7dd0cf` + `43f0fef` (build 15/16 sync nach Staging-Deploy).
+**Commits:** `9f3c4f1` (guest UX) → `a1493ac` (build 17 sync + Staging deploy).
 
-**Nächste Session (Vorschläge):**
-- Smoke Staging: Intent-Picker — Bronze/Silber-Styling visuell prüfen; drei Flows durchklicken
-- **ASC / iOS:** Xcode Archive Build 16 testen; Production-Deploy erst nach expliziter Freigabe
-- Roadmap **S:** Entwickler-Feedback nach Practice-Auswertung
-
-**Repo:** `main` clean, pushed (`43f0fef`).
+**Repo:** `main` pushed; Xcode synced Build 17.
 
 ## Recent Changes (2026-08-08 — Staging Build 16 Intent picker tile themes + copy)
 
