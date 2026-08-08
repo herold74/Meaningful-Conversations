@@ -20,6 +20,39 @@ Ja! Die App bietet einen Gastmodus mit Zugang zu einer Auswahl von Coaches. Im G
 ### Was ist "Gamification"?
 Gamification-Elemente wie XP, Level und Serien sollen Sie motivieren, sich regelmäßig mit Selbstreflexion zu beschäftigen. Sie verdienen XP für die Teilnahme an Gesprächen und können spezielle Boni erhalten. Ein **50-XP-Bonus** wird für das Führen einer Sitzung zu einem natürlichen Abschluss vergeben, und ein **25-XP-Bonus** wird vergeben, wenn Sie berichten, ein bereits bestehendes Ziel erreicht zu haben. Das Abschließen von Sitzungen und das Erreichen von Meilensteinen schaltet Erfolge frei und belohnt Ihr Engagement für persönliches Wachstum.
 
+### Warum funktioniert der Sprachmodus nicht oder warum ist die Sprachqualität schlecht?
+${isNative ? `Die iOS-App nutzt Apple-Gerätestimmen und native Spracherkennung. Bei schlechter Qualität prüfen Sie die **Stimmeinstellungen** im Chat (Signaturstimme vs. Gerätestimme). Erweiterte Stimmen laden Sie unter **iOS-Einstellungen → Barrierefreiheit → Gesprochener Inhalt** herunter.` : `Der Sprachmodus stützt sich auf die integrierte Web Speech API Ihres Browsers. Unterstützung und Qualität können erheblich variieren:
+
+- **Browser:** Chrome und Edge haben im Allgemeinen die beste Unterstützung. Firefox und Safari können Einschränkungen oder Stimmen von geringerer Qualität aufweisen.
+- **Betriebssystem:** Ihr Betriebssystem stellt die Stimmen bereit. Einige Betriebssysteme bieten „Premium“- oder „erweiterte“ Stimmen an, die Sie in den Systemeinstellungen (Barrierefreiheit/Lesen & Sprechen) herunterladen müssen.
+
+Für die beste Erfahrung empfehlen wir einen modernen Chromium-basierten Browser (Chrome oder Edge) auf dem Desktop.`}
+
+---
+
+## Onboarding & Plattform
+
+### Was ist der Intent Picker?
+Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation**, **Coaching** (hervorgehoben) oder **Begleitendes Coaching**. Ihre Wahl bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird. Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+
+### Die App zeigt eine leere Seite — was tun?
+Nach einem Update kann eine zwischengespeicherte Version kurz Probleme machen. Öffnen Sie das Menü (☰) und wählen Sie **App aktualisieren** (↻). Alternativ: Hard-Reload im Browser (Strg+F5 / Cmd+Shift+R) oder den Website-Cache in den Browser-Einstellungen leeren.
+
+### Warum werde ich nach meinem Namen gefragt?
+Der Name (oder ein Pseudonym) wird verwendet, um Ihren Lebenskontext zu personalisieren. Für Gäste wird er nur lokal auf Ihrem Gerät gespeichert. Für registrierte Nutzer wird er in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt jederzeit überspringen.
+
+### Wie kaufe ich ein Upgrade auf iOS?
+In der iOS-App werden Käufe direkt über Apple In-App Purchase abgewickelt. Öffnen Sie die Paywall (erscheint automatisch nach Ablauf der Trial-Phase oder über Menü → "Upgrade") und wählen Sie ein Abonnement. Die Zahlung erfolgt über Ihr Apple-Konto.
+
+${isNative ? `### Kann ich meinen Account auch im Browser nutzen?
+Ja. Ihr Benutzerkonto funktioniert auch über den Web-Browser unter mc-app.manualmode.at. Dort stehen andere Stimmen und PayPal als Zahlungsoption zur Verfügung.` : `### Wie kaufe ich ein Upgrade im Web-Browser?
+Im Web-Browser erfolgen Käufe über PayPal. Öffnen Sie das Menü (☰) → "Upgrade" und wählen Sie ein Produkt. Alternativ können Sie unter Kontoverwaltung einen Zugangscode einlösen.
+
+### Gibt es Unterschiede zwischen iOS-App und Web-Version?
+Die Kernfunktionen sind identisch. Unterschiede:
+- **iOS:** Native In-App Purchases, Apple-Stimmen (Enhanced/Premium), native Spracherkennung
+- **Web:** PayPal-Zahlung, Server-Stimmen (Piper TTS) zusätzlich zu Gerätestimmen, Browser-Spracherkennung`}
+
 ---
 
 ## Registrierte Benutzer
@@ -61,28 +94,25 @@ Sie wählen zu Beginn jeder Sitzung einen Coach aus. Wenn Sie das Gefühl haben,
 
 ---
 
-## Onboarding & Plattform
+## Coaching üben
 
-### Was ist der Intent Picker?
-Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation**, **Coaching** (hervorgehoben) oder **Begleitendes Coaching**. Ihre Wahl bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird. Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+### Welcher Einstieg passt wofür?
+- **Mit Anliegensklärung starten:** Contracting üben — das Klienten-Anliegen bleibt verborgen, bis zur Auswertung.
+- **Vom Szenario starten:** Anliegen sichtbar, dann passende Methode wählen.
+- **Von der Methode starten:** Methode zuerst, dann passendes Szenario (mit Match-Hinweisen).
 
-### Die App zeigt eine leere Seite — was tun?
-Nach einem Update kann eine zwischengespeicherte Version kurz Probleme machen. Öffnen Sie das Menü (☰) und wählen Sie **App aktualisieren** (↻). Alternativ: Hard-Reload im Browser (Strg+F5 / Cmd+Shift+R) oder den Website-Cache in den Browser-Einstellungen leeren.
+Nach Anliegensklärung können Sie optional **Phase 2** starten — mit definierter Methode oder **Improvisation**. Details im Benutzerhandbuch unter **Coaching üben**.
 
-### Warum werde ich nach meinem Namen gefragt?
-Der Name (oder ein Pseudonym) wird verwendet, um Ihren Lebenskontext zu personalisieren. Für Gäste wird er nur lokal auf Ihrem Gerät gespeichert. Für registrierte Nutzer wird er in den verschlüsselten Lebenskontext integriert. Sie können diesen Schritt jederzeit überspringen.
+### Wann sind „Schwer“ und Live-Gespräch freigeschaltet?
+**Schwer** und **Live-Gespräch** sind zunächst gesperrt. Sie schalten beides frei, wenn Sie **Herausfordernd** mit derselben Methode und demselben Szenario abgeschlossen haben — bei Anliegensklärung mit demselben Klienten-Avatar. **Live-Gespräch** ist reiner Sprachmodus ohne Text-Chat.
 
-### Wie kaufe ich ein Upgrade auf iOS?
-In der iOS-App werden Käufe direkt über Apple In-App Purchase abgewickelt. Öffnen Sie die Paywall (erscheint automatisch nach Ablauf der Trial-Phase oder über Menü → "Upgrade") und wählen Sie ein Abonnement. Die Zahlung erfolgt über Ihr Apple-Konto.
+### Wie funktioniert die Auswertung und die Gesamtnote?
+Nach **Sitzung beenden** können Sie optional eine Selbsteinschätzung (1–10) abgeben. Die KI bewertet u. a. Methoden-Treue, Wirksamkeit, Klarheit, Coachee-Autonomie und Klientenzufriedenheit (jeweils 1–10) sowie den Session-Flow.
 
-${isNative ? `### Kann ich meinen Account auch im Browser nutzen?
-Ja. Ihr Benutzerkonto funktioniert auch über den Web-Browser unter mc-app.manualmode.at. Dort stehen andere Stimmen und PayPal als Zahlungsoption zur Verfügung.` : `### Wie kaufe ich ein Upgrade im Web-Browser?
-Im Web-Browser erfolgen Käufe über PayPal. Öffnen Sie das Menü (☰) → "Upgrade" und wählen Sie ein Produkt. Alternativ können Sie unter Kontoverwaltung einen Zugangscode einlösen.
+Die **Gesamtnote** priorisiert die Methoden-Treue. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Ablauf — sonst maximal **9/10**. Bei **Improvisation** entfällt die Methoden-Treue; die Note basiert auf den anderen Dimensionen.
 
-### Gibt es Unterschiede zwischen iOS-App und Web-Version?
-Die Kernfunktionen sind identisch. Unterschiede:
-- **iOS:** Native In-App Purchases, Apple-Stimmen (Enhanced/Premium), native Spracherkennung
-- **Web:** PayPal-Zahlung, Server-Stimmen (Piper TTS) zusätzlich zu Gerätestimmen, Browser-Spracherkennung`}
+### Ersetzt Coach Practice eine Coaching-Ausbildung oder Supervision?
+**Nein.** Coach Practice ist eine **Ergänzung** zum eigenständigen Üben — kein Ersatz für fundierte Ausbildung, Supervision, Mentoring oder Zertifizierung. Auswertungen sind Lernimpulse, keine offizielle Prüfung oder Qualitätsgarantie. Für echte Klientenarbeit gelten Ihre beruflichen Standards und Ethikrichtlinien. Mehr im Benutzerhandbuch und Haftungsausschluss.
 `;
 
 const en_markdown = (isNative: boolean) => `
@@ -96,6 +126,39 @@ Yes! The app offers a guest mode with access to a selection of coaches. In guest
 
 ### What is Gamification?
 Gamification elements like XP, levels, and streaks are designed to motivate you to engage in regular self-reflection. You earn XP for participating in conversations, and you can receive special bonuses. A **50 XP bonus** is awarded for guiding a session to a natural conclusion, and a **25 XP bonus** is awarded if you report completing a pre-existing goal. Completing sessions and reaching milestones unlocks achievements and rewards your commitment to personal growth.
+
+### Why does voice mode not work or why is the voice quality poor?
+${isNative ? `The iOS app uses Apple device voices and native speech recognition. If quality is poor, check **Voice Settings** in the chat (signature voice vs. device voice). Download enhanced voices under **iOS Settings → Accessibility → Spoken Content**.` : `Voice mode relies on your browser's built-in Web Speech API. Support and quality can vary significantly:
+
+- **Browser:** Chrome and Edge generally have the best support. Firefox and Safari may have limitations or lower quality voices.
+- **Operating system:** Your OS provides the voices. Some systems offer "premium" or "enhanced" voices you may need to download in system settings (Accessibility/Speech).
+
+For the best experience, we recommend a modern Chromium-based browser (Chrome or Edge) on desktop.`}
+
+---
+
+## Onboarding & Platform
+
+### What is the Intent Picker?
+After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication**, **Coaching** (featured), or **Augmented Coaching**. Your choice determines which section is highlighted in coach selection. Registered users can disable the Intent Picker under **My Account**.
+
+### The app shows a blank page — what should I do?
+After an update, a cached version can briefly cause loading issues. Open the menu (☰) and select **Refresh App** (↻). Alternatively, hard-reload in your browser (Ctrl+F5 / Cmd+Shift+R) or clear the site cache in browser settings.
+
+### Why am I asked for my name?
+Your name (or a pseudonym) is used to personalize your Life Context. For guests, it's stored locally on your device only. For registered users, it's integrated into the encrypted Life Context. You can always skip this step.
+
+### How do I purchase an upgrade on iOS?
+In the iOS app, purchases are made directly through Apple In-App Purchase. Open the paywall (appears automatically after trial expiration or via Menu → "Upgrade") and select a subscription. Payment is processed through your Apple account.
+
+${isNative ? `### Can I use my account in a web browser too?
+Yes. Your user account also works via web browser at mc-app.manualmode.at. Different voices and PayPal as a payment option are available there.` : `### How do I purchase an upgrade in a web browser?
+In the web browser, purchases are made via PayPal. Open the menu (☰) → "Upgrade" and select a product. Alternatively, you can redeem an access code under Account Management.
+
+### Are there differences between the iOS app and the web version?
+The core features are identical. Differences:
+- **iOS:** Native In-App Purchases, Apple voices (Enhanced/Premium), native speech recognition
+- **Web:** PayPal payment, server voices (Piper TTS) in addition to device voices, browser speech recognition`}
 
 ---
 
@@ -138,28 +201,25 @@ You choose a coach at the start of each session. If you feel another coach's sty
 
 ---
 
-## Onboarding & Platform
+## Coach Practice
 
-### What is the Intent Picker?
-After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication**, **Coaching** (featured), or **Augmented Coaching**. Your choice determines which section is highlighted in coach selection. Registered users can disable the Intent Picker under **My Account**.
+### Which entry path should I use?
+- **Start with concern clarification:** Practice contracting — the client's concern stays hidden until the evaluation.
+- **Start from scenario:** Concern visible first, then choose a matching method.
+- **Start from method:** Method first, then a matching scenario (with match hints).
 
-### The app shows a blank page — what should I do?
-After an update, a cached version can briefly cause loading issues. Open the menu (☰) and select **Refresh App** (↻). Alternatively, hard-reload in your browser (Ctrl+F5 / Cmd+Shift+R) or clear the site cache in browser settings.
+After concern clarification, you can optionally start **Phase 2** — with a defined method or **improvisation**. Details in the User Guide under **Coach Practice**.
 
-### Why am I asked for my name?
-Your name (or a pseudonym) is used to personalize your Life Context. For guests, it's stored locally on your device only. For registered users, it's integrated into the encrypted Life Context. You can always skip this step.
+### When are Hard and Live conversation unlocked?
+**Hard** and **Live conversation** start locked. Unlock both by completing **Challenging** with the same method and scenario — or the same client avatar in concern clarification. **Live conversation** is voice-only (no text chat).
 
-### How do I purchase an upgrade on iOS?
-In the iOS app, purchases are made directly through Apple In-App Purchase. Open the paywall (appears automatically after trial expiration or via Menu → "Upgrade") and select a subscription. Payment is processed through your Apple account.
+### How does evaluation and the overall score work?
+After **End session**, you can optionally submit a self-rating (1–10). The AI scores method compliance, effectiveness, clarity, coachee autonomy, and coachee satisfaction (each 1–10), plus session flow.
 
-${isNative ? `### Can I use my account in a web browser too?
-Yes. Your user account also works via web browser at mc-app.manualmode.at. Different voices and PayPal as a payment option are available there.` : `### How do I purchase an upgrade in a web browser?
-In the web browser, purchases are made via PayPal. Open the menu (☰) → "Upgrade" and select a product. Alternatively, you can redeem an access code under Account Management.
+The **overall score** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent flow — otherwise the cap is **9/10**. With **improvisation**, method compliance is omitted; the score is based on the other dimensions.
 
-### Are there differences between the iOS app and the web version?
-The core features are identical. Differences:
-- **iOS:** Native In-App Purchases, Apple voices (Enhanced/Premium), native speech recognition
-- **Web:** PayPal payment, server voices (Piper TTS) in addition to device voices, browser speech recognition`}
+### Does Coach Practice replace coach training or supervision?
+**No.** Coach Practice is a **supplement** for self-directed practice — not a replacement for thorough training, supervision, mentoring, or certification. Evaluations are learning feedback, not official assessment or a quality guarantee. For real client work, your professional standards and ethics apply. See the User Guide and Disclaimer for more.
 `;
 
 const FAQView: React.FC<InfoViewProps> = () => {
@@ -182,26 +242,6 @@ const FAQView: React.FC<InfoViewProps> = () => {
                 >
                     {markdownContent}
                 </ReactMarkdown>
-                
-                <div className="not-prose">
-                    <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2">
-                        {language === 'de' ? 'Warum funktioniert der Sprachmodus nicht oder warum ist die Sprachqualität schlecht?' : 'Why does voice mode not work or why is the voice quality poor?'}
-                    </h3>
-                     <p className="text-content-secondary leading-relaxed">
-                        {language === 'de' ? 'Der Sprachmodus stützt sich auf die integrierte Web Speech API Ihres Browsers. Unterstützung und Qualität können erheblich variieren:' : 'Voice mode relies on your browser’s built-in Web Speech API. Support and quality can vary significantly:'}
-                    </p>
-                    <div className="space-y-3 my-4">
-                        <div className="bg-background-tertiary dark:bg-background-tertiary p-3 border border-border-primary dark:border-border-primary text-sm">
-                            <p className="text-content-secondary"><strong>{language === 'de' ? 'Browser:' : 'Browser:'}</strong> {language === 'de' ? 'Chrome und Edge haben im Allgemeinen die beste Unterstützung. Firefox und Safari können Einschränkungen oder Stimmen von geringerer Qualität aufweisen.' : 'Chrome and Edge generally have the best support. Firefox and Safari may have limitations or lower quality voices.'}</p>
-                        </div>
-                        <div className="bg-background-tertiary dark:bg-background-tertiary p-3 border border-border-primary dark:border-border-primary text-sm">
-                             <p className="text-content-secondary"><strong>{language === 'de' ? 'Betriebssystem:' : 'Operating System:'}</strong> {language === 'de' ? "Ihr Betriebssystem stellt die Stimmen bereit. Einige Betriebssysteme bieten 'Premium'- oder 'erweiterte' Stimmen an, die Sie in Ihren Systemeinstellungen (Barrierefreiheit/Lesen & Sprechen) herunterladen müssen." : "Your operating system provides the voices. Some operating systems offer 'premium' or 'enhanced' voices that you may need to download in your system settings (Accessibility/Speech)."}</p>
-                        </div>
-                    </div>
-                     <p className="text-content-secondary leading-relaxed">
-                        {language === 'de' ? 'Für die beste Erfahrung empfehlen wir die Verwendung eines modernen Chromium-basierten Browsers (wie Chrome oder Edge) auf einem Desktop-Betriebssystem.' : 'For the best experience, we recommend using a modern Chromium-based browser (like Chrome or Edge) on a desktop operating system.'}
-                    </p>
-                </div>
             </div>
         </div>
     );

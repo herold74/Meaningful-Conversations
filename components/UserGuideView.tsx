@@ -706,7 +706,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Aufbau innerer Ruhe und Gelassenheit
 - Philosophische Reflexion über Lebensfragen
 
-**Besonderes Feature:** Kenji bietet **geführte Meditationsübungen** an (🔔). Fragen Sie ihn einfach nach einer Meditation -- er wird Sie durch eine stoisch inspirierte Übung leiten.
+**🔔 Meditation:** Stoisch inspirierte Übungen — fragen Sie einfach danach.
 
 **Beispiel-Situationen:** "Ich mache mir Sorgen über Dinge, die ich nicht kontrollieren kann." / "Ich brauche innere Ruhe in einer stressigen Phase." / "Ich möchte eine Meditation machen."
 
@@ -726,7 +726,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Strukturierte Selbstreflexion mit klarem Rahmen
 - Emotionale Herausforderungen systematisch angehen
 
-**Besonderes Feature:** Chloe bietet **geführte Meditationsübungen** an (🔔), die speziell auf achtsame Selbstreflexion ausgerichtet sind.
+**🔔 Meditation:** Auf achtsame Selbstreflexion ausgerichtet.
 
 **Beispiel-Situationen:** "Ich denke immer das Schlimmste und möchte das ändern." / "Ich möchte verstehen, warum ich in bestimmten Situationen immer gleich reagiere." / "Ich brauche einen strukturierten Ansatz für meine Herausforderung."
 
@@ -763,7 +763,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Achtsamkeit in den Alltag integrieren
 - Tiefgehende Reflexion über innere Blockaden
 
-**Besonderes Feature:** Rob bietet **geführte Meditationsübungen** an (🔔), die auf mentale Fitness und Achtsamkeit ausgerichtet sind.
+**🔔 Meditation:** Fokus auf mentale Fitness und Achtsamkeit.
 
 **Beispiel-Situationen:** "Ich sabotiere mich selbst und weiß nicht warum." / "Ich möchte mental stärker werden." / "Ich möchte eine Achtsamkeitsübung machen."
 
@@ -843,24 +843,24 @@ ${dePracticeTabSection(isNative, isRegistered, showChapter10)}
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
 ### 5.5 Die Chat-Oberfläche
-- **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
+- **Kopfzeile:** Name und Avatar des Coaches. **Tippen Sie auf die Kopfzeile** — ein Modal zeigt Stil und Methodik. Aktiver Coaching-Modus (DPC/DPFL) erscheint hier ebenfalls. Rechts: **Sitzung beenden**.
 - **Textmodus (Standard):**
-  - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
-  - **Klicken Sie auf das Papierflieger-Symbol**, um Ihre Nachricht zu senden.
-  - **Klicken Sie auf das Mikrofon-Symbol**, um die Sprache-zu-Text-Funktion ${isNative ? 'Ihres Gerätes' : 'Ihres Browsers'} zu nutzen und Ihre Nachricht zu diktieren.
+  - Nachricht unten eingeben.
+  - **Papierflieger-Symbol** sendet die Nachricht.
+  - **Mikrofon-Symbol** startet Sprache-zu-Text (${isNative ? 'Gerät' : 'Browser'}) zum Diktieren.
 - **Sprachausgabe (TTS):**
-  - **Klicken Sie auf das Lautsprecher-Symbol**, um die Sprachausgabe ein- oder auszuschalten.
-  - Wenn sie aktiviert ist, können Sie die Wiedergabe mit den Symbolen **Pause/Wiedergabe** und **Wiederholen** steuern.
-  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie folgende Optionen:
-    - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches -- wird automatisch ausgewählt.
-    - **Gerätestimmen:** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Sofortige Reaktionszeiten und funktionieren auch offline.
-${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser verfügbar)* Professionelle Stimmen, die auf unserem Server generiert werden.
-  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit -- Server-Stimmen sind hier nicht verfügbar und auch nicht nötig.`}
+  - **Lautsprecher-Symbol** schaltet TTS ein oder aus.
+  - Bei aktivem TTS steuern **Pause/Wiedergabe** und **Wiederholen** die Wiedergabe.
+  - **Zahnrad-Symbol** öffnet die **Stimmeinstellungen**:
+    - **Signaturstimme des Coaches:** Beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches — wird automatisch gewählt.
+    - **Gerätestimmen:** Stimmen auf Ihrem Gerät. **Vorteil:** Sofortige Reaktion, auch offline.
+${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium) — exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser)* Professionelle Stimmen auf unserem Server.
+  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich Apple-Gerätestimmen (Enhanced/Premium) — Server-Stimmen entfallen.`}
 - **Sprachmodus:**
-  - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
-  - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
-  - **Tippen Sie erneut auf das Symbol (jetzt ein Papierflieger)**, um die Aufnahme zu beenden und Ihre Nachricht zu senden. Die Antwort des Coaches wird automatisch abgespielt.
-- **Textformatierung:** Ihre Lebenskontext-Datei unterstützt **Markdown-Formatierung** (z.B. \*\*fett\*\*, \*kursiv\*, Aufzählungen, Überschriften). Details finden Sie unter Menü (☰) → **"Formatierung"**.
+  - **Schallwellen-Symbol** wechselt in den reinen Sprachmodus.
+  - **Großes Mikrofon-Symbol** startet die Aufnahme — sprechen Sie Ihre Nachricht.
+  - **Erneut tippen** (Symbol wird zum Papierflieger) beendet die Aufnahme und sendet. Die Coach-Antwort wird automatisch abgespielt.
+- **Textformatierung:** Ihre Lebenskontext-Datei unterstützt **Markdown** (z. B. \*\*fett\*\*, \*kursiv\*, Listen, Überschriften). Details: Menü (☰) → **„Formatierung“**.
 
 </div>
 </details>
@@ -872,7 +872,7 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 <div style="padding: 16px;">
 
 ### 6.1 Die Analyse
-**Wenn Sie auf "Sitzung beenden" klicken**, analysiert eine KI Ihr Gespräch. Sie sehen einen Ladebildschirm mit dem Titel **Sitzung wird analysiert...**. Dieser Vorgang dauert in der Regel etwa 15-30 Sekunden.
+Tippen Sie auf **Sitzung beenden** — die KI analysiert Ihr Gespräch. Der Ladebildschirm **Sitzung wird analysiert...** dauert meist 15–30 Sekunden.
 
 ### 6.2 Der Bildschirm "Diskursanalyse"
 Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
@@ -896,7 +896,7 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
 - **Speichern & Fortfahren:**
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus:</strong> Unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre aktualisierte .md-Datei speichern — sonst ist der Fortschritt nach dem Schließen des Tabs weg. Registrierte Nutzer können dies optional als Backup nutzen.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Gäste:</strong> Siehe Abschnitt <strong>1.2</strong> (Tab-Sitzung). Speichern Sie hier unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre .md-Datei — sonst geht der Fortschritt verloren. Registrierte Nutzer nutzen dies optional als Backup.</p>')}
 
   - **Kontext herunterladen (Backup):** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern.
   - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
@@ -971,7 +971,7 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Premium-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation**.
+Zugang und Ort in der App: siehe Abschnitt **5.2**. Unten beschreiben wir den Ablauf der Auswertung.
 
 ### Wie funktioniert es?
 
@@ -1019,7 +1019,9 @@ Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungs
 
 ### Persönlichkeitsprofile & Personalisierung
 
-**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe ${deChapterLabel(profileChapterNum(isNative))}), nutzt die KI dieses automatisch bei der Auswertung. Aktivieren Sie dazu vor dem Upload die Option **"Persönlichkeitsprofil einbeziehen"** im Reflexionsfragebogen. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. Die Auswertung zeigt Ihnen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
+**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe ${deChapterLabel(profileChapterNum(isNative))}), kann die KI es in die Auswertung einbeziehen. Aktivieren Sie vor dem Upload **„Persönlichkeitsprofil einbeziehen“** im Reflexionsfragebogen.
+
+Sie erhalten persönlichkeitsbasierte Hinweise zu Ihrem Kommunikationsstil — und sehen, welche Muster in diesem Gespräch sichtbar wurden sowie wo Sie ansetzen können.
 
 ### Zusätzliche Funktionen
 
@@ -1075,7 +1077,7 @@ Die Audio-Transkription ermöglicht es Ihnen, **echte Gespräche direkt in der A
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation** (Aufnahme/Upload).
+Zugang und Karte: siehe Abschnitt **5.2**. Zusätzlich benötigen Sie die **Klienten**-Stufe — nutzen Sie **Aufnahme/Upload** in den Transkript-Tools.
 
 ### Wie funktioniert es?
 
@@ -1083,7 +1085,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Einwilligung:</strong> Sie müsse
 <p class="m-0"><strong>KI-Anbieter:</strong> Die Audio-Transkription verwendet immer <strong>Google Gemini</strong> — auch wenn Sie Mistral als bevorzugten KI-Anbieter eingestellt haben. Glättung und Auswertung respektieren hingegen Ihre KI-Anbieter-Einstellung.</p>`)}
 
 **Schritt 1: Einwilligung**
-Bevor Sie beginnen, bestätigen Sie die Einwilligung aller Gesprächsteilnehmer in der App.
+Bestätigen Sie die Einwilligung aller Teilnehmer in der App (Details siehe Hinweis oben).
 
 **Schritt 2: Aufnehmen oder Hochladen**
 Sie haben zwei Möglichkeiten:
@@ -1100,10 +1102,6 @@ Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
 - **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
 - **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(coachingChapterNum(isNative, true) + 3)}) ein, um eine strukturierte Analyse zu erhalten.
-
-### KI-Anbieter-Hinweis
-
-Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral keine Audio-Eingabe unterstützt. Die nachfolgenden Schritte (**Glättung** und **Auswertung**) verwenden den KI-Anbieter, den Sie in Ihren Einstellungen festgelegt haben (bzw. die globale Einstellung, falls Sie keine persönliche Auswahl getroffen haben).
 
 ### Datenschutz
 
@@ -1131,15 +1129,17 @@ const de_chapter10 = (isNative: boolean) => `
 
 ### Was ist Coach-Übung?
 
-Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie übernehmen die Rolle des Coaches, die KI spielt Ihren Klienten. Sie wählen Einstieg, Methode, Szenario und Schwierigkeit — und führen danach ein Live-Gespräch. Am Ende erhalten Sie eine **strukturierte Auswertung** Ihrer Methodenführung mit konkreten Stärken, Entwicklungsfeldern und Übungsvorschlägen.
+Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie führen das Gespräch als Coach, die KI spielt Ihren Klienten.
+
+Sie wählen Einstieg, Methode, Szenario und Schwierigkeit. Am Ende erhalten Sie eine **strukturierte Auswertung** mit Stärken, Entwicklungsfeldern und Übungsvorschlägen.
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase** nach Registrierung oder mit **Klienten**-Zugang. Es befindet sich im Tab **Coaching üben** im Coaching-Bereich (Silber-Sektion auf der Coach-Auswahl — nicht bei den Transkript-Tools).
+Zugang und Tab: siehe Abschnitt **5.3**.
 
 **Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
-${guideWarningBox(`<p class="m-0 mb-2"><strong>Kein Ersatz für Coaching-Ausbildung:</strong> Coach-Übung ist eine <strong>Ergänzung</strong> zum eigenständigen Üben — <strong>keinesfalls</strong> ein Ersatz für eine fundierte Coaching-Ausbildung, Supervision, Mentoring oder anerkannte Zertifizierung.</p>
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Kein Ersatz für Coaching-Ausbildung:</strong> Coach-Übung ist eine <strong>Ergänzung</strong> zum eigenständigen Üben — <strong>keinesfalls</strong> ein Ersatz für eine fundierte Coaching-Ausbildung oder anerkannte Zertifizierung.</p>
 <ul class="list-disc list-outside pl-5 space-y-1 my-0">
 <li>Die KI simuliert einen Klienten; echte Gesprächssituationen sind komplexer und nicht vollständig abbildbar.</li>
 <li>Auswertungen sind Lernimpulse — keine offizielle Prüfung, keine Qualitätsgarantie und kein Nachweis von Coach-Kompetenz.</li>
@@ -1153,7 +1153,7 @@ Oben finden Sie Links zu **Dein Fortschritt** und **Übungsverlauf**. Darunter w
 **1. Mit Anliegensklärung starten**
 - Das Klienten-Anliegen bleibt **verborgen** — Sie üben reines Contracting (Begrüßung, Rahmen, Anliegensklärung).
 - Wählen Sie einen Klienten-Avatar, **Schwierigkeitsgrad** und optional **Live-Gespräch** (nur Sprache).
-- In der Auswertung sehen Sie das verborgene Anliegen; optional folgt eine **Methodensitzung** (Phase 2) mit Methode oder Freispiel.
+- In der Auswertung sehen Sie das verborgene Anliegen; optional folgt eine **Methodensitzung** (Phase 2) — entweder unter Anwendung einer **definierten Methode** oder als **Improvisation** (ohne vorab definierten Ablauf).
 
 **2. Vom Szenario starten**
 - Wählen Sie zuerst ein **Coachee-Szenario** (Anliegen sichtbar), dann eine passende **Coaching-Methode**.
@@ -1162,7 +1162,7 @@ Oben finden Sie Links zu **Dein Fortschritt** und **Übungsverlauf**. Darunter w
 **3. Von der Methode starten**
 - Wählen Sie zuerst eine **Coaching-Methode**, dann ein passendes **Szenario** (mit Match-Hinweisen: besonders passend / alternative / neutral).
 
-**Gemeinsame Optionen** (bei Einstieg 2 und 3, danach in der App):
+**Gemeinsame Optionen** (unter Einstieg 2 oder 3, sobald einer der beiden Bereiche aufgeklappt ist — erscheinen **unterhalb** der Szenario-/Methoden-Auswahl auf dem Setup-Bildschirm):
 - **Schwierigkeitsgrad** — steuert, wie kooperativ oder herausfordernd sich der KI-Klient verhält. **„Level erklärt“** aufklappen:
 
 | Level | Verhalten des KI-Klienten |
@@ -1222,7 +1222,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> D
 <ul class="list-disc list-outside pl-5 space-y-1 my-0">
 <li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
 <li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
-<li><strong>KI-Transparenz:</strong> Der simulierte Klient wird von Sprachmodellen gesteuert; Antworten können fehlerhaft oder unpassend sein — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
+<li><strong>Simulierter Klient:</strong> Allgemeine KI-Hinweise siehe ${deChapterLabel(2)}, Abschnitt 2.3. Der Übungs-Klient kann fehlerhaft antworten — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
 <li><strong>Haftung:</strong> Sie tragen die Verantwortung dafür, wie Sie Erkenntnisse aus der Übung in echter Klientenarbeit anwenden (siehe auch Haftungsausschluss der App).</li>
 </ul>`)}
 
@@ -1806,7 +1806,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Building inner calm and equanimity
 - Philosophical reflection on life questions
 
-**Special Feature:** Kenji offers **guided meditation exercises** (🔔). Simply ask him for a meditation -- he will guide you through a Stoic-inspired practice.
+**🔔 Meditation:** Stoic-inspired practices — just ask.
 
 **Example Situations:** "I worry about things I can't control." / "I need inner calm during a stressful period." / "I'd like to do a meditation."
 
@@ -1826,7 +1826,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Structured self-reflection with a clear framework
 - Tackling emotional challenges systematically
 
-**Special Feature:** Chloe offers **guided meditation exercises** (🔔), specifically designed for mindful self-reflection.
+**🔔 Meditation:** Focused on mindful self-reflection.
 
 **Example Situations:** "I always assume the worst and want to change that." / "I want to understand why I always react the same way in certain situations." / "I need a structured approach for my challenge."
 
@@ -1863,7 +1863,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Integrating mindfulness into daily life
 - Deep reflection on inner blockages
 
-**Special Feature:** Rob offers **guided meditation exercises** (🔔), focused on mental fitness and mindfulness.
+**🔔 Meditation:** Focused on mental fitness and mindfulness.
 
 **Example Situations:** "I sabotage myself and don't know why." / "I want to become mentally stronger." / "I'd like to do a mindfulness exercise."
 
@@ -1943,24 +1943,24 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
 ### 5.5 The Chat Interface
-- **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
+- **Header:** Coach name and avatar. **Tap the header** to open a modal with style and methodology. Active coaching mode (DPC/DPFL) appears here too. On the right: **End Session**.
 - **Text Mode (Default):**
-  - Type your message in the text area at the bottom.
-  - **Click the paper plane icon** to send your message.
-  - **Click the microphone icon** to use your ${isNative ? "device's" : "browser's"} speech-to-text feature and dictate your message.
-- **Voice Output (TTS) Controls:**
-  - **Click the Speaker icon** to toggle text-to-speech on or off.
-  - When enabled, you can control playback with the **Pause/Play** and **Repeat** icons.
-  - **Click the Gear icon** to open the **Voice Settings** modal. You have the following options:
-    - **Coach Signature Voice:** The best available voice for the coach's language and personality -- automatically selected.
-    - **Device Voices:** Voices generated directly on your device. **Advantage:** Instant response times and work offline.
-${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times.` : `    - **Server Voices:** *(Web browser only)* Professional voices generated on our server.
-  - **Note for iOS App:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times -- server voices are not available or needed here.`}
+  - Type your message at the bottom.
+  - **Paper plane icon** sends the message.
+  - **Microphone icon** starts speech-to-text on your ${isNative ? 'device' : 'browser'} for dictation.
+- **Voice Output (TTS):**
+  - **Speaker icon** toggles TTS on or off.
+  - When TTS is on, **Pause/Play** and **Repeat** control playback.
+  - **Gear icon** opens **Voice Settings**:
+    - **Coach Signature Voice:** Best match for the coach's language and personality — selected automatically.
+    - **Device Voices:** Generated on your device. **Advantage:** Instant response, works offline.
+${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices only (Enhanced/Premium) — excellent quality with instant response.` : `    - **Server Voices:** *(Web browser only)* Professional voices on our server.
+  - **Note for iOS app:** Uses Apple device voices only — no server voices.`}
 - **Voice Mode:**
-  - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
-  - **Tap the large microphone icon** to start recording. Speak your message.
-  - **Tap the icon again (now a paper plane)** to stop recording and send your message. The coach's reply will play automatically.
-- **Text formatting:** Your Life Context file supports **Markdown formatting** (e.g. \*\*bold\*\*, \*italic\*, bullet lists, headings). See Menu (☰) → **"Formatting"** for details.
+  - **Sound wave icon** switches to pure voice mode.
+  - **Large microphone icon** starts recording — speak your message.
+  - **Tap again** (icon becomes a paper plane) to stop and send. The coach reply plays automatically.
+- **Text formatting:** Your Life Context supports **Markdown** (e.g. \*\*bold\*\*, \*italic\*, lists, headings). See Menu (☰) → **"Formatting"**.
 
 </div>
 </details>
@@ -1972,7 +1972,7 @@ ${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple devi
 <div style="padding: 16px;">
 
 ### 6.1 The Analysis
-**When you click "End Session,"** an AI analyzes your conversation. You will see a loading screen titled **Analyzing Session...**. This process usually takes about 15-30 seconds.
+Tap **End Session** — the AI analyzes your conversation. The **Analyzing Session...** screen usually takes 15–30 seconds.
 
 ### 6.2 The Session Review Screen
 This is the most important screen for capturing your insights.
@@ -1996,7 +1996,7 @@ This is the most important screen for capturing your insights.
   - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
 - **Saving & Continuing:**
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode:</strong> Under "Download Context (Backup)", <strong>always</strong> save your updated .md file — otherwise progress is lost when you close the tab. Registered users can use this as an optional backup.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Guests:</strong> See section <strong>1.2</strong> (tab session). Here, under "Download Context (Backup)", <strong>always</strong> save your .md file — otherwise progress is lost. Registered users may use this as an optional backup.</p>')}
 
   - **Download Context (Backup):** Click here to save your updated \`.md\` file.
   - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
@@ -2071,7 +2071,7 @@ Transcript Evaluation helps you reflect on real conversations—e.g., with clien
 
 ### Who Can Use It?
 
-This feature is available from the **Premium access tier** and above, and is located in the **Transcript Tools** card in the **Management & Communication** section.
+Access and location in the app: see section **5.2**. Below we describe the evaluation workflow.
 
 ### How Does It Work?
 
@@ -2119,7 +2119,9 @@ The recommendations also appear in the **PDF export**, so you can document your 
 
 ### Personality Profiles & Personalization
 
-**If you have a Personality Profile** (see ${enChapterLabel(profileChapterNum(isNative))}), the AI will automatically use it during the evaluation. To enable this, activate the **"Include Personality Profile"** option in the reflection questionnaire before uploading. You will then receive **personality-based insights** tailored to your communication style and personality traits. The evaluation shows how your typical patterns appeared in this conversation—and where you can target improvements.
+**If you have a Personality Profile** (see ${enChapterLabel(profileChapterNum(isNative))}), the AI can include it in the evaluation. Before uploading, enable **"Include Personality Profile"** in the reflection questionnaire.
+
+You receive personality-based insights on your communication style — and see which patterns showed up in this conversation and where to focus next.
 
 ### Additional Features
 
@@ -2175,7 +2177,7 @@ Audio Transcription allows you to **record live conversations directly in the ap
 
 ### Who Can Use It?
 
-This feature is available from the **Client access tier** and is located in the **Transcript Tools** card in the **Management & Communication** section (record/upload).
+Access and card location: see section **5.2**. You also need **Client** tier — use **record/upload** in Transcript Tools.
 
 ### How Does It Work?
 
@@ -2183,7 +2185,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Consent:</strong> You must confir
 <p class="m-0"><strong>AI provider:</strong> Audio transcription always uses <strong>Google Gemini</strong> — even if you have set Mistral as your preferred AI provider. Smoothing and evaluation respect your AI provider setting.</p>`)}
 
 **Step 1: Consent**
-Before you begin, confirm participant consent in the app.
+Confirm participant consent in the app (see the notice above).
 
 **Step 2: Record or Upload**
 You have two options:
@@ -2200,10 +2202,6 @@ After transcription, you have the following options:
 - **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
 - **Download Transcript:** Save the raw or smoothed transcript as a text file.
 - **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(coachingChapterNum(isNative, true) + 3)}) for a structured analysis.
-
-### AI Provider Note
-
-**Audio transcription** always uses Google Gemini, as Mistral does not support audio input. The subsequent steps (**smoothing** and **evaluation**) use the AI provider configured in your settings (or the global setting if you haven't made a personal choice).
 
 ### Privacy
 
@@ -2231,15 +2229,17 @@ const en_chapter10 = (isNative: boolean) => `
 
 ### What is Coach Practice?
 
-Coach Practice is a **training mode for aspiring or experienced coaches**: you play the coach and the AI plays your client. You choose an entry path, method, scenario, and difficulty — then conduct a live conversation. At the end, you receive a **structured evaluation** of your method application with concrete strengths, development areas, and suggested drills.
+Coach Practice is a **training mode for aspiring or experienced coaches**: you lead the conversation as coach; the AI plays your client.
+
+Choose entry path, method, scenario, and difficulty. At the end you receive a **structured evaluation** with strengths, development areas, and suggested drills.
 
 ### Who Can Use It?
 
-This feature is available with **Premium+**, during the **9-day trial** after registration, or with **Client** access. It is located in the **Coach Practice** tab in the Coaching section (Silver area on coach selection — not in Transcript Tools).
+Access and tab: see section **5.3**.
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
-${guideWarningBox(`<p class="m-0 mb-2"><strong>Not a substitute for coach training:</strong> Coach Practice is a <strong>supplement</strong> for self-directed practice — <strong>not</strong> a replacement for thorough coach training, supervision, mentoring, or recognized certification.</p>
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Not a substitute for coach training:</strong> Coach Practice is a <strong>supplement</strong> for self-directed practice — <strong>not</strong> a replacement for thorough coach training or recognized certification.</p>
 <ul class="list-disc list-outside pl-5 space-y-1 my-0">
 <li>The AI simulates a client; real conversations are more complex and cannot be fully replicated.</li>
 <li>Evaluations are learning feedback — not official assessment, quality guarantee, or proof of coaching competence.</li>
@@ -2253,7 +2253,7 @@ At the top you will find links to **Your progress** and **Practice history**. Be
 **1. Start with concern clarification**
 - The client's concern stays **hidden** — you practice pure contracting (greeting, frame, clarifying the concern).
 - Choose a client avatar, **difficulty level**, and optionally **Live conversation** (voice only).
-- The evaluation reveals the hidden concern; optionally a **method session** (Phase 2) follows with a method or free play.
+- The evaluation reveals the hidden concern; optionally a **method session** (Phase 2) follows — either using a **defined method** or as **improvisation** (without a predefined structure).
 
 **2. Start from scenario**
 - First choose a **coachee scenario** (concern visible), then a matching **coaching method**.
@@ -2262,7 +2262,7 @@ At the top you will find links to **Your progress** and **Practice history**. Be
 **3. Start from method**
 - First choose a **coaching method**, then a matching **scenario** (with match hints: especially suited / alternative / neutral).
 
-**Shared options** (entry paths 2 and 3, then in the app):
+**Shared options** (below entry path 2 or 3, once either section is expanded — shown **below** the scenario/method selection on the setup screen):
 - **Difficulty** — controls how cooperative or challenging the AI client behaves. Expand **Level guide**:
 
 | Level | Client behavior |
@@ -2322,7 +2322,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching 
 <ul class="list-disc list-outside pl-5 space-y-1 my-0">
 <li><strong>Not therapy / not clinical use:</strong> Coach Practice supports reflection and skill practice — not treatment of mental illness or crisis intervention.</li>
 <li><strong>Not supervision:</strong> The app does not replace professional supervision or peer review by qualified colleagues.</li>
-<li><strong>AI transparency:</strong> The simulated client is driven by language models; responses may be wrong or inappropriate — use critical reflection and human oversight in your training.</li>
+<li><strong>Simulated client:</strong> General AI transparency: see ${enChapterLabel(2)}, section 2.3. The practice client may respond incorrectly — use critical reflection and human oversight in your training.</li>
 <li><strong>Liability:</strong> You are responsible for how you apply insights from practice in real client work (see also the app's disclaimer).</li>
 </ul>`)}
 
