@@ -3,7 +3,6 @@ import { Bot, Message, User, GamificationState, NavView, SessionAnalysis } from 
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import * as geminiService from '../services/geminiService';
-import * as analyticsService from '../services/analyticsService';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
@@ -12,6 +11,8 @@ import type { Big5Result } from '../utils/bfi2';
 import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context } from '../types';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
+import { isTemplateOnlyLifeContext } from '../utils/lifeContext';
+import { syncGuestSession, resolveGuestName } from '../utils/guestSession';
 import type { SurveyResult } from './PersonalitySurvey';
 import type { RefinementPreviewResult } from '../services/api';
 
@@ -191,13 +192,15 @@ export interface AppViewRouterProps {
   handleContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
   handleSwitchCoach: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
   handleStartOver: () => void;
+  resumeGuestFromAuth: () => void;
+  handleGuestAuthRequired: () => void;
   handleRunTestSession: (scenario: TestScenario, adminLifeContext: string) => Promise<void>;
   handleTestComfortCheck: (withConversationalEnd: boolean) => void;
   handleNavigateFromMenu: (view: NavView) => void;
   onDeleteAccount: () => void;
 
   // Routing helpers
-  applyIntentLogic: (intent: UserIntent | null) => void;
+  applyIntentLogic: (intent: UserIntent | null, options?: { lifeContextOverride?: string }) => void;
   routeWithIntentPicker: (hasContext: boolean) => Promise<void>;
   routeToCoachPractice: () => void;
   handlePracticeSetupBack: () => void;
@@ -307,6 +310,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleContinueSession,
     handleSwitchCoach,
     handleStartOver,
+    resumeGuestFromAuth,
+    handleGuestAuthRequired,
     handleRunTestSession,
     handleTestComfortCheck,
     handleNavigateFromMenu,
@@ -340,15 +345,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setMenuView(null);
             setView('register');
           }}
-          onGuest={() => {
-            setMenuView(null);
-            analyticsService.trackGuestLogin();
-            try {
-              localStorage.removeItem('guestName');
-            } catch {}
-            setLifeContext('');
-            setView('intentPicker');
-          }}
+          onGuest={resumeGuestFromAuth}
           redirectReason={authRedirectReason}
         />
       );
@@ -473,17 +470,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         />
       );
     case 'landing': {
-      const isTemplateContext = (() => {
-        if (!lifeContext) return false;
-        const lines = lifeContext.split('\n');
-        const fieldPattern = /^\*\*[^*]+\*\*:\s*(.+)/;
-        let filledCount = 0;
-        for (const line of lines) {
-          const m = line.match(fieldPattern);
-          if (m && m[1].trim()) filledCount++;
-        }
-        return filledCount <= 1;
-      })();
+      const isTemplateContext = isTemplateOnlyLifeContext(lifeContext);
       return (
         <LandingPage
           onSubmit={handleFileUpload}
@@ -521,9 +508,13 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           showPiiTips={false}
           title={t('lc_editor_title')}
           description={t('lc_editor_desc')}
+          allowSaveWithoutChanges
           onSave={async (newContext: string) => {
             setLifeContext(newContext);
-            if (currentUser && encryptionKey) {
+            if (!currentUser) {
+              const guestName = resolveGuestName(newContext, questionnaireAnswers.profile_name);
+              if (guestName) syncGuestSession(guestName, newContext);
+            } else if (encryptionKey) {
               try {
                 await userService.saveUserData(
                   newContext,
@@ -534,7 +525,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 console.error('Failed to save edited context:', error);
               }
             }
-            setView('landing');
+            applyIntentLogic(null, { lifeContextOverride: newContext });
           }}
           onCancel={() => setView('landing')}
         />
@@ -591,10 +582,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 applyIntentLogic(null);
               }
             } else {
-              applyIntentLogic(null);
+              syncGuestSession(name, template);
+              setView('landing');
             }
           }}
-          onSkip={!currentUser ? () => applyIntentLogic(null) : undefined}
+          onSkip={!currentUser ? () => setView('landing') : undefined}
           safeAreaTop={iosSafeAreaTop}
         />
       );
@@ -702,7 +694,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setPracticeEvaluation(null);
             setView('practiceSetup');
           }}
-          onAuthRequired={() => setView('auth')}
+          onAuthRequired={handleGuestAuthRequired}
           onUpgrade={() => openUpgrade()}
           onPracticeUpgrade={() => openUpgrade('premium_plus')}
           onStartSessionWithPrompt={handleStartSessionFromEval}

@@ -13,6 +13,8 @@ interface LifeContextEditorViewProps {
   showPiiTips?: boolean;
   title?: string;
   description?: string;
+  /** When true, Save works even without edits (e.g. proceed to coach selection). */
+  allowSaveWithoutChanges?: boolean;
 }
 
 const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({ 
@@ -22,6 +24,7 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
   showPiiTips = true,
   title,
   description,
+  allowSaveWithoutChanges = false,
 }) => {
   const { t, language } = useLocalization();
   const [editableContext, setEditableContext] = useState(lifeContext);
@@ -168,9 +171,11 @@ const LifeContextEditorView: React.FC<LifeContextEditorViewProps> = ({
               onClick={handleSave}
               variant="primary"
               size="md"
-              disabled={!hasChanges}
+              disabled={!hasChanges && !allowSaveWithoutChanges}
             >
-              {language === 'de' ? 'Speichern & Zurück' : 'Save & Return'}
+              {allowSaveWithoutChanges
+                ? (language === 'de' ? 'Speichern & Weiter' : 'Save & Continue')
+                : (language === 'de' ? 'Speichern & Zurück' : 'Save & Return')}
             </Button>
           </div>
         </div>

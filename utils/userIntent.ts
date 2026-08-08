@@ -1,6 +1,6 @@
 import type { UserIntent } from '../components/IntentPickerView';
 
-export type HighlightSection = 'management' | 'topicSearch' | 'coachPractice' | null;
+export type HighlightSection = 'management' | 'topicSearch' | 'coachPractice' | 'coaching' | null;
 
 export type BotSelectionSectionState = {
   kommunikationOpen: boolean;
@@ -42,7 +42,7 @@ export function isCoachPracticeIntent(intent: UserIntent | null | undefined): bo
   return intent === 'coachPractice';
 }
 
-export function getBotSelectionSectionState(intent: UserIntent | null): BotSelectionSectionState {
+export function getBotSelectionSectionState(intent: UserIntent | null, isGuest = false): BotSelectionSectionState {
   switch (intent) {
     case 'communication':
       return {
@@ -61,7 +61,7 @@ export function getBotSelectionSectionState(intent: UserIntent | null): BotSelec
     case 'coaching':
       return {
         kommunikationOpen: false,
-        coachingOpen: false,
+        coachingOpen: isGuest,
         clientOpen: false,
         coachingView: 'coaches',
       };

@@ -25,7 +25,16 @@ describe('userIntent', () => {
     });
   });
 
-  it('collapses all sections for coaching intent', () => {
+  it('opens coaching section for guest coaching intent', () => {
+    expect(getBotSelectionSectionState('coaching', true)).toEqual({
+      kommunikationOpen: false,
+      coachingOpen: true,
+      clientOpen: false,
+      coachingView: 'coaches',
+    });
+  });
+
+  it('collapses all sections for registered coaching intent', () => {
     expect(getBotSelectionSectionState('coaching')).toEqual({
       kommunikationOpen: false,
       coachingOpen: false,

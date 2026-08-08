@@ -30,6 +30,14 @@ import {
     type HighlightSection,
 } from './utils/userIntent';
 import { resolvePracticeAccess } from './utils/practiceAccess';
+import {
+    getPersistedGuestLifeContextTemplate,
+    hasGuestNameProvided,
+    hasGuestPiiAcknowledged,
+    resolveGuestName,
+    setGuestPiiAcknowledged,
+    syncGuestSession,
+} from './utils/guestSession';
 import type { SurveyResult } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
@@ -174,9 +182,13 @@ const App: React.FC = () => {
     }, [currentUser]);
 
     const openUpgrade = useCallback((focus?: 'premium_plus') => {
+        if (!currentUser) {
+            setView('auth');
+            return;
+        }
         setUpgradeFocus(focus ?? null);
         setMenuView('upgrade');
-    }, []);
+    }, [currentUser]);
 
     const buildPracticeTranscriptSummary = useCallback((history: Message[], lang: Language) => {
         const coacheeLabel = lang === 'de' ? 'Coachee' : 'Coachee';
@@ -527,6 +539,13 @@ const App: React.FC = () => {
         setCameFromContextChoice(false);
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setTempContext(context);
+        if (!currentUser && hasGuestPiiAcknowledged()) {
+            setLifeContext(context);
+            const guestName = resolveGuestName(context, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, context);
+            setView('botSelection');
+            return;
+        }
         setView('piiWarning');
     };
 
@@ -543,10 +562,15 @@ const App: React.FC = () => {
 
         // Guest flow
         if (!currentUser) {
-            if (!localStorage.getItem('guestName')) {
+            const persistedLc = getPersistedGuestLifeContextTemplate();
+            const effectiveLc = lifeContext.trim() || persistedLc || '';
+            if (!lifeContext.trim() && persistedLc) setLifeContext(persistedLc);
+            if (!hasGuestNameProvided(effectiveLc, questionnaireAnswers.profile_name)) {
                 setView('namePrompt');
             } else {
-                applyIntentLogic(intent);
+                const guestName = resolveGuestName(effectiveLc, questionnaireAnswers.profile_name);
+                if (guestName) syncGuestSession(guestName, effectiveLc);
+                applyIntentLogic(intent, { lifeContextOverride: effectiveLc });
             }
             return;
         }
@@ -566,7 +590,7 @@ const App: React.FC = () => {
 
         // Registered user: substantial LC + profile → profile hint or intent logic
         routeWithProfileHint(intent);
-    }, [currentUser, hasPersonalityProfile, lifeContext, routeWithProfileHint, routeToCoachPractice, applyIntentLogic]);
+    }, [currentUser, hasPersonalityProfile, lifeContext, questionnaireAnswers.profile_name, routeWithProfileHint, routeToCoachPractice, applyIntentLogic]);
 
     const routeAfterOcean = useCallback(() => {
         if (postOceanRoute === 'landing') {
@@ -743,13 +767,19 @@ const App: React.FC = () => {
     };
 
     const handlePiiConfirm = async () => {
-        setLifeContext(tempContext);
+        const contextToSave = tempContext;
+        setLifeContext(contextToSave);
         setTempContext('');
+        if (!currentUser) {
+            setGuestPiiAcknowledged();
+            const guestName = resolveGuestName(contextToSave, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, contextToSave);
+        }
         setView('botSelection');
 
         if (currentUser && encryptionKey) {
             try {
-                await userService.saveUserData(tempContext, serializeGamificationState(gamificationState), encryptionKey);
+                await userService.saveUserData(contextToSave, serializeGamificationState(gamificationState), encryptionKey);
             } catch (error) {
                 console.error('Failed to auto-save Life Context after questionnaire:', error);
             }
@@ -1213,13 +1243,40 @@ const App: React.FC = () => {
         setIsMenuOpen(false);
         setMenuView(null);
 
-        if (!currentUser) {
-            setLifeContext('');
-            setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        }
-
         setView('intentPicker');
-    }, [currentUser]);
+    }, []);
+
+    const resumeGuestFromAuth = useCallback(() => {
+        setMenuView(null);
+        analyticsService.trackGuestLogin();
+        const persistedLc = getPersistedGuestLifeContextTemplate();
+        const effectiveLc = lifeContext.trim() || persistedLc || '';
+        if (!hasGuestNameProvided(effectiveLc, questionnaireAnswers.profile_name)) {
+            setLifeContext('');
+            setView('intentPicker');
+            return;
+        }
+        const guestName = resolveGuestName(effectiveLc, questionnaireAnswers.profile_name);
+        if (guestName) {
+            syncGuestSession(guestName, effectiveLc);
+            if (!lifeContext.trim() && persistedLc) setLifeContext(persistedLc);
+        }
+        const storedIntent = getStoredUserIntent();
+        if (storedIntent) {
+            setHighlightSection(getHighlightSectionForIntent(storedIntent));
+            applyIntentLogic(storedIntent, { lifeContextOverride: effectiveLc });
+        } else {
+            setView('intentPicker');
+        }
+    }, [applyIntentLogic, lifeContext, questionnaireAnswers.profile_name]);
+
+    const handleGuestAuthRequired = useCallback(() => {
+        if (!currentUser) {
+            const guestName = resolveGuestName(lifeContext, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, lifeContext);
+        }
+        setView('auth');
+    }, [currentUser, lifeContext, questionnaireAnswers.profile_name]);
 
     const handleRunTestSession = async (scenario: TestScenario, adminLifeContext: string) => {
         // Set up test mode state
@@ -1498,14 +1555,10 @@ const App: React.FC = () => {
 
     const handleNavigateToLifeContext = useCallback(() => {
         setIsMenuOpen(false);
+        setMenuView(null);
         if (currentUser && lifeContext.trim()) {
-            setMenuView(null);
             setView('contextChoice');
-        } else if (!currentUser && lifeContext.trim()) {
-            setLifeContextEditorReturnView(null);
-            setMenuView('lifeContextEditor');
         } else {
-            setMenuView(null);
             setView('landing');
         }
     }, [currentUser, lifeContext]);
@@ -1627,6 +1680,8 @@ const App: React.FC = () => {
         handleContinueSession,
         handleSwitchCoach,
         handleStartOver,
+        resumeGuestFromAuth,
+        handleGuestAuthRequired,
         handleRunTestSession,
         handleTestComfortCheck,
         handleNavigateFromMenu,

@@ -77,13 +77,14 @@ interface TopicSearchProps {
     bots: BotWithAvailability[];
     onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
     onUpgrade?: () => void;
+    onAuthRequired?: () => void;
     currentUser: User | null;
     language: Language;
     highlighted?: boolean;
     sectionRef?: React.Ref<HTMLDivElement>;
 }
 
-const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, currentUser, language, highlighted, sectionRef }) => {
+const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, onAuthRequired, currentUser, language, highlighted, sectionRef }) => {
     const { t } = useLocalization();
     const [topic, setTopic] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -105,6 +106,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     }, [topic]);
 
     const isLoggedIn = !!currentUser;
+    const canUseTopicSearch = isLoggedIn;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -252,10 +254,20 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 <div className="flex items-center gap-2 mb-2">
                     <Search className="w-5 h-5 text-accent-primary flex-shrink-0 opacity-60" aria-hidden="true" />
                     <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
-                        {!isLoggedIn ? (
-                            <p className="flex-1 text-sm text-content-secondary py-1">
-                                {t('botSearch_login_hint')}
-                            </p>
+                        {!canUseTopicSearch ? (
+                            onAuthRequired ? (
+                                <button
+                                    type="button"
+                                    onClick={onAuthRequired}
+                                    className="flex-1 text-sm text-content-secondary py-1 text-left hover:text-accent-primary transition-colors"
+                                >
+                                    {t('botSearch_login_hint')}
+                                </button>
+                            ) : (
+                                <p className="flex-1 text-sm text-content-secondary py-1">
+                                    {t('botSearch_login_hint')}
+                                </p>
+                            )
                         ) : (
                             <textarea
                                 ref={topicTextareaRef}
@@ -267,7 +279,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
-                        {isLoggedIn && (
+                        {canUseTopicSearch && (
                             <>
                                 <button
                                     type="button"
@@ -294,10 +306,11 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                     </div>
                 </div>
 
-                {/* Bottom row: hint text centered */}
+                {canUseTopicSearch && (
                 <div className="text-xs font-semibold text-content-subtle text-center pt-0.5">
                     {t('botSearch_section_title')}
                 </div>
+                )}
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
               </div>
@@ -318,44 +331,51 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
 };
 
 interface TranscriptToolsTileProps {
+  isGuest: boolean;
   isPremiumPlus: boolean;
   isClientPlus: boolean;
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
   onUpgrade?: () => void;
+  onAuthRequired?: () => void;
 }
 
 const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
+  isGuest,
   isPremiumPlus,
   isClientPlus,
   onTranscriptEval,
   onTranscriptRecord,
   onUpgrade,
+  onAuthRequired,
 }) => {
   const { t } = useLocalization();
   const evalLocked = !isPremiumPlus;
   const recordLocked = !isClientPlus;
 
-  const handleEval = () => {
-    if (evalLocked) onUpgrade?.();
-    else onTranscriptEval?.();
+  const handleLockedAction = (locked: boolean, onUnlocked: () => void) => {
+    if (!locked) {
+      onUnlocked();
+      return;
+    }
+    if (isGuest) onAuthRequired?.();
+    else onUpgrade?.();
   };
 
-  const handleRecord = () => {
-    if (recordLocked) onUpgrade?.();
-    else onTranscriptRecord?.();
-  };
+  const handleEval = () => handleLockedAction(evalLocked, () => onTranscriptEval?.());
+  const handleRecord = () => handleLockedAction(recordLocked, () => onTranscriptRecord?.());
 
   return (
     <motion.div
-      className="flex flex-col items-center text-center p-6 h-full
-        bg-background-secondary border border-border-primary rounded-card shadow-card"
+      className={`flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border border-border-primary rounded-card shadow-card
+        ${isGuest ? 'opacity-75' : ''}`}
       title={t(COACH_SESSION_RING_I18N.tool)}
-      whileHover={{ y: -3 }}
+      whileHover={isGuest ? undefined : { y: -3 }}
       transition={{ duration: 0.15 }}
     >
-      <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}>
-        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
+      <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)} ${isGuest ? 'opacity-60' : ''}`}>
+        <div className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${isGuest ? 'filter grayscale opacity-80' : ''}`}>
           <TranscriptMicAvatar className="w-[4.75rem] h-[4.75rem]" />
         </div>
       </div>
@@ -399,9 +419,15 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
           </div>
           {(evalLocked || recordLocked) && (
             <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
-              {evalLocked && t('te_premium_required')}
-              {evalLocked && recordLocked && ' · '}
-              {recordLocked && t('botSelection_client_required')}
+              {isGuest ? (
+                t('botSearch_login_hint')
+              ) : (
+                <>
+                  {evalLocked && t('te_premium_required')}
+                  {evalLocked && recordLocked && ' · '}
+                  {recordLocked && t('botSelection_client_required')}
+                </>
+              )}
             </p>
           )}
         </div>
@@ -603,7 +629,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
 
 const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
   const { t, language } = useLocalization();
-  const initialSectionState = getBotSelectionSectionState(entryIntent);
+  const initialSectionState = getBotSelectionSectionState(entryIntent, !currentUser);
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeHighlight, setActiveHighlight] = useState<HighlightSection>(null);
@@ -619,12 +645,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const coachingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const next = getBotSelectionSectionState(entryIntent);
+    const next = getBotSelectionSectionState(entryIntent, !currentUser);
     setKommunikationSectionOpen(next.kommunikationOpen);
     setCoachingSectionOpen(next.coachingOpen);
     setClientSectionOpen(next.clientOpen);
     setCoachingView(next.coachingView);
-  }, [entryIntent]);
+  }, [entryIntent, currentUser]);
 
   useEffect(() => {
     if (!highlightSection || isLoading) return;
@@ -634,12 +660,14 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         target = managementRef.current;
       } else if (highlightSection === 'topicSearch') {
         target = currentUser ? topicSearchRef.current : coachingRef.current;
-      } else if (highlightSection === 'coachPractice') {
+      } else if (highlightSection === 'coachPractice' || highlightSection === 'coaching') {
         target = coachingRef.current;
       }
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setActiveHighlight(highlightSection);
+        const visualHighlight =
+          !currentUser && highlightSection === 'topicSearch' ? 'coaching' : highlightSection;
+        setActiveHighlight(visualHighlight);
         setTimeout(() => {
           setActiveHighlight(null);
           onHighlightDone?.();
@@ -762,11 +790,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         </p>
       </div>
 
-      {(currentUser || entryIntent === 'coaching') && (
+      {(currentUser) && (
         <TopicSearchSection
           bots={bots}
           onStartSessionWithPrompt={onStartSessionWithPrompt}
           onUpgrade={onUpgrade}
+          onAuthRequired={onAuthRequired}
           currentUser={currentUser}
           language={language}
           highlighted={activeHighlight === 'topicSearch'}
@@ -838,11 +867,13 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
             ))}
 
             <TranscriptToolsTile
+              isGuest={!currentUser}
               isPremiumPlus={isPremiumPlus}
               isClientPlus={isClientPlus}
               onTranscriptEval={onTranscriptEval}
               onTranscriptRecord={onTranscriptRecord}
               onUpgrade={onUpgrade}
+              onAuthRequired={onAuthRequired}
             />
           </div>
           <CoachRingLegend />
@@ -852,7 +883,7 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
 
         {/* 2. Coaching Section — Silver toggle: Coaches | Coach Practice */}
         <section className="w-full max-w-6xl mx-auto">
-          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'coachPractice' || (!currentUser && activeHighlight === 'topicSearch') ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
+          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'coachPractice' || activeHighlight === 'coaching' ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
               <div
