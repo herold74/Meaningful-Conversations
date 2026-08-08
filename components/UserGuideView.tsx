@@ -146,7 +146,7 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 
 ### 1.2 Gast vs. Registrierter Benutzer
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
-- **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
+- **Registrieren/Anmelden:** Erstellen Sie ein zunächst kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
 ${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Name und Kontext gelten nur für <strong>diese Browser-Tab-Sitzung</strong>. Ohne Download geht Ihr Fortschritt beim Schließen des Tabs verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie dauerhaft zu speichern.</p>')}
 
@@ -1205,7 +1205,7 @@ Your chosen intent determines which section is highlighted and expanded on the c
 
 ### 1.2 Guest vs. Registered User
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
-- **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
+- **Register/Login:** Create a free account to start with to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
 ${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this browser tab session</strong>. Without a download, progress is lost when you close the tab. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>')}
 
