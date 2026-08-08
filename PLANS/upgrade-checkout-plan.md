@@ -4,6 +4,8 @@
 **Date:** February 18, 2026
 **Based on:** USER-ACCESS-MATRIX.md pricing, existing PayPal Direct Checkout (v1.9.1)
 
+> **Update 2026-08:** Registered Lifetime (`REGISTERED_LIFETIME`, €14,90 einmalig) is **removed from the website** and no longer offered to new users. Legacy buyers and loyalty upgrade pricing (`UPGRADE_LT_*`) remain supported in-app/backend. See `DOCUMENTATION/PAYPAL-SETUP-GUIDE.md`.
+
 ---
 
 ## Current State (v1.9.1)

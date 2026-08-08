@@ -104,7 +104,7 @@ Gloria (Onboarding) erscheint nicht in der Bot-Auswahl, da sie nur beim ersten K
 | ~~Coach Practice Monats-Pass~~ *(Legacy)* | `PRACTICE_PASS_1M` | `PRACTICE_PASS_1M` | 30 Tage | Practice only (webhook/sandbox) |
 | Kenji Coach Unlock | `KENJI_UNLOCK` | `kenji-resilience` | Permanent | Kenji (einzeln) |
 | Chloe Coach Unlock | `CHLOE_UNLOCK` | `chloe-structured-reflection` | Permanent | Chloe (einzeln) |
-| ~~Registered Lifetime~~ *(Legacy)* | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered (Legacy-Käufer) |
+| ~~Registered Lifetime~~ *(Legacy, Website entfernt 2026-08)* | `REGISTERED_LIFETIME` | `REGISTERED_LIFETIME` | Permanent | Registered (Legacy-Käufer; kein Neukauf) |
 
 ### Upgrade-Produkte (rabattiert, gleiche Wirkung wie Standardprodukte)
 
