@@ -159,7 +159,9 @@ ${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong>
 Nach Auth, Intent und (bei Gästen) der Namensabfrage landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
 
 - **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext in die Vorschau oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
-- **Neues Gespräch starten** (hervorgehoben) — **Mit bestehendem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung; **ohne Kontext:** startet den Fragebogen. Nach **Speichern & Weiter** im Editor geht es zur **Coach-Auswahl**.
+- **Neues Gespräch starten** (hervorgehoben)
+  - **Mit bestehendem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung.
+  - **Ohne Kontext:** startet den Fragebogen.
 - **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
 
 **Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
@@ -242,7 +244,7 @@ Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 | **Registriert** | Kostenloses Konto inkl. **9-Tage-Premium-Test** | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
 | **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
 | **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, **Coach Practice (12 Methoden)**, alle Features |
+| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **Coach Practice (12 Methoden)**, alle Features |
 
 **So upgraden Sie:**
 ${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
@@ -300,7 +302,7 @@ Falls Sie die Web-Version bevorzugen:
 ### 3.4 Installation auf Desktop (Windows/Mac/Linux)
 
 1. Öffnen Sie die App in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
-2. Klicken Sie auf das **Install-Symbol** (⊕) in der Adressleiste oder das **Menü** (drei Punkte).
+2. Klicken Sie auf das **Install-Symbol** ⊕ in der Adressleiste oder das **Menü** (drei Punkte).
 3. Wählen Sie **"Installieren"** oder **"App installieren"**.
 4. Die App wird wie eine Desktop-Anwendung installiert und kann über Ihr Startmenü/Dock geöffnet werden.
 
@@ -548,12 +550,12 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. 
 
 Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunikation, Coaching oder Coach Practice). **Gäste** sehen die **Anliegen-Suche** nicht — bei Intent „Coaching zu meinem Anliegen" wird stattdessen der **Coaching-Bereich** hervorgehoben.
 
+**Ihre Interviewerin:**
+- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
+
 **Ihr Guide:**
 - **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
 - **Sam** -- Kurzes zukunftsorientiertes Coaching für Beruf und Alltag (Registriert)
-
-**Ihre Interviewerin:**
-- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
 
 **Ihre Coaches:**
 - **Gabrielle** -- Vier-Phasen-Coaching von Klarheit zu verbindlichem Handeln (Registriert)
@@ -562,8 +564,12 @@ Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunik
 - **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
 - **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
 - **Mike** -- Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung (Premium)
-- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten)
+
+**Exklusiv für Klienten** (${brand.providerName}):
+- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten) 🔔
 - **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
+- **Bekky** -- Gedanken-Audit: belastende Überzeugungen strukturiert prüfen und Perspektiven wechseln (Klienten)
+- **Dan** -- Innere Überzeugungen in Ihrer eigenen Sprache erkunden — ohne fremde Metaphern (Klienten)
 
 Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Klienten-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
 
@@ -778,6 +784,44 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Differenzierung des Selbst -- ein klares "Ich" in Beziehungen entwickeln
 
 **Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Ich möchte verstehen, warum bestimmte Beziehungen mich so triggern." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
+
+**Zugang:** Klienten-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Bekky -- Analytisch, Systematisch, Neutral (Klienten)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Bekky dekonstruiert belastende Überzeugungen durch ein strukturiertes **Gedanken-Audit** — vier Prüfschritte und Perspektivwechsel für mehr Klarheit und Handlungsfähigkeit in Beruf und Privatleben.
+
+**Ideal für:**
+- Konkrete, belastende Gedanken zu einer Situation (nicht globale Selbstlabels)
+- Strukturierte Prüfung von Überzeugungen und alternative Perspektiven
+- Wenn Sie einen analytischen, schrittweisen Ansatz bevorzugen
+
+**Besonderes:** Kein klassisches Session-Contracting — direkter Einstieg in das Audit. Bei Bedarf kann Bekky Sie an Rob, Victor oder Dan weiterleiten.
+
+**Beispiel-Situationen:** "Ich glaube fest, dass ich in dieser Situation scheitern werde." / "Ich möchte einen stressenden Gedanken systematisch durchleuchten." / "Ich brauche Klarheit, bevor ich handele."
+
+**Zugang:** Klienten-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Dan -- Exakte Klientensprache, Nicht-direktiv, Erkundend (Klienten)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Dan hilft Ihnen, innere Überzeugungen durch **Ihre eigene Sprache und Bildwelt** zu erkunden und zu verändern — ohne eigene Metaphern, Interpretationen oder Ratschläge einzubringen.
+
+**Ideal für:**
+- Erkundung innerer Überzeugungen in exakt Ihrer Wortwahl
+- Wenn Sie einen nicht-direktiven, erkundenden Stil bevorzugen
+- Tiefe Reflexion ohne vorgegebene Deutungen
+
+**Besonderes:** Dan arbeitet strikt mit Ihren Formulierungen. Bei passenden fremdgerichteten Glaubenssätzen kann er Sie an Bekky weiterleiten.
+
+**Beispiel-Situationen:** "Ich möchte verstehen, was hinter meiner inneren Überzeugung steckt — in meinen eigenen Worten." / "Ich brauche jemanden, der mir keine fertigen Bilder gibt." / "Ich möchte eine Überzeugung erkunden, ohne interpretiert zu werden."
 
 **Zugang:** Klienten-Benutzer
 </div>
@@ -1087,23 +1131,39 @@ const de_chapter10 = (isNative: boolean) => `
 
 ### Was ist Coach-Übung?
 
-Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie übernehmen die Rolle des Coaches, die KI spielt Ihren Klienten. Sie wählen eine Coaching-Methode, ein Szenario und einen Schwierigkeitsgrad — und führen danach ein Live-Gespräch. Am Ende erhalten Sie eine **strukturierte Auswertung** Ihrer Methodenführung mit konkreten Stärken, Entwicklungsfeldern und Übungsvorschlägen.
+Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie übernehmen die Rolle des Coaches, die KI spielt Ihren Klienten. Sie wählen Einstieg, Methode, Szenario und Schwierigkeit — und führen danach ein Live-Gespräch. Am Ende erhalten Sie eine **strukturierte Auswertung** Ihrer Methodenführung mit konkreten Stärken, Entwicklungsfeldern und Übungsvorschlägen.
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase** nach Registrierung oder mit **Klienten**-Zugang. Es befindet sich im Tab **Coaching üben** im Coaching-Bereich (nicht bei den Transkript-Tools).
+Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase** nach Registrierung oder mit **Klienten**-Zugang. Es befindet sich im Tab **Coaching üben** im Coaching-Bereich (Silber-Sektion auf der Coach-Auswahl — nicht bei den Transkript-Tools).
 
 **Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
-${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung zu und werden nicht unterstützt oder zertifiziert durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.</p>')}
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Kein Ersatz für Coaching-Ausbildung:</strong> Coach-Übung ist eine <strong>Ergänzung</strong> zum eigenständigen Üben — <strong>keinesfalls</strong> ein Ersatz für eine fundierte Coaching-Ausbildung, Supervision, Mentoring oder anerkannte Zertifizierung.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li>Die KI simuliert einen Klienten; echte Gesprächssituationen sind komplexer und nicht vollständig abbildbar.</li>
+<li>Auswertungen sind Lernimpulse — keine offizielle Prüfung, keine Qualitätsgarantie und kein Nachweis von Coach-Kompetenz.</li>
+<li>Für echte Klientenarbeit gelten Ihre beruflichen Standards, Ethikrichtlinien und ggf. gesetzliche Vorgaben — unabhängig von dieser App.</li>
+</ul>`)}
 
-### Wie funktioniert es?
+### Setup-Bildschirm — Reihenfolge wie in der App
 
-**Schritt 1: Übung konfigurieren**
-- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. Vier-Phasen-Coaching, zukunftsorientiertes Coaching, Ambivalenz-Coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
-- **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
-- **Mit Anliegensklärung starten (neu):** Das Szenario bleibt verborgen — Sie üben reines Contracting und erhalten danach optional eine erste Methodensitzung (Methode oder Freispiel).
-- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält. Im Setup können Sie **„Level erklärt“** aufklappen:
+Oben finden Sie Links zu **Dein Fortschritt** und **Übungsverlauf**. Darunter wählen Sie **einen** der drei aufklappbaren Einstiege (in dieser Reihenfolge):
+
+**1. Mit Anliegensklärung starten**
+- Das Klienten-Anliegen bleibt **verborgen** — Sie üben reines Contracting (Begrüßung, Rahmen, Anliegensklärung).
+- Wählen Sie einen Klienten-Avatar, **Schwierigkeitsgrad** und optional **Live-Gespräch** (nur Sprache).
+- In der Auswertung sehen Sie das verborgene Anliegen; optional folgt eine **Methodensitzung** (Phase 2) mit Methode oder Freispiel.
+
+**2. Vom Szenario starten**
+- Wählen Sie zuerst ein **Coachee-Szenario** (Anliegen sichtbar), dann eine passende **Coaching-Methode**.
+- Methodendetails können Sie über das Info-Symbol einblenden (Phasen, typische Fragen).
+
+**3. Von der Methode starten**
+- Wählen Sie zuerst eine **Coaching-Methode**, dann ein passendes **Szenario** (mit Match-Hinweisen: besonders passend / alternative / neutral).
+
+**Gemeinsame Optionen** (bei Einstieg 2 und 3, danach in der App):
+- **Schwierigkeitsgrad** — steuert, wie kooperativ oder herausfordernd sich der KI-Klient verhält. **„Level erklärt“** aufklappen:
 
 | Level | Verhalten des KI-Klienten |
 |-------|---------------------------|
@@ -1113,46 +1173,58 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Die Coaching-Methode
 | **Schwer** | Sehr starker Widerstand + Nebenstressoren; Agenda erst nach Trust-Building |
 
 **Hinweis:** Grenzfall-Training (Hinweise außerhalb des Coaching-Scope) erscheint nur in **Methodensitzungen** bzw. **Phase 2 nach Anliegensklärung** — nicht in der reinen Anliegensklärungs-Phase.
-- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
 
-**Schritt 2: Übungssitzung führen**
-- Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
+- **Live-Gespräch (optional):** Reiner Sprachmodus — freischaltbar, sobald Sie **Herausfordernd** mit derselben Methode und demselben Szenario (bzw. demselben Klienten bei Anliegensklärung) abgeschlossen haben.
+- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
+- **Übung starten** — der Chat beginnt **leer**; **Sie** eröffnen als Coach.
+
+### Übungssitzung führen
+
+- Sie sind der **Coach** — die KI antwortet als Klient. Es gibt **keine** automatische Begrüßung durch die KI.
 - Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
 
 ${guideInfoBox(`<p class="m-0 mb-2"><strong>Keine reguläre Coaching-Sitzung:</strong> Es gibt keinen Lebenskontext-Analyseprozess am Ende; Ihre Lebenskontext-Datei wird nicht aktualisiert.</p>
 <p class="m-0"><strong>Kein DPC/DPFL:</strong> Persönlichkeitsprofil und adaptiver Coaching-Modus gelten nur für Classic Coaching — nicht für Coaching üben. Die KI spielt ausschließlich den Klienten nach Szenario und Methode.</p>`)}
 
-**Schritt 3: Sitzung beenden & Selbsteinschätzung**
-- Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
-- Optional bewerten Sie Ihre Leistung auf einer Skala von **1–10**, bevor die KI auswertet. Diese Selbsteinschätzung dient der Kalibrierung und kann übersprungen werden.
+### Sitzung beenden, Selbsteinschätzung & Auswertung
 
-**Schritt 4: Auswertung erhalten**
-Die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils **1–10**):
+1. **Sitzung beenden** — wie im normalen Chat.
+2. **Selbsteinschätzung (optional)** — Skala **1–10**, vor der KI-Auswertung; kann übersprungen werden.
+3. **Auswertung** — die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils **1–10**):
 - **Methoden-Treue** — Wie konsequent haben Sie die gewählte Methode angewendet?
 - **Wirksamkeit** — Wie hilfreich war Ihr Coaching für den Klienten?
 - **Klarheit** — Wie klar und strukturiert waren Ihre Fragen und Interventionen?
 - **Coachee-Autonomie** — Haben Sie die eigene Denk- und Lösungsarbeit des Klienten ermöglicht (ohne Ratschläge, eigene Vision oder vorgegebene Lösungen)?
 - **Klientenzufriedenheit** — Wie zufrieden wirkt der Klient am Ende?
 
-Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Abschluss — passend zur Methode): War der Gesamtablauf stimmig, wird das positiv hervorgehoben.
+Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Abschluss — passend zur Methode).
 
 Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
 
-Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden verweist die Übung auf einen **Live-Coach** derselben Methode — nützlich, um die Methode aus Klientensicht kennenzulernen.
 
-**Schritt 5: Verlauf & Fortschritt**
-Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
+### Verlauf & Fortschritt
 
-Über **Dein Fortschritt** sehen Sie zusätzlich Score-Verlauf, Kompetenzprofil, Meilensteine und eine empfohlene nächste Übung — ideal, um Entwicklung über mehrere Sessions hinweg zu vergleichen.
-
-**Ihr Feedback als Coach (aktuell):** Nach jeder Session erhalten Sie konkrete **Übungsvorschläge**; im Fortschritt werden **wiederkehrende Entwicklungsthemen** sichtbar, wenn dieselben Muster in mehreren Auswertungen auftauchen. Das ersetzt (noch) keine Anbindung an Ihr OCEAN-/Riemann-Profil — eine vertiefte Coaching-Stil-Signatur ist für spätere Versionen geplant.
+- **Übungsverlauf** — frühere Auswertungen erneut öffnen oder löschen; gespeichert in Ihrem Konto.
+- **Dein Fortschritt** — Score-Verlauf, Kompetenzprofil, Meilensteine und empfohlene nächste Übung über mehrere Sessions hinweg.
+- **Wiederkehrende Entwicklungsthemen** — wenn dieselben Muster in mehreren Auswertungen auftauchen. Das ersetzt (noch) keine Anbindung an Ihr OCEAN-/Riemann-Profil.
 
 ### Tipps für beste Ergebnisse
 
-- **Methode vorher lesen:** Nutzen Sie die Methodendetails, wenn Sie eine Methode zum ersten Mal üben.
-- **Klientenrolle ernst nehmen:** Stellen Sie offene Fragen und vermeiden Sie vorschnelle Lösungsvorschläge — der KI-Klient reagiert realistisch auf Ihren Stil.
-- **Schwierigkeit steigern:** Beginnen Sie mit „leicht“ und steigern Sie, wenn Sie sich sicher fühlen.
-- **Verlauf nutzen:** Vergleichen Sie Auswertungen über die Zeit, um Fortschritte sichtbar zu machen.
+- **Methode vorher lesen:** Nutzen Sie die Methodendetails beim ersten Üben einer Methode.
+- **Klientenrolle ernst nehmen:** Offene Fragen statt vorschneller Lösungen — der KI-Klient reagiert realistisch auf Ihren Stil.
+- **Schwierigkeit steigern:** Mit „leicht“ beginnen und schrittweise erhöhen.
+- **Verlauf nutzen:** Auswertungen über die Zeit vergleichen.
+
+### Hinweise & Disclaimer
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung zu und werden nicht unterstützt oder zertifiziert durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
+<li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
+<li><strong>KI-Transparenz:</strong> Der simulierte Klient wird von Sprachmodellen gesteuert; Antworten können fehlerhaft oder unpassend sein — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
+<li><strong>Haftung:</strong> Sie tragen die Verantwortung dafür, wie Sie Erkenntnisse aus der Übung in echter Klientenarbeit anwenden (siehe auch Haftungsausschluss der App).</li>
+</ul>`)}
 
 </div>
 </details>
@@ -1205,7 +1277,7 @@ Your chosen intent determines which section is highlighted and expanded on the c
 
 ### 1.2 Guest vs. Registered User
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
-- **Register/Login:** Create a free account to start with to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
+- **Register/Login:** Start with a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
 ${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this browser tab session</strong>. Without a download, progress is lost when you close the tab. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>')}
 
@@ -1218,7 +1290,9 @@ ${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Y
 After auth, intent, and (for guests) the name prompt, you arrive at the **start screen** with **three action cards** and an upload area below:
 
 - **Continue with your Life Context** — Loads your saved context into preview, or opens the file picker if no substantial file exists yet.
-- **Start a new conversation** (featured) — **With existing context:** opens the **Markdown editor** for editing; **without context:** starts the questionnaire. After **Save & Continue** in the editor, you proceed to **coach selection**.
+- **Start a new conversation** (featured)
+  - **With existing context:** opens the **Markdown editor** for editing.
+  - **Without context:** starts the questionnaire.
 - **Build with an interview** — Begins a guided interview with Gloria.
 
 **Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
@@ -1301,7 +1375,7 @@ The app offers several access tiers with increasing functionality:
 | **Registered** | Free account incl. **9-day Premium trial** | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification; during trial also Premium features and Coach Practice (8 methods) |
 | **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
 | **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, **Coach Practice (12 methods)**, all features |
+| **Client** | Access code from ${brand.providerName} | + Rob, Victor, Bekky, Dan | Audio transcription, **Coach Practice (12 methods)**, all features |
 
 **How to upgrade:**
 ${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
@@ -1359,7 +1433,7 @@ If you prefer the web version:
 ### 3.4 Installation on Desktop (Windows/Mac/Linux)
 
 1. Open the app in **Chrome**, **Edge**, or another supported browser.
-2. Click the **Install icon** (⊕) in the address bar or the **Menu** (three dots).
+2. Click the **Install icon** ⊕ in the address bar or the **Menu** (three dots).
 3. Select **"Install"** or **"Install App"**.
 4. The app will be installed like a desktop application and can be opened from your Start menu/Dock.
 
@@ -1576,12 +1650,12 @@ On the **Select a Coach** screen, you'll see a list of available coaches. Each c
 
 Your chosen **intent** expands the matching section (Management & Communication, Coaching, or Coach Practice). **Guests** do not see **topic search** — with intent “Coaching for my concern”, the **Coaching section** is highlighted instead.
 
+**Your Interviewer:**
+- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
+
 **Your Guide:**
 - **Nobody** -- Your pragmatic sparring partner for management and communication topics
 - **Sam** -- Brief forward-focused coaching for work and everyday challenges (Registered)
-
-**Your Interviewer:**
-- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
 
 **Your Coaches:**
 - **Gabrielle** -- Four-stage coaching from clarity to committed action (Registered)
@@ -1590,8 +1664,12 @@ Your chosen **intent** expands the matching section (Management & Communication,
 - **Kenji** -- Stoic philosopher for resilience and inner strength (Premium)
 - **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
 - **Mike** -- Ambivalence coaching for mixed feelings about change (Premium)
-- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client)
+
+**Exclusive for clients** (${brand.providerName}):
+- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client) 🔔
 - **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
+- **Bekky** -- Thought audit: structured review of stressful beliefs and perspective shifts (Client)
+- **Dan** -- Explore inner beliefs in your own language — without imported metaphors (Client)
 
 Some coaches are marked with a lock icon and require a premium or client subscription. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
 
@@ -1806,6 +1884,44 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Differentiation of self -- developing a clear "I" within relationships
 
 **Example Situations:** "I always end up in the same conflicts at family gatherings." / "I want to understand why certain relationships trigger me so much." / "I want to learn to stay calmer in conflicts."
+
+**Access:** Client users
+</div>
+</details>
+
+<details>
+<summary>Bekky -- Analytical, Systematic, Neutral (Client)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Bekky deconstructs stressful beliefs through a structured **thought audit** — four review steps and perspective shifts for greater clarity and agency at work and in life.
+
+**Ideal for:**
+- Concrete, stressful thoughts about a situation (not global self-labels)
+- Structured review of beliefs and alternative perspectives
+- When you prefer an analytical, step-by-step approach
+
+**Special:** No classic session contracting — direct entry into the audit. When appropriate, Bekky can refer you to Rob, Victor, or Dan.
+
+**Example Situations:** "I'm convinced I'll fail in this situation." / "I want to systematically examine a stressful thought." / "I need clarity before I act."
+
+**Access:** Client users
+</div>
+</details>
+
+<details>
+<summary>Dan -- Client Exact Language, Non-Directive, Exploratory (Client)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Dan helps you explore and transform inner beliefs through **your own language and imagery** — without introducing his own words, metaphors, or interpretations.
+
+**Ideal for:**
+- Exploring inner beliefs in your exact wording
+- When you prefer a non-directive, exploratory style
+- Deep reflection without imposed interpretations
+
+**Special:** Dan works strictly with your formulations. For matching other-directed beliefs, he may refer you to Bekky.
+
+**Example Situations:** "I want to understand what's behind my inner belief — in my own words." / "I need someone who won't give me ready-made images." / "I want to explore a belief without being interpreted."
 
 **Access:** Client users
 </div>
@@ -2115,23 +2231,39 @@ const en_chapter10 = (isNative: boolean) => `
 
 ### What is Coach Practice?
 
-Coach Practice is a **training mode for aspiring or experienced coaches**: you play the coach and the AI plays your client. You choose a coaching method, a scenario, and a difficulty level — then conduct a live conversation. At the end, you receive a **structured evaluation** of your method application with concrete strengths, development areas, and suggested drills.
+Coach Practice is a **training mode for aspiring or experienced coaches**: you play the coach and the AI plays your client. You choose an entry path, method, scenario, and difficulty — then conduct a live conversation. At the end, you receive a **structured evaluation** of your method application with concrete strengths, development areas, and suggested drills.
 
 ### Who Can Use It?
 
-This feature is available with **Premium+**, during the **9-day trial** after registration, or with **Client** access. It is located in the **Coach Practice** tab in the Coaching section (not in Transcript Tools).
+This feature is available with **Premium+**, during the **9-day trial** after registration, or with **Client** access. It is located in the **Coach Practice** tab in the Coaching section (Silver area on coach selection — not in Transcript Tools).
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
-${guideWarningBox('<p class="m-0"><strong>Note:</strong> The coaching methods in the app are generic descriptive labels for educational practice purposes. They are not affiliated with, endorsed by, or certified by any owners of trademarks, registered method names, or copyrighted coaching approaches.</p>')}
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Not a substitute for coach training:</strong> Coach Practice is a <strong>supplement</strong> for self-directed practice — <strong>not</strong> a replacement for thorough coach training, supervision, mentoring, or recognized certification.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li>The AI simulates a client; real conversations are more complex and cannot be fully replicated.</li>
+<li>Evaluations are learning feedback — not official assessment, quality guarantee, or proof of coaching competence.</li>
+<li>For real client work, your professional standards, ethics, and applicable law apply — independent of this app.</li>
+</ul>`)}
 
-### How Does It Work?
+### Setup screen — order as in the app
 
-**Step 1: Configure your practice**
-- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. four-stage coaching, forward-focused coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
-- **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
-- **Start with concern clarification (new):** The scenario stays hidden — you practice pure contracting, then optionally continue with a first method session (method or free play).
-- **Difficulty:** Controls how cooperative or challenging the client behaves. Tap **Level guide** in setup to expand:
+At the top you will find links to **Your progress** and **Practice history**. Below, choose **one** of three expandable entry paths (in this order):
+
+**1. Start with concern clarification**
+- The client's concern stays **hidden** — you practice pure contracting (greeting, frame, clarifying the concern).
+- Choose a client avatar, **difficulty level**, and optionally **Live conversation** (voice only).
+- The evaluation reveals the hidden concern; optionally a **method session** (Phase 2) follows with a method or free play.
+
+**2. Start from scenario**
+- First choose a **coachee scenario** (concern visible), then a matching **coaching method**.
+- Expand **method details** via the info icon (phases, typical questions).
+
+**3. Start from method**
+- First choose a **coaching method**, then a matching **scenario** (with match hints: especially suited / alternative / neutral).
+
+**Shared options** (entry paths 2 and 3, then in the app):
+- **Difficulty** — controls how cooperative or challenging the AI client behaves. Expand **Level guide**:
 
 | Level | Client behavior |
 |-------|-----------------|
@@ -2141,46 +2273,58 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> The coaching methods in
 | **Hard** | Very strong resistance + secondary stressors; agenda only after trust-building |
 
 **Note:** Scope-boundary training (out-of-scope clinical cues) appears only in **method sessions** or **Phase 2 after concern clarification** — not during pure concern-clarification practice.
-- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
 
-**Step 2: Run the practice session**
-- You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
+- **Live conversation (optional):** Voice-only mode — unlocks after you complete **Challenging** with the same method and scenario (or the same client in concern clarification).
+- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
+- **Start practice** — the chat starts **empty**; **you** open as coach.
+
+### Run the practice session
+
+- You are the **coach** — the AI responds as the client. There is **no** automatic greeting from the AI.
 - The interface matches the regular chat (text, voice input, optional TTS).
 
 ${guideInfoBox(`<p class="m-0 mb-2"><strong>Not a regular coaching session:</strong> There is no Life Context analysis at the end; your Life Context file is not updated.</p>
 <p class="m-0"><strong>No DPC/DPFL:</strong> Your personality profile and adaptive coaching mode apply to classic coaching only — not Coach Practice. The AI plays the client based on scenario and method prompts only.</p>`)}
 
-**Step 3: End session & self-rating**
-- End the session as usual via **End Session**.
-- Optionally rate your performance on a **1–10** scale before the AI evaluates. This self-rating helps with calibration and can be skipped.
+### End session, self-rating & evaluation
 
-**Step 4: Receive your evaluation**
-The AI analyzes the transcript and scores you on five dimensions (each **1–10**):
+1. **End session** — as in the regular chat.
+2. **Self-rating (optional)** — **1–10** scale before AI evaluation; can be skipped.
+3. **Evaluation** — the AI analyzes the transcript and scores five dimensions (each **1–10**):
 - **Method compliance** — How consistently did you apply the chosen method?
 - **Effectiveness** — How helpful was your coaching for the client?
 - **Clarity** — How clear and structured were your questions and interventions?
 - **Coachee autonomy** — Did you facilitate the client's own thinking and solution-finding (without advice, imposed vision, or prescribed solutions)?
 - **Coachee satisfaction** — How satisfied does the client appear at the end?
 
-The AI also assesses **session flow** (contracting, opening, closing — appropriate to the method). When the overall flow was coherent, this is highlighted positively.
+The AI also assesses **session flow** (contracting, opening, closing — appropriate to the method).
 
 The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
 
-You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. four-stage, forward-focused, ambivalence), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods, practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
 
-**Step 5: History & progress**
-From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
+### History & progress
 
-From **Your progress**, you can also view score trends, a competency profile, milestones, and a recommended next drill — useful for comparing development across multiple sessions.
+- **Practice history** — reopen or delete past evaluations; saved to your account.
+- **Your progress** — score trends, competency profile, milestones, and recommended next drill across sessions.
+- **Recurring development themes** — when the same patterns appear across evaluations. This does not yet link to your OCEAN/Riemann profile.
 
-**Your feedback as coach (today):** After each session you get concrete **drill suggestions**; in progress, **recurring development themes** appear when the same patterns show up across evaluations. This does not yet link to your OCEAN/Riemann profile — a deeper coaching-style signature is planned for a future release.
+### Tips for best results
 
-### Tips for Best Results
-
-- **Review the method first:** Use the method details when practicing a method for the first time.
-- **Stay in the coach role:** Ask open questions and avoid jumping to solutions — the AI client responds realistically to your style.
+- **Review the method first:** Use method details when practicing a method for the first time.
+- **Stay in the coach role:** Open questions instead of jumping to solutions — the AI client responds realistically to your style.
 - **Increase difficulty gradually:** Start with "easy" and raise the level as you gain confidence.
-- **Use history:** Compare evaluations over time to track your progress.
+- **Use history:** Compare evaluations over time to track progress.
+
+### Notes & disclaimers
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching methods in the app are generic descriptive labels for educational practice. They are not affiliated with, endorsed by, or certified by any owners of trademarks, registered method names, or copyrighted coaching approaches.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Not therapy / not clinical use:</strong> Coach Practice supports reflection and skill practice — not treatment of mental illness or crisis intervention.</li>
+<li><strong>Not supervision:</strong> The app does not replace professional supervision or peer review by qualified colleagues.</li>
+<li><strong>AI transparency:</strong> The simulated client is driven by language models; responses may be wrong or inappropriate — use critical reflection and human oversight in your training.</li>
+<li><strong>Liability:</strong> You are responsible for how you apply insights from practice in real client work (see also the app's disclaimer).</li>
+</ul>`)}
 
 </div>
 </details>
