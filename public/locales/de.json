@@ -1145,7 +1145,7 @@
   "intent_coaching_title": "Coaching zu meinem Anliegen",
   "intent_coaching_desc": "Beschreibe dein Anliegen — der passende Coach wird vorgeschlagen. Ohne manuelle Methodenwahl, ohne Umwege.",
   "intent_coach_practice_title": "Als Coach üben",
-  "intent_coach_practice_desc": "Trainiere Coaching-Methoden in realistischen Übungsszenarien incl. strukturiertem Feedback.",
+  "intent_coach_practice_desc": "Trainiere Coaching-Methoden anhand typischer Übungsszenarien incl. strukturiertem Feedback.",
   "intent_skip_permanently": "Nicht mehr anzeigen",
   "intent_ask_name_title": "Wie sollen wir Sie ansprechen?",
   "intent_ask_name_subtitle": "Ihr Coach spricht Sie gerne persönlich an.",
