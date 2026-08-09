@@ -3,22 +3,29 @@
 ## Current Status
 **Version:** 2.5.6
 **Branch:** `main`
-**Staging:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-beta.manualmode.at (health 200; bundle Build 23; `sw.js` v2.5.6-b23). Premium+ website redeem (`0265193`); guest LC fix (`24300f6`); User Guide/FAQ/Improvisation (`9460caf`); Premium+ PayPal paywall (`e90e4e7`); Registered Lifetime docs removed (`31acb69c`).
-**Production:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-app.manualmode.at (health 200; bundle Build 23; parity mit Staging).
+**Staging:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.6-b26; IntentPicker UX + Handbuch accordion spacing + DE intent copy)
+**Production:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-app.manualmode.at (health OK; parity with staging b26)
 **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.6 (23) submitted for review** **2026-08-09** (Texte von 2.5.4 übernommen). Review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=23`; `npm run sync:ios-staging` completed **2026-08-08** — bereit für Archive
+**Xcode:** `CURRENT_PROJECT_VERSION=26`; `npm run build && npx cap sync ios` completed **2026-08-09** — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
-## Session handoff (2026-08-08)
+## Session handoff (2026-08-09)
 
-**Heute live (Staging Build 23):** wie Build 22 + Doku Registered Lifetime entfernt.
+**Heute live (Staging + Production Build 26):** IntentPicker UX (iOS Steuerrad-Abstand, Desktop-Karten-Ausrichtung), Handbuch Kapitel-Accordion-Spacing, DE Formatierungshilfe + Intent-Copy „anhand typischer Übungsszenarien“.
 
 **Website Premium+ (Jimdo):** Button live **`ACCESS_PASS_PLUS_1M`**, €14,90 (2026-08-09). Anleitung `PAYPAL-SETUP-GUIDE.md`.
 
 **Website Registered Lifetime:** Button von Jimdo/manualmode.at **entfernt (2026-08-09)**. Kein Neukauf mehr; Backend-Loyalty für Altbestand unverändert.
 
-**Commits (Build 23 deploy):** `49b1ce0c` (build 23 sync) · `31acb69c` (Lifetime docs). **Production:** gleiche Images wie Staging, **2026-08-08**.
+**Commits (Build 26 deploy):** `5722d104` · `e6aec22d` · `ff2c30eb`. **Production:** gleiche Images wie Staging, **2026-08-09**.
+
+## Recent Changes (2026-08-09 — Staging + Production Build 26 UX)
+
+- **Commits:** `5722d104` (IntentPicker + Handbuch spacing, DE intent copy) · `e6aec22d` (UserGuide TS fix) · `ff2c30eb` (build 26 sync)
+- **Also includes:** `70995312` formatting help DE copy (from earlier b24/b25 deploys)
+- **Deploy:** staging `-c app` → `npm run build && npx cap sync ios` → production pull-only
+- **Verified:** staging + production health OK; `sw.js` v2.5.6-b26 parity
 
 ## Recent Changes (2026-08-08 — Production Build 23)
 

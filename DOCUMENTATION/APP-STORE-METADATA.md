@@ -216,7 +216,13 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 
 ---
 
-## Was ist neu — App Store Connect (v2.5.4, Build 1) — **aktuelle Einreichung**
+## Was ist neu — App Store Connect (v2.5.6, Build 23) — **aktuelle Einreichung (2026-08-09)**
+
+**Status:** Submitted for review **2026-08-09**. Release notes text reused from v2.5.4 submission (see below). Xcode `CURRENT_PROJECT_VERSION=26` after web deploy sync.
+
+---
+
+## Was ist neu — App Store Connect (v2.5.4, Build 1) — **vorherige Einreichung (Referenz)**
 
 **In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen. Neue Version **2.5.4** anlegen (nicht die zurückgezogene 2.5.1-Einreichung).
 

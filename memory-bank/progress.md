@@ -97,14 +97,17 @@
     - [x] Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
     - [x] Framer Motion page transitions & micro-interactions
     - [x] 30+ views modernized (rounded cards, elevated shadows, pill buttons)
-- [x] **Visual modernization Phases 1–4 (2026-07-23 – 2026-07-24, staging build 35):**
+- [x] **IntentPicker UX (2026-08-09):** iOS safe-area spacing above logo; desktop card title min-height for aligned descriptions; tighter title→body gap; DE intent copy update
+- [x] **User Guide UX (2026-08-09):** Tighter `<details>` chapter accordion spacing (summary/content gap)
+- [x] **Formatierungshilfe DE (2026-08-09):** Everyday German copy; „Wichtige Begriffe hervorheben“ instead of misleading „Schlüssel“
     - [x] Ambient dual corner gradients (`body::before`), teal-tinted dark palette, 16px card radius, Button gradient variant
     - [x] Chat shell, session review dashboard, bot selection polish (Lucide headers, featured glow)
     - [x] Paywall/auth semantic tokens
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.5.6 (2026-08-05):** https://mc-app.manualmode.at, health OK (staging Build 11 images; FAQ trim + cumulative 2.5.6 changes)
+- [x] **Production v2.5.6 (2026-08-09):** Build **26** — https://mc-app.manualmode.at, health OK (parity staging b26; IntentPicker/Handbuch UX)
+- [x] **Staging v2.5.6 (2026-08-09):** Build **26** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b26)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **11** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b11; FAQ Intent-Picker-Nachfolger entfernt `bc14105`)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **10** — superseded by Build 11 (FAQ STT wait + signature voice fallback from `77f7396`)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **9** — superseded by Build 10 (voice stable STT send on Flieger tap)
@@ -129,6 +132,7 @@
 - [x] **Staging v2.3.1 (2026-07-26):** Build **2** — superseded by v2.4.2
 - [x] **Production v2.5.0 (2026-07-30):** Build **6** — https://mc-app.manualmode.at, health OK (staging registry images)
 - [x] **App Store iOS 2.5.0 (6):** **Live 2026-08-01** (AT/DE/CH)
+- [x] **App Store iOS 2.5.6 (23):** **Submitted for review 2026-08-09** (Xcode `CURRENT_PROJECT_VERSION=26`)
 - [x] **Production v2.3.1 (2026-07-26):** Build **2** — superseded by v2.5.0
 - [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
 - [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1
@@ -186,7 +190,7 @@
 - [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687, OpenSSL 3.5.5, Podman 5.8.2 (dnf upgrade 2026-07-15)
 - [x] **Backup script:** Duplicate log line bug fixed; daily backups healthy (2.8 MB / 16 files, 7-day retention)
 
-## Code Quality (v2.5.5)
+## Code Quality (v2.5.6)
 - [x] **Test Coverage:**
     - [x] Frontend: 25 suites, 220 tests — `collectCoverageFrom` widened (utils, services, hooks, context, config); floors 20% statements/lines, 30% branches, 35% functions
     - [x] Backend: 45 suites, 742 tests — coverage includes routes/middleware/practice/utils (excludes `routes/gemini/**`); floors ~40% statements/lines, 30% branches, 50% functions
@@ -203,7 +207,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging:** Build **37** deployed 2026-07-24 (`6670420` + `11c9c50`) — in-app docs, welcome avatars, SPA asset 404, deploy build-verify stream fallback verified live.
+- **Staging + Production:** Build **26** deployed **2026-08-09** (`sw.js` v2.5.6-b26, parity verified)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
