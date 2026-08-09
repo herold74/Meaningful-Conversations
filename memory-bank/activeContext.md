@@ -16,6 +16,8 @@
 
 **Website Premium+ (Jimdo):** Button mit `ACCESS_PASS_PLUS_1M`, €14,90 — Anleitung `PAYPAL-SETUP-GUIDE.md`.
 
+**Website Registered Lifetime:** Button von Jimdo/manualmode.at **entfernt (2026-08-09)**. Kein Neukauf mehr; Backend-Loyalty für Altbestand unverändert.
+
 **Commits (Build 23 deploy):** `49b1ce0c` (build 23 sync) · `31acb69c` (Lifetime docs). **Production:** gleiche Images wie Staging, **2026-08-08**.
 
 ## Recent Changes (2026-08-08 — Production Build 23)
