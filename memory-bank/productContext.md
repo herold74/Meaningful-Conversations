@@ -22,7 +22,7 @@ The user journey is circular and iterative:
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
 
 ## Distribution
-- **iOS App Store:** **2.5.0 (6) live** (AT/DE/CH — not U.S. storefront). **2.5.4** in ASC review pipeline. English metadata: **English (Canada)**.
+- **iOS App Store:** **2.5.0 (6) live** (AT/DE/CH — not U.S. storefront). **2.5.6 (23) submitted for review** 2026-08-09. English metadata: **English (Canada)**.
 - **PWA:** Available at https://mc-app.manualmode.at for all platforms.
 - **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 

@@ -5,7 +5,7 @@
 **Branch:** `main`
 **Staging:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-beta.manualmode.at (health 200; bundle Build 23; `sw.js` v2.5.6-b23). Premium+ website redeem (`0265193`); guest LC fix (`24300f6`); User Guide/FAQ/Improvisation (`9460caf`); Premium+ PayPal paywall (`e90e4e7`); Registered Lifetime docs removed (`31acb69c`).
 **Production:** Deployed **2026-08-08**, Build **23**, v2.5.6 — https://mc-app.manualmode.at (health 200; bundle Build 23; parity mit Staging).
-**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.4** ASC — review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
+**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.6 (23) submitted for review** **2026-08-09** (Texte von 2.5.4 übernommen). Review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
 **Xcode:** `CURRENT_PROJECT_VERSION=23`; `npm run sync:ios-staging` completed **2026-08-08** — bereit für Archive
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
