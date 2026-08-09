@@ -2370,9 +2370,8 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
                         ul: ({node, ...props}) => <ul className="list-disc list-outside pl-5 space-y-1 my-2" {...props} />,
                         ol: ({node, ...props}) => <ol className="list-decimal list-outside pl-5 space-y-1 my-2" {...props} />,
                         div: ({node, style, ...props}) => {
-                            const isChapterBody =
-                                style === 'padding: 16px' ||
-                                (typeof style === 'object' && style !== null && (style as React.CSSProperties).padding === '16px');
+                            const padding = style && typeof style === 'object' ? style.padding : undefined;
+                            const isChapterBody = padding === '16px' || padding === 16;
                             if (isChapterBody) {
                                 return <div className="px-4 pb-4 pt-2 [&>:first-child]:mt-0" {...props} />;
                             }
