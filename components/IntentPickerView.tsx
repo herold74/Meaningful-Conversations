@@ -71,7 +71,10 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
         transition={{ duration: 0.4 }}
         className="flex flex-col items-center text-center mb-8"
       >
-        <LogoIcon className="w-12 h-12 text-accent-primary mb-5" aria-hidden="true" />
+        <LogoIcon
+          className={`w-12 h-12 text-accent-primary mb-5${safeAreaTop > 0 ? ' mt-3' : ''}`}
+          aria-hidden="true"
+        />
         <h1 className="text-2xl sm:text-3xl font-semibold text-content-primary tracking-tight mb-2">
           {t('intent_title')}
         </h1>
@@ -100,7 +103,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${styles.iconBox}`}>
                 <intent.Icon className={`w-5 h-5 ${styles.icon}`} aria-hidden="true" />
               </div>
-              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${styles.title}`}>
+              <h3 className={`text-base font-semibold leading-snug mb-1 md:min-h-[2.75rem] ${styles.title}`}>
                 {t(intent.titleKey)}
               </h3>
               <p className={`text-sm leading-relaxed flex-1 ${styles.desc}`}>

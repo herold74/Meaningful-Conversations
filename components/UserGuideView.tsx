@@ -2369,8 +2369,17 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
                         td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
                         ul: ({node, ...props}) => <ul className="list-disc list-outside pl-5 space-y-1 my-2" {...props} />,
                         ol: ({node, ...props}) => <ol className="list-decimal list-outside pl-5 space-y-1 my-2" {...props} />,
+                        div: ({node, style, ...props}) => {
+                            const isChapterBody =
+                                style === 'padding: 16px' ||
+                                (typeof style === 'object' && style !== null && (style as React.CSSProperties).padding === '16px');
+                            if (isChapterBody) {
+                                return <div className="px-4 pb-4 pt-2 [&>:first-child]:mt-0" {...props} />;
+                            }
+                            return <div style={style} {...props} />;
+                        },
                         details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden" {...props} />,
-                        summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none" {...props} />,
+                        summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none !my-0" {...props} />,
                     }}
                 >
                     {markdownContent}
