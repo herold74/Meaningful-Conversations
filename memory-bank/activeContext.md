@@ -14,7 +14,7 @@
 
 **Heute live (Staging Build 23):** wie Build 22 + Doku Registered Lifetime entfernt.
 
-**Website Premium+ (Jimdo):** Button mit `ACCESS_PASS_PLUS_1M`, €14,90 — Anleitung `PAYPAL-SETUP-GUIDE.md`.
+**Website Premium+ (Jimdo):** Button live **`ACCESS_PASS_PLUS_1M`**, €14,90 (2026-08-09). Anleitung `PAYPAL-SETUP-GUIDE.md`.
 
 **Website Registered Lifetime:** Button von Jimdo/manualmode.at **entfernt (2026-08-09)**. Kein Neukauf mehr; Backend-Loyalty für Altbestand unverändert.
 
