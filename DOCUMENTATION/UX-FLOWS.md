@@ -1,8 +1,8 @@
-# UX Flows — Meaningful Conversations v2.0.1
+# UX Flows — Meaningful Conversations v2.5.6
 
 Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visuelle Flow-Diagramme.
 
-**Zuletzt aktualisiert:** Juli 2026 (Entry-screen 3-card hubs, build 35)
+**Zuletzt aktualisiert:** August 2026 (IntentPicker 3-card layout, bronze/silver/featured themes, Build 26)
 
 ---
 

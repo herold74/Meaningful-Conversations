@@ -1,6 +1,6 @@
 # Coach-Verhaltensmatrix
 
-**Stand:** 2026-08-05  
+**Stand:** 2026-08-09  
 **Quellen:** `meaningful-conversations-backend/bots.js`, `bots/newCoaches.js`, `bots/coachingPromptBlocks.js`, `crisisText.js`, `practice/frameworks.js`, `practice/methodScenarioMap.js`, `practice/scenarios.js`
 
 Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in der App — abgeleitet aus den System-Prompts (Single Source of Truth). Technische IDs bleiben auf Englisch; Beschreibungen sind auf Deutsch.

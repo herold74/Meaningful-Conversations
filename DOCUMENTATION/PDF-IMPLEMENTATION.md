@@ -1,7 +1,7 @@
 # PDF Export Implementation
 
-**Status:** Current (v2.5.5)  
-**Last updated:** 2026-08-05
+**Status:** Current (v2.5.6)
+**Last updated:** 2026-08-09
 
 ## Stack (current)
 

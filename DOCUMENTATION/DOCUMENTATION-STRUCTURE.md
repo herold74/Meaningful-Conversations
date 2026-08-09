@@ -204,19 +204,19 @@ Historical drift audits — use for reference; many items resolved in 2026-08 ag
 | **DOCUMENTATION-AUDIT-REPORT-2026-02-26.md** | UX & admin guides |
 | **AUDIT-REPORT-DEPLOYMENT-DOCS.md** | Deployment doc accuracy |
 
-**Still open (as of 2026-08-05):** TTS/PDF doc refresh, env template completeness — see improvement plan in repo.
+**Still open (as of 2026-08-09):** TTS/PDF doc refresh, env template completeness — see improvement plan in repo.
 
 ---
 
 ## Current Setup
 
-- **Version:** 2.5.5
+- **Version:** 2.5.6 (Build **26**)
 - **Server:** Hetzner VPS (<YOUR_SERVER_IP>)
-- **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
+- **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at) — **parity b26** as of 2026-08-09
 - **Container Engine:** Podman + podman-compose
 - **Containers:** Frontend, Backend (PM2 x2), TTS (Piper), MariaDB 11.2
 - **Registry:** regy.rhepds.com/gherold/meaningful-conversations
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** August 5, 2026
+**Last Updated:** August 9, 2026
