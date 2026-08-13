@@ -569,6 +569,7 @@ flowchart LR
 | Zahlungen | In-App Purchase (`NativePaywall`, RevenueCat / StoreKit 2) | PayPal Direct Checkout |
 | Paywall-Pflichtfelder | Nutzungsbedingungen + Datenschutz verlinkt (Review 3.1.2) | — |
 | PayPal-Links | Ausgeblendet (Apple 3.1.1) | Sichtbar |
+| Upgrade-Code-Einlösung | Ausgeblendet (Apple 3.1.1) | Sichtbar |
 | TTS | Native iOS Stimmen | Server TTS (Piper, ab Registered) + Web Speech API Fallback |
 | STT | Native Speech Recognition | Web Speech API |
 | Safe Area | Dynamic Island / Notch beruecksichtigt | Standard-Padding |

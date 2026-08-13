@@ -70,6 +70,7 @@ import ChangePasswordView from './ChangePasswordView';
 import { TestScenario } from '../utils/testScenarios';
 import { BOTS } from '../constants';
 import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
+import { isNativeIOS } from '../utils/platformDetection';
 
 export interface AppViewRouterProps {
   // Navigation
@@ -1020,6 +1021,15 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         />
       );
     case 'redeemCode':
+      if (isNativeIOS()) {
+        return (
+          <AccountManagementView
+            currentUser={currentUser!}
+            onNavigate={(v) => setMenuView(v)}
+            onDeleteAccount={onDeleteAccount}
+          />
+        );
+      }
       return (
         <RedeemCodeView
           onBack={view === 'paywall' ? () => setMenuView(null) : undefined}

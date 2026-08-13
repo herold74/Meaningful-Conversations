@@ -231,7 +231,8 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 - **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
 - **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
 - **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Feedbacks, eingelöste Codes, Coaching-Übungssessions, Transkript-Auswertungen und Nutzungsstatistiken.
-- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
+${isNative ? '' : `- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
+`}
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
 ### 2.2 Zugangsstufen & Upgrade
@@ -248,8 +249,8 @@ Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 
 **So upgraden Sie:**
 ${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
-- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.`}
-- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.
+- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
+- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.`}
 
 ### 2.3 KI-Transparenz (EU AI Act)
 
@@ -1362,7 +1363,8 @@ Via the menu (☰), you can access **Account Management** with the following opt
 - **Edit Profile:** Change your name and email address.
 - **Change Password:** Update your password. **Note:** Since your password generates the encryption key, your encrypted data (Life Context, Personality Profile) is automatically re-encrypted with the new key.
 - **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, feedback, redeemed codes, coach practice sessions, transcript evaluations, and usage statistics.
-- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
+${isNative ? '' : `- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
+`}
 - **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
 
 ### 2.2 Access Tiers & Upgrade
@@ -1379,8 +1381,8 @@ The app offers several access tiers with increasing functionality:
 
 **How to upgrade:**
 ${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
-- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.`}
-- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.
+- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.
+- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.`}
 
 ### 2.3 AI Transparency (EU AI Act)
 

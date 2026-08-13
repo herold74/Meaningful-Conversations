@@ -204,21 +204,61 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 7. **Coach Practice (Premium+):** Back to coach selection. Toggle tab **Coach Practice** / **Coaching üben** (graduation cap). Tap **Start practice** / **Übung starten**. Pick a method (e.g. GROW), scenario, and difficulty → run the conversation as coach → receive structured evaluation at the end.
 8. **Life Context:** Landing page → **Edit Life Context File** / **LEBENSKONTEXT-DATEI EDITIEREN**.
 9. **Personality profile:** Menu (☰) → **Personality Profile** (OCEAN pre-filled on test account).
-10. **In-App Purchases:** Menu → **About** → **Upgrade**. Premium+ subscription `mc.premium_plus.monthly` is listed. Sandbox purchase optional; test account already has Premium+ access.
-11. **Account deletion:** Menu → **Disclaimer** → delete account flow (do not delete the review account during testing).
+10. **In-App Purchases:** Menu (☰) → **Upgrade** (not About). Subscriptions and coach unlocks load via StoreKit/RevenueCat. For a **sandbox purchase demo**, sign in with a Sandbox Apple ID (Settings → App Store → Sandbox Account) on a **physical iPhone** — use an account **without** active Premium (not `premium@manualmode.at` for the purchase flow).
+11. **Restore Purchases:** On the Upgrade screen, tap **Restore Purchases** / **Käufe wiederherstellen**.
+12. **Account deletion:** Menu → **Disclaimer** → delete account flow (do not delete the review account during testing).
 
 ### Notes for Reviewer
 - **Store listing name:** ManualMode (previously MyCoach AI). In-app display name is already **ManualMode**.
+- **Upgrade codes removed (v2.5.7):** Code redemption UI is not available in the iOS app. Digital unlock is exclusively via In-App Purchase.
 - **Premium+** (`mc.premium_plus.monthly`): bundles Premium and Coach Practice in one subscription.
+- **Screen recording:** Attached — Home Screen → app launch → login → Menu → Upgrade → successful sandbox purchase.
 - Primary app language: German. Full English via language toggle on Welcome screen.
 - Internet required for AI. Guest mode available without account.
 - Voice mode requires microphone permission.
 
+### Resolution Center reply (v2.5.7 resubmission)
+
+> We removed all upgrade-code redemption UI from the iOS app (Account Management, Paywall, Upgrade). Digital content unlock is exclusively via In-App Purchase. We verified RevenueCat/StoreKit integration with build 2.5.7 (1) and attached a sandbox purchase screen recording. IAP products are resubmitted with this binary.
+
 ---
 
-## Was ist neu — App Store Connect (v2.5.6, Build 23) — **aktuelle Einreichung (2026-08-09)**
+## Was ist neu — App Store Connect (v2.5.7, Build 1) — **Resubmission nach Ablehnung 2.5.6 (2026-08-13)**
 
-**Status:** Submitted for review **2026-08-09**. Release notes text reused from v2.5.4 submission (see below). Xcode `CURRENT_PROJECT_VERSION=26` after web deploy sync.
+**Rejection:** Guideline 3.1.1 (upgrade codes) + 2.1(b) (IAP not found in binary).
+
+**Fixes in this build:**
+- Upgrade-code UI removed from iOS (Apple 3.1.1)
+- RevenueCat key verification before archive (`npm run verify:ios-iap`)
+- Review path: Menu → Upgrade
+
+### Deutsch
+
+```
+App Store Compliance: Upgrade-Code-Einlösung in der iOS-App entfernt — Freischaltung nur noch über In-App-Käufe.
+
+In-App-Käufe: Verbesserte StoreKit/RevenueCat-Integration und klarere Upgrade-Navigation.
+
+Weitere Verbesserungen: Stabilität und kleinere Korrekturen.
+```
+
+### English (Canada)
+
+```
+App Store compliance: Removed upgrade-code redemption from the iOS app — unlock digital content via In-App Purchase only.
+
+In-App Purchases: Improved StoreKit/RevenueCat integration and clearer Upgrade navigation.
+
+Other improvements: Stability and minor fixes.
+```
+
+**Pre-archive checklist:** See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`
+
+---
+
+## Was ist neu — App Store Connect (v2.5.6, Build 26) — **abgelehnt 2026-08-13**
+
+**Status:** Rejected **2026-08-13** (3.1.1 upgrade codes + 2.1(b) IAP). Superseded by **2.5.7 Build 1**.
 
 ---
 
