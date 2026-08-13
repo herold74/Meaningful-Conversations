@@ -401,22 +401,26 @@ const UpgradeView: React.FC<UpgradeViewProps> = ({ currentUser, onPurchaseSucces
         </section>
       )}
 
-      {/* Divider + Redeem Code */}
-      <div className="flex items-center gap-3 text-content-subtle my-6">
-        <div className="flex-1 h-px bg-border-primary" />
-        <span className="text-sm">{t('paywall_or_divider')}</span>
-        <div className="flex-1 h-px bg-border-primary" />
-      </div>
+      {/* Divider + Redeem Code — web only (Apple Guideline 3.1.1) */}
+      {!isNativeIOS() && (
+        <>
+          <div className="flex items-center gap-3 text-content-subtle my-6">
+            <div className="flex-1 h-px bg-border-primary" />
+            <span className="text-sm">{t('paywall_or_divider')}</span>
+            <div className="flex-1 h-px bg-border-primary" />
+          </div>
 
-      <Button
-        onClick={onRedeem}
-        size="lg"
-        fullWidth
-        leftIcon={<KeyIcon className="w-5 h-5" />}
-        className="bg-[#FECC78] text-black hover:brightness-95"
-      >
-        {t('paywall_redeem_button')}
-      </Button>
+          <Button
+            onClick={onRedeem}
+            size="lg"
+            fullWidth
+            leftIcon={<KeyIcon className="w-5 h-5" />}
+            className="bg-[#FECC78] text-black hover:brightness-95"
+          >
+            {t('paywall_redeem_button')}
+          </Button>
+        </>
+      )}
     </div>
   );
 };

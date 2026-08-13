@@ -22,6 +22,7 @@ import {
   CoachSessionRing,
 } from '../utils/coachSessionRing';
 import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/practiceAccess';
+import { isNativeIOS } from '../utils/platformDetection';
 import type { UserIntent } from './IntentPickerView';
 import { getBotSelectionSectionState, type HighlightSection } from '../utils/userIntent';
 
@@ -750,7 +751,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           return t('botSelection_guestMessage');
       }
       // For registered users, the message is always relevant as they can unlock more coaches.
-      return t('botSelection_registeredMessage');
+      return isNativeIOS()
+        ? t('botSelection_registeredMessage_ios')
+        : t('botSelection_registeredMessage');
   }
 
   const unlockMessage = getUnlockMessage();

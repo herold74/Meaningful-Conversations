@@ -1,5 +1,6 @@
 import { User } from '../types';
 import { brand } from '../config/brand';
+import { isNativeIOS } from '../utils/platformDetection';
 
 // Custom error class for API fetch errors.
 // This allows other parts of the app to inspect the error details.
@@ -153,6 +154,10 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
 
     if (options.body && !(options.body instanceof FormData)) {
         headers.set('Content-Type', 'application/json');
+    }
+
+    if (isNativeIOS()) {
+        headers.set('X-Client-Platform', 'ios');
     }
     
     const config: RequestInit = {

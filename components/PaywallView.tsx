@@ -154,7 +154,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
     ? (userXp >= 100
       ? t('paywall_description_engaged', { email: escapeHtml(userEmail), contactEmail: brand.contactEmail, primaryColor: brand.primaryColor })
       : t('paywall_description_expired', { email: escapeHtml(userEmail) }))
-    : t('paywall_description_new');
+    : (isNativeIOS() ? t('paywall_description_new_ios') : t('paywall_description_new'));
 
   const accessProducts = products.filter(p => p.category === 'access');
   const premiumPlusProducts = products.filter(p => p.category === 'premium_plus');
@@ -419,24 +419,28 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
           </div>
         )}
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 text-content-subtle my-5">
-          <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          <span className="text-sm">{t('paywall_or_divider')}</span>
-          <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-        </div>
+        {/* Divider + Redeem — web only (Apple Guideline 3.1.1) */}
+        {!isNativeIOS() && (
+          <div className="flex items-center gap-3 text-content-subtle my-5">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-sm">{t('paywall_or_divider')}</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          </div>
+        )}
 
-        {/* Actions: Redeem, Download, Logout */}
+        {/* Actions: Redeem (web), Download, Logout */}
         <div className="space-y-3">
-          <Button
-            onClick={onRedeem}
-            size="lg"
-            fullWidth
-            leftIcon={<KeyIcon className="w-5 h-5" />}
-            className="bg-[#FECC78] text-black hover:brightness-95"
-          >
-            {t('paywall_redeem_button')}
-          </Button>
+          {!isNativeIOS() && (
+            <Button
+              onClick={onRedeem}
+              size="lg"
+              fullWidth
+              leftIcon={<KeyIcon className="w-5 h-5" />}
+              className="bg-[#FECC78] text-black hover:brightness-95"
+            >
+              {t('paywall_redeem_button')}
+            </Button>
+          )}
 
           {(onDownloadLifeContext || onDownloadProfile) && (
             <div className="flex flex-col items-center gap-1">

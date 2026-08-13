@@ -1,7 +1,7 @@
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import { deserializeGamificationState } from '../utils/gamificationSerializer';
-import { logInRevenueCat, isIAPAvailable, getAccessFromRevenueCat } from '../services/purchaseService';
+import { logInRevenueCat, initializePurchases, isIAPAvailable, getAccessFromRevenueCat } from '../services/purchaseService';
 import type { User, GamificationState, NavView } from '../types';
 
 interface UseAuthHandlersParams {
@@ -34,7 +34,7 @@ export function useAuthHandlers({
         setEncryptionKey(key);
         setView('welcome');
         if (isIAPAvailable()) {
-            logInRevenueCat(user.id);
+            void initializePurchases().then(() => logInRevenueCat(user.id));
         }
         try {
             const data = await userService.loadUserData(key);
@@ -77,6 +77,7 @@ export function useAuthHandlers({
         // Sync from RevenueCat: Backend fetches subscription status. Works from web AND iOS.
         // On iOS we also call logIn first so RevenueCat merges anonymous → our user ID.
         if (isIAPAvailable()) {
+            await initializePurchases();
             await logInRevenueCat(user.id);
             await new Promise(r => setTimeout(r, 500));
         }

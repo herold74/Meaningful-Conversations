@@ -1,14 +1,18 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.6
+**Version:** 2.5.7
 **Branch:** `main`
 **Staging:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.6-b26; IntentPicker UX + Handbuch accordion spacing + DE intent copy)
 **Production:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-app.manualmode.at (health OK; parity with staging b26)
-**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.6 (23) submitted for review** **2026-08-09** (Texte von 2.5.4 übernommen). Review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `CURRENT_PROJECT_VERSION=26`; `npm run build && npx cap sync ios` completed **2026-08-09** — bereit für Archive
+**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.6 rejected 2026-08-13** (3.1.1 upgrade codes + 2.1(b) IAP not in binary). **Fix in repo:** v2.5.7 Build 1 — redeem UI removed on iOS, `verify:ios-iap` script, backend iOS redeem guard. **Resubmit:** see `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`. Review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
+**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=1` — archive after `npm run build && npx cap sync ios && npm run verify:ios-iap`
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
+
+## Session handoff (2026-08-13)
+
+**ASC rejection 2.5.6 (2026-08-13):** 3.1.1 upgrade codes + 2.1(b) IAP not in binary. **Fix:** Redeem UI hidden on iOS; backend `X-Client-Platform: ios` guard; `initializePurchases` on login; `npm run verify:ios-iap`; v**2.5.7** Build **1** (BUILD_NUMBER reset). Resubmit checklist: `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
 
 ## Session handoff (2026-08-09)
 

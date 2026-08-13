@@ -233,7 +233,7 @@
 
 ## Monetization & Payments
 - [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
-- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (iOS)
+- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (web); iOS uses NativePaywall only — **no redeem codes on iOS** (2026-08-13, Apple 3.1.1)
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
 - [x] **Premium Trial:** 9-day trial for new registrations (includes Coach Practice during trial)
 - [x] **Premium+ (2026-08-02):** Single subscription bundles Premium + Coach Practice (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`); Practice add-on legacy-only; staging Build 8

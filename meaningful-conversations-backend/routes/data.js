@@ -241,6 +241,14 @@ router.put('/user/ai-region', async (req, res) => {
 
 // POST /api/data/redeem-code
 router.post('/redeem-code', async (req, res) => {
+    const clientPlatform = String(req.headers['x-client-platform'] || '').toLowerCase();
+    if (clientPlatform === 'ios') {
+        return res.status(403).json({
+            error: 'Code redemption is not available in the iOS app. Please use In-App Purchase.',
+            errorCode: 'REDEEM_NOT_AVAILABLE_IOS',
+        });
+    }
+
     const { code } = req.body;
     const userId = req.userId;
     try {
