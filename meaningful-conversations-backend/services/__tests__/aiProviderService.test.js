@@ -279,6 +279,72 @@ describe('Google → Mistral format conversion', () => {
     expect(responseFormat).toEqual({ type: 'json_object' });
   });
 
+  test('responseSchema activates Mistral json_schema strict mode with maxTokens default', async () => {
+    mockProviderDb('mistral');
+    await service.generateContent({
+      contents: 'evaluate this',
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            summary: { type: 'STRING' },
+            score: { type: 'INTEGER' },
+          },
+          required: ['summary', 'score'],
+        },
+        schemaName: 'test_evaluation',
+        skipMistralBehaviorRules: true,
+      },
+      context: 'analysis',
+    });
+    const request = mockMistralChatComplete.mock.calls[0][0];
+    expect(request.maxTokens).toBe(8192);
+    expect(request.responseFormat).toEqual({
+      type: 'json_schema',
+      jsonSchema: {
+        name: 'test_evaluation',
+        strict: true,
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            summary: { type: 'string' },
+            score: { type: 'integer' },
+          },
+          required: ['summary', 'score'],
+        },
+      },
+    });
+    const sys = request.messages.find((m) => m.role === 'system');
+    expect(sys.content).toContain('Required top-level keys: summary, score');
+  });
+
+  test('responseSchema falls back to json_object when json_schema API call fails', async () => {
+    mockProviderDb('mistral');
+    mockMistralChatComplete
+      .mockRejectedValueOnce(new Error('json_schema unsupported'))
+      .mockResolvedValueOnce(MISTRAL_RESPONSE);
+
+    const r = await service.generateContent({
+      contents: 'evaluate this',
+      config: {
+        responseSchema: {
+          type: 'OBJECT',
+          properties: { summary: { type: 'STRING' } },
+          required: ['summary'],
+        },
+        skipMistralBehaviorRules: true,
+      },
+      context: 'analysis',
+    });
+
+    expect(mockMistralChatComplete).toHaveBeenCalledTimes(2);
+    expect(mockMistralChatComplete.mock.calls[0][0].responseFormat.type).toBe('json_schema');
+    expect(mockMistralChatComplete.mock.calls[1][0].responseFormat).toEqual({ type: 'json_object' });
+    expect(r.text).toBe('Hello from Mistral');
+  });
+
   test('empty initial turn uses English greeting trigger when language is en', async () => {
     await service.generateContent({
       contents: '',

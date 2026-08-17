@@ -1,5 +1,11 @@
 const prisma = require('../prismaClient.js');
 const { normalizeLanguage } = require('../utils/language.js');
+const { convertGoogleSchemaToJsonSchema } = require('../utils/googleSchemaConverter.js');
+
+const STRUCTURED_OUTPUT_MAX_TOKENS = {
+  chat: 2048,
+  analysis: 8192,
+};
 
 // Lazy-loaded clients
 let googleAI = null;
@@ -339,14 +345,22 @@ async function generateWithMistral({ model, contents, config, context = 'chat', 
     temperature: config.temperature || 0.7,
     maxTokens: config.maxOutputTokens,
   };
-  
-  // ADD-ON: Handle JSON mode for structured outputs (Google Gemini compatibility)
-  // This adds Mistral support for responseMimeType and responseSchema from Google API
-  if (config.responseMimeType === 'application/json' || config.responseSchema) {
-    mistralConfig.responseFormat = { type: "json_object" };
-    
-    if (config.responseSchema) {
-      const schemaInstruction = `\n\n## CRITICAL: JSON Response Format
+
+  const usesStructuredOutput = config.responseMimeType === 'application/json' || config.responseSchema;
+  if (usesStructuredOutput) {
+    mistralConfig.maxTokens = config.maxOutputTokens ?? STRUCTURED_OUTPUT_MAX_TOKENS[context] ?? 4096;
+  }
+
+  const appendMistralSystemInstruction = (instruction) => {
+    const systemMessageIndex = messages.findIndex(m => m.role === 'system');
+    if (systemMessageIndex >= 0) {
+      messages[systemMessageIndex].content += instruction;
+    } else {
+      messages.unshift({ role: 'system', content: instruction.trim() });
+    }
+  };
+
+  const buildJsonObjectSchemaInstruction = (schema) => `\n\n## CRITICAL: JSON Response Format
 You MUST respond with ONLY valid, parseable JSON. No markdown, no code blocks, no text before or after.
 STRICT RULES:
 - Every key MUST be a simple string with ONE pair of double quotes: "key"
@@ -357,40 +371,64 @@ STRICT RULES:
 - Use \\n for newlines inside strings, not actual line breaks
 
 Required JSON Schema:
-${JSON.stringify(config.responseSchema, null, 2)}`;
-      
-      // Find or create system message
-      const systemMessageIndex = messages.findIndex(m => m.role === 'system');
-      if (systemMessageIndex >= 0) {
-        messages[systemMessageIndex].content += schemaInstruction;
-      } else {
-        messages.unshift({
-          role: 'system',
-          content: schemaInstruction
-        });
-      }
+${JSON.stringify(schema, null, 2)}`;
+
+  const buildJsonSchemaInstruction = (requiredKeys) => `\n\n## CRITICAL: Structured JSON Response
+You MUST respond with ONLY valid JSON that matches the enforced schema. No markdown, no code fences, no text before or after.
+Required top-level keys: ${requiredKeys.length ? requiredKeys.join(', ') : 'see schema'}.`;
+
+  let mistralStructuredMode = null;
+
+  // ADD-ON: structured outputs (Google Gemini compatibility)
+  if (usesStructuredOutput) {
+    if (config.responseSchema) {
+      const jsonSchema = convertGoogleSchemaToJsonSchema(config.responseSchema, { strict: true });
+      const schemaName = config.schemaName || `${context}_response`;
+      mistralConfig.responseFormat = {
+        type: 'json_schema',
+        jsonSchema: {
+          name: schemaName,
+          strict: true,
+          schema: jsonSchema,
+        },
+      };
+      mistralStructuredMode = 'json_schema';
+      appendMistralSystemInstruction(
+        buildJsonSchemaInstruction(config.responseSchema.required || [])
+      );
+      console.log('  📋 Mistral structured output: json_schema (strict)');
     } else {
-      // Generic JSON instruction if only responseMimeType is set
-      const jsonInstruction = '\n\n## CRITICAL: You MUST respond with ONLY valid JSON. No additional text or formatting.';
-      const systemMessageIndex = messages.findIndex(m => m.role === 'system');
-      if (systemMessageIndex >= 0) {
-        messages[systemMessageIndex].content += jsonInstruction;
-      } else {
-        messages.unshift({
-          role: 'system',
-          content: 'You are a helpful assistant that responds in JSON format.' + jsonInstruction
-        });
-      }
+      mistralConfig.responseFormat = { type: 'json_object' };
+      mistralStructuredMode = 'json_object';
+      appendMistralSystemInstruction(
+        '\n\n## CRITICAL: You MUST respond with ONLY valid JSON. No additional text or formatting.'
+      );
+      console.log('  📋 Mistral structured output: json_object');
     }
-    
-    console.log('  📋 Mistral JSON mode activated (Google Gemini compatibility add-on)');
   }
-  
-  try {
-    const response = await withMistralRetry(
-      () => client.chat.complete(mistralConfig),
+
+  const runMistralComplete = async (requestConfig) =>
+    withMistralRetry(
+      () => client.chat.complete(requestConfig),
       'Mistral chat.complete'
     );
+
+  try {
+    let response;
+    try {
+      response = await runMistralComplete(mistralConfig);
+    } catch (schemaModeError) {
+      if (mistralStructuredMode !== 'json_schema' || !config.responseSchema) {
+        throw schemaModeError;
+      }
+      console.warn('  ↻ Mistral json_schema request failed, falling back to json_object:', schemaModeError.message);
+      const fallbackConfig = {
+        ...mistralConfig,
+        responseFormat: { type: 'json_object' },
+      };
+      appendMistralSystemInstruction(buildJsonObjectSchemaInstruction(config.responseSchema));
+      response = await runMistralComplete(fallbackConfig);
+    }
     
     const choice = response.choices[0];
     let responseText = normalizeMistralContent(choice.message.content);
