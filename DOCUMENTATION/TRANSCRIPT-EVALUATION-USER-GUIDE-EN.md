@@ -218,10 +218,20 @@ The exported PDF contains:
 
 ### What happens to my data?
 
-- ✅ **Transcripts** are sent to AI (Google Gemini) for analysis but are **not stored on the server**.
+- ✅ **Transcripts** are sent to an AI provider for analysis (see **AI provider** below) but are **not stored on the server**.
 - ✅ **Evaluations** (results) are stored in your personal database.
 - ✅ **Personality Profile** is transmitted end-to-end encrypted.
 - ✅ **PDFs** are generated locally in your browser (no server storage).
+
+### AI provider (transcript workflow)
+
+| Step | Provider | Note |
+|------|----------|------|
+| **Audio transcription** | always **Google Gemini** | Even if you chose EU/Mistral as your preferred AI provider |
+| **Transcript smoothing** | Your **AI region setting** | Optimal → admin default; EU → Mistral (Paris); US → Google |
+| **Transcript evaluation** | Your **AI region setting** | Same routing as smoothing; Mistral uses schema-validated JSON |
+
+Find the setting under **Profile → AI region** (`optimal`, `eu`, `us`). See also the user guide (Audio Transcription) and the `tr_gemini_hint` notice in the app.
 
 ### Who can see my evaluations?
 
