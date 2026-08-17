@@ -3,10 +3,14 @@
 ## Current Status
 **Version:** 2.5.7
 **Branch:** `main`
-**Staging:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.6-b26; IntentPicker UX + Handbuch accordion spacing + DE intent copy)
-**Production:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-app.manualmode.at (health OK; parity with staging b26)
-**App Store:** iOS **2.5.0 (6) live** (AT/DE/CH — **not** U.S. storefront); **2.5.6 rejected 2026-08-13** (3.1.1 upgrade codes + 2.1(b) IAP not in binary). **Fix in repo:** v2.5.7 Build 1 — redeem UI removed on iOS, `verify:ios-iap` script, backend iOS redeem guard. **Resubmit:** see `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`. Review account `premium@manualmode.at` **Premium+ until 2028-08-04** on production. **ASC English localization:** **English (Canada)** — not English (U.S.).
-**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=1` — archive after `npm run build && npx cap sync ios && npm run verify:ios-iap`
+**Staging:** Deployed **2026-08-17**, Build **3**, v2.5.7 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.7-b3; Mistral transcript-eval `json_schema` fix live)
+**Production:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-app.manualmode.at (health OK; **behind staging**)
+**App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit:** v2.5.7 — Xcode assets synced **2026-08-15**; archive after `VITE_REVENUECAT_IOS_KEY` in `.env.local` + `npm run verify:ios-iap`. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
+**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` — ready for Archive after RevenueCat key verify
+
+## Session handoff (2026-08-17)
+
+**Transkript-Auswertung / Gernot-Fehler:** Mistral `json_object` lieferte kaputtes JSON auf Staging. **Fix:** `json_schema` strict + Schema-Converter, `maxOutputTokens` 8192, Parse-Retry, `aiRegionPreference` im Evaluate-Endpoint. Docs: `TRANSCRIPT-EVALUATION-USER-GUIDE` (DE/EN) — Transkription immer Google, Glättung/Auswertung folgen KI-Region. **Commits:** `4153854f` · `efed7c0b` (build 3). **Staging deploy:** 2026-08-17.
 
 **Deploy default:** `deploy-manualmode.sh` + `Makefile deploy-staging` default to `-c app` (frontend+backend, TTS re-tag only). Use `-c all` only when `tts-service/` changed.
 
