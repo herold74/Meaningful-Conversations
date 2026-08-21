@@ -415,7 +415,7 @@ const PaywallView: React.FC<PaywallViewProps> = ({ userEmail, userXp = 0, curren
 
         {isNativeIOS() && (
           <div className="mb-6">
-            <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} />
+            <NativePaywall onPurchaseSuccess={onPurchaseSuccess} currentUser={currentUser} skipAutoRestore={true} />
           </div>
         )}
 

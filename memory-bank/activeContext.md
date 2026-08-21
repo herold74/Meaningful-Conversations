@@ -4,9 +4,19 @@
 **Version:** 2.5.7
 **Branch:** `main`
 **Staging:** Deployed **2026-08-17**, Build **3**, v2.5.7 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.7-b3; Mistral transcript-eval `json_schema` fix live)
-**Production:** Deployed **2026-08-09**, Build **26**, v2.5.6 — https://mc-app.manualmode.at (health OK; **behind staging**)
-**App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit:** v2.5.7 — Xcode assets synced **2026-08-15**; archive after `VITE_REVENUECAT_IOS_KEY` in `.env.local` + `npm run verify:ios-iap`. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
-**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` — ready for Archive after RevenueCat key verify
+**Production:** Deployed **2026-08-21**, v2.5.7 (registry images, pull-only) — https://mc-app.manualmode.at (health OK; **parity with staging**; CORS `X-Client-Platform` for iOS 2.5.7 login)
+**App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit submitted:** v**2.5.7 (4)** — **2026-08-21** (Review Notes + IAP video + EN screenshots). Handbook/IAP polish in binary. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
+**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` (local); ASC binary **build 4**. Next archive: bump to **≥5**.
+
+## Session handoff (2026-08-21)
+
+**ASC 2.5.7 resubmit complete:** Submitted **2.5.7 (4)** with handbook audit (UserGuide §1.2/§2.2, PEP ch., iOS IAP copy), NativePaywall locale titles, IAP demo-reset script, CORS `X-Client-Platform` on production. Review account `premium@manualmode.at` → Premium+ until 2028. Repo synced (commit after session).
+
+**Production deploy v2.5.7:** iOS login to mc-app failed with misleading “Could not connect” — **root cause:** CORS preflight blocked `X-Client-Platform` header (staging had fix, production was still on 2.5.6 backend). **Fix:** `./deploy-manualmode.sh -e production` — CORS now allows `X-Client-Platform`.
+
+## Session handoff (2026-08-20)
+
+**ASC 2.5.7 IAP staging test:** Paywall did not appear for `premium@manualmode.at` after DB reset. **Root cause:** `auth.js` + `handleAccessExpired` sync from RevenueCat on login; active sandbox `mc.registered.monthly` (and `mc.coach.chloe` non_sub) re-grant access. **Fix documented:** `reset-app-store-review-account-for-iap-demo.js` now also `DELETE`s RevenueCat subscriber; skill + `ASC-RESUBMIT-2.5.7.md` updated. **Fallback account:** `expired@manualmode.at` (no RC history). **iPhone:** logout + force-quit after reset; sandbox Apple ID must not have active subs for fresh purchase demo.
 
 ## Session handoff (2026-08-17)
 
@@ -520,6 +530,7 @@
 - [ ] PayPal Monthly Subscription on web (3.90 EUR/month)
 - [ ] Formal WCAG accessibility audit
 - [ ] Self-hosted SLM as Gemini replacement (milestone: >1000 paying users)
+- [ ] **Krisen-Hilfsangebote region-aware (Backlog):** AT-Hotlines nur bei Region AT/leer; sonst landesspezifisch — siehe `progress.md` (2026-08-21)
 - [ ] Coaching Framework Roadmap: client exact language bot, The Work bot, NLP Meta-Modell lens, Logische Ebenen lens
 - [ ] **Coach Practice → Coach-Feedback / Profil (Roadmap):** Aktuell Tipps + wiederkehrende Beobachtungen; später optional Coaching-Stil aus Practice — siehe `progress.md`
 - [ ] **Coach Practice → Entwickler-Feedback nach Auswertung (Roadmap, S):** Rating + optionaler Kommentar auf `PracticeEvaluationReview` — analog TE/SessionReview

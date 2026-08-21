@@ -132,7 +132,8 @@
 - [x] **Staging v2.3.1 (2026-07-26):** Build **2** — superseded by v2.4.2
 - [x] **Production v2.5.0 (2026-07-30):** Build **6** — https://mc-app.manualmode.at, health OK (staging registry images)
 - [x] **App Store iOS 2.5.0 (6):** **Live 2026-08-01** (AT/DE/CH)
-- [x] **App Store iOS 2.5.6 (23):** **Submitted for review 2026-08-09** (Xcode `CURRENT_PROJECT_VERSION=26`)
+- [x] **App Store iOS 2.5.6 (23):** **Submitted for review 2026-08-09** (Xcode `CURRENT_PROJECT_VERSION=26`) — **rejected 2026-08-13** (3.1.1 redeem codes + 2.1(b) IAP)
+- [x] **App Store iOS 2.5.7 (4):** **Resubmitted for review 2026-08-21** — redeem UI removed on iOS, handbook/IAP audit, production CORS fix, Review Notes + sandbox video + EN screenshots
 - [x] **Production v2.3.1 (2026-07-26):** Build **2** — superseded by v2.5.0
 - [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
 - [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1
@@ -256,6 +257,7 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
+- [ ] **Krisen-Hilfsangebote region-aware** *(2026-08-21)*: Heute listet `crisisText.js` bei jeder Crisis Response **immer** die österreichischen Standard-Hotlines (142, 147, 1450, 112) — unabhängig von **Country / State** im Lebenskontext. ASC **English (Canada)** oder UI-EN ändern das nicht; steuernd ist nur das LC-Feld. **Backlog:** AT-Block nur bei Region AT/leer; sonst landesspezifische Ressourcen (LLM-generiert aus LC, z. B. Canada → 988 etc.) ohne öst. Nummern. Aufwand grob **S** (`meaningful-conversations-backend/crisisText.js`, ggf. kuratierte Fallback-Liste pro Land).
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **Apple Watch Integration:** watchOS Companion-App (natives Swift/SwiftUI, WatchConnectivity). Kein Capacitor-Support auf watchOS — Watch-App muss nativ in Xcode gebaut werden.
