@@ -297,7 +297,7 @@ async function startServer() {
                 return callback(null, false);
             },
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'X-Test-Mode'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Test-Mode', 'X-Client-Platform'],
         };
         app.use(cors(corsOptions));
         

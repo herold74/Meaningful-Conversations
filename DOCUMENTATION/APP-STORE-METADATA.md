@@ -179,7 +179,29 @@ https://mc-app.manualmode.at/privacy
 
 ## Review Notes (für Apple Reviewer, Englisch)
 
-**Copy into App Store Connect → App Review Information → Notes** (adjust password placeholder).
+### ASC Einreichung — Checkliste (5 Schritte)
+
+**Version 2.5.7** · Production-API (`mc-app.manualmode.at`) · Build laut Xcode/ASC (z. B. **2.5.7 (3)** nach Upload).
+
+| # | Wo in App Store Connect | Was eintragen |
+|---|-------------------------|---------------|
+| **1** | Version **2.5.7** → Build auswählen | Neuesten Build zuweisen (nach „Processing“ → „Ready to Submit“) |
+| **2** | **App Review Information → Sign-In required** | Username: `premium@manualmode.at` · Password: *(Review-Passwort)* |
+| **3** | **App Review Information → Notes** | **Nur** den **Copy-paste block** unten (Englisch) — **keine** 12-Schritte-Demo |
+| **4** | **App Review Information → Attachments** | ~7-Min-Screen-Recording (Sandbox-IAP + App-Features) **als Datei**, nicht in Notes |
+| **5** | **Submit for Review** (+ IAPs mit Binary resubmiten falls „Rejected“) | Optional vorher: Resolution Center (siehe unten) |
+
+**Drei verschiedene Orte — nicht verwechseln:**
+
+| Ort | Zweck |
+|-----|--------|
+| **Notes** | Alles für den Reviewer: Test-Account, Sandbox, Video-Inhalt, Compliance |
+| **Sign-In required** | Login-Daten (Apple öffnet oft separat) |
+| **Resolution Center** | Kurze Antwort auf die **Ablehnung** 2.5.6 — nur wenn du dort antwortest, **bevor** oder **beim** Resubmit |
+
+Die ausführliche **Demo-Anleitung (Schritte 1–12)** unten ist **Referenz** — poste sie **nicht** in Notes, wenn das Video angehängt ist.
+
+---
 
 ### Test Account
 - Email: `premium@manualmode.at`
@@ -193,7 +215,9 @@ podman exec meaningful-conversations-backend-production node scripts/setup-app-s
 ```
 Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account.js` — sets `isPremium`, `hasPracticeAccess`, same expiry (~2 years), `isClient=false`.
 
-### Demo Instructions (English)
+### Demo Instructions (English) — Referenz, nicht in Notes kopieren
+
+*Nur bei Nachfrage von Apple oder wenn kein Screen Recording angehängt ist.*
 
 1. Open the app. On the Welcome screen, choose **Deutsch** or **English**.
 2. Tap **Log in** / **Anmelden**. Sign in with the test account above.
@@ -212,14 +236,50 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 - **Store listing name:** ManualMode (previously MyCoach AI). In-app display name is already **ManualMode**.
 - **Upgrade codes removed (v2.5.7):** Code redemption UI is not available in the iOS app. Digital unlock is exclusively via In-App Purchase.
 - **Premium+** (`mc.premium_plus.monthly`): bundles Premium and Coach Practice in one subscription.
-- **Screen recording:** Attached — Home Screen → app launch → login → Menu → Upgrade → successful sandbox purchase.
+- **Screen recording:** Attached (~7 min, edited for length) — see **Copy-paste block** below.
 - Primary app language: German. Full English via language toggle on Welcome screen.
 - Internet required for AI. Guest mode available without account.
 - Voice mode requires microphone permission.
 
-### Resolution Center reply (v2.5.7 resubmission)
+### Copy-paste block → **Notes** (Schritt 3 der Checkliste)
 
-> We removed all upgrade-code redemption UI from the iOS app (Account Management, Paywall, Upgrade). Digital content unlock is exclusively via In-App Purchase. We verified RevenueCat/StoreKit integration with build 2.5.7 (1) and attached a sandbox purchase screen recording. IAP products are resubmitted with this binary.
+**Das hier** in App Store Connect → App Review Information → **Notes** einfügen (Passwort-Zeile anpassen oder weglassen, wenn schon unter Sign-In required):
+
+```
+TEST ACCOUNT (feature demo — Premium+ incl. Coach Practice):
+Email: premium@manualmode.at
+Password: [same as Sign-In required field]
+
+SANDBOX IAP (screen recording):
+Use a Sandbox Apple ID on the device (Settings → Developer → Sandbox Apple Account).
+MC app login on staging/production API as above; purchases run through Apple Sandbox.
+
+SCREEN RECORDING (~7 min, edited for length):
+- Home Screen → app launch → login (English UI via Welcome screen toggle)
+- Menu (☰) → Upgrade: all IAP products visible with prices
+- Sandbox purchases demonstrated: Registered Monthly, Premium Monthly, Premium+ Monthly, coach unlocks (Kenji, Chloe)
+- Yearly subscriptions (Registered Annual, Premium Annual) are configured in App Store Connect but not shown in this clip to keep review time reasonable; monthly tiers and Premium+ demonstrate the same subscription group and upgrade path
+- Premium+ purchase → Coach Practice tab → short practice demo (method, scenario, session start)
+- Restore Purchases on Upgrade screen
+- Typical app features: Intent picker, coach selection, coaching session, Life Context, Personality Profile (test account may have empty profile after IAP demo reset)
+
+COMPLIANCE (v2.5.7):
+- Upgrade-code redemption UI removed from iOS (Guideline 3.1.1). Digital unlock via In-App Purchase only.
+- IAP products in binary via StoreKit/RevenueCat (Menu → Upgrade). Product IDs: mc.registered.monthly, mc.registered.yearly.v2, mc.premium.monthly, mc.premium.yearly, mc.premium_plus.monthly, mc.coach.kenji, mc.coach.chloe
+- Privacy Policy and Terms links on Upgrade screen (Guideline 3.1.2)
+
+LANGUAGE: Primary store metadata German; full English in-app via Welcome screen language toggle.
+```
+
+### Resolution Center reply — **optional** (separater Tab, nicht Notes)
+
+**Wo:** App Store Connect → App → **App Review** → Tab **Resolution Center** (Nachrichtenverlauf zur Ablehnung 2.5.6).
+
+**Wann:** Nur wenn du dort explizit auf Apple antwortest. Bei reinem Resubmit mit neuem Build reichen oft Notes + Video.
+
+**Text (Englisch, ein Satz):**
+
+> We removed upgrade-code UI from iOS, attached a ~7-minute sandbox IAP screen recording (monthly tiers + Premium+ with Coach Practice demo + Restore), and resubmitted IAP products with build 2.5.7.
 
 ---
 

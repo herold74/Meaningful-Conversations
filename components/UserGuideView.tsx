@@ -138,7 +138,7 @@ Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten*
 
 Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
 
-**Name (Gäste):** Haben Sie in **dieser Browser-Tab-Sitzung** noch keinen Namen angegeben, folgt nach dem Intent die Abfrage Ihres Vornamens (oder Pseudonyms). Daraus entsteht eine minimale Lebenskontext-Vorlage; Sie können den Schritt auch **überspringen**. Anschließend gelangen Sie zum **Startbildschirm** zur Lebenskontext-Einrichtung. Haben Sie in derselben Sitzung bereits einen Namen **und** einen Lebenskontext, springt die App nach dem Intent direkt zur **Coach-Auswahl**.
+**Name (Gäste):** Haben Sie in **${isNative ? 'dieser App-Sitzung' : 'dieser Browser-Tab-Sitzung'}** noch keinen Namen angegeben, folgt nach dem Intent die Abfrage Ihres Vornamens (oder Pseudonyms). Daraus entsteht eine minimale Lebenskontext-Vorlage; Sie können den Schritt auch **überspringen**. Anschließend gelangen Sie zum **Startbildschirm** zur Lebenskontext-Einrichtung. Haben Sie in derselben Sitzung bereits einen Namen **und** einen Lebenskontext, springt die App nach dem Intent direkt zur **Coach-Auswahl**.
 
 **Name (registriert):** Ohne gespeicherten Lebenskontext werden Sie nach Ihrem Namen gefragt; er wird in den verschlüsselten Lebenskontext integriert (kein Überspringen).
 
@@ -148,7 +148,7 @@ Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehobe
 - **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
 - **Registrieren/Anmelden:** Erstellen Sie ein zunächst kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Name und Kontext gelten nur für <strong>diese Browser-Tab-Sitzung</strong>. Ohne Download geht Ihr Fortschritt beim Schließen des Tabs verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie dauerhaft zu speichern.</p>')}
+${guideWarningBox(`<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Name und Kontext gelten nur für <strong>${isNative ? 'diese App-Sitzung' : 'diese Browser-Tab-Sitzung'}</strong>. Ohne Download geht Ihr Fortschritt beim ${isNative ? 'Beenden der App' : 'Schließen des Tabs'} verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie dauerhaft zu speichern.</p>`)}
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
 
@@ -168,7 +168,7 @@ Nach Auth, Intent und (bei Gästen) der Namensabfrage landen Sie auf dem **Start
 
 **Menü → Lebenskontext:** Gäste gelangen immer zum **Startbildschirm**; registrierte Nutzer mit gespeichertem Kontext zur **Kontextauswahl**.
 
-**Fragebogen (über „Neues Gespräch starten", wenn noch kein oder nur minimaler Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro Tab-Sitzung. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
+**Fragebogen (über „Neues Gespräch starten", wenn noch kein oder nur minimaler Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro ${isNative ? 'App-Sitzung' : 'Tab-Sitzung'}. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
 
 **Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
 
@@ -241,14 +241,14 @@ Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 
 | Stufe | Zugang | Coaches | Funktionen |
 | :--- | :--- | :--- | :--- |
-| **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
-| **Registriert** | Kostenloses Konto inkl. **9-Tage-Premium-Test** | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
-| **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
+| **Gast** | Ohne Registrierung | Nobody, Max, Ava, Gloria (Onboarding) | Grundfunktionen, lokale Daten |
+| **Registriert** | **9-Tage-Premium-Test** nach Registrierung; danach Registered-Abo (z. B. €3,90/Monat) | + Gloria (Interview), Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, Narrative Signatur, Server-TTS (Web), DPC-Modus, Profil-PDF, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
+| **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung inkl. PDF |
 | **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **Coach Practice (12 Methoden)**, alle Features |
+| **Klient** | ${isNative ? `Zugang über ${brand.providerName} (Web/Code — **nicht** in der iOS-App einlösbar)` : `Zugangscode von ${brand.providerName}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **PEP Lösungsblockaden**, **Coach Practice (12 Methoden)**, alle Features |
 
 **So upgraden Sie:**
-${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
+${isNative ? `- Direkt in der App über **Apple In-App Purchase** (Menü → **Upgrade**): Registered Monats-/Jahresabo, Premium Monats-/Jahresabo, Premium+ Monat, Coach-Freischaltungen (Kenji, Chloe). Am Ende des Bildschirms: **Käufe wiederherstellen**. Abonnements werden über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
 - **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
 - **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.`}
 
@@ -897,7 +897,7 @@ Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
   - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
 - **Speichern & Fortfahren:**
 
-${guideWarningBox('<p class="m-0"><strong>Gäste:</strong> Siehe Abschnitt <strong>1.2</strong> (Tab-Sitzung). Speichern Sie hier unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre .md-Datei — sonst geht der Fortschritt verloren. Registrierte Nutzer nutzen dies optional als Backup.</p>')}
+${guideWarningBox(`<p class="m-0"><strong>Gäste:</strong> Siehe Abschnitt <strong>1.2</strong> (${isNative ? 'App-Sitzung' : 'Tab-Sitzung'}). Speichern Sie hier unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre .md-Datei — sonst geht der Fortschritt verloren. Registrierte Nutzer nutzen dies optional als Backup.</p>`)}
 
   - **Kontext herunterladen (Backup):** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern.
   - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
@@ -1026,7 +1026,7 @@ Sie erhalten persönlichkeitsbasierte Hinweise zu Ihrem Kommunikationsstil — u
 
 ### Zusätzliche Funktionen
 
-- **PDF-Export** für Klienten
+- **PDF-Export** für Premium-Nutzer (Transkript-Auswertung)
 - **History-Ansicht** zum Überprüfen und Löschen vergangener Auswertungen
 
 ### Datenschutz
@@ -1116,6 +1116,39 @@ Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Deutliches Sprechen:** Klare Aussprache verbessert die Genauigkeit erheblich.
 - **Sprecherwechsel:** Bei Gesprächen mit mehreren Teilnehmern versucht die KI, Sprecher zu unterscheiden. Eindeutige Sprecherwechsel erleichtern dies.
 - **Optimale Länge:** Gespräche von 5–30 Minuten liefern die besten Ergebnisse.
+
+</div>
+</details>
+`;
+
+const de_chapter9_pep = (isNative: boolean) => `
+---
+
+<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Lösungsblockaden (Klienten-Feature)</summary>
+<div style="padding: 16px;">
+
+### Was sind PEP-Lösungsblockaden?
+
+**PEP** (Psychologisches Entwicklungsprogramm) nach **Dr. Michael Bohne** ist ein Verfahren zur Erkennung innerer **Lösungsblockaden** — unbewusster Muster, die Ihren Fortschritt behindern können, obwohl Sie sich anstrengen.
+
+Nach einer Coaching-Sitzung analysiert die KI Ihr Gespräch im **Sitzungs-Review** auf typische Blockademuster (z. B. Vermeidung, Selbstsabotage, unrealistische Erwartungen).
+
+### Wer kann es nutzen?
+
+Nur **Klienten**-Nutzer (Zugang über ${brand.providerName}) sowie Admin/Developer-Testkonten. Premium, Premium+ und registrierte Standardnutzer sehen diesen Abschnitt **nicht**.
+
+${isNative ? `**Hinweis iOS:** Klienten-Zugang wird außerhalb der App vergeben — Code-Einlösung ist in der iOS-App nicht verfügbar.` : ''}
+
+### Wo finden Sie es?
+
+Am Ende einer Coaching-Sitzung im **Sitzungs-Review**, Abschnitt **„Mögliche Lösungsblockaden“**. Die KI listet erkannte Muster mit Erklärung und einem Zitat aus dem Gespräch.
+
+### Wie nutzen Sie es?
+
+- Lesen Sie die Vorschläge als **Reflexionsimpuls**, nicht als Diagnose.
+- Besprechen Sie auffällige Blockaden mit Ihrem Coach bei ${brand.providerName}.
+- Der Abschnitt erscheint nur, wenn die Analyse Muster erkennt — sonst „Keine erkannt“.
 
 </div>
 </details>
@@ -1270,7 +1303,7 @@ On launch, the **Intent Picker** appears — a screen with **three cards** askin
 
 Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
 
-**Name (guests):** If you have not entered a name in **this browser tab session** yet, the app asks for your first name (or pseudonym) after the intent. This creates a minimal Life Context template; you can also **skip** this step. You then reach the **start screen** to set up your Life Context. If you already have a name **and** a Life Context in the same session, the app goes straight to **coach selection** after the intent.
+**Name (guests):** If you have not entered a name in **this ${isNative ? 'app session' : 'browser tab session'}** yet, the app asks for your first name (or pseudonym) after the intent. This creates a minimal Life Context template; you can also **skip** this step. You then reach the **start screen** to set up your Life Context. If you already have a name **and** a Life Context in the same session, the app goes straight to **coach selection** after the intent.
 
 **Name (registered):** Without a saved Life Context, you are asked for your name; it is integrated into the encrypted Life Context (no skip option).
 
@@ -1280,7 +1313,7 @@ Your chosen intent determines which section is highlighted and expanded on the c
 - **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
 - **Register/Login:** Start with a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this browser tab session</strong>. Without a download, progress is lost when you close the tab. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>')}
+${guideWarningBox(`<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this ${isNative ? 'app session' : 'browser tab session'}</strong>. Without a download, progress is lost when you ${isNative ? 'close the app' : 'close the tab'}. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>`)}
 
 **Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
 
@@ -1300,7 +1333,7 @@ After auth, intent, and (for guests) the name prompt, you arrive at the **start 
 
 **Menu → Life Context:** Guests always reach the **start screen**; registered users with a saved context reach **Context Choice**.
 
-**Questionnaire (via “Start a new conversation” when no or only minimal context):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per tab session. **Generate File & Continue** takes you to coach selection.
+**Questionnaire (via “Start a new conversation” when no or only minimal context):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per ${isNative ? 'app session' : 'tab session'}. **Generate File & Continue** takes you to coach selection.
 
 **Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
 
@@ -1373,14 +1406,14 @@ The app offers several access tiers with increasing functionality:
 
 | Tier | Access | Coaches | Features |
 | :--- | :--- | :--- | :--- |
-| **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
-| **Registered** | Free account incl. **9-day Premium trial** | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification; during trial also Premium features and Coach Practice (8 methods) |
-| **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
+| **Guest** | No registration | Nobody, Max, Ava, Gloria (onboarding) | Basic features, local data |
+| **Registered** | **9-day Premium trial** after signup; then Registered subscription (e.g. €3.90/month) | + Gloria (interview), Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, narrative signature, server TTS (web), DPC mode, profile PDF, Gamification; during trial also Premium features and Coach Practice (8 methods) |
+| **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation incl. PDF |
 | **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor, Bekky, Dan | Audio transcription, **Coach Practice (12 methods)**, all features |
+| **Client** | ${isNative ? `Access via ${brand.providerName} (web/code — **not** redeemable in the iOS app)` : `Access code from ${brand.providerName}`} | + Rob, Victor, Bekky, Dan | Audio transcription, **PEP solution blockages**, **Coach Practice (12 methods)**, all features |
 
 **How to upgrade:**
-${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
+${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Upgrade**): Registered monthly/annual, Premium monthly/annual, Premium+ monthly, coach unlocks (Kenji, Chloe). At the bottom of the screen: **Restore Purchases**. Subscriptions are managed through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
 - **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.
 - **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.`}
 
@@ -1477,39 +1510,113 @@ The Personality Profile is an encrypted document that captures your personality 
 
 ### 4.2 The Personality Tests
 
-You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality:
+You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality. You can take additional tests at any time after the first one.
 
-**Spiral Dynamics -- "What Drives You" (Recommended)**
-Spiral Dynamics captures your value systems and inner driving forces across eight levels:
-- Two perspectives: **Self-oriented** (Autonomy & Self-actualization) and **Community-oriented** (Belonging & Connection)
-- 8 levels: Survival, Belonging, Power, Order, Achievement, Community, Integration, Holism
-- Result: Bar chart showing your scores (1-5) per level
-- Quick to complete (approx. 5 minutes)
-- Ideal as a first test for a broad understanding of your motivations
+---
+
+**OCEAN (Big Five) -- "Who You Are"**
+<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Available for all registered users*</span>
+
+The OCEAN test is based on the **Big Five Inventory-2 (BFI-2)** — the most extensively researched personality model worldwide. It measures five core dimensions:
+
+- **Extraversion** — How much energy you draw from social interaction
+- **Agreeableness** — How cooperative and empathetic you are toward others
+- **Conscientiousness** — How structured and goal-oriented you work
+- **Negative Emotionality** — How you handle stress and emotional strain
+- **Openness** — How curious and creative you are
+
+You can choose between two variants:
+- **Quick test (BFI-2-XS):** 15 questions, ~2 minutes — covers the five main dimensions
+- **Extended test (BFI-2-S):** 30 questions, ~5 minutes — additionally covers 15 facets (e.g. sociability, assertiveness, trust, orderliness, creativity)
+
+📊 Result: Horizontal bars show your scores per dimension; with the extended test, also per facet.
+⏱ Duration: 2–5 minutes (depending on variant)
+💡 Ideal as a first step — a quick, evidence-based overview of your personality structure.
+
+*Based on: Soto, C. J., & John, O. P. (2017). Short and extra-short forms of the Big Five Inventory-2. Journal of Research in Personality, 68, 69-81.*
+
+<details>
+<summary>ℹ️ About the OCEAN Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Big Five model** (also known as OCEAN) is the most scientifically validated personality model in modern psychology. It emerged from decades of empirical research known as the **lexical approach**.
+
+**Core idea:** If a personality trait truly matters to people, a word for it exists in everyday language. Researchers systematically analyzed thousands of trait-describing adjectives across languages and consistently found the same five overarching factors — regardless of culture, language, or era.
+
+**Key milestones:**
+- **1930s–1960s:** Gordon Allport, Raymond Cattell, and others collected and categorized personality-describing adjectives
+- **1961:** Ernest Tupes and Raymond Christal first identified five recurring factors through factor analysis
+- **1980s–1990s:** Lewis Goldberg coined "Big Five"; Paul Costa and Robert McCrae developed the NEO-PI-R
+- **2017:** Christopher Soto and Oliver John published the **BFI-2** — the version we use in this app
+
+**What the model can and cannot do:** The Big Five describe *tendencies*, not fixed types. The dimensions are relatively stable over time but can shift through formative life experiences.
+
+**Sources:**
+- Soto, C.J. & John, O.P. (2017). *Short and extra-short forms of the Big Five Inventory–2.* Journal of Research in Personality, 68, 69-81.
+- Goldberg, L.R. (1993). *The structure of phenotypic personality traits.* American Psychologist, 48(1), 26-34.
+
+</div>
+</details>
+
+---
+
+**Riemann-Thomann -- "How You Interact with Others"**
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
+
+The Riemann-Thomann model captures four basic drives that shape your behavior in relationships and teams:
+
+- **Proximity** — Need for connection, harmony, and belonging
+- **Distance** — Need for independence, objectivity, and personal space
+- **Permanence** — Need for stability, order, and reliability
+- **Change** — Need for novelty, flexibility, and new impulses
+
+The test distinguishes **work**, **private**, and **self-image** contexts and shows your **stress reaction pattern**.
+
+📊 Result: Riemann cross (quadrant diagram) with three colored points for the three contexts, plus your personal stress ranking.
+⏱ Duration: ~10 minutes
+💡 Especially valuable for understanding relationship dynamics at work or in private life.
+
+**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
+
+<details>
+<summary>ℹ️ About the Riemann-Thomann Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Riemann-Thomann model** combines depth-psychological insights with systemic counseling practice. It was developed by Swiss psychologist **Christoph Thomann**, building on psychoanalyst **Fritz Riemann**.
+
+**Origin:** Fritz Riemann described four existential core anxieties in *Grundformen der Angst* (1961). Christoph Thomann transformed these into a practical counseling model with two bipolar axes: **Proximity ↔ Distance** and **Permanence ↔ Change**.
+
+Everyone carries elements of all four drives — the individual mix creates the personal profile.
+
+**Stress behavior:** Under pressure, dominant drives tend to intensify. Recognizing these patterns is an important step toward self-regulation.
+
+**Sources:**
+- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
+- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1.* Rowohlt.
+
+</div>
+</details>
+
+---
+
+**Spiral Dynamics -- "What Drives You"**
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
+
+Spiral Dynamics maps your value systems and inner driving forces across eight levels — showing not only *what* matters to you, but *why* and how your values may evolve over time.
+
+Two perspectives: **Self-oriented** (autonomy, achievement) and **Community-oriented** (belonging, connection).
+
+Levels in overview: Survival, Belonging, Power, Order, Achievement, Community, Integration, Holism.
+
+📊 Result: Bar chart with your scores (1–5) per level.
+⏱ Duration: ~5 minutes
+💡 Ideal for making deeper motivations and value conflicts behind your decisions visible.
 
 <details>
 <summary>ℹ️ About the Spiral Dynamics Model</summary>
 <div style="padding: 12px 16px;">
 
-**Spiral Dynamics** is a model of human development that describes how value systems and worldviews unfold over the course of a lifetime -- and over the course of human history. It originated with American developmental psychologist **Clare W. Graves** and was popularized by **Don Edward Beck** and **Christopher Cowan** under the name "Spiral Dynamics."
-
-**Core idea:** People don't develop their value systems randomly. They emerge as responses to the life conditions they face. When conditions change, value systems can evolve -- in a predictable sequence that resembles a spiral: each new level integrates the previous ones and adds new capabilities.
-
-**Two Tiers:**
-- **1st Tier** (Beige through Green): Each level considers its own worldview to be the only correct one. An achievement-oriented person (Orange) may not understand why someone values tradition and order (Blue) so highly -- and vice versa.
-- **2nd Tier** (Yellow, Turquoise): These levels recognize the value of *all* previous levels. They understand that different situations require different value systems and can flexibly switch between perspectives.
-
-**The eight levels:**
-| Color | Core Theme | Self/Community |
-|---|---|---|
-| **Beige** | Survival, basic physiological needs | Self |
-| **Purple** | Belonging, rituals, tribal community | Community |
-| **Red** | Power, assertion, self-expression | Self |
-| **Blue** | Order, duty, morality, tradition | Community |
-| **Orange** | Achievement, success, rationality, innovation | Self |
-| **Green** | Community, equality, empathy, consensus | Community |
-| **Yellow** | Integration, systems thinking, flexibility | Self |
-| **Turquoise** | Holism, global consciousness | Community |
+**Spiral Dynamics** describes how value systems unfold over a lifetime. It originated with **Clare W. Graves** and was popularized by **Don Edward Beck** and **Christopher Cowan**.
 
 **Important note on measurement:** In this app, we use the **PVQ-21 (Portrait Values Questionnaire)** by Shalom Schwartz, whose results are mapped to Spiral Dynamics color levels.
 
@@ -1519,76 +1626,7 @@ ${guideWarningBox('<p class="m-0">The PVQ-21 measures value priorities — <stro
 - Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values.* Journal of Humanistic Psychology.
 - Beck, D.E. & Cowan, C.C. (1996). *Spiral Dynamics: Mastering Values, Leadership, and Change.* Blackwell Publishing.
 - Schwartz, S.H. (2003). *A Proposal for Measuring Value Orientations across Nations.* ESS Questionnaire Development Report.
-
-</div>
-</details>
-
-**OCEAN Test (Big Five):**
-OCEAN is an acronym for the five scientifically validated personality dimensions:
-- **O**penness - Curiosity and creativity
-- **C**onscientiousness - Organization and goal-orientation
-- **E**xtraversion - Sociability and energy
-- **A**greeableness - Cooperation and empathy
-- **N**euroticism / Emotional Stability - Stress resilience
-
-The OCEAN model is the most extensively researched personality model worldwide.
-- Quicker to complete (approx. 5 minutes)
-- Ideal for an initial overview of your personality structure
-
-<details>
-<summary>ℹ️ About the OCEAN Model</summary>
-<div style="padding: 12px 16px;">
-
-The **Big Five model** (also known as OCEAN) is the most scientifically validated personality model in modern psychology. It didn't emerge from a single theory but from decades of empirical research known as the **lexical approach**.
-
-**Core idea:** If a personality trait truly matters to people, a word for it exists in everyday language. Researchers systematically analyzed thousands of trait-describing adjectives across languages and consistently found the same five overarching factors -- regardless of culture, language, or era.
-
-**Key milestones:**
-- **1930s-1960s:** Gordon Allport, Raymond Cattell, and others collected and categorized personality-describing adjectives
-- **1961:** Ernest Tupes and Raymond Christal first identified five recurring factors through factor analysis
-- **1980s-1990s:** Lewis Goldberg coined "Big Five"; Paul Costa and Robert McCrae developed the NEO-PI-R, the first standardized Big Five questionnaire
-- **2017:** Christopher Soto and Oliver John published the **BFI-2** -- the most modern version, which we use in this app
-
-**Why exactly five factors?** Statistical analysis of large datasets consistently yields a five-factor solution. Fewer factors lose important nuances; more factors become unstable and culture-dependent. Five is the robust "sweet spot" of personality description.
-
-**What the model can do -- and what it can't:** The Big Five describe *tendencies*, not fixed types. Everyone has scores on all five dimensions. The model doesn't say *why* you are the way you are (genes, upbringing, and experience all play a role), but rather maps *how* you typically think, feel, and act. The dimensions are relatively stable over time but can shift through formative life experiences.
-
-**Sources:**
-- Soto, C.J. & John, O.P. (2017). *Short and extra-short forms of the Big Five Inventory–2.* Journal of Research in Personality, 68, 69-81.
-- Goldberg, L.R. (1993). *The structure of phenotypic personality traits.* American Psychologist, 48(1), 26-34.
-
-</div>
-</details>
-
-**Riemann-Thomann Test:**
-- Captures your basic drives: Proximity, Distance, Permanence, and Change
-- Distinguishes between professional, private context, and self-image
-- Shows your stress reaction pattern
-- More comprehensive and detailed (approx. 10 minutes)
-
-**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
-
-<details>
-<summary>ℹ️ About the Riemann-Thomann Model</summary>
-<div style="padding: 12px 16px;">
-
-The **Riemann-Thomann model** combines depth-psychological insights with systemic counseling practice. It was developed by Swiss psychologist and communication consultant **Christoph Thomann**, building on the work of psychoanalyst **Fritz Riemann**.
-
-**Origin:** In his influential work *Grundformen der Angst* (Basic Forms of Anxiety, 1961), Fritz Riemann described four existential core anxieties that shape human experience: the fear of intimacy (loss of self), of individuation (isolation), of change (uncertainty), and of permanence (rigidity). Christoph Thomann transformed these depth-psychological polarities into a practical counseling model with two bipolar axes.
-
-**The Riemann Cross:** The four basic drives are arranged as two axes:
-- **Proximity ↔ Distance:** The tension between the desire for closeness and the need for independence
-- **Permanence ↔ Change:** The tension between the desire for stability and the need for novelty
-
-Everyone carries elements of all four drives -- the individual mix creates the personal profile. There is no "better" or "worse"; each position has its strengths and challenges.
-
-**What makes this model special:** Unlike many personality models, Riemann-Thomann explicitly accounts for the fact that people behave **differently depending on context**. At work, we often show different drives than in private life or in our self-perception. This differentiation makes the model particularly valuable for understanding relationship dynamics.
-
-**Stress behavior:** Under pressure, dominant drives tend to intensify -- a strongly proximity-oriented person may become even more clingy under stress, while a distance-oriented person may withdraw further. Recognizing these patterns is an important step toward self-regulation.
-
-**Sources:**
-- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
-- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1.* Rowohlt.
+- [spiraldynamics-integral.de](https://spiraldynamics-integral.de/) — German-language SDi platform (CHE D·A·CH)
 
 </div>
 </details>
@@ -1998,7 +2036,7 @@ This is the most important screen for capturing your insights.
   - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
 - **Saving & Continuing:**
 
-${guideWarningBox('<p class="m-0"><strong>Guests:</strong> See section <strong>1.2</strong> (tab session). Here, under "Download Context (Backup)", <strong>always</strong> save your .md file — otherwise progress is lost. Registered users may use this as an optional backup.</p>')}
+${guideWarningBox(`<p class="m-0"><strong>Guests:</strong> See section <strong>1.2</strong> (${isNative ? 'app session' : 'tab session'}). Here, under "Download Context (Backup)", <strong>always</strong> save your .md file — otherwise progress is lost. Registered users may use this as an optional backup.</p>`)}
 
   - **Download Context (Backup):** Click here to save your updated \`.md\` file.
   - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
@@ -2127,7 +2165,7 @@ You receive personality-based insights on your communication style — and see w
 
 ### Additional Features
 
-- **PDF Export** for Clients
+- **PDF Export** for Premium users (transcript evaluation)
 - **History view** to review and delete past evaluations
 
 ### Privacy
@@ -2217,6 +2255,39 @@ After transcription, you have the following options:
 - **Speak clearly:** Clear pronunciation significantly improves accuracy.
 - **Speaker turns:** For multi-participant conversations, the AI attempts to distinguish speakers. Clear speaker transitions help with this.
 - **Optimal length:** Conversations of 5–30 minutes yield the best results.
+
+</div>
+</details>
+`;
+
+const en_chapter9_pep = (isNative: boolean) => `
+---
+
+<details>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Solution Blockages (Client Feature)</summary>
+<div style="padding: 16px;">
+
+### What are PEP solution blockages?
+
+**PEP** (Psychological Development Program) by **Dr. Michael Bohne** is a framework for identifying inner **solution blockages** — unconscious patterns that can hinder your progress even when you are trying hard.
+
+After a coaching session, the AI analyzes your conversation in **Session Review** for typical blockage patterns (e.g. avoidance, self-sabotage, unrealistic expectations).
+
+### Who can use it?
+
+**Client** users only (access via ${brand.providerName}), plus admin/developer test accounts. Premium, Premium+, and standard registered users do **not** see this section.
+
+${isNative ? `**iOS note:** Client access is granted outside the app — code redemption is not available in the iOS app.` : ''}
+
+### Where to find it
+
+At the end of a coaching session in **Session Review**, section **"Potential Solution Blockages"**. The AI lists identified patterns with an explanation and a quote from the conversation.
+
+### How to use it
+
+- Treat suggestions as **reflection prompts**, not a diagnosis.
+- Discuss notable blockages with your coach at ${brand.providerName}.
+- The section only highlights patterns when the analysis finds them — otherwise "None identified".
 
 </div>
 </details>
@@ -2350,8 +2421,9 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
             : en_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10);
         const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
         const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
+        const ch9pep = language === 'de' ? de_chapter9_pep(native) : en_chapter9_pep(native);
         const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
-        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '') + (showChapter10 ? ch10 : '');
+        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch9pep : '') + (showChapter10 ? ch10 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9, showChapter10]);
     
     return (

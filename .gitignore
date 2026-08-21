@@ -21,6 +21,8 @@ android/capacitor-cordova-android-plugins/build/
 
 # Build output
 /dist
+/build/
+*.xcarchive
 meaningful-conversations-backend/dist/
 
 # Logs

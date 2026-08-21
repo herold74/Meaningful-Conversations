@@ -173,7 +173,8 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     try {
         response = await fetch(finalUrl, config);
     } catch (error: any) {
-        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        const msg = error?.message || '';
+        if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
              throw new ApiError(
                 `Could not connect to the server at ${apiBaseUrl}.`, 
                 0, { error: 'Network Error' }, true, apiBaseUrl

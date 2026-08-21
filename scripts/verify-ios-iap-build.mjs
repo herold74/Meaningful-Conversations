@@ -2,12 +2,15 @@
 /**
  * Pre-archive checks for iOS App Store builds with RevenueCat / IAP.
  * Run after: npm run build && npx cap sync ios
+ *
+ * Staging device builds (mc-beta): npm run sync:ios-staging && node scripts/verify-ios-iap-build.mjs --staging
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const stagingMode = process.argv.includes('--staging');
 let failed = false;
 
 function fail(msg) {
@@ -33,17 +36,25 @@ if (!fs.existsSync(distDir)) {
     if (/appl_[A-Za-z0-9]+/.test(bundle)) {
       ok('RevenueCat iOS API key (appl_…) found in bundle');
     } else {
-      fail('RevenueCat key missing from bundle — set VITE_REVENUECAT_IOS_KEY in .env.local and rebuild');
+      fail(
+        'RevenueCat key missing from bundle — set REVENUECAT_IOS_KEY in .env.local (or VITE_REVENUECAT_IOS_KEY) and rebuild',
+      );
     }
 
-    const backends = [...bundle.matchAll(/mc-[a-z]+\.manualmode\.at/g)].map((m) => m[0]);
-    const uniqueBackends = [...new Set(backends)];
-    if (uniqueBackends.length === 1 && uniqueBackends[0] === 'mc-app.manualmode.at') {
-      ok('Production API host (mc-app.manualmode.at) in bundle');
-    } else if (uniqueBackends.includes('mc-beta.manualmode.at')) {
-      fail(`Staging API in bundle: ${uniqueBackends.join(', ')} — use npm run build (not sync:ios-staging) for App Store`);
+    // Vite inlines VITE_CAPACITOR_BACKEND (or default 'production') into getApiBaseUrl()
+    const capacitorBackendMatch = bundle.match(/"(staging|production)"\.toLowerCase\(\)==="staging"/);
+    const capacitorBackend = capacitorBackendMatch?.[1] || 'production';
+
+    if (stagingMode) {
+      if (capacitorBackend === 'staging') {
+        ok('Capacitor default API: staging (mc-beta.manualmode.at)');
+      } else {
+        fail('Capacitor default API is production — use npm run sync:ios-staging for sandbox / screen recording');
+      }
+    } else if (capacitorBackend === 'production') {
+      ok('Capacitor default API: production (mc-app.manualmode.at) — OK for App Store archive');
     } else {
-      ok(`API hosts in bundle: ${uniqueBackends.join(', ') || '(none — runtime only)'}`);
+      fail('Capacitor default API is staging — use npm run build (not sync:ios-staging) for App Store');
     }
   }
 }
@@ -70,15 +81,16 @@ if (fs.existsSync(pbxproj)) {
 
 // 4. .env.local hint (do not print secret)
 const envLocal = path.join(root, '.env.local');
+const revenueCatPattern = /(?:VITE_)?REVENUECAT_IOS_KEY\s*=\s*"?appl_/;
 if (fs.existsSync(envLocal)) {
   const env = fs.readFileSync(envLocal, 'utf8');
-  if (/VITE_REVENUECAT_IOS_KEY\s*=\s*"?appl_/.test(env)) {
-    ok('.env.local contains VITE_REVENUECAT_IOS_KEY');
+  if (revenueCatPattern.test(env)) {
+    ok('.env.local contains REVENUECAT_IOS_KEY (or VITE_REVENUECAT_IOS_KEY)');
   } else {
-    fail('.env.local exists but VITE_REVENUECAT_IOS_KEY is missing or invalid (must start with appl_)');
+    fail('.env.local exists but REVENUECAT_IOS_KEY is missing or invalid (must start with appl_)');
   }
 } else {
-  fail('.env.local not found — create it with VITE_REVENUECAT_IOS_KEY=appl_… from RevenueCat dashboard');
+  fail('.env.local not found — create it with REVENUECAT_IOS_KEY=appl_… (same as .env.staging)');
 }
 
 if (failed) {
@@ -86,4 +98,8 @@ if (failed) {
   process.exit(1);
 }
 
-console.log('\n_iOS IAP build verification passed. Ready for Xcode Archive._');
+console.log(
+  stagingMode
+    ? '\n_iOS IAP staging build verification passed. Ready for Xcode deploy to physical iPhone._'
+    : '\n_iOS IAP build verification passed. Ready for Xcode Archive._',
+);

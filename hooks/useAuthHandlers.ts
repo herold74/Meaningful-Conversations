@@ -120,8 +120,16 @@ export function useAuthHandlers({
             }
         }
 
-        // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
-        if (isIAPAvailable()) {
+        // Local RC cache fallback only when server sync is unavailable — not when login already
+        // returned accessExpired (server + RC API confirmed no access). Otherwise sandbox device
+        // entitlements bypass the paywall after an intentional demo reset.
+        const serverSaysExpired =
+            !user.isAdmin && !user.isDeveloper && !user.isPremium && !user.isClient
+            && user.accessExpiresAt != null
+            && new Date(user.accessExpiresAt) < new Date();
+        const syncUnavailable = syncResult === 'fatal';
+
+        if (!serverSaysExpired && syncUnavailable && isIAPAvailable()) {
           const rcAccess = await getAccessFromRevenueCat();
           if (rcAccess?.hasAccess) {
             const patched = { ...user };
