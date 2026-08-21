@@ -8,6 +8,15 @@
 **App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit submitted:** v**2.5.7 (4)** — **2026-08-21** (Review Notes + IAP video + EN screenshots). Handbook/IAP polish in binary. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
 **Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` (local); ASC binary **build 4**. Next archive: bump to **≥5**.
 
+## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
+
+1. **Handbuch ist in der Einreichung** — UserGuide/FAQ-Audit (§1.2/§2.2, PEP-Kapitel, iOS-IAP-Copy) steckt im eingereichten Binary **2.5.7 (4)**; kein Rebuild nur fürs Handbuch nötig.
+2. **Uncommitted ≠ nicht im Binary** — Xcode-Archive aus dem lokalen Workspace enthält auch uncommittete Frontend-Änderungen (`main-CaTeQsof.js` im xcarchive prüfbar).
+3. **Build-Nummern drift:** Repo/Xcode kann `CURRENT_PROJECT_VERSION=3` zeigen, ASC **build 4** — Apple hochzählt beim Upload. Vor dem nächsten Archive: **≥5** setzen.
+4. **iOS-Login auf Production** — Fix ist **Backend CORS** (`X-Client-Platform`), kein neues App-Binary; Production muss **v2.5.7+** sein.
+5. **Apple Review-Account** — `premium@manualmode.at` via `setup-app-store-review-account.js` auf Production (Premium+); IAP-Sandbox-Demo ggf. `reset-app-store-review-account-for-iap-demo.js`.
+6. **Repo-Stand 2026-08-21** — Commit **`a4d369c4`** (Handbuch, IAP-Paywall, CORS, ASC-Docs); `build/` + `*.xcarchive` in `.gitignore`.
+
 ## Session handoff (2026-08-21)
 
 **ASC 2.5.7 resubmit complete:** Submitted **2.5.7 (4)** with handbook audit (UserGuide §1.2/§2.2, PEP ch., iOS IAP copy), NativePaywall locale titles, IAP demo-reset script, CORS `X-Client-Platform` on production. Review account `premium@manualmode.at` → Premium+ until 2028. Repo synced (commit after session).
