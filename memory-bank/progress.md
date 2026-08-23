@@ -257,7 +257,7 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
-- [ ] **Krisen-Hilfsangebote region-aware** *(2026-08-21)*: Heute listet `crisisText.js` bei jeder Crisis Response **immer** die österreichischen Standard-Hotlines (142, 147, 1450, 112) — unabhängig von **Country / State** im Lebenskontext. ASC **English (Canada)** oder UI-EN ändern das nicht; steuernd ist nur das LC-Feld. **Backlog:** AT-Block nur bei Region AT/leer; sonst landesspezifische Ressourcen (LLM-generiert aus LC, z. B. Canada → 988 etc.) ohne öst. Nummern. Aufwand grob **S** (`meaningful-conversations-backend/crisisText.js`, ggf. kuratierte Fallback-Liste pro Land).
+- [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **Apple Watch Integration:** watchOS Companion-App (natives Swift/SwiftUI, WatchConnectivity). Kein Capacitor-Support auf watchOS — Watch-App muss nativ in Xcode gebaut werden.
