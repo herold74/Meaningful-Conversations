@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.5.7
 **Branch:** `main`
-**Staging:** Deployed **2026-08-17**, Build **3**, v2.5.7 — https://mc-beta.manualmode.at (health OK; `sw.js` v2.5.7-b3; Mistral transcript-eval `json_schema` fix live)
+**Staging:** Deployed **2026-08-23**, v2.5.7 **backend** (crisis helpline catalog live; frontend still Build **3** / `sw.js` v2.5.7-b3) — https://mc-beta.manualmode.at (health OK)
 **Production:** Deployed **2026-08-21**, v2.5.7 (registry images, pull-only) — https://mc-app.manualmode.at (health OK; **parity with staging**; CORS `X-Client-Platform` for iOS 2.5.7 login)
 **App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit submitted:** v**2.5.7 (4)** — **2026-08-21** (Review Notes + IAP video + EN screenshots). Handbook/IAP polish in binary. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
 **Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` (local); ASC binary **build 4**. Next archive: bump to **≥5**.
@@ -16,6 +16,10 @@
 4. **iOS-Login auf Production** — Fix ist **Backend CORS** (`X-Client-Platform`), kein neues App-Binary; Production muss **v2.5.7+** sein.
 5. **Apple Review-Account** — `premium@manualmode.at` via `setup-app-store-review-account.js` auf Production (Premium+); IAP-Sandbox-Demo ggf. `reset-app-store-review-account-for-iap-demo.js`.
 6. **Repo-Stand 2026-08-21** — Commit **`a4d369c4`** (Handbuch, IAP-Paywall, CORS, ASC-Docs); `build/` + `*.xcarchive` in `.gitignore`.
+
+## Session handoff (2026-08-23)
+
+**Crisis helplines + method comparison:** Commit **`a1504bed`**. Staging **backend-only** deploy 2026-08-23 — `crisisResources.js` in container (AT/DE/CH/CA, 988 present, old Vienna PSD number gone). Health OK. **Not on production.** No iOS rebuild (prompt-only). Docs: `DOCUMENTATION/CRISIS-HELPLINES.md`, `DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.md`. First deploy attempt failed (Podman VM disk full); prune then retry succeeded.
 
 ## Session handoff (2026-08-21)
 
