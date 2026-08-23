@@ -213,6 +213,41 @@
 
     .default-pair strong { color: #92400e; }
 
+    .lens-wrap { margin-bottom: 4mm; }
+
+    table.lens {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 6.5pt;
+      table-layout: fixed;
+    }
+
+    table.lens th {
+      background: var(--dark-teal);
+      color: #fff;
+      font-weight: 600;
+      text-align: left;
+      padding: 1.2mm 1.8mm;
+      font-size: 7pt;
+      vertical-align: bottom;
+    }
+
+    table.lens th:first-child,
+    table.lens td:first-child {
+      width: 12%;
+      font-weight: 700;
+      color: var(--dark-teal);
+    }
+
+    table.lens td {
+      padding: 1.1mm 1.8mm;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    table.lens tr:nth-child(even) td { background: #f9fafb; }
+    table.lens tr:last-child td { border-bottom: none; }
+
     .scenario-wrap {
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -313,6 +348,7 @@
       .special-card,
       .scenario-wrap,
       table.scenarios th,
+      table.lens th,
       .coach-badge,
       .default-pair {
         -webkit-print-color-adjust: exact;
@@ -336,7 +372,7 @@
     <header class="page-header">
       <div>
         <h1>Practice Lab — Methoden-Cheatsheet</h1>
-        <p class="subtitle">Nachschlagewerk für Coach Practice (Setup-Info-Felder). Während der Übung ausdrucken oder auf zweitem Monitor offen halten. Quelle: <code>frameworks.js</code> · Stand 2026-08-05</p>
+        <p class="subtitle">Nachschlagewerk für Coach Practice (Setup-Info-Felder). Während der Übung ausdrucken oder auf zweitem Monitor offen halten. Quelle: <code>frameworks.js</code> · v2.5.7 · Stand 2026-08-23</p>
       </div>
       <div class="brand-mark">Meaningful Conversations</div>
     </header>
@@ -431,7 +467,7 @@
         <span class="coach-badge">AI-Coach: Chloe</span>
         <p class="tagline">Gedanken, Gefühle und Verhalten untersuchen, um hilfreichere Muster zu finden.</p>
         <p class="summary">Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.</p>
-        <p class="label-block"><strong>Wann einsetzen:</strong> Führen ohne Etikettieren oder Therapeutisieren üben.</p>
+        <p class="label-block"><strong>Wann einsetzen:</strong> Führen ohne Etikettieren oder diagnostische Zuschreibungen üben.</p>
         <p class="label-block"><strong>Gute Methodentreue:</strong> Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.</p>
         <p class="phases-title">Phasen</p>
         <ul class="phases">
@@ -460,23 +496,23 @@
         <h3>Systemisches Coaching</h3>
         <span class="coach-badge">AI-Coach: Victor</span>
         <p class="tagline">Beziehungen, Rollen und Muster im System des Coachees erkunden.</p>
-        <p class="summary">Entspricht Victor — systemisch inspiriertes Coaching.</p>
+        <p class="summary">Entspricht Victor — zirkuläre Beobachtung im System (Kartierung vor Intervention); keine lineare Session-Ziel-Arbeit.</p>
         <p class="label-block"><strong>Wann einsetzen:</strong> Coachee im Kontext, nicht isoliert sehen üben.</p>
-        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst nach Rollen und Mustern im gesamten System.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst nach Rollen und Mustern im gesamten System — neutral, ohne zu beschuldigen.</p>
         <p class="phases-title">Phasen</p>
         <ul class="phases">
           <li><strong>System kartieren:</strong> Wichtige Personen, Rollen und Dynamiken identifizieren.</li>
           <li><strong>Muster:</strong> Wiederkehrende Interaktionsschleifen erkennen.</li>
           <li><strong>Verschiebung:</strong> Kleine systemische Experimente finden.</li>
         </ul>
-        <p class="hint">Systemkartierung vor Intervention oder Ratschlägen.</p>
+        <p class="hint">Einheit: System + Muster. Kartierung vor Kontrakt und Intervention. Neutral; Was/Wie/Wer statt Warum. Erfolg: Selbstposition, nicht Commitment.</p>
       </article>
 
       <article class="method-card" id="thought-audit">
-        <h3>Thought Audit</h3>
+        <h3>Gedanken-Audit</h3>
         <span class="coach-badge">AI-Coach: Bekky</span>
         <p class="tagline">Strukturierter Audit eines wiederkehrenden Gedankens: Belege, Wirkung, Revision.</p>
-        <p class="summary">Entspricht Bekky — Thought-Audit-Methodik.</p>
+        <p class="summary">Entspricht Bekky — Gedanken-Audit-Methodik.</p>
         <p class="label-block"><strong>Wann einsetzen:</strong> Gedanken rigoros prüfen ohne Belehrung üben.</p>
         <p class="label-block"><strong>Gute Methodentreue:</strong> Du bleibst bei einem Gedanken und fragst nach Belegen vor der Revision.</p>
         <p class="phases-title">Phasen</p>
@@ -527,10 +563,10 @@
       <article class="method-card" id="four-stage-coaching">
         <h3>Vier-Phasen-Coaching</h3>
         <span class="coach-badge">AI-Coach: Gabrielle</span>
-        <p class="tagline">Goal → Reality → Options → Will: klassische Coaching-Struktur für Klarheit und Commitment.</p>
-        <p class="summary">Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.</p>
+        <p class="tagline">Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment: klassische Coaching-Struktur für Klarheit und Commitment.</p>
+        <p class="summary">Entspricht Gabrielle — lineare Arbeit am Individuum und seinem Session-Ziel: Ist-Zustand halten, dann Möglichkeiten, dann Commitment.</p>
         <p class="label-block"><strong>Wann einsetzen:</strong> Ideal für allgemeine Sessions mit klarem Verlauf vom Thema zum Commitment.</p>
-        <p class="label-block"><strong>Gute Methodentreue:</strong> Du gehst session aim → current state → possibilities → commitment durch, überspringst Reality nicht und drängst in Options nicht zu Ratschlägen.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du gehst Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment durch, überspringst den Ist-Zustand nicht und drängst in Möglichkeiten nicht zu Ratschlägen.</p>
         <p class="phases-title">Phasen</p>
         <ul class="phases">
           <li><strong>Session-Ziel:</strong> Was will der Coachee aus dieser Session / langfristig?</li>
@@ -538,22 +574,23 @@
           <li><strong>Möglichkeiten:</strong> Was könnten sie tun? Brainstormen ohne Bewertung.</li>
           <li><strong>Commitment:</strong> Wozu committen sie sich? Wann und wie?</li>
         </ul>
+        <p class="hint">Einheit: Individuum + Session-Ziel. Voller Contract vor der Methode; Ist-Zustand nicht überspringen.</p>
       </article>
 
       <article class="method-card" id="forward-focused-coaching">
         <h3>Zukunftsorientiertes Coaching</h3>
         <span class="coach-badge">AI-Coach: Sam</span>
         <p class="tagline">Fokus auf gewünschte Zukunft, Ausnahmen vom Problem und Skalierung des Fortschritts.</p>
-        <p class="summary">Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.</p>
+        <p class="summary">Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung (+1). Ist-Zustand nicht ausbauen.</p>
         <p class="label-block"><strong>Wann einsetzen:</strong> Wenn der Coachee in Problemgespräch steckt und einen Vorwärts-Blick braucht.</p>
-        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst.</p>
+        <p class="label-block"><strong>Gute Methodentreue:</strong> Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst — kein Mitgehen vor Zukunftsfragen.</p>
         <p class="phases-title">Phasen</p>
         <ul class="phases">
           <li><strong>Gewünschte Zukunft:</strong> Leben beschreiben, wenn das Problem gelöst ist.</li>
           <li><strong>Ausnahmen:</strong> Wann ist das Problem schon kleiner oder absent?</li>
           <li><strong>Skalierung:</strong> Fortschritt 0–10; wie sähe +1 aus?</li>
         </ul>
-        <p class="hint">Kein voller 6-Schritte-Contract. Keine ausgedehnte Problem-Erkundung vor SF-Fragen.</p>
+        <p class="hint">Einheit: Individuum + Ausnahmen. Kein 6-Schritte-Contract, kein Mitgehen vor Zukunftsfragen — Ist-Zustand nicht ausbauen.</p>
       </article>
 
       <article class="method-card" id="ambivalence-coaching">
@@ -576,7 +613,7 @@
 
     <footer class="footer">
       <span>Practice Lab Methoden-Cheatsheet · Seite 3/4</span>
-      <span>Default-Paar: Alex + Vier-Phasen-Coaching</span>
+      <span>Default-Paar: Lukas + Vier-Phasen-Coaching</span>
     </footer>
   </div>
 
@@ -585,7 +622,7 @@
     <header class="page-header">
       <div>
         <h1>Practice Lab — Methoden-Cheatsheet</h1>
-        <p class="subtitle">Teil 2 — Sonderpfade · Teil 3 — Szenario-Empfehlungen</p>
+        <p class="subtitle">Teil 2 — Sonderpfade · Vergleichslinse · Teil 3 — Szenario-Empfehlungen · v2.5.7</p>
       </div>
       <div class="brand-mark">Meaningful Conversations</div>
     </header>
@@ -605,6 +642,7 @@
           <li><strong>Messbares Session-Ergebnis</strong> — Konkretes Ergebnis definiert.</li>
           <li><strong>Kontrakt bestätigt</strong> — Explizite Bestätigung durch Coachee.</li>
         </ol>
+        <p class="hint">Coachees (Anliegen blind): Nina, Leo, Clara, David, Anna, Markus, Oliver, Elena, Nadia, Martin, Emma, Sophie.</p>
       </article>
 
       <article class="special-card" id="free-play">
@@ -618,8 +656,48 @@
 
     </div>
 
+    <h2 class="section-title">Vergleichslinse — Vier-Phasen · Zukunftsorientiert · Systemisch</h2>
+    <div class="lens-wrap">
+      <table class="lens">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Gabrielle (Vier-Phasen)</th>
+            <th>Sam (zukunftsorientiert)</th>
+            <th>Victor (systemisch)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Einheit</td>
+            <td>Individuum + Session-Ziel</td>
+            <td>Individuum + Ausnahmen</td>
+            <td>System + Muster</td>
+          </tr>
+          <tr>
+            <td>Sequenz</td>
+            <td>Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment</td>
+            <td>Gewünschte Zukunft → Ausnahmen → Skalierung (+1)</td>
+            <td>Kartieren → Muster → Verschiebung</td>
+          </tr>
+          <tr>
+            <td>Erfolg</td>
+            <td>Explizites Commitment</td>
+            <td>+1-Schritt, den der Coachee wählt</td>
+            <td>Differenzierung / Selbstposition</td>
+          </tr>
+          <tr>
+            <td>Typischer Fehler</td>
+            <td>Ist-Zustand überspringen; wie Sam vorwärts springen</td>
+            <td>Problem auswalzen; Mitgehen wie Vier-Phasen</td>
+            <td>Zu früh fixen oder das Anliegen individualisieren</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <h2 class="section-title">Teil 3 — Szenario → empfohlene Struktur</h2>
-    <p class="default-pair"><strong>Default-Paar:</strong> <code>career-decision</code> (Alex) + <a class="ref-link" href="#four-stage-coaching">Vier-Phasen-Coaching</a></p>
+    <p class="default-pair"><strong>Default-Paar:</strong> <code>career-decision</code> (Lukas) + <a class="ref-link" href="#four-stage-coaching">Vier-Phasen-Coaching</a></p>
 
     <div class="scenario-wrap">
       <table class="scenarios">
@@ -637,7 +715,7 @@
           <tr>
             <td><code>career-decision</code></td>
             <td>Karriereentscheidung</td>
-            <td>Alex</td>
+            <td>Lukas</td>
             <td>Strategisch, Vier-Phasen, GPS</td>
             <td><a class="ref-link" href="#strategic-coaching">Strategisch</a></td>
             <td>Zukunftsorientiert, Ambivalenz, Ambitioniert</td>
@@ -645,7 +723,7 @@
           <tr>
             <td><code>team-conflict</code></td>
             <td>Teamkonflikt</td>
-            <td>Sam</td>
+            <td>Lisa</td>
             <td>Systemisch, Vier-Phasen, GPS</td>
             <td><a class="ref-link" href="#systemic-coaching">Systemisch</a></td>
             <td>Zukunftsorientiert, Strukt. Reflexion, Resilienz</td>
@@ -653,7 +731,7 @@
           <tr>
             <td><code>motivation-dip</code></td>
             <td>Motivationstief</td>
-            <td>Jordan</td>
+            <td>Jonas</td>
             <td>Mentale Fitness, Strukt. Reflexion, GPS</td>
             <td><a class="ref-link" href="#mental-fitness-coaching">Mentale Fitness</a></td>
             <td>Vier-Phasen, Zukunftsorientiert, Resilienz</td>
@@ -661,7 +739,7 @@
           <tr>
             <td><code>relationship-boundary</code></td>
             <td>Beziehungsgrenze</td>
-            <td>Taylor</td>
+            <td>Laura</td>
             <td>Vier-Phasen, GPS, Zukunftsorientiert</td>
             <td><a class="ref-link" href="#four-stage-coaching">Vier-Phasen</a></td>
             <td>Strukt. Reflexion, Mentale Fitness, Ambivalenz</td>
@@ -669,7 +747,7 @@
           <tr>
             <td><code>overwhelm</code></td>
             <td>Überforderung</td>
-            <td>Casey</td>
+            <td>Thomas</td>
             <td>GPS, Strukt. Reflexion, Mentale Fitness</td>
             <td><a class="ref-link" href="#goal-path-solution">GPS</a></td>
             <td>Vier-Phasen, Resilienz, Zukunftsorientiert</td>
@@ -677,7 +755,7 @@
           <tr>
             <td><code>resistance-change</code></td>
             <td>Widerstand gg. Veränderung</td>
-            <td>Morgan</td>
+            <td>Marc</td>
             <td>Ambivalenz, Systemisch, Vier-Phasen</td>
             <td><a class="ref-link" href="#ambivalence-coaching">Ambivalenz</a></td>
             <td>GPS, Zukunftsorientiert, Resilienz</td>
@@ -685,15 +763,15 @@
           <tr>
             <td><code>imposter-promotion</code></td>
             <td>Hochstaplergefühl</td>
-            <td>Riley</td>
-            <td>Thought Audit, Strukt. Reflexion, Vier-Phasen</td>
-            <td><a class="ref-link" href="#thought-audit">Thought Audit</a></td>
+            <td>Mia</td>
+            <td>Gedanken-Audit, Strukt. Reflexion, Vier-Phasen</td>
+            <td><a class="ref-link" href="#thought-audit">Gedanken-Audit</a></td>
             <td>Mentale Fitness, GPS, Resilienz</td>
           </tr>
           <tr>
             <td><code>life-balance</code></td>
             <td>Work-Life-Balance</td>
-            <td>Quinn</td>
+            <td>Felix</td>
             <td>GPS, Vier-Phasen, Resilienz</td>
             <td><a class="ref-link" href="#goal-path-solution">GPS</a></td>
             <td>Strukt. Reflexion, Mentale Fitness, Zukunftsorientiert</td>
@@ -717,15 +795,15 @@
           <tr>
             <td><code>feedback-anxiety</code></td>
             <td>Feedback-Angst</td>
-            <td>Jamie</td>
-            <td>Thought Audit, Strukt. Reflexion, Mentale Fitness</td>
-            <td><a class="ref-link" href="#thought-audit">Thought Audit</a></td>
+            <td>Julia</td>
+            <td>Gedanken-Audit, Strukt. Reflexion, Mentale Fitness</td>
+            <td><a class="ref-link" href="#thought-audit">Gedanken-Audit</a></td>
             <td>Vier-Phasen, GPS, Resilienz</td>
           </tr>
           <tr>
             <td><code>stuck-metaphor</code></td>
             <td>Metaphern-Anliegen</td>
-            <td>Robin</td>
+            <td>Roland</td>
             <td>Exakte Klientensprache</td>
             <td><a class="ref-link" href="#client-exact-language">Klientensprache</a></td>
             <td>Vier-Phasen, GPS, Strukt. Reflexion</td>
@@ -735,7 +813,7 @@
     </div>
 
     <footer class="footer">
-      <span>Meaningful Conversations · Practice Lab · Stand 2026-08-05</span>
+      <span>Meaningful Conversations · Practice Lab · v2.5.7 · Stand 2026-08-23</span>
       <span>Markdown: <a href="COACH-BEHAVIOR-MATRIX.md">COACH-BEHAVIOR-MATRIX.md</a> · Druck: Querformat A4, Hintergrundgrafiken an</span>
     </footer>
   </div>

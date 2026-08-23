@@ -175,12 +175,12 @@ const FRAMEWORKS = [
     },
     explainer: {
       summary: { en: 'Aligned with Chloe — structured reflection on thought patterns.', de: 'Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.' },
-      why: { en: 'Practice guiding without labeling or therapizing.', de: 'Führen ohne Etikettieren oder Therapeutisieren üben.' },
+      why: { en: 'Practice guiding without labeling or diagnostic ascriptions.', de: 'Führen ohne Etikettieren oder diagnostische Zuschreibungen üben.' },
       goodCompliance: { en: 'You stay curious about thoughts before suggesting new behaviors.', de: 'Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.' },
     },
     evaluatorRubric: {
-      en: 'Score contracting, single-situation focus, situation→thoughts→alternatives order, evidence-based questioning, and no therapy labels. Penalize diagnosing, multiple scattered examples, or premature behavioral advice before thought exploration.',
-      de: 'Bewerte Contracting, Ein-Situations-Fokus, Reihenfolge Situation→Gedanken→Alternativen, evidenzbasiertes Fragen und keine Therapie-Labels. Abzug für Diagnostizieren, verstreute Beispiele oder voreilige Verhaltens-Ratschläge vor Gedanken-Erkundung.',
+      en: 'Score contracting, single-situation focus, situation→thoughts→alternatives order, evidence-based questioning, and no CBT labels. Penalize diagnosing, multiple scattered examples, or premature behavioral advice before thought exploration.',
+      de: 'Bewerte Contracting, Ein-Situations-Fokus, Reihenfolge Situation→Gedanken→Alternativen, evidenzbasiertes Fragen und keine KVT/CBT-Labels. Abzug für Diagnostizieren, verstreute Beispiele oder voreilige Verhaltens-Ratschläge vor Gedanken-Erkundung.',
     },
   },
   {
@@ -244,9 +244,9 @@ const FRAMEWORKS = [
       de: 'Session-Flow für systemisches Coaching: (1) Kurzes Anknüpfen — Thema und Business- vs. Privat-Kontext; (2) Systemkartierung und Musterbeobachtung VOR Kontrakt oder Intervention; (3) Kurze Session-Ergebnis-Bestätigung, dann systemische Erkundung Richtung Selbstposition; (4) Sauberer Abschluss mit Ergebnis-Review und Differenzierungs-Erkenntnis. coherent=true, wenn Kartierung vor Fixen kommt, Neutralität hält und Abschluss den Kontrakt reflektiert — Abzug für Schuldzuweisung, frühe Ratschläge oder übersprungener Systemblick.',
     },
     explainer: {
-      summary: { en: 'Aligned with Victor — systemic / family-systems inspired coaching.', de: 'Entspricht Victor — systemisch inspiriertes Coaching.' },
+      summary: { en: 'Aligned with Victor — circular observation in the system (map before intervening); not linear Session aim work.', de: 'Entspricht Victor — zirkuläre Beobachtung im System (Kartierung vor Intervention); keine lineare Session-Ziel-Arbeit.' },
       why: { en: 'Practice seeing the coachee in context, not in isolation.', de: 'Coachee im Kontext, nicht isoliert sehen üben.' },
-      goodCompliance: { en: 'You ask about roles and patterns across the system.', de: 'Du fragst nach Rollen und Mustern im gesamten System.' },
+      goodCompliance: { en: 'You ask about roles and patterns across the system — neutrally, without blame.', de: 'Du fragst nach Rollen und Mustern im gesamten System — neutral, ohne zu beschuldigen.' },
     },
     evaluatorRubric: {
       en: 'Score systemic mapping before intervention, pattern recognition, neutral observation, self-position questions, and small systemic experiments. Penalize villain-blaming, advice ("you should leave"), or skipping map phase.',
@@ -257,7 +257,7 @@ const FRAMEWORKS = [
     id: 'thought-audit',
     sourceBotId: 'bekky-thought-audit',
     isPracticeOnly: false,
-    name: { en: 'Thought Audit', de: 'Thought Audit' },
+    name: { en: 'Thought Audit', de: 'Gedanken-Audit' },
     shortDescription: {
       en: 'Structured audit of a recurring thought: evidence, impact, and revision.',
       de: 'Strukturierter Audit eines wiederkehrenden Gedankens: Belege, Wirkung, Revision.',
@@ -276,10 +276,10 @@ const FRAMEWORKS = [
     // sessionFlow aligned with bekky-thought-audit
     sessionFlowRubric: {
       en: 'Session flow for Thought Audit: (1) Brief welcome → Phase 1 thought capture and confirmation (other-directed, concrete); (2) Sequential 4 check questions (reality, certainty, impact, future); (3) Turnarounds with coachee-authored examples; (4) Closing with perspective choice and balance check — NO coaching contract. Mark coherent=true when audit sequence is intact and coach stays question-only — penalize advice, skipped phases, or multiple thoughts at once.',
-      de: 'Session-Flow für Thought Audit: (1) Kurze Begrüßung → Phase 1 Gedanken-Erfassung und Bestätigung (fremdgerichtet, konkret); (2) 4 Check-Fragen nacheinander (Realität, Gewissheit, Wirkung, Zukunft); (3) Turnarounds mit vom Coachee formulierten Beispielen; (4) Abschluss mit Perspektiven-Wahl und Balance-Check — KEIN Coaching-Kontrakt. coherent=true, wenn Audit-Sequenz intakt ist und Coach nur fragt — Abzug für Ratschläge, übersprungene Phasen oder mehrere Gedanken gleichzeitig.',
+      de: 'Session-Flow für Gedanken-Audit: (1) Kurze Begrüßung → Phase 1 Gedanken-Erfassung und Bestätigung (fremdgerichtet, konkret); (2) 4 Check-Fragen nacheinander (Realität, Gewissheit, Wirkung, Zukunft); (3) Turnarounds mit vom Coachee formulierten Beispielen; (4) Abschluss mit Perspektiven-Wahl und Balance-Check — KEIN Coaching-Kontrakt. coherent=true, wenn Audit-Sequenz intakt ist und Coach nur fragt — Abzug für Ratschläge, übersprungene Phasen oder mehrere Gedanken gleichzeitig.',
     },
     explainer: {
-      summary: { en: 'Aligned with Bekky — Thought Audit methodology.', de: 'Entspricht Bekky — Thought-Audit-Methodik.' },
+      summary: { en: 'Aligned with Bekky — Thought Audit methodology.', de: 'Entspricht Bekky — Gedanken-Audit-Methodik.' },
       why: { en: 'Practice rigorous thought examination without lecturing.', de: 'Gedanken rigoros prüfen ohne Belehrung üben.' },
       goodCompliance: { en: 'You stay on one thought and ask for evidence before revision.', de: 'Du bleibst bei einem Gedanken und fragst nach Belegen vor der Revision.' },
     },
@@ -333,8 +333,8 @@ const FRAMEWORKS = [
     isPracticeOnly: false,
     name: { en: 'Four-stage coaching', de: 'Vier-Phasen-Coaching' },
     shortDescription: {
-      en: 'Goal → Reality → Options → Will: a classic coaching structure for clarity and commitment.',
-      de: 'Goal → Reality → Options → Will: klassische Coaching-Struktur für Klarheit und Commitment.',
+      en: 'Session aim → Current state → Possibilities → Commitment: a classic coaching structure for clarity and commitment.',
+      de: 'Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment: klassische Coaching-Struktur für Klarheit und Commitment.',
     },
     stages: [
       { id: 'session-aim', name: { en: 'Session aim', de: 'Session-Ziel' }, description: { en: 'What does the coachee want from this session / longer term?', de: 'Was will der Coachee aus dieser Session / langfristig?' } },
@@ -345,30 +345,30 @@ const FRAMEWORKS = [
     complianceCriteria: [
       { en: 'All four stages addressed in order (Session aim → Current state → Possibilities → Commitment)', de: 'Alle vier Phasen in Reihenfolge (Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment)' },
       { en: '"Mitgehen, mitgehen, führen" rhythm — follow the coachee before leading', de: '„Mitgehen, mitgehen, führen"-Rhythmus — dem Coachee folgen, bevor du führst' },
-      { en: 'Options before Will; coachee-owned options, not coach advice', de: 'Options vor Will; vom Coachee getragene Optionen, keine Coach-Ratschläge' },
+      { en: 'Possibilities before Commitment; coachee-owned possibilities, not coach advice', de: 'Möglichkeiten vor Commitment; vom Coachee getragene Optionen, keine Coach-Ratschläge' },
     ],
     // sessionFlow aligned with gabrielle-four-stage
     sessionFlowRubric: {
-      en: 'Session flow for four-stage: (1) Contracting — brief session focus/agreement (full 6-step contracting optional but valued); (2) Method-appropriate opening that sets the four-stage frame; (3) session aim → current state → possibilities → commitment progression with "mitgehen, mitgehen, führen" rhythm; (4) Clean closing with explicit Will/commitment recap. Mark coherent=true when contracting, opening, stage progression, and ending feel stimmig (aligned and complete).',
-      de: 'Session-Flow für four-stage: (1) Contracting — kurzer Session-Fokus/-Vertrag (voller 6-Schritte-Contract optional, aber wertvoll); (2) Methodengerechter Einstieg mit four-stage-Rahmen; (3) session aim → current state → possibilities → commitment-Verlauf im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit explizitem Will/Commitment-Recap. coherent=true, wenn Contracting, Eröffnung, Phasenverlauf und Ende stimmig wirken.',
+      en: 'Session flow for four-stage: (1) Contracting — brief session focus/agreement (full 6-step contracting optional but valued); (2) Method-appropriate opening that sets the four-stage frame; (3) Session aim → Current state → Possibilities → Commitment progression with "mitgehen, mitgehen, führen" rhythm; (4) Clean closing with explicit Commitment recap. Mark coherent=true when contracting, opening, stage progression, and ending feel stimmig (aligned and complete).',
+      de: 'Session-Flow für Vier-Phasen: (1) Contracting — kurzer Session-Fokus/-Vertrag (voller 6-Schritte-Contract optional, aber wertvoll); (2) Methodengerechter Einstieg mit Vier-Phasen-Rahmen; (3) Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment im „Mitgehen, mitgehen, führen"-Rhythmus; (4) Sauberer Abschluss mit explizitem Commitment-Recap. coherent=true, wenn Contracting, Eröffnung, Phasenverlauf und Ende stimmig wirken.',
     },
     explainer: {
       summary: {
-        en: 'Four-stage model aligned with Gabrielle — Goal, Reality, Options, Will for classic coaching sessions.',
-        de: 'Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.',
+        en: 'Aligned with Gabrielle — linear work with the individual and their Session aim: hold Current state, then Possibilities, then Commitment.',
+        de: 'Entspricht Gabrielle — lineare Arbeit am Individuum und seinem Session-Ziel: Ist-Zustand halten, dann Möglichkeiten, dann Commitment.',
       },
       why: {
-        en: 'Ideal for general coaching sessions where you need clear progression from topic to commitment.',
+        en: 'Ideal for general coaching sessions where you need clear progression from topic to Commitment.',
         de: 'Ideal für allgemeine Sessions mit klarem Verlauf vom Thema zum Commitment.',
       },
       goodCompliance: {
-        en: 'You move through session aim → current state → possibilities → commitment without skipping Reality or rushing to advice in Options.',
-        de: 'Du gehst session aim → current state → possibilities → commitment durch, überspringst Reality nicht und drängst in Options nicht zu Ratschlägen.',
+        en: 'You move through Session aim → Current state → Possibilities → Commitment without skipping Current state or rushing to advice in Possibilities.',
+        de: 'Du gehst Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment durch, überspringst den Ist-Zustand nicht und drängst in Möglichkeiten nicht zu Ratschlägen.',
       },
     },
     evaluatorRubric: {
-      en: 'Score whether all four-stage stages appear in order with coachee-owned options and explicit Will/commitment. Reward "mitgehen, mitgehen, führen" — following before leading. Penalize skipping Reality, rushing to advice in Options, or missing Will.',
-      de: 'Bewerte, ob alle four-stage-Phasen in Reihenfolge vorkommen, mit vom Coachee getragenen Optionen und explizitem Will/Commitment. Belohne „Mitgehen, mitgehen, führen". Abzug für übersprungene Reality, voreilige Ratschläge in Options oder fehlendes Will.',
+      en: 'Score whether all four-stage stages appear in order with coachee-owned Possibilities and explicit Commitment. Reward "mitgehen, mitgehen, führen" — following before leading. Penalize skipping Current state, rushing to advice in Possibilities, or missing Commitment.',
+      de: 'Bewerte, ob alle Vier-Phasen in Reihenfolge vorkommen, mit vom Coachee getragenen Möglichkeiten und explizitem Commitment. Belohne „Mitgehen, mitgehen, führen". Abzug für übersprungenen Ist-Zustand, voreilige Ratschläge in Möglichkeiten oder fehlendes Commitment.',
     },
   },
   {
@@ -398,16 +398,16 @@ const FRAMEWORKS = [
     },
     explainer: {
       summary: {
-        en: 'Forward-focused brief coaching aligned with Sam — preferred future, exceptions, scaling.',
-        de: 'Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.',
+        en: 'Forward-focused brief coaching aligned with Sam — preferred future, exceptions, scaling (+1). Do not expand Current state / problem exploration.',
+        de: 'Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung (+1). Ist-Zustand nicht ausbauen.',
       },
       why: {
         en: 'Use when the coachee is stuck in problem talk and needs a forward lens.',
         de: 'Wenn der Coachee in Problemgespräch steckt und einen Vorwärts-Blick braucht.',
       },
       goodCompliance: {
-        en: 'You ask “when does it work already?” and scale questions before digging into causes.',
-        de: 'Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst.',
+        en: 'You ask “when does it work already?” and scale questions before digging into causes — no Mitgehen before forward-focused questions.',
+        de: 'Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst — kein Mitgehen vor Zukunftsfragen.',
       },
     },
     evaluatorRubric: {

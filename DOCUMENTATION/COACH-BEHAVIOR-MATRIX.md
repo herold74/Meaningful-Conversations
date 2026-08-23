@@ -74,7 +74,7 @@ Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in 
 |-------|--------------|--------|
 | Nobody | `goal-path-solution` | **G** Goals → **P** Present → **S** Strategy |
 | Sam | `forward-focused-coaching` | Gewünschte Zukunft → Ausnahmen → Skalierung (+1) → Bewältigung/kleiner Schritt |
-| Gabrielle | `four-stage-coaching` | Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment (Will) |
+| Gabrielle | `four-stage-coaching` | Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment |
 | Max | `ambitious-coaching` | Contract → ehrgeiziges Denken → langfristiges Denken → limitierende Glaubenssätze → Potenzial |
 | Ava | `strategic-coaching` | Strategischer Kontext → Optionen → Entscheidung (Kriterien, Trade-offs) |
 | Kenji | `resilience-coaching` | Dichotomie der Kontrolle → Umdeutung (Tugend, Urteile) → tägliche Praxis |
@@ -114,32 +114,40 @@ Diese Matrix dokumentiert das **implementierte Verhalten** aller KI-Personas in 
 | Max | **Keine** direkten Ratschläge | — | — |
 | Ava | Fragen, keine voreilige Beratung | — | — |
 | Kenji | Sokratisch, kein Belehren | — | — |
-| Chloe | Erkundung, keine Therapie-Labels | — | — |
+| Chloe | Erkundung, keine KVT/CBT-Labels | — | — |
 | Mike | **Evokation**, keine Expertisen-Falle | Mit Widerstand rollen | — |
 | Rob | Klient benennt Muster selbst | Nicht „reparieren" | — |
 | Victor | **Keine Ratschläge** („nicht kündigen") | — | — |
 | Bekky | **Strikt verboten** | Max. 1 Modell-Beispiel als Gerüst in Turnarounds | — |
 | Dan | **Strikt verboten** | — | — |
 
-### Grenzen & Scope
+### Session-Grenzen (alle Coaches)
 
-| Coach | Keine Psychotherapie | Klinische Themen | Menschlicher Coach |
-|-------|---------------------|------------------|-------------------|
-| Alle Coaches* | Ja (shared `boundaryPersona`) | Empathie + Verweis auf Fach-/Krisenhilfe | Wert bekräftigen; App ergänzt, ersetzt nicht |
-| Gloria | Kein Coaching/Rat | PII-Warnung | — |
-| Victor | + kein Therapeut | Expliziter Disclaimer | Betont Tiefe menschlicher Arbeit |
-| Bekky | + kein Audit bei Selbst-/System-Gedanken ohne Anker | Verweis an Rob/Dan bzw. Victor/Dan | — |
-| Dan | + keine Interpretation | — | — |
+Lehr- und Übungskontext — nicht klinisch empfohlen. **Alle Coaches** (inkl. Gloria) teilen dieselben Session-Grenzen:
 
-\* Gloria ausgenommen (Interviewer). Kenji/Chloe/Rob nutzen teils eigene, kürzere Boundary-Texte mit gleicher Intention.
+- Bei Verdacht auf **Sucht, Krise oder psychische Störung:** Empathie, nicht innerhalb der Methode fortsetzen; **Verweis auf menschliche Ansprechpartner** / Fach- oder Krisenhilfe.
+- Shared Krisenprotokoll: `crisisText.js` (Verify → Region → Activate).
+- Menschliche Begleitung bekräftigen: die App ergänzt, sie ersetzt keine persönliche Unterstützung (`boundaryPersona` bzw. gleichlautender Persona-Block).
+
+Kenji, Chloe und Rob haben denselben Boundary-Inhalt **inline** in `bots.js` statt des shared Blocks in `coachingPromptBlocks.js`. Das ist Prompt-Verdrahtung, **kein anderer Scope.**
+
+### Methodenscope (nur Abweichungen)
+
+| Coach | Abweichung |
+|-------|------------|
+| Gloria | Kein Coaching/Rat; PII-Warnung; gleiches Krisenprotokoll |
+| Bekky | Kein Audit ohne Anker; Handoff Rob/Dan bzw. Victor/Dan (`[REFERRAL:…]`) |
+| Dan | Keine Interpretation; Handoff Bekky bei passendem Glauben |
+
+**Nicht in dieser Spalte:** Profile-Aware / DPFL — eigene Kategorie unten. Access-Tiers stehen in der Persona-Tabelle, nicht unter Grenzen.
 
 ### Krisenbehandlung (shared)
 
-**Quelle:** `crisisText.js` — in **allen** Coach-Prompts eingebunden.
+**Quelle:** `crisisText.js` + `crisisResources.js` — in **allen** Coach-Prompts eingebunden.
 
 1. **Verify:** Eine empathische Klärungsfrage (Sarkasmus ausschließen)
 2. **Region:** Land/Bundesland aus Life Context oder nachfragen
-3. **Activate:** Regionalisierte Krisenressourcen + professionelle Hilfe empfehlen
+3. **Activate:** Nur kuratierte Hotlines aus [CRISIS-HELPLINES.md](CRISIS-HELPLINES.md) (AT/DE/CH/CA); keine erfundenen Nummern. Plus Verweis auf menschliche Begleitung (`brand.providerName`).
 
 Gilt für Gloria, alle Coaches und Interviewer gleichermaßen.
 
@@ -171,11 +179,11 @@ Gilt für Gloria, alle Coaches und Interviewer gleichermaßen.
 | Max | Ambition/Langfrist/10x-Fragen; inspirierend ohne Cheerleading |
 | Ava | Makro, Wettbewerb, Second-Order Thinking |
 | Kenji | Stoizismus; `[MEDITATION:X]` Marker; negative Visualisierung |
-| Chloe | Gedankenanalyse + Verhaltensstrategien; **keine** KVT/Therapie-Labels |
+| Chloe | Gedankenanalyse + Verhaltensstrategien; **keine** KVT/CBT-Labels |
 | Mike | Ambivalenz; OARS; Widerstand reflektieren, nicht widerlegen |
 | Rob | PQ-Style Saboteur/Sage; client-only Tier |
 | Victor | Business vs. Privat Branching; Genogramm; „Ihr Anteil am Tanz" |
-| Bekky | Thought Audit; `[REFERRAL:…]`-Handoff; `[AUDIT_TASK]` → Session Review; fremdgerichtete Gedanken |
+| Bekky | Gedanken-Audit; `[REFERRAL:…]`-Handoff; `[AUDIT_TASK]` → Session Review; fremdgerichtete Gedanken |
 | Dan | Client exact language; keine importierten Metaphern; `[REFERRAL:bekky-thought-audit]` |
 | Gloria (LC) | Life-Context-Interview; einmalig; keine Folgesitzung |
 | Gloria (Interview) | Strukturiertes Projekt-/Ideen-Interview |
@@ -196,7 +204,7 @@ Parsing-Reihenfolge: Meditation → Referral → Audit-Task (`utils/messageMarke
 
 ## Profile-Aware Coaching (DPFL)
 
-Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizit über dynamischen Prompt-Controller für andere).
+Eigene Kategorie — **nicht** Teil der Session-Grenzen. Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizit über dynamischen Prompt-Controller für andere).
 
 - Kommunikationsstil an Profil anpassen
 - **Nie** explizit Profilmerkmale nennen oder etikettieren
@@ -255,7 +263,7 @@ Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizi
 
 - **Rolle:** Strukturierte Reflexion (premium)
 - **Methodik:** Automatische Gedanken → Denkfehler → evidenzbasierte Alternativen; Situationsanalyse
-- **Labels:** Keine KVT/CBT/Therapie-Begriffe in der UI/Prompt-Logik
+- **Labels:** Keine KVT/CBT-Begriffe in der UI/Prompt-Logik
 - **Meditation:** Achtsamkeit mit Coaching-Linse
 
 ### Mike (`mike-ambivalence-coaching`)
@@ -263,7 +271,6 @@ Coaches mit shared Block `profileAware`: Nobody, Sam, Gabrielle, Mike (+ implizi
 - **Rolle:** Ambivalenz und Veränderungswünsche (premium)
 - **Haltung:** Partnerschaft, Akzeptanz, Mitgefühl, Evokation
 - **Widerstand:** Reflektieren, nicht argumentieren
-- **Grenzen:** Keine klinische Sucht-/Psychopathologie-Behandlung
 
 ### Rob (`rob`)
 
@@ -330,7 +337,9 @@ Beide Varianten: PII-Warnung, 1 Frage pro Nachricht, keine Rollenspiel-Sternchen
 
 Druckbares Nachschlagewerk für Coach Practice — spiegelt die Info-Felder aus dem Practice Setup (`frameworks.js` → `getPublicCatalog`). Während der Übungssitzung sind diese Details in der App nicht sichtbar.
 
-**Drucken:** [practice-method-cheatsheet.html](practice-method-cheatsheet.html) im Browser öffnen → Drucken → Als PDF speichern (A4 Querformat, Hintergrundgrafiken an). Vier Seiten: 12 Methoden-Karten, Sonderpfade, Szenario-Tabelle.
+**Drucken:** [practice-method-cheatsheet.html](practice-method-cheatsheet.html) im Browser öffnen → Drucken → Als PDF speichern (A4 Querformat, Hintergrundgrafiken an). Vier Seiten: 12 Methoden-Karten, Sonderpfade, Vergleichslinse (Gabrielle / Sam / Victor), Szenario-Tabelle. Stand **v2.5.7** (2026-08-23).
+
+**Langform Vergleichslinse:** [VERGLEICH-SAM-GABRIELLE-VICTOR.md](VERGLEICH-SAM-GABRIELLE-VICTOR.md) — Einheit der Arbeit, Mix-ups Sam/Gabrielle und Sam/Victor, wann welche Karte.
 
 Quellen: `practice/frameworks.js`, `practice/methodScenarioMap.js`, `practice/scenarios.js`, Contracting-Evaluator in `services/geminiPrompts.js`.
 
@@ -430,7 +439,7 @@ Gedanken, Gefühle und Verhalten untersuchen, um hilfreichere Muster zu finden.
 
 Entspricht Chloe — strukturierte Reflexion von Gedankenmustern.
 
-**Wann einsetzen:** Führen ohne Etikettieren oder Therapeutisieren üben.
+**Wann einsetzen:** Führen ohne Etikettieren oder diagnostische Zuschreibungen üben.
 
 **Gute Methodentreue sieht so aus:** Du bleibst neugierig auf Gedanken, bevor du neues Verhalten vorschlägst.
 
@@ -468,11 +477,11 @@ Entspricht Rob — mentale Fitness im PQ-Stil.
 
 Beziehungen, Rollen und Muster im System des Coachees erkunden.
 
-Entspricht Victor — systemisch inspiriertes Coaching.
+Entspricht Victor — zirkuläre Beobachtung im System (Kartierung vor Intervention); keine lineare Session-Ziel-Arbeit.
 
 **Wann einsetzen:** Coachee im Kontext, nicht isoliert sehen üben.
 
-**Gute Methodentreue sieht so aus:** Du fragst nach Rollen und Mustern im gesamten System.
+**Gute Methodentreue sieht so aus:** Du fragst nach Rollen und Mustern im gesamten System — neutral, ohne zu beschuldigen.
 
 **PHASEN**
 
@@ -480,17 +489,17 @@ Entspricht Victor — systemisch inspiriertes Coaching.
 - **Muster:** Wiederkehrende Interaktionsschleifen erkennen.
 - **Verschiebung:** Kleine systemische Experimente finden.
 
-*Hinweis:* Systemkartierung vor Intervention oder Ratschlägen.
+*Hinweis:* Einheit: System + Muster. Kartierung vor Kontrakt und Intervention. Neutral; Was/Wie/Wer statt Warum. Erfolg: Selbstposition, nicht Commitment.
 
 ---
 
-#### Thought Audit {#thought-audit}
+#### Gedanken-Audit {#thought-audit}
 
 **Auch als AI-Coach verfügbar:** Bekky
 
 Strukturierter Audit eines wiederkehrenden Gedankens: Belege, Wirkung, Revision.
 
-Entspricht Bekky — Thought-Audit-Methodik.
+Entspricht Bekky — Gedanken-Audit-Methodik.
 
 **Wann einsetzen:** Gedanken rigoros prüfen ohne Belehrung üben.
 
@@ -532,13 +541,13 @@ Entspricht Dan — Client-exact-language-Fragen.
 
 **Auch als AI-Coach verfügbar:** Gabrielle
 
-Goal → Reality → Options → Will: klassische Coaching-Struktur für Klarheit und Commitment.
+Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment: klassische Coaching-Struktur für Klarheit und Commitment.
 
-Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für klassisches Coaching.
+Entspricht Gabrielle — lineare Arbeit am Individuum und seinem Session-Ziel: Ist-Zustand halten, dann Möglichkeiten, dann Commitment.
 
 **Wann einsetzen:** Ideal für allgemeine Sessions mit klarem Verlauf vom Thema zum Commitment.
 
-**Gute Methodentreue sieht so aus:** Du gehst session aim → current state → possibilities → commitment durch, überspringst Reality nicht und drängst in Options nicht zu Ratschlägen.
+**Gute Methodentreue sieht so aus:** Du gehst Session-Ziel → Ist-Zustand → Möglichkeiten → Commitment durch, überspringst den Ist-Zustand nicht und drängst in Möglichkeiten nicht zu Ratschlägen.
 
 **PHASEN**
 
@@ -546,6 +555,8 @@ Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für kl
 - **Ist-Zustand:** Was passiert jetzt? Fakten und Gefühle.
 - **Möglichkeiten:** Was könnten sie tun? Brainstormen ohne Bewertung.
 - **Commitment:** Wozu committen sie sich? Wann und wie?
+
+*Hinweis:* Einheit: Individuum + Session-Ziel. Voller Contract vor der Methode; Ist-Zustand nicht überspringen.
 
 ---
 
@@ -555,11 +566,11 @@ Four-stage-Modell im Stil von Gabrielle — Goal, Reality, Options, Will für kl
 
 Fokus auf gewünschte Zukunft, Ausnahmen vom Problem und Skalierung des Fortschritts.
 
-Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung.
+Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausnahmen, Skalierung (+1). Ist-Zustand nicht ausbauen.
 
 **Wann einsetzen:** Wenn der Coachee in Problemgespräch steckt und einen Vorwärts-Blick braucht.
 
-**Gute Methodentreue sieht so aus:** Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst.
+**Gute Methodentreue sieht so aus:** Du fragst „wann funktioniert es schon?“ und Skalierungsfragen, bevor du in Ursachen gräbst — kein Mitgehen vor Zukunftsfragen.
 
 **PHASEN**
 
@@ -567,7 +578,7 @@ Zukunftsorientiertes Kurzcoaching im Stil von Sam — gewünschte Zukunft, Ausna
 - **Ausnahmen:** Wann ist das Problem schon kleiner oder absent?
 - **Skalierung:** Fortschritt 0–10; wie sähe +1 aus?
 
-*Hinweis:* Kein voller 6-Schritte-Contract — Fokus kurz halten. Keine ausgedehnte Problem-Erkundung vor SF-Fragen.
+*Hinweis:* Einheit: Individuum + Ausnahmen. Kein 6-Schritte-Contract, kein Mitgehen vor Zukunftsfragen — Ist-Zustand nicht ausbauen.
 
 ---
 
@@ -629,28 +640,28 @@ Erste Methodensitzung ohne fixe Methode — Coach wählt Interventionen frei.
 
 ### Teil 3 — Szenario → empfohlene Struktur
 
-**Default-Paar:** `career-decision` (Alex) + [Vier-Phasen-Coaching](#four-stage-coaching) — aus `DEFAULT_PRACTICE_PAIR` in `methodTaxonomy.js`.
+**Default-Paar:** `career-decision` (Lukas) + [Vier-Phasen-Coaching](#four-stage-coaching) — aus `DEFAULT_PRACTICE_PAIR` in `methodTaxonomy.js`.
 
 | Szenario-ID | Label (DE) | Coachee | Primary-Methoden | Verweis (1. Primary) | Alternative |
 |-------------|------------|---------|------------------|----------------------|-------------|
-| `career-decision` | Karriereentscheidung | Alex | Strategisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Strategisches Coaching](#strategic-coaching) | Zukunftsorientiertes Coaching, Ambivalenz-Coaching, Ambitioniertes Coaching |
-| `team-conflict` | Teamkonflikt | Sam | Systemisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Systemisches Coaching](#systemic-coaching) | Zukunftsorientiertes Coaching, Strukturierte Reflexion, Resilienz-Coaching |
-| `motivation-dip` | Motivationstief | Jordan | Mentale Fitness, Strukturierte Reflexion, Goal–Path–Solution | → [Mentale Fitness](#mental-fitness-coaching) | Vier-Phasen-Coaching, Zukunftsorientiertes Coaching, Resilienz-Coaching |
-| `relationship-boundary` | Beziehungsgrenze | Taylor | Vier-Phasen-Coaching, Goal–Path–Solution, Zukunftsorientiertes Coaching | → [Vier-Phasen-Coaching](#four-stage-coaching) | Strukturierte Reflexion, Mentale Fitness, Ambivalenz-Coaching |
-| `overwhelm` | Überforderung | Casey | Goal–Path–Solution, Strukturierte Reflexion, Mentale Fitness | → [Goal–Path–Solution](#goal-path-solution) | Vier-Phasen-Coaching, Resilienz-Coaching, Zukunftsorientiertes Coaching |
-| `resistance-change` | Widerstand gegen Veränderung | Morgan | Ambivalenz-Coaching, Systemisches Coaching, Vier-Phasen-Coaching | → [Ambivalenz-Coaching](#ambivalence-coaching) | Goal–Path–Solution, Zukunftsorientiertes Coaching, Resilienz-Coaching |
-| `imposter-promotion` | Hochstaplergefühl nach Beförderung | Riley | Thought Audit, Strukturierte Reflexion, Vier-Phasen-Coaching | → [Thought Audit](#thought-audit) | Mentale Fitness, Goal–Path–Solution, Resilienz-Coaching |
-| `life-balance` | Work-Life-Balance | Quinn | Goal–Path–Solution, Vier-Phasen-Coaching, Resilienz-Coaching | → [Goal–Path–Solution](#goal-path-solution) | Strukturierte Reflexion, Mentale Fitness, Zukunftsorientiertes Coaching |
+| `career-decision` | Karriereentscheidung | Lukas | Strategisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Strategisches Coaching](#strategic-coaching) | Zukunftsorientiertes Coaching, Ambivalenz-Coaching, Ambitioniertes Coaching |
+| `team-conflict` | Teamkonflikt | Lisa | Systemisches Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Systemisches Coaching](#systemic-coaching) | Zukunftsorientiertes Coaching, Strukturierte Reflexion, Resilienz-Coaching |
+| `motivation-dip` | Motivationstief | Jonas | Mentale Fitness, Strukturierte Reflexion, Goal–Path–Solution | → [Mentale Fitness](#mental-fitness-coaching) | Vier-Phasen-Coaching, Zukunftsorientiertes Coaching, Resilienz-Coaching |
+| `relationship-boundary` | Beziehungsgrenze | Laura | Vier-Phasen-Coaching, Goal–Path–Solution, Zukunftsorientiertes Coaching | → [Vier-Phasen-Coaching](#four-stage-coaching) | Strukturierte Reflexion, Mentale Fitness, Ambivalenz-Coaching |
+| `overwhelm` | Überforderung | Thomas | Goal–Path–Solution, Strukturierte Reflexion, Mentale Fitness | → [Goal–Path–Solution](#goal-path-solution) | Vier-Phasen-Coaching, Resilienz-Coaching, Zukunftsorientiertes Coaching |
+| `resistance-change` | Widerstand gegen Veränderung | Marc | Ambivalenz-Coaching, Systemisches Coaching, Vier-Phasen-Coaching | → [Ambivalenz-Coaching](#ambivalence-coaching) | Goal–Path–Solution, Zukunftsorientiertes Coaching, Resilienz-Coaching |
+| `imposter-promotion` | Hochstaplergefühl nach Beförderung | Mia | Gedanken-Audit, Strukturierte Reflexion, Vier-Phasen-Coaching | → [Gedanken-Audit](#thought-audit) | Mentale Fitness, Goal–Path–Solution, Resilienz-Coaching |
+| `life-balance` | Work-Life-Balance | Felix | Goal–Path–Solution, Vier-Phasen-Coaching, Resilienz-Coaching | → [Goal–Path–Solution](#goal-path-solution) | Strukturierte Reflexion, Mentale Fitness, Zukunftsorientiertes Coaching |
 | `career-plateau` | Karriereplateau | Chris | Ambitioniertes Coaching, Vier-Phasen-Coaching, Goal–Path–Solution | → [Ambitioniertes Coaching](#ambitious-coaching) | Strategisches Coaching, Zukunftsorientiertes Coaching, Ambivalenz-Coaching |
 | `strategic-pivot` | Strategische Neuausrichtung | Priya | Strategisches Coaching, Goal–Path–Solution, Vier-Phasen-Coaching | → [Strategisches Coaching](#strategic-coaching) | Ambitioniertes Coaching, Systemisches Coaching, Zukunftsorientiertes Coaching |
-| `feedback-anxiety` | Feedback-Angst | Jamie | Thought Audit, Strukturierte Reflexion, Mentale Fitness | → [Thought Audit](#thought-audit) | Vier-Phasen-Coaching, Goal–Path–Solution, Resilienz-Coaching |
-| `stuck-metaphor` | In Metaphern verpacktes Anliegen | Robin | Exakte Klientensprache | → [Exakte Klientensprache](#client-exact-language) | Vier-Phasen-Coaching, Goal–Path–Solution, Strukturierte Reflexion |
+| `feedback-anxiety` | Feedback-Angst | Julia | Gedanken-Audit, Strukturierte Reflexion, Mentale Fitness | → [Gedanken-Audit](#thought-audit) | Vier-Phasen-Coaching, Goal–Path–Solution, Resilienz-Coaching |
+| `stuck-metaphor` | In Metaphern verpacktes Anliegen | Roland | Exakte Klientensprache | → [Exakte Klientensprache](#client-exact-language) | Vier-Phasen-Coaching, Goal–Path–Solution, Strukturierte Reflexion |
 
 ---
 
 ## Wartung
 
-Bei Prompt-Änderungen in `bots.js` / `newCoaches.js` / `coachingPromptBlocks.js` diese Matrix aktualisieren. Evaluator-Rubriken in `practice/frameworks.js` sollten konsistent bleiben.
+Bei Prompt-Änderungen in `bots.js` / `newCoaches.js` / `coachingPromptBlocks.js` diese Matrix aktualisieren. Evaluator-Rubriken in `practice/frameworks.js` sollten konsistent bleiben. Session-Grenzen nicht coachweise neu formulieren — Kenji/Chloe/Rob-Inline-Blöcke bei Boundary-Änderungen mit `boundaryPersona` mitziehen.
 
 **Practice-Cheatsheet** (Sektion „Practice Lab — Methoden-Cheatsheet“ + [practice-method-cheatsheet.html](practice-method-cheatsheet.html)):
 - `practice/frameworks.js` (`name`, `shortDescription`, `explainer`, `stages`, `complianceCriteria`) → **Teil 1** und Sonderpfade in **Teil 2** (Markdown + HTML)
