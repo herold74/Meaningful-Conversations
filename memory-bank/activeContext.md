@@ -4,7 +4,7 @@
 **Version:** 2.5.7
 **Branch:** `main`
 **Staging:** Deployed **2026-08-23**, v2.5.7 **backend** (crisis helpline catalog live; frontend still Build **3** / `sw.js` v2.5.7-b3) — https://mc-beta.manualmode.at (health OK)
-**Production:** Deployed **2026-08-21**, v2.5.7 (registry images, pull-only) — https://mc-app.manualmode.at (health OK; **parity with staging**; CORS `X-Client-Platform` for iOS 2.5.7 login)
+**Production:** Deployed **2026-08-23**, v2.5.7 **backend** (crisis helpline catalog live; same registry image as staging) — https://mc-app.manualmode.at (health OK; CORS `X-Client-Platform` for iOS 2.5.7 login)
 **App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit submitted:** v**2.5.7 (4)** — **2026-08-21** (Review Notes + IAP video + EN screenshots). Handbook/IAP polish in binary. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
 **Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` (local); ASC binary **build 4**. Next archive: bump to **≥5**.
 
