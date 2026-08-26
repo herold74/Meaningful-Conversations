@@ -10,25 +10,61 @@
 
 | Sprache | Betreff |
 |---------|---------|
-| **DE** | ManualMode 2.5 – Coaching üben, Fortschritt sehen, Premium+ entdecken |
-| **EN** | ManualMode 2.5 – Coach Practice, track progress, meet Premium+ |
+| **DE** | ManualMode 2.5 – Neues Design, neue Coaches, Coaching üben mit Premium+ |
+| **EN** | ManualMode 2.5 – New design, new coaches, Coach Practice with Premium+ |
 
 ---
 
 ## Newsletter-Text DE
 
 ```markdown
-# ManualMode 2.5 – Von der Reflexion zum Übungsfeld
+# ManualMode 2.5 – Neuer Name, neues Gesicht, neues Übungsfeld
 
 Liebe Community,
 
-unser letzter Newsletter war **Version 2.0** — damals ging es um das neue Design, Gloria Interview, Transkript-Auswertung und den iOS-Start als MyCoach AI.
+unser letzter Newsletter war **Version 2.0** — damals ging es um Gloria Interview, Transkript-Auswertung und den iOS-Start als **MyCoach AI**.
 
-Seitdem ist ManualMode gewachsen. Die **2.5-Reihe** erzählt eine zusammenhängende Geschichte — nicht als Versionsliste, sondern als Entwicklung in vier Akten:
+Seitdem ist viel passiert. Die **2.5-Reihe** erzählt eine zusammenhängende Geschichte — in fünf Akten:
 
 ---
 
-## Erster Akt: Das Problem — Üben ohne Coachee
+## Erster Akt: ManualMode — neuer Name, neues Design
+
+**Im App Store heißt die App jetzt ManualMode** — passend zum Namen auf dem Home-Bildschirm. Sucht sie unter **ManualMode** (Entwickler: Guenter Herold), nicht mehr unter MyCoach AI.
+
+Gleichzeitig haben wir das Erscheinungsbild grundlegend überarbeitet:
+
+- **Teal-zentriertes Farbkonzept** mit warmem Amber-Akzent — ruhiger, fokussierter, professioneller
+- **Modernisierter Chat:** randloses Layout, Gradient-Nutzerblasen, schwebender Composer
+- **Überarbeitetes Session Review** mit Dashboard-Layout und klaren Aktionen
+- **Neue Coach-Auswahl** mit empfohlenen Karten und aufgeräumten Zugangsstufen
+- **Self-hosted Avatare** — einheitlicher Look, internationale Vielfalt der Coaches
+
+Web und iOS teilen weiterhin denselben Account und Lebenskontext — nur das Erlebnis ist deutlich moderner geworden.
+
+---
+
+## Zweiter Akt: Drei neue Coaching-Formate — auch ohne Klienten-Zugang
+
+Neben den bekannten Coaches (Nobody, Max, Ava, Kenji, Chloe …) gibt es **drei neue Gesprächspartner** mit eigenen Coaching-Stilen — für alle, die **keinen Klienten-Zugang** brauchen:
+
+| Coach | Coaching-Stil | Verfügbar ab |
+|-------|---------------|--------------|
+| **Sam** | Zukunftsorientiertes Coaching | Registrierter Account |
+| **Gabrielle** | Vier-Phasen-Coaching | Registrierter Account |
+| **Mike** | Ambivalenz-Coaching | Premium |
+
+**Was sie auszeichnet:**
+
+- **Sam** fokussiert Lösungen und nächste Schritte — ideal für Zielklärung und Motivation
+- **Gabrielle** führt strukturiert durch Vier-Phasen-Coaching — und **fragt explizit um Erlaubnis**, bevor sie Ratschläge anbietet (gutes Vorbild für saubere Coaching-Grenzen)
+- **Mike** arbeitet mit Ambivalenz und innerem Widerstand — hilfreich, wenn jemand hin- und hergerissen ist
+
+Alle drei schließen Gespräche bewusster ab als frühere Coaches. Ihr könnt sie im normalen Coaching-Tab nutzen — unabhängig vom Übungsmodus.
+
+---
+
+## Dritter Akt: Das Problem — Üben ohne Coachee
 
 Wer Coaching lernt — in der Ausbildung, im Beruf oder als Quereinsteiger — kennt die Lücke: **Man will üben, aber ein echter Coachee ist selten da.**
 
@@ -38,7 +74,7 @@ Dafür haben wir **Coaching üben** gebaut: Im Tab **„Coaching üben"** spielt
 
 ---
 
-## Zweiter Akt: Vom Einzelgespräch zum Lernweg
+## Vierter Akt: Vom Einzelgespräch zum Lernweg
 
 Aus „mal kurz geübt" wurde ein **erkennbarer Lernfortschritt**:
 
@@ -47,11 +83,9 @@ Aus „mal kurz geübt" wurde ein **erkennbarer Lernfortschritt**:
 - **Live-Sprachmodus** — nach Abschluss auf „Herausfordernd" mit derselben Methode und demselben Szenario
 - **Unterbrochene Sessions fortsetzen** — euer Stand bleibt bis zu 24 Stunden gespeichert
 
-Dazu kamen **Sam, Gabrielle und Mike** — drei neue Gesprächspartner für den Alltag (zukunftsorientiertes Coaching, Vier-Phasen-Coaching, Ambivalenz-Coaching), die saubere Session-Abschlüsse und bewusste Coaching-Grenzen modellieren.
-
 ---
 
-## Dritter Akt: Premium+ — Coaching üben für alle
+## Fünfter Akt: Premium+ — Coaching üben für alle
 
 Anfangs war Coaching üben an den **Klienten-Zugang** gebunden. Viele von euch wolltet üben — ohne Coach-Training-Kontext.
 
@@ -77,29 +111,20 @@ Bestehendes Premium? Beim Wechsel wird die Restlaufzeit anteilig angerechnet.
 
 ---
 
-## Vierter Akt: Reif, stabil, transparent
-
-Die 2.5-Reihe endet nicht mit einem Feature — sondern mit Vertrauen:
+## Stabil, transparent, datenschutzkonform
 
 - **Stimme & Sprache:** Zuverlässigere Stimmen in Übungsszenarien, flüssigere Sprachausgabe, stabilere Spracherkennung beim Senden
 - **EU-KI-Verordnung:** Hinweis bei der Coach-Auswahl, Handbuch §2.3, Disclaimer und Datenschutz §13 — klar, was KI-Coaches sind und was nicht
-- **Regionale Krisen-Hilfsangebote:** Bei emotionaler Belastung zeigen Coaches **geprüfte Hotlines für AT, DE, CH und CA** — passend zu eurem Land, ohne erfundene Nummern
 - **Datenschutz:** Übungsevaluierungen im Datenexport; gespeicherte Übungstranskripte in der Auswertung löschbar; Lebenskontext und Persönlichkeitsprofil bleiben Ende-zu-Ende-verschlüsselt
-- **ManualMode im App Store:** Die App heißt jetzt wie auf dem Home-Bildschirm; In-App-Käufe inkl. Premium+ überarbeitet
-
----
-
-## Was sich seit 2.0 sonst verändert hat (kurz)
-
-Zwischen 2.0 und 2.5 kamen u. a. das **visuelle Redesign** (2.1), der **App-Name ManualMode** und kontinuierliche Verbesserungen an Sprache, Stabilität und Handbuch dazu. Der Schwerpunkt der 2.5-Reihe bleibt: **Coaching üben als eigenständiges Übungsfeld — jetzt mit Premium+ für alle.**
+- **In-App-Käufe:** Überarbeitete Upgrade-Navigation und StoreKit-Integration auf iOS
 
 ---
 
 ## 🚀 So startet ihr
 
 1. App öffnen (Web: mc-app.manualmode.at · iOS: **ManualMode** im App Store)
-2. **Premium+** buchen oder 9-Tage-Test starten (nach Registrierung)
-3. Tab **„Coaching üben"** → Anliegensklärung oder Methode wählen
+2. **Sam oder Gabrielle** ausprobieren (ab Registrierung) — oder **Mike** mit Premium
+3. **Premium+** buchen oder 9-Tage-Test starten → Tab **„Coaching üben"**
 
 **Fragen oder Feedback?** Nutzt die Feedback-Funktion in der App — besonders willkommen: Rückmeldungen aus Coach-Ausbildungen.
 
@@ -113,17 +138,53 @@ Euer ManualMode Team
 ## Newsletter-Text EN
 
 ```markdown
-# ManualMode 2.5 – From reflection to practice lab
+# ManualMode 2.5 – New name, new look, new practice lab
 
 Dear community,
 
-Our last newsletter was **version 2.0** — covering the new design, Gloria Interview, transcript evaluation, and the iOS launch as MyCoach AI.
+Our last newsletter was **version 2.0** — covering Gloria Interview, transcript evaluation, and the iOS launch as **MyCoach AI**.
 
-Since then, ManualMode has grown. The **2.5 release series** tells one connected story — not as a version list, but in four acts:
+A lot has happened since. The **2.5 release series** tells one connected story — in five acts:
 
 ---
 
-## Act 1: The problem — practice without a coachee
+## Act 1: ManualMode — new name, new design
+
+**The app is now listed as ManualMode on the App Store** — matching the name on your home screen. Search for **ManualMode** (developer: Guenter Herold), not MyCoach AI.
+
+At the same time, we redesigned the experience:
+
+- **Teal-centric color palette** with warm amber accent — calmer, more focused, more professional
+- **Modernized chat:** borderless layout, gradient user bubbles, floating composer
+- **Redesigned Session Review** with dashboard layout and clear actions
+- **New coach selection** with recommended cards and cleaner access tiers
+- **Self-hosted avatars** — consistent look, international diversity among coaches
+
+Web and iOS still share the same account and Life Context — the experience is just noticeably more modern.
+
+---
+
+## Act 2: Three new coaching formats — without Client access
+
+Alongside familiar coaches (Nobody, Max, Ava, Kenji, Chloe …), there are **three new conversation partners** with distinct coaching styles — for everyone who **doesn't need Client access**:
+
+| Coach | Coaching style | Available from |
+|-------|----------------|----------------|
+| **Sam** | Forward-focused coaching | Registered account |
+| **Gabrielle** | Four-stage coaching | Registered account |
+| **Mike** | Ambivalence coaching | Premium |
+
+**What sets them apart:**
+
+- **Sam** focuses on solutions and next steps — ideal for goal clarity and motivation
+- **Gabrielle** guides structured four-stage coaching — and **explicitly asks for permission** before offering advice (a good model for clean coaching boundaries)
+- **Mike** works with ambivalence and inner resistance — helpful when someone feels torn
+
+All three close sessions more deliberately than earlier coaches. Use them in the regular coaching tab — independent of practice mode.
+
+---
+
+## Act 3: The problem — practice without a coachee
 
 If you're learning coaching — in training, at work, or as a career changer — you know the gap: **You want to practice, but a real coachee is rarely available.**
 
@@ -133,7 +194,7 @@ That's why we built **Coach Practice**: In the **"Coach Practice"** tab, an AI p
 
 ---
 
-## Act 2: From single sessions to a learning path
+## Act 4: From single sessions to a learning path
 
 Occasional practice became a **visible learning path**:
 
@@ -142,11 +203,9 @@ Occasional practice became a **visible learning path**:
 - **Live voice mode** — after completing "Challenging" with the same method and scenario
 - **Resume interrupted sessions** — your progress is saved for up to 24 hours
 
-We also added **Sam, Gabrielle, and Mike** — three new conversation partners for everyday use (forward-focused coaching, four-stage coaching, ambivalence coaching), modeling clean session closures and conscious coaching boundaries.
-
 ---
 
-## Act 3: Premium+ — Coach Practice for everyone
+## Act 5: Premium+ — Coach Practice for everyone
 
 At first, Coach Practice required **Client access**. Many of you wanted to practice — without a coach-training context.
 
@@ -172,29 +231,20 @@ Already on Premium? Remaining time is credited proportionally when you upgrade.
 
 ---
 
-## Act 4: Mature, stable, transparent
-
-The 2.5 series doesn't end with a feature — it ends with trust:
+## Stable, transparent, privacy-conscious
 
 - **Voice & speech:** More reliable voices in practice scenarios, smoother speech output, more stable speech recognition when sending
 - **EU AI Act:** Notice at coach selection, user guide §2.3, disclaimer, and privacy policy §13 — clear on what AI coaches are and what they are not
-- **Regional crisis helplines:** When users show emotional distress, coaches show **verified hotlines for AT, DE, CH, and CA** — matched to your country, without invented numbers
 - **Privacy:** Practice evaluations in your data export; stored practice transcripts deletable from evaluation review; Life Context and personality profile remain end-to-end encrypted
-- **ManualMode on the App Store:** The app name now matches your home screen; in-app purchases including Premium+ improved
-
----
-
-## What else changed since 2.0 (briefly)
-
-Between 2.0 and 2.5, we also shipped the **visual redesign** (2.1), the **ManualMode** app name, and ongoing improvements to voice, stability, and the user guide. The focus of the 2.5 series remains: **Coach Practice as a dedicated training ground — now with Premium+ for everyone.**
+- **In-app purchases:** Improved upgrade navigation and StoreKit integration on iOS
 
 ---
 
 ## 🚀 How to get started
 
 1. Open the app (Web: mc-app.manualmode.at · iOS: **ManualMode** on the App Store)
-2. Subscribe to **Premium+** or start the 9-day trial (after registration)
-3. **"Coach Practice"** tab → choose concern clarification or a method
+2. Try **Sam or Gabrielle** (from registration) — or **Mike** with Premium
+3. Subscribe to **Premium+** or start the 9-day trial → **"Coach Practice"** tab
 
 **Questions or feedback?** Use the in-app feedback feature — we especially welcome input from coach training programs.
 
@@ -219,11 +269,14 @@ Your ManualMode Team
 
 | Akt | Inhalt | Versionen (intern) |
 |-----|--------|-------------------|
-| **1 – Das Problem** | Coach Practice: KI als Coachee, 12 Methoden, Feedback | 2.2.0 → 2.3.0 |
-| **2 – Der Lernweg** | Fortschritt, Anliegensklärung, Live-Modus, Resume, Sam/Gabrielle/Mike | 2.3.0 → 2.3.5 → 2.5.x |
-| **3 – Premium+** | Abo für alle, Testphase, Preise | 2.5.6 → 2.5.7 |
-| **4 – Reife** | Stimme, EU AI Act, Krisen-Hotlines, Datenschutz, iOS/ManualMode | 2.5.4 → 2.5.7 |
+| **1 – ManualMode & Design** | App Store-Umbenennung, Teal-Redesign, Chat, Session Review, Avatare | 2.1.0 → 2.5.4 |
+| **2 – Neue Coaches** | Sam, Gabrielle, Mike — Zugangsstufen ohne Klient | 2.3.5 → 2.4.0 |
+| **3 – Coaching üben** | KI als Coachee, 12 Methoden, Feedback | 2.2.0 → 2.3.0 |
+| **4 – Lernweg** | Fortschritt, Anliegensklärung, Live-Modus, Resume | 2.3.0 → 2.5.x |
+| **5 – Premium+** | Abo für alle, Testphase, Preise | 2.5.6 → 2.5.7 |
+
+**Weggelassen (User-Wunsch):** Krisenmodus / regionale Krisen-Hotlines.
 
 **Nicht versenden:** `NEWSLETTER-v2.5.0.md` (Entwurf, durch diesen Text ersetzt).
 
-**Abgrenzung zu Newsletter v2.0:** Design, Gloria Interview, Transkript-Auswertung, iOS-Start — nur kurz als Brücke, nicht wiederholen.
+**Abgrenzung zu Newsletter v2.0:** Gloria Interview, Transkript-Auswertung, iOS-Start — nur als Brücke; Design und App-Name bewusst neu erzählt.
