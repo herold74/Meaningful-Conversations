@@ -830,7 +830,26 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 
 ${deTranscriptToolsSection(isNative, isRegistered, showChapter8)}
 ${dePracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 Coach-Empfehlung (KI-gestützte Suche)
+### 5.4 The Connector — Verbindungs-Stärken entdecken (Registriert)
+
+Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector** — kostenlos für alle registrierten Benutzer.
+
+**Was ist das?** Drei kurze Alltagsgespräche mit KI-Personas — zum Beispiel ein Kollege nach einem frustrierenden Meeting, eine Freundin nach einer Trennung oder ein Bruder vor einer schwierigen Entscheidung. Sie führen die Gespräche so, wie Sie es im echten Leben tun würden. Es gibt **kein richtig oder falsch**.
+
+**So läuft es ab:**
+- Wählen Sie beim Start **Text** oder **Stimme** (Sprachmodus mit Vorlesen und Diktat).
+- Pro Gespräch schreiben bzw. sprechen Sie **3–5 Antworten**. Die Gespräche enden natürlich — entweder fühlt sich Ihr Gegenüber verstanden, oder der Alltag ruft (z. B. das nächste Meeting).
+- Sie können ein Gespräch jederzeit über **Sitzung beenden** abbrechen; ausgewertet wird dann, was bereits stattgefunden hat.
+
+**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können. Wer tiefer einsteigen möchte, findet im **Coach Practice** (siehe 5.3) den passenden Trainingsraum.
+
+**Datenschutz:** Die Gespräche werden nur für die Auswertung verwendet und **nicht gespeichert**. Ihr Ergebnis können Sie optional **Ende-zu-Ende-verschlüsselt** in Ihrem Persönlichkeitsprofil sichern.
+
+${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas, die Auswertung erstellt eine KI. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
+
+**Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **kostenlosen Registrierung**.
+
+### 5.5 Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
 
@@ -843,7 +862,7 @@ ${dePracticeTabSection(isNative, isRegistered, showChapter10)}
 
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
-### 5.5 Die Chat-Oberfläche
+### 5.6 Die Chat-Oberfläche
 - **Kopfzeile:** Name und Avatar des Coaches. **Tippen Sie auf die Kopfzeile** — ein Modal zeigt Stil und Methodik. Aktiver Coaching-Modus (DPC/DPFL) erscheint hier ebenfalls. Rechts: **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Nachricht unten eingeben.
@@ -1969,7 +1988,26 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 
 ${enTranscriptToolsSection(isNative, isRegistered, showChapter8)}
 ${enPracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 Coach Recommendation (AI-Powered Search)
+### 5.4 The Connector — Discover Your Connection Strengths (Registered)
+
+In the **Management & Communication** section, you'll find **The Connector** card — free for all registered users.
+
+**What is it?** Three short everyday conversations with AI personas — for example a colleague after a frustrating meeting, a friend after a breakup, or a brother facing a difficult decision. Have the conversations the way you would in real life. There is **no right or wrong**.
+
+**How it works:**
+- Choose **Text** or **Voice** at the start (voice mode with read-aloud and dictation).
+- Per conversation, you write or speak **3–5 replies**. Conversations end naturally — either the other person feels heard, or everyday life calls (e.g. the next meeting).
+- You can abort a conversation at any time via **End Session**; whatever has already taken place will be evaluated.
+
+**Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on. If you want to go deeper, **Coach Practice** (see 5.3) is the matching training space.
+
+**Privacy:** The conversations are only used for the evaluation and are **not stored**. You can optionally save your result **end-to-end encrypted** in your personality profile.
+
+${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversation partners are AI personas, and the evaluation is AI-generated. The result is a prompt for self-reflection — not a psychological assessment and not a coaching certificate.</p>')}
+
+**Guests:** The card is visible but locked — tapping it leads to **free registration**.
+
+### 5.5 Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
 
@@ -1982,7 +2020,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
-### 5.5 The Chat Interface
+### 5.6 The Chat Interface
 - **Header:** Coach name and avatar. **Tap the header** to open a modal with style and methodology. Active coaching mode (DPC/DPFL) appears here too. On the right: **End Session**.
 - **Text Mode (Default):**
   - Type your message at the bottom.
