@@ -100,6 +100,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   } | null>(null);
   const streamingTtsRef = useRef<{
     active: boolean;
+    streamComplete: boolean;
     sentenceCount: number;
     resolvedBlobs: (Blob | null)[];
     resolvedUrls: string[];
@@ -465,7 +466,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           const totalSentences = streaming ? streaming.synthQueue.length : queue.urls.length;
 
           if (queue.currentIndex >= totalSentences) {
-            if (!streaming || !streaming.active) {
+            if (!streaming || streaming.streamComplete) {
+              if (streaming) streaming.active = false;
               setTtsStatus('idle');
               isSpeakingRef.current = false;
               sentenceQueueRef.current = null;
@@ -577,6 +579,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
     streamingTtsRef.current = {
       active: true,
+      streamComplete: false,
       sentenceCount: 0,
       resolvedBlobs: [],
       resolvedUrls: [],
@@ -628,7 +631,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const finishStreamingTts = useCallback((finalText: string) => {
     const s = streamingTtsRef.current;
     if (!s) return;
-    s.active = false;
+    // Mark stream ended but keep active=true until last sentence finishes playing
+    s.streamComplete = true;
     lastSpokenTextRef.current = finalText
       .replace(/#{1,6}\s/g, '')
       .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
@@ -638,13 +642,6 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       .replace(/^>\s?/gm, '')
       .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
       .trim();
-
-    const queue = sentenceQueueRef.current;
-    if (queue && queue.currentIndex >= s.sentenceCount) {
-      setTtsStatus('idle');
-      isSpeakingRef.current = false;
-      sentenceQueueRef.current = null;
-    }
   }, []);
 
   /** Cancel pending (not yet played) streaming sentences. */

@@ -73,16 +73,19 @@ const ProfileRefinementReview: React.FC<ProfileRefinementReviewProps> = ({
       // Construct proper SurveyResult for encryption
       // Preserve existing narrative data and adaptationMode from currentProfile
       const surveyResult = {
+        completedLenses: currentProfile.completedLenses || [],
         path: profileType,
         filter: {
           worry: currentProfile.filterWorry || 0,
           control: currentProfile.filterControl || 0
         },
-        riemann: profileType === 'RIEMANN' ? suggestions.suggestions : undefined,
-        big5: profileType === 'BIG5' ? suggestions.suggested : undefined,
+        spiralDynamics: currentProfile.spiralDynamics,
+        riemann: profileType === 'RIEMANN' ? suggestions.suggestions : currentProfile.riemann,
+        big5: profileType === 'BIG5' ? suggestions.suggested : currentProfile.big5,
         narratives: currentProfile.narratives,
         adaptationMode: currentProfile.adaptationMode || 'adaptive',
-        narrativeProfile: currentProfile.narrativeProfile
+        narrativeProfile: currentProfile.narrativeProfile,
+        connector: currentProfile.connector,
       };
       
       const encryptedData = await encryptPersonalityProfile(surveyResult as any, encryptionKey);

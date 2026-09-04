@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useModalOpen } from '../utils/modalUtils';
 import Button from './shared/Button';
-import { User } from '../types';
+import { User, ConnectorEvaluationResult } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 // --- TYPEN & INTERFACES ---
@@ -74,12 +74,24 @@ export interface SurveyResult {
   
   // Generiertes Narrativ-Profil (optional, wird nach der Umfrage generiert)
   narrativeProfile?: NarrativeProfile;
+
+  /** The Connector — observed connection strengths (optional) */
+  connector?: ConnectorEvaluationResult;
   
   // Session count for DPFL refinements (passed from PersonalityProfileView)
   sessionCount?: number;
 }
 
 // Struktur für das generierte Narrativ-Profil
+export interface ExternalPerspectiveNote {
+  /** 2–3 sentences bridging signature (self) and Connector (observed) */
+  text: string;
+  generatedAt: string;
+  generatedLanguage?: 'de' | 'en';
+  /** Connector run this note was derived from */
+  connectorCompletedAt?: string;
+}
+
 export interface NarrativeProfile {
   operatingSystem: string;        // Paradox-Synthese
   superpowers: {
@@ -96,6 +108,8 @@ export interface NarrativeProfile {
   }[];
   generatedAt: string;
   generatedLanguage?: string;     // 'de' | 'en' — language the narrative was generated in
+  /** Optional 360° bridge — generated on explicit opt-in, does not alter signature body */
+  externalPerspectiveNote?: ExternalPerspectiveNote;
 }
 
 // --- SPIRAL DYNAMICS LEVEL DEFINITIONS ---

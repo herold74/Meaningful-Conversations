@@ -4,6 +4,7 @@ const prisma = require('../prismaClient.js');
 const authMiddleware = require('../middleware/auth.js');
 const profileRefinement = require('../services/profileRefinement.js');
 const aiProvider = require('../services/aiProviderService.js');
+const { trackApiUsage, checkDailyCostCap } = require('../services/apiUsageTracker.js');
 
 /**
  * POST /api/personality/save
@@ -454,6 +455,123 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
 });
 
 /**
+ * POST /api/personality/generate-external-perspective
+ * Opt-in: short bridge text between signature (self) and Connector (observed). Does NOT rewrite signature.
+ */
+router.post('/generate-external-perspective', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { narrativeProfile, connector, language } = req.body;
+
+    if (!narrativeProfile?.operatingSystem || !connector) {
+      return res.status(400).json({ error: 'Missing narrativeProfile or connector.' });
+    }
+
+    if (!validateConnectorPayload(connector)) {
+      return res.status(400).json({ error: 'Invalid connector evaluation payload.' });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const normalizedLang = language === 'en' ? 'en' : 'de';
+    const connectorSummary = summarizeConnectorForPrompt(connector);
+    const signatureExcerpt = buildSignatureExcerpt(narrativeProfile);
+
+    const prompt = EXTERNAL_PERSPECTIVE_PROMPTS[normalizedLang]
+      .replace('{{signatureExcerpt}}', JSON.stringify(signatureExcerpt, null, 2))
+      .replace('{{connectorSummary}}', JSON.stringify(connectorSummary, null, 2));
+
+    let userRegionPreference = 'optimal';
+    if (userId) {
+      const narUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+      userRegionPreference = narUser?.aiRegionPreference || 'optimal';
+    }
+
+    const modelName = 'gemini-2.5-flash';
+    const result = await aiProvider.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        temperature: 0.55,
+        maxOutputTokens: 512,
+        responseMimeType: 'application/json',
+        systemInstruction: normalizedLang === 'de'
+          ? 'Antworte ausschließlich mit validem JSON: { "text": "..." }. Keine Erklärungen außerhalb des JSON.'
+          : 'Respond only with valid JSON: { "text": "..." }. No explanations outside the JSON.',
+      },
+      userRegionPreference,
+      language: normalizedLang,
+    });
+
+    let parsed;
+    try {
+      let jsonText = result.text.trim();
+      if (jsonText.startsWith('```json')) jsonText = jsonText.slice(7);
+      else if (jsonText.startsWith('```')) jsonText = jsonText.slice(3);
+      if (jsonText.endsWith('```')) jsonText = jsonText.slice(0, -3);
+      parsed = JSON.parse(jsonText.trim());
+    } catch (parseErr) {
+      console.error('[ExternalPerspective] parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse external perspective response.' });
+    }
+
+    const text = typeof parsed.text === 'string' ? parsed.text.trim() : '';
+    if (!text || text.length < 20) {
+      return res.status(500).json({ error: 'Generated text too short.' });
+    }
+    if (text.length > 600) {
+      return res.status(500).json({ error: 'Generated text too long.' });
+    }
+
+    const externalPerspectiveNote = {
+      text,
+      generatedAt: new Date().toISOString(),
+      generatedLanguage: normalizedLang,
+      connectorCompletedAt: connector.completedAt || connectorSummary.completedAt || null,
+    };
+
+    res.json({
+      success: true,
+      externalPerspectiveNote,
+      model: result.model,
+      provider: result.provider,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/generate-external-perspective',
+      model: result.model || modelName,
+      botId: 'personality-external-perspective',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error generating external perspective:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/generate-external-perspective',
+      model: 'gemini-2.5-flash',
+      botId: 'personality-external-perspective',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to generate external perspective' });
+  }
+});
+
+/**
  * POST /api/personality/preview-refinement
  * Preview profile refinement based on chat history (dry-run, no save)
  * Used by admin tests to see how a session would affect the profile
@@ -663,6 +781,91 @@ Create a JSON with exactly this structure:
     { "title": "Second exercise", "recommendation": "Second recommendation" }
   ]
 }`
+};
+
+function validateConnectorPayload(connector) {
+  if (!connector || typeof connector !== 'object') return false;
+  if (connector.summary != null && typeof connector.summary !== 'string') return false;
+  const dims = ['empathy', 'presence', 'curiosity', 'nonJudgment', 'steadiness'];
+  for (const dim of dims) {
+    const score = connector[dim]?.score;
+    if (score != null && (typeof score !== 'number' || score < 1 || score > 10)) {
+      return false;
+    }
+  }
+  const hasSummary = Boolean(String(connector.summary || '').trim());
+  const hasScores = dims.some((dim) => connector[dim]?.score != null);
+  return hasSummary || hasScores;
+}
+
+function buildSignatureExcerpt(narrativeProfile) {
+  const os = typeof narrativeProfile.operatingSystem === 'string'
+    ? narrativeProfile.operatingSystem
+    : (narrativeProfile.operatingSystem?.core || narrativeProfile.operatingSystem?.dynamics || '');
+  return {
+    operatingSystem: String(os).slice(0, 500),
+    superpowerNames: (narrativeProfile.superpowers || []).map((s) => s.name).filter(Boolean),
+    blindspotNames: (narrativeProfile.blindspots || []).map((b) => b.name).filter(Boolean),
+  };
+}
+
+function summarizeConnectorForPrompt(connector) {
+  const pickScore = (dim) => ({
+    score: connector[dim]?.score ?? null,
+    evidence: (connector[dim]?.evidence || []).slice(0, 1),
+  });
+  return {
+    overallScore: connector.overallScore ?? null,
+    summary: connector.summary || '',
+    strengths: (connector.strengths || []).slice(0, 3),
+    growthAreas: (connector.growthAreas || []).slice(0, 2),
+    empathy: pickScore('empathy'),
+    presence: pickScore('presence'),
+    curiosity: pickScore('curiosity'),
+    nonJudgment: pickScore('nonJudgment'),
+    steadiness: pickScore('steadiness'),
+    completedAt: connector.completedAt || null,
+  };
+}
+
+const EXTERNAL_PERSPECTIVE_PROMPTS = {
+  de: `Du schreibst einen kurzen Ergänzungstext (Fremdsicht) für ein Persönlichkeitsprofil.
+
+WICHTIG:
+- Die Signatur (Selbstbild) wird NICHT umgeschrieben — du lieferst nur einen separaten Brückentext.
+- Die Fremdsicht stammt aus "The Connector": beobachtetes Verhalten in drei kurzen KI-Gesprächen.
+- Rahme Spannungen zwischen Selbstbild und Beobachtung als 360°-Perspektive, nicht als Urteil.
+- Ton: würdevoll, neugierig, nicht beschämend. Kein Psychobabble.
+- Keine Vignetten-Namen, keine wörtlichen Chat-Zitate, kein Markdown.
+- Maximal 80 Wörter, 2–3 Sätze, Anrede "Du".
+- Auf Deutsch.
+
+SIGNATUR-AUSZUG (nur Kontext — nicht wiederholen):
+{{signatureExcerpt}}
+
+BEOBACHTETE FREMSICHT (The Connector):
+{{connectorSummary}}
+
+Antworte mit JSON: { "text": "..." }`,
+
+  en: `You write a short complement (external perspective) for a personality profile.
+
+IMPORTANT:
+- Do NOT rewrite the signature (self-view) — only provide a separate bridge paragraph.
+- The external view comes from "The Connector": observed behavior in three short AI conversations.
+- Frame tensions between self-view and observation as a 360° perspective, not a verdict.
+- Tone: dignified, curious, never shaming. No psychobabble.
+- No vignette names, no verbatim chat quotes, no Markdown.
+- Maximum 80 words, 2–3 sentences, address "You".
+- In English.
+
+SIGNATURE EXCERPT (context only — do not repeat):
+{{signatureExcerpt}}
+
+OBSERVED EXTERNAL VIEW (The Connector):
+{{connectorSummary}}
+
+Respond with JSON: { "text": "..." }`,
 };
 
 /**

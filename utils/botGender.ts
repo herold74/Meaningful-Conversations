@@ -55,7 +55,7 @@ export function resolvePracticeCoacheeGender(
 }
 
 export function resolveTtsBotId(botId: string, gender?: 'male' | 'female'): string {
-  if (botId === 'practice-coachee' && gender) {
+  if ((botId === 'practice-coachee' || botId === 'connector-persona') && gender) {
     return getPracticeTtsBotId(gender);
   }
   return botId;

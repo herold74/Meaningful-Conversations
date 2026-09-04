@@ -9,6 +9,7 @@
  * Optional:
  *   REVIEW_ACCOUNT_EMAIL=premium@manualmode.at
  *   REVIEW_PREMIUM_YEARS=2
+ *   REVIEW_PREMIUM_EXPIRES_AT=2027-12-31   (overrides YEARS when set)
  */
 'use strict';
 
@@ -18,6 +19,20 @@ const prisma = new PrismaClient();
 
 const EMAIL = (process.env.REVIEW_ACCOUNT_EMAIL || 'premium@manualmode.at').toLowerCase();
 const YEARS = Math.max(1, parseInt(process.env.REVIEW_PREMIUM_YEARS || '2', 10) || 2);
+const EXPIRES_AT = process.env.REVIEW_PREMIUM_EXPIRES_AT?.trim();
+
+function resolveExpiryDate() {
+  if (EXPIRES_AT) {
+    const parsed = new Date(EXPIRES_AT.includes('T') ? EXPIRES_AT : `${EXPIRES_AT}T23:59:59.999Z`);
+    if (Number.isNaN(parsed.getTime())) {
+      throw new Error(`Invalid REVIEW_PREMIUM_EXPIRES_AT: ${EXPIRES_AT}`);
+    }
+    return parsed;
+  }
+  const expires = new Date();
+  expires.setFullYear(expires.getFullYear() + YEARS);
+  return expires;
+}
 
 async function main() {
   const user = await prisma.user.findUnique({ where: { email: EMAIL } });
@@ -26,8 +41,7 @@ async function main() {
     process.exit(1);
   }
 
-  const expires = new Date();
-  expires.setFullYear(expires.getFullYear() + YEARS);
+  const expires = resolveExpiryDate();
 
   const currentAccess = user.accessExpiresAt ? new Date(user.accessExpiresAt) : null;
   const accessExpiresAt = !currentAccess || currentAccess < expires ? expires : currentAccess;
