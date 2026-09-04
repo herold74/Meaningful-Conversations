@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-04**, v**2.6.0** Build **2** — https://mc-beta.manualmode.at (health OK). The Connector live. **Note:** initial deploy missed TTS tag `2.6.0` — fixed same day by retagging `tts:2.5.7` → `2.6.0` and starting `meaningful-conversations-tts-staging`.
+**Staging:** Deployed **2026-09-04**, v**2.6.0** Build **3** — https://mc-beta.manualmode.at (health OK). Connector profile integration + Fremdsicht (Stufe 1+2) live on staging.
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -16,7 +16,9 @@
 - **Frontend:** `ConnectorIntroView` (mode choice text/voice, AI-Act notice), `ChatView` extended (`connectorConfig`/`onConnectorEnded`, TTS gender override), `ConnectorResultsView` (SVG radar, strengths/growth, per-vignette moments, E2EE save, Practice cross-sell ≥8), App.tsx run state machine + transition overlays, `utils/connectorRun.ts`. NavView: `connectorIntro|connectorChat|connectorResults`. Tile in BotSelection Kommunikation section. 5 generated persona avatars `public/avatars/connector-*.png`. i18n DE/EN parity (2348 keys ✓).
 - **E2EE save:** result stored inside `encryptedData` payload as `connector` key; `completedLenses` unchanged (no lens-UI side effects).
 - **Handbuch:** Kapitel **5.4** The Connector (DE/EN), Abschnitte 5.4/5.5 → 5.5/5.6 umnummeriert (`b6cac305`).
-- **Commits:** `1835882f` (feature) · `b6cac305` (handbook) · `0e24214d` (deploy build-2 sync) · `5a45706a` (memory bank).
+- **Commits:** `1835882f` (feature) · `b6cac305` (handbook) · `0e24214d` (deploy build-2 sync) · `5a45706a` (memory bank) · `b55065f2` (profile + Fremdsicht + review fixes) · `887cac9a` (build-3 sync).
+- **Stufe 1 (profile):** `ConnectorProfileSection` under „Wie du interagierst“, E2EE `connector` in profile blob, PDF section, handbook/privacy copy.
+- **Stufe 2 (Fremdsicht):** opt-in `externalPerspectiveNote` on narrative profile; `POST /api/personality/generate-external-perspective`; preview modal; invalidate note on new Connector save; stale/outdated warnings.
 - **Deploy script (2026-09-04):** `deploy-manualmode.sh` hardened — TTS re-tag fail-fast (local registry pull + remote retag fallback), `.previous-version` before VERSION bump, TTS container health gate. No TTS rebuild on `-c app`.
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
