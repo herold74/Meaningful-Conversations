@@ -8,7 +8,8 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult } from '../types';
+import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
 import { isTemplateOnlyLifeContext } from '../utils/lifeContext';
@@ -46,6 +47,8 @@ import TranscriptInput from './TranscriptInput';
 import EvaluationReview from './EvaluationReview';
 import EvaluationHistory from './EvaluationHistory';
 import PracticeSetupView from './PracticeSetupView';
+import ConnectorIntroView from './ConnectorIntroView';
+import ConnectorResultsView from './ConnectorResultsView';
 import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
 import PracticeProgressView from './PracticeProgressView';
@@ -166,6 +169,19 @@ export interface AppViewRouterProps {
   handlePracticeDone: () => void;
   navigateToPracticeHistory: () => void;
   handlePracticeHistoryBack: () => void;
+
+  // The Connector
+  connectorRun: ConnectorRunState | null;
+  connectorEvaluation: ConnectorEvaluationResult | null;
+  isConnectorStarting: boolean;
+  connectorSaveState: 'idle' | 'saving' | 'saved' | 'error';
+  handleOpenConnectorIntro: () => void;
+  handleStartConnectorRun: (liveMode: boolean) => void;
+  handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
+  handleConnectorSaveToProfile: () => void;
+  handleConnectorRestart: () => void;
+  handleConnectorDone: () => void;
+  handleConnectorPracticeCrossSell: () => void;
 
   // Refinement preview (DPFL test)
   refinementPreview: RefinementPreviewResult | null;
@@ -290,6 +306,17 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handlePracticeDone,
     navigateToPracticeHistory,
     handlePracticeHistoryBack,
+    connectorRun,
+    connectorEvaluation,
+    isConnectorStarting,
+    connectorSaveState,
+    handleOpenConnectorIntro,
+    handleStartConnectorRun,
+    handleConnectorEnded,
+    handleConnectorSaveToProfile,
+    handleConnectorRestart,
+    handleConnectorDone,
+    handleConnectorPracticeCrossSell,
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
@@ -695,6 +722,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setPracticeEvaluation(null);
             setView('practiceSetup');
           }}
+          onConnector={handleOpenConnectorIntro}
           onAuthRequired={handleGuestAuthRequired}
           onUpgrade={() => openUpgrade()}
           onPracticeUpgrade={() => openUpgrade('premium_plus')}
@@ -743,6 +771,53 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           practiceEvalError={practiceEvalError}
         />
       );
+    case 'connectorIntro':
+      return (
+        <ConnectorIntroView
+          onStart={handleStartConnectorRun}
+          onBack={() => setView('botSelection')}
+          isStarting={isConnectorStarting}
+        />
+      );
+    case 'connectorChat': {
+      const connectorVignette = connectorRun?.vignettes[connectorRun.currentIndex];
+      return connectorRun && connectorVignette && selectedBot ? (
+        <ChatView
+          key={connectorVignette.id}
+          bot={selectedBot}
+          lifeContext=""
+          chatHistory={chatHistory}
+          setChatHistory={setChatHistory}
+          onEndSession={handleEndSession}
+          onMessageSent={() => setUserMessageCount((c) => c + 1)}
+          currentUser={currentUser}
+          isNewSession={true}
+          encryptionKey={encryptionKey}
+          isTestMode={false}
+          connectorConfig={{
+            vignetteId: connectorVignette.id,
+            personaName: connectorVignette.personaName,
+            personaGender: connectorVignette.gender,
+            liveMode: connectorRun.liveMode,
+          }}
+          onConnectorEnded={handleConnectorEnded}
+        />
+      ) : null;
+    }
+    case 'connectorResults':
+      return connectorEvaluation && connectorRun ? (
+        <ConnectorResultsView
+          evaluation={connectorEvaluation}
+          vignettes={connectorRun.vignettes}
+          onSaveToProfile={handleConnectorSaveToProfile}
+          saveState={connectorSaveState}
+          canSave={!!currentUser && !!encryptionKey}
+          onRestart={handleConnectorRestart}
+          onDone={handleConnectorDone}
+          showPracticeCrossSell={(connectorEvaluation.overallScore ?? 0) >= 8}
+          onPracticeCrossSell={handleConnectorPracticeCrossSell}
+        />
+      ) : null;
     case 'practiceSetup':
       return (
         <PracticeSetupView

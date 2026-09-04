@@ -1,12 +1,21 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.5.7
+**Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-08-23**, v2.5.7 **backend** (crisis helpline catalog live; frontend still Build **3** / `sw.js` v2.5.7-b3) — https://mc-beta.manualmode.at (health OK)
-**Production:** Deployed **2026-08-23**, v2.5.7 **backend** (crisis helpline catalog live; same registry image as staging) — https://mc-app.manualmode.at (health OK; CORS `X-Client-Platform` for iOS 2.5.7 login)
-**App Store:** iOS **2.5.0 (6) live**; **2.5.6 rejected 2026-08-13**. **Resubmit submitted:** v**2.5.7 (4)** — **2026-08-21** (Review Notes + IAP video + EN screenshots). Handbook/IAP polish in binary. See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`.
-**Xcode:** `MARKETING_VERSION=2.5.7`, `CURRENT_PROJECT_VERSION=3` (local); ASC binary **build 4**. Next archive: bump to **≥5**.
+**Staging:** v2.6.0 deploy in progress/done 2026-09-04 (The Connector feature) — https://mc-beta.manualmode.at
+**Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
+**App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
+**Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
+
+## Session handoff (2026-09-04) — The Connector (v2.6.0)
+
+**New feature "The Connector":** scenario-based mini-assessment (3 of 5 everyday vignettes, AI personas, 3–5 user turns each, dynamic heard/timeout close via `[CONNECTOR_END]` marker) → LLM evaluation of 5 dimensions (empathy, presence, curiosity, nonJudgment, steadiness) with pentagon radar. Registered users only (free tier); guests see locked tile as registration motivator.
+
+- **Backend:** `meaningful-conversations-backend/connector/` (vignettes, personaPrompt + role guard, evaluationPrompts + strict JSON schema, connectorScoring, unit tests 19✓), routes `routes/gemini/connector.js` (`GET /connector/start`, `POST /connector/turn` SSE, `POST /connector/evaluate`), mounted in `routes/gemini.js`. `personality.js`: `'connector'` in validLenses.
+- **Frontend:** `ConnectorIntroView` (mode choice text/voice, AI-Act notice), `ChatView` extended (`connectorConfig`/`onConnectorEnded`, TTS gender override), `ConnectorResultsView` (SVG radar, strengths/growth, per-vignette moments, E2EE save, Practice cross-sell ≥8), App.tsx run state machine + transition overlays, `utils/connectorRun.ts`. NavView: `connectorIntro|connectorChat|connectorResults`. Tile in BotSelection Kommunikation section. 5 generated persona avatars `public/avatars/connector-*.png`. i18n DE/EN parity (2348 keys ✓).
+- **E2EE save:** result stored inside `encryptedData` payload as `connector` key; `completedLenses` unchanged (no lens-UI side effects).
+- **Maxwell alignment (2026-09-04):** copy uses skill-framing ("connection is learnable"), NOT talent-framing — aligns with "Everyone Communicates, Few Connect" principle 5 and avoids IP proximity. **No book reference in app/marketing** (copyright assessment in session; dimensions/vignettes are original work). Legal review only if explicit marketing reference is ever wanted.
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
@@ -14,16 +23,16 @@
 2. **Uncommitted ≠ nicht im Binary** — Xcode-Archive aus dem lokalen Workspace enthält auch uncommittete Frontend-Änderungen (`main-CaTeQsof.js` im xcarchive prüfbar).
 3. **Build-Nummern drift:** Repo/Xcode kann `CURRENT_PROJECT_VERSION=3` zeigen, ASC **build 4** — Apple hochzählt beim Upload. Vor dem nächsten Archive: **≥5** setzen.
 4. **iOS-Login auf Production** — Fix ist **Backend CORS** (`X-Client-Platform`), kein neues App-Binary; Production muss **v2.5.7+** sein.
-5. **Apple Review-Account** — `premium@manualmode.at` via `setup-app-store-review-account.js` auf Production (Premium+); IAP-Sandbox-Demo ggf. `reset-app-store-review-account-for-iap-demo.js`.
+5. **Apple Review-Account** — `premium@manualmode.at` via `setup-app-store-review-account.js` auf Production (Premium+ **bis 2027-12-31**); IAP-Sandbox-Demo ggf. `reset-app-store-review-account-for-iap-demo.js`.
 6. **Repo-Stand 2026-08-21** — Commit **`a4d369c4`** (Handbuch, IAP-Paywall, CORS, ASC-Docs); `build/` + `*.xcarchive` in `.gitignore`.
 
 ## Session handoff (2026-08-23)
 
-**Crisis helplines + method comparison:** Commit **`a1504bed`**. Staging **backend-only** deploy 2026-08-23 — `crisisResources.js` in container (AT/DE/CH/CA, 988 present, old Vienna PSD number gone). Health OK. **Not on production.** No iOS rebuild (prompt-only). Docs: `DOCUMENTATION/CRISIS-HELPLINES.md`, `DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.md`. First deploy attempt failed (Podman VM disk full); prune then retry succeeded.
+**Crisis helplines + method comparison:** Commit **`a1504bed`**. Staging **backend-only** deploy 2026-08-23. **Production backend** 2026-08-23 (pull-only, same 2.5.7 image) — `crisisResources.js` live (AT/DE/CH/CA, 988 present). Health OK. No iOS rebuild (prompt-only).
 
 ## Session handoff (2026-08-21)
 
-**ASC 2.5.7 resubmit complete:** Submitted **2.5.7 (4)** with handbook audit (UserGuide §1.2/§2.2, PEP ch., iOS IAP copy), NativePaywall locale titles, IAP demo-reset script, CORS `X-Client-Platform` on production. Review account `premium@manualmode.at` → Premium+ until 2028. Repo synced (commit after session).
+**ASC 2.5.7 resubmit complete:** Submitted **2.5.7 (4)** with handbook audit (UserGuide §1.2/§2.2, PEP ch., iOS IAP copy), NativePaywall locale titles, IAP demo-reset script, CORS `X-Client-Platform` on production. Review account `premium@manualmode.at` → Premium+ until **2027-12-31** (updated **2026-08-27**). Repo synced (commit after session).
 
 **Production deploy v2.5.7:** iOS login to mc-app failed with misleading “Could not connect” — **root cause:** CORS preflight blocked `X-Client-Platform` header (staging had fix, production was still on 2.5.6 backend). **Fix:** `./deploy-manualmode.sh -e production` — CORS now allows `X-Client-Platform`.
 
@@ -280,7 +289,7 @@
 
 ## Recent Changes (2026-08-04 — App Store review account Premium+)
 
-- **Production:** `setup-app-store-review-account.js` — `premium@manualmode.at` → `isPremium`, `hasPracticeAccess` until **2028-08-04**, `isClient=false`
+- **Production:** `setup-app-store-review-account.js` — `premium@manualmode.at` → `isPremium`, `hasPracticeAccess` until **2027-12-31**, `isClient=false`
 
 ## Recent Changes (2026-08-04 — Staging v2.5.4 greeting fix + ASC screenshots)
 

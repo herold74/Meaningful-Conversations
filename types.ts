@@ -36,6 +36,9 @@ export type NavView =
     | 'exportData'
     | 'personalitySurvey'
     | 'personalityProfile'
+    | 'connectorIntro'
+    | 'connectorChat'
+    | 'connectorResults'
     | 'lifeContextEditor'
     | 'transcriptEval'
     | 'transcriptRecord'
@@ -473,4 +476,39 @@ export interface PracticeEvaluationSummary {
     summary: string;
     overallScore: number;
     evaluationData: PracticeEvaluationResult;
+}
+
+// --- The Connector ---
+
+export interface ConnectorVignettePublic {
+    id: string;
+    personaName: string;
+    gender: 'male' | 'female';
+    relationship: string;
+    opening: string;
+}
+
+export type ConnectorEndType = 'heard' | 'timeout' | 'aborted';
+
+export interface ConnectorDimensionScore {
+    score: number;
+    evidence: string[];
+}
+
+export type ConnectorDimensionKey = 'empathy' | 'presence' | 'curiosity' | 'nonJudgment' | 'steadiness';
+
+export interface ConnectorEvaluationResult {
+    summary: string;
+    empathy: ConnectorDimensionScore;
+    presence: ConnectorDimensionScore;
+    curiosity: ConnectorDimensionScore;
+    nonJudgment: ConnectorDimensionScore;
+    steadiness: ConnectorDimensionScore;
+    strengths: string[];
+    growthAreas: string[];
+    perVignette: { vignetteId: string; highlight: string; missedCue: string }[];
+    overallScore: number | null;
+    vignetteIds: string[];
+    endTypes: ConnectorEndType[];
+    completedAt: string;
 }

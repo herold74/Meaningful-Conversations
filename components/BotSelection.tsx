@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info, HeartHandshake } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -31,6 +31,7 @@ interface BotSelectionProps {
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
   onCoachPractice?: () => void;
+  onConnector?: () => void;
   onAuthRequired?: () => void;
   onUpgrade?: () => void;
   onPracticeUpgrade?: () => void;
@@ -437,6 +438,78 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
   );
 };
 
+interface ConnectorTileProps {
+  isGuest: boolean;
+  onConnector?: () => void;
+  onAuthRequired?: () => void;
+}
+
+/**
+ * The Connector — discovery tile in the Kommunikation section.
+ * Registered users start the experience; for guests the tile doubles as the
+ * registration motivator (locked state + register CTA).
+ */
+const ConnectorTile: React.FC<ConnectorTileProps> = ({ isGuest, onConnector, onAuthRequired }) => {
+  const { t } = useLocalization();
+
+  const handleClick = () => {
+    if (isGuest) {
+      onAuthRequired?.();
+    } else {
+      onConnector?.();
+    }
+  };
+
+  return (
+    <motion.div
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+      className={`flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border rounded-card shadow-card cursor-pointer transition-all duration-200
+        ${isGuest
+          ? 'border-border-primary opacity-75 hover:opacity-90'
+          : 'border-accent-primary/40 hover:border-accent-primary hover:shadow-card-hover'}`}
+      whileHover={isGuest ? undefined : { y: -3 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div className="rounded-full p-3 bg-accent-primary/10 shrink-0">
+        <HeartHandshake className={`w-14 h-14 text-accent-primary ${isGuest ? 'opacity-60' : ''}`} aria-hidden />
+      </div>
+
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between">
+        <div>
+          <h3 className="text-xl font-semibold text-content-primary tracking-tight">
+            {t('connector_title')}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('connector_tile_desc')}
+          </p>
+        </div>
+
+        <div className="mt-4 w-full">
+          <span
+            className={`inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border ${
+              isGuest
+                ? 'border-border-primary bg-background-primary/40 text-content-secondary'
+                : 'border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-button-foreground-on-accent'
+            }`}
+          >
+            {isGuest && <LockIcon className="w-4 h-4 shrink-0" />}
+            <span className="truncate">{isGuest ? t('connector_tile_register_cta') : t('connector_tile_start')}</span>
+          </span>
+          {isGuest && (
+            <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
+              {t('connector_tile_guest_hint')}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 interface CoachPracticeHeroProps {
   practiceAccess: ReturnType<typeof resolvePracticeAccess>;
   onCoachPractice?: () => void;
@@ -628,7 +701,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onConnector, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
   const { t, language } = useLocalization();
   const initialSectionState = getBotSelectionSectionState(entryIntent, !currentUser);
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
@@ -876,6 +949,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               onTranscriptEval={onTranscriptEval}
               onTranscriptRecord={onTranscriptRecord}
               onUpgrade={onUpgrade}
+              onAuthRequired={onAuthRequired}
+            />
+
+            <ConnectorTile
+              isGuest={!currentUser}
+              onConnector={onConnector}
               onAuthRequired={onAuthRequired}
             />
           </div>

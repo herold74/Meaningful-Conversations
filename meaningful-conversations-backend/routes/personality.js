@@ -23,7 +23,7 @@ router.post('/save', authMiddleware, async (req, res) => {
     const validMode = adaptationMode === 'adaptive' ? 'adaptive' : 'stable';
     
     // Validate and serialize completedLenses
-    const validLenses = ['sd', 'riemann', 'ocean'];
+    const validLenses = ['sd', 'riemann', 'ocean', 'connector'];
     const premiumOnlyLenses = ['sd', 'riemann'];
     let lensesJson = '[]';
     if (Array.isArray(completedLenses)) {

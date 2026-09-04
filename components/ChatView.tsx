@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, User, CoachPracticeConfig, Language } from '../types';
+import { Bot, Message, User, CoachPracticeConfig, Language, ConnectorEndType } from '../types';
+import type { ConnectorChatConfig } from '../utils/connectorRun';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
@@ -68,6 +69,10 @@ interface ChatViewProps {
   coachPracticeConfig?: CoachPracticeConfig | null;
   /** Shown when Phase 2 evaluation fails (e.g. session too short) */
   practiceEvalError?: string | null;
+  /** The Connector mode: AI plays a friend/colleague with a concern */
+  connectorConfig?: ConnectorChatConfig | null;
+  /** Called when the connector persona ends the vignette ('heard' or 'timeout') */
+  onConnectorEnded?: (endType: 'heard' | 'timeout') => void;
 }
 
 
@@ -78,7 +83,7 @@ function chatInitKey(botId: string, kind: 'greeting' | 'preseed', language: Lang
   return kind === 'greeting' ? `greeting:${botId}:${language}` : `preseed:${botId}:${language}:${seedMessageId ?? ''}`;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError, connectorConfig, onConnectorEnded }) => {
   const { t, language } = useLocalization();
 
   const [input, setInput] = useState('');
@@ -89,7 +94,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const footerRef = useRef<HTMLElement>(null);
   const voiceTextRef = useRef<HTMLDivElement>(null);
   const initialFetchInitiated = useRef<boolean>(false);
-  const [isVoiceMode, setIsVoiceMode] = useState(() => coachPracticeConfig?.liveMode === true);
+  const [isVoiceMode, setIsVoiceMode] = useState(() => coachPracticeConfig?.liveMode === true || connectorConfig?.liveMode === true);
   const practiceLiveMode = coachPracticeConfig?.liveMode === true;
   const showVoiceUi = practiceLiveMode || isVoiceMode;
 
@@ -114,7 +119,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     isVoiceMode: showVoiceUi,
     isNewSession,
     t,
-    genderOverride: practiceCoacheeGender,
+    genderOverride: connectorConfig ? connectorConfig.personaGender : practiceCoacheeGender,
   });
   const meditation = useMeditation({
     speak: tts.speak,
@@ -202,46 +207,51 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }
       };
 
-      const response = coachPracticeConfig
-        ? await geminiService.sendPracticeMessageStream(
-            coachPracticeConfig,
-            historyWithUserMessage,
-            language,
-            (chunk: string) => {
-              streamedText += chunk;
-              chunkCount++;
-              setChatHistory(prev => {
-                const last = prev[prev.length - 1];
-                if (last && last.id === botMessageId) {
-                  return [...prev.slice(0, -1), { ...last, text: streamedText }];
-                }
-                return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
-              });
-              if (useStreamingTts) flushSentences(chunk, false);
-            },
-          )
-        : await geminiService.sendMessageStream(
-        bot.id,
-        lifeContext,
-        historyWithUserMessage,
-        language,
-        false,
-        (chunk: string) => {
-          streamedText += chunk;
-          chunkCount++;
-          // Update the bot message progressively
-          setChatHistory(prev => {
-            const last = prev[prev.length - 1];
-            if (last && last.id === botMessageId) {
-              return [...prev.slice(0, -1), { ...last, text: streamedText }];
-            }
-            return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
-          });
-          if (useStreamingTts) flushSentences(chunk, false);
-        },
-        effectiveCoachingMode,
-        decryptedProfile
-      );
+      const onStreamChunk = (chunk: string) => {
+        streamedText += chunk;
+        chunkCount++;
+        setChatHistory(prev => {
+          const last = prev[prev.length - 1];
+          if (last && last.id === botMessageId) {
+            return [...prev.slice(0, -1), { ...last, text: streamedText }];
+          }
+          return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
+        });
+        if (useStreamingTts) flushSentences(chunk, false);
+      };
+
+      let connectorEnd: { ended: boolean; endType: ConnectorEndType | null } | null = null;
+      let response: { text: string; provider?: string | null };
+
+      if (connectorConfig) {
+        const connectorResponse = await geminiService.sendConnectorTurnStream(
+          connectorConfig.vignetteId,
+          historyWithUserMessage,
+          language,
+          showVoiceUi,
+          onStreamChunk,
+        );
+        connectorEnd = { ended: connectorResponse.ended, endType: connectorResponse.endType };
+        response = { text: connectorResponse.text, provider: connectorResponse.provider ?? null };
+      } else if (coachPracticeConfig) {
+        response = await geminiService.sendPracticeMessageStream(
+          coachPracticeConfig,
+          historyWithUserMessage,
+          language,
+          onStreamChunk,
+        );
+      } else {
+        response = await geminiService.sendMessageStream(
+          bot.id,
+          lifeContext,
+          historyWithUserMessage,
+          language,
+          false,
+          onStreamChunk,
+          effectiveCoachingMode,
+          decryptedProfile
+        );
+      }
 
       // Final text (may be stripped of meta-commentary)
       const finalText = response.text;
@@ -294,6 +304,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       } else {
         tts.speak(meditationData.displayText);
       }
+
+      // The Connector: persona closed the vignette (felt heard or everyday exit)
+      if (connectorConfig && connectorEnd?.ended && onConnectorEnded) {
+        onConnectorEnded(connectorEnd.endType === 'heard' ? 'heard' : 'timeout');
+      }
+
       if (isGuest && guestFingerprint) {
         guestService.incrementGuestUsage(guestFingerprint).then(result => {
           setGuestLimitRemaining(result.remaining);
@@ -320,7 +336,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     } finally {
       setIsLoading(false);
     }
-  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode, coachPracticeConfig]);
+  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode, coachPracticeConfig, connectorConfig, onConnectorEnded, showVoiceUi]);
 
   const speech = useSpeechRecognition({
     input,
@@ -447,6 +463,12 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
 
     // Coach Practice: human coach speaks first — no AI greeting
     if (coachPracticeConfig) {
+        initialFetchInitiated.current = true;
+        return;
+    }
+
+    // The Connector: history is pre-seeded with the persona's opening line — no greeting fetch
+    if (connectorConfig) {
         initialFetchInitiated.current = true;
         return;
     }
@@ -644,6 +666,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                       <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
                         {t('practice_chat_you_are_coach')} · {coachPracticeConfig.frameworkName} · {getPracticeDifficultyLabel(coachPracticeConfig.difficulty, t, { liveMode: coachPracticeConfig.liveMode })}
                         {practiceLiveMode && ` · ${t('practice_live_badge')}`}
+                      </p>
+                    )}
+                    {connectorConfig && (
+                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
+                        {bot.description} · {t('connector_chat_hint')}
                       </p>
                     )}
                 </div>
