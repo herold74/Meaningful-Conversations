@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorEndType } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -41,6 +41,13 @@ import {
 import type { SurveyResult } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
+import { encryptData } from './utils/encryption';
+import {
+    botFromConnectorVignette,
+    openingMessageFromVignette,
+    CONNECTOR_PERSONA_BOT_ID,
+    type ConnectorRunState,
+} from './utils/connectorRun';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 import PageTransition from './components/shared/PageTransition';
@@ -165,6 +172,14 @@ const App: React.FC = () => {
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
     const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
     const [practiceEvalError, setPracticeEvalError] = useState<string | null>(null);
+
+    // The Connector states
+    const [connectorRun, setConnectorRun] = useState<ConnectorRunState | null>(null);
+    const [connectorEvaluation, setConnectorEvaluation] = useState<ConnectorEvaluationResult | null>(null);
+    const [connectorAwaitingNext, setConnectorAwaitingNext] = useState<ConnectorEndType | null>(null);
+    const [isConnectorStarting, setIsConnectorStarting] = useState(false);
+    const [isConnectorEvaluating, setIsConnectorEvaluating] = useState(false);
+    const [connectorSaveState, setConnectorSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
     const routeToCoachPractice = useCallback(() => {
         if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
@@ -877,6 +892,23 @@ const App: React.FC = () => {
     const handleEndSession = async () => {
         if (!selectedBot) return;
 
+        // --- The Connector mode: ending means finishing the run early ---
+        if (connectorRun && selectedBot.id === CONNECTOR_PERSONA_BOT_ID) {
+            const hasUserMessages = chatHistory.some((m) => m.role === 'user');
+            const current = connectorRun.vignettes[connectorRun.currentIndex];
+            const entries = hasUserMessages && current
+                ? [...connectorRun.entries, { vignetteId: current.id, history: chatHistory, endType: 'aborted' as ConnectorEndType }]
+                : connectorRun.entries;
+            if (entries.length === 0) {
+                resetConnectorState();
+                setView('botSelection');
+                return;
+            }
+            setConnectorRun({ ...connectorRun, entries });
+            await finishConnectorRun(entries, connectorRun.liveMode);
+            return;
+        }
+
         // --- Coach Practice mode ---
         if (practiceConfig && selectedBot.id === 'practice-coachee') {
             if (userMessageCount === 0) {
@@ -1336,6 +1368,162 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
     };
 
+    // --- The Connector handlers ---
+
+    const resetConnectorState = () => {
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorAwaitingNext(null);
+        setConnectorSaveState('idle');
+        setSelectedBot(null);
+        setChatHistory([]);
+    };
+
+    const seedConnectorVignette = (run: ConnectorRunState, index: number) => {
+        const vignette = run.vignettes[index];
+        setSelectedBot(botFromConnectorVignette(vignette));
+        setChatHistory([openingMessageFromVignette(vignette)]);
+        setUserMessageCount(0);
+        setBaselineMessageCount(0);
+        setView('connectorChat');
+    };
+
+    const handleOpenConnectorIntro = () => {
+        if (!currentUser) return;
+        resetConnectorState();
+        setView('connectorIntro');
+    };
+
+    const handleStartConnectorRun = async (liveMode: boolean) => {
+        if (!currentUser) return;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsConnectorStarting(true);
+        try {
+            const { vignettes } = await geminiService.startConnectorRun(language);
+            const run: ConnectorRunState = { vignettes, currentIndex: 0, entries: [], liveMode };
+            setConnectorRun(run);
+            setConnectorEvaluation(null);
+            setConnectorSaveState('idle');
+            seedConnectorVignette(run, 0);
+        } catch (error) {
+            console.error('Connector start failed:', error);
+            alert(t('connector_start_error'));
+        } finally {
+            setIsConnectorStarting(false);
+        }
+    };
+
+    const finishConnectorRun = async (entries: ConnectorRunState['entries'], liveMode: boolean) => {
+        const evaluable = entries.filter((e) => e.history.some((m) => m.role === 'user'));
+        if (evaluable.length === 0) {
+            resetConnectorState();
+            setView('botSelection');
+            return;
+        }
+        setIsConnectorEvaluating(true);
+        try {
+            const result = await geminiService.evaluateConnectorRun(evaluable, language, liveMode);
+            setConnectorEvaluation(result.evaluation);
+            setSelectedBot(null);
+            setChatHistory([]);
+            setView('connectorResults');
+        } catch (error) {
+            console.error('Connector evaluation failed:', error);
+            alert(t('connector_eval_error'));
+            resetConnectorState();
+            setView('botSelection');
+        } finally {
+            setIsConnectorEvaluating(false);
+        }
+    };
+
+    const advanceConnector = (endType: ConnectorEndType) => {
+        if (!connectorRun) return;
+        const current = connectorRun.vignettes[connectorRun.currentIndex];
+        const entries = [...connectorRun.entries, { vignetteId: current.id, history: chatHistory, endType }];
+        const nextIndex = connectorRun.currentIndex + 1;
+        if (nextIndex < connectorRun.vignettes.length) {
+            const run = { ...connectorRun, entries, currentIndex: nextIndex };
+            setConnectorRun(run);
+            seedConnectorVignette(run, nextIndex);
+        } else {
+            setConnectorRun({ ...connectorRun, entries, currentIndex: nextIndex });
+            finishConnectorRun(entries, connectorRun.liveMode);
+        }
+    };
+
+    const handleConnectorEnded = (endType: 'heard' | 'timeout') => {
+        setConnectorAwaitingNext(endType);
+    };
+
+    const handleConnectorContinue = () => {
+        const endType = connectorAwaitingNext;
+        setConnectorAwaitingNext(null);
+        if (endType) advanceConnector(endType);
+    };
+
+    /** Persist the result E2EE inside the personality profile payload (no transcript). */
+    const handleConnectorSaveToProfile = async () => {
+        if (!currentUser || !encryptionKey || !connectorEvaluation) return;
+        setConnectorSaveState('saving');
+        try {
+            const existing = await api.loadPersonalityProfile();
+            let decrypted: any = {};
+            let completedLenses: string[] = [];
+            let testType = 'CONNECTOR';
+            if (existing?.encryptedData) {
+                try {
+                    decrypted = await decryptPersonalityProfile(existing.encryptedData, encryptionKey);
+                } catch (decryptError) {
+                    console.error('Connector save: could not decrypt existing profile, aborting to avoid data loss.', decryptError);
+                    setConnectorSaveState('error');
+                    return;
+                }
+                testType = existing.testType || testType;
+                try {
+                    completedLenses = typeof existing.completedLenses === 'string'
+                        ? JSON.parse(existing.completedLenses)
+                        : (existing.completedLenses || []);
+                } catch { completedLenses = []; }
+            }
+            decrypted.connector = connectorEvaluation;
+            const encryptedData = await encryptData(encryptionKey, JSON.stringify(decrypted));
+            await api.savePersonalityProfile({
+                testType,
+                completedLenses,
+                encryptedData,
+                adaptationMode: decrypted.adaptationMode,
+            });
+            setHasPersonalityProfile(true);
+            setConnectorSaveState('saved');
+        } catch (error) {
+            console.error('Connector save failed:', error);
+            setConnectorSaveState('error');
+        }
+    };
+
+    const handleConnectorRestart = () => {
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorSaveState('idle');
+        setView('connectorIntro');
+    };
+
+    const handleConnectorDone = () => {
+        resetConnectorState();
+        setView('botSelection');
+    };
+
+    const handleConnectorPracticeCrossSell = () => {
+        if (currentUser && resolvePracticeAccess(currentUser).canAccessPractice) {
+            resetConnectorState();
+            routeToCoachPractice();
+        } else {
+            resetConnectorState();
+            openUpgrade('premium_plus');
+        }
+    };
+
     const runPracticeEvaluation = async (selfRating?: number) => {
         if (!practiceConfig) return;
         setIsAnalyzing(true);
@@ -1659,6 +1847,17 @@ const App: React.FC = () => {
         handlePracticeDone,
         navigateToPracticeHistory,
         handlePracticeHistoryBack,
+        connectorRun,
+        connectorEvaluation,
+        isConnectorStarting,
+        connectorSaveState,
+        handleOpenConnectorIntro,
+        handleStartConnectorRun,
+        handleConnectorEnded,
+        handleConnectorSaveToProfile,
+        handleConnectorRestart,
+        handleConnectorDone,
+        handleConnectorPracticeCrossSell,
         refinementPreview,
         isLoadingRefinementPreview,
         refinementPreviewError,
@@ -1855,6 +2054,34 @@ const App: React.FC = () => {
             />
             <UpdateNotification onUpdate={updateServiceWorker} />
             {isAnalyzing && <AnalyzingView />}
+            {isConnectorEvaluating && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center px-6">
+                    <BrandLoader size="lg" />
+                    <h1 className="mt-6 text-2xl font-bold text-gray-200">{t('connector_evaluating_title')}</h1>
+                    <p className="mt-2 text-lg text-gray-400">{t('connector_evaluating_subtitle')}</p>
+                </div>
+            )}
+            {connectorAwaitingNext && connectorRun && !isConnectorEvaluating && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center px-6">
+                    <div className="text-4xl mb-4" aria-hidden>{connectorAwaitingNext === 'heard' ? '🤝' : '👋'}</div>
+                    <h1 className="text-2xl font-bold text-gray-200">
+                        {connectorAwaitingNext === 'heard' ? t('connector_transition_heard_title') : t('connector_transition_timeout_title')}
+                    </h1>
+                    <p className="mt-2 text-lg text-gray-400">
+                        {connectorRun.currentIndex + 1 < connectorRun.vignettes.length
+                            ? t('connector_transition_next', { current: String(connectorRun.currentIndex + 2), total: String(connectorRun.vignettes.length) })
+                            : t('connector_transition_last')}
+                    </p>
+                    <button
+                        onClick={handleConnectorContinue}
+                        className="mt-6 py-3 px-8 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"
+                    >
+                        {connectorRun.currentIndex + 1 < connectorRun.vignettes.length
+                            ? t('connector_transition_continue')
+                            : t('connector_transition_to_results')}
+                    </button>
+                </div>
+            )}
             {isSavingProfile && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center">
                     <BrandLoader size="lg" />

@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorEvaluationResult, ConnectorEndType } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
@@ -434,4 +434,94 @@ export const deletePracticeEvaluation = async (id: string): Promise<void> => {
 
 export const deletePracticeTranscript = async (id: string): Promise<void> => {
     await apiFetch(`/practice/evaluations/${id}/transcript`, { method: 'DELETE' });
+};
+
+// --- The Connector ---
+
+export const startConnectorRun = async (
+    language: Language,
+): Promise<{ vignettes: ConnectorVignettePublic[]; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/start?language=${language}`);
+};
+
+/**
+ * Send one Connector turn with SSE streaming.
+ * Returns final text plus whether the persona ended the conversation
+ * ('heard' = felt heard and closed; 'timeout' = everyday-excuse exit at turn cap).
+ */
+export const sendConnectorTurnStream = async (
+    vignetteId: string,
+    history: Message[],
+    language: Language,
+    liveMode: boolean,
+    onChunk: (chunk: string) => void,
+): Promise<{ text: string; ended: boolean; endType: ConnectorEndType | null; provider?: string | null }> => {
+    const session = getSession();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/gemini/connector/turn`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ vignetteId, history, language, liveMode, stream: true }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        const data = await response.json();
+        onChunk(data.text);
+        return { text: data.text, ended: !!data.ended, endType: data.endType ?? null, provider: data.provider ?? null };
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamedText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.chunk) {
+                        streamedText += data.chunk;
+                        onChunk(data.chunk);
+                    }
+                    if (data.done) {
+                        return {
+                            text: data.text || streamedText,
+                            ended: !!data.ended,
+                            endType: data.endType ?? null,
+                            provider: data.provider ?? null,
+                        };
+                    }
+                } catch { /* ignore partial JSON */ }
+            }
+        }
+    }
+    return { text: streamedText, ended: false, endType: null, provider: null };
+};
+
+export const evaluateConnectorRun = async (
+    entries: { vignetteId: string; history: Message[]; endType: ConnectorEndType }[],
+    language: Language,
+    liveMode: boolean,
+): Promise<{ evaluation: ConnectorEvaluationResult; durationMs: number }> => {
+    return await apiFetch('/gemini/connector/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({ vignettes: entries, language, liveMode }),
+    });
 };
