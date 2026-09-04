@@ -160,6 +160,56 @@ else
     REMOTE_ENV_DIR="$REMOTE_DIR-production"
 fi
 
+# Ensure meaningful-conversations-tts:$VERSION exists locally (re-tag only — no Piper rebuild).
+# Fails fast if neither local latest, registry pull, nor server-known previous tag works.
+ensure_local_tts_version_tag() {
+    local TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
+    local TTS_LATEST="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:latest"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo -e "${YELLOW}[DRY RUN]${NC} Would ensure TTS tag: $TTS_IMAGE (re-tag, no rebuild)"
+        return 0
+    fi
+
+    if podman image exists "$TTS_IMAGE" 2>/dev/null; then
+        echo -e "${GREEN}✓ TTS image already tagged for $VERSION${NC}"
+        return 0
+    fi
+
+    if podman image exists "$TTS_LATEST" 2>/dev/null; then
+        echo -e "${YELLOW}Re-tagging TTS image: latest → $VERSION${NC}"
+        podman tag "$TTS_LATEST" "$TTS_IMAGE"
+        echo -e "${GREEN}✓ TTS image re-tagged to $VERSION${NC}"
+        return 0
+    fi
+
+    echo -e "${YELLOW}No local TTS image — pulling from registry (no rebuild)...${NC}"
+    if podman pull --tls-verify=false "$TTS_LATEST" 2>/dev/null; then
+        podman tag "$TTS_LATEST" "$TTS_IMAGE"
+        echo -e "${GREEN}✓ TTS pulled (latest) and re-tagged to $VERSION${NC}"
+        return 0
+    fi
+
+    local PREV=""
+    if [[ "$DRY_RUN" == false ]]; then
+        PREV=$(ssh "$REMOTE_HOST" "cat $REMOTE_ENV_DIR/.previous-version 2>/dev/null || grep -m1 '^VERSION=' $REMOTE_ENV_DIR/.env 2>/dev/null | cut -d'=' -f2" 2>/dev/null || true)
+    fi
+    if [[ -n "$PREV" && "$PREV" != "$VERSION" ]]; then
+        local TTS_PREV="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$PREV"
+        echo -e "${YELLOW}Pulling TTS $PREV from registry...${NC}"
+        if podman pull --tls-verify=false "$TTS_PREV" 2>/dev/null; then
+            podman tag "$TTS_PREV" "$TTS_IMAGE"
+            echo -e "${GREEN}✓ TTS pulled ($PREV) and re-tagged to $VERSION${NC}"
+            return 0
+        fi
+    fi
+
+    echo -e "${RED}ERROR: Cannot ensure TTS image tag $VERSION (no local image, registry pull failed)${NC}"
+    echo -e "${YELLOW}  One-time fix: ./deploy-manualmode.sh -c tts -e $ENVIRONMENT${NC}"
+    echo -e "${YELLOW}  Or full rebuild: ./deploy-manualmode.sh -c all -e $ENVIRONMENT${NC}"
+    return 1
+}
+
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║  Meaningful Conversations - Manualmode Server         ${GREEN}║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════╝${NC}"
@@ -288,22 +338,7 @@ if [[ "$SKIP_BUILD" == false ]]; then
 
     # Re-tag TTS image when using -c app (TTS not rebuilt but compose needs matching version tag)
     if [[ "$COMPONENT" == "app" ]]; then
-        TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
-        TTS_LATEST="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:latest"
-
-        if [[ "$DRY_RUN" == true ]]; then
-            echo -e "${YELLOW}[DRY RUN]${NC} Would re-tag TTS image: $TTS_LATEST → $TTS_IMAGE"
-        else
-            if podman image exists "$TTS_IMAGE" 2>/dev/null; then
-                echo -e "${GREEN}✓ TTS image already tagged for $VERSION${NC}"
-            elif podman image exists "$TTS_LATEST" 2>/dev/null; then
-                echo -e "${YELLOW}Re-tagging TTS image: latest → $VERSION${NC}"
-                podman tag "$TTS_LATEST" "$TTS_IMAGE"
-                echo -e "${GREEN}✓ TTS image re-tagged to $VERSION${NC}"
-            else
-                echo -e "${YELLOW}⚠ No local TTS image found — will rely on registry${NC}"
-            fi
-        fi
+        ensure_local_tts_version_tag || exit 1
         echo ""
     fi
 
@@ -392,6 +427,9 @@ if [[ "$SKIP_PUSH" == false && "$SKIP_BUILD" == false ]]; then
             echo -e "${YELLOW}Pushing re-tagged TTS image...${NC}"
             podman push "$TTS_IMAGE"
             echo -e "${GREEN}✓ TTS image pushed (re-tagged)${NC}"
+        else
+            echo -e "${RED}ERROR: TTS image $TTS_IMAGE missing — cannot push re-tagged TTS${NC}"
+            exit 1
         fi
         echo ""
     fi
@@ -462,15 +500,39 @@ if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "fronten
     podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-frontend:$VERSION" || echo "Warning: Could not pull frontend image"
 fi
 
-if [[ "$COMPONENT" == "all" || "$COMPONENT" == "tts" ]]; then
-    echo "Pulling TTS image..."
-    podman pull $PULL_OPTS "$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION" || echo "Warning: Could not pull TTS image"
+# TTS: required for -c app (re-tagged image) and -c all/-c tts (built image).
+# Pull registry tag first; if missing, re-tag any local TTS image (same bytes, new VERSION tag).
+ensure_remote_tts_version_tag() {
+    TTS_IMAGE="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
+    if podman image exists "$TTS_IMAGE" 2>/dev/null; then
+        echo "TTS image $VERSION already present on server"
+        return 0
+    fi
+    echo "Pulling TTS image $VERSION..."
+    if podman pull $PULL_OPTS "$TTS_IMAGE" 2>/dev/null; then
+        echo "TTS image $VERSION pulled from registry"
+        return 0
+    fi
+    echo "TTS $VERSION not in registry — re-tagging from local TTS image (no rebuild)..."
+    LOCAL_TTS=$(podman images --format '{{.Repository}}:{{.Tag}}' | grep "/meaningful-conversations-tts:" | grep -v ":$VERSION$" | grep -v '<none>' | head -1)
+    if [ -n "$LOCAL_TTS" ]; then
+        podman tag "$LOCAL_TTS" "$TTS_IMAGE"
+        echo "Re-tagged $LOCAL_TTS → $VERSION"
+        return 0
+    fi
+    echo "ERROR: No TTS image available for VERSION=$VERSION on server"
+    exit 1
+}
+
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]; then
+    ensure_remote_tts_version_tag
 fi
 
 # Save current version for rollback (before stopping anything)
+# .previous-version is written by deploy script from the server's prior .env before VERSION bump.
 PREV_VERSION=""
-if [ -f .env ]; then
-    PREV_VERSION=$(grep -m1 '^VERSION=' .env 2>/dev/null | cut -d'=' -f2 || echo "")
+if [ -f .previous-version ]; then
+    PREV_VERSION=$(cat .previous-version 2>/dev/null || echo "")
 fi
 if [ -n "$PREV_VERSION" ] && [ "$PREV_VERSION" != "$VERSION" ]; then
     echo "$PREV_VERSION" > .previous-version
@@ -493,6 +555,21 @@ sleep 10
 # Check service status
 echo "Service status:"
 podman-compose -f "$COMPOSE_FILE" ps
+
+# TTS must be running for app/all deploys (voice mode / server TTS)
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]; then
+    TTS_CONTAINER="meaningful-conversations-tts-${ENVIRONMENT}"
+    if ! podman ps --format '{{.Names}}' | grep -qx "$TTS_CONTAINER"; then
+        echo "ERROR: TTS container $TTS_CONTAINER is not running"
+        exit 1
+    fi
+    TTS_HEALTH=$(podman inspect "$TTS_CONTAINER" --format '{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
+    if [[ "$TTS_HEALTH" == "unhealthy" ]]; then
+        echo "ERROR: TTS container $TTS_CONTAINER is unhealthy"
+        exit 1
+    fi
+    echo "TTS container $TTS_CONTAINER is running (health: ${TTS_HEALTH:-starting})"
+fi
 
 # Update nginx reverse proxy IPs
 echo "Updating nginx reverse proxy configuration..."
@@ -550,6 +627,8 @@ REMOTE_SCRIPT
     
     # Check if environment-specific .env exists
     if [ -f "$ENV_FILE" ]; then
+        # Preserve previous VERSION for rollback + TTS re-tag fallback before overwriting .env
+        ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && [ -f .env ] && grep -m1 '^VERSION=' .env | cut -d'=' -f2 > .previous-version 2>/dev/null || true"
         scp "$ENV_FILE" "$REMOTE_HOST:$REMOTE_ENV_DIR/.env"
         # IMPORTANT: Ensure VERSION is always set correctly from package.json
         # This prevents any stale VERSION values in .env files from causing issues
@@ -674,6 +753,24 @@ REMOTE_SCRIPT
                 echo -e "${RED}ERROR: /api/bots missing /avatars/ paths after backend stream${NC}"
                 exit 1
             fi
+        fi
+    fi
+
+    # Post-deploy: TTS container must be running (catches registry tag gaps after -c app)
+    if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]; then
+        TTS_CONTAINER="meaningful-conversations-tts-${ENVIRONMENT}"
+        sleep 5
+        if ssh "$REMOTE_HOST" "podman ps --format '{{.Names}}' | grep -qx '$TTS_CONTAINER'"; then
+            TTS_HEALTH=$(ssh "$REMOTE_HOST" "podman inspect $TTS_CONTAINER --format '{{.State.Health.Status}}' 2>/dev/null" || echo "unknown")
+            if [[ "$TTS_HEALTH" == "unhealthy" ]]; then
+                echo -e "${RED}ERROR: TTS container $TTS_CONTAINER is unhealthy after deploy${NC}"
+                exit 1
+            fi
+            echo -e "${GREEN}✓ TTS container running (health: ${TTS_HEALTH:-starting})${NC}"
+        else
+            echo -e "${RED}ERROR: TTS container $TTS_CONTAINER not running after deploy${NC}"
+            echo -e "${YELLOW}  Likely missing image tag meaningful-conversations-tts:$VERSION in registry${NC}"
+            exit 1
         fi
     fi
     

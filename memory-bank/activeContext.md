@@ -16,7 +16,8 @@
 - **Frontend:** `ConnectorIntroView` (mode choice text/voice, AI-Act notice), `ChatView` extended (`connectorConfig`/`onConnectorEnded`, TTS gender override), `ConnectorResultsView` (SVG radar, strengths/growth, per-vignette moments, E2EE save, Practice cross-sell ≥8), App.tsx run state machine + transition overlays, `utils/connectorRun.ts`. NavView: `connectorIntro|connectorChat|connectorResults`. Tile in BotSelection Kommunikation section. 5 generated persona avatars `public/avatars/connector-*.png`. i18n DE/EN parity (2348 keys ✓).
 - **E2EE save:** result stored inside `encryptedData` payload as `connector` key; `completedLenses` unchanged (no lens-UI side effects).
 - **Handbuch:** Kapitel **5.4** The Connector (DE/EN), Abschnitte 5.4/5.5 → 5.5/5.6 umnummeriert (`b6cac305`).
-- **Commits:** `1835882f` (feature) · `b6cac305` (handbook) · `0e24214d` (deploy build-2 sync).
+- **Commits:** `1835882f` (feature) · `b6cac305` (handbook) · `0e24214d` (deploy build-2 sync) · `5a45706a` (memory bank).
+- **Deploy script (2026-09-04):** `deploy-manualmode.sh` hardened — TTS re-tag fail-fast (local registry pull + remote retag fallback), `.previous-version` before VERSION bump, TTS container health gate. No TTS rebuild on `-c app`.
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
