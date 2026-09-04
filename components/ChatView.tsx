@@ -135,6 +135,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     }
   }, [practiceLiveMode, tts]);
 
+  // The Connector voice mode: mirror Coach Practice — enable TTS, not just voice UI
+  useEffect(() => {
+    if (connectorConfig?.liveMode) {
+      setIsVoiceMode(true);
+      tts.setIsTtsEnabled(true);
+    }
+  }, [connectorConfig?.liveMode, connectorConfig?.vignetteId, tts]);
+
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [feedbackMessages, setFeedbackMessages] = useState<{ user: Message | null; bot: Message | null }>({ user: null, bot: null });

@@ -1,5 +1,6 @@
 import { encryptData, decryptData } from './encryption';
 import { SurveyResult, NarrativeProfile } from '../components/PersonalitySurvey';
+import type { ConnectorEvaluationResult } from '../types';
 
 export interface EncryptedPersonalityData {
   // Spiral Dynamics results
@@ -32,6 +33,8 @@ export interface EncryptedPersonalityData {
   };
   adaptationMode?: 'adaptive' | 'stable';
   narrativeProfile?: NarrativeProfile;
+  /** The Connector evaluation (optional, saved from results screen) */
+  connector?: ConnectorEvaluationResult;
 }
 
 export const encryptPersonalityProfile = async (
@@ -44,7 +47,8 @@ export const encryptPersonalityProfile = async (
     big5: surveyResult.big5 || undefined,
     narratives: surveyResult.narratives || undefined,
     adaptationMode: surveyResult.adaptationMode || undefined,
-    narrativeProfile: surveyResult.narrativeProfile || undefined
+    narrativeProfile: surveyResult.narrativeProfile || undefined,
+    connector: surveyResult.connector || undefined,
   };
   
   const jsonString = JSON.stringify(sensitiveData);

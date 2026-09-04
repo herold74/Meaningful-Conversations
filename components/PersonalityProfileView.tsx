@@ -13,7 +13,12 @@ import Button from './shared/Button';
 import { InfoIcon } from './icons/InfoIcon';
 import NarrativeStoriesModal from './NarrativeStoriesModal';
 import SpiralDynamicsVisualization from './SpiralDynamicsVisualization';
+import ConnectorProfileSection from './ConnectorProfileSection';
+import ExternalPerspectivePreviewModal from './ExternalPerspectivePreviewModal';
 import { User, CoachingMode } from '../types';
+import type { ConnectorEvaluationResult } from '../types';
+import type { ExternalPerspectiveNote } from './PersonalitySurvey';
+import { isConnectorStale, isExternalPerspectiveOutdated } from '../utils/connectorProfile';
 
 // Narrative Profile Display Component
 interface NarrativeProfileSectionProps {
@@ -372,7 +377,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDpcWarning, setShowDpcWarning] = useState(false);
   const [pendingCoachingMode, setPendingCoachingMode] = useState<CoachingMode | null>(null);
-  useModalOpen(showDpcWarning || showDeleteWarning);
+  const [showExternalPerspectivePreview, setShowExternalPerspectivePreview] = useState(false);
+  const [proposedExternalPerspective, setProposedExternalPerspective] = useState<ExternalPerspectiveNote | null>(null);
+  const [isEnrichingExternalPerspective, setIsEnrichingExternalPerspective] = useState(false);
+  const [externalPerspectiveError, setExternalPerspectiveError] = useState<string | null>(null);
+  useModalOpen(showDpcWarning || showDeleteWarning || showExternalPerspectivePreview);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
@@ -539,7 +548,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         big5: decryptedData.big5,
         narratives: decryptedData.narratives,
         adaptationMode: decryptedData.adaptationMode,
-        narrativeProfile: decryptedData.narrativeProfile
+        narrativeProfile: decryptedData.narrativeProfile,
+        connector: decryptedData.connector,
       };
       
       const filename = generateSurveyPdfFilename(surveyResult.path, language);
@@ -577,37 +587,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         // Update local state with NEW stories and narrativeProfile
         const updatedData = {
           ...decryptedData,
-          narratives: newStories, // Save the NEW stories!
-          narrativeProfile: response.narrativeProfile
+          narratives: newStories,
+          narrativeProfile: response.narrativeProfile,
         };
         setDecryptedData(updatedData);
         
         // Auto-expand to show results
         setIsNarrativeExpanded(true);
         
-        // Persist to backend - re-encrypt and save
         if (encryptionKey && profileMetadata) {
           try {
-            const { encryptPersonalityProfile } = await import('../utils/personalityEncryption');
-            const surveyResult = {
-              completedLenses: profileMetadata.completedLenses,
-              spiralDynamics: updatedData.spiralDynamics,
-              riemann: updatedData.riemann,
-              big5: updatedData.big5,
-              narratives: newStories, // Save NEW stories to DB
-              adaptationMode: updatedData.adaptationMode,
-              narrativeProfile: response.narrativeProfile
-            };
-            const encryptedData = await encryptPersonalityProfile(surveyResult as any, encryptionKey);
-            await api.savePersonalityProfile({
-              testType: profileMetadata.testType || 'RIEMANN', // Legacy field required by backend
-              completedLenses: profileMetadata.completedLenses,
-              encryptedData,
-              adaptationMode: updatedData.adaptationMode
-            });
+            await persistProfileBlob(updatedData);
           } catch (saveErr) {
             console.error('Failed to save narrative profile:', saveErr);
-            // Don't show error to user - local state is still updated
           }
         }
       }
@@ -616,6 +608,94 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       setNarrativeError(t('narrative_generation_error') || 'Signatur-Generierung fehlgeschlagen. Bitte versuche es später erneut.');
     } finally {
       setIsGeneratingNarrative(false);
+    }
+  };
+
+  const persistProfileBlob = async (data: typeof decryptedData) => {
+    if (!encryptionKey || !profileMetadata || !data) return;
+    const { encryptPersonalityProfile } = await import('../utils/personalityEncryption');
+    const surveyResult = {
+      completedLenses: profileMetadata.completedLenses,
+      spiralDynamics: data.spiralDynamics,
+      riemann: data.riemann,
+      big5: data.big5,
+      narratives: data.narratives,
+      adaptationMode: data.adaptationMode,
+      narrativeProfile: data.narrativeProfile,
+      connector: data.connector,
+    };
+    const encryptedData = await encryptPersonalityProfile(surveyResult as any, encryptionKey);
+    await api.savePersonalityProfile({
+      testType: profileMetadata.testType || 'RIEMANN',
+      completedLenses: profileMetadata.completedLenses,
+      encryptedData,
+      adaptationMode: data.adaptationMode,
+    });
+  };
+
+  const handleRequestExternalPerspective = async () => {
+    if (!decryptedData?.narrativeProfile || !decryptedData?.connector) return;
+
+    const connector = decryptedData.connector as ConnectorEvaluationResult;
+    if (isConnectorStale(connector)) {
+      const proceed = window.confirm(t('profile_external_perspective_stale_confirm'));
+      if (!proceed) return;
+    }
+
+    setIsEnrichingExternalPerspective(true);
+    setExternalPerspectiveError(null);
+
+    try {
+      const np = decryptedData.narrativeProfile;
+      const enrichLanguage = np.generatedLanguage === 'en' ? 'en' : np.generatedLanguage === 'de' ? 'de' : language;
+      const response = await api.generateExternalPerspectiveNote({
+        narrativeProfile: {
+          operatingSystem: typeof np.operatingSystem === 'string'
+            ? np.operatingSystem
+            : (np.operatingSystem as any)?.core || '',
+          superpowers: np.superpowers,
+          blindspots: np.blindspots,
+        },
+        connector,
+        language: enrichLanguage,
+      });
+
+      if (response.externalPerspectiveNote) {
+        setProposedExternalPerspective(response.externalPerspectiveNote);
+        setShowExternalPerspectivePreview(true);
+      }
+    } catch (err) {
+      console.error('External perspective generation failed:', err);
+      setExternalPerspectiveError(t('profile_external_perspective_error'));
+    } finally {
+      setIsEnrichingExternalPerspective(false);
+    }
+  };
+
+  const handleConfirmExternalPerspective = async () => {
+    if (!proposedExternalPerspective || !decryptedData?.narrativeProfile) return;
+
+    setIsEnrichingExternalPerspective(true);
+    setExternalPerspectiveError(null);
+
+    try {
+      const updatedData = {
+        ...decryptedData,
+        narrativeProfile: {
+          ...decryptedData.narrativeProfile,
+          externalPerspectiveNote: proposedExternalPerspective,
+        },
+      };
+      setDecryptedData(updatedData);
+      await persistProfileBlob(updatedData);
+      setShowExternalPerspectivePreview(false);
+      setProposedExternalPerspective(null);
+      setIsNarrativeExpanded(true);
+    } catch (err) {
+      console.error('Failed to save external perspective:', err);
+      setExternalPerspectiveError(t('profile_external_perspective_save_error'));
+    } finally {
+      setIsEnrichingExternalPerspective(false);
     }
   };
 
@@ -822,6 +902,32 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 ▼
               </span>
             </button>
+
+            {decryptedData.narrativeProfile.externalPerspectiveNote ? (
+              <div className="mx-4 sm:mx-5 mt-2 p-4 rounded-lg border border-accent-primary/30 bg-accent-primary/5">
+                <p className="text-xs font-semibold text-accent-primary uppercase tracking-wide mb-2">
+                  {t('profile_external_perspective_title')}
+                </p>
+                {decryptedData.connector && isExternalPerspectiveOutdated(
+                  decryptedData.narrativeProfile.externalPerspectiveNote,
+                  decryptedData.connector as ConnectorEvaluationResult,
+                ) && (
+                  <p className="text-xs text-amber-700 dark:text-amber-300 mb-2 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    {t('profile_external_perspective_outdated')}
+                  </p>
+                )}
+                <p className="text-sm text-content-primary leading-relaxed">
+                  {decryptedData.narrativeProfile.externalPerspectiveNote.text}
+                </p>
+                <p className="text-xs text-content-tertiary mt-2 italic">
+                  {t('profile_external_perspective_disclaimer')}
+                </p>
+              </div>
+            ) : decryptedData.connector ? (
+              <div className="mx-4 sm:mx-5 mt-2 p-3 rounded-lg border border-border-secondary dark:border-border-primary bg-background-secondary/50 text-sm text-content-secondary leading-relaxed">
+                {t('profile_connector_signature_bridge')}
+              </div>
+            ) : null}
             
             {/* Language mismatch warning */}
             {decryptedData.narrativeProfile.generatedLanguage && decryptedData.narrativeProfile.generatedLanguage !== language && (
@@ -869,6 +975,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               >
                 📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
               </Button>
+              {decryptedData.connector && (
+                <Button
+                  onClick={handleRequestExternalPerspective}
+                  disabled={isEnrichingExternalPerspective || isGeneratingNarrative}
+                  size="sm"
+                  variant="secondary"
+                  loading={isEnrichingExternalPerspective}
+                >
+                  {t('profile_external_perspective_enrich_button')}
+                </Button>
+              )}
               <Button
                 onClick={() => {
                   // Warning moved to PersonalitySurvey - shows only when repeating an already-completed test
@@ -889,6 +1006,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               </Button>
               {narrativeError && (
                 <span className="text-red-600 dark:text-red-400 text-sm w-full text-center">{narrativeError}</span>
+              )}
+              {externalPerspectiveError && (
+                <span className="text-red-600 dark:text-red-400 text-sm w-full text-center">{externalPerspectiveError}</span>
               )}
             </div>
           </div>
@@ -1101,6 +1221,30 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <p className="mt-3 text-xs text-content-tertiary italic text-center">
               {t('survey_riemann_disclaimer')}
             </p>
+
+            {decryptedData.connector && (
+              <ConnectorProfileSection
+                connector={decryptedData.connector as ConnectorEvaluationResult}
+                nested
+              />
+            )}
+          </section>
+        )}
+
+        {/* Connector only (no Riemann facet yet) */}
+        {decryptedData.connector && !decryptedData.riemann && (
+          <section className="mb-6 rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary dark:bg-background-tertiary p-5 shadow-sm">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold text-content-primary">
+                {t('lens_riemann_name') || 'Wie du interagierst'}
+              </h3>
+              <p className="text-sm text-content-tertiary">
+                {t('profile_view_results') || 'Ergebnisse'}
+              </p>
+            </div>
+            <ConnectorProfileSection
+              connector={decryptedData.connector as ConnectorEvaluationResult}
+            />
           </section>
         )}
 
@@ -1436,6 +1580,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           onComplete={handleGenerateNarrative}
           onCancel={() => setShowNarrativeStoriesModal(false)}
           oldStories={decryptedData?.narratives}
+        />
+      )}
+
+      {showExternalPerspectivePreview && proposedExternalPerspective && (
+        <ExternalPerspectivePreviewModal
+          previousText={decryptedData?.narrativeProfile?.externalPerspectiveNote?.text ?? null}
+          proposedText={proposedExternalPerspective.text}
+          onConfirm={handleConfirmExternalPerspective}
+          onCancel={() => {
+            setShowExternalPerspectivePreview(false);
+            setProposedExternalPerspective(null);
+          }}
+          isSaving={isEnrichingExternalPerspective}
         />
       )}
     </div>

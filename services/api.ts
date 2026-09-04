@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { User, ConnectorEvaluationResult } from '../types';
 import { brand } from '../config/brand';
 import { isNativeIOS } from '../utils/platformDetection';
 
@@ -366,6 +366,27 @@ export const generateNarrativeProfile = async (data: {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to generate narrative profile');
+  }
+  return response.json();
+};
+
+export const generateExternalPerspectiveNote = async (data: {
+  narrativeProfile: {
+    operatingSystem: string;
+    superpowers?: { name: string }[];
+    blindspots?: { name: string }[];
+  };
+  connector: ConnectorEvaluationResult;
+  language: string;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/generate-external-perspective`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate external perspective');
   }
   return response.json();
 };

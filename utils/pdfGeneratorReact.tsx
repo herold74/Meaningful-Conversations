@@ -475,6 +475,18 @@ const translations = {
     oceanInlineHint: 'Erhoben mit dem Big Five Inventory-2 (BFI-2) Fragebogen.',
     footnotesTitle: 'Quellen',
     footnotesOnNextPage: 'Quellenverzeichnis siehe Seite 2.',
+    connectorTitle: 'Verbindungs-Signatur (The Connector)',
+    connectorSubtitle: 'Beobachtete Fremdsicht in Gesprächen — Ergänzung zu „Wie du interagierst“ und deiner Signatur',
+    connectorSignatureBridge: 'Ergänzung zur Signatur: Deine Verbindungs-Signatur (unter „Wie du interagierst“) kann die Signatur um eine Fremdsicht erweitern — nutze dafür „Signatur mit Fremdsicht anreichern“.',
+    connectorOverall: 'Verbindungs-Score',
+    connectorDisclaimer: 'KI-Beobachtung aus simulierten Gesprächen (The Connector), kein psychologisches Gutachten.',
+    connectorDimEmpathy: 'Empathie',
+    connectorDimPresence: 'Präsenz',
+    connectorDimCuriosity: 'Neugier',
+    connectorDimNonjudgment: 'Urteilsfreiheit',
+    connectorDimSteadiness: 'Stabilität',
+    connectorStrengths: 'Stärken in Gesprächen',
+    externalPerspectiveTitle: 'Fremdsicht — Ergänzung zur Signatur',
   },
   en: {
     title: 'Personality Signature',
@@ -530,6 +542,18 @@ const translations = {
     oceanInlineHint: 'Measured using the Big Five Inventory-2 (BFI-2) questionnaire.',
     footnotesTitle: 'Sources',
     footnotesOnNextPage: 'Sources listed on page 2.',
+    connectorTitle: 'Connection Signature (The Connector)',
+    connectorSubtitle: 'Observed perspective in conversation — complements “How you interact” and your signature',
+    connectorSignatureBridge: 'Signature complement: Your connection signature (under “How you interact”) can extend your signature with an external view — use “Enrich signature with external view”.',
+    connectorOverall: 'Connection score',
+    connectorDisclaimer: 'AI observation from simulated conversations (The Connector), not a psychological assessment.',
+    connectorDimEmpathy: 'Empathy',
+    connectorDimPresence: 'Presence',
+    connectorDimCuriosity: 'Curiosity',
+    connectorDimNonjudgment: 'Non-judgment',
+    connectorDimSteadiness: 'Steadiness',
+    connectorStrengths: 'Strengths in conversation',
+    externalPerspectiveTitle: 'External view — complement to your signature',
   },
 };
 
@@ -794,6 +818,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const hasRiemann = !!result.riemann;
   const hasOcean = !!result.big5;
   const hasNarrative = !!result.narrativeProfile;
+  const hasConnector = !!result.connector;
   const narrativeLangMismatch = hasNarrative 
     && result.narrativeProfile?.generatedLanguage 
     && result.narrativeProfile.generatedLanguage !== language;
@@ -989,6 +1014,59 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
       </View>
     );
   };
+
+  const ConnectorSection = () => {
+    if (!hasConnector || !result.connector) return null;
+    const c = result.connector;
+    const dims = [
+      { key: 'empathy', label: t.connectorDimEmpathy },
+      { key: 'presence', label: t.connectorDimPresence },
+      { key: 'curiosity', label: t.connectorDimCuriosity },
+      { key: 'nonJudgment', label: t.connectorDimNonjudgment },
+      { key: 'steadiness', label: t.connectorDimSteadiness },
+    ] as const;
+
+    return (
+      <View style={[styles.box, { marginBottom: 10 }]}>
+        <Text style={styles.boxTitle}>{t.connectorTitle}</Text>
+        <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 6 }}>{t.connectorSubtitle}</Text>
+        {c.overallScore !== null && c.overallScore !== undefined && (
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: colors.primary, marginBottom: 6 }}>
+            {t.connectorOverall}: {c.overallScore}/10
+          </Text>
+        )}
+        {c.summary ? (
+          <Text style={{ fontSize: 9, color: colors.gray700, marginBottom: 6, lineHeight: 1.35 }}>{c.summary}</Text>
+        ) : null}
+        {dims.map(({ key, label }) => {
+          const score = c[key]?.score;
+          if (typeof score !== 'number') return null;
+          return (
+            <View key={key} style={styles.barContainer}>
+              <View style={styles.barLabel}>
+                <Text style={styles.barName}>{label}</Text>
+                <Text style={{ fontSize: 8, color: colors.gray600 }}>{score}/10</Text>
+              </View>
+              <ProgressBar value={score} color={colors.teal500} maxValue={10} />
+            </View>
+          );
+        })}
+        {c.strengths && c.strengths.length > 0 && (
+          <View style={{ marginTop: 6 }}>
+            <Text style={{ fontSize: 9, fontWeight: 'bold', color: colors.gray700, marginBottom: 3 }}>
+              {t.connectorStrengths}
+            </Text>
+            {c.strengths.slice(0, 3).map((s: string, i: number) => (
+              <Text key={i} style={{ fontSize: 8, color: colors.gray600, marginBottom: 2 }}>• {s}</Text>
+            ))}
+          </View>
+        )}
+        <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
+          {t.connectorDisclaimer}
+        </Text>
+      </View>
+    );
+  };
   
   return (
     <Document>
@@ -1013,6 +1091,23 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 : (result.narrativeProfile.operatingSystem as any)?.core || 
                   (result.narrativeProfile.operatingSystem as any)?.dynamics || 
                   ''}
+            </Text>
+            {hasConnector && result.connector && !result.narrativeProfile.externalPerspectiveNote && (
+              <Text style={{ fontSize: 8, color: colors.gray600, marginTop: 6, fontStyle: 'italic', lineHeight: 1.35 }}>
+                {t.connectorSignatureBridge}
+              </Text>
+            )}
+          </View>
+        )}
+
+        {hasNarrative && result.narrativeProfile?.externalPerspectiveNote && (
+          <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
+            <Text style={styles.boxTitle}>{t.externalPerspectiveTitle}</Text>
+            <Text style={styles.signatureText}>
+              {result.narrativeProfile.externalPerspectiveNote.text}
+            </Text>
+            <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 4, fontStyle: 'italic' }}>
+              {t.connectorDisclaimer}
             </Text>
           </View>
         )}
@@ -1129,6 +1224,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </Text>
           </View>
         )}
+
+        <ConnectorSection />
         
         {/* If NOT using two pages, show everything on page 1 */}
         {!useTwoPages && (

@@ -1,97 +1,14 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
+import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic } from '../types';
 
-const DIMENSIONS: ConnectorDimensionKey[] = ['empathy', 'presence', 'curiosity', 'nonJudgment', 'steadiness'];
-
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
-  empathy: '�ance',
+  empathy: '🤝',
   presence: '🎧',
   curiosity: '❓',
   nonJudgment: '⚖️',
   steadiness: '🌊',
-};
-
-interface ConnectorRadarProps {
-  evaluation: ConnectorEvaluationResult;
-  labels: Record<ConnectorDimensionKey, string>;
-}
-
-/** Simple pentagon radar chart (SVG, no dependencies). */
-const ConnectorRadar: React.FC<ConnectorRadarProps> = ({ evaluation, labels }) => {
-  const size = 280;
-  const center = size / 2;
-  const radius = 92;
-  const labelRadius = radius + 26;
-
-  const point = (index: number, value: number) => {
-    const angle = (Math.PI * 2 * index) / DIMENSIONS.length - Math.PI / 2;
-    const r = (value / 10) * radius;
-    return [center + r * Math.cos(angle), center + r * Math.sin(angle)];
-  };
-
-  const ringPath = (value: number) =>
-    DIMENSIONS.map((_, i) => point(i, value).join(',')).join(' ');
-
-  const scorePath = DIMENSIONS
-    .map((dim, i) => point(i, evaluation[dim]?.score ?? 0).join(','))
-    .join(' ');
-
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-xs mx-auto" role="img" aria-label="Radar">
-      {[2.5, 5, 7.5, 10].map((ring) => (
-        <polygon
-          key={ring}
-          points={ringPath(ring)}
-          fill="none"
-          stroke="currentColor"
-          className="text-border-secondary dark:text-border-primary"
-          strokeWidth="1"
-          opacity={0.6}
-        />
-      ))}
-      {DIMENSIONS.map((_, i) => {
-        const [x, y] = point(i, 10);
-        return (
-          <line
-            key={i}
-            x1={center}
-            y1={center}
-            x2={x}
-            y2={y}
-            stroke="currentColor"
-            className="text-border-secondary dark:text-border-primary"
-            strokeWidth="1"
-            opacity={0.6}
-          />
-        );
-      })}
-      <polygon points={scorePath} fill="rgba(27,114,114,0.35)" stroke="#1B7272" strokeWidth="2" />
-      {DIMENSIONS.map((dim, i) => {
-        const [x, y] = point(i, (evaluation[dim]?.score ?? 0));
-        return <circle key={dim} cx={x} cy={y} r="3.5" fill="#1B7272" />;
-      })}
-      {DIMENSIONS.map((dim, i) => {
-        const angle = (Math.PI * 2 * i) / DIMENSIONS.length - Math.PI / 2;
-        const x = center + labelRadius * Math.cos(angle);
-        const y = center + labelRadius * Math.sin(angle);
-        return (
-          <text
-            key={dim}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-current text-content-secondary"
-            fontSize="11"
-            fontWeight="600"
-          >
-            {labels[dim]} ({evaluation[dim]?.score ?? '–'})
-          </text>
-        );
-      })}
-    </svg>
-  );
 };
 
 interface ConnectorResultsViewProps {
@@ -132,15 +49,21 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
     vignettes.find((v) => v.id === vignetteId)?.personaName || vignetteId;
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4">
-      <div className="bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card p-6 md:p-8">
+    <div className="w-full max-w-4xl mx-auto py-8 px-4 sm:px-6">
+      <div className="bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card p-6 md:p-8 lg:p-10">
         <h1 className="text-2xl md:text-3xl font-bold text-content-primary mb-1">
           {t('connector_results_title')}
         </h1>
-        <p className="text-content-tertiary text-sm mb-6">{t('connector_results_subtitle')}</p>
+        <p className="text-content-tertiary text-sm mb-3">{t('connector_results_subtitle')}</p>
+        <p
+          role="note"
+          className="text-sm text-content-secondary leading-relaxed mb-6 px-4 py-3 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary/80"
+        >
+          {t('connector_results_run_info')}
+        </p>
 
         {/* Overall + radar */}
-        <div className="rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-5 mb-6">
+        <div className="rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-5 sm:p-6 mb-6 overflow-visible">
           {evaluation.overallScore !== null && (
             <div className="flex items-center justify-center gap-3 mb-3">
               <div className="w-16 h-16 rounded-full bg-accent-primary text-white flex items-center justify-center text-2xl font-bold">
@@ -149,7 +72,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
               <div className="text-sm text-content-secondary">{t('connector_results_overall_label')}</div>
             </div>
           )}
-          <ConnectorRadar evaluation={evaluation} labels={labels} />
+          <ConnectorRadarChart evaluation={evaluation} labels={labels} />
         </div>
 
         {/* Summary */}
@@ -160,7 +83,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
 
         {/* Dimension details */}
         <div className="space-y-3 mb-6">
-          {DIMENSIONS.map((dim) => (
+          {CONNECTOR_DIMENSIONS.map((dim) => (
             <details key={dim} className="rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary p-3">
               <summary className="cursor-pointer font-medium text-content-primary flex items-center justify-between">
                 <span>{labels[dim]}</span>

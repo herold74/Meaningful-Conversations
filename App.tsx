@@ -38,7 +38,7 @@ import {
     setGuestPiiAcknowledged,
     syncGuestSession,
 } from './utils/guestSession';
-import type { SurveyResult } from './components/PersonalitySurvey';
+import type { SurveyResult, LensType } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { encryptData } from './utils/encryption';
@@ -1487,7 +1487,22 @@ const App: React.FC = () => {
                 } catch { completedLenses = []; }
             }
             decrypted.connector = connectorEvaluation;
-            const encryptedData = await encryptData(encryptionKey, JSON.stringify(decrypted));
+            if (decrypted.narrativeProfile?.externalPerspectiveNote) {
+                const { externalPerspectiveNote: _removed, ...narrativeWithoutNote } = decrypted.narrativeProfile;
+                decrypted.narrativeProfile = narrativeWithoutNote;
+            }
+            const profilePath = (['BIG5', 'SD', 'RIEMANN'].includes(testType) ? testType : 'RIEMANN') as SurveyResult['path'];
+            const encryptedData = await encryptPersonalityProfile({
+                completedLenses: completedLenses.filter((l): l is LensType => l === 'sd' || l === 'riemann' || l === 'ocean'),
+                path: profilePath,
+                adaptationMode: decrypted.adaptationMode || 'stable',
+                spiralDynamics: decrypted.spiralDynamics,
+                riemann: decrypted.riemann,
+                big5: decrypted.big5,
+                narratives: decrypted.narratives,
+                narrativeProfile: decrypted.narrativeProfile,
+                connector: connectorEvaluation,
+            }, encryptionKey);
             await api.savePersonalityProfile({
                 testType,
                 completedLenses,
