@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** v2.6.0 deploy in progress/done 2026-09-04 (The Connector feature) — https://mc-beta.manualmode.at
+**Staging:** Deployed **2026-09-04**, v**2.6.0** Build **2** — https://mc-beta.manualmode.at (health OK). The Connector live. **Note:** initial deploy missed TTS tag `2.6.0` — fixed same day by retagging `tts:2.5.7` → `2.6.0` and starting `meaningful-conversations-tts-staging`.
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -15,7 +15,8 @@
 - **Backend:** `meaningful-conversations-backend/connector/` (vignettes, personaPrompt + role guard, evaluationPrompts + strict JSON schema, connectorScoring, unit tests 19✓), routes `routes/gemini/connector.js` (`GET /connector/start`, `POST /connector/turn` SSE, `POST /connector/evaluate`), mounted in `routes/gemini.js`. `personality.js`: `'connector'` in validLenses.
 - **Frontend:** `ConnectorIntroView` (mode choice text/voice, AI-Act notice), `ChatView` extended (`connectorConfig`/`onConnectorEnded`, TTS gender override), `ConnectorResultsView` (SVG radar, strengths/growth, per-vignette moments, E2EE save, Practice cross-sell ≥8), App.tsx run state machine + transition overlays, `utils/connectorRun.ts`. NavView: `connectorIntro|connectorChat|connectorResults`. Tile in BotSelection Kommunikation section. 5 generated persona avatars `public/avatars/connector-*.png`. i18n DE/EN parity (2348 keys ✓).
 - **E2EE save:** result stored inside `encryptedData` payload as `connector` key; `completedLenses` unchanged (no lens-UI side effects).
-- **Maxwell alignment (2026-09-04):** copy uses skill-framing ("connection is learnable"), NOT talent-framing — aligns with "Everyone Communicates, Few Connect" principle 5 and avoids IP proximity. **No book reference in app/marketing** (copyright assessment in session; dimensions/vignettes are original work). Legal review only if explicit marketing reference is ever wanted.
+- **Handbuch:** Kapitel **5.4** The Connector (DE/EN), Abschnitte 5.4/5.5 → 5.5/5.6 umnummeriert (`b6cac305`).
+- **Commits:** `1835882f` (feature) · `b6cac305` (handbook) · `0e24214d` (deploy build-2 sync).
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
