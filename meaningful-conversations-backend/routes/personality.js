@@ -5,6 +5,18 @@ const authMiddleware = require('../middleware/auth.js');
 const profileRefinement = require('../services/profileRefinement.js');
 const aiProvider = require('../services/aiProviderService.js');
 const { trackApiUsage, checkDailyCostCap } = require('../services/apiUsageTracker.js');
+const { withTimeout, parseStructuredJsonResponse } = require('./gemini/shared.js');
+
+const externalPerspectiveResponseSchema = {
+  type: 'OBJECT',
+  properties: {
+    text: {
+      type: 'STRING',
+      description: 'Bridge paragraph between self-signature and Connector observation. 2–3 sentences, max 80 words.',
+    },
+  },
+  required: ['text'],
+};
 
 /**
  * POST /api/personality/save
@@ -495,31 +507,42 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
     }
 
     const modelName = 'gemini-2.5-flash';
-    const result = await aiProvider.generateContent({
-      model: modelName,
-      contents: prompt,
-      config: {
-        temperature: 0.55,
-        maxOutputTokens: 512,
-        responseMimeType: 'application/json',
-        systemInstruction: normalizedLang === 'de'
-          ? 'Antworte ausschließlich mit validem JSON: { "text": "..." }. Keine Erklärungen außerhalb des JSON.'
-          : 'Respond only with valid JSON: { "text": "..." }. No explanations outside the JSON.',
-      },
-      userRegionPreference,
-      language: normalizedLang,
-    });
+    const llmConfig = {
+      temperature: 0.55,
+      maxOutputTokens: 1024,
+      responseMimeType: 'application/json',
+      responseSchema: externalPerspectiveResponseSchema,
+    };
+
+    const callLlm = () => withTimeout(
+      aiProvider.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: llmConfig,
+        userRegionPreference,
+        language: normalizedLang,
+        context: 'analysis',
+      }),
+      90000,
+      'External perspective generation timed out',
+    );
 
     let parsed;
-    try {
-      let jsonText = result.text.trim();
-      if (jsonText.startsWith('```json')) jsonText = jsonText.slice(7);
-      else if (jsonText.startsWith('```')) jsonText = jsonText.slice(3);
-      if (jsonText.endsWith('```')) jsonText = jsonText.slice(0, -3);
-      parsed = JSON.parse(jsonText.trim());
-    } catch (parseErr) {
-      console.error('[ExternalPerspective] parse error:', parseErr.message);
-      return res.status(500).json({ error: 'Failed to parse external perspective response.' });
+    let result;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      result = await callLlm();
+      try {
+        parsed = parseStructuredJsonResponse(result.text, 'external perspective');
+        break;
+      } catch (parseErr) {
+        console.error(`[ExternalPerspective] parse error (attempt ${attempt}):`, parseErr.message);
+        if (parseErr.rawPreview) {
+          console.error('[ExternalPerspective] raw preview:', parseErr.rawPreview);
+        }
+        if (attempt === 2) {
+          return res.status(500).json({ error: 'Failed to parse external perspective response.' });
+        }
+      }
     }
 
     const text = typeof parsed.text === 'string' ? parsed.text.trim() : '';
