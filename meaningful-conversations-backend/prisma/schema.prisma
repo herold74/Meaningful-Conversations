@@ -299,3 +299,22 @@ model PracticeEvaluation {
   @@index([createdAt])
   @@map("practice_evaluations")
 }
+
+/// Anonymized Connector run scores for GDPR-safe admin aggregates (no userId, no text).
+model ConnectorRunStat {
+  id            String   @id @default(cuid())
+  overallScore  Int
+  empathy       Int
+  presence      Int
+  curiosity     Int
+  nonJudgment   Int
+  steadiness    Int
+  vignetteIds   Json
+  endTypes      Json
+  language      String   @default("de") @map("lang")
+  liveMode      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("connector_run_stats")
+}

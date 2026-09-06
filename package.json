@@ -19,6 +19,7 @@
     "test:watch": "jest --watch",
     "practice-regression": "node scripts/run-practice-regression.mjs",
     "classic-regression": "node scripts/run-classic-regression.mjs",
+    "generate:connector-pdf": "npx tsx scripts/generate-connector-optimal-pdf.ts",
     "test:coverage": "jest --coverage --coverageProvider=v8",
     "test:backend": "cd meaningful-conversations-backend && npx jest",
     "ci": "npm test && npm run test:backend && npm run typecheck && npm run check:locales && npm run build"

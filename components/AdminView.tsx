@@ -35,6 +35,7 @@ import NewsletterPanel from './NewsletterPanel';
 import TestRunner from './TestRunner';
 import TranscriptRatingsView from './TranscriptRatingsView';
 import AdminPracticeAnalyticsView from './AdminPracticeAnalyticsView';
+import AdminConnectorAnalyticsView from './AdminConnectorAnalyticsView';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface AdminViewProps {
@@ -47,7 +48,7 @@ interface AdminViewProps {
     onTestRunnerOpened?: () => void;
 }
 
-type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage' | 'practice-analytics';
+type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage' | 'practice-analytics' | 'connector-analytics';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
 type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'profile' | 'loginCount' | 'xp' | 'lastLogin';
 
@@ -717,6 +718,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         runner: { icon: ActivityIcon, key: 'admin_runner_tab' },
         'api-usage': { icon: DollarIcon, key: 'admin_api_usage_tab' },
         'practice-analytics': { icon: ClipboardCheckIcon, key: 'admin_practice_analytics_tab' },
+        'connector-analytics': { icon: UsersIcon, key: 'admin_connector_analytics_tab' },
     };
 
     const sessionFeedback = useMemo(() => feedback.filter(item => item.rating !== null), [feedback]);
@@ -783,7 +785,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const renderTabs = () => (
         <div className="border-b border-gray-300 dark:border-gray-700 w-full min-w-0">
             <div className="flex w-full min-w-0">
-            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'api-usage'] as AdminTab[]).map(tab => {
+            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'connector-analytics', 'api-usage'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
 
                 const hasOpenTickets = tab === 'tickets' && tickets.some(tk => tk.status === 'OPEN');
@@ -1790,6 +1792,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             runner: currentUser?.isDeveloper ? renderTestRunner() : <p className="text-content-secondary">{t('admin_developer_required') || 'Developer access required.'}</p>,
             'api-usage': <ApiUsageView />,
             'practice-analytics': <AdminPracticeAnalyticsView />,
+            'connector-analytics': <AdminConnectorAnalyticsView />,
         };
 
         return <div className="p-2 sm:p-4 min-w-0 overflow-hidden">{views[activeTab]}</div>;

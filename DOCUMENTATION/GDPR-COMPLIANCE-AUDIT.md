@@ -130,24 +130,34 @@
 - UI: `AdminPracticeAnalyticsView.tsx`
 - **Art. 5(1)(c) GDPR**
 
-### 16. In-app purchase (Apple / RevenueCat) & PayPal
+### 16. Admin Connector analytics (NEW v2.6)
+- **Status:** GDPR-COMPLIANT
+- **Anonymized run stats:** `connector_run_stats` — dimension scores, vignette IDs, end types only; **no** userId, **no** evaluation text, **no** transcript
+- Written at evaluate time; full result remains E2EE on client in personality profile
+- **Active user count:** distinct `ApiUsage` rows on `/connector/evaluate` (activity metadata only); k-anonymity suppressed in API
+- **k-anonymity (k=5):** `services/connectorStatsService.js`
+- Retention: 12 months (`dataRetention.js`)
+- UI: `AdminConnectorAnalyticsView.tsx`
+- **Art. 5(1)(c), Art. 6(1)(f) GDPR** (legitimate interest: product quality)
+
+### 17. In-app purchase (Apple / RevenueCat) & PayPal
 - **Status:** GDPR-COMPLIANT *(privacy text v2.5.0 P1)*
 - iOS: StoreKit 2 + RevenueCat (pseudonymised internal user ID)
 - Web: PayPal — `Purchase` table (email, transaction IDs)
 - RevenueCat DPA via ToS (SCCs); Apple as independent controller
 - **Art. 6(1)(b), Art. 28 GDPR**
 
-### 17. Cookie usage
+### 18. Cookie usage
 - **Status:** GDPR-COMPLIANT
 - **No cookies** for tracking; localStorage/sessionStorage for technically necessary functions
 - No cookie banner required (ePrivacy)
 - Documented in PrivacyPolicyView; `public/privacy.html` partly less detailed
 
-### 18. Apple Privacy Manifest
+### 19. Apple Privacy Manifest
 - **Status:** GDPR-COMPLIANT
 - `ios/App/App/PrivacyInfo.xcprivacy` — no tracking declared
 
-### 19. Newsletter & consent
+### 20. Newsletter & consent
 - **Status:** GDPR-COMPLIANT
 - Opt-in at registration; `unsubscribeToken`; Mailjet as processor
 - **Art. 6(1)(a) GDPR**

@@ -130,24 +130,34 @@
 - UI: `AdminPracticeAnalyticsView.tsx`
 - **Art. 5 Abs. 1 lit. c DSGVO**
 
-### 16. In-App Purchase (Apple / RevenueCat) & PayPal
+### 16. Admin Connector Analytics (NEU v2.6)
+- **Status:** DSGVO-KONFORM
+- **Anonymisierte Run-Statistik:** `connector_run_stats` — Dimensions-Scores, Vignetten-IDs, End-Typen only; **keine** userId, **kein** Bewertungstext, **kein** Transkript
+- Beim Evaluate geschrieben; vollständiges Ergebnis bleibt E2EE im Persönlichkeitsprofil auf dem Client
+- **Aktive Nutzerzahl:** distinct `ApiUsage` auf `/connector/evaluate` (nur Aktivitäts-Metadaten); k-Anonymität in der API unterdrückt
+- **k-Anonymität (k=5):** `services/connectorStatsService.js`
+- Retention: 12 Monate (`dataRetention.js`)
+- UI: `AdminConnectorAnalyticsView.tsx`
+- **Art. 5 Abs. 1 lit. c, Art. 6 Abs. 1 lit. f DSGVO** (berechtigtes Interesse: Produktqualität)
+
+### 17. In-App Purchase (Apple / RevenueCat) & PayPal
 - **Status:** DSGVO-KONFORM *(Privacy-Texte v2.5.0 P1)*
 - iOS: StoreKit 2 + RevenueCat (pseudonymisierte interne User-ID)
 - Web: PayPal — `Purchase`-Tabelle (E-Mail, Transaktions-IDs)
 - RevenueCat DPA via ToS (SCCs); Apple als eigenständiger Verantwortlicher
 - **Art. 6 Abs. 1 lit. b, Art. 28 DSGVO**
 
-### 17. Cookie-Nutzung
+### 18. Cookie-Nutzung
 - **Status:** DSGVO-KONFORM
 - **Keine Cookies** für Tracking; localStorage/sessionStorage für technisch notwendige Funktionen
 - Kein Cookie-Banner erforderlich (ePrivacy)
 - Dokumentiert in PrivacyPolicyView; `public/privacy.html` teilweise weniger detailliert
 
-### 18. Apple Privacy Manifest
+### 19. Apple Privacy Manifest
 - **Status:** DSGVO-KONFORM
 - `ios/App/App/PrivacyInfo.xcprivacy` — kein Tracking deklariert
 
-### 19. Newsletter & Einwilligung
+### 20. Newsletter & Einwilligung
 - **Status:** DSGVO-KONFORM
 - Opt-in bei Registrierung; `unsubscribeToken`; Mailjet als AV
 - **Art. 6 Abs. 1 lit. a DSGVO**

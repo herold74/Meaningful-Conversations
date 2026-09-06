@@ -15,9 +15,11 @@ const {
   MAX_USER_TURNS,
 } = require('../../connector/personaPrompt.js');
 const { connectorEvaluationPrompts } = require('../../connector/evaluationPrompts.js');
+const { CONNECTOR_DIMENSIONS } = require('../../connector/evaluationPrompts.js');
 const {
   computeConnectorOverallScore,
   sanitizeConnectorEvaluation,
+  clampScore,
 } = require('../../connector/connectorScoring.js');
 const { stripCoacheeStageDirections } = require('../../practice/coacheeResponseSanitizer.js');
 const { trackApiUsage, checkDailyCostCap } = require('../../services/apiUsageTracker.js');
@@ -57,6 +59,32 @@ async function getUserRegionPreference(userId) {
     select: { aiRegionPreference: true },
   });
   return regionUser?.aiRegionPreference || 'optimal';
+}
+
+/** Persist anonymized scores for GDPR-safe admin aggregates (no userId, no text). */
+async function persistConnectorRunStat(evaluationResult, { language, liveMode, vignetteIds, endTypes }) {
+  const overallScore = evaluationResult.overallScore;
+  if (overallScore == null) return;
+
+  const dimensionScores = {};
+  for (const dim of CONNECTOR_DIMENSIONS) {
+    dimensionScores[dim] = clampScore(evaluationResult[dim]?.score) ?? 1;
+  }
+
+  try {
+    await prisma.connectorRunStat.create({
+      data: {
+        overallScore,
+        ...dimensionScores,
+        vignetteIds,
+        endTypes,
+        language,
+        liveMode: !!liveMode,
+      },
+    });
+  } catch (err) {
+    console.error('[Connector] Failed to persist anonymized run stat:', err.message);
+  }
 }
 
 // GET /api/gemini/connector/start — pick vignettes for a new run (registered users)
@@ -320,10 +348,17 @@ router.post('/connector/evaluate', authMiddleware, async (req, res) => {
       outputTokens: result.usage?.outputTokens || 0,
       durationMs,
       success: true,
+      isGuest: false,
     });
 
-    // Deliberately no DB persistence: the client stores the result E2EE
-    // as the 'connector' lens in the personality profile.
+    await persistConnectorRunStat(evaluationResult, {
+      language: lang,
+      liveMode: !!liveMode,
+      vignetteIds: evaluationResult.vignetteIds,
+      endTypes: evaluationResult.endTypes,
+    });
+
+    // Client stores full result E2EE as the 'connector' lens in the personality profile.
     res.json({ evaluation: evaluationResult, durationMs });
   } catch (error) {
     console.error('[Connector] evaluate error:', error);

@@ -158,4 +158,6 @@ Export des JSON-Ergebnisses für Regressions-Vergleich bei Prompt-Änderungen.
 
 ---
 
+**Druck-PDF:** [`CONNECTOR-OPTIMAL-CONVERSATIONS.pdf`](CONNECTOR-OPTIMAL-CONVERSATIONS.pdf) — neu erzeugen mit `npm run generate:connector-pdf`
+
 *Quelle Scripts: `utils/connectorLabScripts.ts` · Vignetten: `meaningful-conversations-backend/connector/vignettes.js`*
