@@ -357,6 +357,7 @@ export const generateNarrativeProfile = async (data: {
   };
   narratives: { flowStory: string; frictionStory: string };
   language: string;
+  connector?: ConnectorEvaluationResult | null;
 }) => {
   const response = await fetch(`${API_BASE_URL}/api/personality/generate-narrative`, {
     method: 'POST',

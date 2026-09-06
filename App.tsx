@@ -705,7 +705,8 @@ const App: React.FC = () => {
                                 big5: result.big5
                             },
                             narratives: result.narratives,
-                            language
+                            language,
+                            connector: result.connector ?? null,
                         });
                         
                         if (narrativeResponse.narrativeProfile) {

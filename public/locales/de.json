@@ -1041,6 +1041,8 @@
   "narrative_generating": "Generiere...",
   "narrative_language_mismatch": "Diese Signatur wurde in einer anderen Sprache generiert. Aktualisiere sie, um sie in deiner aktuellen Sprache zu erhalten.",
   "narrative_regenerate_language": "Neu generieren",
+  "narrative_regenerate_connector_hint": "Deine gespeicherte Verbindungs-Signatur (The Connector) fließt in die neue Signatur ein — als beobachtete Fremdsicht neben deinem Selbstbild.",
+  "narrative_regenerate_stale_connector_confirm": "Deine Verbindungs-Signatur ist älter als sechs Monate. Trotzdem in die neue Signatur einbeziehen? Ein neuer Connector-Durchlauf wäre genauer.",
   "narrative_generation_error": "Signatur-Generierung fehlgeschlagen. Bitte versuche es später erneut.",
   "adaptation_adaptive_title": "📊 Adaptives Profil",
   "adaptation_stable_title": "🔒 Stabiles Profil",
