@@ -39,6 +39,12 @@ import {
 } from '../utils/practiceLabScripts';
 import { runPracticeTestSession } from '../utils/runPracticeTestSession';
 import {
+  CONNECTOR_LAB_VIGNETTES,
+  ConnectorLabVignetteId,
+  getConnectorLabScriptedTurns,
+} from '../utils/connectorLabScripts';
+import { runConnectorTestSession, ConnectorLabScope } from '../utils/runConnectorTestSession';
+import {
   buildRegressionSnapshot,
   compareToBaseline,
   parseRegressionSnapshot,
@@ -185,7 +191,7 @@ const MOCK_SD_SESSIONS = [
 ];
 
 type TestPhase = 'setup' | 'running' | 'analyzing' | 'validation' | 'complete';
-type RunnerMode = 'classic' | 'practice_lab';
+type RunnerMode = 'classic' | 'practice_lab' | 'connector_lab';
 
 interface TestRunnerProps {
   onClose: () => void;
@@ -195,7 +201,7 @@ interface TestRunnerProps {
   initialScenarioId?: string;
   /** Start the selected scenario immediately on open */
   autoStart?: boolean;
-  /** Open directly on Practice Lab or classic scenarios tab */
+  /** Open directly on Practice Lab, Connector Lab, or classic scenarios tab */
   initialRunnerMode?: RunnerMode;
 }
 
@@ -220,6 +226,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const [practiceLabTotalTurns, setPracticeLabTotalTurns] = useState(SAM_STAGE_COMPLETE_TURNS);
   const [practiceRegressionBaseline, setPracticeRegressionBaseline] = useState<PracticeRegressionSnapshot | null>(null);
   const [regressionCompareResult, setRegressionCompareResult] = useState<RegressionCompareResult | null>(null);
+  const [connectorLabVignetteId, setConnectorLabVignetteId] = useState<ConnectorLabVignetteId>(CONNECTOR_LAB_VIGNETTES[0].id);
+  const [connectorLabScope, setConnectorLabScope] = useState<ConnectorLabScope>('single');
+  const [connectorLabVignetteProgress, setConnectorLabVignetteProgress] = useState({ index: 0, total: 1 });
+  const [connectorLabTurnProgress, setConnectorLabTurnProgress] = useState({ index: 0, total: 4 });
   
   // Multi-select profile state
   const [selectedRiemann, setSelectedRiemann] = useState<RiemannProfileBlock | null>(null);
@@ -286,6 +296,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   const categories: TestCategory[] = ['core', 'session', 'personality', 'safety', 'bot', 'practice'];
   
   const isPracticeScenario = selectedScenario?.specialTestMode === 'practice_eval' || runnerMode === 'practice_lab';
+  const isConnectorLab = runnerMode === 'connector_lab';
   
   const filteredScenarios = categoryFilter === 'all' 
     ? scenarios 
@@ -1158,6 +1169,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
   useEffect(() => {
     if (!autoStartPending.current || !selectedScenario || phase !== 'setup' || isRunning) return;
     if (runnerMode === 'practice_lab') return;
+    if (runnerMode === 'connector_lab') return;
     if (initialScenarioId && selectedScenario.id !== initialScenarioId) return;
     autoStartPending.current = false;
     void runTest();
@@ -1221,6 +1233,40 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     }
   }, [language, practiceDifficulty, practiceLabScenarioId, practiceLabMode, practiceRegressionBaseline, cancelAutoStart]);
 
+  const runConnectorLab = useCallback(async () => {
+    cancelAutoStart();
+    setPhase('running');
+    setIsRunning(true);
+    setError(null);
+    setCurrentMessageIndex(0);
+    setTestResult(null);
+    const vignetteIds = connectorLabScope === 'all'
+      ? CONNECTOR_LAB_VIGNETTES.map((v) => v.id)
+      : [connectorLabVignetteId];
+    setConnectorLabVignetteProgress({ index: 0, total: vignetteIds.length });
+    setConnectorLabTurnProgress({ index: 0, total: getConnectorLabScriptedTurns(connectorLabVignetteId, language).length });
+
+    try {
+      const result = await runConnectorTestSession({
+        vignetteId: connectorLabVignetteId,
+        scope: connectorLabScope,
+        language,
+        onVignette: (index, total) => setConnectorLabVignetteProgress({ index, total }),
+        onTurn: (index, total) => {
+          setCurrentMessageIndex(index);
+          setConnectorLabTurnProgress({ index, total });
+        },
+      });
+      setTestResult(result);
+      setPhase('complete');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connector lab failed');
+      setPhase('setup');
+    } finally {
+      setIsRunning(false);
+    }
+  }, [language, connectorLabVignetteId, connectorLabScope, cancelAutoStart]);
+
   const handleBaselineFileLoad = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1253,6 +1299,80 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const filename = `practice-regression-${practiceLabScenarioId}-${practiceLabMode}-${new Date().toISOString().slice(0, 10)}.json`;
     await downloadTextFile(jsonContent, filename, 'application/json');
   }, [testResult, practiceLabScenarioId, practiceLabMode, language, practiceDifficulty]);
+
+  const renderConnectorLabSetup = () => (
+    <div className="space-y-5">
+      <div className="p-4 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+        <div className="font-semibold text-content-primary">{t('connector_lab_title')}</div>
+        <p className="text-sm text-content-secondary mt-1">{t('connector_lab_desc')}</p>
+        <p className="text-xs text-content-subtle mt-2">{t('connector_lab_note')}</p>
+      </div>
+
+      <div>
+        <h4 className="font-semibold mb-2 text-content-primary">{t('connector_lab_scope_label')}</h4>
+        <div className="flex flex-wrap gap-2">
+          {(['single', 'all'] as ConnectorLabScope[]).map((scope) => (
+            <button
+              key={scope}
+              type="button"
+              onClick={() => setConnectorLabScope(scope)}
+              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                connectorLabScope === scope
+                  ? 'border-accent-primary bg-accent-primary/10 text-content-primary'
+                  : 'border-border-secondary text-content-secondary hover:border-accent-primary/50'
+              }`}
+            >
+              {t(scope === 'single' ? 'connector_lab_scope_single' : 'connector_lab_scope_all')}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {connectorLabScope === 'single' && (
+        <div>
+          <h4 className="font-semibold mb-2 text-content-primary">{t('connector_lab_vignette_label')}</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {CONNECTOR_LAB_VIGNETTES.map((vignette) => (
+              <button
+                key={vignette.id}
+                type="button"
+                onClick={() => setConnectorLabVignetteId(vignette.id)}
+                className={`p-3 rounded-lg border text-left text-sm transition-colors ${
+                  connectorLabVignetteId === vignette.id
+                    ? 'border-accent-primary bg-accent-primary/10'
+                    : 'border-border-secondary hover:border-accent-primary/50'
+                }`}
+              >
+                <span className="font-medium">{t(vignette.labelKey)}</span>
+                <span className="block text-xs text-content-subtle mt-1">
+                  {vignette.primaryDimensions.join(' · ')}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <details className="text-sm">
+        <summary className="cursor-pointer font-medium text-content-primary">{t('connector_lab_script_preview')}</summary>
+        <ol className="mt-2 space-y-2 list-decimal list-inside text-content-secondary text-xs">
+          {getConnectorLabScriptedTurns(connectorLabVignetteId, language).map((turn, i) => (
+            <li key={i} className="pl-1">{turn}</li>
+          ))}
+        </ol>
+      </details>
+
+      <button
+        type="button"
+        onClick={() => runConnectorLab()}
+        disabled={isRunning}
+        className="w-full py-3 px-6 bg-accent-primary text-button-foreground-on-accent rounded-lg font-semibold
+                   disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-primary/90 transition-colors"
+      >
+        🚀 {t('connector_lab_run')}
+      </button>
+    </div>
+  );
 
   // Render setup phase
   const renderPracticeLabSetup = () => (
@@ -1415,9 +1535,23 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         >
           {t('practice_lab_title')}
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            cancelAutoStart();
+            setRunnerMode('connector_lab');
+          }}
+          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            runnerMode === 'connector_lab'
+              ? 'bg-background-secondary text-content-primary shadow-sm'
+              : 'text-content-secondary hover:text-content-primary'
+          }`}
+        >
+          {t('connector_lab_title')}
+        </button>
       </div>
 
-      {runnerMode === 'practice_lab' ? renderPracticeLabSetup() : (
+      {runnerMode === 'practice_lab' ? renderPracticeLabSetup() : runnerMode === 'connector_lab' ? renderConnectorLabSetup() : (
         <>
       {/* Bot Selection */}
       {!isPracticeScenario && (
@@ -1652,6 +1786,34 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
 
   // Render running phase
   const renderRunning = () => {
+    if (runnerMode === 'connector_lab') {
+      const previewTurn = getConnectorLabScriptedTurns(connectorLabVignetteId, language)[connectorLabTurnProgress.index];
+      return (
+        <div className="text-center py-12">
+          <BrandLoader size="md" />
+          <h3 className="text-xl font-semibold mt-4 text-content-primary">{t('test_runner_running')}</h3>
+          <p className="text-content-secondary mt-2">
+            {t('connector_lab_progress_vignette', {
+              current: connectorLabVignetteProgress.index + 1,
+              total: connectorLabVignetteProgress.total,
+            })}
+          </p>
+          <p className="text-content-secondary mt-1">
+            {t('test_runner_message_progress', {
+              current: connectorLabTurnProgress.index + 1,
+              total: connectorLabTurnProgress.total,
+            })}
+          </p>
+          {previewTurn && (
+            <p className="text-sm text-content-secondary mt-4 italic max-w-md mx-auto">
+              &quot;{previewTurn}&quot;
+            </p>
+          )}
+          <p className="text-xs text-content-subtle mt-2">{t('connector_lab_desc')}</p>
+        </div>
+      );
+    }
+
     if (runnerMode === 'practice_lab') {
       const stageGoals = getSamStageGoals(practiceLabScenarioId);
       const currentGoal = stageGoals[currentMessageIndex];
@@ -2446,6 +2608,10 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
         id: selectedScenario.id,
         name: selectedScenario.name,
         category: selectedScenario.category,
+      } : runnerMode === 'connector_lab' ? {
+        id: testResult.scenarioId,
+        name: t('connector_lab_title'),
+        category: 'connector_lab',
       } : {
         id: testResult.scenarioId,
         name: `Sam Practice Lab · ${practiceLabScenarioId}`,
@@ -2454,7 +2620,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
       bot: selectedBot ? {
         id: selectedBot.id,
         name: selectedBot.name,
-      } : { id: testResult.botId, name: 'Coach Practice' },
+      } : { id: testResult.botId, name: runnerMode === 'connector_lab' ? 'The Connector' : 'Coach Practice' },
       profile: {
         type: useMyProfile ? 'user_profile' : 'manual',
         riemann: selectedRiemann?.id || null,
@@ -2496,7 +2662,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const botSlug = selectedBot?.id || testResult.botId;
     const filename = `test-${selectedScenario?.id ?? testResult.scenarioId}-${botSlug}-${new Date().toISOString().slice(0, 10)}.json`;
     await downloadTextFile(jsonContent, filename, 'application/json');
-  }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult, runnerMode, practiceLabScenarioId, practiceLabMode]);
+  }, [testResult, selectedScenario, selectedBot, useMyProfile, selectedRiemann, selectedSD, selectedOCEAN, manualCheckResults, manualNotes, sessionAnalysisResult, runnerMode, practiceLabScenarioId, practiceLabMode, connectorLabVignetteId, t]);
 
   // Render complete phase
   const renderComplete = () => {
@@ -2511,6 +2677,7 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
     const totalChecks = autoTotalCount + manualTotalCount;
     const passRate = totalChecks > 0 ? Math.round((totalPassed / totalChecks) * 100) : 100;
     const practiceEval = testResult.practiceEvaluation;
+    const connectorEval = testResult.connectorEvaluation;
 
     return (
       <div className="text-center py-8">
@@ -2546,6 +2713,61 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {connectorEval && (
+          <div className="mt-6 p-4 bg-background-tertiary rounded-lg text-left max-w-lg mx-auto space-y-3">
+            <h4 className="font-semibold text-content-primary">🔗 {t('connector_lab_results_title')}</h4>
+            {runnerMode === 'connector_lab' && testResult.connectorLabMeta && (
+              <p className="text-xs text-content-secondary">
+                {testResult.connectorLabMeta.scope === 'all'
+                  ? t('connector_lab_scope_all')
+                  : t(CONNECTOR_LAB_VIGNETTES.find((v) => v.id === connectorLabVignetteId)?.labelKey ?? 'connector_lab_vignette_jonas')}
+                {' · '}
+                {testResult.connectorLabMeta.endTypes.filter((e) => e === 'heard').length}/{testResult.connectorLabMeta.endTypes.length} {t('connector_lab_heard_count')}
+              </p>
+            )}
+            <div className="text-sm">
+              <span className="text-content-secondary">{t('connector_results_overall_label')}:</span>{' '}
+              <span className="font-bold text-lg text-accent-primary">
+                {connectorEval.evaluation.overallScore ?? '—'}/10
+              </span>
+            </div>
+            {testResult.autoCheckResults.filter((c) => c.checkId.startsWith('connector_')).map((check) => (
+              <p
+                key={check.checkId}
+                className={`text-sm font-medium ${check.passed ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}
+              >
+                {check.checkId}: {check.details}
+              </p>
+            ))}
+            <div className="grid grid-cols-2 gap-2 text-xs text-content-primary">
+              <div>Empathy: {connectorEval.evaluation.empathy?.score ?? '—'}/10</div>
+              <div>Presence: {connectorEval.evaluation.presence?.score ?? '—'}/10</div>
+              <div>Curiosity: {connectorEval.evaluation.curiosity?.score ?? '—'}/10</div>
+              <div>Non-judgment: {connectorEval.evaluation.nonJudgment?.score ?? '—'}/10</div>
+              <div>Steadiness: {connectorEval.evaluation.steadiness?.score ?? '—'}/10</div>
+            </div>
+            <p className="text-sm text-content-secondary">{connectorEval.evaluation.summary}</p>
+            {connectorEval.evaluation.strengths?.length > 0 && (
+              <ul className="text-xs text-content-secondary list-disc list-inside">
+                {connectorEval.evaluation.strengths.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            )}
+            <details className="text-xs">
+              <summary className="cursor-pointer text-accent-primary">Transcript ({testResult.responses.length} turns)</summary>
+              <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+                {testResult.responses.map((r, i) => (
+                  <div key={i} className="p-2 bg-background-secondary rounded">
+                    <div className="font-medium text-content-primary">You: {r.userMessage}</div>
+                    <div className="text-content-secondary mt-1">Persona: {r.botResponse}</div>
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
         )}
 

@@ -332,7 +332,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [dynamicRunnerOptions, setDynamicRunnerOptions] = useState<{
         initialScenarioId?: string;
         autoStart?: boolean;
-        initialRunnerMode?: 'classic' | 'practice_lab';
+        initialRunnerMode?: 'classic' | 'practice_lab' | 'connector_lab';
     }>({});
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
     useModalOpen(showMismatchWarning);
@@ -1637,6 +1637,18 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     actionLabel={t('admin_simulator_open')}
                     onAction={() => {
                         setDynamicRunnerOptions({ initialRunnerMode: 'practice_lab' });
+                        setShowDynamicTestRunner(true);
+                    }}
+                />
+
+                <SimulatorToolCard
+                    icon="🔗"
+                    title={t('admin_connector_lab_title')}
+                    description={t('admin_connector_lab_desc')}
+                    note={t('admin_connector_lab_note')}
+                    actionLabel={t('admin_simulator_open')}
+                    onAction={() => {
+                        setDynamicRunnerOptions({ initialRunnerMode: 'connector_lab' });
                         setShowDynamicTestRunner(true);
                     }}
                 />
