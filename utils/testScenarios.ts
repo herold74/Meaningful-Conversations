@@ -254,6 +254,18 @@ export interface TestRunResult {
     stagesUsed: string[];
     scenarioId: string;
   };
+
+  /** Connector Lab evaluation (scripted optimal-connection QA) */
+  connectorEvaluation?: {
+    evaluation: import('../types').ConnectorEvaluationResult;
+    durationMs: number;
+  };
+
+  connectorLabMeta?: {
+    scope: 'single' | 'all';
+    vignetteIds: string[];
+    endTypes: import('../types').ConnectorEndType[];
+  };
 }
 
 // ============================================

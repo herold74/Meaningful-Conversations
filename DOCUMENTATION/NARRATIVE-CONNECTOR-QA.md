@@ -61,6 +61,8 @@ cd meaningful-conversations-backend && npx jest services/__tests__/narrativeConn
 
 For LLM regression on staging, see [`.cursor/skills/meaningful-conversations/llm-upgrade/SKILL.md`](../.cursor/skills/meaningful-conversations/llm-upgrade/SKILL.md).
 
+**Connector QA Lab (admin):** Session Simulator → Connector QA Lab runs scripted optimal conversations; see [`CONNECTOR-OPTIMAL-CONVERSATIONS.md`](CONNECTOR-OPTIMAL-CONVERSATIONS.md).
+
 ## UX copy
 
 - Modal hint when connector present: `narrative_regenerate_connector_hint`
