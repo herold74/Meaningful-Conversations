@@ -294,6 +294,22 @@ async function generateContent({ model, contents, config, skipFallback = false, 
 }
 
 /**
+ * Extract visible text from a Google GenAI response.
+ * Gemini 2.5 thinking models may leave response.text empty while parts still hold text,
+ * or exhaust maxOutputTokens on thoughts only (finishReason MAX_TOKENS).
+ */
+function extractGoogleResponseText(response) {
+  if (response?.text) return response.text;
+  const parts = response?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts
+    .filter((part) => !part.thought && typeof part.text === 'string')
+    .map((part) => part.text)
+    .join('')
+    .trim();
+}
+
+/**
  * Generate content using Google Gemini
  */
 async function generateWithGoogle({ model, contents, config, context = 'chat' }) {
@@ -311,7 +327,7 @@ async function generateWithGoogle({ model, contents, config, context = 'chat' })
   });
   
   return {
-    text: response.text,
+    text: extractGoogleResponseText(response),
     usage: response.usageMetadata ? {
       inputTokens: response.usageMetadata.promptTokenCount || 0,
       outputTokens: response.usageMetadata.candidatesTokenCount || 0,
