@@ -4,12 +4,16 @@ import { useLocalization } from '../context/LocalizationContext';
 import { useModalOpen } from '../utils/modalUtils';
 import Button from './shared/Button';
 
+import type { ProfileTranslator } from '../utils/profileTranslations';
+
 interface ExternalPerspectivePreviewModalProps {
   previousText: string | null;
   proposedText: string;
   onConfirm: () => void;
   onCancel: () => void;
   isSaving: boolean;
+  /** Signature content language — keeps preview labels aligned with narrative text */
+  t?: ProfileTranslator;
 }
 
 const ExternalPerspectivePreviewModal: React.FC<ExternalPerspectivePreviewModalProps> = ({
@@ -18,8 +22,10 @@ const ExternalPerspectivePreviewModal: React.FC<ExternalPerspectivePreviewModalP
   onConfirm,
   onCancel,
   isSaving,
+  t: contentT,
 }) => {
-  const { t } = useLocalization();
+  const { t: uiT } = useLocalization();
+  const t = contentT ?? uiT;
   useModalOpen();
 
   return createPortal(

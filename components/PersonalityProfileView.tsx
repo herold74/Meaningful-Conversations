@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalOpen } from '../utils/modalUtils';
 import { useLocalization } from '../context/LocalizationContext';
@@ -6,7 +6,7 @@ import * as api from '../services/api';
 import { updateCoachingMode } from '../services/userService';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile, SpiralDynamicsResult, LensType } from './PersonalitySurvey';
-import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
+import { generatePDF, generateSurveyPdfFilename, resolvePdfLanguage } from '../utils/pdfGeneratorReact';
 import { detectPII, PIIDetectionResult } from '../utils/piiDetection';
 import BrandLoader from './shared/BrandLoader';
 import Button from './shared/Button';
@@ -19,30 +19,29 @@ import { User, CoachingMode } from '../types';
 import type { ConnectorEvaluationResult } from '../types';
 import type { ExternalPerspectiveNote } from './PersonalitySurvey';
 import { isConnectorStale, isExternalPerspectiveOutdated } from '../utils/connectorProfile';
+import {
+  extractOperatingSystemText,
+  getExternalPerspectiveText,
+  isExternalPerspectiveLanguageMismatch,
+  resolveExternalPerspectiveSourceLanguage,
+  resolveProfileContentLanguage,
+} from '../utils/profileContentLanguage';
+import { createProfileTranslator } from '../utils/profileTranslations';
 
 // Narrative Profile Display Component
 interface NarrativeProfileSectionProps {
   narrativeProfile: NarrativeProfile;
   t: (key: string) => string;
+  contentLanguage: 'de' | 'en';
 }
 
-const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narrativeProfile, t }) => {
-  // Safely extract operatingSystem - handle both string and object formats
-  const operatingSystemText = typeof narrativeProfile.operatingSystem === 'string' 
-    ? narrativeProfile.operatingSystem 
-    : (narrativeProfile.operatingSystem as any)?.core || 
-      (narrativeProfile.operatingSystem as any)?.dynamics ||
-      JSON.stringify(narrativeProfile.operatingSystem);
-  
+const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
+  narrativeProfile,
+  t,
+  contentLanguage,
+}) => {
   return (
     <div>
-      {/* Operating System - The main paradox synthesis */}
-      <div className="prose prose-sm dark:prose-invert max-w-none mb-8">
-        <div className="text-content-primary leading-relaxed whitespace-pre-line">
-          {operatingSystemText}
-        </div>
-      </div>
-
       {/* Superpowers */}
       <div className="mb-8">
         <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
@@ -112,7 +111,10 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({ narra
       {/* Generation timestamp */}
       {narrativeProfile.generatedAt && (
         <div className="mt-6 text-xs text-content-tertiary text-right">
-          {t('narrative_generated_at') || 'Generiert'}: {new Date(narrativeProfile.generatedAt).toLocaleDateString()}
+          {t('narrative_generated_at') || 'Generiert'}:{' '}
+          {new Date(narrativeProfile.generatedAt).toLocaleDateString(
+            contentLanguage === 'de' ? 'de-DE' : 'en-US',
+          )}
         </div>
       )}
     </div>
@@ -381,7 +383,16 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [proposedExternalPerspective, setProposedExternalPerspective] = useState<ExternalPerspectiveNote | null>(null);
   const [isEnrichingExternalPerspective, setIsEnrichingExternalPerspective] = useState(false);
   const [externalPerspectiveError, setExternalPerspectiveError] = useState<string | null>(null);
+  const [externalPerspectiveTranslatedNotice, setExternalPerspectiveTranslatedNotice] = useState(false);
+  const [isAutoTranslatingExternalPerspective, setIsAutoTranslatingExternalPerspective] = useState(false);
+  const externalPerspectiveTranslationKeyRef = useRef<string | null>(null);
   useModalOpen(showDpcWarning || showDeleteWarning || showExternalPerspectivePreview);
+
+  const contentLanguage = useMemo(
+    () => resolveProfileContentLanguage(language, decryptedData?.narrativeProfile),
+    [language, decryptedData?.narrativeProfile],
+  );
+  const tContent = useMemo(() => createProfileTranslator(contentLanguage), [contentLanguage]);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
@@ -524,21 +535,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       if (decryptedData.riemann) completedLenses.push('riemann');
       if (decryptedData.big5) completedLenses.push('ocean');
       
-      // Check for language mismatch in narrative
-      const narrativeLangMismatch = decryptedData.narrativeProfile?.generatedLanguage 
-        && decryptedData.narrativeProfile.generatedLanguage !== language;
-      
-      if (narrativeLangMismatch) {
-        const confirmMsg = language === 'de'
-          ? 'Deine Signatur wurde auf Englisch generiert. Das PDF wird gemischte Sprachen enthalten.\n\nMöchtest du die Signatur erst aktualisieren (Abbrechen) oder das PDF trotzdem herunterladen (OK)?'
-          : 'Your signature was generated in German. The PDF will contain mixed languages.\n\nWould you like to update the signature first (Cancel) or download the PDF anyway (OK)?';
-        if (!window.confirm(confirmMsg)) {
-          setShowNarrativeStoriesModal(true);
-          return;
-        }
-      }
-      
-      // Reconstruct full SurveyResult for formatting
       const surveyResult: SurveyResult = {
         completedLenses,
         path: profileMetadata.testType as 'RIEMANN' | 'BIG5' | 'SD',
@@ -551,8 +547,9 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         narrativeProfile: decryptedData.narrativeProfile,
         connector: decryptedData.connector,
       };
-      
-      const filename = generateSurveyPdfFilename(surveyResult.path, language);
+
+      const pdfLanguage = resolvePdfLanguage(language, surveyResult);
+      const filename = generateSurveyPdfFilename(surveyResult.path, pdfLanguage);
       await generatePDF(surveyResult, filename, language, currentUser?.email);
     } catch (err) {
       console.error('PDF generation failed:', err);
@@ -633,12 +630,68 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
     });
   };
 
+  useEffect(() => {
+    if (!encryptionKey || !profileMetadata || !decryptedData?.narrativeProfile) return;
+
+    const note = decryptedData.narrativeProfile.externalPerspectiveNote;
+    if (!note?.text) return;
+
+    const targetLang = resolveProfileContentLanguage(language, decryptedData.narrativeProfile);
+    if (!isExternalPerspectiveLanguageMismatch(note, targetLang)) return;
+
+    const attemptKey = `${note.generatedAt || ''}:${note.text}:${targetLang}`;
+    if (externalPerspectiveTranslationKeyRef.current === attemptKey) return;
+    externalPerspectiveTranslationKeyRef.current = attemptKey;
+
+    let cancelled = false;
+
+    (async () => {
+      setIsAutoTranslatingExternalPerspective(true);
+      try {
+        const sourceLang = resolveExternalPerspectiveSourceLanguage(note, targetLang);
+        const response = await api.translateExternalPerspectiveNote({
+          text: note.text,
+          sourceLang,
+          targetLang,
+        });
+
+        if (cancelled) return;
+
+        const updatedNote: ExternalPerspectiveNote = {
+          ...note,
+          text: response.text,
+          generatedLanguage: (response.generatedLanguage === 'en' ? 'en' : 'de') as 'de' | 'en',
+        };
+        const updatedData = {
+          ...decryptedData,
+          narrativeProfile: {
+            ...decryptedData.narrativeProfile,
+            externalPerspectiveNote: updatedNote,
+          },
+        };
+        setDecryptedData(updatedData);
+        await persistProfileBlob(updatedData);
+        setExternalPerspectiveTranslatedNotice(true);
+        window.setTimeout(() => setExternalPerspectiveTranslatedNotice(false), 8000);
+      } catch (err) {
+        console.error('Auto-translate external perspective failed:', err);
+        externalPerspectiveTranslationKeyRef.current = null;
+      } finally {
+        if (!cancelled) setIsAutoTranslatingExternalPerspective(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [decryptedData, encryptionKey, profileMetadata, language]);
+
   const handleRequestExternalPerspective = async () => {
     if (!decryptedData?.narrativeProfile || !decryptedData?.connector) return;
 
     const connector = decryptedData.connector as ConnectorEvaluationResult;
     if (isConnectorStale(connector)) {
-      const proceed = window.confirm(t('profile_external_perspective_stale_confirm'));
+      const proceed = window.confirm(tContent('profile_external_perspective_stale_confirm'));
       if (!proceed) return;
     }
 
@@ -647,7 +700,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
     try {
       const np = decryptedData.narrativeProfile;
-      const enrichLanguage = np.generatedLanguage === 'en' ? 'en' : np.generatedLanguage === 'de' ? 'de' : language;
+      const enrichLanguage = resolveProfileContentLanguage(language, np);
       const response = await api.generateExternalPerspectiveNote({
         narrativeProfile: {
           operatingSystem: typeof np.operatingSystem === 'string'
@@ -666,7 +719,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       }
     } catch (err) {
       console.error('External perspective generation failed:', err);
-      setExternalPerspectiveError(t('profile_external_perspective_error'));
+      setExternalPerspectiveError(tContent('profile_external_perspective_error'));
     } finally {
       setIsEnrichingExternalPerspective(false);
     }
@@ -693,7 +746,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       setIsNarrativeExpanded(true);
     } catch (err) {
       console.error('Failed to save external perspective:', err);
-      setExternalPerspectiveError(t('profile_external_perspective_save_error'));
+      setExternalPerspectiveError(tContent('profile_external_perspective_save_error'));
     } finally {
       setIsEnrichingExternalPerspective(false);
     }
@@ -896,41 +949,58 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               className="w-full px-4 sm:px-5 py-4 flex items-center justify-between hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors"
             >
               <h3 className="text-lg font-semibold text-content-primary flex items-center gap-2">
-                🧬 {t('narrative_profile_title') || 'Deine Signatur'}
+                🧬 {tContent('narrative_profile_title') || 'Deine Signatur'}
               </h3>
               <span className={`text-xl text-content-tertiary transition-transform ${isNarrativeExpanded ? 'rotate-180' : ''}`}>
                 ▼
               </span>
             </button>
 
-            {decryptedData.narrativeProfile.externalPerspectiveNote ? (
-              <div className="mx-4 sm:mx-5 mt-2 p-4 rounded-lg border border-accent-primary/30 bg-accent-primary/5">
-                <p className="text-xs font-semibold text-accent-primary uppercase tracking-wide mb-2">
-                  {t('profile_external_perspective_title')}
+            {externalPerspectiveTranslatedNotice && (
+              <div className="mx-4 sm:mx-5 mt-2 p-3 rounded-lg bg-status-success-background border border-status-success-border">
+                <p className="text-sm text-status-success-foreground">
+                  {tContent('profile_external_perspective_translated_success')}
                 </p>
-                {decryptedData.connector && isExternalPerspectiveOutdated(
-                  decryptedData.narrativeProfile.externalPerspectiveNote,
-                  decryptedData.connector as ConnectorEvaluationResult,
-                ) && (
-                  <p className="text-xs text-amber-700 dark:text-amber-300 mb-2 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                    {t('profile_external_perspective_outdated')}
+              </div>
+            )}
+
+            {decryptedData.connector && decryptedData.narrativeProfile.externalPerspectiveNote
+              && isExternalPerspectiveOutdated(
+                decryptedData.narrativeProfile.externalPerspectiveNote,
+                decryptedData.connector as ConnectorEvaluationResult,
+              ) && (
+              <div className="mx-4 sm:mx-5 mt-2">
+                <p className="text-xs text-amber-700 dark:text-amber-300 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  {tContent('profile_external_perspective_outdated')}
+                </p>
+              </div>
+            )}
+
+            <div className="px-4 sm:px-5 pt-2 pb-4">
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <div className="text-content-primary leading-relaxed whitespace-pre-line">
+                  {extractOperatingSystemText(decryptedData.narrativeProfile)}
+                </div>
+                {!isAutoTranslatingExternalPerspective && getExternalPerspectiveText(decryptedData.narrativeProfile) && (
+                  <div className="text-content-primary leading-relaxed whitespace-pre-line mt-4">
+                    {getExternalPerspectiveText(decryptedData.narrativeProfile)}
+                  </div>
+                )}
+                {isAutoTranslatingExternalPerspective && (
+                  <p className="text-sm text-content-tertiary italic mt-4">
+                    {tContent('profile_external_perspective_translating')}
                   </p>
                 )}
-                <p className="text-sm text-content-primary leading-relaxed">
-                  {decryptedData.narrativeProfile.externalPerspectiveNote.text}
-                </p>
-                <p className="text-xs text-content-tertiary mt-2 italic">
-                  {t('profile_external_perspective_disclaimer')}
-                </p>
               </div>
-            ) : decryptedData.connector ? (
-              <div className="mx-4 sm:mx-5 mt-2 p-3 rounded-lg border border-border-secondary dark:border-border-primary bg-background-secondary/50 text-sm text-content-secondary leading-relaxed">
-                {t('profile_connector_signature_bridge')}
-              </div>
-            ) : null}
-            
+              {!getExternalPerspectiveText(decryptedData.narrativeProfile) && decryptedData.connector && (
+                <p className="text-sm text-content-secondary italic leading-relaxed mt-3">
+                  {tContent('profile_connector_signature_bridge')}
+                </p>
+              )}
+            </div>
+
             {/* Language mismatch warning */}
-            {decryptedData.narrativeProfile.generatedLanguage && decryptedData.narrativeProfile.generatedLanguage !== language && (
+            {contentLanguage !== language && (
               <div className="mx-4 sm:mx-5 mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg flex items-center justify-between gap-3">
                 <p className="text-amber-800 dark:text-amber-300 text-sm flex-1">
                   ⚠️ {t('narrative_language_mismatch') || 'Diese Signatur wurde in einer anderen Sprache generiert. Aktualisiere sie, um sie in deiner aktuellen Sprache zu erhalten.'}
@@ -950,7 +1020,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             {/* Collapsible Content */}
             {isNarrativeExpanded && (
               <div className="px-4 sm:px-5 pb-4">
-                <NarrativeProfileSection narrativeProfile={decryptedData.narrativeProfile} t={t} />
+                <NarrativeProfileSection
+                  narrativeProfile={decryptedData.narrativeProfile}
+                  t={tContent}
+                  contentLanguage={contentLanguage}
+                />
               </div>
             )}
             
@@ -964,8 +1038,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 variant="secondary"
               >
                 {isGeneratingNarrative 
-                  ? (t('narrative_generating') || 'Generiere...')
-                  : <>🔄 {t('narrative_update_button') || 'Aktualisieren'}</>
+                  ? (tContent('narrative_generating') || 'Generiere...')
+                  : <>🔄 {tContent('narrative_update_button') || 'Aktualisieren'}</>
                 }
               </Button>
               <Button
@@ -973,7 +1047,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 size="sm"
                 variant="secondary"
               >
-                📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
+                📄 {tContent('profile_view_download_pdf') || 'Als PDF herunterladen'}
               </Button>
               {decryptedData.connector && (
                 <Button
@@ -983,7 +1057,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   variant="secondary"
                   loading={isEnrichingExternalPerspective}
                 >
-                  {t('profile_external_perspective_enrich_button')}
+                  {tContent('profile_external_perspective_enrich_button')}
                 </Button>
               )}
               <Button
@@ -1593,6 +1667,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             setProposedExternalPerspective(null);
           }}
           isSaving={isEnrichingExternalPerspective}
+          t={tContent}
         />
       )}
     </div>

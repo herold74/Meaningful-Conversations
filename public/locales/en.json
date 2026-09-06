@@ -2368,5 +2368,8 @@
   "profile_external_perspective_preview_note": "You can repeat this enrichment anytime — e.g. after a new Connector run.",
   "profile_external_perspective_preview_cancel": "Cancel",
   "profile_external_perspective_preview_confirm": "Save",
-  "profile_external_perspective_outdated": "This external view refers to an older connection signature. Please run “Enrich signature with external view” again or repeat The Connector."
+  "profile_external_perspective_outdated": "This external view refers to an older connection signature. Please run “Enrich signature with external view” again or repeat The Connector.",
+  "profile_external_perspective_language_mismatch": "This external view is in a different language than your signature. Run “Enrich signature with external view” again so both match.",
+  "profile_external_perspective_translated_success": "The external view was translated to your profile language.",
+  "profile_external_perspective_translating": "Translating external view to your profile language…"
 }

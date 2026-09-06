@@ -391,6 +391,23 @@ export const generateExternalPerspectiveNote = async (data: {
   return response.json();
 };
 
+export const translateExternalPerspectiveNote = async (data: {
+  text: string;
+  sourceLang: 'de' | 'en';
+  targetLang: 'de' | 'en';
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/translate-external-perspective`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to translate external perspective');
+  }
+  return response.json();
+};
+
 export const logSessionBehavior = async (data: {
   sessionId: string;
   encryptedTranscript: string;
