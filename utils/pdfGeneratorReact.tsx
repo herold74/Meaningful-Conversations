@@ -3,7 +3,7 @@ import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line, Polygon
 import { brand } from '../config/brand';
 import { buildAiContentHumanLabel } from './aiContentMarking';
 import { SurveyResult } from '../components/PersonalitySurvey';
-import { getMergedSignatureText, resolveProfileContentLanguage } from './profileContentLanguage';
+import { extractOperatingSystemText, getExternalPerspectiveText, resolveProfileContentLanguage } from './profileContentLanguage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -178,8 +178,8 @@ const styles = StyleSheet.create({
   },
   // Signature text
   signatureText: {
-    fontSize: 11, // Increased from 10
-    lineHeight: 1.5,
+    fontSize: 10,
+    lineHeight: 1.4,
     color: colors.gray700,
     fontStyle: 'italic',
   },
@@ -1101,19 +1101,24 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         <Header />
 
         {hasNarrative && result.narrativeProfile && (
-          <SectionBlock>
+          <View style={{ marginBottom: 10 }}>
             <View style={[styles.box, styles.boxAccent, { marginBottom: 0 }]}>
               <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
               <Text style={styles.signatureText}>
-                {getMergedSignatureText(result.narrativeProfile)}
+                {extractOperatingSystemText(result.narrativeProfile).trim()}
               </Text>
+              {getExternalPerspectiveText(result.narrativeProfile) ? (
+                <Text style={[styles.signatureText, { marginTop: 3 }]}>
+                  {getExternalPerspectiveText(result.narrativeProfile)}
+                </Text>
+              ) : null}
               {hasConnector && result.connector && !result.narrativeProfile.externalPerspectiveNote && (
                 <Text style={{ fontSize: 8, color: colors.gray600, marginTop: 6, fontStyle: 'italic', lineHeight: 1.35 }}>
                   {t.connectorSignatureBridge}
                 </Text>
               )}
             </View>
-          </SectionBlock>
+          </View>
         )}
 
         {hasNarrative && result.narrativeProfile && (
