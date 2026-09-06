@@ -1041,6 +1041,8 @@
   "narrative_generating": "Generating...",
   "narrative_language_mismatch": "This signature was generated in a different language. Update it to get it in your current language.",
   "narrative_regenerate_language": "Regenerate",
+  "narrative_regenerate_connector_hint": "Your saved connection signature (The Connector) will be woven into the new signature — as observed external perspective alongside your self-view.",
+  "narrative_regenerate_stale_connector_confirm": "Your connection signature is older than six months. Include it in the new signature anyway? A new Connector run would be more accurate.",
   "narrative_generation_error": "Signature generation failed. Please try again later.",
   "adaptation_adaptive_title": "📊 Adaptive Profile",
   "adaptation_stable_title": "🔒 Stable Profile",

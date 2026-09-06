@@ -557,6 +557,12 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
   const handleGenerateNarrative = async (newStories: { flowStory: string; frictionStory: string }) => {
     if (!decryptedData || !profileMetadata) return;
+
+    const connector = decryptedData.connector as ConnectorEvaluationResult | undefined;
+    if (connector && isConnectorStale(connector)) {
+      const proceed = window.confirm(t('narrative_regenerate_stale_connector_confirm'));
+      if (!proceed) return;
+    }
     
     setIsGeneratingNarrative(true);
     setNarrativeError(null);
@@ -575,15 +581,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       const response = await api.generateNarrativeProfile({
         quantitativeData,
         narratives: newStories,
-        language
+        language,
+        connector: connector ?? null,
       });
       
       if (response.narrativeProfile) {
-        // Update local state with NEW stories and narrativeProfile
+        const previousNote = decryptedData.narrativeProfile?.externalPerspectiveNote;
         const updatedData = {
           ...decryptedData,
           narratives: newStories,
-          narrativeProfile: response.narrativeProfile,
+          narrativeProfile: {
+            ...response.narrativeProfile,
+            externalPerspectiveNote: previousNote,
+          },
         };
         setDecryptedData(updatedData);
         
@@ -1652,6 +1662,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
           onComplete={handleGenerateNarrative}
           onCancel={() => setShowNarrativeStoriesModal(false)}
           oldStories={decryptedData?.narratives}
+          includeConnectorInSignature={!!decryptedData?.connector}
         />
       )}
 

@@ -6,6 +6,12 @@ const profileRefinement = require('../services/profileRefinement.js');
 const aiProvider = require('../services/aiProviderService.js');
 const { trackApiUsage, checkDailyCostCap } = require('../services/apiUsageTracker.js');
 const { withTimeout, parseStructuredJsonResponse } = require('./gemini/shared.js');
+const {
+  validateConnectorPayload,
+  summarizeConnectorForPrompt,
+  formatConnectorPerspectiveBlock,
+  validateNarrativeConnectorConsistency,
+} = require('../services/narrativeConnectorIntegration.js');
 
 /**
  * POST /api/personality/save
@@ -378,20 +384,27 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
  */
 router.post('/generate-narrative', authMiddleware, async (req, res) => {
   try {
-    const { quantitativeData, narratives, language } = req.body;
+    const { quantitativeData, narratives, language, connector } = req.body;
     
     // Validation
     if (!quantitativeData || !narratives || !narratives.flowStory || !narratives.frictionStory) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    
+
     const normalizedLang = language === 'en' ? 'en' : 'de';
+    const hasConnector = connector && validateConnectorPayload(connector);
+    if (connector != null && !hasConnector) {
+      return res.status(400).json({ error: 'Invalid connector evaluation payload.' });
+    }
+
+    const connectorBlock = formatConnectorPerspectiveBlock(normalizedLang, hasConnector ? connector : null);
     
     // Build the synthesis prompt
     const synthesisPrompt = NARRATIVE_SYNTHESIS_PROMPTS[normalizedLang]
       .replace('{{quantitativeData}}', JSON.stringify(quantitativeData, null, 2))
       .replace('{{flowStory}}', narratives.flowStory)
-      .replace('{{frictionStory}}', narratives.frictionStory);
+      .replace('{{frictionStory}}', narratives.frictionStory)
+      .replace('{{connectorPerspective}}', connectorBlock);
     
     
     // Respect user's AI region preference (GDPR)
@@ -402,12 +415,12 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
         userRegionPreference = narUser?.aiRegionPreference || 'optimal';
     }
 
-    // Call AI provider
+    // Call AI provider — slightly lower temperature when Connector informs synthesis
     const result = await aiProvider.generateContent({
       model: 'gemini-2.5-flash',
       contents: synthesisPrompt,
       config: {
-        temperature: 0.8,
+        temperature: hasConnector ? 0.7 : 0.8,
         maxOutputTokens: 4096,
         responseMimeType: 'application/json',
         systemInstruction: normalizedLang === 'de' 
@@ -440,11 +453,22 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       console.error('[Narrative] Failed to parse AI response:', result.text);
       return res.status(500).json({ error: 'Failed to parse narrative profile' });
     }
+
+    const connectorConsistency = validateNarrativeConnectorConsistency(
+      narrativeProfile,
+      hasConnector ? connector : null,
+      normalizedLang,
+    );
+    if (!connectorConsistency.isConsistent) {
+      console.warn('[Narrative] Connector consistency issues:', connectorConsistency.issues);
+    }
     
     
     res.json({ 
       success: true, 
       narrativeProfile,
+      connectorConsistency,
+      connectorIncluded: !!hasConnector,
       model: result.model,
       provider: result.provider
     });
@@ -833,6 +857,7 @@ REGELN:
 5. Auf Deutsch schreiben. Verwende "Du" als Anrede.
 6. Zeitlosigkeit: Das Profil soll in 2 Jahren noch relevant klingen. Vermeide Referenzen auf aktuelle Ereignisse.
 7. Kein Markdown: Verwende KEINE Markdown-Formatierung wie *kursiv*, **fett** oder andere Sonderzeichen. Nur reinen Text.
+8. BEOBACHTETE FREMSICHT (The Connector): Wenn der Block unten „Nicht vorhanden" ist, ignoriere ihn vollständig und erfinde keine Fremdsicht. Wenn Daten vorhanden sind: Gewichte sie als Impuls aus drei kurzen KI-Gesprächen — nicht gleichwertig mit validierten Tests. Rahme Spannungen zwischen Selbstbild und Beobachtung als 360°-Perspektive, nicht als „du liegst falsch". Blindspots dürfen durch Fremdsicht geschärft werden — weiterhin als Unwucht des Talents, nicht als Charakterschwäche. Keine Vignetten-Namen, keine wörtlichen Chat-Zitate, keine Bezüge auf die drei konkreten Gespräche.
 
 QUANTITATIVE DATEN (Testergebnisse):
 {{quantitativeData}}
@@ -842,6 +867,9 @@ FLOW-ERLEBNIS (Was energetisiert diese Person):
 
 KONFLIKT-ERLEBNIS (Was kostet Energie):
 {{frictionStory}}
+
+BEOBACHTETE FREMSICHT (The Connector — optional):
+{{connectorPerspective}}
 
 Erstelle ein JSON mit exakt dieser Struktur:
 {
@@ -872,6 +900,7 @@ RULES:
 5. Write in English. Use "You" as the form of address.
 6. Timelessness: The profile should still be relevant in 2 years. Avoid references to current events.
 7. No Markdown: Do NOT use any Markdown formatting like *italic*, **bold** or other special characters. Plain text only.
+8. OBSERVED EXTERNAL VIEW (The Connector): If the block below says "Not available", ignore it entirely and do not invent an external view. When data is present: treat it as input from three short AI conversations — not equal weight to validated tests. Frame tensions between self-view and observation as a 360° perspective, not "you are wrong". Blindspots may be sharpened by the external view — still as imbalance of talents, not character flaws. No vignette names, no verbatim chat quotes, no references to the three specific conversations.
 
 QUANTITATIVE DATA (Test Results):
 {{quantitativeData}}
@@ -881,6 +910,9 @@ FLOW EXPERIENCE (What energizes this person):
 
 CONFLICT EXPERIENCE (What drains energy):
 {{frictionStory}}
+
+OBSERVED EXTERNAL VIEW (The Connector — optional):
+{{connectorPerspective}}
 
 Create a JSON with exactly this structure:
 {
@@ -920,21 +952,6 @@ function normalizeExternalPerspectiveText(raw) {
   return text.replace(/^["']|["']$/g, '').trim();
 }
 
-function validateConnectorPayload(connector) {
-  if (!connector || typeof connector !== 'object') return false;
-  if (connector.summary != null && typeof connector.summary !== 'string') return false;
-  const dims = ['empathy', 'presence', 'curiosity', 'nonJudgment', 'steadiness'];
-  for (const dim of dims) {
-    const score = connector[dim]?.score;
-    if (score != null && (typeof score !== 'number' || score < 1 || score > 10)) {
-      return false;
-    }
-  }
-  const hasSummary = Boolean(String(connector.summary || '').trim());
-  const hasScores = dims.some((dim) => connector[dim]?.score != null);
-  return hasSummary || hasScores;
-}
-
 function buildSignatureExcerpt(narrativeProfile) {
   const os = typeof narrativeProfile.operatingSystem === 'string'
     ? narrativeProfile.operatingSystem
@@ -943,25 +960,6 @@ function buildSignatureExcerpt(narrativeProfile) {
     operatingSystem: String(os).slice(0, 500),
     superpowerNames: (narrativeProfile.superpowers || []).map((s) => s.name).filter(Boolean),
     blindspotNames: (narrativeProfile.blindspots || []).map((b) => b.name).filter(Boolean),
-  };
-}
-
-function summarizeConnectorForPrompt(connector) {
-  const pickScore = (dim) => ({
-    score: connector[dim]?.score ?? null,
-    evidence: (connector[dim]?.evidence || []).slice(0, 1),
-  });
-  return {
-    overallScore: connector.overallScore ?? null,
-    summary: connector.summary || '',
-    strengths: (connector.strengths || []).slice(0, 3),
-    growthAreas: (connector.growthAreas || []).slice(0, 2),
-    empathy: pickScore('empathy'),
-    presence: pickScore('presence'),
-    curiosity: pickScore('curiosity'),
-    nonJudgment: pickScore('nonJudgment'),
-    steadiness: pickScore('steadiness'),
-    completedAt: connector.completedAt || null,
   };
 }
 
