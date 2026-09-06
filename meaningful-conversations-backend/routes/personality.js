@@ -506,7 +506,7 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
         contents: prompt,
         config: {
           temperature: 0.55,
-          maxOutputTokens: 1024,
+          maxOutputTokens: 4096,
           systemInstruction,
         },
         userRegionPreference: regionPreference,
@@ -521,7 +521,7 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
     let text = '';
     let result;
     const regionAttempts = userRegionPreference === 'optimal'
-      ? [{ region: 'optimal', skipFallback: false }, { region: 'us', skipFallback: true }]
+      ? [{ region: 'us', skipFallback: true }, { region: 'optimal', skipFallback: false }]
       : [{ region: userRegionPreference, skipFallback: true }];
 
     for (const { region, skipFallback } of regionAttempts) {
@@ -539,7 +539,14 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
     }
 
     if (!text || text.length < 20) {
-      console.error('[ExternalPerspective] final text too short:', (result?.text || '').substring(0, 200));
+      const finishReason = result?.rawResponse?.candidates?.[0]?.finishReason;
+      const thoughtsTokens = result?.rawResponse?.usageMetadata?.thoughtsTokenCount;
+      console.error('[ExternalPerspective] final text too short:', {
+        textPreview: (result?.text || '').substring(0, 200),
+        finishReason,
+        thoughtsTokens,
+        provider: result?.provider,
+      });
       return res.status(500).json({ error: 'Generated text too short.' });
     }
     if (text.length > 600) {
