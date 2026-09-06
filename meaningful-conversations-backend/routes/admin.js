@@ -8,6 +8,7 @@ const { sendNewsletterEmail } = require('../services/mailService.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const { getActivityStats } = require('../services/activityTracker.js');
 const { computePracticeAdminStats } = require('../services/practiceStatsService.js');
+const { computeConnectorAdminStats } = require('../services/connectorStatsService.js');
 const brand = require('../config/brand');
 
 // Configure marked for email-safe HTML
@@ -834,6 +835,50 @@ router.get('/practice-stats', async (req, res) => {
     } catch (error) {
         console.error('[Admin] practice-stats error:', error);
         res.status(500).json({ error: 'Failed to load practice statistics.' });
+    }
+});
+
+// GET /api/admin/connector-stats?days=90&language=de
+// GDPR: aggregated Connector metrics only (no userId, no transcript/evaluation text).
+router.get('/connector-stats', async (req, res) => {
+    try {
+        const days = Math.min(Math.max(parseInt(req.query.days, 10) || 90, 7), 365);
+        const language = req.query.language === 'en' ? 'en' : 'de';
+        const end = new Date();
+        const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+
+        const rows = await prisma.connectorRunStat.findMany({
+            where: { createdAt: { gte: start, lte: end } },
+            select: {
+                overallScore: true,
+                empathy: true,
+                presence: true,
+                curiosity: true,
+                nonJudgment: true,
+                steadiness: true,
+                vignetteIds: true,
+                endTypes: true,
+                language: true,
+                liveMode: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        const distinctUsers = await prisma.apiUsage.groupBy({
+            by: ['userId'],
+            where: {
+                endpoint: '/api/gemini/connector/evaluate',
+                success: true,
+                createdAt: { gte: start, lte: end },
+            },
+        });
+
+        const stats = computeConnectorAdminStats(rows, distinctUsers.length, { days, language });
+        res.json(stats);
+    } catch (error) {
+        console.error('[Admin] connector-stats error:', error);
+        res.status(500).json({ error: 'Failed to load connector statistics.' });
     }
 });
 
