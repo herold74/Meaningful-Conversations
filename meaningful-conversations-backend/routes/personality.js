@@ -595,6 +595,101 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
 });
 
 /**
+ * POST /api/personality/translate-external-perspective
+ * Translates a saved Fremdsicht note to the profile content language (short coaching text).
+ */
+router.post('/translate-external-perspective', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { text, sourceLang, targetLang } = req.body;
+
+    if (!text || typeof text !== 'string' || text.trim().length < 10) {
+      return res.status(400).json({ error: 'Missing or invalid text.' });
+    }
+    if (text.length > 600) {
+      return res.status(400).json({ error: 'Text too long.' });
+    }
+
+    const normalizedSource = sourceLang === 'en' ? 'en' : 'de';
+    const normalizedTarget = targetLang === 'en' ? 'en' : 'de';
+    if (normalizedSource === normalizedTarget) {
+      return res.json({
+        success: true,
+        text: text.trim(),
+        generatedLanguage: normalizedTarget,
+      });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const langNames = { de: 'German', en: 'English' };
+    const systemInstruction = normalizedTarget === 'de'
+      ? `Du bist professionelle:r Übersetzer:in für Coaching-Texte. Übersetze den folgenden ${langNames[normalizedSource]}-Text ins Deutsche. Behalte die informelle Anrede „Du“. Gib NUR den übersetzten Text zurück — kein Markdown, keine Einleitung.`
+      : `You are a professional translator for coaching copy. Translate the following ${langNames[normalizedSource]} text into English. Keep the informal "you" address. Return ONLY the translated text — no Markdown, no preamble.`;
+
+    const result = await withTimeout(
+      aiProvider.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: text.trim(),
+        config: {
+          temperature: 0.2,
+          maxOutputTokens: 1024,
+          systemInstruction,
+        },
+        userRegionPreference: 'optimal',
+        language: normalizedTarget,
+        context: 'chat',
+      }),
+      45000,
+      'External perspective translation timed out',
+    );
+
+    const translated = normalizeExternalPerspectiveText(result.text);
+    if (!translated || translated.length < 10) {
+      return res.status(500).json({ error: 'Translation too short.' });
+    }
+
+    res.json({
+      success: true,
+      text: translated,
+      generatedLanguage: normalizedTarget,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-external-perspective',
+      model: result.model || 'gemini-2.5-flash',
+      botId: 'personality-external-perspective-translate',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error translating external perspective:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-external-perspective',
+      model: 'gemini-2.5-flash',
+      botId: 'personality-external-perspective-translate',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to translate external perspective' });
+  }
+});
+
+/**
  * POST /api/personality/preview-refinement
  * Preview profile refinement based on chat history (dry-run, no save)
  * Used by admin tests to see how a session would affect the profile

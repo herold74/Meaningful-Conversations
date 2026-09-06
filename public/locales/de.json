@@ -2368,5 +2368,8 @@
   "profile_external_perspective_preview_note": "Du kannst die Anreicherung jederzeit wiederholen — z. B. nach einem neuen Connector-Durchlauf.",
   "profile_external_perspective_preview_cancel": "Abbrechen",
   "profile_external_perspective_preview_confirm": "Speichern",
-  "profile_external_perspective_outdated": "Diese Fremdsicht bezieht sich auf eine ältere Verbindungs-Signatur. Bitte „Signatur mit Fremdsicht anreichern“ erneut ausführen oder The Connector wiederholen."
+  "profile_external_perspective_outdated": "Diese Fremdsicht bezieht sich auf eine ältere Verbindungs-Signatur. Bitte „Signatur mit Fremdsicht anreichern“ erneut ausführen oder The Connector wiederholen.",
+  "profile_external_perspective_language_mismatch": "Diese Fremdsicht ist in einer anderen Sprache als deine Signatur. Bitte „Signatur mit Fremdsicht anreichern“ erneut ausführen, damit beides zusammenpasst.",
+  "profile_external_perspective_translated_success": "Fremdsicht wurde in deine Profilsprache übertragen.",
+  "profile_external_perspective_translating": "Fremdsicht wird in deine Profilsprache übertragen…"
 }

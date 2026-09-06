@@ -3,6 +3,7 @@ import { Document, Page, View, Text, StyleSheet, pdf, Svg, Circle, Line, Polygon
 import { brand } from '../config/brand';
 import { buildAiContentHumanLabel } from './aiContentMarking';
 import { SurveyResult } from '../components/PersonalitySurvey';
+import { getMergedSignatureText, resolveProfileContentLanguage } from './profileContentLanguage';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -486,7 +487,6 @@ const translations = {
     connectorDimNonjudgment: 'Urteilsfreiheit',
     connectorDimSteadiness: 'Stabilität',
     connectorStrengths: 'Stärken in Gesprächen',
-    externalPerspectiveTitle: 'Fremdsicht — Ergänzung zur Signatur',
   },
   en: {
     title: 'Personality Signature',
@@ -553,7 +553,6 @@ const translations = {
     connectorDimNonjudgment: 'Non-judgment',
     connectorDimSteadiness: 'Steadiness',
     connectorStrengths: 'Strengths in conversation',
-    externalPerspectiveTitle: 'External view — complement to your signature',
   },
 };
 
@@ -643,14 +642,31 @@ const ShipWheelLogo = () => {
 };
 
 // Riemann-Thomann Cross (Quadrant Diagram) for PDF
-// Vertical text label component (characters stacked vertically) — for PDF axis labels
-const VerticalLabel = ({ text, color = colors.gray700 }: { text: string; color?: string }) => (
-  <View style={{ justifyContent: 'center', alignItems: 'center', width: 10 }}>
-    {text.toUpperCase().split('').map((char, i) => (
-      <Text key={i} style={{ fontSize: 6, fontWeight: 'bold', color, lineHeight: 0.95, textAlign: 'center' }}>
-        {char}
+// Vertical axis label — rotated SVG text (avoids per-character page breaks)
+const VerticalLabel = ({ text, height = 150 }: { text: string; height?: number }) => (
+  <Svg width={12} height={height} viewBox={`0 0 12 ${height}`}>
+    <G transform={`translate(6, ${height / 2}) rotate(-90)`}>
+      <Text
+        x={0}
+        y={0}
+        style={{ fontSize: 6, fontWeight: 'bold', fill: colors.gray700, textAnchor: 'middle' }}
+      >
+        {text.toUpperCase()}
       </Text>
-    ))}
+    </G>
+  </Svg>
+);
+
+// Keep narrative / connector / lens blocks on one page when possible
+const SectionBlock = ({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: object | object[];
+}) => (
+  <View wrap={false} style={[{ marginBottom: 10 }, ...(Array.isArray(style) ? style : style ? [style] : [])]}>
+    {children}
   </View>
 );
 
@@ -723,7 +739,7 @@ const RiemannCross = ({ data, language }: {
   });
 
   return (
-    <View style={{ alignItems: 'center' }}>
+    <View wrap={false} style={{ alignItems: 'center' }}>
       {/* Top label: Distanz/Distance — spaced letters to match vertical label style */}
       <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray700, marginBottom: -2, letterSpacing: 3 }}>
         {dimLabels.distanz.toUpperCase()}
@@ -806,6 +822,11 @@ interface PersonalityPdfDocumentProps {
   userEmail?: string;
 }
 
+/** Single language for PDF labels + AI-generated blocks (no DE/EN mix). */
+export function resolvePdfLanguage(uiLanguage: 'de' | 'en', result: SurveyResult): 'de' | 'en' {
+  return resolveProfileContentLanguage(uiLanguage, result.narrativeProfile);
+}
+
 const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result, language, userEmail }) => {
   const t = translations[language];
   const date = new Date().toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -819,13 +840,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const hasOcean = !!result.big5;
   const hasNarrative = !!result.narrativeProfile;
   const hasConnector = !!result.connector;
-  const narrativeLangMismatch = hasNarrative 
-    && result.narrativeProfile?.generatedLanguage 
-    && result.narrativeProfile.generatedLanguage !== language;
-  
-  // When all 3 tests are completed, use 2 pages
-  const useTwoPages = hasSD && hasRiemann && hasOcean;
-  
+
   const getOceanColor = (score: number) => score >= 4 ? colors.teal500 : score >= 3 ? colors.amber500 : colors.red500;
   const getOceanLabel = (score: number) => score >= 4 ? t.high : score >= 3 ? t.medium : t.low;
   
@@ -870,7 +885,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     if (!hasOcean || !result.big5) return null;
     
     return (
-      <View style={[styles.box, { marginBottom: 10 }]}>
+      <SectionBlock>
+        <View style={[styles.box, { marginBottom: 0 }]}>
         <Text style={styles.boxTitle}>{t.whatDefinesYou}</Text>
         <View style={styles.oceanRow}>
           {[
@@ -897,33 +913,36 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 1 }}>
           {t.oceanInlineHint} [{oceanFootnote}]
         </Text>
-      </View>
+        </View>
+      </SectionBlock>
     );
   };
   
   // Usage Guide component
   const UsageGuide = () => (
-    <View style={styles.usageGuide}>
-      <Text style={styles.usageTitle}>{t.howToUse}</Text>
-      <View style={styles.usageContent}>
-        <View style={styles.usageItem}>
-          <Text style={styles.usageItemTitle}>{t.reflect}</Text>
-          <Text> {t.reflectDesc}</Text>
-        </View>
-        <View style={styles.usageItem}>
-          <Text style={styles.usageItemTitle}>{t.noJudgment}</Text>
-          <Text> {t.noJudgmentDesc}</Text>
-        </View>
-        <View style={styles.usageItem}>
-          <Text style={styles.usageItemTitle}>{t.dialogue}</Text>
-          <Text> {t.dialogueDesc}</Text>
-        </View>
-        <View style={styles.usageItem}>
-          <Text style={styles.usageItemTitle}>{t.grow}</Text>
-          <Text> {t.growDesc}</Text>
+    <SectionBlock>
+      <View style={[styles.usageGuide, { marginTop: 0 }]}>
+        <Text style={styles.usageTitle}>{t.howToUse}</Text>
+        <View style={styles.usageContent}>
+          <View style={styles.usageItem}>
+            <Text style={styles.usageItemTitle}>{t.reflect}</Text>
+            <Text> {t.reflectDesc}</Text>
+          </View>
+          <View style={styles.usageItem}>
+            <Text style={styles.usageItemTitle}>{t.noJudgment}</Text>
+            <Text> {t.noJudgmentDesc}</Text>
+          </View>
+          <View style={styles.usageItem}>
+            <Text style={styles.usageItemTitle}>{t.dialogue}</Text>
+            <Text> {t.dialogueDesc}</Text>
+          </View>
+          <View style={styles.usageItem}>
+            <Text style={styles.usageItemTitle}>{t.grow}</Text>
+            <Text> {t.growDesc}</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </SectionBlock>
   );
   
   // Blindspots + Growth Section component (reusable) - wrap={false} prevents page break
@@ -931,7 +950,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     if (!hasNarrative || !result.narrativeProfile) return null;
     
     return (
-      <View style={styles.grid2} wrap={false}>
+      <SectionBlock>
+        <View style={styles.grid2} wrap={false}>
         <View style={[styles.box, styles.boxRose, styles.gridHalf]}>
           <Text style={[styles.boxTitle, styles.boxTitleRose]}>{t.narrativeBlindspots}</Text>
           <Text style={{ fontSize: 9, color: colors.gray500, marginBottom: 3, fontStyle: 'italic' }}>
@@ -956,7 +976,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
             </View>
           ))}
         </View>
-      </View>
+        </View>
+      </SectionBlock>
     );
   };
   
@@ -971,12 +992,14 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     if (pendingTests.length === 0) return null;
     
     return (
-      <View style={styles.pendingSection}>
-        <Text style={styles.pendingTitle}>{t.pendingTests}</Text>
-        {pendingTests.map((test, i) => (
-          <Text key={i} style={styles.pendingItem}>• {test}</Text>
-        ))}
-      </View>
+      <SectionBlock>
+        <View style={[styles.pendingSection, { marginTop: 0 }]}>
+          <Text style={styles.pendingTitle}>{t.pendingTests}</Text>
+          {pendingTests.map((test, i) => (
+            <Text key={i} style={styles.pendingItem}>• {test}</Text>
+          ))}
+        </View>
+      </SectionBlock>
     );
   };
 
@@ -1002,16 +1025,18 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     if (footnotes.length === 0) return null;
 
     return (
-      <View style={{ marginTop: 'auto', paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.gray300 }}>
-        <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray400, marginBottom: 3 }}>
-          {t.footnotesTitle}
-        </Text>
-        {footnotes.map((f, i) => (
-          <Text key={i} style={{ fontSize: 5.5, color: colors.gray400, fontStyle: 'italic', lineHeight: 1.4 }}>
-            [{i + 1}] {f.text}
+      <SectionBlock>
+        <View style={{ paddingTop: 8, borderTopWidth: 0.5, borderTopColor: colors.gray300 }}>
+          <Text style={{ fontSize: 6, fontWeight: 'bold', color: colors.gray400, marginBottom: 3 }}>
+            {t.footnotesTitle}
           </Text>
-        ))}
-      </View>
+          {footnotes.map((f, i) => (
+            <Text key={i} style={{ fontSize: 5.5, color: colors.gray400, fontStyle: 'italic', lineHeight: 1.4 }}>
+              [{i + 1}] {f.text}
+            </Text>
+          ))}
+        </View>
+      </SectionBlock>
     );
   };
 
@@ -1027,7 +1052,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
     ] as const;
 
     return (
-      <View style={[styles.box, { marginBottom: 10 }]}>
+      <SectionBlock>
+        <View style={[styles.box, { marginBottom: 0 }]}>
         <Text style={styles.boxTitle}>{t.connectorTitle}</Text>
         <Text style={{ fontSize: 8, color: colors.gray500, marginBottom: 6 }}>{t.connectorSubtitle}</Text>
         {c.overallScore !== null && c.overallScore !== undefined && (
@@ -1064,212 +1090,156 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>
           {t.connectorDisclaimer}
         </Text>
-      </View>
+        </View>
+      </SectionBlock>
     );
   };
   
   return (
     <Document>
-      {/* PAGE 1 */}
       <Page size="A4" style={[styles.page, { paddingBottom: 50 }]}>
         <Header />
-        
-        {/* Signature - Full Width - only if available */}
+
         {hasNarrative && result.narrativeProfile && (
-          <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
-            <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
-            {narrativeLangMismatch && (
-              <Text style={{ fontSize: 8, color: colors.amber600, fontStyle: 'italic', marginBottom: 4 }}>
-                {language === 'de' 
-                  ? `⚠ Diese Signatur wurde auf ${result.narrativeProfile.generatedLanguage === 'en' ? 'Englisch' : 'Deutsch'} generiert.`
-                  : `⚠ This signature was generated in ${result.narrativeProfile.generatedLanguage === 'de' ? 'German' : 'English'}.`}
+          <SectionBlock>
+            <View style={[styles.box, styles.boxAccent, { marginBottom: 0 }]}>
+              <Text style={styles.boxTitle}>{t.narrativeOS}</Text>
+              <Text style={styles.signatureText}>
+                {getMergedSignatureText(result.narrativeProfile)}
               </Text>
-            )}
-            <Text style={styles.signatureText}>
-              {typeof result.narrativeProfile.operatingSystem === 'string' 
-                ? result.narrativeProfile.operatingSystem 
-                : (result.narrativeProfile.operatingSystem as any)?.core || 
-                  (result.narrativeProfile.operatingSystem as any)?.dynamics || 
-                  ''}
-            </Text>
-            {hasConnector && result.connector && !result.narrativeProfile.externalPerspectiveNote && (
-              <Text style={{ fontSize: 8, color: colors.gray600, marginTop: 6, fontStyle: 'italic', lineHeight: 1.35 }}>
-                {t.connectorSignatureBridge}
-              </Text>
-            )}
-          </View>
+              {hasConnector && result.connector && !result.narrativeProfile.externalPerspectiveNote && (
+                <Text style={{ fontSize: 8, color: colors.gray600, marginTop: 6, fontStyle: 'italic', lineHeight: 1.35 }}>
+                  {t.connectorSignatureBridge}
+                </Text>
+              )}
+            </View>
+          </SectionBlock>
         )}
 
-        {hasNarrative && result.narrativeProfile?.externalPerspectiveNote && (
-          <View style={[styles.box, styles.boxAccent, { marginBottom: 10 }]}>
-            <Text style={styles.boxTitle}>{t.externalPerspectiveTitle}</Text>
-            <Text style={styles.signatureText}>
-              {result.narrativeProfile.externalPerspectiveNote.text}
-            </Text>
-            <Text style={{ fontSize: 7, color: colors.gray400, marginTop: 4, fontStyle: 'italic' }}>
-              {t.connectorDisclaimer}
-            </Text>
-          </View>
-        )}
-        
-        {/* Superpowers - Full Width - only if available */}
         {hasNarrative && result.narrativeProfile && (
-          <View style={[styles.box, styles.boxWarm, { marginBottom: 10 }]}>
-            <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
-            {result.narrativeProfile.superpowers.map((p: { name: string; description: string }, i: number) => (
-              <View key={i} style={styles.compactListItem}>
-                <Text style={styles.compactListTitle}>{i + 1}. {p.name}</Text>
-                <Text style={styles.compactListDesc}>{p.description}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-        
-        {/* Spiral Dynamics - only if available */}
-        {hasSD && result.spiralDynamics && (
-          <View style={[styles.box, { marginBottom: 10 }]}>
-            <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.sectionHeader}>{t.selfOriented}</Text>
-                {['yellow', 'orange', 'red', 'beige'].map((level) => {
-                  const value = (result.spiralDynamics!.levels as Record<string, number>)[level] || 0;
-                  const info = sdLevels[level];
-                  return (
-                    <View key={level} style={styles.barContainer}>
-                      <View style={styles.barLabel}>
-                        <View style={[styles.barDot, { backgroundColor: info.color }]} />
-                        <Text style={styles.barName}>{language === 'de' ? info.keywordDe : info.keywordEn}</Text>
-                      </View>
-                      <ProgressBar value={value} color={info.color} />
-                    </View>
-                  );
-                })}
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.sectionHeader}>{t.communityOriented}</Text>
-                {['turquoise', 'green', 'blue', 'purple'].map((level) => {
-                  const value = (result.spiralDynamics!.levels as Record<string, number>)[level] || 0;
-                  const info = sdLevels[level];
-                  return (
-                    <View key={level} style={styles.barContainer}>
-                      <View style={styles.barLabel}>
-                        <View style={[styles.barDot, { backgroundColor: info.color }]} />
-                        <Text style={styles.barName}>{language === 'de' ? info.keywordDe : info.keywordEn}</Text>
-                      </View>
-                      <ProgressBar value={value} color={info.color} />
-                    </View>
-                  );
-                })}
-              </View>
+          <SectionBlock>
+            <View style={[styles.box, styles.boxWarm, { marginBottom: 0 }]}>
+              <Text style={[styles.boxTitle, styles.boxTitleAmber]}>{t.narrativeSuperpowers}</Text>
+              {result.narrativeProfile.superpowers.map((p: { name: string; description: string }, i: number) => (
+                <View key={i} style={styles.compactListItem}>
+                  <Text style={styles.compactListTitle}>{i + 1}. {p.name}</Text>
+                  <Text style={styles.compactListDesc}>{p.description}</Text>
+                </View>
+              ))}
             </View>
-            <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
-              {t.sdMappingNote} [{sdFootnotes.join(', ')}]
-            </Text>
-          </View>
+          </SectionBlock>
         )}
-        
-        {/* Riemann - only if available */}
-        {hasRiemann && result.riemann && (
-          <View style={[styles.box, { marginBottom: 10 }]}>
-            <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
-            <View style={styles.riemannContainer}>
-              <View style={{ alignItems: 'center' }}>
-                <RiemannCross data={result.riemann} language={language} />
-                {/* Legend below diagram */}
-                <View style={[styles.legendContainer, { marginTop: 8 }]}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
-                    <Text style={styles.legendText}>{t.work}</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.green600 }]} />
-                    <Text style={styles.legendText}>{t.private}</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: colors.orange500 }]} />
-                    <Text style={styles.legendText}>{t.self}</Text>
-                  </View>
+
+        {hasSD && result.spiralDynamics && (
+          <SectionBlock>
+            <View style={[styles.box, { marginBottom: 0 }]}>
+              <Text style={styles.boxTitle}>{t.whatDrivesYou}</Text>
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionHeader}>{t.selfOriented}</Text>
+                  {['yellow', 'orange', 'red', 'beige'].map((level) => {
+                    const value = (result.spiralDynamics!.levels as Record<string, number>)[level] || 0;
+                    const info = sdLevels[level];
+                    return (
+                      <View key={level} style={styles.barContainer}>
+                        <View style={styles.barLabel}>
+                          <View style={[styles.barDot, { backgroundColor: info.color }]} />
+                          <Text style={styles.barName}>{language === 'de' ? info.keywordDe : info.keywordEn}</Text>
+                        </View>
+                        <ProgressBar value={value} color={info.color} />
+                      </View>
+                    );
+                  })}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionHeader}>{t.communityOriented}</Text>
+                  {['turquoise', 'green', 'blue', 'purple'].map((level) => {
+                    const value = (result.spiralDynamics!.levels as Record<string, number>)[level] || 0;
+                    const info = sdLevels[level];
+                    return (
+                      <View key={level} style={styles.barContainer}>
+                        <View style={styles.barLabel}>
+                          <View style={[styles.barDot, { backgroundColor: info.color }]} />
+                          <Text style={styles.barName}>{language === 'de' ? info.keywordDe : info.keywordEn}</Text>
+                        </View>
+                        <ProgressBar value={value} color={info.color} />
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
-              <View style={{ flex: 1 }}>
-                {result.riemann.stressRanking && result.riemann.stressRanking.length > 0 && (
-                  <View style={{ marginBottom: 8 }}>
-                    <Text style={{ fontSize: 9, fontWeight: 'bold', color: colors.gray700, marginBottom: 4 }}>
-                      {t.stressPattern}
-                    </Text>
-                    <View style={styles.stressGrid}>
-                      {result.riemann.stressRanking.map((id: string, i: number) => {
-                        const labels = stressLabels[language];
-                        const item = labels[id as keyof typeof labels];
-                        const isFirst = i === 0;
-                        return (
-                          <View key={id} style={[styles.stressItem, isFirst ? styles.stressItemFirst : {}]}>
-                            <Text style={[styles.stressTitle, isFirst ? styles.stressTitleFirst : {}]}>
-                              {i + 1}. {item?.label || id}
-                            </Text>
-                            <Text style={styles.stressDesc}>{item?.desc || ''}</Text>
-                          </View>
-                        );
-                      })}
+              <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+                {t.sdMappingNote} [{sdFootnotes.join(', ')}]
+              </Text>
+            </View>
+          </SectionBlock>
+        )}
+
+        {hasRiemann && result.riemann && (
+          <SectionBlock>
+            <View style={[styles.box, { marginBottom: 0 }]}>
+              <Text style={styles.boxTitle}>{t.howYouInteract}</Text>
+              <View style={styles.riemannContainer}>
+                <View style={{ alignItems: 'center' }}>
+                  <RiemannCross data={result.riemann} language={language} />
+                  <View style={[styles.legendContainer, { marginTop: 8 }]}>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: colors.blue500 }]} />
+                      <Text style={styles.legendText}>{t.work}</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: colors.green600 }]} />
+                      <Text style={styles.legendText}>{t.private}</Text>
+                    </View>
+                    <View style={styles.legendItem}>
+                      <View style={[styles.legendDot, { backgroundColor: colors.orange500 }]} />
+                      <Text style={styles.legendText}>{t.self}</Text>
                     </View>
                   </View>
-                )}
-                <Text style={[styles.riemannText, { marginBottom: 4 }]}>{t.differencesExplanation}</Text>
-                <Text style={styles.riemannText}>{t.axesExplanation}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  {result.riemann.stressRanking && result.riemann.stressRanking.length > 0 && (
+                    <View style={{ marginBottom: 8 }}>
+                      <Text style={{ fontSize: 9, fontWeight: 'bold', color: colors.gray700, marginBottom: 4 }}>
+                        {t.stressPattern}
+                      </Text>
+                      <View style={styles.stressGrid}>
+                        {result.riemann.stressRanking.map((id: string, i: number) => {
+                          const labels = stressLabels[language];
+                          const item = labels[id as keyof typeof labels];
+                          const isFirst = i === 0;
+                          return (
+                            <View key={id} style={[styles.stressItem, isFirst ? styles.stressItemFirst : {}]}>
+                              <Text style={[styles.stressTitle, isFirst ? styles.stressTitleFirst : {}]}>
+                                {i + 1}. {item?.label || id}
+                              </Text>
+                              <Text style={styles.stressDesc}>{item?.desc || ''}</Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
+                  <Text style={[styles.riemannText, { marginBottom: 4 }]}>{t.differencesExplanation}</Text>
+                  <Text style={styles.riemannText}>{t.axesExplanation}</Text>
+                </View>
               </View>
+              <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
+                {t.riemannInlineHint} [{riemannFootnote}]
+              </Text>
             </View>
-            <Text style={{ fontSize: 7, color: colors.gray400, textAlign: 'center', marginTop: 4 }}>
-              {t.riemannInlineHint} [{riemannFootnote}]
-            </Text>
-          </View>
+          </SectionBlock>
         )}
 
         <ConnectorSection />
-        
-        {/* If NOT using two pages, show everything on page 1 */}
-        {!useTwoPages && (
-          <>
-            <BlindspotsGrowthSection />
-            <OceanSection />
-            <UsageGuide />
-            <PendingTestsSection />
-            <FootnotesSection />
-          </>
-        )}
-        
-        {/* Two-page layout: compact footnote reference on page 1 */}
-        {useTwoPages && footnotes.length > 0 && (
-          <Text style={{ fontSize: 6, color: colors.gray400, fontStyle: 'italic', textAlign: 'center', marginTop: 6 }}>
-            {t.footnotesOnNextPage}
-          </Text>
-        )}
-        
-        {/* Fixed footer on every page */}
+        <BlindspotsGrowthSection />
+        <OceanSection />
+        <UsageGuide />
+        <PendingTestsSection />
+        <FootnotesSection />
+
         <Footer />
       </Page>
-      
-      {/* PAGE 2 - Only when all 3 tests are completed */}
-      {useTwoPages && (
-        <Page size="A4" style={[styles.page, { paddingBottom: 50 }]}>
-          <Header />
-          
-          {/* Blindspots + Growth on Page 2 */}
-          <BlindspotsGrowthSection />
-          
-          {/* OCEAN Section */}
-          <OceanSection />
-          
-          {/* Usage Guide */}
-          <UsageGuide />
-          
-          {/* Footnotes - consolidated citations */}
-          <FootnotesSection />
-          
-          {/* Fixed footer on every page */}
-          <Footer />
-        </Page>
-      )}
     </Document>
   );
 };
@@ -1287,7 +1257,8 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
  */
 export async function generatePDF(result: SurveyResult, filename: string, language: 'de' | 'en' = 'de', userEmail?: string): Promise<void> {
   try {
-    const blob = await pdf(<PersonalityPdfDocument result={result} language={language} userEmail={userEmail} />).toBlob();
+    const pdfLanguage = resolvePdfLanguage(language, result);
+    const blob = await pdf(<PersonalityPdfDocument result={result} language={pdfLanguage} userEmail={userEmail} />).toBlob();
     
     // Check if running in Capacitor native app
     const isNative = Capacitor.isNativePlatform();
