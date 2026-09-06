@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-06**, v**2.6.0** Build **5** — https://mc-beta.manualmode.at (health OK). Profile signature language parity, merged Fremdsicht in signature/PDF, auto-translate mismatched Fremdsicht on profile load.
+**Staging:** Deployed **2026-09-06**, v**2.6.0** Build **10** — https://mc-beta.manualmode.at (health OK). Connector admin analytics tab, anonymized `connector_run_stats`, printable Connector reference PDF.
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -20,6 +20,12 @@
 - **Stufe 1 (profile):** `ConnectorProfileSection` under „Wie du interagierst“, E2EE `connector` in profile blob, PDF section, handbook/privacy copy.
 - **Stufe 2 (Fremdsicht):** opt-in `externalPerspectiveNote` on narrative profile; `POST /api/personality/generate-external-perspective`; preview modal; invalidate note on new Connector save; stale/outdated warnings.
 - **Deploy script (2026-09-04):** `deploy-manualmode.sh` hardened — TTS re-tag fail-fast (local registry pull + remote retag fallback), `.previous-version` before VERSION bump, TTS container health gate. No TTS rebuild on `-c app`.
+
+## Session handoff (2026-09-06) — Connector QA + Admin Analytics
+
+- **Connector QA Lab:** Admin Session Simulator tab; scripted optimal turns (`utils/connectorLabScripts.ts`), `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md` + print PDF (`npm run generate:connector-pdf`).
+- **Connector Analytics (GDPR):** `connector_run_stats` (scores only, no userId/text); `GET /api/admin/connector-stats`; `AdminConnectorAnalyticsView` tab; k=5; 12mo retention. Stats from next completed evaluate onward.
+- **Commits:** `307963df` (analytics + PDF) · `ec3848e9` (build 10 sync).
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
