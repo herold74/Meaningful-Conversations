@@ -7,17 +7,6 @@ const aiProvider = require('../services/aiProviderService.js');
 const { trackApiUsage, checkDailyCostCap } = require('../services/apiUsageTracker.js');
 const { withTimeout, parseStructuredJsonResponse } = require('./gemini/shared.js');
 
-const externalPerspectiveResponseSchema = {
-  type: 'OBJECT',
-  properties: {
-    text: {
-      type: 'STRING',
-      description: 'Bridge paragraph between self-signature and Connector observation. 2–3 sentences, max 80 words.',
-    },
-  },
-  required: ['text'],
-};
-
 /**
  * POST /api/personality/save
  * Speichert verschluesseltes Persoenlichkeitsprofil
@@ -507,46 +496,50 @@ router.post('/generate-external-perspective', authMiddleware, async (req, res) =
     }
 
     const modelName = 'gemini-2.5-flash';
-    const llmConfig = {
-      temperature: 0.55,
-      maxOutputTokens: 1024,
-      responseMimeType: 'application/json',
-      responseSchema: externalPerspectiveResponseSchema,
-    };
+    const systemInstruction = normalizedLang === 'de'
+      ? 'Antworte nur mit dem Brückentext (2–3 Sätze, maximal 80 Wörter, Anrede „Du“). Kein JSON, kein Markdown, keine Einleitung.'
+      : 'Respond with only the bridge paragraph (2–3 sentences, max 80 words, address "You"). No JSON, no Markdown, no preamble.';
 
-    const callLlm = () => withTimeout(
+    const callLlm = (regionPreference, skipFallback = false) => withTimeout(
       aiProvider.generateContent({
         model: modelName,
         contents: prompt,
-        config: llmConfig,
-        userRegionPreference,
+        config: {
+          temperature: 0.55,
+          maxOutputTokens: 1024,
+          systemInstruction,
+        },
+        userRegionPreference: regionPreference,
         language: normalizedLang,
         context: 'analysis',
+        skipFallback,
       }),
       90000,
       'External perspective generation timed out',
     );
 
-    let parsed;
+    let text = '';
     let result;
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      result = await callLlm();
+    const regionAttempts = userRegionPreference === 'optimal'
+      ? [{ region: 'optimal', skipFallback: false }, { region: 'us', skipFallback: true }]
+      : [{ region: userRegionPreference, skipFallback: true }];
+
+    for (const { region, skipFallback } of regionAttempts) {
       try {
-        parsed = parseStructuredJsonResponse(result.text, 'external perspective');
-        break;
-      } catch (parseErr) {
-        console.error(`[ExternalPerspective] parse error (attempt ${attempt}):`, parseErr.message);
-        if (parseErr.rawPreview) {
-          console.error('[ExternalPerspective] raw preview:', parseErr.rawPreview);
-        }
-        if (attempt === 2) {
-          return res.status(500).json({ error: 'Failed to parse external perspective response.' });
+        result = await callLlm(region, skipFallback);
+        text = normalizeExternalPerspectiveText(result.text);
+        if (text.length >= 20) break;
+        console.warn(`[ExternalPerspective] text too short (${text.length}) from ${region}, provider=${result.provider}`);
+      } catch (genErr) {
+        console.error(`[ExternalPerspective] generation error (${region}):`, genErr.message);
+        if (regionAttempts[regionAttempts.length - 1].region === region) {
+          throw genErr;
         }
       }
     }
 
-    const text = typeof parsed.text === 'string' ? parsed.text.trim() : '';
     if (!text || text.length < 20) {
+      console.error('[ExternalPerspective] final text too short:', (result?.text || '').substring(0, 200));
       return res.status(500).json({ error: 'Generated text too short.' });
     }
     if (text.length > 600) {
@@ -806,6 +799,25 @@ Create a JSON with exactly this structure:
 }`
 };
 
+function normalizeExternalPerspectiveText(raw) {
+  let text = (raw || '').trim();
+  const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
+  if (fenceMatch) {
+    text = fenceMatch[1].trim();
+  }
+  if (text.startsWith('{')) {
+    try {
+      const parsed = parseStructuredJsonResponse(text, 'external perspective');
+      if (typeof parsed.text === 'string' && parsed.text.trim()) {
+        return parsed.text.trim();
+      }
+    } catch {
+      // fall through to plain text
+    }
+  }
+  return text.replace(/^["']|["']$/g, '').trim();
+}
+
 function validateConnectorPayload(connector) {
   if (!connector || typeof connector !== 'object') return false;
   if (connector.summary != null && typeof connector.summary !== 'string') return false;
@@ -869,7 +881,7 @@ SIGNATUR-AUSZUG (nur Kontext — nicht wiederholen):
 BEOBACHTETE FREMSICHT (The Connector):
 {{connectorSummary}}
 
-Antworte mit JSON: { "text": "..." }`,
+Antworte nur mit dem Brückentext — sonst nichts.`,
 
   en: `You write a short complement (external perspective) for a personality profile.
 
@@ -888,7 +900,7 @@ SIGNATURE EXCERPT (context only — do not repeat):
 OBSERVED EXTERNAL VIEW (The Connector):
 {{connectorSummary}}
 
-Respond with JSON: { "text": "..." }`,
+Respond with only the bridge paragraph — nothing else.`,
 };
 
 /**
