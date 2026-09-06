@@ -20,13 +20,13 @@ export function getExternalPerspectiveText(
   return narrativeProfile?.externalPerspectiveNote?.text?.trim() ?? '';
 }
 
-/** Operating system + optional Fremdsicht as one signature body (PDF / unified UI). */
+/** Operating system + optional Fremdsicht as one signature body (plain text). */
 export function getMergedSignatureText(narrativeProfile?: NarrativeProfile | null): string {
   const os = extractOperatingSystemText(narrativeProfile).trim();
   const external = getExternalPerspectiveText(narrativeProfile);
   if (!external) return os;
   if (!os) return external;
-  return `${os}\n\n${external}`;
+  return `${os} ${external}`;
 }
 
 /** Rough heuristic when `generatedLanguage` was not stored on older profiles. */

@@ -26,19 +26,18 @@ import {
   resolveExternalPerspectiveSourceLanguage,
   resolveProfileContentLanguage,
 } from '../utils/profileContentLanguage';
-import { createProfileTranslator } from '../utils/profileTranslations';
 
 // Narrative Profile Display Component
 interface NarrativeProfileSectionProps {
   narrativeProfile: NarrativeProfile;
   t: (key: string) => string;
-  contentLanguage: 'de' | 'en';
+  language: 'de' | 'en';
 }
 
 const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
   narrativeProfile,
   t,
-  contentLanguage,
+  language,
 }) => {
   return (
     <div>
@@ -113,7 +112,7 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
         <div className="mt-6 text-xs text-content-tertiary text-right">
           {t('narrative_generated_at') || 'Generiert'}:{' '}
           {new Date(narrativeProfile.generatedAt).toLocaleDateString(
-            contentLanguage === 'de' ? 'de-DE' : 'en-US',
+            language === 'de' ? 'de-DE' : 'en-US',
           )}
         </div>
       )}
@@ -392,7 +391,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
     () => resolveProfileContentLanguage(language, decryptedData?.narrativeProfile),
     [language, decryptedData?.narrativeProfile],
   );
-  const tContent = useMemo(() => createProfileTranslator(contentLanguage), [contentLanguage]);
   
   // Get current coaching mode from user, default to 'off'
   const currentCoachingMode = currentUser?.coachingMode || 'off';
@@ -691,7 +689,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
     const connector = decryptedData.connector as ConnectorEvaluationResult;
     if (isConnectorStale(connector)) {
-      const proceed = window.confirm(tContent('profile_external_perspective_stale_confirm'));
+      const proceed = window.confirm(t('profile_external_perspective_stale_confirm'));
       if (!proceed) return;
     }
 
@@ -719,7 +717,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       }
     } catch (err) {
       console.error('External perspective generation failed:', err);
-      setExternalPerspectiveError(tContent('profile_external_perspective_error'));
+      setExternalPerspectiveError(t('profile_external_perspective_error'));
     } finally {
       setIsEnrichingExternalPerspective(false);
     }
@@ -746,7 +744,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       setIsNarrativeExpanded(true);
     } catch (err) {
       console.error('Failed to save external perspective:', err);
-      setExternalPerspectiveError(tContent('profile_external_perspective_save_error'));
+      setExternalPerspectiveError(t('profile_external_perspective_save_error'));
     } finally {
       setIsEnrichingExternalPerspective(false);
     }
@@ -949,7 +947,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               className="w-full px-4 sm:px-5 py-4 flex items-center justify-between hover:bg-background-secondary dark:hover:bg-background-secondary transition-colors"
             >
               <h3 className="text-lg font-semibold text-content-primary flex items-center gap-2">
-                🧬 {tContent('narrative_profile_title') || 'Deine Signatur'}
+                🧬 {t('narrative_profile_title') || 'Deine Signatur'}
               </h3>
               <span className={`text-xl text-content-tertiary transition-transform ${isNarrativeExpanded ? 'rotate-180' : ''}`}>
                 ▼
@@ -959,7 +957,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             {externalPerspectiveTranslatedNotice && (
               <div className="mx-4 sm:mx-5 mt-2 p-3 rounded-lg bg-status-success-background border border-status-success-border">
                 <p className="text-sm text-status-success-foreground">
-                  {tContent('profile_external_perspective_translated_success')}
+                  {t('profile_external_perspective_translated_success')}
                 </p>
               </div>
             )}
@@ -971,7 +969,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               ) && (
               <div className="mx-4 sm:mx-5 mt-2">
                 <p className="text-xs text-amber-700 dark:text-amber-300 p-2 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                  {tContent('profile_external_perspective_outdated')}
+                  {t('profile_external_perspective_outdated')}
                 </p>
               </div>
             )}
@@ -982,19 +980,19 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   {extractOperatingSystemText(decryptedData.narrativeProfile)}
                 </div>
                 {!isAutoTranslatingExternalPerspective && getExternalPerspectiveText(decryptedData.narrativeProfile) && (
-                  <div className="text-content-primary leading-relaxed whitespace-pre-line mt-4">
+                  <div className="text-content-primary leading-relaxed whitespace-pre-line mt-2">
                     {getExternalPerspectiveText(decryptedData.narrativeProfile)}
                   </div>
                 )}
                 {isAutoTranslatingExternalPerspective && (
                   <p className="text-sm text-content-tertiary italic mt-4">
-                    {tContent('profile_external_perspective_translating')}
+                    {t('profile_external_perspective_translating')}
                   </p>
                 )}
               </div>
               {!getExternalPerspectiveText(decryptedData.narrativeProfile) && decryptedData.connector && (
                 <p className="text-sm text-content-secondary italic leading-relaxed mt-3">
-                  {tContent('profile_connector_signature_bridge')}
+                  {t('profile_connector_signature_bridge')}
                 </p>
               )}
             </div>
@@ -1022,8 +1020,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               <div className="px-4 sm:px-5 pb-4">
                 <NarrativeProfileSection
                   narrativeProfile={decryptedData.narrativeProfile}
-                  t={tContent}
-                  contentLanguage={contentLanguage}
+                  t={t}
+                  language={language}
                 />
               </div>
             )}
@@ -1038,8 +1036,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 variant="secondary"
               >
                 {isGeneratingNarrative 
-                  ? (tContent('narrative_generating') || 'Generiere...')
-                  : <>🔄 {tContent('narrative_update_button') || 'Aktualisieren'}</>
+                  ? (t('narrative_generating') || 'Generiere...')
+                  : <>🔄 {t('narrative_update_button') || 'Aktualisieren'}</>
                 }
               </Button>
               <Button
@@ -1047,7 +1045,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 size="sm"
                 variant="secondary"
               >
-                📄 {tContent('profile_view_download_pdf') || 'Als PDF herunterladen'}
+                📄 {t('profile_view_download_pdf') || 'Als PDF herunterladen'}
               </Button>
               {decryptedData.connector && (
                 <Button
@@ -1057,7 +1055,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                   variant="secondary"
                   loading={isEnrichingExternalPerspective}
                 >
-                  {tContent('profile_external_perspective_enrich_button')}
+                  <>👁️ {t('profile_external_perspective_enrich_button')}</>
                 </Button>
               )}
               <Button
@@ -1667,7 +1665,6 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             setProposedExternalPerspective(null);
           }}
           isSaving={isEnrichingExternalPerspective}
-          t={tContent}
         />
       )}
     </div>
