@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mockup B — Editorial Report</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-b {
+      padding: 0 0 48px;
+    }
+
+    /* Full-width header band */
+    .hero-band {
+      background: linear-gradient(135deg, #165a5a 0%, #1B7272 60%, #3D9E9E 100%);
+      padding: 28px 36px 24px;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .hero-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-title {
+      font-size: 20pt;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      line-height: 1.15;
+    }
+    .hero-claim {
+      font-size: 9pt;
+      opacity: 0.85;
+      margin-top: 6px;
+      max-width: 420px;
+      line-height: 1.4;
+    }
+    .hero-meta {
+      text-align: right;
+      font-size: 8pt;
+      opacity: 0.75;
+      line-height: 1.6;
+    }
+
+    .content-wrap {
+      padding: 0 36px;
+    }
+
+    /* Two-column editorial layout */
+    .editorial-grid {
+      display: grid;
+      grid-template-columns: 58% 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Chapter with overline + left border */
+    .chapter {
+      margin-bottom: 18px;
+    }
+    .overline {
+      font-size: 7pt;
+      font-weight: 700;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 4px;
+    }
+    .chapter-title {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--content-primary);
+      margin-bottom: 8px;
+    }
+    .chapter-body {
+      border-left: 2px solid var(--teal);
+      padding-left: 14px;
+    }
+    .chapter-text {
+      font-size: 10pt;
+      color: var(--gray-700);
+      line-height: 1.5;
+    }
+    .chapter-text.italic {
+      font-style: italic;
+    }
+    .chapter-external {
+      margin-top: 8px;
+      font-size: 9pt;
+      color: var(--gray-600);
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    .narrative-list {
+      margin-top: 4px;
+    }
+    .narrative-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .narrative-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .narrative-num {
+      font-size: 14pt;
+      font-weight: 300;
+      color: var(--teal-light);
+      line-height: 1;
+      width: 20px;
+      flex-shrink: 0;
+    }
+    .narrative-name {
+      font-size: 9pt;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+    .narrative-desc {
+      font-size: 8.5pt;
+      color: var(--gray-500);
+      line-height: 1.4;
+    }
+
+    /* Right column data cards */
+    .data-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .data-card {
+      background: var(--gray-50);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .data-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .data-card-title {
+      font-size: 9pt;
+      font-weight: 600;
+      color: var(--content-primary);
+    }
+    .data-card-sub {
+      font-size: 7pt;
+      color: var(--gray-400);
+    }
+
+    .sd-compact .bar-row { margin-bottom: 3px; }
+    .sd-compact .bar-label { width: 72px; }
+    .sd-compact .bar-name { font-size: 7.5pt; }
+
+    .connector-highlight {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .connector-big-score {
+      font-size: 22pt;
+      font-weight: 600;
+      color: var(--teal);
+      line-height: 1;
+    }
+    .connector-big-label {
+      font-size: 8pt;
+      color: var(--gray-500);
+    }
+
+    .dim-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .riemann-compact {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .riemann-compact .riemann-cross {
+      width: 100px;
+      height: 100px;
+    }
+
+    .stress-compact .stress-item {
+      padding: 4px 6px;
+      margin-bottom: 3px;
+    }
+    .stress-compact .stress-num {
+      width: 16px;
+      height: 16px;
+      font-size: 7pt;
+    }
+
+    /* Page 2 appendix */
+    .appendix {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--gray-200);
+    }
+    .appendix-title {
+      font-size: 9pt;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 10px;
+    }
+    .usage-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .usage-col-title {
+      font-size: 8pt;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 3px;
+    }
+    .usage-col-text {
+      font-size: 7.5pt;
+      color: var(--gray-500);
+      line-height: 1.4;
+    }
+
+    .footer-b {
+      position: absolute;
+      bottom: 20px;
+      left: 36px;
+      right: 36px;
+      text-align: center;
+      font-size: 7pt;
+      color: var(--gray-400);
+    }
+    .page-label {
+      position: absolute;
+      top: 8px;
+      right: 36px;
+      font-size: 7pt;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.5px;
+    }
+    .page-label-light {
+      color: var(--gray-300);
+      top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="pages"></div>
+
+  <script src="sample-data.js"></script>
+  <script>
+    const d = window.PDF_MOCKUP_DATA;
+
+    function shipWheelWhite() {
+      return `<svg class="logo-icon" viewBox="0 0 24 24" fill="none">
+        <line x1="4" y1="4" x2="20" y2="20" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="20" y1="4" x2="4" y2="20" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="12" y1="2" x2="12" y2="22" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="2" y1="12" x2="22" y2="12" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="7" stroke="white" stroke-width="2" fill="none"/>
+        <circle cx="12" cy="12" r="1.75" fill="white"/>
+      </svg>`;
+    }
+
+    function scoreLabel(score, max = 5) {
+      const pct = score / max;
+      if (pct >= 0.75) return 'hoch';
+      if (pct >= 0.45) return 'mittel';
+      return 'niedrig';
+    }
+
+    function renderBarsCompact(items, max = 5) {
+      return items.map(item => `
+        <div class="bar-row">
+          <div class="bar-label">
+            <span class="bar-dot" style="background:${item.color}"></span>
+            <span class="bar-name">${item.label}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${(item.value / max) * 100}%; background:${item.color}"></div>
+          </div>
+          <span class="pill">${item.value.toFixed(1)}</span>
+        </div>`).join('');
+    }
+
+    function renderRiemannCompact() {
+      const size = 100, center = size / 2, axisLen = 36;
+      const ctxs = Object.values(d.riemann.contexts);
+      const maxAbs = Math.max(...ctxs.flatMap(c => [Math.abs(c.x), Math.abs(c.y)]), 1);
+      const scale = Math.ceil(maxAbs);
+      const toPx = (val) => (val / scale) * axisLen;
+      const dots = ctxs.map(c => ({ px: center + toPx(c.x), py: center - toPx(c.y), color: c.color }));
+      const triangle = dots.map(p => `${p.px},${p.py}`).join(' ');
+
+      return `
+        <svg class="riemann-cross" viewBox="0 0 ${size} ${size}">
+          <line x1="${center - axisLen}" y1="${center}" x2="${center + axisLen}" y2="${center}" stroke="#d1d5db" stroke-width="1"/>
+          <line x1="${center}" y1="${center - axisLen}" x2="${center}" y2="${center + axisLen}" stroke="#d1d5db" stroke-width="1"/>
+          <polygon points="${triangle}" fill="#e5e7eb" fill-opacity="0.5" stroke="#d1d5db" stroke-width="0.6"/>
+          ${dots.map(p => `<circle cx="${p.px}" cy="${p.py}" r="3.5" fill="${p.color}" stroke="#fff" stroke-width="1"/>`).join('')}
+        </svg>`;
+    }
+
+    function renderOceanPills() {
+      return d.ocean.map(trait => `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:8pt;color:var(--gray-700)">${trait.name}</span>
+          <span class="pill">${trait.score.toFixed(1)} · ${scoreLabel(trait.score)}</span>
+        </div>`).join('');
+    }
+
+    function footer() {
+      return `<div class="footer-b">${d.meta.email} · Vertraulich · ${d.meta.date} · ${d.meta.appName}</div>`;
+    }
+
+    const page1 = `
+      <div class="page page-b">
+        <div class="hero-band">
+          <span class="page-label">MOCKUP B — EDITORIAL · SEITE 1</span>
+          <div class="hero-top">
+            <div>
+              <div class="hero-logo-row">
+                ${shipWheelWhite()}
+                <div class="hero-title">${d.meta.title}</div>
+              </div>
+              <p class="hero-claim">Dein persönliches Reflexionsdokument — Muster erkennen, nicht bewerten.</p>
+            </div>
+            <div class="hero-meta">
+              <div>${d.meta.date}</div>
+              <div>${d.meta.email}</div>
+              <div>${d.meta.provider}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-wrap">
+          <div class="editorial-grid">
+            <!-- Left: Narrative -->
+            <div class="narrative-col">
+              <div class="chapter">
+                <div class="overline">Signatur</div>
+                <div class="chapter-title">Persönlichkeits-Signatur</div>
+                <div class="chapter-body">
+                  <p class="chapter-text italic">${d.signature.text}</p>
+                  ${d.signature.externalPerspective ? `<p class="chapter-external">${d.signature.externalPerspective}</p>` : ''}
+                </div>
+              </div>
+
+              <div class="chapter">
+                <div class="overline">Stärken</div>
+                <div class="chapter-title">Deine geheimen Superkräfte</div>
+                <div class="chapter-body narrative-list">
+                  ${d.superpowers.map((s, i) => `
+                    <div class="narrative-item">
+                      <span class="narrative-num">${i + 1}</span>
+                      <div>
+                        <div class="narrative-name">${s.name}</div>
+                        <div class="narrative-desc">${s.description}</div>
+                      </div>
+                    </div>`).join('')}
+                </div>
+              </div>
+
+              <div class="chapter">
+                <div class="overline">Reflexion</div>
+                <div class="chapter-title">Blindspots & Wachstum</div>
+                <div class="chapter-body narrative-list">
+                  ${d.blindspots.map((s, i) => `
+                    <div class="narrative-item">
+                      <span class="narrative-num" style="color:#fbbf24">${i + 1}</span>
+                      <div>
+                        <div class="narrative-name">${s.name}</div>
+                        <div class="narrative-desc">${s.description}</div>
+                      </div>
+                    </div>`).join('')}
+                  ${d.growth.map((g, i) => `
+                    <div class="narrative-item">
+                      <span class="narrative-num" style="color:var(--gray-400)">${i + 1}</span>
+                      <div>
+                        <div class="narrative-name">${g.title}</div>
+                        <div class="narrative-desc">${g.recommendation}</div>
+                      </div>
+                    </div>`).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Data cards -->
+            <div class="data-stack">
+              <div class="data-card sd-compact">
+                <div class="data-card-header">
+                  <span class="data-card-title">Was dich antreibt</span>
+                  <span class="data-card-sub">PVQ-21 / SD</span>
+                </div>
+                <div class="sd-col-title" style="font-size:6.5pt;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Ich-orientiert</div>
+                ${renderBarsCompact(d.spiralDynamics.selfOriented.slice(0, 4))}
+                <div class="sd-col-title" style="font-size:6.5pt;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;margin:6px 0 3px">Wir-orientiert</div>
+                ${renderBarsCompact(d.spiralDynamics.communityOriented.slice(0, 4))}
+              </div>
+
+              <div class="data-card">
+                <div class="data-card-header">
+                  <span class="data-card-title">Wie du interagierst</span>
+                  <span class="data-card-sub">Riemann-Thomann</span>
+                </div>
+                <div class="riemann-compact">
+                  ${renderRiemannCompact()}
+                  <div class="stress-compact" style="flex:1">
+                    ${d.riemann.stressRanking.slice(0, 3).map((s, i) => `
+                      <div class="stress-item ${i === 0 ? 'first' : ''}">
+                        <span class="stress-num">${i + 1}</span>
+                        <div>
+                          <span class="stress-label" style="font-size:7.5pt">${s.label}</span>
+                        </div>
+                      </div>`).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div class="data-card">
+                <div class="data-card-header">
+                  <span class="data-card-title">Was dich ausmacht</span>
+                  <span class="data-card-sub">BFI-2</span>
+                </div>
+                ${renderOceanPills()}
+              </div>
+
+              <div class="data-card">
+                <div class="data-card-header">
+                  <span class="data-card-title">The Connector</span>
+                  <span class="data-card-sub">Fremdsicht</span>
+                </div>
+                <div class="connector-highlight">
+                  <span class="connector-big-score">${d.connector.overallScore}</span>
+                  <div>
+                    <div class="connector-big-label">Verbindungs-Score / 10</div>
+                    <span class="pill accent">${scoreLabel(d.connector.overallScore, 10)}</span>
+                  </div>
+                </div>
+                <p style="font-size:7.5pt;color:var(--gray-600);line-height:1.35;margin-bottom:4px">${d.connector.summary}</p>
+                <div class="dim-pills">
+                  ${d.connector.dimensions.map(dim => `
+                    <span class="pill">${dim.label} ${dim.score}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="appendix">
+            <div class="appendix-title">So nutzt du dieses Profil</div>
+            <div class="usage-row">
+              ${d.usageGuide.map(u => `
+                <div>
+                  <div class="usage-col-title">${u.title}</div>
+                  <div class="usage-col-text">${u.text}</div>
+                </div>`).join('')}
+            </div>
+            <div class="footnotes" style="margin-top:12px">
+              ${d.footnotes.map((f, i) => `<div class="footnote-line">[${i + 1}] ${f}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        ${footer()}
+      </div>`;
+
+    document.getElementById('pages').innerHTML = page1;
+  </script>
+</body>
+</html>
