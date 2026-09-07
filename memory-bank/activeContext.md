@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-06**, v**2.6.0** Build **10** — https://mc-beta.manualmode.at (health OK). Connector admin analytics tab, anonymized `connector_run_stats`, printable Connector reference PDF.
+**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **11** — https://mc-beta.manualmode.at (health OK). Connector voice TTS fix + Practice cross-sell copy.
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -28,14 +28,15 @@
 - **Commits:** `307963df` (analytics + PDF) · `ec3848e9` (build 10 sync).
 - **Admin UX constraint:** Icon tab bar at capacity (7/8 tabs) — no further top-level tabs without nav redesign (`systemPatterns.md` Decision #26).
 
-## Session handoff (2026-09-07) — Connector voice mode TTS fix (committed, not deployed)
+## Session handoff (2026-09-07) — Connector voice mode TTS fix (deployed Build 11)
 
 - **Problem:** Connector Live cut off last sentence(s) in TTS; persona voice did not reliably switch between vignettes.
 - **Root cause:** SSE `[CONNECTOR_END]` holdback tail never flushed to client; shared streaming playback could stop before all sentences synthesized; opening line used generic first-message auto-speak without persona voice reset.
-- **Fix (committed, not deployed):** `connector.js` flush holdback tail; `useTts.ts` streaming reconcile/wait + `skipAutoFirstMessage` + `resetFirstMessageSpoken` on gender change; `ChatView.tsx` dedicated Connector opening effect + `reconcileStreamingWithFinalText` after stream.
+- **Fix:** `connector.js` flush holdback tail; `useTts.ts` streaming reconcile/wait + `skipAutoFirstMessage` + `resetFirstMessageSpoken` on gender change; `ChatView.tsx` dedicated Connector opening effect + `reconcileStreamingWithFinalText` after stream.
 - **Copy:** Connector Practice cross-sell text scoped to coaching trainees (DE/EN).
+- **Commits:** `2efc663e` (fix + copy) · `c01d8ad6` (build 11 sync).
 - **Coaching/practice:** Shared streaming improvements only; holdback fix is Connector-only.
-- **Next:** Staging QA in voice mode → deploy Build 11.
+- **Next:** Staging QA — Connector voice mode (full sentences + persona voice switch on vignette advance).
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
